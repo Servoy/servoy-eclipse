@@ -30,6 +30,7 @@ import org.eclipse.gef.ui.actions.DirectEditAction;
 import org.eclipse.gef.ui.actions.PrintAction;
 import org.eclipse.gef.ui.actions.RedoAction;
 import org.eclipse.gef.ui.actions.SaveAction;
+import org.eclipse.gef.ui.actions.SelectAllAction;
 import org.eclipse.gef.ui.actions.UndoAction;
 import org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette;
 import org.eclipse.jface.action.IAction;
@@ -177,7 +178,7 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 		registry.registerAction(action);
 		getStackActions().add(action.getId());
 
-		action = new FixedSelectAllAction(editorPart);
+		action = createSelectAllAction();
 		registry.registerAction(action);
 
 		action = createDeleteAction();
@@ -329,6 +330,14 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 		action = new ZOrderAction(getEditorPart(), ZOrderAction.ID_Z_ORDER_SEND_TO_BACK_ONE_STEP);
 		registry.registerAction(action);
 		getSelectionActions().add(action.getId());
+	}
+
+	/**
+	 * @return
+	 */
+	protected SelectAllAction createSelectAllAction()
+	{
+		return new FixedSelectAllAction(editorPart);
 	}
 
 	protected abstract DeleteAction createDeleteAction();

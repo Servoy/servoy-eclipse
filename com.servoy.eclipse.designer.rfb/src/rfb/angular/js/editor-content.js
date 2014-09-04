@@ -1,5 +1,5 @@
 angular.module('editorContent',['servoyApp'])
- .controller("MainController", function($scope, $window, $timeout, $windowService, $webSocket, $servoyInternal,$rootScope,$compile){
+ .controller("MainController", function($scope, $window, $timeout, $windowService, $webSocket, $servoyInternal,$rootScope,$compile,$solutionSettings){
 	 $rootScope.createComponent = function(html,model) {
 			 var compScope = $scope.$new(true);
 			 compScope.model = model;
@@ -9,7 +9,7 @@ angular.module('editorContent',['servoyApp'])
 			 $('body').append(el); 
 			 return el;
 		  }
-	 
+	$scope.solutionSettings = $solutionSettings; 
 	var realConsole = $window.console;
 	$window.console = {
 			log: function(msg) {

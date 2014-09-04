@@ -311,93 +311,93 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels";
 
 	// performance related
-	public final static Pair<String, ProblemSeverity> LEVEL_PERFORMANCE_COLUMNS_TABLEVIEW = new Pair<String, ProblemSeverity>(
-		"performanceTableColumns", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> LEVEL_PERFORMANCE_TABS_PORTALS = new Pair<String, ProblemSeverity>(
-		"performanceTabsPortals", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> LEVEL_PERFORMANCE_COLUMNS_TABLEVIEW = new Pair<String, ProblemSeverity>("performanceTableColumns",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> LEVEL_PERFORMANCE_TABS_PORTALS = new Pair<String, ProblemSeverity>("performanceTabsPortals",
+		ProblemSeverity.WARNING);
 
 	// developer problems
-	public final static Pair<String, ProblemSeverity> INVALID_TABLE_REFERENCE = new Pair<String, ProblemSeverity>(
-		"invalidTableReference", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> METHOD_EVENT_PARAMETERS = new Pair<String, ProblemSeverity>(
-		"methodEventParameters", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> INVALID_TABLE_REFERENCE = new Pair<String, ProblemSeverity>("invalidTableReference",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> METHOD_EVENT_PARAMETERS = new Pair<String, ProblemSeverity>("methodEventParameters",
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> MEDIA_TIFF = new Pair<String, ProblemSeverity>("mediaTiff", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> CALCULATION_FORM_ACCESS = new Pair<String, ProblemSeverity>(
-		"calculationFormAccess", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> CALCULATION_FORM_ACCESS = new Pair<String, ProblemSeverity>("calculationFormAccess",
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> IMAGE_MEDIA_NOT_SET = new Pair<String, ProblemSeverity>("imageMediaNotSet", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> ROLLOVER_NOT_WORKING = new Pair<String, ProblemSeverity>("rolloverNotWorking", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> MOBILE_NAVIGATOR_OVERLAPS_HEADER_BUTTON = new Pair<String, ProblemSeverity>(
 		"mobileNavigatorOverlapsHeaderButton", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> DATAPROVIDER_MISSING_CONVERTER = new Pair<String, ProblemSeverity>(
-		"dataproviderMissingConverter", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> DATAPROVIDER_MISSING_CONVERTER = new Pair<String, ProblemSeverity>("dataproviderMissingConverter",
+		ProblemSeverity.WARNING);
 
-	// problems with resource projects 
-	public final static Pair<String, ProblemSeverity> REFERENCES_TO_MULTIPLE_RESOURCES = new Pair<String, ProblemSeverity>(
-		"referencesToMultipleResources", ProblemSeverity.ERROR);
+	// problems with resource projects
+	public final static Pair<String, ProblemSeverity> REFERENCES_TO_MULTIPLE_RESOURCES = new Pair<String, ProblemSeverity>("referencesToMultipleResources",
+		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> NO_RESOURCE_REFERENCE = new Pair<String, ProblemSeverity>("noResourceReference", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> PROPERTY_MULTIPLE_METHODS_ON_SAME_TABLE = new Pair<String, ProblemSeverity>(
 		"propertyMultipleMethodsOnSameTable", ProblemSeverity.INFO);
 	public final static Pair<String, ProblemSeverity> SERVER_MISSING_DRIVER = new Pair<String, ProblemSeverity>("severMissingDriver", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> SERVER_CLONE_CYCLE = new Pair<String, ProblemSeverity>("serverCloneCycle", ProblemSeverity.WARNING);
 
-	// login problems 
+	// login problems
 	public final static Pair<String, ProblemSeverity> LOGIN_FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION = new Pair<String, ProblemSeverity>(
 		"formWithDatasourceInLoginSolution", ProblemSeverity.WARNING);
 
 	// deprecated properties usage problems
-	public final static Pair<String, ProblemSeverity> DEPRECATED_PROPERTY_USAGE_PROBLEM = new Pair<String, ProblemSeverity>(
-		"deprecatedPropertyUsage", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> DEPRECATED_PROPERTY_USAGE_PROBLEM = new Pair<String, ProblemSeverity>("deprecatedPropertyUsage",
+		ProblemSeverity.WARNING);
 
 	// deprecated element usage problems
-	public final static Pair<String, ProblemSeverity> DEPRECATED_ELEMENT_USAGE_PROBLEM = new Pair<String, ProblemSeverity>(
-		"deprecatedElementUsage", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> DEPRECATED_ELEMENT_USAGE_PROBLEM = new Pair<String, ProblemSeverity>("deprecatedElementUsage",
+		ProblemSeverity.WARNING);
 
 	//deprecated script elements usage problems
 	public final static Pair<String, ProblemSeverity> DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM = new Pair<String, ProblemSeverity>(
 		"deprecatedScriptElementUsage", ProblemSeverity.WARNING);
 
 	// duplication problems
-	public final static Pair<String, ProblemSeverity> DUPLICATION_UUID_DUPLICATE = new Pair<String, ProblemSeverity>(
-		"duplicationUUIDDuplicate", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> DUPLICATION_DUPLICATE_ENTITY_FOUND = new Pair<String, ProblemSeverity>(
-		"duplicationDuplicateEntityFound", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> RESERVED_WINDOW_OBJECT_PROPERTY = new Pair<String, ProblemSeverity>(
-		"reservedWindowObjectProperty", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> RESERVED_WINDOW_OBJECT_COLUMN = new Pair<String, ProblemSeverity>(
-		"reservedWindowObjectColumn", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> DUPLICATION_UUID_DUPLICATE = new Pair<String, ProblemSeverity>("duplicationUUIDDuplicate",
+		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> DUPLICATION_DUPLICATE_ENTITY_FOUND = new Pair<String, ProblemSeverity>("duplicationDuplicateEntityFound",
+		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> RESERVED_WINDOW_OBJECT_PROPERTY = new Pair<String, ProblemSeverity>("reservedWindowObjectProperty",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> RESERVED_WINDOW_OBJECT_COLUMN = new Pair<String, ProblemSeverity>("reservedWindowObjectColumn",
+		ProblemSeverity.WARNING);
 
 	// database information problems
 	public final static Pair<String, ProblemSeverity> DBI_BAD_INFO = new Pair<String, ProblemSeverity>("DBIBadDBInfo", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> DBI_COLUMN_MISSING_FROM_DB = new Pair<String, ProblemSeverity>(
-		"DBIColumnMissingFromDB", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> DBI_COLUMN_MISSING_FROM_DB_FILE = new Pair<String, ProblemSeverity>(
-		"DBIColumnMissingFromDBIFile", ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> DBI_COLUMN_MISSING_FROM_DB = new Pair<String, ProblemSeverity>("DBIColumnMissingFromDB",
+		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> DBI_COLUMN_MISSING_FROM_DB_FILE = new Pair<String, ProblemSeverity>("DBIColumnMissingFromDBIFile",
+		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> DBI_COLUMN_CONFLICT = new Pair<String, ProblemSeverity>("DBIColumnConflict", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> DBI_TABLE_MISSING = new Pair<String, ProblemSeverity>("DBITableMissing", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> DBI_FILE_MISSING = new Pair<String, ProblemSeverity>("DBIFileMissing", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> DBI_COLUMN_INFO_SEQ_TYPE_OVERRIDE = new Pair<String, ProblemSeverity>(
-		"DBIColumnSequenceTypeOverride", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> DBI_COLUMN_INFO_SEQ_TYPE_OVERRIDE = new Pair<String, ProblemSeverity>("DBIColumnSequenceTypeOverride",
+		ProblemSeverity.WARNING);
 
 	// column problems
-	public final static Pair<String, ProblemSeverity> COLUMN_UUID_FLAG_NOT_SET = new Pair<String, ProblemSeverity>(
-		"ColumnUUIDFlagNotSet", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> COLUMN_DATABASE_IDENTITY_PROBLEM = new Pair<String, ProblemSeverity>(
-		"ColumnDatabaseIdentityProblem", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> COLUMN_DUPLICATE_NAME_DPID = new Pair<String, ProblemSeverity>(
-		"ColumnDuplicateNameDPID", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> COLUMN_FOREIGN_TYPE_PROBLEM = new Pair<String, ProblemSeverity>(
-		"ColumnForeignTypeProblem", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> COLUMN_UUID_FLAG_NOT_SET = new Pair<String, ProblemSeverity>("ColumnUUIDFlagNotSet",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> COLUMN_DATABASE_IDENTITY_PROBLEM = new Pair<String, ProblemSeverity>("ColumnDatabaseIdentityProblem",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> COLUMN_DUPLICATE_NAME_DPID = new Pair<String, ProblemSeverity>("ColumnDuplicateNameDPID",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> COLUMN_FOREIGN_TYPE_PROBLEM = new Pair<String, ProblemSeverity>("ColumnForeignTypeProblem",
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> COLUMN_INCOMPATIBLE_TYPE_FOR_SEQUENCE = new Pair<String, ProblemSeverity>(
 		"ColumnIncompatibleTypeForSequence", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> COLUMN_INCOMPATIBLE_WITH_UUID = new Pair<String, ProblemSeverity>(
-		"ColumnIncompatbleWithUUID", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> COLUMN_INCOMPATIBLE_WITH_UUID = new Pair<String, ProblemSeverity>("ColumnIncompatbleWithUUID",
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> COLUMN_LOOKUP_INVALID = new Pair<String, ProblemSeverity>("ColumnLookupInvalid", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> COLUMN_VALIDATOR_INVALID = new Pair<String, ProblemSeverity>(
-		"ColumnValidatorInvalid", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> COLUMN_CONVERTER_INVALID = new Pair<String, ProblemSeverity>(
-		"ColumnConverterInvalid", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> ROW_IDENT_SHOULD_NOT_BE_NULL = new Pair<String, ProblemSeverity>(
-		"ColumnRowIdentShouldNotBeNull", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> COLUMN_VALIDATOR_INVALID = new Pair<String, ProblemSeverity>("ColumnValidatorInvalid",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> COLUMN_CONVERTER_INVALID = new Pair<String, ProblemSeverity>("ColumnConverterInvalid",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> ROW_IDENT_SHOULD_NOT_BE_NULL = new Pair<String, ProblemSeverity>("ColumnRowIdentShouldNotBeNull",
+		ProblemSeverity.WARNING);
 
 	// sort problems
 	public final static Pair<String, ProblemSeverity> INVALID_SORT_OPTIONS_RELATION_NOT_FOUND = new Pair<String, ProblemSeverity>(
@@ -410,119 +410,119 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	// module problems
 	public final static Pair<String, ProblemSeverity> MODULE_NOT_FOUND = new Pair<String, ProblemSeverity>("moduleNotFound", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> MODULE_MISPLACED = new Pair<String, ProblemSeverity>("moduleMisplaced", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> MODULE_DIFFERENT_I18N_TABLE = new Pair<String, ProblemSeverity>(
-		"moduleDifferentI18NTable", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> MODULE_DIFFERENT_RESOURCE_PROJECT = new Pair<String, ProblemSeverity>(
-		"moduleDifferentResourceProject", ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> MODULE_DIFFERENT_I18N_TABLE = new Pair<String, ProblemSeverity>("moduleDifferentI18NTable",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> MODULE_DIFFERENT_RESOURCE_PROJECT = new Pair<String, ProblemSeverity>("moduleDifferentResourceProject",
+		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> MODULE_INVALID_MOBILE = new Pair<String, ProblemSeverity>("moduleInvalidMobile", ProblemSeverity.ERROR);
 
 	// form problems
-	public final static Pair<String, ProblemSeverity> FORM_COLUMN_LENGTH_TOO_SMALL = new Pair<String, ProblemSeverity>(
-		"formColumnLengthTooSmall", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> FORM_COLUMN_LENGTH_TOO_SMALL = new Pair<String, ProblemSeverity>("formColumnLengthTooSmall",
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> FORM_DATAPROVIDER_AGGREGATE_NOT_EDITABLE = new Pair<String, ProblemSeverity>(
 		"formDataproviderAggregateNotEditable", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> FORM_INVALID_DATAPROVIDER = new Pair<String, ProblemSeverity>(
-		"formInvalidDataprovider", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> FORM_DERIVED_FORM_DIFFERENT_TABLE = new Pair<String, ProblemSeverity>(
-		"formDerivedFormDifferentTable", ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> FORM_INVALID_DATAPROVIDER = new Pair<String, ProblemSeverity>("formInvalidDataprovider",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> FORM_DERIVED_FORM_DIFFERENT_TABLE = new Pair<String, ProblemSeverity>("formDerivedFormDifferentTable",
+		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> FORM_DERIVED_FORM_REDEFINED_VARIABLE = new Pair<String, ProblemSeverity>(
 		"formDerivedFormRedefinedVariable", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> FORM_DUPLICATE_PART = new Pair<String, ProblemSeverity>("formDuplicatePart", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> FORM_EDITABLE_COMBOBOX_CUSTOM_VALUELIST = new Pair<String, ProblemSeverity>(
 		"formEditableComboboxCustomValuelist", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> FORM_EXTENDS_CYCLE = new Pair<String, ProblemSeverity>("formExtendsCycle", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> FORM_FILE_NAME_INCONSISTENT = new Pair<String, ProblemSeverity>(
-		"formFileNameInconsistent", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> FORM_FILE_NAME_INCONSISTENT = new Pair<String, ProblemSeverity>("formFileNameInconsistent",
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> FORM_FORMAT_INVALID = new Pair<String, ProblemSeverity>("formFormatInvalid", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> FORM_INCOMPATIBLE_ELEMENT_TYPE = new Pair<String, ProblemSeverity>(
-		"formIncompatibleElementType", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> FORM_LABEL_FOR_ELEMENT_NOT_FOUND = new Pair<String, ProblemSeverity>(
-		"formLabelForElementNotFound", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> FORM_EXTENDS_FORM_ELEMENT_NOT_FOUND = new Pair<String, ProblemSeverity>(
-		"formExtendsFormElementNotFound", ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> FORM_INCOMPATIBLE_ELEMENT_TYPE = new Pair<String, ProblemSeverity>("formIncompatibleElementType",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> FORM_LABEL_FOR_ELEMENT_NOT_FOUND = new Pair<String, ProblemSeverity>("formLabelForElementNotFound",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> FORM_EXTENDS_FORM_ELEMENT_NOT_FOUND = new Pair<String, ProblemSeverity>("formExtendsFormElementNotFound",
+		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> FORM_ELEMENT_DUPLICATE_TAB_SEQUENCE = new Pair<String, ProblemSeverity>(
 		"formElementDuplicateTabSequence", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> FORM_ELEMENT_OUTSIDE_BOUNDS = new Pair<String, ProblemSeverity>(
-		"formElementOutsideBounds", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> FORM_ELEMENT_OUTSIDE_BOUNDS = new Pair<String, ProblemSeverity>("formElementOutsideBounds",
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> FORM_OBSOLETE_ELEMENT = new Pair<String, ProblemSeverity>("formObsoleteElement", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> FORM_REQUIRED_PROPERTY_MISSING = new Pair<String, ProblemSeverity>(
-		"formRequiredPropertyMissing", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> FORM_FIELD_RELATED_VALUELIST = new Pair<String, ProblemSeverity>(
-		"formFieldRelatedValuelist", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> FORM_FOUNDSET_INCORRECT_VALUE = new Pair<String, ProblemSeverity>(
-		"formFoundsetIncorrectValue", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> FORM_PORTAL_INVALID_RELATION_NAME = new Pair<String, ProblemSeverity>(
-		"formPortalInvalidRelationName", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> FORM_PROPERTY_METHOD_NOT_ACCESIBLE = new Pair<String, ProblemSeverity>(
-		"formPropertyMethodNotAccessible", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> FORM_TABPANEL_TAB_IMAGE_TOO_LARGE = new Pair<String, ProblemSeverity>(
-		"formTabPanelTabImageTooLarge", ProblemSeverity.WARNING);	
-	public final static Pair<String, ProblemSeverity> FORM_RELATED_TAB_DIFFERENT_TABLE = new Pair<String, ProblemSeverity>(
-		"formRelatedTabDifferentTable", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> FORM_RELATED_TAB_UNSOLVED_RELATION = new Pair<String, ProblemSeverity>(
-		"formRelatedTabUnsolvedRelation", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> FORM_RELATED_TAB_UNSOLVED_UUID = new Pair<String, ProblemSeverity>(
-		"formRelatedTabUnsolvedUuid", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> FORM_PROPERTY_TARGET_NOT_FOUND = new Pair<String, ProblemSeverity>(
-		"formPropertyTargetNotFound", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> FORM_REQUIRED_PROPERTY_MISSING = new Pair<String, ProblemSeverity>("formRequiredPropertyMissing",
+		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> FORM_FIELD_RELATED_VALUELIST = new Pair<String, ProblemSeverity>("formFieldRelatedValuelist",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> FORM_FOUNDSET_INCORRECT_VALUE = new Pair<String, ProblemSeverity>("formFoundsetIncorrectValue",
+		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> FORM_PORTAL_INVALID_RELATION_NAME = new Pair<String, ProblemSeverity>("formPortalInvalidRelationName",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> FORM_PROPERTY_METHOD_NOT_ACCESIBLE = new Pair<String, ProblemSeverity>("formPropertyMethodNotAccessible",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> FORM_TABPANEL_TAB_IMAGE_TOO_LARGE = new Pair<String, ProblemSeverity>("formTabPanelTabImageTooLarge",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> FORM_RELATED_TAB_DIFFERENT_TABLE = new Pair<String, ProblemSeverity>("formRelatedTabDifferentTable",
+		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> FORM_RELATED_TAB_UNSOLVED_RELATION = new Pair<String, ProblemSeverity>("formRelatedTabUnsolvedRelation",
+		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> FORM_RELATED_TAB_UNSOLVED_UUID = new Pair<String, ProblemSeverity>("formRelatedTabUnsolvedUuid",
+		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> FORM_PROPERTY_TARGET_NOT_FOUND = new Pair<String, ProblemSeverity>("formPropertyTargetNotFound",
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> FORM_INVALID_TABLE = new Pair<String, ProblemSeverity>("formInvalidTable", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> FORM_TYPEAHEAD_UNSTORED_CALCULATION = new Pair<String, ProblemSeverity>(
 		"formTypeAheadUnstoredCalculation", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> FORM_VARIABLE_TYPE_COL = new Pair<String, ProblemSeverity>(
-		"formVariableTableCol", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> FORM_VARIABLE_TYPE_COL = new Pair<String, ProblemSeverity>("formVariableTableCol",
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> FORM_PROPERTY_MULTIPLE_METHODS_ON_SAME_ELEMENT = new Pair<String, ProblemSeverity>(
 		"formPropertyMultipleMethodsOnSameElement", ProblemSeverity.INFO);
 	public final static Pair<String, ProblemSeverity> NON_ACCESSIBLE_PERSIST_IN_MODULE_USED_IN_PARENT_SOLUTION = new Pair<String, ProblemSeverity>(
 		"nonAccessibleFormInModuleUsedInParentSolution", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> METHOD_NUMBER_OF_ARGUMENTS_MISMATCH = new Pair<String, ProblemSeverity>(
-		"methodNumberOfArgsMismatch", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> TAB_SEQUENCE_NOT_SET = new Pair<String, ProblemSeverity>(
-		"tabpanelTabSequenceNotSet", ProblemSeverity.INFO);
+	public final static Pair<String, ProblemSeverity> METHOD_NUMBER_OF_ARGUMENTS_MISMATCH = new Pair<String, ProblemSeverity>("methodNumberOfArgsMismatch",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> TAB_SEQUENCE_NOT_SET = new Pair<String, ProblemSeverity>("tabpanelTabSequenceNotSet",
+		ProblemSeverity.INFO);
 
 	// relations related
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
 		"relationPrimaryServerWithProblems", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> RELATION_SERVER_DUPLICATE = new Pair<String, ProblemSeverity>(
-		"relationServerDuplicate", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> RELATION_TABLE_NOT_FOUND = new Pair<String, ProblemSeverity>(
-		"relationTableNotFound", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> RELATION_TABLE_WITHOUT_PK = new Pair<String, ProblemSeverity>(
-		"relationTableWithoutPK", ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> RELATION_SERVER_DUPLICATE = new Pair<String, ProblemSeverity>("relationServerDuplicate",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> RELATION_TABLE_NOT_FOUND = new Pair<String, ProblemSeverity>("relationTableNotFound",
+		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> RELATION_TABLE_WITHOUT_PK = new Pair<String, ProblemSeverity>("relationTableWithoutPK",
+		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> RELATION_FOREIGN_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
 		"relationForeignServerWithProblems", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> RELATION_EMPTY = new Pair<String, ProblemSeverity>("relationEmpty", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> RELATION_ITEM_DATAPROVIDER_NOT_FOUND = new Pair<String, ProblemSeverity>(
 		"relationItemDataproviderNotFound", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> RELATION_ITEM_UUID_PROBLEM = new Pair<String, ProblemSeverity>(
-		"relationItemUUIDProblem", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> RELATION_ITEM_TYPE_PROBLEM = new Pair<String, ProblemSeverity>(
-		"relationItemTypeProblem", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> RELATION_ITEM_UUID_PROBLEM = new Pair<String, ProblemSeverity>("relationItemUUIDProblem",
+		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> RELATION_ITEM_TYPE_PROBLEM = new Pair<String, ProblemSeverity>("relationItemTypeProblem",
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> RELATION_GENERIC_ERROR = new Pair<String, ProblemSeverity>("relationGenericError", ProblemSeverity.ERROR);
 
 	// valuelist problems
-	public final static Pair<String, ProblemSeverity> VALUELIST_DB_WITH_CUSTOM_VALUES = new Pair<String, ProblemSeverity>(
-		"valuelistDBWithCustomValues", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> VALUELIST_DB_NOT_TABLE_OR_RELATION = new Pair<String, ProblemSeverity>(
-		"valuelistDBNotTableOrRelation", ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> VALUELIST_DB_WITH_CUSTOM_VALUES = new Pair<String, ProblemSeverity>("valuelistDBWithCustomValues",
+		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> VALUELIST_DB_NOT_TABLE_OR_RELATION = new Pair<String, ProblemSeverity>("valuelistDBNotTableOrRelation",
+		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> VALUELIST_DB_MALFORMED_TABLE_DEFINITION = new Pair<String, ProblemSeverity>(
 		"valuelistDBMalformedTableDefinition", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> VALUELIST_DB_SERVER_DUPLICATE = new Pair<String, ProblemSeverity>(
-		"valuelistDBServerDuplicate", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> VALUELIST_DB_TABLE_NO_PK = new Pair<String, ProblemSeverity>(
-		"valuelistDBTableNoPk", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> VALUELIST_ENTITY_NOT_FOUND = new Pair<String, ProblemSeverity>(
-		"valuelistEntityNotFound", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> VALUELIST_RELATION_WITH_DATASOURCE = new Pair<String, ProblemSeverity>(
-		"valuelistRelationWithDatasource", ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> VALUELIST_DB_SERVER_DUPLICATE = new Pair<String, ProblemSeverity>("valuelistDBServerDuplicate",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> VALUELIST_DB_TABLE_NO_PK = new Pair<String, ProblemSeverity>("valuelistDBTableNoPk",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> VALUELIST_ENTITY_NOT_FOUND = new Pair<String, ProblemSeverity>("valuelistEntityNotFound",
+		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> VALUELIST_RELATION_WITH_DATASOURCE = new Pair<String, ProblemSeverity>("valuelistRelationWithDatasource",
+		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> VALUELIST_RELATION_SEQUENCE_INCONSISTENT = new Pair<String, ProblemSeverity>(
 		"valuelistRelationSequenceInconsistent", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> VALUELIST_CUSTOM_VALUES_WITH_DB_INFO = new Pair<String, ProblemSeverity>(
 		"valuelistCustomValuesWithDBInfo", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> VALUELIST_INVALID_CUSTOM_VALUES = new Pair<String, ProblemSeverity>(
-		"valuelistInvalidCustomValues", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> VALUELIST_INVALID_CUSTOM_VALUES = new Pair<String, ProblemSeverity>("valuelistInvalidCustomValues",
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> VALUELIST_TYPE_UNKNOWN = new Pair<String, ProblemSeverity>("valuelistTypeUnknown", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> VALUELIST_GENERIC_ERROR = new Pair<String, ProblemSeverity>(
-		"valuelistGenericError", ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> VALUELIST_GENERIC_ERROR = new Pair<String, ProblemSeverity>("valuelistGenericError",
+		ProblemSeverity.ERROR);
 
 	// styles
 	public final static Pair<String, ProblemSeverity> STYLE_NOT_FOUND = new Pair<String, ProblemSeverity>("styleNotFound", ProblemSeverity.WARNING);
@@ -531,23 +531,23 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	// solution problems
 	public final static Pair<String, ProblemSeverity> SOLUTION_BAD_STRUCTURE = new Pair<String, ProblemSeverity>("solutionBadStructure", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> SOLUTION_DESERIALIZE_ERROR = new Pair<String, ProblemSeverity>(
-		"solutionDeserializeError", ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> SOLUTION_DESERIALIZE_ERROR = new Pair<String, ProblemSeverity>("solutionDeserializeError",
+		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> SOLUTION_ELEMENT_NAME_INVALID_IDENTIFIER = new Pair<String, ProblemSeverity>(
 		"solutionElementNameInvalidIdentifier", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> SOLUTION_ELEMENT_NAME_RESERVED_PREFIX_IDENTIFIER = new Pair<String, ProblemSeverity>(
 		"solutionElementNameReservedPrefixIdentifier", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> SOLUTION_PROPERTY_FORM_CANNOT_BE_INSTANTIATED = new Pair<String, ProblemSeverity>(
 		"solutionPropertyFormCannotBeInstantiated", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> SOLUTION_PROPERTY_TARGET_NOT_FOUND = new Pair<String, ProblemSeverity>(
-		"solutionPropertyTargetNotFound", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> SOLUTION_PROPERTY_TARGET_NOT_FOUND = new Pair<String, ProblemSeverity>("solutionPropertyTargetNotFound",
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> SERVER_NOT_ACCESSIBLE_FIRST_OCCURENCE = new Pair<String, ProblemSeverity>(
 		"serverNotAccessibleFirstOccurence", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> CONSTANTS_USED = new Pair<String, ProblemSeverity>("constantsUsed", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> SOLUTION_USED_AS_WEBSERVICE_MUSTAUTHENTICATE_PROBLEM = new Pair<String, ProblemSeverity>(
 		"solutionUsedAsWebServiceMustAuthenticateProblem", ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> SOLUTION_WITH_HIGHER_FILE_VERSION = new Pair<String, ProblemSeverity>(
-		"solutionWithHigherFileVersion", ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> SOLUTION_WITH_HIGHER_FILE_VERSION = new Pair<String, ProblemSeverity>("solutionWithHigherFileVersion",
+		ProblemSeverity.ERROR);
 
 	private SAXParserFactory parserFactory;
 	private final HashSet<String> referencedProjectsSet = new HashSet<String>();
@@ -860,7 +860,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						module != null &&
 						(module.getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE && module.getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE_MODULE))
 					{
-						String message = "Module " + module.getSolution().getName() + " is a mobile solution module, it should have solution type Mobile or Mobile shared module.";
+						String message = "Module " + module.getSolution().getName() +
+							" is a mobile solution module, it should have solution type Mobile or Mobile shared module.";
 						IMarker marker = addMarker(project, MISPLACED_MODULES_MARKER_TYPE, message, -1, MODULE_MISPLACED, IMarker.PRIORITY_LOW, null, null);
 						try
 						{
@@ -874,7 +875,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					if (!SolutionMetaData.isServoyMobileSolution(servoyProject.getSolution()) && module != null &&
 						SolutionMetaData.isServoyMobileSolution(module.getSolution()))
 					{
-						String message = "Module " + module.getSolution().getName() + " is a non-mobile solution module, it should have solution type Mobile shared module or other non-mobile type.";
+						String message = "Module " + module.getSolution().getName() +
+							" is a non-mobile solution module, it should have solution type Mobile shared module or other non-mobile type.";
 						IMarker marker = addMarker(project, MISPLACED_MODULES_MARKER_TYPE, message, -1, MODULE_MISPLACED, IMarker.PRIORITY_LOW, null, null);
 						try
 						{
@@ -1087,7 +1089,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				parents.add(new Pair<String, ISupportChilds>(scopeName, persist.getParent()));
 			}
 		}
-		//Table entities 
+		//Table entities
 		/*
 		 * private static final Integer TABLE_CALCULATION_DUPLICATION = Integer.valueOf(6); private static final Integer TABLE_AGREGATION_DUPLICATION =
 		 * Integer.valueOf(7); private static final Integer TABLE_SCRIPT_METHOD_DUPLICATION = Integer.valueOf(8);
@@ -1142,13 +1144,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								{
 									if (duplicateScriptCalculation != null)
 									{
-										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
-											"table calculation", entityName, parentsName + "   on table  " + tableNode.getDataSource());
+										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("table calculation", entityName, parentsName +
+											"   on table  " + tableNode.getDataSource());
 										addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 											duplicateScriptCalculation);
 									}
-									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
-										"table calculation ", entityName, tableNode.getParent() + "  on table  " + tableNode.getDataSource());								
+									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("table calculation ", entityName, tableNode.getParent() +
+										"  on table  " + tableNode.getDataSource());
 									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 										persist);
 								}
@@ -1161,13 +1163,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								{
 									if (duplicateAggregate != null)
 									{
-										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
-											"aggregate variable", entityName, parentsName + "   on table  " + tableNode.getDataSource());
+										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("aggregate variable", entityName, parentsName +
+											"   on table  " + tableNode.getDataSource());
 										addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 											duplicateAggregate);
 									}
-									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
-										"aggregate variable", entityName, tableNode.getParent() + "  on table  " + tableNode.getDataSource());								
+									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("aggregate variable", entityName, tableNode.getParent() +
+										"  on table  " + tableNode.getDataSource());
 									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 										persist);
 								}
@@ -1179,13 +1181,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								{
 									if (duplicateFoundSetMethod != null)
 									{
-										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
-											"table method", entityName, parentsName + "   on table  " + tableNode.getDataSource());
+										ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("table method", entityName, parentsName + "   on table  " +
+											tableNode.getDataSource());
 										addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 											duplicateFoundSetMethod);
 									}
-									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
-										"table method", entityName, tableNode.getParent() + "  on table  " + tableNode.getDataSource());								
+									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("table method", entityName, tableNode.getParent() +
+										"  on table  " + tableNode.getDataSource());
 									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 										persist);
 								}
@@ -1268,12 +1270,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							for (IPersist duplicatePersist : duplicates)
 							{
-								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
-									"form element", ((ISupportName)o).getName(), ((Form)persist).getName());
+								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(),
+									((Form)persist).getName());
 								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 									duplicatePersist);
 
-								mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(), ((Form)persist).getName());								
+								mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(), ((Form)persist).getName());
 								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, o);
 							}
 						}
@@ -1333,7 +1335,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 											duplicateRelation);
 									}
-									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("relation", name, solution.getName());								
+									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("relation", name, solution.getName());
 									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 										persist);
 								}
@@ -1347,7 +1349,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 										duplicateValuelist);
 								}
-								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("valuelist", name, solution.getName());								
+								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("valuelist", name, solution.getName());
 								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
 							}
 							else if (persist instanceof Media)
@@ -1359,7 +1361,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 										duplicateMedia);
 								}
-								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("media", name, solution.getName());								
+								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("media", name, solution.getName());
 								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
 							}
 						}
@@ -1600,8 +1602,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					{
 						// loginForm is deprecated
 						addDeprecatedPropertyUsageMarker(persist, project, DEPRECATED_PROPERTY_USAGE_PROBLEM,
-							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(),
-							"Solution '" + solution.getName() + "' has a loginForm property set which is deprecated, use loginSolutionName property instead.");
+							StaticContentSpecLoader.PROPERTY_LOGINFORMID.getPropertyName(), "Solution '" + solution.getName() +
+								"' has a loginForm property set which is deprecated, use loginSolutionName property instead.");
 					}
 				}
 				catch (Exception e)
@@ -1629,12 +1631,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				try
 				{
 					//only rowBGColorCalculation deprecated property usage marker is error by default
-					addDeprecatedPropertyUsageMarker(persist,
-						project,
-						new Pair<String, ProblemSeverity>("deprecatedPropertyUsage", ProblemSeverity.ERROR),
-						StaticContentSpecLoader.PROPERTY_ROWBGCOLORCALCULATION.getPropertyName(),
-						type +
-							" '" + ((ISupportName)persist).getName() + "' has rowBGColorCalculation property set which is deprecated, use CSS (odd/even/selected) or onRender event instead.");
+					addDeprecatedPropertyUsageMarker(persist, project, new Pair<String, ProblemSeverity>("deprecatedPropertyUsage", ProblemSeverity.ERROR),
+						StaticContentSpecLoader.PROPERTY_ROWBGCOLORCALCULATION.getPropertyName(), type + " '" + ((ISupportName)persist).getName() +
+							"' has rowBGColorCalculation property set which is deprecated, use CSS (odd/even/selected) or onRender event instead.");
 				}
 				catch (Exception e)
 				{
@@ -1847,9 +1846,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							while (methodIt.hasNext())
 							{
 								String methodName = methodIt.next().getName();
-								if (methodName.equals("ws_read") || methodName.equals("ws_create") ||
-									methodName.equals("ws_delete") || methodName.equals("ws_update") ||
-									methodName.equals("ws_authenticate") || methodName.equals("ws_response_headers"))
+								if (methodName.equals("ws_read") || methodName.equals("ws_create") || methodName.equals("ws_delete") ||
+									methodName.equals("ws_update") || methodName.equals("ws_authenticate") || methodName.equals("ws_response_headers"))
 								{
 									isServiceSolution = true;
 									break;
@@ -2763,7 +2761,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									table = form.getTable();
 									if (table != null && !table.getExistInDB())
 									{
-										// the table was probably deleted - update the form table as well 
+										// the table was probably deleted - update the form table as well
 										form.clearTable();
 										table = form.getTable();
 									}
@@ -3539,6 +3537,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								case IRepository.GRAPHICALCOMPONENTS :
 								case IRepository.PARTS :
 								case IRepository.FIELDS :
+								case IRepository.LAYOUTCONTAINERS :
 									break;
 								default :
 									addBadStructureMarker(o, servoyProject, project);
@@ -3701,7 +3700,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	/**
 	 * Checks the state of a valueList, and is able to automatically correct a few problems - but with the possibility of loosing info.
-	 * 
+	 *
 	 * @param vl the valueList to be checked.
 	 * @param flattenedSolution the flattened solution used to get relations if needed.
 	 * @param sm the server manager to use.
@@ -4919,7 +4918,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								Form form = (Form)o;
 								if (((Form)o).getDataSource() != null) // login solution cannot have forms with datasource
 								{
-									String message = "Form '" + form.getName() + "' is part of a login solution and it must not have the datasource property set; its current datasource is : '" + form.getDataSource() + "'";
+									String message = "Form '" + form.getName() +
+										"' is part of a login solution and it must not have the datasource property set; its current datasource is : '" +
+										form.getDataSource() + "'";
 									IMarker marker = addMarker(prj, FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION, message, -1,
 										LOGIN_FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION, IMarker.PRIORITY_HIGH, null, form);
 									if (marker != null)
@@ -5455,7 +5456,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		return null;
 	}
 
-	// Extensions that want to add marker attributes based on persists will do that here (for example preferred editor to open). 
+	// Extensions that want to add marker attributes based on persists will do that here (for example preferred editor to open).
 	private static void addExtensionMarkerAttributes(IMarker marker, IPersist persist)
 	{
 		if (markerContributors == null)
@@ -5752,7 +5753,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	/**
 	 * Container class for problem and optional fix.
-	 * 
+	 *
 	 * @author rgansevles
 	 *
 	 */
