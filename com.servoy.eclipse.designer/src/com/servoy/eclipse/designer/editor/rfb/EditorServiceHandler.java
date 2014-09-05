@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.editor.rfb;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -31,6 +32,7 @@ import org.eclipse.swt.widgets.Display;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONWriter;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -47,10 +49,12 @@ import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RectShape;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
@@ -105,6 +109,77 @@ public class EditorServiceHandler implements IServerService
 	{
 		try
 		{
+			if ("getGhostComponents".equals(methodName))
+			{
+				StringWriter stringWriter = new StringWriter();
+				final JSONWriter writer = new JSONWriter(stringWriter);
+				writer.object();
+				writer.key("ghostContainers");
+				writer.array();
+				editorPart.getForm().acceptVisitor(new IPersistVisitor()
+				{
+
+					private int computeX(int index)
+					{
+						return index * 40;
+					}
+
+					private int computeY(int index)
+					{
+						return -70;
+					}
+
+					@Override
+					public Object visit(IPersist o)
+					{
+						if (o instanceof TabPanel)
+						{
+							try
+							{
+								writer.object();
+								writer.key("left").value(((TabPanel)o).getLocation().getX());
+								writer.key("top").value(((TabPanel)o).getLocation().getY());
+								writer.key("uuid").value(((TabPanel)o).getUUID());
+								writer.key("ghosts");
+								writer.array();
+								Iterator<IPersist> tabIterator = ((TabPanel)o).getTabs();
+								int i = 0;
+								while (tabIterator.hasNext())
+								{
+									IPersist tab = tabIterator.next();
+									writer.object();
+									writer.key("uuid").value(tab.getUUID());
+									writer.key("text").value(((Tab)tab).getText());
+									writer.key("location");
+									writer.object();
+									writer.key("x").value(computeX(i));
+									writer.key("y").value(computeY(i));
+//									writer.key("x").value(((Tab)tab).getLocation().x);
+//									writer.key("y").value(((Tab)tab).getLocation().y);
+									writer.endObject();
+									writer.endObject();
+									i++;
+								}
+								writer.endArray();
+								writer.endObject();
+							}
+							catch (IllegalArgumentException e)
+							{
+								e.printStackTrace();
+							}
+							catch (JSONException e)
+							{
+								e.printStackTrace();
+							}
+						}
+						return IPersistVisitor.CONTINUE_TRAVERSAL;
+					}
+				});
+				writer.endArray();
+				writer.endObject();
+				return new JSONObject(stringWriter.getBuffer().toString());
+			}
+
 			if ("getFormLayoutGrid".equals(methodName))
 			{
 				return editorPart.getForm().getLayoutGrid();
@@ -155,7 +230,7 @@ public class EditorServiceHandler implements IServerService
 						{
 							String uuid = (String)keys.next();
 							final IPersist persist = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(uuid));
-							if (persist instanceof BaseComponent)
+							if (persist instanceof BaseComponent || persist instanceof Tab)
 							{
 								JSONObject properties = args.optJSONObject(uuid);
 								CompoundCommand cc = new CompoundCommand();

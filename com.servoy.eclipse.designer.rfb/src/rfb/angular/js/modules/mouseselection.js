@@ -144,13 +144,13 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 							xMouseDown = event.clientX;
 							yMouseDown = event.clientY;			
 						}
-					if (lassoStarted || hasClass(event.target,"contentframe-overlay")) {
+					if (lassoStarted || hasClass(event.target,"contentframe-overlay")|| hasClass(event.target,"ghost")) {
 						xMouseDown -= editorScope.glasspane.parentElement.offsetLeft;
 						yMouseDown -= editorScope.glasspane.parentElement.offsetTop;
 						xMouseDown += editorScope.glasspane.parentElement.scrollLeft;
 						yMouseDown += editorScope.glasspane.parentElement.scrollTop;
 					}
-					else if (!hasClass(event.target,"contentframe-overlay")){
+					else if (!hasClass(event.target,"contentframe-overlay") && !hasClass(event.target,"ghost")){
 						xMouseDown += parseInt(angular.element(editorScope.glasspane.parentElement).css("padding-left").replace("px",""));
 						yMouseDown += parseInt(angular.element(editorScope.glasspane.parentElement).css("padding-top").replace("px",""));
 					}
@@ -181,19 +181,28 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 						p1.top = p2.top;
 						p2.top = temp;
 					}	
-					var nodes = editorScope.contentDocument.querySelectorAll("[svy-id]")
+					var nodes = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[svy-id]"));
+					var ghosts = Array.prototype.slice.call(editorScope.glasspane.querySelectorAll("[svy-id]"));
+					var concat = nodes.concat(ghosts);
 					var matchedElements = []
-					for (var i = 0; i < nodes.length; i++) {
-						var element = nodes[i]
+					for (var i = 0; i < concat.length; i++) {
+						var element = concat[i]
 						var rect = element.getBoundingClientRect();
+						var left = rect.left;
+						var top = rect.top;
+						
+						if (element.parentElement.parentElement == editorScope.glasspane) {
+							top = top - element.parentElement.parentElement.getBoundingClientRect().top;
+							left = left - element.parentElement.parentElement.getBoundingClientRect().left;
+						}
 
 						if (percentage == undefined || percentage == 100) { //Element must be fully enclosed
-							if (p1.top <= rect.top && p1.left <= rect.left && p2.top >= rect.top + element.clientHeight && p2.left >= rect.left + element.clientWidth) {
+							if (p1.top <= top && p1.left <= left && p2.top >= top + element.clientHeight && p2.left >= left + element.clientWidth) {
 								matchedElements.push(element)
 							}
 						} else {
-							var overlapX = Math.max(0, Math.min(p2.left, rect.left + element.clientWidth) - Math.max(p1.left, rect.left))
-							var overlapY = Math.max(0, Math.min(p2.top, rect.top + element.clientHeight) - Math.max(p1.top, rect.top))
+							var overlapX = Math.max(0, Math.min(p2.left, left + element.clientWidth) - Math.max(p1.left, left))
+							var overlapY = Math.max(0, Math.min(p2.top, top + element.clientHeight) - Math.max(p1.top, top))
 
 							if ( ( (element.clientWidth * element.clientHeight) / 100) * percentage < (overlapX * overlapY)) {
 								matchedElements.push(element)

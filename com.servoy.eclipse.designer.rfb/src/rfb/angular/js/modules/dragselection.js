@@ -1,16 +1,16 @@
 angular.module('dragselection',['mouseselection']).run(function($rootScope, $pluginRegistry, $editorService,$selectionUtils)
-{
+		{
 	$pluginRegistry.registerPlugin(function(editorScope) {
-		
+
 		var utils = $selectionUtils.getUtilsForScope(editorScope);
-		
+
 		function onmousedown(event) {
 			if (utils.getNode(event)){
 				dragStartEvent = event;
 			}
-				
+
 		}
-		
+
 		function onmouseup(event) {
 			dragStartEvent = null;
 			if (dragging) {
@@ -23,9 +23,15 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 					var node = selection[i];
 					var name = node.getAttribute("name");
 					var beanModel = formState.model[name];
-					beanModel.location.y;
-					beanModel.location.x 
-					obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y}
+					if (beanModel){
+						beanModel.location.y;
+						beanModel.location.x
+						obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y}
+					}
+					else {
+						var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+						obj[node.getAttribute("svy-id")] = {x:ghostObject.location.x,y:ghostObject.location.y}
+					}
 				}
 				$editorService.sendChanges(obj)
 			}
@@ -49,21 +55,28 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 							var node = selection[i];
 							var name = node.getAttribute("name");
 							var beanModel = formState.model[name];
-							beanModel.location.y = beanModel.location.y + changeY;
-							beanModel.location.x = beanModel.location.x + changeX;
+							if (beanModel){
+								beanModel.location.y = beanModel.location.y + changeY;
+								beanModel.location.x = beanModel.location.x + changeX;
+							}
+							else 
+						    {
+								var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+								ghostObject.location.x += changeX;
+								ghostObject.location.y += changeY;
+							}
+							editorScope.refreshEditorContent();
 						}
 						dragStartEvent = event;
-						editorScope.refreshEditorContent();
 					}
 				}
 			}
 		}
-		
+
 		// register event on editor form iframe (see register event in the editor.js)
 		editorScope.registerDOMEvent("mousedown","CONTENTFRAME_OVERLAY", onmousedown); // real selection in editor content iframe
 		editorScope.registerDOMEvent("mouseup","CONTENTFRAME_OVERLAY", onmouseup); // real selection in editor content iframe
 		editorScope.registerDOMEvent("mousemove","CONTENTFRAME_OVERLAY", onmousemove); // real selection in editor content iframe
-		
+
 	})
-});
-	
+		});

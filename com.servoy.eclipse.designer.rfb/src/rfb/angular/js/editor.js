@@ -71,6 +71,16 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				return eventCallback;
 			}
 			
+			$scope.getGhost = function (uuid) {
+				for (i = 0; i< $scope.ghosts.ghostContainers.length; i++) {
+					for (j = 0; j< $scope.ghosts.ghostContainers[i].ghosts.length; j++){
+						if ($scope.ghosts.ghostContainers[i].ghosts[j].uuid == uuid)
+							return $scope.ghosts.ghostContainers[i].ghosts[j];
+					}
+				}
+				return null;
+			}
+			
 			$scope.unregisterDOMEvent = function(eventType, target,callback) {
 				if (target == "FORM") {
 					$($scope.contentDocument).off(eventType,null,callback)
@@ -211,6 +221,10 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				        }
 				    });
 				});  
+				var promise = $editorService.getGhostComponents();
+				promise.then(function (result){
+					$scope.ghosts = result;
+				});
 			});
 			
 
@@ -233,6 +247,7 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 						}
 						selection = matchedElements;
 						$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection)
+	
 					},100)
 				}
 			});
@@ -378,6 +393,10 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 		
 		createComponent: function(component) {
 			wsSession.callService('formeditor', 'createComponent', component, true)
+		},
+		
+		getGhostComponents: function() {
+			return wsSession.callService('formeditor', 'getGhostComponents', null, false)
 		},
 		
 		getURLParameter: getURLParameter,

@@ -16,6 +16,11 @@
 		    	<div id="lasso"></div>
 				<!--Decorators-->
 				<decorator></decorator>
+				<div  class="ghostcontainer" ng-repeat="container in ghosts.ghostContainers" ng-style="{left:container.left, top:container.top}" >
+					<div class="ghost" ng-repeat="ghost in container.ghosts track by $index" ng-style='{"position":"absolute", "left": ghost.location.x, "top": ghost.location.y }' svy-id="{{ghost.uuid}}">
+						{{ghost.text}}
+					</div>
+				</div>
 		    </div> <!--  -->
 			<div class="content" ng-style="contentStyle">
 				<!-- id query param should be dynamically set to the selector of the div in which the editor is placed -->
@@ -24,3 +29,4 @@
 		</div>
 	</div>
 </div>
+
