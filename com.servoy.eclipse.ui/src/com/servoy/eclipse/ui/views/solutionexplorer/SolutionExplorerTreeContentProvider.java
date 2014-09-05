@@ -222,16 +222,16 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		resources.parent = invisibleRootNode;
 
 		stylesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Styles, UserNodeType.STYLES, null, uiActivator.loadImageFromBundle("styles.gif"));
-		stylesNode.setClientSupport(ClientSupport.wc_sc);
+		stylesNode.setClientSupport(ClientSupport.ng_wc_sc);
 		stylesNode.parent = resources;
 
 		componentsNode = new PlatformSimpleUserNode(Messages.TreeStrings_Components, UserNodeType.COMPONENTS, null, uiActivator.loadImageFromBundle("bean.gif"));
-		componentsNode.setClientSupport(ClientSupport.wc_sc);
+		componentsNode.setClientSupport(ClientSupport.ng_wc_sc);
 		componentsNode.parent = resources;
 
 		userGroupSecurityNode = new PlatformSimpleUserNode(Messages.TreeStrings_UserGroupSecurity, UserNodeType.USER_GROUP_SECURITY, null,
 			uiActivator.loadImageFromBundle("lock.gif"));
-		userGroupSecurityNode.setClientSupport(ClientSupport.wc_sc);
+		userGroupSecurityNode.setClientSupport(ClientSupport.ng_wc_sc);
 		userGroupSecurityNode.parent = resources;
 
 		i18nFilesNode = new PlatformSimpleUserNode(Messages.TreeStrings_I18NFiles, UserNodeType.I18N_FILES, null, uiActivator.loadImageFromBundle("i18n.gif"));
@@ -239,7 +239,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 		templatesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Templates, UserNodeType.TEMPLATES, null,
 			uiActivator.loadImageFromBundle("template.gif"));
-		templatesNode.setClientSupport(ClientSupport.wc_sc);
+		templatesNode.setClientSupport(ClientSupport.ng_wc_sc);
 		templatesNode.parent = resources;
 
 		activeSolutionNode = new PlatformSimpleUserNode(Messages.TreeStrings_NoActiveSolution, UserNodeType.SOLUTION, null,
@@ -784,7 +784,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				tooltip = "Duplicate of " + serverObj.getName();
 			}
 			PlatformSimpleUserNode node = new PlatformSimpleUserNode(server_name, UserNodeType.SERVER,
-				"", tooltip, serverObj, uiActivator.loadImageFromBundle(getServerImageName(server_name, serverObj)));
+					"", tooltip, serverObj, uiActivator.loadImageFromBundle(getServerImageName(server_name, serverObj)));
 			serverNodes.add(node);
 			node.parent = serversNode;
 			handleServerViewsNode(serverObj, node);
