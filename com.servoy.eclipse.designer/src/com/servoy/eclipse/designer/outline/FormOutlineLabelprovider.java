@@ -32,6 +32,7 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.util.Pair;
 
@@ -91,6 +92,11 @@ public class FormOutlineLabelprovider extends LabelProvider implements IPersistL
 			if (((PersistContext)element).getPersist() instanceof Part)
 			{
 				return ((Part)((PersistContext)element).getPersist()).getEditorName();
+			}
+			if (((PersistContext)element).getPersist() instanceof LayoutContainer)
+			{
+				LayoutContainer layout = (LayoutContainer)((PersistContext)element).getPersist();
+				return layout.getTagType() + (layout.getCssClasses() != null ? "-" + layout.getCssClasses() : "");
 			}
 			return SupportNameLabelProvider.INSTANCE_DEFAULT_ANONYMOUS.getText(((PersistContext)element).getPersist());
 		}
