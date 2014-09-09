@@ -54,6 +54,7 @@ import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Portal;
@@ -207,6 +208,10 @@ public class ElementUtil
 			if (sm.isPrivate()) return "private_method.gif";
 			else if (sm.isProtected()) return "protected_method.gif";
 			else return "public_method.gif";
+		}
+		if (persist instanceof LayoutContainer)
+		{
+			return "layoutcontainer.gif";
 		}
 
 		return null;
