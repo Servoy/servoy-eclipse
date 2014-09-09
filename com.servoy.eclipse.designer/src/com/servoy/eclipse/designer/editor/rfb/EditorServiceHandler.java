@@ -180,10 +180,10 @@ public class EditorServiceHandler implements IServerService
 				return new JSONObject(stringWriter.getBuffer().toString());
 			}
 
-			if ("getFormLayoutGrid".equals(methodName))
-			{
-				return editorPart.getForm().getLayoutGrid();
-			}
+//			if ("getFormLayoutGrid".equals(methodName))
+//			{
+//				return editorPart.getForm().getLayoutGrid();
+//			}
 
 			// void methods
 			if ("setSelection".equals(methodName))
