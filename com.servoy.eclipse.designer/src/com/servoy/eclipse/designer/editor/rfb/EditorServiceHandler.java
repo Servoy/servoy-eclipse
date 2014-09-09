@@ -126,7 +126,7 @@ public class EditorServiceHandler implements IServerService
 
 					private int computeY(int index)
 					{
-						return -70;
+						return 40;
 					}
 
 					@Override
@@ -152,10 +152,8 @@ public class EditorServiceHandler implements IServerService
 									writer.key("text").value(((Tab)tab).getText());
 									writer.key("location");
 									writer.object();
-									writer.key("x").value(computeX(i));
-									writer.key("y").value(computeY(i));
-//									writer.key("x").value(((Tab)tab).getLocation().x);
-//									writer.key("y").value(((Tab)tab).getLocation().y);
+									writer.key("x").value(((Tab)tab).getLocation().x);
+									writer.key("y").value(((Tab)tab).getLocation().y);
 									writer.endObject();
 									writer.endObject();
 									i++;
