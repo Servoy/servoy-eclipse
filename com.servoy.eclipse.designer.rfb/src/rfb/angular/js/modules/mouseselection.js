@@ -164,8 +164,20 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					p.left = p.left-1;
 					
 					var elements = this.getElementsByRectangle(p,p2,0.001);
-					
-					if (elements.length > 0) return elements[0];
+					if (elements.length == 1) return elements[0];
+					else if (elements.length > 1) {
+						var smallest = elements[0];
+						var pixels = smallest.clientWidth * smallest.clientHeight;
+						for(var i=1;i<elements.length;i++) {
+							var el = elements[i];
+							var elPixels = el.clientWidth * el.clientHeight;
+							if (elPixels < pixels) {
+								pixels = elPixels;
+								smallest = el;
+							}
+						}
+						return smallest;
+					}
 					
 					return null;
 				},
