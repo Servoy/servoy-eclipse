@@ -157,13 +157,37 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					return {"left":xMouseDown, "top":yMouseDown};
 				},
 				getNode: function(event) {
-					var lassoMouseSelectPosition = this.getMousePosition(event);
-					var p = this.adjustForPadding(lassoMouseSelectPosition);
-					var p2 = {top:p.top + 1,left:p.left+1}
+					var glassPaneMousePosition = this.getMousePosition(event);
+					var glassPaneMousePosition1 = {top:glassPaneMousePosition.top + 1,left:glassPaneMousePosition.left + 1};
+					var glassPaneMousePosition2 = {top:glassPaneMousePosition.top - 1,left:glassPaneMousePosition.left - 1};
+					/*first get elements with glasspane coordinates 
+					 * (this list may also contain real components - these need to be removed as they have a different coordinate system) */
+					var glassPaneElements = this.getElementsByRectangle(glassPaneMousePosition1,glassPaneMousePosition2,0.001);
+					//adjust for padding (added by phone and tablet canvas size) so that we have the correct position to get elements from the form
+					var p = this.adjustForPadding(glassPaneMousePosition);
+					var p2 = {top:p.top + 1,left:p.left + 1}
 					p.top = p.top-1
 					p.left = p.left-1;
-					
+					/*now get elements from the form 
+					 * (this list may also contain elements from the glasspane - these need to be removed as they have a different coordinate system)*/
 					var elements = this.getElementsByRectangle(p,p2,0.001);
+					
+					function isOnGlassPane (element) {
+						return element.parentElement.parentElement == editorScope.glasspane;
+					};
+					function isNotOnGlassPane (element) {
+						return element.parentElement.parentElement !== editorScope.glasspane;
+					};
+					elements = elements.filter(isNotOnGlassPane);
+					glassPaneElements = glassPaneElements.filter(isOnGlassPane);
+					
+					/*unify the lists*/
+					if (glassPaneElements) {
+						if (glassPaneElements.length > 0 ){
+							elements = elements.concat(glassPaneElements)
+						}
+					}
+						
 					if (elements.length == 1) return elements[0];
 					else if (elements.length > 1) {
 						var smallest = elements[0];
