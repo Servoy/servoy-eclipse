@@ -38,6 +38,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
+import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.websocket.WebsocketSessionManager;
 
 import com.servoy.eclipse.core.Activator;
@@ -116,6 +117,8 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	@Override
 	public void createPartControl(Composite parent)
 	{
+		// always reload the current spec so that always the latest stuff is shown.
+		WebComponentSpecProvider.reload();
 		// Serve requests for rfb editor
 		String editorId = UUID.randomUUID().toString();
 		WebsocketSessionManager.addSession(editorWebsocketSession = new EditorWebsocketSession(editorId));
