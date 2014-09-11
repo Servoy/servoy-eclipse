@@ -72,7 +72,7 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 				cleanListeners();
 				mousemovecallback = $scope.registerDOMEvent("mousemove","CONTENT_AREA",resizeSelection);
 				mouseupcallback = $scope.registerDOMEvent("mouseup","CONTENT_AREA", function(ev){
-					$editorService.setCursorStyle("");
+					$scope.setCursorStyle("");
 					cleanListeners();
 					resizeSelection(ev);
 					sendChanges();
