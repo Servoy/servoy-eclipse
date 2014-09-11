@@ -436,6 +436,9 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 					}
 				}
 			}
+			else if (prevSelection.length > 0) {
+				changed = true;
+			}
 			if (changed) editorScope.setSelection(selection);
 		},
 		
