@@ -121,12 +121,12 @@ public class EditorServiceHandler implements IServerService
 
 					private int computeX(int index)
 					{
-						return index * 40;
+						return 15 + index * 40;
 					}
 
 					private int computeY(int index)
 					{
-						return 40;
+						return 50;
 					}
 
 					@Override
@@ -152,6 +152,7 @@ public class EditorServiceHandler implements IServerService
 									writer.key("text").value(((Tab)tab).getText());
 									writer.key("location");
 									writer.object();
+									if (args != null && args.has("resetPosition")) ((Tab)tab).setLocation(new Point(computeX(i), computeY(i)));
 									writer.key("x").value(((Tab)tab).getLocation().x);
 									writer.key("y").value(((Tab)tab).getLocation().y);
 									writer.endObject();
