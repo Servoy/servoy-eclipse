@@ -206,6 +206,11 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				var size = $scope.getContentSize();
 				return (size.width == "100%") && (size.height == "100%");
 			}
+			
+			$scope.setCursorStyle = function(cursor) {
+				$scope.glasspane.style.cursor = cursor;
+			}
+
 
 			$element.on('documentReady.content', function(event, contentDocument) {
 				$scope.contentDocument = contentDocument;
@@ -428,10 +433,6 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 			if (changed) editorScope.setSelection(selection);
 		},
 		
-		setCursorStyle: function(cursor) {
-			editorScope.glasspane.style.cursor = cursor;
-		}
-
 		// add more service methods here
 	}
 });
