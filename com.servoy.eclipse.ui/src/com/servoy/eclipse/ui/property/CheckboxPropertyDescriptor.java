@@ -19,14 +19,10 @@ package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 
 import com.servoy.eclipse.ui.Activator;
@@ -35,9 +31,7 @@ import com.servoy.eclipse.ui.Activator;
  * Property controller for boolean properties.
  * 
  * @author rgansevles
- *
  */
-
 public class CheckboxPropertyDescriptor extends PropertyDescriptor
 {
 	static final CheckboxLabelProvider LABEL_PROVIDER = new CheckboxLabelProvider();
@@ -60,122 +54,122 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptor
 	}
 
 
-	/**
-	 * Boolean type property editor. It will default to boolean unless the initData string is "class". In that case it will be for java.lang.Boolean.
-	 */
-	public static class CheckboxCellEditor extends CellEditor
-	{
-
-		/**
-		 * The checkbox value.
-		 */
-		/* package */
-		boolean value = false;
-
-		/**
-		 * Default CheckboxCellEditor style
-		 */
-		private static final int defaultStyle = SWT.NONE;
-
-		/**
-		 * Creates a new checkbox cell editor with no control
-		 */
-		public CheckboxCellEditor()
-		{
-			setStyle(defaultStyle);
-		}
-
-		/**
-		 * Creates a new checkbox cell editor parented under the given control. The cell editor value is a boolean value, which is initially <code>false</code>.
-		 * Initially, the cell editor has no cell validator.
-		 * 
-		 * @param parent the parent control
-		 */
-		public CheckboxCellEditor(Composite parent)
-		{
-			this(parent, defaultStyle);
-		}
-
-		/**
-		 * Creates a new checkbox cell editor parented under the given control. The cell editor value is a boolean value, which is initially <code>false</code>.
-		 * Initially, the cell editor has no cell validator.
-		 * 
-		 * @param parent the parent control
-		 * @param style the style bits
-		 */
-		public CheckboxCellEditor(Composite parent, int style)
-		{
-			super(parent, style);
-		}
-
-		@Override
-		protected Control createControl(final Composite parent)
-		{
-			Canvas canvas = new Canvas(parent, SWT.NO_BACKGROUND); // transparent
-			canvas.addMouseListener(new MouseAdapter()
-			{
-				@Override
-				public void mouseUp(MouseEvent e)
-				{
-					toggle();
-				}
-			});
-			return canvas;
-		}
-
-		/**
-		 * The object is being passed in, return the index to be used in the editor.
-		 * 
-		 * It should return sNoSelection if the value can't be converted to a index. The errormsg will have already been set in this case.
-		 */
-
-		@Override
-		public void activate()
-		{
-			toggle();
-		}
-
-		protected void toggle()
-		{
-			value = !value;
-			markDirty();
-			fireApplyEditorValue();
-		}
-
-
-		/**
-		 * The <code>CheckboxCellEditor</code> implementation of this <code>CellEditor</code> framework method returns the checkbox setting wrapped as a
-		 * <code>Boolean</code>.
-		 * 
-		 * @return the Boolean checkbox value
-		 */
-		@Override
-		protected Object doGetValue()
-		{
-			return value ? Boolean.TRUE : Boolean.FALSE;
-		}
-
-		/*
-		 * (non-Javadoc) Method declared on CellEditor.
-		 */
-		@Override
-		protected void doSetFocus()
-		{
-			// Ignore
-		}
-
-		/**
-		 * The <code>CheckboxCellEditor</code> implementation of this <code>CellEditor</code> framework method accepts a value wrapped as a
-		 * <code>Boolean</code> .
-		 * 
-		 * @param val a Boolean value
-		 */
-		@Override
-		protected void doSetValue(Object val)
-		{
-			this.value = Boolean.TRUE.equals(val);
-		}
-	}
+//	/**
+//	 * Boolean type property editor. It will default to boolean unless the initData string is "class". In that case it will be for java.lang.Boolean.
+//	 */
+//	public static class CheckboxCellEditor extends CellEditor
+//	{
+//
+//		/**
+//		 * The checkbox value.
+//		 */
+//		/* package */
+//		boolean value = false;
+//
+//		/**
+//		 * Default CheckboxCellEditor style
+//		 */
+//		private static final int defaultStyle = SWT.NONE;
+//
+//		/**
+//		 * Creates a new checkbox cell editor with no control
+//		 */
+//		public CheckboxCellEditor()
+//		{
+//			setStyle(defaultStyle);
+//		}
+//
+//		/**
+//		 * Creates a new checkbox cell editor parented under the given control. The cell editor value is a boolean value, which is initially <code>false</code>.
+//		 * Initially, the cell editor has no cell validator.
+//		 * 
+//		 * @param parent the parent control
+//		 */
+//		public CheckboxCellEditor(Composite parent)
+//		{
+//			this(parent, defaultStyle);
+//		}
+//
+//		/**
+//		 * Creates a new checkbox cell editor parented under the given control. The cell editor value is a boolean value, which is initially <code>false</code>.
+//		 * Initially, the cell editor has no cell validator.
+//		 * 
+//		 * @param parent the parent control
+//		 * @param style the style bits
+//		 */
+//		public CheckboxCellEditor(Composite parent, int style)
+//		{
+//			super(parent, style);
+//		}
+//
+//		@Override
+//		protected Control createControl(final Composite parent)
+//		{
+//			Canvas canvas = new Canvas(parent, SWT.NO_BACKGROUND); // transparent
+//			canvas.addMouseListener(new MouseAdapter()
+//			{
+//				@Override
+//				public void mouseUp(MouseEvent e)
+//				{
+//					toggle();
+//				}
+//			});
+//			return canvas;
+//		}
+//
+//		/**
+//		 * The object is being passed in, return the index to be used in the editor.
+//		 * 
+//		 * It should return sNoSelection if the value can't be converted to a index. The errormsg will have already been set in this case.
+//		 */
+//
+//		@Override
+//		public void activate()
+//		{
+//			toggle();
+//		}
+//
+//		protected void toggle()
+//		{
+//			value = !value;
+//			markDirty();
+//			fireApplyEditorValue();
+//		}
+//
+//
+//		/**
+//		 * The <code>CheckboxCellEditor</code> implementation of this <code>CellEditor</code> framework method returns the checkbox setting wrapped as a
+//		 * <code>Boolean</code>.
+//		 * 
+//		 * @return the Boolean checkbox value
+//		 */
+//		@Override
+//		protected Object doGetValue()
+//		{
+//			return value ? Boolean.TRUE : Boolean.FALSE;
+//		}
+//
+//		/*
+//		 * (non-Javadoc) Method declared on CellEditor.
+//		 */
+//		@Override
+//		protected void doSetFocus()
+//		{
+//			// Ignore
+//		}
+//
+//		/**
+//		 * The <code>CheckboxCellEditor</code> implementation of this <code>CellEditor</code> framework method accepts a value wrapped as a
+//		 * <code>Boolean</code> .
+//		 * 
+//		 * @param val a Boolean value
+//		 */
+//		@Override
+//		protected void doSetValue(Object val)
+//		{
+//			this.value = Boolean.TRUE.equals(val);
+//		}
+//	}
 
 
 	/**
@@ -196,7 +190,7 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptor
 
 		public String getText(Object element)
 		{
-			return null;
+			return Boolean.TRUE.equals(element) ? " true" : " false";
 		}
 	}
 }
