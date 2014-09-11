@@ -29,6 +29,7 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 			}
 			$scope.enterResizeMode = function(event,resizeInfo)
 			{
+				$editorService.setCursorStyle(resizeInfo.direction +"-resize");
 				event.preventDefault();
 				event.stopPropagation();
 				var lastresizeStartPosition = {
@@ -71,6 +72,7 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 				cleanListeners();
 				mousemovecallback = $scope.registerDOMEvent("mousemove","CONTENT_AREA",resizeSelection);
 				mouseupcallback = $scope.registerDOMEvent("mouseup","CONTENT_AREA", function(ev){
+					$editorService.setCursorStyle("");
 					cleanListeners();
 					resizeSelection(ev);
 					sendChanges();
@@ -96,6 +98,7 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 				});
 			}
 			$scope.cancelResizeMode = function (){
+				$editorService.setCursorStyle("");
 				cleanListeners();
 				sendChanges();
 			}

@@ -426,6 +426,10 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				}
 			}
 			if (changed) editorScope.setSelection(selection);
+		},
+		
+		setCursorStyle: function(cursor) {
+			editorScope.glasspane.style.cursor = cursor;
 		}
 
 		// add more service methods here
