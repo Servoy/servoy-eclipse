@@ -21,7 +21,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 public enum PropertyCategory
 {
-	Commands, Events, Layout, Properties, Elements, Beans;
+	Commands, Events, Layout, Properties, Elements, Component;
 
 	public static PropertyCategory createPropertyCategory(String propertyName)
 	{

@@ -551,7 +551,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 		else
 		{
-			category = PropertyCategory.Beans;
+			category = PropertyCategory.Component;
 			id = BEAN_PROPERTY_PREFIX_DOT + propertyDescriptor.propertyDescriptor.getName();
 		}
 

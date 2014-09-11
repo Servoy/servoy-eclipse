@@ -158,20 +158,20 @@ public class WebComponentPropertySource extends PersistPropertySource
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * com.servoy.eclipse.ui.property.PersistPropertySource#createPropertyCategory(com.servoy.eclipse.ui.property.PersistPropertySource.PropertyDescriptorWrapper
 	 * )
-	 *
-	 * Properties from spec should be dispayed under "Beans" category except for handlers and BEAN_PROPERTIES. Properties found with reflection are handled by
-	 * the super class (they go under "Properties").
+	 * 
+	 * Properties from spec should be dispayed under "Component" category except for handlers and BEAN_PROPERTIES. Properties found with reflection are handled
+	 * by the super class (they go under "Properties").
 	 */
 	@Override
 	protected PropertyCategory createPropertyCategory(PropertyDescriptorWrapper propertyDescriptor)
 	{
 		if (webComponentSpec.getHandlers().containsKey(propertyDescriptor.propertyDescriptor.getName()) ||
 			BEAN_PROPERTIES.containsKey(propertyDescriptor.propertyDescriptor.getName())) return super.createPropertyCategory(propertyDescriptor);
-		if (webComponentSpec.getProperties().containsKey(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Beans;
+		if (webComponentSpec.getProperties().containsKey(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Component;
 		return super.createPropertyCategory(propertyDescriptor);
 	}
 
