@@ -235,7 +235,7 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 						}
 					});
 				});  
-				var promise = $editorService.getGhostComponents();
+				var promise = $editorService.getGhostComponents({"resetPosition":true});
 				promise.then(function (result){
 					$scope.ghosts = result;
 				});
@@ -248,7 +248,13 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				// maybe the form controllers code could call $evalAsync as last thing in its controller when it is in design.
 				if (selection.length > 0) {
 					$timeout(function() {
-						var nodes = $scope.contentDocument.querySelectorAll("[svy-id]")
+						var promise = $editorService.getGhostComponents();//no parameter, then the ghosts are not repositioned
+						promise.then(function (result){
+							$scope.ghosts = result;
+						});
+						var nodes = $scope.contentDocument.querySelectorAll("[svy-id]");
+						var ghosts = $scope.glasspane.querySelectorAll("[svy-id]");
+						nodes = nodes.concat(ghosts);
 						var matchedElements = []
 						for (var i = 0; i < nodes.length; i++) {
 							var element = nodes[i]
