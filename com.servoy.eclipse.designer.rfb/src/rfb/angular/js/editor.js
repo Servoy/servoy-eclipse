@@ -252,8 +252,8 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 						promise.then(function (result){
 							$scope.ghosts = result;
 						});
-						var nodes = $scope.contentDocument.querySelectorAll("[svy-id]");
-						var ghosts = $scope.glasspane.querySelectorAll("[svy-id]");
+						var nodes = Array.prototype.slice.call($scope.contentDocument.querySelectorAll("[svy-id]"));
+						var ghosts = Array.prototype.slice.call($scope.glasspane.querySelectorAll("[svy-id]"));
 						nodes = nodes.concat(ghosts);
 						var matchedElements = []
 						for (var i = 0; i < nodes.length; i++) {
