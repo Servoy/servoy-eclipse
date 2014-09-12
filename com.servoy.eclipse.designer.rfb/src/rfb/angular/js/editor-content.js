@@ -9,6 +9,7 @@ angular.module('editorContent',['servoyApp'])
 			 $('body').append(el); 
 			 return el;
 		  }
+	$solutionSettings.enableAnchoring = false; 
 	$scope.solutionSettings = $solutionSettings; 
 	var realConsole = $window.console;
 	$window.console = {
