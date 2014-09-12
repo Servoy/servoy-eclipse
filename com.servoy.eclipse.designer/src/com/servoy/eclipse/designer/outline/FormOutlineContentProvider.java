@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.designer.outline;
 
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -43,6 +42,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SortedList;
@@ -76,6 +76,8 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 
 	public Object[] getChildrenNonGrouped(Object parentElement)
 	{
+		Comparator comparator = form.getLayoutContainers().hasNext() ? PersistContextLocationComparator.INSTANCE : PersistContextNameComparator.INSTANCE;
+
 		if (parentElement == ELEMENTS || parentElement == PARTS)
 		{
 			try
@@ -108,7 +110,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 						nodes.add(PersistContext.create(persist, form));
 					}
 				}
-				return (parentElement == ELEMENTS) ? new SortedList(PersistContextLocationComparator.INSTANCE, nodes).toArray() : nodes.toArray();
+				return (parentElement == ELEMENTS) ? new SortedList(comparator, nodes).toArray() : nodes.toArray();
 			}
 			catch (RepositoryException e)
 			{
@@ -122,7 +124,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			{
 				list.add(PersistContext.create(persist, ((PersistContext)parentElement).getContext()));
 			}
-			return new SortedList(PersistContextLocationComparator.INSTANCE, list).toArray();
+			return new SortedList(comparator, list).toArray();
 		}
 		else if (parentElement instanceof FormElementGroup)
 		{
@@ -132,13 +134,14 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			{
 				list.add(PersistContext.create(elements.next(), form));
 			}
-			return new SortedList(PersistContextLocationComparator.INSTANCE, list).toArray();
+			return new SortedList(comparator, list).toArray();
 		}
 		return null;
 	}
 
 	public Object[] getChildrenGrouped(Object parentElement)
 	{
+		Comparator comparator = form.getLayoutContainers().hasNext() ? PersistContextLocationComparator.INSTANCE : PersistContextNameComparator.INSTANCE;
 		if (parentElement == ELEMENTS || parentElement == PARTS)
 		{
 			HashSet<Object> availableCategories = null;
@@ -192,7 +195,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 						}
 					}
 				}
-				return new SortedList(PersistContextLocationComparator.INSTANCE, nodes).toArray();
+				return new SortedList(comparator, nodes).toArray();
 			}
 			catch (RepositoryException e)
 			{
@@ -323,6 +326,31 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 	{
 	}
 
+	public static class PersistContextNameComparator implements Comparator<Object>
+	{
+		public static final PersistContextNameComparator INSTANCE = new PersistContextNameComparator();
+
+		private PersistContextNameComparator()
+		{
+		}
+
+		/**
+		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+		 */
+		public int compare(Object o1, Object o2)
+		{
+			if (!(o1 instanceof PersistContext) || !(o2 instanceof PersistContext)) return 0;
+			String name1 = null;
+			if (((PersistContext)o1).getPersist() instanceof ISupportName) name1 = ((ISupportName)((PersistContext)o1).getPersist()).getName();
+			String name2 = null;
+			if (((PersistContext)o2).getPersist() instanceof ISupportName) name2 = ((ISupportName)((PersistContext)o2).getPersist()).getName();
+			if (name1 == null && name2 == null) return 0;
+			if (name1 == null) return 1;
+			if (name2 == null) return -1;
+			return name1.compareToIgnoreCase(name2);
+		}
+	}
+
 	public static class PersistContextLocationComparator implements Comparator<Object>
 	{
 		public static final PersistContextLocationComparator INSTANCE = new PersistContextLocationComparator();
@@ -338,18 +366,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 		{
 			if (!(o1 instanceof PersistContext) || !(o2 instanceof PersistContext)) return 0;
 
-			Point p1 = null;
-			if (((PersistContext)o1).getPersist() instanceof AbstractBase) p1 = (Point)((AbstractBase)((PersistContext)o1).getPersist()).getProperty("location");
-			Point p2 = null;
-			if (((PersistContext)o2).getPersist() instanceof ISupportName) p2 = (Point)((AbstractBase)((PersistContext)o2).getPersist()).getProperty("location");
-			if (p1 == null && p2 == null) return 0;
-			if (p1 == null) return 1;
-			if (p2 == null) return -1;
-			if (p1.y < p2.y) return -1;
-			if (p1.y > p2.y) return 1;
-			if (p1.x < p2.x) return -1;
-			if (p1.x > p2.x) return 1;
-			return 0;
+			return PositionComparator.XY_PERSIST_COMPARATOR.compare(((PersistContext)o1).getPersist(), ((PersistContext)o2).getPersist());
 		}
 	}
 
