@@ -222,17 +222,40 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				servoyInternal = injector.get("$servoyInternal");
 				$scope.glasspane.focus()
 				$(function(){   
-					$(document).keydown(function(objEvent) {   
-						// disable select-all  
-						if (objEvent.ctrlKey) {          
-							if (objEvent.keyCode == 65) {                         
-								return false;
-							}            
-						}
-						else if (objEvent.keyCode == 46) {
+					$(document).keydown(function(objEvent) {
+						var key;
+		                var isCtrl;
+
+		                if(window.event)
+		                {
+		                        key = window.event.keyCode;     //IE
+		                        if(window.event.ctrlKey)
+		                                isCtrl = true;
+		                        else
+		                                isCtrl = false;
+		                }
+		                else
+		                {
+		                        key = objEvent.which;     //firefox
+		                        if(objEvent.ctrlKey)
+		                                isCtrl = true;
+		                        else
+		                                isCtrl = false;
+		                }
+
+		                if(isCtrl)
+		                {
+		                	var k = String.fromCharCode(key).toLowerCase();
+		                    if ('a' == k || 's' == k )
+		                    {                            
+			                   return false;
+		                    }
+		                }
+						if (objEvent.keyCode == 46) {
 							// send the DELETE key code to the server
 							$editorService.keyPressed(objEvent);
 						}
+						return true;
 					});
 				});  
 				var promise = $editorService.getGhostComponents({"resetPosition":true});
