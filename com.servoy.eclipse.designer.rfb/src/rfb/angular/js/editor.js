@@ -445,24 +445,26 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 		getURLParameter: getURLParameter,
 
 		updateSelection: function(ids) {
-			var prevSelection = editorScope.getSelection();
-			var changed = false;
-			var selection = [];
-			if (ids && ids.length > 0) {
-				var nodes = editorScope.contentDocument.querySelectorAll("[svy-id]")
-				for(var i=0;i<nodes.length;i++) {
-					var id = nodes[i].getAttribute("svy-id");
-					if (ids.indexOf(id) != -1) {
-						selection.push(nodes[i]);
-						changed = changed || prevSelection.indexOf(nodes[i]) == -1;
-						if (selection.length == ids.length) break;
+			$timeout(function(){
+				var prevSelection = editorScope.getSelection();
+				var changed = false;
+				var selection = [];
+				if (ids && ids.length > 0) {
+					var nodes = editorScope.contentDocument.querySelectorAll("[svy-id]")
+					for(var i=0;i<nodes.length;i++) {
+						var id = nodes[i].getAttribute("svy-id");
+						if (ids.indexOf(id) != -1) {
+							selection.push(nodes[i]);
+							changed = changed || prevSelection.indexOf(nodes[i]) == -1;
+							if (selection.length == ids.length) break;
+						}
 					}
 				}
-			}
-			else if (prevSelection.length > 0) {
-				changed = true;
-			}
-			if (changed) editorScope.setSelection(selection);
+				else if (prevSelection.length > 0) {
+					changed = true;
+				}
+				if (changed) editorScope.setSelection(selection);
+			},400);
 		},
 		
 		// add more service methods here
