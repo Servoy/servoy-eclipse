@@ -57,12 +57,16 @@ public class ImportComponentAction extends Action
 
 	protected final SolutionExplorerView viewer;
 	private int overrideReturnCode;
+	private final String entity;
+	private final String folder;
 
-	public ImportComponentAction(SolutionExplorerView viewer)
+	public ImportComponentAction(SolutionExplorerView viewer, String entity, String folder)
 	{
 		this.viewer = viewer;
+		this.entity = entity;
+		this.folder = folder;
 		setImageDescriptor(Activator.loadImageDescriptorFromOldLocations("import.gif"));
-		setText("Import component");
+		setText("Import " + entity);
 		setToolTipText(getText());
 	}
 
@@ -102,8 +106,8 @@ public class ImportComponentAction extends Action
 			{
 				public void run()
 				{
-					ScrollableDialog dialog = new ScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.ERROR, "Error",
-						"The folowing components files already exist: ", existingComponents.toString());
+					ScrollableDialog dialog = new ScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.ERROR, "Error", "The folowing " + entity +
+						" files already exist: ", existingComponents.toString());
 					List<Pair<Integer, String>> buttonsAndLabels = new ArrayList<Pair<Integer, String>>();
 					buttonsAndLabels.add(new Pair<Integer, String>(IDialogConstants.YES_TO_ALL_ID, "Overwrite all"));
 					buttonsAndLabels.add(new Pair<Integer, String>(IDialogConstants.CANCEL_ID, "Cancel"));
@@ -200,11 +204,11 @@ public class ImportComponentAction extends Action
 		List<String> incoming = Arrays.asList(fileNames);
 
 		IProject project = getResourcesProject();
-		if (project.getFolder("components").exists())
+		if (project.getFolder(folder).exists())
 		{
 			try
 			{
-				IResource[] members = project.getFolder("components").members();
+				IResource[] members = project.getFolder(folder).members();
 				for (IResource iResource : members)
 				{
 					if (incoming.contains(iResource.getName())) existing.add(iResource.getName());
@@ -258,7 +262,7 @@ public class ImportComponentAction extends Action
 		{
 			e1.printStackTrace();
 		}
-		IFolder folder = project.getFolder("components");
+		IFolder folder = project.getFolder(this.folder);
 		if (!folder.exists())
 		{
 			try

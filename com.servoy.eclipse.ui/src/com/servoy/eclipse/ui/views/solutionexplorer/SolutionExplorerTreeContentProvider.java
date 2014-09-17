@@ -153,6 +153,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private final PlatformSimpleUserNode componentsNode;
 
+	private final PlatformSimpleUserNode servicesNode;
+
 	private final PlatformSimpleUserNode templatesNode;
 
 	private final PlatformSimpleUserNode i18nFilesNode;
@@ -229,6 +231,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		componentsNode.setClientSupport(ClientSupport.ng_wc_sc);
 		componentsNode.parent = resources;
 
+		servicesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Services, UserNodeType.SERVICES, null, uiActivator.loadImageFromBundle("services.gif"));
+		servicesNode.setClientSupport(ClientSupport.ng_wc_sc);
+		servicesNode.parent = resources;
+
 		userGroupSecurityNode = new PlatformSimpleUserNode(Messages.TreeStrings_UserGroupSecurity, UserNodeType.USER_GROUP_SECURITY, null,
 			uiActivator.loadImageFromBundle("lock.gif"));
 		userGroupSecurityNode.setClientSupport(ClientSupport.ng_wc_sc);
@@ -282,7 +288,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			uiActivator.loadImageFromBundle("plugin.gif"));
 		plugins.parent = invisibleRootNode;
 
-		resources.children = new PlatformSimpleUserNode[] { servers, stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsNode };
+		resources.children = new PlatformSimpleUserNode[] { servers, stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsNode, servicesNode };
 
 		invisibleRootNode.children = new PlatformSimpleUserNode[] { resources, allSolutionsNode, activeSolutionNode, jslib, application, solutionModel, databaseManager, datasources, utils, history, security, i18n, jsunit, plugins };
 
@@ -290,7 +296,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 																																						 * exceptions
 																																						 * ,
 																																						 */jsunit, plugins };
-		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsNode };
+		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsNode, servicesNode };
 
 		// we want to load the plugins node in a background low prio job so that it will expand fast
 		// when used...
@@ -783,8 +789,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			{
 				tooltip = "Duplicate of " + serverObj.getName();
 			}
-			PlatformSimpleUserNode node = new PlatformSimpleUserNode(server_name, UserNodeType.SERVER,
-					"", tooltip, serverObj, uiActivator.loadImageFromBundle(getServerImageName(server_name, serverObj)));
+			PlatformSimpleUserNode node = new PlatformSimpleUserNode(server_name, UserNodeType.SERVER, "", tooltip, serverObj,
+				uiActivator.loadImageFromBundle(getServerImageName(server_name, serverObj)));
 			serverNodes.add(node);
 			node.parent = serversNode;
 			handleServerViewsNode(serverObj, node);

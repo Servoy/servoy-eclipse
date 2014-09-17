@@ -34,21 +34,23 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 
 /**
- * @author user
- *
+ * Deletes the selected components or services.
+ * @author gganea
  */
 public class DeleteComponentResourceAction extends Action implements ISelectionChangedListener
 {
 
 	private IStructuredSelection selection;
 	private final Shell shell;
+	private final UserNodeType nodeType;
 
 
-	public DeleteComponentResourceAction(Shell shell)
+	public DeleteComponentResourceAction(Shell shell, String text, UserNodeType nodeType)
 	{
 		this.shell = shell;
-		setText("Delete Component");
-		setToolTipText("Delete Component");
+		this.nodeType = nodeType;
+		setText(text);
+		setToolTipText(text);
 	}
 
 	/*
@@ -100,7 +102,7 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 		while (it.hasNext() && state)
 		{
 			SimpleUserNode node = it.next();
-			state = (node.getType() == UserNodeType.COMPONENT_ITEM);
+			state = (node.getType() == nodeType);
 		}
 		if (state)
 		{
