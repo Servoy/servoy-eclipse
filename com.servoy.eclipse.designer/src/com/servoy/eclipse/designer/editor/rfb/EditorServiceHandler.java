@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.gef.commands.CompoundCommand;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -97,11 +98,13 @@ public class EditorServiceHandler implements IServerService
 	private final BaseVisualFormEditor editorPart;
 	private final ISelectionProvider selectionProvider;
 	private final AtomicInteger id = new AtomicInteger();
+	private final RfbSelectionListener selectionListener;
 
-	public EditorServiceHandler(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider)
+	public EditorServiceHandler(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider, RfbSelectionListener selectionListener)
 	{
 		this.editorPart = editorPart;
 		this.selectionProvider = selectionProvider;
+		this.selectionListener = selectionListener;
 	}
 
 	@Override
@@ -197,7 +200,9 @@ public class EditorServiceHandler implements IServerService
 				{
 					public void run()
 					{
-						selectionProvider.setSelection(selection.length == 0 ? null : new StructuredSelection(selection));
+						ISelection structuredSelection = new StructuredSelection(selection);
+						selectionListener.setLastSelection(structuredSelection);
+						selectionProvider.setSelection(selection.length == 0 ? null : structuredSelection);
 					}
 				});
 			}
