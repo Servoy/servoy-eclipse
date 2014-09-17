@@ -80,6 +80,7 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 				revertresizecallback =  $scope.registerDOMEvent("keydown","CONTENT_AREA", function(ev){
 					if (ev.keyCode == 27)
 					{
+						$scope.setCursorStyle("");
 						cleanListeners();
 						var selection = $scope.getSelection();
 						var formState = $scope.getFormState();

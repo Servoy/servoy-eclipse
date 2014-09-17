@@ -436,14 +436,14 @@ public class SolutionSerializer
 							if (comments != null && comments.size() > 0)
 							{
 								Comment first = comments.first();
-								while (first.sourceStart() <= (written + ((CharSequence)content).length()))
+								while (first != null && first.sourceStart() <= (written + ((CharSequence)content).length()))
 								{
 									written += first.getText().length();
 									fos.write(first.getText().getBytes("UTF8"));
 									fos.write('\n');
 									fos.write('\n');
 									comments.remove(first);
-									first = comments.first();
+									first = (comments.size() > 0 ? comments.first() : null);
 								}
 							}
 							written += ((CharSequence)content).length();
@@ -1246,7 +1246,7 @@ public class SolutionSerializer
 
 		/*
 		 * <solutionname> (as project) /datamodel.xml /<styles>.css (? needed here) /calculations.js (all .js files do contain javadoc tags as
-		 *
+		 * 
 		 * @property=uuid:value, "@property=" followed by json prop notation) /aggregates/sum_orders.obj (=aggregate - ISupportName defines the filename)
 		 * /valuelists/employees.obj (obj files are JSON objects without the outer accolades) /globals.js (methods + vars) /forms/orders/sv_<uuid>.obj (nameless
 		 * form elements) /forms/orders/my_field.obj (named form elements, with ISupportName) /forms/orders/orders.js (script methods)

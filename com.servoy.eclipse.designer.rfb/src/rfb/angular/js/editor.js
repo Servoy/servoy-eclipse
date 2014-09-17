@@ -222,17 +222,40 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				servoyInternal = injector.get("$servoyInternal");
 				$scope.glasspane.focus()
 				$(function(){   
-					$(document).keydown(function(objEvent) {   
-						// disable select-all  
-						if (objEvent.ctrlKey) {          
-							if (objEvent.keyCode == 65) {                         
-								return false;
-							}            
-						}
-						else if (objEvent.keyCode == 46) {
+					$(document).keydown(function(objEvent) {
+						var key;
+		                var isCtrl;
+
+		                if(window.event)
+		                {
+		                        key = window.event.keyCode;     //IE
+		                        if(window.event.ctrlKey)
+		                                isCtrl = true;
+		                        else
+		                                isCtrl = false;
+		                }
+		                else
+		                {
+		                        key = objEvent.which;     //firefox
+		                        if(objEvent.ctrlKey)
+		                                isCtrl = true;
+		                        else
+		                                isCtrl = false;
+		                }
+
+		                if(isCtrl)
+		                {
+		                	var k = String.fromCharCode(key).toLowerCase();
+		                    if ('a' == k || 's' == k )
+		                    {                            
+			                   return false;
+		                    }
+		                }
+						if (objEvent.keyCode == 46) {
 							// send the DELETE key code to the server
 							$editorService.keyPressed(objEvent);
 						}
+						return true;
 					});
 				});  
 				var promise = $editorService.getGhostComponents({"resetPosition":true});
@@ -252,8 +275,8 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 						promise.then(function (result){
 							$scope.ghosts = result;
 						});
-						var nodes = $scope.contentDocument.querySelectorAll("[svy-id]");
-						var ghosts = $scope.glasspane.querySelectorAll("[svy-id]");
+						var nodes = Array.prototype.slice.call($scope.contentDocument.querySelectorAll("[svy-id]"));
+						var ghosts = Array.prototype.slice.call($scope.glasspane.querySelectorAll("[svy-id]"));
 						nodes = nodes.concat(ghosts);
 						var matchedElements = []
 						for (var i = 0; i < nodes.length; i++) {
@@ -422,21 +445,26 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 		getURLParameter: getURLParameter,
 
 		updateSelection: function(ids) {
-			var prevSelection = editorScope.getSelection();
-			var changed = false;
-			var selection = [];
-			if (ids && ids.length > 0) {
-				var nodes = editorScope.contentDocument.querySelectorAll("[svy-id]")
-				for(var i=0;i<nodes.length;i++) {
-					var id = nodes[i].getAttribute("svy-id");
-					if (ids.indexOf(id) != -1) {
-						selection.push(nodes[i]);
-						changed = changed || prevSelection.indexOf(nodes[i]) == -1;
-						if (selection.length == ids.length) break;
+			$timeout(function(){
+				var prevSelection = editorScope.getSelection();
+				var changed = false;
+				var selection = [];
+				if (ids && ids.length > 0) {
+					var nodes = editorScope.contentDocument.querySelectorAll("[svy-id]")
+					for(var i=0;i<nodes.length;i++) {
+						var id = nodes[i].getAttribute("svy-id");
+						if (ids.indexOf(id) != -1) {
+							selection.push(nodes[i]);
+							changed = changed || prevSelection.indexOf(nodes[i]) == -1;
+							if (selection.length == ids.length) break;
+						}
 					}
 				}
-			}
-			if (changed) editorScope.setSelection(selection);
+				else if (prevSelection.length > 0) {
+					changed = true;
+				}
+				if (changed) editorScope.setSelection(selection);
+			},400);
 		},
 		
 		// add more service methods here

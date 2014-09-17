@@ -382,7 +382,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.COMPONENTS)
 			{
-				lm = createComponentsFiles();
+				lm = createComponentsFiles("components", UserNodeType.COMPONENT_ITEM);
+			}
+			else if (type == UserNodeType.SERVICES)
+			{
+				lm = createComponentsFiles("services", UserNodeType.SERVICE_ITEM);
 			}
 			else if (type == UserNodeType.TEMPLATES)
 			{
@@ -684,14 +688,14 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	/**
 	 * @return
 	 */
-	private Object[] createComponentsFiles()
+	private Object[] createComponentsFiles(String folder_name, UserNodeType nodeType)
 	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
 		ServoyProject initialActiveProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 		ServoyResourcesProject resourcesProject = initialActiveProject.getResourcesProject();
 		IProject project = resourcesProject.getProject();
 
-		IFolder folder = project.getFolder("components");
+		IFolder folder = project.getFolder(folder_name);
 		if (folder.exists())
 		{
 			IResource[] members;
@@ -708,7 +712,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						name = name.substring(0, name.length() - (fileResource.getFileExtension().length() + 1));
 					}
 
-					UserNode node = new UserNode(name, UserNodeType.COMPONENT_ITEM, iResource, null);
+					UserNode node = new UserNode(name, nodeType, iResource, null);
 					dlm.add(node);
 				}
 			}

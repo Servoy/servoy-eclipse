@@ -35,11 +35,11 @@ public class ImportComponentFolderAction extends ImportComponentAction
 	/**
 	 * @param viewer
 	 */
-	public ImportComponentFolderAction(SolutionExplorerView viewer)
+	public ImportComponentFolderAction(SolutionExplorerView viewer, String entity, String folder)
 	{
-		super(viewer);
+		super(viewer, entity, folder);
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("import_folder.gif"));
-		setText("Import component folder");
+		setText("Import " + entity + " folder");
 		setToolTipText(getText());
 	}
 

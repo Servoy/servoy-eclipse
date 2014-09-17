@@ -2718,8 +2718,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		renameMediaFolderAction = new RenameMediaFolderAction(this);
 		movePersistAction = new MovePersistAction(this.getSite().getShell());
 		duplicatePersistAction = new DuplicatePersistAction(this.getSite().getShell());
-		IAction importComponent = new ImportComponentAction(this);
-		IAction importComponentFolder = new ImportComponentFolderAction(this);
+		IAction importComponent = new ImportComponentAction(this, "component", "components");
+		IAction importService = new ImportComponentAction(this, "service", "services");
+		IAction importComponentFolder = new ImportComponentFolderAction(this, "component", "components");
+		IAction importServicesFolder = new ImportComponentFolderAction(this, "services", "services");
 
 		newActionInTreePrimary.registerAction(UserNodeType.FORM, newMethod);
 		newActionInTreePrimary.registerAction(UserNodeType.SCOPES_ITEM, newScope);
@@ -2740,10 +2742,12 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_SOLUTIONS, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.STYLES, newStyle);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS, importComponent);
+		newActionInTreePrimary.registerAction(UserNodeType.SERVICES, importService);
 
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA_FOLDER, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS, importComponentFolder);
+		newActionInTreeSecondary.registerAction(UserNodeType.SERVICES, importServicesFolder);
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
@@ -2818,7 +2822,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction deleteGlobalScript = new DeleteScriptAction(UserNodeType.GLOBAL_METHOD_ITEM, "Delete method", this);
 		IAction deleteFormVariable = new DeleteScriptAction(UserNodeType.FORM_VARIABLE_ITEM, "Delete variable", this);
 		IAction deleteGlobalVariable = new DeleteScriptAction(UserNodeType.GLOBAL_VARIABLE_ITEM, "Delete variable", this);
-		IAction deleteComponentResource = new DeleteComponentResourceAction(getSite().getShell());
+		IAction deleteComponentResource = new DeleteComponentResourceAction(getSite().getShell(), "Delete Component", UserNodeType.COMPONENT_ITEM);
+		IAction deleteServiceResource = new DeleteComponentResourceAction(getSite().getShell(), "Delete Service", UserNodeType.SERVICE_ITEM);
 		IAction deleteI18N = new DeleteI18NAction(getSite().getShell());
 		IAction deleteScope = new DeleteScopeAction("Delete scope", this);
 
@@ -2835,6 +2840,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		deleteActionInList.registerAction(UserNodeType.RELATION, deleteRelation);
 		deleteActionInList.registerAction(UserNodeType.I18N_FILE_ITEM, deleteI18N);
 		deleteActionInList.registerAction(UserNodeType.COMPONENT_ITEM, deleteComponentResource);
+		deleteActionInList.registerAction(UserNodeType.SERVICE_ITEM, deleteServiceResource);
 
 		copyTable = new CopyTableAction(getSite().getShell());
 		editVariableAction = new EditVariableAction(this);

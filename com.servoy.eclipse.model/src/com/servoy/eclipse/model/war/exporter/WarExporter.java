@@ -86,6 +86,7 @@ public class WarExporter
 {
 
 	private static final String COMPONENTS_DIR_NAME = "components";
+	private static final String SERVICES_DIR_NAME = "services";
 	private final IWarExportModel exportModel;
 	private static final String[] EXCLUDE_FROM_NG_JAR = new String[] { "com/servoy/j2db/server/ngclient/startup", "war/", "META-INF/" };
 	private static final String[] NG_LIBS = new String[] { "slf4j.api_*.jar", "log4j_*.jar", "org.freemarker*.jar", "org.jsoup*.jar", "servoy_ngclient_" +
@@ -159,7 +160,7 @@ public class WarExporter
 	}
 
 	/**
-	 * Copy to the war all NG components (default and user-defined), as well as the jars required by the NGClient.
+	 * Copy to the war all NG components and services (default and user-defined), as well as the jars required by the NGClient.
 	 * @param monitor
 	 * @param tmpWarDir
 	 * @param targetLibDir
@@ -169,12 +170,16 @@ public class WarExporter
 	{
 		try
 		{
-			StringBuilder locations = new StringBuilder();
-			ComponentResourcesExporter.copyComponents(tmpWarDir);
-			locations.append(ComponentResourcesExporter.getComponentDirectoryNames());
-			locations.append(copyNGComponents(tmpWarDir, monitor));
-			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/components.properties"), locations.toString());
-			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/services.properties"), ComponentResourcesExporter.getServicesDirectoryNames());
+			StringBuilder componentLocations = new StringBuilder();
+			ComponentResourcesExporter.copyDefaultComponentsAndServices(tmpWarDir);
+			componentLocations.append(ComponentResourcesExporter.getComponentDirectoryNames());
+			componentLocations.append(copyUserDefinedComponents(tmpWarDir, monitor));
+			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/components.properties"), componentLocations.toString());
+
+			StringBuilder servicesLocations = new StringBuilder();
+			servicesLocations.append(ComponentResourcesExporter.getServicesDirectoryNames());
+			servicesLocations.append(copyUserDefinedServices(tmpWarDir, monitor));
+			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/services.properties"), servicesLocations.toString());
 			copyNGLibs(targetLibDir);
 		}
 		catch (IOException e)
@@ -314,16 +319,8 @@ public class WarExporter
 		}
 	}
 
-	/**
-	 * Copy all user-defined components from resources/components to the war.
-	 * @param tmpWarDir
-	 * @param monitor 
-	 * @param locations 
-	 * @throws ExportException 
-	 */
-	private String copyNGComponents(File tmpWarDir, IProgressMonitor monitor) throws ExportException
+	private String copyUserDefinedComponentsOrServices(File tmpWarDir, IProgressMonitor monitor, String copyFrom) throws ExportException
 	{
-		monitor.subTask("Copy NG components");
 		StringBuilder locations = new StringBuilder();
 		ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 		try
@@ -336,7 +333,7 @@ public class WarExporter
 		}
 		if (activeResourcesProject != null)
 		{
-			IFolder folder = activeResourcesProject.getProject().getFolder(COMPONENTS_DIR_NAME);
+			IFolder folder = activeResourcesProject.getProject().getFolder(copyFrom);
 			if (folder.exists())
 			{
 				try
@@ -373,6 +370,32 @@ public class WarExporter
 			}
 		}
 		return locations.toString();
+	}
+
+	/**
+	 * Copy all user-defined components from resources/components to the war.
+	 * @param tmpWarDir
+	 * @param monitor 
+	 * @param locations 
+	 * @throws ExportException 
+	 */
+	private String copyUserDefinedComponents(File tmpWarDir, IProgressMonitor monitor) throws ExportException
+	{
+		monitor.subTask("Copy user-defined components");
+		return copyUserDefinedComponentsOrServices(tmpWarDir, monitor, COMPONENTS_DIR_NAME);
+	}
+
+	/**
+	 * Copy all user-defined services from resources/services to the war.
+	 * @param tmpWarDir
+	 * @param monitor 
+	 * @param locations 
+	 * @throws ExportException 
+	 */
+	private String copyUserDefinedServices(File tmpWarDir, IProgressMonitor monitor) throws ExportException
+	{
+		monitor.subTask("Copy user-defined services");
+		return copyUserDefinedComponentsOrServices(tmpWarDir, monitor, SERVICES_DIR_NAME);
 	}
 
 	/**

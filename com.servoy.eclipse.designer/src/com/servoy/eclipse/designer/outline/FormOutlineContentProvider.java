@@ -42,6 +42,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SortedList;
@@ -75,6 +76,8 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 
 	public Object[] getChildrenNonGrouped(Object parentElement)
 	{
+		Comparator comparator = form.getLayoutContainers().hasNext() ? PersistContextLocationComparator.INSTANCE : PersistContextNameComparator.INSTANCE;
+
 		if (parentElement == ELEMENTS || parentElement == PARTS)
 		{
 			try
@@ -107,7 +110,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 						nodes.add(PersistContext.create(persist, form));
 					}
 				}
-				return (parentElement == ELEMENTS) ? new SortedList(PersistContextNameComparator.INSTANCE, nodes).toArray() : nodes.toArray();
+				return (parentElement == ELEMENTS) ? new SortedList(comparator, nodes).toArray() : nodes.toArray();
 			}
 			catch (RepositoryException e)
 			{
@@ -121,7 +124,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			{
 				list.add(PersistContext.create(persist, ((PersistContext)parentElement).getContext()));
 			}
-			return list.toArray();
+			return new SortedList(comparator, list).toArray();
 		}
 		else if (parentElement instanceof FormElementGroup)
 		{
@@ -131,13 +134,14 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			{
 				list.add(PersistContext.create(elements.next(), form));
 			}
-			return new SortedList(PersistContextNameComparator.INSTANCE, list).toArray();
+			return new SortedList(comparator, list).toArray();
 		}
 		return null;
 	}
 
 	public Object[] getChildrenGrouped(Object parentElement)
 	{
+		Comparator comparator = form.getLayoutContainers().hasNext() ? PersistContextLocationComparator.INSTANCE : PersistContextNameComparator.INSTANCE;
 		if (parentElement == ELEMENTS || parentElement == PARTS)
 		{
 			HashSet<Object> availableCategories = null;
@@ -191,7 +195,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 						}
 					}
 				}
-				return new SortedList(PersistContextNameComparator.INSTANCE, nodes).toArray();
+				return new SortedList(comparator, nodes).toArray();
 			}
 			catch (RepositoryException e)
 			{
@@ -344,6 +348,25 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			if (name1 == null) return 1;
 			if (name2 == null) return -1;
 			return name1.compareToIgnoreCase(name2);
+		}
+	}
+
+	public static class PersistContextLocationComparator implements Comparator<Object>
+	{
+		public static final PersistContextLocationComparator INSTANCE = new PersistContextLocationComparator();
+
+		private PersistContextLocationComparator()
+		{
+		}
+
+		/**
+		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+		 */
+		public int compare(Object o1, Object o2)
+		{
+			if (!(o1 instanceof PersistContext) || !(o2 instanceof PersistContext)) return 0;
+
+			return PositionComparator.XY_PERSIST_COMPARATOR.compare(((PersistContext)o1).getPersist(), ((PersistContext)o2).getPersist());
 		}
 	}
 
