@@ -46,17 +46,9 @@ public class RfbSelectionListener implements ISelectionListener
 	@Override
 	public void selectionChanged(IWorkbenchPart part, ISelection selection)
 	{
-		final List<String> uuids = new ArrayList<String>();
 		if (selection instanceof IStructuredSelection)
 		{
-			for (Object sel : Utils.iterate(((IStructuredSelection)selection).iterator()))
-			{
-				IPersist persist = (IPersist)Platform.getAdapterManager().getAdapter(sel, IPersist.class);
-				if (persist != null)
-				{
-					uuids.add(persist.getUUID().toString());
-				}
-			}
+			final List<String> uuids = getPersistUUIDS((IStructuredSelection)selection);
 			if (uuids.size() > 0 && (uuids.size() != lastSelection.size() || !uuids.containsAll(lastSelection)))
 			{
 				lastSelection = uuids;
@@ -84,21 +76,27 @@ public class RfbSelectionListener implements ISelectionListener
 	/**
 	 * @param lastSelection the lastSelection to set
 	 */
-	public void setLastSelection(ISelection selection)
+	public void setLastSelection(IStructuredSelection selection)
+	{
+		this.lastSelection = getPersistUUIDS(selection);
+	}
+
+	/**
+	 * @param selection
+	 * @return
+	 */
+	private List<String> getPersistUUIDS(IStructuredSelection selection)
 	{
 		final List<String> uuids = new ArrayList<String>();
-		if (selection instanceof IStructuredSelection)
+		for (Object sel : Utils.iterate(selection.iterator()))
 		{
-			for (Object sel : Utils.iterate(((IStructuredSelection)selection).iterator()))
+			IPersist persist = (IPersist)Platform.getAdapterManager().getAdapter(sel, IPersist.class);
+			if (persist != null)
 			{
-				IPersist persist = (IPersist)Platform.getAdapterManager().getAdapter(sel, IPersist.class);
-				if (persist != null)
-				{
-					uuids.add(persist.getUUID().toString());
-				}
+				uuids.add(persist.getUUID().toString());
 			}
 		}
-		this.lastSelection = uuids;
+		return uuids;
 	}
 
 }
