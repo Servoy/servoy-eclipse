@@ -309,6 +309,16 @@
 	  		id="com.servoy.eclipse.core.StartPageBrowserEditor"
       		name="StartPage">
       </editor>
+      <editor
+            class="org.eclipse.wst.sse.ui.StructuredTextEditor"
+            default="true"
+            extensions="htm, html"
+            id="com.servoy.eclipse.ui.HTML"
+            name="HTML Editor">
+         <contentTypeBinding
+               contentTypeId="org.eclipse.wst.html.core.htmlsource">
+         </contentTypeBinding>
+      </editor>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">
