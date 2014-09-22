@@ -42,7 +42,7 @@
 			<property name="border-top-style"/>
 			<property name="border-left-style"/>
 			<property name="border-bottom-style"/>
-			<property name="border-right_style"/>
+			<property name="border-right-style"/>
 			<property name="border-top-left-radius"/>
 			<property name="border-top-right-radius"/>
 			<property name="border-bottom-right-radius"/>
@@ -108,7 +108,7 @@
 		<property-def name="border-bottom-style" inherited="no" category="box">
 			<property name="border-style"/>
 		</property-def>
-		<property-def name="border-right_style" inherited="no" category="box">
+		<property-def name="border-right-style" inherited="no" category="box">
 			<property name="border-style"/>
 		</property-def>
 			
