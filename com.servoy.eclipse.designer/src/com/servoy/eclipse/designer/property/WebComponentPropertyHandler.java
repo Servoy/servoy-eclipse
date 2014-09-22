@@ -22,6 +22,7 @@ import java.awt.Color;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONException;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.ColorPropertyType;
 import org.sablo.specification.property.types.FunctionPropertyType;
 
@@ -39,6 +40,9 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.server.ngclient.property.types.ServoyFunctionPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 
@@ -109,18 +113,20 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			ServoyLog.logError(e);
 		}
 
-		if (ColorPropertyType.TYPE_NAME.equals(propertyDescription.getType().getName()))
+		IPropertyType< ? > type = propertyDescription.getType();
+		if (ColorPropertyType.TYPE_NAME.equals(type.getName()))
 		{
 			return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(null, (String)value);
 		}
-		else if (propertyDescription.getType() == FunctionPropertyType.INSTANCE)
+		else if (type == FunctionPropertyType.INSTANCE || type == ServoyFunctionPropertyType.INSTANCE || type == ValueListPropertyType.INSTANCE)
 		{
 			if (value == null) return Integer.valueOf(0);
+			if (value instanceof Integer) return value;
 
-			IPersist func = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).searchPersist(UUID.fromString((String)value));
-			if (func instanceof AbstractBase)
+			IPersist persist = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).searchPersist(UUID.fromString((String)value));
+			if (persist instanceof AbstractBase)
 			{
-				return new Integer(func.getID());
+				return new Integer(persist.getID());
 			}
 
 			return Integer.valueOf(-1);
@@ -135,7 +141,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			{
 				return propertyDescription.getDefaultValue();
 			}
-			return propertyDescription.getType().defaultValue();
+			return type.defaultValue();
 		}
 		return value;
 	}
@@ -150,7 +156,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		{
 			convertedValue = PropertyColorConverter.getColorString((Color)value);
 		}
-		else if (propertyDescription.getType() == FunctionPropertyType.INSTANCE)
+		else if (propertyDescription.getType() == FunctionPropertyType.INSTANCE || propertyDescription.getType() == ServoyFunctionPropertyType.INSTANCE)
 		{
 			//  value is methodid
 			ITable table = null;
@@ -167,6 +173,11 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			}
 			IScriptProvider scriptMethod = ModelUtils.getScriptMethod(bean, persistContext.getContext(), table, ((Integer)value).intValue());
 			convertedValue = scriptMethod == null ? null : scriptMethod.getUUID().toString();
+		}
+		else if (propertyDescription.getType() == ValueListPropertyType.INSTANCE)
+		{
+			ValueList val = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getValueList(((Integer)value).intValue());
+			convertedValue = val.getUUID().toString();
 		}
 
 		try
