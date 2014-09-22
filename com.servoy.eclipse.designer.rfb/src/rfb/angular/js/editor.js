@@ -193,24 +193,88 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				return editorContentRootScope;
 			}
 
-			$scope.contentStyle = {width: "100%", height: "100%"};
+			$scope.contentStyle = {top: "0px", left: "0px",right: "0px", bottom: "0px"};
+			$scope.glasspaneStyle = {};
 
 			$scope.setContentSize = function(width, height) {
 				$scope.contentStyle.width = width;
 				$scope.contentStyle.height = height;
+				delete $scope.contentStyle.top;
+				delete $scope.contentStyle.left;
+				delete $scope.contentStyle.right;
+				delete $scope.contentStyle.bottom;
+				delete $scope.contentStyle.h
+				delete $scope.contentStyle.w
+				$scope.glasspaneStyle = {};
+				$timeout(function() {
+					$scope.setContentSizes();
+				},100);
 			}
+			$scope.setContentSizeFull = function() {
+				$scope.contentStyle = {top: "0px", left: "0px",right: "0px", bottom: "0px"};
+				delete $scope.contentStyle.width;
+				delete $scope.contentStyle.height;
+				delete $scope.contentStyle.h
+				delete $scope.contentStyle.w
+				$scope.glasspaneStyle = {};
+				$timeout(function() {
+					$scope.setContentSizes();
+				},100);
+			},
 			$scope.getContentSize = function() {
 				return {width: $scope.contentStyle.width, height: $scope.contentStyle.height};
 			}
 			$scope.isContentSizeFull = function() {
-				var size = $scope.getContentSize();
-				return (size.width == "100%") && (size.height == "100%");
+				return ($scope.contentStyle.right == "0px") && ($scope.contentStyle.bottom == "0px");
 			}
 			
 			$scope.setCursorStyle = function(cursor) {
 				$scope.glasspane.style.cursor = cursor;
 			}
+			
+			function getScrollSizes(x) {
+				var height = 0;
+				var width = 0;
+				for (var i =0;i<x.length;i++) {
+					if (x[i].scrollHeight > height) {
+						height = x[i].scrollHeight;
+					}
+					if (x[i].scrollWidth > width) {
+						width = x[i].scrollWidth;
+					}
+					var childHeights = getScrollSizes($(x[i]).children())
+					if (childHeights.height > height) {
+						height = childHeights.height;
+					}
+					if (childHeights.width > width) {
+						width = childHeights.width;
+					}
+				}
+				return {height:height,width:width}
+			}
 
+			$scope.setContentSizes = function() {
+				var sizes = getScrollSizes($scope.contentDocument.querySelectorAll(".sfcontent"));
+				if (sizes.height > 0 && sizes.width > 0) {
+					var contentDiv = $element.find('.content-area')[0];
+					if (contentDiv.clientHeight < sizes.height && (!$scope.contentStyle.h || $scope.contentStyle.h + 20 < sizes.height || $scope.contentStyle.h - 20 > sizes.height)) {
+						$scope.contentStyle.h = sizes.height
+						$scope.contentStyle.height = (sizes.height + 20)  +"px"
+						$scope.glasspaneStyle.height = (sizes.height + 20)  +"px"
+					}
+					if ($scope.isContentSizeFull()) {
+						if (contentDiv.clientWidth < sizes.width && (!$scope.contentStyle.w || $scope.contentStyle.w + 20 < sizes.width || $scope.contentStyle.w - 20 > sizes.width)) {
+							$scope.contentStyle.w = sizes.width
+							$scope.contentStyle.width = (sizes.width + 20)  +"px"
+							$scope.glasspaneStyle.width = (sizes.width + 20)  +"px"
+						}
+					}
+				}
+			}
+			
+			$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
+				$scope.setContentSizes();
+			})
 
 			$element.on('documentReady.content', function(event, contentDocument) {
 				$scope.contentDocument = contentDocument;
@@ -262,6 +326,9 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				promise.then(function (result){
 					$scope.ghosts = result;
 				});
+				$timeout(function() {
+					$scope.setContentSizes();
+				},500);
 			});
 
 
@@ -290,8 +357,10 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 						}
 						selection = matchedElements;
 						$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection)
-
 					},100)
+				}
+				else {
+					$scope.setContentSizes();
 				}
 			});
 
