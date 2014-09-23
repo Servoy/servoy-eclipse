@@ -38,6 +38,7 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 
+import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.base.util.ITagResolver;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -51,7 +52,6 @@ import com.servoy.eclipse.ui.views.solutionexplorer.ActiveEditorListener;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Text;
 
 /**
@@ -129,7 +129,7 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 	/**
 	 * Inserts the specified code at the caret position inside the open javaScript editor. It will also modify prefixes in the code based on the source form and
 	 * the edited script's form.
-	 * 
+	 *
 	 * @param ed the editor into which the text must be inserted.
 	 * @param codeText the code to insert.
 	 * @param sourceForm the source form for the code to insert (or null if no source form).
@@ -177,7 +177,7 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 		}
 		else
 		{
-			if (!txt.startsWith(DataSourceUtils.DB_DATASOURCE_SCHEME_COLON_SLASH))
+			if (!txt.startsWith(DataSourceUtilsBase.DB_DATASOURCE_SCHEME_COLON_SLASH))
 			{
 				IFile file = (IFile)ed.getEditorInput().getAdapter(IFile.class);
 				if (file.getName().toLowerCase().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
@@ -206,7 +206,7 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 	 * Gets the Form object that the current editor affects, if that is the case. Will return null if the current editor does not affect a Servoy Form.<BR>
 	 * <BR>
 	 * <B>Note:</B> Currently it only supports javaScript editors but it may be useful to add support for other editors as well (visual editors for example).
-	 * 
+	 *
 	 * @param editor the editor to be used.
 	 * @return the form that the given editor affects, or null if it does not affect any form.
 	 */
@@ -324,8 +324,8 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 			{
 				// see if it is a calculation JS file
 				ScriptEditor scriptEditor = (ScriptEditor)newActiveEditor;
-				IResource resource = null;
-				if (scriptEditor.getInputModelElement() != null && scriptEditor.getInputModelElement().getResource() != null &&
+				IResource resource = (IResource)scriptEditor.getEditorInput().getAdapter(IResource.class);
+				if (resource == null && scriptEditor.getInputModelElement() != null && scriptEditor.getInputModelElement().getResource() != null &&
 					scriptEditor.getInputModelElement().getResource().exists())
 				{
 					resource = scriptEditor.getInputModelElement().getUnderlyingResource();

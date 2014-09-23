@@ -52,8 +52,8 @@ public class CalculationTracker implements ActiveEditorListener
 			{
 				// see if it is a calculation JS file
 				ScriptEditor scriptEditor = (ScriptEditor)newActiveEditor;
-				IResource resource = null;
-				if (scriptEditor.getInputModelElement() != null && scriptEditor.getInputModelElement().getResource() != null &&
+				IResource resource = (IResource)scriptEditor.getEditorInput().getAdapter(IResource.class);
+				if (resource == null && scriptEditor.getInputModelElement() != null && scriptEditor.getInputModelElement().getResource() != null &&
 					scriptEditor.getInputModelElement().getResource().exists())
 				{
 					resource = scriptEditor.getInputModelElement().getUnderlyingResource();
