@@ -199,6 +199,11 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 								pixels = elPixels;
 								smallest = el;
 							}
+							else if (elPixels == pixels && el.parentElement == smallest)
+							{
+								//select child if same size as parent
+								smallest = el;
+							}
 						}
 						return smallest;
 					}
