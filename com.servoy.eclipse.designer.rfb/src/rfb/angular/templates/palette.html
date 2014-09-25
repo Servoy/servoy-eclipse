@@ -2,7 +2,7 @@
 	<accordion close-others='false'>
 		<accordion-group ng-repeat="package in packages" is-open="package.isOpen">
 			<accordion-heading>
-				<h1 class="palette-heading">{{package.packageName}}<span style="float: right">˅</span></h1>
+				<h1 class="palette-heading">{{package.packageName}}<span ng-class="package.isOpen ? 'glyphicon glyphicon-chevron-down' : 'glyphicon glyphicon-chevron-right'" style="float: right"></span></h1>
 			</accordion-heading>
 		    <div>
 			    <ul>
