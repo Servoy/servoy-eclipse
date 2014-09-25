@@ -2656,12 +2656,15 @@ public class TypeCreator extends TypeCache
 				WebComponentSpecification[] serviceSpecifications = WebServiceSpecProvider.getInstance().getWebServiceSpecifications();
 				for (WebComponentSpecification spec : serviceSpecifications)
 				{
-					Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
-					property.setName(spec.getName());
-					property.setReadOnly(true);
-					wcServices.put("WebService<" + spec.getName() + '>', spec);
-					property.setType(getTypeRef(context, "WebService<" + spec.getName() + '>'));
-					members.add(property);
+					if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)
+					{
+						Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+						property.setName(spec.getName());
+						property.setReadOnly(true);
+						wcServices.put("WebService<" + spec.getName() + '>', spec);
+						property.setType(getTypeRef(context, "WebService<" + spec.getName() + '>'));
+						members.add(property);
+					}
 				}
 			}
 
