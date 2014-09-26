@@ -412,6 +412,9 @@ public class EditorServiceHandler implements IServerService
 									}
 									ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false,
 										Arrays.asList(new IPersist[] { newPersist }));
+									Object[] selection = new Object[] { newPersist };
+									IStructuredSelection structuredSelection = new StructuredSelection(selection);
+									selectionProvider.setSelection(structuredSelection);
 								}
 								catch (Exception ex)
 								{
