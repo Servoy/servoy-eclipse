@@ -43,7 +43,7 @@ public class StartNGClientHandler extends StartWebClientHandler
 {
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.debug.actions.StartWebClientActionDelegate#getStartTitle()
 	 */
 	@Override
@@ -54,7 +54,7 @@ public class StartNGClientHandler extends StartWebClientHandler
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.debug.actions.StartWebClientActionDelegate#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
@@ -75,8 +75,8 @@ public class StartNGClientHandler extends StartWebClientHandler
 					{
 						public void run()
 						{
-							MessageDialog.openError(Display.getDefault().getActiveShell(),
-								"Solution type problem", "Cant open this solution type in this client");
+							MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution type problem",
+								"Cant open this solution type in this client");
 						}
 					});
 					return;
@@ -90,13 +90,14 @@ public class StartNGClientHandler extends StartWebClientHandler
 					{
 						debugNGClient.getFlattenedSolution().registerDebugListener(new FlattenedSolutionDebugListener());
 					}
-					if (debugNGClient != null)
+					if (debugNGClient != null && debugNGClient.getSolution() != null)
 					{
 						debugNGClient.shutDown(true);
 					}
 					try
 					{
-						String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solution.getName() + "/index.html";
+						String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/solutions/" + solution.getName() +
+							"/index.html";
 						EditorUtil.openURL(getWebBrowser(), url);
 					}
 					catch (final Throwable e)//catch all for apple mac
