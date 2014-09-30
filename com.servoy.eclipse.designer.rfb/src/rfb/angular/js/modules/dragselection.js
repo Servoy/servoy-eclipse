@@ -91,15 +91,12 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 		    				 selectionToDrag[i].attr('id', 'dragNode'+i)
 				    		 var css = editorScope.convertToContentPoint({
 				    			 position: 'absolute',
-				    			 top: event.pageY,
-				    			 left: event.pageX,
-				    			 'z-index': 4,
-				    			 'pointer-events': 'none',
-				    			 'list-style-type': 'none'
+				    			 top: dragStartEvent.pageY,
+				    			 left: dragStartEvent.pageX,
+				    			 'z-index': 4
 				    		 });
 		    				 selectionToDrag[i].css(css);
-				    		 selectionToDrag[i].position({top:event.screenY, left: event.screenX});
-				    		 $('body').append(selectionToDrag[i]);
+				    		 $(selection[i]).parent().append(selectionToDrag[i]);
 						 }
 	    			 }	 
 				}
