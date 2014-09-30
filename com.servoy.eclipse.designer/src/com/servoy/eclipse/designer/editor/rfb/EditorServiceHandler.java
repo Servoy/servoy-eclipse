@@ -42,6 +42,7 @@ import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
@@ -50,6 +51,8 @@ import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
+import com.servoy.j2db.persistence.ISupportBounds;
+import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RectShape;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -271,144 +274,157 @@ public class EditorServiceHandler implements IServerService
 								{
 									int x = args.getInt("x");
 									int y = args.getInt("y");
-									String name = args.getString("name");
-									if ("svy-button".equals(name))
+									if (args.has("name"))
 									{
-										GraphicalComponent gc = editorPart.getForm().createNewGraphicalComponent(new Point(x, y));
-										gc.setText("button");
-										gc.setOnActionMethodID(-1);
-										newPersist = gc;
-									}
-									else if ("svy-label".equals(name))
-									{
-										GraphicalComponent gc = editorPart.getForm().createNewGraphicalComponent(new Point(x, y));
-										gc.setText("label");
-										newPersist = gc;
-									}
-									else if ("svy-combobox".equals(name))
-									{
-										Field field = editorPart.getForm().createNewField(new Point(x, y));
-										field.setDisplayType(Field.COMBOBOX);
-										newPersist = field;
-									}
-									else if ("svy-textfield".equals(name))
-									{
-										Field field = editorPart.getForm().createNewField(new Point(x, y));
-										field.setDisplayType(Field.TEXT_FIELD);
-										newPersist = field;
-									}
-									else if ("svy-textarea".equals(name))
-									{
-										Field field = editorPart.getForm().createNewField(new Point(x, y));
-										field.setDisplayType(Field.TEXT_AREA);
-										newPersist = field;
-									}
-									else if ("svy-password".equals(name))
-									{
-										Field field = editorPart.getForm().createNewField(new Point(x, y));
-										field.setDisplayType(Field.PASSWORD);
-										newPersist = field;
-									}
-									else if ("svy-calendar".equals(name))
-									{
-										Field field = editorPart.getForm().createNewField(new Point(x, y));
-										field.setDisplayType(Field.CALENDAR);
-										newPersist = field;
-									}
-									else if ("svy-typeahead".equals(name))
-									{
-										Field field = editorPart.getForm().createNewField(new Point(x, y));
-										field.setDisplayType(Field.TYPE_AHEAD);
-										newPersist = field;
-									}
-									else if ("svy-spinner".equals(name))
-									{
-										Field field = editorPart.getForm().createNewField(new Point(x, y));
-										field.setDisplayType(Field.SPINNER);
-										newPersist = field;
-									}
-									else if ("svy-check".equals(name) || "svy-checkgroup".equals(name))
-									{
-										Field field = editorPart.getForm().createNewField(new Point(x, y));
-										field.setDisplayType(Field.CHECKS);
-										newPersist = field;
-									}
-									else if ("svy-radio".equals(name) || "svy-radiogroup".equals(name))
-									{
-										Field field = editorPart.getForm().createNewField(new Point(x, y));
-										field.setDisplayType(Field.RADIOS);
-										newPersist = field;
-									}
-									else if ("svy-imagemedia".equals(name))
-									{
-										Field field = editorPart.getForm().createNewField(new Point(x, y));
-										field.setDisplayType(Field.IMAGE_MEDIA);
-										newPersist = field;
-									}
-									else if ("svy-listbox".equals(name))
-									{
-										Field field = editorPart.getForm().createNewField(new Point(x, y));
-										field.setDisplayType(Field.LIST_BOX);
-										newPersist = field;
-									}
-									else if ("svy-htmlarea".equals(name))
-									{
-										Field field = editorPart.getForm().createNewField(new Point(x, y));
-										field.setDisplayType(Field.HTML_AREA);
-										field.setEditable(false);
-										newPersist = field;
-									}
-									else if ("svy-tabpanel".equals(name))
-									{
-										String compName = "tabpanel_" + id.incrementAndGet();
-										while (!checkName(compName))
+										String name = args.getString("name");
+										if ("svy-button".equals(name))
 										{
-											compName = "tabpanel_" + id.incrementAndGet();
+											GraphicalComponent gc = editorPart.getForm().createNewGraphicalComponent(new Point(x, y));
+											gc.setText("button");
+											gc.setOnActionMethodID(-1);
+											newPersist = gc;
 										}
-										TabPanel tabPanel = editorPart.getForm().createNewTabPanel(compName);
-										tabPanel.setLocation(new Point(x, y));
-										newPersist = tabPanel;
-									}
-									else if ("svy-splitpane".equals(name))
-									{
-										String compName = "tabpanel_" + id.incrementAndGet();
-										while (!checkName(compName))
+										else if ("svy-label".equals(name))
 										{
-											compName = "tabpanel_" + id.incrementAndGet();
+											GraphicalComponent gc = editorPart.getForm().createNewGraphicalComponent(new Point(x, y));
+											gc.setText("label");
+											newPersist = gc;
 										}
-										TabPanel tabPanel = editorPart.getForm().createNewTabPanel(compName);
-										tabPanel.setLocation(new Point(x, y));
-										tabPanel.setTabOrientation(TabPanel.SPLIT_HORIZONTAL);
-										newPersist = tabPanel;
-									}
-									else if ("svy-portal".equals(name))
-									{
-										String compName = "portal_" + id.incrementAndGet();
-										while (!checkName(compName))
+										else if ("svy-combobox".equals(name))
 										{
-											compName = "portal_" + id.incrementAndGet();
+											Field field = editorPart.getForm().createNewField(new Point(x, y));
+											field.setDisplayType(Field.COMBOBOX);
+											newPersist = field;
 										}
-										Portal portal = editorPart.getForm().createNewPortal(compName, new Point(x, y));
-										newPersist = portal;
-									}
-									else if ("svy-rectangle".equals(name))
-									{
-										RectShape shape = editorPart.getForm().createNewRectangle(new Point(x, y));
-										shape.setLineSize(1);
-										newPersist = shape;
-									}
-									else
-									{
-										// bean
-										String compName = "bean_" + id.incrementAndGet();
-										while (!checkName(compName))
+										else if ("svy-textfield".equals(name))
 										{
-											compName = "bean_" + id.incrementAndGet();
+											Field field = editorPart.getForm().createNewField(new Point(x, y));
+											field.setDisplayType(Field.TEXT_FIELD);
+											newPersist = field;
 										}
-										String packageName = args.getString("packageName");
-										Bean bean = editorPart.getForm().createNewBean(compName, packageName + ":" + name);
-										bean.setLocation(new Point(x, y));
-										newPersist = bean;
+										else if ("svy-textarea".equals(name))
+										{
+											Field field = editorPart.getForm().createNewField(new Point(x, y));
+											field.setDisplayType(Field.TEXT_AREA);
+											newPersist = field;
+										}
+										else if ("svy-password".equals(name))
+										{
+											Field field = editorPart.getForm().createNewField(new Point(x, y));
+											field.setDisplayType(Field.PASSWORD);
+											newPersist = field;
+										}
+										else if ("svy-calendar".equals(name))
+										{
+											Field field = editorPart.getForm().createNewField(new Point(x, y));
+											field.setDisplayType(Field.CALENDAR);
+											newPersist = field;
+										}
+										else if ("svy-typeahead".equals(name))
+										{
+											Field field = editorPart.getForm().createNewField(new Point(x, y));
+											field.setDisplayType(Field.TYPE_AHEAD);
+											newPersist = field;
+										}
+										else if ("svy-spinner".equals(name))
+										{
+											Field field = editorPart.getForm().createNewField(new Point(x, y));
+											field.setDisplayType(Field.SPINNER);
+											newPersist = field;
+										}
+										else if ("svy-check".equals(name) || "svy-checkgroup".equals(name))
+										{
+											Field field = editorPart.getForm().createNewField(new Point(x, y));
+											field.setDisplayType(Field.CHECKS);
+											newPersist = field;
+										}
+										else if ("svy-radio".equals(name) || "svy-radiogroup".equals(name))
+										{
+											Field field = editorPart.getForm().createNewField(new Point(x, y));
+											field.setDisplayType(Field.RADIOS);
+											newPersist = field;
+										}
+										else if ("svy-imagemedia".equals(name))
+										{
+											Field field = editorPart.getForm().createNewField(new Point(x, y));
+											field.setDisplayType(Field.IMAGE_MEDIA);
+											newPersist = field;
+										}
+										else if ("svy-listbox".equals(name))
+										{
+											Field field = editorPart.getForm().createNewField(new Point(x, y));
+											field.setDisplayType(Field.LIST_BOX);
+											newPersist = field;
+										}
+										else if ("svy-htmlarea".equals(name))
+										{
+											Field field = editorPart.getForm().createNewField(new Point(x, y));
+											field.setDisplayType(Field.HTML_AREA);
+											field.setEditable(false);
+											newPersist = field;
+										}
+										else if ("svy-tabpanel".equals(name))
+										{
+											String compName = "tabpanel_" + id.incrementAndGet();
+											while (!checkName(compName))
+											{
+												compName = "tabpanel_" + id.incrementAndGet();
+											}
+											TabPanel tabPanel = editorPart.getForm().createNewTabPanel(compName);
+											tabPanel.setLocation(new Point(x, y));
+											newPersist = tabPanel;
+										}
+										else if ("svy-splitpane".equals(name))
+										{
+											String compName = "tabpanel_" + id.incrementAndGet();
+											while (!checkName(compName))
+											{
+												compName = "tabpanel_" + id.incrementAndGet();
+											}
+											TabPanel tabPanel = editorPart.getForm().createNewTabPanel(compName);
+											tabPanel.setLocation(new Point(x, y));
+											tabPanel.setTabOrientation(TabPanel.SPLIT_HORIZONTAL);
+											newPersist = tabPanel;
+										}
+										else if ("svy-portal".equals(name))
+										{
+											String compName = "portal_" + id.incrementAndGet();
+											while (!checkName(compName))
+											{
+												compName = "portal_" + id.incrementAndGet();
+											}
+											Portal portal = editorPart.getForm().createNewPortal(compName, new Point(x, y));
+											newPersist = portal;
+										}
+										else if ("svy-rectangle".equals(name))
+										{
+											RectShape shape = editorPart.getForm().createNewRectangle(new Point(x, y));
+											shape.setLineSize(1);
+											newPersist = shape;
+										}
+										else
+										{
+											// bean
+											String compName = "bean_" + id.incrementAndGet();
+											while (!checkName(compName))
+											{
+												compName = "bean_" + id.incrementAndGet();
+											}
+											String packageName = args.getString("packageName");
+											Bean bean = editorPart.getForm().createNewBean(compName, packageName + ":" + name);
+											bean.setLocation(new Point(x, y));
+											newPersist = bean;
+										}
+									}
+									else if (args.has("uuid"))
+									{
+										IPersist persist = editorPart.getForm().getChild(UUID.fromString(args.getString("uuid")));
+										if (persist instanceof AbstractBase)
+										{
+											IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
+											newPersist = ((AbstractBase)persist).cloneObj(persist.getParent(), true, validator, true, true, true);
+											((ISupportBounds)newPersist).setLocation(new Point(x, y));
+										}
 									}
 									ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false,
 										Arrays.asList(new IPersist[] { newPersist }));
