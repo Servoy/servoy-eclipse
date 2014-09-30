@@ -383,10 +383,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			else if (type == UserNodeType.COMPONENTS)
 			{
 				lm = createComponentsFiles("components", UserNodeType.COMPONENT_ITEM);
+				key = null; // for now don't cache this
 			}
 			else if (type == UserNodeType.SERVICES)
 			{
 				lm = createComponentsFiles("services", UserNodeType.SERVICE_ITEM);
+				key = null; // for now don't cache this
 			}
 			else if (type == UserNodeType.TEMPLATES)
 			{
@@ -573,6 +575,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				if (FormTemplateGenerator.isWebcomponentBean((IPersist)model))
 				{
 					lm = getWebComponentMembers(prefix, (Bean)model);
+					key = null; // for now don't cache this.
 				}
 				else if (specificClass == null)
 				{
@@ -1661,6 +1664,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			for (PropertyDescription pd : properties.values())
 			{
 				String name = pd.getName();
+				if ("design".equals(pd.getScope())) continue;
 				// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
 				// and skip the dataprovider properties (those are not accesable through scripting)
 				if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && pd.getType() != DataproviderPropertyType.INSTANCE)
