@@ -73,10 +73,12 @@ public class ColumnTypeEditingSupport extends EditingSupport
 	private final ChangeSupport changeSupport;
 	private final IObservable observable;
 	private Column column;
+	private final TableViewer tv;
 
 	public ColumnTypeEditingSupport(TableViewer tv)
 	{
 		super(tv);
+		this.tv = tv;
 		String[] types = new String[Column.allDefinedTypes.length];
 		for (int i = 0; i < types.length; i++)
 		{
@@ -141,6 +143,8 @@ public class ColumnTypeEditingSupport extends EditingSupport
 
 			getViewer().update(element, null);
 			getViewer().refresh();
+			//trigger a selection event so that Details, Auto Enter, Validation and Conversion get updated with a correct Column object
+			tv.setSelection(tv.getSelection(), false);
 		}
 	}
 
