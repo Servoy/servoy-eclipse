@@ -31,6 +31,7 @@ public class Messages extends NLS
 	public static String ScriptingConsole_smartClientName;
 	public static String ScriptingConsole_testClientsJobName;
 	public static String ScriptingConsole_webClientName;
+	public static String ScriptingConsole_ngClientName;
 	static
 	{
 		// initialize resource bundle
