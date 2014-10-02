@@ -86,6 +86,7 @@ import org.sablo.specification.WebComponentApiDefinition;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
+import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.BooleanPropertyType;
 import org.sablo.specification.property.types.DatePropertyType;
@@ -443,6 +444,50 @@ public class TypeCreator extends TypeCache
 		addScopeType(DBDataSourceServer.class.getSimpleName(), new DBDataSourceServerCreator());
 		addScopeType(JSDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSDataSource.class, ClientSupport.wc_sc));
 		addScopeType(JSDataSources.class.getSimpleName(), new JSDataSourcesCreator());
+		createSpecTypeDefinitions();
+	}
+
+	private void createSpecTypeDefinitions()
+	{
+		WebComponentSpecification[] webComponentSpecifications = WebComponentSpecProvider.getInstance().getWebComponentSpecifications();
+		WebComponentSpecification[] webServiceSpecifications = WebServiceSpecProvider.getInstance().getWebServiceSpecifications();
+		Collection<WebComponentSpecification> specs = new ArrayList<WebComponentSpecification>();
+		Collections.addAll(specs, webComponentSpecifications);
+		Collections.addAll(specs, webServiceSpecifications);
+		for (WebComponentSpecification webComponentSpecification : specs)
+		{
+			Map<String, IPropertyType< ? >> foundTypes = webComponentSpecification.getFoundTypes();
+			for (String typeName : foundTypes.keySet())
+			{
+				IPropertyType< ? > iPropertyType = foundTypes.get(typeName);
+				Type type = TypeInfoModelFactory.eINSTANCE.createType();
+				type.setName(iPropertyType.getName());
+				type.setKind(TypeKind.JAVA);
+				EList<Member> members = type.getMembers();
+				if (iPropertyType instanceof ICustomType< ? >)
+				{
+					ICustomType< ? > customType = (ICustomType< ? >)iPropertyType;
+					PropertyDescription customJSONTypeDefinition = customType.getCustomJSONTypeDefinition();
+					Map<String, PropertyDescription> properties = customJSONTypeDefinition.getProperties();
+					for (PropertyDescription pd : properties.values())
+					{
+						if ("design".equals(pd.getScope()))
+						{
+							// skip design properties
+							continue;
+						}
+						String name = pd.getName();
+						// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
+						// and skip the dataprovider properties (those are not accesable through scripting)
+						if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && pd.getType() != DataproviderPropertyType.INSTANCE)
+						{
+							members.add(createProperty(name, false, getType(null, pd), "", null));
+						}
+					}
+				}
+				addType(null, type);
+			}
+		}
 	}
 
 	private final ConcurrentHashMap<String, Boolean> ignorePackages = new ConcurrentHashMap<String, Boolean>();
@@ -1006,7 +1051,9 @@ public class TypeCreator extends TypeCache
 			// and skip the dataprovider properties (those are not accesable through scripting)
 			if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && pd.getType() != DataproviderPropertyType.INSTANCE)
 			{
-				members.add(createProperty(name, false, getType(context, pd), "", null));
+				JSType memberType = getType(context, pd);
+				if (memberType == null) memberType = getTypeRef(null, pd.getType().getName());
+				members.add(createProperty(name, false, memberType, "", null));
 			}
 		}
 		Map<String, WebComponentApiDefinition> apis = spec.getApiFunctions();
@@ -1014,7 +1061,9 @@ public class TypeCreator extends TypeCache
 		{
 			Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
 			method.setName(api.getName());
-			method.setType(getType(context, api.getReturnType()));
+			JSType returnType = getType(context, api.getReturnType());
+			if (returnType == null && api.getReturnType() != null) returnType = getTypeRef(null, api.getReturnType().getName());
+			method.setType(returnType);
 			EList<Parameter> parameters = method.getParameters();
 			for (PropertyDescription paramDesc : api.getParameters())
 			{
