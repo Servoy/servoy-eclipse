@@ -497,7 +497,7 @@ public class EclipseMessages implements ICustomMessageLoader
 						public boolean visit(IResource resource) throws CoreException
 						{
 							String resourceName = resource.getName();
-							if (resourceName.startsWith(messageFileName))
+							if (resourceName.startsWith(messageFileName) && resourceName.endsWith(MESSAGES_EXTENSION))
 							{
 								try
 								{
