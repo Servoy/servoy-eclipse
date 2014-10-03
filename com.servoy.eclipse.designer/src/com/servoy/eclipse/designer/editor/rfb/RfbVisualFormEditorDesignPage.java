@@ -177,7 +177,8 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	@Override
 	public boolean showPersist(IPersist persist)
 	{
-		return false; // selectNode(persist);
+		selectionProvider.setSelection(new StructuredSelection(persist));
+		return true;
 	}
 
 	@Override
@@ -214,4 +215,5 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	{
 		return new FixedSelectAllAction(editorPart, selectionProvider);
 	}
+
 }
