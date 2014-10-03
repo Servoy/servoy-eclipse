@@ -26,12 +26,11 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 					for (var i = 0; i < selection.length; i++)
 					{
 						selectionToDrag[i].remove();
-						var node = selection[i];
+						var node = selectionToDrag[i][0];
 						var component = {};
-						component.x = event.pageX;
-						component.y = event.pageY;
-						component.uuid = node.getAttribute('svy-id');
-						component = editorScope.convertToContentPoint(component);
+						component.uuid = node.getAttribute('cloneuuid');
+						component.x = node.location.x;
+						component.y = node.location.y;
 						if (component.x > 0 && component.y > 0)
 						{
 							$editorService.createComponent(component); 
@@ -70,90 +69,108 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 					}
 				}
 				
-				if (event.ctrlKey)
+				if (event.ctrlKey && selectionToDrag == null)
 				{
-					if (selectionToDrag != null)
+					selectionToDrag = [];
+					var selection = editorScope.getSelection();
+					var formState = editorScope.getFormState();
+					for(var i = 0; i < selection.length; i++) 
 					{
-						for(var i = 0; i < selectionToDrag.length; i++) 
-						{
-							dragClone = selectionToDrag[i];
-							var css = { top: event.pageY, left: event.pageX }
-							dragClone.css(editorScope.convertToContentPoint(css));
+						var node = selection[i];
+						selectionToDrag[i] = $(selection[i]).clone();
+						var posX, posY;
+						if (node.uuid) {
+							posX = node.location.x;
+							posY = node.location.y;
 						}
-					}
-					else
-	    			{
-	    				 selectionToDrag = [];
-	    				 var selection = editorScope.getSelection();
-	    				 for(var i = 0; i < selection.length; i++) 
-						 {
-	    					 selectionToDrag[i] = $(selection[i]).clone();
-		    				 selectionToDrag[i].attr('id', 'dragNode'+i)
-				    		 var css = editorScope.convertToContentPoint({
-				    			 position: 'absolute',
-				    			 top: dragStartEvent.pageY,
-				    			 left: dragStartEvent.pageX,
-				    			 'z-index': 4
-				    		 });
-		    				 selectionToDrag[i].css(css);
-				    		 $(selection[i]).parent().append(selectionToDrag[i]);
-						 }
-	    			 }	 
+						else {
+							var name = node.getAttribute("name");
+							var beanModel = formState.model[name];
+							if (beanModel){
+								posX = beanModel.location.x;
+								posY = beanModel.location.y;
+							}
+							else 
+							{
+								var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+								posX = ghostObject.location.x;
+								posY = ghostObject.location.y;
+							}
+
+							selectionToDrag[i] = $(node).clone();
+							selectionToDrag[i].attr('id', 'dragNode'+i);
+							selectionToDrag[i].attr('cloneuuid', node.getAttribute("svy-id"));
+							selectionToDrag[i][0]['location'] = {x: posX, y:posY}; 
+							var css = editorScope.convertToContentPoint({
+								position: 'absolute',
+								top: location.y,
+								left: location.x,
+								'z-index': 4
+							});
+							selectionToDrag[i].css(css);
+							$(selection[i]).parent().append(selectionToDrag[i]);
+						}
+					} 
 				}
-				else
-				{
-					if (!selectionToDrag) {
-						selectionToDrag = editorScope.getSelection();
-						var addToSelection = [];
-						function isAlreadySelected(ghost) {
-							for(var i=0; i < selectionToDrag.length; i++) {
-								if (selectionToDrag[i].getAttribute("svy-id") == ghost.uuid) return true;
-							}
-							return false;
+				
+				if (!selectionToDrag) {
+					selectionToDrag = editorScope.getSelection();
+					var addToSelection = [];
+					function isAlreadySelected(ghost) {
+						for(var i=0; i < selectionToDrag.length; i++) {
+							if (selectionToDrag[i].getAttribute("svy-id") == ghost.uuid) return true;
 						}
-						
-						for(var i=0;i<selectionToDrag.length;i++) {
-							var node = selectionToDrag[i];
-							var ghostsForNode = editorScope.getContainedGhosts(node.getAttribute("svy-id"));
-							if (ghostsForNode){
-								for(var j=0; j < ghostsForNode.length; j++) {
-									if(!isAlreadySelected(ghostsForNode[j]))
-										addToSelection.push(ghostsForNode[j]);
-								}
-							}
-						}
-						selectionToDrag = selectionToDrag.concat(addToSelection);
+						return false;
 					}
-					if (selectionToDrag.length > 0) {
-						if (dragging) {
-							var formState = editorScope.getFormState();
-							if (formState) {
-								var changeX = event.screenX- dragStartEvent.screenX;
-								var changeY = event.screenY- dragStartEvent.screenY;
-								for(var i=0;i<selectionToDrag.length;i++) {
-									var node = selectionToDrag[i];
-									if (node.uuid) {
-										node.location.x += changeX;
-										node.location.y += changeY;
-									}
-									else {
-										var name = node.getAttribute("name");
-										var beanModel = formState.model[name];
-										if (beanModel){
-											beanModel.location.y = beanModel.location.y + changeY;
-											beanModel.location.x = beanModel.location.x + changeX;
-										}
-										else 
-										{
-											var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-											ghostObject.location.x += changeX;
-											ghostObject.location.y += changeY;
-										}
-									}
-									editorScope.refreshEditorContent();
-								}
-								dragStartEvent = event;
+
+					for(var i=0;i<selectionToDrag.length;i++) {
+						var node = selectionToDrag[i];
+						var ghostsForNode = editorScope.getContainedGhosts(node.getAttribute("svy-id"));
+						if (ghostsForNode){
+							for(var j=0; j < ghostsForNode.length; j++) {
+								if(!isAlreadySelected(ghostsForNode[j]))
+									addToSelection.push(ghostsForNode[j]);
 							}
+						}
+					}
+					selectionToDrag = selectionToDrag.concat(addToSelection);
+				}
+				if (selectionToDrag.length > 0) {
+					if (dragging) {
+						var formState = editorScope.getFormState();
+						if (formState) {
+							var changeX = event.screenX- dragStartEvent.screenX;
+							var changeY = event.screenY- dragStartEvent.screenY;
+							for(var i=0;i<selectionToDrag.length;i++) {
+								var node = selectionToDrag[i];
+								if (node.uuid) {
+									node.location.x += changeX;
+									node.location.y += changeY;
+								}
+								else if (node[0] && node[0].getAttribute('cloneuuid'))
+								{
+									node[0].location.x += changeX;
+									node[0].location.y += changeY;
+									var css = { top: node[0].location.y, left: node[0].location.x }
+									node.css(css);
+								}
+								else {
+									var name = node.getAttribute("name");
+									var beanModel = formState.model[name];
+									if (beanModel){
+										beanModel.location.y = beanModel.location.y + changeY;
+										beanModel.location.x = beanModel.location.x + changeX;
+									}
+									else 
+									{
+										var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+										ghostObject.location.x += changeX;
+										ghostObject.location.y += changeY;
+									}
+								}
+								editorScope.refreshEditorContent();
+							}
+							dragStartEvent = event;
 						}
 					}
 				}
