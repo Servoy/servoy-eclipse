@@ -33,6 +33,8 @@ import javax.websocket.CloseReason;
 import javax.websocket.EncodeException;
 import javax.websocket.Extension;
 import javax.websocket.MessageHandler;
+import javax.websocket.MessageHandler.Partial;
+import javax.websocket.MessageHandler.Whole;
 import javax.websocket.RemoteEndpoint.Async;
 import javax.websocket.RemoteEndpoint.Basic;
 import javax.websocket.Session;
@@ -295,6 +297,16 @@ public class SwtWebsocket
 
 		@Override
 		public void setMaxTextMessageBufferSize(int arg0)
+		{
+		}
+
+		@Override
+		public <T> void addMessageHandler(Class<T> arg0, Partial<T> arg1) throws IllegalStateException
+		{
+		}
+
+		@Override
+		public <T> void addMessageHandler(Class<T> arg0, Whole<T> arg1) throws IllegalStateException
 		{
 		}
 	}
