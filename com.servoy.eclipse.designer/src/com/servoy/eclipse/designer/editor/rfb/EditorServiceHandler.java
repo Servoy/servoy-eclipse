@@ -277,93 +277,93 @@ public class EditorServiceHandler implements IServerService
 									if (args.has("name"))
 									{
 										String name = args.getString("name");
-										if ("svy-button".equals(name))
+										if ("servoydefault-button".equals(name))
 										{
 											GraphicalComponent gc = editorPart.getForm().createNewGraphicalComponent(new Point(x, y));
 											gc.setText("button");
 											gc.setOnActionMethodID(-1);
 											newPersist = gc;
 										}
-										else if ("svy-label".equals(name))
+										else if ("servoydefault-label".equals(name))
 										{
 											GraphicalComponent gc = editorPart.getForm().createNewGraphicalComponent(new Point(x, y));
 											gc.setText("label");
 											newPersist = gc;
 										}
-										else if ("svy-combobox".equals(name))
+										else if ("servoydefault-combobox".equals(name))
 										{
 											Field field = editorPart.getForm().createNewField(new Point(x, y));
 											field.setDisplayType(Field.COMBOBOX);
 											newPersist = field;
 										}
-										else if ("svy-textfield".equals(name))
+										else if ("servoydefault-textfield".equals(name))
 										{
 											Field field = editorPart.getForm().createNewField(new Point(x, y));
 											field.setDisplayType(Field.TEXT_FIELD);
 											newPersist = field;
 										}
-										else if ("svy-textarea".equals(name))
+										else if ("servoydefault-textarea".equals(name))
 										{
 											Field field = editorPart.getForm().createNewField(new Point(x, y));
 											field.setDisplayType(Field.TEXT_AREA);
 											newPersist = field;
 										}
-										else if ("svy-password".equals(name))
+										else if ("servoydefault-password".equals(name))
 										{
 											Field field = editorPart.getForm().createNewField(new Point(x, y));
 											field.setDisplayType(Field.PASSWORD);
 											newPersist = field;
 										}
-										else if ("svy-calendar".equals(name))
+										else if ("servoydefault-calendar".equals(name))
 										{
 											Field field = editorPart.getForm().createNewField(new Point(x, y));
 											field.setDisplayType(Field.CALENDAR);
 											newPersist = field;
 										}
-										else if ("svy-typeahead".equals(name))
+										else if ("servoydefault-typeahead".equals(name))
 										{
 											Field field = editorPart.getForm().createNewField(new Point(x, y));
 											field.setDisplayType(Field.TYPE_AHEAD);
 											newPersist = field;
 										}
-										else if ("svy-spinner".equals(name))
+										else if ("servoydefault-spinner".equals(name))
 										{
 											Field field = editorPart.getForm().createNewField(new Point(x, y));
 											field.setDisplayType(Field.SPINNER);
 											newPersist = field;
 										}
-										else if ("svy-check".equals(name) || "svy-checkgroup".equals(name))
+										else if ("servoydefault-check".equals(name) || "servoydefault-checkgroup".equals(name))
 										{
 											Field field = editorPart.getForm().createNewField(new Point(x, y));
 											field.setDisplayType(Field.CHECKS);
 											newPersist = field;
 										}
-										else if ("svy-radio".equals(name) || "svy-radiogroup".equals(name))
+										else if ("servoydefault-radio".equals(name) || "servoydefault-radiogroup".equals(name))
 										{
 											Field field = editorPart.getForm().createNewField(new Point(x, y));
 											field.setDisplayType(Field.RADIOS);
 											newPersist = field;
 										}
-										else if ("svy-imagemedia".equals(name))
+										else if ("servoydefault-imagemedia".equals(name))
 										{
 											Field field = editorPart.getForm().createNewField(new Point(x, y));
 											field.setDisplayType(Field.IMAGE_MEDIA);
 											newPersist = field;
 										}
-										else if ("svy-listbox".equals(name))
+										else if ("servoydefault-listbox".equals(name))
 										{
 											Field field = editorPart.getForm().createNewField(new Point(x, y));
 											field.setDisplayType(Field.LIST_BOX);
 											newPersist = field;
 										}
-										else if ("svy-htmlarea".equals(name))
+										else if ("servoydefault-htmlarea".equals(name))
 										{
 											Field field = editorPart.getForm().createNewField(new Point(x, y));
 											field.setDisplayType(Field.HTML_AREA);
 											field.setEditable(false);
 											newPersist = field;
 										}
-										else if ("svy-tabpanel".equals(name))
+										else if ("servoydefault-tabpanel".equals(name))
 										{
 											String compName = "tabpanel_" + id.incrementAndGet();
 											while (!checkName(compName))
@@ -374,7 +374,7 @@ public class EditorServiceHandler implements IServerService
 											tabPanel.setLocation(new Point(x, y));
 											newPersist = tabPanel;
 										}
-										else if ("svy-splitpane".equals(name))
+										else if ("servoydefault-splitpane".equals(name))
 										{
 											String compName = "tabpanel_" + id.incrementAndGet();
 											while (!checkName(compName))
@@ -386,7 +386,7 @@ public class EditorServiceHandler implements IServerService
 											tabPanel.setTabOrientation(TabPanel.SPLIT_HORIZONTAL);
 											newPersist = tabPanel;
 										}
-										else if ("svy-portal".equals(name))
+										else if ("servoydefault-portal".equals(name))
 										{
 											String compName = "portal_" + id.incrementAndGet();
 											while (!checkName(compName))
@@ -396,7 +396,7 @@ public class EditorServiceHandler implements IServerService
 											Portal portal = editorPart.getForm().createNewPortal(compName, new Point(x, y));
 											newPersist = portal;
 										}
-										else if ("svy-rectangle".equals(name))
+										else if ("servoydefault-rectangle".equals(name))
 										{
 											RectShape shape = editorPart.getForm().createNewRectangle(new Point(x, y));
 											shape.setLineSize(1);
