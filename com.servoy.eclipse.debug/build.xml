@@ -540,29 +540,29 @@
 			<include name="C:/Users/Administrator/dev_v7xx_branch/eclipse_target/compile_target/optional/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/compilation.problem"/>
 			<include name="${pluginTemp}/net.sourceforge.sqlexplorer_3.5.1.v20100211_SR3b/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_v7xx_branch/j2db_tunnel/compilation.problem"/>
-			<include name="${pluginTemp}/j2db_tunnel_7.4.2.2031/compilation.problem"/>
+			<include name="${pluginTemp}/j2db_tunnel_7.4.2.2032/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_v7xx_branch/com.servoy.eclipse.model.exporter.mobile/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.model.exporter.mobile_7.4.2.2031/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.model.exporter.mobile_7.4.2.2032/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_base/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_base_7.4.2.2031/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_base_7.4.2.2032/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_v7xx_branch/j2db_server/compilation.problem"/>
-			<include name="${pluginTemp}/j2db_server_7.4.2.2031/compilation.problem"/>
+			<include name="${pluginTemp}/j2db_server_7.4.2.2032/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_smart_client/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_smart_client_7.4.2.2031/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_smart_client_7.4.2.2032/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_v7xx_branch/com.servoy.eclipse.model/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.model_7.4.2.2031/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.model_7.4.2.2032/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_v7xx_branch/com.servoy.eclipse.ui/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.ui_7.4.2.2031/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.ui_7.4.2.2032/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_v7xx_branch/org.eclipse.dltk.javascript.rhino/compilation.problem"/>
-			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_7.4.2.2031/compilation.problem"/>
+			<include name="${pluginTemp}/org.eclipse.dltk.javascript.rhino_7.4.2.2032/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_v7xx_branch/com.servoy.eclipse.core/compilation.problem"/>
-			<include name="${pluginTemp}/com.servoy.eclipse.core_7.4.2.2031/compilation.problem"/>
+			<include name="${pluginTemp}/com.servoy.eclipse.core_7.4.2.2032/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_headless_client/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_headless_client_7.4.2.2031/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_headless_client_7.4.2.2032/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_shared/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_shared_7.4.2.2031/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_shared_7.4.2.2032/compilation.problem"/>
 			<include name="C:/Users/Administrator/dev_v7xx_branch/servoy_debug/compilation.problem"/>
-			<include name="${pluginTemp}/servoy_debug_7.4.2.2031/compilation.problem"/>
+			<include name="${pluginTemp}/servoy_debug_7.4.2.2032/compilation.problem"/>
 		</eclipse.logCompileError>
 	</target>
 
