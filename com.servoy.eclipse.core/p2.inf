@@ -1,8 +1,8 @@
 instructions.configure=addRepository(type:0,name:Servoy update site,location:http${#58}//download.servoy.com/developer/8xx_updates);addRepository(type:1,name:Servoy update site,location:http${#58}//download.servoy.com/developer/8xx_updates);\
 addRepository(type:0,name:SQLExplorer Updates,location:http${#58}//eclipsesql.sourceforge.net/);addRepository(type:1,name:SQLExplorer Updates,location:http${#58}//eclipsesql.sourceforge.net/);\
 addRepository(type:0,name:Xulrunner Plugin,location:http${#58}//download.servoy.com/developer/xulrunner/);addRepository(type:1,name:Xulrunner Plugin,location:http${#58}//download.servoy.com/developer/xulrunner/);\
-addRepository(type:0,name:Kepler,location:http${#58}//download.eclipse.org/releases/kepler);addRepository(type:1,name:Kepler,location:http${#58}//download.eclipse.org/releases/kepler);\
-addRepository(type:0,name:The Eclipse Project Updates,location:http${#58}//download.eclipse.org/eclipse/updates/4.3);addRepository(type:1,name:The Eclipse Project Updates,location:http${#58}//download.eclipse.org/eclipse/updates/4.3);\
+addRepository(type:0,name:Kepler,location:http${#58}//download.eclipse.org/releases/luna);addRepository(type:1,name:Luna,location:http${#58}//download.eclipse.org/releases/luna);\
+addRepository(type:0,name:The Eclipse Project Updates,location:http${#58}//download.eclipse.org/eclipse/updates/4.4);addRepository(type:1,name:The Eclipse Project Updates,location:http${#58}//download.eclipse.org/eclipse/updates/4.4);\
 addRepository(type:0,name:Subclipse 1.10.x Update Site,location:http${#58}//subclipse.tigris.org/update_1.10.x);addRepository(type:1,name:Subclipse 1.10.x Update Site,location:http${#58}//subclipse.tigris.org/update_1.10.x);\
 addRepository(type:0,name:ServoyEclipse JSDoc Plugin,location:http${#58}//www.servoy-stuff.net/downloads/developer/updates);addRepository(type:1,name:ServoyEclipse JSDoc Plugin,location:http${#58}//www.servoy-stuff.net/downloads/developer/updates);\
 addRepository(type:0,name:QuickImage,location:http${#58}//psnet.nu/eclipse/updates);addRepository(type:1,name:QuickImage,location:http${#58}//psnet.nu/eclipse/updates);\
