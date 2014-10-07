@@ -106,6 +106,8 @@ public class SolutionSerializer
 	public static final String WORKINGSETS_DIR = "workingsets";
 	public static final String VALUELISTS_DIR = "valuelists";
 	public static final String RELATIONS_DIR = "relations";
+	public static final String COMPONENTS_DIR_NAME = "components";
+	public static final String SERVICES_DIR_NAME = "services";
 
 	public static final String DATASOURCES_DIR_NAME = "datasources";
 	public static final int JSON_FILE_EXTENSION_SIZE = 4;

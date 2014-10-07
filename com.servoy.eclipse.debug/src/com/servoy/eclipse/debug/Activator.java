@@ -55,6 +55,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IPersistChangeListener;
@@ -69,9 +70,6 @@ import com.servoy.j2db.util.Utils;
  */
 public class Activator extends AbstractUIPlugin implements IStartup
 {
-	private static final String COMPONENTS_DIR_NAME = "components";
-	private static final String SERVICES_DIR_NAME = "services";
-
 	// The plug-in ID
 	public static final String PLUGIN_ID = "com.servoy.eclipse.debug";
 
@@ -150,7 +148,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 						IPath path = resource.getProjectRelativePath();
 						if (path.segmentCount() > 1)
 						{
-							if (path.segment(0).equals(COMPONENTS_DIR_NAME) || path.segment(0).equals(SERVICES_DIR_NAME))
+							if (path.segment(0).equals(SolutionSerializer.COMPONENTS_DIR_NAME) || path.segment(0).equals(SolutionSerializer.SERVICES_DIR_NAME))
 							{
 								if (path.segmentCount() == 2 && resource instanceof IFile)
 								{
@@ -164,7 +162,8 @@ public class Activator extends AbstractUIPlugin implements IStartup
 							}
 						}
 						if (path.segmentCount() == 0 ||
-							(path.segmentCount() > 0 && (path.segment(0).equals(COMPONENTS_DIR_NAME) || path.segment(0).equals(SERVICES_DIR_NAME))))
+							(path.segmentCount() > 0 && (path.segment(0).equals(SolutionSerializer.COMPONENTS_DIR_NAME) || path.segment(0).equals(
+								SolutionSerializer.SERVICES_DIR_NAME))))
 						{
 							if (shouldRefresh(resourceProject, rd.getAffectedChildren()))
 							{
@@ -253,8 +252,8 @@ public class Activator extends AbstractUIPlugin implements IStartup
 						ResourceProvider.removeServiceResources(serviceReaders.values());
 						serviceReaders.clear();
 					}
-					componentReaders.putAll(readDir(monitor, activeResourcesProject, COMPONENTS_DIR_NAME));
-					serviceReaders.putAll(readDir(monitor, activeResourcesProject, SERVICES_DIR_NAME));
+					componentReaders.putAll(readDir(monitor, activeResourcesProject, SolutionSerializer.COMPONENTS_DIR_NAME));
+					serviceReaders.putAll(readDir(monitor, activeResourcesProject, SolutionSerializer.SERVICES_DIR_NAME));
 
 					ResourceProvider.addComponentResources(componentReaders.values());
 					ResourceProvider.addServiceResources(serviceReaders.values());
