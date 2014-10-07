@@ -410,8 +410,7 @@ public class EditorServiceHandler implements IServerService
 											{
 												compName = "bean_" + id.incrementAndGet();
 											}
-											String packageName = args.getString("packageName");
-											Bean bean = editorPart.getForm().createNewBean(compName, packageName + ":" + name);
+											Bean bean = editorPart.getForm().createNewBean(compName, name);
 											bean.setLocation(new Point(x, y));
 											newPersist = bean;
 										}

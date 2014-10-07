@@ -39,8 +39,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.ValuesConfig;
-import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebComponentSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
@@ -79,7 +79,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Utility class that can create a GEF Palette for the Visual Form Editor.
- * 
+ *
  * @author rgansevles
  * @since 6.0
  */
@@ -285,7 +285,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 				allComponents.put(id, componentIds);
 			}
 
-			String componentId = spec.getFullName();
+			String componentId = spec.getName();
 			componentIds.add(componentId);
 
 			String name = spec.getDisplayName();
@@ -485,9 +485,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		{
 			if (displayType != -1)
 			{
-				setProperty(
-					extendedData,
-					StaticContentSpecLoader.PROPERTY_DISPLAYTYPE,
+				setProperty(extendedData, StaticContentSpecLoader.PROPERTY_DISPLAYTYPE,
 					Integer.valueOf(((ValuesConfig)PersistPropertyHandler.DISPLAY_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(displayType))));
 			}
 			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(requestType, size);
@@ -570,9 +568,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		{
 			if (shapeType != -1)
 			{
-				setProperty(
-					extendedData,
-					StaticContentSpecLoader.PROPERTY_SHAPETYPE,
+				setProperty(extendedData, StaticContentSpecLoader.PROPERTY_SHAPETYPE,
 					Integer.valueOf(((ValuesConfig)PersistPropertyHandler.SHAPE_TYPE_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(shapeType))));
 			}
 			RequestTypeCreationFactory factory = new RequestTypeCreationFactory(requestType, size);
@@ -619,9 +615,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		{
 			// one of the tab panels above
 			factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TAB, new Dimension(300, 300));
-			setProperty(
-				factory.getExtendedData(),
-				StaticContentSpecLoader.PROPERTY_TABORIENTATION,
+			setProperty(factory.getExtendedData(), StaticContentSpecLoader.PROPERTY_TABORIENTATION,
 				Integer.valueOf(((ValuesConfig)PersistPropertyHandler.TAB_ORIENTATION_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(tabOrienation))));
 			if (nameHint != null)
 			{
