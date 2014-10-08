@@ -51,7 +51,9 @@ import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
+import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RectShape;
@@ -274,7 +276,40 @@ public class EditorServiceHandler implements IServerService
 								{
 									int x = args.getInt("x");
 									int y = args.getInt("y");
-									if (args.has("name"))
+									if (args.has("type"))
+									{//a ghost dragged from the pallete. it is defined in the "types" section of the .spec file
+										Iterator<IPersist> allPersists = editorPart.getForm().getAllObjects();
+										while (allPersists.hasNext())
+										{
+											IPersist next = allPersists.next();
+											if (next instanceof ISupportChilds)
+											{
+												ISupportChilds iSupportChilds = (ISupportChilds)next;
+												if (next instanceof BaseComponent)
+												{
+													if (isCorrectTarget(((BaseComponent)next), (String)args.get("dropTargetUUID")))
+													{
+														if (args.getString("type").equals("tab"))
+														{
+															Tab newTab = (Tab)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(
+																iSupportChilds, IRepository.TABS);
+															String tabName = "tab_" + id.incrementAndGet();
+															while (!checkName(tabName))
+															{
+																tabName = "tab_" + id.incrementAndGet();
+															}
+															newTab.setText(tabName);
+															newTab.setLocation(new Point(x - ((BaseComponent)next).getLocation().x, y -
+																((BaseComponent)next).getLocation().y));
+															iSupportChilds.addChild(newTab);
+															newPersist = next;
+														}
+													}
+												}
+											}
+										}
+									}
+									else if (args.has("name"))
 									{
 										String name = args.getString("name");
 										if ("servoydefault-button".equals(name))
@@ -435,6 +470,11 @@ public class EditorServiceHandler implements IServerService
 								{
 									Debug.error(ex);
 								}
+							}
+
+							private boolean isCorrectTarget(BaseComponent baseComponent, String uuid)
+							{
+								return baseComponent.getUUID().toString().equals(uuid);
 							}
 
 							/**
