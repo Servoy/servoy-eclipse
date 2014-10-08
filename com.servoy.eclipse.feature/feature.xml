@@ -696,6 +696,10 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          id="org.eclipse.gef"
          version="0.0.0"/>
 
+   <includes
+         id="org.sweetlemonade.eclipse.json.feature"
+         version="0.0.0"/>
+
    <requires>
       <import feature="org.eclipse.equinox.p2.user.ui" version="1.1.0.0" match="greaterOrEqual"/>
       <import feature="org.eclipse.help" version="1.1.0.0" match="greaterOrEqual"/>
@@ -890,13 +894,6 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          unpack="false"/>
 
    <plugin
-         id="com.servoy.extensions.template"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="sablo"
          download-size="0"
          install-size="0"
@@ -1005,14 +1002,14 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          id="org.apache.httpcomponents.httpcore"
          download-size="0"
          install-size="0"
-         version="4.2.4"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.apache.httpcomponents.httpclient"
          download-size="0"
          install-size="0"
-         version="4.2.5"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
@@ -1031,6 +1028,13 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
 
    <plugin
          id="org.eclipse.equinox.concurrent"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="sj.jsonschemavalidation"
          download-size="0"
          install-size="0"
          version="0.0.0"
