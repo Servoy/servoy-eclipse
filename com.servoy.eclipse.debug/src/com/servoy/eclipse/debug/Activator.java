@@ -86,6 +86,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 	private final List<IWebResourceChangedListener> webResourceChangedListeners = Collections.synchronizedList(new ArrayList<IWebResourceChangedListener>());
 
 	private IActiveProjectListener activeProjectListenerForRegisteringResources;
+	private Job registerResourcesJob;
 
 	/**
 	 * The constructor
@@ -96,7 +97,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.core.runtime.Plugins#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -142,6 +143,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			{
 				for (IResourceDelta rd : affectedChildren)
 				{
+					if (rd.getFlags() == IResourceDelta.MARKERS) continue;
 					IResource resource = rd.getResource();
 					if (resourceProject.equals(resource.getProject()))
 					{
@@ -213,104 +215,114 @@ public class Activator extends AbstractUIPlugin implements IStartup
 	 */
 	private void registerResources()
 	{
-		Job job = new Job("registering resources")
+		if (registerResourcesJob == null)
 		{
-			@Override
-			public IStatus run(IProgressMonitor monitor)
+			registerResourcesJob = new Job("registering resources")
 			{
-				if (activeProjectListenerForRegisteringResources == null)
-				{
-					activeProjectListenerForRegisteringResources = new IActiveProjectListener()
-					{
-						public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
-						{
-							return true;
-						}
-
-						public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
-						{
-							// todo maybe fush on certain things?
-						}
-
-						public void activeProjectChanged(ServoyProject activeProject)
-						{
-							registerResources();
-						}
-					};
-					((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(activeProjectListenerForRegisteringResources);
-				}
-				ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
-				if (activeResourcesProject != null)
-				{
-					if (componentReaders.size() > 0)
-					{
-						ResourceProvider.removeComponentResources(componentReaders.values());
-						componentReaders.clear();
-					}
-					if (serviceReaders.size() > 0)
-					{
-						ResourceProvider.removeServiceResources(serviceReaders.values());
-						serviceReaders.clear();
-					}
-					componentReaders.putAll(readDir(monitor, activeResourcesProject, SolutionSerializer.COMPONENTS_DIR_NAME));
-					serviceReaders.putAll(readDir(monitor, activeResourcesProject, SolutionSerializer.SERVICES_DIR_NAME));
-
-					ResourceProvider.addComponentResources(componentReaders.values());
-					ResourceProvider.addServiceResources(serviceReaders.values());
-
-					for (IWebResourceChangedListener listener : webResourceChangedListeners)
-					{
-						listener.changed();
-					}
-				}
-				return Status.OK_STATUS;
-			}
-
-			/**
-			 * @param monitor
-			 * @param activeResourcesProject
-			 */
-			private Map<String, IPackageReader> readDir(IProgressMonitor monitor, ServoyResourcesProject activeResourcesProject, String folderName)
-			{
-				Map<String, IPackageReader> readers = new HashMap<String, IPackageReader>();
-				IFolder folder = activeResourcesProject.getProject().getFolder(folderName);
-				if (folder.exists())
+				@Override
+				public IStatus run(IProgressMonitor monitor)
 				{
 					try
 					{
-						folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-						IResource[] members = folder.members();
-						for (IResource resource : members)
+						if (activeProjectListenerForRegisteringResources == null)
 						{
-							String name = resource.getName();
-							int index = name.lastIndexOf('.');
-							if (index != -1)
+							activeProjectListenerForRegisteringResources = new IActiveProjectListener()
 							{
-								name = name.substring(0, index);
-							}
-							if (resource instanceof IFolder)
-							{
-								if (((IFolder)resource).getFile("META-INF/MANIFEST.MF").exists())
+								public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
 								{
-									readers.put(name, new WebComponentPackage.DirPackageReader(new File(resource.getRawLocationURI())));
+									return true;
 								}
-							}
-							else if (resource instanceof IFile)
+
+								public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+								{
+									// todo maybe fush on certain things?
+								}
+
+								public void activeProjectChanged(ServoyProject activeProject)
+								{
+									registerResources();
+								}
+							};
+							((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(activeProjectListenerForRegisteringResources);
+						}
+						ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
+						if (activeResourcesProject != null)
+						{
+							if (componentReaders.size() > 0)
 							{
-								readers.put(name, new WebComponentPackage.JarPackageReader(new File(resource.getRawLocationURI())));
+								ResourceProvider.removeComponentResources(componentReaders.values());
+								componentReaders.clear();
+							}
+							if (serviceReaders.size() > 0)
+							{
+								ResourceProvider.removeServiceResources(serviceReaders.values());
+								serviceReaders.clear();
+							}
+							componentReaders.putAll(readDir(monitor, activeResourcesProject, SolutionSerializer.COMPONENTS_DIR_NAME));
+							serviceReaders.putAll(readDir(monitor, activeResourcesProject, SolutionSerializer.SERVICES_DIR_NAME));
+
+							ResourceProvider.addComponentResources(componentReaders.values());
+							ResourceProvider.addServiceResources(serviceReaders.values());
+
+							for (IWebResourceChangedListener listener : webResourceChangedListeners)
+							{
+								listener.changed();
 							}
 						}
 					}
-					catch (CoreException e)
+					finally
 					{
-						ServoyLog.logError(e);
+						registerResourcesJob = null;
 					}
+					return Status.OK_STATUS;
 				}
-				return readers;
-			}
-		};
-		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
-		job.schedule();
+
+				/**
+				 * @param monitor
+				 * @param activeResourcesProject
+				 */
+				private Map<String, IPackageReader> readDir(IProgressMonitor monitor, ServoyResourcesProject activeResourcesProject, String folderName)
+				{
+					Map<String, IPackageReader> readers = new HashMap<String, IPackageReader>();
+					IFolder folder = activeResourcesProject.getProject().getFolder(folderName);
+					if (folder.exists())
+					{
+						try
+						{
+							folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+							IResource[] members = folder.members();
+							for (IResource resource : members)
+							{
+								String name = resource.getName();
+								int index = name.lastIndexOf('.');
+								if (index != -1)
+								{
+									name = name.substring(0, index);
+								}
+								if (resource instanceof IFolder)
+								{
+									if (((IFolder)resource).getFile("META-INF/MANIFEST.MF").exists())
+									{
+										readers.put(name, new WebComponentPackage.DirPackageReader(new File(resource.getRawLocationURI())));
+									}
+								}
+								else if (resource instanceof IFile)
+								{
+									readers.put(name, new WebComponentPackage.JarPackageReader(new File(resource.getRawLocationURI())));
+								}
+							}
+						}
+						catch (CoreException e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+					return readers;
+				}
+			};
+			registerResourcesJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
+			registerResourcesJob.schedule();
+		}
 	}
 
 	public void addWebComponentChangedListener(IWebResourceChangedListener listener)
@@ -325,7 +337,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
