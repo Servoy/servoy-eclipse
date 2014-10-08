@@ -110,6 +110,8 @@ import org.webbitserver.HttpHandler;
 import org.webbitserver.HttpRequest;
 import org.webbitserver.HttpResponse;
 
+import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
+
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
@@ -1399,6 +1401,24 @@ public class ServoyModel extends AbstractServoyModel
 							sequenceProvider = new EclipseSequenceProvider(dataModelManager);
 							readWorkingSetsFromResourcesProject();
 							activeResourcesProject.setListeners(workingSetChangedListeners);
+
+							try
+							{
+								if (!activeResourcesProject.getProject().hasNature(JsonSchemaValidationNature.NATURE_ID))
+								{
+									IProjectDescription description = activeResourcesProject.getProject().getDescription();
+									String[] natures = description.getNatureIds();
+									String[] newNatures = new String[natures.length + 1];
+									System.arraycopy(natures, 0, newNatures, 0, natures.length);
+									newNatures[natures.length] = JsonSchemaValidationNature.NATURE_ID;
+									description.setNatureIds(newNatures);
+									activeResourcesProject.getProject().setDescription(description, null);
+								}
+							}
+							catch (CoreException e)
+							{
+								ServoyLog.logError(e);
+							}
 						}
 						else
 						{
