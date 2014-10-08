@@ -102,6 +102,7 @@
 								}
 							}
 						},
+						"required":["type"],
 						"additionalProperties": false
 					}
 				]
@@ -162,16 +163,28 @@
 			"type": "object",
 			"additionalProperties": {
 				"type":"object",
-				"properties": {
-					"model": {
-						"type":"object",
-						"additionalProperties": {
-							"type":"string"
+				"additionalProperties": {
+					"oneOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "object",
+							"properties": {
+								"type": {
+									"type":"string"
+								},
+								"values":{
+									"type": "array"
+								},
+								"default": {
+								}
+							},
+							"required":["type"],
+							"additionalProperties": false
 						}
-					}
-				},
-				"required":["model"],
-				"additionalProperties":false
+					]
+				}
 			}
 		}
 	},
