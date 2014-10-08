@@ -409,4 +409,11 @@
            </enabledWhen>
         </handler>
      </extension>
+     <extension
+           point="sj.jsonschemavalidation.schemaprovider">
+        <schemaprovider
+              class="com.servoy.eclipse.debug.SpecSchemaProvider"
+              id="com.servoy.eclipse.debug.spec_schema">
+        </schemaprovider>
+     </extension>
 </plugin>

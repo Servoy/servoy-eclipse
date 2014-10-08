@@ -1,0 +1,186 @@
+{
+	"title": "Spec file schema",
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"description": "Spec file schema",
+	"type": "object",
+	"properties": 
+	{
+		"libraries": 
+		{
+			"items": 
+			{
+				"type": "object",
+				"properties": 
+				{
+					"name": 
+					{
+						"type": "string"
+					},
+					"version":
+					{
+						"type": "string"
+					},
+					"url":{
+						"type": "string"
+					},
+					"mimetype": {
+						"type": "string"
+					}
+					
+				},
+				"required": ["name","version","url","mimetype"],
+				"additionalProperties":false
+			},
+
+			"description": "Extra Javascript or CSS libraries that this componnet uses",
+			"type": "array"
+		},
+		"icon": 
+		{
+			"description": "The icon that is displayed in the designer",
+			"type": "string"
+		},
+		"definition": 
+		{
+			"description": "The javascript definition",
+			"type": "string"
+		},
+		"name": 
+		{
+			"description": "The angular directive name of the component",
+			"type": "string"
+		},
+		"displayName": 
+		{
+			"description": "The name that is displayed in the designer",
+			"type": "string"
+		},
+		"model":
+		{
+			"description": "The model this component has",
+			"type":"object",
+			"additionalProperties": {
+				"oneOf": [
+					{
+						"type": "string"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"type": {
+								"type":"string"
+							},
+							"for": {
+								"type": "string"
+							},
+							"scope": {
+								"type": "string",
+								"enum": ["design"]
+							},
+							"values":{
+								"type": "array"
+							},
+							"default": {
+							},
+							"ondatachange" : {
+								"description": "object that configures that this dataprovider type has ondatachange support",
+								"type": "object",
+								"properties": {
+									"onchange": {"type":"string"},
+									"callback": {"type":"string"},
+									"parsehtml": {"type":"boolean"}
+								},
+								"required": ["onchange"],
+								"additionalProperties": false
+							},
+							"elementConfig": {
+								"type":"object",
+								"properties":{
+									"forFoundsetTypedProperty": {
+										"type":"string"
+									}
+								}
+							}
+						},
+						"additionalProperties": false
+					}
+				]
+			}
+		},
+		"handlers":
+		{
+			"description": "The event handlers this component has",
+			"type":"object",
+			"additionalProperties": {
+				"type": "string",
+				"enum": ["function"]
+			}
+		},
+		"api":
+		{
+			"description": "The api this component has",
+			"type":"object",
+			"additionalProperties": {
+				"type": "object",
+				"properties": {
+					"returns": {
+						"description": "the datatype this api call returns",
+						"type": "string"
+					},
+					"parameters": {
+						"description": "the parameter types this api call accepts",
+						"type":"array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"name": {
+									"description": "the name of the parameter",
+									"type": "string"
+								},
+								"type": {
+									"description": "the type of the parameter",
+									"type": "string"
+								},
+								"optional": {
+									"type":"boolean"
+								}
+							},
+							"required": ["name","type"],
+							"additionalProperties":false
+						}
+					}
+				},
+				"additionalProperties":false
+			}
+		},
+		"serverscript": {
+			"description": "js reference that will be run on the server",
+			"type": "string"
+		},
+		"types": {
+			"description": "an object of custom types that is used in the model for property type or api for an return/parameter type",
+			"type": "object",
+			"additionalProperties": {
+				"type":"object",
+				"properties": {
+					"model": {
+						"type":"object",
+						"additionalProperties": {
+							"type":"string"
+						}
+					}
+				},
+				"required":["model"],
+				"additionalProperties":false
+			}
+		}
+	},
+
+	"required": 
+	[
+		"name",
+		"displayName",
+		"definition"
+	],
+	"additionalProperties":false
+}
