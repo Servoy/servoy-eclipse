@@ -20,8 +20,10 @@ package com.servoy.eclipse.designer.editor.rfb;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.gef.commands.CompoundCommand;
@@ -195,10 +197,11 @@ public class EditorServiceHandler implements IServerService
 			if ("setSelection".equals(methodName))
 			{
 				JSONArray json = args.getJSONArray("selection");
-				final Object[] selection = new Object[json.length()];
+				final List<Object> selection = new ArrayList<Object>();
 				for (int i = 0; i < json.length(); i++)
 				{
-					selection[i] = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(json.getString(i)));
+					IPersist searchPersist = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(json.getString(i)));
+					if (searchPersist != null) selection.add(searchPersist);
 				}
 				Display.getDefault().asyncExec(new Runnable()
 				{
@@ -206,7 +209,7 @@ public class EditorServiceHandler implements IServerService
 					{
 						IStructuredSelection structuredSelection = new StructuredSelection(selection);
 						selectionListener.setLastSelection(structuredSelection);
-						selectionProvider.setSelection(selection.length == 0 ? null : structuredSelection);
+						selectionProvider.setSelection(selection.size() == 0 ? null : structuredSelection);
 					}
 				});
 			}
@@ -460,11 +463,14 @@ public class EditorServiceHandler implements IServerService
 											((ISupportBounds)newPersist).setLocation(new Point(x, y));
 										}
 									}
-									ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false,
-										Arrays.asList(new IPersist[] { newPersist }));
-									Object[] selection = new Object[] { newPersist };
-									IStructuredSelection structuredSelection = new StructuredSelection(selection);
-									selectionProvider.setSelection(structuredSelection);
+									if (newPersist != null)
+									{
+										ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false,
+											Arrays.asList(new IPersist[] { newPersist }));
+										Object[] selection = new Object[] { newPersist };
+										IStructuredSelection structuredSelection = new StructuredSelection(selection);
+										selectionProvider.setSelection(structuredSelection);
+									}
 								}
 								catch (Exception ex)
 								{

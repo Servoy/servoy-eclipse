@@ -31,6 +31,16 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						css = $scope.convertToContentPoint(css);
 						if (angularElement)
 							angularElement.css(css);
+						if (type){
+							var dropTarget = utils.getNode(ev);
+							if (dropTarget && dropTarget.getAttribute("svy-types")){
+								if (dropTarget.getAttribute("svy-types").indexOf(type) > 0)
+									$scope.glasspane.style.cursor="";
+								else
+									$scope.glasspane.style.cursor="no-drop";
+							}
+							else $scope.glasspane.style.cursor="no-drop";
+						}else $scope.glasspane.style.cursor="";
 					}
 					else
 					{
@@ -80,6 +90,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 					if (mouseupcallback)  $scope.unregisterDOMEvent("mouseup","EDITOR",mouseupcallback);
 					if (mouseentercallback) $scope.unregisterDOMEvent("mouseenter","CONTENTFRAME_OVERLAY",mouseentercallback);
 					if (mouseleavecallback) $scope.unregisterDOMEvent("mouseenter","PALETTE",mouseleavecallback);
+					$scope.glasspane.style.cursor="";
 					if (angularElement)
 					{
 						angularElement.remove();
@@ -91,8 +102,12 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						if (type) {
 							component.type = type;
 							var dropTarget = utils.getNode(ev);
-							if (dropTarget) 
+							if (!dropTarget) return; // releasing a ghost, but no actual component underneath
+							if (dropTarget) {
+								if (!(dropTarget.getAttribute("svy-types").indexOf(type) > 0))
+									return; // releasing a ghost, but component does not support this ghost type
 								component.dropTargetUUID = dropTarget.getAttribute("svy-id");
+							}
 						}
 						component.name = componentName;
 						component.packageName = packageName;
