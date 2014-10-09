@@ -416,4 +416,15 @@
               id="com.servoy.eclipse.debug.spec_schema">
         </schemaprovider>
      </extension>
+     <extension
+           id="com.servoy.eclipse.debug.SPEC_READ_MARKER"
+           name="Spec or Manifest parse errors"
+           point="org.eclipse.core.resources.markers">
+        <persistent
+              value="false">
+        </persistent>
+        <super
+              type="org.eclipse.core.resources.problemmarker">
+        </super>
+     </extension>
 </plugin>

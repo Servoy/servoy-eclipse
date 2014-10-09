@@ -18,16 +18,20 @@ package com.servoy.eclipse.debug;
 
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.jar.Manifest;
 
 import javax.swing.Action;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -48,6 +52,7 @@ import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.sablo.specification.WebComponentPackage;
+import org.sablo.specification.WebComponentPackage.DirPackageReader;
 import org.sablo.specification.WebComponentPackage.IPackageReader;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
@@ -97,7 +102,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.Plugins#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -303,7 +308,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 								{
 									if (((IFolder)resource).getFile("META-INF/MANIFEST.MF").exists())
 									{
-										readers.put(name, new WebComponentPackage.DirPackageReader(new File(resource.getRawLocationURI())));
+										readers.put(name, new FolderPackageReader(new File(resource.getRawLocationURI()), (IFolder)resource));
 									}
 								}
 								else if (resource instanceof IFile)
@@ -337,7 +342,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -428,4 +433,98 @@ public class Activator extends AbstractUIPlugin implements IStartup
 		}
 
 	}
+
+	public static class FolderPackageReader extends DirPackageReader
+	{
+		private final static String MARKER = "com.servoy.eclipse.debug.SPEC_READ_MARKER";
+		private final IFolder folder;
+
+		public FolderPackageReader(File dir, IFolder folder)
+		{
+			super(dir);
+			this.folder = folder;
+		}
+
+		@Override
+		public Manifest getManifest() throws IOException
+		{
+			IFile file = folder.getFile("META-INF/MANIFEST.MF");
+			try
+			{
+				file.deleteMarkers(MARKER, false, IResource.DEPTH_ONE);
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError(e);
+			}
+			try
+			{
+				return super.getManifest();
+			}
+			catch (IOException ex)
+			{
+				try
+				{
+					IMarker marker = file.createMarker(MARKER);
+					marker.setAttribute(IMarker.MESSAGE, ex.getMessage());
+					marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+					marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
+					marker.setAttribute(IMarker.LOCATION, file.getLocation().toString());
+				}
+				catch (CoreException e)
+				{
+					ServoyLog.logError(e);
+				}
+				throw ex;
+			}
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.sablo.specification.WebComponentPackage.DirPackageReader#readTextFile(java.lang.String, java.nio.charset.Charset)
+		 */
+		@Override
+		public String readTextFile(String path, Charset charset) throws IOException
+		{
+			IFile file = folder.getFile(path);
+			if (file != null)
+			{
+				try
+				{
+					file.deleteMarkers(MARKER, false, IResource.DEPTH_ONE);
+				}
+				catch (CoreException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+			return super.readTextFile(path, charset);
+		}
+
+		@Override
+		public void reportError(String specpath, Exception e)
+		{
+			super.reportError(specpath, e);
+			IFile file = folder.getFile(specpath);
+			if (file != null)
+			{
+				try
+				{
+					IMarker marker = file.createMarker(MARKER);
+					marker.setAttribute(IMarker.MESSAGE, e.getMessage());
+					marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+					marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
+					marker.setAttribute(IMarker.LOCATION, file.getLocation().toString());
+				}
+				catch (CoreException ex)
+				{
+					ServoyLog.logError(ex);
+				}
+			}
+		}
+
+	}
+
+
 }
