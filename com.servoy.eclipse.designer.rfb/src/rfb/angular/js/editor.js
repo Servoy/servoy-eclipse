@@ -519,7 +519,9 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				var changed = false;
 				var selection = [];
 				if (ids && ids.length > 0) {
-					var nodes = editorScope.contentDocument.querySelectorAll("[svy-id]")
+					var nodes = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[svy-id]"));
+					var ghosts = Array.prototype.slice.call(editorScope.glasspane.querySelectorAll("[svy-id]"));
+					nodes = nodes.concat(ghosts);
 					for(var i=0;i<nodes.length;i++) {
 						var id = nodes[i].getAttribute("svy-id");
 						if (ids.indexOf(id) != -1) {
