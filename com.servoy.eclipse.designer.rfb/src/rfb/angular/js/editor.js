@@ -506,6 +506,10 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 		createComponent: function(component) {
 			wsSession.callService('formeditor', 'createComponent', component, true)
 		},
+		
+		createComponents: function(components) {
+			wsSession.callService('formeditor', 'createComponents', components, true)
+		},
 
 		getGhostComponents: function(node) {
 			return wsSession.callService('formeditor', 'getGhostComponents', node, false)

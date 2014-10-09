@@ -23,7 +23,9 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 				
 				if (event.ctrlKey)
 				{
-					for (var i = 0; i < selection.length; i++)
+					var components = [];
+					var size = 0;
+					for (var i = 0; i < selectionToDrag.length; i++)
 					{
 						selectionToDrag[i].remove();
 						var node = selectionToDrag[i][0];
@@ -33,9 +35,11 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 						component.y = node.location.y;
 						if (component.x > 0 && component.y > 0)
 						{
-							$editorService.createComponent(component); 
+							components[size++] = component;
 						}
+						
 					}
+					if (size > 0) $editorService.createComponents({"components": components}); 
 				}
 				else
 				{
@@ -101,13 +105,7 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 							selectionToDrag[i].attr('id', 'dragNode'+i);
 							selectionToDrag[i].attr('cloneuuid', node.getAttribute("svy-id"));
 							selectionToDrag[i][0]['location'] = {x: posX, y:posY}; 
-							var css = editorScope.convertToContentPoint({
-								position: 'absolute',
-								top: location.y,
-								left: location.x,
-								'z-index': 4
-							});
-							selectionToDrag[i].css(css);
+							selectionToDrag[i].css({'z-index': 4});
 							$(selection[i]).parent().append(selectionToDrag[i]);
 						}
 					} 
