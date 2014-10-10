@@ -127,6 +127,7 @@ import com.servoy.j2db.dataui.PropertyEditorClass;
 import com.servoy.j2db.dataui.PropertyEditorHint;
 import com.servoy.j2db.dataui.PropertyEditorOption;
 import com.servoy.j2db.debug.DebugUtils;
+import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
@@ -1600,6 +1601,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	//remove some properties based on the 'known' name
 	protected boolean shouldShow(PropertyDescriptorWrapper propertyDescriptor)
 	{
+		if (((SolutionMetaData)persistContext.getPersist().getRootObject().getMetaData()).getSolutionType() == SolutionMetaData.NG_CLIENT_ONLY &&
+			!propertyDescriptor.propertyDescriptor.hasSupportForClientType(persistContext.getPersist(), ClientSupport.ng))
+		{
+			return false;
+		}
 		return propertyDescriptor.propertyDescriptor.shouldShow(persistContext.getPersist());
 	}
 
