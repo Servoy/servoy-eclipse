@@ -39,7 +39,7 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 					var offset = node.offset();
 					
 					//this is so that ghost elements decorators are positioned correctly
-					if(node.parent().hasClass("ghostcontainer")) {
+					if(node.parent().hasClass("ghostcontainer") && node.parent().parent().offset() != undefined) {
 						offset.top -= node.parent().parent().offset().top;
 						offset.left -= node.parent().parent().offset().left;
 					}

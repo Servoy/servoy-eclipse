@@ -14,7 +14,15 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 	}
 }).value("EDITOR_EVENTS", {
 	SELECTION_CHANGED : "SELECTION_CHANGED"
-}).directive("editor", function( $window, $pluginRegistry,$rootScope,EDITOR_EVENTS, $timeout,$editorService){
+}).value("EDITOR_CONSTANTS", {
+	PART_LABEL_WIDTH: 80,
+	PART_LABEL_HEIGHT: 20,
+	PART_PERSIST_TYPE: 19,
+	PART_TYPE_TITLE_HEADER: 1,
+	PART_TYPE_HEADER: 2,
+	PART_TYPE_BODY: 5,
+	PART_TYPE_FOOTER: 8
+}).directive("editor", function( $window, $pluginRegistry,$rootScope,EDITOR_EVENTS,EDITOR_CONSTANTS,$timeout,$editorService){
 	return {
 		restrict: 'E',
 		transclude: true,
@@ -71,6 +79,8 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				return eventCallback;
 			}
 			
+			
+			
 			//returns the ghost object with the specified uuid
 			$scope.getGhost = function (uuid) {
 				for (i = 0; i< $scope.ghosts.ghostContainers.length; i++) {
@@ -90,6 +100,91 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				return null;
 			}
 
+			$scope.getGhostContainerStyle = function(ghostContainer) {
+				if(ghostContainer.style == undefined) {
+					if($scope.isContentSizeFull()) {
+						return {left: "0px", top: "0px", right: EDITOR_CONSTANTS.PART_LABEL_WIDTH + "px", bottom: "0px"};
+					} else {
+						return {left: "20px", top: "20px", width: $scope.contentStyle.width, height: $scope.contentStyle.height};
+					}
+				}
+				return ghostContainer.style;
+			}
+			
+			$scope.getGhostStyle = function(ghost) {
+				if(ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE) { // parts
+					var partStyle = {right: "-" + (EDITOR_CONSTANTS.PART_LABEL_WIDTH - 6) +"px", width: (EDITOR_CONSTANTS.PART_LABEL_WIDTH - 6) + "px", height: EDITOR_CONSTANTS.PART_LABEL_HEIGHT + "px", textAlign: "center", whiteSpace: "nowrap"};
+					switch(ghost.parttype) {
+						case EDITOR_CONSTANTS.PART_TYPE_TITLE_HEADER:
+						case EDITOR_CONSTANTS.PART_TYPE_HEADER:
+							partStyle.top = (ghost.location.y - EDITOR_CONSTANTS.PART_LABEL_HEIGHT) + "px";
+							break;
+						case EDITOR_CONSTANTS.PART_TYPE_BODY:
+							partStyle.bottom = ghost.partnext ? ($scope.getGhost(ghost.partnext).location.y - ghost.location.y) + "px" : "0px";	
+							break;
+						case EDITOR_CONSTANTS.PART_TYPE_FOOTER:
+							partStyle.bottom = "0px";
+						
+					}
+					return partStyle;
+				}
+				return {left: ghost.location.x, top: ghost.location.y};
+			}
+			
+			$scope.updateGhostLocation = function(ghost, x, y) {
+				if(ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE) { // it is a part
+
+					if(ghost.max == -1 || y <= ghost.min || y >= ghost.max) {
+						// part is overlapping its neighbors or it is last part (ghost.max == -1)
+						return;
+					}
+				}
+				
+				ghost.location.x = x;
+				ghost.location.y = y;
+			}
+			
+			$scope.updateGhostLocationLimits = function(ghost) {
+				ghost.min = ghost.partprev ? $scope.getGhost(ghost.partprev).location.y : ($scope.isContentSizeFull() ? 0 : EDITOR_CONSTANTS.PART_LABEL_HEIGHT);
+				ghost.max = ghost.partnext ? $scope.getGhost(ghost.partnext).location.y : -1;
+			}
+			
+			$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
+				for(var i = 0; i < selection.length; i++) 
+				{
+					var ghost = $scope.getGhost(selection[i].getAttribute("svy-id"));
+					if(ghost && (ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE)) $scope.updateGhostLocationLimits(ghost);
+				}
+			})
+			
+			$scope.registerDOMEvent("mouseup","CONTENTFRAME_OVERLAY", function() {
+				var selection = $scope.getSelection();
+				var isPartSelected = false;
+				
+				for(var i = 0; i < selection.length; i++) 
+				{
+					var ghost = $scope.getGhost(selection[i].getAttribute("svy-id"));
+					if(ghost && (ghost.type == 19)) {
+						isPartSelected = true;
+						break;
+					}
+				}				
+				
+				if(isPartSelected) {
+					$timeout(function() {
+						var promise = $editorService.getPartsStyles();
+						promise.then(function (result){
+							var formScope = $scope.getFormState().getScope();
+							for (i = 0; i < result.length; i++) {
+								formScope[result[i].name + 'Style'] = result[i].style 
+							}
+							editorContentRootScope.$digest();
+						});						
+					}, 0);	
+				}
+			});
+			
+			
 			$scope.unregisterDOMEvent = function(eventType, target,callback) {
 				if (target == "FORM") {
 					$($scope.contentDocument).off(eventType,null,callback)
@@ -193,7 +288,7 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				return editorContentRootScope;
 			}
 
-			$scope.contentStyle = {top: "0px", left: "0px",right: "0px", bottom: "0px"};
+			$scope.contentStyle = {top: "0px", left: "0px", paddingRight: "80px", bottom: "0px"};
 			$scope.glasspaneStyle = {};
 
 			$scope.setContentSize = function(width, height) {
@@ -201,7 +296,7 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				$scope.contentStyle.height = height;
 				delete $scope.contentStyle.top;
 				delete $scope.contentStyle.left;
-				delete $scope.contentStyle.right;
+				delete $scope.contentStyle.paddingRight;
 				delete $scope.contentStyle.bottom;
 				delete $scope.contentStyle.h
 				delete $scope.contentStyle.w
@@ -211,7 +306,7 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				},100);
 			}
 			$scope.setContentSizeFull = function() {
-				$scope.contentStyle = {top: "0px", left: "0px",right: "0px", bottom: "0px"};
+				$scope.contentStyle = {top: "0px", left: "0px",paddingRight: "80px", bottom: "0px"};
 				delete $scope.contentStyle.width;
 				delete $scope.contentStyle.height;
 				delete $scope.contentStyle.h
@@ -225,7 +320,7 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				return {width: $scope.contentStyle.width, height: $scope.contentStyle.height};
 			}
 			$scope.isContentSizeFull = function() {
-				return ($scope.contentStyle.right == "0px") && ($scope.contentStyle.bottom == "0px");
+				return ($scope.contentStyle.paddingRight == "80px") && ($scope.contentStyle.bottom == "0px");
 			}
 			
 			$scope.setCursorStyle = function(cursor) {
@@ -461,7 +556,7 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 				return;
 			}
 		}
-		wsSession = $webSocket.connect('editor', getURLParameter('editorid'))
+		wsSession = $webSocket.connect('/angular', [getURLParameter('editorid')])
 		wsSession.onopen = function()
 		{
 			connected = true;
@@ -506,15 +601,19 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 		createComponent: function(component) {
 			wsSession.callService('formeditor', 'createComponent', component, true)
 		},
-		
-		createComponents: function(components) {
-			wsSession.callService('formeditor', 'createComponents', components, true)
-		},
 
 		getGhostComponents: function(node) {
 			return wsSession.callService('formeditor', 'getGhostComponents', node, false)
 		},
 
+		getPartsStyles: function() {
+			return wsSession.callService('formeditor', 'getPartsStyles', null, false)
+		},
+
+		createComponents: function(components) {
+			wsSession.callService('formeditor', 'createComponents', components, true)
+		},
+		
 		getURLParameter: getURLParameter,
 
 		updateSelection: function(ids) {

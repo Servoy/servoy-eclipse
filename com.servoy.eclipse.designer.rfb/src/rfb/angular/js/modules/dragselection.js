@@ -64,6 +64,13 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 			selectionToDrag = null;
 		}
 
+		function isGhostAlreadySelected(selection, ghost) {
+			for(var i=0; i < selection.length; i++) {
+				if (selection[i].getAttribute("svy-id") == ghost.uuid) return true;
+			}
+			return false;
+		}
+		
 		function onmousemove(event) {
 			if (dragStartEvent) {
 				
@@ -114,25 +121,20 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 				if (!selectionToDrag) {
 					selectionToDrag = editorScope.getSelection();
 					var addToSelection = [];
-					function isAlreadySelected(ghost) {
-						for(var i=0; i < selectionToDrag.length; i++) {
-							if (selectionToDrag[i].getAttribute("svy-id") == ghost.uuid) return true;
-						}
-						return false;
-					}
 
 					for(var i=0;i<selectionToDrag.length;i++) {
 						var node = selectionToDrag[i];
 						var ghostsForNode = editorScope.getContainedGhosts(node.getAttribute("svy-id"));
 						if (ghostsForNode){
 							for(var j=0; j < ghostsForNode.length; j++) {
-								if(!isAlreadySelected(ghostsForNode[j]))
+								if(!isGhostAlreadySelected(selectionToDrag, ghostsForNode[j]))
 									addToSelection.push(ghostsForNode[j]);
 							}
 						}
 					}
 					selectionToDrag = selectionToDrag.concat(addToSelection);
 				}
+
 				if (selectionToDrag.length > 0) {
 					if (dragging) {
 						var formState = editorScope.getFormState();
@@ -162,8 +164,7 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 									else 
 									{
 										var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-										ghostObject.location.x += changeX;
-										ghostObject.location.y += changeY;
+										editorScope.updateGhostLocation(ghostObject, ghostObject.location.x + changeX, ghostObject.location.y + changeY)
 									}
 								}
 								editorScope.refreshEditorContent();

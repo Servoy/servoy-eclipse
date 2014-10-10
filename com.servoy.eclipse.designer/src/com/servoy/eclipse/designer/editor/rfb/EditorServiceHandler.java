@@ -48,6 +48,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFormElement;
@@ -57,12 +58,14 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.IValidateName;
+import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RectShape;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.server.ngclient.template.PartWrapper;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -146,8 +149,11 @@ public class EditorServiceHandler implements IServerService
 							try
 							{
 								writer.object();
+								writer.key("style");
+								writer.object();
 								writer.key("left").value(((TabPanel)o).getLocation().getX());
 								writer.key("top").value(((TabPanel)o).getLocation().getY());
+								writer.endObject();
 								writer.key("uuid").value(((TabPanel)o).getUUID());
 								writer.key("ghosts");
 								writer.array();
@@ -158,6 +164,7 @@ public class EditorServiceHandler implements IServerService
 									IPersist tab = tabIterator.next();
 									writer.object();
 									writer.key("uuid").value(tab.getUUID());
+									writer.key("type").value(tab.getTypeID());
 									writer.key("text").value(((Tab)tab).getText());
 									writer.key("location");
 									writer.object();
@@ -180,6 +187,49 @@ public class EditorServiceHandler implements IServerService
 								e.printStackTrace();
 							}
 						}
+						else if (o instanceof Form)
+						{
+							try
+							{
+								writer.object();
+								writer.key("uuid").value(o.getUUID());
+								writer.key("ghosts");
+								writer.array();
+								Iterator<Part> partIterator = ((Form)o).getParts();
+								ArrayList<Part> parts = new ArrayList<Part>();
+								while (partIterator.hasNext())
+									parts.add(partIterator.next());
+
+								for (int i = 0; i < parts.size(); i++)
+								{
+									writer.object();
+									writer.key("uuid").value(parts.get(i).getUUID());
+									writer.key("type").value(parts.get(i).getTypeID());
+									writer.key("text").value(Part.getDisplayName(parts.get(i).getPartType()));
+									writer.key("location");
+									writer.object();
+									writer.key("x").value(0);
+									writer.key("y").value(parts.get(i).getSize().getHeight());
+									writer.endObject();
+									writer.key("parttype").value(parts.get(i).getPartType());
+									if (i > 0) writer.key("partprev").value(parts.get(i - 1).getUUID());
+									if (i < parts.size() - 1) writer.key("partnext").value(parts.get(i + 1).getUUID());
+									writer.endObject();
+								}
+
+								writer.endArray();
+								writer.endObject();
+							}
+							catch (IllegalArgumentException e)
+							{
+								e.printStackTrace();
+							}
+							catch (JSONException e)
+							{
+								e.printStackTrace();
+							}
+						}
+
 						return IPersistVisitor.CONTINUE_TRAVERSAL;
 					}
 				});
@@ -239,12 +289,13 @@ public class EditorServiceHandler implements IServerService
 						Iterator keys = args.keys();
 						while (keys.hasNext())
 						{
+							CompoundCommand cc = null;
 							String uuid = (String)keys.next();
 							final IPersist persist = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(uuid));
 							if (persist instanceof BaseComponent || persist instanceof Tab)
 							{
 								JSONObject properties = args.optJSONObject(uuid);
-								CompoundCommand cc = new CompoundCommand();
+								cc = new CompoundCommand();
 								if (properties.has("x") && properties.has("y"))
 								{
 									cc.add(new SetPropertyCommand("move", PersistPropertySource.createPersistPropertySource(persist, false),
@@ -258,6 +309,17 @@ public class EditorServiceHandler implements IServerService
 								}
 								editorPart.getCommandStack().execute(cc);
 							}
+							else if (persist instanceof Part)
+							{
+								JSONObject properties = args.optJSONObject(uuid);
+								cc = new CompoundCommand();
+								if (properties.has("y"))
+								{
+									cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(persist, false),
+										StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), new Integer(properties.optInt("y"))));
+								}
+							}
+							if (cc != null) editorPart.getCommandStack().execute(cc);
 						}
 					}
 				});
@@ -314,6 +376,27 @@ public class EditorServiceHandler implements IServerService
 						});
 					}
 				});
+			}
+			else if ("getPartsStyles".equals(methodName))
+			{
+				StringWriter stringWriter = new StringWriter();
+				final JSONWriter writer = new JSONWriter(stringWriter);
+
+				writer.array();
+
+				Iterator<Part> partsIte = editorPart.getForm().getParts();
+				while (partsIte.hasNext())
+				{
+					PartWrapper partWrapper = new PartWrapper(partsIte.next(), editorPart.getForm(), null);
+					writer.object();
+					writer.key("name").value(partWrapper.getName());
+					writer.key("style").value(new JSONObject(partWrapper.getStyle()));
+					writer.endObject();
+				}
+
+				writer.endArray();
+
+				return new JSONArray(stringWriter.getBuffer().toString());
 			}
 			else if ("createComponents".equals(methodName))
 			{
