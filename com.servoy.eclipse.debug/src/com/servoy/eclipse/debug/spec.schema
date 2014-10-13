@@ -70,6 +70,9 @@
 							"type": {
 								"type":"string"
 							},
+							"showInPalette": {
+								"type":"boolean"
+							},
 							"for": {
 								"type": "string"
 							},
