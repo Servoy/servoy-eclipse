@@ -614,6 +614,10 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 			wsSession.callService('formeditor', 'createComponents', components, true)
 		},
 		
+		openElementWizard: function(elementType) {
+			wsSession.callService('formeditor', 'openElementWizard', {elementType: elementType}, true)
+		},
+		
 		getURLParameter: getURLParameter,
 
 		updateSelection: function(ids) {

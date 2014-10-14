@@ -5,15 +5,15 @@
     	<toolbar-item ng-repeat="item in sticky" model="item" class="toolbar-action"/>
 	</div>
 
-	<div class="toolbar editor">
-
-	</div>
-
 	<div class="toolbar element">
 		<toolbar-item ng-repeat="item in elements" model="item" class="toolbar-action"/>
 	</div>
 
 	<div class="toolbar form">
+		<toolbar-item ng-repeat="item in form" model="item" class="toolbar-action"/>
+	</div>
 	
+	<div class="toolbar editor">
+		<!-- toolbar-item ng-repeat="item in editor" model="item" class="toolbar-action"/ -->
 	</div>
 </div>

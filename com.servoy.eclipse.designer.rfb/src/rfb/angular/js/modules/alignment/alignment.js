@@ -8,7 +8,7 @@ angular.module('alignment',['toolbar','editor']).run(function($rootScope, $toolb
 		},
 	};
 	
-	$toolbar.add(btnLeftAlign, TOOLBAR_CATEGORIES.ELEMENTS);
+	$toolbar.add(btnLeftAlign, TOOLBAR_CATEGORIES.FORM);
 	$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
 		// disable or enable buttons.
 		$rootScope.$apply(function() {
