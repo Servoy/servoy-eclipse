@@ -1,4 +1,4 @@
-angular.module("toolbar",['placeelement','alignment','designsize'])
+angular.module("toolbar",['toolbaractions','designsize'])
 .run(["$templateCache","$http",function($templateCache,$http){
 	$http.get("templates/toolbaritem.html").then(function(result){
 		$templateCache.put("templates/toolbaritem.html", result.data);
@@ -35,6 +35,7 @@ angular.module("toolbar",['placeelement','alignment','designsize'])
 	      },
 	      controller: function($scope, $element, $attrs, $toolbar) {
 	    	  $scope.elements = $toolbar.getButtons(TOOLBAR_CATEGORIES.ELEMENTS);
+	    	  $scope.layout = $toolbar.getButtons(TOOLBAR_CATEGORIES.LAYOUT);
 	    	  $scope.form = $toolbar.getButtons(TOOLBAR_CATEGORIES.FORM);
 	    	  $scope.sticky = $toolbar.getButtons(TOOLBAR_CATEGORIES.STICKY);
 	      },
@@ -60,6 +61,7 @@ angular.module("toolbar",['placeelement','alignment','designsize'])
 })
 .value("TOOLBAR_CATEGORIES", {
 	ELEMENTS: "elements",
+	LAYOUT: "layout",
 	FORM: "forms",
 	EDITOR: "editor",
 	STICKY: "sticky"

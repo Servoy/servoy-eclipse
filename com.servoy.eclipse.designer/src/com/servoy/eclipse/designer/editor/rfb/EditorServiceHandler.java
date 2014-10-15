@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.commands.CompoundCommand;
+import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -53,8 +54,8 @@ import com.servoy.eclipse.designer.editor.commands.AddMediaAction;
 import com.servoy.eclipse.designer.editor.commands.AddPortalAction;
 import com.servoy.eclipse.designer.editor.commands.AddSplitpaneAction;
 import com.servoy.eclipse.designer.editor.commands.AddTabpanelAction;
-import com.servoy.eclipse.designer.editor.commands.DesignerToolbarAction;
 import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
+import com.servoy.eclipse.designer.editor.commands.SaveAsTemplateAction;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
@@ -721,7 +722,7 @@ public class EditorServiceHandler implements IServerService
 
 	class OpenElementWizard
 	{
-		DesignerToolbarAction fieldA, imageA, portalA, splitA, tabsA, accordionA;
+		SelectionAction fieldA, imageA, portalA, splitA, tabsA, accordionA, saveAsTemplateA;
 		FormGraphicalEditPart formEditPart;
 
 		OpenElementWizard()
@@ -770,9 +771,13 @@ public class EditorServiceHandler implements IServerService
 			{
 				getAccordionA().run();
 			}
+			else if ("saveastemplate".equals(wizardType))
+			{
+				getSaveAsTemplateA().run();
+			}
 		}
 
-		DesignerToolbarAction getFieldAction()
+		SelectionAction getFieldAction()
 		{
 			if (fieldA == null)
 			{
@@ -794,7 +799,7 @@ public class EditorServiceHandler implements IServerService
 			return fieldA;
 		}
 
-		DesignerToolbarAction getImageAction()
+		SelectionAction getImageAction()
 		{
 			if (imageA == null)
 			{
@@ -816,7 +821,7 @@ public class EditorServiceHandler implements IServerService
 			return imageA;
 		}
 
-		DesignerToolbarAction getPortalAction()
+		SelectionAction getPortalAction()
 		{
 			if (portalA == null)
 			{
@@ -839,7 +844,7 @@ public class EditorServiceHandler implements IServerService
 
 		}
 
-		DesignerToolbarAction getSplitA()
+		SelectionAction getSplitA()
 		{
 			if (splitA == null)
 			{
@@ -861,7 +866,7 @@ public class EditorServiceHandler implements IServerService
 			return splitA;
 		}
 
-		DesignerToolbarAction getTabsA()
+		SelectionAction getTabsA()
 		{
 			if (tabsA == null)
 			{
@@ -883,7 +888,7 @@ public class EditorServiceHandler implements IServerService
 			return tabsA;
 		}
 
-		DesignerToolbarAction getAccordionA()
+		SelectionAction getAccordionA()
 		{
 			if (accordionA == null)
 			{
@@ -903,6 +908,23 @@ public class EditorServiceHandler implements IServerService
 				};
 			}
 			return accordionA;
+		}
+
+
+		SelectionAction getSaveAsTemplateA()
+		{
+			if (saveAsTemplateA == null)
+			{
+				saveAsTemplateA = new SaveAsTemplateAction(editorPart)
+				{
+					@Override
+					protected ISelection getSelection()
+					{
+						return OpenElementWizard.this.getSelection();
+					}
+				};
+			}
+			return saveAsTemplateA;
 		}
 
 		ISelection getSelection()
