@@ -86,6 +86,7 @@ import org.sablo.specification.WebComponentApiDefinition;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
+import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.BooleanPropertyType;
@@ -464,6 +465,7 @@ public class TypeCreator extends TypeCache
 				type.setName(iPropertyType.getName());
 				type.setKind(TypeKind.JAVA);
 				EList<Member> members = type.getMembers();
+				addType(null, type);
 				if (iPropertyType instanceof ICustomType< ? >)
 				{
 					ICustomType< ? > customType = (ICustomType< ? >)iPropertyType;
@@ -481,11 +483,17 @@ public class TypeCreator extends TypeCache
 						// and skip the dataprovider properties (those are not accesable through scripting)
 						if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && pd.getType() != DataproviderPropertyType.INSTANCE)
 						{
-							members.add(createProperty(name, false, getType(null, pd), "", null));
+							JSType memberType = getType(null, pd);
+							if (memberType == null) memberType = getTypeRef(null, pd.getType().getName());
+							if (pd.getType() instanceof CustomJSONArrayType< ? , ? >)
+							{
+								memberType = TypeUtil.arrayOf(memberType);
+							}
+							members.add(createProperty(name, false, memberType, "", null));
 						}
 					}
 				}
-				addType(null, type);
+
 			}
 		}
 	}
@@ -1053,6 +1061,10 @@ public class TypeCreator extends TypeCache
 			{
 				JSType memberType = getType(context, pd);
 				if (memberType == null) memberType = getTypeRef(null, pd.getType().getName());
+				if (pd.getType() instanceof CustomJSONArrayType< ? , ? >)
+				{
+					memberType = TypeUtil.arrayOf(memberType);
+				}
 				members.add(createProperty(name, false, memberType, "", null));
 			}
 		}
@@ -1062,7 +1074,14 @@ public class TypeCreator extends TypeCache
 			Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
 			method.setName(api.getName());
 			JSType returnType = getType(context, api.getReturnType());
-			if (returnType == null && api.getReturnType() != null) returnType = getTypeRef(null, api.getReturnType().getName());
+			if (returnType == null && api.getReturnType() != null)
+			{
+				returnType = getTypeRef(null, api.getReturnType().getType().getName());
+				if (api.getReturnType().getConfig() instanceof Boolean)
+				{
+					if ((Boolean)api.getReturnType().getConfig()) returnType = TypeUtil.arrayOf(returnType);
+				}
+			}
 			method.setType(returnType);
 			EList<Parameter> parameters = method.getParameters();
 			for (PropertyDescription paramDesc : api.getParameters())
@@ -1070,9 +1089,18 @@ public class TypeCreator extends TypeCache
 				Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
 				param.setName(paramDesc.getName());
 				if (paramDesc.isOptional()) param.setKind(ParameterKind.OPTIONAL);
-				param.setType(getType(context, paramDesc));
-				parameters.add(param);
 
+				JSType paramType = getType(context, paramDesc);
+				if (paramType == null)
+				{
+					paramType = getTypeRef(null, paramDesc.getType().getName());
+					if (paramDesc.getConfig() instanceof Boolean)
+					{
+						if ((Boolean)paramDesc.getConfig()) paramType = TypeUtil.arrayOf(paramType);
+					}
+				}
+				param.setType(paramType);
+				parameters.add(param);
 			}
 
 			members.add(method);
