@@ -7,6 +7,9 @@ import javax.servlet.annotation.WebServlet;
 
 import org.apache.tomcat.starter.IServicesProvider;
 
+import com.servoy.eclipse.designer.rfb.endpoint.EditorContentEndpoint;
+import com.servoy.eclipse.designer.rfb.endpoint.EditorEndpoint;
+
 @WebServlet("/rfb/*")
 public class ServicesProvider implements IServicesProvider
 {
@@ -22,6 +25,8 @@ public class ServicesProvider implements IServicesProvider
 			HashSet<Class< ? >> set = new HashSet<Class< ? >>();
 			set.add(ResourcesServlet.class);
 			set.add(EditorContentFilter.class);
+			set.add(EditorEndpoint.class);
+			set.add(EditorContentEndpoint.class);
 			return set;
 		}
 		return null;

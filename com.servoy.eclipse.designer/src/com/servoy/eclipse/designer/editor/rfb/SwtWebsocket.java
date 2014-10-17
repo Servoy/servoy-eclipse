@@ -39,6 +39,7 @@ import javax.websocket.RemoteEndpoint.Async;
 import javax.websocket.RemoteEndpoint.Basic;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
+import javax.websocket.server.ServerEndpoint;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.eclipse.swt.browser.Browser;
@@ -46,6 +47,8 @@ import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.widgets.Display;
 import org.sablo.websocket.WebsocketEndpoint;
 
+import com.servoy.eclipse.designer.rfb.endpoint.EditorContentEndpoint;
+import com.servoy.eclipse.designer.rfb.endpoint.EditorEndpoint;
 import com.servoy.j2db.util.Debug;
 
 /**
@@ -56,25 +59,59 @@ import com.servoy.j2db.util.Debug;
  */
 public class SwtWebsocket
 {
-	private final WebsocketEndpoint websocketEndpoint;
-	private String endpointType;
+	private WebsocketEndpoint websocketEndpoint;
 
 	public SwtWebsocket(Browser browser, String uriString, int id) throws Exception
 	{
-		// @ServerEndpoint(value = "/websocket/{endpointType}/{sessionid}/{windowid}/{argument}")
-		String[] split = uriString.split("/");
-		if (split.length < 5 || !"websocket".equals(split[split.length - 5]))
+		Session newSession = new SwtWebSocketSession(browser, id);
+		if (!createAndStartEditorEndpoint(uriString, newSession) && !createAndStartEditorContentEndpoint(uriString, newSession))
 		{
-			throw new IllegalArgumentException(uriString);
+			throw new IllegalArgumentException("Could not create websocket endpoint for uri '" + uriString + "'");
+		}
+	}
+
+	private boolean createAndStartEditorEndpoint(String uriString, Session newSession) throws Exception
+	{
+		// expecting ws://localhost:8080/rfb/angular/websocket/nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn
+		String[] args = getEndpointArgs(EditorEndpoint.class, uriString);
+
+		if (args == null || args.length != 1)
+		{
+			return false;
 		}
 
-		websocketEndpoint = new WebsocketEndpoint();
-		websocketEndpoint.start(new SwtWebSocketSession(browser, id), //
-			endpointType = split[split.length - 4], //
-			/* sessionid = */split[split.length - 3], //
-			/* windowid = */split[split.length - 2], //
-			/* argument = */split[split.length - 1] //
-		);
+		websocketEndpoint = new EditorEndpoint();
+		((EditorEndpoint)websocketEndpoint).start(newSession, args[0]);
+		return true;
+	}
+
+	private boolean createAndStartEditorContentEndpoint(String uriString, Session newSession) throws Exception
+	{
+		// expecting ws://localhost:8080/rfb/angular/content/websocket/null/null/solname
+		String[] args = getEndpointArgs(EditorContentEndpoint.class, uriString);
+
+		if (args == null || args.length != 3)
+		{
+			return false;
+		}
+
+		websocketEndpoint = new EditorContentEndpoint();
+		((EditorContentEndpoint)websocketEndpoint).start(newSession, args[0], args[1], args[2]);
+		return true;
+	}
+
+	private static String[] getEndpointArgs(Class< ? > cls, String uriString)
+	{
+		String endpointPath = cls.getAnnotation(ServerEndpoint.class).value();
+		//  strip everything off before first argument /xy/y/{args0}/{args1}
+
+		String endpointPrefix = endpointPath.substring(0, endpointPath.indexOf('{'));
+		if (uriString.indexOf(endpointPrefix) < 0)
+		{
+			return null;
+		}
+
+		return uriString.substring(uriString.indexOf(endpointPrefix) + endpointPrefix.length()).split("/");
 	}
 
 	private void send(String string)
@@ -84,7 +121,7 @@ public class SwtWebsocket
 
 	private void close()
 	{
-		websocketEndpoint.onClose(endpointType);
+		websocketEndpoint.onClose();
 	}
 
 	public static void installFakeWebSocket(final Browser browser)

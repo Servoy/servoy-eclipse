@@ -6,8 +6,13 @@ Bundle-Version: 8.0.0.3008
 Bundle-Vendor: Servoy
 Require-Bundle: org.apache.tomcat;bundle-version="7.0.52",
  javax.servlet;bundle-version="3.0.0",
+ javax.websocket;bundle-version="1.0.0",
+ slf4j.api,
  servoy_shared,
- sablo
+ sablo,
+ servoy_ngclient
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.osgi.framework
+Import-Package: javax.websocket.server;version="1.0.0",
+ org.osgi.framework
+Export-Package: com.servoy.eclipse.designer.rfb.endpoint
