@@ -506,6 +506,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			ServoyLog.logError(e);
 		}
 
+		if (info == null)
+		{
+			return new IPropertyHandler[0];
+		}
+
 		java.beans.PropertyDescriptor[] descs = info.getPropertyDescriptors();
 		if (descs == null)
 		{
