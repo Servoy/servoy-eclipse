@@ -64,9 +64,11 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 		}
 
 		function onmousedownLasso(event) {
-			var node = utils.getNode(event);
-			if (!node) {
-				startLasso(event);
+			if(!lassoStarted) {
+				var node = utils.getNode(event);
+				if (!node) {
+					startLasso(event);
+				}	
 			}
 		}
 
@@ -108,15 +110,14 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 				lassoDiv.style.display = 'block';
 			}
 		}
-
+		
 		// register event on editor form iframe (see register event in the editor.js)
 		editorScope.registerDOMEvent("mousedown","CONTENTFRAME_OVERLAY", onmousedown); // real selection in editor content iframe
 		editorScope.registerDOMEvent("mouseup","CONTENTFRAME_OVERLAY", onmouseup); // real selection in editor content iframe
 
 		editorScope.registerDOMEvent("mousedown","CONTENTFRAME_OVERLAY", onmousedownLasso); 
 		editorScope.registerDOMEvent("mouseup","CONTENTFRAME_OVERLAY", onmouseupLasso); 
-		editorScope.registerDOMEvent("mousemove","CONTENTFRAME_OVERLAY", onmousemove); 
-
+		editorScope.registerDOMEvent("mousemove","CONTENTFRAME_OVERLAY", onmousemove);
 	})
 }).factory("$selectionUtils", function() {
 	function hasClass(element, cls) {
