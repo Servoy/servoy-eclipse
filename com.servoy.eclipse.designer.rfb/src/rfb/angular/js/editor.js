@@ -45,7 +45,8 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 			var formLayout =  $editorService.getURLParameter("l");
 			var editorContentRootScope = null;
 			var servoyInternal = null;
-
+			var fieldLocation = null;
+			
 			function fireSelectionChanged(){
 				//Reference to editor should be gotten from Editor instance somehow
 				//instance.fire(Editor.EVENT_TYPES.SELECTION_CHANGED, delta)
@@ -156,9 +157,29 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 					if(ghost && (ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE)) $scope.updateGhostLocationLimits(ghost);
 				}
 			})
+
+			function getMousePosition(event) {
+				var xMouse = -1;
+				var yMouse = -1;
+				if (event.pageX || event.pageY) {
+					xMouse = event.pageX;
+					yMouse = event.pageY;
+				}
+				else if (event.clientX || event.clientY) {
+					xMouse = event.clientX;
+					yMouse = event.clientY;			
+				}
+				
+				return {x: xMouse, y: yMouse};
+			}
 			
-			$scope.registerDOMEvent("mouseup","CONTENTFRAME_OVERLAY", function() {
+			$scope.registerDOMEvent("mousedown","CONTENTFRAME_OVERLAY", function(event) {
+				fieldLocation = getMousePosition(event);
+			});
+			
+			$scope.registerDOMEvent("mouseup","CONTENTFRAME_OVERLAY", function(event) {
 				var selection = $scope.getSelection();
+				
 				var isPartSelected = false;
 				
 				for(var i = 0; i < selection.length; i++) 
@@ -181,6 +202,12 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 							editorContentRootScope.$digest();
 						});						
 					}, 0);	
+				}
+				else {
+					var currentMouseLocation = getMousePosition(event);
+					if(fieldLocation.x == currentMouseLocation.x && fieldLocation.y == currentMouseLocation.y) {
+						$editorService.updateFieldPositioner($scope.convertToContentPoint(fieldLocation));
+					}						
 				}
 			});
 			
@@ -616,6 +643,10 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 		
 		openElementWizard: function(elementType) {
 			wsSession.callService('formeditor', 'openElementWizard', {elementType: elementType}, true)
+		},
+		
+		updateFieldPositioner: function(location) {
+			wsSession.callService('formeditor', 'updateFieldPositioner', {location: location}, true)
 		},
 		
 		getURLParameter: getURLParameter,

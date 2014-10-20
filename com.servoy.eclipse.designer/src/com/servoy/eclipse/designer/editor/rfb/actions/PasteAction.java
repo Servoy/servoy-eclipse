@@ -30,6 +30,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 
+import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.actions.PasteCommand;
 import com.servoy.eclipse.designer.editor.mobile.commands.SelectModelsCommandWrapper;
 import com.servoy.j2db.IApplication;
@@ -47,6 +48,7 @@ public class PasteAction extends SelectionAction
 {
 	private final IApplication application;
 	private final ISelectionProvider selectionProvider;
+	private final IFieldPositioner fieldPositioner;
 
 	/**
 	 * Constructs a <code>CopyAction</code> using the specified part.
@@ -54,11 +56,12 @@ public class PasteAction extends SelectionAction
 	 * @param part
 	 *            The part for this action
 	 */
-	public PasteAction(IApplication application, ISelectionProvider selectionProvider, IWorkbenchPart part)
+	public PasteAction(IApplication application, ISelectionProvider selectionProvider, IWorkbenchPart part, IFieldPositioner fieldPositioner)
 	{
 		super(part);
 		this.application = application;
 		this.selectionProvider = selectionProvider;
+		this.fieldPositioner = fieldPositioner;
 	}
 
 	@Override
@@ -95,7 +98,7 @@ public class PasteAction extends SelectionAction
 		}
 
 		if (form == null) return null;
-		return new SelectModelsCommandWrapper(selectionProvider, new PasteCommand(application, form, Collections.emptyMap(), form, null));
+		return new SelectModelsCommandWrapper(selectionProvider, new PasteCommand(application, form, Collections.emptyMap(), form, fieldPositioner));
 	}
 
 	@Override

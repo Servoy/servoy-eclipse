@@ -124,12 +124,15 @@ public class EditorServiceHandler implements IServerService
 	private final AtomicInteger id = new AtomicInteger();
 	private final RfbSelectionListener selectionListener;
 	private final OpenElementWizard openElementWizard;
+	private final IFieldPositioner fieldPositioner;
 
-	public EditorServiceHandler(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider, RfbSelectionListener selectionListener)
+	public EditorServiceHandler(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider, RfbSelectionListener selectionListener,
+		IFieldPositioner fieldPositioner)
 	{
 		this.editorPart = editorPart;
 		this.selectionProvider = selectionProvider;
 		this.selectionListener = selectionListener;
+		this.fieldPositioner = fieldPositioner;
 
 		openElementWizard = new OpenElementWizard();
 	}
@@ -495,6 +498,11 @@ public class EditorServiceHandler implements IServerService
 					}
 				});
 			}
+			else if ("updateFieldPositioner".equals(methodName))
+			{
+				JSONObject location = args.optJSONObject("location");
+				fieldPositioner.setDefaultLocation(new org.eclipse.swt.graphics.Point(location.optInt("x"), location.optInt("y")));
+			}
 		}
 		catch (JSONException e)
 		{
@@ -728,21 +736,7 @@ public class EditorServiceHandler implements IServerService
 		OpenElementWizard()
 		{
 			formEditPart = new FormGraphicalEditPart(Activator.getDefault().getDesignClient(), editorPart);
-			formEditPart.installEditPolicy(EditPolicy.COMPONENT_ROLE, new FormEditPolicy(Activator.getDefault().getDesignClient(), new IFieldPositioner()
-			{
-
-				@Override
-				public void setDefaultLocation(org.eclipse.swt.graphics.Point location)
-				{
-					// TODO Auto-generated method stub
-				}
-
-				@Override
-				public org.eclipse.swt.graphics.Point getNextLocation(org.eclipse.swt.graphics.Point location)
-				{
-					return new org.eclipse.swt.graphics.Point(100, 100);
-				}
-			}));
+			formEditPart.installEditPolicy(EditPolicy.COMPONENT_ROLE, new FormEditPolicy(Activator.getDefault().getDesignClient(), fieldPositioner));
 		}
 
 		void run(String wizardType)

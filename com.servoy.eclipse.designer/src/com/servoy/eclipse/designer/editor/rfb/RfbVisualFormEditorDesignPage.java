@@ -29,6 +29,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.BrowserFunction;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -37,6 +38,7 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.websocket.WebsocketSessionManager;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.actions.CopyAction;
@@ -68,6 +70,28 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		}
 	};
 
+	private final IFieldPositioner fieldPositioner = new IFieldPositioner()
+	{
+		Point defaultLocation = new Point(0, 0);
+		int counter;
+
+		@Override
+		public void setDefaultLocation(Point location)
+		{
+			defaultLocation = location;
+			counter = 0;
+		}
+
+		@Override
+		public Point getNextLocation(Point location)
+		{
+			defaultLocation.x += (10 * counter);
+			defaultLocation.y += (10 * counter);
+			counter++;
+			return defaultLocation;
+		}
+	};
+
 	// for updating selection in editor when selection changes in IDE
 	private final RfbSelectionListener selectionListener = new RfbSelectionListener();
 
@@ -88,7 +112,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		// Serve requests for rfb editor
 		String editorId = UUID.randomUUID().toString();
 		WebsocketSessionManager.addSession(editorWebsocketSession = new EditorWebsocketSession(editorId));
-		editorWebsocketSession.registerServerService("formeditor", new EditorServiceHandler(editorPart, selectionProvider, selectionListener));
+		editorWebsocketSession.registerServerService("formeditor", new EditorServiceHandler(editorPart, selectionProvider, selectionListener, fieldPositioner));
 		selectionListener.setEditorWebsocketSession(editorWebsocketSession);
 		try
 		{
@@ -206,7 +230,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	@Override
 	protected IAction createPasteAction()
 	{
-		return new PasteAction(Activator.getDefault().getDesignClient(), selectionProvider, editorPart);
+		return new PasteAction(Activator.getDefault().getDesignClient(), selectionProvider, editorPart, fieldPositioner);
 	}
 
 	@Override
