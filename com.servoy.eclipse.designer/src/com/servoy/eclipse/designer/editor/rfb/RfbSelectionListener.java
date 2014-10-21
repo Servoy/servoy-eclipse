@@ -26,7 +26,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 
-import com.servoy.j2db.persistence.GhostBean;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.Utils;
 
