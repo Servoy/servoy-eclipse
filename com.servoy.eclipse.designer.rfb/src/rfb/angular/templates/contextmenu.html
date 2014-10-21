@@ -2,12 +2,12 @@
 	<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
       <li ng-repeat="action in actions" ng-class="action.itemClass">
       		<a tabindex="-1" href="#" ng-click="action.execute()" ng-style="{'background-image':'url({{action.icon}})','background-repeat':'no-repeat','background-position': 'left center'}">{{action.text}}
-      			<span style="float:right;padding-left:10px;" ng-show="action.shortcut != undefined">{{action.shortcut}}</span>
+      			<span style="float:right;" ng-show="action.shortcut != undefined" class="actionshortcut">{{action.shortcut}}</span>
       		</a>
       		<ul class="dropdown-menu" ng-show="action.subMenu != undefined">
       			 <li ng-repeat="subaction in action.subMenu" ng-class="subaction.itemClass">
 		      		<a tabindex="-1" href="#" ng-style="{'background-image':'url({{subaction.icon}})','background-repeat':'no-repeat','background-position': 'left center'}">{{subaction.text}}
-		      			<span style="float:right;" ng-show="subaction.shortcut != undefined">{{subaction.shortcut}}</span>
+		      			<span style="float:right;" ng-show="subaction.shortcut != undefined" class="actionshortcut">{{subaction.shortcut}}</span>
 		      		</a>
 		      	</li>	
       		</ul>
