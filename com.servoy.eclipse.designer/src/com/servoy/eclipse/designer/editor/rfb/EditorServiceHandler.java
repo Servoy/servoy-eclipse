@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.gef.EditPart;
@@ -39,6 +40,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebComponentSpecification;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.Activator;
@@ -80,6 +84,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.server.ngclient.template.PartWrapper;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
@@ -133,8 +138,45 @@ public class EditorServiceHandler implements IServerService
 		this.selectionProvider = selectionProvider;
 		this.selectionListener = selectionListener;
 		this.fieldPositioner = fieldPositioner;
-
 		openElementWizard = new OpenElementWizard();
+	}
+
+
+	/**
+	 * @param uuid
+	 * @return
+	 */
+	private IPersist searchForPersist(String uuid)
+	{
+		String searchFor = uuid;
+		if (searchFor.contains("_"))
+		{
+			String[] split = searchFor.split("_");
+			if (split.length != 3) return null;
+			String parentUUID = split[0];
+			String fieldName = split[1];
+			String typeName = split[2];
+			int index = -1;
+			Bean parentBean = (Bean)ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(parentUUID));
+			WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getBeanClassName());
+			if (fieldName.indexOf('[') > 0)
+			{
+				index = extractIndex(fieldName);
+				fieldName = fieldName.substring(0, fieldName.indexOf('['));
+			}
+			boolean arrayReturnType = spec.isArrayReturnType(fieldName);
+
+			Bean bean = new GhostBean(parentBean, fieldName, typeName, index, arrayReturnType, false);
+			String compName = "bean_" + id.incrementAndGet();
+			while (!checkName(compName))
+			{
+				compName = "bean_" + id.incrementAndGet();
+			}
+			bean.setName(compName);
+			bean.setBeanClassName(typeName);
+			return bean;
+		}
+		return ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(searchFor));
 	}
 
 	@Override
@@ -151,6 +193,102 @@ public class EditorServiceHandler implements IServerService
 				writer.array();
 				editorPart.getForm().acceptVisitor(new IPersistVisitor()
 				{
+
+					private String computeGhostUUID(Bean bean, PropertyDescription pd, String simpleTypeName, int index)
+					{
+						if (index < 0) return bean.getUUID() + "_" + pd.getName() + "_" + simpleTypeName;
+						return bean.getUUID() + "_" + pd.getName() + "[" + index + "]" + "_" + simpleTypeName;
+					}
+
+					private void writeGhostsForWebcomponentBeans(JSONWriter writer, Bean bean)
+					{
+						if (FormTemplateGenerator.isWebcomponentBean(bean))
+						{
+							WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(bean.getBeanClassName());
+							Map<String, PropertyDescription> properties = spec.getProperties();
+							try
+							{
+								writer.object();
+								writer.key("style");
+								{
+									writer.object();
+									writer.key("left").value(bean.getLocation().getX());
+									writer.key("top").value(bean.getLocation().getY());
+									writer.endObject();
+								}
+								writer.key("uuid").value(bean.getUUID());
+								writer.key("ghosts");
+								{
+									writer.array();
+									for (PropertyDescription pd : properties.values())
+									{
+										String simpleTypeName = pd.getType().getName().replaceFirst(spec.getName() + ".", "");
+										if (spec.getFoundTypes().containsKey(simpleTypeName))
+										{
+											try
+											{
+												if (bean.getBeanXML() != null)
+												{
+													JSONObject webComponentModelJson = new JSONObject(bean.getBeanXML());
+													if (webComponentModelJson.has(pd.getName()))
+													{
+														if (webComponentModelJson.get(pd.getName()).toString().startsWith("["))
+														{
+															JSONArray jsonArray = webComponentModelJson.getJSONArray(pd.getName());
+															for (int i = 0; i < jsonArray.length(); i++)
+															{
+																writeGhostToJSON(writer, bean, pd, simpleTypeName, i);
+															}
+														}
+														else
+														{
+															writeGhostToJSON(writer, bean, pd, simpleTypeName, -1);// -1 does not add a [0] at the end of the name
+														}
+													}
+												}
+											}
+											catch (JSONException e)
+											{
+												Debug.error(e);
+											}
+										}
+									}
+									writer.endArray();
+								}
+								writer.endObject();
+							}
+							catch (JSONException e1)
+							{
+								Debug.error(e1);
+							}
+						}
+					}
+
+					/**
+					 * @param jsonWriter
+					 * @param bean
+					 * @param pd
+					 * @param simpleTypeName
+					 * @param i
+					 * @throws JSONException
+					 */
+					private void writeGhostToJSON(JSONWriter jsonWriter, Bean bean, PropertyDescription pd, String simpleTypeName, int i) throws JSONException
+					{
+						jsonWriter.object();
+						jsonWriter.key("uuid").value(computeGhostUUID(bean, pd, simpleTypeName, i));
+						jsonWriter.key("type").value(pd.getType().getName());
+						jsonWriter.key("text").value(pd.getName());
+						jsonWriter.key("location");
+						{
+							jsonWriter.object();
+							int position = i;
+							if (position < 0) position = 0;
+							jsonWriter.key("x").value(computeX(position));
+							jsonWriter.key("y").value(computeY(position));
+							jsonWriter.endObject();
+						}
+						jsonWriter.endObject();
+					}
 
 					private int computeX(int index)
 					{
@@ -171,37 +309,41 @@ public class EditorServiceHandler implements IServerService
 							{
 								writer.object();
 								writer.key("style");
-								writer.object();
-								writer.key("left").value(((TabPanel)o).getLocation().getX());
-								writer.key("top").value(((TabPanel)o).getLocation().getY());
-								writer.endObject();
+								{
+									writer.object();
+									writer.key("left").value(((TabPanel)o).getLocation().getX());
+									writer.key("top").value(((TabPanel)o).getLocation().getY());
+									writer.endObject();
+								}
 								writer.key("uuid").value(((TabPanel)o).getUUID());
 								writer.key("ghosts");
-								writer.array();
-								Iterator<IPersist> tabIterator = ((TabPanel)o).getTabs();
-								int i = 0;
-								while (tabIterator.hasNext())
 								{
-									IPersist tab = tabIterator.next();
-									writer.object();
-									writer.key("uuid").value(tab.getUUID());
-									writer.key("type").value(tab.getTypeID());
-									writer.key("text").value(((Tab)tab).getText());
-									writer.key("location");
-									writer.object();
-									if (args != null && args.has("resetPosition")) ((Tab)tab).setLocation(new Point(computeX(i), computeY(i)));
-									writer.key("x").value(((Tab)tab).getLocation().x);
-									writer.key("y").value(((Tab)tab).getLocation().y);
-									writer.endObject();
-									writer.endObject();
-									i++;
+									writer.array();
+									Iterator<IPersist> tabIterator = ((TabPanel)o).getTabs();
+									int i = 0;
+									while (tabIterator.hasNext())
+									{
+										IPersist tab = tabIterator.next();
+										writer.object();
+										writer.key("uuid").value(tab.getUUID());
+										writer.key("type").value(tab.getTypeID());
+										writer.key("text").value(((Tab)tab).getText());
+										writer.key("location");
+										writer.object();
+										if (args != null && args.has("resetPosition")) ((Tab)tab).setLocation(new Point(computeX(i), computeY(i)));
+										writer.key("x").value(((Tab)tab).getLocation().x);
+										writer.key("y").value(((Tab)tab).getLocation().y);
+										writer.endObject();
+										writer.endObject();
+										i++;
+									}
+									writer.endArray();
 								}
-								writer.endArray();
 								writer.endObject();
 							}
 							catch (IllegalArgumentException e)
 							{
-								e.printStackTrace();
+								Debug.error(e);
 							}
 							catch (JSONException e)
 							{
@@ -237,18 +379,21 @@ public class EditorServiceHandler implements IServerService
 									if (i < parts.size() - 1) writer.key("partnext").value(parts.get(i + 1).getUUID());
 									writer.endObject();
 								}
-
 								writer.endArray();
 								writer.endObject();
 							}
 							catch (IllegalArgumentException e)
 							{
-								e.printStackTrace();
+								Debug.error(e);
 							}
 							catch (JSONException e)
 							{
-								e.printStackTrace();
+								Debug.error(e);
 							}
+						}
+						else if (o instanceof Bean)
+						{
+							writeGhostsForWebcomponentBeans(writer, (Bean)o);
 						}
 
 						return IPersistVisitor.CONTINUE_TRAVERSAL;
@@ -271,7 +416,7 @@ public class EditorServiceHandler implements IServerService
 				final List<Object> selection = new ArrayList<Object>();
 				for (int i = 0; i < json.length(); i++)
 				{
-					IPersist searchPersist = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(json.getString(i)));
+					IPersist searchPersist = searchForPersist(json.getString(i));
 					if (searchPersist != null) selection.add(searchPersist);
 				}
 				Display.getDefault().asyncExec(new Runnable()
@@ -312,8 +457,8 @@ public class EditorServiceHandler implements IServerService
 						{
 							CompoundCommand cc = null;
 							String uuid = (String)keys.next();
-							final IPersist persist = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(uuid));
-							if (persist instanceof BaseComponent || persist instanceof Tab)
+							final IPersist persist = searchForPersist(uuid);
+							if ((persist instanceof BaseComponent || persist instanceof Tab) && !(persist instanceof GhostBean))
 							{
 								JSONObject properties = args.optJSONObject(uuid);
 								cc = new CompoundCommand();
@@ -548,15 +693,15 @@ public class EditorServiceHandler implements IServerService
 			while (allPersists.hasNext())
 			{
 				IPersist next = allPersists.next();
-				if (next instanceof ISupportChilds)
+				if (next instanceof BaseComponent)
 				{
-					ISupportChilds iSupportChilds = (ISupportChilds)next;
-					if (next instanceof BaseComponent)
+					if (isCorrectTarget(((BaseComponent)next), (String)args.get("dropTargetUUID")))
 					{
-						if (isCorrectTarget(((BaseComponent)next), (String)args.get("dropTargetUUID")))
+						if (args.getString("type").equals("tab"))
 						{
-							if (args.getString("type").equals("tab"))
+							if (next instanceof ISupportChilds)
 							{
+								ISupportChilds iSupportChilds = (ISupportChilds)next;
 								Tab newTab = (Tab)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(iSupportChilds, IRepository.TABS);
 								String tabName = "tab_" + id.incrementAndGet();
 								while (!checkName(tabName))
@@ -568,6 +713,27 @@ public class EditorServiceHandler implements IServerService
 								iSupportChilds.addChild(newTab);
 								return next;
 							}
+						}
+						if (next instanceof Bean)
+						{
+							Bean parentBean = (Bean)next;
+							String typeName = args.getString("type");
+							String compName = "bean_" + id.incrementAndGet();
+							while (!checkName(compName))
+							{
+								compName = "bean_" + id.incrementAndGet();
+							}
+							String dropTargetFieldName = getFirstFieldWithType(parentBean, typeName);
+							int index = -1;
+							boolean isArray = false;
+							WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getBeanClassName());
+							Object config = spec.getProperty(dropTargetFieldName).getConfig();
+							JSONObject configObject = new JSONObject(config.toString());
+							if (configObject.getString("type").endsWith("]")) isArray = true;
+							Bean bean = new GhostBean(parentBean, dropTargetFieldName, typeName, index, isArray, true);
+							bean.setName(compName);
+							bean.setBeanClassName(typeName);
+							return bean;
 						}
 					}
 				}
@@ -723,6 +889,39 @@ public class EditorServiceHandler implements IServerService
 				IPersist newPersist = ((AbstractBase)persist).cloneObj(persist.getParent(), true, validator, true, true, true);
 				((ISupportBounds)newPersist).setLocation(new Point(x, y));
 				return newPersist;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * @param dropTargetFieldName
+	 * @return
+	 */
+	private int extractIndex(String dropTargetFieldName)
+	{
+		int index = -1;
+		if (dropTargetFieldName.indexOf('[') > 0)
+		{
+			index = Integer.parseInt(dropTargetFieldName.substring(dropTargetFieldName.indexOf('[') + 1, dropTargetFieldName.indexOf(']')));
+		}
+		return index;
+	}
+
+	/**
+	 * @param parentBean
+	 * @param typeName
+	 * @return the first key name in the model that has a value of type @param typeName
+	 */
+	private String getFirstFieldWithType(Bean parentBean, String typeName)
+	{
+		WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getBeanClassName());
+		Map<String, PropertyDescription> properties = spec.getProperties();
+		for (PropertyDescription pd : properties.values())
+		{
+			if (pd.getType().getName().replaceFirst(spec.getName() + ".", "").equals(typeName))
+			{
+				return pd.getName();
 			}
 		}
 		return null;

@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -28,6 +29,12 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.property.IPropertyType;
 
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -35,8 +42,10 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.GhostBean;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptElement;
@@ -44,12 +53,14 @@ import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SortedList;
 
 /**
  * Content provider for Servoy form in outline view.
- * 
+ *
  * @author rgansevles
  */
 
@@ -124,6 +135,14 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			{
 				list.add(PersistContext.create(persist, ((PersistContext)parentElement).getContext()));
 			}
+			if (((PersistContext)parentElement).getPersist() instanceof Bean)
+			{
+				List<IPersist> allGhostElements = getAllGhostElements((Bean)((PersistContext)parentElement).getPersist());
+				for (IPersist ghost : allGhostElements)
+				{
+					list.add(PersistContext.create(ghost, ((PersistContext)parentElement).getContext()));
+				}
+			}
 			return new SortedList(comparator, list).toArray();
 		}
 		else if (parentElement instanceof FormElementGroup)
@@ -135,6 +154,10 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 				list.add(PersistContext.create(elements.next(), form));
 			}
 			return new SortedList(comparator, list).toArray();
+		}
+		else if (parentElement instanceof Bean)
+		{
+			return getAllGhostElements((Bean)parentElement).toArray();
 		}
 		return null;
 	}
@@ -210,6 +233,10 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 				list.add(PersistContext.create(persist, ((PersistContext)parentElement).getContext()));
 			}
 			return list.toArray();
+		}
+		else if (parentElement instanceof Bean)
+		{
+			return getAllGhostElements((Bean)parentElement).toArray();
 		}
 
 		return null;
@@ -310,7 +337,9 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			element == PARTS ||
 			element instanceof Pair ||
 			element instanceof FormElementGroup ||
-			(element instanceof PersistContext && ((PersistContext)element).getPersist() instanceof AbstractBase && (((AbstractBase)((PersistContext)element).getPersist())).getAllObjects().hasNext());
+			(element instanceof PersistContext && ((PersistContext)element).getPersist() instanceof AbstractBase &&
+				(((AbstractBase)((PersistContext)element).getPersist())).getAllObjects().hasNext() || (((PersistContext)element).getPersist() instanceof Bean &&
+				!(((PersistContext)element).getPersist() instanceof GhostBean) && ((Bean)((PersistContext)element).getPersist()).getBeanXML() != null));
 	}
 
 	public Object[] getElements(Object inputElement)
@@ -324,6 +353,54 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
 	{
+	}
+
+	private List<IPersist> getAllGhostElements(Bean parentBean)
+	{
+		List<IPersist> result = new ArrayList<IPersist>();
+		if (FormTemplateGenerator.isWebcomponentBean(parentBean))
+		{
+			String beanXML = parentBean.getBeanXML();
+			WebComponentSpecification webComponentSpecification = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+				parentBean.getBeanClassName());
+			Map<String, IPropertyType< ? >> foundTypes = webComponentSpecification.getFoundTypes();
+			try
+			{
+				JSONObject beanJSON = new JSONObject(beanXML);
+				for (String beanJSONKey : JSONObject.getNames(beanJSON))
+				{
+					Object object = beanJSON.get(beanJSONKey);
+					if (object != null)
+					{
+						IPropertyType< ? > type = webComponentSpecification.getProperty(beanJSONKey).getType();
+						String simpleTypeName = type.getName().replaceFirst(webComponentSpecification.getName() + ".", "");
+						if (foundTypes.containsKey(simpleTypeName))
+						{
+							WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getBeanClassName());
+							boolean arrayReturnType = spec.isArrayReturnType(beanJSONKey);
+							if (!arrayReturnType)
+							{
+								GhostBean ghostBean = new GhostBean(parentBean, beanJSONKey, simpleTypeName, -1, arrayReturnType, false);
+								ghostBean.setBeanClassName(simpleTypeName);
+								result.add(ghostBean);
+							}
+							else if (object instanceof JSONArray) for (int i = 0; i < ((JSONArray)object).length(); i++)
+							{
+								GhostBean ghostBean = new GhostBean(parentBean, beanJSONKey, simpleTypeName, i, arrayReturnType, false);
+								ghostBean.setBeanClassName(simpleTypeName);
+								result.add(ghostBean);
+							}
+
+						}
+					}
+				}
+			}
+			catch (JSONException e)
+			{
+				Debug.error(e);
+			}
+		}
+		return result;
 	}
 
 	public static class PersistContextNameComparator implements Comparator<Object>
@@ -379,4 +456,6 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 	{
 		return displayType;
 	}
+
+
 }

@@ -25,8 +25,10 @@ import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.gef.EditPart;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.property.ICustomType;
+import org.sablo.specification.property.IPropertyType;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -53,6 +55,7 @@ import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.GhostBean;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptElement;
@@ -272,13 +275,26 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 				PersistContext persistContext = PersistContext.create(persist, context);
 				PersistPropertySource persistProperties = null;
 
-				if (FormTemplateGenerator.isWebcomponentBean(persist))
+				if (FormTemplateGenerator.isWebcomponentBean(persist) || persist instanceof GhostBean)
 				{
-					WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-						FormTemplateGenerator.getComponentTypeName((Bean)persist));
-					if (spec != null)
+					PropertyDescription propertyDescription = null;
+					if (persist instanceof GhostBean)
 					{
-						persistProperties = new WebComponentPropertySource(persistContext, false, spec);
+						GhostBean ghostBean = (GhostBean)persist;
+						Bean parentBean = ghostBean.getParentBean();
+						IPropertyType< ? > iPropertyType = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+							FormTemplateGenerator.getComponentTypeName(parentBean)).getFoundTypes().get(ghostBean.getBeanClassName());
+						if (iPropertyType instanceof ICustomType< ? >) propertyDescription = ((ICustomType< ? >)iPropertyType).getCustomJSONTypeDefinition();
+					}
+					else if (persist.getParent() != null)
+					{
+						propertyDescription = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+							FormTemplateGenerator.getComponentTypeName((Bean)persist));
+					}
+
+					if (propertyDescription != null)
+					{
+						persistProperties = new WebComponentPropertySource(persistContext, false, propertyDescription);
 					}
 				}
 
@@ -365,6 +381,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			return null;
 		}
 
+		if (persist instanceof GhostBean) return persist;
 		ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(persist.getRootObject().getName());
 		if (servoyProject == null)
 		{

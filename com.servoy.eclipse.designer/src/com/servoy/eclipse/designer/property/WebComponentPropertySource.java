@@ -73,16 +73,16 @@ public class WebComponentPropertySource extends PersistPropertySource
 		}
 	}
 
-	private final WebComponentSpecification webComponentSpec;
+	private final PropertyDescription protpetyDescription;
 
-	public WebComponentPropertySource(PersistContext persistContext, boolean readonly, WebComponentSpecification webComponentSpec)
+	public WebComponentPropertySource(PersistContext persistContext, boolean readonly, PropertyDescription propertyDescription)
 	{
 		super(persistContext, readonly);
 		if (!(persistContext.getPersist() instanceof Bean))
 		{
 			throw new IllegalArgumentException();
 		}
-		this.webComponentSpec = webComponentSpec;
+		this.protpetyDescription = propertyDescription;
 	}
 
 	@Override
@@ -96,7 +96,7 @@ public class WebComponentPropertySource extends PersistPropertySource
 	{
 		List<IPropertyHandler> props = new ArrayList<IPropertyHandler>();
 
-		for (PropertyDescription desc : webComponentSpec.getProperties().values())
+		for (PropertyDescription desc : protpetyDescription.getProperties().values())
 		{
 			if (desc.getScope() != null && !"design".equals(desc.getScope()))
 			{
@@ -148,7 +148,8 @@ public class WebComponentPropertySource extends PersistPropertySource
 				}
 			}
 		}
-		for (PropertyDescription desc : webComponentSpec.getHandlers().values())
+
+		if (protpetyDescription instanceof WebComponentSpecification) for (PropertyDescription desc : ((WebComponentSpecification)protpetyDescription).getHandlers().values())
 		{
 			props.add(new WebComponentPropertyHandler(desc));
 		}
@@ -158,26 +159,28 @@ public class WebComponentPropertySource extends PersistPropertySource
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.servoy.eclipse.ui.property.PersistPropertySource#createPropertyCategory(com.servoy.eclipse.ui.property.PersistPropertySource.PropertyDescriptorWrapper
 	 * )
-	 * 
+	 *
 	 * Properties from spec should be dispayed under "Component" category except for handlers and BEAN_PROPERTIES. Properties found with reflection are handled
 	 * by the super class (they go under "Properties").
 	 */
 	@Override
 	protected PropertyCategory createPropertyCategory(PropertyDescriptorWrapper propertyDescriptor)
 	{
-		if (webComponentSpec.getHandlers().containsKey(propertyDescriptor.propertyDescriptor.getName()) ||
+		if (((protpetyDescription instanceof WebComponentSpecification) && ((WebComponentSpecification)protpetyDescription).getHandlers().containsKey(
+			propertyDescriptor.propertyDescriptor.getName())) ||
 			BEAN_PROPERTIES.containsKey(propertyDescriptor.propertyDescriptor.getName())) return super.createPropertyCategory(propertyDescriptor);
-		if (webComponentSpec.getProperties().containsKey(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Component;
+		if (protpetyDescription.getProperties().containsKey(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Component;
 		return super.createPropertyCategory(propertyDescriptor);
 	}
 
 	@Override
 	public String toString()
 	{
-		return webComponentSpec.getDisplayName();
+		if (protpetyDescription instanceof WebComponentSpecification) return ((WebComponentSpecification)protpetyDescription).getDisplayName();
+		return protpetyDescription.getName();
 	}
 }

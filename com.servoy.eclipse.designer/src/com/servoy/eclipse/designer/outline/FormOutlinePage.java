@@ -213,6 +213,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 		}
 	}
 
+
 	@Override
 	public void setActionBars(IActionBars actionBars)
 	{
