@@ -39,32 +39,38 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 			}
 		}
 		function onmousedown(event) {
-			var node = utils.getNode(event);
-			if (node) {
-				if (editorScope.getSelection().indexOf(node) !== -1) {
-					// its in the current selection, remember this for mouse up.
-					selectedNodeMouseEvent = event;
+			if(event.button == 0)
+			{
+				var node = utils.getNode(event);
+				if (node) {
+					if (editorScope.getSelection().indexOf(node) !== -1) {
+						// its in the current selection, remember this for mouse up.
+						selectedNodeMouseEvent = event;
+					}
+					else select(event,node);
 				}
-				else select(event,node);
+				else {
+					editorScope.setSelection([])
+				}
+				event.preventDefault();
 			}
-			else {
-				editorScope.setSelection([])
-			}
-			event.preventDefault();
 		}
 		function onmouseup(event) {
-			if (selectedNodeMouseEvent) {
-				if (event.pageX == selectedNodeMouseEvent.pageX && event.pageY == selectedNodeMouseEvent.pageY) {
-					var node = utils.getNode(event);
-					select(event,node);
+			if(event.button == 0)
+			{
+				if (selectedNodeMouseEvent) {
+					if (event.pageX == selectedNodeMouseEvent.pageX && event.pageY == selectedNodeMouseEvent.pageY) {
+						var node = utils.getNode(event);
+						select(event,node);
+					}
 				}
+				selectedNodeMouseEvent = null;
+				event.preventDefault();
 			}
-			selectedNodeMouseEvent = null;
-			event.preventDefault();
 		}
 
 		function onmousedownLasso(event) {
-			if(!lassoStarted) {
+			if(event.button == 0 && !lassoStarted) {
 				var node = utils.getNode(event);
 				if (!node) {
 					startLasso(event);
@@ -73,7 +79,10 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 		}
 
 		function onmouseupLasso(event) {
-			stopLasso(event);
+			if(event.button == 0)
+			{
+				stopLasso(event);
+			}
 		}
 
 		function startLasso(event) {

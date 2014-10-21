@@ -8,60 +8,63 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 		var selectionToDrag = null;
 
 		function onmousedown(event) {
-			if (utils.getNode(event)){
+			if (event.button == 0 && utils.getNode(event)){
 				dragStartEvent = event;
 			}
 		}
 
 		function onmouseup(event) {
-			dragStartEvent = null;
-			if (dragging) {
-				dragging = false;
-				// store the position changes
-				var selection = editorScope.getSelection();
-				var formState = editorScope.getFormState();
-				
-				if (event.ctrlKey)
-				{
-					var components = [];
-					var size = 0;
-					for (var i = 0; i < selectionToDrag.length; i++)
+			if(event.button == 0)
+			{
+				dragStartEvent = null;
+				if (dragging) {
+					dragging = false;
+					// store the position changes
+					var selection = editorScope.getSelection();
+					var formState = editorScope.getFormState();
+
+					if (event.ctrlKey)
 					{
-						selectionToDrag[i].remove();
-						var node = selectionToDrag[i][0];
-						var component = {};
-						component.uuid = node.getAttribute('cloneuuid');
-						component.x = node.location.x;
-						component.y = node.location.y;
-						if (component.x > 0 && component.y > 0)
+						var components = [];
+						var size = 0;
+						for (var i = 0; i < selectionToDrag.length; i++)
 						{
-							components[size++] = component;
+							selectionToDrag[i].remove();
+							var node = selectionToDrag[i][0];
+							var component = {};
+							component.uuid = node.getAttribute('cloneuuid');
+							component.x = node.location.x;
+							component.y = node.location.y;
+							if (component.x > 0 && component.y > 0)
+							{
+								components[size++] = component;
+							}
+
 						}
-						
+						if (size > 0) $editorService.createComponents({"components": components}); 
 					}
-					if (size > 0) $editorService.createComponents({"components": components}); 
-				}
-				else
-				{
-					var obj = {};
-					for(var i=0;i<selection.length;i++) {
-						var node = selection[i];
-						var name = node.getAttribute("name");
-						var beanModel = formState.model[name];
-						if (beanModel){
-							beanModel.location.y;
-							beanModel.location.x
-							obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y}
+					else
+					{
+						var obj = {};
+						for(var i=0;i<selection.length;i++) {
+							var node = selection[i];
+							var name = node.getAttribute("name");
+							var beanModel = formState.model[name];
+							if (beanModel){
+								beanModel.location.y;
+								beanModel.location.x
+								obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y}
+							}
+							else {
+								var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+								obj[node.getAttribute("svy-id")] = {x:ghostObject.location.x,y:ghostObject.location.y}
+							}
 						}
-						else {
-							var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-							obj[node.getAttribute("svy-id")] = {x:ghostObject.location.x,y:ghostObject.location.y}
-						}
+						$editorService.sendChanges(obj);
 					}
-					$editorService.sendChanges(obj);
 				}
+				selectionToDrag = null;
 			}
-			selectionToDrag = null;
 		}
 
 		function isGhostAlreadySelected(selection, ghost) {

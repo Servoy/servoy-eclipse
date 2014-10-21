@@ -63,6 +63,7 @@ import com.servoy.eclipse.designer.editor.commands.SaveAsTemplateAction;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
@@ -647,6 +648,16 @@ public class EditorServiceHandler implements IServerService
 			{
 				JSONObject location = args.optJSONObject("location");
 				fieldPositioner.setDefaultLocation(new org.eclipse.swt.graphics.Point(location.optInt("x"), location.optInt("y")));
+			}
+			else if ("openScript".equals(methodName))
+			{
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						EditorUtil.openScriptEditor(editorPart.getForm(), null, true);
+					}
+				});
 			}
 		}
 		catch (JSONException e)

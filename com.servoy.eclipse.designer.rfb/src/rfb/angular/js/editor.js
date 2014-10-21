@@ -1,4 +1,4 @@
-angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'decorators','webSocketModule']).factory("$pluginRegistry",function($rootScope) {
+angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dragselection",'decorators','webSocketModule']).factory("$pluginRegistry",function($rootScope) {
 	var plugins = [];
 
 	return {
@@ -647,6 +647,11 @@ angular.module('editor', ['palette','toolbar','mouseselection',"dragselection",'
 		
 		updateFieldPositioner: function(location) {
 			wsSession.callService('formeditor', 'updateFieldPositioner', {location: location}, true)
+		},
+		
+		executeAction: function(action,params)
+		{
+			wsSession.callService('formeditor', action, params, true)
 		},
 		
 		getURLParameter: getURLParameter,
