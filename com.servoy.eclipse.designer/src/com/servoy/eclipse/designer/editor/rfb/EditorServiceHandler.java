@@ -84,6 +84,7 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RectShape;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
@@ -675,6 +676,53 @@ public class EditorServiceHandler implements IServerService
 					}
 				});
 			}
+			else if ("openContainedForm".equals(methodName))
+			{
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						if (args.has("uuid"))
+						{
+							try
+							{
+								IPersist persist = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(
+									UUID.fromString(args.getString("uuid")));
+								if (persist != null)
+								{
+									if (persist instanceof Tab)
+									{
+										Solution s = (Solution)editorPart.getForm().getParent();
+										Form toOpen = s.getForm(((Tab)persist).getContainsFormID());
+										if (toOpen != null)
+										{
+											EditorUtil.openFormDesignEditor(toOpen);
+										}
+										else
+										{
+											Debug.error("Cannot open form in design editor. Form with id " + ((Tab)persist).getContainsFormID() +
+												" was not found.");
+										}
+									}
+									else
+									{
+										Debug.error("Cannot open form in design editor. Container uuid " + args.getString("uuid") + " is not a tab");
+									}
+								}
+								else
+								{
+									Debug.error("Cannot open form in design editor. Container uuid " + args.getString("uuid") + " was not found");
+								}
+							}
+							catch (JSONException ex)
+							{
+								Debug.error(ex);
+							}
+						}
+					}
+				});
+			}
+
 		}
 		catch (JSONException e)
 		{

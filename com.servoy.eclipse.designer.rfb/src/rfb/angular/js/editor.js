@@ -154,6 +154,13 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				return true;
 			}
 			
+			$scope.openContainedForm = function(ghost){
+				if(ghost.type != EDITOR_CONSTANTS.PART_PERSIST_TYPE)
+				{
+					$editorService.openContainedForm(ghost);
+				}
+			}
+			
 			$scope.updateGhostLocation = function(ghost, x, y) {
 				if(ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE) { // it is a part
 
@@ -720,6 +727,9 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			},400);
 		},
 		
+		openContainedForm: function(ghost) {
+			wsSession.callService('formeditor', 'openContainedForm', {"uuid":ghost.uuid}, true)
+		},
 		// add more service methods here
 	}
 });
