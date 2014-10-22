@@ -411,6 +411,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 					$(document).keydown(function(objEvent) {
 						var key;
 		                var isCtrl;
+		                var isShift;
 
 		                if(window.event)
 		                {
@@ -419,6 +420,12 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 		                                isCtrl = true;
 		                        else
 		                                isCtrl = false;
+		                        
+		                        if(window.event.shiftKey)
+	                                	isShift = true;
+		                        else
+	                                	isShift = false;		                        
+		                        
 		                }
 		                else
 		                {
@@ -427,14 +434,23 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 		                                isCtrl = true;
 		                        else
 		                                isCtrl = false;
+		                        
+		                        if(objEvent.shiftKey)
+		                        		isShift = true;
+		                        else
+		                        		isShift = false;		                        
 		                }
 
 		                if(isCtrl)
 		                {
 		                	var k = String.fromCharCode(key).toLowerCase();
 		                    if ('a' == k || 's' == k )
-		                    {                            
-			                   return false;
+		                    {
+		                    	if(isShift && 's' == k) {
+									// send the CTRL+SHIFT+S (save all) key code to the server
+		                    		$editorService.keyPressed(objEvent);
+		                    	}
+			                    return false;
 		                    }
 		                }
 						if (objEvent.keyCode == 46) {

@@ -36,6 +36,8 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.internal.WorkbenchPage;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -443,6 +445,17 @@ public class EditorServiceHandler implements IServerService
 							{
 								editorPart.getCommandStack().execute(new FormElementDeleteCommand(selection));
 							}
+						}
+					});
+				}
+				else if ((args.optInt("keyCode") == 83) && args.optBoolean("ctrl") && args.optBoolean("shift"))
+				{
+					Display.getDefault().asyncExec(new Runnable()
+					{
+						public void run()
+						{
+							IWorkbenchPage page = editorPart.getSite().getPage();
+							((WorkbenchPage)page).saveAllEditors(false, false, true);
 						}
 					});
 				}
