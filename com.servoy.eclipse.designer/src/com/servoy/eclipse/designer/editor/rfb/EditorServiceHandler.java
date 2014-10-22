@@ -312,33 +312,36 @@ public class EditorServiceHandler implements IServerService
 							{
 								writer.object();
 								writer.key("style");
+								TabPanel panel = (TabPanel)o;
 								{
 									writer.object();
-									writer.key("left").value(((TabPanel)o).getLocation().getX());
-									writer.key("top").value(((TabPanel)o).getLocation().getY());
+									writer.key("left").value(panel.getLocation().getX());
+									writer.key("top").value(panel.getLocation().getY());
 									writer.endObject();
 								}
-								writer.key("uuid").value(((TabPanel)o).getUUID());
+								writer.key("uuid").value(panel.getUUID());
 								writer.key("ghosts");
 								{
 									writer.array();
-									Iterator<IPersist> tabIterator = ((TabPanel)o).getTabs();
-									int i = 0;
+									Iterator<IPersist> tabIterator = panel.getTabs();
 									while (tabIterator.hasNext())
 									{
-										IPersist tab = tabIterator.next();
+										Tab tab = (Tab)tabIterator.next();
 										writer.object();
 										writer.key("uuid").value(tab.getUUID());
 										writer.key("type").value(tab.getTypeID());
-										writer.key("text").value(((Tab)tab).getText());
+										writer.key("text").value(tab.getText());
 										writer.key("location");
 										writer.object();
-										if (args != null && args.has("resetPosition")) ((Tab)tab).setLocation(new Point(computeX(i), computeY(i)));
-										writer.key("x").value(((Tab)tab).getLocation().x);
-										writer.key("y").value(((Tab)tab).getLocation().y);
+										writer.key("x").value(tab.getLocation().x);
+										writer.key("y").value(tab.getLocation().y);
+										writer.endObject();
+										writer.key("size");
+										writer.object();
+										writer.key("width").value(tab.getSize().width);
+										writer.key("height").value(tab.getSize().height);
 										writer.endObject();
 										writer.endObject();
-										i++;
 									}
 									writer.endArray();
 								}

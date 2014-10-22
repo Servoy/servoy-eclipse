@@ -129,7 +129,29 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 					}
 					return partStyle;
 				}
-				return {left: ghost.location.x, top: ghost.location.y};
+				return {background: "#e4844a", left: ghost.location.x, top: ghost.location.y, width: ghost.size.width, height: ghost.size.height};
+			}
+			
+			$scope.rearrangeGhosts = function(ghosts) {
+				var overflow = 0;
+				for (var i = 0; i < ghosts.length ; i++)
+				{
+					var ghost = ghosts[i];
+					if (ghost.type != EDITOR_CONSTANTS.PART_PERSIST_TYPE)
+					{
+						if ($('[svy-id='+ghost.uuid+']')[0])
+						{
+							var element = $('[svy-id='+ghost.uuid+']')[0];
+							var width = element.scrollWidth;
+							ghost.location.x = ghost.location.x + overflow;
+							if (width > ghost.size.width){
+								overflow += width - ghost.size.width;
+								ghost.size.width = width;
+							}
+						}
+					}
+				}
+				return true;
 			}
 			
 			$scope.updateGhostLocation = function(ghost, x, y) {
@@ -412,7 +434,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 						var key;
 		                var isCtrl;
 		                var isShift;
-
+		                
 		                if(window.event)
 		                {
 		                        key = window.event.keyCode;     //IE
@@ -420,7 +442,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 		                                isCtrl = true;
 		                        else
 		                                isCtrl = false;
-		                        
+		                		                        
 		                        if(window.event.shiftKey)
 	                                	isShift = true;
 		                        else
@@ -439,18 +461,19 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 		                        		isShift = true;
 		                        else
 		                        		isShift = false;		                        
+		                                
 		                }
 
 		                if(isCtrl)
 		                {
 		                	var k = String.fromCharCode(key).toLowerCase();
 		                    if ('a' == k || 's' == k )
-		                    {
-		                    	if(isShift && 's' == k) {
+		                    {   
+		                    		                    	if(isShift && 's' == k) {
 									// send the CTRL+SHIFT+S (save all) key code to the server
 		                    		$editorService.keyPressed(objEvent);
-		                    	}
-			                    return false;
+		                    	}                         
+			                   return false;
 		                    }
 		                }
 						if (objEvent.keyCode == 46) {
@@ -664,12 +687,12 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 		updateFieldPositioner: function(location) {
 			wsSession.callService('formeditor', 'updateFieldPositioner', {location: location}, true)
 		},
-		
+
 		executeAction: function(action,params)
 		{
 			wsSession.callService('formeditor', action, params, true)
 		},
-		
+				
 		getURLParameter: getURLParameter,
 
 		updateSelection: function(ids) {
