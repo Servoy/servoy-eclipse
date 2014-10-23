@@ -438,30 +438,38 @@ public class EditorServiceHandler implements IServerService
 			}
 			else if ("keyPressed".equals(methodName))
 			{
-				if (args.optInt("keyCode") == 46)
+				int keyCode = args.optInt("keyCode");
+				boolean isCtrl = args.optBoolean("ctrl");
+				boolean isShift = args.optBoolean("shift");
+
+				switch (keyCode)
 				{
-					Display.getDefault().asyncExec(new Runnable()
-					{
-						public void run()
+					case 46 : // delete
+						Display.getDefault().asyncExec(new Runnable()
 						{
-							IPersist[] selection = (IPersist[])((IStructuredSelection)selectionProvider.getSelection()).toList().toArray(new IPersist[0]);
-							if (selection.length > 0)
+							public void run()
 							{
-								editorPart.getCommandStack().execute(new FormElementDeleteCommand(selection));
+								IPersist[] selection = (IPersist[])((IStructuredSelection)selectionProvider.getSelection()).toList().toArray(new IPersist[0]);
+								if (selection.length > 0)
+								{
+									editorPart.getCommandStack().execute(new FormElementDeleteCommand(selection));
+								}
 							}
-						}
-					});
-				}
-				else if ((args.optInt("keyCode") == 83) && args.optBoolean("ctrl") && args.optBoolean("shift"))
-				{
-					Display.getDefault().asyncExec(new Runnable()
-					{
-						public void run()
+						});
+						break;
+					case 83 : // s
+						if (isCtrl && isShift) // ctrl+shift+s (save all)
 						{
-							IWorkbenchPage page = editorPart.getSite().getPage();
-							((WorkbenchPage)page).saveAllEditors(false, false, true);
+							Display.getDefault().asyncExec(new Runnable()
+							{
+								public void run()
+								{
+									IWorkbenchPage page = editorPart.getSite().getPage();
+									((WorkbenchPage)page).saveAllEditors(false, false, true);
+								}
+							});
 						}
-					});
+						break;
 				}
 			}
 			else if ("setProperties".equals(methodName))

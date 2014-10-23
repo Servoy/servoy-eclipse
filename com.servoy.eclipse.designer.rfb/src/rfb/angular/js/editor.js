@@ -1,4 +1,4 @@
-angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dragselection",'decorators','webSocketModule']).factory("$pluginRegistry",function($rootScope) {
+angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dragselection",'decorators','webSocketModule','keyboardlayoutupdater']).factory("$pluginRegistry",function($rootScope) {
 	var plugins = [];
 
 	return {
@@ -200,6 +200,25 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				}
 				
 				return {x: xMouse, y: yMouse};
+			}
+			
+			$scope.getFixedKeyEvent = function(event) {
+				var keyCode, isCtrl, isShift, isAlt;
+
+	            if(window.event) {	//IE
+	            	keyCode = window.event.keyCode;
+	            	isCtrl = window.event.ctrlKey ? true : false;
+	            	isShift = window.event.shiftKey ? true : false;
+	            	isAlt =  window.event.altKey ? true : false;
+	            }
+	            else {	// firefox
+	            	keyCode = event.which;
+	            	isCtrl = event.ctrlKey ? true : false;
+	            	isShift = event.shiftKey ? true : false;
+	            	isAlt =  event.altKey ? true : false;		                        
+	            }
+	            
+	            return {keyCode:keyCode, isCtrl:isCtrl, isShift:isShift, isAlt:isAlt};
 			}
 			
 			$scope.registerDOMEvent("mousedown","CONTENTFRAME_OVERLAY", function(event) {
@@ -437,59 +456,30 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				servoyInternal = injector.get("$servoyInternal");
 				$scope.glasspane.focus()
 				$(function(){   
-					$(document).keydown(function(objEvent) {
-						var key;
-		                var isCtrl;
-		                var isShift;
-		                
-		                if(window.event)
+					$(document).keydown(function(objEvent) {					
+						var fixedKeyEvent = $scope.getFixedKeyEvent(objEvent);
+	
+		                if(fixedKeyEvent.isCtrl)
 		                {
-		                        key = window.event.keyCode;     //IE
-		                        if(window.event.ctrlKey)
-		                                isCtrl = true;
-		                        else
-		                                isCtrl = false;
-		                		                        
-		                        if(window.event.shiftKey)
-	                                	isShift = true;
-		                        else
-	                                	isShift = false;		                        
-		                        
-		                }
-		                else
-		                {
-		                        key = objEvent.which;     //firefox
-		                        if(objEvent.ctrlKey)
-		                                isCtrl = true;
-		                        else
-		                                isCtrl = false;
-		                        
-		                        if(objEvent.shiftKey)
-		                        		isShift = true;
-		                        else
-		                        		isShift = false;		                        
-		                                
-		                }
-
-		                if(isCtrl)
-		                {
-		                	var k = String.fromCharCode(key).toLowerCase();
+		                	var k = String.fromCharCode(fixedKeyEvent.keyCode).toLowerCase();
 		                    if ('a' == k || 's' == k )
-		                    {   
-		                    		                    	if(isShift && 's' == k) {
+		                    {
+		                    	if(fixedKeyEvent.isShift && 's' == k) {
 									// send the CTRL+SHIFT+S (save all) key code to the server
 		                    		$editorService.keyPressed(objEvent);
 		                    	}                         
 			                   return false;
 		                    }
 		                }
-						if (objEvent.keyCode == 46) {
+		                // 46 = delete
+						if (fixedKeyEvent.keyCode == 46) {
 							// send the DELETE key code to the server
 							$editorService.keyPressed(objEvent);
+							return false;
 						}
 						return true;
 					});
-				});  
+				}); 
 				var promise = $editorService.getGhostComponents({"resetPosition":true});
 				promise.then(function (result){
 					$scope.ghosts = result;
