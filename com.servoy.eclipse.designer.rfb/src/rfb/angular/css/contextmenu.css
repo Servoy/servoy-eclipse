@@ -50,6 +50,10 @@
 }
 .dropdown-menu >li >a
 {
-	padding-right: 0px;
-	display: inline-block;
+	/*padding-right: 0px;
+	display: inline-block;*/
+}
+.dropdown-menu .disabled a
+{
+	opacity: 0.5;
 }

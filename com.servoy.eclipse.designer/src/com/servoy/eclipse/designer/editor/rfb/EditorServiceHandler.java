@@ -499,6 +499,11 @@ public class EditorServiceHandler implements IServerService
 										StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), new Dimension(properties.optInt("width"),
 											properties.optInt("height"))));
 								}
+								if (properties.has("anchors"))
+								{
+									cc.add(new SetPropertyCommand("anchor", PersistPropertySource.createPersistPropertySource(persist, false),
+										StaticContentSpecLoader.PROPERTY_ANCHORS.getPropertyName(), properties.optInt("anchors")));
+								}
 								editorPart.getCommandStack().execute(cc);
 							}
 							else if (persist instanceof Part)
