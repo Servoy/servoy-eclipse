@@ -152,7 +152,7 @@ angular.module("contextmenu",[]).directive("contextmenu", function($editorServic
 						execute:function()
 						{
 							$("#contextMenu").hide();
-							$editorService.executeAction('openScript');
+							$editorService.executeAction('z_order_bring_to_front_one_step');
 						}
 					}
 				);
@@ -166,7 +166,7 @@ angular.module("contextmenu",[]).directive("contextmenu", function($editorServic
 						execute:function()
 						{
 							$("#contextMenu").hide();
-							$editorService.executeAction('openScript');
+							$editorService.executeAction('z_order_send_to_back_one_step');
 						}
 					}
 				);
@@ -180,7 +180,7 @@ angular.module("contextmenu",[]).directive("contextmenu", function($editorServic
 						execute:function()
 						{
 							$("#contextMenu").hide();
-							$editorService.executeAction('openScript');
+							$editorService.executeAction('z_order_bring_to_front');
 						}
 					}
 				);
@@ -194,7 +194,7 @@ angular.module("contextmenu",[]).directive("contextmenu", function($editorServic
 						execute:function()
 						{
 							$("#contextMenu").hide();
-							$editorService.executeAction('openScript');
+							$editorService.executeAction('z_order_send_to_back');
 						}
 					}
 				);

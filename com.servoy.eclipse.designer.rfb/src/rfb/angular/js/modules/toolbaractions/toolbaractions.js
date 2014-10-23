@@ -82,6 +82,46 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 	$toolbar.add(btnTabSequence, TOOLBAR_CATEGORIES.FORM);
 	$toolbar.add(btnSaveAsTemplate, TOOLBAR_CATEGORIES.FORM);
 	
+	var btnBringForward = {
+			text: "Bring forward",
+			icon: "../../images/bring_forward.png",
+			enabled: false,
+			onclick: function() {
+				$editorService.executeAction('z_order_bring_to_front_one_step');
+			},
+	};
+	
+	var btnSendBackward = {
+			text: "Send backward",
+			icon: "../../images/send_backward.png",
+			enabled: false,
+			onclick: function() {
+				$editorService.executeAction('z_order_send_to_back_one_step');
+			},
+	};
+	
+	var btnBringToFront = {
+			text: "Bring to front",
+			icon: "../../images/bring_to_front.png",
+			enabled: false,
+			onclick: function() {
+				$editorService.executeAction('z_order_bring_to_front');
+			},
+	};
+	
+	var btnSendToBack = {
+			text: "Send to back",
+			icon: "../../images/send_to_back.png",
+			enabled: false,
+			onclick: function() {
+				$editorService.executeAction('z_order_send_to_back');
+			},
+	};
+	$toolbar.add(btnBringForward, TOOLBAR_CATEGORIES.ORDERING);
+	$toolbar.add(btnSendBackward, TOOLBAR_CATEGORIES.ORDERING);
+	$toolbar.add(btnBringToFront, TOOLBAR_CATEGORIES.ORDERING);
+	$toolbar.add(btnSendToBack, TOOLBAR_CATEGORIES.ORDERING);
+	
 	var btnLeftAlign = {
 			text: "Alignment",
 			icon: "toolbaractions/icons/distribute_leftward.gif",
@@ -96,6 +136,10 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 		// disable or enable buttons.
 		$rootScope.$apply(function() {
 			btnLeftAlign.enabled = selection.length > 0;
+			btnBringForward.enabled = selection.length > 0;
+			btnSendBackward.enabled = selection.length > 0;
+			btnBringToFront.enabled = selection.length > 0;
+			btnSendToBack.enabled = selection.length > 0;
 		});
 	})
 });
