@@ -71,6 +71,56 @@ angular.module("contextmenu",[]).directive("contextmenu", function($editorServic
 			}
 			var actions = [];
 			
+			actions.push(
+					{
+						text: "Set Tab Sequence",
+						getIconStyle: function(){ return {'background-image':"url(images/th_horizontal.gif)"};},
+						shortcut: "Ctrl+T",
+						getItemClass: function() { if (!$scope.getSelection() || $scope.getSelection().length < 2) return "disabled";},
+						execute:function()
+						{
+							$editorService.executeAction('setTabSequence');
+						}
+					}
+				);
+			
+			// sizing
+			var sizingActions = [];
+			
+			sizingActions.push(
+					{
+						text: "Same Width",
+						getIconStyle: function(){ return {'background-image':"url(images/same_width.gif)"};},
+						shortcut: "Shift+W",
+						getItemClass: function() { if (!$scope.getSelection() || $scope.getSelection().length < 2) return "disabled";},
+						execute:function()
+						{
+							$editorService.sameSize(true);
+						}
+					}
+				);
+			
+			sizingActions.push(
+					{
+						text: "Same Height",
+						getIconStyle: function(){ return {'background-image':"url(images/same_height.gif)"};},
+						shortcut: "Shift+H",
+						getItemClass: function() { if (!$scope.getSelection() || $scope.getSelection().length < 2) return "disabled";},
+						execute:function()
+						{
+							$editorService.sameSize(false);
+						}
+					}
+				);
+			
+			actions.push(
+					{
+						text: "Sizing",
+						subMenu: sizingActions,
+						getItemClass: function() { return "dropdown-submenu";}
+					}
+				);
+			
 			// anchoring
 			var anchoringActions = [];
 			

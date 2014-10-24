@@ -63,10 +63,10 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 
 	var btnTabSequence = {
 		text: "Set tab sequence",
-		icon: "toolbaractions/icons/th_horizontal.gif",
+		icon: "../../images/th_horizontal.gif",
 		enabled: false,
 		onclick: function() {
-			// handle click
+			$editorService.executeAction('setTabSequence');
 		},
 	};
 	
@@ -122,6 +122,27 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 	$toolbar.add(btnBringToFront, TOOLBAR_CATEGORIES.ORDERING);
 	$toolbar.add(btnSendToBack, TOOLBAR_CATEGORIES.ORDERING);
 	
+	var btnSameWidth = {
+			text: "Same width",
+			icon: "../../images/same_width.gif",
+			enabled: false,
+			onclick: function() {
+				$editorService.sameSize(true);
+			},
+	};
+	
+	var btnSameHeight = {
+			text: "Same height",
+			icon: "../../images/same_height.gif",
+			enabled: false,
+			onclick: function() {
+				$editorService.sameSize(false);
+			},
+	};
+	
+	$toolbar.add(btnSameWidth, TOOLBAR_CATEGORIES.SIZING);
+	$toolbar.add(btnSameHeight, TOOLBAR_CATEGORIES.SIZING);
+	
 	var btnLeftAlign = {
 			text: "Alignment",
 			icon: "toolbaractions/icons/distribute_leftward.gif",
@@ -135,6 +156,9 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 	$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
 		// disable or enable buttons.
 		$rootScope.$apply(function() {
+			btnTabSequence.enabled = selection.length > 1;
+			btnSameWidth.enabled = selection.length > 1;
+			btnSameHeight.enabled = selection.length > 1;
 			btnLeftAlign.enabled = selection.length > 0;
 			btnBringForward.enabled = selection.length > 0;
 			btnSendBackward.enabled = selection.length > 0;
