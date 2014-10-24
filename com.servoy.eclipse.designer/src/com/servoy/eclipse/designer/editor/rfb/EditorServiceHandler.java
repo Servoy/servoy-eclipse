@@ -45,6 +45,7 @@ import org.json.JSONWriter;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.property.types.TypesRegistry;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.Activator;
@@ -433,6 +434,43 @@ public class EditorServiceHandler implements IServerService
 						IStructuredSelection structuredSelection = new StructuredSelection(selection);
 						selectionListener.setLastSelection(structuredSelection);
 						selectionProvider.setSelection(selection.size() == 0 ? null : structuredSelection);
+					}
+				});
+			}
+			else if ("setTabSequence".equals(methodName))
+			{
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						IPersist[] selection = (IPersist[])((IStructuredSelection)selectionProvider.getSelection()).toList().toArray(new IPersist[0]);
+						if (selection.length > 0)
+						{
+							int tabIndex = 1;
+							CompoundCommand cc = new CompoundCommand();
+							for (IPersist persist : selection)
+							{
+								if (persist instanceof Bean)
+								{
+									WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+										((Bean)persist).getBeanClassName());
+									Map<String, PropertyDescription> tabSeqProps = spec.getProperties(TypesRegistry.getType("tabseq"));
+									for (PropertyDescription pd : tabSeqProps.values())
+									{
+										cc.add(new SetPropertyCommand("tabSeq", PersistPropertySource.createPersistPropertySource(persist, false),
+											pd.getName(), Integer.valueOf(tabIndex)));
+										tabIndex++;
+									}
+								}
+								else
+								{
+									cc.add(new SetPropertyCommand("tabSeq", PersistPropertySource.createPersistPropertySource(persist, false),
+										StaticContentSpecLoader.PROPERTY_TABSEQ.getPropertyName(), Integer.valueOf(tabIndex)));
+									tabIndex++;
+								}
+							}
+							editorPart.getCommandStack().execute(cc);
+						}
 					}
 				});
 			}
