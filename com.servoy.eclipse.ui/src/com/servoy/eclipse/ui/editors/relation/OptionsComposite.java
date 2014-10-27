@@ -64,7 +64,7 @@ public class OptionsComposite extends Group
 
 	/**
 	 * Create the composite
-	 * 
+	 *
 	 * @param parent
 	 * @param style
 	 */
@@ -206,7 +206,9 @@ public class OptionsComposite extends Group
 		m_bindingContext.bindValue(initialSortObserveWidget, initialSortObserveValue, new UpdateValueStrategy(), new UpdateValueStrategy());
 		m_bindingContext.bindValue(joinComboObserveWidget, joinTypeObserveValue, new UpdateValueStrategy().setConverter(String2JoinTypeConverter.INSTANCE),
 			new UpdateValueStrategy().setConverter(JoinType2StringConverter.INSTANCE));
-		m_bindingContext.bindValue(deprecatedObserveWidget, deprecatedObserveValue, new UpdateValueStrategy(), new UpdateValueStrategy());
+		m_bindingContext.bindValue(deprecatedObserveWidget, deprecatedObserveValue,
+			new UpdateValueStrategy().setConverter(EmptyStringToNullConverter.INSTANCE),
+			new UpdateValueStrategy().setConverter(EmptyStringToNullConverter.INSTANCE));
 		m_bindingContext.bindValue(encapsulationObserveWidget, encapsulationObserveValue,
 			new UpdateValueStrategy().setConverter(String2EncapsulationConverter.INSTANCE),
 			new UpdateValueStrategy().setConverter(Encapsulation2StringConverter.INSTANCE));
@@ -266,6 +268,21 @@ public class OptionsComposite extends Group
 				}
 			}
 			return new Integer(-1);
+		}
+	}
+	public static class EmptyStringToNullConverter extends Converter
+	{
+		public static final EmptyStringToNullConverter INSTANCE = new EmptyStringToNullConverter();
+
+		private EmptyStringToNullConverter()
+		{
+			super(String.class, String.class);
+		}
+
+		public Object convert(Object fromObject)
+		{
+			if (fromObject.toString().equals("")) return null;
+			return fromObject;
 		}
 	}
 }
