@@ -292,6 +292,11 @@ public class EditorServiceHandler implements IServerService
 							jsonWriter.key("y").value(computeY(position));
 							jsonWriter.endObject();
 						}
+						jsonWriter.key("size");
+						jsonWriter.object();
+						jsonWriter.key("width").value(bean.getSize().width);
+						jsonWriter.key("height").value(bean.getSize().height);
+						jsonWriter.endObject();
 						jsonWriter.endObject();
 					}
 
