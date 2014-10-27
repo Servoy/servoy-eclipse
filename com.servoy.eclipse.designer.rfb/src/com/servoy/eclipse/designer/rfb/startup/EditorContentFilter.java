@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.rfb.startup;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -64,7 +65,9 @@ public class EditorContentFilter implements Filter
 				formScripts.add("solutions/" + solution + "/forms/" + form + ".js");
 				HashMap<String, String> variableSubstitution = new HashMap<String, String>();
 				variableSubstitution.put("orientation", String.valueOf(0)); // fs.getSolution().getTextOrientation()
-				IndexPageEnhancer.enhance(getClass().getResource("editor-content.html"), httpServletRequest.getContextPath(), null, formScripts,
+				ArrayList<String> css = new ArrayList<String>();
+				css.add("css/servoy.css");
+				IndexPageEnhancer.enhance(getClass().getResource("editor-content.html"), httpServletRequest.getContextPath(), css, formScripts,
 					variableSubstitution, w);
 				w.flush();
 				return;
