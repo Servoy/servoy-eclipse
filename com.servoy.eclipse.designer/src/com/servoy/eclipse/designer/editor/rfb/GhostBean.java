@@ -100,7 +100,7 @@ public class GhostBean extends Bean
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.j2db.persistence.Bean#setBeanXML(java.lang.String)
 	 */
 	@Override
@@ -140,9 +140,14 @@ public class GhostBean extends Bean
 		return parentBean.getUUID() + "_" + jsonKey + addIndex + "_" + typeName;
 	}
 
+	public String getTypeName()
+	{
+		return typeName;
+	}
+
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.j2db.persistence.AbstractBase#equals(java.lang.Object)
 	 */
 	@Override

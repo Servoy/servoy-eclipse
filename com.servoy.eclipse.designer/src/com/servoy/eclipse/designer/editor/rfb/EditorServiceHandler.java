@@ -45,6 +45,8 @@ import org.json.JSONWriter;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.property.ICustomType;
+import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.TypesRegistry;
 import org.sablo.websocket.IServerService;
 
@@ -89,9 +91,11 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.server.ngclient.template.PartWrapper;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -742,32 +746,77 @@ public class EditorServiceHandler implements IServerService
 						{
 							try
 							{
-								IPersist persist = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(
-									UUID.fromString(args.getString("uuid")));
+								IPersist persist = searchForPersist(args.getString("uuid"));
+								Solution s = (Solution)editorPart.getForm().getParent();
+								boolean open = false;
 								if (persist != null)
 								{
+
 									if (persist instanceof Tab)
 									{
-										Solution s = (Solution)editorPart.getForm().getParent();
-										Form toOpen = s.getForm(((Tab)persist).getContainsFormID());
-										if (toOpen != null)
+										open = openFormDesignEditor(s, ((Tab)persist).getContainsFormID());
+										Debug.log("Cannot open form with id " + ((Tab)persist).getContainsFormID() + "in design editor (Tab uuid " +
+											args.getString("uuid") + ")");
+									}
+									else if (persist instanceof GhostBean)
+									{
+										GhostBean ghost = (GhostBean)persist;
+										JSONObject beanXML = new ServoyJSONObject(ghost.getBeanXML(), false);
+
+
+										WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+											ghost.getParentBean().getBeanClassName());
+										if (spec != null)
 										{
-											EditorUtil.openFormDesignEditor(toOpen);
-										}
-										else
-										{
-											Debug.error("Cannot open form in design editor. Form with id " + ((Tab)persist).getContainsFormID() +
-												" was not found.");
+											Map<String, PropertyDescription> forms = null;
+											IPropertyType< ? > iPropertyType = spec.getFoundTypes().get(ghost.getTypeName());
+											if (iPropertyType instanceof ICustomType)
+											{
+												forms = ((ICustomType< ? >)iPropertyType).getCustomJSONTypeDefinition().getProperties(FormPropertyType.INSTANCE);
+											}
+											else
+											{
+												Debug.warn("Unexpected propertyType " + iPropertyType.getName());
+											}
+
+											if (forms != null)
+											{
+												for (PropertyDescription pd : forms.values())
+												{
+													open = openFormDesignEditor(s, beanXML.opt(pd.getName()));
+													if (!open)
+													{
+														Debug.log("Cannot open form with id " + beanXML.opt(pd.getName()) +
+															"in design editor (Container uuid " + args.getString("uuid") + ")");
+													}
+												}
+											}
 										}
 									}
 									else
 									{
-										Debug.error("Cannot open form in design editor. Container uuid " + args.getString("uuid") + " is not a tab");
+										Bean bean = (Bean)persist;
+										WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+											((Bean)persist).getBeanClassName());
+										if (spec != null)
+										{
+											Map<String, PropertyDescription> forms = spec.getProperties(FormPropertyType.INSTANCE);
+											for (PropertyDescription pd : forms.values())
+											{
+												open = openFormDesignEditor(s, bean.getProperty(pd.getName()));
+												if (!open)
+												{
+													Debug.log("Cannot open form with id " + bean.getProperty(pd.getName()) +
+														"in design editor (container uuid " + args.getString("uuid") + ")");
+												}
+											}
+										}
 									}
+
 								}
 								else
 								{
-									Debug.error("Cannot open form in design editor. Container uuid " + args.getString("uuid") + " was not found");
+									Debug.log("Cannot open form in design editor. Container uuid " + args.getString("uuid") + " was not found");
 								}
 							}
 							catch (JSONException ex)
@@ -775,6 +824,24 @@ public class EditorServiceHandler implements IServerService
 								Debug.error(ex);
 							}
 						}
+					}
+
+					/**
+					 * @param s
+					 * @param value
+					 * @return
+					 */
+					private boolean openFormDesignEditor(Solution s, Object value)
+					{
+						if (value != null)
+						{
+							Form toOpen = s.getForm((Integer)value);
+							if (toOpen != null)
+							{
+								return EditorUtil.openFormDesignEditor(toOpen) != null;
+							}
+						}
+						return false;
 					}
 				});
 			}
