@@ -78,7 +78,7 @@
 							},
 							"scope": {
 								"type": "string",
-								"enum": ["design"]
+								"enum": ["design", "runtime"]
 							},
 							"values":{
 								"type": "array"
