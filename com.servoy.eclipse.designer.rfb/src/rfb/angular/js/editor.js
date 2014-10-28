@@ -344,8 +344,8 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				}
 			}
 
-			$scope.getFormLayout = function() {
-				return formLayout;
+			$scope.isAbsoluteFormLayout = function() {
+				return formLayout == "absolute";
 			}
 
 			$scope.getFormState = function() {

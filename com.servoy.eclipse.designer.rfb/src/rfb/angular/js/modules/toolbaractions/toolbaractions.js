@@ -484,20 +484,22 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 			btnSameWidth.enabled = selection.length > 1;
 			btnSameHeight.enabled = selection.length > 1;
 
-			btnDistributeHorizontalSpacing.enabled = selection.length > 2;
-			btnDistributeHorizontalCenters.enabled = selection.length > 2;
-			btnDistributeLeftward.enabled = selection.length > 2;
-			btnDistributeVerticalSpacing.enabled = selection.length > 2;
-			btnDistributeVerticalCenters.enabled = selection.length > 2;
-			btnDistributeUpward.enabled = selection.length > 2;
+			if (editorScope.isAbsoluteFormLayout())
+			{
+				btnDistributeHorizontalSpacing.enabled = selection.length > 2;
+				btnDistributeHorizontalCenters.enabled = selection.length > 2;
+				btnDistributeLeftward.enabled = selection.length > 2;
+				btnDistributeVerticalSpacing.enabled = selection.length > 2;
+				btnDistributeVerticalCenters.enabled = selection.length > 2;
+				btnDistributeUpward.enabled = selection.length > 2;
 
-			btnLeftAlign.enabled = selection.length > 1;
-			btnRightAlign.enabled = selection.length > 1;
-			btnTopAlign.enabled = selection.length > 1;
-			btnBottomAlign.enabled = selection.length > 1;
-			btnCenterAlign.enabled = selection.length > 1;
-			btnMiddleAlign.enabled = selection.length > 1;
-
+				btnLeftAlign.enabled = selection.length > 1;
+				btnRightAlign.enabled = selection.length > 1;
+				btnTopAlign.enabled = selection.length > 1;
+				btnBottomAlign.enabled = selection.length > 1;
+				btnCenterAlign.enabled = selection.length > 1;
+				btnMiddleAlign.enabled = selection.length > 1;
+			}
 			btnBringForward.enabled = selection.length > 0;
 			btnSendBackward.enabled = selection.length > 0;
 			btnBringToFront.enabled = selection.length > 0;
