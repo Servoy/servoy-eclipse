@@ -35,8 +35,9 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	      },
 	      controller: function($scope, $element, $attrs, $toolbar) {
 	    	  $scope.elements = $toolbar.getButtons(TOOLBAR_CATEGORIES.ELEMENTS);
-	    	  $scope.layout = $toolbar.getButtons(TOOLBAR_CATEGORIES.LAYOUT);
 	    	  $scope.ordering = $toolbar.getButtons(TOOLBAR_CATEGORIES.ORDERING);
+	    	  $scope.alignment = $toolbar.getButtons(TOOLBAR_CATEGORIES.ALIGNMENT);
+	    	  $scope.distribution = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISTRIBUTION);
 	    	  $scope.sizing = $toolbar.getButtons(TOOLBAR_CATEGORIES.SIZING);
 	    	  $scope.form = $toolbar.getButtons(TOOLBAR_CATEGORIES.FORM);
 	    	  $scope.sticky = $toolbar.getButtons(TOOLBAR_CATEGORIES.STICKY);
@@ -63,8 +64,9 @@ angular.module("toolbar",['toolbaractions','designsize'])
 })
 .value("TOOLBAR_CATEGORIES", {
 	ELEMENTS: "elements",
-	LAYOUT: "layout",
 	ORDERING: "ordering",
+	ALIGNMENT: "alignment",
+	DISTRIBUTION: "distribution",
 	SIZING: "sizing",
 	FORM: "forms",
 	EDITOR: "editor",

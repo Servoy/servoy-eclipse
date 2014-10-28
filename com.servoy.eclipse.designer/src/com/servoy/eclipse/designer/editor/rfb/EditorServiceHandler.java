@@ -53,10 +53,12 @@ import org.sablo.websocket.IServerService;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
+import com.servoy.eclipse.designer.actions.DistributeRequest.Distribution;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.FormEditPolicy;
 import com.servoy.eclipse.designer.editor.FormGraphicalEditPart;
+import com.servoy.eclipse.designer.editor.FormXYLayoutPolicy;
 import com.servoy.eclipse.designer.editor.commands.AddAccordionPaneAction;
 import com.servoy.eclipse.designer.editor.commands.AddFieldAction;
 import com.servoy.eclipse.designer.editor.commands.AddMediaAction;
@@ -189,7 +191,7 @@ public class EditorServiceHandler implements IServerService
 	}
 
 	@Override
-	public Object executeMethod(String methodName, final JSONObject args)
+	public Object executeMethod(final String methodName, final JSONObject args)
 	{
 		try
 		{
@@ -479,6 +481,45 @@ public class EditorServiceHandler implements IServerService
 								}
 							}
 							editorPart.getCommandStack().execute(cc);
+						}
+					}
+				});
+			}
+			else if ("horizontal_spacing".equals(methodName) || "vertical_spacing".equals(methodName) || "horizontal_centers".equals(methodName) ||
+				"vertical_centers".equals(methodName) || "horizontal_pack".equals(methodName) || "vertical_pack".equals(methodName))
+			{
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						IPersist[] selection = (IPersist[])((IStructuredSelection)selectionProvider.getSelection()).toList().toArray(new IPersist[0]);
+						if (selection.length > 0)
+						{
+							List<ISupportBounds> elements = new ArrayList<ISupportBounds>();
+							for (IPersist persist : selection)
+							{
+								if (persist instanceof ISupportBounds)
+								{
+									elements.add((ISupportBounds)persist);
+								}
+								else
+								{
+									Debug.error("Unexpected selection element for distribution:" + persist);
+									return;
+								}
+							}
+							List<Point> deltas = FormXYLayoutPolicy.getDistributeChildrenDeltas(elements, Distribution.valueOf(methodName.toUpperCase()));
+							CompoundCommand cc = new CompoundCommand();
+							for (int i = 0; i < selection.length; i++)
+							{
+								Point newLocation = new Point(((ISupportBounds)selection[i]).getLocation());
+								newLocation.x += deltas.get(i).x;
+								newLocation.y += deltas.get(i).y;
+								cc.add(new SetPropertyCommand("move", PersistPropertySource.createPersistPropertySource(selection[i], false),
+									StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), newLocation));
+							}
+							editorPart.getCommandStack().execute(cc);
+							ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, new ArrayList<IPersist>((List)elements));
 						}
 					}
 				});

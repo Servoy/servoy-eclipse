@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.designer.editor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.eclipse.gef.requests.CreateRequest;
 import org.eclipse.gef.requests.CreationFactory;
 
 import com.servoy.eclipse.designer.actions.DistributeRequest;
+import com.servoy.eclipse.designer.actions.DistributeRequest.Distribution;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.commands.ChangeBoundsCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
@@ -57,7 +59,7 @@ import com.servoy.j2db.persistence.Part;
 
 /**
  * layout policy for move/resize in form designer.
- * 
+ *
  * @author rgansevles
  */
 
@@ -202,16 +204,15 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 		return super.getCommand(request);
 	}
 
-	protected Command getDistributeChildrenCommand(final DistributeRequest request)
+	public static List<java.awt.Point> getDistributeChildrenDeltas(List<ISupportBounds> elements, final Distribution distribution)
 	{
-		List<EditPart> editParts = request.getEditParts();
-		if (editParts == null || editParts.size() < 3)
+		if (elements == null || elements.size() < 3)
 		{
 			return null;
 		}
 
 		int packGap = new DesignerPreferences().getAlignmentDistances()[0]; // small step
-		int size = editParts.size();
+		int size = elements.size();
 
 		// find the bbox of all selected objects
 		Rectangle _bbox = null;
@@ -222,16 +223,8 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 
 		int totalWidth = 0, totalHeight = 0;
 
-		for (EditPart editPart : editParts)
+		for (ISupportBounds supportBounds : elements)
 		{
-			Object model = editPart.getModel();
-			if (!(model instanceof ISupportBounds))
-			{
-				return null;
-			}
-
-			ISupportBounds supportBounds = (ISupportBounds)model;
-
 			Rectangle r = new Rectangle(supportBounds.getLocation().x, supportBounds.getLocation().y, supportBounds.getSize().width,
 				supportBounds.getSize().height);
 			_bbox = _bbox == null ? r : _bbox.getUnion(r);
@@ -249,7 +242,7 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 		float gap = 0, oncenter = 0;
 		float xNext = 0, yNext = 0;
 
-		switch (request.getDistribution())
+		switch (distribution)
 		{
 			case HORIZONTAL_SPACING :
 				xNext = _bbox.x;
@@ -279,28 +272,23 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 
 		//sort top-to-bottom or left-to-right, this maintains visual order when we set the coordinates
 		//Sorting is also done according to leftmost, rightmost, topmost, bottommost and center point
-		EditPart[] eps = editParts.toArray(new EditPart[editParts.size()]);
-		Arrays.sort(eps, new Comparator<EditPart>()
+		ISupportBounds[] eps = elements.toArray(new ISupportBounds[elements.size()]);
+		Arrays.sort(eps, new Comparator<ISupportBounds>()
 		{
-			public int compare(EditPart ep1, EditPart ep2)
+			public int compare(ISupportBounds o1, ISupportBounds o2)
 			{
-				ISupportBounds o1 = ((ISupportBounds)ep1.getModel());
-				ISupportBounds o2 = ((ISupportBounds)ep2.getModel());
-
 				int a, b;
-				if (request.getDistribution() == DistributeRequest.Distribution.HORIZONTAL_SPACING ||
-					request.getDistribution() == DistributeRequest.Distribution.HORIZONTAL_PACK)
+				if (distribution == DistributeRequest.Distribution.HORIZONTAL_SPACING || distribution == DistributeRequest.Distribution.HORIZONTAL_PACK)
 				{
 					a = o1.getLocation().x;
 					b = o2.getLocation().x;
 				}
-				else if (request.getDistribution() == DistributeRequest.Distribution.VERTICAL_SPACING ||
-					request.getDistribution() == DistributeRequest.Distribution.VERTICAL_PACK)
+				else if (distribution == DistributeRequest.Distribution.VERTICAL_SPACING || distribution == DistributeRequest.Distribution.VERTICAL_PACK)
 				{
 					a = o1.getLocation().y;
 					b = o2.getLocation().y;
 				}
-				else if (request.getDistribution() == DistributeRequest.Distribution.HORIZONTAL_CENTERS)
+				else if (distribution == DistributeRequest.Distribution.HORIZONTAL_CENTERS)
 				{
 					a = o1.getLocation().x + o1.getSize().width / 2;
 					b = o2.getLocation().x + o2.getSize().width / 2;
@@ -317,36 +305,67 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			}
 		});
 
-		CompoundCommand distributeCommand = new CompoundCommand("distribute");
-		for (EditPart ep : eps)
+		List<java.awt.Point> moveDeltas = new ArrayList<java.awt.Point>();
+		for (ISupportBounds supportBounds : elements)
 		{
-			ISupportBounds supportBounds = (ISupportBounds)ep.getModel();
-			Point moveDelta = null;
-			switch (request.getDistribution())
+			java.awt.Point moveDelta = null;
+			switch (distribution)
 			{
 				case HORIZONTAL_SPACING :
 				case HORIZONTAL_PACK :
-					moveDelta = new Point((int)xNext - supportBounds.getLocation().x, 0);
+					moveDelta = new java.awt.Point((int)xNext - supportBounds.getLocation().x, 0);
 					xNext += supportBounds.getSize().width + gap;
 					break;
 				case HORIZONTAL_CENTERS :
-					moveDelta = new Point((int)xNext - supportBounds.getSize().width / 2 - supportBounds.getLocation().x, 0);
+					moveDelta = new java.awt.Point((int)xNext - supportBounds.getSize().width / 2 - supportBounds.getLocation().x, 0);
 					xNext += oncenter;
 					break;
 				case VERTICAL_SPACING :
 				case VERTICAL_PACK :
-					moveDelta = new Point(0, (int)yNext - supportBounds.getLocation().y);
+					moveDelta = new java.awt.Point(0, (int)yNext - supportBounds.getLocation().y);
 					yNext += supportBounds.getSize().height + gap;
 					break;
 				case VERTICAL_CENTERS :
-					moveDelta = new Point(0, (int)yNext - supportBounds.getSize().height / 2 - supportBounds.getLocation().y);
+					moveDelta = new java.awt.Point(0, (int)yNext - supportBounds.getSize().height / 2 - supportBounds.getLocation().y);
 					yNext += oncenter;
 					break;
 			}
-			distributeCommand.add(new ChangeBoundsCommand(ep, moveDelta, null));
+			moveDeltas.add(moveDelta);
+		}
+
+		return moveDeltas;
+	}
+
+	protected Command getDistributeChildrenCommand(final DistributeRequest request)
+	{
+		List<ISupportBounds> elements = new ArrayList<ISupportBounds>();
+		List<EditPart> editParts = request.getEditParts();
+		for (EditPart editPart : editParts)
+		{
+			Object model = editPart.getModel();
+			if (!(model instanceof ISupportBounds))
+			{
+				return null;
+			}
+			else
+			{
+				elements.add((ISupportBounds)model);
+			}
+		}
+		List<java.awt.Point> moveDeltas = getDistributeChildrenDeltas(elements, request.getDistribution());
+
+		if (moveDeltas == null) return null;
+
+		CompoundCommand distributeCommand = new CompoundCommand("distribute");
+		for (EditPart ep : editParts)
+		{
+			java.awt.Point moveDelta = moveDeltas.get(editParts.indexOf(ep));
+			Point gefPoint = new Point(moveDelta.x, moveDelta.y);
+			distributeCommand.add(new ChangeBoundsCommand(ep, gefPoint, null));
 		}
 
 		return distributeCommand.unwrap();
+
 	}
 
 	@Override
