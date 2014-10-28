@@ -61,7 +61,7 @@ public class ZOrderAction extends DesignerSelectionAction
 	public static final String ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP = "z_order_bring_to_front_one_step";
 	public static final String ID_Z_ORDER_SEND_TO_BACK_ONE_STEP = "z_order_send_to_back_one_step";
 
-	private static class OrderableElement
+	public static class OrderableElement
 	{
 		public Object element;
 		public int zIndex;
@@ -255,7 +255,7 @@ public class ZOrderAction extends DesignerSelectionAction
 		return initialList;
 	}
 
-	protected static List<OrderableElement> calculateNewZOrder(Form form, List<Object> models, String zOrderId)
+	public static List<OrderableElement> calculateNewZOrder(Form form, List<Object> models, String zOrderId)
 	{
 		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
 

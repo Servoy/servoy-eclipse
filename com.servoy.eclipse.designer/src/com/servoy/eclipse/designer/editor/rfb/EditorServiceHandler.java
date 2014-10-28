@@ -54,6 +54,8 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.actions.DistributeRequest.Distribution;
+import com.servoy.eclipse.designer.actions.ZOrderAction;
+import com.servoy.eclipse.designer.actions.ZOrderAction.OrderableElement;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.FormEditPolicy;
@@ -481,6 +483,29 @@ public class EditorServiceHandler implements IServerService
 								}
 							}
 							editorPart.getCommandStack().execute(cc);
+						}
+					}
+				});
+			}
+			else if ("z_order_bring_to_front_one_step".equals(methodName) || "z_order_send_to_back_one_step".equals(methodName) ||
+				"z_order_bring_to_front".equals(methodName) || "z_order_send_to_back".equals(methodName))
+			{
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						List selection = ((IStructuredSelection)selectionProvider.getSelection()).toList();
+						if (selection.size() > 0)
+						{
+							List<OrderableElement> elements = ZOrderAction.calculateNewZOrder(editorPart.getForm(), selection, methodName);
+							CompoundCommand cc = new CompoundCommand();
+							for (OrderableElement element : elements)
+							{
+								cc.add(new SetPropertyCommand("zindex", PersistPropertySource.createPersistPropertySource(element.getFormElement(), false),
+									StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), element.zIndex));
+							}
+							editorPart.getCommandStack().execute(cc);
+							ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, new ArrayList<IPersist>(selection));
 						}
 					}
 				});
