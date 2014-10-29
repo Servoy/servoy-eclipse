@@ -78,7 +78,16 @@
 				});
 */			
 			})
-			$(window).resize(renderDecorators)
+			var windowHeight = 0;
+			var windowWidth = 0;
+			$(window).resize(function() {
+				if ($(window).height() != windowHeight || $(window).width() != windowWidth) {
+					windowHeight = $(window).height();
+					windowWidth =  $(window).width();
+					renderDecorators();
+				}
+			});
+			
 		</script>
 		<style>
 			/* Prevent scrollbars due to dragged element */
