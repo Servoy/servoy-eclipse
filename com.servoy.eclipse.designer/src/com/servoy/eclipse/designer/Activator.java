@@ -193,7 +193,7 @@ public class Activator extends AbstractUIPlugin
 					{
 						if (parent instanceof Form)
 						{
-							List<IFormElement> list = frms.get(persist);
+							List<IFormElement> list = frms.get(parent);
 							if (list == null)
 							{
 								list = new ArrayList<IFormElement>();
