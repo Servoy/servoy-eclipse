@@ -78,7 +78,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Class that creates the WAR file.
- * 
+ *
  * @author gboros
  * @since 8.0
  */
@@ -141,7 +141,7 @@ public class WarExporter
 		monitor.worked(1);
 		addServoyProperties(tmpWarDir);
 		monitor.worked(1);
-		if (exportModel.isExportActiveSolutionOnly())
+		if (exportModel.isExportActiveSolution())
 		{
 			monitor.subTask("Copy the active solution");
 			copyActiveSolution(tmpWarDir);
@@ -281,7 +281,7 @@ public class WarExporter
 			}
 			entry = zin.getNextEntry();
 		}
-		// Close the streams        
+		// Close the streams
 		zin.close();
 		// Compress the files
 		// Complete the ZIP file
@@ -289,9 +289,9 @@ public class WarExporter
 	}
 
 	/**
-	 * @param tmpWarDir 
+	 * @param tmpWarDir
 	 * @param locations
-	 * @throws ExportException 
+	 * @throws ExportException
 	 */
 	private void createSpecLocationsPropertiesFile(File file, String locations) throws ExportException
 	{
@@ -375,9 +375,9 @@ public class WarExporter
 	/**
 	 * Copy all user-defined components from resources/components to the war.
 	 * @param tmpWarDir
-	 * @param monitor 
-	 * @param locations 
-	 * @throws ExportException 
+	 * @param monitor
+	 * @param locations
+	 * @throws ExportException
 	 */
 	private String copyUserDefinedComponents(File tmpWarDir, IProgressMonitor monitor) throws ExportException
 	{
@@ -388,9 +388,9 @@ public class WarExporter
 	/**
 	 * Copy all user-defined services from resources/services to the war.
 	 * @param tmpWarDir
-	 * @param monitor 
-	 * @param locations 
-	 * @throws ExportException 
+	 * @param monitor
+	 * @param locations
+	 * @throws ExportException
 	 */
 	private String copyUserDefinedServices(File tmpWarDir, IProgressMonitor monitor) throws ExportException
 	{
@@ -401,7 +401,7 @@ public class WarExporter
 	/**
 	 * @param file
 	 * @param tmpWarDir
-	 * @throws ExportException 
+	 * @throws ExportException
 	 */
 	private void extractJar(File file, File tmpWarDir) throws ExportException
 	{
@@ -447,22 +447,22 @@ public class WarExporter
 	 */
 	private File createNewWarFile() throws ExportException
 	{
-		File warFile = new File(exportModel.getFileName());
+		File warFile = new File(exportModel.getWarFileName());
 		if (warFile.exists() && !warFile.delete())
 		{
-			throw new ExportException("Can't delete the existing war file " + exportModel.getFileName());
+			throw new ExportException("Can't delete the existing war file " + exportModel.getWarFileName());
 		}
 
 		try
 		{
 			if (!warFile.createNewFile())
 			{
-				throw new ExportException("Can't create the file " + exportModel.getFileName());
+				throw new ExportException("Can't create the file " + exportModel.getWarFileName());
 			}
 		}
 		catch (IOException e)
 		{
-			throw new ExportException("Can't create the file " + exportModel.getFileName(), e);
+			throw new ExportException("Can't create the file " + exportModel.getWarFileName(), e);
 		}
 		return warFile;
 	}
@@ -493,10 +493,10 @@ public class WarExporter
 
 	/**
 	 * @param tmpWarDir
-	 * @param monitor 
+	 * @param monitor
 	 * @throws ExportException
 	 */
-	private void copyActiveSolution(File tmpWarDir) throws ExportException
+	protected void copyActiveSolution(File tmpWarDir) throws ExportException
 	{
 		try
 		{
@@ -546,7 +546,7 @@ public class WarExporter
 		InputStream webXmlIS = null;
 		try
 		{
-			webXmlIS = getClass().getResourceAsStream("resources/web.xml");
+			webXmlIS = WarExporter.class.getResourceAsStream("resources/web.xml");
 			bos = new BufferedOutputStream(new FileOutputStream(webXMLFile));
 
 			byte[] buffer = new byte[8096];
@@ -600,7 +600,7 @@ public class WarExporter
 	 */
 	private void copyLibImages(File tmpWarDir, String appServerDir) throws ExportException
 	{
-		// copy lib/images dir 
+		// copy lib/images dir
 		File libImagesDir = new File(appServerDir, "lib/images");
 		File targetLibImagesDir = new File(tmpWarDir, "lib/images");
 		targetLibImagesDir.mkdirs();
@@ -952,7 +952,7 @@ public class WarExporter
 		// TODO ask for a keystore?
 		properties.setProperty("SocketFactory.useSSL", "true");
 		properties.setProperty("SocketFactory.tunnelUseSSLForHttp", "false");
-		//{ "SocketFactory.SSLKeystorePath", "", "The SSL keystore path on the server", "text" }, // 
+		//{ "SocketFactory.SSLKeystorePath", "", "The SSL keystore path on the server", "text" }, //
 		//{ "SocketFactory.SSLKeystorePassphrase", "", "The SSL passphrase to access the keystore", "password" }, //
 
 		properties.setProperty("servoy.use.client.timezone", "true");
@@ -1127,7 +1127,7 @@ public class WarExporter
 	 * @param tmpWarDir
 	 * @param appServerDir
 	 * @param pluginJnlpName
-	 * @param fw 
+	 * @param fw
 	 * @throws ExportException
 	 */
 	private void copyJnlp(File tmpWarDir, String appServerDir, String pluginJnlpName, Writer fw, Set<File> writtenFiles) throws ExportException, IOException

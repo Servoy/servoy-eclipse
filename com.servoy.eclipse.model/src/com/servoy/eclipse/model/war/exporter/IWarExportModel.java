@@ -6,15 +6,15 @@ import java.util.SortedSet;
 
 /**
  * WAR export model
- * 
+ *
  * @author gboros
  * @since 8.0
  */
 public interface IWarExportModel
 {
-	public boolean isExportActiveSolutionOnly();
+	public boolean isExportActiveSolution();
 
-	public String getFileName();
+	public String getWarFileName();
 
 	public String getServoyPropertiesFileName();
 

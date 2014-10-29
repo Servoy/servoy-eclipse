@@ -17,12 +17,17 @@
 package com.servoy.eclipse.warexporter.ui.wizard;
 
 
+import java.io.File;
+import java.io.FileWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Properties;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -36,18 +41,23 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
+import com.servoy.eclipse.ui.export.ExportSolutionJob;
 import com.servoy.eclipse.warexporter.Activator;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 
 
 /**
- * 
+ *
  * @author jcompagner
  * @since 6.1
  */
@@ -105,9 +115,50 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		errorFlag = false;
 		IRunnableWithProgress job = new IRunnableWithProgress()
 		{
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+			public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
-				final WarExporter exporter = new WarExporter(exportModel);
+				final WarExporter exporter = new WarExporter(exportModel)
+				{
+					@Override
+					protected void copyActiveSolution(java.io.File tmpWarDir) throws ExportException
+					{
+						super.copyActiveSolution(tmpWarDir);
+						try
+						{
+							exportModel.setFileName(new File(tmpWarDir, "WEB-INF/solution.servoy").getCanonicalPath());
+							FlattenedSolution solution = ServoyModelFinder.getServoyModel().getActiveProject().getFlattenedSolution();
+							ExportSolutionJob exportSolutionJob = new ExportSolutionJob("export solution", exportModel, solution.getSolution(), false, false,
+								new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()));
+							SubMonitor subMonitor = SubMonitor.convert(monitor);
+							exportSolutionJob.runInWorkspace(subMonitor.newChild(10));
+
+							File importProperties = new File(tmpWarDir, "WEB-INF/import.properties");
+							Properties prop = new Properties();
+							prop.setProperty("overwriteGroups", Boolean.toString(exportModel.isOverwriteGroups()));
+							prop.setProperty("allowSQLKeywords", Boolean.toString(exportModel.isAllowSQLKeywords()));
+							prop.setProperty("overrideSequenceTypes", Boolean.toString(exportModel.isOverrideSequenceTypes()));
+							prop.setProperty("overrideDefaultValues", Boolean.toString(exportModel.isOverrideDefaultValues()));
+							prop.setProperty("insertNewI18NKeysOnly", Boolean.toString(exportModel.isInsertNewI18NKeysOnly()));
+							prop.setProperty("importUserPolicy", Integer.toString(exportModel.getImportUserPolicy()));
+							prop.setProperty("addUsersToAdminGroup", Boolean.toString(exportModel.isAddUsersToAdminGroup()));
+							prop.setProperty("allowDataModelChange", Boolean.toString(exportModel.isAllowDataModelChanges()));
+							prop.setProperty("updateSequences", Boolean.toString(exportModel.isUpdateSequences()));
+							FileWriter writer = new FileWriter(importProperties);
+							try
+							{
+								prop.store(writer, "import properties");
+							}
+							finally
+							{
+								writer.close();
+							}
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+					}
+				};
 				try
 				{
 					final boolean[] cancel = new boolean[] { false };

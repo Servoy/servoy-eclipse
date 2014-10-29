@@ -42,14 +42,14 @@ import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.persistence.IServer;
 
 /**
- * 
+ *
  * @author jcompagner
  * @since 6.1
  */
 public class ServoyPropertiesSelectionPage extends WizardPage implements Listener
 {
 	/**
-	 * 
+	 *
 	 */
 	private final ExportWarModel exportModel;
 	private Text fileNameText;
@@ -98,7 +98,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 			GridLayout gridLayout = new GridLayout();
 			shell.setLayout(gridLayout);
 			FileDialog dlg = new FileDialog(shell, SWT.SAVE);
-			if (exportModel.getFileName() != null)
+			if (exportModel.getWarFileName() != null)
 			{
 				String fileName = exportModel.getServoyPropertiesFileName();
 				if (fileName == null) fileName = "servoy.properties";

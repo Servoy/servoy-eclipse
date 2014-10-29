@@ -67,7 +67,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		WarExporter warExporter = new WarExporter(new IWarExportModel()
 		{
 			@Override
-			public boolean isExportActiveSolutionOnly()
+			public boolean isExportActiveSolution()
 			{
 				return configuration.isExportActiveSolutionOnly();
 			}
@@ -130,7 +130,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			}
 
 			@Override
-			public String getFileName()
+			public String getWarFileName()
 			{
 				ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
 				return configuration.getExportFilePath() + File.separator + activeProject.getProject().getName() + ".war";

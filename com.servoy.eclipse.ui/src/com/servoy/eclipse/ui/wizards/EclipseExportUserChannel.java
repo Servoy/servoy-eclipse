@@ -36,10 +36,10 @@ import com.servoy.j2db.util.xmlxport.IXMLExportUserChannel;
 
 public class EclipseExportUserChannel implements IXMLExportUserChannel
 {
-	private final ExportSolutionModel exportModel;
+	private final IExportSolutionModel exportModel;
 	private final IProgressMonitor monitor;
 
-	public EclipseExportUserChannel(ExportSolutionModel exportModel, IProgressMonitor monitor)
+	public EclipseExportUserChannel(IExportSolutionModel exportModel, IProgressMonitor monitor)
 	{
 		this.exportModel = exportModel;
 		this.monitor = monitor;
@@ -59,7 +59,7 @@ public class EclipseExportUserChannel implements IXMLExportUserChannel
 
 	public void info(String message, int priority)
 	{
-		// Seems that for each referenced module we get one message with priority INFO. 
+		// Seems that for each referenced module we get one message with priority INFO.
 		// We send these to the progress monitor.
 		if (priority == ILogLevel.INFO)
 		{
@@ -70,7 +70,7 @@ public class EclipseExportUserChannel implements IXMLExportUserChannel
 
 	public boolean getExportAllTablesFromReferencedServers()
 	{
-		return exportModel.getExportAllTablesFromReferencedServers();
+		return exportModel.isExportAllTablesFromReferencedServers();
 	}
 
 	public String getTableMetaData(ITable table) throws IOException

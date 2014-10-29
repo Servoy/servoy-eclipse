@@ -115,7 +115,7 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 				exporter.exportSolutionToFile(solution, new File(configuration.getExportFileName(solution.getName())), ClientVersion.getVersion(),
 					ClientVersion.getReleaseNumber(), configuration.shouldExportMetaData(), configuration.shouldExportSampleData(),
 					configuration.getNumberOfSampleDataExported(), configuration.shouldExportI18NData(), configuration.shouldExportUsers(),
-					configuration.shouldExportModules(), configuration.shouldProtectWithPassword(), tableDefManager, metadataDefManager);
+					configuration.shouldExportModules(), configuration.shouldProtectWithPassword(), tableDefManager, metadataDefManager, true);
 			}
 			catch (final RepositoryException e)
 			{

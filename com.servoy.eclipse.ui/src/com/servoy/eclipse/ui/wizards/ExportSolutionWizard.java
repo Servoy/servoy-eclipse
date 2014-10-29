@@ -17,21 +17,15 @@
 package com.servoy.eclipse.ui.wizards;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.IPageChangedListener;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangedEvent;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
@@ -51,7 +45,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
@@ -62,35 +55,22 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
-import org.json.JSONException;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
 import com.servoy.eclipse.model.util.IFileAccess;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.export.ExportSolutionJob;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
-import com.servoy.j2db.persistence.AbstractRepository;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.server.shared.IApplicationServerSingleton;
-import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.Pair;
-import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
-import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
-import com.servoy.j2db.util.xmlxport.ITableDefinitionsManager;
-import com.servoy.j2db.util.xmlxport.IXMLExporter;
 
 public class ExportSolutionWizard extends Wizard implements IExportWizard
 {
@@ -129,122 +109,13 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		EditorUtil.saveDirtyEditors(getShell(), true);
 		getDialogSettings().put("initialFileName", exportModel.getFileName());
 
-		WorkspaceJob exportJob = new WorkspaceJob("Exporting solution '" + activeSolution.getName() + "'") 
-		{
-			@Override
-			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
-			{
-				int totalDuration = IProgressMonitor.UNKNOWN;
-				if (exportModel.getModulesToExport() != null) totalDuration = (int)(1.42 * exportModel.getModulesToExport().length); // make the main export be 70% of the time, leave the rest for sample data
-				monitor.beginTask("Exporting solution", totalDuration);
-
-				AbstractRepository rep = (AbstractRepository)ServoyModel.getDeveloperRepository();
-
-				final IApplicationServerSingleton as = ApplicationServerRegistry.get();
-				IUserManager sm = as.getUserManager();
-				EclipseExportUserChannel eeuc = new EclipseExportUserChannel(exportModel, monitor);
-				EclipseExportI18NHelper eeI18NHelper = new EclipseExportI18NHelper(workspace);
-				IXMLExporter exporter = as.createXMLExporter(rep, sm, eeuc, Settings.getInstance(), as.getDataServer(), as.getClientId(), eeI18NHelper);
-
-				try
-				{
-					ITableDefinitionsManager tableDefManager = null;
-					IMetadataDefManager metadataDefManager = null;
-					if (modulesSelectionPage.hasDBDownErrors() || exportModel.isExportUsingDbiFileInfoOnly())
-					{
-						Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers = TableDefinitionUtils.getTableDefinitionsFromDBI(activeSolution,
-							exportModel.isExportReferencedModules(), exportModel.isExportI18NData(), exportModel.isExportAllTablesFromReferencedServers(),
-							exportModel.isExportMetaData());
-						if (defManagers != null)
-						{
-							tableDefManager = defManagers.getLeft();
-							metadataDefManager = defManagers.getRight();
-						}
-					}
-					final String[] warningMessage = new String[] { "" };
-					if (exportModel.isExportSampleData() && modulesSelectionPage.hasDBDownErrors())
-					{
-						warningMessage[0] = "Skipping sample data export, solution or module has non accesible database.";
-					}
-					if (exportModel.isExportMetaData() && modulesSelectionPage.hasDBDownErrors())
-					{
-						warningMessage[0] = warningMessage[0] + "\nSkipping metadata export, solution or module has non accesible database.";
-					}
-					if (!"".equals(warningMessage[0]))
-					{
-						Display.getDefault().syncExec(new Runnable()
-						{
-							public void run()
-							{
-								MessageDialog.openWarning(Display.getDefault().getActiveShell(),
-									"Export solution from database files (database server not accesible)", warningMessage[0]);
-							}
-						});
-					}
-					exporter.exportSolutionToFile(activeSolution, new File(exportModel.getFileName()), ClientVersion.getVersion(),
-						ClientVersion.getReleaseNumber(), exportModel.isExportMetaData() && !modulesSelectionPage.hasDBDownErrors(),
-						exportModel.isExportSampleData() && !modulesSelectionPage.hasDBDownErrors(), exportModel.getNumberOfSampleDataExported(),
-						exportModel.isExportI18NData(), exportModel.isExportUsers(), exportModel.isExportReferencedModules(),
-						exportModel.isProtectWithPassword(), tableDefManager, metadataDefManager);
-
-					monitor.done();
-
-					if (modulesSelectionPage.hasDBDownErrors())
-					{
-						Display.getDefault().syncExec(new Runnable()
-						{
-							public void run()
-							{
-								MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution exported with errors",
-									"Solution has been exported with errors. This may prevent the solution from functioning well.\nOnly minimal database info has been exported.");
-							}
-						});
-					}
-
-					return Status.OK_STATUS;
-				}
-				catch (RepositoryException e)
-				{
-					handleExportException(e, null, monitor);
-					return Status.CANCEL_STATUS;
-				}
-				catch (JSONException jsonex)
-				{
-					handleExportException(jsonex, "Bad JSON file structure.", monitor);
-					return Status.CANCEL_STATUS;
-				}
-				catch (IOException ioex)
-				{
-					handleExportException(ioex, "Exception getting files.", monitor);
-					return Status.CANCEL_STATUS;
-				}
-
-			}
-		};
+		WorkspaceJob exportJob = new ExportSolutionJob("Exporting solution '" + activeSolution.getName() + "'", exportModel, activeSolution,
+			modulesSelectionPage.hasDBDownErrors(), true, workspace);
 
 		exportJob.setUser(true); // we want the progress to be visible in a dialog, not to stay in the status bar
 		exportJob.schedule();
 
 		return true;
-	}
-
-	private void handleExportException(final Exception ex, final String extraMsg, IProgressMonitor monitor)
-	{
-		ServoyLog.logError("Failed to export solution. " + (extraMsg == null ? "" : extraMsg), ex);
-		monitor.done();
-		Display.getDefault().syncExec(new Runnable()
-		{
-			public void run()
-			{
-				// Try to be nice with the user when presenting error message.
-				String message;
-				if (ex.getCause() != null) message = ex.getCause().getMessage();
-				else message = ex.getMessage();
-				if (message == null) message = ex.toString();
-				MessageDialog.openError(Display.getDefault().getActiveShell(),
-					"Failed to export the active solution", extraMsg == null ? message : (extraMsg + '\n' + message));
-			}
-		});
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
@@ -283,7 +154,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.wizard.Wizard#setContainer(org.eclipse.jface.wizard.IWizardContainer)
 	 */
 	@Override
@@ -409,8 +280,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			}
 			else if (projectProblemsType == BuilderUtils.HAS_WARNING_MARKERS)
 			{
-				setMessage(
-					"Warnings in the solution may prevent it from functioning well. You may want to solve warnings (problems view) first.", IMessageProvider.WARNING);
+				setMessage("Warnings in the solution may prevent it from functioning well. You may want to solve warnings (problems view) first.",
+					IMessageProvider.WARNING);
 			}
 		}
 
@@ -607,8 +478,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 				}
 				else if (resourcesProjectProblemsType == BuilderUtils.HAS_WARNING_MARKERS)
 				{
-					setMessage(
-						"Warnings in the resources project may make the solution misbehave. You may want to solve warnings (problems view) first.", IMessageProvider.WARNING);
+					setMessage("Warnings in the resources project may make the solution misbehave. You may want to solve warnings (problems view) first.",
+						IMessageProvider.WARNING);
 				}
 			}
 			if (isCurrentPage()) getWizard().getContainer().updateButtons();
@@ -928,7 +799,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			else if (projectProblemsType == BuilderUtils.HAS_WARNING_MARKERS)
 			{
 				setMessage(
-					"There are warnings in the modules that may prevent the solution from functioning well. You may want to solve warnings (problems view) first.", IMessageProvider.WARNING);
+					"There are warnings in the modules that may prevent the solution from functioning well. You may want to solve warnings (problems view) first.",
+					IMessageProvider.WARNING);
 			}
 
 			if (isCurrentPage()) getWizard().getContainer().updateButtons();

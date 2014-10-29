@@ -25,20 +25,24 @@ import java.util.TreeSet;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
+import com.servoy.eclipse.ui.wizards.IExportSolutionModel;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
 
 /**
  * Model holding all the data for the export.
- * 
+ *
  * @author jcompagner
  * @since 6.1
  */
-public class ExportWarModel implements IWarExportModel
+public class ExportWarModel implements IWarExportModel, IExportSolutionModel
 {
 
 	private String fileName;
@@ -49,22 +53,71 @@ public class ExportWarModel implements IWarExportModel
 	private final TreeMap<String, ServerConfiguration> servers = new TreeMap<String, ServerConfiguration>();
 	private final SortedSet<String> selectedServerNames = new TreeSet<String>();
 	private String servoyPropertiesFileName;
-	private String startRMIPort;
-	private boolean startRMI;
-	private boolean exportActiveSolutionOnly;
+	private String startRMIPort = "1099";
+	private boolean startRMI = true;
+	private boolean exportActiveSolution;
 	private boolean overwriteSocketFactoryProperties;
 	private final List<String> pluginLocations;
+	private boolean exportAllTablesFromReferencedServers;
+	private boolean exportI18NData;
+	private int sampleRows = 5000;
+	private boolean exportSampleData;
+	private boolean checkMetadataTables;
+	private boolean exportMetaData;
+	private boolean usingDbiFileInfoOnly;
+	private boolean allRows;
+	private String warFileName;
+	private boolean allowDataModelChanges = true;
+	private boolean allowSQLKeywords;
+	private boolean updateSequences;
+	private boolean overrideSequenceTypes;
+	private boolean overrideDefaultValues;
+	private boolean insertNewI18NKeysOnly;
+	private boolean overwriteGroups;
+	private boolean addUsersToAdminGroup;
+	private int importUserPolicy;
 
 	/**
 	 * @param dialogSettings
 	 */
 	public ExportWarModel(IDialogSettings settings)
 	{
-		fileName = settings.get("export.filename");
+		warFileName = settings.get("export.warfilename");
 		servoyPropertiesFileName = settings.get("export.servoyPropertiesFileName");
-		exportActiveSolutionOnly = Utils.getAsBoolean(settings.get("export.exportActiveSolutionOnly"));
+		exportActiveSolution = Utils.getAsBoolean(settings.get("export.exportActiveSolution"));
+		if (settings.get("export.startRMIPort") != null) startRMIPort = settings.get("export.startRMIPort");
+		if (settings.get("export.startRMI") != null) startRMI = Utils.getAsBoolean(settings.get("export.startRMI"));
+		exportAllTablesFromReferencedServers = Utils.getAsBoolean(settings.get("export.exportAllTablesFromReferencedServers"));
+		importUserPolicy = Utils.getAsInteger(settings.get("export.importUserPolicy"));
+		exportI18NData = Utils.getAsBoolean(settings.get("export.exportI18NData"));
+		exportSampleData = Utils.getAsBoolean(settings.get("export.exportSampleData"));
+		if (settings.get("export.sampleRows") != null) sampleRows = Utils.getAsInteger(settings.get("export.sampleRows"));
+		allRows = Utils.getAsBoolean(settings.get("export.allRows"));
+		checkMetadataTables = Utils.getAsBoolean(settings.get("export.checkMetadataTables"));
+		exportMetaData = Utils.getAsBoolean(settings.get("export.exportMetaData"));
+		usingDbiFileInfoOnly = Utils.getAsBoolean(settings.get("export.usingDbiFileInfoOnly"));
+		if (settings.get("export.allowDataModelChanges") != null) allowDataModelChanges = Utils.getAsBoolean(settings.get("export.allowDataModelChanges"));
+		allowSQLKeywords = Utils.getAsBoolean(settings.get("export.allowSQLKeywords"));
+		updateSequences = Utils.getAsBoolean(settings.get("export.updateSequences"));
+		overrideDefaultValues = Utils.getAsBoolean(settings.get("export.overrideDefaultValues"));
+		overrideSequenceTypes = Utils.getAsBoolean(settings.get("export.overrideSequenceTypes"));
+		insertNewI18NKeysOnly = Utils.getAsBoolean(settings.get("export.insertNewI18NKeysOnly"));
+		overwriteGroups = Utils.getAsBoolean(settings.get("export.overwriteGroups"));
+		addUsersToAdminGroup = Utils.getAsBoolean(settings.get("export.addUsersToAdminGroup"));
+
 		pluginLocations = new ArrayList<String>();
-		pluginLocations.add("plugins/");
+		String[] array = settings.getArray("plugin.locations");
+		if (array != null && array.length > 1)
+		{
+			for (String loc : array)
+			{
+				pluginLocations.add(loc);
+			}
+		}
+		else
+		{
+			pluginLocations.add("plugins/");
+		}
 
 		if (settings.get("export.plugins") != null)
 		{
@@ -133,9 +186,36 @@ public class ExportWarModel implements IWarExportModel
 
 	public void saveSettings(IDialogSettings settings)
 	{
-		if (fileName != null) settings.put("export.filename", fileName);
-		if (exportActiveSolutionOnly) settings.put("export.exportActiveSolutionOnly", Boolean.TRUE.toString());
-		if (servoyPropertiesFileName != null) settings.put("export.servoyPropertiesFileName", servoyPropertiesFileName);
+		settings.put("export.warfilename", warFileName);
+		settings.put("export.exportActiveSolution", exportActiveSolution);
+		settings.put("export.servoyPropertiesFileName", servoyPropertiesFileName);
+
+		settings.put("export.startRMIPort", startRMIPort);
+		settings.put("export.startRMI", startRMI);
+		settings.put("export.exportAllTablesFromReferencedServers", exportAllTablesFromReferencedServers);
+		settings.put("export.importUserPolicy", importUserPolicy);
+		settings.put("export.exportI18NData", exportI18NData);
+		settings.put("export.exportSampleData", exportSampleData);
+		settings.put("export.checkMetadataTables", checkMetadataTables);
+		settings.put("export.exportMetaData", exportMetaData);
+		settings.put("export.sampleRows", sampleRows);
+		settings.put("export.allRows", allRows);
+		settings.put("export.usingDbiFileInfoOnly", usingDbiFileInfoOnly);
+		settings.put("export.allowDataModelChanges", allowDataModelChanges);
+		settings.put("export.allowSQLKeywords", allowSQLKeywords);
+		settings.put("export.updateSequences", updateSequences);
+		settings.put("export.overrideDefaultValues", overrideDefaultValues);
+		settings.put("export.overrideSequenceTypes", overrideSequenceTypes);
+		settings.put("export.insertNewI18NKeysOnly", insertNewI18NKeysOnly);
+		settings.put("export.overwriteGroups", overwriteGroups);
+		settings.put("export.addUsersToAdminGroup", addUsersToAdminGroup);
+
+		if (pluginLocations.size() > 1)
+		{
+			settings.put("plugin.locations", pluginLocations.toArray(new String[pluginLocations.size()]));
+		}
+
+
 		if (plugins.size() > 0)
 		{
 			StringBuilder sb = new StringBuilder(128);
@@ -215,6 +295,19 @@ public class ExportWarModel implements IWarExportModel
 		this.fileName = fileName;
 	}
 
+	/**
+	 * @return the warFileName
+	 */
+	public String getWarFileName()
+	{
+		return warFileName;
+	}
+
+	public void setWarFileName(String warFileName)
+	{
+		this.warFileName = warFileName;
+	}
+
 
 	/**
 	 * @return
@@ -238,19 +331,19 @@ public class ExportWarModel implements IWarExportModel
 
 
 	/**
-	 * @return the exportActiveSolutionOnly
+	 * @return the exportActiveSolution
 	 */
-	public boolean isExportActiveSolutionOnly()
+	public boolean isExportActiveSolution()
 	{
-		return exportActiveSolutionOnly;
+		return exportActiveSolution;
 	}
 
 	/**
-	 * @param exportActiveSolutionOnly the exportActiveSolutionOnly to set
+	 * @param exportActiveSolution the exportActiveSolution to set
 	 */
-	public void setExportActiveSolutionOnly(boolean exportActiveSolutionOnly)
+	public void setExportActiveSolution(boolean exportActiveSolution)
 	{
-		this.exportActiveSolutionOnly = exportActiveSolutionOnly;
+		this.exportActiveSolution = exportActiveSolution;
 	}
 
 	/**
@@ -347,11 +440,6 @@ public class ExportWarModel implements IWarExportModel
 		return overwriteSocketFactoryProperties;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getServoyApplicationServerDir()
-	 */
 	@Override
 	public String getServoyApplicationServerDir()
 	{
@@ -366,14 +454,323 @@ public class ExportWarModel implements IWarExportModel
 		pluginLocations.add(pluginsDir);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getPluginLocations()
-	 */
 	@Override
 	public List<String> getPluginLocations()
 	{
 		return pluginLocations;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isExportAllTablesFromReferencedServers()
+	{
+		return exportAllTablesFromReferencedServers;
+	}
+
+	/**
+	 * @param exportAllTablesFromReferencedServers the exportAllTablesFromReferencedServers to set
+	 */
+	public void setExportAllTablesFromReferencedServers(boolean exportAllTablesFromReferencedServers)
+	{
+		this.exportAllTablesFromReferencedServers = exportAllTablesFromReferencedServers;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isExportMetaData()
+	{
+		return exportMetaData;
+	}
+
+	/**
+	 * @param exportMetaData the exportMetaData to set
+	 */
+	public void setExportMetaData(boolean exportMetaData)
+	{
+		this.exportMetaData = exportMetaData;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isCheckMetadataTables()
+	{
+		return checkMetadataTables;
+	}
+
+	/**
+	 * @param checkMetadataTables the checkMetadataTables to set
+	 */
+	public void setCheckMetadataTables(boolean checkMetadataTables)
+	{
+		this.checkMetadataTables = checkMetadataTables;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isExportSampleData()
+	{
+		return exportSampleData;
+	}
+
+	/**
+	 * @param exportSampleData the exportSampleData to set
+	 */
+	public void setExportSampleData(boolean exportSampleData)
+	{
+		this.exportSampleData = exportSampleData;
+	}
+
+
+	/**
+	 * @param maxRowToRetrieve
+	 */
+	public void setNumberOfSampleDataExported(int sampleRows)
+	{
+		this.sampleRows = sampleRows;
+	}
+
+	/**
+	 * @return the sampleRows
+	 */
+	public int getNumberOfSampleDataExported()
+	{
+		return sampleRows;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isExportI18NData()
+	{
+		return exportI18NData;
+	}
+
+	/**
+	 * @param exportI18NData the exportI18NData to set
+	 */
+	public void setExportI18NData(boolean exportI18NData)
+	{
+		this.exportI18NData = exportI18NData;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isExportUsingDbiFileInfoOnly()
+	{
+		return usingDbiFileInfoOnly;
+	}
+
+	/**
+	 * @param usingDbiFileInfoOnly the usingDbiFileInfoOnly to set
+	 */
+	public void setExportUsingDbiFileInfoOnly(boolean usingDbiFileInfoOnly)
+	{
+		this.usingDbiFileInfoOnly = usingDbiFileInfoOnly;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isAllRows()
+	{
+		return allRows;
+	}
+
+	/**
+	 * @param allRows the allRows to set
+	 */
+	public void setAllRows(boolean allRows)
+	{
+		this.allRows = allRows;
+	}
+
+	@Override
+	public boolean isExportReferencedModules()
+	{
+		return true;
+	}
+
+	@Override
+	public String[] getModulesToExport()
+	{
+		ServoyProject[] modules = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
+		String[] toExport = new String[modules.length];
+		for (int i = 0; i < modules.length; i++)
+		{
+			toExport[i] = modules[i].getSolution().getName();
+		}
+		return toExport;
+	}
+
+	@Override
+	public boolean isProtectWithPassword()
+	{
+		return false;
+	}
+
+	@Override
+	public String getPassword()
+	{
+		return null;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isAllowDataModelChanges()
+	{
+		return allowDataModelChanges;
+	}
+
+	/**
+	 * @param selection
+	 */
+	public void setAllowDataModelChanges(boolean allowDataModelChanges)
+	{
+		this.allowDataModelChanges = allowDataModelChanges;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isAllowSQLKeywords()
+	{
+		return allowSQLKeywords;
+	}
+
+	/**
+	 * @param allowKeywords the allowKeywords to set
+	 */
+	public void setAllowSQLKeywords(boolean allowSQLKeywords)
+	{
+		this.allowSQLKeywords = allowSQLKeywords;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isUpdateSequences()
+	{
+		return updateSequences;
+	}
+
+	/**
+	 * @param selection
+	 */
+	public void setUpdateSequences(boolean updateSequences)
+	{
+		this.updateSequences = updateSequences;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isOverrideSequenceTypes()
+	{
+		return overrideSequenceTypes;
+	}
+
+	/**
+	 * @param overrideSequenceTypes the overrideSequenceTypes to set
+	 */
+	public void setOverrideSequenceTypes(boolean overrideSequenceTypes)
+	{
+		this.overrideSequenceTypes = overrideSequenceTypes;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isOverrideDefaultValues()
+	{
+		return overrideDefaultValues;
+	}
+
+	/**
+	 * @param overrideDefaultValues the overrideDefaultValues to set
+	 */
+	public void setOverrideDefaultValues(boolean overrideDefaultValues)
+	{
+		this.overrideDefaultValues = overrideDefaultValues;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isInsertNewI18NKeysOnly()
+	{
+		return insertNewI18NKeysOnly;
+	}
+
+	/**
+	 * @param insertNewI18NKeysOnly the insertNewI18NKeysOnly to set
+	 */
+	public void setInsertNewI18NKeysOnly(boolean insertNewI18NKeysOnly)
+	{
+		this.insertNewI18NKeysOnly = insertNewI18NKeysOnly;
+	}
+
+	/**
+	 * @return the overwriteGroups
+	 */
+	public boolean isOverwriteGroups()
+	{
+		return overwriteGroups;
+	}
+
+	/**
+	 * @param selection
+	 */
+	public void setOverwriteGroups(boolean overwriteGroups)
+	{
+		this.overwriteGroups = overwriteGroups;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isAddUsersToAdminGroup()
+	{
+		return addUsersToAdminGroup;
+	}
+
+	/**
+	 * @param addUsersToAdminGroup the addUsersToAdminGroup to set
+	 */
+	public void setAddUsersToAdminGroup(boolean addUsersToAdminGroup)
+	{
+		this.addUsersToAdminGroup = addUsersToAdminGroup;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportUsers()
+	 */
+	@Override
+	public boolean isExportUsers()
+	{
+		return importUserPolicy > IXMLImportUserChannel.IMPORT_USER_POLICY_DONT;
+	}
+
+	/**
+	 * @return
+	 */
+	public int getImportUserPolicy()
+	{
+		return importUserPolicy;
+	}
+
+	/**
+	 * @param createNoneExistingUsers the createNoneExistingUsers to set
+	 */
+	public void setImportUserPolicy(int importUserPolicy)
+	{
+		this.importUserPolicy = importUserPolicy;
 	}
 }

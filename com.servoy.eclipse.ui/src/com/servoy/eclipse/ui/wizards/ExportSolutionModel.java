@@ -19,7 +19,7 @@ package com.servoy.eclipse.ui.wizards;
 /**
  * Holds all options the user may set during a solution export.
  */
-public class ExportSolutionModel
+public class ExportSolutionModel implements IExportSolutionModel
 {
 	private String fileName = null;
 	private boolean protectWithPassword = false;
@@ -37,6 +37,12 @@ public class ExportSolutionModel
 	private String userAcknowledgedFileToOverwrite = null;
 	private boolean checkMetadataTables = true; // default
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#getFileName()
+	 */
+	@Override
 	public String getFileName()
 	{
 		return fileName;
@@ -57,6 +63,12 @@ public class ExportSolutionModel
 		this.fileName = newFileName;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isProtectWithPassword()
+	 */
+	@Override
 	public boolean isProtectWithPassword()
 	{
 		return protectWithPassword;
@@ -67,6 +79,12 @@ public class ExportSolutionModel
 		this.protectWithPassword = protectWithPassword;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportReferencedModules()
+	 */
+	@Override
 	public boolean isExportReferencedModules()
 	{
 		return exportReferencedModules;
@@ -77,6 +95,12 @@ public class ExportSolutionModel
 		this.exportReferencedModules = exportReferencedModules;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportMetaData()
+	 */
+	@Override
 	public boolean isExportMetaData()
 	{
 		return exportMetaData;
@@ -87,6 +111,12 @@ public class ExportSolutionModel
 		this.exportMetaData = exportMetaData;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportSampleData()
+	 */
+	@Override
 	public boolean isExportSampleData()
 	{
 		return exportSampleData;
@@ -97,6 +127,12 @@ public class ExportSolutionModel
 		this.exportSampleData = exportSampleData;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportI18NData()
+	 */
+	@Override
 	public boolean isExportI18NData()
 	{
 		return exportI18NData;
@@ -107,6 +143,12 @@ public class ExportSolutionModel
 		this.exportI18NData = exportI18NData;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportUsers()
+	 */
+	@Override
 	public boolean isExportUsers()
 	{
 		return exportUsers;
@@ -117,6 +159,12 @@ public class ExportSolutionModel
 		this.exportUsers = exportUsers;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#getModulesToExport()
+	 */
+	@Override
 	public String[] getModulesToExport()
 	{
 		return modulesToExport;
@@ -127,6 +175,12 @@ public class ExportSolutionModel
 		this.modulesToExport = modulesToExport;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#getPassword()
+	 */
+	@Override
 	public String getPassword()
 	{
 		return password;
@@ -203,14 +257,15 @@ public class ExportSolutionModel
 		this.numberOfSampleDataExported = numberOfSampleDataExported;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#getNumberOfSampleDataExported()
+	 */
+	@Override
 	public int getNumberOfSampleDataExported()
 	{
 		return numberOfSampleDataExported;
-	}
-
-	public boolean getExportAllTablesFromReferencedServers()
-	{
-		return exportAllTablesFromReferencedServers;
 	}
 
 	public void setExportAllTablesFromReferencedServers(boolean exportAllTablesFromReferencedServers)
@@ -218,6 +273,12 @@ public class ExportSolutionModel
 		this.exportAllTablesFromReferencedServers = exportAllTablesFromReferencedServers;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportAllTablesFromReferencedServers()
+	 */
+	@Override
 	public boolean isExportAllTablesFromReferencedServers()
 	{
 		return exportAllTablesFromReferencedServers;
@@ -228,6 +289,12 @@ public class ExportSolutionModel
 		this.checkMetadataTables = checkMetadataTables;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isCheckMetadataTables()
+	 */
+	@Override
 	public boolean isCheckMetadataTables()
 	{
 		return checkMetadataTables;
@@ -238,6 +305,12 @@ public class ExportSolutionModel
 		this.exportUsingDbiFileInfoOnly = exportUsingDbiFileInfoOnly;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportUsingDbiFileInfoOnly()
+	 */
+	@Override
 	public boolean isExportUsingDbiFileInfoOnly()
 	{
 		return exportUsingDbiFileInfoOnly;

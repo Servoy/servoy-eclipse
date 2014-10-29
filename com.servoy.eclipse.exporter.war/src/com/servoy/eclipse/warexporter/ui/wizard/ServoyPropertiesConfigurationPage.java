@@ -36,7 +36,7 @@ import com.servoy.eclipse.warexporter.export.ExportWarModel;
 /**
  * Wizard page which handles the configuration of the servoy properties file.
  * Properties set here will be reflected in the generated properties file.
- *   
+ *
  * @author acostache
  *
  */
@@ -69,8 +69,7 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 		GridData gd = new GridData();
 		gd.horizontalSpan = 3;
 		useRMI.setLayoutData(gd);
-		useRMI.setSelection(true);
-		exportModel.setStartRMI(true);
+		useRMI.setSelection(exportModel.getStartRMI());
 		useRMI.addSelectionListener(new SelectionListener()
 		{
 			@Override
@@ -79,6 +78,9 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 				boolean bUseRMI = useRMI.getSelection();
 				startRMIPortText.setEnabled(bUseRMI);
 				exportModel.setStartRMI(bUseRMI);
+				getWizard().getContainer().updateButtons();
+				getWizard().getContainer().updateMessage();
+
 			}
 
 			@Override
@@ -94,9 +96,9 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 3;
 		startRMIPortText.setLayoutData(gd);
-		startRMIPortText.setText("1099");
-		exportModel.setStartRMIPort("1099");
+		startRMIPortText.setText(exportModel.getStartRMIPort());
 		startRMIPortText.addListener(SWT.KeyUp, this);
+		startRMIPortText.setEnabled(exportModel.getStartRMI());
 
 		label = new Label(composite, SWT.NONE);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
@@ -116,7 +118,6 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 			exportModel.setStartRMIPort(rmiPort);
 		}
 
-		canFlipToNextPage();
 		getWizard().getContainer().updateButtons();
 		getWizard().getContainer().updateMessage();
 	}
@@ -124,7 +125,7 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 	@Override
 	public boolean canFlipToNextPage()
 	{
-		return (startRMIPortText.getText() != null && startRMIPortText.getText().length() > 0);
+		return !useRMI.getSelection() || (startRMIPortText.getText() != null && startRMIPortText.getText().length() > 0);
 	}
 
 	@Override

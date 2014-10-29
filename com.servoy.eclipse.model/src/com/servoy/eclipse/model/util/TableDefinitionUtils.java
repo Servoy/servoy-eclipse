@@ -86,8 +86,8 @@ public class TableDefinitionUtils
 			// minimum requirement for dbi files based export: all needed dbi files must be found
 			if (!allNeededDbiFilesExist(tables, dbiz))
 			{
-				throw new FileNotFoundException(
-					"Could not locate all needed dbi files for server '" + serverName + "'.\nPlease make sure the necessary files exist.");
+				throw new FileNotFoundException("Could not locate all needed dbi files for server '" + serverName +
+					"'.\nPlease make sure the necessary files exist.");
 			}
 
 			server_tableDbiFiles.put(serverName, dbiz);
@@ -181,7 +181,7 @@ public class TableDefinitionUtils
 	public static Pair<ITableDefinitionsManager, IMetadataDefManager> getTableDefinitionsFromDBI(Solution activeSolution, boolean exportReferencedModules,
 		boolean exportI18NData, boolean exportAllTablesFromReferencedServers, boolean exportMetaData) throws CoreException, JSONException, IOException
 	{
-		// A. get only the needed servers (and tables) 
+		// A. get only the needed servers (and tables)
 		final Map<String, List<String>> neededServersTables = getNeededServerTables(activeSolution, exportReferencedModules, exportI18NData);
 		return getTableDefinitionsFromDBI(neededServersTables, exportAllTablesFromReferencedServers, exportMetaData);
 	}
@@ -262,7 +262,7 @@ public class TableDefinitionUtils
 		srvTbl.put(serverName, tablesForServer);
 	}
 
-	/** 
+	/**
 	 * @param mainActiveSolution if null all tables from all servers are specified
 	 * @param includeModules
 	 * @param includeI18NData
@@ -343,8 +343,8 @@ public class TableDefinitionUtils
 		return false;
 	}
 
-	/** 
-	 * 
+	/**
+	 *
 	 * @return true if the database is down (servers or tables are inaccessible)
 	 */
 	public static boolean hasDbDownErrorMarkers(String[] projects)
