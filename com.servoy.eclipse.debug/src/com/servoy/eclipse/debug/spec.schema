@@ -70,7 +70,7 @@
 							"type": {
 								"type":"string"
 							},
-							"showInPalette": {
+							"droppable": {
 								"type":"boolean"
 							},
 							"for": {
