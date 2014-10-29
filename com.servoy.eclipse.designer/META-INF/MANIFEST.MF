@@ -28,7 +28,8 @@ Require-Bundle: org.eclipse.core.databinding,
  com.servoy.eclipse.designer.rfb,
  org.maven.ide.eclipse.grouplayout,
  javax.websocket,
- org.apache.commons.lang
+ org.apache.commons.lang,
+ servoy_headless_client
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.designer;uses:="org.eclipse.jface.re
  source,org.eclipse.ui.plugin,org.osgi.framework"
