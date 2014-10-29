@@ -1406,13 +1406,25 @@ public class ServoyModel extends AbstractServoyModel
 							{
 								if (!activeResourcesProject.getProject().hasNature(JsonSchemaValidationNature.NATURE_ID))
 								{
-									IProjectDescription description = activeResourcesProject.getProject().getDescription();
-									String[] natures = description.getNatureIds();
-									String[] newNatures = new String[natures.length + 1];
-									System.arraycopy(natures, 0, newNatures, 0, natures.length);
-									newNatures[natures.length] = JsonSchemaValidationNature.NATURE_ID;
-									description.setNatureIds(newNatures);
-									activeResourcesProject.getProject().setDescription(description, null);
+									WorkspaceJob updateJob = new WorkspaceJob("Updating project nature ...")
+									{
+										@Override
+										public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+										{
+											IProjectDescription description = activeResourcesProject.getProject().getDescription();
+											String[] natures = description.getNatureIds();
+											String[] newNatures = new String[natures.length + 1];
+											System.arraycopy(natures, 0, newNatures, 0, natures.length);
+											newNatures[natures.length] = JsonSchemaValidationNature.NATURE_ID;
+											description.setNatureIds(newNatures);
+											activeResourcesProject.getProject().setDescription(description, null);
+											monitor.done();
+											return Status.OK_STATUS;
+										}
+									};
+									updateJob.setUser(true);
+									updateJob.setRule(getWorkspace().getRoot());
+									updateJob.schedule();
 								}
 							}
 							catch (CoreException e)
@@ -1817,7 +1829,7 @@ public class ServoyModel extends AbstractServoyModel
 		{
 			/*
 			 * (non-Javadoc)
-			 *
+			 * 
 			 * @see org.eclipse.ui.progress.UIJob#runInUIThread(org.eclipse.core.runtime.IProgressMonitor)
 			 */
 			@Override
