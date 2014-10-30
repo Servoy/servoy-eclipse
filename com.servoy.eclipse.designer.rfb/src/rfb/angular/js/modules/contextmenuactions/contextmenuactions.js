@@ -18,12 +18,15 @@ angular.module('contextmenuactions',['contextmenu','editor']).run(function($root
 				var node = selection[0];
 				var name = node.getAttribute("name");
 				var beanModel = formState.model[name];
-				var beanAnchor = beanModel.anchors;
-				if(beanAnchor == 0)
-					 beanAnchor = 1 + 8; // top left
-				if ((beanAnchor & anchor) == anchor)
+				if (beanModel)
 				{
-					return true;
+					var beanAnchor = beanModel.anchors;
+					if(beanAnchor == 0)
+						 beanAnchor = 1 + 8; // top left
+					if ((beanAnchor & anchor) == anchor)
+					{
+						return true;
+					}
 				}
 			}
 			return false;
