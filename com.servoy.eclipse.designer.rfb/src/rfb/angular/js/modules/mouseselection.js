@@ -39,8 +39,6 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 			}
 		}
 		function onmousedown(event) {
-			if(event.button == 0)
-			{
 				var node = utils.getNode(event);
 				if (node) {
 					if (editorScope.getSelection().indexOf(node) !== -1) {
@@ -50,14 +48,14 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					else select(event,node);
 				}
 				else {
-					editorScope.setSelection([])
+					if(event.button == 0)
+					{
+						editorScope.setSelection([])
+					}
 				}
 				event.preventDefault();
-			}
 		}
 		function onmouseup(event) {
-			if(event.button == 0)
-			{
 				if (selectedNodeMouseEvent) {
 					if (event.pageX == selectedNodeMouseEvent.pageX && event.pageY == selectedNodeMouseEvent.pageY) {
 						var node = utils.getNode(event);
@@ -66,7 +64,6 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 				}
 				selectedNodeMouseEvent = null;
 				event.preventDefault();
-			}
 		}
 
 		function onmousedownLasso(event) {
