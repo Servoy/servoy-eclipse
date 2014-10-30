@@ -8,13 +8,17 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 				$("#contextMenu").hide();
 			})
 			$("body").on("contextmenu", function(e) {
-				$scope.$digest();
-				$("#contextMenu")
-					.css({
-						display: "block",
-						left: e.pageX,
-						top: e.pageY
-					})
+				var contentPoint =  $scope.convertToContentPoint( { top: e.pageY, left: e.pageX });
+				if (contentPoint.left >= 0 && contentPoint.top >= 0)
+				{
+					$scope.$digest();
+					$("#contextMenu")
+						.css({
+							display: "block",
+							left: e.pageX,
+							top: e.pageY
+						})
+				}
 				return false;
 			});
 			$scope.actions = $contextmenu.getActions();
