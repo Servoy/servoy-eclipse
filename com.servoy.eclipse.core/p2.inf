@@ -10,4 +10,4 @@ addRepository(type:0,name:Servoy Release Candidate Update Site,location:http${#5
 
 #Adding description for the Servoy updates
 properties.0.name = org.eclipse.equinox.p2.description
-properties.0.value = Servoy 8.0.0 a9, buildnumber 3008
+properties.0.value = Servoy 8.0.0 a10, buildnumber 3009
