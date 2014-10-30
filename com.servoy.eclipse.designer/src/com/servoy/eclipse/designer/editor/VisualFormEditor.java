@@ -131,7 +131,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 			}
 			return new MobileVisualFormEditorHtmlDesignPage(this);
 		}
-		if (new DesignerPreferences().getExperimentalFormEditor())
+		if (!new DesignerPreferences().getClassicFormEditor())
 		{
 			return new RfbVisualFormEditorDesignPage(this);
 		}

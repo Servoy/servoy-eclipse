@@ -80,7 +80,7 @@ public class DesignerPreferences
 	public static final String SHOW_RULERS_SETTING = "showRulers";
 	public static final String MARQUEE_SELECT_OUTER_SETTING = "marqueeSelectOuter";
 	public static final String CLASSIC_FORM_EDITOR_MOBILE_SETTING = "classicFormEditorMobile";
-	public static final String EXPERIMENTAL_FORM_EDITOR_SETTING = "experimentalFormEditor";
+	public static final String CLASSIC_FORM_EDITOR_SETTING = "classicFormEditor";
 	public static final String FORM_EVENT_HANDLER_NAMING_SETTING = "formEventHandlerNaming";
 	public static final String TABLE_EVENT_HANDLER_NAMING_SETTING = "tableEventHandlerNaming";
 	public static final String LOADED_RELATIONS_NAMING_PATTERN_SETTING = "loadedRelationsNamingPattern";
@@ -119,7 +119,7 @@ public class DesignerPreferences
 	public static final boolean SHOW_RULERS_DEFAULT = true;
 	public static final boolean MARQUEE_SELECT_OUTER_DEFAULT = true;
 	public static final boolean CLASSIC_FORM_EDITOR_MOBILE_DEFAULT = true;
-	public static final boolean EXPERIMENTAL_FORM_EDITOR_SETTING_DEFAULT = false;
+	public static final boolean CLASSIC_FORM_EDITOR_SETTING_DEFAULT = false;
 
 	public static final int FORM_EVENT_HANDLER_NAMING_DEFAULT = 0;
 	public static final int FORM_EVENT_HANDLER_NAMING_INCLUDE_FORM_ELEMENT_NAME = 1;
@@ -343,14 +343,14 @@ public class DesignerPreferences
 		setProperty(CLASSIC_FORM_EDITOR_MOBILE_SETTING, classic);
 	}
 
-	public boolean getExperimentalFormEditor()
+	public boolean getClassicFormEditor()
 	{
-		return getProperty(EXPERIMENTAL_FORM_EDITOR_SETTING, EXPERIMENTAL_FORM_EDITOR_SETTING_DEFAULT);
+		return getProperty(CLASSIC_FORM_EDITOR_SETTING, CLASSIC_FORM_EDITOR_SETTING_DEFAULT);
 	}
 
-	public void setExperimentalFormEditor(boolean goforit)
+	public void setClassicFormEditor(boolean useClassic)
 	{
-		setProperty(EXPERIMENTAL_FORM_EDITOR_SETTING, goforit);
+		setProperty(CLASSIC_FORM_EDITOR_SETTING, useClassic);
 	}
 
 	public static boolean isGuideSetting(String key)

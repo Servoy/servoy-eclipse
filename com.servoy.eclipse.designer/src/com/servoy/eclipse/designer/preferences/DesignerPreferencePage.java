@@ -90,7 +90,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	private Button showRulersCheck;
 	private Button marqueeSelectOuterCheck;
 	private Button classicMobileFormeditorCheck;
-	private Button experimentalFormeditorCheck;
+	private Button classicFormeditorCheck;
 	private ColorSelectViewer sameHeightWidthIndicatorColor;
 
 	public void init(IWorkbench workbench)
@@ -110,9 +110,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 
 		classicMobileFormeditorCheck = new Button(optionsPanel, SWT.CHECK);
 		classicMobileFormeditorCheck.setText("Use classic form editor for mobile forms.");
-
-		experimentalFormeditorCheck = new Button(optionsPanel, SWT.CHECK);
-		experimentalFormeditorCheck.setText("Use experimental form editor for regular forms.");
 
 		Link xulRunnerInfo = new Link(optionsPanel, SWT.NONE);
 		xulRunnerInfo.setText("Consider installing <A>XulRunner</A> when this option is disabled, for increased compatibility.");
@@ -134,6 +131,9 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 				}
 			}
 		});
+
+		classicFormeditorCheck = new Button(optionsPanel, SWT.CHECK);
+		classicFormeditorCheck.setText("Use classic form editor for regular forms.");
 
 		Composite copyPastePanel = new Composite(optionsPanel, SWT.NONE);
 		copyPastePanel.setLayout(new GridLayout(2, false));
@@ -409,7 +409,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		showRulersCheck.setSelection(prefs.getShowRulers());
 		marqueeSelectOuterCheck.setSelection(prefs.getMarqueeSelectOuter());
 		classicMobileFormeditorCheck.setSelection(prefs.getClassicFormEditorInMobile());
-		experimentalFormeditorCheck.setSelection(prefs.getExperimentalFormEditor());
+		classicFormeditorCheck.setSelection(prefs.getClassicFormEditor());
 	}
 
 	@Override
@@ -440,7 +440,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		prefs.setShowRulers(showRulersCheck.getSelection());
 		prefs.setMarqueeSelectOuter(marqueeSelectOuterCheck.getSelection());
 		prefs.setClassicFormEditorInMobile(classicMobileFormeditorCheck.getSelection());
-		prefs.setExperimentalFormEditor(experimentalFormeditorCheck.getSelection());
+		prefs.setClassicFormEditor(classicFormeditorCheck.getSelection());
 
 		prefs.save();
 
@@ -480,7 +480,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		showRulersCheck.setSelection(DesignerPreferences.SHOW_RULERS_DEFAULT);
 		marqueeSelectOuterCheck.setSelection(DesignerPreferences.MARQUEE_SELECT_OUTER_DEFAULT);
 		classicMobileFormeditorCheck.setSelection(DesignerPreferences.CLASSIC_FORM_EDITOR_MOBILE_DEFAULT);
-		experimentalFormeditorCheck.setSelection(DesignerPreferences.EXPERIMENTAL_FORM_EDITOR_SETTING_DEFAULT);
+		classicFormeditorCheck.setSelection(DesignerPreferences.CLASSIC_FORM_EDITOR_SETTING_DEFAULT);
 
 		setEnabledState();
 		super.performDefaults();
