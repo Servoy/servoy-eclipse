@@ -17,19 +17,18 @@
 
 package com.servoy.eclipse.designer.property;
 
-import java.awt.Color;
-
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONStringer;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.property.IPropertyConverter;
 import org.sablo.specification.property.IPropertyType;
-import org.sablo.specification.property.types.ColorPropertyType;
 import org.sablo.specification.property.types.FunctionPropertyType;
+import org.sablo.websocket.utils.DataConversion;
 
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.property.ColorPropertyController;
-import com.servoy.eclipse.ui.property.ColorPropertyController.PropertyColorConverter;
 import com.servoy.eclipse.ui.property.IPropertyHandler;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.documentation.ClientSupport;
@@ -43,6 +42,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.ngclient.property.types.ServoyFunctionPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 
@@ -114,11 +114,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		}
 
 		IPropertyType< ? > type = propertyDescription.getType();
-		if (ColorPropertyType.TYPE_NAME.equals(type.getName()))
-		{
-			return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(null, (String)value);
-		}
-		else if (type == FunctionPropertyType.INSTANCE || type == ServoyFunctionPropertyType.INSTANCE || type == ValueListPropertyType.INSTANCE)
+		if (type == FunctionPropertyType.INSTANCE || type == ServoyFunctionPropertyType.INSTANCE || type == ValueListPropertyType.INSTANCE)
 		{
 			if (value == null) return Integer.valueOf(0);
 			if (value instanceof Integer) return value;
@@ -143,6 +139,24 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			}
 			return type.defaultValue();
 		}
+		else if (type instanceof IPropertyConverter)
+		{
+			if (value instanceof String && ((String)value).startsWith("{"))
+			{
+				try
+				{
+					value = ((IPropertyConverter)type).fromJSON(new JSONObject((String)value), null, null);
+				}
+				catch (Exception e)
+				{
+					Debug.error("can't parse '" + value + "' to the real type for property converter: " + type, e);
+				}
+			}
+			else
+			{
+				value = ((IPropertyConverter)type).fromJSON(value, null, null);
+			}
+		}
 		return value;
 	}
 
@@ -152,11 +166,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		Bean bean = (Bean)obj;
 
 		Object convertedValue = value;
-		if (ColorPropertyType.TYPE_NAME.equals(propertyDescription.getType().getName()))
-		{
-			convertedValue = PropertyColorConverter.getColorString((Color)value);
-		}
-		else if (propertyDescription.getType() == FunctionPropertyType.INSTANCE || propertyDescription.getType() == ServoyFunctionPropertyType.INSTANCE)
+		if (propertyDescription.getType() == FunctionPropertyType.INSTANCE || propertyDescription.getType() == ServoyFunctionPropertyType.INSTANCE)
 		{
 			//  value is methodid
 			ITable table = null;
@@ -178,6 +188,22 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		{
 			ValueList val = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getValueList(((Integer)value).intValue());
 			convertedValue = val.getUUID().toString();
+		}
+		else if (propertyDescription.getType() instanceof IPropertyConverter)
+		{
+			IPropertyConverter<Object> type = (IPropertyConverter<Object>)propertyDescription.getType();
+			JSONStringer writer = new JSONStringer();
+			try
+			{
+				writer.object();
+				type.toJSON(writer, getName(), convertedValue, new DataConversion()).toString();
+				writer.endObject();
+				convertedValue = new JSONObject(writer.toString()).get(getName());
+			}
+			catch (JSONException e)
+			{
+				ServoyLog.logError(e);
+			}
 		}
 
 		try
