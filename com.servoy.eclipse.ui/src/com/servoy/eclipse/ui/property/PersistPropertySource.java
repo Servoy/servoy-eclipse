@@ -1733,13 +1733,18 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					// no content spec (example: form.width), try based on property descriptor
 					PropertyDescription desc = beanPropertyDescriptor.propertyDescriptor.getPropertyDescription(beanPropertyDescriptor.valueObject, this,
 						persistContext);
-					if (desc != null && desc.getType() == IntPropertyType.INSTANCE)
+					if (desc != null)
 					{
-						return repository.convertArgumentStringToObject(IRepository.INTEGER, null);
-					}
-					if (desc != null && desc.getType() == BooleanPropertyType.INSTANCE)
-					{
-						return repository.convertArgumentStringToObject(IRepository.BOOLEAN, null);
+						if (desc.getType() == IntPropertyType.INSTANCE)
+						{
+							return repository.convertArgumentStringToObject(IRepository.INTEGER, null);
+						}
+						if (desc.getType() == BooleanPropertyType.INSTANCE)
+						{
+							return repository.convertArgumentStringToObject(IRepository.BOOLEAN, null);
+						}
+						if (desc.getDefaultValue() != null) return desc.getDefaultValue();
+						if (desc.getType() != null) return desc.getType().defaultValue();
 					}
 				}
 				else
