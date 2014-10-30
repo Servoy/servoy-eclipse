@@ -56,7 +56,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						})
 						$('body').append(dragClone);
 						if (!type) {
-							angularElement = $scope.getEditorContentRootScope().createComponent('<div><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-autoapply-disabled=\'true\'/></div>',model);
+							angularElement = $scope.getEditorContentRootScope().createComponent('<div style="border-style: dotted;"><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-autoapply-disabled=\'true\'/></div>',model);
 							var elWidth = model.size ? model.size.width : 100;
 							var elHeight = model.size ? model.size.height : 100;
 							var css = $scope.convertToContentPoint({
