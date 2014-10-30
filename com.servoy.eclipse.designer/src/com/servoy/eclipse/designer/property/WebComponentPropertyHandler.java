@@ -40,6 +40,7 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyFunctionPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.util.Debug;
@@ -139,7 +140,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			}
 			return type.defaultValue();
 		}
-		else if (type instanceof IPropertyConverter)
+		else if (type instanceof IPropertyConverter && type != DataproviderPropertyType.INSTANCE)
 		{
 			if (value instanceof String && ((String)value).startsWith("{"))
 			{
@@ -189,7 +190,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			ValueList val = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getValueList(((Integer)value).intValue());
 			convertedValue = val.getUUID().toString();
 		}
-		else if (propertyDescription.getType() instanceof IPropertyConverter)
+		else if (propertyDescription.getType() instanceof IPropertyConverter && propertyDescription.getType() != DataproviderPropertyType.INSTANCE)
 		{
 			IPropertyConverter<Object> type = (IPropertyConverter<Object>)propertyDescription.getType();
 			JSONStringer writer = new JSONStringer();
