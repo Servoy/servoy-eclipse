@@ -117,5 +117,6 @@ body {
 	height:0px; 
 	width:0px; 
 	border-style:dashed; 
-	border-width: 1px
+	border-width: 1px;
+	display: none
 }
