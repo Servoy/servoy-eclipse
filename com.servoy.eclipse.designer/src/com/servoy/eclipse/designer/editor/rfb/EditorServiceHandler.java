@@ -601,6 +601,16 @@ public class EditorServiceHandler implements IServerService
 							{
 								JSONObject properties = args.optJSONObject(uuid);
 								cc = new CompoundCommand();
+								Iterator it = properties.keys();
+								while (it.hasNext())
+								{
+									String propertyName = (String)it.next();
+									if (!Arrays.asList("x", "y", "width", "height").contains(propertyName))
+									{
+										cc.add(new SetPropertyCommand("propertyName", PersistPropertySource.createPersistPropertySource(persist, false),
+											propertyName, properties.opt(propertyName)));
+									}
+								}
 								if (properties.has("x") && properties.has("y"))
 								{
 									cc.add(new SetPropertyCommand("move", PersistPropertySource.createPersistPropertySource(persist, false),
@@ -611,11 +621,6 @@ public class EditorServiceHandler implements IServerService
 									cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(persist, false),
 										StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), new Dimension(properties.optInt("width"),
 											properties.optInt("height"))));
-								}
-								if (properties.has("anchors"))
-								{
-									cc.add(new SetPropertyCommand("anchor", PersistPropertySource.createPersistPropertySource(persist, false),
-										StaticContentSpecLoader.PROPERTY_ANCHORS.getPropertyName(), properties.optInt("anchors")));
 								}
 								editorPart.getCommandStack().execute(cc);
 							}

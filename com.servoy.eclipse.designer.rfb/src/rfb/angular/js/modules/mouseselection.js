@@ -53,7 +53,6 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 						editorScope.setSelection([])
 					}
 				}
-				event.preventDefault();
 		}
 		function onmouseup(event) {
 				if (selectedNodeMouseEvent) {
@@ -63,7 +62,6 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					}
 				}
 				selectedNodeMouseEvent = null;
-				event.preventDefault();
 		}
 
 		function onmousedownLasso(event) {

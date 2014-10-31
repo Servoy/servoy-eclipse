@@ -161,6 +161,85 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				}
 			}
 			
+			$scope.getBeanModel = function(node)
+			{
+				if(node)
+				{
+					var name = node.getAttribute("name");
+					return $scope.getFormState().model[name];
+				}
+				return null;
+			}
+			
+			$scope.onDoubleClickAction = function(event){
+				var selection = $scope.getSelection();
+				if (selection && selection.length > 0)
+				{
+					var clickPosition = $scope.convertToContentPoint(getMousePosition(event));
+					for (var i=0;i<selection.length;i++)
+					{
+						var node = selection[i];
+						var model = $scope.getBeanModel(node);
+						if (model && (clickPosition.x >= model.location.x && clickPosition.x <= (model.location.x + model.size.width))
+								&& (clickPosition.y >= model.location.y && clickPosition.y <= (model.location.y + model.size.height)))
+						{
+							var directEditProperty = model["directEditPropertyName"];
+							if (directEditProperty)
+							{
+								var obj = {};
+								var absolutePoint = $scope.convertToAbsolutePoint({x: model.location.x,y: model.location.y});
+								var applyValue = function()
+								{
+									$("#directEdit").hide();
+									var newValue = $("#directEdit").text();
+									var oldValue = model[directEditProperty];
+									if (oldValue != newValue)
+									{
+										var value = {};
+										value[directEditProperty] = newValue;
+										obj[node.getAttribute("svy-id")] = value;
+										$editorService.sendChanges(obj);
+									}
+								}
+								// double click on element
+								$("#directEdit")
+									.unbind('blur')
+									.unbind('keyup')
+									.html(model[directEditProperty])
+									.css({
+										display: "block",
+										left: absolutePoint.x,
+										top: absolutePoint.y,
+										width: model.size.width+"px",
+										height: model.size.height+"px"
+									})
+									.bind('keyup',function(event)
+										{
+											if (event.keyCode == 27)
+											{
+												$("#directEdit").html(model[directEditProperty]).hide();
+											}
+											if (event.keyCode == 13)
+											{
+												applyValue();
+											}
+											if (event.keyCode == 46)
+											{
+												return false;
+											}
+										})
+									.bind('blur',function()
+											{
+												applyValue();
+											})
+									.focus();
+								break;
+							}	
+						}
+					}
+				}
+			}
+			
 			$scope.updateGhostLocation = function(ghost, x, y) {
 				if(ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE) { // it is a part
 
@@ -294,6 +373,16 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				return point
 			}
 
+			$scope.convertToAbsolutePoint = function(point){
+				var frameRect = $element.find('.contentframe')[0].getBoundingClientRect()
+				if (point.x && point.y)
+				{
+					point.x = point.x + frameRect.left;
+					point.y = point.y + frameRect.top;
+				}
+				return point
+			}
+			
 			$scope.getSelection = function() {
 				//Returning a copy so selection can't be changed my modifying the selection array
 				return selection.slice(0)
@@ -456,7 +545,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				servoyInternal = injector.get("$servoyInternal");
 				$scope.glasspane.focus()
 				$(function(){   
-					$(document).keydown(function(objEvent) {					
+					$(document).keyup(function(objEvent) {					
 						var fixedKeyEvent = $scope.getFixedKeyEvent(objEvent);
 	
 		                if(fixedKeyEvent.isCtrl)

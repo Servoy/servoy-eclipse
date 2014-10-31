@@ -120,3 +120,16 @@ body {
 	border-width: 1px;
 	display: none
 }
+
+#directEdit[contentEditable] {
+  cursor: pointer;
+  background-color: white;
+    padding: .2em;
+}
+
+#directEdit[contentEditable]:focus {
+  cursor: pointer;
+  background-color: #D0D0D0;
+  border: 1px solid red;
+  padding: .2em;
+}

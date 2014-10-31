@@ -9,10 +9,12 @@
 		
 		<!--Palette-->
 		<palette class="palette lhs-panel user-selection-off" style="width: 200px"></palette>
-	
+		
+		<div id="directEdit" contentEditable="true" style="position:absolute;display:none;z-index:1000;"></div>
+		
 		<!--  Editor -->
 		<div class="content-area {{ isContentSizeFull() ? '' : 'non-full' }}" tabindex="0">
-		    <div class="contentframe-overlay max" style="z-index:2;background-color:rgba(255,255,255,0.01);outline:none;" ng-style="glasspaneStyle" tabindex="0">
+		    <div class="contentframe-overlay max" style="z-index:2;background-color:rgba(255,255,255,0.01);outline:none;" ng-style="glasspaneStyle" tabindex="0" ng-dblclick="onDoubleClickAction($event)">
 		    	<div id="lasso"></div>
 				<!--Decorators-->
 				<decorator></decorator>
