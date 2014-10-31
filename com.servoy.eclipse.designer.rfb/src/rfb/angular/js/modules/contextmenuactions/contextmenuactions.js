@@ -1,10 +1,10 @@
 angular.module('contextmenuactions',['contextmenu','editor']).run(function($rootScope, $pluginRegistry,$contextmenu, $editorService){
 
 	$pluginRegistry.registerPlugin(function(editorScope) {
-		var hasSelection = function()
+		var hasSelection = function(selectionSize)
 		{
 			var selection = editorScope.getSelection();
-			if (selection && selection.length == 1)
+			if (selection && selection.length > 0 && (selectionSize == undefined || selection.length == selectionSize))
 				return true;
 			return false;
 		};
@@ -122,7 +122,7 @@ angular.module('contextmenuactions',['contextmenu','editor']).run(function($root
 						return null;
 					},
 					shortcut: "Shift+-",
-					getItemClass: function() { if (!hasSelection() || !editorScope.isAbsoluteFormLayout()) return "disabled";},
+					getItemClass: function() { if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
 					execute:function()
 					{
 						setAnchoring(1);
@@ -135,7 +135,7 @@ angular.module('contextmenuactions',['contextmenu','editor']).run(function($root
 					text: "Right",
 					getIconStyle: function(){ if(isAnchored(2)) return {'background-image':"url(images/check.png)"};},
 					shortcut: "Shift+*",
-					getItemClass: function() { if (!hasSelection() || !editorScope.isAbsoluteFormLayout()) return "disabled";},
+					getItemClass: function() { if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
 					execute:function()
 					{
 						setAnchoring(2);
@@ -148,7 +148,7 @@ angular.module('contextmenuactions',['contextmenu','editor']).run(function($root
 					text: "Bottom",
 					getIconStyle: function(){ if(isAnchored(4)) return {'background-image':"url(images/check.png)"};},
 					shortcut: "Shift++",
-					getItemClass: function() {  if (!hasSelection() || !editorScope.isAbsoluteFormLayout()) return "disabled";},
+					getItemClass: function() {  if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
 					execute:function()
 					{
 						setAnchoring(4);
@@ -161,7 +161,7 @@ angular.module('contextmenuactions',['contextmenu','editor']).run(function($root
 					text: "Left",
 					getIconStyle: function(){ if(isAnchored(8)) return {'background-image':"url(images/check.png)"};},
 					shortcut: "Shift+/",
-					getItemClass: function() { if (!hasSelection() || !editorScope.isAbsoluteFormLayout()) return "disabled";},
+					getItemClass: function() { if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
 					execute:function()
 					{
 						setAnchoring(8);
