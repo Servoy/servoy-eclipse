@@ -122,6 +122,16 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 				SimpleResourceMapping styles = getResourceProjectResourceMapping(StringResourceDeserializer.STYLES_DIR_NAME);
 				if (styles != null) mappings.add(styles);
 			}
+			else if (nodeType == UserNodeType.COMPONENTS)
+			{
+				SimpleResourceMapping components = getResourceProjectResourceMapping(SolutionSerializer.COMPONENTS_DIR_NAME);
+				if (components != null) mappings.add(components);
+			}
+			else if (nodeType == UserNodeType.SERVICES)
+			{
+				SimpleResourceMapping services = getResourceProjectResourceMapping(SolutionSerializer.SERVICES_DIR_NAME);
+				if (services != null) mappings.add(services);
+			}
 			else if (nodeType == UserNodeType.TEMPLATES)
 			{
 				SimpleResourceMapping templates = getResourceProjectResourceMapping(StringResourceDeserializer.TEMPLATES_DIR_NAME);
@@ -149,7 +159,7 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 				Pair<String, String> formFilePath = SolutionSerializer.getFilePath(form, true);
 				String formScriptFile = SolutionSerializer.getScriptPath(form, true);
 
-				// add the form file 
+				// add the form file
 				mappings.add(new SimpleResourceMapping(ResourcesPlugin.getWorkspace().getRoot().getFile(
 					new Path(formFilePath.getLeft() + formFilePath.getRight()))));
 				if (formScriptFile != null)

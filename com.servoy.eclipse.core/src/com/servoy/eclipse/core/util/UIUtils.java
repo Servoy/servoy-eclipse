@@ -90,7 +90,7 @@ import com.servoy.j2db.util.Pair;
 
 /**
  * Utility class that offers all kinds of utilities (UI related functionality).
- * 
+ *
  * @author acostescu
  */
 public class UIUtils
@@ -316,7 +316,7 @@ public class UIUtils
 		 * index of the label in this array corresponding to the button that was pressed to close the dialog. If the dialog was dismissed without pressing a
 		 * button (ESC, etc.) then -1 is returned. Note that the <code>open</code> method blocks.
 		 * </p>
-		 * 
+		 *
 		 * @param parentShell the parent shell
 		 * @param dialogTitle the dialog title, or <code>null</code> if none
 		 * @param dialogTitleImage the dialog title image, or <code>null</code> if none
@@ -416,7 +416,7 @@ public class UIUtils
 
 		/**
 		 * Creates a new instance that will use the given shell/title to open the dialog.
-		 * 
+		 *
 		 * @param shell the shell used to show the dialog.
 		 * @param title the title of the dialog.
 		 */
@@ -428,7 +428,7 @@ public class UIUtils
 
 		/**
 		 * Sets the dialog's message.
-		 * 
+		 *
 		 * @param message the dialog's message.
 		 */
 		public void setMessage(String message)
@@ -438,7 +438,7 @@ public class UIUtils
 
 		/**
 		 * Returns true if the user chose "Yes" or state is "Yes to all" and false otherwise.
-		 * 
+		 *
 		 * @return true if the user chose "Yes" or state is "Yes to all" and false otherwise.
 		 */
 		public boolean userSaidYes()
@@ -524,7 +524,7 @@ public class UIUtils
 			GridData gridData = new GridData();
 			gridData.grabExcessHorizontalSpace = true;
 			gridData.horizontalAlignment = GridData.FILL;
-			gridData.grabExcessVerticalSpace = true; // Layout vertically, too! 
+			gridData.grabExcessVerticalSpace = true; // Layout vertically, too!
 			gridData.verticalAlignment = GridData.FILL;
 
 			Text scrollable = new Text(composite, SWT.BORDER | SWT.V_SCROLL | SWT.READ_ONLY);
@@ -597,7 +597,7 @@ public class UIUtils
 
 	/**
 	 * Creates a SWT image from the given swing icon + the SWT device. Take care to dispose the resources used by the returned Image object when it's no longer used.
-	 * 
+	 *
 	 * @param swingIcon the swing icon to convert.
 	 * @param device the SWT device used in the Image constructor.
 	 * @return the SWT image object created based on the swing icon. Remember to dispose it when it will no longer be used.
@@ -744,7 +744,7 @@ public class UIUtils
 			bimage = new BufferedImage(image.getWidth(null), image.getHeight(null), hasAlpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
 		}
 
-		Graphics g = bimage.createGraphics(); // Paint the image onto the buffered 
+		Graphics g = bimage.createGraphics(); // Paint the image onto the buffered
 		g.drawImage(image, 0, 0, null);
 		g.dispose();
 		return bimage;
@@ -752,7 +752,7 @@ public class UIUtils
 
 	/**
 	 * Shows an option dialog showing the options in a combo.
-	 * 
+	 *
 	 * @param shell the shell.
 	 * @param title the title.
 	 * @param message the message.
@@ -781,6 +781,18 @@ public class UIUtils
 		}
 		return dialog.getSelectedText();
 	}
+
+	public static String showTextFieldDialog(Shell shell, String title, String message)
+	{
+		TextFieldDialog dialog = new TextFieldDialog(shell, title, null, message, MessageDialog.NONE, new String[] { "OK", "Cancel" }, "");
+		dialog.setBlockOnOpen(true);
+		if (dialog.open() != Window.OK)
+		{
+			return null;
+		}
+		return dialog.getSelectedText();
+	}
+
 
 	public static boolean askConfirmation(final Shell shell, final String title, final String message)
 	{
@@ -852,7 +864,7 @@ public class UIUtils
 
 	/**
 	 * Runs runnable in SWT ui thread.
-	 * 
+	 *
 	 * @param r the runnable to run.
 	 * @param forceSync if this is true and if not already on ui thread, run using sync exec. If this is false and not already running on the ui thread, it will
 	 *            do asyncExec().
@@ -878,7 +890,7 @@ public class UIUtils
 
 	/**
 	 * Shows a warning dialog, but switches to UI thread if needed.
-	 * 
+	 *
 	 * @param title the title of the dialog.
 	 * @param message the message in the dialog.
 	 */
@@ -895,7 +907,7 @@ public class UIUtils
 
 	/**
 	 * Shows a error dialog, but switches to UI thread if needed.
-	 * 
+	 *
 	 * @param title the title of the dialog.
 	 * @param message the message in the dialog.
 	 */
@@ -913,7 +925,7 @@ public class UIUtils
 	/**
 	 * Tries to get the active shell. If this is a thread with an associated Display, then that display is used to get the active shell. If not,
 	 * Display.getDefault().getActiveShell() is used, but called from the UI thread so as not to cause an exception.
-	 * 
+	 *
 	 * @return the found active shell (if any).
 	 */
 	public static Shell getActiveShell()
@@ -1047,7 +1059,7 @@ public class UIUtils
 	/**
 	 * Executes an invoke later on the AWT thread, but avoids (using a supplemental Job) InterruptedExceptions that could result when this is running on the SWT main thread because of
 	 * a Display.syncExec being executed on another thread - that interrupts the main thread and throws exceptions that end like this:
-	 * 
+	 *
 	 * java.lang.InterruptedException
 	 * 	at java.lang.Object.wait(Native Method)
 	 * 	at java.lang.Object.wait(Object.java:503)
@@ -1059,7 +1071,7 @@ public class UIUtils
 	 * 	at java.awt.EventQueue.invokeLater(EventQueue.java:1192)
 	 * 	at javax.swing.SwingUtilities.invokeLater(SwingUtilities.java:1287)
 	 * 	(...)
-	 * 
+	 *
 	 * @param r the runnable to execute.
 	 */
 	public static void invokeLaterOnAWT(final Runnable r)

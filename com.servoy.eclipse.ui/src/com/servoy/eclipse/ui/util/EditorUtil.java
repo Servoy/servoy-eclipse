@@ -67,7 +67,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
-import org.eclipse.ui.internal.browser.IBrowserDescriptor;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 
@@ -125,7 +124,7 @@ import com.servoy.j2db.util.UUID;
 
 /**
  * Utilities for editors.
- * 
+ *
  * @author rgansevles
  */
 
@@ -133,9 +132,9 @@ public class EditorUtil
 {
 	/**
 	 * Opens the javaScript editor file, making a jump to the specified method/variable/calculation (if found).
-	 * 
+	 *
 	 * @param activate TODO
-	 * 
+	 *
 	 */
 	public static IEditorPart openScriptEditor(IPersist persist, String scopeName, boolean activate)
 	{
@@ -198,7 +197,7 @@ public class EditorUtil
 
 	/**
 	 * Open an editor for the form.
-	 * 
+	 *
 	 * @param formId
 	 */
 	public static IEditorPart openFormDesignEditor(Form form)
@@ -208,8 +207,8 @@ public class EditorUtil
 
 	/**
 	 * Open an editor for the form.
-	 * @param newForm 
-	 * 
+	 * @param newForm
+	 *
 	 * @param formId
 	 */
 	public static IEditorPart openFormDesignEditor(Form form, boolean newForm, boolean activate)
@@ -333,6 +332,32 @@ public class EditorUtil
 			ServoyLog.logError(ex);
 		}
 		return null;
+	}
+
+	/**
+	 * Open component file.
+	 * @param resource
+	 */
+	public static void openComponentFileEditor(IFile resource)
+	{
+		if (resource == null) return;
+		try
+		{
+			IWorkbenchPage page = getActivePage();
+			if (page != null)
+			{
+				IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(resource.getName());
+				if (desc != null)
+				{
+					IEditorInput editorInput = new FileEditorInput(resource);
+					page.openEditor(editorInput, desc.getId(), true);
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+		}
 	}
 
 	public static IEditorPart openPersistEditor(IPersist persist)

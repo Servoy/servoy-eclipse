@@ -249,6 +249,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.LoadRelationsAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.MovePersistAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.MoveTextAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NavigationToggleAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewComponentResourceAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewPostgresDbAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewRelationAction;
@@ -258,6 +259,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewSybaseDbAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewTableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewValueListAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewVariableAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenComponentResourceAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenI18NAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenMediaAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenNewFormWizardAction;
@@ -1023,7 +1025,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	/**
 	 * Refreshes the specified node from the tree. If the node is null, it refreshes the whole tree.
-	 * 
+	 *
 	 * @param node the node to be refreshed in the tree or null to refresh the whole tree.
 	 */
 	public void refreshTreeNodeFromModel(final Object node)
@@ -1153,7 +1155,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	/**
 	 * Returns the current selection. u
-	 * 
+	 *
 	 * @return the current selection.
 	 */
 	protected ISelection getSelection()
@@ -1168,7 +1170,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	/**
 	 * Returns the current selection in the (outline) list.
-	 * 
+	 *
 	 * @return the current selection in the (outline) list.
 	 */
 	public IStructuredSelection getListSelection()
@@ -1178,7 +1180,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	/**
 	 * Returns the current selection in the tree.
-	 * 
+	 *
 	 * @return the current selection in the tree.
 	 */
 	public ITreeSelection getTreeSelection()
@@ -1189,7 +1191,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	/**
 	 * Returns the node that is selected in the (outline) list, if there is exactly one node selected. If more than 1 node is selected, returns the first node
 	 * from the selection.
-	 * 
+	 *
 	 * @return the node that is selected in the (outline) list, if there is exactly one node selected. If more than 1 node is selected, returns the first node
 	 *         from the selection.
 	 */
@@ -1207,7 +1209,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	/**
 	 * Returns the node that is selected in the tree, if there is exactly one node selected. If more than 1 node is selected, returns the first node from the
 	 * selection.
-	 * 
+	 *
 	 * @return the node that is selected in the tree, if there is exactly one node selected. If more than 1 node is selected, returns the first node from the
 	 *         selection.
 	 */
@@ -1337,7 +1339,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	/**
 	 * Called from OrientationAction.
-	 * 
+	 *
 	 * @param orientation VIEW_ORIENTATION_HORIZONTAL, VIEW_ORIENTATION_AUTOMATIC or VIEW_ORIENTATION_VERTICAL
 	 */
 	public void setOrientation(int o)
@@ -1404,7 +1406,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	/**
 	 * Handles some key events. (used for actions such as refresh)
-	 * 
+	 *
 	 * @param event the key event.
 	 */
 	protected void handleKeyEvent(KeyEvent event)
@@ -2144,7 +2146,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	/**
 	 * Returns preferred split orientation of this view (for automatic splitting).
-	 * 
+	 *
 	 * @return SWT.HORIZONTAL or SWT.VERTICAL
 	 */
 	public int computeDesiredOrientation()
@@ -2771,7 +2773,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newForm = new OpenNewFormWizardAction();
 		newScope = new NewScopeAction(this);
 		newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("solution_module_m.gif"), "Create new module");
-
+		NewComponentResourceAction newComponentResource = new NewComponentResourceAction(getSite().getShell());
 		newActionInListPrimary.registerAction(UserNodeType.FORM, newMethod);
 		newActionInListPrimary.registerAction(UserNodeType.GLOBALS_ITEM, newMethod);
 		newActionInListPrimary.registerAction(UserNodeType.GLOBAL_VARIABLES, newVariable);
@@ -2780,6 +2782,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInListPrimary.registerAction(UserNodeType.MEDIA, importMedia);
 		newActionInListPrimary.registerAction(UserNodeType.MEDIA_FOLDER, importMedia);
 		newActionInListPrimary.registerAction(UserNodeType.SERVER, newTable);
+		newActionInListPrimary.registerAction(UserNodeType.COMPONENT_ITEM, newComponentResource);
+		newActionInListPrimary.registerAction(UserNodeType.SERVICE_ITEM, newComponentResource);
 
 		newActionInListPrimary.registerAction(UserNodeType.STYLES, newStyle);
 		newActionInListPrimary.registerAction(UserNodeType.ALL_RELATIONS, newRelation);
@@ -2809,6 +2813,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		openAction.registerAction(UserNodeType.RELATION, new OpenRelationAction());
 		openAction.registerAction(UserNodeType.MEDIA_IMAGE, new OpenMediaAction());
 		openAction.registerAction(UserNodeType.I18N_FILE_ITEM, new OpenI18NAction(this));
+		openAction.registerAction(UserNodeType.COMPONENT_RESOURCE, new OpenComponentResourceAction());
 
 		deleteActionInList = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE), "Delete");
 		IAction deleteMedia = new DeleteMediaAction("Delete media", this);
@@ -2822,8 +2827,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction deleteGlobalScript = new DeleteScriptAction(UserNodeType.GLOBAL_METHOD_ITEM, "Delete method", this);
 		IAction deleteFormVariable = new DeleteScriptAction(UserNodeType.FORM_VARIABLE_ITEM, "Delete variable", this);
 		IAction deleteGlobalVariable = new DeleteScriptAction(UserNodeType.GLOBAL_VARIABLE_ITEM, "Delete variable", this);
-		IAction deleteComponentResource = new DeleteComponentResourceAction(getSite().getShell(), "Delete Component", UserNodeType.COMPONENT_ITEM);
-		IAction deleteServiceResource = new DeleteComponentResourceAction(getSite().getShell(), "Delete Service", UserNodeType.SERVICE_ITEM);
+		IAction deleteComponentPackage = new DeleteComponentResourceAction(getSite().getShell(), "Delete Component Package", UserNodeType.COMPONENTS_PACKAGE);
+		IAction deleteServicePackage = new DeleteComponentResourceAction(getSite().getShell(), "Delete Service Package", UserNodeType.SERVICES_PACKAGE);
+		IAction deleteComponentResource = new DeleteComponentResourceAction(getSite().getShell(), "Delete file", UserNodeType.COMPONENT_RESOURCE);
 		IAction deleteI18N = new DeleteI18NAction(getSite().getShell());
 		IAction deleteScope = new DeleteScopeAction("Delete scope", this);
 
@@ -2839,8 +2845,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		deleteActionInList.registerAction(UserNodeType.TEMPLATE_ITEM, deleteTemplate);
 		deleteActionInList.registerAction(UserNodeType.RELATION, deleteRelation);
 		deleteActionInList.registerAction(UserNodeType.I18N_FILE_ITEM, deleteI18N);
-		deleteActionInList.registerAction(UserNodeType.COMPONENT_ITEM, deleteComponentResource);
-		deleteActionInList.registerAction(UserNodeType.SERVICE_ITEM, deleteServiceResource);
+		deleteActionInList.registerAction(UserNodeType.COMPONENT_RESOURCE, deleteComponentResource);
 
 		copyTable = new CopyTableAction(getSite().getShell());
 		editVariableAction = new EditVariableAction(this);
@@ -2870,6 +2875,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		deleteActionInTree.registerAction(UserNodeType.MEDIA_FOLDER, deleteMediaFolder);
 		deleteActionInTree.registerAction(UserNodeType.GLOBALS_ITEM, deleteScope);
 		deleteActionInTree.registerAction(UserNodeType.WORKING_SET, new DeleteWorkingSetAction());
+		deleteActionInTree.registerAction(UserNodeType.COMPONENTS_PACKAGE, deleteComponentPackage);
+		deleteActionInTree.registerAction(UserNodeType.SERVICES_PACKAGE, deleteServicePackage);
+
 
 		renameActionInTree = new ContextAction(this, null, "Rename");
 
@@ -3380,7 +3388,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	/**
 	 * IResource to SimpleUserNode adapter
-	 * 
+	 *
 	 * @param resource
 	 * @return SE node for the the resource
 	 */
@@ -3470,7 +3478,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				}
 				else if (segments.length == 3) // for finding folders under solution/forms
 				{
-					if (segments[1].equals(SolutionSerializer.FORMS_DIR) && selectedProject != null) // if the forms node 
+					if (segments[1].equals(SolutionSerializer.FORMS_DIR) && selectedProject != null) // if the forms node
 					{
 						SimpleUserNode formsNode = cp.getForms(selectedProject);
 						if (formsNode != null && formsNode.children != null)
@@ -3487,7 +3495,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				// we only handle files under solution/forms
 				if (selectedProject != null)
 				{
-					if (segments[1].equals(SolutionSerializer.FORMS_DIR)) // if the forms node 
+					if (segments[1].equals(SolutionSerializer.FORMS_DIR)) // if the forms node
 					{
 						SimpleUserNode formsNode = cp.getForms(selectedProject);
 						if (formsNode != null && formsNode.children != null)

@@ -60,6 +60,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Messages;
@@ -380,15 +381,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = createI18NFiles();
 			}
-			else if (type == UserNodeType.COMPONENTS)
+			else if (type == UserNodeType.COMPONENT_ITEM)
 			{
-				lm = createComponentsFiles("components", UserNodeType.COMPONENT_ITEM);
-				key = null; // for now don't cache this
+				lm = createComponentFileList(SolutionSerializer.COMPONENTS_DIR_NAME, un);
+				key = null;
 			}
-			else if (type == UserNodeType.SERVICES)
+			else if (type == UserNodeType.SERVICE_ITEM)
 			{
-				lm = createComponentsFiles("services", UserNodeType.SERVICE_ITEM);
-				key = null; // for now don't cache this
+				lm = createComponentFileList(SolutionSerializer.SERVICES_DIR_NAME, un);
+				key = null;
 			}
 			else if (type == UserNodeType.TEMPLATES)
 			{
@@ -686,6 +687,56 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			lm = EMPTY_LIST;
 		}
 		return lm;
+	}
+
+	/**
+	 * @param un
+	 * @return
+	 */
+	private SimpleUserNode[] createComponentFileList(String folderName, SimpleUserNode un)
+	{
+		WebComponentSpecification spec = (WebComponentSpecification)un.getRealObject();
+		IProject resources = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject();
+		IFolder folder = resources.getFolder(folderName + "/" + spec.getName().replace("-", "/"));
+		if (folder.exists())
+		{
+			List<SimpleUserNode> list = createComponentList("", folder);
+			return list.toArray(new SimpleUserNode[list.size()]);
+		}
+		return new SimpleUserNode[0];
+	}
+
+	/**
+	 * @param folder
+	 * @param resources
+	 * @return
+	 */
+	private List<SimpleUserNode> createComponentList(String path, IFolder folder)
+	{
+		List<SimpleUserNode> list = new ArrayList<SimpleUserNode>();
+		try
+		{
+			IResource[] members = folder.members();
+			for (IResource iResource : members)
+			{
+				String name = iResource.getName();
+				if (iResource.getType() == IResource.FOLDER)
+				{
+					list.addAll(createComponentList(path + name + "/", (IFolder)iResource));
+				}
+				else
+				{
+					//TODO type/icon?
+					PlatformSimpleUserNode node = new PlatformSimpleUserNode(path + name, UserNodeType.COMPONENT_RESOURCE, iResource, null);
+					list.add(node);
+				}
+			}
+		}
+		catch (CoreException e)
+		{
+			ServoyLog.logError(e);
+		}
+		return list;
 	}
 
 	/**
