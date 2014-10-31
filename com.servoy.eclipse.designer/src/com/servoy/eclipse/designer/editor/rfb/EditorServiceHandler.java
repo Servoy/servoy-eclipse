@@ -302,15 +302,16 @@ public class EditorServiceHandler implements IServerService
 						}
 						jsonWriter.key("size");
 						jsonWriter.object();
-						jsonWriter.key("width").value(bean.getSize().width);
-						jsonWriter.key("height").value(bean.getSize().height);
+						jsonWriter.key("width").value(80);
+						jsonWriter.key("height").value(20);
 						jsonWriter.endObject();
 						jsonWriter.endObject();
+
 					}
 
 					private int computeX(int index)
 					{
-						return 15 + index * 40;
+						return 15 + index * 80;
 					}
 
 					private int computeY(int index)
@@ -342,14 +343,21 @@ public class EditorServiceHandler implements IServerService
 									while (tabIterator.hasNext())
 									{
 										Tab tab = (Tab)tabIterator.next();
+										int x = tab.getLocation().x;
+										int y = tab.getLocation().y;
+										if (args != null && args.has("resetPosition"))
+										{
+											x -= panel.getLocation().x;
+											y -= panel.getLocation().y;
+										}
 										writer.object();
 										writer.key("uuid").value(tab.getUUID());
 										writer.key("type").value(tab.getTypeID());
 										writer.key("text").value(tab.getText());
 										writer.key("location");
 										writer.object();
-										writer.key("x").value(tab.getLocation().x);
-										writer.key("y").value(tab.getLocation().y);
+										writer.key("x").value(x);
+										writer.key("y").value(y);
 										writer.endObject();
 										writer.key("size");
 										writer.object();
