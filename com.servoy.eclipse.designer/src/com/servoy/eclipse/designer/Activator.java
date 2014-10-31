@@ -97,6 +97,8 @@ public class Activator extends AbstractUIPlugin
 
 	private final Map<String, ImageIcon> imageIcons = new HashMap<String, ImageIcon>();
 
+	private DesignNGClient client = null;
+
 	/**
 	 * The constructor
 	 */
@@ -107,6 +109,7 @@ public class Activator extends AbstractUIPlugin
 	private final class DeveloperDesignClient extends DesignNGClient implements IPersistChangeListener
 	{
 		private final IDesignerSolutionProvider solutionProvider;
+
 
 		/**
 		 * @param wsSession
@@ -329,6 +332,38 @@ public class Activator extends AbstractUIPlugin
 			}
 		});
 
+		ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(new IActiveProjectListener()
+		{
+
+			@Override
+			public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+			{
+				if (client != null)
+				{
+					if (toProject.getProject().getName().startsWith("import_placeholder"))
+					{
+						if (client.isSolutionLoaded())
+						{
+							client.closeSolution(true, null);
+						}
+					}
+				}
+				return true;
+			}
+
+			@Override
+			public void activeProjectChanged(ServoyProject activeProject)
+			{
+
+			}
+
+			@Override
+			public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+			{
+
+			}
+		});
+
 		if (ApplicationServerRegistry.getServiceRegistry() != null)
 		{
 			final IDebugClientHandler service = ApplicationServerRegistry.getServiceRegistry().getService(IDebugClientHandler.class);
@@ -337,49 +372,18 @@ public class Activator extends AbstractUIPlugin
 
 				WebsocketSessionManager.setWebsocketSessionFactory(WebsocketSessionFactory.DESIGN_ENDPOINT, new IWebsocketSessionFactory()
 				{
-					private DesignNGClientWebsocketSession designerSession = null;
-					private DesignNGClient client;
-
 					@Override
 					public IWebsocketSession createSession(String uuid) throws Exception
 					{
-						//if (client != null) client.closeSolution(false, null);
+						DesignNGClientWebsocketSession designerSession = null;
 						if (designerSession == null || !designerSession.isValid())
 						{
 							final IDesignerSolutionProvider solutionProvider = ApplicationServerRegistry.getServiceRegistry().getService(
 								IDesignerSolutionProvider.class);
 							designerSession = new DesignNGClientWebsocketSession(uuid);
-							client = new DeveloperDesignClient(designerSession, solutionProvider);
-							designerSession.setClient(client);
+							Activator.this.client = new DeveloperDesignClient(designerSession, solutionProvider);
+							designerSession.setClient(Activator.this.client);
 						}
-						ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(new IActiveProjectListener()
-						{
-
-							@Override
-							public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
-							{
-								if (toProject.getProject().getName().startsWith("import_placeholder"))
-								{
-									if (client.isSolutionLoaded())
-									{
-										client.closeSolution(true, null);
-									}
-								}
-								return true;
-							}
-
-							@Override
-							public void activeProjectChanged(ServoyProject activeProject)
-							{
-
-							}
-
-							@Override
-							public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
-							{
-
-							}
-						});
 						return designerSession;
 					}
 				});
