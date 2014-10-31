@@ -205,6 +205,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 								$("#directEdit")
 									.unbind('blur')
 									.unbind('keyup')
+									.unbind('keydown')
 									.html(model[directEditProperty])
 									.css({
 										display: "block",
@@ -228,6 +229,13 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 												return false;
 											}
 										})
+									.bind('keydown',function(event)
+										{
+											if (event.keyCode == 8)
+											{
+												event.stopPropagation();
+											}
+										})	
 									.bind('blur',function()
 											{
 												applyValue();
