@@ -525,10 +525,8 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			$editorService.registerEditor($scope);
 			var promise = $editorService.connect();
 			promise.then(function() {
-				var replacews = "";
-				var value = $editorService.getURLParameter("replacewebsocket");
-				if (value) replacews = "&replacewebsocket=true";
-				$scope.contentframe = "content/editor-content.html?endpoint=designclient&id=%23" + $element.attr("id") + "&f=" +formName +"&s=" + $editorService.getURLParameter("s") + replacews;
+				var replacews = $editorService.getURLParameter("replacewebsocket") ? "&replacewebsocket=true" : "";
+				$scope.contentframe = "content/editor-content.html?id=%23" + $element.attr("id") + "&f=" +formName +"&s=" + $editorService.getURLParameter("s") + replacews;
 			})
 		},
 		templateUrl: 'templates/editor.html',
@@ -620,13 +618,12 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			}
 		}
 		wsSession = $webSocket.connect('', [getURLParameter('editorid')])
-		wsSession.onopen = function()
+		wsSession.onopen(function()
 		{
 			connected = true;
 			if (deferred) deferred.resolve();
 			deferred = null;
-
-		}
+		});
 	}
 
 	$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
