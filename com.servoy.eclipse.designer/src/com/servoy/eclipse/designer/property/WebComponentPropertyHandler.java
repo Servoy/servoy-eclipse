@@ -188,7 +188,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		else if (propertyDescription.getType() == ValueListPropertyType.INSTANCE)
 		{
 			ValueList val = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getValueList(((Integer)value).intValue());
-			convertedValue = val.getUUID().toString();
+			convertedValue = (val == null) ? null : val.getUUID().toString();
 		}
 		else if (propertyDescription.getType() instanceof IPropertyConverter && propertyDescription.getType() != DataproviderPropertyType.INSTANCE)
 		{
