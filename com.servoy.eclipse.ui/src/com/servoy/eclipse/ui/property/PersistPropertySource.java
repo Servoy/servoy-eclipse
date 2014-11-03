@@ -46,9 +46,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IViewReference;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
+import org.eclipse.ui.views.properties.PropertySheetPage;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.property.IPropertyType;
@@ -1969,6 +1972,18 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 						changed |= !Utils.equalObjects(value, ((ISupportUpdateableName)beanPropertyDescriptor.valueObject).getName());
 						((ISupportUpdateableName)beanPropertyDescriptor.valueObject).updateName(
 							ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), (String)value);
+						if (changed)
+						{
+							IViewReference[] iv = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getViewReferences();
+							for (IViewReference ref : iv)
+							{
+								if (ref.getId().equals("org.eclipse.ui.views.PropertySheet"))
+								{
+									PropertySheetPage psp = (PropertySheetPage)ref.getView(false).getAdapter(PropertySheetPage.class);
+									if (psp != null) psp.refresh();
+								}
+							}
+						}
 					}
 					else
 					{
