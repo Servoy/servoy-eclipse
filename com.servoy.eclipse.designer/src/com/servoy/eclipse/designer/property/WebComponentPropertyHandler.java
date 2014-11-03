@@ -42,6 +42,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyFunctionPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -140,7 +141,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			}
 			return type.defaultValue();
 		}
-		else if (type instanceof IPropertyConverter && type != DataproviderPropertyType.INSTANCE)
+		else if (type instanceof IPropertyConverter && type != DataproviderPropertyType.INSTANCE && type != TagStringPropertyType.INSTANCE)
 		{
 			if (value instanceof String && ((String)value).startsWith("{"))
 			{
