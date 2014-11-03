@@ -191,7 +191,8 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			ValueList val = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getValueList(((Integer)value).intValue());
 			convertedValue = (val == null) ? null : val.getUUID().toString();
 		}
-		else if (propertyDescription.getType() instanceof IPropertyConverter && propertyDescription.getType() != DataproviderPropertyType.INSTANCE)
+		else if (propertyDescription.getType() instanceof IPropertyConverter && propertyDescription.getType() != DataproviderPropertyType.INSTANCE &&
+			propertyDescription.getType() != TagStringPropertyType.INSTANCE)
 		{
 			IPropertyConverter<Object> type = (IPropertyConverter<Object>)propertyDescription.getType();
 			JSONStringer writer = new JSONStringer();
