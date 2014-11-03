@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -60,7 +61,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
-import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Messages;
@@ -381,14 +381,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = createI18NFiles();
 			}
-			else if (type == UserNodeType.COMPONENT_ITEM)
+			else if (type == UserNodeType.COMPONENT_ITEM || type == UserNodeType.SERVICE_ITEM)
 			{
-				lm = createComponentFileList(SolutionSerializer.COMPONENTS_DIR_NAME, un);
-				key = null;
-			}
-			else if (type == UserNodeType.SERVICE_ITEM)
-			{
-				lm = createComponentFileList(SolutionSerializer.SERVICES_DIR_NAME, un);
+				lm = createComponentFileList(un);
 				key = null;
 			}
 			else if (type == UserNodeType.TEMPLATES)
@@ -693,15 +688,25 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	 * @param un
 	 * @return
 	 */
-	private SimpleUserNode[] createComponentFileList(String folderName, SimpleUserNode un)
+	private SimpleUserNode[] createComponentFileList(SimpleUserNode un)
 	{
 		WebComponentSpecification spec = (WebComponentSpecification)un.getRealObject();
 		IProject resources = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject();
-		IFolder folder = resources.getFolder(folderName + "/" + spec.getName().replace("-", "/"));
-		if (folder.exists())
+		if ("file".equals(spec.getSpecURL().getProtocol()))
 		{
-			List<SimpleUserNode> list = createComponentList("", folder);
-			return list.toArray(new SimpleUserNode[list.size()]);
+			try
+			{
+				IFile[] specFile = resources.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
+				if (specFile.length == 1)
+				{
+					List<SimpleUserNode> list = createComponentList("", (IFolder)specFile[0].getParent());
+					return list.toArray(new SimpleUserNode[list.size()]);
+				}
+			}
+			catch (URISyntaxException e)
+			{
+				ServoyLog.logError(e);
+			}
 		}
 		return new SimpleUserNode[0];
 	}

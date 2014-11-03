@@ -18,8 +18,10 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.io.ByteArrayInputStream;
+import java.net.URISyntaxException;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -35,7 +37,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
-import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -48,9 +49,8 @@ import com.servoy.eclipse.ui.util.EditorUtil;
 public class NewComponentResourceAction extends Action implements ISelectionChangedListener
 {
 
-	private String componentName;
-	private UserNodeType type;
 	private final Shell shell;
+	private WebComponentSpecification spec;
 
 	public NewComponentResourceAction(Shell shell)
 	{
@@ -67,17 +67,17 @@ public class NewComponentResourceAction extends Action implements ISelectionChan
 	@Override
 	public void selectionChanged(SelectionChangedEvent event)
 	{
-		componentName = null;
-		type = null;
+		spec = null;
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
 		boolean state = (sel.size() == 1);
 		if (state)
 		{
-			type = ((SimpleUserNode)sel.getFirstElement()).getType();
+			UserNodeType type = ((SimpleUserNode)sel.getFirstElement()).getType();
 			state = (type == UserNodeType.COMPONENT_ITEM) || (type == UserNodeType.SERVICE_ITEM);
 			if (state)
 			{
-				componentName = ((WebComponentSpecification)((SimpleUserNode)sel.getFirstElement()).getRealObject()).getName();
+				spec = ((WebComponentSpecification)((SimpleUserNode)sel.getFirstElement()).getRealObject());
+				state = "file".equals(spec.getSpecURL().getProtocol());
 			}
 		}
 		setEnabled(state);
@@ -86,7 +86,7 @@ public class NewComponentResourceAction extends Action implements ISelectionChan
 	@Override
 	public void run()
 	{
-		if (componentName != null && type != null)
+		if (spec != null)
 		{
 			String newFileName = UIUtils.showTextFieldDialog(shell, getText(), "Please provide a file name.");
 			if (newFileName == null) return;
@@ -94,25 +94,40 @@ public class NewComponentResourceAction extends Action implements ISelectionChan
 			ServoyProject initialActiveProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 			ServoyResourcesProject resourcesProject = initialActiveProject.getResourcesProject();
 			IProject project = resourcesProject.getProject();
-			String folderName = type == UserNodeType.COMPONENT_ITEM ? SolutionSerializer.COMPONENTS_DIR_NAME : SolutionSerializer.SERVICES_DIR_NAME;
-			folderName += "/" + componentName.replace("-", "/");
-			IFile file = project.getFile(folderName + "/" + newFileName);
-			if (!file.exists())
+
+			try
 			{
-				try
+				IFile[] specFile = project.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
+				if (specFile.length == 1)
 				{
-					file.create(new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
-					EditorUtil.openComponentFileEditor(file);
+					IFolder folder = (IFolder)specFile[0].getParent();
+					IFile file = folder.getFile(newFileName);
+					if (!file.exists())
+					{
+						try
+						{
+							file.create(new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
+							EditorUtil.openComponentFileEditor(file);
+						}
+						catch (CoreException e)
+						{
+							MessageDialog.openError(shell, getText(), "Could not create file.");
+							ServoyLog.logError(e);
+						}
+					}
+					else
+					{
+						MessageDialog.openError(shell, getText(), "The file " + newFileName + " already exists.");
+					}
 				}
-				catch (CoreException e)
+				else
 				{
-					MessageDialog.openError(shell, getText(), "Could not create file.");
-					ServoyLog.logError(e);
+					MessageDialog.openError(shell, getText(), "Could not create file. Spec file location incorrect.");
 				}
 			}
-			else
+			catch (URISyntaxException e)
 			{
-				MessageDialog.openError(shell, getText(), "The file " + newFileName + " already exists.");
+				ServoyLog.logError(e);
 			}
 		}
 	}

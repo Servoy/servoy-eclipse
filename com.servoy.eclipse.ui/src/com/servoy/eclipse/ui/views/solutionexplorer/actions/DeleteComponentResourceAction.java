@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.util.Iterator;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -29,9 +30,13 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
 
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
 /**
  * Deletes the selected components or services.
@@ -43,10 +48,12 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 	private IStructuredSelection selection;
 	private final Shell shell;
 	private final UserNodeType nodeType;
+	private final SolutionExplorerView viewer;
 
 
-	public DeleteComponentResourceAction(Shell shell, String text, UserNodeType nodeType)
+	public DeleteComponentResourceAction(SolutionExplorerView viewer, Shell shell, String text, UserNodeType nodeType)
 	{
+		this.viewer = viewer;
 		this.shell = shell;
 		this.nodeType = nodeType;
 		setText(text);
@@ -61,20 +68,36 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 	@Override
 	public void run()
 	{
+		PlatformSimpleUserNode parent = (PlatformSimpleUserNode)viewer.getSelectedTreeNode().parent;
+		IProject resources = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject();
+		boolean deleted = false;
 		if (selection != null && MessageDialog.openConfirm(shell, getText(), "Are you sure you want to delete?"))
 		{
 			Iterator<SimpleUserNode> it = selection.iterator();
-			String[] componentName;
 			while (it.hasNext())
 			{
 				SimpleUserNode next = it.next();
-				Object realObject = next.getRealObject();
-				if (realObject instanceof IResource)
+				IResource resource = null;
+				if (next.getType() == UserNodeType.COMPONENTS_PACKAGE || next.getType() == UserNodeType.SERVICES_PACKAGE)
 				{
-					IResource resource = (IResource)realObject;
+					resource = resources.getFolder((next.getType() == UserNodeType.COMPONENTS_PACKAGE ? SolutionSerializer.COMPONENTS_DIR_NAME
+						: SolutionSerializer.SERVICES_DIR_NAME) + "/" + (String)next.getRealObject());
+				}
+				else
+				{
+					Object realObject = next.getRealObject();
+					if (realObject instanceof IResource)
+					{
+						resource = (IResource)realObject;
+					}
+				}
+				if (resource != null)
+				{
 					try
 					{
 						resource.delete(true, new NullProgressMonitor());
+						resources.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+						deleted = true;
 					}
 					catch (CoreException e)
 					{
@@ -82,6 +105,11 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 					}
 				}
 
+			}
+			if (deleted)
+			{
+				parent.children = null;
+				viewer.refreshTreeNodeFromModel(parent);
 			}
 		}
 	}
@@ -110,6 +138,4 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 		}
 		setEnabled(state);
 	}
-
-
 }
