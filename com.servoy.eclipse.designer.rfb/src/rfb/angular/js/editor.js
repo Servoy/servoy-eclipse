@@ -1,4 +1,4 @@
-angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dragselection",'decorators','webSocketModule','keyboardlayoutupdater']).factory("$pluginRegistry",function($rootScope) {
+angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dragselection",'inlineedit','decorators','webSocketModule','keyboardlayoutupdater']).factory("$pluginRegistry",function($rootScope) {
 	var plugins = [];
 
 	return {
@@ -169,83 +169,6 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 					return $scope.getFormState().model[name];
 				}
 				return null;
-			}
-			
-			$scope.onDoubleClickAction = function(event){
-				var selection = $scope.getSelection();
-				if (selection && selection.length > 0)
-				{
-					var clickPosition = $scope.convertToContentPoint(getMousePosition(event));
-					for (var i=0;i<selection.length;i++)
-					{
-						var node = selection[i];
-						var model = $scope.getBeanModel(node);
-						if (model && (clickPosition.x >= model.location.x && clickPosition.x <= (model.location.x + model.size.width))
-								&& (clickPosition.y >= model.location.y && clickPosition.y <= (model.location.y + model.size.height)))
-						{
-							var directEditProperty = model["directEditPropertyName"];
-							if (directEditProperty)
-							{
-								var obj = {};
-								var absolutePoint = $scope.convertToAbsolutePoint({x: model.location.x,y: model.location.y});
-								var applyValue = function()
-								{
-									$("#directEdit").hide();
-									var newValue = $("#directEdit").text();
-									var oldValue = model[directEditProperty];
-									if (oldValue != newValue)
-									{
-										var value = {};
-										value[directEditProperty] = newValue;
-										obj[node.getAttribute("svy-id")] = value;
-										$editorService.sendChanges(obj);
-									}
-								}
-								// double click on element
-								$("#directEdit")
-									.unbind('blur')
-									.unbind('keyup')
-									.unbind('keydown')
-									.html(model[directEditProperty])
-									.css({
-										display: "block",
-										left: absolutePoint.x,
-										top: absolutePoint.y,
-										width: model.size.width+"px",
-										height: model.size.height+"px"
-									})
-									.bind('keyup',function(event)
-										{
-											if (event.keyCode == 27)
-											{
-												$("#directEdit").html(model[directEditProperty]).hide();
-											}
-											if (event.keyCode == 13)
-											{
-												applyValue();
-											}
-											if (event.keyCode == 46)
-											{
-												return false;
-											}
-										})
-									.bind('keydown',function(event)
-										{
-											if (event.keyCode == 8)
-											{
-												event.stopPropagation();
-											}
-										})	
-									.bind('blur',function()
-											{
-												applyValue();
-											})
-									.focus();
-								break;
-							}	
-						}
-					}
-				}
 			}
 			
 			$scope.updateGhostLocation = function(ghost, x, y) {
