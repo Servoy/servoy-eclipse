@@ -1154,6 +1154,13 @@ public class EditorServiceHandler implements IServerService
 				}
 				Bean bean = editorPart.getForm().createNewBean(compName, name);
 				bean.setLocation(new Point(x, y));
+				WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(name);
+				PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
+				if (description != null && description.getDefaultValue() instanceof JSONObject)
+				{
+					bean.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
+						((JSONObject)description.getDefaultValue()).optInt("height", 80)));
+				}
 				return bean;
 			}
 		}
