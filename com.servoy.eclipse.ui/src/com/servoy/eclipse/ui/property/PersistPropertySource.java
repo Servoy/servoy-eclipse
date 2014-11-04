@@ -784,7 +784,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		/*
 		 * Category based property controllers.
 		 */
-		if (FunctionPropertyType.INSTANCE.getClass().isAssignableFrom(propertyType.getClass()))
+		if (propertyType != null && FunctionPropertyType.INSTANCE.getClass().isAssignableFrom(propertyType.getClass()))
 		{
 			final Table table = form == null ? null : form.getTable();
 			return new MethodPropertyController<Integer>(id, displayName, persistContext, new MethodListOptions(true,
@@ -1297,96 +1297,99 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			}
 		}
 
-		/*
-		 * Type based property controllers.
-		 */
-
-		if (DimensionPropertyType.TYPE_NAME.equals(propertyType.getName()))
+		if (propertyType != null)
 		{
-			final java.awt.Dimension defaultDimension = id.equals("intercellSpacing") ? new Dimension(1, 1) : new Dimension(0, 0);
-			return new PropertyController<java.awt.Dimension, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Dimension>()
+			/*
+			 * Type based property controllers.
+			 */
+
+			if (DimensionPropertyType.TYPE_NAME.equals(propertyType.getName()))
 			{
-				@Override
-				public Object convertProperty(Object id, java.awt.Dimension value)
+				final java.awt.Dimension defaultDimension = id.equals("intercellSpacing") ? new Dimension(1, 1) : new Dimension(0, 0);
+				return new PropertyController<java.awt.Dimension, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Dimension>()
 				{
-					return new ComplexProperty<java.awt.Dimension>(value)
+					@Override
+					public Object convertProperty(Object id, java.awt.Dimension value)
 					{
-						@Override
-						public IPropertySource getPropertySource()
+						return new ComplexProperty<java.awt.Dimension>(value)
 						{
-							DimensionPropertySource dimensionPropertySource = new DimensionPropertySource(this, defaultDimension);
-							dimensionPropertySource.setReadonly(readOnly);
-							return dimensionPropertySource;
-						}
-					};
-				}
+							@Override
+							public IPropertySource getPropertySource()
+							{
+								DimensionPropertySource dimensionPropertySource = new DimensionPropertySource(this, defaultDimension);
+								dimensionPropertySource.setReadonly(readOnly);
+								return dimensionPropertySource;
+							}
+						};
+					}
 
-			}, DimensionPropertySource.getLabelProvider(), new ICellEditorFactory()
-			{
-				public CellEditor createPropertyEditor(Composite parent)
+				}, DimensionPropertySource.getLabelProvider(), new ICellEditorFactory()
 				{
-					return DimensionPropertySource.createPropertyEditor(parent);
-				}
-			});
-		}
-
-		if (PointPropertyType.TYPE_NAME.equals(propertyType.getName()))
-		{
-			return new PropertyController<java.awt.Point, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Point>()
-			{
-				@Override
-				public Object convertProperty(Object id, java.awt.Point value)
-				{
-					return new ComplexProperty<java.awt.Point>(value)
+					public CellEditor createPropertyEditor(Composite parent)
 					{
-						@Override
-						public IPropertySource getPropertySource()
-						{
-							PointPropertySource pointPropertySource = new PointPropertySource(this);
-							pointPropertySource.setReadonly(readOnly);
-							return pointPropertySource;
-						}
-					};
-				}
-			}, PointPropertySource.getLabelProvider(), new ICellEditorFactory()
-			{
-				public CellEditor createPropertyEditor(Composite parent)
-				{
-					return PointPropertySource.createPropertyEditor(parent);
-				}
-			});
-		}
+						return DimensionPropertySource.createPropertyEditor(parent);
+					}
+				});
+			}
 
-		if (InsetsPropertyType.TYPE_NAME.equals(propertyType.getName()))
-		{
-			return new PropertyController<java.awt.Insets, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Insets>()
+			if (PointPropertyType.TYPE_NAME.equals(propertyType.getName()))
 			{
-				@Override
-				public Object convertProperty(Object property, java.awt.Insets value)
+				return new PropertyController<java.awt.Point, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Point>()
 				{
-					return new ComplexProperty<Insets>(value)
+					@Override
+					public Object convertProperty(Object id, java.awt.Point value)
 					{
-						@Override
-						public IPropertySource getPropertySource()
+						return new ComplexProperty<java.awt.Point>(value)
 						{
-							InsetsPropertySource insetsPropertySource = new InsetsPropertySource(this);
-							insetsPropertySource.setReadonly(readOnly);
-							return insetsPropertySource;
-						}
-					};
-				}
-			}, InsetsPropertySource.getLabelProvider(), new ICellEditorFactory()
-			{
-				public CellEditor createPropertyEditor(Composite parent)
+							@Override
+							public IPropertySource getPropertySource()
+							{
+								PointPropertySource pointPropertySource = new PointPropertySource(this);
+								pointPropertySource.setReadonly(readOnly);
+								return pointPropertySource;
+							}
+						};
+					}
+				}, PointPropertySource.getLabelProvider(), new ICellEditorFactory()
 				{
-					return InsetsPropertySource.createPropertyEditor(parent);
-				}
-			});
-		}
+					public CellEditor createPropertyEditor(Composite parent)
+					{
+						return PointPropertySource.createPropertyEditor(parent);
+					}
+				});
+			}
 
-		if (ColorPropertyType.TYPE_NAME.equals(propertyType.getName()))
-		{
-			return new ColorPropertyController(id, displayName);
+			if (InsetsPropertyType.TYPE_NAME.equals(propertyType.getName()))
+			{
+				return new PropertyController<java.awt.Insets, Object>(id, displayName, new ComplexPropertyConverter<java.awt.Insets>()
+				{
+					@Override
+					public Object convertProperty(Object property, java.awt.Insets value)
+					{
+						return new ComplexProperty<Insets>(value)
+						{
+							@Override
+							public IPropertySource getPropertySource()
+							{
+								InsetsPropertySource insetsPropertySource = new InsetsPropertySource(this);
+								insetsPropertySource.setReadonly(readOnly);
+								return insetsPropertySource;
+							}
+						};
+					}
+				}, InsetsPropertySource.getLabelProvider(), new ICellEditorFactory()
+				{
+					public CellEditor createPropertyEditor(Composite parent)
+					{
+						return InsetsPropertySource.createPropertyEditor(parent);
+					}
+				});
+			}
+
+			if (ColorPropertyType.TYPE_NAME.equals(propertyType.getName()))
+			{
+				return new ColorPropertyController(id, displayName);
+			}
 		}
 
 		if (propertyType == BorderPropertyType.INSTANCE)
