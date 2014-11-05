@@ -39,13 +39,13 @@ public class ImportComponentFolderAction extends ImportComponentAction
 	{
 		super(viewer, entity, folder);
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("import_folder.gif"));
-		setText("Import " + entity + " folder");
+		setText("Import " + entity + " folder package");
 		setToolTipText(getText());
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportComponentAction#run()
 	 */
 	@Override

@@ -88,8 +88,6 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	private IResourceChangeListener resourceChangeListener;
 
-	private final List<IWebResourceChangedListener> webResourceChangedListeners = Collections.synchronizedList(new ArrayList<IWebResourceChangedListener>());
-
 	private IActiveProjectListener activeProjectListenerForRegisteringResources;
 	private Job registerResourcesJob;
 
@@ -269,10 +267,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 							ResourceProvider.addComponentResources(componentReaders.values());
 							ResourceProvider.addServiceResources(serviceReaders.values());
 
-							for (IWebResourceChangedListener listener : webResourceChangedListeners)
-							{
-								listener.changed();
-							}
+							com.servoy.eclipse.core.Activator.getDefault().webResourcesChanged();
 						}
 					}
 					finally
@@ -328,16 +323,6 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			registerResourcesJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
 			registerResourcesJob.schedule();
 		}
-	}
-
-	public void addWebComponentChangedListener(IWebResourceChangedListener listener)
-	{
-		webResourceChangedListeners.add(listener);
-	}
-
-	public void removeWebComponentChangedListener(IWebResourceChangedListener listener)
-	{
-		webResourceChangedListeners.remove(listener);
 	}
 
 	/*
@@ -488,7 +473,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 		public String readTextFile(String path, Charset charset) throws IOException
 		{
 			IFile file = folder.getFile(path);
-			if (file != null)
+			if (file != null && file.exists())
 			{
 				try
 				{

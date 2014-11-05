@@ -99,12 +99,12 @@ import org.sablo.specification.property.types.StringPropertyType;
 
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.IActiveProjectListener;
+import com.servoy.eclipse.core.IWebResourceChangedListener;
 import com.servoy.eclipse.core.JSDeveloperSolutionModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.Activator;
-import com.servoy.eclipse.debug.IWebResourceChangedListener;
 import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
@@ -831,7 +831,7 @@ public class TypeCreator extends TypeCache
 					});
 				}
 
-				Activator.getDefault().addWebComponentChangedListener(new IWebResourceChangedListener()
+				com.servoy.eclipse.core.Activator.getDefault().addWebComponentChangedListener(new IWebResourceChangedListener()
 				{
 					@Override
 					public void changed()

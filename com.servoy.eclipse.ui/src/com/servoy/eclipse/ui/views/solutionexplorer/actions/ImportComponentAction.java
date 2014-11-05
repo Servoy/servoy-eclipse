@@ -66,7 +66,7 @@ public class ImportComponentAction extends Action
 		this.entity = entity;
 		this.folder = folder;
 		setImageDescriptor(Activator.loadImageDescriptorFromOldLocations("import.gif"));
-		setText("Import " + entity);
+		setText("Import " + entity + " jar package");
 		setToolTipText(getText());
 	}
 
@@ -248,7 +248,7 @@ public class ImportComponentAction extends Action
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private IFolder checkComponentsFolderCreated()
 	{

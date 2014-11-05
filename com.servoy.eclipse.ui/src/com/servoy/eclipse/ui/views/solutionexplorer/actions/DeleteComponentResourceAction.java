@@ -31,7 +31,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -70,46 +69,26 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 	{
 		PlatformSimpleUserNode parent = (PlatformSimpleUserNode)viewer.getSelectedTreeNode().parent;
 		IProject resources = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject();
-		boolean deleted = false;
 		if (selection != null && MessageDialog.openConfirm(shell, getText(), "Are you sure you want to delete?"))
 		{
 			Iterator<SimpleUserNode> it = selection.iterator();
 			while (it.hasNext())
 			{
 				SimpleUserNode next = it.next();
-				IResource resource = null;
-				if (next.getType() == UserNodeType.COMPONENTS_PACKAGE || next.getType() == UserNodeType.SERVICES_PACKAGE)
+				Object realObject = next.getRealObject();
+				if (realObject instanceof IResource)
 				{
-					resource = resources.getFolder((next.getType() == UserNodeType.COMPONENTS_PACKAGE ? SolutionSerializer.COMPONENTS_DIR_NAME
-						: SolutionSerializer.SERVICES_DIR_NAME) + "/" + (String)next.getRealObject());
-				}
-				else
-				{
-					Object realObject = next.getRealObject();
-					if (realObject instanceof IResource)
-					{
-						resource = (IResource)realObject;
-					}
-				}
-				if (resource != null)
-				{
+					IResource resource = (IResource)realObject;
 					try
 					{
 						resource.delete(true, new NullProgressMonitor());
 						resources.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
-						deleted = true;
 					}
 					catch (CoreException e)
 					{
 						ServoyLog.logError(e);
 					}
 				}
-
-			}
-			if (deleted)
-			{
-				parent.children = null;
-				viewer.refreshTreeNodeFromModel(parent);
 			}
 		}
 	}

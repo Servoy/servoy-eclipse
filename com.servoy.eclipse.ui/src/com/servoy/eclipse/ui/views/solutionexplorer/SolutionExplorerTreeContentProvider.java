@@ -17,6 +17,8 @@
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,7 +36,11 @@ import java.util.TreeSet;
 import javax.swing.Icon;
 
 import org.apache.commons.dbcp.DbcpException;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -54,6 +60,7 @@ import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.IWebResourceChangedListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -125,7 +132,7 @@ import com.servoy.j2db.util.Utils;
  *
  * @author jblok
  */
-public class SolutionExplorerTreeContentProvider implements IStructuredContentProvider, ITreeContentProvider
+public class SolutionExplorerTreeContentProvider implements IStructuredContentProvider, ITreeContentProvider, IWebResourceChangedListener
 {
 	private static final String IMG_SOLUTION = "solution.gif";
 	private static final String IMG_SOLUTION_M = "module.gif";
@@ -318,6 +325,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		job.setSystem(true);
 		job.setPriority(Job.LONG);
 		job.schedule();
+
+		com.servoy.eclipse.core.Activator.getDefault().addWebComponentChangedListener(this);
 	}
 
 	public void inputChanged(Viewer v, Object oldInput, Object newInput)
@@ -713,14 +722,17 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					else if (type == UserNodeType.COMPONENTS)
 					{
 						WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
-						Set<String> packages = provider.getPackageNames();
+						Map<String, URL> packages = provider.getPackagesToURLs();
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
-						for (String packageName : packages)
+						for (String packageName : packages.keySet())
 						{
-							if (packageName.equals("Servoy Default")) continue;
-							PlatformSimpleUserNode node = new PlatformSimpleUserNode(packageName, UserNodeType.COMPONENTS_PACKAGE, packageName, null);
-							node.parent = un;
-							children.add(node);
+							IResource resource = getResource(packages.get(packageName));
+							if (resource != null)
+							{
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(packageName, UserNodeType.COMPONENTS_PACKAGE, resource, null);
+								node.parent = un;
+								children.add(node);
+							}
 						}
 						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 					}
@@ -729,40 +741,49 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
 						List<String> components = provider.getComponentsInPackage(un.getName());
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
-						for (String component : components)
+						if (components != null)
 						{
-							WebComponentSpecification spec = provider.getWebComponentSpecification(component);
-							PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT_ITEM, spec, null);
-							node.parent = un;
-							children.add(node);
+							for (String component : components)
+							{
+								WebComponentSpecification spec = provider.getWebComponentSpecification(component);
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT_ITEM, spec, null);
+								node.parent = un;
+								children.add(node);
+							}
 						}
 						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 					}
 					else if (type == UserNodeType.SERVICES)
 					{
 						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
-						Set<String> packages = provider.getPackageNames();
+						Map<String, URL> packages = provider.getPackagesToURLs();
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
-						for (String packageName : packages)
+						for (String packageName : packages.keySet())
 						{
-							if (packageName.equals("servoyservices")) continue;
-							PlatformSimpleUserNode node = new PlatformSimpleUserNode(packageName, UserNodeType.SERVICES_PACKAGE, packageName, null);
-							node.parent = un;
-							children.add(node);
+							IResource resource = getResource(packages.get(packageName));
+							if (resource != null)
+							{
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(packageName, UserNodeType.SERVICES_PACKAGE, resource, null);
+								node.parent = un;
+								children.add(node);
+							}
 						}
 						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 					}
 					else if (type == UserNodeType.SERVICES_PACKAGE)
 					{
 						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
-						List<String> components = provider.getServicesInPackage(un.getName());
+						List<String> services = provider.getServicesInPackage(un.getName());
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
-						for (String component : components)
+						if (services != null)
 						{
-							WebComponentSpecification spec = provider.getWebServiceSpecification(component);
-							PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE_ITEM, spec, null);
-							node.parent = un;
-							children.add(node);
+							for (String component : services)
+							{
+								WebComponentSpecification spec = provider.getWebServiceSpecification(component);
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE_ITEM, spec, null);
+								node.parent = un;
+								children.add(node);
+							}
 						}
 						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 
@@ -780,6 +801,30 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			return un.children;
 		}
 		return new Object[0];
+	}
+
+	/**
+	 * @param url
+	 * @return
+	 */
+	private IResource getResource(URL packageURL)
+	{
+		if (packageURL == null) return null;
+
+		try
+		{
+			IWorkspaceRoot root = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getWorkspace().getRoot();
+			IContainer[] dirResource = root.findContainersForLocationURI(packageURL.toURI());
+			if (dirResource.length == 1 && dirResource[0].exists()) return dirResource[0];
+
+			IFile[] jarResource = root.findFilesForLocationURI(packageURL.toURI());
+			if (jarResource.length == 1 && jarResource[0].exists()) return jarResource[0];
+		}
+		catch (URISyntaxException ex)
+		{
+			ServoyLog.logError(ex);
+		}
+		return null;
 	}
 
 	public boolean hasChildren(Object parent)
@@ -838,11 +883,13 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 				else if (un.getType() == UserNodeType.COMPONENTS_PACKAGE)
 				{
-					return !WebComponentSpecProvider.getInstance().getComponentsInPackage(un.getName()).isEmpty();
+					List<String> components = WebComponentSpecProvider.getInstance().getComponentsInPackage(un.getName());
+					return components != null && !components.isEmpty();
 				}
 				else if (un.getType() == UserNodeType.SERVICES_PACKAGE)
 				{
-					return !WebServiceSpecProvider.getInstance().getServicesInPackage(un.getName()).isEmpty();
+					List<String> services = WebServiceSpecProvider.getInstance().getServicesInPackage(un.getName());
+					return services != null && !services.isEmpty();
 				}
 			}
 			else if (un.children.length > 0)
@@ -2325,6 +2372,20 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		else return null;
 
 		return relations.toArray();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.core.IWebResourceChangedListener#changed()
+	 */
+	@Override
+	public void changed()
+	{
+		componentsNode.children = null;
+		view.refreshTreeNodeFromModel(componentsNode);
+		servicesNode.children = null;
+		view.refreshTreeNodeFromModel(servicesNode);
 	}
 
 }

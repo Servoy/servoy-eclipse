@@ -23,8 +23,10 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -168,6 +170,8 @@ public class Activator extends Plugin
 	private Boolean sqlExplorerLoaded = null;
 
 	private IDesignerCallback designerCallback;
+
+	private final List<IWebResourceChangedListener> webResourceChangedListeners = Collections.synchronizedList(new ArrayList<IWebResourceChangedListener>());
 
 	/**
 	 * @author jcompagner
@@ -474,7 +478,7 @@ public class Activator extends Plugin
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -646,7 +650,7 @@ public class Activator extends Plugin
 
 				/*
 				 * (non-Javadoc)
-				 *
+				 * 
 				 * @see com.servoy.j2db.IDesignerCallback#testAndStartDebugger()
 				 */
 				public void testAndStartDebugger()
@@ -662,7 +666,7 @@ public class Activator extends Plugin
 
 				/*
 				 * (non-Javadoc)
-				 *
+				 * 
 				 * @see com.servoy.j2db.IDesignerCallback#addURLStreamHandler(java.lang.String, java.net.URLStreamHandler)
 				 */
 				@Override
@@ -1275,6 +1279,27 @@ public class Activator extends Plugin
 				e.printStackTrace();
 				getLog().log(new Status(IStatus.ERROR, getBundle().getSymbolicName(), "Unexpected exception", e));
 			}
+		}
+	}
+
+	public void addWebComponentChangedListener(IWebResourceChangedListener listener)
+	{
+		webResourceChangedListeners.add(listener);
+	}
+
+	public void removeWebComponentChangedListener(IWebResourceChangedListener listener)
+	{
+		webResourceChangedListeners.remove(listener);
+	}
+
+	/**
+	 *
+	 */
+	public void webResourcesChanged()
+	{
+		for (IWebResourceChangedListener listener : webResourceChangedListeners)
+		{
+			listener.changed();
 		}
 	}
 }
