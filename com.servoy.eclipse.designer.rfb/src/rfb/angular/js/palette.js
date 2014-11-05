@@ -99,14 +99,17 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 					{
 						dragClone.remove();
 						var component = {};
+						
+						var dropTarget = utils.getNode(ev);
+						if (dropTarget) {
+							component.dropTargetUUID = dropTarget.getAttribute("svy-id");
+						}
 						if (type) {
 							component.type = type;
-							var dropTarget = utils.getNode(ev);
 							if (!dropTarget) return; // releasing a ghost, but no actual component underneath
 							if (dropTarget) {
 								if (!(dropTarget.getAttribute("svy-types").indexOf(type) > 0))
 									return; // releasing a ghost, but component does not support this ghost type
-								component.dropTargetUUID = dropTarget.getAttribute("svy-id");
 							}
 						}
 						component.name = componentName;

@@ -163,7 +163,7 @@ public abstract class BaseVisualFormEditorPaletteFactory implements IPaletteFact
 
 	/**
 	 * @param entryProperties
-	 * @param id
+	 * @param data.id
 	 * @param entry
 	 */
 	private static void addPaletteEntryProperties(Map<String, Object> map, String key, PaletteEntry entry, Map<String, Object> defaults)

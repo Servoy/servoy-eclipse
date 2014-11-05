@@ -1302,7 +1302,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			/*
 			 * Type based property controllers.
 			 */
-
 			if (DimensionPropertyType.TYPE_NAME.equals(propertyType.getName()))
 			{
 				final java.awt.Dimension defaultDimension = id.equals("intercellSpacing") ? new Dimension(1, 1) : new Dimension(0, 0);
@@ -1390,7 +1389,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			{
 				return new ColorPropertyController(id, displayName);
 			}
-		}
 
 		if (propertyType == BorderPropertyType.INSTANCE)
 		{
@@ -1508,7 +1506,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				}
 			};
 		}
-
+		}
 		// other bean properties
 		if (propertyDescriptor.propertyDescriptor instanceof BeanPropertyHandler)
 		{
