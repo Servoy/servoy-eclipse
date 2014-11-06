@@ -118,5 +118,4 @@ public class EditorServiceHandler implements IServerService
 		}
 		return null;
 	}
-
 }
