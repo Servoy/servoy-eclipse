@@ -208,8 +208,8 @@ public class CreateComponentHandler implements IServerService
 				{
 					Portal portal = (Portal)searchForPersist;
 					parent = portal;
-					x = x - portal.getLocation().x;
-					y = y - portal.getLocation().y;
+					//x = x - portal.getLocation().x;
+					//y = y - portal.getLocation().y;
 				}
 				else parent = editorPart.getForm();
 			}

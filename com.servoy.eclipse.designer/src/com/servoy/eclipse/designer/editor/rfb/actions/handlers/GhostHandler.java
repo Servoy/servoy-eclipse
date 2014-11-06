@@ -298,8 +298,8 @@ public class GhostHandler implements IServerService
 						Portal portal = (Portal)o;
 						{
 							writer.object();
-							writer.key("left").value(portal.getLocation().getX());
-							writer.key("top").value(portal.getLocation().getY());
+							writer.key("left").value(0);
+							writer.key("top").value(0);
 							writer.endObject();
 						}
 						writer.key("uuid").value(o.getUUID());

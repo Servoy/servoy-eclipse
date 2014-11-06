@@ -129,7 +129,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 					}
 					return partStyle;
 				}
-				return {background: "#e4844a", padding: "3px", left: ghost.location.x, top: ghost.location.y, width: ghost.size.width, height: ghost.size.height};
+				return {background: "#e4844a", opacity: 0.4, padding: "3px", left: ghost.location.x, top: ghost.location.y, width: ghost.size.width, height: ghost.size.height};
 			}
 			
 			$scope.rearrangeGhosts = function(ghosts) {

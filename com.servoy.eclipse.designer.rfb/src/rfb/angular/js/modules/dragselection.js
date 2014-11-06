@@ -6,6 +6,7 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 		var dragging = false;
 		var dragStartEvent = null;
 		var selectionToDrag = null;
+		var COMPONENT_TYPE = 7;
 
 		function onmousedown(event) {
 			if (event.button == 0 && utils.getNode(event)){
@@ -39,25 +40,32 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 							{
 								components[size++] = component;
 							}
-
 						}
 						if (size > 0) $editorService.createComponents({"components": components}); 
 					}
 					else
 					{
 						var obj = {};
-						for(var i=0;i<selection.length;i++) {
-							var node = selection[i];
-							var name = node.getAttribute("name");
-							var beanModel = formState.model[name];
-							if (beanModel){
-								beanModel.location.y;
-								beanModel.location.x
-								obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y}
-							}
+						for (var i=0; i < selectionToDrag.length; i++) {
+							var node = selectionToDrag[i];
+							if (node.uuid) {
+								posX = node.location.x;
+								posY = node.location.y;
+								if (node.type === COMPONENT_TYPE) // this is a component, so we have to move it
+								obj[node.uuid] = {x:node.location.x,y:node.location.y}
+							} 
 							else {
-								var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-								obj[node.getAttribute("svy-id")] = {x:ghostObject.location.x,y:ghostObject.location.y}
+								var name = node.getAttribute("name");
+								var beanModel = formState.model[name];
+								if (beanModel){
+									beanModel.location.y;
+									beanModel.location.x
+									obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y}
+								}
+								else {
+									var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+									obj[node.getAttribute("svy-id")] = {x:ghostObject.location.x,y:ghostObject.location.y}
+								}
 							}
 						}
 						$editorService.sendChanges(obj);
