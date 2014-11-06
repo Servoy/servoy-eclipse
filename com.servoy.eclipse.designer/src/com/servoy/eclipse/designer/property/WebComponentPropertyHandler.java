@@ -41,6 +41,7 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyFunctionPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
@@ -141,7 +142,8 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			}
 			return type.defaultValue();
 		}
-		else if (type instanceof IPropertyConverter && type != DataproviderPropertyType.INSTANCE && type != TagStringPropertyType.INSTANCE)
+		else if (type instanceof IPropertyConverter && type != DataproviderPropertyType.INSTANCE && type != TagStringPropertyType.INSTANCE &&
+			propertyDescription.getType() != MediaPropertyType.INSTANCE)
 		{
 			if (value instanceof String && ((String)value).startsWith("{"))
 			{
@@ -192,7 +194,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			convertedValue = (val == null) ? null : val.getUUID().toString();
 		}
 		else if (propertyDescription.getType() instanceof IPropertyConverter && propertyDescription.getType() != DataproviderPropertyType.INSTANCE &&
-			propertyDescription.getType() != TagStringPropertyType.INSTANCE)
+			propertyDescription.getType() != TagStringPropertyType.INSTANCE && propertyDescription.getType() != MediaPropertyType.INSTANCE)
 		{
 			IPropertyConverter<Object> type = (IPropertyConverter<Object>)propertyDescription.getType();
 			JSONStringer writer = new JSONStringer();
