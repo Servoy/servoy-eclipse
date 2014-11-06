@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
+import java.awt.Dimension;
 import java.util.List;
 import java.util.UUID;
 
@@ -126,8 +127,9 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 		Form form = editorPart.getForm();
 		String layout = computeLayout(form);
-		String url = "http://localhost:8080/rfb/angular/index.html?s=" + form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&editorid=" +
-			editorId;
+		Dimension formSize = form.getSize();
+		String url = "http://localhost:8080/rfb/angular/index.html?s=" + form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" +
+			formSize.getWidth() + "&h=" + formSize.getHeight() + "&editorid=" + editorId;
 		try
 		{
 			ServoyLog.logInfo("Browser url for editor: " + url);

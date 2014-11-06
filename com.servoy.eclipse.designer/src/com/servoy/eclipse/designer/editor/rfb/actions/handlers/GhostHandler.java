@@ -43,6 +43,7 @@ import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.UUID;
 
 /**
  * @author user
@@ -252,15 +253,17 @@ public class GhostHandler implements IServerService
 				{
 					try
 					{
+						Form f = (Form)o;
 						writer.object();
-						writer.key("uuid").value(o.getUUID());
+						writer.key("uuid").value(UUID.randomUUID()/* f.getUUID() */);
 						writer.key("ghosts");
 						writer.array();
-						Iterator<Part> partIterator = ((Form)o).getParts();
+						Iterator<Part> partIterator = f.getParts();
 						ArrayList<Part> parts = new ArrayList<Part>();
 						while (partIterator.hasNext())
 							parts.add(partIterator.next());
 
+						// the parts
 						for (int i = 0; i < parts.size(); i++)
 						{
 							writer.object();
@@ -277,6 +280,24 @@ public class GhostHandler implements IServerService
 							if (i < parts.size() - 1) writer.key("partnext").value(parts.get(i + 1).getUUID());
 							writer.endObject();
 						}
+
+						// the form itself
+						writer.object();
+						writer.key("uuid").value(f.getUUID());
+						writer.key("type").value(f.getTypeID());
+						writer.key("text").value("");
+						writer.key("location");
+						writer.object();
+						writer.key("x").value(0);
+						writer.key("y").value(0);
+						writer.endObject();
+						writer.key("size");
+						writer.object();
+						writer.key("width").value(f.getSize().width);
+						writer.key("height").value(f.getSize().height);
+						writer.endObject();
+						writer.endObject();
+
 						writer.endArray();
 						writer.endObject();
 					}

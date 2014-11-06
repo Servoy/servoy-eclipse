@@ -46,6 +46,10 @@
 			function renderDecorators() {
 				editorNode.trigger('renderDecorators.content')
 			}
+			
+			function updateForm(w, h) {
+				editorNode.trigger('updateForm.content', w, h)
+			}
 
 			$(document).ready(function(){
 				editorNode.trigger('documentReady.content', document)

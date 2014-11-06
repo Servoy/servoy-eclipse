@@ -21,7 +21,8 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 	PART_TYPE_TITLE_HEADER: 1,
 	PART_TYPE_HEADER: 2,
 	PART_TYPE_BODY: 5,
-	PART_TYPE_FOOTER: 8
+	PART_TYPE_FOOTER: 8,
+	FORM_PERSIST_TYPE: 3
 }).directive("editor", function( $window, $pluginRegistry,$rootScope,EDITOR_EVENTS,EDITOR_CONSTANTS,$timeout,$editorService){
 	return {
 		restrict: 'E',
@@ -43,6 +44,8 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 
 			var formName =  $editorService.getURLParameter("f");
 			var formLayout =  $editorService.getURLParameter("l");
+			var formWidth = parseInt($editorService.getURLParameter("w"), 10);
+			var formHeight = parseInt($editorService.getURLParameter("h"), 10);
 			var editorContentRootScope = null;
 			var servoyInternal = null;
 			var fieldLocation = null;
@@ -103,33 +106,28 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 
 			$scope.getGhostContainerStyle = function(ghostContainer) {
 				if(ghostContainer.style == undefined) {
-					if($scope.isContentSizeFull()) {
-						return {left: "0px", top: "0px", right: EDITOR_CONSTANTS.PART_LABEL_WIDTH + "px", bottom: "0px"};
-					} else {
-						return {left: "20px", top: "20px", width: $scope.contentStyle.width, height: $scope.contentStyle.height};
-					}
+					return {left: "20px", top: "20px", width: $scope.contentStyle.width, height: $scope.contentStyle.height};
 				}
 				return ghostContainer.style;
 			}
 			
 			$scope.getGhostStyle = function(ghost) {
 				if(ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE) { // parts
-					var partStyle = {right: "-" + (EDITOR_CONSTANTS.PART_LABEL_WIDTH - 6) +"px", width: (EDITOR_CONSTANTS.PART_LABEL_WIDTH - 6) + "px", height: EDITOR_CONSTANTS.PART_LABEL_HEIGHT + "px", textAlign: "center", whiteSpace: "nowrap"};
-					switch(ghost.parttype) {
-						case EDITOR_CONSTANTS.PART_TYPE_TITLE_HEADER:
-						case EDITOR_CONSTANTS.PART_TYPE_HEADER:
-							partStyle.top = (ghost.location.y - EDITOR_CONSTANTS.PART_LABEL_HEIGHT) + "px";
-							break;
-						case EDITOR_CONSTANTS.PART_TYPE_BODY:
-							partStyle.bottom = ghost.partnext ? ($scope.getGhost(ghost.partnext).location.y - ghost.location.y) + "px" : "0px";	
-							break;
-						case EDITOR_CONSTANTS.PART_TYPE_FOOTER:
-							partStyle.bottom = "0px";
-						
-					}
-					return partStyle;
+					return {background: "#d0d0d0", top: ghost.location.y + "px", right: "-" + (EDITOR_CONSTANTS.PART_LABEL_WIDTH - 6) +"px", width: (EDITOR_CONSTANTS.PART_LABEL_WIDTH - 6) + "px", height: EDITOR_CONSTANTS.PART_LABEL_HEIGHT + "px", textAlign: "center", whiteSpace: "nowrap"};
+				}
+				else if(ghost.type == EDITOR_CONSTANTS.FORM_PERSIST_TYPE) { // the form
+					return {left: 0, top: 0, width: ghost.size.width + "px", height: ghost.size.height + "px", padding: "3px"};
 				}
 				return {background: "#e4844a", opacity: 0.4, padding: "3px", left: ghost.location.x, top: ghost.location.y, width: ghost.size.width, height: ghost.size.height};
+			}
+			
+			$scope.getGhostHRStyle = function(ghost) {
+				if(ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE) { // parts
+					return {marginTop:"-4px", border:0, borderTop:"1px dashed #000", width:(parseInt($scope.contentStyle.width, 10) + EDITOR_CONSTANTS.PART_LABEL_WIDTH - 15) + "px", float:"right"};
+				}
+				else {
+					return {display:"none"};
+				}
 			}
 			
 			$scope.rearrangeGhosts = function(ghosts) {
@@ -137,7 +135,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				for (var i = 0; i < ghosts.length ; i++)
 				{
 					var ghost = ghosts[i];
-					if (ghost.type != EDITOR_CONSTANTS.PART_PERSIST_TYPE)
+					if ((ghost.type != EDITOR_CONSTANTS.PART_PERSIST_TYPE) && (ghost.type != EDITOR_CONSTANTS.FORM_PERSIST_TYPE))
 					{
 						if ($('[svy-id='+ghost.uuid+']')[0])
 						{
@@ -170,23 +168,31 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				}
 				return null;
 			}
-			
+
 			$scope.updateGhostLocation = function(ghost, x, y) {
 				if(ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE) { // it is a part
-
-					if(ghost.max == -1 || y <= ghost.min || y >= ghost.max) {
-						// part is overlapping its neighbors or it is last part (ghost.max == -1)
+					if(y <= ghost.min || (ghost.max != -1 && y >= ghost.max)) {
+						// part is overlapping its neighbors
 						return;
 					}
 				}
-				
+				if(ghost.type == EDITOR_CONSTANTS.FORM_PERSIST_TYPE) {
+					return;
+				}
 				ghost.location.x = x;
 				ghost.location.y = y;
 			}
 			
 			$scope.updateGhostLocationLimits = function(ghost) {
-				ghost.min = ghost.partprev ? $scope.getGhost(ghost.partprev).location.y : ($scope.isContentSizeFull() ? 0 : EDITOR_CONSTANTS.PART_LABEL_HEIGHT);
+				ghost.min = ghost.partprev ? $scope.getGhost(ghost.partprev).location.y : 0;
 				ghost.max = ghost.partnext ? $scope.getGhost(ghost.partnext).location.y : -1;
+			}
+			
+			$scope.updateGhostSize = function(ghost, deltaWidth, deltaHeight) {
+				if(ghost.type == EDITOR_CONSTANTS.FORM_PERSIST_TYPE) {
+					ghost.size.width = ghost.size.width + deltaWidth;
+					$scope.contentStyle.width = ghost.size.width + "px";
+				}
 			}
 			
 			$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
@@ -239,7 +245,6 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				var selection = $scope.getSelection();
 				
 				var isPartSelected = false;
-				
 				for(var i = 0; i < selection.length; i++) 
 				{
 					var ghost = $scope.getGhost(selection[i].getAttribute("svy-id"));
@@ -253,11 +258,12 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 					$timeout(function() {
 						var promise = $editorService.getPartsStyles();
 						promise.then(function (result){
+							var partsStyle = result.parts;
 							var formScope = $scope.getFormState().getScope();
-							for (i = 0; i < result.length; i++) {
-								formScope[result[i].name + 'Style'] = result[i].style 
+							for (i = 0; i < partsStyle.length; i++) {
+								formScope[partsStyle[i].name + 'Style'] = partsStyle[i].style 
 							}
-							editorContentRootScope.$digest();
+							editorContentRootScope.$apply();
 						});						
 					}, 0);	
 				}
@@ -330,6 +336,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 						selection.push(ar[i])
 					}
 				}
+				removeInvalidSelectionEntries();
 				if (dirty) {
 					markDirty()
 				}
@@ -359,11 +366,27 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				Array.prototype.push.apply(delta.addedNodes, ar)
 				Array.prototype.push.apply(selection, ar)
 
+				removeInvalidSelectionEntries();
 				if (dirty) {
 					markDirty()
 				}
 			}
 
+			function removeInvalidSelectionEntries() {
+				if(selection.length > 1) {
+					var validSelection = new Array();
+					for (var i = 0; i < selection.length; i++) {
+						var ghost = $scope.getGhost(selection[i].getAttribute("svy-id"));
+						if(ghost && (ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE))
+						{
+							continue;
+						}
+						validSelection.push(selection[i])
+					}
+					selection = validSelection;
+				}
+			}
+			
 			$scope.isAbsoluteFormLayout = function() {
 				return formLayout == "absolute";
 			}
@@ -449,13 +472,13 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 					var contentDiv = $element.find('.content-area')[0];
 					if (contentDiv.clientHeight < sizes.height && (!$scope.contentStyle.h || $scope.contentStyle.h + 20 < sizes.height || $scope.contentStyle.h - 20 > sizes.height)) {
 						$scope.contentStyle.h = sizes.height
-						$scope.contentStyle.height = (sizes.height + 20)  +"px"
+						//$scope.contentStyle.height = (sizes.height + 20)  +"px"
 						$scope.glasspaneStyle.height = (sizes.height + 20)  +"px"
 					}
 					if ($scope.isContentSizeFull()) {
 						if (contentDiv.clientWidth < sizes.width && (!$scope.contentStyle.w || $scope.contentStyle.w + 20 < sizes.width || $scope.contentStyle.w - 20 > sizes.width)) {
 							$scope.contentStyle.w = sizes.width
-							$scope.contentStyle.width = (sizes.width + 20)  +"px"
+							//$scope.contentStyle.width = (sizes.width + 20)  +"px"
 							$scope.glasspaneStyle.width = (sizes.width + 20)  +"px"
 						}
 					}
@@ -499,7 +522,12 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 						}
 						return true;
 					});
-				}); 
+				});
+				
+				if($scope.isAbsoluteFormLayout) {
+					$scope.setContentSize(formWidth + "px", formHeight + "px");
+				}
+				
 				var promise = $editorService.getGhostComponents({"resetPosition":true});
 				promise.then(function (result){
 					$scope.ghosts = result;
@@ -508,40 +536,58 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 					$scope.setContentSizes();
 				},500);
 			});
-
-
+			
 			$element.on('renderDecorators.content', function(event) {
 				// TODO this is now in a timeout to let the editor-content be able to reload the form.
 				// could we have an event somewhere from the editor-content that the form is reloaded and ready?
 				// maybe the form controllers code could call $evalAsync as last thing in its controller when it is in design.
 				if (selection.length > 0) {
-					$timeout(function() {
+					var ghost = $scope.getGhost(selection[0].getAttribute("svy-id"));
+					if(ghost && (ghost.type == EDITOR_CONSTANTS.FORM_PERSIST_TYPE)) {						
+						$scope.setContentSizes();
+					}
+					else {
 						var promise = $editorService.getGhostComponents();//no parameter, then the ghosts are not repositioned
 						promise.then(function (result){
 							$scope.ghosts = result;
-						});
-						var nodes = Array.prototype.slice.call($scope.contentDocument.querySelectorAll("[svy-id]"));
-						var ghosts = Array.prototype.slice.call($scope.glasspane.querySelectorAll("[svy-id]"));
-						nodes = nodes.concat(ghosts);
-						var matchedElements = []
-						for (var i = 0; i < nodes.length; i++) {
-							var element = nodes[i]
-							for(var s=0;s<selection.length;s++) {
-								if (selection[s].getAttribute("svy-id") == element.getAttribute("svy-id")){
-									matchedElements.push(element);
-									break;
+							$timeout(function() {
+								var nodes = Array.prototype.slice.call($scope.contentDocument.querySelectorAll("[svy-id]"));
+								var ghosts = Array.prototype.slice.call($scope.glasspane.querySelectorAll("[svy-id]"));
+								nodes = nodes.concat(ghosts);
+								var matchedElements = []
+								for (var i = 0; i < nodes.length; i++) {
+									var element = nodes[i]
+									for(var s=0;s<selection.length;s++) {
+										if (selection[s].getAttribute("svy-id") == element.getAttribute("svy-id")){
+											matchedElements.push(element);
+											break;
+										}
+									}
 								}
-							}
-						}
-						selection = matchedElements;
-						$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection)
-					},100)
+								selection = matchedElements;
+								$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection)
+							}, 100);
+						});
+					}
 				}
 				else {
 					$scope.setContentSizes();
 				}
 			});
 
+			$element.on('updateForm.content', function(event, formInfo) {
+				$scope.setContentSize(formInfo.w + "px", formInfo.h + "px");
+				var ghost = $scope.getGhost(formInfo.uuid);
+				if(ghost && (ghost.type == EDITOR_CONSTANTS.FORM_PERSIST_TYPE)) {						
+					ghost.size.width = formInfo.w;
+					ghost.size.height = formInfo.h;
+					
+					if(selection.length > 0 && selection[0].getAttribute("svy-id") == formInfo.uuid) {
+						$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection)
+					}
+				}
+			});			
+			
 			$editorService.registerEditor($scope);
 			var promise = $editorService.connect();
 			promise.then(function() {

@@ -31,6 +31,7 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.GhostBean;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
@@ -104,6 +105,17 @@ public class SetPropertiesHandler implements IServerService
 							cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(persist, false),
 								StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), new Integer(properties.optInt("y"))));
 						}
+					}
+					else if (persist instanceof Form)
+					{
+						JSONObject properties = args.optJSONObject(uuid);
+						cc = new CompoundCommand();
+						if (properties.has("width"))
+						{
+							cc.add(new SetPropertyCommand("formwidth", PersistPropertySource.createPersistPropertySource(persist, false),
+								StaticContentSpecLoader.PROPERTY_WIDTH.getPropertyName(), new Integer(properties.optInt("width"))));
+						}
+
 					}
 					if (cc != null) editorPart.getCommandStack().execute(cc);
 				}

@@ -34,13 +34,17 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	      scope: {
 	      },
 	      controller: function($scope, $element, $attrs, $toolbar) {
-	    	  $scope.elements = $toolbar.getButtons(TOOLBAR_CATEGORIES.ELEMENTS);
-	    	  $scope.ordering = $toolbar.getButtons(TOOLBAR_CATEGORIES.ORDERING);
-	    	  $scope.alignment = $toolbar.getButtons(TOOLBAR_CATEGORIES.ALIGNMENT);
-	    	  $scope.distribution = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISTRIBUTION);
-	    	  $scope.sizing = $toolbar.getButtons(TOOLBAR_CATEGORIES.SIZING);
-	    	  $scope.form = $toolbar.getButtons(TOOLBAR_CATEGORIES.FORM);
-	    	  $scope.sticky = $toolbar.getButtons(TOOLBAR_CATEGORIES.STICKY);
+	    	  $scope.loadToolbar = function() {
+		    	  $scope.elements = $toolbar.getButtons(TOOLBAR_CATEGORIES.ELEMENTS);
+		    	  $scope.ordering = $toolbar.getButtons(TOOLBAR_CATEGORIES.ORDERING);
+		    	  $scope.alignment = $toolbar.getButtons(TOOLBAR_CATEGORIES.ALIGNMENT);
+		    	  $scope.distribution = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISTRIBUTION);
+		    	  $scope.sizing = $toolbar.getButtons(TOOLBAR_CATEGORIES.SIZING);
+		    	  $scope.form = $toolbar.getButtons(TOOLBAR_CATEGORIES.FORM);
+		    	  $scope.sticky = $toolbar.getButtons(TOOLBAR_CATEGORIES.STICKY);	    		  
+	    	  }
+	    	  $scope.loadToolbar();
+	    	  $toolbar.registerPanel($scope);
 	      },
 	      templateUrl: 'templates/toolbar.html',
 	      replace: true
@@ -49,7 +53,12 @@ angular.module("toolbar",['toolbaractions','designsize'])
 })
 .factory("$toolbar", function(TOOLBAR_CATEGORIES){
 	var buttons= [];
+	var panelScope;
 	return {
+		registerPanel: function(scope) {
+			panelScope = scope;
+		},
+		
 		add: function(buttonState, category) {
 			if(!buttons[category]){
 				buttons[category] = [];
@@ -59,6 +68,10 @@ angular.module("toolbar",['toolbaractions','designsize'])
 		
 		getButtons: function(category) {
 			return buttons[category];
+		},
+		
+		refresh: function() {
+			if(panelScope) panelScope.loadToolbar()
 		}
 	}
 })

@@ -12,7 +12,12 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 					var node = selection[i];
 					var name = node.getAttribute("name");
 					var beanModel = formState.model[name];
-					obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y,width:beanModel.size.width,height:beanModel.size.height}
+					if(!beanModel) {
+						beanModel = $scope.getGhost(node.getAttribute("svy-id"));
+					}
+					if(beanModel) {
+						obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y,width:beanModel.size.width,height:beanModel.size.height}
+					}
 				}
 				$editorService.sendChanges(obj)
 			}
@@ -47,10 +52,16 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 							var node = selection[i];
 							var name = node.getAttribute("name");
 							var beanModel = formState.model[name];
-							beanModel.location.y = beanModel.location.y + deltaY* resizeInfo.top;
-							beanModel.location.x = beanModel.location.x + deltaX* resizeInfo.left;
-							beanModel.size.width = beanModel.size.width + deltaX* resizeInfo.width;
-							beanModel.size.height = beanModel.size.height + deltaY* resizeInfo.height;
+							if(beanModel) {
+								beanModel.location.y = beanModel.location.y + deltaY* resizeInfo.top;
+								beanModel.location.x = beanModel.location.x + deltaX* resizeInfo.left;
+								beanModel.size.width = beanModel.size.width + deltaX* resizeInfo.width;
+								beanModel.size.height = beanModel.size.height + deltaY* resizeInfo.height;
+							}
+							else {
+								var ghostObject = $scope.getGhost(node.getAttribute("svy-id"));
+								$scope.updateGhostSize(ghostObject, deltaX*resizeInfo.width, deltaY*resizeInfo.height)
+							}
 						}
 						$scope.refreshEditorContent();
 						lastresizeStartPosition = {
@@ -64,12 +75,14 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 						var node = selection[i];
 						var name = node.getAttribute("name");
 						var beanModel = formState.model[name];
-						node.originalSize = {};
-						node.originalSize.width = beanModel.size.width;
-						node.originalSize.height = beanModel.size.height;
-						node.originalLocation = {};
-						node.originalLocation.x = beanModel.location.x;
-						node.originalLocation.y = beanModel.location.y;
+						if(beanModel) {
+							node.originalSize = {};
+							node.originalSize.width = beanModel.size.width;
+							node.originalSize.height = beanModel.size.height;
+							node.originalLocation = {};
+							node.originalLocation.x = beanModel.location.x;
+							node.originalLocation.y = beanModel.location.y;
+						}
 					}
 					cleanListeners();
 					mousemovecallback = $scope.registerDOMEvent("mousemove","CONTENT_AREA",resizeSelection);
@@ -90,10 +103,12 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 								var node = selection[i];
 								var name = node.getAttribute("name");
 								var beanModel = formState.model[name];
-								beanModel.size.width = node.originalSize.width;
-								beanModel.size.height = node.originalSize.height ;
-								beanModel.location.x = node.originalLocation.x;
-								beanModel.location.y = node.originalLocation.y;
+								if(beanModel) {
+									beanModel.size.width = node.originalSize.width;
+									beanModel.size.height = node.originalSize.height ;
+									beanModel.location.x = node.originalLocation.x;
+									beanModel.location.y = node.originalLocation.y;
+								}
 							}
 							$scope.refreshEditorContent();
 							sendChanges();

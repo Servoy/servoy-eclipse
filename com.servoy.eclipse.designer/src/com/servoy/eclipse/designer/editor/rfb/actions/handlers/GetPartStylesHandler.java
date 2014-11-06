@@ -20,13 +20,15 @@ package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 import java.io.StringWriter;
 import java.util.Iterator;
 
-import org.json.JSONArray;
+import org.eclipse.swt.widgets.Display;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.server.ngclient.template.PartWrapper;
 
@@ -52,23 +54,44 @@ public class GetPartStylesHandler implements IServerService
 	 */
 	public Object executeMethod(String methodName, JSONObject args) throws JSONException
 	{
-		StringWriter stringWriter = new StringWriter();
-		final JSONWriter writer = new JSONWriter(stringWriter);
-
-		writer.array();
-
-		Iterator<Part> partsIte = editorPart.getForm().getParts();
-		while (partsIte.hasNext())
+		final JSONObject[] getPartsStylesReturn = new JSONObject[1];
+		Display.getDefault().syncExec(new Runnable()
 		{
-			PartWrapper partWrapper = new PartWrapper(partsIte.next(), editorPart.getForm(), null);
-			writer.object();
-			writer.key("name").value(partWrapper.getName());
-			writer.key("style").value(new JSONObject(partWrapper.getStyle()));
-			writer.endObject();
-		}
+			public void run()
+			{
+				StringWriter stringWriter = new StringWriter();
+				final JSONWriter writer = new JSONWriter(stringWriter);
 
-		writer.endArray();
+				Form f = editorPart.getForm();
+				try
+				{
+					writer.object();
+					writer.key("formSize").object().key("width").value(f.getWidth()).key("height").value(f.getSize().getHeight()).endObject();
+					writer.key("parts");
+					writer.array();
 
-		return new JSONArray(stringWriter.getBuffer().toString());
+					Iterator<Part> partsIte = f.getParts();
+					while (partsIte.hasNext())
+					{
+						PartWrapper partWrapper = new PartWrapper(partsIte.next(), editorPart.getForm(), null, true);
+						writer.object();
+						writer.key("name").value(partWrapper.getName());
+						writer.key("style").value(new JSONObject(partWrapper.getStyle()));
+						writer.endObject();
+					}
+
+					writer.endArray();
+					writer.endObject();
+
+					getPartsStylesReturn[0] = new JSONObject(stringWriter.getBuffer().toString());
+				}
+				catch (JSONException ex)
+				{
+					ServoyLog.logError("Could not get parts style", ex);
+				}
+			}
+		});
+
+		return getPartsStylesReturn[0];
 	}
 }

@@ -60,6 +60,7 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.Solution;
@@ -183,6 +184,8 @@ public class Activator extends AbstractUIPlugin
 		public void persistChanges(Collection<IPersist> changes)
 		{
 			final Map<Form, List<IFormElement>> frms = new HashMap<Form, List<IFormElement>>();
+			final Form[] changedForm = new Form[1];
+
 			for (IPersist persist : changes)
 			{
 				if (persist instanceof IFormElement || persist instanceof Tab)
@@ -193,6 +196,7 @@ public class Activator extends AbstractUIPlugin
 						parent = ((Tab)persist).getParent();
 						persist = parent;
 					}
+
 					while (parent != null)
 					{
 						if (parent instanceof Form)
@@ -209,8 +213,16 @@ public class Activator extends AbstractUIPlugin
 						parent = parent.getParent();
 					}
 				}
+				else if (persist instanceof Form)
+				{
+					changedForm[0] = (Form)persist;
+				}
+				else if (persist instanceof Part)
+				{
+					changedForm[0] = (Form)persist.getParent();
+				}
 			}
-			if (frms.size() > 0)
+			if (frms.size() > 0 || changedForm[0] != null)
 			{
 				getWebsocketSession().getEventDispatcher().addEvent(new Runnable()
 				{
@@ -290,8 +302,17 @@ public class Activator extends AbstractUIPlugin
 								if (bigChange) fc.recreateUI();
 							}
 						}
-						getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall("refreshDecorators",
-							new Object[] { });
+						if (changedForm[0] != null)
+						{
+							getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
+								"updateForm",
+								new Object[] { changedForm[0].getUUID().toString(), Integer.valueOf((int)changedForm[0].getSize().getWidth()), Integer.valueOf((int)changedForm[0].getSize().getHeight()) });
+						}
+						else
+						{
+							getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
+								"refreshDecorators", new Object[] { });
+						}
 					}
 				});
 			}
