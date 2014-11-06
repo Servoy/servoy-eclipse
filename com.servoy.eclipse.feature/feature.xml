@@ -922,7 +922,14 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
+   <plugin
+         id="javax.servlet.jsp"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+                  
    <plugin
          id="org.apache.commons.io"
          download-size="0"
