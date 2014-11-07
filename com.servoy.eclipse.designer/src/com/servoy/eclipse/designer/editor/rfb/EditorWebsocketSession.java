@@ -18,6 +18,7 @@
 package com.servoy.eclipse.designer.editor.rfb;
 
 import org.json.JSONObject;
+import org.sablo.Container;
 import org.sablo.specification.WebComponentSpecification;
 import org.sablo.websocket.BaseWebsocketSession;
 import org.sablo.websocket.IClientService;
@@ -62,5 +63,12 @@ public class EditorWebsocketSession extends BaseWebsocketSession
 			return new ClientService(name, EDITOR_SERVICE_SPECIFICATION);
 		}
 		return super.createClientService(name);
+	}
+
+	@Override
+	public Container getForm(String formName)
+	{
+		// will not be used here
+		return null;
 	}
 }
