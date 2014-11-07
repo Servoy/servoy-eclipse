@@ -106,6 +106,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 
 			$scope.getGhostContainerStyle = function(ghostContainer) {
 				if(ghostContainer.style == undefined) {
+					//TODO refactor out this 20px addition
 					return {left: "20px", top: "20px", width: $scope.contentStyle.width, height: $scope.contentStyle.height};
 				}
 				return ghostContainer.style;
@@ -118,7 +119,15 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				else if(ghost.type == EDITOR_CONSTANTS.FORM_PERSIST_TYPE) { // the form
 					return {left: 0, top: 0, width: ghost.size.width + "px", height: ghost.size.height + "px", padding: "3px"};
 				}
-				return {background: "#e4844a", opacity: 0.4, padding: "3px", left: ghost.location.x, top: ghost.location.y, width: ghost.size.width, height: ghost.size.height};
+				var xOffset = 0;
+				var yOffset = 0;
+				
+				//TODO refactor out this 20px addition
+				if (!$scope.isContentSizeFull()) {
+					xOffset += 20;
+					yOffset += 20;
+				}
+				return {background: "#e4844a", opacity: 0.4, padding: "3px", left: ghost.location.x + xOffset, top: ghost.location.y + yOffset, width: ghost.size.width, height: ghost.size.height};
 			}
 			
 			$scope.getGhostHRStyle = function(ghost) {
