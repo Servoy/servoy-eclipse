@@ -113,7 +113,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			
 			$scope.getGhostStyle = function(ghost) {
 				if(ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE) { // parts
-					return {background: "#d0d0d0", top: ghost.location.y + "px", right: "-" + (EDITOR_CONSTANTS.PART_LABEL_WIDTH - 6) +"px", width: (EDITOR_CONSTANTS.PART_LABEL_WIDTH - 6) + "px", height: EDITOR_CONSTANTS.PART_LABEL_HEIGHT + "px", textAlign: "center", whiteSpace: "nowrap"};
+					return {background: "#d0d0d0", top: ghost.location.y + "px", right: "-" + (EDITOR_CONSTANTS.PART_LABEL_WIDTH - 6) +"px", width: (EDITOR_CONSTANTS.PART_LABEL_WIDTH - 6) + "px", height: EDITOR_CONSTANTS.PART_LABEL_HEIGHT + "px", textAlign: "center", whiteSpace: "nowrap", cursor: "s-resize"};
 				}
 				else if(ghost.type == EDITOR_CONSTANTS.FORM_PERSIST_TYPE) { // the form
 					return {left: 0, top: 0, width: ghost.size.width + "px", height: ghost.size.height + "px", padding: "3px"};

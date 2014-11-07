@@ -1,4 +1,4 @@
-angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", function($editorService){
+angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", function($editorService, EDITOR_CONSTANTS, $selectionUtils){
 	return {
 		restrict: 'E',
 		transclude: true,
@@ -11,6 +11,15 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 				var contentPoint =  $scope.convertToContentPoint( { top: e.pageY, left: e.pageX });
 				if (contentPoint.left >= 0 && contentPoint.top >= 0)
 				{
+					var utils = $selectionUtils.getUtilsForScope($scope);
+					var selection = utils.getNode(e);
+					if(selection) {
+						var ghost = $scope.getGhost(selection.getAttribute("svy-id"));
+						if(ghost && (ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE)) {
+							$("#contextMenu").hide();
+							return false;
+						}
+					}
 					$scope.$digest();
 					$("#contextMenu")
 						.css({
