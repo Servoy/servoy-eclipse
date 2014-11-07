@@ -17,8 +17,17 @@
 
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URISyntaxException;
 import java.util.Iterator;
+import java.util.jar.Manifest;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -29,12 +38,12 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
+import org.sablo.specification.WebComponentSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
-import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
 /**
@@ -67,7 +76,6 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 	@Override
 	public void run()
 	{
-		PlatformSimpleUserNode parent = (PlatformSimpleUserNode)viewer.getSelectedTreeNode().parent;
 		IProject resources = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject();
 		if (selection != null && MessageDialog.openConfirm(shell, getText(), "Are you sure you want to delete?"))
 		{
@@ -76,9 +84,19 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 			{
 				SimpleUserNode next = it.next();
 				Object realObject = next.getRealObject();
+				IResource resource = null;
 				if (realObject instanceof IResource)
 				{
-					IResource resource = (IResource)realObject;
+					resource = (IResource)realObject;
+
+				}
+				else if (next.getType() == UserNodeType.COMPONENT_ITEM || next.getType() == UserNodeType.SERVICE_ITEM)
+				{
+					resource = getComponentFolderToDelete(resources, next, resource);
+				}
+
+				if (resource != null)
+				{
 					try
 					{
 						resource.delete(true, new NullProgressMonitor());
@@ -91,6 +109,52 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 				}
 			}
 		}
+	}
+
+	private IResource getComponentFolderToDelete(IProject resources, SimpleUserNode next, IResource resource)
+	{
+		WebComponentSpecification spec = (WebComponentSpecification)next.getRealObject();
+		IContainer[] dirResource;
+		OutputStream out = null;
+		try
+		{
+			dirResource = resources.getWorkspace().getRoot().findContainersForLocationURI(spec.getSpecURL().toURI());
+			if (dirResource.length == 1 && dirResource[0].getParent().exists()) resource = dirResource[0].getParent();
+
+			if (resource != null)
+			{
+				IFolder parent = (IFolder)resource.getParent();
+				IFile m = parent.getFile("META-INF/MANIFEST.MF");
+				Manifest manifest = new Manifest(m.getContents());
+				manifest.getEntries().remove(resource.getName() + "/" + resource.getName() + ".spec");
+				out = new FileOutputStream(new File(m.getLocationURI()), false);
+				manifest.write(out);
+			}
+		}
+		catch (URISyntaxException e)
+		{
+			ServoyLog.logError(e);
+		}
+		catch (IOException e)
+		{
+			ServoyLog.logError(e);
+		}
+		catch (CoreException e)
+		{
+			ServoyLog.logError(e);
+		}
+		finally
+		{
+			if (out != null) try
+			{
+				out.close();
+			}
+			catch (IOException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+		return resource;
 	}
 
 	/*
@@ -110,6 +174,10 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 		{
 			SimpleUserNode node = it.next();
 			state = (node.getType() == nodeType);
+			if (node.getType() == UserNodeType.COMPONENT_ITEM || node.getType() == UserNodeType.SERVICE_ITEM)
+			{
+				state = node.parent.getRealObject() instanceof IFolder;
+			}
 		}
 		if (state)
 		{

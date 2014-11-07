@@ -721,6 +721,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		List<SimpleUserNode> list = new ArrayList<SimpleUserNode>();
 		try
 		{
+			if (!folder.exists()) return list;
 			IResource[] members = folder.members();
 			for (IResource iResource : members)
 			{

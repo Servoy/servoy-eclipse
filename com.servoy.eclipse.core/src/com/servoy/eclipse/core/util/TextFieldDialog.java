@@ -45,7 +45,7 @@ public class TextFieldDialog extends MessageDialog
 	public TextFieldDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage, int dialogImageType,
 		String[] dialogButtonLabels, String defaultText)
 	{
-		super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, dialogButtonLabels, -1);
+		super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, dialogButtonLabels, 0);
 		setBlockOnOpen(true);
 		this.defaultText = defaultText;
 	}

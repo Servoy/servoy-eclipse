@@ -249,6 +249,8 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.LoadRelationsAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.MovePersistAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.MoveTextAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NavigationToggleAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewComponentAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewComponentPackageAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewComponentResourceAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewPostgresDbAction;
@@ -1507,6 +1509,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	}
 
 	private ClientSupportViewerFilter clientSupportViewerFilter;
+	private ContextAction createActionInTree;
 
 	private void createTreeViewer(Composite parent)
 	{
@@ -2343,6 +2346,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		{
 			if (newActionInTreePrimary.isEnabled()) manager.add(newActionInTreePrimary);
 			if (newActionInTreeSecondary.isEnabled()) manager.add(newActionInTreeSecondary);
+			if (createActionInTree.isEnabled()) manager.add(createActionInTree);
 		}
 
 		if (createMediaFolderAction.isEnabled()) manager.add(createMediaFolderAction);
@@ -2673,6 +2677,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			"New");
 		newActionInTreeSecondary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
 			"New");
+		createActionInTree = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
+			"Create");
 		newActionInListSecondary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
 			"New");
 
@@ -2724,6 +2730,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction importService = new ImportComponentAction(this, "service", "services");
 		IAction importComponentFolder = new ImportComponentFolderAction(this, "component", "components");
 		IAction importServicesFolder = new ImportComponentFolderAction(this, "services", "services");
+		IAction newComponentAction = new NewComponentAction(this, getSite().getShell(), "Create new component");
+		IAction newServiceAction = new NewComponentAction(this, getSite().getShell(), "Create new service");
+		IAction newComponentPackageAction = new NewComponentPackageAction(this, getSite().getShell(), "Create component package");
+		IAction newServicePackageAction = new NewComponentPackageAction(this, getSite().getShell(), "Create service package");
 
 		newActionInTreePrimary.registerAction(UserNodeType.FORM, newMethod);
 		newActionInTreePrimary.registerAction(UserNodeType.SCOPES_ITEM, newScope);
@@ -2745,11 +2755,15 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreePrimary.registerAction(UserNodeType.STYLES, newStyle);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS, importComponent);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES, importService);
+		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS_PACKAGE, newComponentAction);
+		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_PACKAGE, newServiceAction);
 
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA_FOLDER, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS, importComponentFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.SERVICES, importServicesFolder);
+		createActionInTree.registerAction(UserNodeType.COMPONENTS, newComponentPackageAction);
+		createActionInTree.registerAction(UserNodeType.SERVICES, newServicePackageAction);
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
@@ -2830,6 +2844,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction deleteComponentPackage = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete Component Package",
 			UserNodeType.COMPONENTS_PACKAGE);
 		IAction deleteServicePackage = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete Service Package", UserNodeType.SERVICES_PACKAGE);
+		IAction deleteComponent = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete Component", UserNodeType.COMPONENT_ITEM);
+		IAction deleteService = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete Service", UserNodeType.SERVICE_ITEM);
 		IAction deleteComponentResource = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete file", UserNodeType.COMPONENT_RESOURCE);
 		IAction deleteI18N = new DeleteI18NAction(getSite().getShell());
 		IAction deleteScope = new DeleteScopeAction("Delete scope", this);
@@ -2878,6 +2894,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		deleteActionInTree.registerAction(UserNodeType.WORKING_SET, new DeleteWorkingSetAction());
 		deleteActionInTree.registerAction(UserNodeType.COMPONENTS_PACKAGE, deleteComponentPackage);
 		deleteActionInTree.registerAction(UserNodeType.SERVICES_PACKAGE, deleteServicePackage);
+		deleteActionInTree.registerAction(UserNodeType.COMPONENT_ITEM, deleteComponent);
+		deleteActionInTree.registerAction(UserNodeType.SERVICE_ITEM, deleteService);
 
 
 		renameActionInTree = new ContextAction(this, null, "Rename");
@@ -2923,6 +2941,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		addTreeSelectionChangedListener(loadRelationsAction);
 		addTreeSelectionChangedListener(newActionInTreePrimary);
 		addTreeSelectionChangedListener(newActionInTreeSecondary);
+		addTreeSelectionChangedListener(createActionInTree);
 
 		addTreeSelectionChangedListener(newActionInListPrimary);
 

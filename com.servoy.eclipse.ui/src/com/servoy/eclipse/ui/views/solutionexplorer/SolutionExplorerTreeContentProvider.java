@@ -240,11 +240,13 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		stylesNode.setClientSupport(ClientSupport.ng_wc_sc);
 		stylesNode.parent = resources;
 
-		componentsNode = new PlatformSimpleUserNode(Messages.TreeStrings_Components, UserNodeType.COMPONENTS, null, uiActivator.loadImageFromBundle("bean.gif"));
+		componentsNode = new PlatformSimpleUserNode(Messages.TreeStrings_Components, UserNodeType.COMPONENTS, SolutionSerializer.COMPONENTS_DIR_NAME,
+			uiActivator.loadImageFromBundle("bean.gif"));
 		componentsNode.setClientSupport(ClientSupport.ng_wc_sc);
 		componentsNode.parent = resources;
 
-		servicesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Services, UserNodeType.SERVICES, null, uiActivator.loadImageFromBundle("services.gif"));
+		servicesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Services, UserNodeType.SERVICES, SolutionSerializer.SERVICES_DIR_NAME,
+			uiActivator.loadImageFromBundle("services.gif"));
 		servicesNode.setClientSupport(ClientSupport.ng_wc_sc);
 		servicesNode.parent = resources;
 
@@ -2376,7 +2378,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.core.IWebResourceChangedListener#changed()
 	 */
 	@Override
