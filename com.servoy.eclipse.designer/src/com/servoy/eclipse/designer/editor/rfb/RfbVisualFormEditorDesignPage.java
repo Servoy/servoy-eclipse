@@ -48,6 +48,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.DeleteAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.FixedSelectAllAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -71,26 +72,14 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		}
 	};
 
-	private final IFieldPositioner fieldPositioner = new IFieldPositioner()
+	private final IFieldPositioner fieldPositioner = new DefaultFieldPositioner(new Point(0, 0))
 	{
-		Point defaultLocation = new Point(0, 0);
-		int counter;
-
-		@Override
-		public void setDefaultLocation(Point location)
-		{
-			defaultLocation = location;
-			counter = 0;
-		}
-
 		@Override
 		public Point getNextLocation(Point location)
 		{
-			defaultLocation.x += (10 * counter);
-			defaultLocation.y += (10 * counter);
-			counter++;
-			return defaultLocation;
-		}
+			if (location == null) return defaultLocation;
+			return location;
+		};
 	};
 
 	// for updating selection in editor when selection changes in IDE
