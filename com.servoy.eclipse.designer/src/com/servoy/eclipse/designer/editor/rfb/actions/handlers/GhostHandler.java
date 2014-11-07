@@ -251,63 +251,66 @@ public class GhostHandler implements IServerService
 				}
 				else if (o instanceof Form)
 				{
-					try
+					Form f = (Form)o;
+					if (!((Form)o).getLayoutContainers().hasNext()) // absolute layout
 					{
-						Form f = (Form)o;
-						writer.object();
-						writer.key("uuid").value(UUID.randomUUID()/* f.getUUID() */);
-						writer.key("ghosts");
-						writer.array();
-						Iterator<Part> partIterator = f.getParts();
-						ArrayList<Part> parts = new ArrayList<Part>();
-						while (partIterator.hasNext())
-							parts.add(partIterator.next());
-
-						// the parts
-						for (int i = 0; i < parts.size(); i++)
+						try
 						{
 							writer.object();
-							writer.key("uuid").value(parts.get(i).getUUID());
-							writer.key("type").value(parts.get(i).getTypeID());
-							writer.key("text").value(Part.getDisplayName(parts.get(i).getPartType()));
+							writer.key("uuid").value(UUID.randomUUID()/* f.getUUID() */);
+							writer.key("ghosts");
+							writer.array();
+							Iterator<Part> partIterator = f.getParts();
+							ArrayList<Part> parts = new ArrayList<Part>();
+							while (partIterator.hasNext())
+								parts.add(partIterator.next());
+
+							// the parts
+							for (int i = 0; i < parts.size(); i++)
+							{
+								writer.object();
+								writer.key("uuid").value(parts.get(i).getUUID());
+								writer.key("type").value(parts.get(i).getTypeID());
+								writer.key("text").value(Part.getDisplayName(parts.get(i).getPartType()));
+								writer.key("location");
+								writer.object();
+								writer.key("x").value(0);
+								writer.key("y").value(parts.get(i).getSize().getHeight());
+								writer.endObject();
+								writer.key("parttype").value(parts.get(i).getPartType());
+								if (i > 0) writer.key("partprev").value(parts.get(i - 1).getUUID());
+								if (i < parts.size() - 1) writer.key("partnext").value(parts.get(i + 1).getUUID());
+								writer.endObject();
+							}
+
+							// the form itself
+							writer.object();
+							writer.key("uuid").value(f.getUUID());
+							writer.key("type").value(f.getTypeID());
+							writer.key("text").value("");
 							writer.key("location");
 							writer.object();
 							writer.key("x").value(0);
-							writer.key("y").value(parts.get(i).getSize().getHeight());
+							writer.key("y").value(0);
 							writer.endObject();
-							writer.key("parttype").value(parts.get(i).getPartType());
-							if (i > 0) writer.key("partprev").value(parts.get(i - 1).getUUID());
-							if (i < parts.size() - 1) writer.key("partnext").value(parts.get(i + 1).getUUID());
+							writer.key("size");
+							writer.object();
+							writer.key("width").value(f.getSize().width);
+							writer.key("height").value(f.getSize().height);
+							writer.endObject();
+							writer.endObject();
+
+							writer.endArray();
 							writer.endObject();
 						}
-
-						// the form itself
-						writer.object();
-						writer.key("uuid").value(f.getUUID());
-						writer.key("type").value(f.getTypeID());
-						writer.key("text").value("");
-						writer.key("location");
-						writer.object();
-						writer.key("x").value(0);
-						writer.key("y").value(0);
-						writer.endObject();
-						writer.key("size");
-						writer.object();
-						writer.key("width").value(f.getSize().width);
-						writer.key("height").value(f.getSize().height);
-						writer.endObject();
-						writer.endObject();
-
-						writer.endArray();
-						writer.endObject();
-					}
-					catch (IllegalArgumentException e)
-					{
-						Debug.error(e);
-					}
-					catch (JSONException e)
-					{
-						Debug.error(e);
+						catch (IllegalArgumentException e)
+						{
+							Debug.error(e);
+						}
+						catch (JSONException e)
+						{
+							Debug.error(e);
+						}
 					}
 				}
 				else if (o instanceof Portal)

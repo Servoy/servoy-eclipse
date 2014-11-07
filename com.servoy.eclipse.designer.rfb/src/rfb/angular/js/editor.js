@@ -472,13 +472,17 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 					var contentDiv = $element.find('.content-area')[0];
 					if (contentDiv.clientHeight < sizes.height && (!$scope.contentStyle.h || $scope.contentStyle.h + 20 < sizes.height || $scope.contentStyle.h - 20 > sizes.height)) {
 						$scope.contentStyle.h = sizes.height
-						//$scope.contentStyle.height = (sizes.height + 20)  +"px"
+						if(!$scope.isAbsoluteFormLayout()) {
+							$scope.contentStyle.height = (sizes.height + 20)  +"px"
+						}
 						$scope.glasspaneStyle.height = (sizes.height + 20)  +"px"
 					}
 					if ($scope.isContentSizeFull()) {
 						if (contentDiv.clientWidth < sizes.width && (!$scope.contentStyle.w || $scope.contentStyle.w + 20 < sizes.width || $scope.contentStyle.w - 20 > sizes.width)) {
 							$scope.contentStyle.w = sizes.width
-							//$scope.contentStyle.width = (sizes.width + 20)  +"px"
+							if(!$scope.isAbsoluteFormLayout()) {
+								$scope.contentStyle.width = (sizes.width + 20)  +"px"	
+							}
 							$scope.glasspaneStyle.width = (sizes.width + 20)  +"px"
 						}
 					}
@@ -524,16 +528,18 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 					});
 				});
 				
-				if($scope.isAbsoluteFormLayout) {
-					$scope.setContentSize(formWidth + "px", formHeight + "px");
-				}
 				
 				var promise = $editorService.getGhostComponents({"resetPosition":true});
 				promise.then(function (result){
 					$scope.ghosts = result;
 				});
-				$timeout(function() {
-					$scope.setContentSizes();
+				$timeout(function() {					
+					if($scope.isAbsoluteFormLayout()) {
+						$scope.setContentSize(formWidth + "px", formHeight + "px");
+					}
+					else {
+						$scope.setContentSizeFull();
+					}
 				},500);
 			});
 			
