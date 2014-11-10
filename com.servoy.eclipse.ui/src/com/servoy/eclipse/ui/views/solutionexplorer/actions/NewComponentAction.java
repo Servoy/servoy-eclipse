@@ -77,9 +77,8 @@ public class NewComponentAction extends Action
 
 		String componentName = UIUtils.showTextFieldDialog(shell, getText(), "Please provide the " + type.toLowerCase() + " name.");
 		if (componentName == null) return;
-		while (componentName.trim().equals(""))
+		while (!isNameValid(componentName, type + " name must start with a letter and must contain only alphanumeric characters"))
 		{
-			MessageDialog.openError(shell, getText(), "The " + type.toLowerCase() + " name was not provided.");
 			componentName = UIUtils.showTextFieldDialog(shell, getText(), "Please provide the " + type.toLowerCase() + " name.");
 			if (componentName == null) return;
 		}
@@ -87,6 +86,19 @@ public class NewComponentAction extends Action
 
 		IResource packageRoot = (IResource)node.getRealObject();
 		createComponent(packageRoot, type, componentName);
+	}
+
+	private boolean isNameValid(String value, String message)
+	{
+		if (!value.matches("^[a-zA-Z][0-9a-zA-Z]+$"))
+		{
+			if (message != null)
+			{
+				MessageDialog.openError(shell, getText(), message);
+			}
+			return false;
+		}
+		return true;
 	}
 
 	/**

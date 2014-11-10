@@ -79,13 +79,14 @@ public class NewComponentPackageAction extends Action
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	@Override
 	public void run()
 	{
 		final PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
+		final String type = UserNodeType.COMPONENTS == node.getType() ? "Component" : "Service";
 		IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
 			(String)node.getRealObject());
 
@@ -123,7 +124,7 @@ public class NewComponentPackageAction extends Action
 				packDisplay.setLayoutData(data);
 
 				Label componentLabel = new Label(container, SWT.NONE);
-				componentLabel.setText("Component name");
+				componentLabel.setText(type + " name");
 				compName = new Text(container, SWT.BORDER);
 				if (componentName != null) compName.setText(componentName);
 				compName.setLayoutData(data);
@@ -143,7 +144,9 @@ public class NewComponentPackageAction extends Action
 		int code = dialog.open();
 		if (code != 0) return;
 		while (checkIfEmpty(packageName, "Package name was not provided.") ||
-			checkIfEmpty(componentName, "The name of the first component was not provided.") || !isNameValid(node))
+			checkIfEmpty(componentName, "The name of the first component was not provided.") || !isNameValid(node) ||
+			!isNameValid(packageName, "Package name must start with a letter and must contain only alphanumeric characters") ||
+			!isNameValid(componentName, type + " name must start with a letter and must contain only alphanumeric characters"))
 		{
 			code = dialog.open();
 			if (code != 0) return;
@@ -153,20 +156,22 @@ public class NewComponentPackageAction extends Action
 			packageDisplayName = packageName;
 		}
 
-		IFolder pack = folder.getFolder(packageName);
-		if (pack.exists())
-		{
-			MessageDialog.openError(shell, getText(), "Package " + packageName + " already exists in " + node.getName());
-			return;
-		}
-
 		try
 		{
+
+			if (!folder.exists()) folder.create(IResource.FORCE, true, new NullProgressMonitor());
+
+			IFolder pack = folder.getFolder(packageName);
+			if (pack.exists())
+			{
+				MessageDialog.openError(shell, getText(), "Package " + packageName + " already exists in " + node.getName());
+				return;
+			}
+
 			pack.create(IResource.FORCE, true, new NullProgressMonitor());
 			createManifest(pack);
 
 			NewComponentAction newComponent = new NewComponentAction(viewer, shell, "");
-			String type = UserNodeType.COMPONENTS == node.getType() ? "Component" : "Service";
 			newComponent.createComponent(pack, type, componentName);
 		}
 		catch (Exception e)
@@ -210,6 +215,19 @@ public class NewComponentPackageAction extends Action
 			return true;
 		}
 		return false;
+	}
+
+	private boolean isNameValid(String value, String message)
+	{
+		if (!value.matches("^[a-zA-Z][0-9a-zA-Z]+$"))
+		{
+			if (message != null)
+			{
+				MessageDialog.openError(shell, getText(), message);
+			}
+			return false;
+		}
+		return true;
 	}
 
 	/**
