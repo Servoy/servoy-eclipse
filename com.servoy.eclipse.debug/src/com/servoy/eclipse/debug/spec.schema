@@ -55,6 +55,11 @@
 			"description": "The name that is displayed in the designer",
 			"type": "string"
 		},
+		"version":
+		{ 
+			"description": "The version of the component",
+			"type": "integer"
+		},
 		"model":
 		{
 			"description": "The model this component has",
@@ -196,7 +201,8 @@
 	[
 		"name",
 		"displayName",
-		"definition"
+		"definition",
+		"version"
 	],
 	"additionalProperties":false
 }
