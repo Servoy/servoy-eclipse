@@ -66,7 +66,7 @@ public class NewComponentAction extends Action
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	@Override
@@ -110,6 +110,8 @@ public class NewComponentAction extends Action
 					return;
 				}
 
+				String moduleName = pack.getName() + componentName.substring(0, 1).toUpperCase() + componentName.substring(1);
+
 				folder.create(IResource.FORCE, true, new NullProgressMonitor());
 				if (type.equals("Component"))
 				{
@@ -117,13 +119,14 @@ public class NewComponentAction extends Action
 				}
 				in = uiActivator.getBundle().getEntry("/component-templates/" + type.toLowerCase() + ".js").openStream();
 				String text = IOUtils.toString(in, "UTF-8");
-				text = text.replaceAll("\\$\\{DIRECTIVENAME\\}", pack.getName() + componentName.substring(0, 1).toUpperCase() + componentName.substring(1));
+				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
 				text = text.replaceAll("\\$\\{NAME\\}", componentName);
 				text = text.replaceAll("\\$\\{PACKAGENAME\\}", pack.getName());
 				createFile(componentName + ".js", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
 
 				in = uiActivator.getBundle().getEntry("/component-templates/" + type.toLowerCase() + ".spec").openStream();
 				text = IOUtils.toString(in, "UTF-8");
+				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
 				text = text.replaceAll("\\$\\{NAME\\}", componentName);
 				text = text.replaceAll("\\$\\{PACKAGENAME\\}", pack.getName());
 				createFile(componentName + ".spec", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
@@ -206,7 +209,7 @@ public class NewComponentAction extends Action
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.jface.action.Action#isEnabled()
 	 */
 	@Override

@@ -44,6 +44,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
@@ -182,6 +183,17 @@ public class NewComponentPackageAction extends Action
 			{
 				MessageDialog.openError(shell, getText(), "Service package names must end with \"services\"");
 				return false;
+			}
+		}
+		if (node.children != null)
+		{
+			for (SimpleUserNode n : node.children)
+			{
+				if (n.getName().equals(packageDisplayName))
+				{
+					MessageDialog.openError(shell, getText(), "A package with display name " + packageDisplayName + " already exists in " + node.getName());
+					return false;
+				}
 			}
 		}
 		return true;

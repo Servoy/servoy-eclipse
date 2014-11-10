@@ -1,7 +1,7 @@
-angular.module('${NAME}',['servoy'])
-.factory("${NAME}",function($services) 
+angular.module('${MODULENAME}',['servoy'])
+.factory("${MODULENAME}",function($services) 
 {
-	var scope = $services.getServiceScope('${NAME}');
+	var scope = $services.getServiceScope('${MODULENAME}');
 	return {
 		helloworld: function(text) {
 			alert("helloworld: " + scope.model.text + text);
@@ -10,7 +10,7 @@ angular.module('${NAME}',['servoy'])
 })
 .run(function($rootScope,$services)
 {
-	var scope = $services.getServiceScope('${NAME}')
+	var scope = $services.getServiceScope('${MODULENAME}')
 	scope.$watch('model', function(newvalue,oldvalue) {
 	// handle state changes
 		console.log(newvalue)

@@ -1,4 +1,4 @@
-angular.module('${DIRECTIVENAME}',['servoy']).directive('${DIRECTIVENAME}', function() {  
+angular.module('${MODULENAME}',['servoy']).directive('${MODULENAME}', function() {  
     return {
       restrict: 'E',
       scope: {
