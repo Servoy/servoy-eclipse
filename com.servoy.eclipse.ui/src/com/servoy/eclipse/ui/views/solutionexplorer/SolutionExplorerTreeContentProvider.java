@@ -905,7 +905,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private boolean resourceFolderHasChildren(String folderName)
 	{
-		IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(folderName);
+		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		if (activeProject == null) return false;
+		IFolder folder = activeProject.getResourcesProject().getProject().getFolder(folderName);
 		try
 		{
 			return folder.exists() ? folder.members().length > 0 : false;
