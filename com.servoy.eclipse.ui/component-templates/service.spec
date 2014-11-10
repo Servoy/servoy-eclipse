@@ -12,7 +12,6 @@
  	{
 	   	"helloworld": 
 	   	{
-	   		"returns": "boolean",
 	    	"parameters":
 	    	[
 		    	{
