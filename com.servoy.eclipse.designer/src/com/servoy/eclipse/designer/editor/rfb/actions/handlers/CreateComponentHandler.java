@@ -44,6 +44,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
@@ -354,23 +355,22 @@ public class CreateComponentHandler implements IServerService
 				}
 
 				Bean bean = null;
-				if (args.has("dropTargetUUID"))
+				if (parent instanceof Portal)
 				{
-					IPersist searchForPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, args.getString("dropTargetUUID"));
-					if (searchForPersist instanceof Portal)
-					{
-						Portal portal = (Portal)searchForPersist;
-						bean = (Bean)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(portal, IRepository.BEANS);
-						bean.setProperty("text", compName);
-						bean.setBeanClassName(name);
-						portal.addChild(bean);
-					}
-					else return null;
+					Portal portal = (Portal)parent;
+					bean = (Bean)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(portal, IRepository.BEANS);
+					bean.setProperty("text", compName);
+					bean.setBeanClassName(name);
+					portal.addChild(bean);
 				}
-				else
+				else if (parent instanceof Form)
 				{
-					bean = editorPart.getForm().createNewBean(compName, name);
+					bean = ((Form)parent).createNewBean(compName, name);
 
+				}
+				else if (parent instanceof Bean)
+				{
+					// TODO create it inthe bean an store it in the component array???
 				}
 				bean.setLocation(new Point(x, y));
 				WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(name);
