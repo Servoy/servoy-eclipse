@@ -144,13 +144,17 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				for (var i = 0; i < ghosts.length ; i++)
 				{
 					var ghost = ghosts[i];
+					var prevGhost = i > 0 ? ghosts[i-1] : undefined;
 					if ((ghost.type != EDITOR_CONSTANTS.PART_PERSIST_TYPE) && (ghost.type != EDITOR_CONSTANTS.FORM_PERSIST_TYPE))
 					{
 						if ($('[svy-id='+ghost.uuid+']')[0])
 						{
 							var element = $('[svy-id='+ghost.uuid+']')[0];
 							var width = element.scrollWidth;
-							ghost.location.x = ghost.location.x + overflow;
+							if (prevGhost != undefined && ghost.location.y == prevGhost.location.y)
+							{
+								ghost.location.x += overflow;
+							}
 							if (width > ghost.size.width){
 								overflow += width - ghost.size.width;
 								ghost.size.width = width;

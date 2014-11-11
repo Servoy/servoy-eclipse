@@ -215,10 +215,14 @@ public class GhostHandler implements IServerService
 								Tab tab = (Tab)tabIterator.next();
 								int x = tab.getLocation().x;
 								int y = tab.getLocation().y;
-								if (args != null && args.has("resetPosition"))
+								//try to move tab inside the tabpanel (if needed)
+								if (y > panel.getLocation().y)
 								{
-									x -= panel.getLocation().x;
 									y -= panel.getLocation().y;
+								}
+								if (x < panel.getLocation().x)
+								{
+									x += panel.getLocation().x;
 								}
 								writer.object();
 								writer.key("uuid").value(tab.getUUID());
