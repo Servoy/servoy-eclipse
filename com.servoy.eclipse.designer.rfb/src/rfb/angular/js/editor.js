@@ -276,7 +276,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 						});						
 					}, 0);	
 				}
-				else {
+				else if(fieldLocation) {
 					var currentMouseLocation = getMousePosition(event);
 					if(fieldLocation.x == currentMouseLocation.x && fieldLocation.y == currentMouseLocation.y) {
 						$editorService.updateFieldPositioner($scope.convertToContentPoint(fieldLocation));
