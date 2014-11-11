@@ -118,7 +118,7 @@ public class OpenContainedFormHandler implements IServerService
 									}
 								}
 							}
-							else
+							else if (persist instanceof Bean)
 							{
 								Bean bean = (Bean)persist;
 								WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
