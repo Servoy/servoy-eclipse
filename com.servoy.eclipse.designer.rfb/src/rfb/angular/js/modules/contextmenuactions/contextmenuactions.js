@@ -1,17 +1,9 @@
-angular.module('contextmenuactions',['contextmenu','editor']).run(function($rootScope, $pluginRegistry,$contextmenu, $editorService){
-
+angular.module('contextmenuactions',['contextmenu','editor']).run(function($rootScope, $pluginRegistry,$contextmenu, $editorService,EDITOR_EVENTS){
 	$pluginRegistry.registerPlugin(function(editorScope) {
-		var hasSelection = function(selectionSize)
-		{
-			var selection = editorScope.getSelection();
-			if (selection && selection.length > 0 && (selectionSize == undefined || selection.length == selectionSize))
-				return true;
-			return false;
-		};
-		
-		var isAnchored = function(anchor)
-		{
-			var selection = editorScope.getSelection();
+		var selection = null;
+		var beanAnchor = 0;
+		$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, sel) {
+			selection = sel;
 			if (selection && selection.length == 1)
 			{
 				var formState = editorScope.getFormState();
@@ -20,13 +12,26 @@ angular.module('contextmenuactions',['contextmenu','editor']).run(function($root
 				var beanModel = formState.model[name];
 				if (beanModel)
 				{
-					var beanAnchor = beanModel.anchors;
-					if(beanAnchor == 0)
-						 beanAnchor = 1 + 8; // top left
-					if ((beanAnchor & anchor) == anchor)
-					{
-						return true;
-					}
+					beanAnchor = beanModel.anchors;
+				}
+			}
+		});
+		var hasSelection = function(selectionSize)
+		{
+			if (selection && selection.length > 0 && (selectionSize == undefined || selection.length == selectionSize))
+				return true;
+			return false;
+		};
+		
+		var isAnchored = function(anchor)
+		{
+			if (selection && selection.length == 1)
+			{
+				if(beanAnchor == 0)
+					 beanAnchor = 1 + 8; // top left
+				if ((beanAnchor & anchor) == anchor)
+				{
+					return true;
 				}
 			}
 			return false;
