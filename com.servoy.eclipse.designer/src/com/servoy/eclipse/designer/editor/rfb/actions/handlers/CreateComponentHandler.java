@@ -147,6 +147,8 @@ public class CreateComponentHandler implements IServerService
 	{
 		int x = args.getInt("x");
 		int y = args.getInt("y");
+		int w = args.getInt("w");
+		int h = args.getInt("h");
 		if (args.has("type"))
 		{//a ghost dragged from the pallete. it is defined in the "types" section of the .spec file
 			Iterator<IPersist> allPersists = editorPart.getForm().getAllObjects();
@@ -225,78 +227,91 @@ public class CreateComponentHandler implements IServerService
 				GraphicalComponent gc = parent.createNewGraphicalComponent(new Point(x, y));
 				gc.setText("button");
 				gc.setOnActionMethodID(-1);
+				gc.setSize(new Dimension(w, h));
 				return gc;
 			}
 			else if ("servoydefault-label".equals(name))
 			{
 				GraphicalComponent gc = parent.createNewGraphicalComponent(new Point(x, y));
 				gc.setText("label");
+				gc.setSize(new Dimension(w, h));
 				return gc;
 			}
 			else if ("servoydefault-combobox".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.COMBOBOX);
+				field.setSize(new Dimension(w, h));
 				return field;
 			}
 			else if ("servoydefault-textfield".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.TEXT_FIELD);
+				field.setSize(new Dimension(w, h));
 				return field;
 			}
 			else if ("servoydefault-textarea".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.TEXT_AREA);
+				field.setSize(new Dimension(w, h));
 				return field;
 			}
 			else if ("servoydefault-password".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.PASSWORD);
+				field.setSize(new Dimension(w, h));
 				return field;
 			}
 			else if ("servoydefault-calendar".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.CALENDAR);
+				field.setSize(new Dimension(w, h));
 				return field;
 			}
 			else if ("servoydefault-typeahead".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.TYPE_AHEAD);
+				field.setSize(new Dimension(w, h));
 				return field;
 			}
 			else if ("servoydefault-spinner".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.SPINNER);
+				field.setSize(new Dimension(w, h));
 				return field;
 			}
 			else if ("servoydefault-check".equals(name) || "servoydefault-checkgroup".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.CHECKS);
+				field.setSize(new Dimension(w, h));
 				return field;
 			}
 			else if ("servoydefault-radio".equals(name) || "servoydefault-radiogroup".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.RADIOS);
+				field.setSize(new Dimension(w, h));
 				return field;
 			}
 			else if ("servoydefault-imagemedia".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.IMAGE_MEDIA);
+				field.setSize(new Dimension(w, h));
 				return field;
 			}
 			else if ("servoydefault-listbox".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.LIST_BOX);
+				field.setSize(new Dimension(w, h));
 				return field;
 			}
 			else if ("servoydefault-htmlarea".equals(name))
@@ -304,6 +319,7 @@ public class CreateComponentHandler implements IServerService
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.HTML_AREA);
 				field.setEditable(false);
+				field.setSize(new Dimension(w, h));
 				return field;
 			}
 			else if ("servoydefault-tabpanel".equals(name))
@@ -315,6 +331,7 @@ public class CreateComponentHandler implements IServerService
 				}
 				TabPanel tabPanel = editorPart.getForm().createNewTabPanel(compName);
 				tabPanel.setLocation(new Point(x, y));
+				tabPanel.setSize(new Dimension(w, h));
 				return tabPanel;
 			}
 			else if ("servoydefault-splitpane".equals(name))
@@ -327,6 +344,7 @@ public class CreateComponentHandler implements IServerService
 				TabPanel tabPanel = editorPart.getForm().createNewTabPanel(compName);
 				tabPanel.setLocation(new Point(x, y));
 				tabPanel.setTabOrientation(TabPanel.SPLIT_HORIZONTAL);
+				tabPanel.setSize(new Dimension(w, h));
 				return tabPanel;
 			}
 			else if ("servoydefault-portal".equals(name))
@@ -337,12 +355,14 @@ public class CreateComponentHandler implements IServerService
 					compName = "portal_" + id.incrementAndGet();
 				}
 				Portal portal = editorPart.getForm().createNewPortal(compName, new Point(x, y));
+				portal.setSize(new Dimension(w, h));
 				return portal;
 			}
 			else if ("servoydefault-rectangle".equals(name))
 			{
 				RectShape shape = editorPart.getForm().createNewRectangle(new Point(x, y));
 				shape.setLineSize(1);
+				shape.setSize(new Dimension(w, h));
 				return shape;
 			}
 			else
@@ -373,6 +393,7 @@ public class CreateComponentHandler implements IServerService
 					// TODO create it inthe bean an store it in the component array???
 				}
 				bean.setLocation(new Point(x, y));
+				bean.setSize(new Dimension(w, h));
 				WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(name);
 				PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
 				if (description != null && description.getDefaultValue() instanceof JSONObject)
@@ -391,6 +412,7 @@ public class CreateComponentHandler implements IServerService
 				IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 				IPersist newPersist = ((AbstractBase)persist).cloneObj(persist.getParent(), true, validator, true, true, true);
 				((ISupportBounds)newPersist).setLocation(new Point(x, y));
+				((ISupportBounds)newPersist).setSize(new Dimension(w, h));
 				return newPersist;
 			}
 		}
