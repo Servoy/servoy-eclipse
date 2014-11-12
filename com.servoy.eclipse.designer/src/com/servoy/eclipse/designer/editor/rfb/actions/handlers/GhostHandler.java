@@ -41,6 +41,7 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
@@ -88,6 +89,11 @@ public class GhostHandler implements IServerService
 				if (FormTemplateGenerator.isWebcomponentBean(bean))
 				{
 					WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(bean.getBeanClassName());
+					if (spec == null)
+					{
+						//error bean
+						spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(FormElement.ERROR_BEAN);
+					}
 					Map<String, PropertyDescription> properties = spec.getProperties();
 					try
 					{
