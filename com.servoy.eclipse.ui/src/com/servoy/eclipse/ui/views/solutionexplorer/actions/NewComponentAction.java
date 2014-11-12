@@ -66,7 +66,7 @@ public class NewComponentAction extends Action
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	@Override
@@ -191,6 +191,7 @@ public class NewComponentAction extends Action
 	private void addToManifest(String componentName, String type, IFolder pack) throws IOException, CoreException, FileNotFoundException
 	{
 		IFile m = pack.getFile("META-INF/MANIFEST.MF");
+		m.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
 		Manifest manifest = new Manifest(m.getContents());
 		Attributes attr = new Attributes();
 		if (type.equals("Component"))
@@ -221,7 +222,7 @@ public class NewComponentAction extends Action
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.action.Action#isEnabled()
 	 */
 	@Override

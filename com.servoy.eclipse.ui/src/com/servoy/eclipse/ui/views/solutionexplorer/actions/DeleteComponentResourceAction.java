@@ -70,7 +70,7 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	@Override
@@ -125,6 +125,7 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 			{
 				IFolder parent = (IFolder)resource.getParent();
 				IFile m = parent.getFile("META-INF/MANIFEST.MF");
+				m.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
 				Manifest manifest = new Manifest(m.getContents());
 				manifest.getEntries().remove(resource.getName() + "/" + resource.getName() + ".spec");
 				out = new FileOutputStream(new File(m.getLocationURI()), false);
@@ -159,7 +160,7 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
 	 */
 	@Override
