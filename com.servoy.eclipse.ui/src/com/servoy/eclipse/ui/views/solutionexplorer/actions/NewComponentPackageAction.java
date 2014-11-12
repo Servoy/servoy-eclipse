@@ -219,7 +219,7 @@ public class NewComponentPackageAction extends Action
 
 	private boolean isNameValid(String value, String message)
 	{
-		if (!value.matches("^[a-zA-Z][0-9a-zA-Z]+$"))
+		if (!value.matches("^[a-zA-Z][0-9a-zA-Z]*$"))
 		{
 			if (message != null)
 			{

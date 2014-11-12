@@ -66,7 +66,7 @@ public class NewComponentAction extends Action
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	@Override
@@ -90,7 +90,7 @@ public class NewComponentAction extends Action
 
 	private boolean isNameValid(String value, String message)
 	{
-		if (!value.matches("^[a-zA-Z][0-9a-zA-Z]+$"))
+		if (!value.matches("^[a-zA-Z][0-9a-zA-Z]*$"))
 		{
 			if (message != null)
 			{
@@ -222,7 +222,7 @@ public class NewComponentAction extends Action
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.jface.action.Action#isEnabled()
 	 */
 	@Override
