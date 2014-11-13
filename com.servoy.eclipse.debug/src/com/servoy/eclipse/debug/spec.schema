@@ -114,6 +114,9 @@
 								"items": {
 									"type": "string"
 								}
+							},
+							"forFoundSet":{
+								"type":"string"
 							}
 						},
 						"required":["type"],
@@ -192,6 +195,9 @@
 									"type": "array"
 								},
 								"default": {
+								},
+								"forFoundSet":{
+									"type":"string"
 								}
 							},
 							"required":["type"],
