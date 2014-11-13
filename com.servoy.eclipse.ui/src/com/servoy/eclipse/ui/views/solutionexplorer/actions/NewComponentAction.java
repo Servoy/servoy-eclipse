@@ -18,9 +18,8 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -66,7 +65,7 @@ public class NewComponentAction extends Action
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	@Override
@@ -205,10 +204,13 @@ public class NewComponentAction extends Action
 		manifest.getEntries().put(componentName + "/" + componentName + ".spec", attr);
 
 		OutputStream out = null;
+		InputStream in = null;
 		try
 		{
-			out = new FileOutputStream(new File(m.getLocationURI()), false);
+			out = new ByteArrayOutputStream();
 			manifest.write(out);
+			in = new ByteArrayInputStream(out.toString().getBytes());
+			m.setContents(in, IResource.FORCE, new NullProgressMonitor());
 		}
 		catch (IOException e)
 		{
@@ -217,12 +219,13 @@ public class NewComponentAction extends Action
 		finally
 		{
 			if (out != null) out.close();
+			if (in != null) in.close();
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.action.Action#isEnabled()
 	 */
 	@Override

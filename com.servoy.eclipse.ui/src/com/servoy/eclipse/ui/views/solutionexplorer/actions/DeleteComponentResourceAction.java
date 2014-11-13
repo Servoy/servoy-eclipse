@@ -17,9 +17,10 @@
 
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.util.Iterator;
@@ -70,7 +71,7 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	@Override
@@ -92,7 +93,7 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 				}
 				else if (next.getType() == UserNodeType.COMPONENT_ITEM || next.getType() == UserNodeType.SERVICE_ITEM)
 				{
-					resource = getComponentFolderToDelete(resources, next, resource);
+					resource = getComponentFolderToDelete(resources, next);
 				}
 
 				if (resource != null)
@@ -111,11 +112,13 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 		}
 	}
 
-	private IResource getComponentFolderToDelete(IProject resources, SimpleUserNode next, IResource resource)
+	private IResource getComponentFolderToDelete(IProject resources, SimpleUserNode next)
 	{
 		WebComponentSpecification spec = (WebComponentSpecification)next.getRealObject();
 		IContainer[] dirResource;
+		IResource resource = null;
 		OutputStream out = null;
+		InputStream in = null;
 		try
 		{
 			dirResource = resources.getWorkspace().getRoot().findContainersForLocationURI(spec.getSpecURL().toURI());
@@ -128,8 +131,10 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 				m.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
 				Manifest manifest = new Manifest(m.getContents());
 				manifest.getEntries().remove(resource.getName() + "/" + resource.getName() + ".spec");
-				out = new FileOutputStream(new File(m.getLocationURI()), false);
+				out = new ByteArrayOutputStream();
 				manifest.write(out);
+				in = new ByteArrayInputStream(out.toString().getBytes());
+				m.setContents(in, IResource.FORCE, new NullProgressMonitor());
 			}
 		}
 		catch (URISyntaxException e)
@@ -146,9 +151,10 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 		}
 		finally
 		{
-			if (out != null) try
+			try
 			{
-				out.close();
+				if (out != null) out.close();
+				if (in != null) in.close();
 			}
 			catch (IOException e)
 			{
@@ -160,7 +166,7 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
 	 */
 	@Override
