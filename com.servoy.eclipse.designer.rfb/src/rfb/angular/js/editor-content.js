@@ -72,7 +72,9 @@ angular.module('editorContent',['servoyApp'])
 		 refreshDecorators: function() {
 			 renderDecorators();
 		 },
-		 
+		 refreshGhosts: function() {
+			 renderGhosts();
+		 },
 		 updateForm: function(uuid, w, h) {
 			 updateForm({uuid:uuid, w:w, h:h});
 		 }

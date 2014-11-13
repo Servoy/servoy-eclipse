@@ -125,7 +125,7 @@ public class Activator extends AbstractUIPlugin
 
 		/*
 		 * (non-Javadoc)
-		 *
+		 * 
 		 * @see com.servoy.j2db.server.ngclient.NGClient#shutDown(boolean)
 		 */
 		@Override
@@ -177,7 +177,7 @@ public class Activator extends AbstractUIPlugin
 
 		/*
 		 * (non-Javadoc)
-		 *
+		 * 
 		 * @see com.servoy.j2db.persistence.IPersistChangeListener#persistChanges(java.util.Collection)
 		 */
 		@Override
@@ -188,6 +188,7 @@ public class Activator extends AbstractUIPlugin
 
 			for (IPersist persist : changes)
 			{
+
 				if (persist instanceof IFormElement || persist instanceof Tab)
 				{
 					IPersist parent = persist;
@@ -196,7 +197,6 @@ public class Activator extends AbstractUIPlugin
 						parent = ((Tab)persist).getParent();
 						persist = parent;
 					}
-
 					while (parent != null)
 					{
 						if (parent instanceof Form)
@@ -299,9 +299,15 @@ public class Activator extends AbstractUIPlugin
 										break;
 									}
 								}
-								if (bigChange) fc.recreateUI();
+								if (bigChange)
+								{
+									fc.recreateUI();
+									getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
+										"refreshGhosts", new Object[] { });
+								}
 							}
 						}
+
 						if (changedForm[0] != null)
 						{
 							getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
@@ -321,7 +327,7 @@ public class Activator extends AbstractUIPlugin
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -414,7 +420,7 @@ public class Activator extends AbstractUIPlugin
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override

@@ -116,9 +116,14 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						component.packageName = packageName;
 						component.x = ev.pageX;
 						component.y = ev.pageY;
-						component.w = model.size ? model.size.width : 100;
-						component.h = model.size ? model.size.height : 100;
-						
+						if (model){
+							component.w = model.size ? model.size.width : 100;
+							component.h = model.size ? model.size.height : 100;
+						}
+						else {
+							component.w = 100;
+							component.h = 100;
+						}
 						component = $scope.convertToContentPoint(component);
 						if (component.x >0 && component.y >0)
 						{

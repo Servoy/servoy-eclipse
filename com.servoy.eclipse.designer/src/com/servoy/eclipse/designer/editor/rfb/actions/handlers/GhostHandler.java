@@ -207,8 +207,8 @@ public class GhostHandler implements IServerService
 						TabPanel panel = (TabPanel)o;
 						{
 							writer.object();
-							writer.key("left").value(panel.getLocation().getX());
-							writer.key("top").value(panel.getLocation().getY());
+							writer.key("left").value(0);
+							writer.key("top").value(0);
 							writer.endObject();
 						}
 						writer.key("uuid").value(panel.getUUID());
@@ -221,15 +221,6 @@ public class GhostHandler implements IServerService
 								Tab tab = (Tab)tabIterator.next();
 								int x = tab.getLocation().x;
 								int y = tab.getLocation().y;
-								//try to move tab inside the tabpanel (if needed)
-								if (y > panel.getLocation().y)
-								{
-									y -= panel.getLocation().y;
-								}
-								if (x < panel.getLocation().x)
-								{
-									x += panel.getLocation().x;
-								}
 								writer.object();
 								writer.key("uuid").value(tab.getUUID());
 								writer.key("type").value(tab.getTypeID());
@@ -340,7 +331,7 @@ public class GhostHandler implements IServerService
 						writer.key("ghosts");
 						writer.array();
 						{
-							Iterator<IPersist> partIterator = ((Portal)o).getAllObjects();
+							Iterator<IPersist> partIterator = portal.getAllObjects();
 							ArrayList<BaseComponent> persists = new ArrayList<BaseComponent>();
 							while (partIterator.hasNext())
 							{

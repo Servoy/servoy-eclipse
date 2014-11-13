@@ -556,6 +556,13 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				},500);
 			});
 			
+			$element.on('renderGhosts.content', function(event) {
+				var promise = $editorService.getGhostComponents();//no parameter, then the ghosts are not repositioned
+				promise.then(function (result){
+					$scope.ghosts = result;
+				});
+			});
+			
 			$element.on('renderDecorators.content', function(event) {
 				// TODO this is now in a timeout to let the editor-content be able to reload the form.
 				// could we have an event somewhere from the editor-content that the form is reloaded and ready?

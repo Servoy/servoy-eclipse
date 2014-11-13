@@ -42,6 +42,10 @@
 			}
 			var editorNode = parent.$(decodeURIComponent(getURLParameter('id')))
 			
+			function renderGhosts() {
+				editorNode.trigger('renderGhosts.content')
+			}
+			
 			function renderDecorators() {
 				editorNode.trigger('renderDecorators.content')
 			}

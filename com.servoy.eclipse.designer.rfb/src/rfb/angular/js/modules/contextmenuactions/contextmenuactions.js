@@ -9,10 +9,12 @@ angular.module('contextmenuactions',['contextmenu','editor']).run(function($root
 				var formState = editorScope.getFormState();
 				var node = selection[0];
 				var name = node.getAttribute("name");
-				var beanModel = formState.model[name];
-				if (beanModel)
-				{
-					beanAnchor = beanModel.anchors;
+				if (formState && name) {
+					var beanModel = formState.model[name];
+					if (beanModel)
+					{
+						beanAnchor = beanModel.anchors;
+					}
 				}
 			}
 		});
