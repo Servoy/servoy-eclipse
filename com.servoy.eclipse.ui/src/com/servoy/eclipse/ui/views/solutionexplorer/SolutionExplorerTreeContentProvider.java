@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -42,6 +43,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -52,6 +54,8 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.mozilla.javascript.JavaMembers;
@@ -143,6 +147,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	private static final String IMG_SOLUTION_WEB_ONLY = "solution_web_only.gif";
 	private static final String IMG_SOLUTION_PREIMPORT = "solution_preimport.png";
 	private static final String IMG_SOLUTION_POSTIMPORT = "solution_postimport.png";
+	private static Map<IPath, Image> imageCache = new HashMap<IPath, Image>();
 
 	private PlatformSimpleUserNode invisibleRootNode;
 
@@ -241,7 +246,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		stylesNode.parent = resources;
 
 		componentsNode = new PlatformSimpleUserNode(Messages.TreeStrings_Components, UserNodeType.COMPONENTS, SolutionSerializer.COMPONENTS_DIR_NAME,
-			uiActivator.loadImageFromBundle("bean.gif"));
+			uiActivator.loadImageFromBundle("coffee_grains.png"));
 		componentsNode.setClientSupport(ClientSupport.ng_wc_sc);
 		componentsNode.parent = resources;
 
@@ -726,12 +731,13 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
 						Map<String, URL> packages = provider.getPackagesToURLs();
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
+						Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
 						for (String packageName : packages.keySet())
 						{
 							IResource resource = getResource(packages.get(packageName));
 							if (resource != null)
 							{
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(packageName, UserNodeType.COMPONENTS_PACKAGE, resource, null);
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(packageName, UserNodeType.COMPONENTS_PACKAGE, resource, packageIcon);
 								node.parent = un;
 								children.add(node);
 							}
@@ -745,10 +751,15 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (components != null)
 						{
+							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
+								SolutionSerializer.COMPONENTS_DIR_NAME);
+							Image componentIcon = uiActivator.loadImageFromBundle("bean.gif");
 							for (String component : components)
 							{
 								WebComponentSpecification spec = provider.getWebComponentSpecification(component);
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT_ITEM, spec, null);
+								Image img = loadImageFromFolder(folder, spec.getIcon());
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT_ITEM, spec, img != null
+									? img : componentIcon);
 								node.parent = un;
 								children.add(node);
 							}
@@ -760,12 +771,13 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
 						Map<String, URL> packages = provider.getPackagesToURLs();
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
+						Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
 						for (String packageName : packages.keySet())
 						{
 							IResource resource = getResource(packages.get(packageName));
 							if (resource != null)
 							{
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(packageName, UserNodeType.SERVICES_PACKAGE, resource, null);
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(packageName, UserNodeType.SERVICES_PACKAGE, resource, packageIcon);
 								node.parent = un;
 								children.add(node);
 							}
@@ -779,10 +791,15 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (services != null)
 						{
+							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
+								SolutionSerializer.SERVICES_DIR_NAME);
+							Image serviceDefaultIcon = uiActivator.loadImageFromBundle("service.png");
 							for (String component : services)
 							{
 								WebComponentSpecification spec = provider.getWebServiceSpecification(component);
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE_ITEM, spec, null);
+								Image img = loadImageFromFolder(folder, spec.getIcon());
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE_ITEM, spec, img != null
+									? img : serviceDefaultIcon);
 								node.parent = un;
 								children.add(node);
 							}
@@ -803,6 +820,24 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			return un.children;
 		}
 		return new Object[0];
+	}
+
+	private Image loadImageFromFolder(IFolder folder, String iconPath) throws CoreException
+	{
+		if (iconPath != null)
+		{
+			IFile iconFile = folder.getFile(iconPath);
+			Image img = imageCache.get(iconFile.getFullPath());
+			if (img == null && iconFile.exists())
+			{
+				InputStream is = iconFile.getContents();
+				Display display = Display.getCurrent();
+				img = new Image(display, new ImageData(is));
+				if (img != null) imageCache.put(iconFile.getFullPath(), img);
+			}
+			return img;
+		}
+		return null;
 	}
 
 	/**

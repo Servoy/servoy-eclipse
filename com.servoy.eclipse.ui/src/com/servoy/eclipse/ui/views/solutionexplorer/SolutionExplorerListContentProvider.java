@@ -732,8 +732,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				else
 				{
-					//TODO type/icon?
-					PlatformSimpleUserNode node = new PlatformSimpleUserNode(path + name, UserNodeType.COMPONENT_RESOURCE, iResource, null);
+					PlatformSimpleUserNode node = new PlatformSimpleUserNode(path + name, UserNodeType.COMPONENT_RESOURCE, iResource,
+						uiActivator.loadImageFromBundle("js.gif"));
 					list.add(node);
 				}
 			}
