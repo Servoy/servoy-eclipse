@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
-import org.json.JSONObject;
 import org.sablo.Container;
 import org.sablo.specification.WebComponentSpecification;
 import org.sablo.websocket.BaseWebsocketSession;
@@ -48,11 +47,6 @@ public class EditorWebsocketSession extends BaseWebsocketSession
 	{
 		// TODO: check if editor is still open?
 		return true;
-	}
-
-	@Override
-	public void handleMessage(JSONObject obj)
-	{
 	}
 
 	@Override
