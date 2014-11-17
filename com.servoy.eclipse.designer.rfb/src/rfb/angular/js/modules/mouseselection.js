@@ -34,7 +34,13 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 				else {
 					editorScope.setSelection(node);
 				}
-			} else {
+			} 
+			else if (event.button == 2 && editorScope.getSelection().indexOf(node) !== -1 && editorScope.getSelection().length > 1)
+			{
+				// if we right click on selected element while multiple selection,just show context menu and do not modify selection
+				return;
+			}
+			else {
 				editorScope.setSelection(node);
 			}
 		}
