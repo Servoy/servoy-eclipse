@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -109,6 +110,149 @@ public class Activator extends AbstractUIPlugin
 
 	private final class DeveloperDesignClient extends DesignNGClient implements IPersistChangeListener
 	{
+		/**
+		 * @author user
+		 *
+		 */
+		private final class SendCSSFile implements Runnable
+		{
+			private final Solution solution;
+
+			/**
+			 * @param name
+			 */
+			public SendCSSFile(Solution solution)
+			{
+				this.solution = solution;
+			}
+
+			@Override
+			public void run()
+			{
+				getWebsocketSession().solutionLoaded(solution);
+			}
+		}
+
+		/**
+		 * @author user
+		 *
+		 */
+		private final class FormUpdater implements Runnable
+		{
+			/**
+			 *
+			 */
+			private final Map<Form, List<IFormElement>> frms;
+			/**
+			 *
+			 */
+			private final Form changedForm;
+
+			/**
+			 * @param frms
+			 * @param changedForm
+			 * @param changedSolution
+			 */
+			private FormUpdater(Map<Form, List<IFormElement>> frms, Form changedForm)
+			{
+				this.frms = frms;
+				this.changedForm = changedForm;
+			}
+
+			@Override
+			public void run()
+			{
+				for (Entry<Form, List<IFormElement>> entry : frms.entrySet())
+				{
+					List<IFormController> cachedFormControllers = getFormManager().getCachedFormControllers(entry.getKey());
+					ServoyDataConverterContext cntxt = new ServoyDataConverterContext(DeveloperDesignClient.this);
+					for (IFormController fc : cachedFormControllers)
+					{
+						boolean bigChange = false;
+						outer : for (IFormElement persist : entry.getValue())
+						{
+							if (persist.getParent().getChild(persist.getUUID()) == null)
+							{
+								// deleted persist
+								bigChange = true;
+								break;
+							}
+							FormElement newFe = new FormElement(persist, cntxt, new PropertyPath());
+
+							IWebFormUI formUI = (IWebFormUI)fc.getFormUI();
+							WebFormComponent webComponent = formUI.getWebComponent(newFe.getName());
+							if (webComponent != null)
+							{
+								FormElement existingFe = webComponent.getFormElement();
+
+								WebComponentSpecification spec = webComponent.getSpecification();
+								Map<String, PropertyDescription> handlers = spec.getHandlers();
+								Set<String> allKeys = new HashSet<String>();
+								allKeys.addAll(newFe.getRawPropertyValues().keySet());
+								allKeys.addAll(existingFe.getRawPropertyValues().keySet());
+								for (String property : allKeys)
+								{
+									Object currentPropValue = existingFe.getPropertyValue(property);
+									Object newPropValue = newFe.getPropertyValue(property);
+									if (!Utils.equalObjects(currentPropValue, newPropValue))
+									{
+										if (handlers.get(property) != null)
+										{
+											// this is a handler change so a big change (component could react to a handler differently)
+											bigChange = true;
+											break outer;
+										}
+										PropertyDescription prop = spec.getProperty(property);
+										if (prop != null)
+										{
+											if ("design".equals(prop.getScope()) || prop.getType() == DataproviderPropertyType.INSTANCE)
+											{
+												// this is a design property change so a big change
+												bigChange = true;
+												break outer;
+											}
+											if (property.equals("tabs"))
+											{
+												bigChange = true;
+												break outer;
+											}
+											webComponent.setFormElement(newFe);
+											webComponent.setProperty(property, newFe.getPropertyValueConvertedForWebComponent(property, webComponent,
+												formUI.getDataAdapterList() instanceof DataAdapterList ? (DataAdapterList)formUI.getDataAdapterList() : null));
+
+										}
+									}
+								}
+							}
+							else
+							{
+								// no webcomponent found, so new one or name change, recreate all
+								bigChange = true;
+								break;
+							}
+						}
+						if (bigChange)
+						{
+							fc.recreateUI();
+							getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall("refreshGhosts",
+								new Object[] { });
+						}
+					}
+				}
+				if (changedForm != null)
+				{
+					getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
+						"updateForm",
+						new Object[] { changedForm.getUUID().toString(), Integer.valueOf((int)changedForm.getSize().getWidth()), Integer.valueOf((int)changedForm.getSize().getHeight()) });
+				}
+				else
+				{
+					getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall("refreshDecorators",
+						new Object[] { });
+				}
+			}
+		}
+
 		private final IDesignerSolutionProvider solutionProvider;
 
 
@@ -184,8 +328,8 @@ public class Activator extends AbstractUIPlugin
 		public void persistChanges(Collection<IPersist> changes)
 		{
 			final Map<Form, List<IFormElement>> frms = new HashMap<Form, List<IFormElement>>();
-			final Form[] changedForm = new Form[1];
-
+			Form changedForm = null;
+			Solution changedSolution = null;
 			for (IPersist persist : changes)
 			{
 
@@ -215,112 +359,35 @@ public class Activator extends AbstractUIPlugin
 				}
 				else if (persist instanceof Form)
 				{
-					changedForm[0] = (Form)persist;
+					changedForm = (Form)persist;
 				}
 				else if (persist instanceof Part)
 				{
-					changedForm[0] = (Form)persist.getParent();
+					changedForm = (Form)persist.getParent();
 				}
-			}
-			if (frms.size() > 0 || changedForm[0] != null)
-			{
-				getWebsocketSession().getEventDispatcher().addEvent(new Runnable()
+				else if (persist instanceof Solution)
 				{
-					@Override
-					public void run()
+					changedSolution = (Solution)persist;
+				}
+
+			}
+			if (frms.size() > 0 || changedForm != null || changedSolution != null)
+			{
+				getWebsocketSession().getEventDispatcher().addEvent(new FormUpdater(frms, changedForm));
+			}
+			if (changedSolution != null)
+			{
+				Iterator<IPersist> iterator = changes.iterator();
+				while (iterator.hasNext())
+				{
+					IPersist next = iterator.next();
+					if (next.getTypeID() == IRepository.MEDIA) // changes collection contains a solution and a media ( .css file) => stylesheet change
 					{
-						for (Entry<Form, List<IFormElement>> entry : frms.entrySet())
-						{
-							List<IFormController> cachedFormControllers = getFormManager().getCachedFormControllers(entry.getKey());
-							ServoyDataConverterContext cntxt = new ServoyDataConverterContext(DeveloperDesignClient.this);
-							for (IFormController fc : cachedFormControllers)
-							{
-								boolean bigChange = false;
-								outer : for (IFormElement persist : entry.getValue())
-								{
-									if (persist.getParent().getChild(persist.getUUID()) == null)
-									{
-										// deleted persist
-										bigChange = true;
-										break;
-									}
-									FormElement newFe = new FormElement(persist, cntxt, new PropertyPath());
-
-									IWebFormUI formUI = (IWebFormUI)fc.getFormUI();
-									WebFormComponent webComponent = formUI.getWebComponent(newFe.getName());
-									if (webComponent != null)
-									{
-										FormElement existingFe = webComponent.getFormElement();
-
-										WebComponentSpecification spec = webComponent.getSpecification();
-										Map<String, PropertyDescription> handlers = spec.getHandlers();
-										Set<String> allKeys = new HashSet<String>();
-										allKeys.addAll(newFe.getRawPropertyValues().keySet());
-										allKeys.addAll(existingFe.getRawPropertyValues().keySet());
-										for (String property : allKeys)
-										{
-											Object currentPropValue = existingFe.getPropertyValue(property);
-											Object newPropValue = newFe.getPropertyValue(property);
-											if (!Utils.equalObjects(currentPropValue, newPropValue))
-											{
-												if (handlers.get(property) != null)
-												{
-													// this is a handler change so a big change (component could react to a handler differently)
-													bigChange = true;
-													break outer;
-												}
-												PropertyDescription prop = spec.getProperty(property);
-												if (prop != null)
-												{
-													if ("design".equals(prop.getScope()) || prop.getType() == DataproviderPropertyType.INSTANCE)
-													{
-														// this is a design property change so a big change
-														bigChange = true;
-														break outer;
-													}
-													if (property.equals("tabs"))
-													{
-														bigChange = true;
-														break outer;
-													}
-													webComponent.setFormElement(newFe);
-													webComponent.setProperty(property, newFe.getPropertyValueConvertedForWebComponent(property, webComponent,
-														formUI.getDataAdapterList() instanceof DataAdapterList ? (DataAdapterList)formUI.getDataAdapterList()
-															: null));
-
-												}
-											}
-										}
-									}
-									else
-									{
-										// no webcomponent found, so new one or name change, recreate all
-										bigChange = true;
-										break;
-									}
-								}
-								if (bigChange)
-								{
-									fc.recreateUI();
-									getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
-										"refreshGhosts", new Object[] { });
-								}
-							}
-						}
-
-						if (changedForm[0] != null)
-						{
-							getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
-								"updateForm",
-								new Object[] { changedForm[0].getUUID().toString(), Integer.valueOf((int)changedForm[0].getSize().getWidth()), Integer.valueOf((int)changedForm[0].getSize().getHeight()) });
-						}
-						else
-						{
-							getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
-								"refreshDecorators", new Object[] { });
-						}
+						getWebsocketSession().getEventDispatcher().addEvent(new SendCSSFile(changedSolution));
+						break;
 					}
-				});
+				}
+
 			}
 		}
 	}
