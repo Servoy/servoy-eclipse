@@ -519,6 +519,17 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 					$(document).keyup(function(objEvent) {					
 						var fixedKeyEvent = $scope.getFixedKeyEvent(objEvent);
 	
+		                // 46 = delete
+						if (fixedKeyEvent.keyCode == 46) {
+							// send the DELETE key code to the server
+							$editorService.keyPressed(objEvent);
+							return false;
+						}
+						return true;
+					});
+					$(document).keydown(function(objEvent) {
+						var fixedKeyEvent = $scope.getFixedKeyEvent(objEvent);
+						
 		                if(fixedKeyEvent.isCtrl)
 		                {
 		                	var k = String.fromCharCode(fixedKeyEvent.keyCode).toLowerCase();
@@ -531,13 +542,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			                   return false;
 		                    }
 		                }
-		                // 46 = delete
-						if (fixedKeyEvent.keyCode == 46) {
-							// send the DELETE key code to the server
-							$editorService.keyPressed(objEvent);
-							return false;
-						}
-						return true;
+		                return true;
 					});
 				});
 				
