@@ -73,7 +73,7 @@ public class NewComponentResourceAction extends Action implements ISelectionChan
 		if (state)
 		{
 			UserNodeType type = ((SimpleUserNode)sel.getFirstElement()).getType();
-			state = (type == UserNodeType.COMPONENT_ITEM) || (type == UserNodeType.SERVICE_ITEM);
+			state = (type == UserNodeType.COMPONENT) || (type == UserNodeType.SERVICE);
 			if (state)
 			{
 				spec = ((WebComponentSpecification)((SimpleUserNode)sel.getFirstElement()).getRealObject());

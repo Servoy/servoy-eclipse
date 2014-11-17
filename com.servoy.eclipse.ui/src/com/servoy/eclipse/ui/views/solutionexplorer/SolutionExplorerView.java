@@ -280,6 +280,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.RefreshAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ReloadTablesAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RemoveModuleAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RemoveSolutionProtectionAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameComponentAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameMediaAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameMediaFolderAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenamePersistAction;
@@ -2796,8 +2797,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInListPrimary.registerAction(UserNodeType.MEDIA, importMedia);
 		newActionInListPrimary.registerAction(UserNodeType.MEDIA_FOLDER, importMedia);
 		newActionInListPrimary.registerAction(UserNodeType.SERVER, newTable);
-		newActionInListPrimary.registerAction(UserNodeType.COMPONENT_ITEM, newComponentResource);
-		newActionInListPrimary.registerAction(UserNodeType.SERVICE_ITEM, newComponentResource);
+		newActionInListPrimary.registerAction(UserNodeType.COMPONENT, newComponentResource);
+		newActionInListPrimary.registerAction(UserNodeType.SERVICE, newComponentResource);
 
 		newActionInListPrimary.registerAction(UserNodeType.STYLES, newStyle);
 		newActionInListPrimary.registerAction(UserNodeType.ALL_RELATIONS, newRelation);
@@ -2841,11 +2842,11 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction deleteGlobalScript = new DeleteScriptAction(UserNodeType.GLOBAL_METHOD_ITEM, "Delete method", this);
 		IAction deleteFormVariable = new DeleteScriptAction(UserNodeType.FORM_VARIABLE_ITEM, "Delete variable", this);
 		IAction deleteGlobalVariable = new DeleteScriptAction(UserNodeType.GLOBAL_VARIABLE_ITEM, "Delete variable", this);
-		IAction deleteComponentPackage = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete Component Package",
+		IAction deleteComponentPackage = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete component package",
 			UserNodeType.COMPONENTS_PACKAGE);
-		IAction deleteServicePackage = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete Service Package", UserNodeType.SERVICES_PACKAGE);
-		IAction deleteComponent = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete Component", UserNodeType.COMPONENT_ITEM);
-		IAction deleteService = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete Service", UserNodeType.SERVICE_ITEM);
+		IAction deleteServicePackage = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete service package", UserNodeType.SERVICES_PACKAGE);
+		IAction deleteComponent = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete component", UserNodeType.COMPONENT);
+		IAction deleteService = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete service", UserNodeType.SERVICE);
 		IAction deleteComponentResource = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete file", UserNodeType.COMPONENT_RESOURCE);
 		IAction deleteI18N = new DeleteI18NAction(getSite().getShell());
 		IAction deleteScope = new DeleteScopeAction("Delete scope", this);
@@ -2894,8 +2895,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		deleteActionInTree.registerAction(UserNodeType.WORKING_SET, new DeleteWorkingSetAction());
 		deleteActionInTree.registerAction(UserNodeType.COMPONENTS_PACKAGE, deleteComponentPackage);
 		deleteActionInTree.registerAction(UserNodeType.SERVICES_PACKAGE, deleteServicePackage);
-		deleteActionInTree.registerAction(UserNodeType.COMPONENT_ITEM, deleteComponent);
-		deleteActionInTree.registerAction(UserNodeType.SERVICE_ITEM, deleteService);
+		deleteActionInTree.registerAction(UserNodeType.COMPONENT, deleteComponent);
+		deleteActionInTree.registerAction(UserNodeType.SERVICE, deleteService);
 
 
 		renameActionInTree = new ContextAction(this, null, "Rename");
@@ -2907,6 +2908,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		renameActionInTree.registerAction(UserNodeType.FORM, new RenamePersistAction());
 		renameActionInTree.registerAction(UserNodeType.GLOBALS_ITEM, new RenameScopeAction(this));
 		renameActionInTree.registerAction(UserNodeType.WORKING_SET, new RenameWorkingSetAction());
+		renameActionInTree.registerAction(UserNodeType.COMPONENT, new RenameComponentAction(this, getSite().getShell(), UserNodeType.COMPONENT));
+		renameActionInTree.registerAction(UserNodeType.SERVICE, new RenameComponentAction(this, getSite().getShell(), UserNodeType.SERVICE));
 
 		addAsModuleAction = new AddAsModuleAction(getSite().getShell());
 		removeModuleAction = new RemoveModuleAction(getSite().getShell());

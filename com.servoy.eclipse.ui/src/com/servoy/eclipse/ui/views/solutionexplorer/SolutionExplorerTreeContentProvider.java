@@ -758,7 +758,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							{
 								WebComponentSpecification spec = provider.getWebComponentSpecification(component);
 								Image img = loadImageFromFolder(folder, spec.getIcon());
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT_ITEM, spec, img != null
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec, img != null
 									? img : componentIcon);
 								node.parent = un;
 								children.add(node);
@@ -798,7 +798,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							{
 								WebComponentSpecification spec = provider.getWebServiceSpecification(component);
 								Image img = loadImageFromFolder(folder, spec.getIcon());
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE_ITEM, spec, img != null
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec, img != null
 									? img : serviceDefaultIcon);
 								node.parent = un;
 								children.add(node);

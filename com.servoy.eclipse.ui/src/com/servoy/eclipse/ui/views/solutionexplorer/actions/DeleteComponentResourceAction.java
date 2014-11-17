@@ -91,7 +91,7 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 					resource = (IResource)realObject;
 
 				}
-				else if (next.getType() == UserNodeType.COMPONENT_ITEM || next.getType() == UserNodeType.SERVICE_ITEM)
+				else if (next.getType() == UserNodeType.COMPONENT || next.getType() == UserNodeType.SERVICE)
 				{
 					resource = getComponentFolderToDelete(resources, next);
 				}
@@ -181,7 +181,7 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 		{
 			SimpleUserNode node = it.next();
 			state = (node.getType() == nodeType);
-			if (node.getType() == UserNodeType.COMPONENT_ITEM || node.getType() == UserNodeType.SERVICE_ITEM)
+			if (node.getType() == UserNodeType.COMPONENT || node.getType() == UserNodeType.SERVICE)
 			{
 				state = node.parent.getRealObject() instanceof IFolder;
 			}
