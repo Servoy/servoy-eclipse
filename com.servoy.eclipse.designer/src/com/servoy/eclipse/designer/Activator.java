@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -61,11 +60,14 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.server.ngclient.DataAdapterList;
 import com.servoy.j2db.server.ngclient.FormElement;
@@ -269,7 +271,7 @@ public class Activator extends AbstractUIPlugin
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see com.servoy.j2db.server.ngclient.NGClient#shutDown(boolean)
 		 */
 		@Override
@@ -321,7 +323,7 @@ public class Activator extends AbstractUIPlugin
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see com.servoy.j2db.persistence.IPersistChangeListener#persistChanges(java.util.Collection)
 		 */
 		@Override
@@ -329,7 +331,7 @@ public class Activator extends AbstractUIPlugin
 		{
 			final Map<Form, List<IFormElement>> frms = new HashMap<Form, List<IFormElement>>();
 			Form changedForm = null;
-			Solution changedSolution = null;
+			Media cssFile = null;
 			for (IPersist persist : changes)
 			{
 
@@ -365,36 +367,35 @@ public class Activator extends AbstractUIPlugin
 				{
 					changedForm = (Form)persist.getParent();
 				}
-				else if (persist instanceof Solution)
+				else if (persist instanceof Media)
 				{
-					changedSolution = (Solution)persist;
+					if (((Media)persist).getName().endsWith(".css"))
+					{
+						cssFile = (Media)persist;
+					}
 				}
-
 			}
-			if (frms.size() > 0 || changedForm != null || changedSolution != null)
+			if (frms.size() > 0 || changedForm != null)
 			{
 				getWebsocketSession().getEventDispatcher().addEvent(new FormUpdater(frms, changedForm));
 			}
-			if (changedSolution != null)
+			if (cssFile != null)
 			{
-				Iterator<IPersist> iterator = changes.iterator();
-				while (iterator.hasNext())
+				ISupportChilds parent = cssFile.getParent();
+				if (parent instanceof Solution)
 				{
-					IPersist next = iterator.next();
-					if (next.getTypeID() == IRepository.MEDIA) // changes collection contains a solution and a media ( .css file) => stylesheet change
-					{
-						getWebsocketSession().getEventDispatcher().addEvent(new SendCSSFile(changedSolution));
-						break;
-					}
+					Solution theSolution = (Solution)parent;
+					Object property = theSolution.getProperty(StaticContentSpecLoader.PROPERTY_STYLESHEET.getPropertyName());
+					if (property.equals(cssFile.getID()) || (Integer)property == 0) getWebsocketSession().getEventDispatcher().addEvent(
+						new SendCSSFile(theSolution));
 				}
-
 			}
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -487,7 +488,7 @@ public class Activator extends AbstractUIPlugin
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
