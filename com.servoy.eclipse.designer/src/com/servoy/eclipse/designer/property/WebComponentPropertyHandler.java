@@ -40,6 +40,7 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyFunctionPropertyType;
@@ -117,6 +118,10 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		}
 
 		IPropertyType< ? > type = propertyDescription.getType();
+		if (type == FoundsetPropertyType.INSTANCE)
+		{
+			return value;
+		}
 		if (type == FunctionPropertyType.INSTANCE || type == ServoyFunctionPropertyType.INSTANCE || type == ValueListPropertyType.INSTANCE)
 		{
 			if (value == null) return Integer.valueOf(0);
@@ -194,7 +199,8 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			convertedValue = (val == null) ? null : val.getUUID().toString();
 		}
 		else if (propertyDescription.getType() instanceof IPropertyConverter && propertyDescription.getType() != DataproviderPropertyType.INSTANCE &&
-			propertyDescription.getType() != TagStringPropertyType.INSTANCE && propertyDescription.getType() != MediaPropertyType.INSTANCE)
+			propertyDescription.getType() != TagStringPropertyType.INSTANCE && propertyDescription.getType() != MediaPropertyType.INSTANCE &&
+			propertyDescription.getType() != FoundsetPropertyType.INSTANCE)
 		{
 			IPropertyConverter<Object> type = (IPropertyConverter<Object>)propertyDescription.getType();
 			JSONStringer writer = new JSONStringer();

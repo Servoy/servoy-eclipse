@@ -52,6 +52,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.eclipse.ui.views.properties.PropertySheetPage;
+import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.property.IPropertyType;
@@ -174,6 +175,7 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.scripting.FunctionDefinition;
+import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
@@ -1390,122 +1392,123 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				return new ColorPropertyController(id, displayName);
 			}
 
-		if (propertyType == BorderPropertyType.INSTANCE)
-		{
-			BorderPropertyController borderPropertyController = new BorderPropertyController(id, displayName, propertySource, persistContext);
-			borderPropertyController.setReadonly(readOnly);
-
-			if (Boolean.TRUE.equals(propertyDescription.getConfig()))
+			if (propertyType == BorderPropertyType.INSTANCE)
 			{
-				// BorderPropertyController handles Border objects, the property is a String.
-				return new PropertyController<String, Object>(id, displayName, new ChainedPropertyConverter<String, Border, Object>(BORDER_STRING_CONVERTER,
-					borderPropertyController.getConverter()), borderPropertyController.getLabelProvider(), borderPropertyController);
+				BorderPropertyController borderPropertyController = new BorderPropertyController(id, displayName, propertySource, persistContext);
+				borderPropertyController.setReadonly(readOnly);
+
+				if (Boolean.TRUE.equals(propertyDescription.getConfig()))
+				{
+					// BorderPropertyController handles Border objects, the property is a String.
+					return new PropertyController<String, Object>(id, displayName, new ChainedPropertyConverter<String, Border, Object>(
+						BORDER_STRING_CONVERTER, borderPropertyController.getConverter()), borderPropertyController.getLabelProvider(),
+						borderPropertyController);
+				}
+
+				return borderPropertyController;
 			}
 
-			return borderPropertyController;
-		}
-
-		if (propertyType == BooleanPropertyType.INSTANCE)
-		{
-			return new CheckboxPropertyDescriptor(id, displayName);
-		}
-
-		IPropertyDescriptor retval = getGeneralPropertyDescriptor(persistContext, readOnly, id, displayName, flattenedEditingSolution);
-		if (retval != null)
-		{
-			return retval;
-		}
-
-		if (propertyType == ScrollbarsPropertyType.INSTANCE)
-		{
-			return new PropertyController<Integer, Object>(id, displayName, new ComplexProperty.ComplexPropertyConverter<Integer>()
+			if (propertyType == BooleanPropertyType.INSTANCE)
 			{
-				@Override
-				public Object convertProperty(Object property, Integer value)
+				return new CheckboxPropertyDescriptor(id, displayName);
+			}
+
+			IPropertyDescriptor retval = getGeneralPropertyDescriptor(persistContext, readOnly, id, displayName, flattenedEditingSolution);
+			if (retval != null)
+			{
+				return retval;
+			}
+
+			if (propertyType == ScrollbarsPropertyType.INSTANCE)
+			{
+				return new PropertyController<Integer, Object>(id, displayName, new ComplexProperty.ComplexPropertyConverter<Integer>()
 				{
-					return new ComplexProperty<Integer>(value)
+					@Override
+					public Object convertProperty(Object property, Integer value)
 					{
-						@Override
-						public IPropertySource getPropertySource()
+						return new ComplexProperty<Integer>(value)
 						{
-							ScrollbarSettingPropertySource scrollbarSettingPropertySource = new ScrollbarSettingPropertySource(this);
-							scrollbarSettingPropertySource.setReadonly(readOnly);
-							return scrollbarSettingPropertySource;
-						}
-					};
-				}
-			}, ScrollbarSettingLabelProvider.INSTANCE, new DummyCellEditorFactory(ScrollbarSettingLabelProvider.INSTANCE));
-		}
+							@Override
+							public IPropertySource getPropertySource()
+							{
+								ScrollbarSettingPropertySource scrollbarSettingPropertySource = new ScrollbarSettingPropertySource(this);
+								scrollbarSettingPropertySource.setReadonly(readOnly);
+								return scrollbarSettingPropertySource;
+							}
+						};
+					}
+				}, ScrollbarSettingLabelProvider.INSTANCE, new DummyCellEditorFactory(ScrollbarSettingLabelProvider.INSTANCE));
+			}
 
-		if (propertyType == StyleClassPropertyType.INSTANCE)
-		{
-			return createStyleClassPropertyController(persistContext.getPersist(), id, displayName, null, form);
-		}
-
-		retval = getPropertiesPropertyDescriptor(propertyDescriptor, persistContext, readOnly, id, displayName, propertyDescription, flattenedEditingSolution,
-			form);
-		if (retval != null)
-		{
-			return retval;
-		}
-
-		if (propertyType == StringPropertyType.INSTANCE)
-		{
-			return new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null, new ICellEditorFactory()
+			if (propertyType == StyleClassPropertyType.INSTANCE)
 			{
-				public CellEditor createPropertyEditor(Composite parent)
-				{
-					return new TextCellEditor(parent);
-				}
-			});
-		}
+				return createStyleClassPropertyController(persistContext.getPersist(), id, displayName, null, form);
+			}
 
-		final int type;
-		if (propertyType == BytePropertyType.INSTANCE)
-		{
-			type = NumberCellEditor.BYTE;
-		}
-		else if (propertyType == DoublePropertyType.INSTANCE)
-		{
-			type = NumberCellEditor.DOUBLE;
-		}
-		else if (propertyType == FloatPropertyType.INSTANCE)
-		{
-			type = NumberCellEditor.FLOAT;
-		}
-		else if (propertyType == IntPropertyType.INSTANCE)
-		{
-			type = NumberCellEditor.INTEGER;
-		}
-		else if (propertyType == TabSeqPropertyType.INSTANCE)
-		{
-			type = NumberCellEditor.INTEGER;
-		}
-		else if (propertyType == LongPropertyType.INSTANCE)
-		{
-			type = NumberCellEditor.LONG;
-		}
+			retval = getPropertiesPropertyDescriptor(propertyDescriptor, persistContext, readOnly, id, displayName, propertyDescription,
+				flattenedEditingSolution, form);
+			if (retval != null)
+			{
+				return retval;
+			}
+
+			if (propertyType == StringPropertyType.INSTANCE)
+			{
+				return new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null, new ICellEditorFactory()
+				{
+					public CellEditor createPropertyEditor(Composite parent)
+					{
+						return new TextCellEditor(parent);
+					}
+				});
+			}
+
+			final int type;
+			if (propertyType == BytePropertyType.INSTANCE)
+			{
+				type = NumberCellEditor.BYTE;
+			}
+			else if (propertyType == DoublePropertyType.INSTANCE)
+			{
+				type = NumberCellEditor.DOUBLE;
+			}
+			else if (propertyType == FloatPropertyType.INSTANCE)
+			{
+				type = NumberCellEditor.FLOAT;
+			}
+			else if (propertyType == IntPropertyType.INSTANCE)
+			{
+				type = NumberCellEditor.INTEGER;
+			}
+			else if (propertyType == TabSeqPropertyType.INSTANCE)
+			{
+				type = NumberCellEditor.INTEGER;
+			}
+			else if (propertyType == LongPropertyType.INSTANCE)
+			{
+				type = NumberCellEditor.LONG;
+			}
 //		else if (propertyType == TypesRegistry.shortnumber)
 //		{
 //			type = NumberCellEditor.SHORT;
 //		}
-		else
-		{
-			type = -1;
-		}
-		if (type != -1)
-		{
-			return new PropertyDescriptor(id, displayName)
+			else
 			{
-				@Override
-				public CellEditor createPropertyEditor(Composite parent)
+				type = -1;
+			}
+			if (type != -1)
+			{
+				return new PropertyDescriptor(id, displayName)
 				{
-					NumberCellEditor editor = new NumberCellEditor(parent);
-					editor.setType(type);
-					return editor;
-				}
-			};
-		}
+					@Override
+					public CellEditor createPropertyEditor(Composite parent)
+					{
+						NumberCellEditor editor = new NumberCellEditor(parent);
+						editor.setType(type);
+						return editor;
+					}
+				};
+			}
 		}
 		// other bean properties
 		if (propertyDescriptor.propertyDescriptor instanceof BeanPropertyHandler)
@@ -2706,6 +2709,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 						"Edit text property", Activator.getDefault().getDesignClient(), Boolean.TRUE.equals(propertyDescription.getConfig()));
 				}
 			});
+		}
+
+		if (propertyType == FoundsetPropertyType.INSTANCE)
+		{
+			return new FoundsetPropertyController(id, displayName, flattenedEditingSolution, persistContext, (JSONObject)propertyDescription.getConfig());
 		}
 
 		if (id.equals("name"))
