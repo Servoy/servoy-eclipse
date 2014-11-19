@@ -99,6 +99,7 @@ import org.sablo.specification.property.types.StringPropertyType;
 
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.IActiveProjectListener;
+import com.servoy.eclipse.core.ISolutionMetaDataChangeListener;
 import com.servoy.eclipse.core.IWebResourceChangedListener;
 import com.servoy.eclipse.core.JSDeveloperSolutionModel;
 import com.servoy.eclipse.core.ServoyModel;
@@ -163,6 +164,7 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.plugins.IBeanClassProvider;
 import com.servoy.j2db.plugins.IClientPlugin;
@@ -702,6 +704,27 @@ public class TypeCreator extends TypeCache
 	}
 
 
+	private void clearCache()
+	{
+		Job job = new Job("clearing cache")
+		{
+			@Override
+			public IStatus run(IProgressMonitor monitor)
+			{
+				for (IScopeTypeCreator creator : scopeTypes.values())
+				{
+					creator.flush();
+				}
+				servoyStaticTypeSystem.reset();
+				clear(null);
+				flushCache();
+				return Status.OK_STATUS;
+			}
+		};
+		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		job.schedule();
+	}
+
 	protected void initalize()
 	{
 		DesignApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
@@ -796,6 +819,15 @@ public class TypeCreator extends TypeCache
 							job.schedule();
 						}
 					});
+					((ServoyModel)servoyModel).addSolutionMetaDataChangeListener(new ISolutionMetaDataChangeListener()
+					{
+
+						@Override
+						public void solutionMetaDataChanged(Solution changedSolution)
+						{
+							clearCache();
+						}
+					});
 					((ServoyModel)servoyModel).addActiveProjectListener(new IActiveProjectListener()
 					{
 						public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
@@ -805,32 +837,14 @@ public class TypeCreator extends TypeCache
 
 						public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
 						{
-							// todo maybe fush on certain things?
 						}
 
 						public void activeProjectChanged(ServoyProject activeProject)
 						{
-							Job job = new Job("clearing cache")
-							{
-								@Override
-								public IStatus run(IProgressMonitor monitor)
-								{
-									for (IScopeTypeCreator creator : scopeTypes.values())
-									{
-										creator.flush();
-									}
-									servoyStaticTypeSystem.reset();
-									clear(null);
-									flushCache();
-									return Status.OK_STATUS;
-								}
-							};
-							job.setRule(ResourcesPlugin.getWorkspace().getRoot());
-							job.schedule();
+							clearCache();
 						}
 					});
 				}
-
 				com.servoy.eclipse.core.Activator.getDefault().addWebComponentChangedListener(new IWebResourceChangedListener()
 				{
 					@Override
