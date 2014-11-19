@@ -390,7 +390,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 					var validSelection = new Array();
 					for (var i = 0; i < selection.length; i++) {
 						var ghost = $scope.getGhost(selection[i].getAttribute("svy-id"));
-						if(ghost && (ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE))
+						if(ghost && (ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE || ghost.type == EDITOR_CONSTANTS.FORM_PERSIST_TYPE))
 						{
 							continue;
 						}

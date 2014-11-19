@@ -1,4 +1,4 @@
-angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegistry,$selectionUtils){
+angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegistry,$selectionUtils,EDITOR_CONSTANTS){
 	$pluginRegistry.registerPlugin(function(editorScope) {
 		var selectedNodeMouseEvent;
 		var lassoStarted = false;
@@ -73,9 +73,15 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 		function onmousedownLasso(event) {
 			if(event.button == 0 && !lassoStarted) {
 				var node = utils.getNode(event);
-				if (!node) {
+				var canStartLasso = !node;
+				if(node) {
+					var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+					canStartLasso = (ghostObject && ghostObject.type == EDITOR_CONSTANTS.FORM_PERSIST_TYPE);
+				}
+				
+				if(canStartLasso) {
 					startLasso(event);
-				}	
+				}
 			}
 		}
 
@@ -98,8 +104,10 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 				var lassoMouseSelectPosition = utils.getMousePosition(event,lassoStarted);
 				var p1 = utils.adjustForPadding(mouseDownPosition);
 				var p2 = utils.adjustForPadding(lassoMouseSelectPosition);
-				var selectedElements = utils.getElementsByRectangle(p1,p2,1);
-				editorScope.setSelection(selectedElements);
+				if(Math.abs(p1.left - p2.left) > 1 && Math.abs(p1.top - p2.top) > 1) {
+					var selectedElements = utils.getElementsByRectangle(p1,p2,1);
+					editorScope.setSelection(selectedElements);	
+				}
 				lassoStarted = false;
 				lassoDiv.style.display = 'none';
 			}
