@@ -101,10 +101,13 @@
 								"required": ["onchange"],
 								"additionalProperties": false
 							},
+							"forFoundset": {
+								"type":"string"
+							},
 							"elementConfig": {
 								"type":"object",
 								"properties":{
-									"forFoundsetTypedProperty": {
+									"forFoundset": {
 										"type":"string"
 									}
 								}
