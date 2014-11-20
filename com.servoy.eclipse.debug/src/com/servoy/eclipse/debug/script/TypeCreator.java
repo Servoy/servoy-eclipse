@@ -718,6 +718,7 @@ public class TypeCreator extends TypeCache
 				servoyStaticTypeSystem.reset();
 				clear(null);
 				flushCache();
+				docCache.clear();
 				return Status.OK_STATUS;
 			}
 		};
