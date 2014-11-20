@@ -38,6 +38,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportChilds;
 
 /** Command to past previously copied editor models.
  *
@@ -84,6 +85,7 @@ public class PasteAction extends SelectionAction
 		final Object selected = objects.get(0);
 
 		Form form = null;
+		ISupportChilds parent = null;
 		if (selected instanceof FormElementGroup)
 		{
 			form = ((FormElementGroup)selected).getParent();
@@ -94,11 +96,19 @@ public class PasteAction extends SelectionAction
 			if (persist != null)
 			{
 				form = (Form)persist.getAncestor(IRepository.FORMS);
+				if (persist instanceof ISupportChilds)
+				{
+					parent = (ISupportChilds)persist;
+				}
+				else
+				{
+					parent = form;
+				}
 			}
 		}
 
 		if (form == null) return null;
-		return new SelectModelsCommandWrapper(selectionProvider, new PasteCommand(application, form, Collections.emptyMap(), form, fieldPositioner));
+		return new SelectModelsCommandWrapper(selectionProvider, new PasteCommand(application, parent, Collections.emptyMap(), form, fieldPositioner));
 	}
 
 	@Override
