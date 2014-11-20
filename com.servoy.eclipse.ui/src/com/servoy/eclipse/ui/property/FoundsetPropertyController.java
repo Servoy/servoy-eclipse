@@ -274,11 +274,9 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 			DataProviderLabelProvider hidePrefix = new DataProviderLabelProvider(true);
 			hidePrefix.setConverter(converter);
 
-			ILabelProvider labelProviderShowPrefix = new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(showPrefix,
-				persistContext.getContext()));
 			final ILabelProvider labelProviderHidePrefix = new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(hidePrefix,
 				persistContext.getContext()));
-			PropertyController<String, String> propertyController = new PropertyController<String, String>(id, displayName, null, labelProviderShowPrefix,
+			PropertyController<String, String> propertyController = new PropertyController<String, String>(id, displayName, null, labelProviderHidePrefix,
 				new ICellEditorFactory()
 				{
 					public CellEditor createPropertyEditor(Composite parent)
@@ -309,7 +307,13 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 				JSONObject dataprovidersValues = v.optJSONObject(DATAPROVIDERS);
 				if (dataprovidersValues != null && dataprovidersValues.has(id.toString()))
 				{
-					return dataprovidersValues.optString(id.toString());
+					String foundsetSelector = v.optString(FOUNDSET_SELECTOR);
+					String dp = dataprovidersValues.optString(id.toString());
+					if (dp != null && foundsetSelector.length() > 0)
+					{
+						dp = foundsetSelector + "." + dp;
+					}
+					return dp;
 				}
 			}
 			return null;
@@ -350,7 +354,13 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 						editableValue.put(DATAPROVIDERS, dataprovidersValues);
 
 					}
-					dataprovidersValues.put(id.toString(), v);
+					String dpValue = v.toString();
+					String foundsetSelector = editableValue.optString(FOUNDSET_SELECTOR);
+					if (dpValue.startsWith(foundsetSelector + "."))
+					{
+						dpValue = dpValue.substring(foundsetSelector.length() + 1);
+					}
+					dataprovidersValues.put(id.toString(), dpValue);
 				}
 			}
 			catch (JSONException ex)
