@@ -94,6 +94,17 @@ public class EditorServiceHandler implements IServerService
 		configuredHandlers.put("updateFieldPositioner", new UpdateFieldPositioner(fieldPositioner));
 		configuredHandlers.put("openScript", new OpenScriptHandler(editorPart));
 		configuredHandlers.put("openContainedForm", new OpenContainedFormHandler(editorPart));
+
+		configuredHandlers.put("isInheritedForm", new IServerService()
+		{
+
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				return editorPart.getForm().getExtendsID() > 0;
+			}
+
+		});
 	}
 
 	/**

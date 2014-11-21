@@ -41,6 +41,7 @@ angular.module("toolbar",['toolbaractions','designsize'])
 		    	  $scope.distribution = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISTRIBUTION);
 		    	  $scope.sizing = $toolbar.getButtons(TOOLBAR_CATEGORIES.SIZING);
 		    	  $scope.form = $toolbar.getButtons(TOOLBAR_CATEGORIES.FORM);
+		    	  $scope.display = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISPLAY);
 		    	  $scope.sticky = $toolbar.getButtons(TOOLBAR_CATEGORIES.STICKY);	    		  
 	    	  }
 	    	  $scope.loadToolbar();
@@ -82,6 +83,7 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	DISTRIBUTION: "distribution",
 	SIZING: "sizing",
 	FORM: "forms",
+	DISPLAY: "display",
 	EDITOR: "editor",
 	STICKY: "sticky"
 })

@@ -13,7 +13,8 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 		},
 	}
 }).value("EDITOR_EVENTS", {
-	SELECTION_CHANGED : "SELECTION_CHANGED"
+	SELECTION_CHANGED : "SELECTION_CHANGED",
+	INITIALIZED: "INITIALIZED"
 }).value("EDITOR_CONSTANTS", {
 	PART_LABEL_WIDTH: 80,
 	PART_LABEL_HEIGHT: 20,
@@ -720,6 +721,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			connected = true;
 			if (deferred) deferred.resolve();
 			deferred = null;
+			$rootScope.$broadcast(EDITOR_EVENTS.INITIALIZED)
 		});
 	}
 
@@ -767,6 +769,10 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			return wsSession.callService('formeditor', 'getPartsStyles', null, false)
 		},
 
+		isInheritedForm: function() {
+			return wsSession.callService('formeditor', 'isInheritedForm')
+		},
+		
 		createComponents: function(components) {
 			wsSession.callService('formeditor', 'createComponents', components, true)
 		},

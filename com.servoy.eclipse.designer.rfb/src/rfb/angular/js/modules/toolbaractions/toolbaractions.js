@@ -86,6 +86,36 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 	$toolbar.add(btnTabSequence, TOOLBAR_CATEGORIES.FORM);
 	$toolbar.add(btnSaveAsTemplate, TOOLBAR_CATEGORIES.FORM);
 
+	var showingInheritedElements = true;
+	
+	var btnHideInheritedElements = {
+			text: "Hide inherited elements",
+			icon: "../../images/hide_inherited.gif",
+			enabled: true,
+			onclick: function() {
+				$(editorScope.contentDocument).find('.inherited_element').each(function(index,element) {
+					if (showingInheritedElements)
+					{
+						$(element).hide();
+					}
+					else
+					{
+						$(element).show();
+					}
+				});
+				if (showingInheritedElements)
+				{
+					showingInheritedElements = false;
+				}
+				else
+				{
+					showingInheritedElements = true;
+				}
+			},
+	};
+
+	$toolbar.add(btnHideInheritedElements, TOOLBAR_CATEGORIES.DISPLAY);
+	
 	var btnBringForward = {
 			text: "Bring forward",
 			icon: "../../images/bring_forward.png",
@@ -477,6 +507,19 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 	$toolbar.add(btnDistributeVerticalCenters, TOOLBAR_CATEGORIES.DISTRIBUTION);
 	$toolbar.add(btnDistributeUpward, TOOLBAR_CATEGORIES.DISTRIBUTION);
 
+	$rootScope.$on(EDITOR_EVENTS.INITIALIZED, function() {
+		// disable or enable buttons.
+		$rootScope.$apply(function() {
+			var promise = $editorService.isInheritedForm();
+			promise.then(function (result){
+				if (!result)
+				{
+					btnHideInheritedElements.enabled = false;
+				}
+			});
+		});
+	})
+	
 	$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
 		// disable or enable buttons.
 		$rootScope.$apply(function() {
