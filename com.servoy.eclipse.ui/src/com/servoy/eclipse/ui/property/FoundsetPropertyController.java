@@ -79,27 +79,30 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 
 	protected boolean hasDynamicDataproviders()
 	{
-		return config.optBoolean(DYNAMIC_DATAPROVIDERS);
+		return config != null && config.optBoolean(DYNAMIC_DATAPROVIDERS);
 	}
 
 	protected String[] getDataproviders()
 	{
-		JSONArray dataprovidersJSON = config.optJSONArray(DATAPROVIDERS);
-		if (dataprovidersJSON != null)
+		if (config != null)
 		{
-			try
+			JSONArray dataprovidersJSON = config.optJSONArray(DATAPROVIDERS);
+			if (dataprovidersJSON != null)
 			{
-				String[] dataproviders = new String[dataprovidersJSON.length()];
-				for (int i = 0; i < dataprovidersJSON.length(); i++)
+				try
 				{
-					dataproviders[i] = dataprovidersJSON.get(i).toString();
-				}
+					String[] dataproviders = new String[dataprovidersJSON.length()];
+					for (int i = 0; i < dataprovidersJSON.length(); i++)
+					{
+						dataproviders[i] = dataprovidersJSON.get(i).toString();
+					}
 
-				return dataproviders;
-			}
-			catch (JSONException ex)
-			{
-				ServoyLog.logError(ex);
+					return dataproviders;
+				}
+				catch (JSONException ex)
+				{
+					ServoyLog.logError(ex);
+				}
 			}
 		}
 
