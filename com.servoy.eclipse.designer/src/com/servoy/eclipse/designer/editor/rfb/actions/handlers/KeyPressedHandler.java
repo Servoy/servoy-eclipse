@@ -17,6 +17,10 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
@@ -27,6 +31,7 @@ import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 
 /**
@@ -62,10 +67,18 @@ public class KeyPressedHandler implements IServerService
 				{
 					public void run()
 					{
-						IPersist[] selection = (IPersist[])((IStructuredSelection)selectionProvider.getSelection()).toList().toArray(new IPersist[0]);
-						if (selection.length > 0)
+						List<IPersist> selection = new ArrayList<IPersist>(((IStructuredSelection)selectionProvider.getSelection()).toList());
+						Iterator<IPersist> it = selection.iterator();
+						while (it.hasNext())
 						{
-							editorPart.getCommandStack().execute(new FormElementDeleteCommand(selection));
+							if (it.next() instanceof Form)
+							{
+								it.remove();
+							}
+						}
+						if (selection.size() > 0)
+						{
+							editorPart.getCommandStack().execute(new FormElementDeleteCommand(selection.toArray(new IPersist[0])));
 						}
 					}
 				});
