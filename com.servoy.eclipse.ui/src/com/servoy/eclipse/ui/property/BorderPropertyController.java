@@ -69,7 +69,7 @@ import com.servoy.j2db.util.gui.SpecialMatteBorder;
 
 /**
  * Property controller for selecting border in Properties view.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -180,7 +180,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 
 	/**
 	 * Create a default Border for the border type
-	 * 
+	 *
 	 * @param borderType
 	 * @return
 	 */
@@ -345,7 +345,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 
 	/*
 	 * Border source property implementations
-	 * 
+	 *
 	 * @author rgansevles
 	 */
 
@@ -1511,7 +1511,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 				{
 					final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(),
 						persistContext.getContext());
-					final Form form = ModelUtils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext())
+					final Form form = Utils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext())
 						? (Form)persistContext.getContext().getAncestor(IRepository.FORMS) : (Form)persistContext.getPersist().getAncestor(IRepository.FORMS);
 					final Table table = form == null ? null : form.getTable();
 					propertyDescriptors = new IPropertyDescriptor[] { new PropertyDescriptor(TITLE, "title text")
@@ -1615,8 +1615,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		}
 
 		@Override
-		public Object resetComplexPropertyValue(@SuppressWarnings("unused")
-		Object id)
+		public Object resetComplexPropertyValue(@SuppressWarnings("unused") Object id)
 		{
 			TitledBorder defVal = (TitledBorder)getDefaultBorderValuesMap().get(BorderType.Title);
 			if (TITLE.equals(id))

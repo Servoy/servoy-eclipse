@@ -58,7 +58,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * The Contents Graphical Edit Part for a Servoy Form.
- * 
+ *
  * @author rgansevles
  */
 public class FormGraphicalEditPart extends BaseFormGraphicalEditPart implements IFieldPositionerProvider
@@ -91,7 +91,7 @@ public class FormGraphicalEditPart extends BaseFormGraphicalEditPart implements 
 			{
 				if (Boolean.TRUE.equals(getViewer().getProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED)) && !getPersist().equals(o.getParent()))
 				{
-					// Hide inherited elements 
+					// Hide inherited elements
 					continue;
 				}
 
@@ -206,17 +206,17 @@ public class FormGraphicalEditPart extends BaseFormGraphicalEditPart implements 
 		}
 		if (child instanceof Part)
 		{
-			return new FormPartGraphicalEditPart(application, editorPart, (Part)child, ModelUtils.isInheritedFormElement(child, form));
+			return new FormPartGraphicalEditPart(application, editorPart, (Part)child, Utils.isInheritedFormElement(child, form));
 		}
 		if (child instanceof Tab)
 		{
-			return new TabFormGraphicalEditPart(application, (Tab)child, ModelUtils.isInheritedFormElement(child, form));
+			return new TabFormGraphicalEditPart(application, (Tab)child, Utils.isInheritedFormElement(child, form));
 		}
 		if (child instanceof FormElementGroup)
 		{
 			return new GroupGraphicalEditPart(application, editorPart, form, (FormElementGroup)child);
 		}
-		return new PersistGraphicalEditPart(application, (IPersist)child, form, ModelUtils.isInheritedFormElement(child, form),
+		return new PersistGraphicalEditPart(application, (IPersist)child, form, Utils.isInheritedFormElement(child, form),
 			new PersistGraphicalEditPartFigureFactory(application, form));
 	}
 

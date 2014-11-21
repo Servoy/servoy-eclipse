@@ -33,10 +33,11 @@ import com.servoy.eclipse.ui.labelproviders.ValuelistLabelProvider;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Property controller for selecting value list in Properties view.
- * 
+ *
  * @author rgansevles
  *
  * @param <P> property type
@@ -76,8 +77,8 @@ public class ValuelistPropertyController<P> extends PropertyController<P, Intege
 				{
 					AddValueListButtonComposite buttons = new AddValueListButtonComposite(composite, SWT.NONE);
 					buttons.setDialog(dialog);
-					buttons.setPersist(ModelUtils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext())
-						? persistContext.getContext() : persistContext.getPersist());
+					buttons.setPersist(Utils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext()) ? persistContext.getContext()
+						: persistContext.getPersist());
 					return buttons;
 				}
 			}, "valuelistDialog");

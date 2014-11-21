@@ -399,7 +399,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		if (propertyDescriptors == null)
 		{
 			FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
-			Form form = (Form)(ModelUtils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext()) ? persistContext.getContext()
+			Form form = (Form)(Utils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext()) ? persistContext.getContext()
 				: persistContext.getPersist()).getAncestor(IRepository.FORMS);
 
 
@@ -2729,7 +2729,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 						{
 							public String isValid(Object value)
 							{
-								if (ModelUtils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext()))
+								if (Utils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext()))
 								{
 									return "Cannot change name of an override element.";
 								}

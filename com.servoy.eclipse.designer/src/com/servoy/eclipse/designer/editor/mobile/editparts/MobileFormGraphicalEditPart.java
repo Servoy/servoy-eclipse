@@ -53,7 +53,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Edit part form form in mobile form editor.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -217,7 +217,7 @@ public class MobileFormGraphicalEditPart extends BaseFormGraphicalEditPart imple
 		{
 			return new MobileListGraphicalEditPart(application, (MobileListModel)child, editorPart);
 		}
-		return new MobilePersistGraphicalEditPart(application, (IPersist)child, form, ModelUtils.isInheritedFormElement(child, form),
+		return new MobilePersistGraphicalEditPart(application, (IPersist)child, form, Utils.isInheritedFormElement(child, form),
 			new MobilePersistGraphicalEditPartFigureFactory(application, editorPart.getForm()));
 	}
 }

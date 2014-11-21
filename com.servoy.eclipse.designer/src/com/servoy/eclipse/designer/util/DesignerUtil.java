@@ -37,10 +37,11 @@ import com.servoy.j2db.persistence.ISupportEncapsulation;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Utility methods for form designer.
- * 
+ *
  * @author rgansevles
  */
 
@@ -94,8 +95,7 @@ public class DesignerUtil
 			{
 				EditPart object = (EditPart)selectedEditParts.get(i);
 				EditPart parent = object.getParent();
-				if (parent != null && parent.getModel() instanceof IPersist &&
-					ModelUtils.isInheritedFormElement(object.getModel(), (IPersist)parent.getModel())) return true;
+				if (parent != null && parent.getModel() instanceof IPersist && Utils.isInheritedFormElement(object.getModel(), (IPersist)parent.getModel())) return true;
 			}
 		}
 		return false;

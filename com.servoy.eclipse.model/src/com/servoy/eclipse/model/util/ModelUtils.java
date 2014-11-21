@@ -34,8 +34,8 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebComponentSpecification;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
@@ -47,14 +47,12 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
-import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
@@ -69,9 +67,9 @@ import com.servoy.j2db.ui.ISupportRowStyling;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.Pair;
-import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyStyleSheet;
 import com.servoy.j2db.util.StringComparator;
+import com.servoy.j2db.util.Utils;
 
 public class ModelUtils
 {
@@ -249,7 +247,7 @@ public class ModelUtils
 					String styleName = styleParts[styleParts.length - 1];
 					if (styleName.equals(lookupName))
 					{
-						matchedFormPrefix |= styleParts.length == 2; // found a match with form prefix, skip root matches 
+						matchedFormPrefix |= styleParts.length == 2; // found a match with form prefix, skip root matches
 						styleExist = true;
 					}
 					else if (styleName.startsWith(lookupName + '.'))
@@ -290,7 +288,7 @@ public class ModelUtils
 					stylePartsCount--;
 				}
 
-				if ((matchedFormPrefix && stylePartsCount == 1) // found a match with form prefix, skip root matches 
+				if ((matchedFormPrefix && stylePartsCount == 1) // found a match with form prefix, skip root matches
 					||
 					stylePartsCount > 2 || !styleName.startsWith(lookupName) || (stylePartsCount == 2 && !styleParts[0].equals(formPrefix)))
 				{
@@ -326,12 +324,12 @@ public class ModelUtils
 
 	public static FlattenedSolution getEditingFlattenedSolution(IPersist persist, IPersist context)
 	{
-		return getEditingFlattenedSolution(isInheritedFormElement(persist, context) ? context : persist);
+		return getEditingFlattenedSolution(Utils.isInheritedFormElement(persist, context) ? context : persist);
 	}
 
 	/**
 	 * Get a script method by id.
-	 * 
+	 *
 	 * @param persist
 	 * @param context
 	 * @param table
@@ -415,9 +413,8 @@ public class ModelUtils
 	{
 		// probably Servoy developer was started via a workspace exporter app. - it must not initialize core/ui and other related projects
 		// but some extension points these use (for example DLTK extension points) will cause them to get loaded; do not allow this!
-		if (ModelUtils.isUIDisabled()) throw new RuntimeException(
-			bundleName != null
-				? "'" + bundleName + "' bundle will not be started as Servoy is started without UI. Please ignore this log message." : "Assertion failed. UI is marked as not running.");
+		if (ModelUtils.isUIDisabled()) throw new RuntimeException(bundleName != null ? "'" + bundleName +
+			"' bundle will not be started as Servoy is started without UI. Please ignore this log message." : "Assertion failed. UI is marked as not running.");
 	}
 
 	public static boolean isUIDisabled()
@@ -428,39 +425,6 @@ public class ModelUtils
 	public static void setUIDisabled(boolean disabled)
 	{
 		uiDisabled = disabled;
-	}
-
-	public static boolean isInheritedFormElement(Object element, IPersist context)
-	{
-		if (element instanceof Form)
-		{
-			return false;
-		}
-		if (context instanceof Form && element instanceof IPersist && (((IPersist)element).getAncestor(IRepository.FORMS) != context))
-		{
-			if (element instanceof IPersist && (((IPersist)element).getAncestor(IRepository.FORMS) != context))
-			{
-				// child of super-form, readonly
-				return true;
-			}
-		}
-		if (element instanceof FormElementGroup)
-		{
-			Iterator<IFormElement> elements = ((FormElementGroup)element).getElements();
-			while (elements.hasNext())
-			{
-				if (isInheritedFormElement(elements.next(), context))
-				{
-					return true;
-				}
-			}
-		}
-		if (element instanceof ISupportExtendsID)
-		{
-			return PersistHelper.isOverrideElement((ISupportExtendsID)element);
-		}
-		// child of this form, not of a inherited form
-		return false;
 	}
 
 	/**
