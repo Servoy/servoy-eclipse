@@ -104,6 +104,9 @@
 							"forFoundset": {
 								"type":"string"
 							},
+							"dynamicDataproviders": {
+								"type":"boolean"
+							},
 							"elementConfig": {
 								"type":"object",
 								"properties":{
@@ -117,9 +120,6 @@
 								"items": {
 									"type": "string"
 								}
-							},
-							"forFoundSet":{
-								"type":"string"
 							}
 						},
 						"required":["type"],
