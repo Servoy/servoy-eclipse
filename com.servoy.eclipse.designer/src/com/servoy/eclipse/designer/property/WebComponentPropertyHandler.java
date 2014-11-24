@@ -17,6 +17,9 @@
 
 package com.servoy.eclipse.designer.property;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,10 +44,13 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.NGColorPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.NGDimensionPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.NGFontPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.NGInsetsPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.NGPointPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyFunctionPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -58,6 +64,19 @@ import com.servoy.j2db.util.UUID;
  */
 public class WebComponentPropertyHandler implements IPropertyHandler
 {
+	// this map can be filled by an extension point if we support 3th party types.
+	private static final Map<IPropertyType< ? >, IPropertyConverter< ? extends Object>> jsonConverters = new HashMap<IPropertyType< ? >, IPropertyConverter< ? extends Object>>();
+
+	static
+	{
+		jsonConverters.put(NGPointPropertyType.NG_INSTANCE, NGPointPropertyType.NG_INSTANCE);
+		jsonConverters.put(NGDimensionPropertyType.NG_INSTANCE, NGDimensionPropertyType.NG_INSTANCE);
+		jsonConverters.put(NGColorPropertyType.NG_INSTANCE, NGColorPropertyType.NG_INSTANCE);
+		jsonConverters.put(NGFontPropertyType.NG_INSTANCE, NGFontPropertyType.NG_INSTANCE);
+		jsonConverters.put(NGInsetsPropertyType.NG_INSTANCE, NGInsetsPropertyType.NG_INSTANCE);
+		jsonConverters.put(BorderPropertyType.INSTANCE, BorderPropertyType.INSTANCE);
+	}
+
 	private final PropertyDescription propertyDescription;
 
 	/**
@@ -147,23 +166,26 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			}
 			return type.defaultValue();
 		}
-		else if (type instanceof IPropertyConverter && type != DataproviderPropertyType.INSTANCE && type != TagStringPropertyType.INSTANCE &&
-			propertyDescription.getType() != MediaPropertyType.INSTANCE)
+		else
 		{
-			if (value instanceof String && ((String)value).startsWith("{"))
+			IPropertyConverter<Object> converter = (IPropertyConverter<Object>)jsonConverters.get(type);
+			if (converter != null)
 			{
-				try
+				if (value instanceof String && ((String)value).startsWith("{"))
 				{
-					value = ((IPropertyConverter)type).fromJSON(new JSONObject((String)value), null, null);
+					try
+					{
+						value = converter.fromJSON(new JSONObject((String)value), null, null);
+					}
+					catch (Exception e)
+					{
+						Debug.error("can't parse '" + value + "' to the real type for property converter: " + type, e);
+					}
 				}
-				catch (Exception e)
+				else
 				{
-					Debug.error("can't parse '" + value + "' to the real type for property converter: " + type, e);
+					value = converter.fromJSON(value, null, null);
 				}
-			}
-			else
-			{
-				value = ((IPropertyConverter)type).fromJSON(value, null, null);
 			}
 		}
 		return value;
@@ -198,22 +220,24 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			ValueList val = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getValueList(((Integer)value).intValue());
 			convertedValue = (val == null) ? null : val.getUUID().toString();
 		}
-		else if (propertyDescription.getType() instanceof IPropertyConverter && propertyDescription.getType() != DataproviderPropertyType.INSTANCE &&
-			propertyDescription.getType() != TagStringPropertyType.INSTANCE && propertyDescription.getType() != MediaPropertyType.INSTANCE &&
-			propertyDescription.getType() != FoundsetPropertyType.INSTANCE)
+		else
 		{
 			IPropertyConverter<Object> type = (IPropertyConverter<Object>)propertyDescription.getType();
-			JSONStringer writer = new JSONStringer();
-			try
+			IPropertyConverter<Object> converter = (IPropertyConverter<Object>)jsonConverters.get(type);
+			if (converter != null)
 			{
-				writer.object();
-				type.toJSON(writer, getName(), convertedValue, new DataConversion()).toString();
-				writer.endObject();
-				convertedValue = new JSONObject(writer.toString()).get(getName());
-			}
-			catch (JSONException e)
-			{
-				ServoyLog.logError(e);
+				JSONStringer writer = new JSONStringer();
+				try
+				{
+					writer.object();
+					converter.toJSON(writer, getName(), convertedValue, new DataConversion()).toString();
+					writer.endObject();
+					convertedValue = new JSONObject(writer.toString()).get(getName());
+				}
+				catch (JSONException e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
 		}
 
