@@ -62,8 +62,7 @@ angular.module('keyboardlayoutupdater', ['editor']).run(function($pluginRegistry
 
 						for(var i=0;i<selection.length;i++) {
 							var node = selection[i];
-							var name = node.getAttribute("name");
-							var beanModel = formState.model[name];
+							var beanModel = editorScope.getBeanModel(node);
 							if (beanModel){
 								if(isResize) {
 									beanModel.size.width = beanModel.size.width + changeW;
@@ -74,7 +73,7 @@ angular.module('keyboardlayoutupdater', ['editor']).run(function($pluginRegistry
 									beanModel.location.x = beanModel.location.x + changeX;	
 								}
 							}
-							else if(!isRezie) {
+							else if(!isResize) {
 								var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
 								editorScope.updateGhostLocation(ghostObject, ghostObject.location.x + changeX, ghostObject.location.y + changeY)										
 							}
@@ -92,12 +91,10 @@ angular.module('keyboardlayoutupdater', ['editor']).run(function($pluginRegistry
 				boundsUpdating = false;
 				var obj = {};
 				var selection = editorScope.getSelection();
-				var formState = editorScope.getFormState();
 				
 				for(var i=0;i<selection.length;i++) {
 					var node = selection[i];
-					var name = node.getAttribute("name");
-					var beanModel = formState.model[name];
+					var beanModel = editorScope.getBeanModel(node);
 					if (beanModel){
 						obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y,width:beanModel.size.width,height:beanModel.size.height}
 					}

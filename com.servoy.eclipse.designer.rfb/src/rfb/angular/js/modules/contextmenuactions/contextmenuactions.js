@@ -6,15 +6,11 @@ angular.module('contextmenuactions',['contextmenu','editor']).run(function($root
 			selection = sel;
 			if (selection && selection.length == 1)
 			{
-				var formState = editorScope.getFormState();
 				var node = selection[0];
-				var name = node.getAttribute("name");
-				if (formState && name) {
-					var beanModel = formState.model[name];
-					if (beanModel)
-					{
-						beanAnchor = beanModel.anchors;
-					}
+				var beanModel = editorScope.getBeanModel(node);
+				if (beanModel)
+				{
+					beanAnchor = beanModel.anchors;
 				}
 			}
 		});
@@ -42,26 +38,27 @@ angular.module('contextmenuactions',['contextmenu','editor']).run(function($root
 			var selection = editorScope.getSelection();
 			if (selection && selection.length == 1)
 			{
-				var formState = editorScope.getFormState();
 				var obj = {};
 				var node = selection[0];
-				var name = node.getAttribute("name");
-				var beanModel = formState.model[name];
-				var beanAnchor = beanModel.anchors;
-				if(beanAnchor == 0)
-					 beanAnchor = 1 + 8; // top left
-				if ((beanAnchor & anchor) == anchor)
+				var beanModel = editorScope.getBeanModel(node);
+				if (beanModel)
 				{
-					// already exists, remove it
-					beanAnchor = beanAnchor - anchor;
+					var beanAnchor = beanModel.anchors;
+					if(beanAnchor == 0)
+						 beanAnchor = 1 + 8; // top left
+					if ((beanAnchor & anchor) == anchor)
+					{
+						// already exists, remove it
+						beanAnchor = beanAnchor - anchor;
+					}
+					else
+					{
+						beanAnchor = beanAnchor + anchor;
+					}
+					beanModel.anchors = beanAnchor;
+					obj[node.getAttribute("svy-id")] = {anchors:beanModel.anchors}
+					$editorService.sendChanges(obj);
 				}
-				else
-				{
-					beanAnchor = beanAnchor + anchor;
-				}
-				beanModel.anchors = beanAnchor;
-				obj[node.getAttribute("svy-id")] = {anchors:beanModel.anchors}
-				$editorService.sendChanges(obj);
 			}
 		}
 		

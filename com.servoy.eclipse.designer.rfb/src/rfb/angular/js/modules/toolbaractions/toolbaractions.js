@@ -185,31 +185,34 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 				var selection = editorScope.getSelection();
 				if (selection && selection.length > 1)
 				{
-					var formState = editorScope.getFormState();
 					var obj = {};
 					var left = null;
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var name = node.getAttribute("name");
-						var beanModel = formState.model[name];
-						if (left == null)
+						var beanModel = editorScope.getBeanModel(node);
+						if(beanModel)
 						{
-							left = beanModel.location.x;
-						}
-						else if (left > beanModel.location.x)
-						{
-							left = beanModel.location.x;
+							if (left == null)
+							{
+								left = beanModel.location.x;
+							}
+							else if (left > beanModel.location.x)
+							{
+								left = beanModel.location.x;
+							}
 						}
 					}
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var name = node.getAttribute("name");
-						var beanModel = formState.model[name];
-						if (beanModel.location.x != left)
+						var beanModel = editorScope.getBeanModel(node);
+						if(beanModel)
 						{
-							obj[node.getAttribute("svy-id")] = {x: left,y: beanModel.location.y};
+							if (beanModel.location.x != left)
+							{
+								obj[node.getAttribute("svy-id")] = {x: left,y: beanModel.location.y};
+							}
 						}
 					}
 					$editorService.sendChanges(obj);
@@ -225,14 +228,12 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 				var selection = editorScope.getSelection();
 				if (selection && selection.length > 1)
 				{
-					var formState = editorScope.getFormState();
 					var obj = {};
 					var right = null;
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var name = node.getAttribute("name");
-						var beanModel = formState.model[name];
+						var beanModel = editorScope.getBeanModel(node);
 						if (right == null)
 						{
 							right = beanModel.location.x+beanModel.size.width;
@@ -245,9 +246,8 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var name = node.getAttribute("name");
-						var beanModel = formState.model[name];
-						if ((beanModel.location.x + beanModel.size.width) != right)
+						var beanModel = editorScope.getBeanModel(node);
+						if (beanModel && (beanModel.location.x + beanModel.size.width) != right)
 						{
 							obj[node.getAttribute("svy-id")] = {x: (right - beanModel.size.width),y: beanModel.location.y};
 						}
@@ -265,29 +265,29 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 				var selection = editorScope.getSelection();
 				if (selection && selection.length > 1)
 				{
-					var formState = editorScope.getFormState();
 					var obj = {};
 					var top = null;
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var name = node.getAttribute("name");
-						var beanModel = formState.model[name];
-						if (top == null)
+						var beanModel = editorScope.getBeanModel(node);
+						if (beanModel)
 						{
-							top = beanModel.location.y;
-						}
-						else if (top > beanModel.location.y)
-						{
-							top = beanModel.location.y;
+							if (top == null)
+							{
+								top = beanModel.location.y;
+							}
+							else if (top > beanModel.location.y)
+							{
+								top = beanModel.location.y;
+							}
 						}
 					}
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var name = node.getAttribute("name");
-						var beanModel = formState.model[name];
-						if (beanModel.location.y != top)
+						var beanModel = editorScope.getBeanModel(node);
+						if (beanModel && beanModel.location.y != top)
 						{
 							obj[node.getAttribute("svy-id")] = {x: beanModel.location.x,y: top};
 						}
@@ -305,29 +305,29 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 				var selection = editorScope.getSelection();
 				if (selection && selection.length > 1)
 				{
-					var formState = editorScope.getFormState();
 					var obj = {};
 					var bottom = null;
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var name = node.getAttribute("name");
-						var beanModel = formState.model[name];
-						if (bottom == null)
+						var beanModel = editorScope.getBeanModel(node);
+						if (beanModel)
 						{
-							bottom = beanModel.location.y + beanModel.size.height;
-						}
-						else if (bottom < (beanModel.location.y + beanModel.size.height))
-						{
-							bottom = beanModel.location.y + beanModel.size.height;
+							if (bottom == null)
+							{
+								bottom = beanModel.location.y + beanModel.size.height;
+							}
+							else if (bottom < (beanModel.location.y + beanModel.size.height))
+							{
+								bottom = beanModel.location.y + beanModel.size.height;
+							}
 						}
 					}
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var name = node.getAttribute("name");
-						var beanModel = formState.model[name];
-						if ((beanModel.location.y + beanModel.size.height) != bottom)
+						var beanModel = editorScope.getBeanModel(node);
+						if (beanModel && (beanModel.location.y + beanModel.size.height) != bottom)
 						{
 							obj[node.getAttribute("svy-id")] = {x: beanModel.location.x,y: (bottom - beanModel.size.height)};
 						}
@@ -345,40 +345,40 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 				var selection = editorScope.getSelection();
 				if (selection && selection.length > 1)
 				{
-					var formState = editorScope.getFormState();
 					var obj = {};
 					var centerElementModel = null;
 					var sortedSelection = [];
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var name = node.getAttribute("name");
-						var beanModel = formState.model[name];
-						if (sortedSelection.length == 0)
+						var beanModel = editorScope.getBeanModel(node);
+						if (beanModel)
 						{
-							sortedSelection.splice(0,0,beanModel);
-						}
-						else
-						{
-							var insertIndex = sortedSelection.length;
-							for (var j=0;j<sortedSelection.length;j++)
+							if (sortedSelection.length == 0)
 							{
-								if ((beanModel.location.x + beanModel.size.width/2) < (sortedSelection[j].location.x + sortedSelection[j].size.width/2))
-								{
-									insertIndex = j;
-									break;
-								}
+								sortedSelection.splice(0,0,beanModel);
 							}
-							sortedSelection.splice(insertIndex,0,beanModel);
+							else
+							{
+								var insertIndex = sortedSelection.length;
+								for (var j=0;j<sortedSelection.length;j++)
+								{
+									if ((beanModel.location.x + beanModel.size.width/2) < (sortedSelection[j].location.x + sortedSelection[j].size.width/2))
+									{
+										insertIndex = j;
+										break;
+									}
+								}
+								sortedSelection.splice(insertIndex,0,beanModel);
+							}
 						}
 					}
 					centerElementModel = sortedSelection[Math.round((sortedSelection.length-1)/2)];
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var name = node.getAttribute("name");
-						var beanModel = formState.model[name];
-						if (beanModel != centerElementModel)
+						var beanModel = editorScope.getBeanModel(node);
+						if (beanModel && beanModel != centerElementModel)
 						{
 							obj[node.getAttribute("svy-id")] = {x: (centerElementModel.location.x + centerElementModel.size.width/2 - beanModel.size.width/2),y: beanModel.location.y};
 						}
@@ -396,40 +396,40 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 				var selection = editorScope.getSelection();
 				if (selection && selection.length > 1)
 				{
-					var formState = editorScope.getFormState();
 					var obj = {};
 					var centerElementModel = null;
 					var sortedSelection = [];
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var name = node.getAttribute("name");
-						var beanModel = formState.model[name];
-						if (sortedSelection.length == 0)
+						var beanModel = editorScope.getBeanModel(node);
+						if (beanModel)
 						{
-							sortedSelection.splice(0,0,beanModel);
-						}
-						else
-						{
-							var insertIndex = sortedSelection.length;
-							for (var j=0;j<sortedSelection.length;j++)
+							if (sortedSelection.length == 0)
 							{
-								if ((beanModel.location.y + beanModel.size.height/2) < (sortedSelection[j].location.y + sortedSelection[j].size.height/2))
-								{
-									insertIndex = j;
-									break;
-								}
+								sortedSelection.splice(0,0,beanModel);
 							}
-							sortedSelection.splice(insertIndex,0,beanModel);
+							else
+							{
+								var insertIndex = sortedSelection.length;
+								for (var j=0;j<sortedSelection.length;j++)
+								{
+									if ((beanModel.location.y + beanModel.size.height/2) < (sortedSelection[j].location.y + sortedSelection[j].size.height/2))
+									{
+										insertIndex = j;
+										break;
+									}
+								}
+								sortedSelection.splice(insertIndex,0,beanModel);
+							}
 						}
 					}
 					centerElementModel = sortedSelection[Math.round((sortedSelection.length-1)/2)];
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var name = node.getAttribute("name");
-						var beanModel = formState.model[name];
-						if (beanModel != centerElementModel)
+						var beanModel = editorScope.getBeanModel(node);
+						if (beanModel && beanModel != centerElementModel)
 						{
 							obj[node.getAttribute("svy-id")] = {x: beanModel.location.x,y: (centerElementModel.location.y + centerElementModel.size.height/2 - beanModel.size.height/2)};
 						}

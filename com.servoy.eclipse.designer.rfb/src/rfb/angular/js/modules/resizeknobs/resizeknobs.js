@@ -6,12 +6,10 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 		link: function($scope, $element, $attrs) {
 			var sendChanges = function(){
 				var selection = $scope.getSelection();
-				var formState = $scope.getFormState();
 				var obj = {};
 				for(var i=0;i<selection.length;i++) {
 					var node = selection[i];
-					var name = node.getAttribute("name");
-					var beanModel = formState.model[name];
+					var beanModel = $scope.getBeanModel(node);
 					if(!beanModel) {
 						beanModel = $scope.getGhost(node.getAttribute("svy-id"));
 					}
@@ -47,11 +45,9 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 						var selection = $scope.getSelection();
 						var deltaX = ev.screenX - lastresizeStartPosition.x;
 						var deltaY = ev.screenY - lastresizeStartPosition.y;
-						var formState = $scope.getFormState();
 						for(var i=0;i<selection.length;i++) {
 							var node = selection[i];
-							var name = node.getAttribute("name");
-							var beanModel = formState.model[name];
+							var beanModel = $scope.getBeanModel(node);
 							if(beanModel) {
 								beanModel.location.y = beanModel.location.y + deltaY* resizeInfo.top;
 								beanModel.location.x = beanModel.location.x + deltaX* resizeInfo.left;
@@ -70,11 +66,9 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 						}
 					}
 					var selection = $scope.getSelection();
-					var formState = $scope.getFormState();
 					for(var i=0;i<selection.length;i++) {
 						var node = selection[i];
-						var name = node.getAttribute("name");
-						var beanModel = formState.model[name];
+						var beanModel = $scope.getBeanModel(node);
 						if(beanModel) {
 							node.originalSize = {};
 							node.originalSize.width = beanModel.size.width;
@@ -98,11 +92,9 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 							$scope.setCursorStyle("");
 							cleanListeners();
 							var selection = $scope.getSelection();
-							var formState = $scope.getFormState();
 							for(var i=0;i<selection.length;i++) {
 								var node = selection[i];
-								var name = node.getAttribute("name");
-								var beanModel = formState.model[name];
+								var beanModel = $scope.getBeanModel(node);
 								if(beanModel) {
 									beanModel.size.width = node.originalSize.width;
 									beanModel.size.height = node.originalSize.height ;

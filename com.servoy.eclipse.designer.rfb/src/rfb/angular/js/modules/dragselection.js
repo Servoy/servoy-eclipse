@@ -22,7 +22,6 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 					dragging = false;
 					// store the position changes
 					var selection = editorScope.getSelection();
-					var formState = editorScope.getFormState();
 
 					if (event.ctrlKey)
 					{
@@ -55,8 +54,7 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 								obj[node.uuid] = {x:node.location.x,y:node.location.y}
 							} 
 							else {
-								var name = node.getAttribute("name");
-								var beanModel = formState.model[name];
+								var beanModel = editorScope.getBeanModel(node);
 								if (beanModel){
 									beanModel.location.y;
 									beanModel.location.x
@@ -95,7 +93,6 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 				{
 					selectionToDrag = [];
 					var selection = editorScope.getSelection();
-					var formState = editorScope.getFormState();
 					for(var i = 0; i < selection.length; i++) 
 					{
 						var node = selection[i];
@@ -106,8 +103,7 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 							posY = node.location.y;
 						}
 						else {
-							var name = node.getAttribute("name");
-							var beanModel = formState.model[name];
+							var beanModel = editorScope.getBeanModel(node);
 							if (beanModel){
 								posX = beanModel.location.x;
 								posY = beanModel.location.y;
@@ -166,8 +162,7 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 									node.css(css);
 								}
 								else {
-									var name = node.getAttribute("name");
-									var beanModel = formState.model[name];
+									var beanModel = editorScope.getBeanModel(node);
 									if (beanModel){
 										beanModel.location.y = beanModel.location.y + changeY;
 										beanModel.location.x = beanModel.location.x + changeX;

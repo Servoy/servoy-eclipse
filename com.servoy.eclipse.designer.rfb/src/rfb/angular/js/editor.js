@@ -795,30 +795,31 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			var selection = editorScope.getSelection();
 			if (selection && selection.length > 1)
 			{
-				var formState = editorScope.getFormState();
 				var obj = {};
 				var firstSize = null;
 				for (var i=0;i<selection.length;i++)
 				{
 					var node = selection[i];
-					var name = node.getAttribute("name");
-					var beanModel = formState.model[name];
-					if (firstSize == null)
+					var beanModel = editorScope.getBeanModel(node);
+					if (beanModel)
 					{
-						firstSize = beanModel.size;
-					}
-					else
-					{
-						var newSize;
-						if (width)
+						if (firstSize == null)
 						{
-							newSize = {width:firstSize.width,height:beanModel.size.height};
+							firstSize = beanModel.size;
 						}
 						else
 						{
-							newSize = {width:beanModel.size.width,height:firstSize.height};
+							var newSize;
+							if (width)
+							{
+								newSize = {width:firstSize.width,height:beanModel.size.height};
+							}
+							else
+							{
+								newSize = {width:beanModel.size.width,height:firstSize.height};
+							}
+							obj[node.getAttribute("svy-id")] = newSize;
 						}
-						obj[node.getAttribute("svy-id")] = newSize;
 					}
 				}
 				this.sendChanges(obj);
