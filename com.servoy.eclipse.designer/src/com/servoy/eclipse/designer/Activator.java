@@ -243,6 +243,13 @@ public class Activator extends AbstractUIPlugin
 				}
 				if (changedForm != null)
 				{
+					List<IFormController> cachedFormControllers = getFormManager().getCachedFormControllers(changedForm);
+					for (IFormController iFormController : cachedFormControllers)
+					{
+						iFormController.recreateUI();
+					}
+					getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall("refreshGhosts",
+						new Object[] { });
 					getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
 						"updateForm",
 						new Object[] { changedForm.getName(), changedForm.getUUID().toString(), Integer.valueOf((int)changedForm.getSize().getWidth()), Integer.valueOf((int)changedForm.getSize().getHeight()) });

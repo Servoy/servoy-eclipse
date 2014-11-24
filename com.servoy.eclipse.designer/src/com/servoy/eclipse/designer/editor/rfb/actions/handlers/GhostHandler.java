@@ -20,6 +20,7 @@ package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
@@ -31,12 +32,16 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
 import org.sablo.websocket.IServerService;
 
+import com.servoy.base.persistence.constants.IContentSpecConstantsBase;
+import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
+import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Tab;
@@ -255,63 +260,8 @@ public class GhostHandler implements IServerService
 					Form f = (Form)o;
 					if (!((Form)o).getLayoutContainers().hasNext()) // absolute layout
 					{
-						try
-						{
-							writer.object();
-							writer.key("uuid").value(UUID.randomUUID()/* f.getUUID() */);
-							writer.key("ghosts");
-							writer.array();
-							Iterator<Part> partIterator = f.getParts();
-							ArrayList<Part> parts = new ArrayList<Part>();
-							while (partIterator.hasNext())
-								parts.add(partIterator.next());
-
-							// the parts
-							for (int i = 0; i < parts.size(); i++)
-							{
-								writer.object();
-								writer.key("uuid").value(parts.get(i).getUUID());
-								writer.key("type").value(parts.get(i).getTypeID());
-								writer.key("text").value(Part.getDisplayName(parts.get(i).getPartType()));
-								writer.key("location");
-								writer.object();
-								writer.key("x").value(0);
-								writer.key("y").value(parts.get(i).getSize().getHeight());
-								writer.endObject();
-								writer.key("parttype").value(parts.get(i).getPartType());
-								if (i > 0) writer.key("partprev").value(parts.get(i - 1).getUUID());
-								if (i < parts.size() - 1) writer.key("partnext").value(parts.get(i + 1).getUUID());
-								writer.endObject();
-							}
-
-							// the form itself
-							writer.object();
-							writer.key("uuid").value(f.getUUID());
-							writer.key("type").value(f.getTypeID());
-							writer.key("text").value("");
-							writer.key("location");
-							writer.object();
-							writer.key("x").value(0);
-							writer.key("y").value(0);
-							writer.endObject();
-							writer.key("size");
-							writer.object();
-							writer.key("width").value(f.getSize().width);
-							writer.key("height").value(f.getSize().height);
-							writer.endObject();
-							writer.endObject();
-
-							writer.endArray();
-							writer.endObject();
-						}
-						catch (IllegalArgumentException e)
-						{
-							Debug.error(e);
-						}
-						catch (JSONException e)
-						{
-							Debug.error(e);
-						}
+						writePartGhosts(writer, f);
+						writeListViewTableViewGhosts(writer, f);
 					}
 				}
 				else if (o instanceof Portal)
@@ -392,6 +342,157 @@ public class GhostHandler implements IServerService
 				}
 
 				return IPersistVisitor.CONTINUE_TRAVERSAL;
+			}
+
+			/**
+			 * @param writer
+			 * @param f
+			 */
+			private void writeListViewTableViewGhosts(final JSONWriter writer, Form f)
+			{
+				if (f.getProperty(IContentSpecConstantsBase.PROPERTY_VIEW) != null)
+				{
+					Object property = f.getProperty(IContentSpecConstantsBase.PROPERTY_VIEW);
+					if ((Integer)property == IFormConstants.VIEW_TYPE_TABLE || (Integer)property == IFormConstants.VIEW_TYPE_TABLE_LOCKED)
+					{
+						List<Integer> typesSubset = new ArrayList<Integer>();
+						typesSubset.add(IRepository.FIELDS);
+						typesSubset.add(IRepository.GRAPHICALCOMPONENTS);
+						typesSubset.add(IRepository.BEANS);
+						typesSubset.add(IRepository.SHAPES);
+						typesSubset.add(IRepository.RECTSHAPES);
+						try
+						{
+							writer.object();
+							{
+								writer.key("style");
+								{
+									writer.object();
+									writer.key("left").value(0);
+									writer.key("top").value(0);
+									writer.endObject();
+								}
+								writer.key("uuid").value(f.getUUID());
+								writer.key("ghosts");
+								writer.array();
+								{
+									for (Integer elementType : typesSubset)
+									{
+										Iterator<IPersist> fields = f.getObjects(elementType.intValue());
+										while (fields.hasNext())
+										{
+											IPersist next = fields.next();
+											if (next instanceof ISupportBounds)
+											{
+												ISupportBounds iSupportBounds = (ISupportBounds)next;
+												int x = iSupportBounds.getLocation().x;
+												int y = iSupportBounds.getLocation().y;
+												writer.object();
+												writer.key("uuid").value(next.getUUID());
+												writer.key("type").value(next.getTypeID());
+												writer.key("location");
+												writer.object();
+												writer.key("x").value(x);
+												writer.key("y").value(y);
+												writer.endObject();
+												writer.key("size");
+												writer.object();
+												writer.key("width").value(iSupportBounds.getSize().width);
+												writer.key("height").value(iSupportBounds.getSize().height);
+												writer.endObject();
+												writer.endObject();
+											}
+										}
+									}
+								}
+								writer.endArray();
+							}
+							writer.endObject();
+						}
+						catch (IllegalArgumentException e)
+						{
+							Debug.error(e);
+						}
+						catch (JSONException e)
+						{
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+
+			/**
+			 * @param writer
+			 * @param f
+			 */
+			private void writePartGhosts(final JSONWriter writer, Form f)
+			{
+				try
+				{
+					writer.object();
+					{
+						writer.key("uuid").value(UUID.randomUUID()/* f.getUUID() */);
+						writer.key("ghosts");
+						writer.array();
+						{
+							Iterator<Part> partIterator = f.getParts();
+							ArrayList<Part> parts = new ArrayList<Part>();
+							while (partIterator.hasNext())
+								parts.add(partIterator.next());
+
+							// the parts
+							for (int i = 0; i < parts.size(); i++)
+							{
+								writer.object();
+								{
+									writer.key("uuid").value(parts.get(i).getUUID());
+									writer.key("type").value(parts.get(i).getTypeID());
+									writer.key("text").value(Part.getDisplayName(parts.get(i).getPartType()));
+									writer.key("location");
+									writer.object();
+									{
+										writer.key("x").value(0);
+										writer.key("y").value(parts.get(i).getSize().getHeight());
+									}
+									writer.endObject();
+									writer.key("parttype").value(parts.get(i).getPartType());
+									if (i > 0) writer.key("partprev").value(parts.get(i - 1).getUUID());
+									if (i < parts.size() - 1) writer.key("partnext").value(parts.get(i + 1).getUUID());
+								}
+								writer.endObject();
+							}
+
+							// the form itself
+							writer.object();
+							{
+								writer.key("uuid").value(f.getUUID());
+								writer.key("type").value(f.getTypeID());
+								writer.key("text").value("");
+								writer.key("location");
+								writer.object();
+								writer.key("x").value(0);
+								writer.key("y").value(0);
+								writer.endObject();
+								writer.key("size");
+								writer.object();
+								writer.key("width").value(f.getSize().width);
+								writer.key("height").value(f.getSize().height);
+								writer.endObject();
+							}
+							writer.endObject();
+						}
+						writer.endArray();
+					}
+					writer.endObject();
+				}
+				catch (IllegalArgumentException e)
+				{
+					Debug.error(e);
+				}
+				catch (JSONException e)
+				{
+					Debug.error(e);
+				}
 			}
 		});
 		writer.endArray();
