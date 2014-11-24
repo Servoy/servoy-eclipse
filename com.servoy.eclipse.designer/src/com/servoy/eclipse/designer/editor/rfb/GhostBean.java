@@ -92,6 +92,16 @@ public class GhostBean extends Bean
 		}
 	}
 
+	@Override
+	public boolean hasProperty(String propertyName)
+	{
+		if ("anchors".equals(propertyName) || "size".equals(propertyName) || "location".equals(propertyName))
+		{
+			return false;
+		}
+		return super.hasProperty(propertyName);
+	}
+
 	public Bean getParentBean()
 	{
 		return parentBean;
@@ -100,7 +110,7 @@ public class GhostBean extends Bean
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.j2db.persistence.Bean#setBeanXML(java.lang.String)
 	 */
 	@Override
@@ -147,7 +157,7 @@ public class GhostBean extends Bean
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.j2db.persistence.AbstractBase#equals(java.lang.Object)
 	 */
 	@Override

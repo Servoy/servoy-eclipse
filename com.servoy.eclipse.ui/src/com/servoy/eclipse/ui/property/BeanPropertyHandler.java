@@ -27,7 +27,7 @@ import com.servoy.j2db.persistence.Bean;
 
 /**
  * Property handler for classic (component) beans.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -74,4 +74,17 @@ public class BeanPropertyHandler extends BasePropertyHandler
 			}
 		}
 	}
+
+	@Override
+	public boolean shouldShow(Object obj)
+	{
+		String name = getName();
+		if ((obj instanceof Bean) && !((Bean)obj).hasProperty(name))
+		{
+			return false;
+		}
+		return super.shouldShow(obj);
+	}
+
+
 }
