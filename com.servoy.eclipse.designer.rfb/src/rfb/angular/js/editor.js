@@ -608,15 +608,17 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			});
 
 			$element.on('updateForm.content', function(event, formInfo) {
-				$scope.setContentSize(formInfo.w + "px", formInfo.h + "px");
-				var ghost = $scope.getGhost(formInfo.uuid);
-				if(ghost && (ghost.type == EDITOR_CONSTANTS.FORM_PERSIST_TYPE)) {						
-					ghost.size.width = formInfo.w;
-					ghost.size.height = formInfo.h;
-					
-					if(selection.length > 0 && selection[0].getAttribute("svy-id") == formInfo.uuid) {
-						$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection)
-					}
+				if(formName == formInfo.name) {
+					$scope.setContentSize(formInfo.w + "px", formInfo.h + "px");
+					var ghost = $scope.getGhost(formInfo.uuid);
+					if(ghost && (ghost.type == EDITOR_CONSTANTS.FORM_PERSIST_TYPE)) {						
+						ghost.size.width = formInfo.w;
+						ghost.size.height = formInfo.h;
+						
+						if(selection.length > 0 && selection[0].getAttribute("svy-id") == formInfo.uuid) {
+							$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection)
+						}
+					}	
 				}
 			});			
 			
