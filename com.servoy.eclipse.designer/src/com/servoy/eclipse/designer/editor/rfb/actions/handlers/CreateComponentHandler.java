@@ -171,7 +171,7 @@ public class CreateComponentHandler implements IServerService
 									tabName = "tab_" + id.incrementAndGet();
 								}
 								newTab.setText(tabName);
-								newTab.setLocation(new Point(x - ((BaseComponent)next).getLocation().x, y - ((BaseComponent)next).getLocation().y));
+								newTab.setLocation(new Point(x, y));
 								iSupportChilds.addChild(newTab);
 								return next;
 							}
