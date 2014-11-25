@@ -1,4 +1,4 @@
-angular.module("palette",['ui.bootstrap']).directive("palette", function($editorService,$compile,$selectionUtils){
+angular.module("palette",['ui.bootstrap']).directive("palette", function($editorService,$compile,$selectionUtils,$rootScope, EDITOR_EVENTS){
 	return {
 		restrict: 'E',
 		transclude: true,
@@ -6,12 +6,20 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 			$scope.packages = [];
 			var utils = $selectionUtils.getUtilsForScope($scope);
 
-			$http({method: 'GET', url: '/designer/palette'}).success(function(data) {
-				$scope.packages = data;
-				for(var i = 0; i < data.length; i++) {
-					data[i].isOpen = "true";
-				}
+			var loadPalette = function()
+			{
+				$http({method: 'GET', url: '/designer/palette'}).success(function(data) {
+					$scope.packages = data;
+					for(var i = 0; i < data.length; i++) {
+						data[i].isOpen = "true";
+					}
+				});
+			}
+			loadPalette();
+			$rootScope.$on(EDITOR_EVENTS.RELOAD_PALETTE, function(e){
+				loadPalette();
 			});
+			
 			/**
 			 * enterDragMode($event,item.name,package.packageName,item.tagName,item.model)  for new components from the pallete
 			 * enterDragMode($event,ghost,null,null,null,ghost) for a ghost 

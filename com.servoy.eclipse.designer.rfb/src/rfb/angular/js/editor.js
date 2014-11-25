@@ -14,7 +14,8 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 	}
 }).value("EDITOR_EVENTS", {
 	SELECTION_CHANGED : "SELECTION_CHANGED",
-	INITIALIZED: "INITIALIZED"
+	INITIALIZED: "INITIALIZED",
+	RELOAD_PALETTE: "RELOAD_PALETTE"
 }).value("EDITOR_CONSTANTS", {
 	PART_LABEL_WIDTH: 80,
 	PART_LABEL_HEIGHT: 20,
@@ -856,6 +857,10 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 		
 		openContainedForm: function(ghost) {
 			wsSession.callService('formeditor', 'openContainedForm', {"uuid":ghost.uuid}, true)
+		},
+		
+		reloadPalette: function() {
+			$rootScope.$emit(EDITOR_EVENTS.RELOAD_PALETTE, "")
 		},
 		// add more service methods here
 	}

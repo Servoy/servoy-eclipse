@@ -85,6 +85,9 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	// for updating selection in editor when selection changes in IDE
 	private final RfbSelectionListener selectionListener = new RfbSelectionListener();
 
+	// for updating selection in editor when selection changes in IDE
+	private final RfbWebResourceListener resourceChangedListener = new RfbWebResourceListener();
+
 	private Browser browser;
 
 	private EditorWebsocketSession editorWebsocketSession;
@@ -104,6 +107,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		WebsocketSessionManager.addSession(editorWebsocketSession = new EditorWebsocketSession(editorId));
 		editorWebsocketSession.registerServerService("formeditor", new EditorServiceHandler(editorPart, selectionProvider, selectionListener, fieldPositioner));
 		selectionListener.setEditorWebsocketSession(editorWebsocketSession);
+		resourceChangedListener.setEditorWebsocketSession(editorWebsocketSession);
 		try
 		{
 			browser = new Browser(parent, SWT.NONE);
