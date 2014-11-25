@@ -39,6 +39,7 @@ import com.servoy.eclipse.ui.editors.DataProviderCellEditor;
 import com.servoy.eclipse.ui.editors.DataProviderCellEditor.DataProviderValueEditor;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.j2db.FlattenedSolution;
@@ -60,6 +61,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 	private static final String DATAPROVIDERS = "dataproviders";
 	private static final String DYNAMIC_DATAPROVIDERS = "dynamicDataproviders";
 
+	private static final String FORM_FOUNDSET = "formFoundset";
 
 	private final FlattenedSolution flattenedSolution;
 	private final PersistContext persistContext;
@@ -133,7 +135,8 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 						{
 							JSONObject elementJSON = (JSONObject)element;
 							StringBuilder sb = new StringBuilder();
-							sb.append(elementJSON.optString(FOUNDSET_SELECTOR));
+							String fs = elementJSON.optString(FOUNDSET_SELECTOR);
+							sb.append("".equals(fs) ? FORM_FOUNDSET : fs);
 							sb.append('[');
 							JSONObject dataproviders = elementJSON.optJSONObject(DATAPROVIDERS);
 							if (dataproviders != null)
@@ -230,6 +233,15 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 			ArrayList<IPropertyDescriptor> propertyDescriptors = new ArrayList<IPropertyDescriptor>();
 			relationPropertyController = new RelationPropertyController(FOUNDSET_SELECTOR, FOUNDSET_SELECTOR, persistContext, table, null /* foreignTable */,
 				true, false);
+			relationPropertyController.setLabelProvider(new SolutionContextDelegateLabelProvider(RelationLabelProvider.INSTANCE_ALL_NO_IMAGE,
+				persistContext.getContext())
+			{
+				@Override
+				public String getText(Object value)
+				{
+					return value == null ? FORM_FOUNDSET : super.getText(value);
+				}
+			});
 			propertyDescriptors.add(relationPropertyController);
 
 			if (dataproviders != null)
