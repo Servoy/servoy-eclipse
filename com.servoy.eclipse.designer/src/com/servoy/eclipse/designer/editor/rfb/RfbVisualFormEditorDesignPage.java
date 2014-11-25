@@ -85,7 +85,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	// for updating selection in editor when selection changes in IDE
 	private final RfbSelectionListener selectionListener = new RfbSelectionListener();
 
-	// for updating selection in editor when selection changes in IDE
+	// for reloading palette when components change
 	private final RfbWebResourceListener resourceChangedListener = new RfbWebResourceListener();
 
 	private Browser browser;
