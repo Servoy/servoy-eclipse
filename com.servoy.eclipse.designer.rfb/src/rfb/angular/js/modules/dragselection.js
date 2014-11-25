@@ -134,8 +134,9 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 						var ghostsForNode = editorScope.getContainedGhosts(node.getAttribute("svy-id"));
 						if (ghostsForNode){
 							for(var j=0; j < ghostsForNode.length; j++) {
-								if(!isGhostAlreadySelected(selectionToDrag, ghostsForNode[j]))
-									addToSelection.push(ghostsForNode[j]);
+								var ghost = $('[svy-id='+ghostsForNode[j].uuid+']')[0]
+								if(!isGhostAlreadySelected(selectionToDrag, ghost))
+									addToSelection.push(ghost);
 							}
 						}
 					}
