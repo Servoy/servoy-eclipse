@@ -31,7 +31,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						css = $scope.convertToContentPoint(css);
 						if (angularElement)
 							angularElement.css(css);
-						if (type){
+						if (type != "component"){
 							var dropTarget = utils.getNode(ev);
 							if (dropTarget && dropTarget.getAttribute("svy-types")){
 								if (dropTarget.getAttribute("svy-types").indexOf(type) > 0)
@@ -40,11 +40,13 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 									$scope.glasspane.style.cursor="no-drop";
 							}
 							else $scope.glasspane.style.cursor="no-drop";
-						}else $scope.glasspane.style.cursor="";
+						}
+						else $scope.glasspane.style.cursor="";
 					}
 					else
 					{
 						dragClone = $(event.target).clone()
+						utils.setDraggingFromPallete(type);
 						dragClone.attr('id', 'dragNode')
 						dragClone.css({
 							position: 'absolute',
@@ -55,7 +57,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 							'list-style-type': 'none'
 						})
 						$('body').append(dragClone);
-						if (!type) {
+						if (type=='component') {
 							angularElement = $scope.getEditorContentRootScope().createComponent('<div style="border-style: dotted;"><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-autoapply-disabled=\'true\'/></div>',model);
 							var elWidth = model.size ? model.size.width : 100;
 							var elHeight = model.size ? model.size.height : 100;
@@ -97,6 +99,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 					}
 					if (dragClone)
 					{
+						utils.setDraggingFromPallete(null);
 						dragClone.remove();
 						var component = {};
 						
@@ -104,7 +107,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						if (dropTarget) {
 							component.dropTargetUUID = dropTarget.getAttribute("svy-id");
 						}
-						if (type) {
+						if (type!="component") {
 							component.type = type;
 							if (!dropTarget) return; // releasing a ghost, but no actual component underneath
 							if (dropTarget) {

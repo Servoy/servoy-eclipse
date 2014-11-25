@@ -7,9 +7,18 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 		var event = null;
 		var enabled = true;
 		var execute = null;
+		
+		function shouldDrawIfDragging(dropTarget) {
+			if (utils.getDraggingFromPallete() != null) {
+				var draggedItem = utils.getDraggingFromPallete();
+				return ((dropTarget.getAttribute("svy-types") != null) && (dropTarget.getAttribute("svy-types").indexOf(draggedItem) > 0)) 
+			}
+			return true;
+		}
+		
 		function drawHighlightDiv() {
 			var node = utils.getNode(event);
-			if (node && enabled) {
+			if (node && enabled && shouldDrawIfDragging(node)) {
 				if (node.parentElement.parentElement !== editorScope.glasspane) {
 					highlightDiv.style.display = 'block';
 					var rect = node.getBoundingClientRect();

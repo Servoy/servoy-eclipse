@@ -141,10 +141,20 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 	function hasClass(element, cls) {
 		return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
 	}
+	
+	var draggingFromPallete = null;
 
 	return {
 		getUtilsForScope: function(editorScope) {
 			return {
+				
+				setDraggingFromPallete: function(dragging){
+					draggingFromPallete = dragging;
+				},
+				getDraggingFromPallete: function(){
+					return draggingFromPallete;
+				},
+				
 				adjustForPadding:function (mousePosition) {
 					mousePosition.left -= parseInt(angular.element(editorScope.glasspane.parentElement).css("padding-left").replace("px",""));
 					mousePosition.top  -= parseInt(angular.element(editorScope.glasspane.parentElement).css("padding-top").replace("px",""));
