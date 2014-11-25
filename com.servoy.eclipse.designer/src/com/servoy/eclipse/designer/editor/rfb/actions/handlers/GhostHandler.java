@@ -261,7 +261,7 @@ public class GhostHandler implements IServerService
 					if (!((Form)o).getLayoutContainers().hasNext()) // absolute layout
 					{
 						writePartGhosts(writer, f);
-						writeListViewTableViewGhosts(writer, f);
+						writeTableViewGhosts(writer, f);
 					}
 				}
 				else if (o instanceof Portal)
@@ -348,7 +348,7 @@ public class GhostHandler implements IServerService
 			 * @param writer
 			 * @param f
 			 */
-			private void writeListViewTableViewGhosts(final JSONWriter writer, Form f)
+			private void writeTableViewGhosts(final JSONWriter writer, Form f)
 			{
 				if (f.getProperty(IContentSpecConstantsBase.PROPERTY_VIEW) != null)
 				{
