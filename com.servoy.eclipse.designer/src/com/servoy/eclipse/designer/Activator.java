@@ -285,7 +285,7 @@ public class Activator extends AbstractUIPlugin
 		public synchronized void shutDown(boolean force)
 		{
 			super.shutDown(force);
-			solutionProvider.removePersistListener(this);
+			if (solutionProvider != null) solutionProvider.removePersistListener(this);
 		}
 
 		@Override
@@ -449,6 +449,7 @@ public class Activator extends AbstractUIPlugin
 							client.closeSolution(true, null);
 						}
 					}
+					client.shutDown(true);
 				}
 				return true;
 			}
@@ -471,21 +472,16 @@ public class Activator extends AbstractUIPlugin
 			final IDebugClientHandler service = ApplicationServerRegistry.getServiceRegistry().getService(IDebugClientHandler.class);
 			if (service != null)
 			{
-
 				WebsocketSessionManager.setWebsocketSessionFactory(WebsocketSessionFactory.DESIGN_ENDPOINT, new IWebsocketSessionFactory()
 				{
 					@Override
 					public IWebsocketSession createSession(String uuid) throws Exception
 					{
-						DesignNGClientWebsocketSession designerSession = null;
-						if (designerSession == null || !designerSession.isValid())
-						{
-							final IDesignerSolutionProvider solutionProvider = ApplicationServerRegistry.getServiceRegistry().getService(
-								IDesignerSolutionProvider.class);
-							designerSession = new DesignNGClientWebsocketSession(uuid);
-							Activator.this.client = new DeveloperDesignClient(designerSession, solutionProvider);
-							designerSession.setClient(Activator.this.client);
-						}
+						DesignNGClientWebsocketSession designerSession = new DesignNGClientWebsocketSession(uuid);
+						final IDesignerSolutionProvider solutionProvider = ApplicationServerRegistry.getServiceRegistry().getService(
+							IDesignerSolutionProvider.class);
+						Activator.this.client = new DeveloperDesignClient(designerSession, solutionProvider);
+						designerSession.setClient(Activator.this.client);
 						return designerSession;
 					}
 				});
