@@ -67,7 +67,6 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.server.ngclient.DataAdapterList;
 import com.servoy.j2db.server.ngclient.FormElement;
@@ -392,9 +391,13 @@ public class Activator extends AbstractUIPlugin
 				if (parent instanceof Solution)
 				{
 					Solution theSolution = (Solution)parent;
-					Object property = theSolution.getProperty(StaticContentSpecLoader.PROPERTY_STYLESHEET.getPropertyName());
-					if (property.equals(cssFile.getID()) || (Integer)property == 0) getWebsocketSession().getEventDispatcher().addEvent(
-						new SendCSSFile(theSolution));
+					//TODO change to commented code once IPersistChangeListener is notified only the modified file, not all media files: case SVY-7581
+					/*
+					 * Object property = theSolution.getProperty(StaticContentSpecLoader.PROPERTY_STYLESHEET.getPropertyName()); if
+					 * (property.equals(cssFile.getID()) || (Integer)property == 0) getWebsocketSession().getEventDispatcher().addEvent( new
+					 * SendCSSFile(theSolution));
+					 */
+					getWebsocketSession().getEventDispatcher().addEvent(new SendCSSFile(theSolution));
 				}
 			}
 		}
