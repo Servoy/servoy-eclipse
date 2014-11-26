@@ -3,6 +3,7 @@ angular.module('keyboardlayoutupdater', ['editor']).run(function($pluginRegistry
 	$pluginRegistry.registerPlugin(function(editorScope) {
 	
 		var boundsUpdating = false;
+		var highlightDiv = angular.element(document.querySelector('#highlight'))[0];
 		
 		function onkeydown(event) {
 			var fixedKeyEvent = editorScope.getFixedKeyEvent(event);            
@@ -91,6 +92,9 @@ angular.module('keyboardlayoutupdater', ['editor']).run(function($pluginRegistry
 				boundsUpdating = false;
 				var obj = {};
 				var selection = editorScope.getSelection();
+				
+				if (selection.length > 0)
+					highlightDiv.style.display = 'none';
 				
 				for(var i=0;i<selection.length;i++) {
 					var node = selection[i];
