@@ -129,7 +129,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 					xOffset += 20;
 					yOffset += 20;
 				}
-				return {background: "#e4844a", opacity: 0.4, padding: "3px", left: ghost.location.x + xOffset, top: ghost.location.y + yOffset, width: ghost.size.width, height: ghost.size.height};
+				return {background: "#e4844a", padding: "3px", left: ghost.location.x + xOffset, top: ghost.location.y + yOffset, width: ghost.size.width, height: ghost.size.height};
 			}
 			
 			$scope.getGhostHRStyle = function(ghost) {
