@@ -247,6 +247,7 @@ public class Activator extends AbstractUIPlugin
 				}
 				if (changedForm != null)
 				{
+					Form form = ModelUtils.getEditingFlattenedSolution(changedForm).getFlattenedForm(changedForm);
 					List<IFormController> cachedFormControllers = getFormManager().getCachedFormControllers(changedForm);
 					for (IFormController iFormController : cachedFormControllers)
 					{
@@ -256,7 +257,7 @@ public class Activator extends AbstractUIPlugin
 						new Object[] { });
 					getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
 						"updateForm",
-						new Object[] { changedForm.getName(), changedForm.getUUID().toString(), Integer.valueOf((int)changedForm.getSize().getWidth()), Integer.valueOf((int)changedForm.getSize().getHeight()) });
+						new Object[] { changedForm.getName(), changedForm.getUUID().toString(), Integer.valueOf((int)form.getSize().getWidth()), Integer.valueOf((int)form.getSize().getHeight()) });
 				}
 				else
 				{
@@ -282,7 +283,7 @@ public class Activator extends AbstractUIPlugin
 
 		/*
 		 * (non-Javadoc)
-		 *
+		 * 
 		 * @see com.servoy.j2db.server.ngclient.NGClient#shutDown(boolean)
 		 */
 		@Override
@@ -334,7 +335,7 @@ public class Activator extends AbstractUIPlugin
 
 		/*
 		 * (non-Javadoc)
-		 *
+		 * 
 		 * @see com.servoy.j2db.persistence.IPersistChangeListener#persistChanges(java.util.Collection)
 		 */
 		@Override
@@ -410,7 +411,7 @@ public class Activator extends AbstractUIPlugin
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -499,7 +500,7 @@ public class Activator extends AbstractUIPlugin
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
