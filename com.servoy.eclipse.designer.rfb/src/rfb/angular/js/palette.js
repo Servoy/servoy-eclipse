@@ -84,16 +84,18 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 					}
 				});
 				mouseentercallback = $scope.registerDOMEvent("mouseenter","CONTENTFRAME_OVERLAY", function(ev){
-					if (!type)
-						dragClone.css('opacity', '0');
 					if (angularElement)
+					{
+						dragClone.css('opacity', '0');
 						angularElement.css('opacity', '1');
+					}	
 				});
 				mouseleavecallback = $scope.registerDOMEvent("mouseenter","PALETTE", function(ev){
-					if (!type)
-						dragClone.css('opacity', '1');
 					if (angularElement)
+					{
+						dragClone.css('opacity', '1');
 						angularElement.css('opacity', '0');
+					}
 				});
 				mouseupcallback = $scope.registerDOMEvent("mouseup","EDITOR", function(ev){
 					if (mousemovecallback) $scope.unregisterDOMEvent("mousemove","EDITOR",mousemovecallback);
