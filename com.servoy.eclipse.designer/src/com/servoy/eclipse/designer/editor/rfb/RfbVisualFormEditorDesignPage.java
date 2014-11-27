@@ -47,6 +47,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.CutAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.DeleteAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.FixedSelectAllAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
@@ -119,8 +120,9 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		}
 
 		Form form = editorPart.getForm();
-		String layout = computeLayout(form);
-		Dimension formSize = form.getSize();
+		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
+		String layout = computeLayout(flattenedForm);
+		Dimension formSize = flattenedForm.getSize();
 		String url = "http://localhost:8080/rfb/angular/index.html?s=" + form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" +
 			formSize.getWidth() + "&h=" + formSize.getHeight() + "&editorid=" + editorId;
 		try
