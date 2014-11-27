@@ -19,13 +19,14 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 }).value("EDITOR_CONSTANTS", {
 	PART_LABEL_WIDTH: 80,
 	PART_LABEL_HEIGHT: 20,
-	PART_PERSIST_TYPE: 19,
 	PART_TYPE_TITLE_HEADER: 1,
 	PART_TYPE_HEADER: 2,
 	PART_TYPE_BODY: 5,
 	PART_TYPE_FOOTER: 8,
-	FORM_PERSIST_TYPE: 3,
-	TAB_PERSIST_TYPE: 15,
+	GHOST_TYPE_CONFIGURATION: "config",
+	GHOST_TYPE_COMPONENT: "comp",
+	GHOST_TYPE_PART: "part",
+	GHOST_TYPE_FORM: "form"
 }).directive("editor", function( $window, $pluginRegistry,$rootScope,EDITOR_EVENTS,EDITOR_CONSTANTS,$timeout,$editorService){
 	return {
 		restrict: 'E',
@@ -116,10 +117,10 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			}
 			
 			$scope.getGhostStyle = function(ghost) {
-				if(ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE) { // parts
+				if(ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART) { // parts
 					return {background: "#d0d0d0", top: ghost.location.y + "px", right: "-" + (EDITOR_CONSTANTS.PART_LABEL_WIDTH - 6) +"px", width: (EDITOR_CONSTANTS.PART_LABEL_WIDTH - 6) + "px", height: EDITOR_CONSTANTS.PART_LABEL_HEIGHT + "px", textAlign: "center", whiteSpace: "nowrap", cursor: "s-resize"};
 				}
-				else if(ghost.type == EDITOR_CONSTANTS.FORM_PERSIST_TYPE) { // the form
+				else if(ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM) { // the form
 					return {left: 0, top: 0, width: ghost.size.width + "px", height: ghost.size.height + "px", padding: "3px"};
 				}
 				var xOffset = 0;
@@ -134,7 +135,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			}
 			
 			$scope.getGhostHRStyle = function(ghost) {
-				if(ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE) { // parts
+				if(ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART) { // parts
 					return {marginTop:"-4px", border:0, borderTop:"1px dashed #000", width:(parseInt($scope.contentStyle.width, 10) + EDITOR_CONSTANTS.PART_LABEL_WIDTH - 15) + "px", float:"right"};
 				}
 				else {
@@ -148,7 +149,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				{
 					var ghost = ghosts[i];
 					var prevGhost = i > 0 ? ghosts[i-1] : undefined;
-					if (ghost.type == EDITOR_CONSTANTS.TAB_PERSIST_TYPE)
+					if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION)
 					{
 						if ($('[svy-id='+ghost.uuid+']')[0])
 						{
@@ -169,7 +170,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			}			
 
 			$scope.openContainedForm = function(ghost){
-				if(ghost.type != EDITOR_CONSTANTS.PART_PERSIST_TYPE)
+				if(ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_PART)
 				{
 					$editorService.openContainedForm(ghost);
 				}
@@ -186,13 +187,13 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			}
 
 			$scope.updateGhostLocation = function(ghost, x, y) {
-				if(ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE) { // it is a part
+				if(ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART) { // it is a part
 					if(y <= ghost.min || (ghost.max != -1 && y >= ghost.max)) {
 						// part is overlapping its neighbors
 						return;
 					}
 				}
-				if(ghost.type == EDITOR_CONSTANTS.FORM_PERSIST_TYPE) {
+				if(ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM) {
 					return;
 				}
 				ghost.location.x = x;
@@ -205,11 +206,11 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			}
 			
 			$scope.updateGhostSize = function(ghost, deltaWidth, deltaHeight) {
-				if(ghost.type == EDITOR_CONSTANTS.FORM_PERSIST_TYPE) {
+				if(ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM) {
 					ghost.size.width = ghost.size.width + deltaWidth;
 					$scope.contentStyle.width = ghost.size.width + "px";
 				}
-				else if(ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE || ghost.type == EDITOR_CONSTANTS.TAB_PERSIST_TYPE) {
+				else if(ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART || ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) {
 					// nop
 				}
 				else {
@@ -222,7 +223,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				for(var i = 0; i < selection.length; i++) 
 				{
 					var ghost = $scope.getGhost(selection[i].getAttribute("svy-id"));
-					if(ghost && (ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE)) $scope.updateGhostLocationLimits(ghost);
+					if(ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART)) $scope.updateGhostLocationLimits(ghost);
 				}
 			})
 
@@ -400,7 +401,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 					var validSelection = new Array();
 					for (var i = 0; i < selection.length; i++) {
 						var ghost = $scope.getGhost(selection[i].getAttribute("svy-id"));
-						if(ghost && (ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE || ghost.type == EDITOR_CONSTANTS.FORM_PERSIST_TYPE))
+						if(ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART || ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM))
 						{
 							continue;
 						}
@@ -584,7 +585,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				// maybe the form controllers code could call $evalAsync as last thing in its controller when it is in design.
 				if (selection.length > 0) {
 					var ghost = $scope.getGhost(selection[0].getAttribute("svy-id"));
-					if(ghost && (ghost.type == EDITOR_CONSTANTS.FORM_PERSIST_TYPE)) {						
+					if(ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM)) {						
 						$scope.setContentSizes();
 					}
 					else {
@@ -620,7 +621,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				if(formName == formInfo.name) {
 					$scope.setContentSize(formInfo.w + "px", formInfo.h + "px");
 					var ghost = $scope.getGhost(formInfo.uuid);
-					if(ghost && (ghost.type == EDITOR_CONSTANTS.FORM_PERSIST_TYPE)) {						
+					if(ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM)) {						
 						ghost.size.width = formInfo.w;
 						ghost.size.height = formInfo.h;
 						

@@ -15,7 +15,7 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 					var selection = utils.getNode(e);
 					if(selection) {
 						var ghost = $scope.getGhost(selection.getAttribute("svy-id"));
-						if(ghost && (ghost.type == EDITOR_CONSTANTS.PART_PERSIST_TYPE)) {
+						if(ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART)) {
 							$("#contextMenu").hide();
 							return false;
 						}

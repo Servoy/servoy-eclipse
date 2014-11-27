@@ -76,7 +76,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 				var canStartLasso = !node;
 				if(node) {
 					var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-					canStartLasso = (ghostObject && ghostObject.type == EDITOR_CONSTANTS.FORM_PERSIST_TYPE);
+					canStartLasso = (ghostObject && ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM);
 				}
 				
 				if(canStartLasso) {

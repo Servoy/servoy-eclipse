@@ -60,6 +60,11 @@ import com.servoy.j2db.util.UUID;
  */
 public class GhostHandler implements IServerService
 {
+	public static final String GHOST_TYPE_CONFIGURATION = "config";
+	public static final String GHOST_TYPE_COMPONENT = "comp";
+	public static final String GHOST_TYPE_PART = "part";
+	public static final String GHOST_TYPE_FORM = "form";
+
 	private final BaseVisualFormEditor editorPart;
 
 	/**
@@ -173,7 +178,7 @@ public class GhostHandler implements IServerService
 			{
 				jsonWriter.object();
 				jsonWriter.key("uuid").value(computeGhostUUID(bean, pd, simpleTypeName, i));
-				jsonWriter.key("type").value(pd.getType().getName());
+				jsonWriter.key("type").value(GHOST_TYPE_CONFIGURATION);
 				jsonWriter.key("text").value(pd.getName());
 				jsonWriter.key("location");
 				{
@@ -231,7 +236,7 @@ public class GhostHandler implements IServerService
 								int y = tab.getLocation().y;
 								writer.object();
 								writer.key("uuid").value(tab.getUUID());
-								writer.key("type").value(tab.getTypeID());
+								writer.key("type").value(GHOST_TYPE_CONFIGURATION);
 								writer.key("text").value(tab.getText());
 								writer.key("location");
 								writer.object();
@@ -301,7 +306,7 @@ public class GhostHandler implements IServerService
 									int x = baseComponent.getLocation().x;
 									int y = baseComponent.getLocation().y;
 									writer.key("uuid").value(persists.get(i).getUUID());
-									writer.key("type").value(persists.get(i).getTypeID());
+									writer.key("type").value(GHOST_TYPE_COMPONENT);
 									Object label = baseComponent.getProperty("text");
 									if (label == null || label.toString().trim().equals(""))
 									{
@@ -393,7 +398,7 @@ public class GhostHandler implements IServerService
 												int y = iSupportBounds.getLocation().y;
 												writer.object();
 												writer.key("uuid").value(next.getUUID());
-												writer.key("type").value(next.getTypeID());
+												writer.key("type").value(GHOST_TYPE_COMPONENT);
 												writer.key("location");
 												writer.object();
 												writer.key("x").value(x);
@@ -462,7 +467,7 @@ public class GhostHandler implements IServerService
 								writer.object();
 								{
 									writer.key("uuid").value(parts.get(i).getUUID());
-									writer.key("type").value(parts.get(i).getTypeID());
+									writer.key("type").value(GHOST_TYPE_PART);
 									writer.key("text").value(Part.getDisplayName(parts.get(i).getPartType()));
 									writer.key("location");
 									writer.object();
@@ -482,7 +487,7 @@ public class GhostHandler implements IServerService
 							writer.object();
 							{
 								writer.key("uuid").value(f.getUUID());
-								writer.key("type").value(f.getTypeID());
+								writer.key("type").value(GHOST_TYPE_FORM);
 								writer.key("text").value("");
 								writer.key("location");
 								writer.object();
