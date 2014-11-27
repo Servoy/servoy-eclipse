@@ -222,21 +222,24 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		}
 		else
 		{
-			IPropertyConverter<Object> type = (IPropertyConverter<Object>)propertyDescription.getType();
-			IPropertyConverter<Object> converter = (IPropertyConverter<Object>)jsonConverters.get(type);
-			if (converter != null)
+			if (propertyDescription.getType() instanceof IPropertyConverter< ? >)
 			{
-				JSONStringer writer = new JSONStringer();
-				try
+				IPropertyConverter<Object> type = (IPropertyConverter<Object>)propertyDescription.getType();
+				IPropertyConverter<Object> converter = (IPropertyConverter<Object>)jsonConverters.get(type);
+				if (converter != null)
 				{
-					writer.object();
-					converter.toJSON(writer, getName(), convertedValue, new DataConversion()).toString();
-					writer.endObject();
-					convertedValue = new JSONObject(writer.toString()).get(getName());
-				}
-				catch (JSONException e)
-				{
-					ServoyLog.logError(e);
+					JSONStringer writer = new JSONStringer();
+					try
+					{
+						writer.object();
+						converter.toJSON(writer, getName(), convertedValue, new DataConversion()).toString();
+						writer.endObject();
+						convertedValue = new JSONObject(writer.toString()).get(getName());
+					}
+					catch (JSONException e)
+					{
+						ServoyLog.logError(e);
+					}
 				}
 			}
 		}
