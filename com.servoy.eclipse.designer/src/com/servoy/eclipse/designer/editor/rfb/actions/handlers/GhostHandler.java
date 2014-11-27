@@ -42,6 +42,8 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
+import com.servoy.j2db.persistence.ISupportDataProviderID;
+import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Tab;
@@ -400,6 +402,18 @@ public class GhostHandler implements IServerService
 												writer.key("width").value(iSupportBounds.getSize().width);
 												writer.key("height").value(iSupportBounds.getSize().height);
 												writer.endObject();
+												String nameText = "";
+												if (next instanceof ISupportDataProviderID)
+												{
+													String dp = ((ISupportDataProviderID)next).getDataProviderID();
+													if (dp != null) nameText = dp;
+												}
+												if (next instanceof ISupportName)
+												{
+													String name = ((ISupportName)next).getName();
+													if (name != null) nameText = name;
+												}
+												writer.key("text").value(nameText);
 												writer.endObject();
 											}
 										}
