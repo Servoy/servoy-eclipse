@@ -27,6 +27,7 @@ import org.json.JSONWriter;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Part;
@@ -62,7 +63,7 @@ public class GetPartStylesHandler implements IServerService
 				StringWriter stringWriter = new StringWriter();
 				final JSONWriter writer = new JSONWriter(stringWriter);
 
-				Form f = editorPart.getForm();
+				Form f = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm());
 				try
 				{
 					writer.object();
