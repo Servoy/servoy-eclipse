@@ -30,7 +30,7 @@ import com.servoy.j2db.persistence.IRepository;
 
 /**
  * Base class for actions on the form designer elements toolbar.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -56,12 +56,15 @@ public abstract class DesignerToolbarAction extends DesignerSelectionAction
 	/*
 	 * When multiple objects are selected on a form, the AddFieldAction, AddMediaAction, AddPortalAction, AddTabPanelAction and AddSplitPaneAction should be
 	 * executed once, no matter how many items are selected on the form.
-	 * 
+	 *
 	 * @see com.servoy.eclipse.designer.editor.commands.DesignerSelectionAction#createRequests(java.util.List)
 	 */
 	@Override
 	protected Map<EditPart, Request> createRequests(List<EditPart> selected)
 	{
+		// TODO remove this workaround required by case SVY-7590
+		if (selected != null && selected.size() > 0 && !(selected.get(0) instanceof EditPart)) return null;
+
 		Map<EditPart, Request> requests = null;
 		for (EditPart editPart : selected)
 		{
@@ -81,7 +84,7 @@ public abstract class DesignerToolbarAction extends DesignerSelectionAction
 
 	/**
 	 * Get context model of selected type.
-	 * 
+	 *
 	 * @param editPart
 	 * @param typeId
 	 * @return
@@ -89,7 +92,7 @@ public abstract class DesignerToolbarAction extends DesignerSelectionAction
 	protected IPersist getContext(EditPart editPart, int typeId)
 	{
 		// Follow editpart hierarchy, not persist hierarchy, in case of an inherited element persist.getParent() is the
-		// super form but we are looking for the form that the editpart is shown in (the subform) 
+		// super form but we are looking for the form that the editpart is shown in (the subform)
 		EditPart ep = editPart;
 		while (ep != null)
 		{

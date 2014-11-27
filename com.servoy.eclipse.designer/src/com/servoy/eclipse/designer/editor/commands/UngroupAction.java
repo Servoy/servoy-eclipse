@@ -26,8 +26,8 @@ import org.eclipse.gef.Request;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.actions.SetPropertyRequest;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.GroupGraphicalEditPart;
-import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
@@ -62,6 +62,8 @@ public class UngroupAction extends DesignerSelectionAction
 	protected static Map<EditPart, Request> createUngroupingRequests(List<EditPart> selected)
 	{
 		if (selected == null) return null;
+		// TODO remove this workaround required by case SVY-7590
+		if (selected.size() > 0 && !(selected.get(0) instanceof EditPart)) return null;
 
 		List<EditPart> children = new ArrayList<EditPart>();
 
@@ -80,7 +82,7 @@ public class UngroupAction extends DesignerSelectionAction
 			{
 				requests = new HashMap<EditPart, Request>(selected.size());
 			}
-			requests.put(child, new SetPropertyRequest(VisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName(), null,
+			requests.put(child, new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName(), null,
 				"ungroup"));
 		}
 

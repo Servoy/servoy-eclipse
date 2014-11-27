@@ -32,7 +32,7 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 
 /**
  * Base action to set the same width or height to selected elements.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -58,6 +58,9 @@ public abstract class SameSizeAction extends DesignerSelectionAction
 		{
 			return null;
 		}
+
+		// TODO remove this workaround required by case SVY-7590
+		if (selected.size() > 0 && !(selected.get(0) instanceof EditPart)) return null;
 
 		Rectangle bounds = null;
 

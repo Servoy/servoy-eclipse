@@ -70,6 +70,9 @@ public class SetTabSequenceAction extends DesignerSelectionAction
 			return null;
 		}
 
+		// TODO remove this workaround required by case SVY-7590
+		if (!(selected.get(0) instanceof EditPart)) return null;
+
 		EditPart first = selected.get(0);
 		Object model = first.getModel();
 		if (!(model instanceof IPersist))
@@ -99,10 +102,8 @@ public class SetTabSequenceAction extends DesignerSelectionAction
 		for (EditPart editPart : tabSeqEditParts)
 		{
 			int index = selected.indexOf(editPart);
-			requests.put(
-				editPart,
-				new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_TABSEQ.getPropertyName(), Integer.valueOf(index < 0
-					? ISupportTabSeq.SKIP : index + 1), "set tab sequence"));
+			requests.put(editPart, new SetPropertyRequest(BaseVisualFormEditor.REQ_SET_PROPERTY, StaticContentSpecLoader.PROPERTY_TABSEQ.getPropertyName(),
+				Integer.valueOf(index < 0 ? ISupportTabSeq.SKIP : index + 1), "set tab sequence"));
 		}
 
 		return requests;

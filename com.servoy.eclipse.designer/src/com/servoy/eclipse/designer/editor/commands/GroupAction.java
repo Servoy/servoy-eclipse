@@ -35,8 +35,8 @@ import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.actions.SetPropertyRequest;
-import com.servoy.eclipse.designer.editor.GroupGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.GroupGraphicalEditPart;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -77,6 +77,9 @@ public class GroupAction extends DesignerSelectionAction
 
 	public static Map<EditPart, Request> createGroupingRequests(List<EditPart> selected)
 	{
+		// TODO remove this workaround required by case SVY-7590
+		if (selected != null && selected.size() > 0 && !(selected.get(0) instanceof EditPart)) return null;
+
 		// check existing groups
 		String groupID = null;
 		int ngroups = 0;

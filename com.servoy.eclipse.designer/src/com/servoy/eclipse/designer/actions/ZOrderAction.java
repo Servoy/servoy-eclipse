@@ -365,6 +365,8 @@ public class ZOrderAction extends DesignerSelectionAction
 	{
 		if (selected == null || selected.isEmpty()) return null;
 
+		// TODO remove this workaround required by case SVY-7590
+		if (!(selected.get(0) instanceof EditPart)) return null;
 
 		Map<EditPart, Request> requests = null;
 
