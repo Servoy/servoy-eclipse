@@ -35,6 +35,7 @@ import org.sablo.websocket.IServerService;
 import com.servoy.base.persistence.constants.IContentSpecConstantsBase;
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
@@ -259,7 +260,7 @@ public class GhostHandler implements IServerService
 				}
 				else if (o instanceof Form)
 				{
-					Form f = (Form)o;
+					Form f = ModelUtils.getEditingFlattenedSolution(o).getFlattenedForm(o);
 					if (!((Form)o).getLayoutContainers().hasNext()) // absolute layout
 					{
 						writePartGhosts(writer, f);
@@ -384,7 +385,8 @@ public class GhostHandler implements IServerService
 										while (fields.hasNext())
 										{
 											IPersist next = fields.next();
-											if (next instanceof ISupportBounds)
+											if (next instanceof ISupportBounds &&
+												f.getPartAt(((ISupportBounds)next).getLocation().y).getPartType() == Part.BODY)
 											{
 												ISupportBounds iSupportBounds = (ISupportBounds)next;
 												int x = iSupportBounds.getLocation().x;
