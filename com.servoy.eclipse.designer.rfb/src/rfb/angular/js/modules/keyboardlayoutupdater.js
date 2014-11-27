@@ -63,6 +63,9 @@ angular.module('keyboardlayoutupdater', ['editor']).run(function($pluginRegistry
 						}
 						
 						selection = utils.addGhostsToSelection(selection);
+						
+						if (selection.length > 0)
+							highlightDiv.style.display = 'none';
 
 						for(var i=0;i<selection.length;i++) {
 							var node = selection[i];
