@@ -142,11 +142,38 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 		return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
 	}
 	
+	function isGhostAlreadySelected(selection, ghost) {
+		for(var i=0; i < selection.length; i++) {
+			if (selection[i].getAttribute("svy-id") == ghost.getAttribute("svy-id")) return true;
+		}
+		return false;
+	}
+	
+	
 	var draggingFromPallete = null;
 
 	return {
 		getUtilsForScope: function(editorScope) {
 			return {
+				
+				addGhostsToSelection: function(selection) {
+					
+					var addToSelection = [];
+
+					for(var i=0;i<selection.length;i++) {
+						var node = selection[i];
+						var ghostsForNode = editorScope.getContainedGhosts(node.getAttribute("svy-id"));
+						if (ghostsForNode){
+							for(var j=0; j < ghostsForNode.length; j++) {
+								var ghost = $('[svy-id='+ghostsForNode[j].uuid+']')[0]
+								if(!isGhostAlreadySelected(selection, ghost))
+									addToSelection.push(ghost);
+							}
+						}
+					}
+					selection = selection.concat(addToSelection);
+					return selection;
+				},
 				
 				setDraggingFromPallete: function(dragging){
 					draggingFromPallete = dragging;

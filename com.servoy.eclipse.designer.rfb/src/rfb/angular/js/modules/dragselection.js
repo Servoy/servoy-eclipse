@@ -73,13 +73,7 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 			}
 		}
 
-		function isGhostAlreadySelected(selection, ghost) {
-			for(var i=0; i < selection.length; i++) {
-				if (selection[i].getAttribute("svy-id") == ghost.uuid) return true;
-			}
-			return false;
-		}
-		
+
 		function onmousemove(event) {
 			if (dragStartEvent) {
 				
@@ -127,22 +121,9 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 				
 				if (!selectionToDrag) {
 					selectionToDrag = editorScope.getSelection();
-					var addToSelection = [];
-
-					for(var i=0;i<selectionToDrag.length;i++) {
-						var node = selectionToDrag[i];
-						var ghostsForNode = editorScope.getContainedGhosts(node.getAttribute("svy-id"));
-						if (ghostsForNode){
-							for(var j=0; j < ghostsForNode.length; j++) {
-								var ghost = $('[svy-id='+ghostsForNode[j].uuid+']')[0]
-								if(!isGhostAlreadySelected(selectionToDrag, ghost))
-									addToSelection.push(ghost);
-							}
-						}
-					}
-					selectionToDrag = selectionToDrag.concat(addToSelection);
+					selectionToDrag = utils.addGhostsToSelection(selectionToDrag);
 				}
-
+				
 				if (selectionToDrag.length > 0) {
 					if (dragging) {
 						var formState = editorScope.getFormState();
