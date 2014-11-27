@@ -147,8 +147,8 @@ public class CreateComponentHandler implements IServerService
 	{
 		int x = args.getInt("x");
 		int y = args.getInt("y");
-		int w = args.getInt("w");
-		int h = args.getInt("h");
+		int w = args.optInt("w");
+		int h = args.optInt("h");
 		if (args.has("type"))
 		{//a ghost dragged from the pallete. it is defined in the "types" section of the .spec file
 			Iterator<IPersist> allPersists = editorPart.getForm().getAllObjects();
@@ -412,7 +412,7 @@ public class CreateComponentHandler implements IServerService
 				IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 				IPersist newPersist = ((AbstractBase)persist).cloneObj(persist.getParent(), true, validator, true, true, true);
 				((ISupportBounds)newPersist).setLocation(new Point(x, y));
-				((ISupportBounds)newPersist).setSize(new Dimension(w, h));
+				if (w > 0 && h > 0) ((ISupportBounds)newPersist).setSize(new Dimension(w, h));
 				return newPersist;
 			}
 		}
