@@ -17,7 +17,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 	INITIALIZED: "INITIALIZED",
 	RELOAD_PALETTE: "RELOAD_PALETTE"
 }).value("EDITOR_CONSTANTS", {
-	PART_LABEL_WIDTH: 80,
+	PART_LABEL_WIDTH: 100,
 	PART_LABEL_HEIGHT: 20,
 	PART_TYPE_TITLE_HEADER: 1,
 	PART_TYPE_HEADER: 2,
