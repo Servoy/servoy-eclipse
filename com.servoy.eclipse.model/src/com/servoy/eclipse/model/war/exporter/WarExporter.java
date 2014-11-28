@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.Writer;
+import java.net.URI;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -1317,11 +1318,16 @@ public class WarExporter
 		List<String> pluginLocations = exportModel.getPluginLocations();
 		for (String libName : NG_LIBS)
 		{
+			File parent = new File(URI.create(System.getProperty("eclipse.home.location")));
 			int i = 0;
 			boolean found = false;
 			while (!found && i < pluginLocations.size())
 			{
 				File pluginLocation = new File(pluginLocations.get(i));
+				if (!pluginLocation.isAbsolute())
+				{
+					pluginLocation = new File(parent, pluginLocations.get(i));
+				}
 				FileFilter filter = new WildcardFileFilter(libName);
 				File[] libs = pluginLocation.listFiles(filter);
 				if (libs != null && libs.length > 0)
