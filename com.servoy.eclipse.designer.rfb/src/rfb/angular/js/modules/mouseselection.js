@@ -137,7 +137,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 		editorScope.registerDOMEvent("mouseup","CONTENTFRAME_OVERLAY", onmouseupLasso); 
 		editorScope.registerDOMEvent("mousemove","CONTENTFRAME_OVERLAY", onmousemove);
 	})
-}).factory("$selectionUtils", function() {
+}).factory("$selectionUtils", function(EDITOR_CONSTANTS) {
 	function hasClass(element, cls) {
 		return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
 	}
@@ -246,6 +246,15 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 						
 					if (elements.length == 1) return elements[0];
 					else if (elements.length > 1) {
+						if (glassPaneElements && glassPaneElements.length > 0)
+						{
+							var node = elements[elements.length-1];
+							var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+							if (ghostObject && ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM)
+							{
+								return elements[elements.length-2];
+							}
+						}	
 						// always return the one on top (visible); this is due to formIndex implementation
 						return elements[elements.length-1]
 					}
