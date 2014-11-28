@@ -1318,7 +1318,9 @@ public class WarExporter
 		List<String> pluginLocations = exportModel.getPluginLocations();
 		for (String libName : NG_LIBS)
 		{
-			File parent = new File(URI.create(System.getProperty("eclipse.home.location")));
+			File parent = null;
+			if (System.getProperty("eclipse.home.location") != null) parent = new File(URI.create(System.getProperty("eclipse.home.location")));
+			else parent = new File(System.getProperty("user.dir"));
 			int i = 0;
 			boolean found = false;
 			while (!found && i < pluginLocations.size())
