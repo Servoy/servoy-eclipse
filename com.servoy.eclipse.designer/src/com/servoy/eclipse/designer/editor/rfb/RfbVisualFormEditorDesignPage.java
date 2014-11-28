@@ -73,12 +73,30 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		}
 	};
 
-	private final IFieldPositioner fieldPositioner = new DefaultFieldPositioner(new Point(0, 0))
+	private final IFieldPositioner fieldPositioner = new DefaultFieldPositioner(new Point(40, 50))
 	{
+
+		private boolean locationNeverSet = true;
+
+		@Override
+		public void setDefaultLocation(Point defaultLocation)
+		{
+			super.setDefaultLocation(defaultLocation);
+			locationNeverSet = false;
+		}
+
 		@Override
 		public Point getNextLocation(Point location)
 		{
-			if (location == null) return defaultLocation;
+			if (location == null)
+			{
+				if (locationNeverSet)
+				{
+					defaultLocation.x += 20;
+					defaultLocation.y += 20;
+				}
+				return defaultLocation;
+			}
 			return location;
 		};
 	};
