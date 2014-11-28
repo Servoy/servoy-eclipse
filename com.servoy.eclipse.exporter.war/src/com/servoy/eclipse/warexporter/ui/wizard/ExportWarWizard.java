@@ -35,13 +35,18 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.model.war.exporter.ExportException;
@@ -83,6 +88,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 
 	private ServoyPropertiesConfigurationPage servoyPropertiesConfigurationPage;
 
+	private WizardPage errorPage;
+
 	public ExportWarWizard()
 	{
 		setWindowTitle("War Export");
@@ -98,8 +105,34 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
-		exportModel = new ExportWarModel(getDialogSettings());
+		ServoyProject activeProject;
+		if ((activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject()) == null)
+		{
+			createErrorPage("No active Servoy solution project found", "No active Servoy solution project found",
+				"Please activate a Servoy solution project before trying to export");
+		}
+		else if (BuilderUtils.getMarkers(activeProject) == BuilderUtils.HAS_ERROR_MARKERS)
+		{
+			createErrorPage("Solution with errors", "Solution with errors", "Cannot export solution with errors, please fix them first");
+		}
+		else
+		{
+			exportModel = new ExportWarModel(getDialogSettings());
+		}
+	}
 
+	private void createErrorPage(String pageName, String title, String errorMessage)
+	{
+		errorPage = new WizardPage(pageName)
+		{
+			public void createControl(Composite parent)
+			{
+				setControl(new Composite(parent, SWT.NONE));
+			}
+		};
+		errorPage.setTitle(title);
+		errorPage.setErrorMessage(errorMessage);
+		errorPage.setPageComplete(false);
 	}
 
 	@Override
@@ -216,61 +249,68 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 	@Override
 	public void addPages()
 	{
-		HashMap<String, IWizardPage> serverConfigurationPages = new HashMap<String, IWizardPage>();
-
-		serversSelectionPage = new ServersSelectionPage("serverspage", "Choose the database servernames to export",
-			"Select the database server names that will be used on the application server", exportModel.getSelectedServerNames(),
-			new String[] { IServer.REPOSITORY_SERVER }, serverConfigurationPages);
-		servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel, serversSelectionPage);
-		servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel, servoyPropertiesConfigurationPage);
-		driverSelectionPage = new DirectorySelectionPage("driverpage", "Choose the jdbc drivers to export",
-			"Select the jdbc drivers that you want to use in the war (if the app server doesn't provide them)",
-			ApplicationServerRegistry.get().getServerManager().getDriversDir(), exportModel.getDrivers(), new String[] { "hsqldb.jar" },
-			servoyPropertiesSelectionPage);
-		lafSelectionPage = new DirectorySelectionPage("lafpage", "Choose the lafs to export", "Select the lafs that you want to use in the war",
-			ApplicationServerRegistry.get().getLafManager().getLAFDir(), exportModel.getLafs(), null, driverSelectionPage);
-		beanSelectionPage = new DirectorySelectionPage("beanpage", "Choose the beans to export", "Select the beans that you want to use in the war",
-			ApplicationServerRegistry.get().getBeanManager().getBeansDir(), exportModel.getBeans(), null, lafSelectionPage);
-		pluginSelectionPage = new DirectorySelectionPage("pluginpage", "Choose the plugins to export", "Select the plugins that you want to use in the war",
-			ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), exportModel.getPlugins(), null, beanSelectionPage);
-		fileSelectionPage = new FileSelectionPage(exportModel, pluginSelectionPage);
-		addPage(fileSelectionPage);
-		addPage(pluginSelectionPage);
-		addPage(beanSelectionPage);
-		addPage(lafSelectionPage);
-		addPage(driverSelectionPage);
-		addPage(servoyPropertiesSelectionPage);
-		addPage(servoyPropertiesConfigurationPage);
-		addPage(serversSelectionPage);
-
-		String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, true, false);
-		ArrayList<String> srvNames = new ArrayList<String>(Arrays.asList(serverNames));
-		boolean repositoryServerPresent = true;
-		if (!srvNames.contains(IServer.REPOSITORY_SERVER))
+		if (errorPage != null)
 		{
-			repositoryServerPresent = false;
-			srvNames.add(IServer.REPOSITORY_SERVER);
+			addPage(errorPage);
 		}
-		for (String serverName : srvNames)
+		else
 		{
-			ServerConfiguration serverConfiguration = exportModel.getServerConfiguration(serverName);
-			//handle required repository_server if not present in the servers list
-			if (serverName.equals(IServer.REPOSITORY_SERVER) && !repositoryServerPresent)
+			HashMap<String, IWizardPage> serverConfigurationPages = new HashMap<String, IWizardPage>();
+
+			serversSelectionPage = new ServersSelectionPage("serverspage", "Choose the database servernames to export",
+				"Select the database server names that will be used on the application server", exportModel.getSelectedServerNames(),
+				new String[] { IServer.REPOSITORY_SERVER }, serverConfigurationPages);
+			servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel, serversSelectionPage);
+			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel, servoyPropertiesConfigurationPage);
+			driverSelectionPage = new DirectorySelectionPage("driverpage", "Choose the jdbc drivers to export",
+				"Select the jdbc drivers that you want to use in the war (if the app server doesn't provide them)",
+				ApplicationServerRegistry.get().getServerManager().getDriversDir(), exportModel.getDrivers(), new String[] { "hsqldb.jar" },
+				servoyPropertiesSelectionPage);
+			lafSelectionPage = new DirectorySelectionPage("lafpage", "Choose the lafs to export", "Select the lafs that you want to use in the war",
+				ApplicationServerRegistry.get().getLafManager().getLAFDir(), exportModel.getLafs(), null, driverSelectionPage);
+			beanSelectionPage = new DirectorySelectionPage("beanpage", "Choose the beans to export", "Select the beans that you want to use in the war",
+				ApplicationServerRegistry.get().getBeanManager().getBeansDir(), exportModel.getBeans(), null, lafSelectionPage);
+			pluginSelectionPage = new DirectorySelectionPage("pluginpage", "Choose the plugins to export",
+				"Select the plugins that you want to use in the war", ApplicationServerRegistry.get().getPluginManager().getPluginsDir(),
+				exportModel.getPlugins(), null, beanSelectionPage);
+			fileSelectionPage = new FileSelectionPage(exportModel, pluginSelectionPage);
+			addPage(fileSelectionPage);
+			addPage(pluginSelectionPage);
+			addPage(beanSelectionPage);
+			addPage(lafSelectionPage);
+			addPage(driverSelectionPage);
+			addPage(servoyPropertiesSelectionPage);
+			addPage(servoyPropertiesConfigurationPage);
+			addPage(serversSelectionPage);
+
+			String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, true, false);
+			ArrayList<String> srvNames = new ArrayList<String>(Arrays.asList(serverNames));
+			boolean repositoryServerPresent = true;
+			if (!srvNames.contains(IServer.REPOSITORY_SERVER))
 			{
-				//set some default configuration
-				serverConfiguration.setDriver((exportModel.getServerConfiguration(srvNames.get(0))).getDriver());
-				serverConfiguration.setUserName((exportModel.getServerConfiguration(srvNames.get(0))).getUserName());
-				serverConfiguration.setPassword((exportModel.getServerConfiguration(srvNames.get(0))).getPassword());
-				serverConfiguration.setMaxActive((exportModel.getServerConfiguration(srvNames.get(0))).getMaxActive());
-				serverConfiguration.setMaxIdle((exportModel.getServerConfiguration(srvNames.get(0))).getMaxIdle());
-				serverConfiguration.setMaxPreparedStatementsIdle((exportModel.getServerConfiguration(srvNames.get(0))).getMaxPreparedStatementsIdle());
+				repositoryServerPresent = false;
+				srvNames.add(IServer.REPOSITORY_SERVER);
 			}
-			ServerConfigurationPage configurationPage = new ServerConfigurationPage("serverconf:" + serverName, serverConfiguration,
-				exportModel.getSelectedServerNames(), serverConfigurationPages);
-			addPage(configurationPage);
-			serverConfigurationPages.put(serverName, configurationPage);
+			for (String serverName : srvNames)
+			{
+				ServerConfiguration serverConfiguration = exportModel.getServerConfiguration(serverName);
+				//handle required repository_server if not present in the servers list
+				if (serverName.equals(IServer.REPOSITORY_SERVER) && !repositoryServerPresent)
+				{
+					//set some default configuration
+					serverConfiguration.setDriver((exportModel.getServerConfiguration(srvNames.get(0))).getDriver());
+					serverConfiguration.setUserName((exportModel.getServerConfiguration(srvNames.get(0))).getUserName());
+					serverConfiguration.setPassword((exportModel.getServerConfiguration(srvNames.get(0))).getPassword());
+					serverConfiguration.setMaxActive((exportModel.getServerConfiguration(srvNames.get(0))).getMaxActive());
+					serverConfiguration.setMaxIdle((exportModel.getServerConfiguration(srvNames.get(0))).getMaxIdle());
+					serverConfiguration.setMaxPreparedStatementsIdle((exportModel.getServerConfiguration(srvNames.get(0))).getMaxPreparedStatementsIdle());
+				}
+				ServerConfigurationPage configurationPage = new ServerConfigurationPage("serverconf:" + serverName, serverConfiguration,
+					exportModel.getSelectedServerNames(), serverConfigurationPages);
+				addPage(configurationPage);
+				serverConfigurationPages.put(serverName, configurationPage);
+			}
 		}
-
 	}
 
 	@Override
