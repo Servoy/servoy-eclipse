@@ -1324,7 +1324,7 @@ public class WarExporter
 				File pluginLocation = new File(pluginLocations.get(i));
 				FileFilter filter = new WildcardFileFilter(libName);
 				File[] libs = pluginLocation.listFiles(filter);
-				if (libs.length > 0)
+				if (libs != null && libs.length > 0)
 				{
 					found = true;
 					break;
