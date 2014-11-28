@@ -246,22 +246,8 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 						
 					if (elements.length == 1) return elements[0];
 					else if (elements.length > 1) {
-						var smallest = elements[0];
-						var pixels = smallest.clientWidth * smallest.clientHeight;
-						for(var i=1;i<elements.length;i++) {
-							var el = elements[i];
-							var elPixels = el.clientWidth * el.clientHeight;
-							if (elPixels < pixels) {
-								pixels = elPixels;
-								smallest = el;
-							}
-							else if (elPixels == pixels && el.parentElement == smallest)
-							{
-								//select child if same size as parent
-								smallest = el;
-							}
-						}
-						return smallest;
+						// always return the one on top (visible); this is due to formIndex implementation
+						return elements[elements.length-1]
 					}
 					
 					return null;
