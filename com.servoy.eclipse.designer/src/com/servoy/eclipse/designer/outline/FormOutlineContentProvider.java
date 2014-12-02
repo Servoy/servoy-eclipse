@@ -365,41 +365,48 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			{
 				WebComponentSpecification webComponentSpecification = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
 					parentBean.getBeanClassName());
-				Map<String, IPropertyType< ? >> foundTypes = webComponentSpecification.getFoundTypes();
-				try
+				if (webComponentSpecification != null)
 				{
-					JSONObject beanJSON = new JSONObject(beanXML);
-					for (String beanJSONKey : JSONObject.getNames(beanJSON))
+					Map<String, IPropertyType< ? >> foundTypes = webComponentSpecification.getFoundTypes();
+					try
 					{
-						Object object = beanJSON.get(beanJSONKey);
-						if (object != null)
+						JSONObject beanJSON = new JSONObject(beanXML);
+						for (String beanJSONKey : JSONObject.getNames(beanJSON))
 						{
-							IPropertyType< ? > type = webComponentSpecification.getProperty(beanJSONKey).getType();
-							String simpleTypeName = type.getName().replaceFirst(webComponentSpecification.getName() + ".", "");
-							if (foundTypes.containsKey(simpleTypeName))
+							Object object = beanJSON.get(beanJSONKey);
+							if (object != null)
 							{
-								WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-									parentBean.getBeanClassName());
-								boolean arrayReturnType = spec.isArrayReturnType(beanJSONKey);
-								if (!arrayReturnType)
+								IPropertyType< ? > type = webComponentSpecification.getProperty(beanJSONKey).getType();
+								String simpleTypeName = type.getName().replaceFirst(webComponentSpecification.getName() + ".", "");
+								if (foundTypes.containsKey(simpleTypeName))
 								{
-									GhostBean ghostBean = new GhostBean(parentBean, beanJSONKey, simpleTypeName, -1, arrayReturnType, false);
-									ghostBean.setBeanClassName(simpleTypeName);
-									result.add(ghostBean);
-								}
-								else if (object instanceof JSONArray) for (int i = 0; i < ((JSONArray)object).length(); i++)
-								{
-									GhostBean ghostBean = new GhostBean(parentBean, beanJSONKey, simpleTypeName, i, arrayReturnType, false);
-									ghostBean.setBeanClassName(simpleTypeName);
-									result.add(ghostBean);
+									WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+										parentBean.getBeanClassName());
+									boolean arrayReturnType = spec.isArrayReturnType(beanJSONKey);
+									if (!arrayReturnType)
+									{
+										GhostBean ghostBean = new GhostBean(parentBean, beanJSONKey, simpleTypeName, -1, arrayReturnType, false);
+										ghostBean.setBeanClassName(simpleTypeName);
+										result.add(ghostBean);
+									}
+									else if (object instanceof JSONArray) for (int i = 0; i < ((JSONArray)object).length(); i++)
+									{
+										GhostBean ghostBean = new GhostBean(parentBean, beanJSONKey, simpleTypeName, i, arrayReturnType, false);
+										ghostBean.setBeanClassName(simpleTypeName);
+										result.add(ghostBean);
+									}
 								}
 							}
 						}
 					}
+					catch (JSONException e)
+					{
+						Debug.error(e);
+					}
 				}
-				catch (JSONException e)
+				else
 				{
-					Debug.error(e);
+					Debug.error("no webcomponent specification found for: " + parentBean.getBeanClassName());
 				}
 			}
 		}
