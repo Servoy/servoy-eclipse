@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -28,6 +29,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.wst.css.core.internal.parserz.CSSRegionContexts;
 import org.eclipse.wst.css.core.internal.provisional.document.ICSSStyleRule;
 import org.eclipse.wst.css.core.internal.provisional.document.ICSSStyleSheet;
@@ -44,11 +46,12 @@ import org.eclipse.wst.sse.core.internal.provisional.text.ITextRegion;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.sse.ui.internal.contentassist.ContentAssistUtils;
 
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.j2db.component.ComponentFactory;
 
 /**
  * This class is able to filter the part listener events and provide support for ActiveEditorListeners.
- * 
+ *
  * @author acostescu
  */
 public class ActiveEditorTracker implements IPartListener
@@ -68,7 +71,7 @@ public class ActiveEditorTracker implements IPartListener
 
 	/**
 	 * Returns the currently active editor (as calculated by this tracker).
-	 * 
+	 *
 	 * @return the currently active editor (as calculated by this tracker).
 	 */
 	public IEditorPart getActiveEditor()
@@ -128,6 +131,15 @@ public class ActiveEditorTracker implements IPartListener
 	{
 		if (part instanceof StructuredTextEditor)
 		{
+			if (((StructuredTextEditor)part).getEditorInput() instanceof FileEditorInput)
+			{
+				IFile input = ((FileEditorInput)(((StructuredTextEditor)part).getEditorInput())).getFile();
+				if (input.getProjectRelativePath().segmentCount() > 0 && input.getProjectRelativePath().segment(0).equals(SolutionSerializer.MEDIAS_DIR))
+				{
+					// css from media folder are not Servoy specific
+					return;
+				}
+			}
 			((StructuredTextEditor)part).getTextViewer().configure(new StructuredTextViewerConfigurationCSS()
 			{
 				@Override
