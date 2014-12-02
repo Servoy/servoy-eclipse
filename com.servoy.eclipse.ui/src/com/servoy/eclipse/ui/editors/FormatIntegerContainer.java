@@ -235,13 +235,16 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 		}
 
 		Integer len = null;
-		try
+		if (maxLength.getText().length() != 0)
 		{
-			len = Integer.valueOf(maxLength.getText());
-		}
-		catch (NumberFormatException e)
-		{
-			Debug.log(e);
+			try
+			{
+				len = Integer.valueOf(maxLength.getText());
+			}
+			catch (NumberFormatException e)
+			{
+				Debug.log(e);
+			}
 		}
 
 		return new ParsedFormat(false, false, false, false, false, editFormat.getText(), displayFormat.getText(), len, null, null, null);
