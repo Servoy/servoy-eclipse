@@ -117,7 +117,7 @@ import com.servoy.j2db.util.Utils;
 public class PersistPropertyHandler extends BasePropertyHandler
 {
 	public static final PropertyDescription ROTATION_VALUES = new PropertyDescription("rotation", ValuesPropertyType.INSTANCE,
-		new Integer[] { Integer.valueOf(0), Integer.valueOf(90), Integer.valueOf(180), Integer.valueOf(270) });
+		new ValuesConfig().setValues(new Integer[] { Integer.valueOf(0), Integer.valueOf(90), Integer.valueOf(180), Integer.valueOf(270) }));
 
 	public static final PropertyDescription HORIZONTAL_ALIGNMENT_VALUES = new PropertyDescription("horizontalAlignment", ValuesPropertyType.INSTANCE,
 		new ValuesConfig().setValues(
@@ -473,7 +473,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		}
 
 
-		if (name.equals("rotation"))
+		if (name.equals("textRotation"))
 		{
 			return ROTATION_VALUES;
 		}
