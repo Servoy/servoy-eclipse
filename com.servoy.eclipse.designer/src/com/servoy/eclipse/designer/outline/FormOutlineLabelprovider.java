@@ -16,6 +16,9 @@
  */
 package com.servoy.eclipse.designer.outline;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
@@ -96,7 +99,18 @@ public class FormOutlineLabelprovider extends LabelProvider implements IPersistL
 			if (((PersistContext)element).getPersist() instanceof LayoutContainer)
 			{
 				LayoutContainer layout = (LayoutContainer)((PersistContext)element).getPersist();
-				return "<" + layout.getTagType() + ">" + (layout.getCssClasses() != null ? " " + layout.getCssClasses() : "");
+				StringBuilder tag = new StringBuilder("<");
+				tag.append(layout.getTagType());
+				Map<String, String> attributes = layout.getAttributes();
+				for (Entry<String, String> entry : attributes.entrySet())
+				{
+					tag.append(" ");
+					tag.append(entry.getKey());
+					tag.append("=");
+					tag.append(entry.getValue());
+				}
+				tag.append(">");
+				return tag.toString();
 			}
 			return SupportNameLabelProvider.INSTANCE_DEFAULT_ANONYMOUS.getText(((PersistContext)element).getPersist());
 		}
