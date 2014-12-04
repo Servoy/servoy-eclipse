@@ -21,6 +21,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -53,6 +54,7 @@ import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.IValidateName;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RectShape;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -367,41 +369,74 @@ public class CreateComponentHandler implements IServerService
 			}
 			else
 			{
-				// bean
-				String compName = "bean_" + id.incrementAndGet();
-				while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
-				{
-					compName = "bean_" + id.incrementAndGet();
-				}
-
-				Bean bean = null;
-				if (parent instanceof Portal)
-				{
-					Portal portal = (Portal)parent;
-					bean = (Bean)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(portal, IRepository.BEANS);
-					bean.setProperty("text", compName);
-					bean.setBeanClassName(name);
-					portal.addChild(bean);
-				}
-				else if (parent instanceof Form)
-				{
-					bean = ((Form)parent).createNewBean(compName, name);
-
-				}
-				else if (parent instanceof Bean)
-				{
-					// TODO create it inthe bean an store it in the component array???
-				}
-				bean.setLocation(new Point(x, y));
-				bean.setSize(new Dimension(w, h));
 				WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(name);
-				PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
-				if (description != null && description.getDefaultValue() instanceof JSONObject)
+				if (spec != null)
 				{
-					bean.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
-						((JSONObject)description.getDefaultValue()).optInt("height", 80)));
+					// bean
+					String compName = "bean_" + id.incrementAndGet();
+					while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
+					{
+						compName = "bean_" + id.incrementAndGet();
+					}
+
+					Bean bean = null;
+					if (parent instanceof Portal)
+					{
+						Portal portal = (Portal)parent;
+						bean = (Bean)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(portal, IRepository.BEANS);
+						bean.setProperty("text", compName);
+						bean.setBeanClassName(name);
+						portal.addChild(bean);
+					}
+					else if (parent instanceof Form)
+					{
+						bean = ((Form)parent).createNewBean(compName, name);
+
+					}
+					else if (parent instanceof Bean)
+					{
+						// TODO create it inthe bean an store it in the component array???
+					}
+					bean.setLocation(new Point(x, y));
+					bean.setSize(new Dimension(w, h));
+					PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
+					if (description != null && description.getDefaultValue() instanceof JSONObject)
+					{
+						bean.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
+							((JSONObject)description.getDefaultValue()).optInt("height", 80)));
+					}
+					return bean;
 				}
-				return bean;
+				else
+				{
+					List<WebComponentSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+						args.optString("packageName"));
+					if (specifications != null)
+					{
+						for (WebComponentSpecification layoutSpec : specifications)
+						{
+							if (layoutSpec.getName().equals(name))
+							{
+								LayoutContainer container = (LayoutContainer)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(parent,
+									IRepository.LAYOUTCONTAINERS);
+								parent.addChild(container);
+								Object config = layoutSpec.getConfig();
+								if (config instanceof String)
+								{
+									JSONObject json = new JSONObject((String)config);
+									Iterator keys = json.keys();
+									while (keys.hasNext())
+									{
+										String key = (String)keys.next();
+										Object value = json.get(key);
+										container.putAttribute(key, value.toString());
+									}
+								}
+								return container;
+							}
+						}
+					}
+				}
 			}
 		}
 		else if (args.has("uuid"))
