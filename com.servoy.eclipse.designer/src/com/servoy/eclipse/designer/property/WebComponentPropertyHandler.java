@@ -232,7 +232,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 					try
 					{
 						writer.object();
-						converter.toJSON(writer, getName(), convertedValue, new DataConversion()).toString();
+						converter.toJSON(writer, getName(), convertedValue, new DataConversion(), null).toString();
 						writer.endObject();
 						convertedValue = new JSONObject(writer.toString()).get(getName());
 					}
