@@ -21,7 +21,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 
 /**
  * @author jcompagner
- * 
+ *
  */
 public interface IActiveProjectListener
 {
@@ -68,8 +68,13 @@ public interface IActiveProjectListener
 	public static final int SCOPE_NAMES_CHANGED = 7;
 
 	/**
+	 * Used by activeProjectUpdated(...) to notify that service spec was changed.
+	 */
+	public static final int SERVICE_SPEC_CHANGED = 8;
+
+	/**
 	 * Notifies the change of the active project - another project (or null) becomes active.
-	 * 
+	 *
 	 * @param activeProject The current active project
 	 * @param toProject the project that will become the active project
 	 * @return true if the change can happen. false if the current active project should stay the active.
@@ -78,14 +83,14 @@ public interface IActiveProjectListener
 
 	/**
 	 * Notifies the change of the active project - another project (or null) becomes active.
-	 * 
+	 *
 	 * @param activeProject the new active project.
 	 */
 	void activeProjectChanged(ServoyProject activeProject);
 
 	/**
 	 * Notifies the fact that the currently active project was updated (it's contents or things related to it changed; things such as modules, styles...)
-	 * 
+	 *
 	 * @param activeProject the currently active project.
 	 * @param updateInfo one of the constants declared in this interface identifying the event type.
 	 */
@@ -93,7 +98,7 @@ public interface IActiveProjectListener
 
 	/**
 	 * Abstract base implementation.
-	 * 
+	 *
 	 * @author rgansevles
 	 *
 	 */
