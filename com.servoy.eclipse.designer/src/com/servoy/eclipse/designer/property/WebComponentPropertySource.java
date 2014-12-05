@@ -73,7 +73,7 @@ public class WebComponentPropertySource extends PersistPropertySource
 		}
 	}
 
-	private final PropertyDescription protpetyDescription;
+	private final PropertyDescription propertyDescription;
 
 	public WebComponentPropertySource(PersistContext persistContext, boolean readonly, PropertyDescription propertyDescription)
 	{
@@ -82,7 +82,7 @@ public class WebComponentPropertySource extends PersistPropertySource
 		{
 			throw new IllegalArgumentException();
 		}
-		this.protpetyDescription = propertyDescription;
+		this.propertyDescription = propertyDescription;
 	}
 
 	@Override
@@ -96,7 +96,7 @@ public class WebComponentPropertySource extends PersistPropertySource
 	{
 		List<IPropertyHandler> props = new ArrayList<IPropertyHandler>();
 
-		for (PropertyDescription desc : protpetyDescription.getProperties().values())
+		for (PropertyDescription desc : propertyDescription.getProperties().values())
 		{
 			if (desc.getScope() != null && !"design".equals(desc.getScope()))
 			{
@@ -149,7 +149,7 @@ public class WebComponentPropertySource extends PersistPropertySource
 			}
 		}
 
-		if (protpetyDescription instanceof WebComponentSpecification) for (PropertyDescription desc : ((WebComponentSpecification)protpetyDescription).getHandlers().values())
+		if (propertyDescription instanceof WebComponentSpecification) for (PropertyDescription desc : ((WebComponentSpecification)propertyDescription).getHandlers().values())
 		{
 			props.add(new WebComponentPropertyHandler(desc));
 		}
@@ -170,17 +170,18 @@ public class WebComponentPropertySource extends PersistPropertySource
 	@Override
 	protected PropertyCategory createPropertyCategory(PropertyDescriptorWrapper propertyDescriptor)
 	{
-		if (((protpetyDescription instanceof WebComponentSpecification) && ((WebComponentSpecification)protpetyDescription).getHandlers().containsKey(
+		if (((propertyDescription instanceof WebComponentSpecification) && ((WebComponentSpecification)propertyDescription).getHandlers().containsKey(
 			propertyDescriptor.propertyDescriptor.getName())) ||
 			BEAN_PROPERTIES.containsKey(propertyDescriptor.propertyDescriptor.getName())) return super.createPropertyCategory(propertyDescriptor);
-		if (protpetyDescription.getProperties().containsKey(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Component;
+		if (propertyDescription.getProperties().containsKey(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Component;
 		return super.createPropertyCategory(propertyDescriptor);
 	}
 
 	@Override
 	public String toString()
 	{
-		if (protpetyDescription instanceof WebComponentSpecification) return ((WebComponentSpecification)protpetyDescription).getDisplayName();
-		return protpetyDescription.getName();
+		if (propertyDescription instanceof WebComponentSpecification) return ((WebComponentSpecification)propertyDescription).getDisplayName() + " - " +
+			((Bean)persistContext.getPersist()).getName();
+		return propertyDescription.getName();
 	}
 }
