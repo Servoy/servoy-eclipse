@@ -87,11 +87,6 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.wizard.Wizard#canFinish()
-	 */
 	@Override
 	public boolean canFinish()
 	{
@@ -102,6 +97,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
 		setNeedsProgressMonitor(true);
+		setWindowTitle("Import solution wizard");
 		page = new ImportSolutionWizardPage(this, "Import solution");
 		finishPage = new FinishPage("Solution imported");
 	}
@@ -165,8 +161,8 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		{
 			super(pageName);
 			this.wizard = wizard;
-			setTitle(wizard.getFirstPageTitle() == null ? "Import a solution" : wizard.getFirstPageTitle());
-			setDescription("A solution (with or without modules) will be imported into the workspace from a .servoy file.");
+			setTitle(wizard.getFirstPageTitle() == null ? "Preparing to import solution" : wizard.getFirstPageTitle());
+			setDescription("A solution (can be with modules) will be imported into the workspace using the selected import options.");
 		}
 
 		public void createControl(Composite parent)
@@ -416,7 +412,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			String error = null;
 			if (filePath.getText().trim().length() == 0)
 			{
-				error = "Please select servoy file to import.";
+				error = "Please select .servoy file to import.";
 			}
 			else if (resourceProjectComposite != null) error = resourceProjectComposite.validate();
 			setErrorMessage(error);
@@ -425,9 +421,9 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 
 		/**
 		 * AES Decryption of the specified file and write the output in a temporary file.
-		 * 
+		 *
 		 * @return file
-		 * 
+		 *
 		 */
 		private File fileDecryption(File file)
 		{
