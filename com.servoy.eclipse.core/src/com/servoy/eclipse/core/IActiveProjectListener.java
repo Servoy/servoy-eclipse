@@ -68,11 +68,6 @@ public interface IActiveProjectListener
 	public static final int SCOPE_NAMES_CHANGED = 7;
 
 	/**
-	 * Used by activeProjectUpdated(...) to notify that service spec was changed.
-	 */
-	public static final int SERVICE_SPEC_CHANGED = 8;
-
-	/**
 	 * Notifies the change of the active project - another project (or null) becomes active.
 	 *
 	 * @param activeProject The current active project

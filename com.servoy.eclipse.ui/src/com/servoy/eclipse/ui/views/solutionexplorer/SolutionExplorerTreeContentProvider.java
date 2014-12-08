@@ -42,6 +42,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -758,8 +759,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							{
 								WebComponentSpecification spec = provider.getWebComponentSpecification(component);
 								Image img = loadImageFromFolder(folder, spec.getIcon());
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec, img != null
-									? img : componentIcon);
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec, img != null ? img
+									: componentIcon);
 								node.parent = un;
 								children.add(node);
 							}
@@ -798,8 +799,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							{
 								WebComponentSpecification spec = provider.getWebServiceSpecification(component);
 								Image img = loadImageFromFolder(folder, spec.getIcon());
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec, img != null
-									? img : serviceDefaultIcon);
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec, img != null ? img
+									: serviceDefaultIcon);
 								node.parent = un;
 								children.add(node);
 							}
@@ -2415,16 +2416,27 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.core.IWebResourceChangedListener#changed()
 	 */
 	@Override
 	public void changed()
 	{
-		componentsNode.children = null;
-		view.refreshTreeNodeFromModel(componentsNode);
-		servicesNode.children = null;
-		view.refreshTreeNodeFromModel(servicesNode);
+		Job job = new Job("Refreshing tree")
+		{
+
+			@Override
+			public IStatus run(IProgressMonitor monitor)
+			{
+				componentsNode.children = null;
+				view.refreshTreeNodeFromModel(componentsNode);
+				servicesNode.children = null;
+				view.refreshTreeNodeFromModel(servicesNode);
+				return Status.OK_STATUS;
+			}
+		};
+		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		job.schedule();
 	}
 
 }

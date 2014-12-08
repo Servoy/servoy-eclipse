@@ -2918,8 +2918,7 @@ public class ServoyModel extends AbstractServoyModel
 			{
 				columnInfoFiles.add(fileRd);
 			}
-			else if (file.getName().endsWith(".spec") && file.getProjectRelativePath().segmentCount() > 0 &&
-				file.getProjectRelativePath().segment(0).equals(SolutionSerializer.SERVICES_DIR_NAME))
+			else if (file.getName().endsWith(".spec"))
 			{
 				serviceSpecChanged = true;
 			}
@@ -2961,7 +2960,7 @@ public class ServoyModel extends AbstractServoyModel
 		}
 		if (serviceSpecChanged)
 		{
-			fireActiveProjectUpdated(IActiveProjectListener.SERVICE_SPEC_CHANGED);
+			com.servoy.eclipse.core.Activator.getDefault().webResourcesChanged();
 		}
 		if (columnInfoChanged)
 		{

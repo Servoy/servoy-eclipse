@@ -838,10 +838,6 @@ public class TypeCreator extends TypeCache
 
 						public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
 						{
-							if (updateInfo == IActiveProjectListener.SERVICE_SPEC_CHANGED)
-							{
-								clearCache();
-							}
 						}
 
 						public void activeProjectChanged(ServoyProject activeProject)
@@ -861,7 +857,7 @@ public class TypeCreator extends TypeCache
 							@Override
 							public IStatus run(IProgressMonitor monitor)
 							{
-								flushCache();
+								clearCache();
 								return Status.OK_STATUS;
 							}
 						};
