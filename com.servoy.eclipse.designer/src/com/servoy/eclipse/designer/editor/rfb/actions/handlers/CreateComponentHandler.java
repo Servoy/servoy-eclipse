@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
@@ -215,6 +216,10 @@ public class CreateComponentHandler implements IServerService
 					parent = portal;
 					//x = x - portal.getLocation().x;
 					//y = y - portal.getLocation().y;
+				}
+				else if (searchForPersist instanceof LayoutContainer)
+				{
+					parent = (LayoutContainer)searchForPersist;
 				}
 				else parent = editorPart.getForm();
 			}
@@ -417,22 +422,8 @@ public class CreateComponentHandler implements IServerService
 						{
 							if (layoutSpec.getName().equals(name))
 							{
-								LayoutContainer container = (LayoutContainer)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(parent,
-									IRepository.LAYOUTCONTAINERS);
-								parent.addChild(container);
 								Object config = layoutSpec.getConfig();
-								if (config instanceof String)
-								{
-									JSONObject json = new JSONObject((String)config);
-									Iterator keys = json.keys();
-									while (keys.hasNext())
-									{
-										String key = (String)keys.next();
-										Object value = json.get(key);
-										container.putAttribute(key, value.toString());
-									}
-								}
-								return container;
+								return createLayoutContainer(parent, config instanceof String ? new JSONObject((String)config) : null);
 							}
 						}
 					}
@@ -452,6 +443,41 @@ public class CreateComponentHandler implements IServerService
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * @param parent
+	 * @param layoutSpec
+	 * @return
+	 * @throws RepositoryException
+	 * @throws JSONException
+	 */
+	protected IPersist createLayoutContainer(ISupportFormElements parent, JSONObject config) throws RepositoryException, JSONException
+	{
+		LayoutContainer container = (LayoutContainer)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(parent,
+			IRepository.LAYOUTCONTAINERS);
+		parent.addChild(container);
+		if (config != null)
+		{
+			Iterator keys = config.keys();
+			while (keys.hasNext())
+			{
+				String key = (String)keys.next();
+				Object value = config.get(key);
+				if ("children".equals(key))
+				{
+					// special key to create children instead of a attribute set.
+					JSONArray array = (JSONArray)value;
+					for (int i = 0; i < array.length(); i++)
+					{
+						JSONObject jsonObject = array.getJSONObject(i);
+						createLayoutContainer(container, jsonObject);
+					}
+				}
+				else container.putAttribute(key, value.toString());
+			}
+		}
+		return container;
 	}
 
 	private boolean isCorrectTarget(BaseComponent baseComponent, String uuid)
