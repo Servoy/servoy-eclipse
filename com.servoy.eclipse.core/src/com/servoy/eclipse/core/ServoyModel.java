@@ -1829,7 +1829,7 @@ public class ServoyModel extends AbstractServoyModel
 		{
 			/*
 			 * (non-Javadoc)
-			 * 
+			 *
 			 * @see org.eclipse.ui.progress.UIJob#runInUIThread(org.eclipse.core.runtime.IProgressMonitor)
 			 */
 			@Override
@@ -2898,7 +2898,6 @@ public class ServoyModel extends AbstractServoyModel
 		List<IResourceDelta> securityFiles = new ArrayList<IResourceDelta>();
 		List<IResourceDelta> i18nFiles = new ArrayList<IResourceDelta>();
 
-		boolean serviceSpecChanged = false;
 		for (IResourceDelta fileRd : al)
 		{
 			IFile file = (IFile)fileRd.getResource();
@@ -2917,10 +2916,6 @@ public class ServoyModel extends AbstractServoyModel
 			else if (file.getName().endsWith(DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT))
 			{
 				columnInfoFiles.add(fileRd);
-			}
-			else if (file.getName().endsWith(".spec"))
-			{
-				serviceSpecChanged = true;
 			}
 			else if (file.equals(activeResourcesProject.getProject().getFile(new Path(WorkspaceUserManager.SECURITY_FILE_RELATIVE_TO_PROJECT))) ||
 				file.getName().endsWith(WorkspaceUserManager.SECURITY_FILE_EXTENSION))
@@ -2957,10 +2952,6 @@ public class ServoyModel extends AbstractServoyModel
 		if (templatesAddedOrRemoved)
 		{
 			fireActiveProjectUpdated(IActiveProjectListener.TEMPLATES_ADDED_OR_REMOVED);
-		}
-		if (serviceSpecChanged)
-		{
-			com.servoy.eclipse.core.Activator.getDefault().webResourcesChanged();
 		}
 		if (columnInfoChanged)
 		{
