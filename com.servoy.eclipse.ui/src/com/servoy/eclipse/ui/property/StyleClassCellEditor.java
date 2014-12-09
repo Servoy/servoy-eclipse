@@ -17,16 +17,19 @@
 
 package com.servoy.eclipse.ui.property;
 
+import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.fieldassist.IContentProposalListener;
 import org.eclipse.jface.fieldassist.IContentProposalListener2;
+import org.eclipse.jface.fieldassist.IContentProposalProvider;
 import org.eclipse.jface.fieldassist.IControlContentAdapter;
 import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * Cell editor used for specifying multiple css style classes (e.g. btn btn-default)
@@ -37,7 +40,7 @@ import org.eclipse.swt.widgets.Control;
  */
 public class StyleClassCellEditor extends TextCellEditor
 {
-	private ContentProposalAdapter contentProposalAdapter;
+	private ModifiedContentProposalAdapter contentProposalAdapter;
 	private boolean popupOpen = false; // true, iff popup is currently open
 	private final boolean multiSelect;
 
@@ -67,7 +70,7 @@ public class StyleClassCellEditor extends TextCellEditor
 				return super.getProposals(contents, position);
 			}
 		};
-		contentProposalAdapter = new ContentProposalAdapter(text, new TextContentAdapter(), provider, null, null);
+		contentProposalAdapter = new ModifiedContentProposalAdapter(text, new TextContentAdapter(), provider, null, null);
 		contentProposalAdapter.addContentProposalListener(new IContentProposalListener2()
 		{
 			@Override
@@ -125,5 +128,51 @@ public class StyleClassCellEditor extends TextCellEditor
 	protected boolean dependsOnExternalFocusListener()
 	{
 		return false;
+	}
+
+	@Override
+	protected Object doGetValue()
+	{
+		String value = (String)super.doGetValue();
+		return value.replace("DEFAULT", "");
+	}
+
+	@Override
+	public void activate()
+	{
+		super.activate();
+		Display.getCurrent().asyncExec(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				contentProposalAdapter.openProposalPopup();
+			}
+		});
+
+	}
+
+	private static class ModifiedContentProposalAdapter extends ContentProposalAdapter
+	{
+
+		/**
+		 * @param control
+		 * @param controlContentAdapter
+		 * @param proposalProvider
+		 * @param keyStroke
+		 * @param autoActivationCharacters
+		 */
+		public ModifiedContentProposalAdapter(Control control, IControlContentAdapter controlContentAdapter, IContentProposalProvider proposalProvider,
+			KeyStroke keyStroke, char[] autoActivationCharacters)
+		{
+			super(control, controlContentAdapter, proposalProvider, keyStroke, autoActivationCharacters);
+		}
+
+		@Override
+		public void openProposalPopup()
+		{
+			super.openProposalPopup();
+		}
+
 	}
 }

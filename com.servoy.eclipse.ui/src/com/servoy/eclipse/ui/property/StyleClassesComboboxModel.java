@@ -30,9 +30,9 @@ import com.servoy.j2db.persistence.IFormElement;
  * IComboboxPropertyModel model for style classes.
  * <p>
  * Style classes are not cached, when a form style changes the new classes should be updated automatically.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class StyleClassesComboboxModel implements IComboboxPropertyModel<String>
 {
@@ -69,14 +69,15 @@ public class StyleClassesComboboxModel implements IComboboxPropertyModel<String>
 
 	/**
 	 * Get the style classes usable for the persist.
-	 * 
+	 *
 	 * @param persist
 	 * @return
 	 */
 	protected String[] getStyleClasses()
 	{
 		List<String> styleClasses = new ArrayList<String>();
-
+		// always DEFAULT is first element
+		styleClasses.add(null);
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
 		String[] classes = ModelUtils.getStyleClasses(flattenedSolution, form, element, propertyName, lookupName);
 		if (classes != null && classes.length > 0)
