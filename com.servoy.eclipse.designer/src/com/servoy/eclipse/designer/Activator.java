@@ -179,7 +179,7 @@ public class Activator extends AbstractUIPlugin
 								bigChange = true;
 								break;
 							}
-							FormElement newFe = new FormElement(persist, cntxt, new PropertyPath());
+							FormElement newFe = new FormElement(persist, cntxt.getSolution(), new PropertyPath(), true);
 
 							IWebFormUI formUI = (IWebFormUI)fc.getFormUI();
 							WebFormComponent webComponent = formUI.getWebComponent(newFe.getName());
