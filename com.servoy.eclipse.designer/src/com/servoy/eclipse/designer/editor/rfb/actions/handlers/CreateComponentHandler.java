@@ -206,26 +206,23 @@ public class CreateComponentHandler implements IServerService
 		}
 		else if (args.has("name"))
 		{
-			ISupportFormElements parent = null;
+			ISupportFormElements parent = editorPart.getForm();
 			if (args.has("dropTargetUUID"))
 			{
+
 				IPersist searchForPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, args.getString("dropTargetUUID"));
-				if (searchForPersist instanceof Portal)
+				if (searchForPersist != null)
 				{
-					Portal portal = (Portal)searchForPersist;
-					parent = portal;
-					//x = x - portal.getLocation().x;
-					//y = y - portal.getLocation().y;
+					IPersist p = searchForPersist;
+					while (!(p instanceof ISupportFormElements) && p != null)
+					{
+						p = p.getParent();
+					}
+					if (p instanceof ISupportFormElements)
+					{
+						parent = (ISupportFormElements)p;
+					}
 				}
-				else if (searchForPersist instanceof LayoutContainer)
-				{
-					parent = (LayoutContainer)searchForPersist;
-				}
-				else parent = editorPart.getForm();
-			}
-			else
-			{
-				parent = editorPart.getForm();
 			}
 
 			String name = args.getString("name");
