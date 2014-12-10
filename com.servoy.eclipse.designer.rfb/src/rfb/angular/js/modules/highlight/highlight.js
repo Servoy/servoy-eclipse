@@ -10,6 +10,11 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 		
 		function shouldDrawIfDragging(dropTarget) {
 			if (utils.getDraggingFromPallete() != null) {
+				if (!editorScope.isAbsoluteFormLayout())
+				{
+					// always draw for flow layout
+					return true;
+				}
 				var draggedItem = utils.getDraggingFromPallete();
 				return ((dropTarget.getAttribute("svy-types") != null) && (dropTarget.getAttribute("svy-types").indexOf(draggedItem) > 0)) 
 			}

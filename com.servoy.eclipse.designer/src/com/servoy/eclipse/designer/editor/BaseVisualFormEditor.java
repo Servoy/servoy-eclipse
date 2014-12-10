@@ -81,7 +81,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Multi-page form editor.
- * 
+ *
  * @author rgansevles
  */
 
@@ -102,7 +102,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 
 	private IContextActivation activateContext;
 
-	private BaseVisualFormEditorDesignPage graphicaleditor = null;
+	protected BaseVisualFormEditorDesignPage graphicaleditor = null;
 	private boolean closing = false;
 
 	private final CommandStackListener commandStackEventListener = new CommandStackListener();
@@ -156,7 +156,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.IEditorPart#init(org.eclipse.ui.IEditorSite, org.eclipse.ui.IEditorInput)
 	 */
 	@Override
@@ -204,7 +204,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 
 	/**
 	 * Revert form, remove changes.
-	 * 
+	 *
 	 * @param force
 	 */
 	public void revert(boolean force)
@@ -368,7 +368,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 
 	/**
 	 * Does nothing be default. This method should be overridden if {@link #isSaveAsAllowed()} has been overridden to return <code>true</code>.
-	 * 
+	 *
 	 * @see org.eclipse.ui.ISaveablePart#doSaveAs()
 	 */
 	@Override
@@ -385,7 +385,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 
 	/**
 	 * Close this editor.
-	 * 
+	 *
 	 * @param save
 	 */
 	public void close(final boolean save)
@@ -425,7 +425,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 	 * Refresh all pages for the persist.
 	 * <p>
 	 * When null, refresh the entire interface.
-	 * 
+	 *
 	 * @param persist
 	 */
 	public void refresh(final List<IPersist> persists)
@@ -446,7 +446,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	protected void doRefresh(List<IPersist> persists)
 	{
@@ -762,7 +762,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 
 	/**
 	 *  Request type for actions in Visual Form Editor.]
-	 * 
+	 *
 	 * @author rgansevles
 	 *
 	 */

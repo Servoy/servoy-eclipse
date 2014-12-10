@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -38,7 +39,7 @@ import com.servoy.j2db.persistence.IPersist;
 
 /**
  * Multi-page form editor.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -139,6 +140,16 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	}
 
 	@Override
+	public void persistChanges(Collection<IPersist> changedPersists)
+	{
+		super.persistChanges(changedPersists);
+		if (graphicaleditor instanceof RfbVisualFormEditorDesignPage)
+		{
+			((RfbVisualFormEditorDesignPage)graphicaleditor).refreshBrowserUrl();
+		}
+	}
+
+	@Override
 	public void dispose()
 	{
 		if (!isMobile())
@@ -167,7 +178,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	@Override
 	protected void doRefresh(List<IPersist> persists)
@@ -203,7 +214,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.editors.TabbedEditor#changeActiveTab(java.lang.String)
 	 */
 	public void changeActiveTab(String tabName)

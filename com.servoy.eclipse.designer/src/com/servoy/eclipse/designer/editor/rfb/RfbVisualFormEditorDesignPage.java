@@ -53,6 +53,7 @@ import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Design page for browser based rfb editor.
@@ -111,6 +112,9 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 	private EditorWebsocketSession editorWebsocketSession;
 
+	private String layout = null;
+	private String editorId = null;
+
 	public RfbVisualFormEditorDesignPage(BaseVisualFormEditor editorPart)
 	{
 		super(editorPart);
@@ -122,7 +126,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		// always reload the current spec so that always the latest stuff is shown.
 		WebComponentSpecProvider.reload();
 		// Serve requests for rfb editor
-		String editorId = UUID.randomUUID().toString();
+		editorId = UUID.randomUUID().toString();
 		WebsocketSessionManager.addSession(editorWebsocketSession = new EditorWebsocketSession(editorId));
 		editorWebsocketSession.registerServerService("formeditor", new EditorServiceHandler(editorPart, selectionProvider, selectionListener, fieldPositioner));
 		selectionListener.setEditorWebsocketSession(editorWebsocketSession);
@@ -137,16 +141,9 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			return;
 		}
 
-		Form form = editorPart.getForm();
-		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
-		String layout = computeLayout(flattenedForm);
-		Dimension formSize = flattenedForm.getSize();
-		String url = "http://localhost:8080/rfb/angular/index.html?s=" + form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" +
-			formSize.getWidth() + "&h=" + formSize.getHeight() + "&editorid=" + editorId;
+		refreshBrowserUrl();
 		try
 		{
-			ServoyLog.logInfo("Browser url for editor: " + url);
-			browser.setUrl(url + "&replacewebsocket=true");
 			// install fake WebSocket in case browser does not support it
 			SwtWebsocket.installFakeWebSocket(browser);
 			// install console
@@ -172,7 +169,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		}
 		catch (Exception e)
 		{
-			ServoyLog.logError("couldn't load the editor: " + url, e);
+			ServoyLog.logError("couldn't load the editor: ", e);
 		}
 	}
 
@@ -184,6 +181,29 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	{
 		if (form.getLayoutContainers().hasNext()) return "flow";
 		else return "absolute";
+	}
+
+	public void refreshBrowserUrl()
+	{
+		Form form = editorPart.getForm();
+		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
+		String newLayout = computeLayout(flattenedForm);
+		if (!Utils.equalObjects(layout, newLayout))
+		{
+			layout = newLayout;
+			Dimension formSize = flattenedForm.getSize();
+			String url = "http://localhost:8080/rfb/angular/index.html?s=" + form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" +
+				formSize.getWidth() + "&h=" + formSize.getHeight() + "&editorid=" + editorId;
+			try
+			{
+				ServoyLog.logInfo("Browser url for editor: " + url);
+				browser.setUrl(url + "&replacewebsocket=true");
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError("couldn't load the editor: " + url, ex);
+			}
+		}
 	}
 
 	@Override
