@@ -36,6 +36,7 @@ import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -454,17 +455,15 @@ public class CreateComponentHandler implements IServerService
 				}
 				else
 				{
-					List<WebComponentSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+					Map<String, WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
 						args.optString("packageName"));
 					if (specifications != null)
 					{
-						for (WebComponentSpecification layoutSpec : specifications)
+						WebLayoutSpecification layoutSpec = specifications.get(name);
+						if (layoutSpec != null)
 						{
-							if (layoutSpec.getName().equals(name))
-							{
-								Object config = layoutSpec.getConfig();
-								return createLayoutContainer(parent, config instanceof String ? new JSONObject((String)config) : null, x);
-							}
+							JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
+							return createLayoutContainer(parent, layoutSpec, config, x, specifications, args.optString("packageName"));
 						}
 					}
 				}
@@ -492,10 +491,13 @@ public class CreateComponentHandler implements IServerService
 	 * @throws RepositoryException
 	 * @throws JSONException
 	 */
-	protected IPersist createLayoutContainer(ISupportFormElements parent, JSONObject config, int index) throws RepositoryException, JSONException
+	protected IPersist createLayoutContainer(ISupportFormElements parent, WebLayoutSpecification layoutSpec, JSONObject config, int index,
+		Map<String, WebLayoutSpecification> specifications, String packageName) throws RepositoryException, JSONException
 	{
 		LayoutContainer container = (LayoutContainer)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(parent,
 			IRepository.LAYOUTCONTAINERS);
+		container.setSpecName(layoutSpec.getName());
+		container.setPackageName(packageName);
 		parent.addChild(container);
 		container.setLocation(new Point(index, index));
 		if (config != null)
@@ -512,7 +514,8 @@ public class CreateComponentHandler implements IServerService
 					for (int i = 0; i < array.length(); i++)
 					{
 						JSONObject jsonObject = array.getJSONObject(i);
-						createLayoutContainer(container, jsonObject, i + 1);
+						WebLayoutSpecification spec = specifications.get(jsonObject.get("layoutname"));
+						createLayoutContainer(container, spec, jsonObject.optJSONObject("model"), i + 1, specifications, packageName);
 					}
 				}
 				else container.putAttribute(key, value.toString());

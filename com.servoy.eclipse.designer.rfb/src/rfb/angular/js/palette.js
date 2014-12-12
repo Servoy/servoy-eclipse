@@ -21,10 +21,10 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 			});
 			
 			/**
-			 * enterDragMode($event,item.name,package.packageName,item.tagName,item.model)  for new components from the pallete
-			 * enterDragMode($event,ghost,null,null,null,ghost) for a ghost 
+			 * enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.allowedParents)  for new components from the pallete
+			 * enterDragMode($event,ghost,null,null,null,ghost,null) for a ghost 
 			 */
-			$scope.enterDragMode = function(event,componentName,packageName,tagName,model,type)
+			$scope.enterDragMode = function(event,componentName,packageName,tagName,model,type, allowedParents)
 			{
 				var dragClone = null;
 				var angularElement = null;
@@ -39,7 +39,32 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						css = $scope.convertToContentPoint(css);
 						if (angularElement)
 							angularElement.css(css);
-						if (type != "component" && type != "layout"){
+						if (type == "layout") {
+							var dropTarget = utils.getNode(ev);
+							if (!dropTarget){
+								// this is on the form, can this layout container be dropped on the form?
+								if (!allowedParents.contains("form")){
+									$scope.glasspane.style.cursor="no-drop";
+									return;
+								}
+							}
+							else {
+								var allowedChildren = dropTarget.getAttribute("svy-allowed-children");
+								if (!allowedChildren || !(allowedChildren.indexOf(componentName) > 0))
+								{
+									$scope.glasspane.style.cursor="no-drop";
+									return; // the drop target doesn't allow this layout container type
+								}
+								var dropTargetLayoutName = dropTarget.getAttribute("svy-layoutname");
+								// is this element able to drop on the dropTarget?
+								if (!allowedParents.indexOf(dropTargetLayoutName) == -1) {
+									$scope.glasspane.style.cursor="no-drop";
+									return;
+								}
+							}
+							$scope.glasspane.style.cursor="";
+						}
+						else if (type != "component"){
 							var dropTarget = utils.getNode(ev);
 							if (dropTarget && dropTarget.getAttribute("svy-types")){
 								if (dropTarget.getAttribute("svy-types").indexOf(type) > 0)
@@ -65,7 +90,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 							'list-style-type': 'none'
 						})
 						$('body').append(dragClone);
-						if (type=='component') {
+						if (type=='component' || type == "layout") {
 							angularElement = $scope.getEditorContentRootScope().createComponent('<div style="border-style: dotted;"><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-autoapply-disabled=\'true\'/></div>',model);
 							var elWidth = model.size ? model.size.width : 100;
 							var elHeight = model.size ? model.size.height : 100;
@@ -116,7 +141,21 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						if (dropTarget) {
 							component.dropTargetUUID = dropTarget.getAttribute("svy-id");
 						}
-						if (type!="component" && type != "layout") {
+						if (type == "layout") {
+							if (!dropTarget){
+								// this is on the form, can this layout container be dropped on the form?
+								if (!allowedParents.contains("form")) return;
+							}
+							else {
+								var allowedChildren = dropTarget.getAttribute("svy-allowed-children");
+								if (!allowedChildren || !(allowedChildren.indexOf(componentName) > 0))
+									return; // the drop target doesn't allow this layout container type
+								var dropTargetLayoutName = dropTarget.getAttribute("svy-layoutname");
+								// is this element able to drop on the dropTarget?
+								if (!allowedParents.indexOf(dropTargetLayoutName) == -1) return;
+							}
+						}
+						else if (type!="component") {
 							component.type = type;
 							if (!dropTarget) return; // releasing a ghost, but no actual component underneath
 							if (dropTarget) {

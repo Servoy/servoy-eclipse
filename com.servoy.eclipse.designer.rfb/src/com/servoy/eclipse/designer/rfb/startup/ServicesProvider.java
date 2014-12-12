@@ -27,6 +27,7 @@ public class ServicesProvider implements IServicesProvider
 			set.add(EditorContentFilter.class);
 			set.add(EditorEndpoint.class);
 			set.add(EditorContentEndpoint.class);
+			set.add(DesignerFilter.class);
 			return set;
 		}
 		return null;
