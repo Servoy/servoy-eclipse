@@ -177,6 +177,24 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 				
 				setDraggingFromPallete: function(dragging){
 					draggingFromPallete = dragging;
+					if (!editorScope.isAbsoluteFormLayout())
+					{
+						var rows = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll(".row"));
+						if (dragging)
+						{
+							//drag started
+							for (var i = 0; i < rows.length; i++) {
+								$(rows[i]).addClass('rowDesign');
+							}
+						}
+						else
+						{
+							//drag end
+							for (var i = 0; i < rows.length; i++) {
+								$(rows[i]).removeClass('rowDesign');
+							}
+						}
+					}
 				},
 				getDraggingFromPallete: function(){
 					return draggingFromPallete;
@@ -355,9 +373,70 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 								var i = 0;
 								for (i=0;i<arr.length;i++)
 								{
-									var rect = arr[i].getBoundingClientRect();
-									if (Math.sqrt(rect.top * rect.top + rect.left * rect.left) > Math.sqrt(contentPointDrop.top * contentPointDrop.top + contentPointDrop.left * contentPointDrop.left))
-										break;
+									var rect1 = arr[i].getBoundingClientRect();
+									rect1 = {top: rect1.top, left: rect1.left};
+									var borderWidth = $(arr[i]).css('borderWidth');
+									borderWidth =  parseInt(borderWidth.substring(0,borderWidth.length-2)); 
+									rect1.top = rect1.top + borderWidth;
+									rect1.left = rect1.left + borderWidth;
+									var rect2;
+									var secondIndex = null;
+									if (i==0 && arr.length > 1)
+									{
+										secondIndex = i+1;
+									}
+									if (i>0)
+									{
+										secondIndex = i-1;
+									}
+									if (secondIndex != null)
+									{
+										rect2 = arr[secondIndex].getBoundingClientRect();
+										rect2 = {top: rect2.top, left: rect2.left};
+										borderWidth = $(arr[secondIndex]).css('borderWidth');
+										borderWidth =  parseInt(borderWidth.substring(0,borderWidth.length-2)); 
+										rect2.top = rect2.top + borderWidth;
+										rect2.left = rect2.left + borderWidth;
+									}
+									if (i == 0)
+									{
+										// search if before first element
+										if (!rect2)
+										{
+											// true means before first element
+											if (contentPointDrop.top < rect1.top) break;
+											if (contentPointDrop.left < rect1.left) break;
+										}
+										else
+										{
+											if (rect1.top == rect2.top)
+											{
+												// horizontal aligned
+												// true means before first element
+												if (contentPointDrop.left < rect1.left) break;
+											}
+											if (rect1.left == rect2.left)
+											{
+												// vertical aligned
+												// true means before first element
+												if (contentPointDrop.top < rect1.top) break;
+											}
+										}
+									}
+									else if (rect2)
+									{
+										// search if between i-1 and i element
+										if (rect1.top == rect2.top)
+										{
+											// horizontal aligned
+											if (contentPointDrop.left < rect1.left) break;
+										}
+										if (rect1.left == rect2.left)
+										{
+											// vertical aligned
+											if (contentPointDrop.top < rect1.top) break;
+										}
+									}	
 								}
 								if (i>0)
 								{

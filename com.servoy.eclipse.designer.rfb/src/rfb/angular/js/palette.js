@@ -109,7 +109,6 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 					}
 					if (dragClone)
 					{
-						utils.setDraggingFromPallete(null);
 						dragClone.remove();
 						var component = {};
 						
@@ -146,6 +145,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 							component.w = 100;
 							component.h = 100;
 						}
+						utils.setDraggingFromPallete(null);
 						component = $scope.convertToContentPoint(component);
 						if (component.x >0 && component.y >0)
 						{
