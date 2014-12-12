@@ -125,6 +125,15 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 									return; // releasing a ghost, but component does not support this ghost type
 							}
 						}
+						var flowLocation = utils.getFlowLocation(dropTarget,ev);
+						if (flowLocation.leftSibling)
+						{
+							component.leftSibling = flowLocation.leftSibling;
+						}
+						if (flowLocation.rightSibling)
+						{
+							component.rightSibling = flowLocation.rightSibling;
+						}
 						component.name = componentName;
 						component.packageName = packageName;
 						component.x = ev.pageX;

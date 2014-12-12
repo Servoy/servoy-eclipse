@@ -52,6 +52,8 @@ public class PersistFinder
 
 	public IPersist searchForPersist(BaseVisualFormEditor editorPart, String uuid)
 	{
+		if (uuid == null) return null;
+
 		String searchFor = uuid;
 		if (searchFor.contains("_"))
 		{

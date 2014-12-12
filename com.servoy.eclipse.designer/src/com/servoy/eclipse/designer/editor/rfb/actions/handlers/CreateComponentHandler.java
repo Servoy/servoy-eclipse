@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -49,6 +50,7 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IDeveloperRepository;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
@@ -57,6 +59,7 @@ import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Portal;
+import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RectShape;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
@@ -224,7 +227,47 @@ public class CreateComponentHandler implements IServerService
 					}
 				}
 			}
-
+			if (args.has("leftSibling") || args.has("rightSibling"))
+			{
+				IPersist leftSibling = PersistFinder.INSTANCE.searchForPersist(editorPart, args.optString("leftSibling", null));
+				IPersist rightSibling = PersistFinder.INSTANCE.searchForPersist(editorPart, args.optString("rightSibling", null));
+				List<IPersist> children = new ArrayList<IPersist>();
+				Iterator<IPersist> it = parent.getAllObjects();
+				while (it.hasNext())
+				{
+					IPersist persist = it.next();
+					if (persist instanceof IFormElement || persist instanceof ISupportFormElements)
+					{
+						children.add(persist);
+					}
+				}
+				IPersist[] childArray = children.toArray(new IPersist[0]);
+				Arrays.sort(childArray, PositionComparator.XY_PERSIST_COMPARATOR);
+				int counter = 1;
+				if (childArray.length > 0 && childArray[0] == rightSibling)
+				{
+					x = counter;
+					y = counter;
+					counter++;
+				}
+				for (IPersist element : childArray)
+				{
+					((ISupportBounds)element).setLocation(new Point(counter, counter));
+					counter++;
+					if (element == leftSibling)
+					{
+						x = counter;
+						y = counter;
+						counter++;
+					}
+				}
+			}
+			else if (editorPart.getForm().getLayoutContainers().hasNext())
+			{
+				// insert as first element in flow layout
+				x = 1;
+				y = 1;
+			}
 			String name = args.getString("name");
 			if ("servoydefault-button".equals(name))
 			{
@@ -420,7 +463,7 @@ public class CreateComponentHandler implements IServerService
 							if (layoutSpec.getName().equals(name))
 							{
 								Object config = layoutSpec.getConfig();
-								return createLayoutContainer(parent, config instanceof String ? new JSONObject((String)config) : null);
+								return createLayoutContainer(parent, config instanceof String ? new JSONObject((String)config) : null, x);
 							}
 						}
 					}
@@ -449,11 +492,12 @@ public class CreateComponentHandler implements IServerService
 	 * @throws RepositoryException
 	 * @throws JSONException
 	 */
-	protected IPersist createLayoutContainer(ISupportFormElements parent, JSONObject config) throws RepositoryException, JSONException
+	protected IPersist createLayoutContainer(ISupportFormElements parent, JSONObject config, int index) throws RepositoryException, JSONException
 	{
 		LayoutContainer container = (LayoutContainer)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(parent,
 			IRepository.LAYOUTCONTAINERS);
 		parent.addChild(container);
+		container.setLocation(new Point(index, index));
 		if (config != null)
 		{
 			Iterator keys = config.keys();
@@ -468,7 +512,7 @@ public class CreateComponentHandler implements IServerService
 					for (int i = 0; i < array.length(); i++)
 					{
 						JSONObject jsonObject = array.getJSONObject(i);
-						createLayoutContainer(container, jsonObject);
+						createLayoutContainer(container, jsonObject, i + 1);
 					}
 				}
 				else container.putAttribute(key, value.toString());

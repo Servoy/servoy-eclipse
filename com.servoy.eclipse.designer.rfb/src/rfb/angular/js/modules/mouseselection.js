@@ -218,7 +218,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					var glassPaneMousePosition2 = {top:glassPaneMousePosition.top - 1,left:glassPaneMousePosition.left - 1};
 					/*first get elements with glasspane coordinates 
 					 * (this list may also contain real components - these need to be removed as they have a different coordinate system) */
-					var glassPaneElements = this.getElementsByRectangle(glassPaneMousePosition1,glassPaneMousePosition2,0.001);
+					var glassPaneElements = this.getElementsByRectangle(glassPaneMousePosition1,glassPaneMousePosition2,0.00001);
 					//adjust for padding (added by phone and tablet canvas size) so that we have the correct position to get elements from the form
 					var p = this.adjustForPadding(glassPaneMousePosition);
 					var p2 = {top:p.top + 1,left:p.left + 1}
@@ -226,7 +226,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					p.left = p.left-1;
 					/*now get elements from the form 
 					 * (this list may also contain elements from the glasspane - these need to be removed as they have a different coordinate system)*/
-					var elements = this.getElementsByRectangle(p,p2,0.001);
+					var elements = this.getElementsByRectangle(p,p2,0.00001);
 					
 					function isOnGlassPane (element) {
 						return element.parentElement.parentElement == editorScope.glasspane;
@@ -303,6 +303,74 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 						}
 					}
 					return matchedElements
+				},
+				getFlowLocation: function(dropTarget,event)
+				{
+					var ret = {};
+					if (!editorScope.isAbsoluteFormLayout())
+					{
+						if (!dropTarget || !dropTarget.hasAttribute("svy-id"))
+						{
+							// we dropped on form itself
+							var nodes = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[ng-controller]"));
+							if (nodes && nodes.length > 1)
+							{
+								dropTarget = nodes[nodes.length-1];
+							}
+							else
+							{
+								console.error("Cannot find form drop target");
+							}
+						}
+						if (dropTarget && dropTarget.childNodes.length >0)
+						{
+							var arr = new Array();
+							for (var i=0;i< dropTarget.childNodes.length;i++)
+							{
+								if (dropTarget.childNodes[i].hasAttribute && dropTarget.childNodes[i].hasAttribute("svy-id"))
+								{
+									arr.push(dropTarget.childNodes[i]);
+								}
+							}
+							if (arr.length >0)
+							{
+								arr.sort(function(elem1,elem2)
+										{
+									var rect1 = elem1.getBoundingClientRect();
+									var rect2 = elem2.getBoundingClientRect();
+									if (rect1.top != rect2.top)
+									{
+										return rect1.top - rect2.top;
+									}
+									else
+									{
+										return rect1.left - rect2.left;
+									}	
+								});
+								var contentPointDrop = editorScope.convertToContentPoint({
+									top: event.pageY,
+									left: event.pageX
+								});
+								// search where drop point fits in the array
+								var i = 0;
+								for (i=0;i<arr.length;i++)
+								{
+									var rect = arr[i].getBoundingClientRect();
+									if (Math.sqrt(rect.top * rect.top + rect.left * rect.left) > Math.sqrt(contentPointDrop.top * contentPointDrop.top + contentPointDrop.left * contentPointDrop.left))
+										break;
+								}
+								if (i>0)
+								{
+									ret.leftSibling = arr[i-1].getAttribute("svy-id");
+								}
+								if (i<arr.length)
+								{
+									ret.rightSibling = arr[i].getAttribute("svy-id");
+								}	
+							}
+						}
+					}
+					return ret;
 				}
 			}
 		}
