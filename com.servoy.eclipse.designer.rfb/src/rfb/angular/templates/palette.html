@@ -7,12 +7,12 @@
 		    <div>
 			    <ul>
 					<li ng-repeat="item in package.components | orderBy:'displayName'" >
-						<div ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName,item.model,'component') " title="Place component {{item.displayName}}"> 
-							<img draggable="false" ng-src="/{{item.icon}}" alt="{{item.displayName}}"/>{{item.displayName}}
+						<div ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.componentType) " title="Place component {{item.displayName}}"> 
+							<img draggable="false" ng-src="/{{item.icon}}" alt=""/>{{item.displayName}}
 						</div>
 						<ul>
 							<li ng-repeat="ghost in item.types" ng-mousedown="enterDragMode($event,ghost,null,null,null,ghost) " title="Place component {{ghost}}">
-								<img draggable="false" ng-src="/{{item.icon}}" alt="{{ghost}}"/>{{ghost}}
+								<img draggable="false" ng-src="/{{item.icon}}" alt=""/>{{ghost}}
 						</ul>
 					</li>
 			    </ul>

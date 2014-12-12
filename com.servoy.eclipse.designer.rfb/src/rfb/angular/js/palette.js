@@ -39,7 +39,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						css = $scope.convertToContentPoint(css);
 						if (angularElement)
 							angularElement.css(css);
-						if (type != "component"){
+						if (type != "component" && type != "layout"){
 							var dropTarget = utils.getNode(ev);
 							if (dropTarget && dropTarget.getAttribute("svy-types")){
 								if (dropTarget.getAttribute("svy-types").indexOf(type) > 0)
@@ -116,7 +116,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						if (dropTarget) {
 							component.dropTargetUUID = dropTarget.getAttribute("svy-id");
 						}
-						if (type!="component") {
+						if (type!="component" && type != "layout") {
 							component.type = type;
 							if (!dropTarget) return; // releasing a ghost, but no actual component underneath
 							if (dropTarget) {
