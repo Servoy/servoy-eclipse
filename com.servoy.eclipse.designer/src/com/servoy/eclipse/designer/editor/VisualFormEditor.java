@@ -94,7 +94,10 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		{
 			if (!isClosing())
 			{
-				createPartsPage();
+				if (!getForm().getLayoutContainers().hasNext()) // is absolute layout
+				{
+					createPartsPage();
+				}
 				createTabsPage();
 			}
 			createSecPage(); // MultiPageEditorPart wants at least 1 page

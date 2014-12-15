@@ -344,7 +344,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 
 	public Object[] getElements(Object inputElement)
 	{
-		return new Object[] { ELEMENTS, PARTS };
+		return form.getLayoutContainers().hasNext() ? new Object[] { ELEMENTS } : new Object[] { ELEMENTS, PARTS };
 	}
 
 	public void dispose()
