@@ -64,16 +64,15 @@ public class SetPropertiesHandler implements IServerService
 		{
 			public void run()
 			{
+				CompoundCommand cc = new CompoundCommand();
 				Iterator keys = args.keys();
 				while (keys.hasNext())
 				{
-					CompoundCommand cc = null;
 					String uuid = (String)keys.next();
 					final IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart, uuid);
 					if ((persist instanceof BaseComponent || persist instanceof Tab) && !(persist instanceof GhostBean))
 					{
 						JSONObject properties = args.optJSONObject(uuid);
-						cc = new CompoundCommand();
 						Iterator it = properties.keys();
 						while (it.hasNext())
 						{
@@ -94,7 +93,6 @@ public class SetPropertiesHandler implements IServerService
 							cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(persist, false),
 								StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), new Dimension(properties.optInt("width"), properties.optInt("height"))));
 						}
-						editorPart.getCommandStack().execute(cc);
 					}
 					else if (persist instanceof Part)
 					{
@@ -117,8 +115,8 @@ public class SetPropertiesHandler implements IServerService
 						}
 
 					}
-					if (cc != null) editorPart.getCommandStack().execute(cc);
 				}
+				if (!cc.isEmpty()) editorPart.getCommandStack().execute(cc);
 			}
 		});
 		return null;
