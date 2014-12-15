@@ -153,7 +153,7 @@ public class DesignerFilter implements Filter
 								WebComponentSpecification spec = provider.getWebComponentSpecification(componentName);
 								jsonWriter.object();
 								jsonWriter.key("name").value(spec.getName());
-								jsonWriter.key("type").value("component");
+								jsonWriter.key("componentType").value("component");
 								jsonWriter.key("displayName").value(spec.getDisplayName());
 								jsonWriter.key("tagName").value(FormTemplateGenerator.getTagName(componentName));
 								Map<String, Object> model = new HashMap<String, Object>();
