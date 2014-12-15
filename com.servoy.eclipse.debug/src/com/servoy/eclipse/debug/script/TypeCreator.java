@@ -1102,7 +1102,7 @@ public class TypeCreator extends TypeCache
 
 						/*
 						 * (non-Javadoc)
-						 * 
+						 *
 						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitObjectInitializer(org.eclipse.dltk.javascript.ast.
 						 * ObjectInitializer)
 						 */
@@ -1179,6 +1179,11 @@ public class TypeCreator extends TypeCache
 		{
 			Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
 			method.setName(api.getName());
+			if (api.getDocumentation() != null)
+			{
+				method.setDescription(getParsedComment(api.getDocumentation()));
+				method.setDeprecated(api.getDocumentation().contains("@deprecated"));
+			}
 			JSType returnType = getType(context, api.getReturnType());
 			if (returnType == null && api.getReturnType() != null)
 			{
