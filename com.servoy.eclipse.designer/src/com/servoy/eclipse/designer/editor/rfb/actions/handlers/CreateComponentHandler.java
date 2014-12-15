@@ -502,6 +502,9 @@ public class CreateComponentHandler implements IServerService
 		container.setLocation(new Point(index, index));
 		if (config != null)
 		{
+			// if this is a composite try to set the actual layoutname (so a row combination with columns becomes here just a row)
+			String layoutName = config.optString("layoutName", null);
+			if (layoutName != null) container.setSpecName(layoutName);
 			Iterator keys = config.keys();
 			while (keys.hasNext())
 			{
@@ -514,11 +517,11 @@ public class CreateComponentHandler implements IServerService
 					for (int i = 0; i < array.length(); i++)
 					{
 						JSONObject jsonObject = array.getJSONObject(i);
-						WebLayoutSpecification spec = specifications.get(jsonObject.get("layoutname"));
+						WebLayoutSpecification spec = specifications.get(jsonObject.get("layoutName"));
 						createLayoutContainer(container, spec, jsonObject.optJSONObject("model"), i + 1, specifications, packageName);
 					}
-				}
-				else container.putAttribute(key, value.toString());
+				} // children and layoutName are special
+				else if (!"layoutName".equals(key)) container.putAttribute(key, value.toString());
 			}
 		}
 		return container;

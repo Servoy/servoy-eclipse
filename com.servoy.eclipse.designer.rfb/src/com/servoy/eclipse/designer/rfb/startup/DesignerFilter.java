@@ -95,6 +95,14 @@ public class DesignerFilter implements Filter
 						{
 							jsonWriter.object();
 							jsonWriter.key("name").value(spec.getName());
+							if (spec.getConfig() != null)
+							{
+								String layoutName = new JSONObject((String)spec.getConfig()).optString("layoutName", null);
+								if (layoutName != null)
+								{
+									jsonWriter.key("layoutName").value(layoutName);
+								}
+							}
 							jsonWriter.key("componentType").value("layout");
 							jsonWriter.key("displayName").value(spec.getDisplayName());
 							jsonWriter.key("tagName").value("div"); //TODO is this configurable by the spec
