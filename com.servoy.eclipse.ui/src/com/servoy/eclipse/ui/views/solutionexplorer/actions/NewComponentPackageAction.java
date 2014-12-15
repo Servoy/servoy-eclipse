@@ -104,11 +104,18 @@ public class NewComponentPackageAction extends Action
 				GridData data = new GridData(GridData.FILL_HORIZONTAL);
 				data.horizontalAlignment = GridData.FILL_HORIZONTAL;
 				data.grabExcessHorizontalSpace = true;
+				data.horizontalSpan = 2;
 
 				Composite container = new Composite(parent, SWT.FILL);
 				GridLayout layout = new GridLayout(2, true);
+				layout.marginWidth = 0;
+
 				container.setLayout(layout);
 				container.setLayoutData(data);
+
+				data = new GridData();
+				data.horizontalAlignment = SWT.FILL;
+				data.grabExcessHorizontalSpace = true;
 
 				Label packageLabel = new Label(container, SWT.NONE);
 				packageLabel.setText("Package name");
