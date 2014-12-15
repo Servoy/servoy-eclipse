@@ -230,7 +230,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					}
 					return {"left":xMouseDown, "top":yMouseDown};
 				},
-				getNode: function(event) {
+				getNode: function(event, skipGlass) {
 					var glassPaneMousePosition = this.getMousePosition(event);
 					var glassPaneMousePosition1 = {top:glassPaneMousePosition.top + 1,left:glassPaneMousePosition.left + 1};
 					var glassPaneMousePosition2 = {top:glassPaneMousePosition.top - 1,left:glassPaneMousePosition.left - 1};
@@ -256,7 +256,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					glassPaneElements = glassPaneElements.filter(isOnGlassPane);
 					
 					/*unify the lists*/
-					if (glassPaneElements) {
+					if (glassPaneElements && !skipGlass) {
 						if (glassPaneElements.length > 0 ){
 							elements = elements.concat(glassPaneElements)
 						}

@@ -40,10 +40,11 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						if (angularElement)
 							angularElement.css(css);
 						if (type == "layout") {
-							var dropTarget = utils.getNode(ev);
+							var dropTarget = utils.getNode(ev, true);
+							console.log(dropTarget)
 							if (!dropTarget){
 								// this is on the form, can this layout container be dropped on the form?
-								if (!allowedParents.contains("form")){
+								if (allowedParents.indexOf("form") == -1){
 									$scope.glasspane.style.cursor="no-drop";
 									return;
 								}
@@ -142,9 +143,10 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 							component.dropTargetUUID = dropTarget.getAttribute("svy-id");
 						}
 						if (type == "layout") {
+							dropTarget = utils.getNode(ev, true);
 							if (!dropTarget){
 								// this is on the form, can this layout container be dropped on the form?
-								if (!allowedParents.contains("form")) return;
+								if (allowedParents.indexOf("form") == -1) return;
 							}
 							else {
 								var allowedChildren = dropTarget.getAttribute("svy-allowed-children");
