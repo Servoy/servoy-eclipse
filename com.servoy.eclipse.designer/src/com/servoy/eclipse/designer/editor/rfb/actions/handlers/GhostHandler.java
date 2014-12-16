@@ -36,6 +36,7 @@ import com.servoy.base.persistence.constants.IContentSpecConstantsBase;
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
@@ -55,7 +56,7 @@ import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
 
 /**
- * @author user
+ * @author gganea@servoy.com
  *
  */
 public class GhostHandler implements IServerService
@@ -307,11 +308,7 @@ public class GhostHandler implements IServerService
 									int y = baseComponent.getLocation().y;
 									writer.key("uuid").value(persists.get(i).getUUID());
 									writer.key("type").value(GHOST_TYPE_COMPONENT);
-									Object label = baseComponent.getProperty("text");
-									if (label == null || label.toString().trim().equals(""))
-									{
-										label = baseComponent.getProperty("name");
-									}
+									Object label = getGhostLabel(baseComponent);
 									writer.key("text").value(label);
 
 									writer.key("location");
@@ -409,17 +406,7 @@ public class GhostHandler implements IServerService
 												writer.key("width").value(iSupportBounds.getSize().width);
 												writer.key("height").value(iSupportBounds.getSize().height);
 												writer.endObject();
-												String nameText = "";
-												if (next instanceof ISupportDataProviderID)
-												{
-													String dp = ((ISupportDataProviderID)next).getDataProviderID();
-													if (dp != null) nameText = dp;
-												}
-												if (next instanceof ISupportName)
-												{
-													String name = ((ISupportName)next).getName();
-													if (name != null) nameText = name;
-												}
+												String nameText = getGhostLabel(next);
 												writer.key("text").value(nameText);
 												writer.endObject();
 											}
@@ -440,6 +427,35 @@ public class GhostHandler implements IServerService
 						}
 					}
 				}
+			}
+
+			/**
+			 * @param next
+			 * @return
+			 */
+			private String getGhostLabel(IPersist next)
+			{
+				String nameText = "";
+				if (next instanceof ISupportDataProviderID)
+				{
+					String dp = ((ISupportDataProviderID)next).getDataProviderID();
+					if (dp != null) nameText = dp;
+				}
+				if (next instanceof Bean)
+				{
+					nameText = ((Bean)next).getBeanClassName();
+				}
+				if (next instanceof AbstractBase)
+				{
+					Object label = ((AbstractBase)next).getProperty("text");
+					if (label != null) nameText = label.toString();
+				}
+				if (next instanceof ISupportName)
+				{
+					String name = ((ISupportName)next).getName();
+					if (name != null) nameText = name;
+				}
+				return nameText;
 			}
 
 			/**
