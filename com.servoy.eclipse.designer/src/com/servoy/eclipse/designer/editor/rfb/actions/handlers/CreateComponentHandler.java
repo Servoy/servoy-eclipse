@@ -366,7 +366,7 @@ public class CreateComponentHandler implements IServerService
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.HTML_AREA);
-				field.setEditable(false);
+				field.setEditable(true);
 				field.setSize(new Dimension(w, h));
 				return field;
 			}
