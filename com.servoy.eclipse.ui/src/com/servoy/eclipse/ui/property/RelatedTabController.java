@@ -34,7 +34,7 @@ import com.servoy.j2db.persistence.Form;
 
 /**
  * Property controller that combines containsFormID and relationName in 1 selector.
- * 
+ *
  * @author rgansevles
  */
 public class RelatedTabController extends PropertyController<String, Object> implements IPropertySetter<Object, IPropertySource>
@@ -76,7 +76,7 @@ public class RelatedTabController extends PropertyController<String, Object> imp
 		Object relation = propertySource.getPropertyValue("relationName"); // RelationContentProvider.NONE when no relation is set
 
 		Form containsForm = null;
-		if (containsFormID == null)
+		if (containsFormID == null || containsFormID.intValue() == 0)
 		{
 			return RelationContentProvider.NONE;
 		}
@@ -121,7 +121,7 @@ public class RelatedTabController extends PropertyController<String, Object> imp
 	public CellEditor createPropertyEditor(Composite parent)
 	{
 		ListSelectCellEditor listSelectCellEditor = new ListSelectCellEditor(parent, title, new RelatedFormsContentProvider(form),
-				RelatedFormsLabelProvider.INSTANCE, RelatedFormValueEditor.INSTANCE, isReadOnly(), form, SWT.NONE, null, "relatedFormDialog");
+			RelatedFormsLabelProvider.INSTANCE, RelatedFormValueEditor.INSTANCE, isReadOnly(), form, SWT.NONE, null, "relatedFormDialog");
 		listSelectCellEditor.setShowFilterMenu(true);
 		return listSelectCellEditor;
 	}
