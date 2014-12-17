@@ -92,30 +92,23 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 						var node = selection[i];
 						selectionToDrag[i] = $(selection[i]).clone();
 						var posX, posY;
-						if (node.uuid) {
-							posX = node.location.x;
-							posY = node.location.y;
+						var beanModel = editorScope.getBeanModel(node);
+						if (beanModel){
+							posX = beanModel.location.x;
+							posY = beanModel.location.y;
 						}
-						else {
-							var beanModel = editorScope.getBeanModel(node);
-							if (beanModel){
-								posX = beanModel.location.x;
-								posY = beanModel.location.y;
-							}
-							else 
-							{
-								var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-								posX = ghostObject.location.x;
-								posY = ghostObject.location.y;
-							}
-
-							selectionToDrag[i] = $(node).clone();
-							selectionToDrag[i].attr('id', 'dragNode'+i);
-							selectionToDrag[i].attr('cloneuuid', node.getAttribute("svy-id"));
-							selectionToDrag[i][0]['location'] = {x: posX, y:posY}; 
-							selectionToDrag[i].css({'z-index': 4});
-							$(selection[i]).parent().append(selectionToDrag[i]);
+						else 
+						{
+							var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+							posX = ghostObject.location.x;
+							posY = ghostObject.location.y;
 						}
+						selectionToDrag[i] = $(node).clone();
+						selectionToDrag[i].attr('id', 'dragNode'+i);
+						selectionToDrag[i].attr('cloneuuid', node.getAttribute("svy-id"));
+						selectionToDrag[i][0]['location'] = {x: posX, y:posY}; 
+						selectionToDrag[i].css({'z-index': 4});
+						$(selection[i]).parent().append(selectionToDrag[i]);
 					} 
 				}
 				
@@ -132,11 +125,7 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 							var changeY = event.screenY- dragStartEvent.screenY;
 							for(var i=0;i<selectionToDrag.length;i++) {
 								var node = selectionToDrag[i];
-								if (node.uuid) {
-									node.location.x += changeX;
-									node.location.y += changeY;
-								}
-								else if (node[0] && node[0].getAttribute('cloneuuid'))
+								if (node[0] && node[0].getAttribute('cloneuuid'))
 								{
 									node[0].location.x += changeX;
 									node[0].location.y += changeY;

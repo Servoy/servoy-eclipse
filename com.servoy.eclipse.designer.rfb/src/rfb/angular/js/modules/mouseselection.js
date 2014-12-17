@@ -28,7 +28,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 						p1 = {top:Math.min(p1.top, rect.top),left:Math.min(p1.left, rect.left)}
 						p2 = {top:Math.max(p2.top, rect.bottom),left:Math.max(p2.left, rect.right)}
 					}
-					var elements = utils.getElementsByRectangle(p1,p2,1)
+					var elements = utils.getElementsByRectangle(p1,p2,1,true,true)
 					editorScope.setSelection(elements);
 				}
 				else {
@@ -102,10 +102,10 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 		function stopLasso(event) {
 			if (lassoStarted) {
 				var lassoMouseSelectPosition = utils.getMousePosition(event,lassoStarted);
-				var p1 = utils.adjustForPadding(mouseDownPosition);
-				var p2 = utils.adjustForPadding(lassoMouseSelectPosition);
+				var p1 = mouseDownPosition;
+				var p2 = lassoMouseSelectPosition;
 				if(Math.abs(p1.left - p2.left) > 1 && Math.abs(p1.top - p2.top) > 1) {
-					var selectedElements = utils.getElementsByRectangle(p1,p2,1);
+					var selectedElements = utils.getElementsByRectangle(p1,p2,1,true,true);
 					editorScope.setSelection(selectedElements);	
 				}
 				lassoStarted = false;
@@ -236,68 +236,51 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					var glassPaneMousePosition2 = {top:glassPaneMousePosition.top - 1,left:glassPaneMousePosition.left - 1};
 					/*first get elements with glasspane coordinates 
 					 * (this list may also contain real components - these need to be removed as they have a different coordinate system) */
-					var glassPaneElements = this.getElementsByRectangle(glassPaneMousePosition1,glassPaneMousePosition2,0.000001);
+					var elements = this.getElementsByRectangle(glassPaneMousePosition1,glassPaneMousePosition2,0.000001,true,!skipGlass);
 					//adjust for padding (added by phone and tablet canvas size) so that we have the correct position to get elements from the form
-					var p = this.adjustForPadding(glassPaneMousePosition);
-					var p2 = {top:p.top + 1,left:p.left + 1}
-					p.top = p.top-1
-					p.left = p.left-1;
-					/*now get elements from the form 
-					 * (this list may also contain elements from the glasspane - these need to be removed as they have a different coordinate system)*/
-					var elements = this.getElementsByRectangle(p,p2,0.000001);
+//					var p = this.adjustForPadding(glassPaneMousePosition);
+//					var p2 = {top:p.top + 1,left:p.left + 1}
+//					p.top = p.top-1
+//					p.left = p.left-1;
+//					/*now get elements from the form 
+//					 * (this list may also contain elements from the glasspane - these need to be removed as they have a different coordinate system)*/
+//					var elements = this.getElementsByRectangle(p,p2,0.000001,true,false);
 					
-					function isOnGlassPane (element) {
-						return element.parentElement.parentElement == editorScope.glasspane;
-					};
-					function isNotOnGlassPane (element) {
-						return element.parentElement.parentElement !== editorScope.glasspane;
-					};
-					elements = elements.filter(isNotOnGlassPane);
-					glassPaneElements = glassPaneElements.filter(isOnGlassPane);
+//					function isOnGlassPane (element) {
+//						return element.parentElement.parentElement == editorScope.glasspane;
+//					};
+//					function isNotOnGlassPane (element) {
+//						return element.parentElement.parentElement !== editorScope.glasspane;
+//					};
+//					elements = elements.filter(isNotOnGlassPane);
+//					glassPaneElements = glassPaneElements.filter(isOnGlassPane);
 					
 					/*unify the lists*/
-					if (glassPaneElements && !skipGlass) {
-						if (glassPaneElements.length > 0 ){
-							elements = elements.concat(glassPaneElements)
-						}
-					}
+//					if (glassPaneElements && !skipGlass) {
+//						if (glassPaneElements.length > 0 ){
+//							elements = elements.concat(glassPaneElements)
+//						}
+//					}
 						
-					if (elements.length == 1) return elements[0];
-					else if (elements.length > 1) {
-						if (glassPaneElements && glassPaneElements.length > 0)
-						{
+					if (elements.length == 1)
+						return elements[0];
+					else 
+						if (elements.length > 1) {
 							var node = elements[elements.length-1];
 							var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-							if (ghostObject && ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM)
-							{
+							if (ghostObject && ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM && !(angular.element(elements[elements.length-2]).is("[svy-non-selectable]"))) {
 								return elements[elements.length-2];
 							}
-						}	
-						// always return the one on top (visible); this is due to formIndex implementation
-						return elements[elements.length-1]
-					}
+							// always return the one on top (visible); this is due to formIndex implementation
+							return elements[elements.length-1]
+						}
 					
 					return null;
 				},
 
-				getElementsByRectangle: function(p1, p2, percentage) {
-					var temp = 0;
-					if (p1.left > p2.left) {
-						var temp = p1.left;
-						p1.left = p2.left;
-						p2.left = temp;
-					}
-					if (p1.top > p2.top) {
-						var temp = p1.top;
-						p1.top = p2.top;
-						p2.top = temp;
-					}	
-					var nodes = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[svy-id]"));
-					var ghosts = Array.prototype.slice.call(editorScope.glasspane.querySelectorAll("[svy-id]"));
-					var concat = nodes.concat(ghosts);
-					var matchedElements = []
-					for (var i = 0; i < concat.length; i++) {
-						var element = concat[i]
+				collectMatchedElements: function (matchedElements, fromList, p1, p2, percentage) {
+					for (var i = 0; i < fromList.length; i++) {
+						var element = fromList[i]
 						var rect = element.getBoundingClientRect();
 						var left = rect.left;
 						var top = rect.top;
@@ -320,7 +303,37 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 							}
 						}
 					}
-					return matchedElements
+				},
+				
+				getElementsByRectangle: function(p1, p2, percentage, fromDoc, fromGlass) {
+					var temp = 0;
+					if (p1.left > p2.left) {
+						var temp = p1.left;
+						p1.left = p2.left;
+						p2.left = temp;
+					}
+					if (p1.top > p2.top) {
+						var temp = p1.top;
+						p1.top = p2.top;
+						p2.top = temp;
+					}	
+					var nodes = [];
+					var ghosts = [];
+					if (fromDoc)
+						nodes = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[svy-id]"));
+					
+					if (fromGlass)
+						ghosts = Array.prototype.slice.call(editorScope.glasspane.querySelectorAll("[svy-id]"));
+					
+					var matchedFromDoc = [];
+					var matchedFromGlass = [];
+					this.collectMatchedElements(matchedFromGlass, ghosts, p1, p2, percentage);
+					p1 = this.adjustForPadding(p1);
+					p2 = this.adjustForPadding(p2);
+					this.collectMatchedElements(matchedFromDoc, nodes, p1, p2, percentage);
+					
+					var concat = matchedFromDoc.concat(matchedFromGlass);
+					return concat;
 				},
 				getFlowLocation: function(dropTarget,event)
 				{

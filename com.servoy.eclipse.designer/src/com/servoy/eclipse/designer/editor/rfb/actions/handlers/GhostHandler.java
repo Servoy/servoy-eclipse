@@ -377,7 +377,7 @@ public class GhostHandler implements IServerService
 									writer.key("top").value(0);
 									writer.endObject();
 								}
-								writer.key("uuid").value(f.getUUID());
+								//writer.key("uuid").value(f.getUUID());
 								writer.key("ghosts");
 								writer.array();
 								{
