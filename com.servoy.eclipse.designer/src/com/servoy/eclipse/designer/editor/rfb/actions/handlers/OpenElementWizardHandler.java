@@ -21,6 +21,7 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.json.JSONObject;
@@ -31,6 +32,9 @@ import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.FormEditPolicy;
 import com.servoy.eclipse.designer.editor.FormGraphicalEditPart;
+import com.servoy.eclipse.designer.editor.PersistEditPolicy;
+import com.servoy.eclipse.designer.editor.PersistGraphicalEditPart;
+import com.servoy.eclipse.designer.editor.PersistGraphicalEditPartFigureFactory;
 import com.servoy.eclipse.designer.editor.commands.AddAccordionPaneAction;
 import com.servoy.eclipse.designer.editor.commands.AddFieldAction;
 import com.servoy.eclipse.designer.editor.commands.AddMediaAction;
@@ -38,8 +42,12 @@ import com.servoy.eclipse.designer.editor.commands.AddPortalAction;
 import com.servoy.eclipse.designer.editor.commands.AddSplitpaneAction;
 import com.servoy.eclipse.designer.editor.commands.AddTabpanelAction;
 import com.servoy.eclipse.designer.editor.commands.SaveAsTemplateAction;
+import com.servoy.j2db.IApplication;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author user
@@ -51,6 +59,7 @@ public class OpenElementWizardHandler implements IServerService
 	private final OpenElementWizard openElementWizard;
 
 	private final IFieldPositioner fieldPositioner;
+	private final ISelectionProvider selectionProvider;
 	private final BaseVisualFormEditor editorPart;
 
 	/**
@@ -58,10 +67,11 @@ public class OpenElementWizardHandler implements IServerService
 	 * @param selectionListener
 	 * @param selectionProvider
 	 */
-	public OpenElementWizardHandler(BaseVisualFormEditor editorPart, IFieldPositioner fieldPositioner)
+	public OpenElementWizardHandler(BaseVisualFormEditor editorPart, IFieldPositioner fieldPositioner, ISelectionProvider selectionProvider)
 	{
 		this.editorPart = editorPart;
 		this.fieldPositioner = fieldPositioner;
+		this.selectionProvider = selectionProvider;
 		openElementWizard = new OpenElementWizard();
 	}
 
@@ -206,6 +216,21 @@ public class OpenElementWizardHandler implements IServerService
 					@Override
 					protected ISelection getSelection()
 					{
+						ISelection selection = selectionProvider.getSelection();
+						if (selection instanceof StructuredSelection && ((StructuredSelection)selection).size() == 1)
+						{
+							Object selectedElement = ((StructuredSelection)selection).getFirstElement();
+							if (selectedElement instanceof TabPanel)
+							{
+								IApplication application = Activator.getDefault().getDesignClient();
+								Form form = formEditPart.getPersist();
+								PersistGraphicalEditPart persistGraphicalEditPart = new PersistGraphicalEditPart(application, (TabPanel)selectedElement, form,
+									Utils.isInheritedFormElement(selectedElement, form), new PersistGraphicalEditPartFigureFactory(application, form));
+								persistGraphicalEditPart.installEditPolicy(EditPolicy.COMPONENT_ROLE, new PersistEditPolicy(application, fieldPositioner));
+
+								return new StructuredSelection(persistGraphicalEditPart);
+							}
+						}
 						return OpenElementWizard.this.getSelection();
 					}
 

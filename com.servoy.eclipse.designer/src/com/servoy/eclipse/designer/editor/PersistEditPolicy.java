@@ -63,10 +63,10 @@ import com.servoy.j2db.persistence.ValueList;
 
 /**
  * This edit policy enables the removal and copy of a Form elements
- * 
+ *
  * @author rgansevles
  */
-class PersistEditPolicy extends ComponentEditPolicy
+public class PersistEditPolicy extends ComponentEditPolicy
 {
 
 	private final IFieldPositioner fieldPositioner;
@@ -247,7 +247,7 @@ class PersistEditPolicy extends ComponentEditPolicy
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.gef.editpolicies.ComponentEditPolicy#createDeleteCommand(org.eclipse.gef.requests.GroupRequest)
 	 */
 	@Override
