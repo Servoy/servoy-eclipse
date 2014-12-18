@@ -1,13 +1,13 @@
 <div id="contextMenu" class="dropdown clearfix" style="position:absolute;display:none;z-index:1000;">
 	<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
       <li ng-repeat="action in actions" ng-class="action.getItemClass()">
-      		<a tabindex="-1" href="#" ng-click="action.execute()" style="height:20px;background-repeat:no-repeat;background-position:left center;" ng-style="action.getIconStyle()">
+      		<a tabindex="-1" href="#" ng-click="action.execute()" style="margin-left:5px; height:20px;background-repeat:no-repeat;background-position:left center;" ng-style="action.getIconStyle()">
       			<span style="float:left">{{action.text}}</span>
       			<span style="float:right;" ng-show="action.shortcut != undefined" class="actionshortcut">{{action.shortcut}}</span>
       		</a>
       		<ul class="dropdown-menu" ng-show="action.subMenu != undefined">
       			 <li ng-repeat="subaction in action.subMenu" ng-class="subaction.getItemClass()">
-		      		<a tabindex="-1" href="#" ng-click="subaction.execute()" style="height:20px;background-repeat:no-repeat;background-position:left center;" ng-style="subaction.getIconStyle()">
+		      		<a tabindex="-1" href="#" ng-click="subaction.execute()" style="margin-left:10px; height:20px;background-repeat:no-repeat;background-position:left center;" ng-style="subaction.getIconStyle()">
 		      			<span style="float:left">{{subaction.text}}</span>
 		      			<span style="float:right;" ng-show="subaction.shortcut != undefined" class="actionshortcut">{{subaction.shortcut}}</span>
 		      		</a>
