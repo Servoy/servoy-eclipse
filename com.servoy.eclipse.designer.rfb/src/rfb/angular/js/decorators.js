@@ -1,4 +1,4 @@
-angular.module("decorators",['editor','margin','resizeknobs']).directive("decorator", function($rootScope,EDITOR_EVENTS){
+angular.module("decorators",['editor','margin','resizeknobs']).directive("decorator", function($rootScope,EDITOR_EVENTS,EDITOR_CONSTANTS){
 	return {
 	      restrict: 'E',
 	      transclude: true,
@@ -43,6 +43,14 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 					
 					currentNode.name =  node.attr('name');
 					currentNode.node = node;
+					var ghost = $scope.getGhost(node.attr("svy-id"));
+					if(ghost) {
+						currentNode.isResizable = (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_COMPONENT) || (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM);	
+					}
+					else {
+						currentNode.isResizable = true;
+					}
+					
 					var offset = node.offset();
 					
 					//this is so that ghost elements decorators are positioned correctly

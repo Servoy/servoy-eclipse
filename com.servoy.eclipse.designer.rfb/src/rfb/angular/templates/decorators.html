@@ -1,6 +1,6 @@
 <div class="decorators">
  <div class="decorationOverlay" ng-repeat="node in nodes" ng-style="node.style" svy-decorator-for="node.name">
  	<margin node='node.node'/>
- 	<resizeknobs node='node.node'/>
+ 	<resizeknobs node='node.node' ng-if='node.isResizable'/>
  </div>
 </div>
