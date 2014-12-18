@@ -75,6 +75,7 @@ public class JSFileExternalize implements IBuildParticipantFactory
 		 */
 		public void build(IBuildContext context) throws CoreException
 		{
+			if (context.getContents() == null || context.getContents().length == 0) return;
 			final Script script = getScript(context);
 			if (script != null)
 			{
@@ -109,8 +110,8 @@ public class JSFileExternalize implements IBuildParticipantFactory
 		{
 			if (reporter != null)
 			{
-				reporter.reportProblem(JSFileExternalizeProblem.NON_EXTERNALIZED_STRING,
-					WARNING_MESSAGE + "//$NON-NLS-" + stringLiteralIdx + "$", sourceStart, sourceStop);
+				reporter.reportProblem(JSFileExternalizeProblem.NON_EXTERNALIZED_STRING, WARNING_MESSAGE + "//$NON-NLS-" + stringLiteralIdx + "$", sourceStart,
+					sourceStop);
 			}
 		}
 
