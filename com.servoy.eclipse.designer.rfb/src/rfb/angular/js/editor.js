@@ -469,6 +469,21 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				$scope.glasspane.style.cursor = cursor;
 			}
 			
+			$scope.setGhosts = function(ghosts) {
+				$scope.ghosts = ghosts;
+				if($scope.ghosts.ghostContainers) {
+					for (i = 0; i< $scope.ghosts.ghostContainers.length; i++) {
+						for(j = 0; j < $scope.ghosts.ghostContainers[i].ghosts.length; j++) {
+							if($scope.ghosts.ghostContainers[i].ghosts[j].type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) {
+								var changedGhosts = $scope.ghosts.ghostContainers[i].ghosts;
+								$timeout(function() { $scope.rearrangeGhosts(changedGhosts) }, 0);
+								break;
+							}
+						}
+					}
+				}
+			}
+			
 			function getScrollSizes(x) {
 				var height = 0;
 				var width = 0;
@@ -560,7 +575,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				
 				var promise = $editorService.getGhostComponents({"resetPosition":true});
 				promise.then(function (result){
-					$scope.ghosts = result;
+					$scope.setGhosts(result);
 				});
 				$timeout(function() {					
 					if($scope.isAbsoluteFormLayout()) {
@@ -575,7 +590,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			$element.on('renderGhosts.content', function(event) {
 				var promise = $editorService.getGhostComponents();//no parameter, then the ghosts are not repositioned
 				promise.then(function (result){
-					$scope.ghosts = result;
+					$scope.setGhosts(result);
 				});
 			});
 			
@@ -591,7 +606,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 					else {
 						var promise = $editorService.getGhostComponents();//no parameter, then the ghosts are not repositioned
 						promise.then(function (result){
-							$scope.ghosts = result;
+							$scope.setGhosts(result);
 							$timeout(function() {
 								var nodes = Array.prototype.slice.call($scope.contentDocument.querySelectorAll("[svy-id]"));
 								var ghosts = Array.prototype.slice.call($scope.glasspane.querySelectorAll("[svy-id]"));

@@ -19,7 +19,7 @@
 		    	<div id="highlight"></div>
 				<!--Decorators-->
 				<decorator></decorator>
-				<div  class="ghostcontainer" ng-repeat="container in ghosts.ghostContainers" ng-style="getGhostContainerStyle(container)" ng-show="rearrangeGhosts(container.ghosts)">
+				<div  class="ghostcontainer" ng-repeat="container in ghosts.ghostContainers" ng-style="getGhostContainerStyle(container)">
 					<div class="ghost label" ng-repeat="ghost in container.ghosts track by $index" ng-style="getGhostStyle(ghost)" svy-id="{{ghost.uuid}}" ng-dblclick="openContainedForm(ghost)">
 						<hr ng-style="getGhostHRStyle(ghost)">{{ghost.text}}&nbsp;
 					</div>
