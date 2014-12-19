@@ -291,7 +291,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	{
 		public String convertProperty(Object id, String value)
 		{
-			return (value == null) ? "" : value;
+			return value == null ? "" : value;
 		}
 
 		public String convertValue(Object id, String value)
@@ -303,7 +303,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	{
 		public String convertProperty(Object id, String value)
 		{
-			return (value == null) ? "DEFAULT" : value;
+			return value == null ? "DEFAULT" : value;
 		}
 
 		public String convertValue(Object id, String value)
@@ -401,7 +401,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
 			Form form = (Form)(Utils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext()) ? persistContext.getContext()
 				: persistContext.getPersist()).getAncestor(IRepository.FORMS);
-
 
 			propertyDescriptors = new LinkedHashMap<Object, IPropertyDescriptor>();// defines order
 			hiddenPropertyDescriptors = new HashMap<Object, IPropertyDescriptor>();
@@ -686,7 +685,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		return propertyDescriptor;
 	}
 
-	private Map<Object, PropertyDescriptorWrapper> getBeansProperties()
+	protected Map<Object, PropertyDescriptorWrapper> getBeansProperties()
 	{
 		init();
 		return beansProperties;
@@ -1408,7 +1407,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				return borderPropertyController;
 			}
 
-			if (propertyType == BooleanPropertyType.INSTANCE)
+			if (propertyType == BooleanPropertyType.INSTANCE || propertyType.isProtecting())
 			{
 				return new CheckboxPropertyDescriptor(id, displayName);
 			}
@@ -1727,36 +1726,26 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		{
 			ServoyLog.logError("Unknown property id " + id, null);
 			return null;
-
 		}
+
 		if (id instanceof String)
 		{
 			AbstractRepository repository = (EclipseRepository)persistContext.getPersist().getRootObject().getRepository();
 			try
 			{
 				Element element = repository.getContentSpec().getPropertyForObjectTypeByName(persistContext.getPersist().getTypeID(), (String)id);
-				if (element == null)
-				{
-					// no content spec (example: form.width), try based on property descriptor
-					PropertyDescription desc = beanPropertyDescriptor.propertyDescriptor.getPropertyDescription(beanPropertyDescriptor.valueObject, this,
-						persistContext);
-					if (desc != null)
-					{
-						if (desc.getType() == IntPropertyType.INSTANCE)
-						{
-							return repository.convertArgumentStringToObject(IRepository.INTEGER, null);
-						}
-						if (desc.getType() == BooleanPropertyType.INSTANCE)
-						{
-							return repository.convertArgumentStringToObject(IRepository.BOOLEAN, null);
-						}
-						if (desc.getDefaultValue() != null) return desc.getDefaultValue();
-						if (desc.getType() != null) return desc.getType().defaultValue();
-					}
-				}
-				else
+				if (element != null)
 				{
 					return repository.convertArgumentStringToObject(element.getTypeID(), element.getDefaultTextualClassValue());
+				}
+
+				// no content spec (example: form.width), try based on property descriptor
+				PropertyDescription desc = beanPropertyDescriptor.propertyDescriptor.getPropertyDescription(beanPropertyDescriptor.valueObject, this,
+					persistContext);
+				if (desc != null)
+				{
+					if (desc.getDefaultValue() != null) return desc.getDefaultValue();
+					if (desc.getType() != null) return desc.getType().defaultValue();
 				}
 			}
 			catch (RepositoryException e)
@@ -2415,7 +2404,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	{
 		if (propertyDescription == null) return null;
 
-		IPropertyType propertyType = propertyDescription.getType();
+		IPropertyType< ? > propertyType = propertyDescription.getType();
 		if (propertyType == ValuesPropertyType.INSTANCE)
 		{
 			final ValuesConfig config = (ValuesConfig)propertyDescription.getConfig();

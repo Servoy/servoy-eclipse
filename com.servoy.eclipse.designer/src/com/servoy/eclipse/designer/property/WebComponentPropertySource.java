@@ -139,8 +139,8 @@ public class WebComponentPropertySource extends PersistPropertySource
 					{
 						config.addDefault(desc.getDefaultValue(), null);
 					}
-					props.add(new WebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config,
-						desc.getDefaultValue())));
+					props.add(new WebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, null, config,
+						desc.getDefaultValue(), null, false)));
 				}
 				else
 				{
@@ -149,9 +149,12 @@ public class WebComponentPropertySource extends PersistPropertySource
 			}
 		}
 
-		if (propertyDescription instanceof WebComponentSpecification) for (PropertyDescription desc : ((WebComponentSpecification)propertyDescription).getHandlers().values())
+		if (propertyDescription instanceof WebComponentSpecification)
 		{
-			props.add(new WebComponentPropertyHandler(desc));
+			for (PropertyDescription desc : ((WebComponentSpecification)propertyDescription).getHandlers().values())
+			{
+				props.add(new WebComponentPropertyHandler(desc));
+			}
 		}
 
 		return props.toArray(new IPropertyHandler[props.size()]);
@@ -159,11 +162,11 @@ public class WebComponentPropertySource extends PersistPropertySource
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * com.servoy.eclipse.ui.property.PersistPropertySource#createPropertyCategory(com.servoy.eclipse.ui.property.PersistPropertySource.PropertyDescriptorWrapper
 	 * )
-	 *
+	 * 
 	 * Properties from spec should be dispayed under "Component" category except for handlers and BEAN_PROPERTIES. Properties found with reflection are handled
 	 * by the super class (they go under "Properties").
 	 */

@@ -17,7 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
-import java.util.Map;
+import java.util.Collection;
 
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -69,8 +69,8 @@ public class SetTabSequence implements IServerService
 						{
 							WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
 								((Bean)persist).getBeanClassName());
-							Map<String, PropertyDescription> tabSeqProps = spec.getProperties(TypesRegistry.getType("tabseq"));
-							for (PropertyDescription pd : tabSeqProps.values())
+							Collection<PropertyDescription> tabSeqProps = spec.getProperties(TypesRegistry.getType("tabseq"));
+							for (PropertyDescription pd : tabSeqProps)
 							{
 								cc.add(new SetPropertyCommand("tabSeq", PersistPropertySource.createPersistPropertySource(persist, false), pd.getName(),
 									Integer.valueOf(tabIndex)));

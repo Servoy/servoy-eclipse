@@ -17,7 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
-import java.util.Map;
+import java.util.Collection;
 
 import org.eclipse.swt.widgets.Display;
 import org.json.JSONException;
@@ -40,6 +40,7 @@ import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyJSONObject;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author gganea@servoy.com
@@ -93,7 +94,7 @@ public class OpenContainedFormHandler implements IServerService
 									ghost.getParentBean().getBeanClassName());
 								if (spec != null)
 								{
-									Map<String, PropertyDescription> forms = null;
+									Collection<PropertyDescription> forms = null;
 									IPropertyType< ? > iPropertyType = spec.getFoundTypes().get(ghost.getTypeName());
 									if (iPropertyType instanceof ICustomType)
 									{
@@ -104,16 +105,13 @@ public class OpenContainedFormHandler implements IServerService
 										Debug.warn("Unexpected propertyType " + iPropertyType.getName());
 									}
 
-									if (forms != null)
+									for (PropertyDescription pd : Utils.iterate(forms))
 									{
-										for (PropertyDescription pd : forms.values())
+										open = openFormDesignEditor(s, beanXML.opt(pd.getName()));
+										if (!open)
 										{
-											open = openFormDesignEditor(s, beanXML.opt(pd.getName()));
-											if (!open)
-											{
-												Debug.log("Cannot open form with id " + beanXML.opt(pd.getName()) + "in design editor (Container uuid " +
-													args.getString("uuid") + ")");
-											}
+											Debug.log("Cannot open form with id " + beanXML.opt(pd.getName()) + "in design editor (Container uuid " +
+												args.getString("uuid") + ")");
 										}
 									}
 								}
@@ -125,8 +123,8 @@ public class OpenContainedFormHandler implements IServerService
 									((Bean)persist).getBeanClassName());
 								if (spec != null)
 								{
-									Map<String, PropertyDescription> forms = spec.getProperties(FormPropertyType.INSTANCE);
-									for (PropertyDescription pd : forms.values())
+									Collection<PropertyDescription> forms = spec.getProperties(FormPropertyType.INSTANCE);
+									for (PropertyDescription pd : forms)
 									{
 										open = openFormDesignEditor(s, bean.getProperty(pd.getName()));
 										if (!open)

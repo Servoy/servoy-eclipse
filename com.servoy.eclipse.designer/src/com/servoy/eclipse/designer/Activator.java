@@ -190,7 +190,6 @@ public class Activator extends AbstractUIPlugin
 								FormElement existingFe = webComponent.getFormElement();
 
 								WebComponentSpecification spec = webComponent.getSpecification();
-								Map<String, PropertyDescription> handlers = spec.getHandlers();
 								Set<String> allKeys = new HashSet<String>();
 								allKeys.addAll(newFe.getRawPropertyValues().keySet());
 								allKeys.addAll(existingFe.getRawPropertyValues().keySet());
@@ -200,7 +199,7 @@ public class Activator extends AbstractUIPlugin
 									Object newPropValue = newFe.getPropertyValue(property);
 									if (!Utils.equalObjects(currentPropValue, newPropValue))
 									{
-										if (handlers.get(property) != null)
+										if (spec.getHandler(property) != null)
 										{
 											// this is a handler change so a big change (component could react to a handler differently)
 											bigChange = true;
