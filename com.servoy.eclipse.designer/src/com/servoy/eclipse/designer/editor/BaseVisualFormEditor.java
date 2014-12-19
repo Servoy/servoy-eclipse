@@ -156,7 +156,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.ui.IEditorPart#init(org.eclipse.ui.IEditorSite, org.eclipse.ui.IEditorInput)
 	 */
 	@Override
@@ -721,7 +721,10 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 		if (activateContext == null)
 		{
 			IContextService service = (IContextService)getSite().getService(IContextService.class);
-			activateContext = service.activateContext(COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT);
+			if (service != null)
+			{
+				activateContext = service.activateContext(COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT);
+			}
 		}
 	}
 
