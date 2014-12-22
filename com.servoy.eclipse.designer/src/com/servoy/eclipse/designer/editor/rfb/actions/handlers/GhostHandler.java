@@ -435,7 +435,6 @@ public class GhostHandler implements IServerService
 			 */
 			private String getGhostLabel(IPersist next)
 			{
-				String nameText = "";
 				if (next instanceof ISupportName)
 				{
 					String name = ((ISupportName)next).getName();
@@ -455,7 +454,7 @@ public class GhostHandler implements IServerService
 					String dp = ((ISupportDataProviderID)next).getDataProviderID();
 					if (dp != null) return dp;
 				}
-				return nameText;
+				return "";
 			}
 
 			/**
