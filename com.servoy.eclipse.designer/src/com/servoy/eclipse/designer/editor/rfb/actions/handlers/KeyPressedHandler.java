@@ -33,9 +33,10 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.util.Utils;
 
 /**
- * @author user
+ * @author gganea@servoy.com
  *
  */
 public class KeyPressedHandler implements IServerService
@@ -48,6 +49,16 @@ public class KeyPressedHandler implements IServerService
 	{
 		this.editorPart = editorPart;
 		this.selectionProvider = selectionProvider;
+	}
+
+	private boolean containsInheritedElements(List<IPersist> selection)
+	{
+		Form form = editorPart.getForm();
+		for (IPersist iPersist : selection)
+		{
+			if (Utils.isInheritedFormElement(iPersist, form)) return true;
+		}
+		return false;
 	}
 
 	/**
@@ -78,7 +89,8 @@ public class KeyPressedHandler implements IServerService
 						}
 						if (selection.size() > 0)
 						{
-							editorPart.getCommandStack().execute(new FormElementDeleteCommand(selection.toArray(new IPersist[0])));
+							if (!containsInheritedElements(selection)) editorPart.getCommandStack().execute(
+								new FormElementDeleteCommand(selection.toArray(new IPersist[0])));
 						}
 					}
 				});
