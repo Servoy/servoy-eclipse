@@ -8,6 +8,10 @@
 
   <!-- Servoy related servlets -->
   
+  <absolute-ordering>
+    <name>servoy_ngclient</name>
+  </absolute-ordering>
+    
   <listener>
 		<listener-class>com.servoy.j2db.server.servlets.WarClientServletContextListener</listener-class>
   </listener>  
