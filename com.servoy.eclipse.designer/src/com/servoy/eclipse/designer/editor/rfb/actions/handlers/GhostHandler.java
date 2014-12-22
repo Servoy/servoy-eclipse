@@ -436,24 +436,24 @@ public class GhostHandler implements IServerService
 			private String getGhostLabel(IPersist next)
 			{
 				String nameText = "";
-				if (next instanceof ISupportDataProviderID)
+				if (next instanceof ISupportName)
 				{
-					String dp = ((ISupportDataProviderID)next).getDataProviderID();
-					if (dp != null) nameText = dp;
-				}
-				if (next instanceof Bean)
-				{
-					nameText = ((Bean)next).getBeanClassName();
+					String name = ((ISupportName)next).getName();
+					if (name != null) return name;
 				}
 				if (next instanceof AbstractBase)
 				{
 					Object label = ((AbstractBase)next).getProperty("text");
-					if (label != null) nameText = label.toString();
+					if (label != null) return label.toString();
 				}
-				if (next instanceof ISupportName)
+				if (next instanceof Bean)
 				{
-					String name = ((ISupportName)next).getName();
-					if (name != null) nameText = name;
+					return ((Bean)next).getBeanClassName();
+				}
+				if (next instanceof ISupportDataProviderID)
+				{
+					String dp = ((ISupportDataProviderID)next).getDataProviderID();
+					if (dp != null) return dp;
 				}
 				return nameText;
 			}
