@@ -123,7 +123,7 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 					IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
 					IWebBrowser browser = support.getExternalBrowser();
 					browser.openURL(new URL(
-						"https://wiki.servoy.com/display/public/DOCS/Post-Installation+Modifications#Post-InstallationModifications-InstallMozillaXulRunnerasinternalbrowser"));
+						"https://wiki.servoy.com/display/DOCS/Post-Installation+Modifications#Post-InstallationModifications-InstallMozillaXulRunnerasinternalbrowser"));
 				}
 				catch (Exception ex)
 				{
