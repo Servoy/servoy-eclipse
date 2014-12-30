@@ -194,6 +194,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 								$(rows[i]).removeClass('rowDesign');
 							}
 						}
+						editorScope.refreshEditorContent();
 					}
 				},
 				getDraggingFromPallete: function(){
