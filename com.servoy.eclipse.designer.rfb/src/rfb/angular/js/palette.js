@@ -34,14 +34,14 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 				var mousemovecallback = $scope.registerDOMEvent("mousemove","EDITOR", function(ev){
 					if (dragClone)
 					{
+						var dropTarget = null;
 						var css = { top: ev.pageY, left: ev.pageX }
 						dragClone.css(css);
-						css = $scope.convertToContentPoint(css);
-						if (angularElement)
-							angularElement.css(css);
-						if (type == "layout") {
-							var realName = layoutName?layoutName:componentName;
-							var dropTarget = utils.getNode(ev, true);
+						if (angularElement && $scope.isAbsoluteFormLayout())
+							angularElement.css($scope.convertToContentPoint(css));
+						if (type == "layout" || type == "component") {
+							var realName = layoutName?layoutName:"component";
+							dropTarget = utils.getNode(ev, true);
 							if (!dropTarget){
 								// this is on the form, can this layout container be dropped on the form?
 								if (allowedParents.indexOf("form") == -1){
@@ -58,7 +58,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 								}
 								var dropTargetLayoutName = dropTarget.getAttribute("svy-layoutname");
 								// is this element able to drop on the dropTarget?
-								if (!allowedParents.indexOf(dropTargetLayoutName) == -1) {
+								if (allowedParents && !allowedParents.indexOf(dropTargetLayoutName) == -1) {
 									$scope.glasspane.style.cursor="no-drop";
 									return;
 								}
@@ -66,7 +66,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 							$scope.glasspane.style.cursor="";
 						}
 						else if (type != "component"){
-							var dropTarget = utils.getNode(ev);
+							dropTarget = utils.getNode(ev);
 							if (dropTarget && dropTarget.getAttribute("svy-types")){
 								if (dropTarget.getAttribute("svy-types").indexOf(type) > 0)
 									$scope.glasspane.style.cursor="";
@@ -75,7 +75,14 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 							}
 							else $scope.glasspane.style.cursor="no-drop";
 						}
-						else $scope.glasspane.style.cursor="";
+						else {
+							dropTarget = utils.getNode(ev, true);
+							$scope.glasspane.style.cursor="";
+						}
+						
+						if (dropTarget && angularElement && $scope.glasspane.style.cursor=="" && !$scope.isAbsoluteFormLayout()) {
+							$(dropTarget).append(angularElement);
+						}
 					}
 					else
 					{
@@ -92,20 +99,31 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						})
 						$('body').append(dragClone);
 						if (type=='component' || type == "layout") {
-							angularElement = $scope.getEditorContentRootScope().createComponent('<div style="border-style: dotted;"><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-autoapply-disabled=\'true\'/></div>',model);
-							var elWidth = model.size ? model.size.width : 100;
-							var elHeight = model.size ? model.size.height : 100;
-							var css = $scope.convertToContentPoint({
-								position: 'absolute',
-								top: event.pageY,
-								left: event.pageX,
-								width: (elWidth +'px'),
-								height: (elHeight +'px'),
-								'z-index': 4,
-								opacity: 0,
-								transition: 'opacity .5s ease-in-out 0'
-							});
-							angularElement.css(css)
+							if (type=='component') {
+								angularElement = $scope.getEditorContentRootScope().createComponent('<div style="border-style: dotted;"><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-autoapply-disabled=\'true\'/></div>',model);
+							}
+							else {
+								// tagname is the full element
+								angularElement = $scope.getEditorContentRootScope().createComponent(tagName);
+							}
+							if ($scope.isAbsoluteFormLayout()) {
+								var elWidth = model.size ? model.size.width : 100;
+								var elHeight = model.size ? model.size.height : 100;
+								var css = $scope.convertToContentPoint({
+									position: 'absolute',
+									top: event.pageY,
+									left: event.pageX,
+									width: (elWidth +'px'),
+									height: (elHeight +'px'),
+									'z-index': 4,
+									opacity: 0,
+									transition: 'opacity .5s ease-in-out 0'
+								});
+								angularElement.css(css)
+							}
+							else {
+								angularElement.css('opacity', '0');
+							}
 						}
 					}
 				});
@@ -142,8 +160,8 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						if (dropTarget) {
 							component.dropTargetUUID = dropTarget.getAttribute("svy-id");
 						}
-						if (type == "layout") {
-							var realName = layoutName?layoutName:componentName;
+						if (type == "layout" || type == "component") {
+							var realName = layoutName?layoutName:"component";
 							dropTarget = utils.getNode(ev, true);
 							if (!dropTarget){
 								// this is on the form, can this layout container be dropped on the form?
@@ -155,7 +173,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 									return; // the drop target doesn't allow this layout container type
 								var dropTargetLayoutName = dropTarget.getAttribute("svy-layoutname");
 								// is this element able to drop on the dropTarget?
-								if (!allowedParents.indexOf(dropTargetLayoutName) == -1) return;
+								if (allowedParents && !allowedParents.indexOf(dropTargetLayoutName) == -1) return;
 							}
 						}
 						else if (type!="component") {

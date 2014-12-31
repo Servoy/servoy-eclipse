@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -105,7 +106,17 @@ public class DesignerFilter implements Filter
 							}
 							jsonWriter.key("componentType").value("layout");
 							jsonWriter.key("displayName").value(spec.getDisplayName());
-							jsonWriter.key("tagName").value("div"); //TODO is this configurable by the spec
+							JSONObject config = spec.getConfig() instanceof String ? new JSONObject((String)spec.getConfig()) : null;
+							if (config == null)
+							{
+								jsonWriter.key("tagName").value("<div style='border-style: dotted;'></div>"); //TODO is tagname configurable by the spec
+							}
+							else
+							{
+								StringBuilder sb = new StringBuilder();
+								createLayoutDiv(config, sb, entry.getValue());
+								jsonWriter.key("tagName").value(sb.toString());
+							}
 							Map<String, Object> model = new HashMap<String, Object>();
 							PropertyDescription pd = spec.getProperty("size");
 							if (pd != null && pd.getDefaultValue() != null)
@@ -125,6 +136,7 @@ public class DesignerFilter implements Filter
 								jsonWriter.key("icon").value(spec.getIcon());
 							}
 							jsonWriter.key("allowedParents").value(new JSONArray(spec.getAllowedParents()));
+
 
 							jsonWriter.endObject();
 						}
@@ -217,6 +229,43 @@ public class DesignerFilter implements Filter
 			Debug.error(e);
 			throw e;
 		}
+	}
+
+	/**
+	 * @param config
+	 * @param sb
+	 * @param specifications
+	 * @throws JSONException
+	 */
+	protected void createLayoutDiv(JSONObject config, StringBuilder sb, Map<String, WebLayoutSpecification> specifications) throws JSONException
+	{
+		sb.append("<div style='border-style: dotted;' "); // TODO tagname from spec?
+		Iterator keys = config.keys();
+		while (keys.hasNext())
+		{
+			String key = (String)keys.next();
+			if (key.equals("children") || key.equals("layoutName")) continue;
+			String value = config.getString(key);
+			sb.append(key);
+			sb.append("='");
+			sb.append(value);
+			sb.append("' ");
+		}
+		sb.append(">");
+		JSONArray children = config.optJSONArray("children");
+		if (children != null)
+		{
+			for (int i = 0; i < children.length(); i++)
+			{
+				JSONObject jsonObject = children.getJSONObject(i);
+				JSONObject childModel = jsonObject.optJSONObject("model");
+				if (childModel != null)
+				{
+					createLayoutDiv(childModel, sb, specifications);
+				}
+			}
+		}
+		sb.append("</div>");
 	}
 
 	private List<String> getPalleteTypeNames(WebComponentSpecification spec)
