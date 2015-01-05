@@ -907,6 +907,10 @@ public class SolutionDeserializer
 												}
 											}
 										}
+										else
+										{
+											persist_json_map.remove(persist);
+										}
 									}
 								}
 							}
