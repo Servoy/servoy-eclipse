@@ -39,7 +39,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						dragClone.css(css);
 						if (angularElement && $scope.isAbsoluteFormLayout())
 							angularElement.css($scope.convertToContentPoint(css));
-						if (type == "layout" || type == "component") {
+						if (type == "layout" || (type == "component" && !$scope.isAbsoluteFormLayout())) {
 							var realName = layoutName?layoutName:"component";
 							dropTarget = utils.getNode(ev, true);
 							if (!dropTarget){
@@ -160,7 +160,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						if (dropTarget) {
 							component.dropTargetUUID = dropTarget.getAttribute("svy-id");
 						}
-						if (type == "layout" || type == "component") {
+						if (type == "layout" || (type == "component" && !$scope.isAbsoluteFormLayout())) {
 							var realName = layoutName?layoutName:"component";
 							dropTarget = utils.getNode(ev, true);
 							if (!dropTarget){
