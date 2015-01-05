@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.swing.Icon;
@@ -730,15 +731,15 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					else if (type == UserNodeType.COMPONENTS)
 					{
 						WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
-						Map<String, URL> packages = provider.getPackagesToURLs();
+						Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
-						for (String packageName : packages.keySet())
+						for (Map.Entry<String, URL> entry : packages.entrySet())
 						{
-							IResource resource = getResource(packages.get(packageName));
+							IResource resource = getResource(entry.getValue());
 							if (resource != null)
 							{
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(packageName, UserNodeType.COMPONENTS_PACKAGE, resource, packageIcon);
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(entry.getKey(), UserNodeType.COMPONENTS_PACKAGE, resource, packageIcon);
 								node.parent = un;
 								children.add(node);
 							}
@@ -752,6 +753,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (components != null)
 						{
+							Collections.sort(components);
 							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
 								SolutionSerializer.COMPONENTS_DIR_NAME);
 							Image componentIcon = uiActivator.loadImageFromBundle("bean.gif");
@@ -770,15 +772,15 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					else if (type == UserNodeType.SERVICES)
 					{
 						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
-						Map<String, URL> packages = provider.getPackagesToURLs();
+						Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
-						for (String packageName : packages.keySet())
+						for (Map.Entry<String, URL> entry : packages.entrySet())
 						{
-							IResource resource = getResource(packages.get(packageName));
+							IResource resource = getResource(entry.getValue());
 							if (resource != null)
 							{
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(packageName, UserNodeType.SERVICES_PACKAGE, resource, packageIcon);
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(entry.getKey(), UserNodeType.SERVICES_PACKAGE, resource, packageIcon);
 								node.parent = un;
 								children.add(node);
 							}
@@ -792,6 +794,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (services != null)
 						{
+							Collections.sort(services);
 							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
 								SolutionSerializer.SERVICES_DIR_NAME);
 							Image serviceDefaultIcon = uiActivator.loadImageFromBundle("service.png");
@@ -2416,7 +2419,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.core.IWebResourceChangedListener#changed()
 	 */
 	@Override
