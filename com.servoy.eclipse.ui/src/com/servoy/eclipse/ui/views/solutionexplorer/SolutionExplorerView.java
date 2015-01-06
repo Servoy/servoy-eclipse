@@ -3070,7 +3070,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					EditorUtil.openScriptEditor((Form)doubleClickedItem.getRealObject(), null, true);
 				}
 				else if (doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE ||
-					(doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM && !expandable && SolutionMetaData.isImportHook(((ServoyProject)doubleClickedItem.getRealObject()).getSolutionMetaData())))
+					(doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM && !expandable && (SolutionMetaData.isImportHook(((ServoyProject)doubleClickedItem.getRealObject()).getSolutionMetaData()) || ((ServoyProject)doubleClickedItem.getRealObject()).getSolutionMetaData().getSolutionType() == SolutionMetaData.MODULE)))
 				{
 					Object clickedRealObject = doubleClickedItem.getRealObject();
 					if (clickedRealObject instanceof ServoyProject) ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(
