@@ -47,6 +47,7 @@ import org.sablo.websocket.IWebsocketSession;
 import org.sablo.websocket.IWebsocketSessionFactory;
 import org.sablo.websocket.WebsocketSessionManager;
 
+import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.I18NChangeListener;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -210,6 +211,12 @@ public class Activator extends AbstractUIPlugin
 											bigChange = true;
 											break outer;
 										}
+										if (property.equals("visible") &&
+											(fc.getForm().getView() == IFormConstants.VIEW_TYPE_TABLE || fc.getForm().getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED))
+										{
+											bigChange = true;
+											break outer;
+										}
 										if (webComponent.getParent() != formUI && (property.equals("location") || property.equals("size")))
 										{
 											bigChange = true;
@@ -326,7 +333,7 @@ public class Activator extends AbstractUIPlugin
 
 		/*
 		 * (non-Javadoc)
-		 *
+		 * 
 		 * @see com.servoy.j2db.server.ngclient.NGClient#shutDown(boolean)
 		 */
 		@Override
@@ -378,7 +385,7 @@ public class Activator extends AbstractUIPlugin
 
 		/*
 		 * (non-Javadoc)
-		 *
+		 * 
 		 * @see com.servoy.j2db.persistence.IPersistChangeListener#persistChanges(java.util.Collection)
 		 */
 		@Override
@@ -458,7 +465,7 @@ public class Activator extends AbstractUIPlugin
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -547,7 +554,7 @@ public class Activator extends AbstractUIPlugin
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
