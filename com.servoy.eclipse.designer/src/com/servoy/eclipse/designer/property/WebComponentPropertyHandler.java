@@ -45,6 +45,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGColorPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGDimensionPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGFontPropertyType;
@@ -141,7 +142,8 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		{
 			return value;
 		}
-		if (type == FunctionPropertyType.INSTANCE || type == ServoyFunctionPropertyType.INSTANCE || type == ValueListPropertyType.INSTANCE)
+		if (type == FunctionPropertyType.INSTANCE || type == ServoyFunctionPropertyType.INSTANCE || type == ValueListPropertyType.INSTANCE ||
+			type == FormPropertyType.INSTANCE)
 		{
 			if (value == null) return Integer.valueOf(0);
 			if (value instanceof Integer) return value;
@@ -219,6 +221,11 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		{
 			ValueList val = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getValueList(((Integer)value).intValue());
 			convertedValue = (val == null) ? null : val.getUUID().toString();
+		}
+		else if (propertyDescription.getType() == FormPropertyType.INSTANCE)
+		{
+			Form frm = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getForm(((Integer)value).intValue());
+			convertedValue = (frm == null) ? null : frm.getUUID().toString();
 		}
 		else
 		{
