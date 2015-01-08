@@ -60,7 +60,7 @@ import com.servoy.j2db.util.Settings;
 
 /**
  * Common implementation for workspace based exporter applications.
- * 
+ *
  * @author acostescu
  */
 public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implements IApplication, IBundleStopListener
@@ -333,9 +333,16 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 								}
 							}
 
-							if (errors.size() > 0 && !dbDownMode && configuration.getExportUsingDbiFileInfoOnly()) // TODO see large comment some lines above; remove this when error markers can be generated based on dbi files only
+							if (errors.size() > 0 && !dbDownMode && (configuration.getExportUsingDbiFileInfoOnly() || configuration.isIgnoreBuildErrors())) // TODO see large comment some lines above; remove this when error markers can be generated based on dbi files only
 							{
-								output("Found error markers but -dbi was specified. Ignoring the following errors and exporting based on .dbi files instead of database contents..."); //$NON-NLS-1$
+								if (configuration.isIgnoreBuildErrors())
+								{
+									output("Found error markers but -ie was specified. Ignoring the following errors."); //$NON-NLS-1$
+								}
+								else
+								{
+									output("Found error markers but -dbi was specified. Ignoring the following errors and exporting based on .dbi files instead of database contents..."); //$NON-NLS-1$
+								}
 								if (verbose)
 								{
 									for (IMarker marker : errors)
@@ -345,8 +352,9 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 								}
 							}
 
+
 							// if db is down we still try to export (using dbi files)
-							if (errors.size() > 0 && !(dbDownMode || configuration.getExportUsingDbiFileInfoOnly())) // TODO see large comment some lines above; remove this when error markers can be generated based on dbi files only
+							if (errors.size() > 0 && !(dbDownMode || configuration.getExportUsingDbiFileInfoOnly() || configuration.isIgnoreBuildErrors())) // TODO see large comment some lines above; remove this when error markers can be generated based on dbi files only
 							{
 								exitCode = EXIT_EXPORT_FAILED;
 								outputError("Found error markers in projects for solution '" + solutionName + "'."); //$NON-NLS-1$//$NON-NLS-2$
@@ -388,7 +396,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		}
 		finally
 		{
-			outputExtra("Restoring closed projects if needed."); //$NON-NLS-1$ 
+			outputExtra("Restoring closed projects if needed."); //$NON-NLS-1$
 			for (IProject p : existingClosedProjects)
 			{
 				try
@@ -401,7 +409,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 					outputError("Cannot restore project '" + p.getName() + "' to it's closed state after export. Check workspace log."); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
-			outputExtra("Removing imported projects from workspace (without removing content) if needed."); //$NON-NLS-1$ 
+			outputExtra("Removing imported projects from workspace (without removing content) if needed."); //$NON-NLS-1$
 			for (IProject p : importedProjects)
 			{
 				try

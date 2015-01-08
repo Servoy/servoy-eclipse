@@ -36,6 +36,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 	private String appServerDir = "../../application_server";
 	private boolean exportUsingDbiFileInfoOnly = false;
 	private boolean exportIfDBDown = false;
+	private boolean ignoreBuildErrors = false;
 
 	// this must not be done in constructor as it calls an abstract method that can end up setting fields in an extending class - fields that are not yet set to default values and will be after the constructor of this class finishes
 	public void initialize(String[] args)
@@ -115,6 +116,10 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 				{
 					exportIfDBDown = true;
 				}
+				else if ("-ie".equals(args[i]))
+				{
+					ignoreBuildErrors = true;
+				}
 				i++;
 			}
 
@@ -147,7 +152,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 			+ "   -help or -? or /? or no arguments ... shows current help message.\n\n"
 			+ "                  OR\n\n"
 			+ "   -s <solutions_separated_by_comma> -o <out_dir> -data <workspace_location> [optional_args]\n\n"
-			
+
 			+ "        Optional arguments:\n\n"
 			+ "        -verbose ... prints more info to console\n"
 			+ "        -p <properties_file> ... path and name of properties file.\n"
@@ -158,6 +163,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 			+ "             for in direct subfolders of the given 'workspace_location'.     Example: if the\n"
 			+ "             workspace needs to contain projects from different git repositories,  those can\n"
 			+ "             be checked out in '<workspace_location>/a', '<workspace_location>/b' and so on.\n"
+			+ "        -ie ignore build warnings.CAUTION! usage of -ie is highly discouraged , export shuld not proceed if there are errors in solution\n"
 			+ getHelpMessageDbiDbd();
 		// @formatter:on
 	}
@@ -178,7 +184,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 	}
 
 	/**
-	 * Called inside the constructor. So you can count on this method being called in child classes as part of the super(...) call. 
+	 * Called inside the constructor. So you can count on this method being called in child classes as part of the super(...) call.
 	 */
 	protected abstract void parseArguments(String[] args);
 
@@ -240,6 +246,11 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 	public boolean exportIfDBDown()
 	{
 		return exportIfDBDown;
+	}
+
+	public boolean isIgnoreBuildErrors()
+	{
+		return ignoreBuildErrors;
 	}
 
 	public void info(String message, int priority)
