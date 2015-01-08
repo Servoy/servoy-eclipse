@@ -33,12 +33,13 @@ import com.servoy.j2db.util.Pair;
 
 /**
  * This action opens in the editor the user script element currently selected in the outline of the solution view.
- * 
+ *
  * @author acostescu
  */
 public class OpenScriptAction extends Action implements ISelectionChangedListener
 {
 
+	public static final String OPEN_SCRIPT_ID = "com.servoy.eclipse.ui.OpenFormJsAction";
 	protected IStructuredSelection selection;
 
 	/**
@@ -49,6 +50,7 @@ public class OpenScriptAction extends Action implements ISelectionChangedListene
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.gif"));
 		setText("Open in Script Editor");
 		setToolTipText(getText());
+		setId(OPEN_SCRIPT_ID);
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)

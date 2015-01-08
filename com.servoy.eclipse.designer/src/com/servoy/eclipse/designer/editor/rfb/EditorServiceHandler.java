@@ -105,6 +105,7 @@ public class EditorServiceHandler implements IServerService
 			}
 
 		});
+		configuredHandlers.put("getShortcuts", new ShortcutsHandler(editorPart));
 	}
 
 	/**

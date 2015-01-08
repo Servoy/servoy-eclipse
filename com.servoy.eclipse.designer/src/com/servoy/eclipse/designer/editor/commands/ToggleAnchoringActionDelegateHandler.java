@@ -20,7 +20,7 @@ import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySou
 
 /**
  * An action to change the anchoring of selected objects.
- * 
+ *
  * @author rgansevles
  */
 public abstract class ToggleAnchoringActionDelegateHandler extends ToggleCheckboxActionDelegateHandler
@@ -32,6 +32,8 @@ public abstract class ToggleAnchoringActionDelegateHandler extends ToggleCheckbo
 
 	public static class ToggleAnchoringTop extends ToggleAnchoringActionDelegateHandler
 	{
+		public static final String TOGGLE_ANCHORING_TOP_ID = "com.servoy.eclipse.designer.anchorTop";
+
 		public ToggleAnchoringTop()
 		{
 			super(AnchorPropertySource.TOP);
@@ -39,6 +41,8 @@ public abstract class ToggleAnchoringActionDelegateHandler extends ToggleCheckbo
 	}
 	public static class ToggleAnchoringRight extends ToggleAnchoringActionDelegateHandler
 	{
+		public static final String TOGGLE_ANCHORING_RIGHT_ID = "com.servoy.eclipse.designer.anchorRight";
+
 		public ToggleAnchoringRight()
 		{
 			super(AnchorPropertySource.RIGHT);
@@ -46,6 +50,8 @@ public abstract class ToggleAnchoringActionDelegateHandler extends ToggleCheckbo
 	}
 	public static class ToggleAnchoringBottom extends ToggleAnchoringActionDelegateHandler
 	{
+		public static final String TOGGLE_ANCHORING_BOTTOM_ID = "com.servoy.eclipse.designer.anchorBottom";
+
 		public ToggleAnchoringBottom()
 		{
 			super(AnchorPropertySource.BOTTOM);
@@ -53,6 +59,8 @@ public abstract class ToggleAnchoringActionDelegateHandler extends ToggleCheckbo
 	}
 	public static class ToggleAnchoringLeft extends ToggleAnchoringActionDelegateHandler
 	{
+		public static final String TOGGLE_ANCHORING_LEFT_ID = "com.servoy.eclipse.designer.anchorLeft";
+
 		public ToggleAnchoringLeft()
 		{
 			super(AnchorPropertySource.LEFT);

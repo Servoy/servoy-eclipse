@@ -886,6 +886,11 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 		reloadPalette: function() {
 			$rootScope.$emit(EDITOR_EVENTS.RELOAD_PALETTE, "")
 		},
+		
+		getShortcuts: function()
+		{
+			return wsSession.callService('formeditor', 'getShortcuts');
+		},
 		// add more service methods here
 	}
 });
