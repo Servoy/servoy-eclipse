@@ -58,16 +58,16 @@ angular.module('designsize',['toolbar','editor']).run(function($rootScope, $tool
 			}
 		};
 
-	var btnRotate = {
-			text: "Rotate",
-			icon: "designsize/gear-1-64x64.png",
-			enabled: true,
-			onclick: function() {
-				isPortrait = !isPortrait;
-				var size = editor.getContentSize();
-				editor.setContentSize(size.height, size.width);
-			},
-		};
+//	var btnRotate = {
+//			text: "Rotate",
+//			icon: "designsize/gear-1-64x64.png",
+//			enabled: true,
+//			onclick: function() {
+//				isPortrait = !isPortrait;
+//				var size = editor.getContentSize();
+//				editor.setContentSize(size.height, size.width);
+//			},
+//		};
 
 	var editor;
 	$pluginRegistry.registerPlugin(function(editorScope) {
@@ -77,13 +77,13 @@ angular.module('designsize',['toolbar','editor']).run(function($rootScope, $tool
 			btnTabletSize.enabled = false;
 			btnMobileSize.enabled = false;
 			btnCustomSize.enabled = false;
-			btnRotate.enabled = false;
+			//btnRotate.enabled = false;
 		}
 		$toolbar.add(btnDesktopSize, TOOLBAR_CATEGORIES.STICKY);
 		$toolbar.add(btnTabletSize, TOOLBAR_CATEGORIES.STICKY);
 		$toolbar.add(btnMobileSize, TOOLBAR_CATEGORIES.STICKY);
 		$toolbar.add(btnCustomSize, TOOLBAR_CATEGORIES.STICKY);
-		$toolbar.add(btnRotate, TOOLBAR_CATEGORIES.STICKY);
+		//$toolbar.add(btnRotate, TOOLBAR_CATEGORIES.STICKY);
 		$toolbar.refresh();
 	});
 	

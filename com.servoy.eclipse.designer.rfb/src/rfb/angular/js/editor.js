@@ -443,9 +443,6 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				delete $scope.contentStyle.h
 				delete $scope.contentStyle.w
 				$scope.glasspaneStyle = {};
-				$timeout(function() {
-					$scope.setContentSizes();
-				},100);
 			}
 			$scope.setContentSizeFull = function() {
 				$scope.contentStyle = {top: "0px", left: "0px",paddingRight: "80px", bottom: "0px"};
@@ -454,9 +451,6 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				delete $scope.contentStyle.h
 				delete $scope.contentStyle.w
 				$scope.glasspaneStyle = {};
-				$timeout(function() {
-					$scope.setContentSizes();
-				},100);
 			},
 			$scope.getContentSize = function() {
 				return {width: $scope.contentStyle.width, height: $scope.contentStyle.height};
