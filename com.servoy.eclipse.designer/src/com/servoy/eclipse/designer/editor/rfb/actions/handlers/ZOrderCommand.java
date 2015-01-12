@@ -20,18 +20,22 @@ package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.designer.actions.AbstractEditorActionDelegateHandler;
 import com.servoy.eclipse.designer.actions.ZOrderAction;
 import com.servoy.eclipse.designer.actions.ZOrderAction.OrderableElement;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
@@ -39,16 +43,25 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
  * @author user
  *
  */
-public class ZOrderHandler implements IServerService
+public class ZOrderCommand extends AbstractEditorActionDelegateHandler implements IServerService
 {
 
 	private final ISelectionProvider selectionProvider;
 	private final BaseVisualFormEditor editorPart;
+	private final String methodName;
 
-	public ZOrderHandler(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider)
+	public ZOrderCommand(String methodName)
+	{
+		this.editorPart = null;
+		this.selectionProvider = null;
+		this.methodName = methodName;
+	}
+
+	public ZOrderCommand(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider)
 	{
 		this.editorPart = editorPart;
 		this.selectionProvider = selectionProvider;
+		this.methodName = null;
 	}
 
 	/**
@@ -64,14 +77,7 @@ public class ZOrderHandler implements IServerService
 				List selection = ((IStructuredSelection)selectionProvider.getSelection()).toList();
 				if (selection.size() > 0)
 				{
-					List<OrderableElement> elements = ZOrderAction.calculateNewZOrder(editorPart.getForm(), selection, methodName);
-					CompoundCommand cc = new CompoundCommand();
-					for (OrderableElement element : elements)
-					{
-						cc.add(new SetPropertyCommand("zindex", PersistPropertySource.createPersistPropertySource(element.getFormElement(), false),
-							StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), element.zIndex));
-					}
-					editorPart.getCommandStack().execute(cc);
+					editorPart.getCommandStack().execute(createCommand());
 					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, new ArrayList<IPersist>(selection));
 				}
 			}
@@ -79,4 +85,75 @@ public class ZOrderHandler implements IServerService
 		return null;
 	}
 
+	protected Command createCommand(String methodName)
+	{
+		List selection = null;
+		if (selectionProvider != null)
+		{
+			selection = ((IStructuredSelection)selectionProvider.getSelection()).toList();
+		}
+		else
+		{
+			selection = getSelectedObjects();
+		}
+		Form form = null;
+		if (editorPart != null)
+		{
+			form = editorPart.getForm();
+		}
+		else
+		{
+			form = ((BaseVisualFormEditor)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor()).getForm();
+		}
+		if (selection.size() > 0)
+		{
+			List<OrderableElement> elements = ZOrderAction.calculateNewZOrder(form, selection, methodName);
+			CompoundCommand cc = new CompoundCommand();
+			for (OrderableElement element : elements)
+			{
+				cc.add(new SetPropertyCommand("zindex", PersistPropertySource.createPersistPropertySource(element.getFormElement(), false),
+					StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName(), element.zIndex));
+			}
+			return cc;
+		}
+		return super.createCommand();
+	}
+
+	@Override
+	protected Command createCommand()
+	{
+		return createCommand(methodName);
+	}
+
+	public static class ToFront extends ZOrderCommand
+	{
+		public ToFront()
+		{
+			super("z_order_bring_to_front");
+		}
+	}
+
+	public static class ToBack extends ZOrderCommand
+	{
+		public ToBack()
+		{
+			super("z_order_send_to_back");
+		}
+	}
+
+	public static class ToFrontOneStep extends ZOrderCommand
+	{
+		public ToFrontOneStep()
+		{
+			super("z_order_bring_to_front_one_step");
+		}
+	}
+
+	public static class ToBackOneStep extends ZOrderCommand
+	{
+		public ToBackOneStep()
+		{
+			super("z_order_send_to_back_one_step");
+		}
+	}
 }

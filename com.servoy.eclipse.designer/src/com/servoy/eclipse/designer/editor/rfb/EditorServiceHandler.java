@@ -36,10 +36,10 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenElementWizard
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenScriptHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetPropertiesHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetSelectionHandler;
-import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetTabSequence;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetTabSequenceCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SpacingCentersPack;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdateFieldPositioner;
-import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderHandler;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
@@ -71,12 +71,12 @@ public class EditorServiceHandler implements IServerService
 	{
 		configuredHandlers.put("getGhostComponents", new GhostHandler(editorPart));
 		configuredHandlers.put("setSelection", new SetSelectionHandler(editorPart, selectionListener, selectionProvider));
-		configuredHandlers.put("setTabSequence", new SetTabSequence(editorPart, selectionProvider));
+		configuredHandlers.put("setTabSequence", new SetTabSequenceCommand(editorPart, selectionProvider));
 
-		configuredHandlers.put("z_order_bring_to_front_one_step", new ZOrderHandler(editorPart, selectionProvider));
-		configuredHandlers.put("z_order_send_to_back_one_step", new ZOrderHandler(editorPart, selectionProvider));
-		configuredHandlers.put("z_order_bring_to_front", new ZOrderHandler(editorPart, selectionProvider));
-		configuredHandlers.put("z_order_send_to_back", new ZOrderHandler(editorPart, selectionProvider));
+		configuredHandlers.put("z_order_bring_to_front_one_step", new ZOrderCommand(editorPart, selectionProvider));
+		configuredHandlers.put("z_order_send_to_back_one_step", new ZOrderCommand(editorPart, selectionProvider));
+		configuredHandlers.put("z_order_bring_to_front", new ZOrderCommand(editorPart, selectionProvider));
+		configuredHandlers.put("z_order_send_to_back", new ZOrderCommand(editorPart, selectionProvider));
 
 		configuredHandlers.put("horizontal_spacing", new SpacingCentersPack(editorPart, selectionProvider));
 		configuredHandlers.put("vertical_spacing", new SpacingCentersPack(editorPart, selectionProvider));

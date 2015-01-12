@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
 import java.util.Collection;
 
+import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -30,6 +31,7 @@ import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.property.types.TypesRegistry;
 import org.sablo.websocket.IServerService;
 
+import com.servoy.eclipse.designer.actions.AbstractEditorActionDelegateHandler;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.Bean;
@@ -40,13 +42,19 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
  * @author user
  *
  */
-public class SetTabSequence implements IServerService
+public class SetTabSequenceCommand extends AbstractEditorActionDelegateHandler implements IServerService
 {
 	private final BaseVisualFormEditor editorPart;
 	private final ISelectionProvider selectionProvider;
 
 
-	public SetTabSequence(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider)
+	public SetTabSequenceCommand()
+	{
+		this.editorPart = null;
+		this.selectionProvider = null;
+	}
+
+	public SetTabSequenceCommand(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider)
 	{
 		this.editorPart = editorPart;
 		this.selectionProvider = selectionProvider;
@@ -58,37 +66,50 @@ public class SetTabSequence implements IServerService
 		{
 			public void run()
 			{
-				IPersist[] selection = (IPersist[])((IStructuredSelection)selectionProvider.getSelection()).toList().toArray(new IPersist[0]);
-				if (selection.length > 0)
-				{
-					int tabIndex = 1;
-					CompoundCommand cc = new CompoundCommand();
-					for (IPersist persist : selection)
-					{
-						if (persist instanceof Bean)
-						{
-							WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-								((Bean)persist).getBeanClassName());
-							Collection<PropertyDescription> tabSeqProps = spec.getProperties(TypesRegistry.getType("tabseq"));
-							for (PropertyDescription pd : tabSeqProps)
-							{
-								cc.add(new SetPropertyCommand("tabSeq", PersistPropertySource.createPersistPropertySource(persist, false), pd.getName(),
-									Integer.valueOf(tabIndex)));
-								tabIndex++;
-							}
-						}
-						else
-						{
-							cc.add(new SetPropertyCommand("tabSeq", PersistPropertySource.createPersistPropertySource(persist, false),
-								StaticContentSpecLoader.PROPERTY_TABSEQ.getPropertyName(), Integer.valueOf(tabIndex)));
-							tabIndex++;
-						}
-					}
-					editorPart.getCommandStack().execute(cc);
-				}
+				editorPart.getCommandStack().execute(createCommand());
 			}
 		});
 		return null;
 	}
 
+	@Override
+	protected Command createCommand()
+	{
+		IPersist[] selection = null;
+		if (selectionProvider != null)
+		{
+			selection = (IPersist[])((IStructuredSelection)selectionProvider.getSelection()).toList().toArray(new IPersist[0]);
+		}
+		else
+		{
+			selection = getSelectedObjects().toArray(new IPersist[0]);
+		}
+		if (selection.length > 0)
+		{
+			int tabIndex = 1;
+			CompoundCommand cc = new CompoundCommand();
+			for (IPersist persist : selection)
+			{
+				if (persist instanceof Bean)
+				{
+					WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((Bean)persist).getBeanClassName());
+					Collection<PropertyDescription> tabSeqProps = spec.getProperties(TypesRegistry.getType("tabseq"));
+					for (PropertyDescription pd : tabSeqProps)
+					{
+						cc.add(new SetPropertyCommand("tabSeq", PersistPropertySource.createPersistPropertySource(persist, false), pd.getName(),
+							Integer.valueOf(tabIndex)));
+						tabIndex++;
+					}
+				}
+				else
+				{
+					cc.add(new SetPropertyCommand("tabSeq", PersistPropertySource.createPersistPropertySource(persist, false),
+						StaticContentSpecLoader.PROPERTY_TABSEQ.getPropertyName(), Integer.valueOf(tabIndex)));
+					tabIndex++;
+				}
+			}
+			return cc;
+		}
+		return super.createCommand();
+	}
 }

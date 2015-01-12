@@ -482,6 +482,72 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="[">
       </key>
+      <key
+            commandId="com.servoy.eclipse.designer.rfb.sameheight"
+            contextId="com.servoy.eclipse.designer.rfb.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M2+H">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.rfb.samewidth"
+            contextId="com.servoy.eclipse.designer.rfb.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M2+W">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.rfb.anchorTop"
+            contextId="com.servoy.eclipse.designer.rfb.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M2+-">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.rfb.anchorRight"
+            contextId="com.servoy.eclipse.designer.rfb.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M2+*">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.rfb.anchorBottom"
+            contextId="com.servoy.eclipse.designer.rfb.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M2++">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.rfb.anchorLeft"
+            contextId="com.servoy.eclipse.designer.rfb.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M2+/">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.rfb.settabseq"
+            contextId="com.servoy.eclipse.designer.rfb.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+T">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.rfb.bringtofront"
+            contextId="com.servoy.eclipse.designer.rfb.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+[">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.rfb.sendtoback"
+            contextId="com.servoy.eclipse.designer.rfb.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+]">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.rfb.sendtobackonestep"
+            contextId="com.servoy.eclipse.designer.rfb.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="]">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.rfb.bringtofrontonestep"
+            contextId="com.servoy.eclipse.designer.rfb.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="[">
+      </key>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -559,6 +625,10 @@
       <category
             id="com.servoy.eclipse.designer.category"
             name="Servoy">
+      </category>
+       <category
+            id="com.servoy.eclipse.designer.rfb.category"
+            name="RFB Designer">
       </category>
       <command
           description="Show form in Form Editor"
@@ -697,6 +767,72 @@
             defaultHandler="com.servoy.eclipse.designer.editor.mobile.commands.ConvertToRecordFormActionDelegateHandler"
             id="com.servoy.eclipse.designer.convertToRecordForm"
             name="Convert to Record Form">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.rfb.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.SameSizeCommand$Height"
+            id="com.servoy.eclipse.designer.rfb.sameheight"
+            name="Same Height">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.rfb.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.SameSizeCommand$Width"
+            id="com.servoy.eclipse.designer.rfb.samewidth"
+            name="Same Width">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.rfb.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.ToggleAnchoringCommand$ToggleAnchoringTop"
+            id="com.servoy.eclipse.designer.rfb.anchorTop"
+            name="Toggle Anchor Top">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.rfb.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.ToggleAnchoringCommand$ToggleAnchoringRight"
+            id="com.servoy.eclipse.designer.rfb.anchorRight"
+            name="Toggle Anchor Right">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.rfb.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.ToggleAnchoringCommand$ToggleAnchoringBottom"
+            id="com.servoy.eclipse.designer.rfb.anchorBottom"
+            name="Toggle Anchor Bottom">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.rfb.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.ToggleAnchoringCommand$ToggleAnchoringLeft"
+            id="com.servoy.eclipse.designer.rfb.anchorLeft"
+            name="Toggle Anchor Left">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.rfb.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetTabSequenceCommand"
+            id="com.servoy.eclipse.designer.rfb.settabseq"
+            name="Set Tab Sequence">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.rfb.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand$ToBack"
+            id="com.servoy.eclipse.designer.rfb.sendtoback"
+            name="Send to back">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.rfb.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand$ToFrontOneStep"
+            id="com.servoy.eclipse.designer.rfb.bringtofrontonestep"
+            name="Bring to front one step">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.rfb.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand$ToBackOneStep"
+            id="com.servoy.eclipse.designer.rfb.sendtobackonestep"
+            name="Send to back one step">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.rfb.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand$ToFront"
+            id="com.servoy.eclipse.designer.rfb.bringtofront"
+            name="Bring to front">
       </command>
    </extension>
       <extension
@@ -1019,6 +1155,11 @@
                id="com.servoy.eclipse.designer.context"
                name="Editing Forms"
                parentId="org.eclipse.ui.contexts.window">
+         </context>
+         <context
+               id="com.servoy.eclipse.designer.rfb.context"
+               name="RFB Editing Forms"
+               parentId="com.servoy.eclipse.designer.context">
          </context>
       </extension>
 </plugin>

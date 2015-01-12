@@ -57,6 +57,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -89,6 +90,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 	IShowEditorInput
 {
 	private static final String COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.context";
+	private static final String COM_SERVOY_ECLIPSE_RFB_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.rfb.context";
 
 	// edit request types
 	public static final String REQ_SET_PROPERTY = "VFE_SET_PROPERTY";
@@ -723,7 +725,14 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 			IContextService service = (IContextService)getSite().getService(IContextService.class);
 			if (service != null)
 			{
-				activateContext = service.activateContext(COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT);
+				if (!new DesignerPreferences().getClassicFormEditor())
+				{
+					activateContext = service.activateContext(COM_SERVOY_ECLIPSE_RFB_DESIGNER_CONTEXT);
+				}
+				else
+				{
+					activateContext = service.activateContext(COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT);
+				}
 			}
 		}
 	}
