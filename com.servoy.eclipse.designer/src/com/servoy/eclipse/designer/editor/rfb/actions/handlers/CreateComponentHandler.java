@@ -263,7 +263,7 @@ public class CreateComponentHandler implements IServerService
 					}
 				}
 			}
-			else if (editorPart.getForm().getLayoutContainers().hasNext())
+			else if (editorPart.getForm().isResponsiveLayout())
 			{
 				// insert as first element in flow layout
 				x = 1;

@@ -87,7 +87,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 
 	public Object[] getChildrenNonGrouped(Object parentElement)
 	{
-		Comparator comparator = form.getLayoutContainers().hasNext() ? PersistContextLocationComparator.INSTANCE : PersistContextNameComparator.INSTANCE;
+		Comparator comparator = form.isResponsiveLayout() ? PersistContextLocationComparator.INSTANCE : PersistContextNameComparator.INSTANCE;
 
 		if (parentElement == ELEMENTS || parentElement == PARTS)
 		{
@@ -164,7 +164,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 
 	public Object[] getChildrenGrouped(Object parentElement)
 	{
-		Comparator comparator = form.getLayoutContainers().hasNext() ? PersistContextLocationComparator.INSTANCE : PersistContextNameComparator.INSTANCE;
+		Comparator comparator = form.isResponsiveLayout() ? PersistContextLocationComparator.INSTANCE : PersistContextNameComparator.INSTANCE;
 		if (parentElement == ELEMENTS || parentElement == PARTS)
 		{
 			HashSet<Object> availableCategories = null;
@@ -344,7 +344,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 
 	public Object[] getElements(Object inputElement)
 	{
-		return form.getLayoutContainers().hasNext() ? new Object[] { ELEMENTS } : new Object[] { ELEMENTS, PARTS };
+		return form.isResponsiveLayout() ? new Object[] { ELEMENTS } : new Object[] { ELEMENTS, PARTS };
 	}
 
 	public void dispose()

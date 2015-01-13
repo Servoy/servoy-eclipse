@@ -94,7 +94,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		{
 			if (!isClosing())
 			{
-				if (!getForm().getLayoutContainers().hasNext()) // is absolute layout
+				if (!getForm().isResponsiveLayout()) // is absolute layout
 				{
 					createPartsPage();
 				}
@@ -217,7 +217,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.ui.editors.TabbedEditor#changeActiveTab(java.lang.String)
 	 */
 	public void changeActiveTab(String tabName)

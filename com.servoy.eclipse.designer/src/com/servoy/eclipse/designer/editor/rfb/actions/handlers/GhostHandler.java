@@ -267,7 +267,7 @@ public class GhostHandler implements IServerService
 				else if (o instanceof Form)
 				{
 					Form f = ModelUtils.getEditingFlattenedSolution(o).getFlattenedForm(o);
-					if (!((Form)o).getLayoutContainers().hasNext()) // absolute layout
+					if (!((Form)o).isResponsiveLayout()) // absolute layout
 					{
 						writePartGhosts(writer, f);
 						writeTableViewGhosts(writer, f);

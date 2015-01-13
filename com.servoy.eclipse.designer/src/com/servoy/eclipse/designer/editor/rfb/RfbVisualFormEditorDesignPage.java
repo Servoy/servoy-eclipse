@@ -179,7 +179,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	 */
 	private String computeLayout(Form form)
 	{
-		if (form.getLayoutContainers().hasNext()) return "flow";
+		if (form.isResponsiveLayout()) return "flow";
 		else return "absolute";
 	}
 
