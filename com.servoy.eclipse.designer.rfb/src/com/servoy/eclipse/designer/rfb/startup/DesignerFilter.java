@@ -103,7 +103,9 @@ public class DesignerFilter implements Filter
 								{
 									jsonWriter.key("layoutName").value(layoutName);
 								}
+								else jsonWriter.key("layoutName").value(spec.getName());
 							}
+							else jsonWriter.key("layoutName").value(spec.getName());
 							jsonWriter.key("componentType").value("layout");
 							jsonWriter.key("displayName").value(spec.getDisplayName());
 							JSONObject config = spec.getConfig() instanceof String ? new JSONObject((String)spec.getConfig()) : null;
