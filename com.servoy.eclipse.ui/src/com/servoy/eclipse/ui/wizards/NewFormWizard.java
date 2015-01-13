@@ -32,11 +32,14 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
@@ -112,7 +115,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * Create new form.
- * 
+ *
  * @author rgansevles
  */
 public class NewFormWizard extends Wizard implements INewWizard
@@ -306,14 +309,17 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			if (template == null)
 			{
-				// create default form, most is already set in createNewForm
-				if (superForm == null) form.createNewPart(Part.BODY, 480/* height */); // else the form just inherits parts from super; no need to add body
-
-				if (newFormWizardPage.getListForm())
+				if (!newFormWizardPage.isResponsiveLayout())
 				{
-					// set view type and add list form items
-					form.setView(IFormConstants.VIEW_TYPE_TABLE_LOCKED);
-					ElementFactory.addFormListItems(form, null, null);
+					// create default form, most is already set in createNewForm
+					if (superForm == null) form.createNewPart(Part.BODY, 480/* height */); // else the form just inherits parts from super; no need to add body
+
+					if (newFormWizardPage.getListForm())
+					{
+						// set view type and add list form items
+						form.setView(IFormConstants.VIEW_TYPE_TABLE_LOCKED);
+						ElementFactory.addFormListItems(form, null, null);
+					}
 				}
 			}
 			else
@@ -407,7 +413,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 		/**
 		 * Creates a new form creation wizard page.
-		 * 
+		 *
 		 * @param pageName the name of the page
 		 */
 		public NewFormWizardPage(String pageName)
@@ -420,7 +426,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 		/**
 		 * Creates a new form creation wizard page.
-		 * 
+		 *
 		 * @param pageName the name of the page
 		 * @param superForm the preselected super form
 		 */
@@ -432,7 +438,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 		/**
 		 * Creates a new form creation wizard page.
-		 * 
+		 *
 		 * @param pageName the name of the page
 		 * @param superForm the pre selected super form
 		 */
@@ -500,6 +506,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 		 * @return the listFormCheck value
 		 */
 		public boolean getListForm()
+		{
+			return listFormCheck.getSelection();
+		}
+
+		public boolean isResponsiveLayout()
 		{
 			return listFormCheck.getSelection();
 		}
@@ -659,12 +670,28 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 			});
 
+			boolean isNgClient = SolutionMetaData.isServoyNGSolution(getActiveSolution());
 			Label listFormLabel = new Label(topLevel, SWT.NONE);
-			listFormLabel.setText("&Listform");
-			listFormLabel.setVisible(activeSolutionMobile);
+			listFormLabel.setText(isNgClient ? "&Responsive Layout" : "&Listform");
+			listFormLabel.setVisible(activeSolutionMobile || isNgClient);
 
 			listFormCheck = new Button(topLevel, SWT.CHECK);
-			listFormCheck.setVisible(activeSolutionMobile);
+			listFormCheck.setVisible(activeSolutionMobile || isNgClient);
+
+			listFormCheck.addSelectionListener(new SelectionListener()
+			{
+
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					setPageComplete(validatePage());
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e)
+				{
+				}
+			});
 
 			final GroupLayout groupLayout = new GroupLayout(topLevel);
 			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
@@ -814,6 +841,21 @@ public class NewFormWizard extends Wizard implements INewWizard
 			{
 				projectCombo.setSelection(new StructuredSelection(servoyProject));
 			}
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.jface.wizard.WizardPage#getNextPage()
+		 */
+		@Override
+		public IWizardPage getNextPage()
+		{
+			if (SolutionMetaData.isServoyNGSolution(getActiveSolution()) && isResponsiveLayout())
+			{
+				return null;
+			}
+			return super.getNextPage();
 		}
 
 		public void fillTemplateCombo(String templateName)
@@ -1048,7 +1090,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 		/**
 		 * Creates a new form creation wizard page.
-		 * 
+		 *
 		 * @param pageName the name of the page
 		 * @param selection the current resource selection
 		 */
