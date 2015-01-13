@@ -387,8 +387,9 @@ public class GhostHandler implements IServerService
 										while (fields.hasNext())
 										{
 											IPersist next = fields.next();
-											if (next instanceof ISupportBounds &&
-												f.getPartAt(((ISupportBounds)next).getLocation().y).getPartType() == Part.BODY)
+											// TODO check responsive/relative layout and ghosts...
+											if (!f.getParts().hasNext() ||
+												(next instanceof ISupportBounds && f.getPartAt(((ISupportBounds)next).getLocation().y).getPartType() == Part.BODY))
 											{
 												ISupportBounds iSupportBounds = (ISupportBounds)next;
 												int x = iSupportBounds.getLocation().x;
