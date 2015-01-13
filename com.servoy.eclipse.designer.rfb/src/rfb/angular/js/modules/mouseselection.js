@@ -175,6 +175,45 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					return selection;
 				},
 				
+				getDropNode: function(type,allowedParents,layoutName,event) {
+					var dropTarget = null;
+					if (type == "layout" || (type == "component" && !editorScope.isAbsoluteFormLayout())) {
+						var realName = layoutName?layoutName:"component";
+						dropTarget = this.getNode(event, true);
+						if (!dropTarget){
+							// this is on the form, can this layout container be dropped on the form?
+							if (allowedParents.indexOf("form") == -1){
+								return null;
+							}
+							return "form"; // special mode, its dropped on a form and it is allowed.
+						}
+						else {
+							var allowedChildren = dropTarget.getAttribute("svy-allowed-children");
+							if (!allowedChildren || !(allowedChildren.indexOf(realName) > 0))
+							{
+								return null; // the drop target doesn't allow this layout container type
+							}
+							var dropTargetLayoutName = dropTarget.getAttribute("svy-layoutname");
+							// is this element able to drop on the dropTarget?
+							if (allowedParents && allowedParents.indexOf(dropTargetLayoutName) == -1) {
+								return null;
+							}
+						}
+					}
+					else if (type != "component"){
+						dropTarget = this.getNode(event);
+						if (dropTarget && dropTarget.getAttribute("svy-types")){
+							if (dropTarget.getAttribute("svy-types").indexOf(type) <= 0)
+								return null;
+						}
+						else return null;
+					}
+					else {
+						dropTarget = this.getNode(event, true);
+					}
+					return dropTarget;
+				},
+				
 				setDraggingFromPallete: function(dragging){
 					draggingFromPallete = dragging;
 					if (!editorScope.isAbsoluteFormLayout())
