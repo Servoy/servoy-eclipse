@@ -185,7 +185,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 							if (allowedParents.indexOf("form") == -1){
 								return {dropAllowed:false};
 							}
-							return {dropAllowed:true,dropTarget:"form"}; // special mode, its dropped on a form and it is allowed.
+							return {dropAllowed:true,dropTarget:null};
 						}
 						else {
 							function getParent(dt) {

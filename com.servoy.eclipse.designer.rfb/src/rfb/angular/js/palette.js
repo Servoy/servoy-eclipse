@@ -44,8 +44,8 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						}
 						else $scope.glasspane.style.cursor="";
 						
-						if ( canDrop.dropTarget != "form" && !$scope.isAbsoluteFormLayout()  && angularElement) {
-							if (canDrop.dropTarget && $scope.glasspane.style.cursor=="") {
+						if ( canDrop.dropTarget  && !$scope.isAbsoluteFormLayout()  && angularElement) {
+							if ($scope.glasspane.style.cursor=="") {
 								if (canDrop.beforeChild) {
 									angularElement.insertBefore(canDrop.beforeChild);
 									angularElement.css('opacity', '1');
@@ -147,7 +147,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						if (!canDrop.dropAllowed) return;
 						
 						var component = {};
-						if (canDrop.dropTarget != "form") {
+						if (canDrop.dropTarget) {
 							component.dropTargetUUID = canDrop.dropTarget.getAttribute("svy-id");
 						}
 						
