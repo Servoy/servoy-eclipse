@@ -183,20 +183,42 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 						if (!dropTarget){
 							// this is on the form, can this layout container be dropped on the form?
 							if (allowedParents.indexOf("form") == -1){
-								return null;
+								return {dropAllowed:false};
 							}
-							return "form"; // special mode, its dropped on a form and it is allowed.
+							return {dropAllowed:true,dropTarget:"form"}; // special mode, its dropped on a form and it is allowed.
 						}
 						else {
-							var allowedChildren = dropTarget.getAttribute("svy-allowed-children");
-							if (!allowedChildren || !(allowedChildren.indexOf(realName) > 0))
-							{
-								return null; // the drop target doesn't allow this layout container type
+							function getParent(dt) {
+								if (!dt || !dt[0]) return null;
+								var allowedChildren = dt[0].getAttribute("svy-allowed-children");
+								if (!allowedChildren || !(allowedChildren.indexOf(realName) > 0))
+								{
+									return getParent( $(dt).parent("[svy-id]")); // the drop target doesn't allow this layout container type
+								}
+								var dropTargetLayoutName = dt[0].getAttribute("svy-layoutname");
+								// is this element able to drop on the dropTarget?
+								if (allowedParents && allowedParents.indexOf(dropTargetLayoutName) == -1) {
+									return getParent( $(dt).parent("[svy-id]"));
+								}
+								return dt;
 							}
-							var dropTargetLayoutName = dropTarget.getAttribute("svy-layoutname");
-							// is this element able to drop on the dropTarget?
-							if (allowedParents && allowedParents.indexOf(dropTargetLayoutName) == -1) {
-								return null;
+							var realDropTarget = getParent($(dropTarget));
+							if (realDropTarget == null) {
+								return {dropAllowed:false};
+							}
+							else if (realDropTarget[0] != dropTarget) {
+								var clientRec = dropTarget.getBoundingClientRect();
+								var mousePos = this.getMousePosition(event);
+								var bottomPixels = (clientRec.bottom - clientRec.top) * 0.3;
+								var rightPixels = (clientRec.right - clientRec.left) * 0.3;
+								if (mousePos.top > (clientRec.bottom - bottomPixels) || mousePos.left > (clientRec.right - rightPixels)) {
+									// this is in the 30% corner (bottom or right) of the component
+									// the beforeChild should be a sibling of the dropTarget (or empty if it is the last)
+									dropTarget = dropTarget.nextElementSibling;
+									// if there is no nextElementSibling then force it to append so that it is moved to the last position.
+									if (!dropTarget) return {dropAllowed:true,dropTarget:realDropTarget[0],append:true};
+								}
+								return {dropAllowed:true,dropTarget:realDropTarget[0],beforeChild:dropTarget};
 							}
 						}
 					}
@@ -204,20 +226,21 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 						dropTarget = this.getNode(event);
 						if (dropTarget && dropTarget.getAttribute("svy-types")){
 							if (dropTarget.getAttribute("svy-types").indexOf(type) <= 0)
-								return null;
+								return {dropAllowed:false}; // the drop target doesn't suppor this type
 						}
-						else return null;
+						else return {dropAllowed:false}; // ghost has no drop target or the drop target doesnt support any types
 					}
 					else {
 						dropTarget = this.getNode(event, true);
 					}
-					return dropTarget;
+					return {dropAllowed:true,dropTarget:dropTarget};
 				},
 				
 				setDraggingFromPallete: function(dragging){
 					draggingFromPallete = dragging;
 					if (!editorScope.isAbsoluteFormLayout())
 					{
+						// TODO this is bootstrap layout specific, should be based on svy-xx attribute?
 						var rows = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll(".row"));
 						if (dragging)
 						{
@@ -349,135 +372,6 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					var concat = matchedFromDoc.concat(matchedFromGlass);
 					return concat;
 				},
-				getFlowLocation: function(dropTarget,event)
-				{
-					var ret = {};
-					if (!editorScope.isAbsoluteFormLayout())
-					{
-						if (!dropTarget || !dropTarget.hasAttribute("svy-id"))
-						{
-							// we dropped on form itself
-							var nodes = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[ng-controller]"));
-							if (nodes && nodes.length > 1)
-							{
-								dropTarget = nodes[nodes.length-1];
-							}
-							else
-							{
-								console.error("Cannot find form drop target");
-							}
-						}
-						if (dropTarget && dropTarget.childNodes.length >0)
-						{
-							var arr = new Array();
-							for (var i=0;i< dropTarget.childNodes.length;i++)
-							{
-								if (dropTarget.childNodes[i].hasAttribute && dropTarget.childNodes[i].hasAttribute("svy-id"))
-								{
-									arr.push(dropTarget.childNodes[i]);
-								}
-							}
-							if (arr.length >0)
-							{
-								arr.sort(function(elem1,elem2)
-										{
-									var rect1 = elem1.getBoundingClientRect();
-									var rect2 = elem2.getBoundingClientRect();
-									if (rect1.top != rect2.top)
-									{
-										return rect1.top - rect2.top;
-									}
-									else
-									{
-										return rect1.left - rect2.left;
-									}	
-								});
-								var contentPointDrop = editorScope.convertToContentPoint({
-									top: event.pageY,
-									left: event.pageX
-								});
-								// search where drop point fits in the array
-								var i = 0;
-								for (i=0;i<arr.length;i++)
-								{
-									var rect1 = arr[i].getBoundingClientRect();
-									rect1 = {top: rect1.top, left: rect1.left};
-									var borderWidth = $(arr[i]).css('borderWidth');
-									borderWidth =  parseInt(borderWidth.substring(0,borderWidth.length-2)); 
-									rect1.top = rect1.top + borderWidth;
-									rect1.left = rect1.left + borderWidth;
-									var rect2;
-									var secondIndex = null;
-									if (i==0 && arr.length > 1)
-									{
-										secondIndex = i+1;
-									}
-									if (i>0)
-									{
-										secondIndex = i-1;
-									}
-									if (secondIndex != null)
-									{
-										rect2 = arr[secondIndex].getBoundingClientRect();
-										rect2 = {top: rect2.top, left: rect2.left};
-										borderWidth = $(arr[secondIndex]).css('borderWidth');
-										borderWidth =  parseInt(borderWidth.substring(0,borderWidth.length-2)); 
-										rect2.top = rect2.top + borderWidth;
-										rect2.left = rect2.left + borderWidth;
-									}
-									if (i == 0)
-									{
-										// search if before first element
-										if (!rect2)
-										{
-											// true means before first element
-											if (contentPointDrop.top < rect1.top) break;
-											if (contentPointDrop.left < rect1.left) break;
-										}
-										else
-										{
-											if (rect1.top == rect2.top)
-											{
-												// horizontal aligned
-												// true means before first element
-												if (contentPointDrop.left < rect1.left) break;
-											}
-											if (rect1.left == rect2.left)
-											{
-												// vertical aligned
-												// true means before first element
-												if (contentPointDrop.top < rect1.top) break;
-											}
-										}
-									}
-									else if (rect2)
-									{
-										// search if between i-1 and i element
-										if (rect1.top == rect2.top)
-										{
-											// horizontal aligned
-											if (contentPointDrop.left < rect1.left) break;
-										}
-										if (rect1.left == rect2.left)
-										{
-											// vertical aligned
-											if (contentPointDrop.top < rect1.top) break;
-										}
-									}	
-								}
-								if (i>0)
-								{
-									ret.leftSibling = arr[i-1].getAttribute("svy-id");
-								}
-								if (i<arr.length)
-								{
-									ret.rightSibling = arr[i].getAttribute("svy-id");
-								}	
-							}
-						}
-					}
-					return ret;
-				}
 			}
 		}
 	}

@@ -228,46 +228,51 @@ public class CreateComponentHandler implements IServerService
 					}
 				}
 			}
-			if (args.has("leftSibling") || args.has("rightSibling"))
+			if (editorPart.getForm().isResponsiveLayout())
 			{
-				IPersist leftSibling = PersistFinder.INSTANCE.searchForPersist(editorPart, args.optString("leftSibling", null));
-				IPersist rightSibling = PersistFinder.INSTANCE.searchForPersist(editorPart, args.optString("rightSibling", null));
 				List<IPersist> children = new ArrayList<IPersist>();
 				Iterator<IPersist> it = parent.getAllObjects();
 				while (it.hasNext())
 				{
 					IPersist persist = it.next();
-					if (persist instanceof IFormElement || persist instanceof ISupportFormElements)
+					if (persist instanceof ISupportBounds)
 					{
 						children.add(persist);
 					}
 				}
-				IPersist[] childArray = children.toArray(new IPersist[0]);
-				Arrays.sort(childArray, PositionComparator.XY_PERSIST_COMPARATOR);
-				int counter = 1;
-				if (childArray.length > 0 && childArray[0] == rightSibling)
-				{
-					x = counter;
-					y = counter;
-					counter++;
-				}
-				for (IPersist element : childArray)
-				{
-					((ISupportBounds)element).setLocation(new Point(counter, counter));
-					counter++;
-					if (element == leftSibling)
-					{
-						x = counter;
-						y = counter;
-						counter++;
-					}
-				}
-			}
-			else if (editorPart.getForm().isResponsiveLayout())
-			{
-				// insert as first element in flow layout
+
+				// default place it as the first element.
 				x = 1;
 				y = 1;
+				if (children.size() > 0)
+				{
+					IPersist[] childArray = children.toArray(new IPersist[0]);
+					Arrays.sort(childArray, PositionComparator.XY_PERSIST_COMPARATOR);
+					if (args.has("rightSibling"))
+					{
+						IPersist rightSibling = PersistFinder.INSTANCE.searchForPersist(editorPart, args.optString("rightSibling", null));
+						int counter = 1;
+
+						for (IPersist element : childArray)
+						{
+							if (element == rightSibling)
+							{
+								x = counter;
+								y = counter;
+								counter++;
+							}
+							((ISupportBounds)element).setLocation(new Point(counter, counter));
+							counter++;
+						}
+					}
+					else
+					{
+						// insert as last element in flow layout because no right/bottom sibling was given
+						Point location = ((ISupportBounds)childArray[childArray.length - 1]).getLocation();
+						x = location.x + 1;
+						y = location.y + 1;
+					}
+				}
 			}
 			String name = args.getString("name");
 			if ("servoydefault-button".equals(name))

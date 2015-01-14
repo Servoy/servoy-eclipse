@@ -38,15 +38,27 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						dragClone.css(css);
 						if (angularElement && $scope.isAbsoluteFormLayout())
 							angularElement.css($scope.convertToContentPoint(css));
-						var dropTarget = utils.getDropNode(type, allowedParents,layoutName,ev);
-						if (!dropTarget) {
+						var canDrop = utils.getDropNode(type, allowedParents,layoutName,ev);
+						if (!canDrop.dropAllowed) {
 							$scope.glasspane.style.cursor="no-drop";
-							return
 						}
-						$scope.glasspane.style.cursor="";
+						else $scope.glasspane.style.cursor="";
 						
-						if (dropTarget != "form" && dropTarget && angularElement && $scope.glasspane.style.cursor=="" && !$scope.isAbsoluteFormLayout()) {
-							$(dropTarget).append(angularElement);
+						if ( canDrop.dropTarget != "form" && !$scope.isAbsoluteFormLayout()  && angularElement) {
+							if (canDrop.dropTarget && $scope.glasspane.style.cursor=="") {
+								if (canDrop.beforeChild) {
+									angularElement.insertBefore(canDrop.beforeChild);
+									angularElement.css('opacity', '1');
+								}
+								else if (angularElement.parent()[0] != canDrop.dropTarget || canDrop.append){
+									$(canDrop.dropTarget).append(angularElement);
+									angularElement.css('opacity', '1');
+								}
+							}
+							else {
+								angularElement.css('opacity', '0');
+								angularElement.remove();
+							}
 						}
 					}
 					else
@@ -97,14 +109,18 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 					if (angularElement)
 					{
 						dragClone.css('opacity', '0');
-						angularElement.css('opacity', '1');
+						if ($scope.isAbsoluteFormLayout()) {
+							angularElement.css('opacity', '1');
+						}
 					}	
 				});
 				mouseleavecallback = $scope.registerDOMEvent("mouseenter","PALETTE", function(ev){
 					if (angularElement)
 					{
 						dragClone.css('opacity', '1');
-						angularElement.css('opacity', '0');
+						if ($scope.isAbsoluteFormLayout()) {
+							angularElement.css('opacity', '0');
+						}
 					}
 				});
 				mouseupcallback = $scope.registerDOMEvent("mouseup","EDITOR", function(ev){
@@ -113,30 +129,30 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 					if (mouseentercallback) $scope.unregisterDOMEvent("mouseenter","CONTENTFRAME_OVERLAY",mouseentercallback);
 					if (mouseleavecallback) $scope.unregisterDOMEvent("mouseenter","PALETTE",mouseleavecallback);
 					$scope.glasspane.style.cursor="";
-					if (angularElement)
-					{
-						angularElement.remove();
-					}
 					if (dragClone)
 					{
-						var dropTarget = utils.getDropNode(type, allowedParents,layoutName,ev);
+						var canDrop = utils.getDropNode(type, allowedParents,layoutName,ev);
 						utils.setDraggingFromPallete(null);
 						dragClone.remove();
-						if (!dropTarget) return;
+						if (angularElement)
+						{
+							// if the drop was still allowed an the beforeChild is not set
+							// then ask the current angularelement for the next sibling because it 
+							// is in the location where it should be dropped but the canDrop matched purely on the parent
+							if (canDrop.dropAllowed && !canDrop.beforeChild) {
+								canDrop.beforeChild = angularElement[0].nextElementSibling;
+							}
+							angularElement.remove();
+						}
+						if (!canDrop.dropAllowed) return;
 						
 						var component = {};
-						if (dropTarget && dropTarget != "form") {
-							component.dropTargetUUID = dropTarget.getAttribute("svy-id");
+						if (canDrop.dropTarget != "form") {
+							component.dropTargetUUID = canDrop.dropTarget.getAttribute("svy-id");
 						}
 						
-						var flowLocation = utils.getFlowLocation(dropTarget,ev);
-						if (flowLocation.leftSibling)
-						{
-							component.leftSibling = flowLocation.leftSibling;
-						}
-						if (flowLocation.rightSibling)
-						{
-							component.rightSibling = flowLocation.rightSibling;
+						if (canDrop.beforeChild) {
+							component.rightSibling = canDrop.beforeChild.getAttribute("svy-id");
 						}
 						component.name = componentName;
 						component.packageName = packageName;
@@ -155,6 +171,10 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						{
 							$editorService.createComponent(component); 
 						}
+					} 
+					else if (angularElement)
+					{
+						angularElement.remove();
 					}
 				});
 			}
