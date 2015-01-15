@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
+import java.awt.Point;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -40,6 +41,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
@@ -430,33 +432,6 @@ public class GhostHandler implements IServerService
 				}
 			}
 
-			/**
-			 * @param next
-			 * @return
-			 */
-			private String getGhostLabel(IPersist next)
-			{
-				if (next instanceof ISupportName)
-				{
-					String name = ((ISupportName)next).getName();
-					if (name != null) return name;
-				}
-				if (next instanceof AbstractBase)
-				{
-					Object label = ((AbstractBase)next).getProperty("text");
-					if (label != null) return label.toString();
-				}
-				if (next instanceof Bean)
-				{
-					return ((Bean)next).getBeanClassName();
-				}
-				if (next instanceof ISupportDataProviderID)
-				{
-					String dp = ((ISupportDataProviderID)next).getDataProviderID();
-					if (dp != null) return dp;
-				}
-				return "";
-			}
 
 			/**
 			 * @param writer
@@ -532,8 +507,81 @@ public class GhostHandler implements IServerService
 				}
 			}
 		});
+		List<IFormElement> outsideElements = new ArrayList<IFormElement>();
+		Iterator<IPersist> it = editorPart.getForm().getAllObjects();
+		while (it.hasNext())
+		{
+			IPersist persist = it.next();
+			if (persist instanceof IFormElement)
+			{
+				Point location = ((IFormElement)persist).getLocation();
+				if ((location.x > editorPart.getForm().getWidth()) || (location.y > editorPart.getForm().getSize().getHeight()))
+				{
+					outsideElements.add((IFormElement)persist);
+				}
+			}
+		}
+		if (outsideElements.size() > 0)
+		{
+			writer.object();
+			writer.key("style");
+			{
+				writer.object();
+				writer.key("left").value(0);
+				writer.key("top").value(0);
+				writer.endObject();
+			}
+			writer.key("ghosts");
+			writer.array();
+			Iterator<IFormElement> elementsIterator = outsideElements.iterator();
+			while (elementsIterator.hasNext())
+			{
+				IFormElement persist = elementsIterator.next();
+				writer.object();
+				writer.key("uuid").value(persist.getUUID());
+				writer.key("type").value(GHOST_TYPE_COMPONENT);
+				writer.key("text").value(getGhostLabel(persist));
+				writer.key("location");
+				writer.object();
+				writer.key("x").value(persist.getLocation().x);
+				writer.key("y").value(persist.getLocation().y);
+				writer.endObject();
+				writer.key("size");
+				writer.object();
+				writer.key("width").value(persist.getSize().width);
+				writer.key("height").value(persist.getSize().height);
+				writer.endObject();
+				writer.endObject();
+			}
+			writer.endArray();
+			writer.endObject();
+		}
 		writer.endArray();
 		writer.endObject();
 		return new JSONObject(stringWriter.getBuffer().toString());
+	}
+
+	private String getGhostLabel(IPersist next)
+	{
+		if (next instanceof ISupportName)
+		{
+			String name = ((ISupportName)next).getName();
+			if (name != null) return name;
+		}
+		if (next instanceof AbstractBase)
+		{
+			Object label = ((AbstractBase)next).getProperty("text");
+			if (label != null) return label.toString();
+		}
+		if (next instanceof Bean)
+		{
+			return ((Bean)next).getBeanClassName();
+		}
+		if (next instanceof ISupportDataProviderID)
+		{
+			String dp = ((ISupportDataProviderID)next).getDataProviderID();
+			if (dp != null) return dp;
+		}
+		return "";
 	}
 }
