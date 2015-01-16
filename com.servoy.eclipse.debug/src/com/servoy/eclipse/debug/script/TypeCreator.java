@@ -225,6 +225,7 @@ import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
 import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
+import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
@@ -489,7 +490,7 @@ public class TypeCreator extends TypeCache
 					Map<String, PropertyDescription> properties = customJSONTypeDefinition.getProperties();
 					for (PropertyDescription pd : properties.values())
 					{
-						if ("design".equals(pd.getScope()))
+						if (WebFormComponent.isDesignOnlyProperty(pd))
 						{
 							// skip design properties
 							continue;
@@ -1102,7 +1103,7 @@ public class TypeCreator extends TypeCache
 
 						/*
 						 * (non-Javadoc)
-						 *
+						 * 
 						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitObjectInitializer(org.eclipse.dltk.javascript.ast.
 						 * ObjectInitializer)
 						 */
@@ -1154,7 +1155,7 @@ public class TypeCreator extends TypeCache
 		Map<String, PropertyDescription> properties = spec.getProperties();
 		for (PropertyDescription pd : properties.values())
 		{
-			if ("design".equals(pd.getScope()))
+			if (WebFormComponent.isDesignOnlyProperty(pd))
 			{
 				// skip design properties
 				continue;

@@ -138,6 +138,7 @@ import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
+import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
@@ -1720,8 +1721,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			Map<String, PropertyDescription> properties = spec.getProperties();
 			for (PropertyDescription pd : properties.values())
 			{
+				if (WebFormComponent.isDesignOnlyProperty(pd)) continue;
+
 				String name = pd.getName();
-				if ("design".equals(pd.getScope())) continue;
 				// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
 				// and skip the dataprovider properties (those are not accesable through scripting)
 				if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && pd.getType() != DataproviderPropertyType.INSTANCE)

@@ -79,11 +79,13 @@
 								"type":"boolean"
 							},
 							"for": {
-								"type": "string"
+								"type": "string|array"
 							},
-							"scope": {
-								"type": "string",
-								"enum": ["design", "runtime"]
+							"blockingOn": {
+								"type": "boolean"
+							},
+							"tags": {
+								"type": "object",
 							},
 							"values":{
 								"type": "array"

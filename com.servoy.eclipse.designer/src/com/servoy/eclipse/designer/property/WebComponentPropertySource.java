@@ -41,6 +41,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.server.ngclient.WebFormComponent;
 
 /**
  * Properties for ngclient components.
@@ -98,11 +99,13 @@ public class WebComponentPropertySource extends PersistPropertySource
 
 		for (PropertyDescription desc : propertyDescription.getProperties().values())
 		{
-			if (desc.getScope() != null && !"design".equals(desc.getScope()))
+			Object scope = propertyDescription.getTag(WebFormComponent.TAG_SCOPE);
+			if ("private".equals(scope) || "runtime".equals(scope))
 			{
 				// only show design properties
 				continue;
 			}
+
 			PropertyDescriptor beanPropertyDescriptor = BEAN_PROPERTIES.get(desc.getName());
 			if (beanPropertyDescriptor != null)
 			{
@@ -111,35 +114,34 @@ public class WebComponentPropertySource extends PersistPropertySource
 			}
 			else
 			{
-				if (desc.getValues() != null && desc.getValues().size() > 0 &&
-					!desc.getName().equals(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()))
+				List<Object> values = desc.getValues();
+				if (values != null && values.size() > 0 && !desc.getName().equals(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()))
 				{
 					ValuesConfig config = new ValuesConfig();
-					if (!(desc.getValues().get(0) instanceof JSONObject))
+					if (!(values.get(0) instanceof JSONObject))
 					{
-						config.setValues(desc.getValues().toArray(new Object[0]));
+						config.setValues(values.toArray(new Object[0]));
 					}
 					else
 					{
 						List<String> displayValues = new ArrayList<String>();
 						List<Object> realValues = new ArrayList<Object>();
-						for (Object jsonObject : desc.getValues())
+						for (Object jsonObject : values)
 						{
-							if (jsonObject instanceof JSONObject)
+							if (jsonObject instanceof JSONObject && ((JSONObject)jsonObject).keys().hasNext())
 							{
 								String key = (String)((JSONObject)jsonObject).keys().next();
-								Object value = ((JSONObject)jsonObject).opt(key);
 								displayValues.add(key);
-								realValues.add(value);
+								realValues.add(((JSONObject)jsonObject).opt(key));
 							}
 						}
-						config.setValues(realValues.toArray(), displayValues.toArray(new String[0]));
+						config.setValues(realValues.toArray(new Object[realValues.size()]), displayValues.toArray(new String[displayValues.size()]));
 					}
 					if (desc.getDefaultValue() != null)
 					{
 						config.addDefault(desc.getDefaultValue(), null);
 					}
-					props.add(new WebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, null, config,
+					props.add(new WebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config,
 						desc.getDefaultValue(), null, null, false)));
 				}
 				else
