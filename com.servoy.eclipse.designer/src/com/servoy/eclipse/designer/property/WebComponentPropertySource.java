@@ -140,7 +140,7 @@ public class WebComponentPropertySource extends PersistPropertySource
 						config.addDefault(desc.getDefaultValue(), null);
 					}
 					props.add(new WebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, null, config,
-						desc.getDefaultValue(), null, false)));
+						desc.getDefaultValue(), null, null, false)));
 				}
 				else
 				{
