@@ -88,7 +88,11 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 
 	private ServoyPropertiesConfigurationPage servoyPropertiesConfigurationPage;
 
+	private AbstractComponentsSelectionPage componentsSelectionPage;
+
 	private WizardPage errorPage;
+
+	private ServicesSelectionPage servicesSelectionPage;
 
 	public ExportWarWizard()
 	{
@@ -262,10 +266,14 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 				new String[] { IServer.REPOSITORY_SERVER }, serverConfigurationPages);
 			servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel, serversSelectionPage);
 			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel, servoyPropertiesConfigurationPage);
+			componentsSelectionPage = new ComponentsSelectionPage(exportModel, "componentspage", "Select components to export",
+				"View the components used and select others which you want to export.", servicesSelectionPage);
+			servicesSelectionPage = new ServicesSelectionPage(exportModel, "servicespage", "Select services to export",
+				"View the services used and select others which you want to export.", servoyPropertiesSelectionPage);
 			driverSelectionPage = new DirectorySelectionPage("driverpage", "Choose the jdbc drivers to export",
 				"Select the jdbc drivers that you want to use in the war (if the app server doesn't provide them)",
 				ApplicationServerRegistry.get().getServerManager().getDriversDir(), exportModel.getDrivers(), new String[] { "hsqldb.jar" },
-				servoyPropertiesSelectionPage);
+				componentsSelectionPage);
 			lafSelectionPage = new DirectorySelectionPage("lafpage", "Choose the lafs to export", "Select the lafs that you want to use in the war",
 				ApplicationServerRegistry.get().getLafManager().getLAFDir(), exportModel.getLafs(), null, driverSelectionPage);
 			beanSelectionPage = new DirectorySelectionPage("beanpage", "Choose the beans to export", "Select the beans that you want to use in the war",
@@ -282,6 +290,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 			addPage(servoyPropertiesSelectionPage);
 			addPage(servoyPropertiesConfigurationPage);
 			addPage(serversSelectionPage);
+			addPage(componentsSelectionPage);
+			addPage(servicesSelectionPage);
 
 			String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, true, false);
 			ArrayList<String> srvNames = new ArrayList<String>(Arrays.asList(serverNames));

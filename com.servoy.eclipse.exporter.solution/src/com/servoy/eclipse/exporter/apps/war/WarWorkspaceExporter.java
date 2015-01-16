@@ -20,22 +20,37 @@ package com.servoy.eclipse.exporter.apps.war;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.equinox.app.IApplicationContext;
+import org.sablo.specification.WebComponentPackage;
+import org.sablo.specification.WebComponentPackage.IPackageReader;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ExportException;
-import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
+import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
@@ -47,7 +62,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter#createArgumentChest(org.eclipse.equinox.app.IApplicationContext)
 	 */
 	@Override
@@ -58,13 +73,14 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter#exportActiveSolution(com.servoy.eclipse.exporter.apps.common.IArgumentChest)
 	 */
 	@Override
 	protected void exportActiveSolution(final WarArgumentChest configuration)
 	{
-		WarExporter warExporter = new WarExporter(new IWarExportModel()
+		initComponentProviders();
+		WarExporter warExporter = new WarExporter(new AbstractWarExportModel()
 		{
 			@Override
 			public boolean isExportActiveSolution()
@@ -187,6 +203,68 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			{
 				return Arrays.asList(configuration.getPluginLocations().split(" "));
 			}
+
+			@Override
+			public Set<String> getExportedComponents()
+			{
+				if (configuration.getSelectedComponents() == null) return configuration.getSelectedServices() != null ? super.getUsedComponents() : null;
+				if (configuration.getSelectedComponents().equals("")) return super.getUsedComponents();
+
+				WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
+				Set<String> set = new HashSet<String>();
+				if (configuration.getSelectedComponents().trim().equalsIgnoreCase("all"))
+				{
+					for (WebComponentSpecification spec : provider.getWebComponentSpecifications())
+					{
+						set.add(spec.getName());
+					}
+				}
+				else
+				{
+					set.addAll(Arrays.asList(configuration.getSelectedComponents().split(" ")));
+					for (String componentName : set)
+					{
+						if (provider.getWebComponentSpecification(componentName) == null)
+						{
+							System.out.println(componentName + " is not a valid component name.");
+							set.remove(componentName);
+						}
+					}
+					set.addAll(super.getUsedComponents());
+				}
+				return set;
+
+			}
+
+			@Override
+			public Set<String> getExportedServices()
+			{
+				if (configuration.getSelectedServices() == null) return configuration.getSelectedComponents() != null ? super.getUsedServices() : null;
+				if (configuration.getSelectedServices().equals("")) return super.getUsedServices();
+				Set<String> set = new HashSet<String>();
+				WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
+				if (configuration.getSelectedServices().trim().equalsIgnoreCase("all"))
+				{
+					for (WebComponentSpecification spec : provider.getWebServiceSpecifications())
+					{
+						set.add(spec.getName());
+					}
+				}
+				else
+				{
+					set.addAll(Arrays.asList(configuration.getSelectedServices().split(" ")));
+					for (String serviceName : set)
+					{
+						if (provider.getWebServiceSpecification(serviceName) == null)
+						{
+							System.out.println(serviceName + " is not a valid service name.");
+							set.remove(serviceName);
+						}
+					}
+					set.addAll(super.getUsedServices());
+				}
+				return set;
+			}
 		});
 		try
 		{
@@ -243,5 +321,72 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			outputError("Exception while exporting solution. EXPORT FAILED for this solution. Check workspace log.");
 			exitCode = EXIT_EXPORT_FAILED;
 		}
+	}
+
+	private void initComponentProviders()
+	{
+		Map<String, IPackageReader> componentReaders = new HashMap<String, IPackageReader>();
+		Map<String, IPackageReader> serviceReaders = new HashMap<String, IPackageReader>();
+
+		ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
+		if (activeResourcesProject != null)
+		{
+			if (componentReaders.size() > 0)
+			{
+				ResourceProvider.removeComponentResources(componentReaders.values());
+				componentReaders.clear();
+			}
+			if (serviceReaders.size() > 0)
+			{
+				ResourceProvider.removeServiceResources(serviceReaders.values());
+				serviceReaders.clear();
+			}
+			componentReaders.putAll(readDir(new NullProgressMonitor(), activeResourcesProject, SolutionSerializer.COMPONENTS_DIR_NAME));
+			serviceReaders.putAll(readDir(new NullProgressMonitor(), activeResourcesProject, SolutionSerializer.SERVICES_DIR_NAME));
+
+			ResourceProvider.addComponentResources(componentReaders.values());
+			ResourceProvider.addServiceResources(serviceReaders.values());
+		}
+	}
+
+	private Map<String, IPackageReader> readDir(IProgressMonitor monitor, ServoyResourcesProject activeResourcesProject, String folderName)
+	{
+		Map<String, IPackageReader> readers = new HashMap<String, IPackageReader>();
+		IFolder folder = activeResourcesProject.getProject().getFolder(folderName);
+		if (folder.exists())
+		{
+			try
+			{
+				folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+				IResource[] members = folder.members();
+				for (IResource resource : members)
+				{
+					String name = resource.getName();
+					int index = name.lastIndexOf('.');
+					if (index != -1)
+					{
+						name = name.substring(0, index);
+					}
+					if (resource instanceof IFolder)
+					{
+						IFolder folderResource = (IFolder)resource;
+						if ((folderResource).getFile("META-INF/MANIFEST.MF").exists())
+						{
+							File f = new File(resource.getRawLocationURI());
+							readers.put(name, new WebComponentPackage.DirPackageReader(f));
+						}
+					}
+					else if (resource instanceof IFile)
+					{
+						readers.put(name, new WebComponentPackage.JarPackageReader(new File(resource.getRawLocationURI())));
+					}
+				}
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+		return readers;
 	}
 }

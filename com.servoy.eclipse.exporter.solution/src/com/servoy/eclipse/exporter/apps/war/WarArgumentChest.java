@@ -35,6 +35,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private String drivers;
 	private boolean isExportActiveSolutionOnly;
 	private String pluginLocations;
+	private String selectedComponents;
+	private String selectedServices;
 
 	public WarArgumentChest(String[] args)
 	{
@@ -44,7 +46,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest#getHelpMessage()
 	 */
 	@Override
@@ -56,18 +58,18 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "   -help or -? or /? or no arguments ... shows current help message.\n\n"
 			+ "                  OR\n\n"
 			+ "   -s <solution> -o <out_dir> -data <workspace_location> [optional_args]\n\n"
-			
+
 			+ "        Optional arguments:\n\n"
 			+ "        -verbose ... prints more info to console\n"
 			+ "        -p <properties_file> ... path and name of properties file.\n"
 			+ "             Default: the 'servoy.properties' file  from 'application_server'  will be used.\n"
-			+ "        -pi <plugin_names> ... the list of plugins to export e.g. -pi plugin1.jar plugin2.zip\n" 
+			+ "        -pi <plugin_names> ... the list of plugins to export e.g. -pi plugin1.jar plugin2.zip\n"
 			+			    "Default: all plugins from application_server/plugins are exported.\n"
-			+ "        -b <bean_names> ... the list of beans to export \n" 
+			+ "        -b <bean_names> ... the list of beans to export \n"
 			+			   "Default: all beans from application_server/beans are exported.\n"
-			+ "        -l <lafs_names> ... the list of lafs to export \n" 
+			+ "        -l <lafs_names> ... the list of lafs to export \n"
 			+			    "Default: all lafs from application_server/lafs are exported.\n"
-			+ "        -d <jdbc_drivers> ... the list of drivers to export\n" 
+			+ "        -d <jdbc_drivers> ... the list of drivers to export\n"
 			+			    "Default: all drivers from application_server/drivers are exported.\n"
 			+ "        -as <app_server_dir> ... specifies where to find the 'application_server' directory.\n"
 			+ "             Default: '../../application_server'.\n"
@@ -79,8 +81,18 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             invalid solutions to be exported.\n"
 			+ "        -active <true/false> export active solution (and its modules) only\n"
 			+ "				Default: true\n"
-			+ "        -pluginlocations absolute paths to plugin folders.\n" 
-			+			    "Default: '../plugins'.\n";
+			+ "        -pluginlocations absolute paths to plugin folders.\n"
+			+			    "Default: '../plugins'.\n"
+			+ "        -crefs exports only the components used by the solution.\n"
+			+			    "Default: all components are exported.\n"
+			+ "        -crefs <additional_component_names> or \"all\" exports the components used by the solution and the\n" +
+			"				 components in the additional components list .\n"
+			+			    "Default: all components are exported.\n"
+			+ "        -srefs exports only the services used by the solution.\n"
+			+			    "Default: all services are exported.\n"
+			+ "        -srefs <additional_service_names>  or \"all\" exports the services used by the solution and the\n" +
+			"				 services in the additional services list .\n"
+			+			    "Default: all services are exported.\n";
 	}
 
 	@Override
@@ -95,6 +107,23 @@ public class WarArgumentChest extends AbstractArgumentChest
 		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolutionOnly = false;
 		pluginLocations = parseArg("pluginLocations", null, argsMap);
 		if (pluginLocations == null) pluginLocations = "../plugins";
+		selectedComponents = parseComponentsArg("crefs", argsMap);
+		selectedServices = parseComponentsArg("srefs", argsMap);
+
+	}
+
+	private String parseComponentsArg(String argName, HashMap<String, String> argsMap)
+	{
+		if (argsMap.containsKey(argName))
+		{
+			if (argsMap.get(argName) == null)
+			{
+				return "";
+			}
+			return argsMap.get(argName);
+		}
+		return null;
+
 	}
 
 	public String getPlugins()
@@ -129,4 +158,22 @@ public class WarArgumentChest extends AbstractArgumentChest
 	{
 		return pluginLocations;
 	}
+
+	/**
+	 * @return the selectedComponents
+	 */
+	public String getSelectedComponents()
+	{
+		return selectedComponents;
+	}
+
+	/**
+	 * @return the selectedServices
+	 */
+	public String getSelectedServices()
+	{
+		return selectedServices;
+	}
+
+
 }

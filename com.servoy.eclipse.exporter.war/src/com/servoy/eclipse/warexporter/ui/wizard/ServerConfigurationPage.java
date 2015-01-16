@@ -30,14 +30,14 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.grouplayout.GroupLayout;
+import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.wb.swt.layout.grouplayout.GroupLayout;
-import org.eclipse.wb.swt.layout.grouplayout.LayoutStyle;
 
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.j2db.persistence.IServer;
@@ -69,8 +69,8 @@ public class ServerConfigurationPage extends WizardPage
 
 	/**
 	 * @param pageName
-	 * @param selectedServerNames 
-	 * @param serverConfigurationPages 
+	 * @param selectedServerNames
+	 * @param serverConfigurationPages
 	 */
 	protected ServerConfigurationPage(String pageName, ServerConfiguration serverConfig, SortedSet<String> selectedServerNames,
 		HashMap<String, IWizardPage> serverConfigurationPages)

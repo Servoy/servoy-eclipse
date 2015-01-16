@@ -96,7 +96,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 			argsMap.put("?", "");
 		}
 
-		String[] argss = argsString.toString().split("-");
+		String[] argss = argsString.toString().replaceFirst("-", "").split(" -");
 		for (String arg : argss)
 		{
 			if (arg != null && !arg.trim().equals(""))
@@ -151,7 +151,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 			+ "   -help or -? or /? or no arguments ... shows current help message.\n\n"
 			+ "                  OR\n\n"
 			+ "   -s <solutions_separated_by_comma> -o <out_dir> -data <workspace_location> [optional_args]\n\n"
-			
+
 			+ "        Optional arguments:\n\n"
 			+ "        -verbose ... prints more info to console\n"
 			+ "        -p <properties_file> ... path and name of properties file.\n"
@@ -183,7 +183,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 	}
 
 	/**
-	 * Called inside the constructor. So you can count on this method being called in child classes as part of the super(...) call. 
+	 * Called inside the constructor. So you can count on this method being called in child classes as part of the super(...) call.
 	 */
 	protected abstract void parseArguments(HashMap<String, String> argsMap);
 

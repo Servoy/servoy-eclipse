@@ -17,7 +17,9 @@
 package com.servoy.eclipse.warexporter.export;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -27,7 +29,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.war.exporter.IWarExportModel;
+import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.ui.wizards.IExportSolutionModel;
 import com.servoy.j2db.persistence.IServer;
@@ -42,7 +44,7 @@ import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
  * @author jcompagner
  * @since 6.1
  */
-public class ExportWarModel implements IWarExportModel, IExportSolutionModel
+public class ExportWarModel extends AbstractWarExportModel implements IExportSolutionModel
 {
 
 	private String fileName;
@@ -76,6 +78,8 @@ public class ExportWarModel implements IWarExportModel, IExportSolutionModel
 	private boolean overwriteGroups;
 	private boolean addUsersToAdminGroup;
 	private int importUserPolicy;
+	private Set<String> exportedComponents;
+	private Set<String> exportedServices;
 
 	/**
 	 * @param dialogSettings
@@ -104,7 +108,14 @@ public class ExportWarModel implements IWarExportModel, IExportSolutionModel
 		insertNewI18NKeysOnly = Utils.getAsBoolean(settings.get("export.insertNewI18NKeysOnly"));
 		overwriteGroups = Utils.getAsBoolean(settings.get("export.overwriteGroups"));
 		addUsersToAdminGroup = Utils.getAsBoolean(settings.get("export.addUsersToAdminGroup"));
-
+		if (settings.getArray("export.components") != null)
+		{
+			exportedComponents = new TreeSet<String>(Arrays.asList(settings.getArray("export.components")));
+		}
+		if (settings.getArray("export.services") != null)
+		{
+			exportedServices = new TreeSet<String>(Arrays.asList(settings.getArray("export.services")));
+		}
 		pluginLocations = new ArrayList<String>();
 		String[] array = settings.getArray("plugin.locations");
 		if (array != null && array.length > 1)
@@ -209,6 +220,8 @@ public class ExportWarModel implements IWarExportModel, IExportSolutionModel
 		settings.put("export.insertNewI18NKeysOnly", insertNewI18NKeysOnly);
 		settings.put("export.overwriteGroups", overwriteGroups);
 		settings.put("export.addUsersToAdminGroup", addUsersToAdminGroup);
+		if (exportedComponents != null) settings.put("export.components", exportedComponents.toArray(new String[exportedComponents.size()]));
+		if (exportedServices != null) settings.put("export.services", exportedServices.toArray(new String[exportedServices.size()]));
 
 		if (pluginLocations.size() > 1)
 		{
@@ -749,7 +762,7 @@ public class ExportWarModel implements IWarExportModel, IExportSolutionModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportUsers()
 	 */
 	@Override
@@ -772,5 +785,43 @@ public class ExportWarModel implements IWarExportModel, IExportSolutionModel
 	public void setImportUserPolicy(int importUserPolicy)
 	{
 		this.importUserPolicy = importUserPolicy;
+	}
+
+	/**
+	 * @param selectedComponents
+	 */
+	public void setExportedComponents(Set<String> selectedComponents)
+	{
+		this.exportedComponents = selectedComponents;
+	}
+
+	/**
+	 * @param selectedServices
+	 */
+	public void setExportedServices(Set<String> selectedServices)
+	{
+		this.exportedServices = selectedServices;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getExportedComponents()
+	 */
+	@Override
+	public Set<String> getExportedComponents()
+	{
+		return exportedComponents;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getExportedServices()
+	 */
+	@Override
+	public Set<String> getExportedServices()
+	{
+		return exportedServices;
 	}
 }

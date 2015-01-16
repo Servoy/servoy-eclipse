@@ -108,7 +108,7 @@ public class WarExporter
 	 */
 	public void doExport(IProgressMonitor monitor) throws ExportException
 	{
-		monitor.beginTask("Creating War File", 17);
+		monitor.beginTask("Creating War File", 18);
 		File warFile = createNewWarFile();
 		monitor.worked(1);
 		File tmpWarDir = createTempDir();
@@ -151,6 +151,9 @@ public class WarExporter
 		monitor.subTask("Copy NGClient components");
 		copyComponents(monitor, tmpWarDir, targetLibDir);
 		monitor.worked(1);
+		monitor.subTask("Copy exported components");
+		copyExportedComponentsPropertyFile(tmpWarDir);
+		monitor.worked(1);
 		monitor.subTask("Creating/zipping the WAR file");
 		zipDirectory(tmpWarDir, warFile);
 		monitor.worked(1);
@@ -158,6 +161,57 @@ public class WarExporter
 		monitor.worked(1);
 		monitor.done();
 		return;
+	}
+
+	/**
+	 * Copy to the war the properties file containing the selected NG components and services.
+	 * This is needed to optimize the references included in the index.html file.
+	 * If no components and services are selected, then all references would be included in the index.
+	 * @param tmpWarDir
+	 * @throws ExportException
+	 */
+	private void copyExportedComponentsPropertyFile(File tmpWarDir) throws ExportException
+	{
+		if (exportModel.getExportedComponents() == null && exportModel.getExportedServices() == null) return;
+
+		File exported = new File(tmpWarDir, "WEB-INF/exported_components.properties");
+		Properties properties = new Properties();
+		StringBuilder components = new StringBuilder();
+		if (exportModel.getExportedComponents() != null)
+		{
+			for (String component : exportModel.getExportedComponents())
+			{
+				components.append(component + ",");
+			}
+		}
+		if (exportModel.getExportedServices() != null)
+		{
+			for (String service : exportModel.getExportedServices())
+			{
+				components.append(service + ",");
+			}
+		}
+		properties.put("components", components.substring(0, components.length() - 1));
+		FileOutputStream fos = null;
+		try
+		{
+			fos = new FileOutputStream(exported);
+			properties.store(fos, "");
+		}
+		catch (Exception e)
+		{
+			throw new ExportException("Couldn't generate the exported_components.properties file", e);
+		}
+		finally
+		{
+			if (fos != null) try
+			{
+				fos.close();
+			}
+			catch (IOException e)
+			{
+			}
+		}
 	}
 
 	/**
