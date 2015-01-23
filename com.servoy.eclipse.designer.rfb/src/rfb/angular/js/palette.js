@@ -166,6 +166,11 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 							component.w = 100;
 							component.h = 100;
 						}
+						if (type != "component" && type != "layout") {		
+							component.type = type;
+								if (!(canDrop.dropTarget.getAttribute("svy-types").indexOf(type) > 0))		
+									return; // releasing a ghost, but component does not support this ghost type		
+						}
 						component = $scope.convertToContentPoint(component);
 						if (component.x >0 && component.y >0)
 						{
