@@ -207,7 +207,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 							while (missingJarName != null)
 							{
 								DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.OPEN);
-								dialog.setMessage("Please select the directory where " + missingJarName + " is located");
+								dialog.setMessage("Please select the directory where " + missingJarName +
+									" is located (usually your servoy developer/plugins directory)");
 								String chosenDirName = dialog.open();
 								if (chosenDirName != null)
 								{
