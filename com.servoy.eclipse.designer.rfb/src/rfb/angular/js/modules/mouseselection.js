@@ -105,7 +105,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 				var p1 = mouseDownPosition;
 				var p2 = lassoMouseSelectPosition;
 				if(Math.abs(p1.left - p2.left) > 1 && Math.abs(p1.top - p2.top) > 1) {
-					var selectedElements = utils.getElementsByRectangle(p1,p2,1,true,true);
+					var selectedElements = utils.getElementsByRectangle(p1,p2,100,true,true);
 					editorScope.setSelection(selectedElements);	
 				}
 				lassoStarted = false;
