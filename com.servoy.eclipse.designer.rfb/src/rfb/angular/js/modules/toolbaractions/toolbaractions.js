@@ -190,7 +190,7 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var beanModel = editorScope.getBeanModel(node);
+						var beanModel = editorScope.getBeanModelOrGhost(node);
 						if(beanModel)
 						{
 							if (left == null)
@@ -206,7 +206,7 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var beanModel = editorScope.getBeanModel(node);
+						var beanModel = editorScope.getBeanModelOrGhost(node);
 						if(beanModel)
 						{
 							if (beanModel.location.x != left)
@@ -233,7 +233,7 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var beanModel = editorScope.getBeanModel(node);
+						var beanModel = editorScope.getBeanModelOrGhost(node);
 						if (right == null)
 						{
 							right = beanModel.location.x+beanModel.size.width;
@@ -246,7 +246,7 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var beanModel = editorScope.getBeanModel(node);
+						var beanModel = editorScope.getBeanModelOrGhost(node);
 						if (beanModel && (beanModel.location.x + beanModel.size.width) != right)
 						{
 							obj[node.getAttribute("svy-id")] = {x: (right - beanModel.size.width),y: beanModel.location.y};
@@ -270,7 +270,7 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var beanModel = editorScope.getBeanModel(node);
+						var beanModel = editorScope.getBeanModelOrGhost(node);
 						if (beanModel)
 						{
 							if (top == null)
@@ -286,7 +286,7 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var beanModel = editorScope.getBeanModel(node);
+						var beanModel = editorScope.getBeanModelOrGhost(node);
 						if (beanModel && beanModel.location.y != top)
 						{
 							obj[node.getAttribute("svy-id")] = {x: beanModel.location.x,y: top};
@@ -310,7 +310,7 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var beanModel = editorScope.getBeanModel(node);
+						var beanModel = editorScope.getBeanModelOrGhost(node);
 						if (beanModel)
 						{
 							if (bottom == null)
@@ -326,7 +326,7 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var beanModel = editorScope.getBeanModel(node);
+						var beanModel = editorScope.getBeanModelOrGhost(node);
 						if (beanModel && (beanModel.location.y + beanModel.size.height) != bottom)
 						{
 							obj[node.getAttribute("svy-id")] = {x: beanModel.location.x,y: (bottom - beanModel.size.height)};
@@ -351,7 +351,7 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var beanModel = editorScope.getBeanModel(node);
+						var beanModel = editorScope.getBeanModelOrGhost(node);
 						if (beanModel)
 						{
 							if (sortedSelection.length == 0)
@@ -377,7 +377,7 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var beanModel = editorScope.getBeanModel(node);
+						var beanModel = editorScope.getBeanModelOrGhost(node);
 						if (beanModel && beanModel != centerElementModel)
 						{
 							obj[node.getAttribute("svy-id")] = {x: (centerElementModel.location.x + centerElementModel.size.width/2 - beanModel.size.width/2),y: beanModel.location.y};
@@ -402,7 +402,7 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var beanModel = editorScope.getBeanModel(node);
+						var beanModel = editorScope.getBeanModelOrGhost(node);
 						if (beanModel)
 						{
 							if (sortedSelection.length == 0)
@@ -428,7 +428,7 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 					for (var i=0;i<selection.length;i++)
 					{
 						var node = selection[i];
-						var beanModel = editorScope.getBeanModel(node);
+						var beanModel = editorScope.getBeanModelOrGhost(node);
 						if (beanModel && beanModel != centerElementModel)
 						{
 							obj[node.getAttribute("svy-id")] = {x: beanModel.location.x,y: (centerElementModel.location.y + centerElementModel.size.height/2 - beanModel.size.height/2)};

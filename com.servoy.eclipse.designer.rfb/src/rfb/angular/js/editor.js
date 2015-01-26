@@ -185,6 +185,23 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				}
 				return null;
 			}
+			
+			$scope.getBeanModelOrGhost = function(node)
+			{
+				if(node)
+				{
+					var name = node.getAttribute("name");
+					if (name)
+						return $scope.getFormState().model[name];
+					else
+						{
+							var ghostObject = $scope.getGhost(node.getAttribute("svy-id"));
+							if (ghostObject && ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_COMPONENT)
+								return ghostObject;
+						}
+				}
+				return null;
+			}
 
 			$scope.updateGhostLocation = function(ghost, x, y) {
 				if(ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART) { // it is a part
