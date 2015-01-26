@@ -110,7 +110,7 @@ public class MobileExporter
 	private static final String HTML_FILE = "servoy_mobile.html";
 	private static final String MOBILE_MODULE_NAME = "mobileclient";
 
-	private static final String RELATIVE_TEST_WAR_PATH = "resources/servoy_mobile_test.war";
+	private static final String RELATIVE_TEST_WAR_PATH = "resources/servoy_mobile_jsunit.war";
 	private static final String HTML_TEST_FILE = "servoy_mobile_test.html";
 	private static final String MOBILE_TEST_MODULE_NAME = "mobiletestclient";
 
@@ -1023,11 +1023,6 @@ public class MobileExporter
 	{
 		private int endLine;
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.jshybugger.instrumentation.DebugInstrumentator#loadFile(org.mozilla.javascript.ast.AstRoot)
-		 */
 		@Override
 		protected void loadFile(AstRoot node)
 		{

@@ -39,7 +39,7 @@ import com.servoy.j2db.util.StaticSingletonMap;
 
 /**
  * A simulated JUnit test suite helper that is driven by something else behind the scenes. (eg. a jsUnit mobile suite running in a browser)
- * 
+ *
  * @author acostescu
  */
 public class SuiteBridge implements IJSUnitSuiteHandler
@@ -65,8 +65,7 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 	private Throwable unexpectedRunThrowable = null;
 	private boolean doneTesting = false;
 	private TestCycleListener testCycleListener;
-	private String solutionSuiteName;
-	private String solutionSuiteJSCode;
+
 	private String[] credentials = null;
 
 	public static SuiteBridge prepareNewInstance(int clientConnectTimeout, String userName, String password)
@@ -156,7 +155,8 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 					{
 						// if the user is in a hurry or not going to wait for "testTreeWaitTimeout" when something went wrong
 						testSuite.setName("Stop requested");
-						unexpectedRunProblemMessage = "Stop requested after " + ((System.currentTimeMillis() - ct) / 1000 + " sec of waiting for the mobile test client to connect... ");
+						unexpectedRunProblemMessage = "Stop requested after " +
+							((System.currentTimeMillis() - ct) / 1000 + " sec of waiting for the mobile test client to connect... ");
 						break;
 					}
 				}
@@ -223,7 +223,8 @@ public class SuiteBridge implements IJSUnitSuiteHandler
 							runLock.wait(stopRequestedWait);
 							if (!doneTesting && !unexpectedProblemOccurred())
 							{
-								log.warn("Stop requested; Shutting down server side because client side didn't report as stopped in under " + (stopRequestedWait / 1000) + " seconds.");
+								log.warn("Stop requested; Shutting down server side because client side didn't report as stopped in under " +
+									(stopRequestedWait / 1000) + " seconds.");
 								break; // end anyway
 							}
 						}
