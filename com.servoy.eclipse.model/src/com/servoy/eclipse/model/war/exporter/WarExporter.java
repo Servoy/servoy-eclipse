@@ -53,6 +53,8 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebServiceSpecProvider;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -172,24 +174,19 @@ public class WarExporter
 	 */
 	private void copyExportedComponentsPropertyFile(File tmpWarDir) throws ExportException
 	{
-		if (exportModel.getExportedComponents() == null && exportModel.getExportedServices() == null) return;
+		if (exportModel.getExportedComponents().size() == WebComponentSpecProvider.getInstance().getWebComponentSpecifications().length &&
+			exportModel.getExportedServices().size() == WebServiceSpecProvider.getInstance().getWebServiceSpecifications().length) return;
 
 		File exported = new File(tmpWarDir, "WEB-INF/exported_components.properties");
 		Properties properties = new Properties();
 		StringBuilder components = new StringBuilder();
-		if (exportModel.getExportedComponents() != null)
+		for (String component : exportModel.getExportedComponents())
 		{
-			for (String component : exportModel.getExportedComponents())
-			{
-				components.append(component + ",");
-			}
+			components.append(component + ",");
 		}
-		if (exportModel.getExportedServices() != null)
+		for (String service : exportModel.getExportedServices())
 		{
-			for (String service : exportModel.getExportedServices())
-			{
-				components.append(service + ",");
-			}
+			components.append(service + ",");
 		}
 		properties.put("components", components.substring(0, components.length() - 1));
 		FileOutputStream fos = null;

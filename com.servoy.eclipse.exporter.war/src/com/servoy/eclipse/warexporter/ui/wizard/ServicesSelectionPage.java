@@ -61,8 +61,7 @@ public class ServicesSelectionPage extends AbstractComponentsSelectionPage
 	@Override
 	public IWizardPage getNextPage()
 	{
-		exportModel.setExportedServices(availableComponentsList.getItemCount() == 0 ? null : new TreeSet<String>(
-			Arrays.asList(selectedComponentsList.getItems())));
+		exportModel.setExportedServices(new TreeSet<String>(Arrays.asList(selectedComponentsList.getItems())));
 		if (nextPage != null) return nextPage;
 		return super.getNextPage();
 	}

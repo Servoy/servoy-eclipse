@@ -89,6 +89,11 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			extractUsedComponentsAndServices(SolutionSerializer.getRelativePath(scope.getRight(), false) + scope.getLeft() +
 				SolutionSerializer.JS_FILE_EXTENSION);
 		}
+
+		//these are always required
+		usedComponents.add("servoydefault-errorbean");
+		usedComponents.add("servoydefault-portal");
+		usedServices.addAll(WebServiceSpecProvider.getInstance().getServicesInPackage("servoyservices"));
 	}
 
 	public void extractUsedComponentsAndServices(String scriptPath)
