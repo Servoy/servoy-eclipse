@@ -89,7 +89,7 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 	{
 		super(tv);
 		int[] types = ColumnInfo.allDefinedSeqTypes;
-		comboSeqTypes = null;
+		comboSeqTypes = new String[0];
 		try
 		{
 			List<String> seqType = new ArrayList<String>();
