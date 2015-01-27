@@ -97,7 +97,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 			Shell shell = new Shell();
 			GridLayout gridLayout = new GridLayout();
 			shell.setLayout(gridLayout);
-			FileDialog dlg = new FileDialog(shell, SWT.SAVE);
+			FileDialog dlg = new FileDialog(shell, SWT.OPEN);
 			if (exportModel.getWarFileName() != null)
 			{
 				String fileName = exportModel.getServoyPropertiesFileName();
