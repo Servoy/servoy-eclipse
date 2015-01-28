@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -32,16 +34,17 @@ import com.servoy.j2db.documentation.ClientSupport;
 
 /**
  * Filter for viewers, used on top of Solution Explorer Tree.
- * 
+ *
  * @author jblok
  */
 
 public class TextFilter extends ViewerFilter
 {
 	private final Set<Object> matchingNodes = new HashSet<Object>();
-	private final Set<Object> parentsOfMatchingNodes = new HashSet<Object>(); // the nodes that are in here (parentsOfMatchingNodes) will not be in childrenOfMatchingNodes 
+	private final Set<Object> parentsOfMatchingNodes = new HashSet<Object>(); // the nodes that are in here (parentsOfMatchingNodes) will not be in childrenOfMatchingNodes
 	private final Set<Object> childrenOfMatchingNodes = new HashSet<Object>();
 	private final ILabelProvider labelProvider;
+	private IProgressMonitor monitor;
 
 	@Override
 	public Object[] filter(Viewer viewer, Object parent, Object[] elements)
@@ -71,7 +74,7 @@ public class TextFilter extends ViewerFilter
 	/**
 	 * Filter the parent's subtree (elements are the direct children of parent) and puts them into 3 categories: matching nodes, parents of matching nodes and
 	 * children of matching nodes.
-	 * 
+	 *
 	 * @param viewer the viewer being filtered
 	 * @param parent the parent node
 	 * @param elements the parent's direct children
@@ -84,6 +87,7 @@ public class TextFilter extends ViewerFilter
 		boolean retval = false;
 		for (int i = 0; i < size; ++i)
 		{
+			if (monitor != null && monitor.isCanceled()) throw new OperationCanceledException();
 			Object element = elements[i];
 			if (filterNodeSubtree(viewer, element, ancestorsMatched))
 			{
@@ -102,6 +106,8 @@ public class TextFilter extends ViewerFilter
 
 	private boolean filterNodeSubtree(Viewer viewer, Object element, boolean ancestorsMatched)
 	{
+		if (monitor != null && monitor.isCanceled()) throw new OperationCanceledException();
+
 		boolean match = matchInList(element) || match(labelProvider.getText(element));
 
 		if (match)
@@ -222,14 +228,14 @@ public class TextFilter extends ViewerFilter
 	/**
 	 * StringMatcher constructor. Method setText() takes in a String object that is a simple pattern which may contain '*' for 0 and many characters and '?' for
 	 * exactly one character.
-	 * 
+	 *
 	 * Literal '*' and '?' characters must be escaped in the pattern e.g., "\*" means literal "*", etc.
-	 * 
+	 *
 	 * Escaping any other character (including the escape character itself), just results in that character in the pattern. e.g., "\a" means "a" and "\\" means
 	 * "\"
-	 * 
+	 *
 	 * If invoking the StringMatcher with string literals in Java, don't forget escape characters are represented by "\\".
-	 * 
+	 *
 	 * @param ignoreCase if true, case is ignored
 	 * @param ignoreWildCards if true, wild cards and their escape sequences are ignored (everything is taken literally).
 	 */
@@ -245,7 +251,7 @@ public class TextFilter extends ViewerFilter
 	 * Registers a supplemental content provider to this filter. When filtering is applied to an element, this content-provider is used to get more content for
 	 * that element - content that will be searched too. If the filter is true for any content returned by this content provider, it will be true for the
 	 * element as well.
-	 * 
+	 *
 	 * @param contentProvider the supplemental content provider.
 	 */
 	public void setSupplementalContentProvider(IStructuredContentProvider contentProvider)
@@ -282,9 +288,14 @@ public class TextFilter extends ViewerFilter
 		}
 	}
 
+	public void setProgressMonitor(IProgressMonitor monitor)
+	{
+		this.monitor = monitor;
+	}
+
 	/**
 	 * Returns the current filter String (pattern).
-	 * 
+	 *
 	 * @return the current filter String (pattern).
 	 */
 	public String getText()
@@ -294,7 +305,7 @@ public class TextFilter extends ViewerFilter
 
 	/**
 	 * Returns the first node that matched the last pattern.
-	 * 
+	 *
 	 * @return the first node that matched the last pattern.
 	 */
 	public Object getFirstMatchingNode()
@@ -304,7 +315,7 @@ public class TextFilter extends ViewerFilter
 
 	/**
 	 * Returns all nodes that match directly the last given pattern.
-	 * 
+	 *
 	 * @return all nodes that match directly the last given pattern.
 	 */
 	public Set<Object> getMatchingNodes()
@@ -314,7 +325,7 @@ public class TextFilter extends ViewerFilter
 
 	/**
 	 * Returns all nodes that have matching children in their subtree, but are not matching them selves...
-	 * 
+	 *
 	 * @return all nodes that have matching children in their subtree, but are not matching them selves...
 	 */
 	public Set<Object> getParentsOfMatchingNodes()
@@ -323,13 +334,13 @@ public class TextFilter extends ViewerFilter
 	}
 
 	/**
-	 * Find the first occurrence of the pattern between <code>start</code)(inclusive) 
-	 * and <code>end</code>(exclusive).  
-	 * @param <code>text</code>, the String object to search in 
+	 * Find the first occurrence of the pattern between <code>start</code)(inclusive)
+	 * and <code>end</code>(exclusive).
+	 * @param <code>text</code>, the String object to search in
 	 * @param <code>start</code>, the starting index of the search range, inclusive
 	 * @param <code>end</code>, the ending index of the search range, exclusive
-	 * @return an <code>StringMatcher.Position</code> object that keeps the starting 
-	 * (inclusive) and ending positions (exclusive) of the first occurrence of the 
+	 * @return an <code>StringMatcher.Position</code> object that keeps the starting
+	 * (inclusive) and ending positions (exclusive) of the first occurrence of the
 	 * pattern in the specified range of the text; return null if not found or subtext
 	 * is empty (start==end). A pair of zeros is returned if pattern is empty string
 	 * Note that for pattern like "*abc*" with leading and trailing stars, position of "abc"
@@ -387,7 +398,7 @@ public class TextFilter extends ViewerFilter
 	 */
 	/**
 	 * match the given <code>text</code> with the pattern
-	 * 
+	 *
 	 * @return true if matched eitherwise false
 	 * @param <code>text</code>, a String object
 	 */
@@ -398,7 +409,7 @@ public class TextFilter extends ViewerFilter
 
 	/**
 	 * Given the starting (inclusive) and the ending (exclusive) poisitions in the <code>text</code>, determine if the given substring matches with aPattern
-	 * 
+	 *
 	 * @return true if the specified portion of the text matches the pattern
 	 * @param String <code>text</code>, a String object that contains the substring to match
 	 * @param int <code>start<code> marks the starting position (inclusive) of the substring
@@ -519,14 +530,15 @@ public class TextFilter extends ViewerFilter
 
 	/**
 	 * Parses the given pattern into segments seperated by wildcard '*' characters.
-	 * 
+	 *
 	 * @param p, a String object that is a simple regular expression with '*' and/or '?'
 	 */
 	private void parseWildCards()
 	{
 		fHasLeadingStar = (fPattern.startsWith("*"));
 
-		if (fPattern.endsWith("*")) {
+		if (fPattern.endsWith("*"))
+		{
 			/* make sure it's not an escaped wildcard */
 			if (fLength > 1 && fPattern.charAt(fLength - 2) != '\\')
 			{
@@ -648,7 +660,7 @@ public class TextFilter extends ViewerFilter
 	}
 
 	/**
-	 * 
+	 *
 	 * @return boolean
 	 * @param <code>text</code>, a String to match
 	 * @param <code>start</code>, int that indicates the starting index of match, inclusive

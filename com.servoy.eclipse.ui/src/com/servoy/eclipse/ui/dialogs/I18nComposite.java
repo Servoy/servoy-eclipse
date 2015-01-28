@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeMap;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -165,7 +166,7 @@ public class I18nComposite extends Composite
 		delayedFilterJob = new FilterDelayJob(new FilteredEntity()
 		{
 
-			public void filter(final String filterValue)
+			public void filter(final String filterValue, IProgressMonitor monitor)
 			{
 				dialogSettings.put(DIALOGSTORE_FILTER, filterValue);
 				if (Display.getCurrent() != null)
@@ -272,7 +273,7 @@ public class I18nComposite extends Composite
 			}
 			catch (Exception ex)
 			{
-				// just ignore, an exception just means that the setting wasnt there yet. 
+				// just ignore, an exception just means that the setting wasnt there yet.
 			}
 			keyColumn.setWidth(keyWidth);
 			localeColumn.setWidth(localeWidth);

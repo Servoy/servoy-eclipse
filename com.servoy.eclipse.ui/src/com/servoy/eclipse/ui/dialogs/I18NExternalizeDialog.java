@@ -923,7 +923,7 @@ public class I18NExternalizeDialog extends Dialog
 		delayedFilterJob = new FilterDelayJob(new FilteredEntity()
 		{
 
-			public void filter(final String filterValue)
+			public void filter(final String filterValue, IProgressMonitor monitor)
 			{
 				if (Display.getCurrent() != null)
 				{
@@ -1452,7 +1452,7 @@ public class I18NExternalizeDialog extends Dialog
 				{
 					EclipseMessages.writeMessages(editingSolution.getI18nServerName(), editingSolution.getI18nTableName(), projectMessages, workspaceFileAccess);
 
-					// write js i18n keys 
+					// write js i18n keys
 					Iterator<Map.Entry<IPersist, TreeMap<Integer, JSText>>> persistJSTextMapIte = persistJSTextMap.entrySet().iterator();
 					Map.Entry<IPersist, TreeMap<Integer, JSText>> persistJSTextMapEntry;
 					while (persistJSTextMapIte.hasNext())

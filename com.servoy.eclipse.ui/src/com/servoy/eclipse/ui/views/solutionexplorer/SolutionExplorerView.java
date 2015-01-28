@@ -1039,7 +1039,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			{
 				if (treeFilter != null && treeFilter.getText() != null && treeFilter.getText().length() > 0)
 				{
-					filter(treeFilter.getText());
+					filter(treeFilter.getText(), null);
 				}
 				else if (node == null)
 				{
@@ -2591,12 +2591,12 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		manager.add(linkWithEditorAction);
 	}
 
-	public void filter(String filterValue)
+	public void filter(String filterValue, IProgressMonitor monitor)
 	{
-		filterTree(filterValue);
+		filterTree(filterValue, monitor);
 	}
 
-	private void filterTree(final String text)
+	private void filterTree(final String text, IProgressMonitor monitor)
 	{
 		final boolean wasNull;
 		if (treeFilter == null)
@@ -2610,6 +2610,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			wasNull = false;
 		}
 		treeFilter.setText(text);
+		treeFilter.setProgressMonitor(monitor);
 		treeFilter.setClientType(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType());
 		if (wasNull)
 		{

@@ -16,9 +16,11 @@
  */
 package com.servoy.eclipse.ui.util;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 /**
  * Objects that support filtering implement this interface.
- * 
+ *
  * @author acostescu
  */
 public interface FilteredEntity
@@ -26,9 +28,10 @@ public interface FilteredEntity
 
 	/**
 	 * Applies the specified filter to this object.
-	 * 
+	 *
 	 * @param filterValue the value of the filter to be applied.
+	 * @param monitor progress monitor
 	 */
-	void filter(String filterValue);
+	void filter(String filterValue, IProgressMonitor monitor);
 
 }
