@@ -155,7 +155,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 					warFileName = activeProject.getProject().getName();
 				}
 				if (!warFileName.endsWith(".war")) warFileName += ".war";
-				return configuration.getExportFilePath() + warFileName;
+				return configuration.getExportFilePath() + File.separator + warFileName;
 			}
 
 			@Override
