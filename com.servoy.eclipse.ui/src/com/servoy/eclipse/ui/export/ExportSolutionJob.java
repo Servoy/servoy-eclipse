@@ -30,12 +30,12 @@ import org.eclipse.swt.widgets.Display;
 import org.json.JSONException;
 
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.model.export.IExportSolutionModel;
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
+import com.servoy.eclipse.model.repository.EclipseExportUserChannel;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
-import com.servoy.eclipse.ui.wizards.EclipseExportUserChannel;
-import com.servoy.eclipse.ui.wizards.IExportSolutionModel;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.RepositoryException;

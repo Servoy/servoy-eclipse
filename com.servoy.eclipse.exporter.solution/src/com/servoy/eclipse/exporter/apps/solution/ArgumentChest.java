@@ -30,7 +30,6 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
-import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Table;
@@ -44,11 +43,12 @@ import com.servoy.j2db.util.xmlxport.IXMLExportUserChannel;
 public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUserChannel
 {
 	private static final String FILE_EXTENSION = ".servoy";
-
+	
 	private static final int META_DATA_NONE = 0;
 	private static final int META_DATA_WS = 1;
 	private static final int META_DATA_DB = 2;
 	private static final int META_DATA_BOTH = 3;
+
 
 	private boolean exportSampleData = false;
 	private int metadataSource = META_DATA_WS;
@@ -73,7 +73,7 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 		if (argsMap.containsKey("sd"))
 		{
 			exportSampleData = true;
-			parseSampleDataCount(argsMap);
+			sampleDataCount = parseSampleDataCount(argsMap);
 		}
 		if (argsMap.containsKey("i18n")) exportI18N = true;
 		if (argsMap.containsKey("users")) exportUsers = true;
@@ -85,40 +85,6 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 			exportModules = true;
 			String modules = parseArg("modules", null, argsMap);
 			if (modules != null) moduleList = Arrays.asList(modules.split(" "));
-		}
-	}
-
-	private void parseSampleDataCount(HashMap<String, String> argsMap)
-	{
-		if (argsMap.containsKey("sdcount"))
-		{
-			if (!argsMap.get("sdcount").equals(""))
-			{
-				try
-				{
-					sampleDataCount = Integer.parseInt(argsMap.get("sdcount"));
-					if (sampleDataCount < 1)
-					{
-						sampleDataCount = 1;
-						info("Number of rows to export per table cannot be < 1. Corrected to 1.", ILogLevel.ERROR);
-					}
-					else if (sampleDataCount > IDataServerInternal.MAX_ROWS_TO_RETRIEVE)
-					{
-						sampleDataCount = IDataServerInternal.MAX_ROWS_TO_RETRIEVE;
-						info("Number of rows to export per table cannot be > " + IDataServerInternal.MAX_ROWS_TO_RETRIEVE + ". Corrected.", ILogLevel.ERROR);
-					}
-				}
-				catch (NumberFormatException e)
-				{
-					info("Number of rows to export per table specified after '-sdcount' argument is not an integer value.", ILogLevel.ERROR);
-					markInvalid();
-				}
-			}
-			else
-			{
-				info("Number of rows to export per table was not specified after '-sdcount' argument.", ILogLevel.ERROR);
-				markInvalid();
-			}
 		}
 	}
 
@@ -145,6 +111,7 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 		}
 		return META_DATA_WS;
 	}
+
 
 	@Override
 	public String getHelpMessage()
@@ -207,7 +174,7 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 		return protectionPassword != null;
 	}
 
-	// IXMLExportUserChannel methods: 
+	// IXMLExportUserChannel methods:
 
 	public boolean getExportAllTablesFromReferencedServers()
 	{

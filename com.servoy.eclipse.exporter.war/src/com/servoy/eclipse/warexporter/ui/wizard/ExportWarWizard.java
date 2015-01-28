@@ -25,9 +25,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Properties;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -45,17 +43,13 @@ import org.eclipse.ui.IWorkbench;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
-import com.servoy.eclipse.ui.export.ExportSolutionJob;
 import com.servoy.eclipse.warexporter.Activator;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
-import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
@@ -157,18 +151,11 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 				final WarExporter exporter = new WarExporter(exportModel)
 				{
 					@Override
-					protected void copyActiveSolution(java.io.File tmpWarDir) throws ExportException
+					protected void copyActiveSolution(IProgressMonitor progressMonitor, java.io.File tmpWarDir) throws ExportException
 					{
-						super.copyActiveSolution(tmpWarDir);
+						super.copyActiveSolution(progressMonitor, tmpWarDir);
 						try
 						{
-							exportModel.setFileName(new File(tmpWarDir, "WEB-INF/solution.servoy").getCanonicalPath());
-							FlattenedSolution solution = ServoyModelFinder.getServoyModel().getActiveProject().getFlattenedSolution();
-							ExportSolutionJob exportSolutionJob = new ExportSolutionJob("export solution", exportModel, solution.getSolution(), false, false,
-								new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()));
-							SubMonitor subMonitor = SubMonitor.convert(monitor);
-							exportSolutionJob.runInWorkspace(subMonitor.newChild(10));
-
 							File importProperties = new File(tmpWarDir, "WEB-INF/import.properties");
 							Properties prop = new Properties();
 							prop.setProperty("overwriteGroups", Boolean.toString(exportModel.isOverwriteGroups()));

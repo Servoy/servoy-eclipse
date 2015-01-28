@@ -38,6 +38,15 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private String selectedComponents;
 	private String selectedServices;
 
+	private boolean exportMetaData = false;
+	private boolean exportSampleData = false;
+	private int sampleDataCount = 5000;
+	private boolean exportI18N = false;
+	private boolean exportAllTablesFromReferencedServers = false;
+	private boolean checkMetadataTables = false;
+	private boolean exportUsers = false;
+	private String warFileName = null;
+
 	public WarArgumentChest(String[] args)
 	{
 		super();
@@ -92,7 +101,20 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+			    "Default: all services are exported.\n"
 			+ "        -srefs <additional_service_names>  or \"all\" exports the services used by the solution and the\n" +
 			"				 services in the additional services list .\n"
-			+			    "Default: all services are exported.\n";
+			+			    "Default: all services are exported.\n"
+			+ "        -md ws|db|none|both ... take table  metadata from workspace / database / both+check.\n"
+			+ "             Usually you will want to use 'ws'.\n"
+			+ "        -checkmd ... check metadata tables, default false\n"
+			+ "        -sd ... exports sample data. IMPORTANT: all needed DB\n"
+			+ "             servers must already be started\n"
+			+ "        -sdcount <count> ... number of rows to  export per table. Only  makes sense when -sd\n"
+			+ "             is also present. Can be 'all' (without the '). Default: 10000\n"
+			+			"Default: the solution name\n"
+			+ "        -i18n ... exports i18n data\n"
+			+ "        -users ... exports users\n"
+			+ "        -tables ... export  all table  information  about  tables from  referenced  servers.\n"
+			+ "             IMPORTANT: all needed DB servers must already be started\n"
+			+ "        -warFileName ... the name of the war file \n";
 	}
 
 	@Override
@@ -110,6 +132,17 @@ public class WarArgumentChest extends AbstractArgumentChest
 		selectedComponents = parseComponentsArg("crefs", argsMap);
 		selectedServices = parseComponentsArg("srefs", argsMap);
 
+		if (argsMap.containsKey("md")) exportMetaData = true;
+		if (argsMap.containsKey("checkmd")) checkMetadataTables = true;
+		if (argsMap.containsKey("sd"))
+		{
+			exportSampleData = true;
+			sampleDataCount = parseSampleDataCount(argsMap);
+		}
+		if (argsMap.containsKey("i18n")) exportI18N = true;
+		if (argsMap.containsKey("users")) exportUsers = true;
+		if (argsMap.containsKey("tables")) exportAllTablesFromReferencedServers = true;
+		if (argsMap.containsKey("warFileName")) warFileName = parseArg("warFileName", null, argsMap);
 	}
 
 	private String parseComponentsArg(String argName, HashMap<String, String> argsMap)
@@ -175,5 +208,44 @@ public class WarArgumentChest extends AbstractArgumentChest
 		return selectedServices;
 	}
 
+	public boolean isExportSampleData()
+	{
+		return exportSampleData;
+	}
 
+	public boolean isExportI18NData()
+	{
+		return exportI18N;
+	}
+
+	public int getNumberOfSampleDataExported()
+	{
+		return sampleDataCount;
+	}
+
+	public boolean isExportAllTablesFromReferencedServers()
+	{
+		return exportAllTablesFromReferencedServers;
+	}
+
+	public boolean shouldExportMetadata()
+	{
+		return exportMetaData;
+	}
+
+	public boolean checkMetadataTables()
+	{
+		return checkMetadataTables;
+	}
+
+
+	public boolean exportUsers()
+	{
+		return exportUsers;
+	}
+
+	public String getWarFileName()
+	{
+		return warFileName;
+	}
 }

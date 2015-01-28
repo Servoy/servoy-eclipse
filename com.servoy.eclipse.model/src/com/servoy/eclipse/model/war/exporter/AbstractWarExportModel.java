@@ -37,6 +37,7 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
@@ -56,7 +57,6 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 	private final Set<String> usedComponents;
 	private final Set<String> usedServices;
-
 
 	public AbstractWarExportModel()
 	{
@@ -115,7 +115,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 						/*
 						 * (non-Javadoc)
-						 * 
+						 *
 						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitCallExpression(org.eclipse.dltk.javascript.ast.CallExpression)
 						 */
 						@Override
@@ -163,7 +163,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getUsedComponents()
 	 */
 	@Override
@@ -174,12 +174,42 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getUsedServices()
 	 */
 	@Override
 	public Set<String> getUsedServices()
 	{
 		return usedServices;
+	}
+
+	@Override
+	public String[] getModulesToExport()
+	{
+		ServoyProject[] modules = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
+		String[] toExport = new String[modules.length];
+		for (int i = 0; i < modules.length; i++)
+		{
+			toExport[i] = modules[i].getSolution().getName();
+		}
+		return toExport;
+	}
+
+	@Override
+	public boolean isProtectWithPassword()
+	{
+		return false;
+	}
+
+	@Override
+	public String getPassword()
+	{
+		return null;
+	}
+
+	@Override
+	public boolean isExportReferencedModules()
+	{
+		return true;
 	}
 }

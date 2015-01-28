@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.wizards;
 
+import com.servoy.eclipse.model.export.IExportSolutionModel;
+
 /**
  * Holds all options the user may set during a solution export.
  */

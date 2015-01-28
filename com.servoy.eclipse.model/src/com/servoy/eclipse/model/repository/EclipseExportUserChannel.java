@@ -14,18 +14,19 @@
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
-package com.servoy.eclipse.ui.wizards;
+package com.servoy.eclipse.model.repository;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 
-import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.export.IExportSolutionModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
@@ -75,14 +76,24 @@ public class EclipseExportUserChannel implements IXMLExportUserChannel
 
 	public String getTableMetaData(ITable table) throws IOException
 	{
-		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
+		DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();
 		if (dmm == null)
 		{
-			UIUtils.reportWarning("Error exporting table meta data", "Cannot find internal data model manager.");
+			if (Display.getCurrent() != null)
+			{
+				Display.getDefault().asyncExec(new Runnable()
+				{
+					public void run()
+					{
+						MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Error exporting table meta data",
+							"Cannot find internal data model manager.");
+					}
+				});
+			}
 			return null;
 		}
 
-		WorkspaceFileAccess wsa = new WorkspaceFileAccess(ServoyModel.getWorkspace());
+		WorkspaceFileAccess wsa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 		String metadatapath = dmm.getMetaDataFile(table.getDataSource()).getFullPath().toString();
 		if (!wsa.exists(metadatapath))
 		{

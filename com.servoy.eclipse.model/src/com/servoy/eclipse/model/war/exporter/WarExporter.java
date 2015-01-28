@@ -51,8 +51,10 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.json.JSONException;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 import org.w3c.dom.Document;
@@ -63,20 +65,34 @@ import org.xml.sax.InputSource;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
+import com.servoy.eclipse.model.repository.EclipseExportUserChannel;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.TableDefinitionUtils;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBeanManagerInternal;
 import com.servoy.j2db.ILAFManagerInternal;
+import com.servoy.j2db.persistence.AbstractRepository;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ComponentResourcesExporter;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.server.shared.IApplicationServerSingleton;
+import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.JarManager;
 import com.servoy.j2db.util.JarManager.ExtensionResource;
+import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.SortedProperties;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.xmlxport.IMetadataDefManager;
+import com.servoy.j2db.util.xmlxport.ITableDefinitionsManager;
+import com.servoy.j2db.util.xmlxport.IXMLExporter;
 
 
 /**
@@ -147,7 +163,7 @@ public class WarExporter
 		if (exportModel.isExportActiveSolution())
 		{
 			monitor.subTask("Copy the active solution");
-			copyActiveSolution(tmpWarDir);
+			copyActiveSolution(monitor, tmpWarDir);
 		}
 		monitor.worked(1);
 		monitor.subTask("Copy NGClient components");
@@ -174,7 +190,8 @@ public class WarExporter
 	 */
 	private void copyExportedComponentsPropertyFile(File tmpWarDir) throws ExportException
 	{
-		if (exportModel.getExportedComponents().size() == WebComponentSpecProvider.getInstance().getWebComponentSpecifications().length &&
+		if (exportModel.getExportedComponents() == null && exportModel.getExportedServices() == null ||
+			exportModel.getExportedComponents().size() == WebComponentSpecProvider.getInstance().getWebComponentSpecifications().length &&
 			exportModel.getExportedServices().size() == WebServiceSpecProvider.getInstance().getWebServiceSpecifications().length) return;
 
 		File exported = new File(tmpWarDir, "WEB-INF/exported_components.properties");
@@ -555,17 +572,70 @@ public class WarExporter
 	 * @param monitor
 	 * @throws ExportException
 	 */
-	protected void copyActiveSolution(File tmpWarDir) throws ExportException
+	protected void copyActiveSolution(IProgressMonitor monitor, File tmpWarDir) throws ExportException
 	{
 		try
 		{
 			FlattenedSolution solution = ServoyModelFinder.getServoyModel().getActiveProject().getFlattenedSolution();
 			SolutionSerializer.writeRuntimeSolution(null, new File(tmpWarDir, "WEB-INF/solution.runtime"), solution.getSolution(),
 				ApplicationServerRegistry.get().getDeveloperRepository(), solution.getModules());
+
+			exportSolution(monitor, tmpWarDir.getCanonicalPath(), solution.getSolution(), false);
 		}
 		catch (Exception ex)
 		{
 			throw new ExportException("Cannot write the active solution in war file", ex);
+		}
+	}
+
+	private void exportSolution(IProgressMonitor monitor, String tmpWarDir, Solution activeSolution, boolean exportSolution) throws CoreException,
+		ExportException
+	{
+		int totalDuration = IProgressMonitor.UNKNOWN;
+		if (exportModel.getModulesToExport() != null) totalDuration = (int)(1.42 * exportModel.getModulesToExport().length); // make the main export be 70% of the time, leave the rest for sample data
+		monitor.beginTask("Exporting solution", totalDuration);
+
+		final IApplicationServerSingleton as = ApplicationServerRegistry.get();
+		AbstractRepository rep = (AbstractRepository)as.getDeveloperRepository();
+
+		IUserManager sm = as.getUserManager();
+		EclipseExportUserChannel eeuc = new EclipseExportUserChannel(exportModel, monitor);
+		EclipseExportI18NHelper eeI18NHelper = new EclipseExportI18NHelper(new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()));
+		IXMLExporter exporter = as.createXMLExporter(rep, sm, eeuc, Settings.getInstance(), as.getDataServer(), as.getClientId(), eeI18NHelper);
+
+		try
+		{
+			ITableDefinitionsManager tableDefManager = null;
+			IMetadataDefManager metadataDefManager = null;
+			if (exportModel.isExportUsingDbiFileInfoOnly())
+			{
+				Pair<ITableDefinitionsManager, IMetadataDefManager> defManagers = TableDefinitionUtils.getTableDefinitionsFromDBI(activeSolution,
+					exportModel.isExportReferencedModules(), exportModel.isExportI18NData(), exportModel.isExportAllTablesFromReferencedServers(),
+					exportModel.isExportMetaData());
+				if (defManagers != null)
+				{
+					tableDefManager = defManagers.getLeft();
+					metadataDefManager = defManagers.getRight();
+				}
+			}
+			exporter.exportSolutionToFile(activeSolution, new File(tmpWarDir, "WEB-INF/solution.servoy"), ClientVersion.getVersion(),
+				ClientVersion.getReleaseNumber(), exportModel.isExportMetaData(), exportModel.isExportSampleData(),
+				exportModel.getNumberOfSampleDataExported(), exportModel.isExportI18NData(), exportModel.isExportUsers(),
+				exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword(), tableDefManager, metadataDefManager, exportSolution);
+
+			monitor.done();
+		}
+		catch (RepositoryException e)
+		{
+			throw new ExportException("Repository exception", e);
+		}
+		catch (JSONException jsonex)
+		{
+			throw new ExportException("Bad JSON file structure.", jsonex);
+		}
+		catch (IOException ioex)
+		{
+			throw new ExportException("Exception getting files.", ioex);
 		}
 	}
 

@@ -27,11 +27,8 @@ import java.util.TreeSet;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
-import com.servoy.eclipse.model.ServoyModelFinder;
-import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
-import com.servoy.eclipse.ui.wizards.IExportSolutionModel;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -44,7 +41,7 @@ import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
  * @author jcompagner
  * @since 6.1
  */
-public class ExportWarModel extends AbstractWarExportModel implements IExportSolutionModel
+public class ExportWarModel extends AbstractWarExportModel
 {
 
 	private String fileName;
@@ -602,36 +599,6 @@ public class ExportWarModel extends AbstractWarExportModel implements IExportSol
 		this.allRows = allRows;
 	}
 
-	@Override
-	public boolean isExportReferencedModules()
-	{
-		return true;
-	}
-
-	@Override
-	public String[] getModulesToExport()
-	{
-		ServoyProject[] modules = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
-		String[] toExport = new String[modules.length];
-		for (int i = 0; i < modules.length; i++)
-		{
-			toExport[i] = modules[i].getSolution().getName();
-		}
-		return toExport;
-	}
-
-	@Override
-	public boolean isProtectWithPassword()
-	{
-		return false;
-	}
-
-	@Override
-	public String getPassword()
-	{
-		return null;
-	}
-
 	/**
 	 * @return
 	 */
@@ -771,6 +738,7 @@ public class ExportWarModel extends AbstractWarExportModel implements IExportSol
 		return importUserPolicy > IXMLImportUserChannel.IMPORT_USER_POLICY_DONT;
 	}
 
+
 	/**
 	 * @return
 	 */
@@ -805,7 +773,7 @@ public class ExportWarModel extends AbstractWarExportModel implements IExportSol
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getExportedComponents()
 	 */
 	@Override
@@ -816,7 +784,7 @@ public class ExportWarModel extends AbstractWarExportModel implements IExportSol
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getExportedServices()
 	 */
 	@Override

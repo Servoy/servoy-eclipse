@@ -19,6 +19,7 @@ package com.servoy.eclipse.exporter.apps.common;
 
 import java.util.HashMap;
 
+import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.util.ILogLevel;
 
 /**
@@ -27,7 +28,6 @@ import com.servoy.j2db.util.ILogLevel;
  */
 public abstract class AbstractArgumentChest implements IArgumentChest
 {
-
 	private boolean invalidArguments = false;
 	private boolean mustShowHelp = false;
 	private String solutionNames = null;
@@ -38,6 +38,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 	private String appServerDir = "../../application_server";
 	private boolean exportUsingDbiFileInfoOnly = false;
 	private boolean ignoreBuildErrors = false;
+
 
 	// this must not be done in constructor as it calls an abstract method that can end up setting fields in an extending class - fields that are not yet set to default values and will be after the constructor of this class finishes
 	public void initialize(String[] args)
@@ -129,6 +130,42 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 			}
 		}
 		return null;
+	}
+
+	protected int parseSampleDataCount(HashMap<String, String> argsMap)
+	{
+		int sampleDataCount = 0;
+		if (argsMap.containsKey("sdcount"))
+		{
+			if (!argsMap.get("sdcount").equals(""))
+			{
+				try
+				{
+					sampleDataCount = Integer.parseInt(argsMap.get("sdcount"));
+					if (sampleDataCount < 1)
+					{
+						sampleDataCount = 1;
+						info("Number of rows to export per table cannot be < 1. Corrected to 1.", ILogLevel.ERROR);
+					}
+					else if (sampleDataCount > IDataServerInternal.MAX_ROWS_TO_RETRIEVE)
+					{
+						sampleDataCount = IDataServerInternal.MAX_ROWS_TO_RETRIEVE;
+						info("Number of rows to export per table cannot be > " + IDataServerInternal.MAX_ROWS_TO_RETRIEVE + ". Corrected.", ILogLevel.ERROR);
+					}
+				}
+				catch (NumberFormatException e)
+				{
+					info("Number of rows to export per table specified after '-sdcount' argument is not an integer value.", ILogLevel.ERROR);
+					markInvalid();
+				}
+			}
+			else
+			{
+				info("Number of rows to export per table was not specified after '-sdcount' argument.", ILogLevel.ERROR);
+				markInvalid();
+			}
+		}
+		return sampleDataCount;
 	}
 
 	void printArguments(String args[])

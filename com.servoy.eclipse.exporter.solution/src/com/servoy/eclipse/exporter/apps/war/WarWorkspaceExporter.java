@@ -148,8 +148,14 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			@Override
 			public String getWarFileName()
 			{
-				ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
-				return configuration.getExportFilePath() + File.separator + activeProject.getProject().getName() + ".war";
+				String warFileName = configuration.getWarFileName();
+				if (warFileName == null)
+				{
+					ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+					warFileName = activeProject.getProject().getName();
+				}
+				if (!warFileName.endsWith(".war")) warFileName += ".war";
+				return configuration.getExportFilePath() + warFileName;
 			}
 
 			@Override
@@ -264,6 +270,61 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 					set.addAll(super.getUsedServices());
 				}
 				return set;
+			}
+
+
+			@Override
+			public String getFileName()
+			{
+				return null;
+			}
+
+			@Override
+			public boolean isExportMetaData()
+			{
+				return configuration.shouldExportMetadata();
+			}
+
+			@Override
+			public boolean isExportSampleData()
+			{
+				return configuration.isExportSampleData();
+			}
+
+			@Override
+			public boolean isExportI18NData()
+			{
+				return configuration.isExportI18NData();
+			}
+
+			@Override
+			public int getNumberOfSampleDataExported()
+			{
+				return configuration.getNumberOfSampleDataExported();
+			}
+
+			@Override
+			public boolean isExportAllTablesFromReferencedServers()
+			{
+				return configuration.isExportAllTablesFromReferencedServers();
+			}
+
+			@Override
+			public boolean isCheckMetadataTables()
+			{
+				return configuration.checkMetadataTables();
+			}
+
+			@Override
+			public boolean isExportUsingDbiFileInfoOnly()
+			{
+				return configuration.shouldExportUsingDbiFileInfoOnly();
+			}
+
+			@Override
+			public boolean isExportUsers()
+			{
+				return configuration.exportUsers();
 			}
 		});
 		try

@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
+import com.servoy.eclipse.model.export.IExportSolutionModel;
+
 
 /**
  * WAR export model
@@ -11,7 +13,7 @@ import java.util.SortedSet;
  * @author gboros
  * @since 8.0
  */
-public interface IWarExportModel
+public interface IWarExportModel extends IExportSolutionModel
 {
 	public boolean isExportActiveSolution();
 

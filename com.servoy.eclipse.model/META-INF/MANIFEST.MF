@@ -18,9 +18,12 @@ Require-Bundle: servoy_shared,
  org.eclipse.dltk.javascript.rhino,
  sablo,
  org.apache.commons.dbcp,
- org.apache.commons.io
+ org.apache.commons.io,
+ org.eclipse.swt,
+ org.eclipse.jface
 Export-Package: com.servoy.eclipse.model,
  com.servoy.eclipse.model.builder,
+ com.servoy.eclipse.model.export,
  com.servoy.eclipse.model.extensions,
  com.servoy.eclipse.model.nature,
  com.servoy.eclipse.model.preferences,
