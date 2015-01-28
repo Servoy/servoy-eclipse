@@ -14,6 +14,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 	}
 }).value("EDITOR_EVENTS", {
 	SELECTION_CHANGED : "SELECTION_CHANGED",
+	SELECTION_MOVED : "SELECTION_MOVED",
 	INITIALIZED: "INITIALIZED",
 	RELOAD_PALETTE: "RELOAD_PALETTE"
 }).value("EDITOR_CONSTANTS", {
@@ -439,7 +440,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			$scope.refreshEditorContent = function() {
 				if (editorContentRootScope) {
 					editorContentRootScope.$digest();
-					$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection)
+					$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_MOVED,selection)
 				}
 			}
 

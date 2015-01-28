@@ -72,14 +72,17 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 						left: offset.left,
 						display: 'block'
 					};
-					$scope.$apply();
 				})
 				for(var i=selection.length;i<$scope.nodes.length;i++) {
 					$scope.nodes[i].style.display = 'none';
 				}
+				$scope.$digest();
 			}
 	    	  
 			$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
+				renderDecorators(selection);
+			})
+			$rootScope.$on(EDITOR_EVENTS.SELECTION_MOVED, function(event, selection) {
 				renderDecorators(selection);
 			})
 	      },

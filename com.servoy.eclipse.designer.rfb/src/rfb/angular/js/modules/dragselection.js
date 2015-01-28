@@ -137,6 +137,8 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 									if (beanModel){
 										beanModel.location.y = beanModel.location.y + changeY;
 										beanModel.location.x = beanModel.location.x + changeX;
+										var css = { top: beanModel.location.y, left: beanModel.location.x }
+										$(node).css(css);
 									}
 									else 
 									{
@@ -144,8 +146,8 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 										editorScope.updateGhostLocation(ghostObject, ghostObject.location.x + changeX, ghostObject.location.y + changeY)
 									}
 								}
-								editorScope.refreshEditorContent();
 							}
+							editorScope.refreshEditorContent();
 							dragStartEvent = event;
 						}
 					}

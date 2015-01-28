@@ -84,9 +84,8 @@ angular.module('keyboardlayoutupdater', ['editor']).run(function($pluginRegistry
 								var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
 								editorScope.updateGhostLocation(ghostObject, ghostObject.location.x + changeX, ghostObject.location.y + changeY)										
 							}
-							editorScope.refreshEditorContent();
 						}
-			
+						editorScope.refreshEditorContent();
 						return false;
 					}
 				}
