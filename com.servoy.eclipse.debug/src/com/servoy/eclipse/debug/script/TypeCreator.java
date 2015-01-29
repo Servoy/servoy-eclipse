@@ -864,7 +864,7 @@ public class TypeCreator extends TypeCache
 				com.servoy.eclipse.core.Activator.getDefault().addWebComponentChangedListener(new IWebResourceChangedListener()
 				{
 					@Override
-					public void changed()
+					public void changed(Boolean component)
 					{
 						Job job = new Job("clearing cache")
 						{
@@ -1103,7 +1103,7 @@ public class TypeCreator extends TypeCache
 
 						/*
 						 * (non-Javadoc)
-						 * 
+						 *
 						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitObjectInitializer(org.eclipse.dltk.javascript.ast.
 						 * ObjectInitializer)
 						 */

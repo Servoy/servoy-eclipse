@@ -30,12 +30,17 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.util.RunInWorkspaceJob;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -65,14 +70,14 @@ public class NewComponentAction extends Action
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	@Override
 	public void run()
 	{
 		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
-		String type = UserNodeType.COMPONENTS_PACKAGE == node.getType() ? "Component" : "Service";
+		final String type = UserNodeType.COMPONENTS_PACKAGE == node.getType() ? "Component" : "Service";
 
 		String componentName = UIUtils.showTextFieldDialog(shell, getText(), "Please provide the " + type.toLowerCase() + " name.");
 		if (componentName == null) return;
@@ -83,8 +88,23 @@ public class NewComponentAction extends Action
 		}
 		componentName = componentName.trim();
 
-		IResource packageRoot = (IResource)node.getRealObject();
-		createComponent(packageRoot, type, componentName);
+		final String compName = componentName;
+		final IResource packageRoot = (IResource)node.getRealObject();
+		IWorkspaceRunnable createJob = new IWorkspaceRunnable()
+		{
+
+			@Override
+			public void run(IProgressMonitor monitor) throws CoreException
+			{
+				createComponent(packageRoot, type, compName);
+			}
+		};
+
+		RunInWorkspaceJob job = new RunInWorkspaceJob(createJob);
+		job.setName("Create component");
+		job.setRule(ServoyModel.getWorkspace().getRoot());
+		job.setUser(false);
+		job.schedule();
 	}
 
 	private boolean isNameValid(String value, String message)
@@ -106,7 +126,7 @@ public class NewComponentAction extends Action
 	 * @param componentName
 	 * @param displayName
 	 */
-	void createComponent(IResource packageRoot, String type, String componentName)
+	void createComponent(IResource packageRoot, final String type, final String componentName)
 	{
 		if (packageRoot instanceof IFolder)
 		{
@@ -114,10 +134,16 @@ public class NewComponentAction extends Action
 			InputStream in = null;
 			try
 			{
-				IFolder folder = pack.getFolder(componentName);
+				final IFolder folder = pack.getFolder(componentName);
 				if (folder.exists())
 				{
-					MessageDialog.openError(shell, getText(), type + " " + componentName + " already exists in package " + folder.getName());
+					Display.getDefault().asyncExec(new Runnable()
+					{
+						public void run()
+						{
+							MessageDialog.openError(shell, getText(), type + " " + componentName + " already exists in package " + folder.getName());
+						}
+					});
 					return;
 				}
 
@@ -225,7 +251,7 @@ public class NewComponentAction extends Action
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.jface.action.Action#isEnabled()
 	 */
 	@Override

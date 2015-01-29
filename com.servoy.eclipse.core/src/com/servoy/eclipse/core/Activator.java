@@ -478,7 +478,7 @@ public class Activator extends Plugin
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -650,7 +650,7 @@ public class Activator extends Plugin
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see com.servoy.j2db.IDesignerCallback#testAndStartDebugger()
 				 */
 				public void testAndStartDebugger()
@@ -666,7 +666,7 @@ public class Activator extends Plugin
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see com.servoy.j2db.IDesignerCallback#addURLStreamHandler(java.lang.String, java.net.URLStreamHandler)
 				 */
 				@Override
@@ -1295,11 +1295,11 @@ public class Activator extends Plugin
 	/**
 	 *
 	 */
-	public void webResourcesChanged()
+	public void webResourcesChanged(Boolean component)
 	{
 		for (IWebResourceChangedListener listener : webResourceChangedListeners)
 		{
-			listener.changed();
+			listener.changed(component);
 		}
 	}
 }

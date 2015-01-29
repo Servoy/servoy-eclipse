@@ -2423,7 +2423,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	 * @see com.servoy.eclipse.core.IWebResourceChangedListener#changed()
 	 */
 	@Override
-	public void changed()
+	public void changed(final Boolean component)
 	{
 		Job job = new Job("Refreshing tree")
 		{
@@ -2431,10 +2431,16 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			@Override
 			public IStatus run(IProgressMonitor monitor)
 			{
-				componentsNode.children = null;
-				view.refreshTreeNodeFromModel(componentsNode);
-				servicesNode.children = null;
-				view.refreshTreeNodeFromModel(servicesNode);
+				if (!Boolean.FALSE.equals(component))
+				{
+					componentsNode.children = null;
+					view.refreshTreeNodeFromModel(componentsNode);
+				}
+				if (component == null || Boolean.FALSE.equals(component))
+				{
+					servicesNode.children = null;
+					view.refreshTreeNodeFromModel(servicesNode);
+				}
 				return Status.OK_STATUS;
 			}
 		};

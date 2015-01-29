@@ -23,5 +23,5 @@ package com.servoy.eclipse.core;
  */
 public interface IWebResourceChangedListener
 {
-	public void changed();
+	public void changed(Boolean component);
 }

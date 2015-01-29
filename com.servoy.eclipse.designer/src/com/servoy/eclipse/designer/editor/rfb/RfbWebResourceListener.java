@@ -35,20 +35,23 @@ public class RfbWebResourceListener implements IWebResourceChangedListener
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.core.IWebResourceChangedListener#changed()
 	 */
 	@Override
-	public void changed()
+	public void changed(Boolean component)
 	{
-		editorWebsocketSession.getEventDispatcher().addEvent(new Runnable()
+		if (!Boolean.FALSE.equals(component))
 		{
-			@Override
-			public void run()
+			editorWebsocketSession.getEventDispatcher().addEvent(new Runnable()
 			{
-				editorWebsocketSession.getService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("reloadPalette", new Object[] { });
-			}
-		});
+				@Override
+				public void run()
+				{
+					editorWebsocketSession.getService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("reloadPalette", new Object[] { });
+				}
+			});
+		}
 	}
 
 	/**

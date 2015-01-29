@@ -28,7 +28,9 @@ import java.util.jar.Manifest;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -42,7 +44,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.RunInWorkspaceJob;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -87,7 +91,7 @@ public class NewComponentPackageAction extends Action
 	{
 		final PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
 		final String type = UserNodeType.COMPONENTS == node.getType() ? "Component" : "Service";
-		IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
+		final IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
 			(String)node.getRealObject());
 
 		MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), getText(), null, null, MessageDialog.CONFIRM,
@@ -163,28 +167,48 @@ public class NewComponentPackageAction extends Action
 			packageDisplayName = packageName;
 		}
 
-		try
+		IWorkspaceRunnable createJob = new IWorkspaceRunnable()
 		{
 
-			if (!folder.exists()) folder.create(IResource.FORCE, true, new NullProgressMonitor());
-
-			IFolder pack = folder.getFolder(packageName);
-			if (pack.exists())
+			@Override
+			public void run(IProgressMonitor monitor) throws CoreException
 			{
-				MessageDialog.openError(shell, getText(), "Package " + packageName + " already exists in " + node.getName());
-				return;
+				try
+				{
+
+					if (!folder.exists()) folder.create(IResource.FORCE, true, monitor);
+
+					IFolder pack = folder.getFolder(packageName);
+					if (pack.exists())
+					{
+						Display.getDefault().asyncExec(new Runnable()
+						{
+							public void run()
+							{
+								MessageDialog.openError(shell, getText(), "Package " + packageName + " already exists in " + node.getName());
+							}
+						});
+						return;
+					}
+
+					pack.create(IResource.FORCE, true, monitor);
+					createManifest(pack);
+
+					NewComponentAction newComponent = new NewComponentAction(viewer, shell, "");
+					newComponent.createComponent(pack, type, componentName);
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("Could not create component/service package.", e);
+				}
 			}
+		};
 
-			pack.create(IResource.FORCE, true, new NullProgressMonitor());
-			createManifest(pack);
-
-			NewComponentAction newComponent = new NewComponentAction(viewer, shell, "");
-			newComponent.createComponent(pack, type, componentName);
-		}
-		catch (Exception e)
-		{
-			ServoyLog.logError("Could not create component/service package.", e);
-		}
+		RunInWorkspaceJob job = new RunInWorkspaceJob(createJob);
+		job.setName("Create component");
+		job.setRule(ServoyModel.getWorkspace().getRoot());
+		job.setUser(false);
+		job.schedule();
 	}
 
 	private boolean isNameValid(PlatformSimpleUserNode node)

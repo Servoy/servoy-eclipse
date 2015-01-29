@@ -118,7 +118,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			System.setProperty("swing.defaultlaf", "javax.swing.plaf.metal.MetalLookAndFeel");
 		}
 
-		registerResources();
+		registerResources(null);
 
 		resourceChangeListener = new IResourceChangeListener()
 		{
@@ -131,9 +131,11 @@ public class Activator extends AbstractUIPlugin implements IStartup
 					IProject resourceProject = activeResourcesProject.getProject();
 					IResourceDelta delta = event.getDelta();
 					IResourceDelta[] affectedChildren = delta.getAffectedChildren();
-					if (shouldRefresh(resourceProject, affectedChildren))
+					boolean refreshServices = shouldRefresh(resourceProject, affectedChildren, SolutionSerializer.SERVICES_DIR_NAME);
+					boolean refreshComponents = shouldRefresh(resourceProject, affectedChildren, SolutionSerializer.COMPONENTS_DIR_NAME);
+					if (refreshServices || refreshComponents)
 					{
-						registerResources();
+						registerResources(refreshServices && refreshComponents ? null : (refreshComponents ? Boolean.TRUE : Boolean.FALSE));
 					}
 				}
 			}
@@ -142,7 +144,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			 * @param resourceProject
 			 * @param affectedChildren
 			 */
-			private boolean shouldRefresh(IProject resourceProject, IResourceDelta[] affectedChildren)
+			private boolean shouldRefresh(IProject resourceProject, IResourceDelta[] affectedChildren, String parentDir)
 			{
 				for (IResourceDelta rd : affectedChildren)
 				{
@@ -153,7 +155,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 						IPath path = resource.getProjectRelativePath();
 						if (path.segmentCount() > 1)
 						{
-							if (path.segment(0).equals(SolutionSerializer.COMPONENTS_DIR_NAME) || path.segment(0).equals(SolutionSerializer.SERVICES_DIR_NAME))
+							if (path.segment(0).equals(parentDir))
 							{
 								if (path.segmentCount() == 2 && resource instanceof IFile)
 								{
@@ -166,11 +168,9 @@ public class Activator extends AbstractUIPlugin implements IStartup
 								}
 							}
 						}
-						if (path.segmentCount() == 0 ||
-							(path.segmentCount() > 0 && (path.segment(0).equals(SolutionSerializer.COMPONENTS_DIR_NAME) || path.segment(0).equals(
-								SolutionSerializer.SERVICES_DIR_NAME))))
+						if (path.segmentCount() == 0 || (path.segmentCount() > 0 && path.segment(0).equals(parentDir)))
 						{
-							if (shouldRefresh(resourceProject, rd.getAffectedChildren()))
+							if (shouldRefresh(resourceProject, rd.getAffectedChildren(), parentDir))
 							{
 								return true;
 							}
@@ -216,7 +216,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 	/**
 	 * @param activeResourcesProject
 	 */
-	private void registerResources()
+	private void registerResources(final Boolean component)
 	{
 		if (registerResourcesJob == null)
 		{
@@ -243,7 +243,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 								public void activeProjectChanged(ServoyProject activeProject)
 								{
-									registerResources();
+									registerResources(null);
 								}
 							};
 							((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(activeProjectListenerForRegisteringResources);
@@ -251,23 +251,30 @@ public class Activator extends AbstractUIPlugin implements IStartup
 						ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 						if (activeResourcesProject != null)
 						{
-							if (componentReaders.size() > 0)
+							if (!Boolean.FALSE.equals(component))
 							{
-								ResourceProvider.removeComponentResources(componentReaders.values());
-								componentReaders.clear();
+								if (componentReaders.size() > 0)
+								{
+									ResourceProvider.removeComponentResources(componentReaders.values());
+									componentReaders.clear();
+								}
+								componentReaders.putAll(readDir(monitor, activeResourcesProject, SolutionSerializer.COMPONENTS_DIR_NAME));
+								ResourceProvider.addComponentResources(componentReaders.values());
 							}
-							if (serviceReaders.size() > 0)
+
+							if (component == null || Boolean.FALSE.equals(component))
 							{
-								ResourceProvider.removeServiceResources(serviceReaders.values());
-								serviceReaders.clear();
+								if (serviceReaders.size() > 0)
+								{
+									ResourceProvider.removeServiceResources(serviceReaders.values());
+									serviceReaders.clear();
+								}
+								serviceReaders.putAll(readDir(monitor, activeResourcesProject, SolutionSerializer.SERVICES_DIR_NAME));
+
+								ResourceProvider.addServiceResources(serviceReaders.values());
 							}
-							componentReaders.putAll(readDir(monitor, activeResourcesProject, SolutionSerializer.COMPONENTS_DIR_NAME));
-							serviceReaders.putAll(readDir(monitor, activeResourcesProject, SolutionSerializer.SERVICES_DIR_NAME));
 
-							ResourceProvider.addComponentResources(componentReaders.values());
-							ResourceProvider.addServiceResources(serviceReaders.values());
-
-							com.servoy.eclipse.core.Activator.getDefault().webResourcesChanged();
+							com.servoy.eclipse.core.Activator.getDefault().webResourcesChanged(component);
 						}
 					}
 					finally
