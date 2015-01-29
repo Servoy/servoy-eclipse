@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,10 +85,11 @@ public class TableDefinitionUtils
 			final List<IFile> dbiz = getTablesDBIList(serverName, tables, exportAllTablesFromReferencedServers);
 
 			// minimum requirement for dbi files based export: all needed dbi files must be found
-			if (!allNeededDbiFilesExist(tables, dbiz))
+			List<String> notFoundDBIFileTableNames = allNeededDbiFilesExist(tables, dbiz);
+			if (notFoundDBIFileTableNames.size() > 0)
 			{
-				throw new FileNotFoundException("Could not locate all needed dbi files for server '" + serverName +
-					"'.\nPlease make sure the necessary files exist.");
+				throw new FileNotFoundException("Could not locate all needed dbi files for server '" + serverName + "', tablenames: '" +
+					Arrays.toString(notFoundDBIFileTableNames.toArray()) + "'.\nPlease make sure the necessary files exist.");
 			}
 
 			server_tableDbiFiles.put(serverName, dbiz);
@@ -224,11 +226,10 @@ public class TableDefinitionUtils
 
 	}
 
-	private static boolean allNeededDbiFilesExist(List<String> neededTableNames, List<IFile> existingDbiFiles)
+	private static List<String> allNeededDbiFilesExist(List<String> neededTableNames, List<IFile> existingDbiFiles)
 	{
-		if (neededTableNames != null && existingDbiFiles != null && neededTableNames.size() > 0 && existingDbiFiles.size() == 0) return false;
+		if (neededTableNames != null && existingDbiFiles != null && neededTableNames.size() > 0 && existingDbiFiles.size() == 0) return neededTableNames;
 
-		boolean allFound = true;
 		List<String> dbiFileNames = new ArrayList<String>(existingDbiFiles.size());
 		for (IFile f : existingDbiFiles)
 		{
@@ -239,16 +240,16 @@ public class TableDefinitionUtils
 			}
 		}
 
+		List<String> notFoundDbiForTable = new ArrayList<String>();
 		for (String tableName : neededTableNames)
 		{
 			if (!dbiFileNames.contains(tableName))
 			{
-				allFound = false;
-				break;
+				notFoundDbiForTable.add(tableName);
 			}
 		}
 
-		return allFound;
+		return notFoundDbiForTable;
 	}
 
 	private static void addServerTable(Map<String, List<String>> srvTbl, String serverName, String tableName)
