@@ -594,7 +594,7 @@ public class SolutionSerializer
 				{
 					try
 					{
-						ServoyJSONObject obj = new ServoyJSONObject();
+						ServoyJSONObject obj = new ServoyJSONObject(false, true);
 						obj.put(PROP_NAME, workingSetName);
 						JSONArray jsonPaths = new ServoyJSONArray();
 						obj.put("paths", jsonPaths);
@@ -1248,7 +1248,7 @@ public class SolutionSerializer
 
 		/*
 		 * <solutionname> (as project) /datamodel.xml /<styles>.css (? needed here) /calculations.js (all .js files do contain javadoc tags as
-		 * 
+		 *
 		 * @property=uuid:value, "@property=" followed by json prop notation) /aggregates/sum_orders.obj (=aggregate - ISupportName defines the filename)
 		 * /valuelists/employees.obj (obj files are JSON objects without the outer accolades) /globals.js (methods + vars) /forms/orders/sv_<uuid>.obj (nameless
 		 * form elements) /forms/orders/my_field.obj (named form elements, with ISupportName) /forms/orders/orders.js (script methods)
