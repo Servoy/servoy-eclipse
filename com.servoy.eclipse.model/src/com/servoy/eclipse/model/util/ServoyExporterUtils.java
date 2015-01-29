@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,22 +78,22 @@ public class ServoyExporterUtils
 	 * This method takes care of minimal db info to be used in export in the case in which the db is down.
 	 * It will create and initialize the table def manager and the metadata manager, which will contain server and table and metadata info
 	 * to be used at solution export.
-	 * 
+	 *
 	 * If the database is not down, it will export all needed (non-minimal) db info, based on dbi files (only). That is, if needed,
 	 * it will export all tables from referenced servers, based on dbi files.
-	 * 
+	 *
 	 * NOTE: if there are no dbi files created, export info will be empty
-	 * 
-	 * @param true if the database is down, false otherwise 
-	 * 
+	 *
+	 * @param true if the database is down, false otherwise
+	 *
 	 * @throws CoreException
-	 * @throws JSONException 
-	 * @throws IOException 
+	 * @throws JSONException
+	 * @throws IOException
 	 */
 	public Pair<ITableDefinitionsManager, IMetadataDefManager> prepareDbiFilesBasedExportData(Solution activeSolution, boolean exportReferencedModules,
 		boolean exportI18NData, boolean exportAllTablesFromReferencedServers, boolean exportMetaData) throws CoreException, JSONException, IOException
 	{
-		// A. get only the needed servers (and tables) 
+		// A. get only the needed servers (and tables)
 		final Map<String, List<String>> neededServersTables = getNeededServerTables(activeSolution, exportReferencedModules, exportI18NData);
 		final boolean exportAll = exportAllTablesFromReferencedServers;
 		DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();
@@ -129,10 +130,11 @@ public class ServoyExporterUtils
 			}
 
 			// minimum requirement for dbi files based export: all needed dbi files must be found
-			if (!allNeededDbiFilesExist(tables, dbiz))
+			List<String> notFoundDBIFileTableNames = allNeededDbiFilesExist(tables, dbiz);
+			if (notFoundDBIFileTableNames.size() > 0)
 			{
-				throw new FileNotFoundException(
-					"Could not locate all needed dbi files for server '" + serverName + "'.\nPlease make sure the necessary files exist."); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new FileNotFoundException("Could not locate all needed dbi files for server '" + serverName + "', tablenames: '" +
+					Arrays.toString(notFoundDBIFileTableNames.toArray()) + "'.\nPlease make sure the necessary files exist.");
 			}
 
 			server_tableDbiFiles.put(serverName, dbiz);
@@ -223,11 +225,10 @@ public class ServoyExporterUtils
 		return new Pair<ITableDefinitionsManager, IMetadataDefManager>(tableDefManager, metadataDefManager);
 	}
 
-	private boolean allNeededDbiFilesExist(List<String> neededTableNames, List<IFile> existingDbiFiles)
+	private List<String> allNeededDbiFilesExist(List<String> neededTableNames, List<IFile> existingDbiFiles)
 	{
-		if (neededTableNames != null && existingDbiFiles != null && neededTableNames.size() > 0 && existingDbiFiles.size() == 0) return false;
+		if (neededTableNames != null && existingDbiFiles != null && neededTableNames.size() > 0 && existingDbiFiles.size() == 0) return neededTableNames;
 
-		boolean allFound = true;
 		List<String> dbiFileNames = new ArrayList<String>(existingDbiFiles.size());
 		for (IFile f : existingDbiFiles)
 		{
@@ -238,16 +239,16 @@ public class ServoyExporterUtils
 			}
 		}
 
+		List<String> notFoundDBITableNames = new ArrayList<String>();
 		for (String tableName : neededTableNames)
 		{
 			if (!dbiFileNames.contains(tableName))
 			{
-				allFound = false;
-				break;
+				notFoundDBITableNames.add(tableName);
 			}
 		}
 
-		return allFound;
+		return notFoundDBITableNames;
 	}
 
 	private void addServerTable(Map<String, List<String>> srvTbl, String serverName, String tableName)
@@ -294,8 +295,8 @@ public class ServoyExporterUtils
 		return neededServersTablesMap;
 	}
 
-	/** 
-	 * 
+	/**
+	 *
 	 * @return true if the database is down (servers or tables are inaccessible)
 	 */
 	public boolean hasDbDownErrorMarkers(String[] projects)
