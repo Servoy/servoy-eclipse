@@ -92,19 +92,25 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			
 			//returns the ghost object with the specified uuid
 			$scope.getGhost = function (uuid) {
-				for (i = 0; i< $scope.ghosts.ghostContainers.length; i++) {
-					for (j = 0; j< $scope.ghosts.ghostContainers[i].ghosts.length; j++){
-						if ($scope.ghosts.ghostContainers[i].ghosts[j].uuid == uuid)
-							return $scope.ghosts.ghostContainers[i].ghosts[j];
+				if ($scope.ghosts)
+				{
+					for (i = 0; i< $scope.ghosts.ghostContainers.length; i++) {
+						for (j = 0; j< $scope.ghosts.ghostContainers[i].ghosts.length; j++){
+							if ($scope.ghosts.ghostContainers[i].ghosts[j].uuid == uuid)
+								return $scope.ghosts.ghostContainers[i].ghosts[j];
+						}
 					}
-				}
+				}	
 				return null;
 			}
 			//returns an array of objects for the specified container uuid
 			$scope.getContainedGhosts = function (uuid) {
-				for (i = 0; i< $scope.ghosts.ghostContainers.length; i++) {
-					if ($scope.ghosts.ghostContainers[i].uuid == uuid)
-						return $scope.ghosts.ghostContainers[i].ghosts;
+				if ($scope.ghosts)
+				{
+					for (i = 0; i< $scope.ghosts.ghostContainers.length; i++) {
+						if ($scope.ghosts.ghostContainers[i].uuid == uuid)
+							return $scope.ghosts.ghostContainers[i].ghosts;
+					}
 				}
 				return null;
 			}
