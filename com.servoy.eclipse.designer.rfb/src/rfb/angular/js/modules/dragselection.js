@@ -137,8 +137,6 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 									if (beanModel){
 										beanModel.location.y = beanModel.location.y + changeY;
 										beanModel.location.x = beanModel.location.x + changeX;
-										var css = { top: beanModel.location.y, left: beanModel.location.x }
-										$(node).css(css);
 									}
 									else 
 									{
