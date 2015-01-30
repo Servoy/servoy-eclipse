@@ -31,7 +31,9 @@ angular.module('inlineedit', ['editor']).run(function($pluginRegistry, $editorSe
 									obj[node.getAttribute("svy-id")] = value;
 									$editorService.sendChanges(obj);
 								}
+								$editorService.setInlineEditMode(false);
 							}
+							$editorService.setInlineEditMode(true);
 							// double click on element
 							$("#directEdit")
 								.unbind('blur')
@@ -50,6 +52,7 @@ angular.module('inlineedit', ['editor']).run(function($pluginRegistry, $editorSe
 										if (event.keyCode == 27)
 										{
 											$("#directEdit").html(model[directEditProperty]).hide();
+											$editorService.setInlineEditMode(false);
 										}
 										if (event.keyCode == 13)
 										{
@@ -65,6 +68,10 @@ angular.module('inlineedit', ['editor']).run(function($pluginRegistry, $editorSe
 										if (event.keyCode == 8)
 										{
 											event.stopPropagation();
+										}
+										if (event.keyCode == 65 && event.ctrlKey)
+										{
+											document.execCommand('selectAll',false,null);
 										}
 									})	
 								.bind('blur',function()

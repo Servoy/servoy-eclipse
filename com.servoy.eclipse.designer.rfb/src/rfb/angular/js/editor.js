@@ -917,6 +917,10 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			wsSession.callService('formeditor', 'openContainedForm', {"uuid":ghost.uuid}, true)
 		},
 		
+		setInlineEditMode: function(inlineEdit){
+			wsSession.callService('formeditor', 'setInlineEditMode', {"inlineEdit":inlineEdit}, true)
+		},
+		
 		reloadPalette: function() {
 			$rootScope.$emit(EDITOR_EVENTS.RELOAD_PALETTE, "")
 		},

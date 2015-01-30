@@ -94,6 +94,27 @@ public class EditorServiceHandler implements IServerService
 		configuredHandlers.put("updateFieldPositioner", new UpdateFieldPositioner(fieldPositioner));
 		configuredHandlers.put("openScript", new OpenScriptHandler(editorPart));
 		configuredHandlers.put("openContainedForm", new OpenContainedFormHandler(editorPart));
+		configuredHandlers.put("setInlineEditMode", new IServerService()
+		{
+
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				if (args.has("inlineEdit"))
+				{
+					boolean inlineEdit = args.getBoolean("inlineEdit");
+					if (inlineEdit)
+					{
+						editorPart.deactivateEditorContext();
+					}
+					else
+					{
+						editorPart.activateEditorContext();
+					}
+				}
+				return null;
+			}
+		});
 
 		configuredHandlers.put("isInheritedForm", new IServerService()
 		{
