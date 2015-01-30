@@ -490,7 +490,7 @@ public class TypeCreator extends TypeCache
 					Map<String, PropertyDescription> properties = customJSONTypeDefinition.getProperties();
 					for (PropertyDescription pd : properties.values())
 					{
-						if (WebFormComponent.isDesignOnlyProperty(pd))
+						if (WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd))
 						{
 							// skip design properties
 							continue;
@@ -1103,7 +1103,7 @@ public class TypeCreator extends TypeCache
 
 						/*
 						 * (non-Javadoc)
-						 *
+						 * 
 						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitObjectInitializer(org.eclipse.dltk.javascript.ast.
 						 * ObjectInitializer)
 						 */
@@ -1155,9 +1155,9 @@ public class TypeCreator extends TypeCache
 		Map<String, PropertyDescription> properties = spec.getProperties();
 		for (PropertyDescription pd : properties.values())
 		{
-			if (WebFormComponent.isDesignOnlyProperty(pd))
+			if (WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd))
 			{
-				// skip design properties
+				// skip design and private properties
 				continue;
 			}
 			String name = pd.getName();

@@ -1721,7 +1721,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			Map<String, PropertyDescription> properties = spec.getProperties();
 			for (PropertyDescription pd : properties.values())
 			{
-				if (WebFormComponent.isDesignOnlyProperty(pd)) continue;
+				if (WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd)) continue;
 
 				String name = pd.getName();
 				// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
