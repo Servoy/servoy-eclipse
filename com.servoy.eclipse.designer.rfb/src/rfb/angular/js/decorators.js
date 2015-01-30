@@ -44,11 +44,22 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 					currentNode.name =  node.attr('name');
 					currentNode.node = node;
 					var ghost = $scope.getGhost(node.attr("svy-id"));
-					if(ghost) {
-						currentNode.isResizable = (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_COMPONENT) || (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM);	
+					if(ghost) {			
+						if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_COMPONENT) 
+						{
+							currentNode.isResizable = {t:true, l:true, b:true, r:true};
+						}
+						else if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM)
+						{
+							currentNode.isResizable = {t:false, l:false, b:true, r:true};
+						}
+						else
+						{
+							currentNode.isResizable = false;
+						}
 					}
 					else {
-						currentNode.isResizable = true;
+						currentNode.isResizable = {t:true, l:true, b:true, r:true};
 					}
 					
 					var offset = node.offset();

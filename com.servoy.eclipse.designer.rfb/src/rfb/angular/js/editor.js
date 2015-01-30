@@ -233,6 +233,10 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				if(ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM) {
 					ghost.size.width = ghost.size.width + deltaWidth;
 					$scope.contentStyle.width = ghost.size.width + "px";
+					ghost.size.height = ghost.size.height + deltaHeight;
+					$scope.contentStyle.height = ghost.size.height + "px";
+					var part = $scope.getLastPartGhost();
+					if (part != null) $scope.updateGhostLocation(part, part.location.x, part.location.y + deltaHeight);
 				}
 				else if(ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART || ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) {
 					// nop
@@ -241,6 +245,18 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 					ghost.size.height = ghost.size.height + deltaHeight;
 					ghost.size.width = ghost.size.width + deltaWidth;
 				}
+			}
+			
+			$scope.getLastPartGhost = function() {
+				var part = null;
+				for (i = 0; i< $scope.ghosts.ghostContainers.length; i++) {
+					var container = $scope.ghosts.ghostContainers[i];
+					for (j = 0; j < container.ghosts.length; j++)
+					{
+						if (container.ghosts[j].type == EDITOR_CONSTANTS.GHOST_TYPE_PART) part = container.ghosts[j];
+					}
+				}
+				return part;
 			}
 			
 			$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {

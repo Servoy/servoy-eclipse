@@ -97,7 +97,6 @@ public class SetPropertiesHandler implements IServerService
 					else if (persist instanceof Part)
 					{
 						JSONObject properties = args.optJSONObject(uuid);
-						cc = new CompoundCommand();
 						if (properties.has("y"))
 						{
 							cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(persist, false),
@@ -107,7 +106,6 @@ public class SetPropertiesHandler implements IServerService
 					else if (persist instanceof Form)
 					{
 						JSONObject properties = args.optJSONObject(uuid);
-						cc = new CompoundCommand();
 						if (properties.has("width"))
 						{
 							cc.add(new SetPropertyCommand("formwidth", PersistPropertySource.createPersistPropertySource(persist, false),

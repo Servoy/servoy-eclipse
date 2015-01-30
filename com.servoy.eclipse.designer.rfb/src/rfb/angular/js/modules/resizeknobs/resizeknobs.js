@@ -1,4 +1,4 @@
-angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITOR_EVENTS,$editorService)
+angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITOR_EVENTS,EDITOR_CONSTANTS,$editorService)
 {
 	return {
 		restrict: 'E',
@@ -14,7 +14,16 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 						beanModel = $scope.getGhost(node.getAttribute("svy-id"));
 					}
 					if(beanModel) {
-						obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y,width:beanModel.size.width,height:beanModel.size.height}
+						if(beanModel.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM) {
+							obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y,width:beanModel.size.width,height:beanModel.size.height}
+							
+							var part = $scope.getLastPartGhost();
+							if (part != null) obj[part.uuid] = {x:part.location.x, y:part.location.y};
+						}
+						else
+						{
+							obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y,width:beanModel.size.width,height:beanModel.size.height}
+						}
 					}
 				}
 				$editorService.sendChanges(obj)

@@ -65,3 +65,5 @@
 .knob.b.l {
 	cursor: ne-resize
 }
+
+.knob.hidden {display:none}
