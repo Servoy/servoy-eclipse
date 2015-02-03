@@ -62,7 +62,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter#createArgumentChest(org.eclipse.equinox.app.IApplicationContext)
 	 */
 	@Override
@@ -73,7 +73,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter#exportActiveSolution(com.servoy.eclipse.exporter.apps.common.IArgumentChest)
 	 */
 	@Override
@@ -325,6 +325,61 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			public boolean isExportUsers()
 			{
 				return configuration.exportUsers();
+			}
+
+
+			@Override
+			public boolean isOverwriteGroups()
+			{
+				return configuration.isOverwriteGroups();
+			}
+
+			@Override
+			public boolean isAllowSQLKeywords()
+			{
+				return configuration.isAllowSQLKeywords();
+			}
+
+			@Override
+			public boolean isOverrideSequenceTypes()
+			{
+				return configuration.isOverwriteGroups();
+			}
+
+			@Override
+			public boolean isInsertNewI18NKeysOnly()
+			{
+				return configuration.isInsertNewI18NKeysOnly();
+			}
+
+			@Override
+			public boolean isOverrideDefaultValues()
+			{
+				return configuration.isOverrideDefaultValues();
+			}
+
+			@Override
+			public int getImportUserPolicy()
+			{
+				return configuration.getImportUserPolicy();
+			}
+
+			@Override
+			public boolean isAddUsersToAdminGroup()
+			{
+				return configuration.isAddUsersToAdminGroup();
+			}
+
+			@Override
+			public boolean isAllowDataModelChanges()
+			{
+				return true;
+			}
+
+			@Override
+			public boolean isUpdateSequences()
+			{
+				return configuration.isUpdateSequences();
 			}
 		});
 		try

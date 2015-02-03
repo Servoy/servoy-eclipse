@@ -50,4 +50,23 @@ public interface IWarExportModel extends IExportSolutionModel
 	public Set<String> getUsedComponents();
 
 	public Set<String> getUsedServices();
+
+
+	public boolean isOverwriteGroups();
+
+	public boolean isAllowSQLKeywords();
+
+	public boolean isOverrideSequenceTypes();
+
+	public boolean isInsertNewI18NKeysOnly();
+
+	public boolean isOverrideDefaultValues();
+
+	public int getImportUserPolicy();
+
+	public boolean isAddUsersToAdminGroup();
+
+	public boolean isAllowDataModelChanges();
+
+	public boolean isUpdateSequences();
 }

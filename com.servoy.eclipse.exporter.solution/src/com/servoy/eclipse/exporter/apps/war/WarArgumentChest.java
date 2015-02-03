@@ -21,6 +21,7 @@ import java.util.HashMap;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest;
 import com.servoy.j2db.util.Utils;
+import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
 
 /**
  * Stores and provides the export-relevant arguments the product was started with.
@@ -47,6 +48,18 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private boolean exportUsers = false;
 	private String warFileName = null;
 
+	private static final String overwriteGroups = "overwriteGroups";//  overwrites Groups\n"
+	private static final String allowSQLKeywords = "allowSQLKeywords";// allows SQLKeywords \n"
+	private static final String overrideSequenceTypes = "overrideSequenceTypes";// overrides Sequence Types \n"
+	private static final String overrideDefaultValues = "overrideDefaultValues";// overrides Default Values \n"
+	private static final String insertNewI18NKeysOnly = "insertNewI18NKeysOnly";// inserts NewI18NKeysOnly \n"
+
+	private static final String importUserPolicy = "importUserPolicy";// int \n"
+	private static final String addUsersToAdminGroup = "addUsersToAdminGroup";// adds Users To Admin Group \n"
+	private static final String updateSequences = "updateSequences";// updates Sequences \n";
+
+	private HashMap<String, String> argumentsMap;
+
 	public WarArgumentChest(String[] args)
 	{
 		super();
@@ -55,7 +68,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest#getHelpMessage()
 	 */
 	@Override
@@ -114,17 +127,27 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -users ... exports users\n"
 			+ "        -tables ... export  all table  information  about  tables from  referenced  servers.\n"
 			+ "             IMPORTANT: all needed DB servers must already be started\n"
-			+ "        -warFileName ... the name of the war file \n";
+			+ "        -warFileName ... the name of the war file \n"
+			+ "        -"+overwriteGroups+" ...  overwrites Groups\n"
+			+ "        -"+allowSQLKeywords+" ... allows SQLKeywords \n"
+			+ "        -"+overrideSequenceTypes+" ... overrides Sequence Types \n"
+			+ "        -"+overrideDefaultValues+" ... overrides Default Values \n"
+			+ "        -"+insertNewI18NKeysOnly+" ... inserts NewI18NKeysOnly \n"
+			+ "        -"+importUserPolicy+" ... 0/1/2 \n"
+			+ "        				 don't = 0 \n"
+			+ "        		Default: create users update groups = 1 \n"
+			+ "        				 overwrite completely = 2 \n"
+			+ "        -"+addUsersToAdminGroup+" ... adds Users To Admin Group \n"
+			+ "        -"+updateSequences+" ... updates Sequences \n";
 	}
-
 	@Override
 	protected void parseArguments(HashMap<String, String> argsMap)
 	{
-		System.out.println("parsing arguments map "+argsMap);
+		System.out.println("parsing arguments map " + argsMap);
 		plugins = parseArg("pi", "Plugin name(s) was(were) not specified after '-pi' argument.", argsMap);
 		beans = parseArg("b", "Bean name(s) was(were) not specified after '-b' argument.", argsMap);
 		lafs = parseArg("l", "Laf name(s) was(were) not specified after '-l' argument.", argsMap);
-		drivers = parseArg("d","Driver name(s) was(were) not specified after '-d' argument.", argsMap);
+		drivers = parseArg("d", "Driver name(s) was(were) not specified after '-d' argument.", argsMap);
 		isExportActiveSolutionOnly = true;
 		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolutionOnly = false;
 		pluginLocations = parseArg("pluginLocations", null, argsMap);
@@ -143,6 +166,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 		if (argsMap.containsKey("users")) exportUsers = true;
 		if (argsMap.containsKey("tables")) exportAllTablesFromReferencedServers = true;
 		if (argsMap.containsKey("warFileName")) warFileName = parseArg("warFileName", null, argsMap);
+		argumentsMap = argsMap;
 	}
 
 	private String parseComponentsArg(String argName, HashMap<String, String> argsMap)
@@ -247,5 +271,63 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public String getWarFileName()
 	{
 		return warFileName;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isOverwriteGroups()
+	{
+		return argumentsMap.containsKey(overwriteGroups);
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isAllowSQLKeywords()
+	{
+		return argumentsMap.containsKey(allowSQLKeywords);
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isInsertNewI18NKeysOnly()
+	{
+		return argumentsMap.containsKey(insertNewI18NKeysOnly);
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isOverrideDefaultValues()
+	{
+		return argumentsMap.containsKey(overrideDefaultValues);
+	}
+
+	/**
+	 * @return
+	 */
+	public int getImportUserPolicy()
+	{
+		if (argumentsMap.containsKey(importUserPolicy))
+			return Utils.getAsInteger(argumentsMap.get(importUserPolicy));
+		return IXMLImportUserChannel.IMPORT_USER_POLICY_CREATE_U_UPDATE_G;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isAddUsersToAdminGroup()
+	{
+		return argumentsMap.containsKey(addUsersToAdminGroup);
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isUpdateSequences()
+	{
+		return argumentsMap.containsKey(updateSequences);
 	}
 }

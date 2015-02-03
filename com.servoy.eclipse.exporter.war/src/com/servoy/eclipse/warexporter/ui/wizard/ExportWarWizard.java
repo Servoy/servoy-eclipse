@@ -17,13 +17,10 @@
 package com.servoy.eclipse.warexporter.ui.wizard;
 
 
-import java.io.File;
-import java.io.FileWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Properties;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -44,7 +41,6 @@ import org.eclipse.ui.IWorkbench;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
@@ -148,41 +144,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		{
 			public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
-				final WarExporter exporter = new WarExporter(exportModel)
-				{
-					@Override
-					protected void copyActiveSolution(IProgressMonitor progressMonitor, java.io.File tmpWarDir) throws ExportException
-					{
-						super.copyActiveSolution(progressMonitor, tmpWarDir);
-						try
-						{
-							File importProperties = new File(tmpWarDir, "WEB-INF/import.properties");
-							Properties prop = new Properties();
-							prop.setProperty("overwriteGroups", Boolean.toString(exportModel.isOverwriteGroups()));
-							prop.setProperty("allowSQLKeywords", Boolean.toString(exportModel.isAllowSQLKeywords()));
-							prop.setProperty("overrideSequenceTypes", Boolean.toString(exportModel.isOverrideSequenceTypes()));
-							prop.setProperty("overrideDefaultValues", Boolean.toString(exportModel.isOverrideDefaultValues()));
-							prop.setProperty("insertNewI18NKeysOnly", Boolean.toString(exportModel.isInsertNewI18NKeysOnly()));
-							prop.setProperty("importUserPolicy", Integer.toString(exportModel.getImportUserPolicy()));
-							prop.setProperty("addUsersToAdminGroup", Boolean.toString(exportModel.isAddUsersToAdminGroup()));
-							prop.setProperty("allowDataModelChange", Boolean.toString(exportModel.isAllowDataModelChanges()));
-							prop.setProperty("updateSequences", Boolean.toString(exportModel.isUpdateSequences()));
-							FileWriter writer = new FileWriter(importProperties);
-							try
-							{
-								prop.store(writer, "import properties");
-							}
-							finally
-							{
-								writer.close();
-							}
-						}
-						catch (Exception e)
-						{
-							ServoyLog.logError(e);
-						}
-					}
-				};
+				final WarExporter exporter = new WarExporter(exportModel);
 				try
 				{
 					final boolean[] cancel = new boolean[] { false };
