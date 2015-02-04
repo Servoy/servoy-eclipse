@@ -45,13 +45,12 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.GhostBean;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
-import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IDeveloperRepository;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
@@ -439,9 +438,9 @@ public class CreateComponentHandler implements IServerService
 						bean.setBeanClassName(name);
 						portal.addChild(bean);
 					}
-					else if (parent instanceof Form)
+					else if (parent instanceof AbstractContainer)
 					{
-						bean = ((Form)parent).createNewBean(compName, name);
+						bean = ((AbstractContainer)parent).createNewBean(compName, name);
 
 					}
 					else if (parent instanceof Bean)
