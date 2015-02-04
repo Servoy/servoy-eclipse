@@ -39,6 +39,11 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 							height = node.outerHeight()
 							width = node.outerWidth()
 						}
+						else
+						{
+							height = node.outerHeight()
+							width = node.outerWidth()
+						}	
 					}
 					
 					currentNode.name =  node.attr('name');

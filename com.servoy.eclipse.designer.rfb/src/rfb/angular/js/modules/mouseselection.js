@@ -328,14 +328,28 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 						}
 
 						var clientWidth = element.clientWidth;
-						if (clientWidth == 0 && element.firstChild)
+						if (clientWidth == 0)
 						{
-							clientWidth = element.firstChild.clientWidth
+							if ( element.firstChild &&  element.firstChild.clientWidth > 0)
+							{
+								clientWidth = element.firstChild.clientWidth
+							}
+							else
+							{
+								clientWidth = element.offsetWidth;
+							}	
 						}	
 						var clientHeight = element.clientHeight;
-						if (clientHeight == 0 && element.firstChild)
+						if (clientHeight == 0)
 						{
-							clientHeight = element.firstChild.clientHeight
+							if ( element.firstChild &&  element.firstChild.clientHeight > 0)
+							{
+								clientHeight = element.firstChild.clientHeight
+							}
+							else
+							{
+								clientHeight = element.offsetHeight;
+							}	
 						}
 						
 						if (percentage == undefined || percentage == 100) { //Element must be fully enclosed

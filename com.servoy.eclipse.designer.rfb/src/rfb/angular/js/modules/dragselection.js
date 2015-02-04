@@ -62,7 +62,10 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 								}
 								else {
 									var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-									obj[node.getAttribute("svy-id")] = {x:ghostObject.location.x,y:ghostObject.location.y}
+									if (ghostObject)
+									{
+										obj[node.getAttribute("svy-id")] = {x:ghostObject.location.x,y:ghostObject.location.y}
+									}	
 								}
 							}
 						}
@@ -141,7 +144,10 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 									else 
 									{
 										var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-										editorScope.updateGhostLocation(ghostObject, ghostObject.location.x + changeX, ghostObject.location.y + changeY)
+										if (ghostObject)
+										{
+											editorScope.updateGhostLocation(ghostObject, ghostObject.location.x + changeX, ghostObject.location.y + changeY)
+										}	
 									}
 								}
 							}
