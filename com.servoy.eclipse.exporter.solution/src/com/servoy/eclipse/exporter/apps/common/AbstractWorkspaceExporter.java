@@ -320,15 +320,23 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 
 							if (dbDownMode)
 							{
-								output("Found error markers that would suggest at least a DB used by this solution or it's exported modules is down."); //$NON-NLS-1$
 								// TODO see large comment some lines above; when error markers can be generated based on dbi files only we should do a rebuild here based on that to get real markers
 								if (configuration.exportIfDBDown()) // TODO see large comment some lines above; remove this when error markers can be generated based on dbi files only
 								{
+									// as -dbd decides by itself if it uses DB or not, let the user know that .dbi files were used
+									output("Found error markers that would suggest at least a DB used by this solution or it's exported modules is down."); //$NON-NLS-1$
 									output("Exporting with DB down is allowed. Proceeding..."); //$NON-NLS-1$
 								}
-								else if (!configuration.getExportUsingDbiFileInfoOnly())
+								else if (configuration.getExportUsingDbiFileInfoOnly())
 								{
-									outputError("Please use -dbd argument to allow exports when DB is down."); //$NON-NLS-1$
+									// user requested .dbi files anyway, so not really relevant
+									outputExtra("Found error markers that would suggest at least a DB used by this solution or it's exported modules is down."); //$NON-NLS-1$
+									outputExtra("Exporting based on .dbi files instead of DB as requested..."); //$NON-NLS-1$
+								}
+								else
+								{
+									outputError("Found error markers that would suggest at least a DB used by this solution or it's exported modules is down."); //$NON-NLS-1$
+									outputError("Please use -dbd (or -dbi) argument to allow exports when DB is down."); //$NON-NLS-1$
 									dbDownMode = false; // so that it fails because of error markers
 								}
 							}
