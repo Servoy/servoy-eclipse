@@ -20,6 +20,7 @@ package com.servoy.eclipse.exporter.apps.solution;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -243,7 +244,7 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 		return protectionPassword != null;
 	}
 
-	// IXMLExportUserChannel methods: 
+	// IXMLExportUserChannel methods:
 
 	public boolean getExportAllTablesFromReferencedServers()
 	{
@@ -254,10 +255,12 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 	{
 		if (moduleList != null)
 		{
+			String allModulesString = Arrays.toString(allModules.toArray());
 			allModules.retainAll(moduleList);
 			if (allModules.size() != moduleList.size())
 			{
-				info("Some of the modules specified for export were not actually modules of exported solution.", ILogLevel.ERROR); //$NON-NLS-1$
+				info(
+					"Some of the modules specified for export where not actually modules of exported solution. All solution modules: '" + allModulesString + "', to exported modules: '" + Arrays.toString(moduleList.toArray()) + "'", ILogLevel.ERROR); //$NON-NLS-1$
 				return null;
 			}
 		}
