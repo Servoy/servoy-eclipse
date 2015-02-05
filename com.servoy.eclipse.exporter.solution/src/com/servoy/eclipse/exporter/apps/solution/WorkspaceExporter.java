@@ -51,8 +51,8 @@ import com.servoy.j2db.util.xmlxport.ITableDefinitionsManager;
 import com.servoy.j2db.util.xmlxport.IXMLExporter;
 
 /**
- * Eclipse application that can be used for exporting servoy solutions in .servoy format (that can be used to import solutions afterwards in developer/app. server). 
- * 
+ * Eclipse application that can be used for exporting servoy solutions in .servoy format (that can be used to import solutions afterwards in developer/app. server).
+ *
  * @author acostescu
  */
 public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
@@ -148,9 +148,15 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 		moduleNames = config.getModuleIncludeList(moduleNames);
 		if (moduleNames == null)
 		{
-			exitCode = EXIT_STOPPED;
-			return;
+			// this will make the actual export code fail with exception later on that's why we don't set any 'fail' exitcode here; it will catch/set correct exit code anyway
+			moduleNames = new ArrayList<String>();
+			outputError("Cannot check for error markes in all listed modules; please make sure all listed modules (-modules ...) are actually modules of the exported solution.");
 		}
+
+		// don't check import hooks as those are not build with active solution in developer either!
+		ServoyProject[] importHooks = sm.getImportHookModulesOfActiveProject();
+		for (ServoyProject p : importHooks)
+			moduleNames.remove(p.getProject().getName());
 
 		ServoyProject[] toCheck = new ServoyProject[moduleNames.size() + 1];
 		toCheck[0] = activeProject;
