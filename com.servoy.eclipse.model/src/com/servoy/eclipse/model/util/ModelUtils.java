@@ -146,8 +146,8 @@ public class ModelUtils
 								List<Object> values = pd.getValues();
 								if (values != null)
 								{
-									Collections.sort(values, StringComparator.INSTANCE);
 									cssClasses.addAll(values);
+									Collections.sort(cssClasses, StringComparator.INSTANCE);
 								}
 							}
 						}
