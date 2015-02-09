@@ -75,13 +75,13 @@ public class SwtWebsocket
 		// expecting ws://localhost:8080/rfb/angular/websocket/nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn
 		String[] args = getEndpointArgs(EditorEndpoint.class, uriString);
 
-		if (args == null || args.length != 1)
+		if (args == null || args.length != 2)
 		{
 			return false;
 		}
 
 		websocketEndpoint = new EditorEndpoint();
-		((EditorEndpoint)websocketEndpoint).start(newSession, args[0]);
+		((EditorEndpoint)websocketEndpoint).start(newSession, args[0], args[1]);
 		return true;
 	}
 
@@ -90,13 +90,13 @@ public class SwtWebsocket
 		// expecting ws://localhost:8080/rfb/angular/content/websocket/null/null/solname
 		String[] args = getEndpointArgs(EditorContentEndpoint.class, uriString);
 
-		if (args == null || args.length != 3)
+		if (args == null || args.length != 4)
 		{
 			return false;
 		}
 
 		websocketEndpoint = new EditorContentEndpoint();
-		((EditorContentEndpoint)websocketEndpoint).start(newSession, args[0], args[1], args[2]);
+		((EditorContentEndpoint)websocketEndpoint).start(newSession, args[0], args[1], args[2], args[3]);
 		return true;
 	}
 
