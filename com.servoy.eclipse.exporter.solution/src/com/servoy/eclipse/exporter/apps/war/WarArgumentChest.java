@@ -68,7 +68,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest#getHelpMessage()
 	 */
 	@Override
@@ -103,7 +103,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             invalid solutions to be exported.\n"
 			+ "        -active <true/false> export active solution (and its modules) only\n"
 			+ "				Default: true\n"
-			+ "        -pluginlocations absolute paths to plugin folders.\n"
+			+ "        -pluginLocations absolute paths to plugin folders.\n"
 			+			    "Default: '../plugins'.\n"
 			+ "        -crefs exports only the components used by the solution.\n"
 			+			    "Default: all components are exported.\n"
