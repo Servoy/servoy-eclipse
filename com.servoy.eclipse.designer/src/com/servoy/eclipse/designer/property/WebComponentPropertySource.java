@@ -99,7 +99,7 @@ public class WebComponentPropertySource extends PersistPropertySource
 
 		for (PropertyDescription desc : propertyDescription.getProperties().values())
 		{
-			Object scope = propertyDescription.getTag(WebFormComponent.TAG_SCOPE);
+			Object scope = desc.getTag(WebFormComponent.TAG_SCOPE);
 			if ("private".equals(scope) || "runtime".equals(scope))
 			{
 				// only show design properties
@@ -164,11 +164,11 @@ public class WebComponentPropertySource extends PersistPropertySource
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * com.servoy.eclipse.ui.property.PersistPropertySource#createPropertyCategory(com.servoy.eclipse.ui.property.PersistPropertySource.PropertyDescriptorWrapper
 	 * )
-	 *
+	 * 
 	 * Properties from spec should be dispayed under "Component" category except for handlers and BEAN_PROPERTIES. Properties found with reflection are handled
 	 * by the super class (they go under "Properties").
 	 */

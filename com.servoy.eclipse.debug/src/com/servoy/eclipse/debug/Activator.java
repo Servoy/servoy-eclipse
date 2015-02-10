@@ -100,7 +100,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.core.runtime.Plugins#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -255,7 +255,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 							{
 								if (componentReaders.size() > 0)
 								{
-									ResourceProvider.removeComponentResources(componentReaders.values());
+									ResourceProvider.refreshComponentResources(componentReaders.values());
 									componentReaders.clear();
 								}
 								componentReaders.putAll(readDir(monitor, activeResourcesProject, SolutionSerializer.COMPONENTS_DIR_NAME));
@@ -266,7 +266,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 							{
 								if (serviceReaders.size() > 0)
 								{
-									ResourceProvider.removeServiceResources(serviceReaders.values());
+									ResourceProvider.refreshServiceResources(serviceReaders.values());
 									serviceReaders.clear();
 								}
 								serviceReaders.putAll(readDir(monitor, activeResourcesProject, SolutionSerializer.SERVICES_DIR_NAME));
@@ -334,7 +334,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -473,7 +473,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.sablo.specification.WebComponentPackage.DirPackageReader#readTextFile(java.lang.String, java.nio.charset.Charset)
 		 */
 		@Override

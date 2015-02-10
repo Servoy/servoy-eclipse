@@ -157,53 +157,46 @@ public class CreateComponentHandler implements IServerService
 		int h = args.optInt("h");
 		if (args.has("type"))
 		{//a ghost dragged from the pallete. it is defined in the "types" section of the .spec file
-			Iterator<IPersist> allPersists = editorPart.getForm().getAllObjects();
-			while (allPersists.hasNext())
+			IPersist next = PersistFinder.INSTANCE.searchForPersist(editorPart, (String)args.get("dropTargetUUID"));
+			if (next instanceof BaseComponent)
 			{
-				IPersist next = allPersists.next();
-				if (next instanceof BaseComponent)
+				if (args.getString("type").equals("tab"))
 				{
-					if (isCorrectTarget(((BaseComponent)next), (String)args.get("dropTargetUUID")))
+					if (next instanceof ISupportChilds)
 					{
-						if (args.getString("type").equals("tab"))
+						ISupportChilds iSupportChilds = (ISupportChilds)next;
+						Tab newTab = (Tab)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(iSupportChilds, IRepository.TABS);
+						String tabName = "tab_" + id.incrementAndGet();
+						while (!PersistFinder.INSTANCE.checkName(editorPart, tabName))
 						{
-							if (next instanceof ISupportChilds)
-							{
-								ISupportChilds iSupportChilds = (ISupportChilds)next;
-								Tab newTab = (Tab)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(iSupportChilds, IRepository.TABS);
-								String tabName = "tab_" + id.incrementAndGet();
-								while (!PersistFinder.INSTANCE.checkName(editorPart, tabName))
-								{
-									tabName = "tab_" + id.incrementAndGet();
-								}
-								newTab.setText(tabName);
-								newTab.setLocation(new Point(x, y));
-								iSupportChilds.addChild(newTab);
-								return next;
-							}
+							tabName = "tab_" + id.incrementAndGet();
 						}
-						if (next instanceof Bean)
-						{
-							Bean parentBean = (Bean)next;
-							String typeName = args.getString("type");
-							String compName = "bean_" + id.incrementAndGet();
-							while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
-							{
-								compName = "bean_" + id.incrementAndGet();
-							}
-							String dropTargetFieldName = getFirstFieldWithType(parentBean, typeName);
-							int index = -1;
-							boolean isArray = false;
-							WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getBeanClassName());
-							Object config = spec.getProperty(dropTargetFieldName).getConfig();
-							JSONObject configObject = new JSONObject(config.toString());
-							if (configObject.getString("type").endsWith("]")) isArray = true;
-							Bean bean = new GhostBean(parentBean, dropTargetFieldName, typeName, index, isArray, true);
-							bean.setName(compName);
-							bean.setBeanClassName(typeName);
-							return bean;
-						}
+						newTab.setText(tabName);
+						newTab.setLocation(new Point(x, y));
+						iSupportChilds.addChild(newTab);
+						return next;
 					}
+				}
+				if (next instanceof Bean)
+				{
+					Bean parentBean = (Bean)next;
+					String typeName = args.getString("type");
+					String compName = "bean_" + id.incrementAndGet();
+					while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
+					{
+						compName = "bean_" + id.incrementAndGet();
+					}
+					String dropTargetFieldName = getFirstFieldWithType(parentBean, typeName);
+					int index = -1;
+					boolean isArray = false;
+					WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getBeanClassName());
+					Object config = spec.getProperty(dropTargetFieldName).getConfig();
+					JSONObject configObject = new JSONObject(config.toString());
+					if (configObject.getString("type").endsWith("]")) isArray = true;
+					Bean bean = new GhostBean(parentBean, dropTargetFieldName, typeName, index, isArray, true);
+					bean.setName(compName);
+					bean.setBeanClassName(typeName);
+					return bean;
 				}
 			}
 		}

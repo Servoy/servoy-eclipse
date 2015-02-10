@@ -449,12 +449,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		{
 			if (componentReaders.size() > 0)
 			{
-				ResourceProvider.removeComponentResources(componentReaders.values());
+				ResourceProvider.refreshComponentResources(componentReaders.values());
 				componentReaders.clear();
 			}
 			if (serviceReaders.size() > 0)
 			{
-				ResourceProvider.removeServiceResources(serviceReaders.values());
+				ResourceProvider.refreshServiceResources(serviceReaders.values());
 				serviceReaders.clear();
 			}
 			componentReaders.putAll(readDir(new NullProgressMonitor(), activeResourcesProject, SolutionSerializer.COMPONENTS_DIR_NAME));
