@@ -1745,7 +1745,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				if (desc != null)
 				{
 					if (desc.getDefaultValue() != null) return desc.getDefaultValue();
-					if (desc.getType() != null) return desc.getType().defaultValue();
+					if (desc.getType() != null) return desc.getType().defaultValue(desc);
 				}
 			}
 			catch (RepositoryException e)

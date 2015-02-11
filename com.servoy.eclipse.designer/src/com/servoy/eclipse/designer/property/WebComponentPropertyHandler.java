@@ -166,7 +166,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			{
 				return propertyDescription.getDefaultValue();
 			}
-			return type.defaultValue();
+			return type.defaultValue(propertyDescription);
 		}
 		else
 		{
