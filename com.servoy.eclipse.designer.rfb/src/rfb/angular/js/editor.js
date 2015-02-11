@@ -214,14 +214,15 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				if(ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART) { // it is a part
 					if(y <= ghost.min || (ghost.max != -1 && y >= ghost.max)) {
 						// part is overlapping its neighbors
-						return;
+						return false;
 					}
 				}
 				if(ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM) {
-					return;
+					return false;
 				}
 				ghost.location.x = x;
 				ghost.location.y = y;
+				return true;
 			}
 			
 			$scope.updateGhostLocationLimits = function(ghost) {
@@ -233,10 +234,16 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				if(ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM) {
 					ghost.size.width = ghost.size.width + deltaWidth;
 					$scope.contentStyle.width = ghost.size.width + "px";
-					ghost.size.height = ghost.size.height + deltaHeight;
-					$scope.contentStyle.height = ghost.size.height + "px";
 					var part = $scope.getLastPartGhost();
-					if (part != null) $scope.updateGhostLocation(part, part.location.x, part.location.y + deltaHeight);
+					if (part != null)
+					{
+						$scope.updateGhostLocationLimits(part);
+						if ($scope.updateGhostLocation(part, part.location.x, part.location.y + deltaHeight))
+						{
+							ghost.size.height = ghost.size.height + deltaHeight;
+							$scope.contentStyle.height = ghost.size.height + "px";	
+						}
+					}
 				}
 				else if(ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART || ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) {
 					// nop
@@ -456,7 +463,9 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			}
 
 			$scope.getFormState = function() {
-				return servoyInternal.initFormState(formName); // this is a normal direct get if no init config is given
+				var state = servoyInternal.initFormState(formName); // this is a normal direct get if no init config is given
+				if (state) $scope.lastState = state;
+				return $scope.lastState;
 			}
 
 			$scope.refreshEditorContent = function() {

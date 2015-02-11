@@ -327,15 +327,40 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 							left = left - element.parentElement.parentElement.getBoundingClientRect().left;
 						}
 
+						var clientWidth = element.clientWidth;
+						if (clientWidth == 0)
+						{
+							if ( element.firstChild &&  element.firstChild.clientWidth > 0)
+							{
+								clientWidth = element.firstChild.clientWidth
+							}
+							else
+							{
+								clientWidth = element.offsetWidth;
+							}	
+						}	
+						var clientHeight = element.clientHeight;
+						if (clientHeight == 0)
+						{
+							if ( element.firstChild &&  element.firstChild.clientHeight > 0)
+							{
+								clientHeight = element.firstChild.clientHeight
+							}
+							else
+							{
+								clientHeight = element.offsetHeight;
+							}	
+						}
+						
 						if (percentage == undefined || percentage == 100) { //Element must be fully enclosed
-							if (p1.top <= top && p1.left <= left && p2.top >= top + element.clientHeight && p2.left >= left + element.clientWidth) {
+							if (p1.top <= top && p1.left <= left && p2.top >= top + clientHeight && p2.left >= left + clientWidth) {
 								matchedElements.push(element)
 							}
 						} else {
-							var overlapX = Math.max(0, Math.min(p2.left, left + element.clientWidth) - Math.max(p1.left, left))
-							var overlapY = Math.max(0, Math.min(p2.top, top + element.clientHeight) - Math.max(p1.top, top))
+							var overlapX = Math.max(0, Math.min(p2.left, left + clientWidth) - Math.max(p1.left, left))
+							var overlapY = Math.max(0, Math.min(p2.top, top + clientHeight) - Math.max(p1.top, top))
 
-							if ( ( (element.clientWidth * element.clientHeight) / 100) * percentage < (overlapX * overlapY)) {
+							if ( ( (clientWidth * clientHeight) / 100) * percentage < (overlapX * overlapY)) {
 								matchedElements.push(element)
 							}
 						}

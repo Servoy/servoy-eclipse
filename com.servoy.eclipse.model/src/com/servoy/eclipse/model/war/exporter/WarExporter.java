@@ -586,6 +586,34 @@ public class WarExporter
 		{
 			throw new ExportException("Cannot write the active solution in war file", ex);
 		}
+
+		try
+		{
+			File importProperties = new File(tmpWarDir, "WEB-INF/import.properties");
+			Properties prop = new Properties();
+			prop.setProperty("overwriteGroups", Boolean.toString(exportModel.isOverwriteGroups()));
+			prop.setProperty("allowSQLKeywords", Boolean.toString(exportModel.isAllowSQLKeywords()));
+			prop.setProperty("overrideSequenceTypes", Boolean.toString(exportModel.isOverrideSequenceTypes()));
+			prop.setProperty("overrideDefaultValues", Boolean.toString(exportModel.isOverrideDefaultValues()));
+			prop.setProperty("insertNewI18NKeysOnly", Boolean.toString(exportModel.isInsertNewI18NKeysOnly()));
+			prop.setProperty("importUserPolicy", Integer.toString(exportModel.getImportUserPolicy()));
+			prop.setProperty("addUsersToAdminGroup", Boolean.toString(exportModel.isAddUsersToAdminGroup()));
+			prop.setProperty("allowDataModelChange", Boolean.toString(exportModel.isAllowDataModelChanges()));
+			prop.setProperty("updateSequences", Boolean.toString(exportModel.isUpdateSequences()));
+			FileWriter writer = new FileWriter(importProperties);
+			try
+			{
+				prop.store(writer, "import properties");
+			}
+			finally
+			{
+				writer.close();
+			}
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
 	}
 
 	private void exportSolution(IProgressMonitor monitor, String tmpWarDir, Solution activeSolution, boolean exportSolution) throws CoreException,

@@ -23,8 +23,25 @@
    <filter-mapping>
       <filter-name>NGClientEntryFilter</filter-name>
       <url-pattern>/solutions/*</url-pattern>
-   </filter-mapping>  
-     
+   </filter-mapping>
+	<servlet>
+		<servlet-name>webcomponents_services</servlet-name>
+		<servlet-class>com.servoy.j2db.server.ngclient.ComponentsModuleGenerator</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>webcomponents_services</servlet-name>
+		<url-pattern>/js/servoy-components.js</url-pattern>
+	</servlet-mapping>
+	
+    <servlet>
+		<servlet-name>media_resources</servlet-name>
+		<servlet-class>com.servoy.j2db.server.ngclient.MediaResourcesServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>media_resources</servlet-name>
+		<url-pattern>/resources/*</url-pattern>
+	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>http-tunnel-servlet</servlet-name>
 		<servlet-class>

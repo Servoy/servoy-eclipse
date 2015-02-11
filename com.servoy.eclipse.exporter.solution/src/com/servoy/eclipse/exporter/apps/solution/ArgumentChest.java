@@ -185,10 +185,12 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 	{
 		if (moduleList != null)
 		{
+			String allModulesString = Arrays.toString(allModules.toArray());
 			allModules.retainAll(moduleList);
 			if (allModules.size() != moduleList.size())
 			{
-				info("Some of the modules specified for export were not actually modules of exported solution.", ILogLevel.ERROR);
+				info(
+					"Some of the modules specified for export where not actually modules of exported solution. All solution modules: '" + allModulesString + "', to exported modules: '" + Arrays.toString(moduleList.toArray()) + "'", ILogLevel.ERROR); //$NON-NLS-1$
 				return null;
 			}
 		}

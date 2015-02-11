@@ -49,6 +49,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorPart;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -473,10 +474,12 @@ public class ServerEditor extends EditorPart
 			ServerConfig serverConfig = serverConfigObservable.getObject();
 			String currentServerName = serverConfig.getServerName();
 			String dataModelCloneFrom = null;
+			String oldURL = null;
 			ServerConfig oldConfig = serverManager.getServerConfig(oldServerName);
 			if (oldConfig != null)
 			{
 				dataModelCloneFrom = oldConfig.getDataModelCloneFrom();
+				oldURL = oldConfig.getServerUrl();
 			}
 			boolean log_server = logServerButton.getSelection();
 
@@ -537,7 +540,14 @@ public class ServerEditor extends EditorPart
 					}
 				}
 			}
-
+			if (oldURL != null && !oldURL.equals(serverConfig.getServerUrl()))
+			{
+				if (MessageDialog.openQuestion(getSite().getShell(), "Database Server URL changed",
+					"It is strongly recommended to restart your Servoy Developer. Would you like to restart now?"))
+				{
+					PlatformUI.getWorkbench().restart();
+				}
+			}
 		}
 		catch (Exception e)
 		{

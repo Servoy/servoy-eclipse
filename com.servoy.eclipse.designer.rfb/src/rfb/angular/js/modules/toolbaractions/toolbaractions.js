@@ -1,4 +1,4 @@
-angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $toolbar, TOOLBAR_CATEGORIES, $editorService,$pluginRegistry, EDITOR_EVENTS){
+angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $toolbar, TOOLBAR_CATEGORIES, $editorService, $pluginRegistry, EDITOR_EVENTS){
 
 	var editorScope = null;
 	$pluginRegistry.registerPlugin(function(scope) {
@@ -57,6 +57,25 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 				$editorService.openElementWizard('accordion');
 			},
 	};
+	
+	var btnHighlightWebcomponents = {
+			text: "Highlight webcomponents",
+			icon: "toolbaractions/icons/highlight.png",
+			enabled: true,
+			onclick: function() {
+				if (editorScope.highlight == undefined)
+					editorScope.highlight = true;
+				else
+					editorScope.highlight = !editorScope.highlight;
+				
+				var nodes = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[svy-id]"));
+				var arrayLength = nodes.length;
+				for (var i = 0; i < arrayLength; i++) {
+				   var node = nodes[i];
+				   angular.element(node).toggleClass("highlight_element", editorScope.highlight);
+				}
+			},
+	};
 
 	$toolbar.add(btnPlaceField, TOOLBAR_CATEGORIES.ELEMENTS);
 	$toolbar.add(btnPlaceImage, TOOLBAR_CATEGORIES.ELEMENTS);
@@ -64,7 +83,7 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 	$toolbar.add(btnPlaceSplitPane, TOOLBAR_CATEGORIES.ELEMENTS);
 	$toolbar.add(btnPlaceTabPanel, TOOLBAR_CATEGORIES.ELEMENTS);
 	$toolbar.add(btnPlaceAccordion, TOOLBAR_CATEGORIES.ELEMENTS);	
-
+	$toolbar.add(btnHighlightWebcomponents, TOOLBAR_CATEGORIES.ELEMENTS);	
 	var btnTabSequence = {
 			text: "Set tab sequence",
 			icon: "../../images/th_horizontal.gif",
