@@ -4,44 +4,22 @@
     PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
     "http://java.sun.com/dtd/web-app_2_3.dtd">
 
-<web-app>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+                      http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+  version="3.0">
 
   <!-- Servoy related servlets -->
   
   <absolute-ordering>
     <name>servoy_ngclient</name>
   </absolute-ordering>
-    
-  <listener>
+   
+   <listener>
 		<listener-class>com.servoy.j2db.server.servlets.WarClientServletContextListener</listener-class>
   </listener>  
    
-   <filter>
-      <filter-name>NGClientEntryFilter</filter-name>
-      <filter-class>com.servoy.j2db.server.ngclient.NGClientEntryFilter</filter-class>
-   </filter>
-   <filter-mapping>
-      <filter-name>NGClientEntryFilter</filter-name>
-      <url-pattern>/solutions/*</url-pattern>
-   </filter-mapping>
-	<servlet>
-		<servlet-name>webcomponents_services</servlet-name>
-		<servlet-class>com.servoy.j2db.server.ngclient.ComponentsModuleGenerator</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>webcomponents_services</servlet-name>
-		<url-pattern>/js/servoy-components.js</url-pattern>
-	</servlet-mapping>
-	
-    <servlet>
-		<servlet-name>media_resources</servlet-name>
-		<servlet-class>com.servoy.j2db.server.ngclient.MediaResourcesServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>media_resources</servlet-name>
-		<url-pattern>/resources/*</url-pattern>
-	</servlet-mapping>
-	
 	<servlet>
 		<servlet-name>http-tunnel-servlet</servlet-name>
 		<servlet-class>
