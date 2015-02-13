@@ -31,6 +31,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentsH
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.GetPartStylesHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.GhostHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.KeyPressedHandler;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.MoveInResponsiveLayoutHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenContainedFormHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenElementWizardHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenScriptHandler;
@@ -87,6 +88,7 @@ public class EditorServiceHandler implements IServerService
 
 		configuredHandlers.put("keyPressed", new KeyPressedHandler(editorPart, selectionProvider));
 		configuredHandlers.put("setProperties", new SetPropertiesHandler(editorPart));
+		configuredHandlers.put("moveComponent", new MoveInResponsiveLayoutHandler(editorPart));
 		configuredHandlers.put("createComponent", new CreateComponentHandler(editorPart, selectionProvider));
 		configuredHandlers.put("getPartsStyles", new GetPartStylesHandler(editorPart));
 		configuredHandlers.put("createComponents", new CreateComponentsHandler(editorPart, selectionProvider));

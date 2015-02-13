@@ -175,14 +175,16 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					return selection;
 				},
 				
-				getDropNode: function(type,allowedParents,layoutName,event) {
+				getDropNode: function(type,topContainer,layoutName,event) {
 					var dropTarget = null;
 					if (type == "layout" || (type == "component" && !editorScope.isAbsoluteFormLayout())) {
 						var realName = layoutName?layoutName:"component";
+						
+						console.log("type: " + type +",parents: " + topContainer + ", lname:" + layoutName)
 						dropTarget = this.getNode(event, true);
 						if (!dropTarget){
 							// this is on the form, can this layout container be dropped on the form?
-							if (allowedParents.indexOf("form") == -1){
+							if (!topContainer){
 								return {dropAllowed:false};
 							}
 							return {dropAllowed:true,dropTarget:null};
@@ -194,11 +196,6 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 								if (!allowedChildren || !(allowedChildren.indexOf(realName) > 0))
 								{
 									return getParent( $(dt).parent("[svy-id]")); // the drop target doesn't allow this layout container type
-								}
-								var dropTargetLayoutName = dt[0].getAttribute("svy-layoutname");
-								// is this element able to drop on the dropTarget?
-								if (allowedParents && allowedParents.indexOf(dropTargetLayoutName) == -1) {
-									return getParent( $(dt).parent("[svy-id]"));
 								}
 								return dt;
 							}

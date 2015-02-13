@@ -826,6 +826,10 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 		sendChanges: function(properties) {
 			wsSession.callService('formeditor', 'setProperties', properties, true)
 		},
+		
+		moveResponsiveComponent: function(properties) {
+			wsSession.callService('formeditor', 'moveComponent', properties, true)
+		},
 
 		createComponent: function(component) {
 			wsSession.callService('formeditor', 'createComponent', component, true)

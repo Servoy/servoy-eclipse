@@ -1,5 +1,6 @@
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 
@@ -26,5 +27,17 @@ public final class SetPropertyCommand extends BaseRestorableCommand
 	public void execute()
 	{
 		setPropertyValue(source, propertyName, value);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.gef.commands.Command#redo()
+	 */
+	@Override
+	public void redo()
+	{
+		super.redo();
+		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, source.getPersist(), true);
 	}
 }

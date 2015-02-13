@@ -19,6 +19,7 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 			{
 				dragStartEvent = null;
 				if (dragging) {
+					utils.setDraggingFromPallete(null);
 					dragging = false;
 					// store the position changes
 					var selection = editorScope.getSelection();
@@ -44,32 +45,69 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 					}
 					else
 					{
-						var obj = {};
-						for (var i=0; i < selectionToDrag.length; i++) {
-							var node = selectionToDrag[i];
-							if (node.uuid) {
-								posX = node.location.x;
-								posY = node.location.y;
-								if (node.type === COMPONENT_TYPE) // this is a component, so we have to move it
-								obj[node.uuid] = {x:node.location.x,y:node.location.y}
-							} 
-							else {
-								var beanModel = editorScope.getBeanModel(node);
-								if (beanModel){
-									beanModel.location.y;
-									beanModel.location.x
-									obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y}
+						if (!editorScope.isAbsoluteFormLayout()) {
+							var obj = {};
+							for (var i=0; i < selectionToDrag.length; i++) {
+								var node = selectionToDrag[i];
+								var type = "component";
+								var topContainer = null;
+								var layoutName = null;
+								var canDrop = utils.getDropNode(type, topContainer,layoutName,event);
+								if (!canDrop.dropAllowed)  {
+									// full refresh the editor content, it can be moved to different places already.
+									// TODO this is not enough
+									editorScope.refreshEditorContent();
+									continue;
 								}
-								else {
-									var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-									if (ghostObject)
-									{
-										obj[node.getAttribute("svy-id")] = {x:ghostObject.location.x,y:ghostObject.location.y}
-									}	
+								if (canDrop.dropAllowed && !canDrop.beforeChild) {
+									canDrop.beforeChild = node.nextElementSibling;
+								}
+								
+								var key = node.uuid;
+								if (!key) {
+									key = node.getAttribute("svy-id");
+								}
+							
+								obj[key] = {};
+								
+								if (canDrop.dropTarget) {
+									obj[key].dropTargetUUID = canDrop.dropTarget.getAttribute("svy-id");
+								}
+								
+								if (canDrop.beforeChild) {
+									obj[key].rightSibling = canDrop.beforeChild.getAttribute("svy-id");
 								}
 							}
+							$editorService.moveResponsiveComponent(obj);
 						}
-						$editorService.sendChanges(obj);
+						else {
+							var obj = {};
+							for (var i=0; i < selectionToDrag.length; i++) {
+								var node = selectionToDrag[i];
+								if (node.uuid) {
+									posX = node.location.x;
+									posY = node.location.y;
+									if (node.type === COMPONENT_TYPE) // this is a component, so we have to move it
+									obj[node.uuid] = {x:node.location.x,y:node.location.y}
+								} 
+								else {
+									var beanModel = editorScope.getBeanModel(node);
+									if (beanModel){
+										beanModel.location.y;
+										beanModel.location.x
+										obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y}
+									}
+									else {
+										var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+										if (ghostObject)
+										{
+											obj[node.getAttribute("svy-id")] = {x:ghostObject.location.x,y:ghostObject.location.y}
+										}	
+									}
+								}
+							}
+							$editorService.sendChanges(obj);
+						}
 					}
 				}
 				selectionToDrag = null;
@@ -122,37 +160,67 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 				
 				if (selectionToDrag.length > 0) {
 					if (dragging) {
-						var formState = editorScope.getFormState();
-						if (formState) {
-							var changeX = event.screenX- dragStartEvent.screenX;
-							var changeY = event.screenY- dragStartEvent.screenY;
-							for(var i=0;i<selectionToDrag.length;i++) {
-								var node = selectionToDrag[i];
-								if (node[0] && node[0].getAttribute('cloneuuid'))
-								{
-									node[0].location.x += changeX;
-									node[0].location.y += changeY;
-									var css = { top: node[0].location.y, left: node[0].location.x }
-									node.css(css);
-								}
-								else {
-									var beanModel = editorScope.getBeanModel(node);
-									if (beanModel){
-										beanModel.location.y = beanModel.location.y + changeY;
-										beanModel.location.x = beanModel.location.x + changeX;
-									}
-									else 
-									{
-										var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-										if (ghostObject)
-										{
-											editorScope.updateGhostLocation(ghostObject, ghostObject.location.x + changeX, ghostObject.location.y + changeY)
-										}	
-									}
-								}
+						if (!editorScope.isAbsoluteFormLayout()) {
+							var type = "component";
+							var layoutName = selectionToDrag[0].getAttribute("svy-layoutname");
+							if (layoutName) type = "layout"
+							utils.setDraggingFromPallete(type);
+							var topContainer = null;
+							var canDrop = utils.getDropNode(type, topContainer,layoutName,event);
+							if (!canDrop.dropAllowed) {
+								editorScope.glasspane.style.cursor="no-drop";
 							}
-							editorScope.refreshEditorContent();
-							dragStartEvent = event;
+							else editorScope.glasspane.style.cursor="";
+							
+							if ( canDrop.dropTarget) {
+								for(var i=0;i<selectionToDrag.length;i++) {
+									var node = $(selectionToDrag[i]);
+									if (editorScope.glasspane.style.cursor=="") {
+										if (canDrop.beforeChild) {
+											node.insertBefore(canDrop.beforeChild);
+										}
+										else if (node.parent()[0] != canDrop.dropTarget || canDrop.append){
+											$(canDrop.dropTarget).append(node);
+										}
+									}
+								}
+								dragStartEvent = event;
+								editorScope.refreshEditorContent();
+							}
+						}
+						else {
+							var formState = editorScope.getFormState();
+							if (formState) {
+								var changeX = event.screenX- dragStartEvent.screenX;
+								var changeY = event.screenY- dragStartEvent.screenY;
+								for(var i=0;i<selectionToDrag.length;i++) {
+									var node = selectionToDrag[i];
+									if (node[0] && node[0].getAttribute('cloneuuid'))
+									{
+										node[0].location.x += changeX;
+										node[0].location.y += changeY;
+										var css = { top: node[0].location.y, left: node[0].location.x }
+										node.css(css);
+									}
+									else {
+										var beanModel = editorScope.getBeanModel(node);
+										if (beanModel){
+											beanModel.location.y = beanModel.location.y + changeY;
+											beanModel.location.x = beanModel.location.x + changeX;
+										}
+										else 
+										{
+											var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+											if (ghostObject)
+											{
+												editorScope.updateGhostLocation(ghostObject, ghostObject.location.x + changeX, ghostObject.location.y + changeY)
+											}	
+										}
+									}
+								}
+								editorScope.refreshEditorContent();
+								dragStartEvent = event;
+							}
 						}
 					}
 				}

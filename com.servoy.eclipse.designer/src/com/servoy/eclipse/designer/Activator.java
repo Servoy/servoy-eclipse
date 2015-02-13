@@ -194,12 +194,14 @@ public class Activator extends AbstractUIPlugin
 								Set<String> allKeys = new HashSet<String>();
 								allKeys.addAll(newFe.getRawPropertyValues().keySet());
 								allKeys.addAll(existingFe.getRawPropertyValues().keySet());
+								boolean changed = false;
 								for (String property : allKeys)
 								{
 									Object currentPropValue = existingFe.getPropertyValue(property);
 									Object newPropValue = newFe.getPropertyValue(property);
 									if (!Utils.equalObjects(currentPropValue, newPropValue))
 									{
+										changed = true;
 										if (spec.getHandler(property) != null)
 										{
 											// this is a handler change so a big change (component could react to a handler differently)
@@ -256,6 +258,11 @@ public class Activator extends AbstractUIPlugin
 										}
 									}
 								}
+								if (!changed && persist.getParent() instanceof LayoutContainer)
+								{
+									// hack if no changes are found and the parent of the persist is a layout container then the parent could be changed
+									bigChange = true;
+								}
 							}
 							else
 							{
@@ -269,6 +276,8 @@ public class Activator extends AbstractUIPlugin
 							fc.recreateUI();
 							getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall("refreshGhosts",
 								new Object[] { });
+							getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
+								"refreshDecorators", new Object[] { });
 						}
 					}
 				}

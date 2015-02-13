@@ -7,7 +7,7 @@
 		    <div>
 			    <ul>
 					<li ng-repeat="item in package.components | orderBy:'displayName'" >
-						<div ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.componentType,item.allowedParents, item.layoutName) " title="Place component {{item.displayName}}"> 
+						<div ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.componentType,item.topContainer, item.layoutName) " title="Place component {{item.displayName}}"> 
 							<img draggable="false" ng-src="/{{item.icon}}" alt=""/>{{item.displayName}}
 						</div>
 						<ul>

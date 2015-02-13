@@ -21,10 +21,10 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 			});
 			
 			/**
-			 * enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.allowedParents,layoutName)  for new components from the pallete
+			 * enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.topContainer,layoutName)  for new components from the pallete
 			 * enterDragMode($event,ghost,null,null,null,ghost,null) for a ghost 
 			 */
-			$scope.enterDragMode = function(event,componentName,packageName,tagName,model,type, allowedParents,layoutName)
+			$scope.enterDragMode = function(event,componentName,packageName,tagName,model,type, topContainer,layoutName)
 			{
 				var dragClone = null;
 				var angularElement = null;
@@ -38,7 +38,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						dragClone.css(css);
 						if (angularElement && $scope.isAbsoluteFormLayout())
 							angularElement.css($scope.convertToContentPoint(css));
-						var canDrop = utils.getDropNode(type, allowedParents,layoutName,ev);
+						var canDrop = utils.getDropNode(type, topContainer,layoutName,ev);
 						if (!canDrop.dropAllowed) {
 							$scope.glasspane.style.cursor="no-drop";
 						}
@@ -131,7 +131,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 					$scope.glasspane.style.cursor="";
 					if (dragClone)
 					{
-						var canDrop = utils.getDropNode(type, allowedParents,layoutName,ev);
+						var canDrop = utils.getDropNode(type, topContainer,layoutName,ev);
 						utils.setDraggingFromPallete(null);
 						dragClone.remove();
 						if (angularElement)

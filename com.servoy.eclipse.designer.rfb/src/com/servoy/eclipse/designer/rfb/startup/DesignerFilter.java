@@ -137,7 +137,7 @@ public class DesignerFilter implements Filter
 							{
 								jsonWriter.key("icon").value(spec.getIcon());
 							}
-							jsonWriter.key("allowedParents").value(new JSONArray(spec.getAllowedParents()));
+							jsonWriter.key("topContainer").value(spec.isTopContainer());
 
 
 							jsonWriter.endObject();
