@@ -39,7 +39,7 @@ import com.servoy.j2db.server.ngclient.WebsocketSessionFactory;
  *
  */
 
-@ServerEndpoint(value = "/rfb/angular/content/websocket/{sessionid}/{windowid}/{solutionName}/{queryParams}")
+@ServerEndpoint(value = "/rfb/angular/content/websocket/{sessionid}/{windowid}")
 public class EditorContentEndpoint extends WebsocketEndpoint
 {
 	public EditorContentEndpoint()
@@ -47,12 +47,12 @@ public class EditorContentEndpoint extends WebsocketEndpoint
 		super(WebsocketSessionFactory.DESIGN_ENDPOINT);
 	}
 
+	@Override
 	@OnOpen
 	public void start(Session newSession, @PathParam("sessionid") String sessionid, @PathParam("windowid")
-	final String windowid, @PathParam("solutionName")
-	final String solutionName, @PathParam("queryParams") String queryParams) throws Exception
+	final String windowid) throws Exception
 	{
-		super.start(newSession, sessionid, windowid, solutionName);
+		super.start(newSession, sessionid, windowid);
 	}
 
 	@Override
