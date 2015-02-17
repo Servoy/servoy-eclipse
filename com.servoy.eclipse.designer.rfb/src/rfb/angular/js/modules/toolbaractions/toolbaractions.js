@@ -68,12 +68,7 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 				else
 					editorScope.highlight = !editorScope.highlight;
 				
-				var nodes = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[svy-id]"));
-				var arrayLength = nodes.length;
-				for (var i = 0; i < arrayLength; i++) {
-				   var node = nodes[i];
-				   angular.element(node).toggleClass("highlight_element", editorScope.highlight);
-				}
+				editorScope.contentframe = "content/editor-content.html?id=%23" + editorScope.editorID + "&f=" + $editorService.getURLParameter("f") +"&s=" + $editorService.getURLParameter("s") + "&replacewebsocket=false" + "&highlight=" + editorScope.highlight;
 			},
 	};
 

@@ -66,6 +66,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 
 			$scope.contentWindow = $element.find('.contentframe')[0].contentWindow;
 			$scope.glasspane = $element.find('.contentframe-overlay')[0];
+			$scope.editorID = $element.attr('id');
 			$scope.contentDocument = null;
 			$scope.registerDOMEvent = function(eventType, target,callback) {
 				var eventCallback = callback.bind(this);
@@ -576,9 +577,11 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			})
 
 			$element.on('documentReady.content', function(event, contentDocument) {
-				$scope.contentDocument = contentDocument;
-				$pluginRegistry.registerEditor($scope);
+				
+				if (!$scope.editorInitialized)
+					$pluginRegistry.registerEditor($scope);
 
+				$scope.contentDocument = contentDocument;
 				var htmlTag = $scope.contentDocument.getElementsByTagName("html")[0];
 				var injector = $scope.contentWindow.angular.element(htmlTag).injector();
 				editorContentRootScope = injector.get("$rootScope");
@@ -620,14 +623,18 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				promise.then(function (result){
 					$scope.setGhosts(result);
 				});
-				$timeout(function() {					
-					if($scope.isAbsoluteFormLayout()) {
-						$scope.setContentSize(formWidth + "px", formHeight + "px");
-					}
-					else {
-						$scope.setContentSizeFull();
-					}
-				},500);
+				if (!$scope.editorInitialized) {
+					$timeout(function() {					
+						if($scope.isAbsoluteFormLayout()) {
+							$scope.setContentSize(formWidth + "px", formHeight + "px");
+						}
+						else {
+							$scope.setContentSizeFull();
+						}
+					},500);
+				}
+				
+				$scope.editorInitialized = true;
 			});
 			
 			$element.on('renderGhosts.content', function(event) {

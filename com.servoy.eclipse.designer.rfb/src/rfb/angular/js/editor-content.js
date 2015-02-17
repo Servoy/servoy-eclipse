@@ -37,7 +37,7 @@ angular.module('editorContent',['servoyApp'])
 			return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec($window.location.search)||[,""])[1].replace(/\+/g, '%20'))||null
 	}
 	
-	if (typeof(WebSocket) == 'undefined' || getURLParameter("replacewebsocket")) {
+	if (typeof(WebSocket) == 'undefined' || getURLParameter("replacewebsocket")=='true') {
 		
 		WebSocket = SwtWebSocket;
 		 
@@ -59,11 +59,12 @@ angular.module('editorContent',['servoyApp'])
 	}
 	 $servoyInternal.connect();
 	 var formName = getURLParameter("f");
+	 var high = getURLParameter("highlight");
 	 $scope.getUrl = function() {
 		 if ($webSocket.isConnected()) {
 			 var url = $windowService.getFormUrl(formName);
 			 // this main url is in design (the template must have special markers)
-			 return url?url+"&design=true":null;
+			 return url?url+"&design=true"+"&highlight="+high:null;
 		 }
 	 }
  }).factory("$editorContentService", function() {

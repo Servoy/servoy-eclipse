@@ -174,7 +174,7 @@ public class CreateComponentHandler implements IServerService
 						newTab.setText(tabName);
 						newTab.setLocation(new Point(x, y));
 						iSupportChilds.addChild(newTab);
-						return next;
+						return newTab;
 					}
 				}
 				if (next instanceof Bean)
