@@ -23,11 +23,11 @@ import java.util.Map;
 import org.json.JSONException;
 
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
-import com.servoy.eclipse.model.repository.WorkspaceUserManager.SecurityInfo;
+import com.servoy.j2db.server.shared.SecurityInfo;
 
 /**
  * Abstract class that helps derived classes to alter the table/form sec. files.
- * 
+ *
  * @author acostescu
  */
 public abstract class AlterPermissionSecFileQuickFix extends SecurityQuickFix

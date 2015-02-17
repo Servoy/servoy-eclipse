@@ -21,11 +21,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
-import com.servoy.eclipse.model.repository.WorkspaceUserManager.SecurityInfo;
+import com.servoy.j2db.server.shared.SecurityInfo;
 
 /**
  * Quick fix for removing access mask for an element that does not exist.
- * 
+ *
  * @author acostescu
  */
 public class RemoveAccessMaskForMissingElement extends AlterPermissionSecFileQuickFix

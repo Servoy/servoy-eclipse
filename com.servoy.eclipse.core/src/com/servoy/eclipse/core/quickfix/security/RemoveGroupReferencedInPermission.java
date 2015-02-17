@@ -20,11 +20,11 @@ import java.util.List;
 import java.util.Map;
 
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
-import com.servoy.eclipse.model.repository.WorkspaceUserManager.SecurityInfo;
+import com.servoy.j2db.server.shared.SecurityInfo;
 
 /**
  * Quick fix for removing permissions/access mask in a form/table sec file for a group that is not declared.
- * 
+ *
  * @author acostescu
  */
 public class RemoveGroupReferencedInPermission extends AlterPermissionSecFileQuickFix

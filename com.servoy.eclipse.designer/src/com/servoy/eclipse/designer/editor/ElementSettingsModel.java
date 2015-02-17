@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.model.repository.WorkspaceUserManager.SecurityInfo;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
@@ -33,11 +32,12 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.server.shared.SecurityInfo;
 import com.servoy.j2db.util.UUID;
 
 /**
  * Model for setting security checkboxes in form editor security page.
- * 
+ *
  * @author lvostinar
  */
 

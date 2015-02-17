@@ -53,15 +53,17 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.server.shared.GroupSecurityInfo;
 import com.servoy.j2db.server.shared.IClientInternal;
 import com.servoy.j2db.server.shared.IClientManagerInternal;
+import com.servoy.j2db.server.shared.SecurityInfo;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Settings;
 
 /**
  * This class manages security information when running from an Eclipse-Servoy developer.
- * Is aware of things that change when developing. 
+ * Is aware of things that change when developing.
  * @author acostescu
  */
 public class EclipseUserManager extends WorkspaceUserManager
@@ -76,7 +78,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 	 * <p> Some operations can only be done by admin user or own user (like change own password)
 	 * @param clientId
 	 * @param ownerUserId allowed when non-null
-	 * @throws RepositoryException 
+	 * @throws RepositoryException
 	 */
 	@Override
 	protected void checkForAdminUser(String clientId, String ownerUserId) throws RepositoryException
@@ -112,7 +114,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 	 * If this method is called, the user manager will listen for form/form element/table/table column add/remove/modify events and will update in-memory
 	 * security model and/or security files. For example when a table/form is deleted by the user, delete it's sec file, when a table/form is added check to see
 	 * if a sec file already exists for those and read it, ...
-	 * 
+	 *
 	 * These updates ignore the write mode - so these changes will be applied even if write mode is WRITE_MODE_MANUAL. If you do not want this, then do not call
 	 * this method.
 	 */
@@ -246,7 +248,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 
 			public void hiddenTableChanged(IServerInternal server, Table table)
 			{
-				// nothing to do here				
+				// nothing to do here
 			}
 
 		};

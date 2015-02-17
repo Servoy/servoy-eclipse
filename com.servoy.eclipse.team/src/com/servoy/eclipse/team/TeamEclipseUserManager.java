@@ -31,6 +31,8 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.server.shared.GroupSecurityInfo;
+import com.servoy.j2db.server.shared.SecurityInfo;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.UUID;
 

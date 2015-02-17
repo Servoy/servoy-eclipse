@@ -28,12 +28,12 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
-import com.servoy.eclipse.model.repository.WorkspaceUserManager.SecurityInfo;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.server.shared.SecurityInfo;
 
 /**
  * Quick fix for removing one of the access masks for a form element.
- * 
+ *
  * @author acostescu
  */
 public class RemoveAllButOneOfTheAccessMasksForElement extends AlterPermissionSecFileQuickFix

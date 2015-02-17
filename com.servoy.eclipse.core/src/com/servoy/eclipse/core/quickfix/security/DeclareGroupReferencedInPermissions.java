@@ -27,12 +27,12 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
-import com.servoy.eclipse.model.repository.WorkspaceUserManager.SecurityInfo;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager.User;
+import com.servoy.j2db.server.shared.SecurityInfo;
 
 /**
  * Quick fix for declaring a missing group that has associated access mask/permissions in a form/table sec. file.
- * 
+ *
  * @author acostescu
  */
 public class DeclareGroupReferencedInPermissions extends AlterPermissionSecFileQuickFix

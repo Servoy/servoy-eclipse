@@ -75,8 +75,11 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.server.shared.GroupSecurityInfo;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerInternal;
+import com.servoy.j2db.server.shared.PCloneable;
+import com.servoy.j2db.server.shared.SecurityInfo;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.ServoyJSONArray;
@@ -97,53 +100,6 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		public void userGroupChanged();
 	}
 
-	public static class SecurityInfo implements Comparable<SecurityInfo>
-	{
-		public final String element_uid;//element UUID or columnname
-		public final int access;
-
-		public SecurityInfo(String element_uid, int access)
-		{
-			this.element_uid = element_uid;
-			this.access = access;
-		}
-
-		public String getName()
-		{
-			return element_uid;
-		}
-
-		// needed in order for remove(Object) to work correctly in a sorted list
-		public int compareTo(SecurityInfo o)
-		{
-			int result;
-			if (element_uid == o.element_uid)
-			{
-				result = 0;
-			}
-			else if (element_uid == null) result = -1;
-			else if (o.element_uid == null) result = 1;
-			else result = element_uid.compareToIgnoreCase(o.element_uid); // case insensitive sort
-
-			if (result == 0) result = element_uid.compareTo(o.element_uid); // do not consider equal ones that match case insensitive
-			if (result == 0)
-			{
-				// names are the same; check pwd
-				result = access - o.access;
-			}
-
-			return result;
-		}
-
-		// needed in order for remove(Object) to work correctly in an ArrayList
-		@Override
-		public boolean equals(Object o)
-		{
-			if (o instanceof SecurityInfo) return (compareTo((SecurityInfo)o) == 0);
-			return false;
-		}
-
-	}
 
 	public static class User implements Comparable<User>, PCloneable<User>
 	{
@@ -245,56 +201,6 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	}
 
-	public static class GroupSecurityInfo implements ISupportName, PCloneable<GroupSecurityInfo>
-	{
-		public String groupName;
-		public Map<String, List<SecurityInfo>> tableSecurity = new ConcurrentHashMap<String, List<SecurityInfo>>();//servername.tablename -> SecurityInfos 
-		public Map<UUID, List<SecurityInfo>> formSecurity = new ConcurrentHashMap<UUID, List<SecurityInfo>>();//form_uuid -> SecurityInfos
-
-		/**
-		 * Creates a new instance for the group with the given name.<BR>
-		 * tableSecurity and formSecurity will be != null and empty.
-		 * 
-		 * @param groupName the group name.
-		 */
-		public GroupSecurityInfo(String groupName)
-		{
-			this.groupName = groupName;
-		}
-
-		public String getName()
-		{
-			return groupName;
-		}
-
-		@Override
-		public GroupSecurityInfo clone()
-		{
-			GroupSecurityInfo gsi = new GroupSecurityInfo(groupName);
-			for (Entry<String, List<SecurityInfo>> element : tableSecurity.entrySet())
-			{
-				List<SecurityInfo> valCopy = null;
-				if (element.getValue() != null)
-				{
-					valCopy = new SortedList<SecurityInfo>(element.getValue().size());
-					valCopy.addAll(element.getValue());
-				}
-				gsi.tableSecurity.put(element.getKey(), valCopy);
-			}
-			for (Entry<UUID, List<SecurityInfo>> element : formSecurity.entrySet())
-			{
-				List<SecurityInfo> valCopy = null;
-				if (element.getValue() != null)
-				{
-					valCopy = new SortedList<SecurityInfo>(element.getValue().size());
-					valCopy.addAll(element.getValue());
-				}
-				gsi.formSecurity.put(element.getKey(), valCopy);
-			}
-			return gsi;
-		}
-
-	}
 
 	public static class SecurityReadException extends RepositoryException // only extends RepositoryException so it can be thrown in certain inherited methods
 	{
@@ -514,7 +420,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	/**
 	 * Get (create if necessary) the id for given UUID. Note that as groups do not have UUIDs but have ids, group names are passed to this methos as UUIDs.
-	 * 
+	 *
 	 * @param UUID the UUID for which an id must be created.
 	 * @return the id.
 	 */
@@ -536,7 +442,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	/**
 	 * Returns the UUID associated to the given id. Note that groups names can be returned for group id's, as groups do not have associated UUIDs.
-	 * 
+	 *
 	 * @param id the id.
 	 * @return the UUID.
 	 */
@@ -547,7 +453,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	/**
 	 * Add the accessMask & identifier or replace them if the identifier already exists.
-	 * 
+	 *
 	 * @return true if the identifier existed and was replaced; false if the info was just added.
 	 */
 	protected boolean setSecurityInfo(List<SecurityInfo> securityInfo, String element_uid, int accessMask, boolean formElement)
@@ -585,7 +491,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	 * Writes the user and group information to the "security.sec" file in the resources project.<BR>
 	 * This method should be used when the write mode is {@link #WRITE_MODE_MANUAL}. When the write mode is {@link #WRITE_MODE_AUTOMATIC}, it will get called
 	 * automatically when security information is changed.
-	 * 
+	 *
 	 * @param later if the file write operation should be performed later using a job.
 	 * @throws RepositoryException if the security contents cannot be written because of some reason...
 	 */
@@ -740,7 +646,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	 * information for that table.<BR>
 	 * This method should be used when the write mode is {@link #WRITE_MODE_MANUAL}. When the write mode is {@link #WRITE_MODE_AUTOMATIC}, it will get called
 	 * automatically when security information is changed.
-	 * 
+	 *
 	 * @param later if the file write operation should be performed later using a job.
 	 * @param t the table who's information is to be written.
 	 * @throws RepositoryException if the info cannot be created because of some reason.
@@ -867,7 +773,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	 * Writes the "formName.sec" file in the form's directory. This file contains the user/group security access rights for that form.<BR>
 	 * This method should be used when the write mode is {@link #WRITE_MODE_MANUAL}. When the write mode is {@link #WRITE_MODE_AUTOMATIC}, it will get called
 	 * automatically when security information is changed.
-	 * 
+	 *
 	 * @param later if the file write operation should be performed later using a job.
 	 * @param f the form who's security info is written.
 	 * @throws RepositoryException if the file cannot be written because of some reason.
@@ -1031,7 +937,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	 * Reads the group users and groups.<BR>
 	 * Groups that are not in the list of groups but are supposed to contain users are created. Users that are supposed to belong to a group, but they are not
 	 * in the user list will be deleted. If any of these two happens the security file will be written back with the corrections applied.
-	 * 
+	 *
 	 * @throws RepositoryException if something wrong happens.
 	 */
 	private void readUserAndGroupInfo(String clientId) throws RepositoryException
@@ -1225,7 +1131,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	 * Reads the security info for the given table from the resources project.<BR>
 	 * Missing groups that are in the table security info file will be added to the group list. Groups with invalid names will be removed from this table's
 	 * security info. If any of these two happens the security file will be written back with the corrections applied.
-	 * 
+	 *
 	 * @param table the table.
 	 * @throws RepositoryException if something wrong happens.
 	 */
@@ -2527,7 +2433,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	/**
 	 * Reloads the security information related to table t.
-	 * 
+	 *
 	 * @param t the table.
 	 */
 	public void reloadSecurityInfo(String serverName, String tableName)
@@ -2596,7 +2502,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	/**
 	 * Reloads the security information related to form f.
-	 * 
+	 *
 	 * @param f the form.
 	 */
 	public synchronized void reloadSecurityInfo(Form f)
@@ -2634,7 +2540,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	/**
 	 * Deletes all security info for the given table, but does not write the changes to disk.
-	 * 
+	 *
 	 * @param t the table.
 	 */
 	protected void removeSecurityInfoFromMemory(String serverName, String tableName)
@@ -2649,7 +2555,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	/**
 	 * Deletes all security info for the given form, but does not write the changes to disk.
-	 * 
+	 *
 	 * @param f the form.
 	 */
 	private void removeSecurityInfoFromMemory(Form f)
@@ -2664,7 +2570,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	/**
 	 * Specifies the resources project to be used by this security manager. Also reloads all sec. info.
-	 * 
+	 *
 	 * @param project the resources project.
 	 */
 	public void setResourcesProject(IProject project)
@@ -2678,7 +2584,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	/**
 	 * Writes to disk all the security information from memory.
-	 * 
+	 *
 	 * @param discardInvalidOldInfo if this is true, previous read errors are ignored, and (probably empty) memory content is written to disk. If this is false,
 	 *            the method will do nothing if the security manager detected that the security content on disk is invalid.
 	 * @throws RepositoryException if the security information cannot be written to disk.
@@ -2727,7 +2633,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				catch (DbcpException ex)
 				{
 					// the initialize of servers might not be completed at this point; so we may have an invalid server
-					// don't do anything, this error should not exist 
+					// don't do anything, this error should not exist
 				}
 				catch (RepositoryException e)
 				{
@@ -2802,7 +2708,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 					catch (DbcpException ex)
 					{
 						// the initialize of servers might not be completed at this point; so we may have an invalid server
-						// don't do anything, this error should not exist 
+						// don't do anything, this error should not exist
 					}
 					catch (RepositoryException e)
 					{
@@ -2895,8 +2801,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 						}
 
 						// we have an active solution with a resources project but with invalid security info; add problem marker
-						IMarker marker = ServoyBuilder.addMarker(er, ServoyBuilder.USER_SECURITY_MARKER_TYPE, "Bad User/Security information: " +
-							error.getMessage(), charNo, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, "JSON file");
+						IMarker marker = ServoyBuilder.addMarker(er, ServoyBuilder.USER_SECURITY_MARKER_TYPE,
+							"Bad User/Security information: " + error.getMessage(), charNo, IMarker.SEVERITY_ERROR, IMarker.PRIORITY_NORMAL, "JSON file");
 						if (marker != null)
 						{
 							try
@@ -2945,7 +2851,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	/**
 	 * Tells whether or not this security manager is able to manipulate user/group/security information.
-	 * 
+	 *
 	 * @return true if security info is available, false otherwise.
 	 */
 	public boolean isOperational()
@@ -2963,7 +2869,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 	/**
 	 * Sets the write mode for this security manager.<BR>
 	 * The write mode determines how the security information it written to a persistent state.
-	 * 
+	 *
 	 * @param mode {@link #WRITE_MODE_AUTOMATIC} or {@link #WRITE_MODE_MANUAL}
 	 */
 	public void setWriteMode(int mode)
@@ -2978,7 +2884,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 
 	/**
 	 * Returns true if security files are in the process of being written/deleted; false otherwise.
-	 * 
+	 *
 	 * @return true if security files are in the process of being written/deleted; false otherwise.
 	 */
 	public boolean isWritingResources()
@@ -3003,10 +2909,4 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		}
 		return destination;
 	}
-
-	private interface PCloneable<T> extends Cloneable
-	{
-		T clone();
-	}
-
 }
