@@ -36,14 +36,9 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 						var children = node.children();
 						if (children.length == 1 && children[0].clientHeight > 0 && children[0].clientWidth > 0) {
 							node = $(children[0]);
-							height = node.outerHeight()
-							width = node.outerWidth()
 						}
-						else
-						{
-							height = node.outerHeight()
-							width = node.outerWidth()
-						}	
+						height = node.outerHeight();
+						width = node.outerWidth();
 					}
 					
 					currentNode.name =  node.attr('name');
@@ -62,6 +57,8 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 						{
 							currentNode.isResizable = false;
 						}
+						height = node.outerHeight();
+						width = node.outerWidth();
 					}
 					else {
 						currentNode.isResizable = {t:true, l:true, b:true, r:true};
