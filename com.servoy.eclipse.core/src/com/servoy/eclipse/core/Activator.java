@@ -121,6 +121,7 @@ import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IMethodTemplate;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
@@ -133,6 +134,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.plugins.IMethodTemplatesProvider;
 import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
@@ -478,7 +480,7 @@ public class Activator extends Plugin
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -650,7 +652,7 @@ public class Activator extends Plugin
 
 				/*
 				 * (non-Javadoc)
-				 *
+				 * 
 				 * @see com.servoy.j2db.IDesignerCallback#testAndStartDebugger()
 				 */
 				public void testAndStartDebugger()
@@ -666,7 +668,7 @@ public class Activator extends Plugin
 
 				/*
 				 * (non-Javadoc)
-				 *
+				 * 
 				 * @see com.servoy.j2db.IDesignerCallback#addURLStreamHandler(java.lang.String, java.net.URLStreamHandler)
 				 */
 				@Override
@@ -901,6 +903,26 @@ public class Activator extends Plugin
 						{
 							public void run()
 							{
+								Collection<IPersist> affectedFormElements = new ArrayList<IPersist>(changes);
+								if (changes != null)
+								{
+									for (IPersist persist : changes)
+									{
+										if (persist instanceof IFormElement)
+										{
+											IPersist parent = persist.getParent();
+											while (parent instanceof IFormElement)
+											{
+												if (!affectedFormElements.contains(parent))
+												{
+													affectedFormElements.add(parent);
+												}
+												parent = parent.getParent();
+											}
+										}
+									}
+								}
+								FormElementHelper.INSTANCE.flush(affectedFormElements);
 								IDebugClientHandler dch = getDebugClientHandler();
 								dch.refreshDebugClients(changes);
 							}
