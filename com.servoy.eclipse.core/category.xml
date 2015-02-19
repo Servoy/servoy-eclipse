@@ -27,7 +27,7 @@
    <feature url="features/org.eclipse.gef_3.5.2.v20100111-1352-777928194B66D5D476C33B2A.jar" id="org.eclipse.gef" version="3.5.2.v20100111-1352-777928194B66D5D476C33B2A">
       <category name="servoy.gef.draw2d"/>
    </feature>
-   <feature url="features/com.servoy.eclipse.feature_8.0.0.3014.jar" id="com.servoy.eclipse.feature" version="8.0.0.3014">
+   <feature url="features/com.servoy.eclipse.feature_8.0.0.3015.jar" id="com.servoy.eclipse.feature" version="8.0.0.3015">
       <category name="servoy.developer"/>
    </feature>
    <feature url="features/com.servoy.css.core_2.0.0.201308221100.jar" id="com.servoy.css.core" version="2.0.0.201308221100">
