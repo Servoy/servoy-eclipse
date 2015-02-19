@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Workspace based exporter
 Bundle-SymbolicName: com.servoy.eclipse.exporter.solution;singleton:=true
-Bundle-Version: 8.0.0.3014
+Bundle-Version: 8.0.0.3015
 Bundle-Activator: com.servoy.eclipse.exporter.apps.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.core.resources,
