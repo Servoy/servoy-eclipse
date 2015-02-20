@@ -1,4 +1,4 @@
-angular.module('keyboardlayoutupdater', ['editor']).run(function($pluginRegistry, $editorService, $selectionUtils) {
+angular.module('keyboardlayoutupdater', ['editor']).run(function($pluginRegistry, $editorService, $selectionUtils, $timeout) {
 	
 	$pluginRegistry.registerPlugin(function(editorScope) {
 	
@@ -8,7 +8,6 @@ angular.module('keyboardlayoutupdater', ['editor']).run(function($pluginRegistry
 		
 		function onkeydown(event) {
 			var fixedKeyEvent = editorScope.getFixedKeyEvent(event);            
-            
             if(fixedKeyEvent.keyCode > 36 && fixedKeyEvent.keyCode < 41) {	// cursor key
             	var selection = editorScope.getSelection();
 				if (selection.length > 0) {
@@ -91,35 +90,40 @@ angular.module('keyboardlayoutupdater', ['editor']).run(function($pluginRegistry
 				}
             }
 		}
-		
+
+		editorScope.sendUpdates = null;
 		function onkeyup(event) {
-			if(boundsUpdating) {
-				boundsUpdating = false;
-				var obj = {};
-				var selection = editorScope.getSelection();
-				
-				if (selection.length > 0)
-					highlightDiv.style.display = 'none';
-				
-				selection = utils.addGhostsToSelection(selection);
-				
-				for(var i=0;i<selection.length;i++) {
-					var node = selection[i];
-					var beanModel = editorScope.getBeanModel(node);
-					if (beanModel){
-						obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y,width:beanModel.size.width,height:beanModel.size.height}
+			if (editorScope.sendUpdates) $timeout.cancel(editorScope.sendUpdates);
+			editorScope.sendUpdates = $timeout(function(){
+				editorScope.sendUpdates = null;
+				if(boundsUpdating) {
+					boundsUpdating = false;
+					var obj = {};
+					var selection = editorScope.getSelection();
+					
+					if (selection.length > 0)
+						highlightDiv.style.display = 'none';
+					
+					selection = utils.addGhostsToSelection(selection);
+					
+					for(var i=0;i<selection.length;i++) {
+						var node = selection[i];
+						var beanModel = editorScope.getBeanModel(node);
+						if (beanModel){
+							obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y,width:beanModel.size.width,height:beanModel.size.height}
+						}
+						else {
+							var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+							obj[node.getAttribute("svy-id")] = {x:ghostObject.location.x,y:ghostObject.location.y}
+						}
 					}
-					else {
-						var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-						obj[node.getAttribute("svy-id")] = {x:ghostObject.location.x,y:ghostObject.location.y}
-					}
-				}
-				$editorService.sendChanges(obj);
-			}			
-		}		
+					$editorService.sendChanges(obj);
+				}	
+			},100);
+		}
 
 		editorScope.registerDOMEvent("keydown","CONTENTFRAME_OVERLAY", onkeydown);
 		editorScope.registerDOMEvent("keyup","CONTENTFRAME_OVERLAY", onkeyup);
-		
+
 	});
 });

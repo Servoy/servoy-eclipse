@@ -515,6 +515,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			
 			$scope.setGhosts = function(ghosts) {
 				$scope.ghosts = ghosts;
+				
 				if($scope.ghosts.ghostContainers) {
 					for (i = 0; i< $scope.ghosts.ghostContainers.length; i++) {
 						for(j = 0; j < $scope.ghosts.ghostContainers[i].ghosts.length; j++) {
@@ -526,6 +527,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 						}
 					}
 				}
+				$scope.glasspane.focus();
 			}
 			
 			function getScrollSizes(x) {
