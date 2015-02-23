@@ -9,6 +9,7 @@ angular.module('editorContent',['servoyApp'])
 			 $('body').append(el); 
 			 return el;
 		  }
+	$rootScope.highlight = false;
 	$solutionSettings.enableAnchoring = false; 
 	$scope.solutionSettings = $solutionSettings; 
 	var realConsole = $window.console;
@@ -64,7 +65,7 @@ angular.module('editorContent',['servoyApp'])
 		 if ($webSocket.isConnected()) {
 			 var url = $windowService.getFormUrl(formName);
 			 // this main url is in design (the template must have special markers)
-			 return url?url+"&design=true"+"&highlight="+high:null;
+			 return url?url+"&design=true"+"&highlight="+$rootScope.highlight:null;
 		 }
 	 }
  }).factory("$editorContentService", function() {

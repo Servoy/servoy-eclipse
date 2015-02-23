@@ -63,12 +63,7 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 			icon: "toolbaractions/icons/highlight.png",
 			enabled: true,
 			onclick: function() {
-				if (editorScope.highlight == undefined)
-					editorScope.highlight = true;
-				else
-					editorScope.highlight = !editorScope.highlight;
-				
-				editorScope.contentframe = "content/editor-content.html?id=%23" + editorScope.editorID + "&f=" + $editorService.getURLParameter("f") +"&s=" + $editorService.getURLParameter("s") + "&replacewebsocket=false" + "&highlight=" + editorScope.highlight;
+				$editorService.toggleHighlight();
 			},
 	};
 
