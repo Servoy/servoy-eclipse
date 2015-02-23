@@ -118,6 +118,7 @@ angular.module('keyboardlayoutupdater', ['editor']).run(function($pluginRegistry
 						}
 					}
 					$editorService.sendChanges(obj);
+					editorScope.refocusGlasspane = true;
 				}	
 			},100);
 		}
