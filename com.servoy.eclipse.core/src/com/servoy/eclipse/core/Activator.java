@@ -480,7 +480,7 @@ public class Activator extends Plugin
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -554,9 +554,26 @@ public class Activator extends Plugin
 				// -- display disposed case
 				if (allDisplaysDisposed)
 				{ // create a display
-					Display d = Display.getDefault();
-					DebugUtils.invokeAndWaitWhileDispatchingOnSWT(run);
-					d.dispose();
+					try
+					{
+						Display d = Display.getDefault();
+						DebugUtils.invokeAndWaitWhileDispatchingOnSWT(run);
+						d.dispose();
+					}
+					catch (Exception ex)
+					{
+						// couldn't create a display, run directly
+						try
+						{
+							run.run();
+						}
+						catch (Exception e)
+						{
+							// couldn't shut it down, log both errors
+							ServoyLog.logWarning("Couldn't shut down smart client", ex);
+							ServoyLog.logWarning("Couldn't shut down smart client", e);
+						}
+					}
 				}
 			}
 			else
@@ -566,7 +583,7 @@ public class Activator extends Plugin
 
 
 		}
-		catch (InterruptedException e)
+		catch (Exception e)
 		{
 			ServoyLog.logWarning("Interrupted while waiting for clients to shut down on stop. Continuing with server shutdown.", null);
 			interrupted = true;
@@ -652,7 +669,7 @@ public class Activator extends Plugin
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see com.servoy.j2db.IDesignerCallback#testAndStartDebugger()
 				 */
 				public void testAndStartDebugger()
@@ -668,7 +685,7 @@ public class Activator extends Plugin
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see com.servoy.j2db.IDesignerCallback#addURLStreamHandler(java.lang.String, java.net.URLStreamHandler)
 				 */
 				@Override
