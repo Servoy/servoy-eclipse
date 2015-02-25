@@ -562,17 +562,8 @@ public class Activator extends Plugin
 					}
 					catch (Exception ex)
 					{
-						// couldn't create a display, run directly
-						try
-						{
-							run.run();
-						}
-						catch (Exception e)
-						{
-							// couldn't shut it down, log both errors
-							ServoyLog.logWarning("Couldn't shut down smart client", ex);
-							ServoyLog.logWarning("Couldn't shut down smart client", e);
-						}
+						// couldn't create a display, everything is already destroyed
+						// just don't do anything for now, touching swing will hang developer on mac
 					}
 				}
 			}
