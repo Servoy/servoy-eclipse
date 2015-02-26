@@ -159,11 +159,13 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 
 		if (value == null)
 		{
-			// TODO propertyDescription.getDefaultValue() is JSON... I think NGConversions conversion 1 and 3 should be applied here to get something of the same type as propertyDescription.getType().defaultValue()
-			// or maybe nothing really has to be returned here but "DEFAULT" cause the designer doesn't really need to show the default value, or does it?
-			// anyway, currently it's not ok as propertyDescription.getDefaultValue() is a JSON value (can be primitive though) and propertyDescription.getType().defaultValue() is a sablo type value default (can be pure java, not JSON, can also be primitive)
 			if (propertyDescription.getDefaultValue() != null)
 			{
+				IPropertyType< ? > propertyType = propertyDescription.getType();
+				if (propertyType instanceof IPropertyConverter< ? >)
+				{
+					return ((IPropertyConverter)propertyType).fromJSON(propertyDescription.getDefaultValue(), null, null);
+				}
 				return propertyDescription.getDefaultValue();
 			}
 			return type.defaultValue(propertyDescription);
