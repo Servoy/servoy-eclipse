@@ -57,6 +57,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.AbstractActiveSolutionHandler;
 import com.servoy.j2db.IDebugClientHandler;
 import com.servoy.j2db.IFormController;
+import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IActiveSolutionHandler;
 import com.servoy.j2db.persistence.IFormElement;
@@ -213,6 +214,12 @@ public class Activator extends AbstractUIPlugin
 											bigChange = true;
 											break outer;
 										}
+										if (property.equals("editable") && newFe.getPersistIfAvailable() instanceof Field &&
+											((Field)newFe.getPersistIfAvailable()).getDisplayType() == Field.HTML_AREA)
+										{
+											bigChange = true;
+											break outer;
+										}
 										if ((property.equals("visible") || property.equals("text") || property.equals("labelFor")) &&
 											(fc.getForm().getView() == IFormConstants.VIEW_TYPE_TABLE || fc.getForm().getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED))
 										{
@@ -342,7 +349,7 @@ public class Activator extends AbstractUIPlugin
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see com.servoy.j2db.server.ngclient.NGClient#shutDown(boolean)
 		 */
 		@Override
@@ -394,7 +401,7 @@ public class Activator extends AbstractUIPlugin
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see com.servoy.j2db.persistence.IPersistChangeListener#persistChanges(java.util.Collection)
 		 */
 		@Override
@@ -474,7 +481,7 @@ public class Activator extends AbstractUIPlugin
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -563,7 +570,7 @@ public class Activator extends AbstractUIPlugin
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
