@@ -48,7 +48,7 @@ public class RfbWebResourceListener implements IWebResourceChangedListener
 				@Override
 				public void run()
 				{
-					editorWebsocketSession.getService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("reloadPalette", new Object[] { });
+					editorWebsocketSession.getClientService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("reloadPalette", new Object[] { });
 				}
 			});
 		}

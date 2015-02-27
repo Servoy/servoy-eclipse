@@ -28,7 +28,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 	GHOST_TYPE_COMPONENT: "comp",
 	GHOST_TYPE_PART: "part",
 	GHOST_TYPE_FORM: "form"
-}).directive("editor", function( $window, $pluginRegistry,$rootScope,EDITOR_EVENTS,EDITOR_CONSTANTS,$timeout,$editorService){
+}).directive("editor", function($window, $pluginRegistry, $rootScope, EDITOR_EVENTS, EDITOR_CONSTANTS, $timeout, $editorService, $webSocket) {
 	return {
 		restrict: 'E',
 		transclude: true,
@@ -47,10 +47,10 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				timeout = $timeout(fireSelectionChanged, 1)
 			}
 
-			var formName =  $editorService.getURLParameter("f");
-			var formLayout =  $editorService.getURLParameter("l");
-			var formWidth = parseInt($editorService.getURLParameter("w"), 10);
-			var formHeight = parseInt($editorService.getURLParameter("h"), 10);
+			var formName =  $webSocket.getURLParameter("f");
+			var formLayout =  $webSocket.getURLParameter("l");
+			var formWidth = parseInt($webSocket.getURLParameter("w"), 10);
+			var formHeight = parseInt($webSocket.getURLParameter("h"), 10);
 			var editorContentRootScope = null;
 			var servoyInternal = null;
 			var fieldLocation = null;
@@ -705,10 +705,9 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			});			
 			
 			$editorService.registerEditor($scope);
-			var promise = $editorService.connect();
-			promise.then(function() {
-				var replacews = $editorService.getURLParameter("replacewebsocket") ? "&replacewebsocket=true" : "";
-				$scope.contentframe = "content/editor-content.html?id=%23" + $element.attr("id") + "&f=" +formName +"&s=" + $editorService.getURLParameter("s") + replacews;
+			$editorService.connect().then(function() {
+				var replacews = $webSocket.getURLParameter("replacewebsocket") ? "&replacewebsocket=true" : "";
+				$scope.contentframe = "content/editor-content.html?id=%23" + $element.attr("id") + "&f=" +formName +"&s=" + $webSocket.getURLParameter("s") + replacews;
 			})
 		},
 		templateUrl: 'templates/editor.html',
@@ -742,11 +741,8 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 	var connected = false;
 	var deferred = null;
 
-	function getURLParameter(name) {
-		return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec($window.location.search)||[,""])[1].replace(/\+/g, '%20'))||null
-	}
 	function testWebsocket() {
-		if (typeof(WebSocket) == 'undefined' || getURLParameter("replacewebsocket"))
+		if (typeof(WebSocket) == 'undefined' || $webSocket.getURLParameter("replacewebsocket"))
 		{
 			if (typeof(SwtWebsocketBrowserFunction) != 'undefined') 
 			{
@@ -799,7 +795,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				return;
 			}
 		}
-		wsSession = $webSocket.connect('', [getURLParameter('editorid')])
+		wsSession = $webSocket.connect('', [$webSocket.getURLParameter('editorid')])
 		wsSession.onopen(function()
 		{
 			connected = true;
@@ -913,7 +909,6 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				this.sendChanges(obj);
 			}
 		},
-		getURLParameter: getURLParameter,
 
 		updateSelection: function(ids) {
 			$timeout(function(){

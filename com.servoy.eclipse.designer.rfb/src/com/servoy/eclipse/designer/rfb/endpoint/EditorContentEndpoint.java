@@ -18,8 +18,6 @@
 package com.servoy.eclipse.designer.rfb.endpoint;
 
 
-import java.io.IOException;
-
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -28,9 +26,8 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
-import org.sablo.websocket.WebsocketEndpoint;
-
 import com.servoy.j2db.server.ngclient.WebsocketSessionFactory;
+import com.servoy.j2db.server.ngclient.endpoint.BaseNGClientEndpoint;
 
 /**
  * WebsocketEndpoint for editor content (running design ngclient)
@@ -39,8 +36,8 @@ import com.servoy.j2db.server.ngclient.WebsocketSessionFactory;
  *
  */
 
-@ServerEndpoint(value = "/rfb/angular/content/websocket/{sessionid}/{windowid}")
-public class EditorContentEndpoint extends WebsocketEndpoint
+@ServerEndpoint(value = "/rfb/angular/content/websocket/{sessionid}/{windowName}/{windowid}")
+public class EditorContentEndpoint extends BaseNGClientEndpoint
 {
 	public EditorContentEndpoint()
 	{
@@ -49,10 +46,12 @@ public class EditorContentEndpoint extends WebsocketEndpoint
 
 	@Override
 	@OnOpen
-	public void start(Session newSession, @PathParam("sessionid") String sessionid, @PathParam("windowid")
+	public void start(Session newSession, @PathParam("sessionid")
+	String sessionid, @PathParam("windowName")
+	final String windowName, @PathParam("windowid")
 	final String windowid) throws Exception
 	{
-		super.start(newSession, sessionid, windowid);
+		super.start(newSession, sessionid, windowName, windowid);
 	}
 
 	@Override
@@ -69,16 +68,10 @@ public class EditorContentEndpoint extends WebsocketEndpoint
 		super.onClose();
 	}
 
+	@Override
 	@OnError
 	public void onError(Throwable t)
 	{
-		if (t instanceof IOException)
-		{
-			log.error("IOException happened", t.getMessage()); // TODO if it has no message but has a 'cause' it will not print anything useful
-		}
-		else
-		{
-			log.error("IOException happened", t);
-		}
+		super.onError(t);
 	}
 }

@@ -57,7 +57,7 @@ public class RfbSelectionListener implements ISelectionListener
 					@Override
 					public void run()
 					{
-						editorWebsocketSession.getService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("updateSelection",
+						editorWebsocketSession.getClientService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("updateSelection",
 							new Object[] { uuids.toArray() });
 					}
 				});

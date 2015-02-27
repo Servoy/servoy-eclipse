@@ -88,16 +88,16 @@ public class SwtWebsocket
 
 	private boolean createAndStartEditorContentEndpoint(String uriString, Session newSession) throws Exception
 	{
-		// expecting ws://localhost:8080/rfb/angular/content/websocket/null/null
+		// expecting ws://localhost:8080/rfb/angular/content/websocket/{sessionid}/{windowName}/{windowid}?solution=tst&id=%23editor&f=orders&s=tst&replacewebsocket=true
 		String[] args = getEndpointArgs(EditorContentEndpoint.class, uriString);
 
-		if (args == null || args.length != 2)
+		if (args == null || args.length != 3)
 		{
 			return false;
 		}
 
 		websocketEndpoint = new EditorContentEndpoint();
-		((EditorContentEndpoint)websocketEndpoint).start(newSession, args[0], args[1].split("\\?")[0]);
+		((EditorContentEndpoint)websocketEndpoint).start(newSession, args[0], args[1], args[2].split("\\?")[0]);
 		return true;
 	}
 

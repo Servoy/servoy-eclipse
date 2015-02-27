@@ -281,9 +281,9 @@ public class Activator extends AbstractUIPlugin
 						if (bigChange)
 						{
 							fc.recreateUI();
-							getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall("refreshGhosts",
-								new Object[] { });
-							getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
+							getWebsocketSession().getClientService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
+								"refreshGhosts", new Object[] { });
+							getWebsocketSession().getClientService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
 								"refreshDecorators", new Object[] { });
 						}
 					}
@@ -296,18 +296,18 @@ public class Activator extends AbstractUIPlugin
 					{
 						iFormController.recreateUI();
 					}
-					getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall("refreshGhosts",
+					getWebsocketSession().getClientService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall("refreshGhosts",
 						new Object[] { });
 					if (!form.isResponsiveLayout())
 					{
-						getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
+						getWebsocketSession().getClientService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
 							"updateForm",
 							new Object[] { changedForm.getName(), changedForm.getUUID().toString(), Integer.valueOf((int)form.getSize().getWidth()), Integer.valueOf((int)form.getSize().getHeight()) });
 					}
 				}
 				else
 				{
-					getWebsocketSession().getService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall("refreshDecorators",
+					getWebsocketSession().getClientService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall("refreshDecorators",
 						new Object[] { });
 				}
 			}
