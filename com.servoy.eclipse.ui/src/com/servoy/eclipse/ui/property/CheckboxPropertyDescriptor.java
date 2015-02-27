@@ -29,7 +29,7 @@ import com.servoy.eclipse.ui.Activator;
 
 /**
  * Property controller for boolean properties.
- * 
+ *
  * @author rgansevles
  */
 public class CheckboxPropertyDescriptor extends PropertyDescriptor
@@ -44,7 +44,15 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptor
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		return new CheckboxCellEditor(parent);
+		return new CheckboxCellEditor(parent)
+		{
+			@Override
+			public void activate()
+			{
+				markDirty();
+				super.activate();
+			}
+		};
 	}
 
 	@Override
@@ -82,7 +90,7 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptor
 //		/**
 //		 * Creates a new checkbox cell editor parented under the given control. The cell editor value is a boolean value, which is initially <code>false</code>.
 //		 * Initially, the cell editor has no cell validator.
-//		 * 
+//		 *
 //		 * @param parent the parent control
 //		 */
 //		public CheckboxCellEditor(Composite parent)
@@ -93,7 +101,7 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptor
 //		/**
 //		 * Creates a new checkbox cell editor parented under the given control. The cell editor value is a boolean value, which is initially <code>false</code>.
 //		 * Initially, the cell editor has no cell validator.
-//		 * 
+//		 *
 //		 * @param parent the parent control
 //		 * @param style the style bits
 //		 */
@@ -119,7 +127,7 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptor
 //
 //		/**
 //		 * The object is being passed in, return the index to be used in the editor.
-//		 * 
+//		 *
 //		 * It should return sNoSelection if the value can't be converted to a index. The errormsg will have already been set in this case.
 //		 */
 //
@@ -140,7 +148,7 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptor
 //		/**
 //		 * The <code>CheckboxCellEditor</code> implementation of this <code>CellEditor</code> framework method returns the checkbox setting wrapped as a
 //		 * <code>Boolean</code>.
-//		 * 
+//		 *
 //		 * @return the Boolean checkbox value
 //		 */
 //		@Override
@@ -161,7 +169,7 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptor
 //		/**
 //		 * The <code>CheckboxCellEditor</code> implementation of this <code>CellEditor</code> framework method accepts a value wrapped as a
 //		 * <code>Boolean</code> .
-//		 * 
+//		 *
 //		 * @param val a Boolean value
 //		 */
 //		@Override
@@ -174,9 +182,9 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptor
 
 	/**
 	 * Label provider for checkboxes.
-	 * 
+	 *
 	 * @author rgansevles
-	 * 
+	 *
 	 */
 	public static class CheckboxLabelProvider extends BaseLabelProvider implements ILabelProvider
 	{
