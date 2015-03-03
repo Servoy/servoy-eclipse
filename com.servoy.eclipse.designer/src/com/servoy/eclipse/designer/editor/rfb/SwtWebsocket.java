@@ -45,6 +45,8 @@ import javax.websocket.server.ServerEndpoint;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.BrowserFunction;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Display;
 import org.sablo.websocket.WebsocketEndpoint;
 
@@ -69,6 +71,16 @@ public class SwtWebsocket
 		{
 			throw new IllegalArgumentException("Could not create websocket endpoint for uri '" + uriString + "'");
 		}
+
+		browser.addDisposeListener(new DisposeListener()
+		{
+
+			@Override
+			public void widgetDisposed(DisposeEvent e)
+			{
+				close();
+			}
+		});
 	}
 
 	private boolean createAndStartEditorEndpoint(String uriString, Session newSession) throws Exception
