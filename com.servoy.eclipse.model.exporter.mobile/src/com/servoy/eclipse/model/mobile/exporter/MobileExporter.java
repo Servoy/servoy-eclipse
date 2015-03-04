@@ -111,7 +111,7 @@ public class MobileExporter
 	private static final String MOBILE_MODULE_NAME = "mobileclient";
 
 	private static final String RELATIVE_TEST_WAR_PATH = "resources/servoy_mobile_jsunit.war";
-	private static final String HTML_TEST_FILE = "servoy_mobile_test.html";
+	private static final String HTML_TEST_FILE = "servoy_mobile_jsunit.html";
 	private static final String MOBILE_TEST_MODULE_NAME = "mobiletestclient";
 
 	private static final String FORM_LOOP_START = "${loop_forms}";
