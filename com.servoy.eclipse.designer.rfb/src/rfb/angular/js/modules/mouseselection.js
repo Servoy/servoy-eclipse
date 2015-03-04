@@ -180,7 +180,6 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					if (type == "layout" || (type == "component" && !editorScope.isAbsoluteFormLayout())) {
 						var realName = layoutName?layoutName:"component";
 						
-						console.log("type: " + type +",parents: " + topContainer + ", lname:" + layoutName)
 						dropTarget = this.getNode(event, true);
 						if (!dropTarget){
 							// this is on the form, can this layout container be dropped on the form?
