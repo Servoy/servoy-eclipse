@@ -268,27 +268,19 @@ public class NewComponentPackageAction extends Action
 	 */
 	private void createManifest(IFolder pack) throws CoreException, IOException
 	{
-		OutputStream out = null;
-		try
-		{
-			Manifest manifest = new Manifest();
-			manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-			manifest.getMainAttributes().put(new Attributes.Name("Bundle-Name"), packageDisplayName);
+		Manifest manifest = new Manifest();
+		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+		manifest.getMainAttributes().put(new Attributes.Name("Bundle-Name"), packageDisplayName);
+		manifest.getMainAttributes().put(new Attributes.Name("Bundle-SymbolicName"), packageName);
 
-			IFolder metainf = pack.getFolder("META-INF");
-			metainf.create(true, true, new NullProgressMonitor());
-			IFile m = metainf.getFile("MANIFEST.MF");
-			m.create(new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
-			out = new FileOutputStream(new File(m.getLocationURI()), false);
+		IFolder metainf = pack.getFolder("META-INF");
+		metainf.create(true, true, new NullProgressMonitor());
+		IFile m = metainf.getFile("MANIFEST.MF");
+		m.create(new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
+
+		try (OutputStream out = new FileOutputStream(new File(m.getLocationURI()), false))
+		{
 			manifest.write(out);
-		}
-		catch (IOException e)
-		{
-			ServoyLog.logError(e);
-		}
-		finally
-		{
-			if (out != null) out.close();
 		}
 	}
 }

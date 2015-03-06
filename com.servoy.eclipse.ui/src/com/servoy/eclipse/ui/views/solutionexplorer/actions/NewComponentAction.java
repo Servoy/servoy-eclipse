@@ -160,6 +160,7 @@ public class NewComponentAction extends Action
 				text = text.replaceAll("\\$\\{NAME\\}", componentName);
 				text = text.replaceAll("\\$\\{PACKAGENAME\\}", pack.getName());
 				createFile(componentName + ".js", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
+				in.close();
 
 				in = uiActivator.getBundle().getEntry("/component-templates/" + type.toLowerCase() + ".spec").openStream();
 				text = IOUtils.toString(in, "UTF-8");
