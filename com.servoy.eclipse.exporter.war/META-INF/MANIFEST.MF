@@ -22,6 +22,6 @@ Require-Bundle: org.eclipse.core.resources,
  com.servoy.eclipse.ui,
  com.servoy.eclipse.core,
  sablo
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .

@@ -33,4 +33,4 @@ Require-Bundle: org.eclipse.core.databinding,
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.designer;uses:="org.eclipse.jface.re
  source,org.eclipse.ui.plugin,org.osgi.framework"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7

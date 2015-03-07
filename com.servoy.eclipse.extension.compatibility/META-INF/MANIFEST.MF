@@ -17,7 +17,7 @@ Require-Bundle: servoy_shared,
  org.apache.httpcomponents.httpclient,
  org.apache.httpcomponents.httpcore,
  org.apache.commons.pool
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Import-Package: javax.servlet,

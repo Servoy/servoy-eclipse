@@ -58,4 +58,4 @@ Export-Package: com.servoy.eclipse.core,
  com.servoy.eclipse.core.util,
  com.servoy.eclipse.dnd
 Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7

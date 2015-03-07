@@ -8,7 +8,7 @@ Require-Bundle: org.eclipse.core.runtime,
  servoy_base,
  servoy_shared,
  com.servoy.eclipse.model
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/js.jar,
  lib/jshybugger.jar,

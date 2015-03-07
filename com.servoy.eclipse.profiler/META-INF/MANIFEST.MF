@@ -19,5 +19,5 @@ Require-Bundle: com.servoy.eclipse.model,
  com.servoy.eclipse.ui,
  org.eclipse.ui.ide
 Eclipse-LazyStart: true
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy

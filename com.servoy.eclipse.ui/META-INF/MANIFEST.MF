@@ -90,4 +90,4 @@ Export-Package: com.servoy.eclipse.ui,
  com.servoy.eclipse.ui.views.solutionexplorer.actions,
  com.servoy.eclipse.ui.wizards
 Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
