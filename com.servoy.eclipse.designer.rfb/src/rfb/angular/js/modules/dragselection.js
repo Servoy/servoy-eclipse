@@ -106,6 +106,7 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 									}
 								}
 							}
+							editorScope.refreshEditorContent();
 							$editorService.sendChanges(obj);
 						}
 					}
