@@ -55,6 +55,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Display;
@@ -126,6 +127,7 @@ import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.SortedList;
@@ -836,8 +838,15 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			{
 				InputStream is = iconFile.getContents();
 				Display display = Display.getCurrent();
-				img = new Image(display, new ImageData(is));
-				if (img != null) imageCache.put(iconFile.getFullPath(), img);
+				try
+				{
+					img = new Image(display, new ImageData(is));
+					if (img != null) imageCache.put(iconFile.getFullPath(), img);
+				}
+				catch (SWTException e)
+				{
+					Debug.log(e);
+				}
 			}
 			return img;
 		}
@@ -2419,7 +2428,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.core.IWebResourceChangedListener#changed()
 	 */
 	@Override

@@ -209,6 +209,7 @@ import com.servoy.eclipse.ui.views.ModifiedPropertySheetEntry;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ActivateSolutionAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddAsModuleAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddComponentIconResourceAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddModuleAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddWorkingSetAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ChangeResourcesProjectAction;
@@ -414,6 +415,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private ContextAction openActionInTree;
 
 	private ContextAction deleteActionInTree;
+
+	private ContextAction addComponentIcon;
 
 	private AddAsModuleAction addAsModuleAction;
 
@@ -2439,6 +2442,13 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (duplicateFormAction.isEnabled()) manager.add(duplicateFormAction);
 		if (deleteActionInTree.isEnabled()) manager.add(deleteActionInTree);
 		if (renameActionInTree.isEnabled()) manager.add(renameActionInTree);
+
+		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.COMPONENT)
+		{
+			manager.add(new Separator());
+			manager.add(addComponentIcon);
+		}
+
 		manager.add(new Separator());
 		manager.add(cutAction);
 		manager.add(copyAction);
@@ -2464,6 +2474,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			manager.add(new Separator());
 			manager.add(filePropertiesAction);
 		}
+
 	}
 
 	public void showContextMenuNavigationGroup(boolean show)
@@ -2663,6 +2674,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		moveCode = new MoveTextAction(this, false);
 		searchListAction = new SearchAction();
 		searchTreeAction = new SearchAction();
+
 		moveFormAction = new MovePersistAction(getSite().getShell());
 		duplicateFormAction = new DuplicatePersistAction(getSite().getShell());
 		changeResourcesProjectAction = new ChangeResourcesProjectAction(getSite().getShell());
@@ -2831,6 +2843,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		openAction.registerAction(UserNodeType.I18N_FILE_ITEM, new OpenI18NAction(this));
 		openAction.registerAction(UserNodeType.COMPONENT_RESOURCE, new OpenComponentResourceAction());
 
+		addComponentIcon = new ContextAction(this, null, "Add Icon");
+		IAction addComponentIconAction = new AddComponentIconResourceAction(this);
+		addComponentIcon.registerAction(UserNodeType.COMPONENT, addComponentIconAction);
+
 		deleteActionInList = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE), "Delete");
 		IAction deleteMedia = new DeleteMediaAction("Delete media", this);
 		IAction deleteMediaFolder = new DeleteMediaAction("Delete media", this);
@@ -2846,6 +2862,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction deleteComponentPackage = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete component package",
 			UserNodeType.COMPONENTS_PACKAGE);
 		IAction deleteServicePackage = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete service package", UserNodeType.SERVICES_PACKAGE);
+
 		IAction deleteComponent = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete component", UserNodeType.COMPONENT);
 		IAction deleteService = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete service", UserNodeType.SERVICE);
 		IAction deleteComponentResource = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete file", UserNodeType.COMPONENT_RESOURCE);
@@ -2970,6 +2987,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		addTreeSelectionChangedListener(enableServer);
 		addTreeSelectionChangedListener(toggleFormCommandsActions);
 		addTreeSelectionChangedListener(expandNodeAction);
+
+		addTreeSelectionChangedListener(addComponentIcon);
 
 		addTreeSelectionChangedListener(createMediaFolderAction);
 		addTreeSelectionChangedListener(renameMediaFolderAction);
