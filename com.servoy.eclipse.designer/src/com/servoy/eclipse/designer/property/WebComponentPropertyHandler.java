@@ -46,6 +46,7 @@ import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.FormatPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGColorPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGDimensionPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGFontPropertyType;
@@ -168,6 +169,9 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 				}
 				return propertyDescription.getDefaultValue();
 			}
+			// FormatPropertyType default is an Object, but the properties view expects string,
+			// so just return null as default
+			if (type == FormatPropertyType.INSTANCE) return null;
 			return type.defaultValue(propertyDescription);
 		}
 		else
