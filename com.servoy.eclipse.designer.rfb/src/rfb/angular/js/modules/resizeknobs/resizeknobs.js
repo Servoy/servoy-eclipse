@@ -67,6 +67,9 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 							}
 							else {
 								var ghostObject = $scope.getGhost(node.getAttribute("svy-id"));
+								if(ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_COMPONENT) {
+									$scope.updateGhostLocation(ghostObject, ghostObject.location.x + deltaX*resizeInfo.left, ghostObject.location.y + deltaY*resizeInfo.top)
+								}
 								$scope.updateGhostSize(ghostObject, deltaX*resizeInfo.width, deltaY*resizeInfo.height)
 							}
 						}
