@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -27,6 +28,8 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
+import javax.imageio.ImageIO;
+
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -36,6 +39,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -85,10 +89,40 @@ public class AddComponentIconResourceAction extends Action implements ISelection
 		if (selection != null)
 		{
 			FileDialog fd = new FileDialog(solutionExplorerView.getSite().getShell(), SWT.OPEN | SWT.SINGLE);
-			String[] filterExt = { "*.png", "*.gif", ".bmp", "*.svg", "*.jpg" };
+			String[] filterExt = { "*.png", "*.gif", "*.bmp", "*.jpg" };
 			fd.setFilterExtensions(filterExt);
 			String fileName = fd.open();
 			if (fileName == null) return;
+
+			BufferedImage bimg;
+			try
+			{
+				bimg = ImageIO.read(new File(fileName));
+				if (bimg != null)
+				{
+					int width = bimg.getWidth();
+					int height = bimg.getHeight();
+					if ((width != 16) || (height != 16))
+					{
+						MessageDialog dialog = new MessageDialog(solutionExplorerView.getSite().getShell(), "Incorrect image size.", null,
+							"The size of selected image file is " + width + " x " + height + ". Please select an image of size 16 x 16.", 0,
+							new String[] { "Ok" }, 0);
+						dialog.open();
+						return;
+					}
+				}
+				else
+				{
+					Debug.error("ImageIO could not find an Image Reader found for file " + fileName);
+					return;
+				}
+			}
+			catch (IOException e1)
+			{
+				Debug.log(e1);
+				//java does not see it as an image, we simply return
+				return;
+			}
 
 			WebComponentSpecification spec = (WebComponentSpecification)selection.getRealObject();
 			try
@@ -122,6 +156,8 @@ public class AddComponentIconResourceAction extends Action implements ISelection
 					if (imageIFile.getParent() != null && imageIFile.getParent().getParent() != null) json.put("icon",
 						imageIFile.getParent().getParent().getName() + "/" + imageIFile.getParent().getName() + "/" + imageFileName);
 					specfile.setContents(new ByteArrayInputStream(json.toString(4).getBytes(StandardCharsets.UTF_8)), true, false, null);
+
+
 				}
 			}
 			catch (URISyntaxException e)

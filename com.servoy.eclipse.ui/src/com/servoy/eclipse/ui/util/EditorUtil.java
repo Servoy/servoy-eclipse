@@ -349,8 +349,8 @@ public class EditorUtil
 				IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(resource.getName());
 				if (desc == null)
 				{
-					if (resource.getName().endsWith(".png") || resource.getName().endsWith(".jpg") || resource.getName().endsWith(".svg") ||
-						resource.getName().endsWith(".bmp") || resource.getName().endsWith(".png"))
+					if (resource.getName().endsWith(".png") || resource.getName().endsWith(".jpg") || resource.getName().endsWith(".bmp") ||
+						resource.getName().endsWith(".gif"))
 					{
 						PlatformUI.getWorkbench().getBrowserSupport().createBrowser("com.servoy.component.icon.browser").openURL(
 							resource.getLocationURI().toURL());
