@@ -53,7 +53,7 @@ public class ComponentsSelectionPage extends AbstractComponentsSelectionPage
 	protected Set<String> getAvailableItems()
 	{
 		Set<String> availableComponents = new TreeSet<String>();
-		for (WebComponentSpecification spec : WebComponentSpecProvider.getInstance().getWebComponentSpecifications())
+		for (WebComponentSpecification spec : WebComponentSpecProvider.getInstance().getAllWebComponentSpecifications())
 		{
 			if (!selectedComponents.contains(spec.getName())) availableComponents.add(spec.getName());
 		}

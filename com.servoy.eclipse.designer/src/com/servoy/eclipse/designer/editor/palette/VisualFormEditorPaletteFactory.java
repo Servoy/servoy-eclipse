@@ -39,6 +39,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.ValuesConfig;
+import org.sablo.specification.WebComponentPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
 
@@ -271,30 +272,33 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		Map<String, List<String>> allComponents = new HashMap<String, List<String>>();
 		Map<String, String> drawerNames = new HashMap<String, String>();
 
-		for (WebComponentSpecification spec : WebComponentSpecProvider.getInstance().getWebComponentSpecifications())
+		for (WebComponentPackageSpecification<WebComponentSpecification> pkg : WebComponentSpecProvider.getInstance().getWebComponentSpecifications().values())
 		{
-			String packageName = spec.getPackageName();
+			String packageName = pkg.getPackageDisplayname();
 			String id = COMPONENTS_ID + "." + packageName;
 
 			drawerNames.put(id, packageName);
 
-			List<String> componentIds = new ArrayList<String>();
-			if (allComponents.get(id) != null) componentIds = allComponents.get(id);
-			else
+			for (WebComponentSpecification spec : pkg.getSpecifications().values())
 			{
-				allComponents.put(id, componentIds);
-			}
+				List<String> componentIds;
+				if (allComponents.get(id) != null) componentIds = allComponents.get(id);
+				else
+				{
+					allComponents.put(id, componentIds = new ArrayList<String>());
+				}
 
-			String componentId = spec.getName();
-			componentIds.add(componentId);
+				String componentId = spec.getName();
+				componentIds.add(componentId);
 
-			String name = spec.getDisplayName();
-			if (name == null || name.length() == 0)
-			{
-				name = "<UNKNOWN>";
+				String name = spec.getDisplayName();
+				if (name == null || name.length() == 0)
+				{
+					name = "<UNKNOWN>";
+				}
+				entryProperties.put(id + '.' + componentId + '.' + PaletteCustomization.PROPERTY_LABEL, name);
+				entryProperties.put(id + '.' + componentId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, "Place component " + name);
 			}
-			entryProperties.put(id + '.' + componentId + '.' + PaletteCustomization.PROPERTY_LABEL, name);
-			entryProperties.put(id + '.' + componentId + '.' + PaletteCustomization.PROPERTY_DESCRIPTION, "Place component " + name);
 		}
 
 		for (String containerPackageID : allComponents.keySet())

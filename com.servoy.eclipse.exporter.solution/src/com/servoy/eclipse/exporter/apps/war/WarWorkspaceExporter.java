@@ -213,14 +213,14 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			@Override
 			public Set<String> getExportedComponents()
 			{
-				if (configuration.getSelectedComponents() == null) return configuration.getSelectedServices() != null ? super.getUsedComponents() : null;
-				if (configuration.getSelectedComponents().equals("")) return super.getUsedComponents();
+				if (configuration.getSelectedComponents() == null) return configuration.getSelectedServices() != null ? getUsedComponents() : null;
+				if (configuration.getSelectedComponents().equals("")) return getUsedComponents();
 
 				WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
 				Set<String> set = new HashSet<String>();
 				if (configuration.getSelectedComponents().trim().equalsIgnoreCase("all"))
 				{
-					for (WebComponentSpecification spec : provider.getWebComponentSpecifications())
+					for (WebComponentSpecification spec : provider.getAllWebComponentSpecifications())
 					{
 						set.add(spec.getName());
 					}
@@ -236,7 +236,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 							set.remove(componentName);
 						}
 					}
-					set.addAll(super.getUsedComponents());
+					set.addAll(getUsedComponents());
 				}
 				return set;
 
@@ -245,13 +245,13 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			@Override
 			public Set<String> getExportedServices()
 			{
-				if (configuration.getSelectedServices() == null) return configuration.getSelectedComponents() != null ? super.getUsedServices() : null;
-				if (configuration.getSelectedServices().equals("")) return super.getUsedServices();
+				if (configuration.getSelectedServices() == null) return configuration.getSelectedComponents() != null ? getUsedServices() : null;
+				if (configuration.getSelectedServices().equals("")) return getUsedServices();
 				Set<String> set = new HashSet<String>();
 				WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
 				if (configuration.getSelectedServices().trim().equalsIgnoreCase("all"))
 				{
-					for (WebComponentSpecification spec : provider.getWebServiceSpecifications())
+					for (WebComponentSpecification spec : provider.getAllWebServiceSpecifications())
 					{
 						set.add(spec.getName());
 					}
@@ -267,7 +267,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 							set.remove(serviceName);
 						}
 					}
-					set.addAll(super.getUsedServices());
+					set.addAll(getUsedServices());
 				}
 				return set;
 			}

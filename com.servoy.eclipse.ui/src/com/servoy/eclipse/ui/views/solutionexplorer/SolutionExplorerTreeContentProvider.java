@@ -62,6 +62,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.mozilla.javascript.JavaMembers;
+import org.sablo.specification.WebComponentPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
@@ -751,9 +752,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					else if (type == UserNodeType.COMPONENTS_PACKAGE)
 					{
 						WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
-						List<String> components = provider.getComponentsInPackage(un.getName());
+						List<String> components = new ArrayList<>(provider.getComponentsInPackage(un.getName()));
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
-						if (components != null)
+						if (components.size() > 0)
 						{
 							Collections.sort(components);
 							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
@@ -792,10 +793,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					else if (type == UserNodeType.SERVICES_PACKAGE)
 					{
 						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
-						List<String> services = provider.getServicesInPackage(un.getName());
+						WebComponentPackageSpecification<WebComponentSpecification> servicesPackage = provider.getServicesInPackage(un.getName());
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
-						if (services != null)
+						if (servicesPackage != null)
 						{
+							List<String> services = new ArrayList<>(servicesPackage.getSpecifications().keySet());
 							Collections.sort(services);
 							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
 								SolutionSerializer.SERVICES_DIR_NAME);
@@ -933,13 +935,13 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 				else if (un.getType() == UserNodeType.COMPONENTS_PACKAGE)
 				{
-					List<String> components = WebComponentSpecProvider.getInstance().getComponentsInPackage(un.getName());
-					return components != null && !components.isEmpty();
+					return !WebComponentSpecProvider.getInstance().getComponentsInPackage(un.getName()).isEmpty();
 				}
 				else if (un.getType() == UserNodeType.SERVICES_PACKAGE)
 				{
-					List<String> services = WebServiceSpecProvider.getInstance().getServicesInPackage(un.getName());
-					return services != null && !services.isEmpty();
+					WebComponentPackageSpecification<WebComponentSpecification> services = WebServiceSpecProvider.getInstance().getServicesInPackage(
+						un.getName());
+					return services != null && !services.getSpecifications().isEmpty();
 				}
 			}
 			else if (un.children.length > 0)

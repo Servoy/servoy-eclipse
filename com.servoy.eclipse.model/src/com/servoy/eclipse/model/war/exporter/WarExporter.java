@@ -191,8 +191,8 @@ public class WarExporter
 	private void copyExportedComponentsPropertyFile(File tmpWarDir) throws ExportException
 	{
 		if (exportModel.getExportedComponents() == null && exportModel.getExportedServices() == null ||
-			exportModel.getExportedComponents().size() == WebComponentSpecProvider.getInstance().getWebComponentSpecifications().length &&
-			exportModel.getExportedServices().size() == WebServiceSpecProvider.getInstance().getWebServiceSpecifications().length) return;
+			exportModel.getExportedComponents().size() == WebComponentSpecProvider.getInstance().getWebComponentSpecifications().size() &&
+			exportModel.getExportedServices().size() == WebServiceSpecProvider.getInstance().getAllWebServiceSpecifications().length) return;
 
 		File exported = new File(tmpWarDir, "WEB-INF/exported_components.properties");
 		Properties properties = new Properties();

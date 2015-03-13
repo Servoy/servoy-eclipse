@@ -51,7 +51,7 @@ public class ServicesSelectionPage extends AbstractComponentsSelectionPage
 	protected Set<String> getAvailableItems()
 	{
 		Set<String> availableComponents = new TreeSet<String>();
-		for (WebComponentSpecification spec : WebServiceSpecProvider.getInstance().getWebServiceSpecifications())
+		for (WebComponentSpecification spec : WebServiceSpecProvider.getInstance().getAllWebServiceSpecifications())
 		{
 			if (!selectedComponents.contains(spec.getName())) availableComponents.add(spec.getName());
 		}

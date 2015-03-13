@@ -34,6 +34,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebLayoutSpecification;
@@ -452,11 +453,11 @@ public class CreateComponentHandler implements IServerService
 				}
 				else
 				{
-					Map<String, WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+					WebComponentPackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
 						args.optString("packageName"));
 					if (specifications != null)
 					{
-						WebLayoutSpecification layoutSpec = specifications.get(name);
+						WebLayoutSpecification layoutSpec = specifications.getSpecification(name);
 						if (layoutSpec != null)
 						{
 							JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
@@ -489,7 +490,7 @@ public class CreateComponentHandler implements IServerService
 	 * @throws JSONException
 	 */
 	protected IPersist createLayoutContainer(ISupportFormElements parent, WebLayoutSpecification layoutSpec, JSONObject config, int index,
-		Map<String, WebLayoutSpecification> specifications, String packageName) throws RepositoryException, JSONException
+		WebComponentPackageSpecification<WebLayoutSpecification> specifications, String packageName) throws RepositoryException, JSONException
 	{
 		LayoutContainer container = (LayoutContainer)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(parent,
 			IRepository.LAYOUTCONTAINERS);
@@ -514,7 +515,7 @@ public class CreateComponentHandler implements IServerService
 					for (int i = 0; i < array.length(); i++)
 					{
 						JSONObject jsonObject = array.getJSONObject(i);
-						WebLayoutSpecification spec = specifications.get(jsonObject.get("layoutName"));
+						WebLayoutSpecification spec = specifications.getSpecification(jsonObject.getString("layoutName"));
 						createLayoutContainer(container, spec, jsonObject.optJSONObject("model"), i + 1, specifications, packageName);
 					}
 				} // children and layoutName are special
@@ -523,12 +524,6 @@ public class CreateComponentHandler implements IServerService
 		}
 		return container;
 	}
-
-	private boolean isCorrectTarget(BaseComponent baseComponent, String uuid)
-	{
-		return baseComponent.getUUID().toString().equals(uuid);
-	}
-
 
 	/**
 	 * @param parentBean

@@ -467,8 +467,8 @@ public class TypeCreator extends TypeCache
 
 	private void createSpecTypeDefinitions()
 	{
-		WebComponentSpecification[] webComponentSpecifications = WebComponentSpecProvider.getInstance().getWebComponentSpecifications();
-		WebComponentSpecification[] webServiceSpecifications = WebServiceSpecProvider.getInstance().getWebServiceSpecifications();
+		WebComponentSpecification[] webComponentSpecifications = WebComponentSpecProvider.getInstance().getAllWebComponentSpecifications();
+		WebComponentSpecification[] webServiceSpecifications = WebServiceSpecProvider.getInstance().getAllWebServiceSpecifications();
 		Collection<WebComponentSpecification> specs = new ArrayList<WebComponentSpecification>();
 		Collections.addAll(specs, webComponentSpecifications);
 		Collections.addAll(specs, webServiceSpecifications);
@@ -2841,7 +2841,7 @@ public class TypeCreator extends TypeCache
 			ClientSupport clientSupport = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
 			if (clientSupport != null && clientSupport.supports(ClientSupport.ng))
 			{
-				WebComponentSpecification[] serviceSpecifications = WebServiceSpecProvider.getInstance().getWebServiceSpecifications();
+				WebComponentSpecification[] serviceSpecifications = WebServiceSpecProvider.getInstance().getAllWebServiceSpecifications();
 				for (WebComponentSpecification spec : serviceSpecifications)
 				{
 					if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)
