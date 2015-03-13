@@ -26,8 +26,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -44,6 +42,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebLayoutSpecification;
@@ -61,7 +60,8 @@ import com.servoy.j2db.util.HTTPUtils;
 @SuppressWarnings("nls")
 public class DesignerFilter implements Filter
 {
-	private static List<String> ignoreList = Arrays.asList(new String[] { "servoydefault-checkgroup", FormElement.ERROR_BEAN, "servoydefault-navigator", "servoydefault-radiogroup", "servoydefault-htmlview", "colorthefoundset" });
+	private static final List<String> IGNORE_LIST = Arrays.asList(new String[] { "servoydefault-checkgroup", FormElement.ERROR_BEAN, "servoydefault-navigator", "servoydefault-radiogroup", "servoydefault-htmlview", "colorthefoundset" });
+
 	public static final String DROPPABLE = "droppable";
 
 	@Override
@@ -84,15 +84,15 @@ public class DesignerFilter implements Filter
 					JSONWriter jsonWriter = new JSONWriter(servletResponse.getWriter());
 					jsonWriter.array();
 					// first add all the layout containers.
-					Map<String, Map<String, WebLayoutSpecification>> layoutSpecifications = provider.getLayoutSpecifications();
-					for (Entry<String, Map<String, WebLayoutSpecification>> entry : layoutSpecifications.entrySet())
+					for (WebComponentPackageSpecification<WebLayoutSpecification> entry : provider.getLayoutSpecifications().values())
 					{
 						jsonWriter.object();
-						jsonWriter.key("packageName").value(entry.getKey());
+						jsonWriter.key("packageName").value(entry.getPackageName());
+						jsonWriter.key("packageDisplayname").value(entry.getPackageDisplayname());
 						jsonWriter.key("components");
 						jsonWriter.array();
 
-						for (WebLayoutSpecification spec : entry.getValue().values())
+						for (WebLayoutSpecification spec : entry.getSpecifications().values())
 						{
 							jsonWriter.object();
 							jsonWriter.key("name").value(spec.getName());
@@ -115,9 +115,7 @@ public class DesignerFilter implements Filter
 							}
 							else
 							{
-								StringBuilder sb = new StringBuilder();
-								createLayoutDiv(config, sb, entry.getValue());
-								jsonWriter.key("tagName").value(sb.toString());
+								jsonWriter.key("tagName").value(createLayoutDiv(config, new StringBuilder()).toString());
 							}
 							Map<String, Object> model = new HashMap<String, Object>();
 							PropertyDescription pd = spec.getProperty("size");
@@ -146,38 +144,37 @@ public class DesignerFilter implements Filter
 						jsonWriter.endArray();
 						jsonWriter.endObject();
 					}
-					Set<String> packageNames = provider.getPackageNames();
-					ArrayList<String> orderedPackageNames = new ArrayList<String>();
-					for (String packName : packageNames)
-					{
-						orderedPackageNames.add(packName);
-					}
-					Collections.sort(orderedPackageNames, new Comparator<String>()
-					{
 
+					List<WebComponentPackageSpecification<WebComponentSpecification>> packages = new ArrayList<>(
+						provider.getWebComponentSpecifications().values());
+					Collections.sort(packages, new Comparator<WebComponentPackageSpecification<WebComponentSpecification>>()
+					{
 						@Override
-						public int compare(String o1, String o2)
+						public int compare(WebComponentPackageSpecification<WebComponentSpecification> pkg1,
+							WebComponentPackageSpecification<WebComponentSpecification> pkg2)
 						{
-							if (o1.toLowerCase().contains("default")) return -1;
-							else return o1.compareTo(o2);
+							if (pkg1.getPackageName().equals("servoydefault")) return -1;
+							if (pkg2.getPackageName().equals("servoydefault")) return 1;
+							return pkg1.getPackageDisplayname().compareTo(pkg1.getPackageDisplayname());
 						}
 					});
-					for (String packageName : orderedPackageNames)
+
+					for (WebComponentPackageSpecification<WebComponentSpecification> pkg : packages)
 					{
 						jsonWriter.object();
-						jsonWriter.key("packageName").value(packageName);
+						jsonWriter.key("packageName").value(pkg.getPackageName());
+						jsonWriter.key("packageDisplayname").value(pkg.getPackageDisplayname());
 						jsonWriter.key("components");
 						jsonWriter.array();
-						for (String componentName : provider.getComponentsInPackage(packageName))
+						for (WebComponentSpecification spec : pkg.getSpecifications().values())
 						{
-							if (!ignoreList.contains(componentName))
+							if (!IGNORE_LIST.contains(spec.getName()))
 							{
-								WebComponentSpecification spec = provider.getWebComponentSpecification(componentName);
 								jsonWriter.object();
 								jsonWriter.key("name").value(spec.getName());
 								jsonWriter.key("componentType").value("component");
 								jsonWriter.key("displayName").value(spec.getDisplayName());
-								jsonWriter.key("tagName").value(FormTemplateGenerator.getTagName(componentName));
+								jsonWriter.key("tagName").value(FormTemplateGenerator.getTagName(spec.getName()));
 								Map<String, Object> model = new HashMap<String, Object>();
 								PropertyDescription pd = spec.getProperty("size");
 								if (pd != null && pd.getDefaultValue() != null)
@@ -239,7 +236,7 @@ public class DesignerFilter implements Filter
 	 * @param specifications
 	 * @throws JSONException
 	 */
-	protected void createLayoutDiv(JSONObject config, StringBuilder sb, Map<String, WebLayoutSpecification> specifications) throws JSONException
+	protected StringBuilder createLayoutDiv(JSONObject config, StringBuilder sb) throws JSONException
 	{
 		sb.append("<div style='border-style: dotted;' "); // TODO tagname from spec?
 		Iterator keys = config.keys();
@@ -263,11 +260,11 @@ public class DesignerFilter implements Filter
 				JSONObject childModel = jsonObject.optJSONObject("model");
 				if (childModel != null)
 				{
-					createLayoutDiv(childModel, sb, specifications);
+					createLayoutDiv(childModel, sb);
 				}
 			}
 		}
-		sb.append("</div>");
+		return sb.append("</div>");
 	}
 
 	private List<String> getPalleteTypeNames(WebComponentSpecification spec)
