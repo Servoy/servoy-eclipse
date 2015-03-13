@@ -83,7 +83,7 @@ public class NewComponentPackageAction extends Action
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	@Override
@@ -156,8 +156,8 @@ public class NewComponentPackageAction extends Action
 		if (code != 0) return;
 		while (checkIfEmpty(packageName, "Package name was not provided.") ||
 			checkIfEmpty(componentName, "The name of the first component was not provided.") || !isNameValid(node) ||
-			!isNameValid(packageName, "Package name must start with a letter and must contain only alphanumeric characters") ||
-			!isNameValid(componentName, type + " name must start with a letter and must contain only alphanumeric characters"))
+			!isNameValid(packageName, "^[a-z][0-9a-z]*$", "Package name must start with a letter and must contain only lowercase letters or numbers") ||
+			!isNameValid(componentName, "^[a-zA-Z][0-9a-zA-Z]*$", type + " name must start with a letter and must contain only alphanumeric characters"))
 		{
 			code = dialog.open();
 			if (code != 0) return;
@@ -248,9 +248,9 @@ public class NewComponentPackageAction extends Action
 		return false;
 	}
 
-	private boolean isNameValid(String value, String message)
+	private boolean isNameValid(String value, String regex, String message)
 	{
-		if (!value.matches("^[a-zA-Z][0-9a-zA-Z]*$"))
+		if (!value.matches(regex))
 		{
 			if (message != null)
 			{
