@@ -78,9 +78,9 @@ public class AddComponentIconResourceAction extends Action implements ISelection
 	}
 
 	/*
-	 *
+	 * 
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	@Override
@@ -125,6 +125,10 @@ public class AddComponentIconResourceAction extends Action implements ISelection
 			}
 
 			WebComponentSpecification spec = (WebComponentSpecification)selection.getRealObject();
+			InputStream contents = null;
+			BufferedInputStream bufferedInputStream = null;
+			ByteArrayInputStream source = null;
+			FileInputStream fis = null;
 			try
 			{
 				IFile[] dirResource = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
@@ -145,19 +149,19 @@ public class AddComponentIconResourceAction extends Action implements ISelection
 
 					}
 					//copy image file contents
-					if (imageIFile.exists()) imageIFile.setContents(new FileInputStream(new File(fileName)), IResource.FORCE, null);
-					else imageIFile.create(new FileInputStream(new File(fileName)), IResource.FORCE, null);
+					fis = new FileInputStream(new File(fileName));
+					if (imageIFile.exists()) imageIFile.setContents(fis, IResource.FORCE, null);
+					else imageIFile.create(fis, IResource.FORCE, null);
 
 					//change .spec file so that "icon" points to the new icon
-					InputStream contents = specfile.getContents();
-					BufferedInputStream bufferedInputStream = new BufferedInputStream(contents);
+					contents = specfile.getContents();
+					bufferedInputStream = new BufferedInputStream(contents);
 					String specFileString = IOUtils.toString(bufferedInputStream);
 					JSONObject json = new JSONObject(specFileString);
 					if (imageIFile.getParent() != null && imageIFile.getParent().getParent() != null) json.put("icon",
 						imageIFile.getParent().getParent().getName() + "/" + imageIFile.getParent().getName() + "/" + imageFileName);
-					specfile.setContents(new ByteArrayInputStream(json.toString(4).getBytes(StandardCharsets.UTF_8)), true, false, null);
-
-
+					source = new ByteArrayInputStream(json.toString(4).getBytes(StandardCharsets.UTF_8));
+					specfile.setContents(source, true, false, null);
 				}
 			}
 			catch (URISyntaxException e)
@@ -180,6 +184,42 @@ public class AddComponentIconResourceAction extends Action implements ISelection
 			{
 				Debug.log(e);
 			}
+			finally
+			{
+				if (contents != null) try
+				{
+					contents.close();
+				}
+				catch (IOException e)
+				{
+					Debug.log(e);
+				}
+
+				if (bufferedInputStream != null) try
+				{
+					bufferedInputStream.close();
+				}
+				catch (IOException e)
+				{
+					Debug.log(e);
+				}
+				if (source != null) try
+				{
+					source.close();
+				}
+				catch (IOException e)
+				{
+					Debug.log(e);
+				}
+				if (fis != null) try
+				{
+					fis.close();
+				}
+				catch (IOException e)
+				{
+					Debug.log(e);
+				}
+			}
 		}
 	}
 
@@ -201,7 +241,7 @@ public class AddComponentIconResourceAction extends Action implements ISelection
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
 	 */
 	@Override
