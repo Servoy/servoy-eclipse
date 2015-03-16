@@ -618,4 +618,10 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	{
 		return null;
 	}
+
+	@Override
+	public boolean compactSolutions()
+	{
+		return false;
+	}
 }
