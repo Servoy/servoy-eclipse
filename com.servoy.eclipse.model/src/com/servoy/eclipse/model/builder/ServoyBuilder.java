@@ -2900,7 +2900,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 
 							//if it has elements, it must have at least one part or extend a form which has a part
-							if (form.getAllObjects().hasNext())
+							if (form.getFormElementsSortedByFormIndex().hasNext())
 							{
 								Form f = form;
 								boolean hasPart = false;
