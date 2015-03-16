@@ -126,8 +126,8 @@ public class MarkerMessages
 	 */
 
 	/**
-	 * When this message appears it means that the content in the files in the solution folder is 
-	 * corrupted. 
+	 * When this message appears it means that the content in the files in the solution folder is
+	 * corrupted.
 	 */
 	public static ServoyMarker SolutionBadStructure = new ServoyMarker(
 		"Structure of the files for solution \"{0}\" is broken (incorrect parent-child combination).", ServoyBuilder.BAD_STRUCTURE_MARKER_TYPE); //$NON-NLS-1$
@@ -139,7 +139,7 @@ public class MarkerMessages
 		"Error while reading solution \"{0}\": {1}.", ServoyBuilder.PROJECT_DESERIALIZE_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
-	 * This message appears when a checked-out solution/module has a higher fileVersion than the current version of the repository.    
+	 * This message appears when a checked-out solution/module has a higher fileVersion than the current version of the repository.
 	 */
 	public static ServoyMarker SolutionWithHigherFileVersion = new ServoyMarker(
 		"{0} \"{1}\" has a higher version of Servoy.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE); //$NON-NLS-1$
@@ -287,11 +287,14 @@ public class MarkerMessages
 		"rowBGColorCalculation of form \"{0}\" is linked to an entity that does not exist.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 	public static ServoyMarker FormDuplicatePart = new ServoyMarker(
 		"Form \"{0}\" has multiple parts of type: \"{1}\".", ServoyBuilder.FORM_DUPLICATE_PART_MARKER_TYPE); //$NON-NLS-1$
+	public static ServoyMarker FormNoParts = new ServoyMarker(
+		"Form \"{0}\" does not have any parts and does not extend a form which has parts.", ServoyBuilder.FORM_NO_PARTS_MARKER_TYPE); //$NON-NLS-1$
+
 
 	public static ServoyMarker NonAccessibleFormInModuleUsedInParentSolutionForm = new ServoyMarker(
 		"Non-public {0} \"{1}\" from module \"{2}\" is used in solution \"{3}\", in form \"{4}\". This is not allowed.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
-	/** 
+	/**
 	 * This means that the sam tab sequence position is assigned to more than one element on a form.
 	 */
 	public static ServoyMarker FormNamedElementDuplicateTabSequence = new ServoyMarker(
@@ -378,7 +381,7 @@ public class MarkerMessages
 		"Portal has invalid relationName (relation chain is not correct).", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
-	 * This means that the relations that build up the relation sequence of the portal do not fit together properly. At some point in the 
+	 * This means that the relations that build up the relation sequence of the portal do not fit together properly. At some point in the
 	 * sequence two relations are joined, but not on the same table.
 	 */
 	public static ServoyMarker FormPortalNamedInvalidRelationName = new ServoyMarker("Portal \"{0}\" has invalid relationName (relation chain not correct).", //$NON-NLS-1$

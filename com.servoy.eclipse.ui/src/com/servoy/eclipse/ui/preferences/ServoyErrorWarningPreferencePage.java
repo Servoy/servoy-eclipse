@@ -65,11 +65,11 @@ import com.servoy.j2db.util.Pair;
 /**
  * Preference page that lets the user configure the type of Servoy problem markers (IGNORE, INFO, ERROR, WARNING).
  * This is minimal, just made to resemble existing Error/Warnings page.
- * 
+ *
  * When we need to extend this to work as JS Error/Warnings page does with project/workspace settings and more marker types (SVY-75),
  * have a look at jdt implementation or at org.eclipse.dltk.javascript.internal.ui.preferences.JavaScriptErrorWarningPreferencePage (should be pretty reusable - it's a lot of copy paste from jdt as well)
  * and rewrite it based on that.
- * 
+ *
  * @author acostescu
  */
 public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferencePage implements IWorkbenchPreferencePage, IWorkbenchPropertyPage
@@ -492,6 +492,7 @@ public class ServoyErrorWarningPreferencePage extends WorkspaceOrProjectPreferen
 				Messages.ErrorWarningPreferencePage_formDerivedFormRedefinedVariable, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_DUPLICATE_PART,
 				Messages.ErrorWarningPreferencePage_formDuplicatePart, false));
+			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_NO_PARTS, Messages.ErrorWarningPreferencePage_formNoParts, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_EDITABLE_COMBOBOX_CUSTOM_VALUELIST,
 				Messages.ErrorWarningPreferencePage_formEditableComboboxCustomValuelist, false));
 			associatedProblemMarkers.add(new ErrorWarningPreferenceItem(ServoyBuilder.FORM_EXTENDS_CYCLE, Messages.ErrorWarningPreferencePage_formExtendsCycle,
