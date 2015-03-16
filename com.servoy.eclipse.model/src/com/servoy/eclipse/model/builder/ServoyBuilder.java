@@ -302,6 +302,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE = _PREFIX + ".labelForElementProblem";
 	public static final String INVALID_MOBILE_MODULE_MARKER_TYPE = _PREFIX + ".invalidMobileModuleProblem";
 	public static final String FORM_DUPLICATE_PART_MARKER_TYPE = _PREFIX + ".formDuplicatePart";
+	public static final String FORM_NO_PARTS_MARKER_TYPE = _PREFIX + ".formNoParts"; //$NON-NLS-1$
 	public static final String DEPRECATED_SCRIPT_ELEMENT_USAGE = _PREFIX + ".deprecatedScriptElementUsage";
 	public static final String METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE = _PREFIX + ".methodNumberOfArgsMismatch";
 	public static final String SERVER_CLONE_CYCLE_TYPE = _PREFIX + ".serverCloneCycle";
@@ -478,6 +479,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> TAB_SEQUENCE_NOT_SET = new Pair<String, ProblemSeverity>("tabpanelTabSequenceNotSet",
 		ProblemSeverity.INFO);
+	public final static Pair<String, ProblemSeverity> FORM_NO_PARTS = new Pair<String, ProblemSeverity>("formNoParts", ProblemSeverity.ERROR); //$NON-NLS-1$
 
 	// relations related
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
@@ -1790,6 +1792,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE);
 		deleteMarkers(project, SERVER_CLONE_CYCLE_TYPE);
 		deleteMarkers(project, DEPRECATED_ELEMENT_USAGE);
+		deleteMarkers(project, FORM_NO_PARTS_MARKER_TYPE);
 
 		try
 		{
@@ -2916,6 +2919,22 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								}
 							}
 
+							//if it has elements, it must have at least one part or extend a form which has a part
+							if (form.getAllObjects().hasNext())
+							{
+								Form f = form;
+								boolean hasPart = false;
+								while (!(hasPart = f.getParts().hasNext()) && f.getExtendsID() > 0)
+								{
+									f = formFlattenedSolution.getForm(f.getExtendsID());
+								}
+								if (!hasPart)
+								{
+									ServoyMarker mk = MarkerMessages.FormNoParts.fill(form.getName());
+									addMarker(project, mk.getType(), mk.getText(), -1, FORM_NO_PARTS, IMarker.PRIORITY_NORMAL, null, form);
+								}
+							}
+
 							// check to see if there are too many portals/tab panels for an acceptable slow WAN SC deployment
 							int portalAndTabPanelCount = 0;
 							// check to see if there are too many columns in a table view form (that could result in poor WC performance when selecting rows for example)
@@ -3537,7 +3556,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								case IRepository.GRAPHICALCOMPONENTS :
 								case IRepository.PARTS :
 								case IRepository.FIELDS :
-								case IRepository.LAYOUTCONTAINERS :
 									break;
 								default :
 									addBadStructureMarker(o, servoyProject, project);
@@ -5428,7 +5446,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				type.equals(INVALID_SORT_OPTION) || type.equals(EVENT_METHOD_MARKER_TYPE) || type.equals(PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE) ||
 				type.equals(INVALID_EVENT_METHOD) || type.equals(MISSING_STYLE) || type.equals(INVALID_COMMAND_METHOD) || type.equals(INVALID_DATAPROVIDERID) ||
 				type.equals(OBSOLETE_ELEMENT) || type.equals(HIDDEN_TABLE_STILL_IN_USE) || type.equals(LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE) ||
-				type.equals(FORM_DUPLICATE_PART_MARKER_TYPE))
+				type.equals(FORM_DUPLICATE_PART_MARKER_TYPE) || type.equals(FORM_NO_PARTS_MARKER_TYPE))
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString());
 				marker.setAttribute("SolutionName", resource.getName());

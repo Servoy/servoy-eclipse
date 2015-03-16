@@ -648,6 +648,17 @@
             type="com.servoy.eclipse.core.servoyProblem">
       </super>
    </extension>
+   <extension
+         id="com.servoy.eclipse.core.formNoParts"
+         name="Form does not have any parts and does not extend a form which has parts."
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="com.servoy.eclipse.core.servoyProblem">
+      </super>
+   </extension>
     <extension
          id="com.servoy.eclipse.core.reservedWindowObjectUsageProblem"
          name="Reserved browser window object usage"
