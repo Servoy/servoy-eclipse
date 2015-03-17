@@ -59,7 +59,6 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
@@ -746,44 +745,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return list;
 	}
 
-	/**
-	 * @return
-	 */
-	private Object[] createComponentsFiles(String folder_name, UserNodeType nodeType)
-	{
-		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
-		ServoyProject initialActiveProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		ServoyResourcesProject resourcesProject = initialActiveProject.getResourcesProject();
-		IProject project = resourcesProject.getProject();
-
-		IFolder folder = project.getFolder(folder_name);
-		if (folder.exists())
-		{
-			IResource[] members;
-			try
-			{
-				members = folder.members();
-
-				for (IResource iResource : members)
-				{
-					String name = iResource.getName();
-					if (iResource.getType() == IResource.FILE)
-					{
-						IFile fileResource = (IFile)iResource;
-						name = name.substring(0, name.length() - (fileResource.getFileExtension().length() + 1));
-					}
-
-					UserNode node = new UserNode(name, nodeType, iResource, null);
-					dlm.add(node);
-				}
-			}
-			catch (CoreException e)
-			{
-				e.printStackTrace();
-			}
-		}
-		return dlm.toArray();
-	}
 
 	private List<IPersist> getPersists(Solution solution, UserNodeType type, String scopeName)
 	{
