@@ -301,7 +301,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE = _PREFIX + ".labelForElementProblem"; //$NON-NLS-1$
 	public static final String INVALID_MOBILE_MODULE_MARKER_TYPE = _PREFIX + ".invalidMobileModuleProblem"; //$NON-NLS-1$
 	public static final String FORM_DUPLICATE_PART_MARKER_TYPE = _PREFIX + ".formDuplicatePart"; //$NON-NLS-1$
-	public static final String FORM_NO_PARTS_MARKER_TYPE = _PREFIX + ".formNoParts"; //$NON-NLS-1$
 	public static final String DEPRECATED_SCRIPT_ELEMENT_USAGE = _PREFIX + ".deprecatedScriptElementUsage"; //$NON-NLS-1$
 	public static final String METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE = _PREFIX + ".methodNumberOfArgsMismatch"; //$NON-NLS-1$
 	public static final String SERVER_CLONE_CYCLE_TYPE = _PREFIX + ".serverCloneCycle"; //$NON-NLS-1$
@@ -331,7 +330,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> DATAPROVIDER_MISSING_CONVERTER = new Pair<String, ProblemSeverity>(
 		"dataproviderMissingConverter", ProblemSeverity.WARNING); //$NON-NLS-1$
 
-	// problems with resource projects
+	// problems with resource projects 
 	public final static Pair<String, ProblemSeverity> REFERENCES_TO_MULTIPLE_RESOURCES = new Pair<String, ProblemSeverity>(
 		"referencesToMultipleResources", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> NO_RESOURCE_REFERENCE = new Pair<String, ProblemSeverity>("noResourceReference", ProblemSeverity.ERROR); //$NON-NLS-1$
@@ -340,7 +339,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> SERVER_MISSING_DRIVER = new Pair<String, ProblemSeverity>("severMissingDriver", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> SERVER_CLONE_CYCLE = new Pair<String, ProblemSeverity>("serverCloneCycle", ProblemSeverity.WARNING); //$NON-NLS-1$
 
-	// login problems
+	// login problems 
 	public final static Pair<String, ProblemSeverity> LOGIN_FORM_WITH_DATASOURCE_IN_LOGIN_SOLUTION = new Pair<String, ProblemSeverity>(
 		"formWithDatasourceInLoginSolution", ProblemSeverity.WARNING); //$NON-NLS-1$
 
@@ -456,7 +455,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> FORM_PROPERTY_METHOD_NOT_ACCESIBLE = new Pair<String, ProblemSeverity>(
 		"formPropertyMethodNotAccessible", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> FORM_TABPANEL_TAB_IMAGE_TOO_LARGE = new Pair<String, ProblemSeverity>(
-		"formTabPanelTabImageTooLarge", ProblemSeverity.WARNING); //$NON-NLS-1$
+		"formTabPanelTabImageTooLarge", ProblemSeverity.WARNING); //$NON-NLS-1$	
 	public final static Pair<String, ProblemSeverity> FORM_RELATED_TAB_DIFFERENT_TABLE = new Pair<String, ProblemSeverity>(
 		"formRelatedTabDifferentTable", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> FORM_RELATED_TAB_UNSOLVED_RELATION = new Pair<String, ProblemSeverity>(
@@ -478,13 +477,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		"methodNumberOfArgsMismatch", ProblemSeverity.WARNING); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> TAB_SEQUENCE_NOT_SET = new Pair<String, ProblemSeverity>(
 		"tabpanelTabSequenceNotSet", ProblemSeverity.INFO); //$NON-NLS-1$
-	public final static Pair<String, ProblemSeverity> FORM_NO_PARTS = new Pair<String, ProblemSeverity>("formNoParts", ProblemSeverity.ERROR); //$NON-NLS-1$
 
 	// relations related
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
 		"relationPrimaryServerWithProblems", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> RELATION_SERVER_DUPLICATE = new Pair<String, ProblemSeverity>(
-		"relationServerDuplicate", ProblemSeverity.WARNING); //$NON-NLS-1$
+		"relationServerDuplicate", ProblemSeverity.WARNING); //$NON-NLS-1$ 
 	public final static Pair<String, ProblemSeverity> RELATION_TABLE_NOT_FOUND = new Pair<String, ProblemSeverity>(
 		"relationTableNotFound", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> RELATION_TABLE_WITHOUT_PK = new Pair<String, ProblemSeverity>(
@@ -1079,7 +1077,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				parents.add(new Pair<String, ISupportChilds>(scopeName, persist.getParent()));
 			}
 		}
-		//Table entities
+		//Table entities 
 		/*
 		 * private static final Integer TABLE_CALCULATION_DUPLICATION = Integer.valueOf(6); private static final Integer TABLE_AGREGATION_DUPLICATION =
 		 * Integer.valueOf(7); private static final Integer TABLE_SCRIPT_METHOD_DUPLICATION = Integer.valueOf(8);
@@ -1140,7 +1138,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											duplicateScriptCalculation);
 									}
 									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
-										"table calculation ", entityName, tableNode.getParent() + "  on table  " + tableNode.getDataSource()); //$NON-NLS-1$
+										"table calculation ", entityName, tableNode.getParent() + "  on table  " + tableNode.getDataSource()); //$NON-NLS-1$								
 									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 										persist);
 								}
@@ -1159,7 +1157,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											duplicateAggregate);
 									}
 									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
-										"aggregate variable", entityName, tableNode.getParent() + "  on table  " + tableNode.getDataSource()); //$NON-NLS-1$
+										"aggregate variable", entityName, tableNode.getParent() + "  on table  " + tableNode.getDataSource()); //$NON-NLS-1$								
 									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 										persist);
 								}
@@ -1177,7 +1175,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											duplicateFoundSetMethod);
 									}
 									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill(
-										"table method", entityName, tableNode.getParent() + "  on table  " + tableNode.getDataSource()); //$NON-NLS-1$
+										"table method", entityName, tableNode.getParent() + "  on table  " + tableNode.getDataSource()); //$NON-NLS-1$								
 									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 										persist);
 								}
@@ -1265,7 +1263,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 									duplicatePersist);
 
-								mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(), ((Form)persist).getName()); //$NON-NLS-1$
+								mk = MarkerMessages.DuplicateEntityFound.fill("form element", ((ISupportName)o).getName(), ((Form)persist).getName()); //$NON-NLS-1$								
 								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, o);
 							}
 						}
@@ -1325,7 +1323,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 											duplicateRelation);
 									}
-									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("relation", name, solution.getName()); //$NON-NLS-1$
+									ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("relation", name, solution.getName()); //$NON-NLS-1$								
 									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 										persist);
 								}
@@ -1339,7 +1337,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 										duplicateValuelist);
 								}
-								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("valuelist", name, solution.getName()); //$NON-NLS-1$
+								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("valuelist", name, solution.getName()); //$NON-NLS-1$								
 								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
 							}
 							else if (persist instanceof Media)
@@ -1351,7 +1349,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null,
 										duplicateMedia);
 								}
-								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("media", name, solution.getName()); //$NON-NLS-1$
+								ServoyMarker mk = MarkerMessages.DuplicateEntityFound.fill("media", name, solution.getName()); //$NON-NLS-1$								
 								addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_DUPLICATE_ENTITY_FOUND, IMarker.PRIORITY_NORMAL, null, persist);
 							}
 						}
@@ -1779,7 +1777,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, MISSING_CONVERTER);
 		deleteMarkers(project, LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE);
 		deleteMarkers(project, FORM_DUPLICATE_PART_MARKER_TYPE);
-		deleteMarkers(project, FORM_NO_PARTS_MARKER_TYPE);
 		deleteMarkers(project, METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE);
 		deleteMarkers(project, SERVER_CLONE_CYCLE_TYPE);
 		deleteMarkers(project, DEPRECATED_ELEMENT_USAGE);
@@ -2053,8 +2050,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														null, o);
 													marker.setAttribute("Uuid", o.getUUID().toString()); //$NON-NLS-1$
 													marker.setAttribute("SolutionName", elementName); //$NON-NLS-1$
-													marker.setAttribute("PropertyName", element.getName()); //$NON-NLS-1$
-													marker.setAttribute("DisplayName", RepositoryHelper.getDisplayName(element.getName(), o.getClass())); //$NON-NLS-1$
+													marker.setAttribute("PropertyName", element.getName()); //$NON-NLS-1$ 
+													marker.setAttribute("DisplayName", RepositoryHelper.getDisplayName(element.getName(), o.getClass())); //$NON-NLS-1$ 
 													addMarker = false;
 												}
 												else
@@ -2744,7 +2741,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									table = form.getTable();
 									if (table != null && !table.getExistInDB())
 									{
-										// the table was probably deleted - update the form table as well
+										// the table was probably deleted - update the form table as well 
 										form.clearTable();
 										table = form.getTable();
 									}
@@ -2896,22 +2893,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									{
 										parts.put(Integer.valueOf(part.getPartType()), Boolean.TRUE);
 									}
-								}
-							}
-
-							//if it has elements, it must have at least one part or extend a form which has a part
-							if (form.getFormElementsSortedByFormIndex().hasNext())
-							{
-								Form f = form;
-								boolean hasPart = false;
-								while (!(hasPart = f.getParts().hasNext()) && f.getExtendsID() > 0)
-								{
-									f = formFlattenedSolution.getForm(f.getExtendsID());
-								}
-								if (!hasPart)
-								{
-									ServoyMarker mk = MarkerMessages.FormNoParts.fill(form.getName());
-									addMarker(project, mk.getType(), mk.getText(), -1, FORM_NO_PARTS, IMarker.PRIORITY_NORMAL, null, form);
 								}
 							}
 
@@ -3698,7 +3679,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	/**
 	 * Checks the state of a valueList, and is able to automatically correct a few problems - but with the possibility of loosing info.
-	 *
+	 * 
 	 * @param vl the valueList to be checked.
 	 * @param flattenedSolution the flattened solution used to get relations if needed.
 	 * @param sm the server manager to use.
@@ -4946,23 +4927,23 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		String elementName = null;
 		if (persist instanceof Form)
 		{
-			elementName = "Form";//$NON-NLS-1$
+			elementName = "Form";//$NON-NLS-1$ 
 		}
 		else if (persist instanceof Relation)
 		{
-			elementName = "Relation";//$NON-NLS-1$
+			elementName = "Relation";//$NON-NLS-1$ 
 		}
 		else if (persist instanceof ValueList)
 		{
-			elementName = "Valuelist";//$NON-NLS-1$
+			elementName = "Valuelist";//$NON-NLS-1$ 
 		}
 		else
 		{
-			elementName = "Element";//$NON-NLS-1$
+			elementName = "Element";//$NON-NLS-1$ 
 		}
 		String name = null;
 		if (persist instanceof ISupportName) name = ((ISupportName)persist).getName();
-		StringTokenizer tk = new StringTokenizer(sortOptions, ",");//$NON-NLS-1$
+		StringTokenizer tk = new StringTokenizer(sortOptions, ",");//$NON-NLS-1$ 
 		while (tk.hasMoreTokens())
 		{
 			String columnName = null;
@@ -5160,7 +5141,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							String foreignColumn = item.getForeignColumnName();
 							IDataProvider dataProvider = null;
 							IDataProvider column = null;
-							if (primaryDataProvider == null || "".equals(primaryDataProvider))//$NON-NLS-1$
+							if (primaryDataProvider == null || "".equals(primaryDataProvider))//$NON-NLS-1$ 
 							{
 								mk = MarkerMessages.RelationItemNoPrimaryDataprovider.fill(element.getName());
 								errorsFound = true;
@@ -5205,7 +5186,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									}
 								}
 							}
-							if (foreignColumn == null || "".equals(foreignColumn))//$NON-NLS-1$
+							if (foreignColumn == null || "".equals(foreignColumn))//$NON-NLS-1$ 
 							{
 								mk = MarkerMessages.RelationItemNoForeignDataprovider.fill(element.getName());
 								errorsFound = true;
@@ -5417,7 +5398,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				type.equals(INVALID_SORT_OPTION) || type.equals(EVENT_METHOD_MARKER_TYPE) || type.equals(PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE) ||
 				type.equals(INVALID_EVENT_METHOD) || type.equals(MISSING_STYLE) || type.equals(INVALID_COMMAND_METHOD) || type.equals(INVALID_DATAPROVIDERID) ||
 				type.equals(OBSOLETE_ELEMENT) || type.equals(HIDDEN_TABLE_STILL_IN_USE) || type.equals(LABEL_FOR_ELEMENT_NOT_FOUND_MARKER_TYPE) ||
-				type.equals(FORM_DUPLICATE_PART_MARKER_TYPE) || type.equals(FORM_NO_PARTS_MARKER_TYPE))
+				type.equals(FORM_DUPLICATE_PART_MARKER_TYPE))
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString()); //$NON-NLS-1$
 				marker.setAttribute("SolutionName", resource.getName()); //$NON-NLS-1$
@@ -5445,7 +5426,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		return null;
 	}
 
-	// Extensions that want to add marker attributes based on persists will do that here (for example preferred editor to open).
+	// Extensions that want to add marker attributes based on persists will do that here (for example preferred editor to open). 
 	private static void addExtensionMarkerAttributes(IMarker marker, IPersist persist)
 	{
 		if (markerContributors == null)
