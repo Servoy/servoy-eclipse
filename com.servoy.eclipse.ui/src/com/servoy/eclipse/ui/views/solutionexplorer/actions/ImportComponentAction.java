@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -35,6 +36,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 
@@ -46,6 +48,7 @@ import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -72,7 +75,7 @@ public class ImportComponentAction extends Action
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	@Override
@@ -95,6 +98,15 @@ public class ImportComponentAction extends Action
 		if (fileNames == null || fileNames.length == 0)
 		{
 			return;
+		}
+		Set<String> defaultPackageNames = ResourceProvider.getDefaultPackageNames();
+		for (String fName : fileNames)
+		{
+			if (defaultPackageNames.contains(fName.split("\\.")[0]))
+			{
+				MessageDialog.openError(UIUtils.getActiveShell(), "Error", fName + " is a default " + entity + "s package.");
+				return;
+			}
 		}
 		overrideReturnCode = IDialogConstants.YES_TO_ALL_ID;
 

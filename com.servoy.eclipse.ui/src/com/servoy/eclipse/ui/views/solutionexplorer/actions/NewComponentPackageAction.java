@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -43,12 +44,15 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.sablo.specification.WebComponentPackageSpecification;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
@@ -213,6 +217,7 @@ public class NewComponentPackageAction extends Action
 
 	private boolean isNameValid(PlatformSimpleUserNode node)
 	{
+		Collection<WebComponentPackageSpecification<WebComponentSpecification>> packages = null;
 		if (node.getType() == UserNodeType.SERVICES)
 		{
 			if (!packageName.toLowerCase().endsWith("services"))
@@ -220,16 +225,24 @@ public class NewComponentPackageAction extends Action
 				MessageDialog.openError(shell, getText(), "Service package names must end with \"services\"");
 				return false;
 			}
+			packages = WebServiceSpecProvider.getInstance().getWebServiceSpecifications().values();
 		}
-		if (node.children != null)
+		else
 		{
-			for (SimpleUserNode n : node.children)
+			packages = WebComponentSpecProvider.getInstance().getWebComponentSpecifications().values();
+		}
+		for (WebComponentPackageSpecification<WebComponentSpecification> p : packages)
+		{
+			if (p.getPackageName().equals(packageName))
 			{
-				if (n.getName().equals(packageDisplayName))
-				{
-					MessageDialog.openError(shell, getText(), "A package with display name " + packageDisplayName + " already exists in " + node.getName());
-					return false;
-				}
+				MessageDialog.openError(shell, getText(), "A " + node.getName().toLowerCase() + " package with name " + packageName + " already exists.");
+				return false;
+			}
+			if (p.getPackageDisplayname().equals(packageDisplayName))
+			{
+				MessageDialog.openError(shell, getText(), "A " + node.getName().toLowerCase() + " package with display name " + packageDisplayName +
+					" already exists.");
+				return false;
 			}
 		}
 		return true;
