@@ -43,11 +43,11 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormatPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGColorPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.NGConversions.IDesignToFormElement;
 import com.servoy.j2db.server.ngclient.property.types.NGDimensionPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGFontPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGInsetsPropertyType;
@@ -139,10 +139,6 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		}
 
 		IPropertyType< ? > type = propertyDescription.getType();
-		if (type == FoundsetPropertyType.INSTANCE)
-		{
-			return value;
-		}
 		if (type == FunctionPropertyType.INSTANCE || type == ServoyFunctionPropertyType.INSTANCE || type == ValueListPropertyType.INSTANCE ||
 			type == FormPropertyType.INSTANCE)
 		{
@@ -157,7 +153,10 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 
 			return Integer.valueOf(-1);
 		}
-
+		if (!(type instanceof IDesignToFormElement))
+		{
+			return value;
+		}
 		if (value == null)
 		{
 			if (propertyDescription.getDefaultValue() != null)
