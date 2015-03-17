@@ -59,6 +59,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebComponentSpecification;
 
 import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
@@ -69,17 +71,20 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.views.IndexedListViewer;
 import com.servoy.eclipse.ui.views.IndexedStructuredSelection;
+import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.server.ngclient.property.types.NGTabSeqPropertyType;
+import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.SortedList;
 
 /**
  * Tab in form editor for managing tab sequences.
- * 
+ *
  * @author rgansevles
  */
 
@@ -385,6 +390,18 @@ public class VisualFormEditorTabSequencePage extends Composite
 		for (int i = 0; iterator.hasNext(); i++)
 		{
 			ISupportTabSeq tabSeq = iterator.next();
+			if (tabSeq instanceof Bean)
+			{
+				if (FormTemplateGenerator.isWebcomponentBean((Bean)tabSeq))
+				{
+					WebComponentSpecification specification = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+						((Bean)tabSeq).getBeanClassName());
+					if (specification.getProperties(NGTabSeqPropertyType.NG_INSTANCE).size() < 1)
+					{
+						continue;
+					}
+				}
+			}
 			if ((tabSeq).getTabSeq() >= 0)
 			{
 				selected.add(tabSeq);
@@ -439,7 +456,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 
 	/**
 	 * Create a command for saving the tab sequences, return null if there is nothing to save.
-	 * 
+	 *
 	 * @param tabSeqs
 	 * @param label
 	 * @return
@@ -489,7 +506,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 
 	/**
 	 * Execute a command on the command stack and refresh the views.
-	 * 
+	 *
 	 * @param command
 	 */
 	protected void executeCommand(Command command)
