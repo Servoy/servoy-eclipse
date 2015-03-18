@@ -427,4 +427,15 @@
               type="org.eclipse.core.resources.problemmarker">
         </super>
      </extension>
+     <extension
+           id="com.servoy.eclipse.debug.DUPLICATE_COMPONENT_MARKER"
+           name="Duplicate component/service package"
+           point="org.eclipse.core.resources.markers">
+        <persistent
+              value="false">
+        </persistent>
+        <super
+              type="org.eclipse.core.resources.problemmarker">
+        </super>
+     </extension>
 </plugin>

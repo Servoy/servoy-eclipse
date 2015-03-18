@@ -53,6 +53,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.sablo.specification.WebComponentPackage;
 import org.sablo.specification.WebComponentPackage.DirPackageReader;
+import org.sablo.specification.WebComponentPackage.DuplicatePackageException;
 import org.sablo.specification.WebComponentPackage.IPackageReader;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
@@ -90,6 +91,10 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	private IActiveProjectListener activeProjectListenerForRegisteringResources;
 	private Job registerResourcesJob;
+
+	private static final String DUPLICATE_COMPONENT_MARKER = "com.servoy.eclipse.debug.DUPLICATE_COMPONENT_MARKER";
+	private static final String SPEC_READ_MARKER = "com.servoy.eclipse.debug.SPEC_READ_MARKER";
+
 
 	/**
 	 * The constructor
@@ -251,6 +256,28 @@ public class Activator extends AbstractUIPlugin implements IStartup
 						ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 						if (activeResourcesProject != null)
 						{
+							try
+							{
+								IFolder components = activeResourcesProject.getProject().getFolder(SolutionSerializer.COMPONENTS_DIR_NAME);
+								if (components != null && components.exists())
+								{
+									components.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+									components.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_INFINITE);
+									components.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+								}
+								IFolder services = activeResourcesProject.getProject().getFolder(SolutionSerializer.SERVICES_DIR_NAME);
+								if (services != null && services.exists())
+								{
+									services.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+									services.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_INFINITE);
+									services.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+								}
+							}
+							catch (CoreException e)
+							{
+								ServoyLog.logError(e);
+							}
+
 							if (!Boolean.FALSE.equals(component))
 							{
 								if (componentReaders.size() > 0)
@@ -315,7 +342,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 								}
 								else if (resource instanceof IFile)
 								{
-									readers.put(name, new WebComponentPackage.JarPackageReader(new File(resource.getRawLocationURI())));
+									readers.put(name, new FilePackageReader(resource));
 								}
 							}
 						}
@@ -410,6 +437,54 @@ public class Activator extends AbstractUIPlugin implements IStartup
 		return shortcuts;
 	}
 
+	private static void addErrorMarker(IResource resource, Exception e)
+	{
+		try
+		{
+			IMarker marker = null;
+			if (e instanceof DuplicatePackageException)
+			{
+				resource.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_ONE);
+				marker = resource.createMarker(DUPLICATE_COMPONENT_MARKER);
+			}
+			else
+			{
+				marker = resource.createMarker(SPEC_READ_MARKER);
+			}
+			marker.setAttribute(IMarker.MESSAGE, e.getMessage());
+			marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+			marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
+			marker.setAttribute(IMarker.LOCATION, resource.getLocation().toString());
+		}
+		catch (CoreException ex)
+		{
+			ServoyLog.logError(ex);
+		}
+	}
+
+	private class FilePackageReader extends WebComponentPackage.JarPackageReader
+	{
+		private final IResource resource;
+
+		public FilePackageReader(IResource resource)
+		{
+			super(new File(resource.getRawLocationURI()));
+			this.resource = resource;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.sablo.specification.WebComponentPackage.JarPackageReader#reportError(java.lang.String, java.lang.Exception)
+		 */
+		@Override
+		public void reportError(String specpath, Exception e)
+		{
+			super.reportError(specpath, e);
+			addErrorMarker(resource, e);
+		}
+	}
+
 	public static class ShortcutDefinition
 	{
 
@@ -428,7 +503,6 @@ public class Activator extends AbstractUIPlugin implements IStartup
 
 	public static class FolderPackageReader extends DirPackageReader
 	{
-		private final static String MARKER = "com.servoy.eclipse.debug.SPEC_READ_MARKER";
 		private final IFolder folder;
 
 		public FolderPackageReader(File dir, IFolder folder)
@@ -443,7 +517,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			IFile file = folder.getFile("META-INF/MANIFEST.MF");
 			try
 			{
-				file.deleteMarkers(MARKER, false, IResource.DEPTH_ONE);
+				file.deleteMarkers(SPEC_READ_MARKER, false, IResource.DEPTH_ONE);
 			}
 			catch (CoreException e)
 			{
@@ -455,25 +529,14 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			}
 			catch (IOException ex)
 			{
-				try
-				{
-					IMarker marker = file.createMarker(MARKER);
-					marker.setAttribute(IMarker.MESSAGE, ex.getMessage());
-					marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-					marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
-					marker.setAttribute(IMarker.LOCATION, file.getLocation().toString());
-				}
-				catch (CoreException e)
-				{
-					ServoyLog.logError(e);
-				}
+				addErrorMarker(file, ex);
 				throw ex;
 			}
 		}
 
 		/*
 		 * (non-Javadoc)
-		 *
+		 * 
 		 * @see org.sablo.specification.WebComponentPackage.DirPackageReader#readTextFile(java.lang.String, java.nio.charset.Charset)
 		 */
 		@Override
@@ -484,7 +547,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			{
 				try
 				{
-					file.deleteMarkers(MARKER, false, IResource.DEPTH_ONE);
+					file.deleteMarkers(SPEC_READ_MARKER, false, IResource.DEPTH_ONE);
 				}
 				catch (CoreException e)
 				{
@@ -498,25 +561,7 @@ public class Activator extends AbstractUIPlugin implements IStartup
 		public void reportError(String specpath, Exception e)
 		{
 			super.reportError(specpath, e);
-			IFile file = folder.getFile(specpath);
-			if (file != null)
-			{
-				try
-				{
-					IMarker marker = file.createMarker(MARKER);
-					marker.setAttribute(IMarker.MESSAGE, e.getMessage());
-					marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-					marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
-					marker.setAttribute(IMarker.LOCATION, file.getLocation().toString());
-				}
-				catch (CoreException ex)
-				{
-					ServoyLog.logError(ex);
-				}
-			}
+			addErrorMarker(e instanceof DuplicatePackageException ? folder : folder.getFile(specpath), e);
 		}
-
 	}
-
-
 }
