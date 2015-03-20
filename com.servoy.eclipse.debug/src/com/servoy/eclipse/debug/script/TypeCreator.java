@@ -1070,7 +1070,7 @@ public class TypeCreator extends TypeCache
 	 */
 	private void extractApiDocs(WebComponentSpecification spec)
 	{
-		if (spec.getApiFunctions().size() > 0)
+		if (spec.getApiFunctions().size() > 0 && spec.getDefinitionURL() != null)
 		{
 			final Map<String, WebComponentApiDefinition> apis = spec.getApiFunctions();
 			try
