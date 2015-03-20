@@ -707,7 +707,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			$editorService.registerEditor($scope);
 			$editorService.connect().then(function() {
 				var replacews = $webSocket.getURLParameter("replacewebsocket") ? "&replacewebsocket=true" : "";
-				$scope.contentframe = "content/editor-content.html?id=%23" + $element.attr("id")+ "&windowname=" +formName + "&f=" +formName +"&s=" + $webSocket.getURLParameter("s") + replacews;
+				$scope.contentframe = "content/editor-content.html?id=%23" + $element.attr("id") + "&sessionid=" + $webSocket.getURLParameter("c_sessionid")+ "&windowname=" +formName + "&f=" +formName +"&s=" + $webSocket.getURLParameter("s") + replacews;
 			})
 		},
 		templateUrl: 'templates/editor.html',

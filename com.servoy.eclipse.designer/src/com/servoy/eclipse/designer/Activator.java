@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.swing.ImageIcon;
 
@@ -106,6 +107,11 @@ public class Activator extends AbstractUIPlugin
 	private final Map<String, ImageIcon> imageIcons = new HashMap<String, ImageIcon>();
 
 	private DesignNGClient client = null;
+
+	/**
+	 * A unique editor content session id. Making sure we reuse the session across editors.
+	 */
+	public final UUID contentSessionUniqueID = UUID.randomUUID();
 
 	/**
 	 * The constructor
