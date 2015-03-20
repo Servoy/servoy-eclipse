@@ -51,7 +51,7 @@ import com.servoy.j2db.util.Utils;
 /**
  * Sequence provider that always looks in the db when computing next sequence. Has no ties to the repository db. Only uses column info manager to update column
  * info & the column infos from the Column itself + SQL queries to compute next sequence.
- * 
+ *
  * @author acostescu
  */
 public class EclipseSequenceProvider implements ISequenceProvider
@@ -63,7 +63,7 @@ public class EclipseSequenceProvider implements ISequenceProvider
 
 	/**
 	 * Creates a new instance that uses the specified manager to save column info data.
-	 * 
+	 *
 	 * @param columnInfoManager manager to save column info data.
 	 */
 	public EclipseSequenceProvider(IColumnInfoManager columnInfoManager)
@@ -106,7 +106,7 @@ public class EclipseSequenceProvider implements ISequenceProvider
 				QuerySet querySet = tableServer.getSQLQuerySet(select, null, 0, -1, false);
 				String maxSeqSelect = querySet.getSelect().getSql();
 
-				// in case one of the debug clients has a transaction started on this server, exectute the query inside that transaction
+				// in case one of the debug clients has a transaction started on this server, execute the query inside that transaction
 				// (otherwise the query will block)
 
 				String clientId = ApplicationServerSingleton.get().getClientId();
@@ -117,7 +117,8 @@ public class EclipseSequenceProvider implements ISequenceProvider
 				{
 					// in case switchServer was called tableServer will be new_server because DataServerProxy was called
 					String possibleMappedServerName = update && (client.getDataServer() instanceof DataServerProxy)
-						? ((DataServerProxy)client.getDataServer()).getReverseMappedServerName(tableServer.getName()) : tableServer.getName();
+						? ((DataServerProxy)client.getDataServer()).getReverseMappedServerNames(tableServer.getName()).iterator().next()
+						: tableServer.getName();
 					tid = client.getFoundSetManager().getTransactionID(possibleMappedServerName);
 					clientId = client.getClientID();
 				}
