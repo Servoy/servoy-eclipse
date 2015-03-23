@@ -1087,14 +1087,17 @@ public class TypeCreator extends TypeCache
 						@Override
 						public ASTNode visitBinaryOperation(BinaryOperation node)
 						{
-							if (node.getOperationText().trim().equals("=") && node.getLeftExpression() instanceof PropertyExpression &&
-								((PropertyExpression)node.getLeftExpression()).toString().startsWith("$scope.api"))
+							if (node.getOperationText().trim().equals("=") && node.getLeftExpression() instanceof PropertyExpression)
 							{
-								WebComponentApiDefinition api = apis.get(((PropertyExpression)node.getLeftExpression()).getProperty().toString());
-								Comment doc = node.getDocumentation();
-								if (api != null && doc != null && doc.isDocumentation())
+								String expr = ((PropertyExpression)node.getLeftExpression()).toString();
+								if (expr.startsWith("$scope.api") || expr.startsWith("scope.api"))
 								{
-									api.setDocumentation(doc.getText());
+									WebComponentApiDefinition api = apis.get(((PropertyExpression)node.getLeftExpression()).getProperty().toString());
+									Comment doc = node.getDocumentation();
+									if (api != null && doc != null && doc.isDocumentation())
+									{
+										api.setDocumentation(doc.getText());
+									}
 								}
 							}
 							return super.visitBinaryOperation(node);
@@ -1103,7 +1106,7 @@ public class TypeCreator extends TypeCache
 
 						/*
 						 * (non-Javadoc)
-						 * 
+						 *
 						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitObjectInitializer(org.eclipse.dltk.javascript.ast.
 						 * ObjectInitializer)
 						 */
@@ -1138,7 +1141,6 @@ public class TypeCreator extends TypeCache
 		}
 
 	}
-
 
 	/**
 	 * @param context
