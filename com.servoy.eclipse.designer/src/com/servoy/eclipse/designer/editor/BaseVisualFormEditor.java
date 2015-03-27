@@ -71,6 +71,7 @@ import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Style;
@@ -600,6 +601,10 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 					ServoyLog.logError(e);
 					full_refresh = true;
 				}
+			}
+			else if (changed instanceof Media && ((Media)changed).getName().toLowerCase().endsWith(".css"))
+			{
+				changedChildren.add(changed);
 			}
 			else if (changed.getTypeID() == IRepository.SOLUTIONS &&
 				!ServoyModelManager.getServoyModelManager().getServoyModel().isProjectActive(servoyProject))
