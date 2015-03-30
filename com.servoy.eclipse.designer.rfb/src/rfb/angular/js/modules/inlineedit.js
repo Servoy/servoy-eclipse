@@ -14,7 +14,7 @@ angular.module('inlineedit', ['editor']).run(function($pluginRegistry, $editorSe
 					if (model && (clickPosition.x >= model.location.x && clickPosition.x <= (model.location.x + model.size.width))
 							&& (clickPosition.y >= model.location.y && clickPosition.y <= (model.location.y + model.size.height)))
 					{
-						var directEditProperty = model["directEditPropertyName"];
+						var directEditProperty = node.getAttribute("directEditPropertyName");
 						if (directEditProperty)
 						{
 							var obj = {};
