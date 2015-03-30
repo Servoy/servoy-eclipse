@@ -68,6 +68,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.server.ngclient.INGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.WebsocketSessionFactory;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
@@ -214,8 +215,9 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		{
 			layout = newLayout;
 			Dimension formSize = flattenedForm.getSize();
-			String url = "http://localhost:8080/rfb/angular/index.html?s=" + form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" +
-				formSize.getWidth() + "&h=" + formSize.getHeight() + "&editorid=" + editorId + "&c_sessionid=" + CONTENT_SESSION_ID;
+			String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/angular/index.html?s=" +
+				form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" + formSize.getWidth() + "&h=" + formSize.getHeight() +
+				"&editorid=" + editorId + "&c_sessionid=" + CONTENT_SESSION_ID;
 			try
 			{
 				ServoyLog.logInfo("Browser url for editor: " + url);
