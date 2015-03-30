@@ -23,10 +23,12 @@ import java.util.Iterator;
 
 import org.json.JSONException;
 
+import com.servoy.base.persistence.IBaseField;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -37,17 +39,19 @@ import com.servoy.j2db.persistence.IDataProviderLookup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
 /**
  * Set of utility methods related to database operations.
- * 
+ *
  * @author acostescu
  */
 public final class DatabaseUtils
@@ -60,7 +64,7 @@ public final class DatabaseUtils
 
 	/**
 	 * Creates a new table in the database based on the contents of a .dbi file.
-	 * 
+	 *
 	 * @param server the server to which the table will be added.
 	 * @param tableName the name of the table.
 	 * @param dbiFileContent the JSON column/table info content.
@@ -115,7 +119,9 @@ public final class DatabaseUtils
 			// Warn if the table types are different.
 			if (table.getTableType() != tableInfo.tableType)
 			{
-				problems.append("WARNING! The table '" + table.getName() + " in server '" + table.getServerName() + "' has type " + Table.getTableTypeAsString(table.getTableType()) + " but in the import it has type " + Table.getTableTypeAsString(tableInfo.tableType) + ". Servoy cannot keep the datamodels synchronized automatically if you use database views, please do so manually.\n");
+				problems.append("WARNING! The table '" + table.getName() + " in server '" + table.getServerName() + "' has type " +
+					Table.getTableTypeAsString(table.getTableType()) + " but in the import it has type " + Table.getTableTypeAsString(tableInfo.tableType) +
+					". Servoy cannot keep the datamodels synchronized automatically if you use database views, please do so manually.\n");
 			}
 
 			// Iterate over all the columns of this table and add them to
@@ -151,7 +157,10 @@ public final class DatabaseUtils
 						if (!server.supportsSequenceType(sequenceType, null))
 						{
 							// Database does not support the import sequence type, default to servoy sequence.
-							problems.append("The import version of the column '" + columnInfoInfo.name + "' of table '" + tableInfo.name + "' in server '" + server.getName() + "' has '" + ColumnInfo.getSeqDisplayTypeString(sequenceType) + "' sequence type which is not supported by the database, using '" + ColumnInfo.getSeqDisplayTypeString(ColumnInfo.SERVOY_SEQUENCE) + "' sequence type instead.\n");
+							problems.append("The import version of the column '" + columnInfoInfo.name + "' of table '" + tableInfo.name + "' in server '" +
+								server.getName() + "' has '" + ColumnInfo.getSeqDisplayTypeString(sequenceType) +
+								"' sequence type which is not supported by the database, using '" +
+								ColumnInfo.getSeqDisplayTypeString(ColumnInfo.SERVOY_SEQUENCE) + "' sequence type instead.\n");
 							sequenceType = ColumnInfo.SERVOY_SEQUENCE;
 						}
 
@@ -202,8 +211,8 @@ public final class DatabaseUtils
 				Column column = table.getColumn(columnInfoDef.name);
 				if (column == null)
 				{
-					throw new RepositoryException(
-						"Column '" + columnInfoDef.name + "' in table '" + tableInfo.name + "' for server '" + server.getName() + "' does not exist and could not be created.");
+					throw new RepositoryException("Column '" + columnInfoDef.name + "' in table '" + tableInfo.name + "' for server '" + server.getName() +
+						"' does not exist and could not be created.");
 				}
 
 				// Update the column info of this table.
@@ -286,10 +295,20 @@ public final class DatabaseUtils
 		Form form = (Form)persist.getAncestor(IRepository.FORMS);
 		if (form != null)
 		{
-			IDataProviderLookup dataproviderLookup = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getDataproviderLookup(
-				null, form);
+			FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
+			IDataProviderLookup dataproviderLookup = flattenedSolution.getDataproviderLookup(null, form);
+			ValueList vl = null;
+			if (persist instanceof IBaseField)
+			{
+				int vlID = ((IBaseField)persist).getValuelistID();
+				if (vlID > 0)
+				{
+					vl = flattenedSolution.getValueList(vlID);
+				}
+			}
+
 			ComponentFormat componentFormat = null;
-			if (format != null)
+			if (format != null && vl == null)
 			{
 				componentFormat = ComponentFormat.getComponentFormat(format, dataProviderID, dataproviderLookup, Activator.getDefault().getDesignClient());
 			}
@@ -301,19 +320,60 @@ public final class DatabaseUtils
 			{
 				try
 				{
-					IDataProvider dataProvider = dataproviderLookup.getDataProvider(dataProviderID);
+					IDataProvider dataProvider = null;
+					// if it has valuelist, use the display type
+					if (vl != null)
+					{
+						ITable table;
+						if (vl.getRelationName() != null)
+						{
+							Relation[] relations = flattenedSolution.getRelationSequence(vl.getRelationName());
+							table = relations[relations.length - 1].getForeignTable();
+						}
+						else
+						{
+							table = vl.getTable();
+						}
+
+						if (table != null)
+						{
+							String dp = null;
+							int showDataProviders = vl.getShowDataProviders();
+							if (showDataProviders == 1)
+							{
+								dp = vl.getDataProviderID1();
+							}
+							else if (showDataProviders == 2)
+							{
+								dp = vl.getDataProviderID2();
+							}
+							else if (showDataProviders == 4)
+							{
+								dp = vl.getDataProviderID3();
+							}
+
+							if (dp != null)
+							{
+								dataProvider = flattenedSolution.getDataProviderForTable((Table)table, dp);
+							}
+						}
+					}
+
+					if (dataProvider == null && vl == null)
+					{
+						dataProvider = dataproviderLookup.getDataProvider(dataProviderID);
+					}
 					if (dataProvider != null)
 					{
 						type = dataProvider.getDataProviderType();
 					}
 				}
-				catch (RepositoryException re)
+				catch (Exception ex)
 				{
-					ServoyLog.logError(re);
+					ServoyLog.logError(ex);
 				}
 			}
 		}
 		return type;
 	}
-
 }
