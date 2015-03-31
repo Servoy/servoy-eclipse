@@ -12,7 +12,7 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 			function hasClass(element, cls) {
 				return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
 			}
-			function renderDecorators(selection) {
+			function renderDecorators(selection,renderResizeKnobs) {
 				if (selection.length == 1){
 					//when resizing the form, the server sends a refreshGhosts message that updates the form ghost div => the selection references a stale form ghost,
 					//we need to search for the real form ghost div
@@ -44,25 +44,32 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 					currentNode.name =  node.attr('name');
 					currentNode.node = node;
 					var ghost = $scope.getGhost(node.attr("svy-id"));
-					if(ghost) {			
-						if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_COMPONENT) 
-						{
+					if (renderResizeKnobs)
+					{
+						if(ghost) {			
+							if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_COMPONENT) 
+							{
+								currentNode.isResizable = {t:true, l:true, b:true, r:true};
+							}
+							else if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM)
+							{
+								currentNode.isResizable = {t:false, l:false, b:true, r:true};
+							}
+							else
+							{
+								currentNode.isResizable = false;
+							}
+							height = node.outerHeight();
+							width = node.outerWidth();
+						}
+						else {
 							currentNode.isResizable = {t:true, l:true, b:true, r:true};
 						}
-						else if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM)
-						{
-							currentNode.isResizable = {t:false, l:false, b:true, r:true};
-						}
-						else
-						{
-							currentNode.isResizable = false;
-						}
-						height = node.outerHeight();
-						width = node.outerWidth();
-					}
-					else {
-						currentNode.isResizable = {t:true, l:true, b:true, r:true};
-					}
+					}	
+					else
+					{
+						currentNode.isResizable = false;
+					}	
 					
 					var offset = node.offset();
 					
@@ -89,10 +96,11 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 			}
 	    	  
 			$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
-				renderDecorators(selection);
+				renderDecorators(selection,true);
 			})
 			$rootScope.$on(EDITOR_EVENTS.SELECTION_MOVED, function(event, selection) {
-				renderDecorators(selection);
+				// do not render resize knobs while selection is moving; performance optimization
+				renderDecorators(selection,false);
 			})
 	      },
 	      templateUrl: 'templates/decorators.html',
