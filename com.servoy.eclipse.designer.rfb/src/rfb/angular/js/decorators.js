@@ -72,10 +72,6 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 						offset.left -= node.parent().parent().offset().left;
 					}
 					
-					var x = (window.pageXOffset !== undefined) ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
-					var y = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
-					offset.top -= y;
-					offset.left -= x;
 					if (!hasClass(node.context,"ghost"))
 						offset = adjustForPadding(offset)
 					currentNode.style = {

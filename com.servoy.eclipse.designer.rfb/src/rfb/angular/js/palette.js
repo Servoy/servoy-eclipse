@@ -31,13 +31,18 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 				var mouseentercallback;
 				var mouseleavecallback;
 				var mouseupcallback;
-				var mousemovecallback = $scope.registerDOMEvent("mousemove","EDITOR", function(ev){
+				var mousemovecallback = $scope.registerDOMEvent("mousemove","EDITOR", function(ev){					
 					if (dragClone)
 					{
-						var css = { top: ev.pageY, left: ev.pageX }
+						var css = { top: ev.pageY, left: ev.pageX}; 
 						dragClone.css(css);
-						if (angularElement && $scope.isAbsoluteFormLayout())
-							angularElement.css($scope.convertToContentPoint(css));
+						if (angularElement && $scope.isAbsoluteFormLayout()) {
+							var x = (window.pageXOffset !== undefined) ? window.pageXOffset : document.documentElement.scrollLeft;
+							var y = (window.pageYOffset !== undefined) ? window.pageYOffset : document.documentElement.scrollTop;
+							var angularCss = { top: ev.pageY - y, left: ev.pageX - x };
+							angularElement.css($scope.convertToContentPoint(angularCss));
+						}
+
 						var canDrop = utils.getDropNode(type, topContainer,layoutName,ev);
 						if (!canDrop.dropAllowed) {
 							$scope.glasspane.style.cursor="no-drop";
@@ -62,7 +67,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						}
 					}
 					else
-					{
+					{	
 						dragClone = $(event.target).clone()
 						utils.setDraggingFromPallete(type);
 						$scope.setSelection(null);

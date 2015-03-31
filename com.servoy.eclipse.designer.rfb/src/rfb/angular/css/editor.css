@@ -22,12 +22,12 @@ body {
 
 /* Left Hand Side Panel */
 .lhs-panel {
-	position: absolute; 
-	top: 37px; 
+	position: relative;  
 	bottom: 0px;
 	left: 0px; 
 	width: 200px; 
 	padding-left: 8px;
+	display: table-cell;
 }
 
 .content {
@@ -51,13 +51,12 @@ body {
 }
 
 .content-area {
-	position: absolute;
-	top: 34px;
-	left: 200px;
-	right: 0px;
-	bottom: 0px;
+	position: relative;
+	width: 100%;
 	overflow: auto;
-	background-image: url('../images/light-raster-background.png')
+	background-image: url('../images/light-raster-background.png');
+	display: table-cell;
+	vertical-align: top;
 }
 
 .content-area.non-full {
