@@ -11,7 +11,7 @@
 		<palette class="palette lhs-panel user-selection-off" style="width: 200px"></palette>
 		
 		<!--  Editor -->
-		<div class="content-area {{ isContentSizeFull() ? '' : 'non-full' }}" tabindex="0">
+		<div class="content-area {{ isContentSizeFull() ? '' : 'non-full' }}" tabindex="0" ng-style="getContentAreaStyle()">
 		    <div class="contentframe-overlay max" style="z-index:2;background-color:rgba(255,255,255,0.01);outline:none;user-select:none;-moz-user-select: none;-webkit-user-select: none;-ms-user-select:none;" ng-style="glasspaneStyle" tabindex="0">
 		    	<div id="lasso"></div>
 		    	<div id="highlight"></div>
@@ -28,7 +28,6 @@
 				<iframe class="contentframe" ng-src="{{contentframe}}"></iframe>
 			</div>
 		</div>
-		
 		<div id="directEdit" contentEditable="true" style="position:absolute;display:none;z-index:1000;"></div>		
 		
 		<contextmenu ></contextmenu>

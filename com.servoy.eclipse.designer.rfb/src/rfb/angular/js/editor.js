@@ -90,6 +90,14 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			}
 			
 			
+			$scope.getContentAreaStyle = function() {
+				var contentAreaStyle = {};
+				if($scope.isAbsoluteFormLayout()) {
+					contentAreaStyle.minWidth = parseInt($scope.contentStyle.width, 10) + EDITOR_CONSTANTS.PART_LABEL_WIDTH + 20 + 'px';
+					contentAreaStyle.minHeight = parseInt($scope.contentStyle.height, 10) + EDITOR_CONSTANTS.PART_LABEL_HEIGHT + 20 + 'px';
+				}
+				return contentAreaStyle;
+			}
 			
 			//returns the ghost object with the specified uuid
 			$scope.getGhost = function (uuid) {
