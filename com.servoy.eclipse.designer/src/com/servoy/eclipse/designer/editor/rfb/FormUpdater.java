@@ -114,6 +114,11 @@ public class FormUpdater implements Runnable
 									bigChange = true;
 									break outer;
 								}
+								if (property.equals("displayType"))
+								{
+									bigChange = true;
+									break outer;
+								}
 								if (property.equals("editable") && newFe.getPersistIfAvailable() instanceof Field &&
 									((Field)newFe.getPersistIfAvailable()).getDisplayType() == Field.HTML_AREA)
 								{
