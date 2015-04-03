@@ -568,7 +568,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					prefix += ((ISupportName)model).getName();
 				}
 
-				if (FormTemplateGenerator.isWebcomponentBean((IPersist)model))
+				if (model instanceof IPersist && FormTemplateGenerator.isWebcomponentBean((IPersist)model))
 				{
 					lm = getWebComponentMembers(prefix, (Bean)model);
 					key = null; // for now don't cache this.
