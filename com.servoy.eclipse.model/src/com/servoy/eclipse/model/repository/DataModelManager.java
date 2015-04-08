@@ -441,7 +441,7 @@ public class DataModelManager implements IColumnInfoManager
 		catch (DbcpException ex)
 		{
 			// the initialize of servers might not be completed at this point; so we may have an invalid server
-			// don't do anything, this error should not exist 
+			// don't do anything, this error should not exist
 		}
 	}
 
@@ -630,7 +630,7 @@ public class DataModelManager implements IColumnInfoManager
 
 	/**
 	 * Will save the dbi file later or now, depending on the parameters.
-	 * 
+	 *
 	 * @param t the table.
 	 * @param writeBackLater specifies whether the column info should be updater now or later.
 	 * @throws RepositoryException
@@ -642,7 +642,7 @@ public class DataModelManager implements IColumnInfoManager
 
 	/**
 	 * Will save the dbi file later or now, depending on the parameters.
-	 * 
+	 *
 	 * @param t the table.
 	 * @param writeBackLater specifies whether the column info should be updater now or later.
 	 * @throws RepositoryException
@@ -807,7 +807,7 @@ public class DataModelManager implements IColumnInfoManager
 
 	/**
 	 * Gets the table information from a .dbi (JSON format) file like structured String.
-	 * 
+	 *
 	 * @param stringDBIContent the table information in .dbi format
 	 * @return the deserialized table information.
 	 * @throws JSONException if the structure of the JSON in String stringDBIContent is bad.
@@ -882,6 +882,7 @@ public class DataModelManager implements IColumnInfoManager
 		tableInfo.name = t.getName();
 		tableInfo.hiddenInDeveloper = t.isMarkedAsHiddenInDeveloper();
 		tableInfo.isMetaData = t.isMarkedAsMetaData();
+		tableInfo.tableType = t.getTableType();
 
 		List<String> colNames = new ArrayList<String>();
 		Collection<Column> col = t.getColumns();
@@ -913,7 +914,7 @@ public class DataModelManager implements IColumnInfoManager
 
 	/**
 	 * Puts all information about the given column into a ColumnInfoDef object, if the give column has column info.
-	 * 
+	 *
 	 * @param column the column to be inspected.
 	 * @param creationOrderIndex the creationOrderIndex for this column.
 	 * @return all information about the given column into a ColumnInfoDef object, if the give column has column info and null otherwise.
@@ -965,7 +966,7 @@ public class DataModelManager implements IColumnInfoManager
 
 	/**
 	 * Creates a .dbi (JSON format) file like structured String from the given table information.
-	 * 
+	 *
 	 * @param tableInfo the information about the table to be transformed into a JSON String.
 	 * @return the JSON representation of tableInfo.
 	 * @throws JSONException if something goes wrong with the serialize.
@@ -1806,7 +1807,7 @@ public class DataModelManager implements IColumnInfoManager
 
 	/** Get the DataModelManager installe as ColumnInfoManager in the servermanager.
 	 * @param serverManager
-	 * @param serverName 
+	 * @param serverName
 	 * @return
 	 */
 	public static DataModelManager getColumnInfoManager(IServerManagerInternal serverManager, String serverName)
