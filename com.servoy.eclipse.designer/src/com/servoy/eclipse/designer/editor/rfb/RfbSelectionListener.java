@@ -74,14 +74,6 @@ public class RfbSelectionListener implements ISelectionListener
 	}
 
 	/**
-	 * @param lastSelection the lastSelection to set
-	 */
-	public void setLastSelection(IStructuredSelection selection)
-	{
-		this.lastSelection = getPersistUUIDS(selection);
-	}
-
-	/**
 	 * @param selection
 	 * @return
 	 */

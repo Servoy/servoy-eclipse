@@ -919,7 +919,8 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 		},
 
 		updateSelection: function(ids) {
-			$timeout(function(){
+			if (editorScope.updateSel) $timeout.cancel(editorScope.updateSel);
+			editorScope.updateSel = $timeout(function(){
 				var prevSelection = editorScope.getSelection();
 				var changed = false;
 				var selection = [];
