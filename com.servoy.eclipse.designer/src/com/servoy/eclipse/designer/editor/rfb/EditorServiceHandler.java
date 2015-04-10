@@ -74,10 +74,10 @@ public class EditorServiceHandler implements IServerService
 		configuredHandlers.put("setSelection", new SetSelectionHandler(editorPart, selectionListener, selectionProvider));
 		configuredHandlers.put("setTabSequence", new SetTabSequenceCommand(editorPart, selectionProvider));
 
-		configuredHandlers.put("z_order_bring_to_front_one_step", new ZOrderCommand(editorPart, selectionProvider));
-		configuredHandlers.put("z_order_send_to_back_one_step", new ZOrderCommand(editorPart, selectionProvider));
-		configuredHandlers.put("z_order_bring_to_front", new ZOrderCommand(editorPart, selectionProvider));
-		configuredHandlers.put("z_order_send_to_back", new ZOrderCommand(editorPart, selectionProvider));
+		configuredHandlers.put("z_order_bring_to_front_one_step", new ZOrderCommand(editorPart, selectionProvider, "z_order_bring_to_front_one_step"));
+		configuredHandlers.put("z_order_send_to_back_one_step", new ZOrderCommand(editorPart, selectionProvider, "z_order_send_to_back_one_step"));
+		configuredHandlers.put("z_order_bring_to_front", new ZOrderCommand(editorPart, selectionProvider, "z_order_bring_to_front"));
+		configuredHandlers.put("z_order_send_to_back", new ZOrderCommand(editorPart, selectionProvider, "z_order_send_to_back"));
 
 		configuredHandlers.put("horizontal_spacing", new SpacingCentersPack(editorPart, selectionProvider));
 		configuredHandlers.put("vertical_spacing", new SpacingCentersPack(editorPart, selectionProvider));

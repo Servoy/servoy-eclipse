@@ -40,7 +40,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
- * @author user
+ * @author lvostinar
  *
  */
 public class ZOrderCommand extends AbstractEditorActionDelegateHandler implements IServerService
@@ -57,11 +57,11 @@ public class ZOrderCommand extends AbstractEditorActionDelegateHandler implement
 		this.methodName = methodName;
 	}
 
-	public ZOrderCommand(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider)
+	public ZOrderCommand(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider, String methodName)
 	{
 		this.editorPart = editorPart;
 		this.selectionProvider = selectionProvider;
-		this.methodName = null;
+		this.methodName = methodName;
 	}
 
 	/**
