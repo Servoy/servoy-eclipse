@@ -30,16 +30,15 @@ import org.sablo.specification.property.IPropertyType;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.rfb.GhostBean;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Tab;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -84,10 +83,10 @@ public class OpenContainedFormHandler implements IServerService
 								Debug.log("Cannot open form with id " + ((Tab)persist).getContainsFormID() + "in design editor (Tab uuid " +
 									args.getString("uuid") + ")");
 							}
-							else if (persist instanceof GhostBean)
+							else if (persist instanceof WebCustomType)
 							{
-								GhostBean ghost = (GhostBean)persist;
-								JSONObject beanXML = new ServoyJSONObject(ghost.getBeanXML(), false);
+								WebCustomType ghost = (WebCustomType)persist;
+								JSONObject beanXML = ghost.getJson();
 
 
 								WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(

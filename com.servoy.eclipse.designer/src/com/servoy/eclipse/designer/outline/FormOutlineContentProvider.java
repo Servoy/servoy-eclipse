@@ -36,7 +36,6 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.property.IPropertyType;
 
-import com.servoy.eclipse.designer.editor.rfb.GhostBean;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -53,6 +52,8 @@ import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
@@ -339,7 +340,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			element instanceof FormElementGroup ||
 			(element instanceof PersistContext && ((PersistContext)element).getPersist() instanceof AbstractBase &&
 				(((AbstractBase)((PersistContext)element).getPersist())).getAllObjects().hasNext() || (((PersistContext)element).getPersist() instanceof Bean &&
-				!(((PersistContext)element).getPersist() instanceof GhostBean) && ((Bean)((PersistContext)element).getPersist()).getBeanXML() != null));
+				!(((PersistContext)element).getPersist() instanceof WebCustomType) && ((Bean)((PersistContext)element).getPersist()).getBeanXML() != null));
 	}
 
 	public Object[] getElements(Object inputElement)
@@ -357,6 +358,8 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 
 	private List<IPersist> getAllGhostElements(Bean parentBean)
 	{
+		if (parentBean instanceof WebComponent) return ((WebComponent)parentBean).getAllCustomProperties();
+
 		List<IPersist> result = new ArrayList<IPersist>();
 		if (FormTemplateGenerator.isWebcomponentBean(parentBean))
 		{
@@ -385,14 +388,14 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 									boolean arrayReturnType = spec.isArrayReturnType(beanJSONKey);
 									if (!arrayReturnType)
 									{
-										GhostBean ghostBean = new GhostBean(parentBean, beanJSONKey, simpleTypeName, -1, arrayReturnType, false);
-										ghostBean.setBeanClassName(simpleTypeName);
+										WebCustomType ghostBean = new WebCustomType(parentBean, beanJSONKey, simpleTypeName, -1, arrayReturnType, false);
+										ghostBean.setTypeName(simpleTypeName);
 										result.add(ghostBean);
 									}
 									else if (object instanceof JSONArray) for (int i = 0; i < ((JSONArray)object).length(); i++)
 									{
-										GhostBean ghostBean = new GhostBean(parentBean, beanJSONKey, simpleTypeName, i, arrayReturnType, false);
-										ghostBean.setBeanClassName(simpleTypeName);
+										WebCustomType ghostBean = new WebCustomType(parentBean, beanJSONKey, simpleTypeName, i, arrayReturnType, false);
+										ghostBean.setTypeName(simpleTypeName);
 										result.add(ghostBean);
 									}
 								}

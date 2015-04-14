@@ -24,11 +24,12 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.rfb.GhostBean;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -64,23 +65,33 @@ public class PersistFinder
 			String typeName = split[2];
 			int index = -1;
 			Bean parentBean = (Bean)ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(parentUUID));
-			WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getBeanClassName());
+
 			if (fieldName.indexOf('[') > 0)
 			{
 				index = extractIndex(fieldName);
 				fieldName = fieldName.substring(0, fieldName.indexOf('['));
 			}
-			boolean arrayReturnType = spec.isArrayReturnType(fieldName);
 
-			Bean bean = new GhostBean(parentBean, fieldName, typeName, index, arrayReturnType, false);
-			String compName = "bean_" + id.incrementAndGet();
-			while (!checkName(editorPart, compName))
+			if (parentBean instanceof WebComponent)
 			{
-				compName = "bean_" + id.incrementAndGet();
+				Object propertyValue = ((WebComponent)parentBean).getProperty(fieldName);
+				return index == -1 ? (WebCustomType)propertyValue : ((WebCustomType[])propertyValue)[index];
 			}
-			bean.setName(compName);
-			bean.setBeanClassName(typeName);
-			return bean;
+			else
+			{
+				WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getBeanClassName());
+				boolean arrayReturnType = spec.isArrayReturnType(fieldName);
+
+				WebCustomType bean = new WebCustomType(parentBean, fieldName, typeName, index, arrayReturnType, false);
+				String compName = "bean_" + id.incrementAndGet();
+				while (!checkName(editorPart, compName))
+				{
+					compName = "bean_" + id.incrementAndGet();
+				}
+				bean.setName(compName);
+				bean.setTypeName(typeName);
+				return bean;
+			}
 		}
 		return ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(searchFor));
 	}

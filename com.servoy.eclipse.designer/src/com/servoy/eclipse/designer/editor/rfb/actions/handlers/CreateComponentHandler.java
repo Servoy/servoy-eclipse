@@ -43,7 +43,6 @@ import org.sablo.websocket.IServerService;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.rfb.GhostBean;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
@@ -66,6 +65,8 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
 
@@ -194,9 +195,10 @@ public class CreateComponentHandler implements IServerService
 					Object config = spec.getProperty(dropTargetFieldName).getConfig();
 					JSONObject configObject = new JSONObject(config.toString());
 					if (configObject.getString("type").endsWith("]")) isArray = true;
-					Bean bean = new GhostBean(parentBean, dropTargetFieldName, typeName, index, isArray, true);
+					WebCustomType bean = new WebCustomType(parentBean, dropTargetFieldName, typeName, index, isArray, true);
 					bean.setName(compName);
-					bean.setBeanClassName(typeName);
+					bean.setTypeName(typeName);
+					if (parentBean instanceof WebComponent) ((WebComponent)parentBean).setProperty(dropTargetFieldName, bean);
 					return bean;
 				}
 			}
@@ -423,33 +425,33 @@ public class CreateComponentHandler implements IServerService
 						compName = "bean_" + id.incrementAndGet();
 					}
 
-					Bean bean = null;
+					WebComponent webComponent = null;
 					if (parent instanceof Portal)
 					{
 						Portal portal = (Portal)parent;
-						bean = (Bean)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(portal, IRepository.BEANS);
-						bean.setProperty("text", compName);
-						bean.setBeanClassName(name);
-						portal.addChild(bean);
+						webComponent = (WebComponent)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(portal, IRepository.WEBCOMPONENTS);
+						webComponent.setProperty("text", compName);
+						webComponent.setBeanClassName(name);
+						portal.addChild(webComponent);
 					}
 					else if (parent instanceof AbstractContainer)
 					{
-						bean = ((AbstractContainer)parent).createNewBean(compName, name);
+						webComponent = ((AbstractContainer)parent).createWebComponent(compName, name);
 
 					}
 					else if (parent instanceof Bean)
 					{
 						// TODO create it inthe bean an store it in the component array???
 					}
-					bean.setLocation(new Point(x, y));
-					bean.setSize(new Dimension(w, h));
+					webComponent.setLocation(new Point(x, y));
+					webComponent.setSize(new Dimension(w, h));
 					PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
 					if (description != null && description.getDefaultValue() instanceof JSONObject)
 					{
-						bean.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
+						webComponent.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
 							((JSONObject)description.getDefaultValue()).optInt("height", 80)));
 					}
-					return bean;
+					return webComponent;
 				}
 				else
 				{

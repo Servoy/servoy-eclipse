@@ -33,7 +33,6 @@ import org.sablo.specification.property.IPropertyType;
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.rfb.GhostBean;
 import com.servoy.eclipse.designer.mobile.property.MobileComponentWithTitlePropertySource;
 import com.servoy.eclipse.designer.mobile.property.MobileListPropertySource;
 import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
@@ -64,6 +63,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Style;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Pair;
 
@@ -275,15 +275,15 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 				PersistContext persistContext = PersistContext.create(persist, context);
 				PersistPropertySource persistProperties = null;
 
-				if (FormTemplateGenerator.isWebcomponentBean(persist) || persist instanceof GhostBean)
+				if (FormTemplateGenerator.isWebcomponentBean(persist) || persist instanceof WebCustomType)
 				{
 					PropertyDescription propertyDescription = null;
-					if (persist instanceof GhostBean)
+					if (persist instanceof WebCustomType)
 					{
-						GhostBean ghostBean = (GhostBean)persist;
+						WebCustomType ghostBean = (WebCustomType)persist;
 						Bean parentBean = ghostBean.getParentBean();
 						IPropertyType< ? > iPropertyType = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-							FormTemplateGenerator.getComponentTypeName(parentBean)).getFoundTypes().get(ghostBean.getBeanClassName());
+							FormTemplateGenerator.getComponentTypeName(parentBean)).getFoundTypes().get(ghostBean.getTypeName());
 						if (iPropertyType instanceof ICustomType< ? >) propertyDescription = ((ICustomType< ? >)iPropertyType).getCustomJSONTypeDefinition();
 					}
 					else if (persist.getParent() != null)
@@ -381,7 +381,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			return null;
 		}
 
-		if (persist instanceof GhostBean) return persist;
+		if (persist instanceof WebCustomType) return persist;
 		ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(persist.getRootObject().getName());
 		if (servoyProject == null)
 		{

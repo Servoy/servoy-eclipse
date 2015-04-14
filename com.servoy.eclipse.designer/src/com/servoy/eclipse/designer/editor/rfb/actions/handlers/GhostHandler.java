@@ -52,6 +52,8 @@ import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
@@ -130,31 +132,41 @@ public class GhostHandler implements IServerService
 								String simpleTypeName = pd.getType().getName().replaceFirst(spec.getName() + ".", "");
 								if (spec.getFoundTypes().containsKey(simpleTypeName))
 								{
-									try
+									if (bean instanceof WebComponent)
 									{
-										if (bean.getBeanXML() != null)
+										for (IPersist p : ((WebComponent)bean).getAllCustomProperties())
 										{
-											JSONObject webComponentModelJson = new JSONObject(bean.getBeanXML());
-											if (webComponentModelJson.has(pd.getName()))
+											writeGhostToJSON(writer, bean, pd, ((WebCustomType)p).getTypeName(), ((WebCustomType)p).getIndex());
+										}
+									}
+									else
+									{
+										try
+										{
+											if (bean.getBeanXML() != null)
 											{
-												if (webComponentModelJson.get(pd.getName()).toString().startsWith("["))
+												JSONObject webComponentModelJson = new JSONObject(bean.getBeanXML());
+												if (webComponentModelJson.has(pd.getName()))
 												{
-													JSONArray jsonArray = webComponentModelJson.getJSONArray(pd.getName());
-													for (int i = 0; i < jsonArray.length(); i++)
+													if (webComponentModelJson.get(pd.getName()).toString().startsWith("["))
 													{
-														writeGhostToJSON(writer, bean, pd, simpleTypeName, i);
+														JSONArray jsonArray = webComponentModelJson.getJSONArray(pd.getName());
+														for (int i = 0; i < jsonArray.length(); i++)
+														{
+															writeGhostToJSON(writer, bean, pd, simpleTypeName, i);
+														}
 													}
-												}
-												else
-												{
-													writeGhostToJSON(writer, bean, pd, simpleTypeName, -1);// -1 does not add a [0] at the end of the name
+													else
+													{
+														writeGhostToJSON(writer, bean, pd, simpleTypeName, -1);// -1 does not add a [0] at the end of the name
+													}
 												}
 											}
 										}
-									}
-									catch (JSONException e)
-									{
-										Debug.error(e);
+										catch (JSONException e)
+										{
+											Debug.error(e);
+										}
 									}
 								}
 							}

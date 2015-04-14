@@ -3538,6 +3538,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								case IRepository.PARTS :
 								case IRepository.FIELDS :
 								case IRepository.LAYOUTCONTAINERS :
+								case IRepository.WEBCOMPONENTS :
 									break;
 								default :
 									addBadStructureMarker(o, servoyProject, project);

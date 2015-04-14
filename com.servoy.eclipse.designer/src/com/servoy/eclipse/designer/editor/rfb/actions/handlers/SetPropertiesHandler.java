@@ -28,7 +28,6 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.rfb.GhostBean;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
@@ -36,6 +35,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
+import com.servoy.j2db.persistence.WebCustomType;
 
 /**
  * @author user
@@ -70,7 +70,7 @@ public class SetPropertiesHandler implements IServerService
 				{
 					String uuid = (String)keys.next();
 					final IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart, uuid);
-					if ((persist instanceof BaseComponent || persist instanceof Tab) && !(persist instanceof GhostBean))
+					if ((persist instanceof BaseComponent || persist instanceof Tab) && !(persist instanceof WebCustomType))
 					{
 						JSONObject properties = args.optJSONObject(uuid);
 						Iterator it = properties.keys();

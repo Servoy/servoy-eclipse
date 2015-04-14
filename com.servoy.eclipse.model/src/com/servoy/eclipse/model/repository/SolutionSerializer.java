@@ -1077,6 +1077,7 @@ public class SolutionSerializer
 			Object propertyObjectValue = property_values.get(propertyName);
 			boolean isBoolean = (propertyObjectValue instanceof Boolean);
 			boolean isNumber = (propertyObjectValue instanceof Number && element.getTypeID() != IRepository.ELEMENTS);//element_id for elements type becomes uuid
+			boolean isJSON = propertyObjectValue instanceof JSONObject;
 
 			String propertyValue = repository.convertObjectToArgumentString(element.getTypeID(), propertyObjectValue);//, persist.getID(), persist.getRevisionNumber(), element.contentID, resolver);
 
@@ -1107,7 +1108,7 @@ public class SolutionSerializer
 			}
 			else
 			{
-				if (!isBoolean && !isNumber)
+				if (!isBoolean && !isNumber && !isJSON)
 				{
 					property_values.put(propertyName, propertyValue);//replace with textual version
 				}
@@ -1251,7 +1252,7 @@ public class SolutionSerializer
 
 		/*
 		 * <solutionname> (as project) /datamodel.xml /<styles>.css (? needed here) /calculations.js (all .js files do contain javadoc tags as
-		 * 
+		 *
 		 * @property=uuid:value, "@property=" followed by json prop notation) /aggregates/sum_orders.obj (=aggregate - ISupportName defines the filename)
 		 * /valuelists/employees.obj (obj files are JSON objects without the outer accolades) /globals.js (methods + vars) /forms/orders/sv_<uuid>.obj (nameless
 		 * form elements) /forms/orders/my_field.obj (named form elements, with ISupportName) /forms/orders/orders.js (script methods)
