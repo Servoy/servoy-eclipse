@@ -161,8 +161,17 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						}
 						component.name = componentName;
 						component.packageName = packageName;
+
 						component.x = ev.pageX;
 						component.y = ev.pageY;
+						
+						if (angularElement && $scope.isAbsoluteFormLayout()) {
+							var x = (window.pageXOffset !== undefined) ? window.pageXOffset : document.documentElement.scrollLeft;
+							var y = (window.pageYOffset !== undefined) ? window.pageYOffset : document.documentElement.scrollTop;
+							component.x = component.x - x;
+							component.y = component.y - y;
+						}												
+						
 						if (model){
 							component.w = model.size ? model.size.width : 100;
 							component.h = model.size ? model.size.height : 100;
