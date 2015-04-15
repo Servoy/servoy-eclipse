@@ -522,13 +522,14 @@ public class GhostHandler implements IServerService
 		});
 		List<IFormElement> outsideElements = new ArrayList<IFormElement>();
 		Iterator<IPersist> it = editorPart.getForm().getAllObjects();
+		int formHeight = editorPart.getForm().getParts().hasNext() ? editorPart.getForm().getSize().height : 0;
 		while (it.hasNext())
 		{
 			IPersist persist = it.next();
 			if (persist instanceof IFormElement)
 			{
 				Point location = ((IFormElement)persist).getLocation();
-				if ((location.x > editorPart.getForm().getWidth()) || (location.y > editorPart.getForm().getSize().getHeight()))
+				if ((location.x > editorPart.getForm().getWidth()) || (location.y > formHeight))
 				{
 					outsideElements.add((IFormElement)persist);
 				}
