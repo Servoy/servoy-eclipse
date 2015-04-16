@@ -68,7 +68,6 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 	private final ActionRegistry registry;
 	private final static String CONTEXT_MENU_ID = "com.servoy.eclipse.designer.rfb.popup";
 	private volatile boolean refreshing;
-	private MenuManager menuManager;
 
 	public FormOutlinePage(Form form, GraphicalViewer viewer, ActionRegistry registry)
 	{
@@ -101,7 +100,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 		}
 		else
 		{
-			menuManager = new MenuManager();
+			MenuManager menuManager = new MenuManager();
 			Menu contextMenu = menuManager.createContextMenu(getTreeViewer().getTree());
 			getTreeViewer().getTree().setMenu(contextMenu);
 			getSite().registerContextMenu(CONTEXT_MENU_ID, menuManager, this);
