@@ -6,19 +6,21 @@ angular.module('inlineedit', ['editor']).run(function($pluginRegistry, $editorSe
 			var selection = editorScope.getSelection();
 			if (selection && selection.length > 0)
 			{
-				var clickPosition = editorScope.convertToContentPoint({x: event.pageX,y:event.pageY});
+				var scrollX = (window.pageXOffset !== undefined) ? window.pageXOffset : document.documentElement.scrollLeft;
+				var scrollY = (window.pageYOffset !== undefined) ? window.pageYOffset : document.documentElement.scrollTop;
+				var clickPosition = editorScope.convertToContentPoint({x: event.pageX,y:event.pageY}); 				
 				for (var i=0;i<selection.length;i++)
 				{
 					var node = selection[i];
 					var model = editorScope.getBeanModel(node);
-					if (model && (clickPosition.x >= model.location.x && clickPosition.x <= (model.location.x + model.size.width))
-							&& (clickPosition.y >= model.location.y && clickPosition.y <= (model.location.y + model.size.height)))
+					if (model && (clickPosition.x >= model.location.x + scrollX && clickPosition.x <= (model.location.x + scrollX + model.size.width))
+							&& (clickPosition.y >= model.location.y + scrollY && clickPosition.y <= (model.location.y + scrollY + model.size.height)))
 					{
 						var directEditProperty = node.getAttribute("directEditPropertyName");
 						if (directEditProperty)
 						{
 							var obj = {};
-							var absolutePoint = editorScope.convertToAbsolutePoint({x: model.location.x,y: model.location.y});
+							var absolutePoint = editorScope.convertToAbsolutePoint({x: model.location.x + scrollX,y: model.location.y + scrollY});
 							var applyValue = function()
 							{
 								$("#directEdit").hide();
