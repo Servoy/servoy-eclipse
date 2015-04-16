@@ -27,7 +27,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 /**
  * Base SelectionProvider adapter.
- * 
+ *
  * @author rgansevles
  */
 public class SelectionProviderAdapter implements ISelectionProvider
@@ -84,7 +84,7 @@ public class SelectionProviderAdapter implements ISelectionProvider
 		ISelection oldSelection = getSelection();
 		this.selection = selection;
 		ISelection newSelection = getSelection();
-		if (oldSelection != newSelection)
+		if (!oldSelection.equals(newSelection))
 		{
 			fireSelectionChanged(new SelectionChangedEvent(this, newSelection));
 		}
