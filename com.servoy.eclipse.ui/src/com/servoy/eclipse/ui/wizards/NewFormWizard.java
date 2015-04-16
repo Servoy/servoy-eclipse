@@ -139,7 +139,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.wizard.IWizard#addPages()
 	 */
 	@Override
@@ -159,7 +159,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench, org.eclipse.jface.viewers.IStructuredSelection)
 	 */
 	public void init(IWorkbench workbench, IStructuredSelection selection)
@@ -259,7 +259,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
 	 */
 	@Override
@@ -320,6 +320,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 						form.setView(IFormConstants.VIEW_TYPE_TABLE_LOCKED);
 						ElementFactory.addFormListItems(form, null, null);
 					}
+				}
+				else
+				{
+					form.setResponsiveLayout(true);
 				}
 			}
 			else
@@ -845,7 +849,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.wizard.WizardPage#getNextPage()
 		 */
 		@Override
