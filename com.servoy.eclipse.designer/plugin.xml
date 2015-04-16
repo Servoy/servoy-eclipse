@@ -834,6 +834,32 @@
             id="com.servoy.eclipse.designer.rfb.bringtofront"
             name="Bring to front">
       </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.rfb.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.AddContainerCommand"
+            id="com.servoy.eclipse.designer.rfb.add"
+            name="AddComponent">
+         <commandParameter
+               id="com.servoy.eclipse.designer.editor.rfb.menu.add.spec"
+               name="Container Kind"
+               optional="true">
+         </commandParameter>
+         <commandParameter
+               id="com.servoy.eclipse.designer.editor.rfb.menu.add.package"
+               name="Package Name"
+               optional="true">
+         </commandParameter>
+         <commandParameter
+               id="com.servoy.eclipse.designer.editor.rfb.menu.add.config"
+               name="Configuration"
+               optional="true">
+         </commandParameter>
+      </command>
+      <command
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.DeleteCommand"
+            id="com.servoy.eclipse.designer.rfb.delete"
+            name="Delete">
+      </command>
    </extension>
       <extension
          point="org.eclipse.ui.preferencePages">
@@ -1161,5 +1187,73 @@
                name="RFB Editing Forms"
                parentId="com.servoy.eclipse.designer.context">
          </context>
+      </extension>
+      <extension
+            point="org.eclipse.ui.menus">
+         <menuContribution
+               allPopups="false"
+               locationURI="popup:com.servoy.eclipse.designer.rfb.popup">
+            <command
+                  commandId="com.servoy.eclipse.designer.rfb.delete"
+                  label="Delete"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+		          <iterate>
+		              <or>
+		                    <instanceof
+		                           value="com.servoy.j2db.persistence.IPersist">
+		                    </instanceof>
+		                    <instanceof
+		                          value="com.servoy.eclipse.ui.property.PersistContext">
+		                    </instanceof>
+		              </or>
+		         </iterate>
+               </visibleWhen>
+            </command>
+            <menu
+                  label="Add">
+               <dynamic
+                     class="com.servoy.eclipse.designer.editor.rfb.menu.AddContainerContributionItem"
+                     id="com.servoy.eclipse.designer.rfb.MyContributionItem">
+               </dynamic>
+               <visibleWhen
+                     checkEnabled="false">
+                  <with  
+                        variable="selection">  
+                     <and>  
+		                  <iterate>
+		                     <and>
+		                        <test
+		                              property="com.servoy.eclipse.designer.editor.rfb.iscontainer">
+		                        </test>
+		                        <or>
+		                           <instanceof
+		                                 value="com.servoy.eclipse.ui.property.PersistContext">
+		                           </instanceof>
+		                           <instanceof
+		                                 value="com.servoy.j2db.persistence.IPersist">
+		                           </instanceof>
+		                        </or>
+		                     </and>
+		                  </iterate>
+		                  <count  
+                             	value="1">  
+                          </count>
+		              </and>  
+                  </with>  
+               </visibleWhen>
+            </menu>
+         </menuContribution>
+      </extension>
+      <extension
+            point="org.eclipse.core.expressions.propertyTesters">
+         <propertyTester
+               class="com.servoy.eclipse.designer.editor.rfb.menu.IsContainerPropertyTester"
+               id="com.servoy.eclipse.designer.rfb.iscontainer"
+               namespace="com.servoy.eclipse.designer.editor.rfb"
+               properties="iscontainer"
+               type="com.servoy.eclipse.ui.property.PersistContext">
+         </propertyTester>
       </extension>
 </plugin>

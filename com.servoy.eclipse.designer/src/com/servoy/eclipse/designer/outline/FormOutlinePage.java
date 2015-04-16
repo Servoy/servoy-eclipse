@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
@@ -55,7 +56,7 @@ import com.servoy.j2db.persistence.IRepository;
 
 /**
  * ContentOutlinePage for Servoy form in outline view.
- * 
+ *
  * @author rgansevles
  */
 
@@ -65,7 +66,9 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 	private final Form form;
 	private final GraphicalViewer viewer;
 	private final ActionRegistry registry;
+	private final static String CONTEXT_MENU_ID = "com.servoy.eclipse.designer.rfb.popup";
 	private volatile boolean refreshing;
+	private MenuManager menuManager;
 
 	public FormOutlinePage(Form form, GraphicalViewer viewer, ActionRegistry registry)
 	{
@@ -95,6 +98,13 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			{
 				getTreeViewer().getTree().setMenu(menuManager.createContextMenu(getTreeViewer().getTree()));
 			}
+		}
+		else
+		{
+			menuManager = new MenuManager();
+			Menu contextMenu = menuManager.createContextMenu(getTreeViewer().getTree());
+			getTreeViewer().getTree().setMenu(contextMenu);
+			getSite().registerContextMenu(CONTEXT_MENU_ID, menuManager, this);
 		}
 	}
 

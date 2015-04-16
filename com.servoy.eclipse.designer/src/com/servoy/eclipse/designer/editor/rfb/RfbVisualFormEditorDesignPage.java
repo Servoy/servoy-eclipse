@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.sablo.websocket.CurrentWindow;
 import org.sablo.websocket.IWindow;
 import org.sablo.websocket.WebsocketSessionManager;
@@ -51,6 +52,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.CutAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.DeleteAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.FixedSelectAllAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
+import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
@@ -138,6 +140,8 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	private String layout = null;
 	private String editorId = null;
 
+	private FormOutlinePage outline;
+
 	public RfbVisualFormEditorDesignPage(BaseVisualFormEditor editorPart)
 	{
 		super(editorPart);
@@ -194,6 +198,27 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		{
 			ServoyLog.logError("couldn't load the editor: ", e);
 		}
+
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage#getAdapter(java.lang.Class)
+	 */
+	@Override
+	public Object getAdapter(Class type)
+	{
+		Object adapter = super.getAdapter(type);
+
+		if (type.equals(IContentOutlinePage.class))
+		{
+			outline = new FormOutlinePage(editorPart.getForm(), null, getActionRegistry());
+			adapter = outline;
+		}
+
+		return adapter;
 	}
 
 	/**
