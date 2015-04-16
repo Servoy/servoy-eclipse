@@ -182,6 +182,7 @@ import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormatPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.smart.dataui.InvisibleBean;
@@ -1451,7 +1452,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				return retval;
 			}
 
-			if (propertyType == StringPropertyType.INSTANCE)
+			if (propertyType == StringPropertyType.INSTANCE || propertyType == ServoyStringPropertyType.INSTANCE)
 			{
 				return new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null, new ICellEditorFactory()
 				{

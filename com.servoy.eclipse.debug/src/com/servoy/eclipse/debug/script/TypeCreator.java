@@ -227,6 +227,7 @@ import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
@@ -1106,7 +1107,7 @@ public class TypeCreator extends TypeCache
 
 						/*
 						 * (non-Javadoc)
-						 *
+						 * 
 						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitObjectInitializer(org.eclipse.dltk.javascript.ast.
 						 * ObjectInitializer)
 						 */
@@ -1232,7 +1233,8 @@ public class TypeCreator extends TypeCache
 		if (type == BooleanPropertyType.INSTANCE) return getTypeRef(context, ITypeNames.BOOLEAN);
 		if (type == IntPropertyType.INSTANCE || type == LongPropertyType.INSTANCE || type == FloatPropertyType.INSTANCE || type == DoublePropertyType.INSTANCE) return getTypeRef(
 			context, ITypeNames.NUMBER);
-		if (type == StringPropertyType.INSTANCE || type == TagStringPropertyType.INSTANCE) return getTypeRef(context, ITypeNames.STRING);
+		if (type == StringPropertyType.INSTANCE || type == ServoyStringPropertyType.INSTANCE || type == TagStringPropertyType.INSTANCE) return getTypeRef(
+			context, ITypeNames.STRING);
 		if (DatePropertyType.TYPE_NAME.equals(type.getName())) return getTypeRef(context, ITypeNames.DATE);
 		return null;
 	}
