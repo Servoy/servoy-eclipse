@@ -52,6 +52,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.eclipse.ui.views.properties.PropertySheetPage;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
@@ -154,6 +155,7 @@ import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Part;
@@ -174,8 +176,13 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.scripting.FunctionDefinition;
+import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
+import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
+import com.servoy.j2db.server.ngclient.property.FoundsetTypeSabloValue;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
@@ -187,6 +194,8 @@ import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.smart.dataui.InvisibleBean;
 import com.servoy.j2db.util.ComponentFactoryHelper;
+import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.IDelegate;
 import com.servoy.j2db.util.JavaVersion;
 import com.servoy.j2db.util.Pair;
@@ -2510,6 +2519,88 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			}
 		}
 
+		if (propertyType instanceof FoundsetLinkedPropertyType< ? , ? >)
+		{
+			FoundsetLinkedPropertyType< ? , ? > foundsetLinkedPropertyType = (FoundsetLinkedPropertyType< ? , ? >)propertyType;
+			IPropertyType< ? > possibleYieldType = foundsetLinkedPropertyType.getPossibleYieldType();
+			Table table = null;
+			String forFoundsetName = ((FoundsetLinkedConfig)propertyDescription.getConfig()).getForFoundsetName();
+			JSONObject json = null; // we want the json of the component
+			if (persistContext.getPersist() instanceof WebComponent)
+			{
+				WebComponent bean = (WebComponent)persistContext.getPersist();
+				json = bean.getJson();
+
+			}
+			else if (persistContext.getPersist() instanceof WebCustomType)
+			{
+				WebCustomType webCustomType = (WebCustomType)persistContext.getPersist();
+				//TODO should this find the actual top-level/on-the-form component once https://support.servoy.com/browse/SVY-8143 is done
+				Bean ancestor = webCustomType.getParentBean();
+				try
+				{
+					json = new JSONObject(ancestor.getBeanXML());
+				}
+				catch (JSONException e)
+				{
+					Debug.log(e);
+				}
+			}
+			else if (persistContext.getPersist() instanceof Bean)
+			{
+				Bean bean = (Bean)persistContext.getPersist();
+				try
+				{
+					json = new JSONObject(bean.getBeanXML());
+				}
+				catch (JSONException e)
+				{
+					Debug.log(e);
+				}
+			}
+			try
+			{
+				Object object = json.get(forFoundsetName);
+				String foundsetValue = "";
+				if (object instanceof JSONObject)
+				{
+					foundsetValue = (String)((JSONObject)object).get(FoundsetTypeSabloValue.FOUNDSET_SELECTOR);
+				}
+				if (foundsetValue.equals(""))
+				{
+					table = flattenedEditingSolution.getFlattenedForm(form).getTable();
+				}
+				else
+				{
+					if (DataSourceUtils.isDatasourceUri(foundsetValue))
+					{
+						ITable iTable = DataSourceUtils.getTable(foundsetValue, flattenedEditingSolution.getSolution(), null);
+						if (iTable instanceof Table) table = (Table)iTable;
+					}
+					else if (flattenedEditingSolution.getRelation(foundsetValue) != null)
+					{
+						table = flattenedEditingSolution.getRelation(foundsetValue).getForeignTable();
+					}
+				}
+			}
+			catch (JSONException e)
+			{
+				Debug.log(e);
+			}
+
+			if (possibleYieldType == TagStringPropertyType.INSTANCE)
+			{
+				return tagStringController(persistContext, id, displayName, propertyDescription, flattenedEditingSolution, table);
+			}
+			else
+			{
+				final DataProviderOptions options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, table != null, true,
+					true, table != null, table != null, INCLUDE_RELATIONS.NESTED, true, true, null);
+
+				return createDataproviderController(persistContext, readOnly, id, displayName, flattenedEditingSolution, form, table, options);
+			}
+		}
+
 		if (propertyType == DataproviderPropertyType.INSTANCE)
 		{
 			Table table = null;
@@ -2551,27 +2642,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					table != null, INCLUDE_RELATIONS.NESTED, true, true, null);
 
 			}
-			final DataProviderConverter converter = new DataProviderConverter(flattenedEditingSolution, persistContext.getPersist(), table);
-			DataProviderLabelProvider showPrefix = new DataProviderLabelProvider(false);
-			showPrefix.setConverter(converter);
-			DataProviderLabelProvider hidePrefix = new DataProviderLabelProvider(true);
-			hidePrefix.setConverter(converter);
 
-			ILabelProvider labelProviderShowPrefix = new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(showPrefix,
-				persistContext.getContext()));
-			final ILabelProvider labelProviderHidePrefix = new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(hidePrefix,
-				persistContext.getContext()));
-			PropertyController<String, String> propertyController = new PropertyController<String, String>(id, displayName, null, labelProviderShowPrefix,
-				new ICellEditorFactory()
-				{
-					public CellEditor createPropertyEditor(Composite parent)
-					{
-						return new DataProviderCellEditor(parent, labelProviderHidePrefix, new DataProviderValueEditor(converter), form,
-							flattenedEditingSolution, readOnly, options, converter);
-					}
-				});
-			propertyController.setSupportsReadonly(true);
-			return propertyController;
+			return createDataproviderController(persistContext, readOnly, id, displayName, flattenedEditingSolution, form, table, options);
 		}
 
 		if (propertyType == RelationPropertyType.INSTANCE)
@@ -2675,30 +2747,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				}
 			}
 			final Table finalTable = table;
-			return new PropertyController<String, String>(id, displayName, new IPropertyConverter<String, String>()
-			{
-				public String convertProperty(Object id, String value)
-				{
-					return value;
-				}
 
-				public String convertValue(Object id, String value)
-				{
-					if ("titleText".equals(id) && value != null && value.length() > 0 && value.trim().length() == 0)
-					{
-						return IBasicFormManager.NO_TITLE_TEXT;
-					}
-					return value;
-				}
-
-			}, TextCutoffLabelProvider.DEFAULT, new ICellEditorFactory()
-			{
-				public CellEditor createPropertyEditor(Composite parent)
-				{
-					return new TagsAndI18NTextCellEditor(parent, persistContext, flattenedEditingSolution, TextCutoffLabelProvider.DEFAULT, finalTable,
-						"Edit text property", Activator.getDefault().getDesignClient(), Boolean.TRUE.equals(propertyDescription.getConfig()));
-				}
-			});
+			return tagStringController(persistContext, id, displayName, propertyDescription, flattenedEditingSolution, finalTable);
 		}
 
 		if (propertyType == FoundsetPropertyType.INSTANCE)
@@ -2772,6 +2822,81 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 
 		return null;
+	}
+
+	/**
+	 * @param persistContext
+	 * @param id
+	 * @param displayName
+	 * @param propertyDescription
+	 * @param flattenedEditingSolution
+	 * @param finalTable
+	 * @return
+	 */
+	private static IPropertyDescriptor tagStringController(final PersistContext persistContext, final String id, final String displayName,
+		final PropertyDescription propertyDescription, final FlattenedSolution flattenedEditingSolution, final Table finalTable)
+	{
+		return new PropertyController<String, String>(id, displayName, new IPropertyConverter<String, String>()
+		{
+			public String convertProperty(Object id, String value)
+			{
+				return value;
+			}
+
+			public String convertValue(Object id, String value)
+			{
+				if ("titleText".equals(id) && value != null && value.length() > 0 && value.trim().length() == 0)
+				{
+					return IBasicFormManager.NO_TITLE_TEXT;
+				}
+				return value;
+			}
+
+		}, TextCutoffLabelProvider.DEFAULT, new ICellEditorFactory()
+		{
+			public CellEditor createPropertyEditor(Composite parent)
+			{
+				return new TagsAndI18NTextCellEditor(parent, persistContext, flattenedEditingSolution, TextCutoffLabelProvider.DEFAULT, finalTable,
+					"Edit text property", Activator.getDefault().getDesignClient(), Boolean.TRUE.equals(propertyDescription.getConfig()));
+			}
+		});
+	}
+
+	/**
+	 * @param persistContext
+	 * @param readOnly
+	 * @param id
+	 * @param displayName
+	 * @param flattenedEditingSolution
+	 * @param form
+	 * @param table
+	 * @param options
+	 * @return
+	 */
+	private static IPropertyDescriptor createDataproviderController(final PersistContext persistContext, final boolean readOnly, final String id,
+		final String displayName, final FlattenedSolution flattenedEditingSolution, final Form form, Table table, final DataProviderOptions options)
+	{
+		final DataProviderConverter converter = new DataProviderConverter(flattenedEditingSolution, persistContext.getPersist(), table);
+		DataProviderLabelProvider showPrefix = new DataProviderLabelProvider(false);
+		showPrefix.setConverter(converter);
+		DataProviderLabelProvider hidePrefix = new DataProviderLabelProvider(true);
+		hidePrefix.setConverter(converter);
+
+		ILabelProvider labelProviderShowPrefix = new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(showPrefix,
+			persistContext.getContext()));
+		final ILabelProvider labelProviderHidePrefix = new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(hidePrefix,
+			persistContext.getContext()));
+		PropertyController<String, String> propertyController = new PropertyController<String, String>(id, displayName, null, labelProviderShowPrefix,
+			new ICellEditorFactory()
+			{
+				public CellEditor createPropertyEditor(Composite parent)
+				{
+					return new DataProviderCellEditor(parent, labelProviderHidePrefix, new DataProviderValueEditor(converter), form, flattenedEditingSolution,
+						readOnly, options, converter);
+				}
+			});
+		propertyController.setSupportsReadonly(true);
+		return propertyController;
 	}
 
 	public static class NullDefaultLabelProvider extends LabelProvider implements IFontProvider

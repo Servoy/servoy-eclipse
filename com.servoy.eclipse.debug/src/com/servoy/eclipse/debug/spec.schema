@@ -201,7 +201,7 @@
 								},
 								"default": {
 								},
-								"forFoundSet":{
+								"forFoundset":{
 									"type":"string"
 								}
 							},
