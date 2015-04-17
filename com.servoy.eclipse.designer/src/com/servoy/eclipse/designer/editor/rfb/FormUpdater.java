@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +43,7 @@ import com.servoy.j2db.server.ngclient.INGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.IWebFormUI;
 import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
+import com.servoy.j2db.server.ngclient.component.WebFormController;
 import com.servoy.j2db.server.ngclient.design.DesignNGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
@@ -199,6 +201,16 @@ public class FormUpdater implements Runnable
 			List<IFormController> cachedFormControllers = websocketSession.getClient().getFormManager().getCachedFormControllers(changedForm);
 			for (IFormController iFormController : cachedFormControllers)
 			{
+				if (iFormController.getView() != form.getView())
+				{
+					List<Runnable> invokeLaterRunnables = new ArrayList<Runnable>(); // should we also use these?
+
+					boolean isVisible = iFormController.isFormVisible();
+					if (isVisible) iFormController.notifyVisible(false, invokeLaterRunnables);
+					((WebFormController)iFormController).initFormUI();
+					if (isVisible) iFormController.notifyVisible(true, invokeLaterRunnables);
+
+				}
 				iFormController.recreateUI();
 			}
 			websocketSession.getClientService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall("refreshGhosts", new Object[] { });
