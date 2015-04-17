@@ -734,13 +734,6 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          version="0.0.0"
          unpack="false"/>
 
-   <!--plugin
-         id="com.servoy.eclipse.team"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/ -->
-
    <plugin
          id="com.servoy.eclipse.ui"
          download-size="0"
@@ -929,7 +922,7 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-                  
+
    <plugin
          id="org.apache.commons.io"
          download-size="0"
@@ -1051,6 +1044,13 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
 
    <plugin
          id="sj.jsonschemavalidation"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="jabsorb"
          download-size="0"
          install-size="0"
          version="0.0.0"
