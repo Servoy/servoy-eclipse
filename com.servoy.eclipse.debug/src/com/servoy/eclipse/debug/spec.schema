@@ -79,13 +79,13 @@
 								"type":"boolean"
 							},
 							"for": {
-								"type": "string|array"
+								"type": "array"
 							},
 							"blockingOn": {
 								"type": "boolean"
 							},
 							"tags": {
-								"type": "object",
+								"type": "object"
 							},
 							"values":{
 								"type": "array"
