@@ -376,21 +376,21 @@ stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST;]]></sample
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="ng,wc,sc"><![CDATA[Adds a string of client information which gets stored on the server, 
+            <description clientSupport="ng,wc,sc"><![CDATA[Adds a string of client information which gets stored on the server,
 and can be viewed on the Clients page of Servoy Server Administration Console.
 
-The new piece of client information is added on behalf of the running 
+The new piece of client information is added on behalf of the running
 Servoy client.
 
 This function can be called more than once, if you want to add multiple
 lines of client information.
 
-NOTE: 
+NOTE:
 This function can also be used with the function <em>getClientCountForInfo</em>
 to count the number of clients with matching addditional client information.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="ng,wc,sc"><![CDATA[Adds a string of client information which gets stored on the server, 
+            <summary clientSupport="ng,wc,sc"><![CDATA[Adds a string of client information which gets stored on the server,
 and can be viewed on the Clients page of Servoy Server Administration Console.]]></summary>
           </summaries>
           <samples>
@@ -494,7 +494,7 @@ if (qdialog == "Yes") {
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Closes the currently open solution and optionally opens another solution, calling a specified global method with the specified arguments.
 If the user has been logged in, this function keeps the user logged in and in the newly open solution, the login is skipped and the solution goes straight to the first form.
-If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client). 
+If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client).
 An alternative option is security.logout() which also does a log out for the user (for solutions that require authentication).]]></description>
           </descriptions>
           <summaries>
@@ -518,7 +518,7 @@ application.closeSolution();
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Closes the currently open solution and optionally opens another solution, calling a specified global method with the specified arguments.
 If the user has been logged in, this function keeps the user logged in and in the newly open solution, the login is skipped and the solution goes straight to the first form.
-If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client). 
+If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client).
 An alternative option is security.logout() which also does a log out for the user (for solutions that require authentication).]]></description>
           </descriptions>
           <summaries>
@@ -548,7 +548,7 @@ application.closeSolution();
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Closes the currently open solution and optionally opens another solution, calling a specified global method with the specified arguments.
 If the user has been logged in, this function keeps the user logged in and in the newly open solution, the login is skipped and the solution goes straight to the first form.
-If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client). 
+If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client).
 An alternative option is security.logout() which also does a log out for the user (for solutions that require authentication).]]></description>
           </descriptions>
           <summaries>
@@ -582,7 +582,7 @@ application.closeSolution();
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Closes the currently open solution and optionally opens another solution, calling a specified global method with the specified arguments.
 If the user has been logged in, this function keeps the user logged in and in the newly open solution, the login is skipped and the solution goes straight to the first form.
-If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client). 
+If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client).
 An alternative option is security.logout() which also does a log out for the user (for solutions that require authentication).]]></description>
           </descriptions>
           <summaries>
@@ -755,16 +755,16 @@ controller.showRecords(15, nmd); // 15 is a single-number pk in this case]]></sa
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
-// The same as above, but run the application in the user's home directory. 
-application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgram("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
@@ -795,16 +795,16 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
-// The same as above, but run the application in the user's home directory. 
-application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgram("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
@@ -839,16 +839,16 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
-// The same as above, but run the application in the user's home directory. 
-application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgram("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
@@ -887,16 +887,16 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
-// The same as above, but run the application in the user's home directory. 
-application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgram("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
@@ -932,16 +932,16 @@ Execute a program and returns output. Specify the cmd as you would do in a conso
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", "arg1", "arg2", "arg3");
-// The same as above, but run the application in the user's home directory. 
-application.executeProgram("c:\\Users\\myself\\myapp.exe", "arg1", "arg2", "arg3", "#", "#", "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgram("c:\\Users\\myself\\myapp.exe", "arg1", "arg2", "arg3", "#", "#", "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", "arg1", "arg2", "arg3", "#", "MY_ENV_VAR=something", "#", "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgram("/home/myself/myapp", "arg1", "arg2", "arg3");
-application.executeProgram("/home/myself/myapp", "arg1", "arg2", "arg3", "#", "#", "/home/myself/");	
+application.executeProgram("/home/myself/myapp", "arg1", "arg2", "arg3", "#", "#", "/home/myself/");
 application.executeProgram("/home/myself/myapp", "arg1", "arg2", "arg3", "#", "MY_ENV_VAR=something", "#", "/home/myself/myapp");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgram("rundll32.exe", "url.dll,FileProtocolHandler", "filename");	
+application.executeProgram("rundll32.exe", "url.dll,FileProtocolHandler", "filename");
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgram("xdg-open", "filename");
 // Open a file with the default application associated with it. (on MacOS)
@@ -995,16 +995,16 @@ application.executeProgram("open", "-a", "OpenOffice.org.app", "filename.doc");]
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
-// The same as above, but run the application in the user's home directory. 
-application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgramInBackground("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
@@ -1035,16 +1035,16 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
-// The same as above, but run the application in the user's home directory. 
-application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgramInBackground("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
@@ -1079,16 +1079,16 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
-// The same as above, but run the application in the user's home directory. 
-application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgramInBackground("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
@@ -1127,16 +1127,16 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
-// The same as above, but run the application in the user's home directory. 
-application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgramInBackground("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
@@ -1172,16 +1172,16 @@ Execute a program in the background. Specify the cmd as you would do in a consol
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", "arg1", "arg2", "arg3");
-// The same as above, but run the application in the user's home directory. 
-application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", "arg1", "arg2", "arg3", "#", "#", "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", "arg1", "arg2", "arg3", "#", "#", "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", "arg1", "arg2", "arg3", "#", "MY_ENV_VAR=something", "#", "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgramInBackground("/home/myself/myapp", "arg1", "arg2", "arg3");
-application.executeProgramInBackground("/home/myself/myapp", "arg1", "arg2", "arg3", "#", "#", "/home/myself/");	
-application.executeProgramInBackground("/home/myself/myapp", "arg1", "arg2", "arg3", "#", "MY_ENV_VAR=something", "#", "/home/myself/myapp");	
+application.executeProgramInBackground("/home/myself/myapp", "arg1", "arg2", "arg3", "#", "#", "/home/myself/");
+application.executeProgramInBackground("/home/myself/myapp", "arg1", "arg2", "arg3", "#", "MY_ENV_VAR=something", "#", "/home/myself/myapp");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgramInBackground("rundll32.exe", "url.dll,FileProtocolHandler", "filename");	
+application.executeProgramInBackground("rundll32.exe", "url.dll,FileProtocolHandler", "filename");
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgramInBackground("xdg-open", "filename");
 // Open a file with the default application associated with it. (on MacOS)
@@ -1272,7 +1272,7 @@ application.exit();]]></sample>
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[This gets the currently focused active window; this can be the main application window or a modal dialog.
 For a webclient getWindow() can return the main window that is not really the main for the current tab in the browser
-that can return the previous tab that a user could have opened. For this method is better suited because this 
+that can return the previous tab that a user could have opened. For this method is better suited because this
 will give you the actual tab in the browser. Another call would be form.controller.getWindow() of a form that you know in which window it resides.]]></description>
           </descriptions>
           <summaries>
@@ -1303,11 +1303,11 @@ var activeWindow = application.getActiveWindow();]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[Number of clients]]></return>
           <descriptions>
-            <description clientSupport="ng,wc,sc"><![CDATA[Gets the count for all clients displaying the same additional information 
+            <description clientSupport="ng,wc,sc"><![CDATA[Gets the count for all clients displaying the same additional information
 in the Clients page of Servoy Server Administration Console.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="ng,wc,sc"><![CDATA[Gets the count for all clients displaying the same additional information 
+            <summary clientSupport="ng,wc,sc"><![CDATA[Gets the count for all clients displaying the same additional information
 in the Clients page of Servoy Server Administration Console.]]></summary>
           </summaries>
           <samples>
@@ -1336,7 +1336,7 @@ application.output('Including yourself, there are ' + count + ' client(s) runnin
 //In smart client, use this to set javax.swing.UIDefaults properties.
 application.putClientProperty('ToolTip.hideAccelerator', true)
 //To change the comboboxes selection background color, do this:
-application.putClientProperty('ComboBox.selectionBackground', new Packages.javax.swing.plaf.ColorUIResource(java.awt.Color.RED)) 
+application.putClientProperty('ComboBox.selectionBackground', new Packages.javax.swing.plaf.ColorUIResource(java.awt.Color.RED))
 
 //In web client, use this to change the template directory.
 //To change the default dir of templates/default to templates/green_skin, do this:
@@ -1854,7 +1854,7 @@ for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.JSWindow" typecode="com.servoy.j2db.scripting.JSWindow"><![CDATA[the main application JSWindow.]]></return>
           <descriptions>
-            <description clientSupport="ng,wc,sc"><![CDATA[Get the main application window. This is the window that is created first for this client. 
+            <description clientSupport="ng,wc,sc"><![CDATA[Get the main application window. This is the window that is created first for this client.
 
 In a smart client this is always just the first started window where the solution is loaded in.
 In a webclient the user may open the same solution in a new tab in the same browser. In that case the main solution
@@ -2170,7 +2170,7 @@ application.overrideStyle('mystyle','mystyle_mace')//in this case both styles sh
 //In smart client, use this to set javax.swing.UIDefaults properties.
 application.putClientProperty('ToolTip.hideAccelerator', true)
 //To change the comboboxes selection background color, do this:
-application.putClientProperty('ComboBox.selectionBackground', new Packages.javax.swing.plaf.ColorUIResource(java.awt.Color.RED)) 
+application.putClientProperty('ComboBox.selectionBackground', new Packages.javax.swing.plaf.ColorUIResource(java.awt.Color.RED))
 
 //In web client, use this to change the template directory.
 //To change the default dir of templates/default to templates/green_skin, do this:
@@ -2478,7 +2478,8 @@ For headless clients(including Batch Processors and Authentication clients) the 
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.
 
-NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects
+NOTE: This is expensive operation, which triggers refresh of all visible forms. Over usage of this method may inflict performance issues.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="ng,wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
@@ -2515,7 +2516,8 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.
 
-NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects
+NOTE: This is expensive operation, which triggers refresh of all visible forms. Over usage of this method may inflict performance issues.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="ng,wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
@@ -2554,7 +2556,8 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
           <descriptions>
             <description clientSupport="ng,mc,wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.
 
-NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects
+NOTE: This is expensive operation, which triggers refresh of all visible forms. Over usage of this method may inflict performance issues.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="ng,mc,wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
@@ -2591,7 +2594,8 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.
 
-NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects
+NOTE: This is expensive operation, which triggers refresh of all visible forms. Over usage of this method may inflict performance issues.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="ng,wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
@@ -2631,7 +2635,8 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
           <descriptions>
             <description clientSupport="ng,mc,wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.
 
-NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects
+NOTE: This is expensive operation, which triggers refresh of all visible forms. Over usage of this method may inflict performance issues.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="ng,mc,wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
@@ -2672,7 +2677,8 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.
 
-NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects
+NOTE: This is expensive operation, which triggers refresh of all visible forms. Over usage of this method may inflict performance issues.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="ng,wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
@@ -3013,7 +3019,7 @@ application.showFormInDialog(forms.contacts,100,80,500,300,'my own dialog title'
 
 NOTE:
 Forms in windows cannot be modal. They are more independent then dialogs, even non-modal ones. For example in SC, a non-modal dialog will always
-be shown on top of the parent window and it will not have a separate entry in the OS window manager (for example Windows taskbar). 
+be shown on top of the parent window and it will not have a separate entry in the OS window manager (for example Windows taskbar).
 
 NOTE:
 x, y, width and height coordinates are only applied the first time the specified window is shown.
@@ -3313,7 +3319,7 @@ application.sleep(3000);]]></sample>
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="sc"><![CDATA[Updates the UI (painting). If in a script an element changed and the script continues doing 
+            <description clientSupport="sc"><![CDATA[Updates the UI (painting). If in a script an element changed and the script continues doing
 things, you can give an number in ms how long this can take.
 Warning: this gives the UI time to paint, but this also means that it will give the ui time to respond to all other events,
 so if a user keeps clicking on other stuff this will also be handled right away inside this call.]]></description>
@@ -3332,7 +3338,7 @@ so if a user keeps clicking on other stuff this will also be handled right away 
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="sc"><![CDATA[Updates the UI (painting). If in a script an element changed and the script continues doing 
+            <description clientSupport="sc"><![CDATA[Updates the UI (painting). If in a script an element changed and the script continues doing
 things, you can give an number in ms how long this can take.
 Warning: this gives the UI time to paint, but this also means that it will give the ui time to respond to all other events,
 so if a user keeps clicking on other stuff this will also be handled right away inside this call.]]></description>
@@ -6119,13 +6125,15 @@ The matching requires the properties and getter functions of the source to match
 the 'get' will be removed and the remaining name will be converted to lowercase before attempting to match.
 Returns true if no error occurred.
 
-NOTE: This function could be used to store a copy of records in an archive table. Use the getRecord() function to get the record as an object.]]></description>
+NOTE: This function could be used to store a copy of records in an archive table. Use the getRecord() function to get the record as an object.
+Before trying this example, please make sure that the foundsets have some records loaded:]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="ng,wc,sc"><![CDATA[Copies all matching non empty columns (if overwrite boolean is given all columns except pk/ident, if array then all columns except pk and array names).]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[for( var i = 1 ; i <= foundset.getSize() ; i++ )
+            <sample clientSupport="ng,wc,sc"><![CDATA[otherfoundset.loadAllRecords();
+for( var i = 1 ; i <= foundset.getSize() ; i++ )
 {
 	var srcRecord = foundset.getRecord(i);
 	var destRecord = otherfoundset.getRecord(i);
@@ -6168,13 +6176,15 @@ The matching requires the properties and getter functions of the source to match
 the 'get' will be removed and the remaining name will be converted to lowercase before attempting to match.
 Returns true if no error occurred.
 
-NOTE: This function could be used to store a copy of records in an archive table. Use the getRecord() function to get the record as an object.]]></description>
+NOTE: This function could be used to store a copy of records in an archive table. Use the getRecord() function to get the record as an object.
+Before trying this example, please make sure that the foundsets have some records loaded:]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="ng,wc,sc"><![CDATA[Copies all matching non empty columns (if overwrite boolean is given all columns except pk/ident, if array then all columns except pk and array names).]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[for( var i = 1 ; i <= foundset.getSize() ; i++ )
+            <sample clientSupport="ng,wc,sc"><![CDATA[otherfoundset.loadAllRecords();
+for( var i = 1 ; i <= foundset.getSize() ; i++ )
 {
 	var srcRecord = foundset.getRecord(i);
 	var destRecord = otherfoundset.getRecord(i);
@@ -6203,7 +6213,7 @@ databaseManager.saveData();
               <description><![CDATA[The destination record to copy to.]]></description>
             </parameter>
             <parameter name="overwrite" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
-              <description><![CDATA[Boolean values to overwrite all values.]]></description>
+              <description><![CDATA[Boolean values to overwrite all values. If overwrite is false/not provided, then the non empty values are not overwritten in the destination record.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -6220,13 +6230,15 @@ The matching requires the properties and getter functions of the source to match
 the 'get' will be removed and the remaining name will be converted to lowercase before attempting to match.
 Returns true if no error occurred.
 
-NOTE: This function could be used to store a copy of records in an archive table. Use the getRecord() function to get the record as an object.]]></description>
+NOTE: This function could be used to store a copy of records in an archive table. Use the getRecord() function to get the record as an object.
+Before trying this example, please make sure that the foundsets have some records loaded:]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="ng,wc,sc"><![CDATA[Copies all matching non empty columns (if overwrite boolean is given all columns except pk/ident, if array then all columns except pk and array names).]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[for( var i = 1 ; i <= foundset.getSize() ; i++ )
+            <sample clientSupport="ng,wc,sc"><![CDATA[otherfoundset.loadAllRecords();
+for( var i = 1 ; i <= foundset.getSize() ; i++ )
 {
 	var srcRecord = foundset.getRecord(i);
 	var destRecord = otherfoundset.getRecord(i);
@@ -6289,8 +6301,7 @@ A new createDataSourceByQuery() call will clear the datasource contents from a p
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[// select customer data for order 1234
-/** @type {QBSelect<db:/example_data/customers>} */
-var q = databaseManager.createSelect("db:/example_data/customers");
+var q = datasources.db.example_data.customers.createSelect()
 q.result.add(q.columns.customer_id).add(q.columns.city).add(q.columns.country);
 q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
 var uri = databaseManager.createDataSourceByQuery('mydata', q, true, 999, null, ['customer_id']);
@@ -6345,8 +6356,7 @@ A new createDataSourceByQuery() call will clear the datasource contents from a p
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[// select customer data for order 1234
-/** @type {QBSelect<db:/example_data/customers>} */
-var q = databaseManager.createSelect("db:/example_data/customers");
+var q = datasources.db.example_data.customers.createSelect()
 q.result.add(q.columns.customer_id).add(q.columns.city).add(q.columns.country);
 q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
 var uri = databaseManager.createDataSourceByQuery('mydata', q, true, 999, null, ['customer_id']);
@@ -6395,8 +6405,7 @@ A new createDataSourceByQuery() call will clear the datasource contents from a p
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[// select customer data for order 1234
-/** @type {QBSelect<db:/example_data/customers>} */
-var q = databaseManager.createSelect("db:/example_data/customers");
+var q = datasources.db.example_data.customers.createSelect();
 q.result.add(q.columns.address).add(q.columns.city).add(q.columns.country);
 q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
 var uri = databaseManager.createDataSourceByQuery('mydata', q, 999);
@@ -6449,8 +6458,7 @@ A new createDataSourceByQuery() call will clear the datasource contents from a p
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[// select customer data for order 1234
-/** @type {QBSelect<db:/example_data/customers>} */
-var q = databaseManager.createSelect("db:/example_data/customers");
+var q = datasources.db.example_data.customers.createSelect();
 q.result.add(q.columns.customer_id).add(q.columns.city).add(q.columns.country);
 q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
 var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, null, ['customer_id']);
@@ -6731,8 +6739,7 @@ var dataset2 = databaseManager.createEmptyDataSet(10,new Array ('a','b','c','d')
             <summary clientSupport="ng,wc,sc"><![CDATA[Create a QueryBuilder object for a datasource.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/book_nodes>} */
-var q = databaseManager.createSelect('db:/example_data/book_nodes')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var q = datasources.db.example_data.book_nodes.createSelect();
 q.result.addPk()
 q.where.add(q.columns.label_text.not.isin(null))
 databaseManager.getFoundSet('db:/example_data/book_nodes').loadRecords(q)]]></sample>
@@ -6865,8 +6872,7 @@ var maxReturnedRows = 10;//useful to limit number of rows
 var ds = databaseManager.getDataSetByQuery(q, true, maxReturnedRows);
 
 // query: select PK from example.book_nodes where parent = 111 and(note_date is null or note_date > now)
-/** @type {QBSelect<db:/example_data/book_nodes>} */
-var query = databaseManager.createSelect('db:/example_data/book_nodes').result.addPk().root
+var query = datasources.db.example_data.book_nodes.createSelect().result.addPk().root
 query.where.add(query.columns.parent_id.eq(111))
 	.add(query.or
 	.add(query.columns.note_date.isNull)
@@ -6909,8 +6915,7 @@ var maxReturnedRows = 10;//useful to limit number of rows
 var ds = databaseManager.getDataSetByQuery(q, maxReturnedRows);
 
 // query: select PK from example.book_nodes where parent = 111 and(note_date is null or note_date > now)
-/** @type {QBSelect<db:/example_data/book_nodes>} */
-var query = databaseManager.createSelect('db:/example_data/book_nodes').result.addPk().root
+var query = datasources.db.example_data.book_nodes.createSelect().result.addPk().root
 query.where.add(query.columns.parent_id.eq(111))
 	.add(query.or
 	.add(query.columns.note_date.isNull)
@@ -8499,9 +8504,9 @@ databaseManager.setAutoSave(true)]]></sample>
           <return type="void" typecode="void"/>
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Rollback a transaction started by databaseManager.startTransaction().
-Note that when autosave is false, rollbackEditedRecords() will not handle deleted records, while rollbackTransaction() does.
+Note that when autosave is false, revertEditedRecords() will not handle deleted records, while rollbackTransaction() does.
 Also, rollbackEditedRecords() is called before rolling back the transaction see rollbackTransaction(boolean) to controll that behavior
-and saved records within the transactions are restored to the database values, so user input is lost, to controll this see rollbackTransaction(boolean,boolean)]]></description>
+and saved records within the transactions are restored to the database values, so user input is lost, to control this see rollbackTransaction(boolean,boolean)]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="ng,wc,sc"><![CDATA[Rollback a transaction started by databaseManager.]]></summary>
@@ -8525,7 +8530,7 @@ if (cancel || !databaseManager.commitTransaction())
           <return type="void" typecode="void"/>
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Rollback a transaction started by databaseManager.startTransaction().
-Note that when autosave is false, rollbackEditedRecords() will not handle deleted records, while rollbackTransaction() does.
+Note that when autosave is false, revertEditedRecords() will not handle deleted records, while rollbackTransaction() does.
 Also, saved records within the transactions are restored to the database values, so user input is lost, to controll this see rollbackTransaction(boolean,boolean)]]></description>
           </descriptions>
           <summaries>
@@ -8556,7 +8561,7 @@ if (cancel || !databaseManager.commitTransaction())
           <return type="void" typecode="void"/>
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Rollback a transaction started by databaseManager.startTransaction().
-Note that when autosave is false, rollbackEditedRecords() will not handle deleted records, while rollbackTransaction() does.]]></description>
+Note that when autosave is false, revertEditedRecords() will not handle deleted records, while rollbackTransaction() does.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="ng,wc,sc"><![CDATA[Rollback a transaction started by databaseManager.]]></summary>
@@ -8577,7 +8582,9 @@ if (cancel || !databaseManager.commitTransaction())
               <description><![CDATA[call rollbackEditedRecords() before rolling back the transaction]]></description>
             </parameter>
             <parameter name="revertSavedRecords" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
-              <description><![CDATA[if false then all records in the transaction do keep the user input and are back in the edited records list]]></description>
+              <description><![CDATA[if false then all records in the transaction do keep the user input and are back in the edited records list.
+Note that if the pks of such a record are no longer used by it's foundset (find/search or load by query or ...) it will just be rolled-back as
+it can't be put in editing records list.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -9542,10 +9549,10 @@ var status = history.buttonsEnabled;]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if successful]]></return>
           <descriptions>
             <description clientSupport="ng,mc,wc,sc"><![CDATA[Removes the named form item from the history stack (and from memory) if not currently shown.
-Will return false when the form can't be removed, this can happen in certain situations: 
-1> The form is visible, 
+Will return false when the form can't be removed, this can happen in certain situations:
+1> The form is visible,
 2> The form is executing a function (is actively used),
-3> There are references to this form by a global variable/array, 
+3> There are references to this form by a global variable/array,
 4> If the form has a separate foundset with edited records that can't be saved (for example autosave is false)]]></description>
           </descriptions>
           <summaries>
@@ -12237,6 +12244,21 @@ var column = table.getColumn('customerid')
 var sqlName = column.getSQLName()]]></sample>
           </samples>
         </function>
+        <function clientSupport="ng,wc,sc" name="getSQLType">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int sql type.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Get the raw JDBC type of the column, which allows to check database specific types, like sting/byte column type variations.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Get the raw JDBC type of the column, which allows to check database specific types, like sting/byte column type variations.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var table = databaseManager.getTable('db:/example_data/orders')
+var column = table.getColumn('customerid')
+var sqlType = column.getSQLType();]]></sample>
+          </samples>
+        </function>
         <function clientSupport="ng,wc,sc" name="getScale">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int column scale.]]></return>
@@ -12969,6 +12991,21 @@ plugins.rawSQL.executeSQL('udm',  quotedTableName,  'select * from ' + quotedTab
             <sample clientSupport="ng,wc,sc"><![CDATA[var table = databaseManager.getTable('db:/example_data/orders')
 var column = table.getColumn('customerid')
 var sqlName = column.getSQLName()]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getSQLType">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int sql type.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Get the raw JDBC type of the column, which allows to check database specific types, like sting/byte column type variations.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Get the raw JDBC type of the column, which allows to check database specific types, like sting/byte column type variations.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var table = databaseManager.getTable('db:/example_data/orders')
+var column = table.getColumn('customerid')
+var sqlType = column.getSQLType();]]></sample>
           </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getScale">
@@ -14564,7 +14601,7 @@ When the client exits, all datasources used by that client are removed automatic
 
 Most resources used by the datasource can be released by deleting all records:
   dataset.removeRow(-1) or databaseManager.getFoundSet(datasource).deleteAllRecords()
-  
+
 A datasource can be reused if the data has the same signature (column names and types).
 A new createDataSource() call will clear the datasource contents from a previous call and insert the current data.]]></description>
           </descriptions>
@@ -15325,8 +15362,7 @@ function mySortFunction(r1, r2)
             <summary clientSupport="ng,wc,sc"><![CDATA[Create a query builder for a data source.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/book_nodes>} */
- var q = datasources.db.example_data.book_nodes.createSelect()
+            <sample clientSupport="ng,wc,sc"><![CDATA[var q = datasources.db.example_data.book_nodes.createSelect()
  q.result.addPk()
  q.where.add(q.columns.label_text.not.isin(null))
  datasources.db.example_data.book_nodes.getFoundSet().loadRecords(q)]]></sample>
@@ -16341,7 +16377,7 @@ field.displaysTags = true;]]></sample>
         <property clientSupport="ng,wc,sc" name="editable">
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
           <descriptions>
-            <description clientSupport="ng,wc,sc"><![CDATA[Flag that tells if the content of the field can be edited or not. 
+            <description clientSupport="ng,wc,sc"><![CDATA[Flag that tells if the content of the field can be edited or not.
 The default value of this flag is "true", that is the content can be edited.]]></description>
           </descriptions>
           <summaries>
@@ -20921,7 +20957,6 @@ forms['newForm1'].controller.show();]]></sample>
         </function>
         <function clientSupport="ng,wc,sc" name="newLayoutContainer">
           <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
             <argumentType typecode="int"/>
             <argumentType typecode="int"/>
           </argumentsTypes>
@@ -20933,12 +20968,9 @@ forms['newForm1'].controller.show();]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create a new layout container.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[var container = form.newLayoutContainer('col-md-4',0,0);]]></sample>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var container = form.newLayoutContainer(0,0);]]></sample>
           </samples>
           <parameters>
-            <parameter name="cssClasses" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[css classes used for layout]]></description>
-            </parameter>
             <parameter name="x" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[location x]]></description>
             </parameter>
@@ -25764,6 +25796,24 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
             <sample clientSupport="ng,wc,sc"><![CDATA[layoutContainer.name = 'col1';]]></sample>
           </samples>
         </property>
+        <property clientSupport="ng,wc,sc" name="packageName">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[returns the layouts package name]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[returns the layouts package name]]></summary>
+          </summaries>
+        </property>
+        <property clientSupport="ng,wc,sc" name="specName">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[returns the layouts spec name]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[returns the layouts spec name]]></summary>
+          </summaries>
+        </property>
         <property clientSupport="ng,wc,sc" name="style">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
@@ -25814,6 +25864,15 @@ fld.removeDesignTimeProperty('myprop')]]></sample>
         </property>
       </properties>
       <functions>
+        <function clientSupport="ng,wc,sc" name="getAttribute">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[layoutContainer.getAttribute('class');]]></sample>
+          </samples>
+        </function>
         <function clientSupport="ng,mc,wc,sc" name="getBean">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
@@ -26737,7 +26796,6 @@ forms['newForm1'].controller.show();]]></sample>
         </function>
         <function clientSupport="ng,wc,sc" name="newLayoutContainer">
           <argumentsTypes>
-            <argumentType typecode="java.lang.String"/>
             <argumentType typecode="int"/>
             <argumentType typecode="int"/>
           </argumentsTypes>
@@ -26749,12 +26807,9 @@ forms['newForm1'].controller.show();]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create a new layout container.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[var container = form.newLayoutContainer('col-md-4',0,0);]]></sample>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var container = form.newLayoutContainer(0,0);]]></sample>
           </samples>
           <parameters>
-            <parameter name="cssClasses" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[css classes used for layout]]></description>
-            </parameter>
             <parameter name="x" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[location x]]></description>
             </parameter>
@@ -27211,6 +27266,20 @@ forms['newForm1'].controller.show();]]></sample>
             <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
               <description><![CDATA[the height of the JSField object in pixels]]></description>
             </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="ng,wc,sc" name="putAttribute">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[layoutContainer.putAttribute('class','container fluid');]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="key"/>
+            <parameter name="value" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           </parameters>
         </function>
         <function clientSupport="ng,mc,wc,sc" name="removeBean">
@@ -30264,8 +30333,7 @@ record.save();]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant for the joinType of a Query Builder join.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
  /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.RIGHT_OUTER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
@@ -30283,8 +30351,7 @@ record.save();]]></sample>
             <sample clientSupport="ng,wc,sc"><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
 relation.joinType = JSRelation.LEFT_OUTER_JOIN;
 
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+	var query = datasources.db.example_data.orders.createSelect();
  /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
@@ -30302,8 +30369,7 @@ relation.joinType = JSRelation.LEFT_OUTER_JOIN;
             <sample clientSupport="ng,wc,sc"><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
 relation.joinType = JSRelation.LEFT_OUTER_JOIN;
 
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+	var query = datasources.db.example_data.orders.createSelect();
  /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
@@ -30318,8 +30384,7 @@ relation.joinType = JSRelation.LEFT_OUTER_JOIN;
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant for the joinType of a Query Builder join.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
  /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.RIGHT_OUTER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
@@ -30437,8 +30502,7 @@ Can be "inner join" or "left outer join".]]></description>
             <sample clientSupport="ng,wc,sc"><![CDATA[var relation = solutionModel.newRelation('parentToChild', 'db:/example_data/parent_table', 'db:/example_data/child_table', JSRelation.INNER_JOIN);
 relation.joinType = JSRelation.LEFT_OUTER_JOIN;
 
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+	var query = datasources.db.example_data.orders.createSelect();
  /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))]]></sample>
@@ -33665,7 +33729,7 @@ var fallbackValueList = myValueList.fallbackValueList]]></sample>
         <property clientSupport="ng,wc,sc" name="globalMethod">
           <return type="com.servoy.j2db.scripting.solutionmodel.JSMethod" typecode="com.servoy.j2db.scripting.solutionmodel.JSMethod"/>
           <descriptions>
-            <description clientSupport="ng,wc,sc"><![CDATA[A global method that provides the data for the valuelist. The global method must provided the data 
+            <description clientSupport="ng,wc,sc"><![CDATA[A global method that provides the data for the valuelist. The global method must provided the data
 as a JSDataSet.
 
 It is called when the valuelist needs data, it has 3 modes.
@@ -33684,31 +33748,30 @@ The last argument is rawDisplayValue which contains the same text as displayValu
             <sample clientSupport="ng,wc,sc"><![CDATA[var listProvider = solutionModel.newGlobalMethod('globals', 'function getDataSetForValueList(displayValue, realValue, record, valueListName, findMode, rawDisplayValue) {' +
 		'	' +
 		'var args = null;' +
-		'/** @type QBSelect<db:/example_data/employees> */' +
-		'var query = databaseManager.createSelect('db:/example_data/employees');' + 
-		'/** @type  {JSDataSet} */' + 
-		'var result = null;' + 
+		'var query = datasources.db.example_data.employees.createSelect();' +
+		'/** @type  {JSDataSet} */' +
+		'var result = null;' +
 		'if (displayValue == null && realValue == null) {' +
 		'  // TODO think about caching this result. can be called often!' +
 		'  // return the complete list' +
 		'  query.result.add(query.columns.firstname.concat(' ').concat(query.columns.lastname)).add(query.columns.employeeid);' +
-		'  result = databaseManager.getDataSetByQuery(query,100);' + 
+		'  result = databaseManager.getDataSetByQuery(query,100);' +
 		'} else if (displayValue != null) {' +
 		'  // TYPE_AHEAD filter call, return a filtered list' +
 		'  args = [displayValue + "%", displayValue + "%"]' +
 		'  query.result.add(query.columns.firstname.concat(' ').concat(query.columns.lastname)).add(query.columns.employeeid).' +
 		'  root.where.add(query.or.add(query.columns.firstname.lower.like(args[0] + '%')).add(query.columns.lastname.lower.like(args[1] + '%')));' +
-		'  result = databaseManager.getDataSetByQuery(query,100);' +  
+		'  result = databaseManager.getDataSetByQuery(query,100);' +
 		'} else if (realValue != null) {' +
 		'  // TODO think about caching this result. can be called often!' +
 		'  // real object not found in the current list, return 1 row with display,realvalue that will be added to the current list' +
 		'  // dont return a complete list in this mode because that will be added to the list that is already there' +
 		'  args = [realValue];' +
 		'  query.result.add(query.columns.firstname.concat(' ').concat(query.columns.lastname)).add(query.columns.employeeid).' +
-		'  root.where.add(query.columns.employeeid.eq(args[0]));' + 
-		'  result = databaseManager.getDataSetByQuery(query,1);' + 
+		'  root.where.add(query.columns.employeeid.eq(args[0]));' +
+		'  result = databaseManager.getDataSetByQuery(query,1);' +
 		'}' +
-		'return result;' + 
+		'return result;' +
 		'}');
 var vlist = solutionModel.newValueList('vlist', JSValueList.CUSTOM_VALUES);
 vlist.globalMethod = listProvider;]]></sample>
@@ -35574,8 +35637,7 @@ forms['printForm'].controller.showPrintPreview();]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an ascending sort expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.asc)
 .add(query.columns.companyid)
@@ -35591,8 +35653,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.avg.eq(1))
 	foundset.loadRecords(query)]]></sample>
@@ -35631,8 +35692,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
 	foundset.loadRecords(query)]]></sample>
@@ -35659,8 +35719,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an descending sort expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.desc)
 .add(query.columns.companyid)
@@ -35736,8 +35795,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.max(10))
 	foundset.loadRecords(query)]]></sample>
@@ -35752,8 +35810,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.min(10))
 	foundset.loadRecords(query)]]></sample>
@@ -35804,8 +35861,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.person.createSelect();
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
           </samples>
@@ -35819,20 +35875,18 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
-	var subquery = databaseManager.createSelect('db:/example_data/order_details')
-	
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var subquery = datasources.db.example_data.order_details.createSelect();
+
+	var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query
-		.or 
+		.or
 			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
+
 			.add(query.exists(
 					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
 			))
 		)
-		
+
 	foundset.loadRecords(query)]]></sample>
           </samples>
         </property>
@@ -35881,8 +35935,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.sum(10))
 	foundset.loadRecords(query)]]></sample>
@@ -36394,8 +36447,7 @@ Operator: lessThan]]></description>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an ascending sort expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.asc)
 .add(query.columns.companyid)
@@ -36411,8 +36463,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.avg.eq(1))
 	foundset.loadRecords(query)]]></sample>
@@ -36451,8 +36502,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
 	foundset.loadRecords(query)]]></sample>
@@ -36479,8 +36529,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an descending sort expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.desc)
 .add(query.columns.companyid)
@@ -36556,8 +36605,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.max(10))
 	foundset.loadRecords(query)]]></sample>
@@ -36572,8 +36620,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.min(10))
 	foundset.loadRecords(query)]]></sample>
@@ -36624,8 +36671,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.person.createSelect();
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
           </samples>
@@ -36639,20 +36685,18 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
-	var subquery = databaseManager.createSelect('db:/example_data/order_details')
-	
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var subquery = datasources.db.example_data.order_details.createSelect();
+
+	var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query
-		.or 
+		.or
 			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
+
 			.add(query.exists(
 					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
 			))
 		)
-		
+
 	foundset.loadRecords(query)]]></sample>
           </samples>
         </property>
@@ -36701,8 +36745,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.sum(10))
 	foundset.loadRecords(query)]]></sample>
@@ -37203,8 +37246,7 @@ Operator: lessThan]]></description>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.person.createSelect();
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
           </samples>
@@ -37218,20 +37260,18 @@ Operator: lessThan]]></description>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
-	var subquery = databaseManager.createSelect('db:/example_data/order_details')
-	
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var subquery = datasources.db.example_data.order_details.createSelect();
+
+	var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query
-		.or 
+		.or
 			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
+
 			.add(query.exists(
 					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
 			))
 		)
-		
+
 	foundset.loadRecords(query)]]></sample>
           </samples>
         </property>
@@ -37260,8 +37300,7 @@ Operator: lessThan]]></description>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an ascending sort expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.asc)
 .add(query.columns.companyid)
@@ -37277,8 +37316,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.avg.eq(1))
 	foundset.loadRecords(query)]]></sample>
@@ -37317,8 +37355,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
 	foundset.loadRecords(query)]]></sample>
@@ -37345,8 +37382,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an descending sort expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.desc)
 .add(query.columns.companyid)
@@ -37422,8 +37458,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.max(10))
 	foundset.loadRecords(query)]]></sample>
@@ -37438,8 +37473,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.min(10))
 	foundset.loadRecords(query)]]></sample>
@@ -37490,8 +37524,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.person.createSelect();
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
           </samples>
@@ -37505,20 +37538,18 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
-	var subquery = databaseManager.createSelect('db:/example_data/order_details')
-	
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var subquery = datasources.db.example_data.order_details.createSelect();
+
+	var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query
-		.or 
+		.or
 			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
+
 			.add(query.exists(
 					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
 			))
 		)
-		
+
 	foundset.loadRecords(query)]]></sample>
           </samples>
         </property>
@@ -37567,8 +37598,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create an aggregate expression.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 	query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 	.root.having.add(query.joins.orders_to_order_details.columns.quantity.count.sum(10))
 	foundset.loadRecords(query)]]></sample>
@@ -38068,8 +38098,7 @@ Operator: lessThan]]></description>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.person.createSelect();
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
           </samples>
@@ -38083,20 +38112,18 @@ Operator: lessThan]]></description>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
-	var subquery = databaseManager.createSelect('db:/example_data/order_details')
-	
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var subquery = datasources.db.example_data.order_details.createSelect();
+
+	var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query
-		.or 
+		.or
 			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
+
 			.add(query.exists(
 					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
 			))
 		)
-		
+
 	foundset.loadRecords(query)]]></sample>
           </samples>
         </property>
@@ -38114,9 +38141,8 @@ Operator: lessThan]]></description>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create abs(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.mynum.abs.eq(query.functions.abs(myval))) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.mynum.abs.eq(query.functions.abs(myval)))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38135,9 +38161,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create bit_length(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.shipname.bit_length.eq(query.functions.bit_length('Sample'))) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.shipname.bit_length.eq(query.functions.bit_length('Sample')))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38157,9 +38182,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Cast using type name.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
           <parameters>
@@ -38183,9 +38207,8 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="ng,wc,sc"><![CDATA[Create ceil(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.mynumcol.ceil.eq(query.functions.ceil(myvar)) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.mynumcol.ceil.eq(query.functions.ceil(myvar))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38206,9 +38229,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create year(date) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.mycol.coalesce('defval').eq(query.functions.coalesce(myvar, 'defval')) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.mycol.coalesce('defval').eq(query.functions.coalesce(myvar, 'defval'))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38230,8 +38252,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create concat(args, arg2) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/udm/contacts>} */
-	var query = databaseManager.createSelect('db:/udm/contacts') //$NON-NLS-1$
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.udm.contacts.createSelect();
 	query.result.add(query.columns.name_first.concat(' ').concat(query.columns.name_last))
 	var ds = databaseManager.getDataSetByQuery(query, -1)]]></sample>
           </samples>
@@ -38252,9 +38273,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create day(date) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.mydatecol.day.eq(query.functions.day(mydatevar)) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.mydatecol.day.eq(query.functions.day(mydatevar))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38276,9 +38296,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create divide(args, arg2) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.mynumcol.divide(2).eq(query.functions.divide(myvar, 2)) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.mynumcol.divide(2).eq(query.functions.divide(myvar, 2))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38298,9 +38317,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create floor(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.mynumcol.floor.eq(query.functions.floor(myvar)) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.mynumcol.floor.eq(query.functions.floor(myvar))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38321,9 +38339,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create hour(date) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.mydatecol.hour.eq(query.functions.hour(mydatevar)) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.mydatecol.hour.eq(query.functions.hour(mydatevar))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38344,9 +38361,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create length(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.shipname.len.eq(query.functions.len('Sample'))) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.shipname.len.eq(query.functions.len('Sample')))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38366,9 +38382,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create locate(str1, str2) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.shipname.locate('amp').eq(query.functions.locate('Sample', 'amp'))) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.shipname.locate('amp').eq(query.functions.locate('Sample', 'amp')))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38394,9 +38409,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create locate(str1, str2, start) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.shipname.locate('amp', 1).eq(query.functions.locate('Sample', 'amp', 1))) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.shipname.locate('amp', 1).eq(query.functions.locate('Sample', 'amp', 1)))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38423,9 +38437,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create lower(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.shipname.lower.eq(query.functions.lower('Sample'))) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.shipname.lower.eq(query.functions.lower('Sample')))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38445,9 +38458,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create minus(args, arg2) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.mynumcol.minus(2).eq(query.functions.minus(myvar, 2)) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.mynumcol.minus(2).eq(query.functions.minus(myvar, 2))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38467,9 +38479,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create minute(date) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.mydatecol.minute.eq(query.functions.minute(mydatevar)) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.mydatecol.minute.eq(query.functions.minute(mydatevar))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38491,9 +38502,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create mod(dividend, divisor) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.mynumcol.mod(2).eq(query.functions.mod(myvar, 2)) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.mynumcol.mod(2).eq(query.functions.mod(myvar, 2))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38513,9 +38523,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create month(date) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.mydatecol.month.eq(query.functions.month(mydatevar)) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.mydatecol.month.eq(query.functions.month(mydatevar))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38537,9 +38546,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create multiply(args, arg2) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.mynumcol.multiply(2).eq(query.functions.multiply(myvar, 2)) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.mynumcol.multiply(2).eq(query.functions.multiply(myvar, 2))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38560,9 +38568,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create nullif(arg1, arg2) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.shipname.nullif('none').eq(query.functions.nullif('Sample', 'none'))) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.shipname.nullif('none').eq(query.functions.nullif('Sample', 'none')))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38583,9 +38590,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create plus(args, arg2) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.mynumcol.plus(2).eq(query.functions.plus(myvar, 2)) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.mynumcol.plus(2).eq(query.functions.plus(myvar, 2))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38605,9 +38611,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create round(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.mynumcol.round.eq(query.functions.round(myvar)) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.mynumcol.round.eq(query.functions.round(myvar))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38628,9 +38633,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create second(date) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.mydatecol.second.eq(query.functions.second(mydatevar)) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.mydatecol.second.eq(query.functions.second(mydatevar))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38651,9 +38655,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create sqrt(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.mynum.sqrt.eq(query.functions.sqrt(myval))) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.mynum.sqrt.eq(query.functions.sqrt(myval)))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38673,9 +38676,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create substring(column, pos) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.shipname.substring(3).eq(query.functions.substring('Sample', 3))) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.shipname.substring(3).eq(query.functions.substring('Sample', 3)))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38701,9 +38703,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create substring(column, pos, len) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.shipname.substring(3, 2).eq(query.functions.substring('Sample', 3, 2))) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.shipname.substring(3, 2).eq(query.functions.substring('Sample', 3, 2)))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38730,9 +38731,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create trim(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.shipname.trim.eq(query.functions.trim('Sample'))) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.shipname.trim.eq(query.functions.trim('Sample')))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38751,9 +38751,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create upper(column) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.shipname.upper.eq(query.functions.upper('Sample'))) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.shipname.upper.eq(query.functions.upper('Sample')))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38772,9 +38771,8 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Create year(date) expression]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.where.add(query.columns.mydatecol.year.eq(query.functions.year(mydatevar)) 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.where.add(query.columns.mydatecol.year.eq(query.functions.year(mydatevar))
 foundset.loadRecords(query);]]></sample>
           </samples>
           <parameters>
@@ -38796,8 +38794,7 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.person.createSelect();
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
           </samples>
@@ -38811,20 +38808,18 @@ foundset.loadRecords(query);]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
-	var subquery = databaseManager.createSelect('db:/example_data/order_details')
-	
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var subquery = datasources.db.example_data.order_details.createSelect();
+
+	var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query
-		.or 
+		.or
 			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
+
 			.add(query.exists(
 					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
 			))
 		)
-		
+
 	foundset.loadRecords(query)]]></sample>
           </samples>
         </property>
@@ -38844,8 +38839,7 @@ Same as query.groupBy().add(join.getColumn("value"))]]></description>
             <summary clientSupport="ng,wc,sc"><![CDATA[Add column name to group-by clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 query.groupBy.add(query.columns.orderid) // have to group by on pk when using having-conditions in (foundset) pk queries
 .root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
 foundset.loadRecords(query)]]></sample>
@@ -38870,8 +38864,7 @@ Same as query.groupBy().add(join.getColumn("value"))]]></description>
             <summary clientSupport="ng,wc,sc"><![CDATA[Add column name to group-by clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 query.groupBy.add(query.columns.orderid) // have to group by on pk when using having-conditions in (foundset) pk queries
 .root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
 foundset.loadRecords(query)]]></sample>
@@ -38892,8 +38885,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Add the tables' primary pk columns in alphabetical order to the group by clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 .root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
 foundset.loadRecords(query)]]></sample>
@@ -38955,8 +38947,7 @@ Joins added to this clause will be based on this table clauses table.]]></descri
             <summary clientSupport="ng,wc,sc"><![CDATA[Get the on clause for the join.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-var query = databaseManager.createSelect('db:/example_data/person')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.person.createSelect();
 /** @type {QBJoin<db:/example_data/person>} */
 var join1 = query.joins.add('db:/example_data/person')
 join1.on.add(query.columns.parent_person_id.eq(join1.columns.person_id))
@@ -38977,8 +38968,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.person.createSelect();
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
           </samples>
@@ -38992,20 +38982,18 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
-	var subquery = databaseManager.createSelect('db:/example_data/order_details')
-	
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var subquery = datasources.db.example_data.order_details.createSelect();
+
+	var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query
-		.or 
+		.or
 			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
+
 			.add(query.exists(
 					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
 			))
 		)
-		
+
 	foundset.loadRecords(query)]]></sample>
           </samples>
         </property>
@@ -39099,8 +39087,7 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.person.createSelect();
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
           </samples>
@@ -39114,11 +39101,9 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
-	var subquery = databaseManager.createSelect('db:/example_data/order_details')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var subquery = datasources.db.example_data.order_details.createSelect();
 
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+	var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query
 		.or
 			.add(query.columns.order_id.not.isin([1, 2, 3]))
@@ -39145,8 +39130,7 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="ng,wc,sc"><![CDATA[Add a join with join type IQueryBuilderJoin#LEFT_OUTER_JOIN and no alias for the joining table.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
  /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))
@@ -39174,8 +39158,7 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="ng,wc,sc"><![CDATA[Add a join with no alias for the joining table.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
  /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))
@@ -39207,8 +39190,7 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="ng,wc,sc"><![CDATA[Add a join clause from the parent query builder part to the specified data source.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
  /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))
@@ -39244,8 +39226,7 @@ When dataSourceOrRelation is a data source, an empty join will be added with joi
             <summary clientSupport="ng,wc,sc"><![CDATA[Add a join based on relation or add a manual join.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
  /** @type {QBJoin<db:/example_data/order_details>} */
 	var join = query.joins.add('db:/example_data/order_details', JSRelation.INNER_JOIN, 'odetail')
 	join.on.add(join.columns.orderid.eq(query.columns.orderid))
@@ -39280,8 +39261,7 @@ When dataSourceOrRelation is a data source, an empty join will be added with joi
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.person.createSelect();
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
           </samples>
@@ -39295,20 +39275,18 @@ When dataSourceOrRelation is a data source, an empty join will be added with joi
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
-	var subquery = databaseManager.createSelect('db:/example_data/order_details')
-	
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var subquery = datasources.db.example_data.order_details.createSelect();
+
+	var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query
-		.or 
+		.or
 			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
+
 			.add(query.exists(
 					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
 			))
 		)
-		
+
 	foundset.loadRecords(query)]]></sample>
           </samples>
         </property>
@@ -39326,8 +39304,7 @@ When dataSourceOrRelation is a data source, an empty join will be added with joi
             <summary clientSupport="ng,wc,sc"><![CDATA[Add a condition to the AND or OR condition list.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 query.where.add(query.columns.orderdate.isNull)]]></sample>
           </samples>
           <parameters>
@@ -39349,8 +39326,7 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.person.createSelect();
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
           </samples>
@@ -39364,20 +39340,18 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
-	var subquery = databaseManager.createSelect('db:/example_data/order_details')
-	
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var subquery = datasources.db.example_data.order_details.createSelect();
+
+	var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query
-		.or 
+		.or
 			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
+
 			.add(query.exists(
 					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
 			))
 		)
-		
+
 	foundset.loadRecords(query)]]></sample>
           </samples>
         </property>
@@ -39395,8 +39369,7 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.person.createSelect();
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
           </samples>
@@ -39410,20 +39383,18 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
-	var subquery = databaseManager.createSelect('db:/example_data/order_details')
-	
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var subquery = datasources.db.example_data.order_details.createSelect();
+
+	var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query
-		.or 
+		.or
 			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
+
 			.add(query.exists(
 					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
 			))
 		)
-		
+
 	foundset.loadRecords(query)]]></sample>
           </samples>
         </property>
@@ -39452,8 +39423,7 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.person.createSelect();
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
           </samples>
@@ -39467,20 +39437,18 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
-	var subquery = databaseManager.createSelect('db:/example_data/order_details')
-	
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var subquery = datasources.db.example_data.order_details.createSelect();
+
+	var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query
-		.or 
+		.or
 			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
+
 			.add(query.exists(
 					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
 			))
 		)
-		
+
 	foundset.loadRecords(query)]]></sample>
           </samples>
         </property>
@@ -39753,8 +39721,7 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get the functions clause from a query, used for functions that are not tied to a column.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = ddatasources.db.example_data.orders.createSelect();
 query.where.add(query.columns.shipname.upper.eq(query.functions.upper('servoy'))) //$NON-NLS-1$
 foundset.loadRecords(query)]]></sample>
           </samples>
@@ -39768,8 +39735,7 @@ foundset.loadRecords(query)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get the group by clause from a query]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 .root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
 foundset.loadRecords(query)]]></sample>
@@ -39785,8 +39751,7 @@ The conditions added here are AND-ed.]]></description>
             <summary clientSupport="ng,wc,sc"><![CDATA[Get the having-part of the query, used to add conditions.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 query.groupBy.addPk() // have to group by on pk when using having-conditions in (foundset) pk queries
 .root.having.add(query.joins.orders_to_order_details.columns.quantity.count.eq(0))
 foundset.loadRecords(query)]]></sample>
@@ -39838,8 +39803,7 @@ Joins added to this clause will be based on this table clauses table.]]></descri
             <summary clientSupport="ng,wc,sc"><![CDATA[Get the named parameters from a query.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query.columns.contact_id.eq(query.getParameter('mycontactid')))
 
 	// load orders where contact_id = 100
@@ -39860,8 +39824,7 @@ Joins added to this clause will be based on this table clauses table.]]></descri
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.person.createSelect();
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
           </samples>
@@ -39887,20 +39850,18 @@ Joins added to this clause will be based on this table clauses table.]]></descri
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
-	var subquery = databaseManager.createSelect('db:/example_data/order_details')
-	
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var subquery = datasources.db.example_data.order_details.createSelect();
+
+	var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query
-		.or 
+		.or
 			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
+
 			.add(query.exists(
 					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
 			))
 		)
-		
+
 	foundset.loadRecords(query)]]></sample>
           </samples>
         </property>
@@ -39913,8 +39874,7 @@ Joins added to this clause will be based on this table clauses table.]]></descri
             <summary clientSupport="ng,wc,sc"><![CDATA[Get the sorting part of the query.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 query.sort
 .add(query.joins.orders_to_order_details.columns.quantity.desc)
 .add(query.columns.companyid)
@@ -40035,8 +39995,7 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="ng,wc,sc"><![CDATA[Get or create a parameter for the query, this used to parameterize queries.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query.columns.contact_id.eq(query.getParameter('mycontactid')))
 
 	// load orders where contact_id = 100
@@ -40111,8 +40070,7 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.person.createSelect();
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
           </samples>
@@ -40126,20 +40084,18 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
-	var subquery = databaseManager.createSelect('db:/example_data/order_details')
-	
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var subquery = datasources.db.example_data.order_details.createSelect();
+
+	var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query
-		.or 
+		.or
 			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
+
 			.add(query.exists(
 					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
 			))
 		)
-		
+
 	foundset.loadRecords(query)]]></sample>
           </samples>
         </property>
@@ -40156,8 +40112,7 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.person.createSelect();
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
           </samples>
@@ -40171,20 +40126,18 @@ The alias may be of the main table or any level deep joined table.]]></descripti
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
-	var subquery = databaseManager.createSelect('db:/example_data/order_details')
-	
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var subquery = datasources.db.example_data.order_details.createSelect();
+
+	var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query
-		.or 
+		.or
 			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
+
 			.add(query.exists(
 					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
 			))
 		)
-		
+
 	foundset.loadRecords(query)]]></sample>
           </samples>
         </property>
@@ -40316,8 +40269,7 @@ Joins added to this clause will be based on this table clauses table.]]></descri
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.person.createSelect();
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
           </samples>
@@ -40331,20 +40283,18 @@ Joins added to this clause will be based on this table clauses table.]]></descri
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
-	var subquery = databaseManager.createSelect('db:/example_data/order_details')
-	
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var subquery = datasources.db.example_data.order_details.createSelect();
+
+	var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query
-		.or 
+		.or
 			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
+
 			.add(query.exists(
 					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
 			))
 		)
-		
+
 	foundset.loadRecords(query)]]></sample>
           </samples>
         </property>
@@ -40444,8 +40394,7 @@ for (var c in q.where.conditionnames)
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent table clause, this may be a query or a join clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/person>} */
-	var query = databaseManager.createSelect('db:/example_data/person')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.person.createSelect();
 	query.where.add(query.joins.person_to_parent.joins.person_to_parent.columns.name.eq('john'))
 	foundset.loadRecords(query)]]></sample>
           </samples>
@@ -40459,20 +40408,18 @@ for (var c in q.where.conditionnames)
             <summary clientSupport="ng,wc,sc"><![CDATA[Get query builder parent.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/order_details>} */
-	var subquery = databaseManager.createSelect('db:/example_data/order_details')
-	
- /** @type {QBSelect<db:/example_data/orders>} */
-	var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var subquery = datasources.db.example_data.order_details.createSelect();
+
+	var query = datasources.db.example_data.orders.createSelect();
 	query.where.add(query
-		.or 
+		.or
 			.add(query.columns.order_id.not.isin([1, 2, 3]))
-			
+
 			.add(query.exists(
 					subquery.where.add(subquery.columns.orderid.eq(query.columns.order_id)).root
 			))
 		)
-		
+
 	foundset.loadRecords(query)]]></sample>
           </samples>
         </property>
@@ -40490,8 +40437,7 @@ for (var c in q.where.conditionnames)
             <summary clientSupport="ng,wc,sc"><![CDATA[Add a condition to the AND or OR condition list.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 query.where.add(query.columns.orderdate.isNull)]]></sample>
           </samples>
           <parameters>
@@ -40513,8 +40459,7 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Add a named condition to the AND or OR condition list.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 query.where.add("mycond", query.columns.orderdate.isNull)]]></sample>
           </samples>
           <parameters>
@@ -40536,8 +40481,7 @@ query.where.add("mycond", query.columns.orderdate.isNull)]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Clear the conditions in the query where-clause.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 query.where.clear()]]></sample>
           </samples>
         </function>
@@ -40572,8 +40516,7 @@ for (var c in q.where.conditionnames)
             <summary clientSupport="ng,wc,sc"><![CDATA[Remove a named condition from the AND or OR condition list.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders')
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
 query.where.remove("mycond")]]></sample>
           </samples>
         </function>
@@ -40590,9 +40533,8 @@ query.where.remove("mycond")]]></sample>
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
         </constant>
@@ -40605,9 +40547,8 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
         </constant>
@@ -40620,9 +40561,8 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
         </constant>
@@ -40635,9 +40575,8 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
         </constant>
@@ -40650,9 +40589,8 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
         </constant>
@@ -40665,9 +40603,8 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
         </constant>
@@ -40680,9 +40617,8 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
         </constant>
@@ -40695,9 +40631,8 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
         </constant>
@@ -40710,9 +40645,8 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
         </constant>
@@ -40725,9 +40659,8 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
         </constant>
@@ -40740,9 +40673,8 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
         </constant>
@@ -40755,9 +40687,8 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
         </constant>
@@ -40770,9 +40701,8 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
         </constant>
@@ -40785,9 +40715,8 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
         </constant>
@@ -40800,9 +40729,8 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
         </constant>
@@ -40815,9 +40743,8 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
         </constant>
@@ -40830,9 +40757,8 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
         </constant>
@@ -40845,9 +40771,8 @@ application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></s
             <summary clientSupport="ng,wc,sc"><![CDATA[Constant used for casting.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/orders>} */
-var query = databaseManager.createSelect('db:/example_data/orders') //$NON-NLS-1$
-query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING)); 
+            <sample clientSupport="ng,wc,sc"><![CDATA[var query = datasources.db.example_data.orders.createSelect();
+query.result.add(query.functions.cast("22",QUERY_COLUMN_TYPES.TYPE_INTEGER)).add(query.columns.amt_discount.cast(QUERY_COLUMN_TYPES.TYPE_STRING));
 application.output(databaseManager.getDataSetByQuery(query,1).getAsHTML())]]></sample>
           </samples>
         </constant>
@@ -44710,7 +44635,7 @@ forms.company.elements.portal50.setScroll(x+10,y+10);]]></description>
             <sample clientSupport="ng,wc,sc"><![CDATA[var y = %%prefix%%%%elementName%%.getScrollY();]]></sample>
           </samples>
         </function>
-         <function clientSupport="ng,wc,sc" name="getSelectedElements">
+        <function clientSupport="ng,wc,sc" name="getSelectedElements">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;"><![CDATA[array with selected values]]></return>
           <descriptions>
@@ -48093,7 +48018,9 @@ forms.company.elements.faxBtn.visible = !currentState;]]></sample>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the plain text]]></return>
           <descriptions>
-            <description clientSupport="ng,wc,sc"><![CDATA[Gets the plain text for the formatted HTML/RTF text of a specified field element with a design time display property of HTML_AREA/RTF only. It is for Smart Client use only.
+            <description clientSupport="ng,wc,sc"><![CDATA[Gets the plain text for the formatted HTML/RTF text of a specified field element with a design time display property of HTML_AREA/RTF only.
+
+NOTE: This does not work in Web Client.
 
 NOTE: As of Servoy 4.x (and higher) you can also get/set the relative or absolute URL for an HTML_AREA field element. For more detail, see the .URL and .baseURL field element runtime properties earlier in this section.
 
@@ -54292,7 +54219,9 @@ forms.company.elements.faxBtn.visible = !currentState;]]></sample>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the plain text]]></return>
           <descriptions>
-            <description clientSupport="ng,wc,sc"><![CDATA[Gets the plain text for the formatted HTML/RTF text of a specified field element with a design time display property of HTML_AREA/RTF only. It is for Smart Client use only.
+            <description clientSupport="ng,wc,sc"><![CDATA[Gets the plain text for the formatted HTML/RTF text of a specified field element with a design time display property of HTML_AREA/RTF only.
+
+NOTE: This does not work in Web Client.
 
 NOTE: As of Servoy 4.x (and higher) you can also get/set the relative or absolute URL for an HTML_AREA field element. For more detail, see the .URL and .baseURL field element runtime properties earlier in this section.
 
@@ -58882,7 +58811,7 @@ security.addUserToGroup(userUID, 'groupname');]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[authentication result from authenticator solution or boolean in case of servoy built-in authentication]]></return>
           <descriptions>
-            <description clientSupport="ng,mc"><![CDATA[Authenticate the given credentials against the mobile service solution. 
+            <description clientSupport="ng,mc"><![CDATA[Authenticate the given credentials against the mobile service solution.
 It will set the credentials and then do a sync call to the server.]]></description>
           </descriptions>
           <summaries>
@@ -58940,7 +58869,7 @@ ok = security.authenticate(null, null, [scopes.globals.userName, scopes.globals.
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[authentication result from authenticator solution or boolean in case of servoy built-in authentication]]></return>
           <descriptions>
-            <description clientSupport="mc"><![CDATA[Authenticate the given credentials against the mobile service solution. First two parameters are not used in mobile solution, just the credentials. 
+            <description clientSupport="mc"><![CDATA[Authenticate the given credentials against the mobile service solution. First two parameters are not used in mobile solution, just the credentials.
 It will set the credentials and then do a sync call to the server.]]></description>
             <description clientSupport="ng,wc,sc"><![CDATA[Authenticate to the Servoy Server using one of the installed authenticators or the Servoy default authenticator.
 
@@ -59262,7 +59191,7 @@ if (groupName)
 		// add user to group
 		security.addUserToGroup(uid, groupName);
 		// if not delete group, do delete group
-		if (deleteGroup) 
+		if (deleteGroup)
 		{
 			security.deleteGroup(groupName);
 		}
@@ -59420,7 +59349,7 @@ if (groupName)
 		// add user to group
 		security.addUserToGroup(uid, groupName);
 		// if not delete group, do delete group
-		if (deleteGroup) 
+		if (deleteGroup)
 		{
 			security.deleteGroup(groupName);
 		}
@@ -59690,7 +59619,7 @@ for(var i=1 ; i<=dsUsers.getMaxRowIndex() ; i++)
           <samples>
             <sample clientSupport="mc"><![CDATA[var username = security.getUserName();
 if (username != null) {
-  // user is logged in 
+  // user is logged in
 }]]></sample>
             <sample clientSupport="ng,wc,sc"><![CDATA[//gets the current loggedIn username
 var userName = security.getUserName();]]></sample>
@@ -59712,7 +59641,7 @@ var userName = security.getUserName();]]></sample>
           <samples>
             <sample clientSupport="mc"><![CDATA[var username = security.getUserName();
 if (username != null) {
-  // user is logged in 
+  // user is logged in
 }]]></sample>
             <sample clientSupport="ng,wc,sc"><![CDATA[//gets the current loggedIn username
 var userName = security.getUserName();]]></sample>
@@ -59734,10 +59663,10 @@ var userName = security.getUserName();]]></sample>
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[//gets the current loggedIn username
-var userName = security.getUserName(); 
+var userName = security.getUserName();
 //gets the uid of the given username
 var userUID = security.getUserUID(userName);
-//is the same as above 
+//is the same as above
 //var my_userUID = security.getUserUID();]]></sample>
           </samples>
         </function>
@@ -59754,10 +59683,10 @@ var userUID = security.getUserUID(userName);
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[//gets the current loggedIn username
-var userName = security.getUserName(); 
+var userName = security.getUserName();
 //gets the uid of the given username
 var userUID = security.getUserUID(userName);
-//is the same as above 
+//is the same as above
 //var my_userUID = security.getUserUID();]]></sample>
           </samples>
           <parameters>
@@ -60165,7 +60094,7 @@ else
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Sets the security settings; the entries contained in the given dataset will override those contained in the current security settings.
 
-NOTE: The security.getElementUUIDs and security.setSecuritySettings functions can be used to define custom security that overrides Servoy security. 
+NOTE: The security.getElementUUIDs and security.setSecuritySettings functions can be used to define custom security that overrides Servoy security.
 For additional information see the function security.getElementUUIDs.]]></description>
           </descriptions>
           <summaries>
@@ -60231,7 +60160,7 @@ if (groupName)
 		// add user to group
 		security.addUserToGroup(uid, groupName);
 		// if not delete group, do delete group
-		if (deleteGroup) 
+		if (deleteGroup)
 		{
 			security.deleteGroup(groupName);
 		}
@@ -62368,6 +62297,22 @@ form.borderType = solutionModel.createTitledBorder('Test',solutionModel.createFo
             </parameter>
           </parameters>
         </function>
+        <function clientSupport="ng,wc,sc" name="getAllRelations">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSRelation[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSRelation;"><![CDATA[an array of all relations (all elements in the array are of type JSRelation)]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Gets an array of all relations.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Gets an array of all relations.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var relations = solutionModel.getAllRelations();
+if (relations.length != 0)
+	for (var i in relations)
+		application.output(relations[i].name);]]></sample>
+          </samples>
+        </function>
         <function clientSupport="ng,wc,sc" deprecated="true" name="getCalculation">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
@@ -63990,7 +63935,7 @@ DEFAULT: false]]></description>
         <constant clientSupport="ng,wc,sc" name="COMBOBOX_SHOW_POPUP_ON_FOCUS_GAIN">
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
           <descriptions>
-            <description clientSupport="ng,wc,sc"><![CDATA[Property that can be set using application.putClientProperty() or element.putClientProperty().
+            <description clientSupport="ng,wc,sc"><![CDATA[Property that can be set using application.putClientProperty() or element.putClientProperty(). It is used only in Smart Client.
 
 If set on application it will affect all COMBOBOX fields. If set on an element it will affect only that COMBOBOX element/field (with priority over the application property).
 Value can be true/false/null.
@@ -64084,7 +64029,7 @@ forms.someForm.elements.typeAheadElement.putClientProperty(APP_UI_PROPERTY.DATE_
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Property that can be set on editable html area using element.putClientProperty()
 
-The value must be a valid json string according to TinyMCE editor configuration (http://www.tinymce.com/wiki.php/configuration). 
+The value must be a valid json string according to TinyMCE editor configuration (http://www.tinymce.com/wiki.php/configuration).
 It will be used to override/set configuration properties in order to customize the editor.]]></description>
           </descriptions>
           <summaries>
@@ -64127,7 +64072,7 @@ If set to true, table views in web client are scrollable by default
 If set to false, table views in web client are not scrollable, but pageable by default
 
 The value can be true/false
-DEFAULT: false 
+DEFAULT: false
 
 When this property is set to true, you can control the size of the page by setting the servoy property "servoy.webclient.scrolling.tableview.multiplier".
 The default value is 2. Setting the property to a higher value, will result in more data to be queried at once. You can also set it to a lower value, like 1 or 1.5 for example.
@@ -64156,6 +64101,24 @@ DEFAULT: false]]></description>
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[application.putClientProperty(APP_UI_PROPERTY.TABLEVIEW_WC_SCROLLABLE_KEEP_LOADED_ROWS, true)]]></sample>
+          </samples>
+        </constant>
+        <constant clientSupport="ng,wc,sc" name="TABLEVIEW_WC_USE_KEY_NAVIGATION">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Property that can be set using application.putClientProperty().
+
+If set to true, you can change selection in webclient tableview using up/down keys
+If set to false, you cannot change selection via keyboard arrows
+
+The value can be true/false
+DEFAULT: true]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Property that can be set using application.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[application.putClientProperty(APP_UI_PROPERTY.TABLEVIEW_WC_USE_KEY_NAVIGATION, false)]]></sample>
           </samples>
         </constant>
         <constant clientSupport="ng,wc,sc" name="TOOLTIP_DISMISS_DELAY">
@@ -64249,7 +64212,7 @@ DEFAULT: false]]></description>
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Property that can be set using application.putClientProperty()
 
-The value can be a positive integer representing the maximum number of rows that will be retrieved by query in database or related valuelist. 
+The value can be a positive integer representing the maximum number of rows that will be retrieved by query in database or related valuelist.
 Can have a maximum value of 1000.
 
 DEFAULT: 500]]></description>
@@ -64411,12 +64374,12 @@ Another use is, to pass a record and qualified relations string to test multiple
             <summary clientSupport="ng,mc,wc,sc"><![CDATA[Returns true if the (related)foundset exists and has records.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,mc,wc,sc"><![CDATA[//test the orders_to_orderitems foundset 
+            <sample clientSupport="ng,mc,wc,sc"><![CDATA[//test the orders_to_orderitems foundset
 if (%%elementName%%.hasRecords(orders_to_orderitems))
 {
 	//do work on relatedFoundSet
 }
-//test the orders_to_orderitems.orderitems_to_products foundset to be reached from the current record 
+//test the orders_to_orderitems.orderitems_to_products foundset to be reached from the current record
 //if (%%elementName%%.hasRecords(foundset.getSelectedRecord(),'orders_to_orderitems.orderitems_to_products'))
 //{
 //	//do work on deeper relatedFoundSet
@@ -64442,12 +64405,12 @@ Another use is, to pass a record and qualified relations string to test multiple
             <summary clientSupport="ng,mc,wc,sc"><![CDATA[Returns true if the (related)foundset exists and has records.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,mc,wc,sc"><![CDATA[//test the orders_to_orderitems foundset 
+            <sample clientSupport="ng,mc,wc,sc"><![CDATA[//test the orders_to_orderitems foundset
 if (%%elementName%%.hasRecords(orders_to_orderitems))
 {
 	//do work on relatedFoundSet
 }
-//test the orders_to_orderitems.orderitems_to_products foundset to be reached from the current record 
+//test the orders_to_orderitems.orderitems_to_products foundset to be reached from the current record
 //if (%%elementName%%.hasRecords(foundset.getSelectedRecord(),'orders_to_orderitems.orderitems_to_products'))
 //{
 //	//do work on deeper relatedFoundSet
@@ -64659,36 +64622,36 @@ if (%%elementName%%.hasRecords(orders_to_orderitems))
 // precision is a non-negative decimal integer usually used to restrict the number of characters
 // conversion is a character indicating how the argument should be formatted
 // typical conversion values: b(boolean), s(string), c(character), d(decimal integer), f(floating number), t(prefix for date and time)
-// Date/Time Conversions (used after 't' prefix): 
-		// 'H' 	Hour of the day for the 24-hour clock, formatted as two digits with a leading zero as necessary i.e. 00 - 23. 
-		// 'I' 	Hour for the 12-hour clock, formatted as two digits with a leading zero as necessary, i.e. 01 - 12. 
-		// 'k' 	Hour of the day for the 24-hour clock, i.e. 0 - 23. 
-		// 'l' 	Hour for the 12-hour clock, i.e. 1 - 12. 
-		// 'M' 	Minute within the hour formatted as two digits with a leading zero as necessary, i.e. 00 - 59. 
+// Date/Time Conversions (used after 't' prefix):
+		// 'H' 	Hour of the day for the 24-hour clock, formatted as two digits with a leading zero as necessary i.e. 00 - 23.
+		// 'I' 	Hour for the 12-hour clock, formatted as two digits with a leading zero as necessary, i.e. 01 - 12.
+		// 'k' 	Hour of the day for the 24-hour clock, i.e. 0 - 23.
+		// 'l' 	Hour for the 12-hour clock, i.e. 1 - 12.
+		// 'M' 	Minute within the hour formatted as two digits with a leading zero as necessary, i.e. 00 - 59.
 		// 'S' 	Seconds within the minute, formatted as two digits with a leading zero as necessary, i.e. 00 - 60 ("60" is a special value required to support leap seconds).
 		// 'L' 	Millisecond within the second formatted as three digits with leading zeros as necessary, i.e. 000 - 999.
-		// 'p' 	Locale-specific morning or afternoon marker in lower case, e.g."am" or "pm". Use of the conversion prefix 'T' forces this output to upper case. 
+		// 'p' 	Locale-specific morning or afternoon marker in lower case, e.g."am" or "pm". Use of the conversion prefix 'T' forces this output to upper case.
 		// 'z' 	RFC 822 style numeric time zone offset from GMT, e.g. -0800.
 		// 'Z' 	A string representing the abbreviation for the time zone.
 		// 'B' 	Locale-specific full month name, e.g. "January", "February".
-		// 'b' 	Locale-specific abbreviated month name, e.g. "Jan", "Feb". 
-		// 'h' 	Same as 'b'. 
-		// 'A' 	Locale-specific full name of the day of the week, e.g. "Sunday", "Monday" 
-		// 'a' 	Locale-specific short name of the day of the week, e.g. "Sun", "Mon" 
-		// 'C' 	Four-digit year divided by 100, formatted as two digits with leading zero as necessary, i.e. 00 - 99 
-		// 'Y' 	Year, formatted as at least four digits with leading zeros as necessary, e.g. 0092 equals 92 CE for the Gregorian calendar. 
+		// 'b' 	Locale-specific abbreviated month name, e.g. "Jan", "Feb".
+		// 'h' 	Same as 'b'.
+		// 'A' 	Locale-specific full name of the day of the week, e.g. "Sunday", "Monday"
+		// 'a' 	Locale-specific short name of the day of the week, e.g. "Sun", "Mon"
+		// 'C' 	Four-digit year divided by 100, formatted as two digits with leading zero as necessary, i.e. 00 - 99
+		// 'Y' 	Year, formatted as at least four digits with leading zeros as necessary, e.g. 0092 equals 92 CE for the Gregorian calendar.
 		// 'y' 	Last two digits of the year, formatted with leading zeros as necessary, i.e. 00 - 99.
-		// 'j' 	Day of year, formatted as three digits with leading zeros as necessary, e.g. 001 - 366 for the Gregorian calendar. 
-		// 'm' 	Month, formatted as two digits with leading zeros as necessary, i.e. 01 - 13. 
-		// 'd' 	Day of month, formatted as two digits with leading zeros as necessary, i.e. 01 - 31 
+		// 'j' 	Day of year, formatted as three digits with leading zeros as necessary, e.g. 001 - 366 for the Gregorian calendar.
+		// 'm' 	Month, formatted as two digits with leading zeros as necessary, i.e. 01 - 13.
+		// 'd' 	Day of month, formatted as two digits with leading zeros as necessary, i.e. 01 - 31
 		// 'e' 	Day of month, formatted as two digits, i.e. 1 - 31.
 
 		// common compositions for date/time conversion
-		// 'R' 	Time formatted for the 24-hour clock as "%tH:%tM" 
-		// 'T' 	Time formatted for the 24-hour clock as "%tH:%tM:%tS". 
-		// 'r' 	Time formatted for the 12-hour clock as "%tI:%tM:%tS %Tp". The location of the morning or afternoon marker ('%Tp') may be locale-dependent. 
-		// 'D' 	Date formatted as "%tm/%td/%ty". 
-		// 'F' 	ISO 8601 complete date formatted as "%tY-%tm-%td". 
+		// 'R' 	Time formatted for the 24-hour clock as "%tH:%tM"
+		// 'T' 	Time formatted for the 24-hour clock as "%tH:%tM:%tS".
+		// 'r' 	Time formatted for the 12-hour clock as "%tI:%tM:%tS %Tp". The location of the morning or afternoon marker ('%Tp') may be locale-dependent.
+		// 'D' 	Date formatted as "%tm/%td/%ty".
+		// 'F' 	ISO 8601 complete date formatted as "%tY-%tm-%td".
 		// 'c' 	Date and time formatted as "%ta %tb %td %tT %tZ %tY", e.g. "Sun Jul 20 16:17:00 EDT 1969".
 
 utils.stringFormat('%s Birthday: %2$tm %2$te,%2$tY',new Array('My',new Date(2009,0,1))) // returns My Birthday: 01 1,2009
@@ -64929,7 +64892,7 @@ var retval = utils.stringMiddleWords('this is a test',2,2);]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[the resulting hashString]]></return>
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Returns the PBKDF2 hash for specified text. This method is preferred above the old MD5 hash for enhanced security.
-It uses a default of 2000 iterations. The string that is returned can only be used in the utils.validatePBKDF2Hash(password,thisReturnValue) 
+It uses a default of 2000 iterations. The string that is returned can only be used in the utils.validatePBKDF2Hash(password,thisReturnValue)
 to check if this hash is a result of that password.
 This will always be false: utils.stringPBKDF2Hash("test") == utils.stringPBKDF2Hash("test"). Because for the same string in multiply calls it will not generate the same hash.
 So you can only check it like this: utils.validatePBKDF2Hash("test",utils.stringPBKDF2Hash("test"))
@@ -65309,7 +65272,7 @@ NOTE: PBKDF2 is the key hash function for the PKCS (Public-Key Cryptography) sta
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[if (utils.validatePBKDF2Hash(user_password, hashFromDb)) {
-   // logged in 
+   // logged in
 }]]></sample>
           </samples>
           <parameters>
@@ -68303,7 +68266,7 @@ TIP: You can use the Copy button in the developer Select Sorting Fields dialog t
             <summary clientSupport="ng,wc,sc"><![CDATA[Get the list of available time zones.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[//Get the list of available time zones 
+            <sample clientSupport="ng,wc,sc"><![CDATA[//Get the list of available time zones
 var timezones = i18n.getAvailableTimeZoneIDs();]]></sample>
           </samples>
         </function>
@@ -68324,7 +68287,7 @@ var timezones = i18n.getAvailableTimeZoneIDs();]]></sample>
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[a String representing the current country.]]></return>
           <descriptions>
-            <description clientSupport="ng,wc,sc"><![CDATA[Gets the current country; based on the current locale settings in the Servoy Client Locale preferences. 
+            <description clientSupport="ng,wc,sc"><![CDATA[Gets the current country; based on the current locale settings in the Servoy Client Locale preferences.
 
 NOTE: For more information on i18n, see the chapter on Internationalization in the Servoy Developer User's Guide, and the chapter on Internationalization-I18N in the Programming Guide.]]></description>
           </descriptions>
@@ -68339,7 +68302,7 @@ NOTE: For more information on i18n, see the chapter on Internationalization in t
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[a String representing the current language.]]></return>
           <descriptions>
-            <description clientSupport="ng,mc,wc,sc"><![CDATA[Gets the current language; based on the current locale settings in the Servoy Client Locale preferences. 
+            <description clientSupport="ng,mc,wc,sc"><![CDATA[Gets the current language; based on the current locale settings in the Servoy Client Locale preferences.
 
 NOTE: For more information on i18n, see the chapter on Internationalization in the Servoy Developer User's Guide, and the chapter on Internationalization-I18N in the Programming Guide.]]></description>
           </descriptions>
@@ -68418,7 +68381,7 @@ i18n.getI18NMessage('mykey.username.text',new Array('my_name'))]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[a String that is the message for the message key.]]></return>
           <descriptions>
-            <description clientSupport="ng,mc,wc,sc"><![CDATA[Gets the real message (for the clients locale) for a specified message key. 
+            <description clientSupport="ng,mc,wc,sc"><![CDATA[Gets the real message (for the clients locale) for a specified message key.
 You can use parameter substitution by using {n}, where n is a index number of the value thats in the arguments array.]]></description>
           </descriptions>
           <summaries>
@@ -68466,7 +68429,7 @@ for(var i=1;i<=set.getMaxRowIndex();i++)
           <argumentsTypes/>
           <return type="com.servoy.j2db.dataprocessing.JSDataSet" typecode="com.servoy.j2db.dataprocessing.JSDataSet"><![CDATA[a JSDataSet with all the system messages.]]></return>
           <descriptions>
-            <description clientSupport="ng,wc,sc"><![CDATA[Returns a dataset with rows that contains 3 columns: 'key' (i18n key), 'reference' (reference text for that key) and 'locale ([CURRENT_LOCALE])' (where [CURRENT_LOCALE] is the current language) - with the system messages of servoy. 
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns a dataset with rows that contains 3 columns: 'key' (i18n key), 'reference' (reference text for that key) and 'locale ([CURRENT_LOCALE])' (where [CURRENT_LOCALE] is the current language) - with the system messages of servoy.
 This means all servoy messages, with all available translations.]]></description>
           </descriptions>
           <summaries>
@@ -68544,7 +68507,7 @@ for(var i=1;i<=set.getMaxRowIndex();i++)
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="ng,mc,wc,sc"><![CDATA[Sets the value of i18n key for client scope,if value null the setting is removed. 
+            <description clientSupport="ng,mc,wc,sc"><![CDATA[Sets the value of i18n key for client scope,if value null the setting is removed.
 All forms not yet loaded will change (execute this in solution startup or first form)]]></description>
           </descriptions>
           <summaries>
@@ -68664,9 +68627,9 @@ i18n.setI18NMessagesFilter('message_variant', filterValue)
 All forms not yet loaded will change (execute this in solution startup or first form).
 
 The language must be a lowercase 2 letter code defined by ISO-639.
-see http://www.ics.uci.edu/pub/ietf/http/related/iso639.txt
-The country must be an upper case 2 letter code defined by IS-3166
-see http://www.chemie.fu-berlin.de/diverse/doc/ISO_3166.html 
+see ISO 639-1 codes at http://en.wikipedia.org/wiki/List_of_ISO_639-1_code
+The country must be an upper case 2 letter code defined by ISO-3166
+see ISO-3166-1 codes at http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
 
 NOTE: For more information on i18n, see the chapter on Internationalization in the Servoy Developer User's Guide, and the chapter on Internationalization-I18N in the Programming Guide.]]></description>
           </descriptions>
@@ -68696,7 +68659,7 @@ i18n.setLocale('en','US');]]></sample>
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Sets the current time zone of the client.
 The parameter should be a string having the format which can be retrieved via i18n.getAvailableTimeZones or
-can be seen in the SmartClient Edit -> Preferences -> Locale at the "Default Timezone" combobox. 
+can be seen in the SmartClient Edit -> Preferences -> Locale at the "Default Timezone" combobox.
 For instance the time zone for Netherlands is set using the ID "Europe/Amsterdam".]]></description>
           </descriptions>
           <summaries>
