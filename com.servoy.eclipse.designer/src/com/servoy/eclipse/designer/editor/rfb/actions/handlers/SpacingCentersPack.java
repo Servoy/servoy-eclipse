@@ -32,6 +32,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.actions.DistributeRequest.Distribution;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.FormXYLayoutPolicy;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
@@ -64,15 +65,15 @@ public class SpacingCentersPack implements IServerService
 		{
 			public void run()
 			{
-				IPersist[] selection = (IPersist[])((IStructuredSelection)selectionProvider.getSelection()).toList().toArray(new IPersist[0]);
+				PersistContext[] selection = (PersistContext[])((IStructuredSelection)selectionProvider.getSelection()).toList().toArray(new PersistContext[0]);
 				if (selection.length > 0)
 				{
 					List<ISupportBounds> elements = new ArrayList<ISupportBounds>();
-					for (IPersist persist : selection)
+					for (PersistContext persist : selection)
 					{
-						if (persist instanceof ISupportBounds)
+						if (persist.getPersist() instanceof ISupportBounds)
 						{
-							elements.add((ISupportBounds)persist);
+							elements.add((ISupportBounds)persist.getPersist());
 						}
 						else
 						{
