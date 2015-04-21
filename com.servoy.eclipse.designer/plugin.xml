@@ -1220,27 +1220,18 @@
                <visibleWhen
                      checkEnabled="false">
                   <with  
-                        variable="selection">  
-                     <and>  
-		                  <iterate>
-		                     <and>
-		                        <test
-		                              property="com.servoy.eclipse.designer.editor.rfb.iscontainer">
-		                        </test>
-		                        <or>
-		                           <instanceof
-		                                 value="com.servoy.eclipse.ui.property.PersistContext">
-		                           </instanceof>
-		                           <instanceof
-		                                 value="com.servoy.j2db.persistence.IPersist">
-		                           </instanceof>
-		                        </or>
-		                     </and>
-		                  </iterate>
-		                  <count  
-                             	value="1">  
-                          </count>
-		              </and>  
+                        variable="activeMenuSelection">  
+                     <and>
+                        <iterate
+                              operator="and">
+                           <test
+                                 property="com.servoy.eclipse.designer.editor.rfb.iscontainer">
+                           </test>
+                        </iterate>
+                        <count
+                              value="1">
+                        </count>
+                     </and>  
                   </with>  
                </visibleWhen>
             </menu>
@@ -1253,7 +1244,7 @@
                id="com.servoy.eclipse.designer.rfb.iscontainer"
                namespace="com.servoy.eclipse.designer.editor.rfb"
                properties="iscontainer"
-               type="com.servoy.eclipse.ui.property.PersistContext">
+               type="java.lang.Object">
          </propertyTester>
       </extension>
 </plugin>

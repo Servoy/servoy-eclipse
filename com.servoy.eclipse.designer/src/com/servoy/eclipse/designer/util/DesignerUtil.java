@@ -24,19 +24,35 @@ import java.util.Set;
 
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.gef.EditPart;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IViewReference;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.views.contentoutline.ContentOutline;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.outline.FormOutlineContentProvider;
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportEncapsulation;
+import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -166,5 +182,79 @@ public class DesignerUtil
 		IPersist realPersist = fs.searchPersist(dragData.uuid);
 		if (realPersist == null) return false;
 		else return DesignerUtil.isDropAllowed(dropTargetForm, realPersist);
+	}
+
+	/** Returns the ContentOutline view instance in the active page.
+	 * @return Returns the ContentOutline view instance in the active page. Returns null if the view can not be found in the active page.
+	 */
+	public static ContentOutline getContentOutline()
+	{
+		IWorkbenchWindow active = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (active == null) return null;
+		IWorkbenchPage page = active.getActivePage();
+		if (page == null) return null;
+		IViewReference[] viewReferences = page.getViewReferences();
+		for (IViewReference iViewReference : viewReferences)
+		{
+			if (iViewReference.getId().equals("org.eclipse.ui.views.ContentOutline"))
+			{
+				IViewPart view = iViewReference.getView(false);
+				if (view != null)
+				{
+					ContentOutline outline = (ContentOutline)view;
+					return outline;
+				}
+			}
+		}
+		return null;
+	}
+
+	/** Returns the ContentOutline view instance in the active page.
+	 * @return Returns the ContentOutline view instance in the active page. Returns null if the view can not be found in the active page.
+	 */
+	public static BaseVisualFormEditor getActiveEditor()
+	{
+		IWorkbenchWindow active = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (active == null) return null;
+		IWorkbenchPage page = active.getActivePage();
+		if (page == null) return null;
+		IEditorPart activeEditor = page.getActiveEditor();
+		if (activeEditor instanceof BaseVisualFormEditor)
+		{
+			return (BaseVisualFormEditor)activeEditor;
+		}
+		return null;
+	}
+
+
+	public static Object getContentOutlineSelection()
+	{
+		if (getContentOutline() != null)
+		{
+			Object firstElement = ((IStructuredSelection)getContentOutline().getSelection()).getFirstElement();
+			if (firstElement instanceof PersistContext)
+			{
+				PersistContext persistContext = (PersistContext)firstElement;
+				if (persistContext.getPersist() instanceof ISupportFormElements) return persistContext.getPersist();
+			}
+			if (firstElement == FormOutlineContentProvider.ELEMENTS)
+			{
+				IWorkbenchWindow active = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+				if (active == null) return null;
+				IWorkbenchPage page = active.getActivePage();
+				if (page == null) return null;
+				IEditorInput editorInput = page.getActiveEditor().getEditorInput();
+				if (editorInput instanceof PersistEditorInput)
+				{
+					PersistEditorInput persistEditorInput = (PersistEditorInput)editorInput;
+					ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
+						persistEditorInput.getSolutionName());
+					UUID uuid = persistEditorInput.getUuid();
+					return servoyProject.getEditingPersist(uuid);
+				}
+			}
+			return firstElement;
+		}
+		return null;
 	}
 }

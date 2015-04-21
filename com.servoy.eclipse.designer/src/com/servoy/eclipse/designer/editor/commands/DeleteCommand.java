@@ -16,6 +16,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.IPersist;
 
@@ -28,7 +29,8 @@ public class DeleteCommand extends AbstractHandler implements IHandler
 		List<IPersist> selection = getSelection();
 		if (selection.size() > 0)
 		{
-			getEditorPart().getCommandStack().execute(new FormElementDeleteCommand(selection.toArray(new IPersist[selection.size()])));
+			BaseVisualFormEditor editorPart = getEditorPart();
+			if (editorPart != null) editorPart.getCommandStack().execute(new FormElementDeleteCommand(selection.toArray(new IPersist[selection.size()])));
 		}
 		return null;
 	}
@@ -39,7 +41,7 @@ public class DeleteCommand extends AbstractHandler implements IHandler
 	private List<IPersist> getSelection()
 	{
 		ArrayList<IPersist> result = new ArrayList<IPersist>();
-		ContentOutline contentOutline = getContentOutline();
+		ContentOutline contentOutline = DesignerUtil.getContentOutline();
 		if (contentOutline != null)
 		{
 			Iterator iterator = ((IStructuredSelection)contentOutline.getSelection()).iterator();
@@ -71,19 +73,15 @@ public class DeleteCommand extends AbstractHandler implements IHandler
 		return null;
 	}
 
-	private ContentOutline getContentOutline()
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.eclipse.core.commands.AbstractHandler#isEnabled()
+	 */
+	@Override
+	public boolean isEnabled()
 	{
-		IWorkbenchWindow active = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		if (active == null) return null;
-		IWorkbenchPage page = active.getActivePage();
-		if (page == null) return null;
-		IWorkbenchPart part = page.getActivePart();
-		if (part instanceof ContentOutline)
-		{
-			return (ContentOutline)part;
-		}
-		return null;
+		return getSelection().size() > 0;
 	}
-
 
 }
