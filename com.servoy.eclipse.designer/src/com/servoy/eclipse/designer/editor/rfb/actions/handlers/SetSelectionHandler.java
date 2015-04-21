@@ -31,6 +31,7 @@ import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.RfbSelectionListener;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.IPersist;
 
 /**
@@ -67,7 +68,7 @@ public class SetSelectionHandler implements IServerService
 		for (int i = 0; i < json.length(); i++)
 		{
 			IPersist searchPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, json.getString(i));
-			if (searchPersist != null) selection.add(searchPersist);
+			if (searchPersist != null) selection.add(PersistContext.create(searchPersist, editorPart.getForm()));
 		}
 		Display.getDefault().asyncExec(new Runnable()
 		{
