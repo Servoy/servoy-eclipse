@@ -151,8 +151,6 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	private String layout = null;
 	private String editorId = null;
 
-	private FormOutlinePage outline;
-
 	public RfbVisualFormEditorDesignPage(BaseVisualFormEditor editorPart)
 	{
 		super(editorPart);
@@ -225,8 +223,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 		if (type.equals(IContentOutlinePage.class))
 		{
-			outline = new FormOutlinePage(editorPart.getForm(), null, getActionRegistry());
-			adapter = outline;
+			adapter = new FormOutlinePage(editorPart.getForm(), null, getActionRegistry());
 		}
 
 		return adapter;
