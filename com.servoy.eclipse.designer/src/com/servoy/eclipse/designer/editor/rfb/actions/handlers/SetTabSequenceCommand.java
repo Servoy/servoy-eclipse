@@ -33,9 +33,9 @@ import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.actions.AbstractEditorActionDelegateHandler;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.Bean;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
@@ -75,24 +75,25 @@ public class SetTabSequenceCommand extends AbstractEditorActionDelegateHandler i
 	@Override
 	protected Command createCommand()
 	{
-		IPersist[] selection = null;
+		PersistContext[] selection = null;
 		if (selectionProvider != null)
 		{
-			selection = (IPersist[])((IStructuredSelection)selectionProvider.getSelection()).toList().toArray(new IPersist[0]);
+			selection = (PersistContext[])((IStructuredSelection)selectionProvider.getSelection()).toList().toArray(new PersistContext[0]);
 		}
 		else
 		{
-			selection = getSelectedObjects().toArray(new IPersist[0]);
+			selection = getSelectedObjects().toArray(new PersistContext[0]);
 		}
 		if (selection.length > 0)
 		{
 			int tabIndex = 1;
 			CompoundCommand cc = new CompoundCommand();
-			for (IPersist persist : selection)
+			for (PersistContext persist : selection)
 			{
-				if (persist instanceof Bean)
+				if (persist.getPersist() instanceof Bean)
 				{
-					WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((Bean)persist).getBeanClassName());
+					WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+						((Bean)persist.getPersist()).getBeanClassName());
 					Collection<PropertyDescription> tabSeqProps = spec.getProperties(TypesRegistry.getType("tabseq"));
 					for (PropertyDescription pd : tabSeqProps)
 					{
