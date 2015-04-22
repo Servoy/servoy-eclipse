@@ -165,7 +165,7 @@ public class ZOrderAction extends DesignerSelectionAction
 		{
 			if (o1.getFormElement() != null && o2.getFormElement() != null)
 			{
-				return FlattenedForm.FORM_INDEX_COMPARATOR.compare(o1.getFormElement(), o2.getFormElement());
+				return FlattenedForm.FORM_INDEX_WITH_HIERARCHY_COMPARATOR.compare(o1.getFormElement(), o2.getFormElement());
 			}
 			return o1.zIndex - o2.zIndex;
 		}
