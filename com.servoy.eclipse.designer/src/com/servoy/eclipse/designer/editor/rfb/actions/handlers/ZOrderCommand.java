@@ -94,19 +94,19 @@ public class ZOrderCommand extends AbstractEditorActionDelegateHandler implement
 
 	protected Command createCommand(String methodName)
 	{
-		List selection = null;
+		List contextSelection = null;
+		List selection = new ArrayList<IPersist>();
 		if (selectionProvider != null)
 		{
-			List<PersistContext> contextSelection = ((IStructuredSelection)selectionProvider.getSelection()).toList();
-			selection = new ArrayList<IPersist>();
-			for (PersistContext pc : contextSelection)
-			{
-				selection.add(pc.getPersist());
-			}
+			contextSelection = ((IStructuredSelection)selectionProvider.getSelection()).toList();
 		}
 		else
 		{
-			selection = getSelectedObjects();
+			contextSelection = getSelectedObjects();
+		}
+		for (Object pc : contextSelection)
+		{
+			selection.add(((PersistContext)pc).getPersist());
 		}
 		Form form = null;
 		if (editorPart != null)
