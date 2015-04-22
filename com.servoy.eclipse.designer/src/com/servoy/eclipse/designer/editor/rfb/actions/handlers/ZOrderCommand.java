@@ -34,6 +34,7 @@ import com.servoy.eclipse.designer.actions.AbstractEditorActionDelegateHandler;
 import com.servoy.eclipse.designer.actions.ZOrderAction;
 import com.servoy.eclipse.designer.actions.ZOrderAction.OrderableElement;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -74,9 +75,15 @@ public class ZOrderCommand extends AbstractEditorActionDelegateHandler implement
 		{
 			public void run()
 			{
-				List selection = ((IStructuredSelection)selectionProvider.getSelection()).toList();
-				if (selection.size() > 0)
+				List<PersistContext> contextSelection = ((IStructuredSelection)selectionProvider.getSelection()).toList();
+				if (contextSelection.size() > 0)
 				{
+					List<IPersist> selection = new ArrayList<IPersist>();
+					for (PersistContext pc : contextSelection)
+					{
+						selection.add(pc.getPersist());
+					}
+
 					editorPart.getCommandStack().execute(createCommand());
 					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, new ArrayList<IPersist>(selection));
 				}
@@ -90,7 +97,12 @@ public class ZOrderCommand extends AbstractEditorActionDelegateHandler implement
 		List selection = null;
 		if (selectionProvider != null)
 		{
-			selection = ((IStructuredSelection)selectionProvider.getSelection()).toList();
+			List<PersistContext> contextSelection = ((IStructuredSelection)selectionProvider.getSelection()).toList();
+			selection = new ArrayList<IPersist>();
+			for (PersistContext pc : contextSelection)
+			{
+				selection.add(pc.getPersist());
+			}
 		}
 		else
 		{
