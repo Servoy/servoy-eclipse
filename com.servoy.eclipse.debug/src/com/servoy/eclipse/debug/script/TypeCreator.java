@@ -90,6 +90,8 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.mozilla.javascript.JavaMembers;
 import org.mozilla.javascript.JavaMembers.BeanProperty;
 import org.mozilla.javascript.MemberBox;
@@ -226,6 +228,7 @@ import com.servoy.j2db.scripting.annotations.JSReadonlyProperty;
 import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
+import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
@@ -1107,7 +1110,7 @@ public class TypeCreator extends TypeCache
 
 						/*
 						 * (non-Javadoc)
-						 * 
+						 *
 						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitObjectInitializer(org.eclipse.dltk.javascript.ast.
 						 * ObjectInitializer)
 						 */
@@ -1236,6 +1239,48 @@ public class TypeCreator extends TypeCache
 		if (type == StringPropertyType.INSTANCE || type == ServoyStringPropertyType.INSTANCE || type == TagStringPropertyType.INSTANCE) return getTypeRef(
 			context, ITypeNames.STRING);
 		if (DatePropertyType.TYPE_NAME.equals(type.getName())) return getTypeRef(context, ITypeNames.DATE);
+		if (FoundsetPropertyType.TYPE_NAME.equals(type.getName()))
+		{
+			Type recordType = TypeInfoModelFactory.eINSTANCE.createType();
+			EList<Member> members = recordType.getMembers();
+			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+			property.setName("foundset");
+			property.setType(getTypeRef(context, FoundSet.JS_FOUNDSET));
+			members.add(property);
+			Object config = pd.getConfig();
+			if (config instanceof JSONObject)
+			{
+				if (((JSONObject)config).optBoolean("dynamicDataproviders", false))
+				{
+					property = TypeInfoModelFactory.eINSTANCE.createProperty();
+					property.setName("dataproviders");
+					property.setType(getTypeRef(context, ITypeNames.OBJECT));
+					members.add(property);
+				}
+				else
+				{
+					JSONArray dataproviders = ((JSONObject)config).optJSONArray("dataproviders");
+					if (dataproviders != null)
+					{
+						property = TypeInfoModelFactory.eINSTANCE.createProperty();
+						property.setName("dataproviders");
+						Type dataprovidersType = TypeInfoModelFactory.eINSTANCE.createType();
+						EList<Member> dpMembers = dataprovidersType.getMembers();
+						for (int i = 0; i < dataproviders.length(); i++)
+						{
+							Property dbProp = TypeInfoModelFactory.eINSTANCE.createProperty();
+							dbProp.setName(dataproviders.optString(i));
+							dbProp.setType(getTypeRef(context, ITypeNames.STRING));
+							dpMembers.add(dbProp);
+						}
+						property.setType(TypeUtil.ref(dataprovidersType));
+
+						members.add(property);
+					}
+				}
+			}
+			return TypeUtil.ref(recordType);
+		}
 		return null;
 	}
 
