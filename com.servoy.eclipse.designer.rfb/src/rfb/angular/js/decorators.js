@@ -102,6 +102,9 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 				// do not render resize knobs while selection is moving; performance optimization
 				renderDecorators(selection,false);
 			})
+			$rootScope.$on(EDITOR_EVENTS.RENDER_DECORATORS, function(event, selection) {
+				renderDecorators(selection,true);
+			})
 	      },
 	      templateUrl: 'templates/decorators.html',
 	      replace: true

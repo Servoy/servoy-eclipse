@@ -16,7 +16,8 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 	SELECTION_CHANGED : "SELECTION_CHANGED",
 	SELECTION_MOVED : "SELECTION_MOVED",
 	INITIALIZED: "INITIALIZED",
-	RELOAD_PALETTE: "RELOAD_PALETTE"
+	RELOAD_PALETTE: "RELOAD_PALETTE",
+	RENDER_DECORATORS: "RENDER_DECORATORS"
 }).value("EDITOR_CONSTANTS", {
 	PART_LABEL_WIDTH: 100,
 	PART_LABEL_HEIGHT: 20,
@@ -693,7 +694,10 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 								}								
 								if(selection.length != matchedElements.length) {
 									selection = matchedElements;
-									$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection)
+									$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection);
+								}
+								else {
+									$rootScope.$broadcast(EDITOR_EVENTS.RENDER_DECORATORS, selection);
 								}
 							}, 100);
 						});
