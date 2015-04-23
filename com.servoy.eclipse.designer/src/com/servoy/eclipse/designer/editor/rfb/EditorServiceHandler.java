@@ -20,6 +20,7 @@ package com.servoy.eclipse.designer.editor.rfb;
 import java.util.HashMap;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.ui.PlatformUI;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
@@ -149,6 +150,26 @@ public class EditorServiceHandler implements IServerService
 
 		});
 		configuredHandlers.put("getShortcuts", new ShortcutsHandler(editorPart));
+		configuredHandlers.put("activated", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				UIUtils.runInUI(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						if (editorPart != PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart())
+						{
+							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(editorPart);
+						}
+					}
+				}, false);
+
+				return null;
+			}
+		});
 	}
 
 	/**

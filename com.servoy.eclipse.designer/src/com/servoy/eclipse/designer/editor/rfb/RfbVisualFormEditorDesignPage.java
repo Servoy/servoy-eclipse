@@ -38,7 +38,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.sablo.websocket.CurrentWindow;
 import org.sablo.websocket.IWindow;
@@ -97,16 +96,6 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		{
 			// select form if nothing else is selected
 			return selection == null ? new StructuredSelection(editorPart.getForm()) : selection;
-		}
-
-		@Override
-		public void setSelection(ISelection selection)
-		{
-			if (editorPart != PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart())
-			{
-				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(editorPart);
-			}
-			super.setSelection(selection);
 		}
 	};
 

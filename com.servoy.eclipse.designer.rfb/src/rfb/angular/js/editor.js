@@ -631,6 +631,11 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 		                }
 		                return true;
 					});
+					
+					$(document).mousedown(function(objEvent) {					
+						$editorService.activated(objEvent);
+						return false;
+					});					
 				});
 				
 				
@@ -839,6 +844,10 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 			return promise;
 		},
 
+		activated: function() {
+			return wsSession.callService('formeditor', 'activated')
+		},
+		
 		keyPressed: function(event) {
 			wsSession.callService('formeditor', 'keyPressed', {ctrl:event.ctrlKey,shift:event.shiftKey,alt:event.altKey,keyCode:event.keyCode}, true)
 		},
