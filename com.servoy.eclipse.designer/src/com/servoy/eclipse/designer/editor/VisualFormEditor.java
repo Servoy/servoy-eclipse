@@ -148,7 +148,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		super.persistChanges(changedPersists);
 		if (graphicaleditor instanceof RfbVisualFormEditorDesignPage)
 		{
-			((RfbVisualFormEditorDesignPage)graphicaleditor).refreshBrowserUrl();
+			((RfbVisualFormEditorDesignPage)graphicaleditor).refreshBrowserUrl(false);
 		}
 	}
 
@@ -217,7 +217,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.editors.TabbedEditor#changeActiveTab(java.lang.String)
 	 */
 	public void changeActiveTab(String tabName)

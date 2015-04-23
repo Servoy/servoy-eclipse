@@ -25,6 +25,8 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.elements.IFieldPositioner;
+import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentsHandler;
@@ -118,6 +120,24 @@ public class EditorServiceHandler implements IServerService
 			}
 		});
 
+		configuredHandlers.put("toggleShowData", new IServerService()
+		{
+
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				Activator.getDefault().toggleShowData();
+				UIUtils.runInUI(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
+					}
+				}, false);
+				return null;
+			}
+		});
 		configuredHandlers.put("isInheritedForm", new IServerService()
 		{
 

@@ -67,6 +67,15 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 			},
 	};
 
+	var btnToggleShowData = {
+			text: "Toggle show data",
+			icon: "toolbaractions/icons/import.gif",
+			enabled: true,
+			onclick: function() {
+				$editorService.toggleShowData();
+			},
+	};
+	
 	$toolbar.add(btnPlaceField, TOOLBAR_CATEGORIES.ELEMENTS);
 	$toolbar.add(btnPlaceImage, TOOLBAR_CATEGORIES.ELEMENTS);
 	$toolbar.add(btnPlacePortal, TOOLBAR_CATEGORIES.ELEMENTS);
@@ -74,6 +83,7 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 	$toolbar.add(btnPlaceTabPanel, TOOLBAR_CATEGORIES.ELEMENTS);
 	$toolbar.add(btnPlaceAccordion, TOOLBAR_CATEGORIES.ELEMENTS);	
 	$toolbar.add(btnHighlightWebcomponents, TOOLBAR_CATEGORIES.ELEMENTS);	
+	$toolbar.add(btnToggleShowData, TOOLBAR_CATEGORIES.ELEMENTS);	
 	var btnTabSequence = {
 			text: "Set tab sequence",
 			icon: "../../images/th_horizontal.gif",

@@ -177,7 +177,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			return;
 		}
 
-		refreshBrowserUrl();
+		refreshBrowserUrl(false);
 		try
 		{
 			// install fake WebSocket in case browser does not support it
@@ -239,7 +239,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		else return "absolute";
 	}
 
-	public void refreshBrowserUrl()
+	public void refreshBrowserUrl(boolean force)
 	{
 		Form form = editorPart.getForm();
 		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
@@ -260,6 +260,10 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			{
 				ServoyLog.logError("couldn't load the editor: " + url, ex);
 			}
+		}
+		else if (force)
+		{
+			browser.refresh();
 		}
 	}
 

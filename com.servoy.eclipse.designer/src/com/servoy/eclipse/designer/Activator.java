@@ -56,6 +56,7 @@ public class Activator extends AbstractUIPlugin
 {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "com.servoy.eclipse.designer";
+	public static final String SHOW_DATA_IN_ANGULAR_DESIGNER = "showDataInDesigner";
 
 	// The shared instance
 	private static Activator plugin;
@@ -75,7 +76,7 @@ public class Activator extends AbstractUIPlugin
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -137,7 +138,8 @@ public class Activator extends AbstractUIPlugin
 					{
 						DesignNGClientWebsocketSession designerSession = new DesignNGClientWebsocketSession(uuid);
 						designerSession.setClient(client = new DesignNGClient(designerSession, ApplicationServerRegistry.getServiceRegistry().getService(
-							IDesignerSolutionProvider.class)));
+							IDesignerSolutionProvider.class), getPreferenceStore().contains(SHOW_DATA_IN_ANGULAR_DESIGNER) ? getPreferenceStore().getBoolean(
+							SHOW_DATA_IN_ANGULAR_DESIGNER) : true));
 						return designerSession;
 					}
 				});
@@ -145,9 +147,20 @@ public class Activator extends AbstractUIPlugin
 		}
 	}
 
+	public void toggleShowData()
+	{
+		if (client != null)
+		{
+			boolean showData = client.getShowData();
+			showData = !showData;
+			client.setShowData(showData);
+			getPreferenceStore().putValue(SHOW_DATA_IN_ANGULAR_DESIGNER, String.valueOf(showData));
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override

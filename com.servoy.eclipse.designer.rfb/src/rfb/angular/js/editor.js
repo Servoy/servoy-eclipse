@@ -970,6 +970,10 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 				editorScope.getEditorContentRootScope().highlight = !editorScope.getEditorContentRootScope().highlight;
 			
 			editorScope.getEditorContentRootScope().$digest();
+		},
+		
+		toggleShowData: function(){
+			wsSession.callService('formeditor', 'toggleShowData', null, true)
 		}
 		// add more service methods here
 	}
