@@ -57,6 +57,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
+import com.servoy.j2db.IFormController;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
@@ -202,7 +203,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage#getAdapter(java.lang.Class)
 	 */
 	@Override
@@ -302,6 +303,15 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 					editorContentWebsocketSession.getEventDispatcher().addEvent(new FormUpdater(editorContentWebsocketSession, null, getEditorPart().getForm()));
 				}
 			});
+		}
+	}
+
+	public void revert()
+	{
+		List<IFormController> cachedFormControllers = getContentWebsocketSession().getClient().getFormManager().getCachedFormControllers(editorPart.getForm());
+		for (IFormController iFormController : cachedFormControllers)
+		{
+			iFormController.recreateUI();
 		}
 	}
 
