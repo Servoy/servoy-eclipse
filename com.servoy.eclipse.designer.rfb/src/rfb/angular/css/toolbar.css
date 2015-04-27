@@ -1,7 +1,14 @@
 .toolbar-area {
-	position: relative;
-	width: 100%;
-	display: table-caption;
+	display: -webkit-flex;
+  	display: flex;
+  	flex-wrap: wrap;
+    flex-direction: row;
+    -webkit-flex-wrap: wrap;
+    -webkit-flex-direction: row;
+    align-items: flex-start;
+    -webkit-align-items: flex-start;
+    flex-shrink : 0;
+    -webkit-flex-shrink : 0;
 	border: 0px solid #C0C0C0;
 	border-bottom-width: 1px;
 	background-color: #F2F2F2;
@@ -9,8 +16,10 @@
 }
 
 .toolbar {
-	position: relative;
-	float: left;
+	display: -webkit-flex;
+	display: flex;
+	flex-wrap: wrap;
+    flex-direction: row;
 	height: 30px;
 	border: 0px solid #C0C0C0;
 	border-left-width: 1px;
@@ -19,7 +28,7 @@
 }
 
 .toolbar.right-aligned {
-	float: right;
+ 	margin-left: auto;
 }
 
 .toolbar.first {
@@ -29,7 +38,7 @@
 }
 
 .toolbar-action {
-	display: inline-block;
+	
 	height: 26px;
 	min-width: 26px;
 	text-align: center;

@@ -1,36 +1,35 @@
-<div id="editor">
-	<div tabindex="0">
+<div tabindex="0" class="column" id="editor">
 		<!-- 
 			TODO: everything inside the #editor div should be dynamically generated and inserted.
 			Take special care of making sure the ID query parameter on the src url of the iframe is set to the ID of the div in which the editor is instantiated
 		-->
 		<!-- Toolbar -->
 		<toolbar class="toolbar-area"></toolbar>
+			
+		<div  class="fill-area" > 
 		
-		<!--Palette-->
-		<palette class="palette lhs-panel user-selection-off" style="width: 200px"></palette>
-		
-		<!--  Editor -->
-		<div class="content-area {{ isContentSizeFull() ? '' : 'non-full' }}" tabindex="0" ng-style="getContentAreaStyle()">
-		    <div class="contentframe-overlay max" style="z-index:2;background-color:rgba(255,255,255,0.01);outline:none;user-select:none;-moz-user-select: none;-webkit-user-select: none;-ms-user-select:none;" ng-style="glasspaneStyle" tabindex="0">
-		    	<div id="lasso"></div>
-		    	<div id="highlight"></div>
-				<!--Decorators-->
-				<decorator></decorator>
-				<div  class="ghostcontainer" ng-repeat="container in ghosts.ghostContainers" ng-style="getGhostContainerStyle(container)">
-					<div class="ghost label" ng-repeat="ghost in container.ghosts track by $index" ng-style="getGhostStyle(ghost)" svy-id="{{ghost.uuid}}" ng-dblclick="openContainedForm(ghost)">
-						<hr ng-style="getGhostHRStyle(ghost)">{{ghost.text}}&nbsp;
-					</div>
+			<!--Palette-->
+			<palette class="palette user-selection-off" ></palette>
+				
+			<!--  Editor -->
+			<div class="content-area {{ isContentSizeFull() ? '' : 'non-full' }}" tabindex="0" >
+			    <div class="contentframe-overlay max" style="z-index:2;background-color:rgba(255,255,255,0.01);outline:none;user-select:none;-moz-user-select: none;-webkit-user-select: none;-ms-user-select:none;" ng-style="glasspaneStyle" tabindex="0">
+			    	<div id="lasso"></div>
+			    	<div id="highlight"></div>
+					<!--Decorators-->
+						<decorator></decorator>
+						<div  class="ghostcontainer" ng-repeat="container in ghosts.ghostContainers" ng-style="getGhostContainerStyle(container)">
+							<div class="ghost label" ng-repeat="ghost in container.ghosts track by $index" ng-style="getGhostStyle(ghost)" svy-id="{{ghost.uuid}}" ng-dblclick="openContainedForm(ghost)">
+								<hr ng-style="getGhostHRStyle(ghost)">{{ghost.text}}&nbsp;
+							</div>
+						</div>
+			    </div> <!--  -->
+				<div class="content" ng-style="contentStyle">
+					<!-- id query param should be dynamically set to the selector of the div in which the editor is placed -->
+					<iframe class="contentframe" ng-src="{{contentframe}}"></iframe>
 				</div>
-		    </div> <!--  -->
-			<div class="content" ng-style="contentStyle">
-				<!-- id query param should be dynamically set to the selector of the div in which the editor is placed -->
-				<iframe class="contentframe" ng-src="{{contentframe}}"></iframe>
 			</div>
-		</div>
-		<div id="directEdit" contentEditable="true" style="position:absolute;display:none;z-index:1000;"></div>		
-		
+			<div id="directEdit" contentEditable="true" style="position:absolute;display:none;z-index:1000;"></div>		
 		<contextmenu ></contextmenu>
-	</div>
+		</div>
 </div>
-

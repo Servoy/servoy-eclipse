@@ -1,9 +1,12 @@
 .palette {
+	flex-shrink: 0;
+	-webkit-flex-shrink: 0;
 	color: #000;
 	border: 0px solid #C0C0C0;
 	border-right-width: 1px;
 	overflow: auto;
 	padding-top: 6px;
+	padding-left: 2px;
 }
 
 .palette-heading {
