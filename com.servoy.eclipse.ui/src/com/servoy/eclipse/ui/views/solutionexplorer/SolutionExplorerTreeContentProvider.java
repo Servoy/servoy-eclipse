@@ -1509,99 +1509,92 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		List<PlatformSimpleUserNode> elements = new SortedList<PlatformSimpleUserNode>(StringComparator.INSTANCE);
 
 		// get all objects ordered alphabetically by name
-		Iterator<IPersist> formElementIterator = ancestorForm.getAllObjects();
-
+		List<IFormElement> formElements = ancestorForm.getFlattenedObjects(NameComparator.INSTANCE);
 
 		boolean mobile = SolutionMetaData.isServoyMobileSolution(ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution());
 
 		// all named form elements must be added, as well as named fields inside
 		// portal elements
 		PlatformSimpleUserNode node;
-		while (formElementIterator.hasNext())
+		for (IFormElement element : formElements)
 		{
 			PlatformSimpleUserNode parentNode = elementsNode;
-			IPersist persist = formElementIterator.next();
-			if (persist instanceof IFormElement)
+			// TODO: fix multiple anonymous groups (use proper content providers and label providers)
+			if (element.getGroupID() != null & !mobile)
 			{
-				// TODO: fix multiple anonymous groups (use proper content providers and label providers)
-				IFormElement element = (IFormElement)persist;
-				if (element.getGroupID() != null & !mobile)
+				String groupName = FormElementGroup.getName(element.getGroupID());
+				String groupLabel = groupName == null ? Messages.LabelAnonymous : groupName;
+				node = null;
+				for (PlatformSimpleUserNode el : elements)
 				{
-					String groupName = FormElementGroup.getName(element.getGroupID());
-					String groupLabel = groupName == null ? Messages.LabelAnonymous : groupName;
-					node = null;
-					for (PlatformSimpleUserNode el : elements)
+					if (groupLabel.equals(el.getName()))
 					{
-						if (groupLabel.equals(el.getName()))
-						{
-							node = el;
-							break;
-						}
+						node = el;
+						break;
 					}
-					if (node == null)
-					{
-						node = new PlatformSimpleUserNode(groupLabel, UserNodeType.FORM_ELEMENTS_GROUP,
-							new Object[] { new FormElementGroup(element.getGroupID(),
-								ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution(), (Form)persist.getParent()), null },
-							originalForm, uiActivator.loadImageFromBundle("group.gif"));
-						node.setDeveloperFeedback(new SimpleDeveloperFeedback(element.getName() + ".", null, null));
-						elements.add(node);
-						node.parent = parentNode;
-					}
-					parentNode = node; // this field comes under the group node
 				}
-				if (element.getName() != null && element.getName().trim().length() > 0)
+				if (node == null)
 				{
-					if (element instanceof Bean)
-					{
-						// might need to add the sub-type children to node (such as
-						// JComponent for a JSplitPane bean)
-						// as well as return types (in case of beans that implement
-						// IScriptObject)
-						node = addBeanAndBeanChildNodes((Bean)element);
-						if (node == null) continue;
-					}
-					else
-					{
-						Object model;
-						if (element instanceof Portal && ((Portal)element).isMobileInsetList())
-						{
-							model = MobileListModel.create((Form)element.getParent(), (Portal)element);
-						}
-						else if (mobile && element.getGroupID() != null)
-						{
-							model = new FormElementGroup(element.getGroupID(),
-								ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution(), (Form)persist.getParent());
-						}
-						else
-						{
-							model = element;
-						}
-
-						node = new PlatformSimpleUserNode(element.getName(), UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { model, null }, originalForm,
-							uiActivator.loadImageFromBundle("element.gif"));
-						node.setDeveloperFeedback(new SimpleDeveloperFeedback(element.getName() + ".", null, null));
-					}
+					node = new PlatformSimpleUserNode(groupLabel, UserNodeType.FORM_ELEMENTS_GROUP, new Object[] { new FormElementGroup(element.getGroupID(),
+						ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution(), (Form)element.getParent()), null }, originalForm,
+						uiActivator.loadImageFromBundle("group.gif"));
+					node.setDeveloperFeedback(new SimpleDeveloperFeedback(element.getName() + ".", null, null));
 					elements.add(node);
 					node.parent = parentNode;
 				}
-				if (element instanceof Portal && !((Portal)element).isMobileInsetList())
+				parentNode = node; // this field comes under the group node
+			}
+			if (element.getName() != null && element.getName().trim().length() > 0)
+			{
+				if (element instanceof Bean)
 				{
-					// find named child elements
-					Iterator<IPersist> portalElementIterator = ((Portal)element).getAllObjects();
-					while (portalElementIterator.hasNext())
+					// might need to add the sub-type children to node (such as
+					// JComponent for a JSplitPane bean)
+					// as well as return types (in case of beans that implement
+					// IScriptObject)
+					node = addBeanAndBeanChildNodes((Bean)element);
+					if (node == null) continue;
+				}
+				else
+				{
+					Object model;
+					if (element instanceof Portal && ((Portal)element).isMobileInsetList())
 					{
-						IPersist oo = portalElementIterator.next();
-						if (oo instanceof IFormElement)
+						model = MobileListModel.create((Form)element.getParent(), (Portal)element);
+					}
+					else if (mobile && element.getGroupID() != null)
+					{
+						model = new FormElementGroup(element.getGroupID(), ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution(),
+							(Form)element.getParent());
+					}
+					else
+					{
+						model = element;
+					}
+
+					node = new PlatformSimpleUserNode(element.getName(), UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { model, null }, originalForm,
+						uiActivator.loadImageFromBundle("element.gif"));
+					node.setDeveloperFeedback(new SimpleDeveloperFeedback(element.getName() + ".", null, null));
+				}
+				elements.add(node);
+				node.parent = parentNode;
+			}
+			if (element instanceof Portal && !((Portal)element).isMobileInsetList())
+			{
+				// find named child elements
+				Iterator<IPersist> portalElementIterator = ((Portal)element).getAllObjects();
+				while (portalElementIterator.hasNext())
+				{
+					IPersist oo = portalElementIterator.next();
+					if (oo instanceof IFormElement)
+					{
+						IFormElement portalElement = (IFormElement)oo;
+						if (portalElement.getName() != null && portalElement.getName().trim().length() > 0)
 						{
-							IFormElement portalElement = (IFormElement)oo;
-							if (portalElement.getName() != null && portalElement.getName().trim().length() > 0)
-							{
-								node = new PlatformSimpleUserNode(portalElement.getName(), UserNodeType.FORM_ELEMENTS_ITEM,
-									new Object[] { portalElement, null }, originalForm, uiActivator.loadImageFromBundle("element.gif"));
-								elements.add(node);
-								node.parent = parentNode;
-							}
+							node = new PlatformSimpleUserNode(portalElement.getName(), UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { portalElement, null },
+								originalForm, uiActivator.loadImageFromBundle("element.gif"));
+							elements.add(node);
+							node.parent = parentNode;
 						}
 					}
 				}
@@ -2430,7 +2423,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.core.IWebResourceChangedListener#changed()
 	 */
 	@Override
