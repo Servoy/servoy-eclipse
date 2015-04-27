@@ -52,7 +52,7 @@ import com.servoy.j2db.util.Utils;
 public class FormUpdater implements Runnable
 {
 	private final Map<Form, List<IFormElement>> frms;
-	private final Form changedForm;
+	private final List<Form> changedForms;
 	private final INGClientWebsocketSession websocketSession;
 
 	/**
@@ -60,11 +60,11 @@ public class FormUpdater implements Runnable
 	 * @param changedForm
 	 * @param changedSolution
 	 */
-	FormUpdater(INGClientWebsocketSession websocketSession, Map<Form, List<IFormElement>> frms, Form changedForm)
+	FormUpdater(INGClientWebsocketSession websocketSession, Map<Form, List<IFormElement>> frms, List<Form> changedForms)
 	{
 		this.websocketSession = websocketSession;
 		this.frms = frms;
-		this.changedForm = changedForm;
+		this.changedForms = changedForms;
 	}
 
 	@Override
@@ -195,30 +195,34 @@ public class FormUpdater implements Runnable
 				}
 			}
 		}
-		if (changedForm != null)
+		if (changedForms != null && changedForms.size() > 0)
 		{
-			Form form = ModelUtils.getEditingFlattenedSolution(changedForm).getFlattenedForm(changedForm);
-			List<IFormController> cachedFormControllers = websocketSession.getClient().getFormManager().getCachedFormControllers(changedForm);
-			for (IFormController iFormController : cachedFormControllers)
+			for (Form changedForm : changedForms)
 			{
-				if (iFormController.getView() != form.getView())
+				Form form = ModelUtils.getEditingFlattenedSolution(changedForm).getFlattenedForm(changedForm);
+				List<IFormController> cachedFormControllers = websocketSession.getClient().getFormManager().getCachedFormControllers(changedForm);
+				for (IFormController iFormController : cachedFormControllers)
 				{
-					List<Runnable> invokeLaterRunnables = new ArrayList<Runnable>(); // should we also use these?
+					if (iFormController.getView() != form.getView())
+					{
+						List<Runnable> invokeLaterRunnables = new ArrayList<Runnable>(); // should we also use these?
 
-					boolean isVisible = iFormController.isFormVisible();
-					if (isVisible) iFormController.notifyVisible(false, invokeLaterRunnables);
-					((WebFormController)iFormController).initFormUI();
-					if (isVisible) iFormController.notifyVisible(true, invokeLaterRunnables);
+						boolean isVisible = iFormController.isFormVisible();
+						if (isVisible) iFormController.notifyVisible(false, invokeLaterRunnables);
+						((WebFormController)iFormController).initFormUI();
+						if (isVisible) iFormController.notifyVisible(true, invokeLaterRunnables);
 
+					}
+					iFormController.recreateUI();
 				}
-				iFormController.recreateUI();
-			}
-			websocketSession.getClientService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall("refreshGhosts", new Object[] { });
-			if (!form.isResponsiveLayout())
-			{
-				websocketSession.getClientService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
-					"updateForm",
-					new Object[] { changedForm.getName(), changedForm.getUUID().toString(), Integer.valueOf((int)form.getSize().getWidth()), Integer.valueOf((int)form.getSize().getHeight()) });
+				websocketSession.getClientService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall("refreshGhosts",
+					new Object[] { });
+				if (!form.isResponsiveLayout())
+				{
+					websocketSession.getClientService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
+						"updateForm",
+						new Object[] { changedForm.getName(), changedForm.getUUID().toString(), Integer.valueOf((int)form.getSize().getWidth()), Integer.valueOf((int)form.getSize().getHeight()) });
+				}
 			}
 		}
 		else

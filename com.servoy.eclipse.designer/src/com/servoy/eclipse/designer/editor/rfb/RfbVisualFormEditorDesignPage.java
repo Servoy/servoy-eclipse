@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.editor.rfb;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -300,7 +301,8 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 				public void run()
 				{
 					INGClientWebsocketSession editorContentWebsocketSession = getContentWebsocketSession();
-					editorContentWebsocketSession.getEventDispatcher().addEvent(new FormUpdater(editorContentWebsocketSession, null, getEditorPart().getForm()));
+					editorContentWebsocketSession.getEventDispatcher().addEvent(
+						new FormUpdater(editorContentWebsocketSession, null, Arrays.asList(new Form[] { getEditorPart().getForm() })));
 				}
 			});
 		}
@@ -333,7 +335,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		}
 
 		final Map<Form, List<IFormElement>> frms = new HashMap<Form, List<IFormElement>>();
-		Form changedForm = null;
+		final List<Form> changedForms = new ArrayList<Form>();
 		Media cssFile = null;
 		for (IPersist persist : persists)
 		{
@@ -362,15 +364,27 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			}
 			else if (persist instanceof Form)
 			{
-				changedForm = (Form)persist;
+				Form changedForm = (Form)persist;
+				if (!changedForms.contains(changedForm))
+				{
+					changedForms.add(changedForm);
+				}
 			}
 			else if (persist instanceof Part)
 			{
-				changedForm = (Form)persist.getParent();
+				Form changedForm = (Form)persist.getParent();
+				if (!changedForms.contains(changedForm))
+				{
+					changedForms.add(changedForm);
+				}
 			}
 			else if (persist instanceof LayoutContainer)
 			{
-				changedForm = (Form)persist.getAncestor(IRepository.FORMS);
+				Form changedForm = (Form)persist.getAncestor(IRepository.FORMS);
+				if (!changedForms.contains(changedForm))
+				{
+					changedForms.add(changedForm);
+				}
 			}
 			else if (persist instanceof Media)
 			{
@@ -382,16 +396,15 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		}
 
 		final Media fcssFile = cssFile;
-		final Form fchangedForm = changedForm;
 
 		CurrentWindow.runForWindow(window, new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				if (frms.size() > 0 || fchangedForm != null)
+				if (frms.size() > 0 || changedForms.size() > 0)
 				{
-					editorContentWebsocketSession.getEventDispatcher().addEvent(new FormUpdater(editorContentWebsocketSession, frms, fchangedForm));
+					editorContentWebsocketSession.getEventDispatcher().addEvent(new FormUpdater(editorContentWebsocketSession, frms, changedForms));
 				}
 				if (fcssFile != null)
 				{
