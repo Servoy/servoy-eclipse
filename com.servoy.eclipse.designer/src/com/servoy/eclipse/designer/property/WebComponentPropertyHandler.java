@@ -153,13 +153,9 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 
 			return Integer.valueOf(-1);
 		}
-		if (!(type instanceof IDesignToFormElement))
-		{
-			return value;
-		}
 		if (value == null)
 		{
-			if (propertyDescription.getDefaultValue() != null)
+			if (!(type instanceof IDesignToFormElement) && propertyDescription.getDefaultValue() != null)
 			{
 				IPropertyType< ? > propertyType = propertyDescription.getType();
 				if (propertyType instanceof IPropertyConverter< ? >)
