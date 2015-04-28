@@ -691,9 +691,9 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 											break;
 										}
 									}
-								}								
+								}	
+								selection = matchedElements;
 								if(selection.length != matchedElements.length) {
-									selection = matchedElements;
 									$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection);
 								}
 								else {
