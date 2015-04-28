@@ -151,6 +151,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 	
 	
 	var draggingFromPallete = null;
+	var designMode = false;
 
 	return {
 		getUtilsForScope: function(editorScope) {
@@ -232,28 +233,35 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					return {dropAllowed:true,dropTarget:dropTarget};
 				},
 				
-				setDraggingFromPallete: function(dragging){
-					draggingFromPallete = dragging;
+				toggleDesignMode: function()
+				{
+					designMode = !designMode;
+					this.updateDesignMode(designMode);
+				},
+				updateDesignMode: function(design)
+				{
 					if (!editorScope.isAbsoluteFormLayout())
 					{
-						// TODO this is bootstrap layout specific, should be based on svy-xx attribute?
-						var rows = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll(".row"));
-						if (dragging)
-						{
-							//drag started
-							for (var i = 0; i < rows.length; i++) {
-								$(rows[i]).addClass('rowDesign');
-							}
-						}
-						else
-						{
-							//drag end
-							for (var i = 0; i < rows.length; i++) {
-								$(rows[i]).removeClass('rowDesign');
-							}
-						}
+						$(editorScope.contentDocument).find("div[svy-designclass]").each(function() {
+							var designClass = $(this).attr('svy-designclass');
+							if (design)
+							{
+								$(this).addClass(designClass ); 
+							}	  
+							else
+							{
+								$(this).removeClass(designClass );
+							} 
+						});
 						editorScope.refreshEditorContent();
 					}
+				},
+				setDraggingFromPallete: function(dragging){
+					draggingFromPallete = dragging;
+					if (!designMode)
+					{
+						this.updateDesignMode(dragging != null);
+					}	
 				},
 				getDraggingFromPallete: function(){
 					return draggingFromPallete;

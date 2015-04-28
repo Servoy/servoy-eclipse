@@ -1,8 +1,14 @@
-angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $toolbar, TOOLBAR_CATEGORIES, $editorService, $pluginRegistry, EDITOR_EVENTS){
+angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $toolbar, TOOLBAR_CATEGORIES, $editorService, $pluginRegistry,$selectionUtils, EDITOR_EVENTS){
 
 	var editorScope = null;
+	var utils = null;
 	$pluginRegistry.registerPlugin(function(scope) {
 		editorScope = scope;
+		utils = $selectionUtils.getUtilsForScope(scope);
+		if (editorScope.isAbsoluteFormLayout())
+		{
+			btnToggleDesignMode.enabled = false;
+		}
 	});
 	var btnPlaceField = {
 			text: "Place Field Wizard",
@@ -76,6 +82,15 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 			},
 	};
 	
+	var btnToggleDesignMode = {
+			text: "Toggle design mode",
+			icon: "toolbaractions/icons/edit.gif",
+			enabled: true,
+			onclick: function() {
+				utils.toggleDesignMode();
+			},
+	};
+	
 	$toolbar.add(btnPlaceField, TOOLBAR_CATEGORIES.ELEMENTS);
 	$toolbar.add(btnPlaceImage, TOOLBAR_CATEGORIES.ELEMENTS);
 	$toolbar.add(btnPlacePortal, TOOLBAR_CATEGORIES.ELEMENTS);
@@ -84,6 +99,8 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 	$toolbar.add(btnPlaceAccordion, TOOLBAR_CATEGORIES.ELEMENTS);	
 	$toolbar.add(btnHighlightWebcomponents, TOOLBAR_CATEGORIES.ELEMENTS);	
 	$toolbar.add(btnToggleShowData, TOOLBAR_CATEGORIES.ELEMENTS);	
+	$toolbar.add(btnToggleDesignMode, TOOLBAR_CATEGORIES.ELEMENTS);
+	
 	var btnTabSequence = {
 			text: "Set tab sequence",
 			icon: "../../images/th_horizontal.gif",

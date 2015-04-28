@@ -36,6 +36,8 @@
 		<script src="js/servoy_app.js"></script>
 		<script src="js/jquery.maskedinput.js"></script>
 
+		<!-- TODO remove this hardcoded dependency -->
+		<link rel="stylesheet" href="12grid/lib/12grid.css">
 		
 		<script>
 			function getURLParameter(name) {
@@ -108,33 +110,6 @@
 				z-index: 1;
 				/*background-image: url("rfb/angular/images/transparent.png")*/
 			}
-			/* TODO shouldn't these be moved because these are all really bootstrap specific stuff (see also mouseselection.js that adds "rowDesign")*/
-			.container {
-				height: 100%;
-				width: 100%;
-			}
-			.row {
-				min-height: 20px;
-			}
-			.rowDesign
-			{
-				border: 3px solid #F5F5F5;
-				padding: 5px;
-				margin: 10px 0px 10px 0px;
-			}
-			.customDiv {
-				min-height: 20px;
-			}
-			/*column*/
-			.row div {
-				min-height: 20px;
-			}
-			.rowDesign div {
-				border: 2px solid #DDDDDD;
-				padding: 5px;
-			}
-			
-			
 		</style>
 		<!-- component_contributions -->
 		<link rel="stylesheet" ng-href='{{solutionSettings.styleSheetPath}}'>
