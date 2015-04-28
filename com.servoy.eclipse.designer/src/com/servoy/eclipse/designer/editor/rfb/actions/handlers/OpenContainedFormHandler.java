@@ -90,7 +90,7 @@ public class OpenContainedFormHandler implements IServerService
 
 
 								WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-									ghost.getParentBean().getBeanClassName());
+									ghost.getParentComponent().getTypeName());
 								if (spec != null)
 								{
 									Collection<PropertyDescription> forms = null;

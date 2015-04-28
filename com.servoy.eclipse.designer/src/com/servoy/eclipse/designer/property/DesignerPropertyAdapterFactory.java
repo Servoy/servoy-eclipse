@@ -52,12 +52,12 @@ import com.servoy.eclipse.ui.property.PointPropertySource;
 import com.servoy.eclipse.ui.property.RetargetToEditorPersistProperties;
 import com.servoy.eclipse.ui.property.SavingPersistPropertySource;
 import com.servoy.j2db.persistence.AbstractRepository;
-import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptElement;
+import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -281,7 +281,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 					if (persist instanceof WebCustomType)
 					{
 						WebCustomType ghostBean = (WebCustomType)persist;
-						Bean parentBean = ghostBean.getParentBean();
+						IWebComponent parentBean = ghostBean.getParentComponent();
 						IPropertyType< ? > iPropertyType = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
 							FormTemplateGenerator.getComponentTypeName(parentBean)).getFoundTypes().get(ghostBean.getTypeName());
 						if (iPropertyType instanceof ICustomType< ? >) propertyDescription = ((ICustomType< ? >)iPropertyType).getCustomJSONTypeDefinition();
@@ -289,7 +289,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 					else if (persist.getParent() != null)
 					{
 						propertyDescription = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-							FormTemplateGenerator.getComponentTypeName((Bean)persist));
+							FormTemplateGenerator.getComponentTypeName((IWebComponent)persist));
 					}
 
 					if (propertyDescription != null)

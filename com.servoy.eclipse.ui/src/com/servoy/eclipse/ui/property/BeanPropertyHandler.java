@@ -68,7 +68,7 @@ public class BeanPropertyHandler extends BasePropertyHandler
 		else
 		{
 			// obj is bean instance
-			if (persistContext != null) // null for subproperties
+			if (persistContext != null && persistContext.getPersist() instanceof Bean) // null for subproperties
 			{
 				ComponentFactory.updateBeanWithItsXML((Bean)persistContext.getPersist(), obj);
 			}

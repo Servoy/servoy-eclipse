@@ -56,6 +56,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
+import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Portal;
@@ -179,9 +180,9 @@ public class CreateComponentHandler implements IServerService
 						return newTab;
 					}
 				}
-				if (next instanceof Bean)
+				if (next instanceof IWebComponent)
 				{
-					Bean parentBean = (Bean)next;
+					IWebComponent parentBean = (IWebComponent)next;
 					String typeName = args.getString("type");
 					String compName = "bean_" + id.incrementAndGet();
 					while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
@@ -191,7 +192,7 @@ public class CreateComponentHandler implements IServerService
 					String dropTargetFieldName = getFirstFieldWithType(parentBean, typeName);
 					int index = -1;
 					boolean isArray = false;
-					WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getBeanClassName());
+					WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getTypeName());
 					Object config = spec.getProperty(dropTargetFieldName).getConfig();
 					JSONObject configObject = new JSONObject(config.toString());
 					if (configObject.getString("type").endsWith("]")) isArray = true;
@@ -431,7 +432,7 @@ public class CreateComponentHandler implements IServerService
 						Portal portal = (Portal)parent;
 						webComponent = (WebComponent)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(portal, IRepository.WEBCOMPONENTS);
 						webComponent.setProperty("text", compName);
-						webComponent.setBeanClassName(name);
+						webComponent.setTypeName(name);
 						portal.addChild(webComponent);
 					}
 					else if (parent instanceof AbstractContainer)
@@ -532,9 +533,9 @@ public class CreateComponentHandler implements IServerService
 	 * @param typeName
 	 * @return the first key name in the model that has a value of type @param typeName
 	 */
-	private String getFirstFieldWithType(Bean parentBean, String typeName)
+	private String getFirstFieldWithType(IWebComponent parentBean, String typeName)
 	{
-		WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getBeanClassName());
+		WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getTypeName());
 		Map<String, PropertyDescription> properties = spec.getProperties();
 		for (PropertyDescription pd : properties.values())
 		{

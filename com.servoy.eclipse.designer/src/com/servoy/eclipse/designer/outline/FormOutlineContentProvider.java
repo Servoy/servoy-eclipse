@@ -49,6 +49,7 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.ISupportName;
+import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -356,18 +357,18 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 	{
 	}
 
-	private List<IPersist> getAllGhostElements(Bean parentBean)
+	private List<IPersist> getAllGhostElements(IWebComponent parentBean)
 	{
 		if (parentBean instanceof WebComponent) return ((WebComponent)parentBean).getAllCustomProperties();
 
 		List<IPersist> result = new ArrayList<IPersist>();
-		if (FormTemplateGenerator.isWebcomponentBean(parentBean))
+		if (parentBean instanceof Bean && FormTemplateGenerator.isWebcomponentBean(parentBean))
 		{
-			String beanXML = parentBean.getBeanXML();
+			String beanXML = ((Bean)parentBean).getBeanXML();
 			if (beanXML != null)
 			{
 				WebComponentSpecification webComponentSpecification = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-					parentBean.getBeanClassName());
+					((Bean)parentBean).getBeanClassName());
 				if (webComponentSpecification != null)
 				{
 					Map<String, IPropertyType< ? >> foundTypes = webComponentSpecification.getFoundTypes();
@@ -384,7 +385,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 								if (foundTypes.containsKey(simpleTypeName))
 								{
 									WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-										parentBean.getBeanClassName());
+										((Bean)parentBean).getBeanClassName());
 									boolean arrayReturnType = spec.isArrayReturnType(beanJSONKey);
 									if (!arrayReturnType)
 									{
@@ -409,7 +410,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 				}
 				else
 				{
-					Debug.error("no webcomponent specification found for: " + parentBean.getBeanClassName());
+					Debug.error("no webcomponent specification found for: " + ((Bean)parentBean).getBeanClassName());
 				}
 			}
 		}

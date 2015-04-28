@@ -48,6 +48,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportName;
+import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Tab;
@@ -96,17 +97,17 @@ public class GhostHandler implements IServerService
 		editorPart.getForm().acceptVisitor(new IPersistVisitor()
 		{
 
-			private String computeGhostUUID(Bean bean, PropertyDescription pd, String simpleTypeName, int index)
+			private String computeGhostUUID(IWebComponent bean, PropertyDescription pd, String simpleTypeName, int index)
 			{
 				if (index < 0) return bean.getUUID() + "_" + pd.getName() + "_" + simpleTypeName;
 				return bean.getUUID() + "_" + pd.getName() + "[" + index + "]" + "_" + simpleTypeName;
 			}
 
-			private void writeGhostsForWebcomponentBeans(JSONWriter writer, Bean bean)
+			private void writeGhostsForWebcomponentBeans(JSONWriter writer, IWebComponent bean)
 			{
 				if (FormTemplateGenerator.isWebcomponentBean(bean))
 				{
-					WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(bean.getBeanClassName());
+					WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(bean.getTypeName());
 					if (spec == null)
 					{
 						//error bean
@@ -139,13 +140,13 @@ public class GhostHandler implements IServerService
 											writeGhostToJSON(writer, bean, pd, ((WebCustomType)p).getTypeName(), ((WebCustomType)p).getIndex());
 										}
 									}
-									else
+									else if (bean instanceof Bean)
 									{
 										try
 										{
-											if (bean.getBeanXML() != null)
+											if (((Bean)bean).getBeanXML() != null)
 											{
-												JSONObject webComponentModelJson = new JSONObject(bean.getBeanXML());
+												JSONObject webComponentModelJson = new JSONObject(((Bean)bean).getBeanXML());
 												if (webComponentModelJson.has(pd.getName()))
 												{
 													if (webComponentModelJson.get(pd.getName()).toString().startsWith("["))
@@ -189,7 +190,7 @@ public class GhostHandler implements IServerService
 			 * @param i
 			 * @throws JSONException
 			 */
-			private void writeGhostToJSON(JSONWriter jsonWriter, Bean bean, PropertyDescription pd, String simpleTypeName, int i) throws JSONException
+			private void writeGhostToJSON(JSONWriter jsonWriter, IWebComponent bean, PropertyDescription pd, String simpleTypeName, int i) throws JSONException
 			{
 				jsonWriter.object();
 				jsonWriter.key("uuid").value(computeGhostUUID(bean, pd, simpleTypeName, i));
@@ -355,9 +356,9 @@ public class GhostHandler implements IServerService
 						Debug.error(e);
 					}
 				}
-				else if (o instanceof Bean)
+				else if (o instanceof IWebComponent)
 				{
-					writeGhostsForWebcomponentBeans(writer, (Bean)o);
+					writeGhostsForWebcomponentBeans(writer, (IWebComponent)o);
 				}
 
 				return IPersistVisitor.CONTINUE_TRAVERSAL;
@@ -587,9 +588,9 @@ public class GhostHandler implements IServerService
 			Object label = ((AbstractBase)next).getProperty("text");
 			if (label != null) return label.toString();
 		}
-		if (next instanceof Bean)
+		if (next instanceof IWebComponent)
 		{
-			return ((Bean)next).getBeanClassName();
+			return ((IWebComponent)next).getTypeName();
 		}
 		if (next instanceof ISupportDataProviderID)
 		{

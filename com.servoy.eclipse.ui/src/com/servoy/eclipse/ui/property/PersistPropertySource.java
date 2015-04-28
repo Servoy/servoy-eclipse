@@ -155,6 +155,7 @@ import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
+import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
@@ -428,7 +429,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					ServoyLog.logError("Could not register property " + element.getName(), e);
 				}
 			}
-			if (!(persistContext.getPersist() instanceof Bean))
+			if (!(persistContext.getPersist() instanceof IWebComponent))
 			{
 				// check for pseudo properties
 				IPropertyHandler[] pseudoProperties = getPseudoProperties(persistContext.getPersist().getClass());
@@ -2536,27 +2537,13 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			{
 				WebCustomType webCustomType = (WebCustomType)persistContext.getPersist();
 				//TODO should this find the actual top-level/on-the-form component once https://support.servoy.com/browse/SVY-8143 is done
-				Bean ancestor = webCustomType.getParentBean();
-				try
-				{
-					json = new JSONObject(ancestor.getBeanXML());
-				}
-				catch (JSONException e)
-				{
-					Debug.log(e);
-				}
+				IWebComponent ancestor = webCustomType.getParentComponent();
+				json = ancestor.getJson();
 			}
-			else if (persistContext.getPersist() instanceof Bean)
+			else if (persistContext.getPersist() instanceof IWebComponent)
 			{
-				Bean bean = (Bean)persistContext.getPersist();
-				try
-				{
-					json = new JSONObject(bean.getBeanXML());
-				}
-				catch (JSONException e)
-				{
-					Debug.log(e);
-				}
+				IWebComponent bean = (IWebComponent)persistContext.getPersist();
+				json = bean.getJson();
 			}
 			try
 			{

@@ -38,8 +38,9 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PropertyCategory;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.Bean;
+import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IWebObject;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 
@@ -57,7 +58,7 @@ public class WebComponentPropertySource extends PersistPropertySource
 		BeanInfo info;
 		try
 		{
-			info = java.beans.Introspector.getBeanInfo(Bean.class);
+			info = java.beans.Introspector.getBeanInfo(BaseComponent.class);
 			for (PropertyDescriptor desc : info.getPropertyDescriptors())
 			{
 				if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(desc.getName()) ||
@@ -79,7 +80,7 @@ public class WebComponentPropertySource extends PersistPropertySource
 	public WebComponentPropertySource(PersistContext persistContext, boolean readonly, PropertyDescription propertyDescription)
 	{
 		super(persistContext, readonly);
-		if (!(persistContext.getPersist() instanceof Bean))
+		if (!(persistContext.getPersist() instanceof IWebObject))
 		{
 			throw new IllegalArgumentException();
 		}
@@ -186,7 +187,7 @@ public class WebComponentPropertySource extends PersistPropertySource
 	public String toString()
 	{
 		if (propertyDescription instanceof WebComponentSpecification) return ((WebComponentSpecification)propertyDescription).getDisplayName() + " - " +
-			((Bean)persistContext.getPersist()).getName();
+			((IWebObject)persistContext.getPersist()).getName();
 		return propertyDescription.getName();
 	}
 }

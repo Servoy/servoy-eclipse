@@ -25,9 +25,9 @@ import org.sablo.specification.WebComponentSpecification;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.UUID;
@@ -64,7 +64,8 @@ public class PersistFinder
 			String fieldName = split[1];
 			String typeName = split[2];
 			int index = -1;
-			Bean parentBean = (Bean)ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(parentUUID));
+			IWebComponent parentBean = (IWebComponent)ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(
+				UUID.fromString(parentUUID));
 
 			if (fieldName.indexOf('[') > 0)
 			{
@@ -79,7 +80,7 @@ public class PersistFinder
 			}
 			else
 			{
-				WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getBeanClassName());
+				WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getTypeName());
 				boolean arrayReturnType = spec.isArrayReturnType(fieldName);
 
 				WebCustomType bean = new WebCustomType(parentBean, fieldName, typeName, index, arrayReturnType, false);

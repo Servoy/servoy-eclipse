@@ -36,11 +36,11 @@ import com.servoy.eclipse.ui.property.IPropertyHandler;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractBase;
-import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.IWebObject;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
@@ -124,18 +124,12 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 	public Object getValue(Object obj, PersistContext persistContext)
 	{
 		Object value = null;
-		Bean bean = (Bean)obj;
-		try
+		IWebObject bean = (IWebObject)obj;
+
+		JSONObject json = bean.getJson();
+		if (json != null)
 		{
-			String json = bean.getBeanXML();
-			if (json != null)
-			{
-				value = new ServoyJSONObject(json, false).opt(getName());
-			}
-		}
-		catch (JSONException e)
-		{
-			ServoyLog.logError(e);
+			value = json.opt(getName());
 		}
 
 		IPropertyType< ? > type = propertyDescription.getType();
@@ -197,7 +191,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 	@Override
 	public void setValue(Object obj, Object value, PersistContext persistContext)
 	{
-		Bean bean = (Bean)obj;
+		IWebObject bean = (IWebObject)obj;
 
 		Object convertedValue = value;
 		if (propertyDescription.getType() == FunctionPropertyType.INSTANCE || propertyDescription.getType() == ServoyFunctionPropertyType.INSTANCE)
@@ -254,10 +248,9 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 
 		try
 		{
-			String json = bean.getBeanXML();
-			ServoyJSONObject jsonObject = json == null ? new ServoyJSONObject(true, true) : new ServoyJSONObject(json, false);
+			JSONObject jsonObject = bean.getJson() == null ? new ServoyJSONObject(true, true) : bean.getJson();
 			jsonObject.put(getName(), convertedValue);
-			bean.setBeanXML(jsonObject.length() == 0 ? null : jsonObject.toString(false));
+			bean.setJson(jsonObject);
 		}
 		catch (JSONException e)
 		{
