@@ -30,6 +30,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 
 import com.servoy.eclipse.designer.editor.commands.FormElementCopyCommand;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
@@ -82,13 +83,14 @@ public class CopyAction extends SelectionAction
 			{
 				toCopy.addAll(Utils.asList(((FormElementGroup)modelObject).getElements()));
 			}
-			else if (modelObject instanceof IPersist)
+			else if (modelObject instanceof PersistContext)
 			{
-				toCopy.add((IPersist)modelObject);
-				if (modelObject instanceof ISupportChilds)
+				IPersist persist = ((PersistContext)modelObject).getPersist();
+				toCopy.add(persist);
+				if (persist instanceof ISupportChilds)
 				{
 					// also copy children
-					Iterator<IPersist> it = ((ISupportChilds)modelObject).getAllObjects();
+					Iterator<IPersist> it = ((ISupportChilds)persist).getAllObjects();
 					while (it.hasNext())
 					{
 						toCopy.add(it.next());

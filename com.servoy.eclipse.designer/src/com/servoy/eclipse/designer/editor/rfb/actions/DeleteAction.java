@@ -24,6 +24,7 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
@@ -75,9 +76,9 @@ public class DeleteAction extends org.eclipse.gef.ui.actions.DeleteAction
 			{
 				toDelete.addAll(Utils.asList(((FormElementGroup)modelObject).getElements()));
 			}
-			else if (modelObject instanceof IPersist)
+			else if (modelObject instanceof PersistContext)
 			{
-				toDelete.add((IPersist)modelObject);
+				toDelete.add(((PersistContext)modelObject).getPersist());
 			}
 		}
 
