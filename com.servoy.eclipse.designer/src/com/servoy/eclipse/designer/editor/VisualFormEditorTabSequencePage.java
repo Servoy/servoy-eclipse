@@ -396,7 +396,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 				{
 					WebComponentSpecification specification = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
 						((Bean)tabSeq).getBeanClassName());
-					if (specification.getProperties(NGTabSeqPropertyType.NG_INSTANCE).size() < 1)
+					if (specification != null && specification.getProperties(NGTabSeqPropertyType.NG_INSTANCE).size() < 1)
 					{
 						continue;
 					}
