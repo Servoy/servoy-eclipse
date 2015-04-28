@@ -115,7 +115,7 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 			}
 		}
 
-
+		var t;
 		function onmousemove(event) {
 			if (dragStartEvent) {
 				
@@ -162,6 +162,7 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 				if (selectionToDrag.length > 0) {
 					if (dragging) {
 						if (!editorScope.isAbsoluteFormLayout()) {
+
 							var type = "component";
 							var layoutName = selectionToDrag[0].getAttribute("svy-layoutname");
 							if (layoutName) type = "layout"
@@ -173,7 +174,7 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 							}
 							else editorScope.glasspane.style.cursor="";
 							
-							if ( canDrop.dropTarget) {
+							if (canDrop.dropTarget) {
 								for(var i=0;i<selectionToDrag.length;i++) {
 									var node = $(selectionToDrag[i]);
 									if (editorScope.glasspane.style.cursor=="") {
@@ -186,7 +187,12 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 									}
 								}
 								dragStartEvent = event;
-								editorScope.refreshEditorContent();
+
+								if (t) clearTimeout(t);
+								t = setTimeout(function(){
+								 	editorScope.refreshEditorContent();
+								}, 200);
+								
 							}
 						}
 						else {

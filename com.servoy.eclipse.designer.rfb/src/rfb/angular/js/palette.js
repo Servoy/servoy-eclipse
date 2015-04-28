@@ -31,6 +31,7 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 				var mouseentercallback;
 				var mouseleavecallback;
 				var mouseupcallback;
+				var t;
 				var mousemovecallback = $scope.registerDOMEvent("mousemove","EDITOR", function(ev){					
 					if (dragClone)
 					{
@@ -51,14 +52,19 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 						
 						if ( canDrop.dropTarget  && !$scope.isAbsoluteFormLayout()  && angularElement) {
 							if ($scope.glasspane.style.cursor=="") {
-								if (canDrop.beforeChild) {
-									angularElement.insertBefore(canDrop.beforeChild);
-									angularElement.css('opacity', '1');
-								}
-								else if (angularElement.parent()[0] != canDrop.dropTarget || canDrop.append){
-									$(canDrop.dropTarget).append(angularElement);
-									angularElement.css('opacity', '1');
-								}
+
+								if (t) clearTimeout(t);
+								t = setTimeout(function(){
+									if (canDrop.beforeChild) {
+										angularElement.insertBefore(canDrop.beforeChild);
+										angularElement.css('opacity', '1');
+									}
+									else if (angularElement.parent()[0] != canDrop.dropTarget || canDrop.append){
+										$(canDrop.dropTarget).append(angularElement);
+										angularElement.css('opacity', '1');
+									}
+								}, 200);
+
 							}
 							else {
 								angularElement.css('opacity', '0');
