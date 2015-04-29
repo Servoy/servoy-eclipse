@@ -32,15 +32,18 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Table;
 
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
- * 
+ *
  * @author jcompagner
  * @since 6.1
  */
@@ -50,6 +53,7 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 	private CheckboxTableViewer checkboxTableViewer;
 	private final HashMap<String, IWizardPage> serverConfigurationPages;
 	private final String[] requiredServers;
+	private SelectionButtonsBar selectionButtonsBar;
 
 	/**
 	 * @param string
@@ -73,19 +77,28 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 	{
 		Composite container = new Composite(parent, SWT.NULL);
 		setControl(container);
-		container.setLayout(new FillLayout(SWT.HORIZONTAL));
+		container.setLayout(new FormLayout());
 
 		checkboxTableViewer = CheckboxTableViewer.newCheckList(container, SWT.BORDER | SWT.FULL_SELECTION);
+		Table table = checkboxTableViewer.getTable();
+		FormData fd_table = new FormData();
+		fd_table.top = new FormAttachment(0, 5);
+		fd_table.right = new FormAttachment(100, -5);
+		fd_table.left = new FormAttachment(0, 5);
+		table.setLayoutData(fd_table);
+		selectionButtonsBar = new SelectionButtonsBar(checkboxTableViewer, fd_table, container);
 
 		checkboxTableViewer.setContentProvider(new ServersContentProvider());
 		checkboxTableViewer.setInput(ApplicationServerRegistry.get().getServerManager());
 		if (requiredServers != null && requiredServers.length > 0) checkboxTableViewer.addCheckStateListener(this);
 		if (selectedServers.size() == 0)
 		{
+			selectionButtonsBar.diableButtons();
 			checkboxTableViewer.setAllChecked(true);
 		}
 		else
 		{
+			selectionButtonsBar.disableSelectAll();
 			checkboxTableViewer.setCheckedElements(appendRequiredLabel(selectedServers.toArray()));
 		}
 
