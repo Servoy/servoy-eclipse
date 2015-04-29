@@ -204,7 +204,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage#getAdapter(java.lang.Class)
 	 */
 	@Override
@@ -271,6 +271,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	{
 		super.dispose();
 		getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(selectionListener);
+		WebsocketSessionManager.removeSession(editorWebsocketSession.getUuid());
 	}
 
 	protected INGClientWebsocketSession getContentWebsocketSession()

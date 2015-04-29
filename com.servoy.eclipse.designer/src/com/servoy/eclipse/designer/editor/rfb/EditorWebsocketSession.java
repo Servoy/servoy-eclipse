@@ -41,11 +41,17 @@ public class EditorWebsocketSession extends BaseWebsocketSession
 		super(uuid);
 	}
 
+	// session will be destroyed when editor is closed
 	@Override
 	public boolean isValid()
 	{
-		// TODO: check if editor is still open?
 		return true;
+	}
+
+	@Override
+	public boolean checkForWindowActivity()
+	{
+		return false;
 	}
 
 	@Override
