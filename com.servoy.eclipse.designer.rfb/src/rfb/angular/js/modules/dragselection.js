@@ -174,6 +174,8 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 							}
 							else editorScope.glasspane.style.cursor="";
 							
+							dragStartEvent = event;
+							
 							if (t) clearTimeout(t);
 							t = setTimeout(function(){
 								if (canDrop.dropTarget) {
