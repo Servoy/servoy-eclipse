@@ -154,7 +154,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.jface.wizard.Wizard#setContainer(org.eclipse.jface.wizard.IWizardContainer)
 	 */
 	@Override
@@ -704,6 +704,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		CheckboxTreeViewer treeViewer;
 		public int projectProblemsType = BuilderUtils.HAS_NO_MARKERS;
 		private boolean moduleDbDownErrors = false;
+		private SelectAllButtons selectAllButtons;
 
 		protected ModulesSelectionPage()
 		{
@@ -734,7 +735,14 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			final String[] moduleNamesFinal = moduleNames;
 
 			treeViewer = new CheckboxTreeViewer(composite);
-			treeViewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH));
+			gridLayout.numColumns = 2;
+			GridData gridData = new GridData();
+			gridData.horizontalAlignment = GridData.FILL;
+			gridData.verticalAlignment = GridData.FILL;
+			gridData.grabExcessVerticalSpace = true;
+			gridData.grabExcessHorizontalSpace = true;
+			gridData.horizontalSpan = 2;
+			treeViewer.getTree().setLayoutData(gridData);
 			treeViewer.setContentProvider(new ITreeContentProvider()
 			{
 				public Object[] getChildren(Object parentElement)
@@ -767,7 +775,15 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			});
 			treeViewer.setInput(moduleNames);
 			treeViewer.setCheckedElements(moduleNames);
-
+			selectAllButtons = new SelectAllButtons(treeViewer, composite);
+			if (moduleNames.length == 0)
+			{
+				selectAllButtons.disableDeselectAll();
+			}
+			else
+			{
+				selectAllButtons.disableSelectAll();
+			}
 			treeViewer.addCheckStateListener(this);
 			setControl(composite);
 		}
@@ -806,6 +822,15 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			if (isCurrentPage()) getWizard().getContainer().updateButtons();
 
 			exportOptionsPage.refreshDBIDownFlag(hasDBDownErrors());
+
+			if (treeViewer.getCheckedElements().length < treeViewer.getTree().getItemCount())
+			{
+				selectAllButtons.disableDeselectAll();
+			}
+			else
+			{
+				selectAllButtons.disableSelectAll();
+			}
 		}
 
 		/**

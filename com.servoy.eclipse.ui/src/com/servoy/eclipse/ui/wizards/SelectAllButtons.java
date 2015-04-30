@@ -15,9 +15,9 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.warexporter.ui.wizard;
+package com.servoy.eclipse.ui.wizards;
 
-import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -29,31 +29,30 @@ import org.eclipse.swt.widgets.Composite;
  * @author rlazar
  * @since 8
  */
-public class SelectionButtonsBar
+public class SelectAllButtons
 {
 	private final Button selectAll;
 	private final Button deselectAll;
-	private final String[] required;
 
-	public SelectionButtonsBar(final CheckboxTableViewer checkboxTableViewer, Composite container, String[] requiredData)
+	public SelectAllButtons(final CheckboxTreeViewer checkboxTreeViewer, Composite container)
 	{
-		required = requiredData;
 		selectAll = new Button(container, SWT.NONE);
 		GridData gridData = new GridData(SWT.BEGINNING);
 		selectAll.setLayoutData(gridData);
 		selectAll.setText("Select All");
 		selectAll.addSelectionListener(new SelectionAdapter()
 		{
-
+			@SuppressWarnings("deprecation")
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
 				deselectAll.setEnabled(true);
 				selectAll.setEnabled(false);
-				checkboxTableViewer.setAllChecked(true);
+				checkboxTreeViewer.setAllChecked(true);
 			}
 
 		});
+
 		deselectAll = new Button(container, SWT.NONE);
 		GridData gridDataDeselectAll = new GridData(SWT.BEGINNING);
 		deselectAll.setLayoutData(gridDataDeselectAll);
@@ -65,19 +64,13 @@ public class SelectionButtonsBar
 			{
 				selectAll.setEnabled(true);
 				deselectAll.setEnabled(false);
-				checkboxTableViewer.setAllChecked(false);
-				if (required != null && required.length > 0)
-				{
-					checkboxTableViewer.setChecked(required[0] + DirectorySelectionPage.REQUIRED_LABEL, true);
-				}
-
+				checkboxTreeViewer.setAllChecked(false);
 			}
 		});
 	}
 
 	public void disableButtons()
 	{
-
 		selectAll.setEnabled(false);
 		deselectAll.setEnabled(false);
 	}
@@ -94,9 +87,4 @@ public class SelectionButtonsBar
 		deselectAll.setEnabled(false);
 	}
 
-	public void enableAll()
-	{
-		selectAll.setEnabled(true);
-		deselectAll.setEnabled(true);
-	}
 }

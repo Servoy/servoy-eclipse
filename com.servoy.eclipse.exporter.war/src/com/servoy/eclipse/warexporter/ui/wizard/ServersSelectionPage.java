@@ -32,11 +32,9 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Table;
 
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -75,25 +73,28 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 
 	public void createControl(Composite parent)
 	{
-		Composite container = new Composite(parent, SWT.NULL);
+		GridLayout gridLayout = new GridLayout();
+		Composite container = new Composite(parent, SWT.NONE);
 		setControl(container);
-		container.setLayout(new FormLayout());
+		container.setLayout(gridLayout);
 
 		checkboxTableViewer = CheckboxTableViewer.newCheckList(container, SWT.BORDER | SWT.FULL_SELECTION);
-		Table table = checkboxTableViewer.getTable();
-		FormData fd_table = new FormData();
-		fd_table.top = new FormAttachment(0, 5);
-		fd_table.right = new FormAttachment(100, -5);
-		fd_table.left = new FormAttachment(0, 5);
-		table.setLayoutData(fd_table);
-		selectionButtonsBar = new SelectionButtonsBar(checkboxTableViewer, fd_table, container);
-
 		checkboxTableViewer.setContentProvider(new ServersContentProvider());
 		checkboxTableViewer.setInput(ApplicationServerRegistry.get().getServerManager());
+		gridLayout.numColumns = 2;
+		GridData gridData = new GridData();
+		gridData.horizontalAlignment = GridData.FILL;
+		gridData.verticalAlignment = GridData.FILL;
+		gridData.grabExcessVerticalSpace = true;
+		gridData.grabExcessHorizontalSpace = true;
+		gridData.horizontalSpan = 2;
+		checkboxTableViewer.getTable().setLayoutData(gridData);
+
 		if (requiredServers != null && requiredServers.length > 0) checkboxTableViewer.addCheckStateListener(this);
+		selectionButtonsBar = new SelectionButtonsBar(checkboxTableViewer, container, requiredServers);
 		if (selectedServers.size() == 0)
 		{
-			selectionButtonsBar.diableButtons();
+			selectionButtonsBar.disableButtons();
 			checkboxTableViewer.setAllChecked(true);
 		}
 		else
@@ -101,7 +102,6 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 			selectionButtonsBar.disableSelectAll();
 			checkboxTableViewer.setCheckedElements(appendRequiredLabel(selectedServers.toArray()));
 		}
-
 	}
 
 	private String[] appendRequiredLabel(Object[] serverNames)
@@ -151,7 +151,7 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.wizard.WizardPage#getNextPage()
 	 */
 	@Override
@@ -185,7 +185,7 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.commands.IStateListener#handleStateChange(org.eclipse.core.commands.State, java.lang.Object)
 	 */
 	@Override
@@ -193,8 +193,18 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 	{
 		ICheckable checkable = event.getCheckable();
 		for (String requiredServer : requiredServers)
-			if (!checkable.getChecked(requiredServer + DirectorySelectionPage.REQUIRED_LABEL)) checkable.setChecked(requiredServer +
-				DirectorySelectionPage.REQUIRED_LABEL, true);
+			if (!checkable.getChecked(requiredServer + DirectorySelectionPage.REQUIRED_LABEL))
+			{
+				checkable.setChecked(requiredServer + DirectorySelectionPage.REQUIRED_LABEL, true);
+			}
+		if (checkboxTableViewer.getCheckedElements().length < checkboxTableViewer.getTable().getItemCount())
+		{
+			selectionButtonsBar.enableAll();
+		}
+		else
+		{
+			selectionButtonsBar.disableSelectAll();
+		}
 
 	}
 }

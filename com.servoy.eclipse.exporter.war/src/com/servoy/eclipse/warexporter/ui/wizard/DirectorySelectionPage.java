@@ -32,11 +32,9 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Table;
 
 /**
  *
@@ -54,9 +52,6 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 	private CheckboxTableViewer checkboxTableViewer;
 	private SelectionButtonsBar selectionButtonsBar;
 
-	/**
-	 * @wbp.parser.constructor
-	 */
 	public DirectorySelectionPage(String pagename, String title, String description, File directory, List<String> files, String[] requiredFiles)
 	{
 		this(pagename, title, description, directory, files, requiredFiles, null);
@@ -83,25 +78,27 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 
 	public void createControl(Composite parent)
 	{
-		Composite container = new Composite(parent, SWT.NULL);
+		GridLayout gridLayout = new GridLayout();
+		Composite container = new Composite(parent, SWT.NONE);
 		setControl(container);
-		container.setLayout(new FormLayout());
+		container.setLayout(gridLayout);
 
 		checkboxTableViewer = CheckboxTableViewer.newCheckList(container, SWT.BORDER | SWT.FULL_SELECTION);
-		Table table = checkboxTableViewer.getTable();
-		FormData fd_table = new FormData();
-		fd_table.top = new FormAttachment(0, 5);
-		fd_table.right = new FormAttachment(100, -5);
-		fd_table.left = new FormAttachment(0, 5);
-		table.setLayoutData(fd_table);
 		checkboxTableViewer.setContentProvider(new DirectoryContentProvider());
 		checkboxTableViewer.setInput(directory);
-		selectionButtonsBar = new SelectionButtonsBar(checkboxTableViewer, fd_table, container);
-
+		gridLayout.numColumns = 2;
+		GridData gridData = new GridData();
+		gridData.horizontalAlignment = GridData.FILL;
+		gridData.verticalAlignment = GridData.FILL;
+		gridData.grabExcessVerticalSpace = true;
+		gridData.grabExcessHorizontalSpace = true;
+		gridData.horizontalSpan = 2;
+		checkboxTableViewer.getTable().setLayoutData(gridData);
 		if (requiredFiles != null && requiredFiles.length > 0) checkboxTableViewer.addCheckStateListener(this);
+		selectionButtonsBar = new SelectionButtonsBar(checkboxTableViewer, container, requiredFiles);
 		if (files.size() == 0)
 		{
-			selectionButtonsBar.diableButtons();
+			selectionButtonsBar.disableButtons();
 			checkboxTableViewer.setAllChecked(true);
 		}
 		else
@@ -211,5 +208,13 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 		ICheckable checkable = event.getCheckable();
 		for (String requiredFile : requiredFiles)
 			if (!checkable.getChecked(requiredFile + REQUIRED_LABEL)) checkable.setChecked(requiredFile + REQUIRED_LABEL, true);
+		if (checkboxTableViewer.getCheckedElements().length < checkboxTableViewer.getTable().getItemCount())
+		{
+			selectionButtonsBar.enableAll();
+		}
+		else
+		{
+			selectionButtonsBar.disableSelectAll();
+		}
 	}
 }
