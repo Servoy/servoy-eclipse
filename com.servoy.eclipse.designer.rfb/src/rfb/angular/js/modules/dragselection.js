@@ -174,26 +174,23 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 							}
 							else editorScope.glasspane.style.cursor="";
 							
-							if (canDrop.dropTarget) {
-								for(var i=0;i<selectionToDrag.length;i++) {
-									var node = $(selectionToDrag[i]);
-									if (editorScope.glasspane.style.cursor=="") {
-										if (canDrop.beforeChild) {
-											node.insertBefore(canDrop.beforeChild);
-										}
-										else if (node.parent()[0] != canDrop.dropTarget || canDrop.append){
-											$(canDrop.dropTarget).append(node);
+							if (t) clearTimeout(t);
+							t = setTimeout(function(){
+								if (canDrop.dropTarget) {
+									for(var i=0;i<selectionToDrag.length;i++) {
+										var node = $(selectionToDrag[i]);
+										if (editorScope.glasspane.style.cursor=="") {
+											if (canDrop.beforeChild) {
+												node.insertBefore(canDrop.beforeChild);
+											}
+											else if (node.parent()[0] != canDrop.dropTarget || canDrop.append){
+												$(canDrop.dropTarget).append(node);
+											}
 										}
 									}
+									editorScope.refreshEditorContent();
 								}
-								dragStartEvent = event;
-
-								if (t) clearTimeout(t);
-								t = setTimeout(function(){
-								 	editorScope.refreshEditorContent();
-								}, 200);
-								
-							}
+							}, 200);
 						}
 						else {
 							var formState = editorScope.getFormState();
