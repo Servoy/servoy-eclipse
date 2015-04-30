@@ -15408,6 +15408,16 @@ record.emp_name = 'John'
 databaseManager.saveData()]]></sample>
           </samples>
         </function>
+        <function clientSupport="ng,wc,sc" name="getTable">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.dataprocessing.JSTable" typecode="com.servoy.j2db.dataprocessing.JSTable"><![CDATA[JSTable table]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Get the table of a datasource.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Get the table of a datasource.]]></summary>
+          </summaries>
+        </function>
       </functions>
     </object>
     <object clientSupport="ng,wc,sc" publicName="JSDataSourceNode" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSDataSourceNode">
@@ -18279,7 +18289,7 @@ frmEmpty.namedFoundSet = JSForm.EMPTY_FOUNDSET;
 // form with an initial foundset based on a global relation
 var frmGlobalRel = solutionModel.newForm("categories_related", solutionModel.getForm("categories"));
 frmGlobalRel.namedFoundSet = "g2_to_category_name";
- 
+
 // form with an initial foundset based on a global relation
 var frmGlobalRel = solutionModel.newForm("categories_related", solutionModel.getForm("categories"));
 frmGlobalRel.namedFoundSet = solutionModel.getRelation("g1_to_categories");]]></sample>
@@ -18315,7 +18325,7 @@ aForm.navigator = aNavigator;]]></sample>
 // here we assign an other new form as the navigator.
 var aNavigator = solutionModel.newForm('navForm', myDatasource, null, false, 800, 600);
 // set the navigators navigator to NONE
-aNavigator.navigator = SM_DEFAULTS.NONE; // Hide the navigator on the form. 
+aNavigator.navigator = SM_DEFAULTS.NONE; // Hide the navigator on the form.
 myListViewForm.navigator = aNavigator;
 application.output(myListViewForm.navigator.name);]]></sample>
           </samples>
@@ -18801,7 +18811,7 @@ to display only when needed or to never display.]]></description>
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var form = solutionModel.newForm('myForm',myDatasource,null,true,1000,600);
-form.scrollbars = SM_SCROLLBAR.VERTICAL_SCROLLBAR_NEVER; 
+form.scrollbars = SM_SCROLLBAR.VERTICAL_SCROLLBAR_NEVER;
 forms['newForm1'].controller.show();]]></sample>
           </samples>
         </property>
@@ -19022,7 +19032,7 @@ application.output(mybean.className);]]></sample>
         </function>
         <function clientSupport="ng,wc,sc" name="getBeans">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSBean[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSBean;"><![CDATA[the list of all JSbuttons on this forms]]></return>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSBean[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSBean;"><![CDATA[the list of all JSBeans on this forms]]></return>
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Returns all JSBeans of this form.]]></description>
           </descriptions>
@@ -19042,7 +19052,7 @@ for (var b in beans)
           <argumentsTypes>
             <argumentType typecode="boolean"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSBean[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSBean;"><![CDATA[the list of all JSbuttons on this forms]]></return>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSBean[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSBean;"><![CDATA[the list of all JSBeans on this forms]]></return>
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Returns all JSBeans of this form.]]></description>
           </descriptions>
@@ -19099,7 +19109,7 @@ application.output(btn.text);]]></sample>
         </function>
         <function clientSupport="ng,mc,wc,sc" name="getButtons">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSButton[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSButton;"><![CDATA[the list of all JSbuttons on this forms]]></return>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSButton[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSButton;"><![CDATA[the list of all JSButtons on this forms]]></return>
           <descriptions>
             <description clientSupport="ng,mc,wc,sc"><![CDATA[Returns all JSButtons of this form, including the ones without a name.]]></description>
           </descriptions>
@@ -19121,7 +19131,7 @@ for (var b in buttons)
           <argumentsTypes>
             <argumentType typecode="boolean"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSButton[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSButton;"><![CDATA[the list of all JSbuttons on this forms]]></return>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSButton[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSButton;"><![CDATA[the list of all JSButtons on this forms]]></return>
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Returns all JSButtons of this form, including the ones without a name.]]></description>
           </descriptions>
@@ -19148,12 +19158,12 @@ for (var b in buttons)
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent" typecode="com.servoy.j2db.scripting.solutionmodel.JSComponent"><![CDATA[a JSComponent object (might be a JSField, JSLabel, JSButton, JSPortal, JSBean or JSTabPanel)]]></return>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent" typecode="com.servoy.j2db.scripting.solutionmodel.JSComponent"><![CDATA[a JSComponent object (might be a JSField, JSLabel, JSButton, JSPortal, JSBean, JSWebComponent or JSTabPanel)]]></return>
           <descriptions>
-            <description clientSupport="ng,mc,wc,sc"><![CDATA[Returns a JSComponent that has the given name; if found it will be a JSField, JSLabel, JSButton, JSPortal, JSBean or JSTabPanel.]]></description>
+            <description clientSupport="ng,mc,wc,sc"><![CDATA[Returns a JSComponent that has the given name; if found it will be a JSField, JSLabel, JSButton, JSPortal, JSBean, JSWebComponent or JSTabPanel.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="ng,mc,wc,sc"><![CDATA[Returns a JSComponent that has the given name; if found it will be a JSField, JSLabel, JSButton, JSPortal, JSBean or JSTabPanel.]]></summary>
+            <summary clientSupport="ng,mc,wc,sc"><![CDATA[Returns a JSComponent that has the given name; if found it will be a JSField, JSLabel, JSButton, JSPortal, JSBean, JSWebComponent or JSTabPanel.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="ng,mc,wc,sc"><![CDATA[var frm = solutionModel.getForm("myForm");
@@ -19170,10 +19180,10 @@ application.output("Component type and name: " + cmp);]]></sample>
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSComponent;"><![CDATA[an array of all the JSComponents on the form.]]></return>
           <descriptions>
-            <description clientSupport="ng,mc,wc,sc"><![CDATA[Returns a array of all the JSComponents that a form has; they are of type JSField,JSLabel,JSButton,JSPortal,JSBean or JSTabPanel.]]></description>
+            <description clientSupport="ng,mc,wc,sc"><![CDATA[Returns a array of all the JSComponents that a form has; they are of type JSField,JSLabel,JSButton,JSPortal,JSBean, JSWebComponents or JSTabPanel.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="ng,mc,wc,sc"><![CDATA[Returns a array of all the JSComponents that a form has; they are of type JSField,JSLabel,JSButton,JSPortal,JSBean or JSTabPanel.]]></summary>
+            <summary clientSupport="ng,mc,wc,sc"><![CDATA[Returns a array of all the JSComponents that a form has; they are of type JSField,JSLabel,JSButton,JSPortal,JSBean, JSWebComponents or JSTabPanel.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="ng,mc,wc,sc"><![CDATA[var form = solutionModel.getForm("myForm");
@@ -19188,10 +19198,10 @@ for (var i in components)
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSComponent;"><![CDATA[an array of all the JSComponents on the form.]]></return>
           <descriptions>
-            <description clientSupport="ng,wc,sc"><![CDATA[Returns a array of all the JSComponents that a form has; they are of type JSField,JSLabel,JSButton,JSPortal,JSBean or JSTabPanel.]]></description>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns a array of all the JSComponents that a form has; they are of type JSField,JSLabel,JSButton,JSPortal,JSBean, JSWebComponent or JSTabPanel.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="ng,wc,sc"><![CDATA[Returns a array of all the JSComponents that a form has; they are of type JSField,JSLabel,JSButton,JSPortal,JSBean or JSTabPanel.]]></summary>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns a array of all the JSComponents that a form has; they are of type JSField,JSLabel,JSButton,JSPortal,JSBean, JSWebComponent or JSTabPanel.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var form = solutionModel.getForm("myForm");
@@ -19678,7 +19688,7 @@ form.getPart(JSPart.LEADING_SUBSUMMARY, 160).background = 'red';]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSPartWithConstants" typecode="com.servoy.j2db.scripting.solutionmodel.JSPart"><![CDATA[A JSPart instance representing the retrieved form part.]]></return>
           <descriptions>
-            <description clientSupport="ng,wc,sc"><![CDATA[Gets a part of the form from the given type (see JSPart constants). 
+            <description clientSupport="ng,wc,sc"><![CDATA[Gets a part of the form from the given type (see JSPart constants).
 Use the height if you want to get a specific LEADING_SUBSUMMARY or TRAILING_SUBSUMMARY.]]></description>
           </descriptions>
           <summaries>
@@ -19704,7 +19714,7 @@ form.getPart(JSPart.LEADING_SUBSUMMARY, 160).background = 'red';]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[A number holding the Y offset of the specified form part.]]></return>
           <descriptions>
-            <description clientSupport="ng,wc,sc"><![CDATA[Returns the Y offset of a given part (see JSPart) of the form. This will include 
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the Y offset of a given part (see JSPart) of the form. This will include
 all the super forms parts if this form extends a form.]]></description>
           </descriptions>
           <summaries>
@@ -19731,8 +19741,8 @@ form.newButton('mybutton',50,50+height,80,20,solutionModel.getGlobalMethod('glob
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[A number holding the Y offset of the specified form part.]]></return>
           <descriptions>
-            <description clientSupport="ng,wc,sc"><![CDATA[Returns the Y offset of a given part (see JSPart) of the form. This will include 
-all the super forms parts if this form extends a form. Use the height parameter for 
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the Y offset of a given part (see JSPart) of the form. This will include
+all the super forms parts if this form extends a form. Use the height parameter for
 targetting one of multiple subsummary parts.]]></description>
           </descriptions>
           <summaries>
@@ -20074,6 +20084,70 @@ for (var i in variables)
           <parameters>
             <parameter name="returnInheritedElements" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
               <description><![CDATA[true to also return the elements from the parent form]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="ng" name="getWebComponent">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSWebComponent" typecode="com.servoy.j2db.scripting.solutionmodel.JSWebComponent"><![CDATA[a JSWebComponent object]]></return>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[Returns a JSWebComponent that has the given name.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[Returns a JSWebComponent that has the given name.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[var btn = myForm.getWebComponent("mycomponent");
+application.output(mybean.typeName);]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified name of the web component]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="ng" name="getWebComponents">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSWebComponent[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSWebComponent;"><![CDATA[the list of all JSWebComponent on this forms]]></return>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[Returns all JSWebComponents of this form.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[Returns all JSWebComponents of this form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[var webComponents = myForm.getWebComponents();
+for (var i in webComponents)
+{
+	if (webComponents[i].name != null)
+		application.output(webComponents[i].name);
+}]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng" name="getWebComponents">
+          <argumentsTypes>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSWebComponent[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSWebComponent;"><![CDATA[the list of all JSWebComponents on this forms]]></return>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[Returns all JSWebComponents of this form.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[Returns all JSWebComponents of this form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[var webComponents = myForm.getWebComponents(false);
+for (var i in webComponents)
+{
+	if (webComponents[i].name != null)
+		application.output(webComponents[i].name);
+}]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="returnInheritedElements" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[true to also return the elements from parent form]]></description>
             </parameter>
           </parameters>
         </function>
@@ -21904,7 +21978,7 @@ forms['newForm1'].controller.show();]]></sample>
 var variable = form.newVariable('myVar', JSVariable.TEXT , "'This is a default value (with triple quotes)!'");
 //or variable = form.newVariable('myVar', JSVariable.TEXT)
 //variable.defaultValue = "'This is a default value (with triple quotes)!'" // setting the default value after the variable is created requires form recreation
-//variable.defaultValue = "{a:'First letter',b:'Second letter'}"   
+//variable.defaultValue = "{a:'First letter',b:'Second letter'}"
 var field = form.newField(variable, JSField.TEXT_FIELD, 100, 100, 200, 200);
 forms['newForm1'].controller.show();]]></sample>
           </samples>
@@ -21937,7 +22011,7 @@ This method does not require the form to be destroyed and recreated. Use this me
 var variable = form.newVariable('myVar', JSVariable.TEXT , "'This is a default value (with triple quotes)!'");
 //or variable = form.newVariable('myVar', JSVariable.TEXT)
 //variable.defaultValue = "'This is a default value (with triple quotes)!'" // setting the default value after the variable is created requires form recreation
-//variable.defaultValue = "{a:'First letter',b:'Second letter'}"   
+//variable.defaultValue = "{a:'First letter',b:'Second letter'}"
 var field = form.newField(variable, JSField.TEXT_FIELD, 100, 100, 200, 200);
 forms['newForm1'].controller.show();]]></sample>
           </samples>
@@ -21950,6 +22024,48 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
             <parameter name="defaultValue" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the default value as a javascript expression string]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="ng" name="newWebComponent">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSWebComponent" typecode="com.servoy.j2db.scripting.solutionmodel.JSWebComponent"><![CDATA[a JSWebComponent object]]></return>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[Creates a new JSWebComponent (spec based component) object on the form.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[Creates a new JSWebComponent (spec based component) object on the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[var form = solutionModel.newForm('newForm1', 'db:/server1/table1', null, true, 800, 600);
+var bean = form.newWebComponent('bean','mypackage-testcomponent',200,200,300,300);
+forms['newForm1'].controller.show();]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified name of the JSWebComponent object]]></description>
+            </parameter>
+            <parameter name="type" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the webcomponent name as it appears in the spec]]></description>
+            </parameter>
+            <parameter name="x" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the horizontal "x" position of the JSWebComponent object in pixels]]></description>
+            </parameter>
+            <parameter name="y" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the vertical "y" position of the JSWebComponent object in pixels]]></description>
+            </parameter>
+            <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the width of the JSWebComponent object in pixels]]></description>
+            </parameter>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the height of the JSWebComponent object in pixels]]></description>
             </parameter>
           </parameters>
         </function>
@@ -22023,11 +22139,11 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if component has been successfully deleted; false otherwise]]></return>
           <descriptions>
-            <description clientSupport="ng,mc,wc,sc"><![CDATA[Removes a component (JSLabel, JSButton, JSField, JSPortal, JSBean, JSTabpanel) that has the given name. It is the same as calling "if(!removeLabel(name) &amp;&amp; !removeButton(name) ....)".
+            <description clientSupport="ng,mc,wc,sc"><![CDATA[Removes a component (JSLabel, JSButton, JSField, JSPortal, JSBean, JSTabpanel, JSWebComponent) that has the given name. It is the same as calling "if(!removeLabel(name) &amp;&amp; !removeButton(name) ....)".
 Returns true if removal was successful, false otherwise.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="ng,mc,wc,sc"><![CDATA[Removes a component (JSLabel, JSButton, JSField, JSPortal, JSBean, JSTabpanel) that has the given name.]]></summary>
+            <summary clientSupport="ng,mc,wc,sc"><![CDATA[Removes a component (JSLabel, JSButton, JSField, JSPortal, JSBean, JSTabpanel, JSWebComponent) that has the given name.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="ng,mc,wc,sc"><![CDATA[var form = solutionModel.newForm('newFormX','db:/server1/parent_table',null,true,1000,750);
@@ -22250,7 +22366,7 @@ form.removePart(JSPart.LEADING_SUBSUMMARY, 160);]]></sample>
               <description><![CDATA[The type of the part that should be removed.]]></description>
             </parameter>
             <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
-              <description><![CDATA[The height of the part that should be removed. This parameter is for 
+              <description><![CDATA[The height of the part that should be removed. This parameter is for
 					removing one of multiple Leading/Trailing Subsummary parts.]]></description>
             </parameter>
           </parameters>
@@ -22342,6 +22458,27 @@ forms['newForm1'].controller.recreateUI();]]></sample>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the specified name of the variable]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="ng" name="removeWebComponent">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the JSWebComponent has been removed; false otherwise]]></return>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[Removes a JSWebComponent that has the specified name. Returns true if removal was successful, false otherwise.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[Removes a JSWebComponent that has the specified name.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[var form = solutionModel.getForm('myform');
+form.removeWebComponent('mybean')]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified name of the JSWebComponent to be removed]]></description>
             </parameter>
           </parameters>
         </function>
@@ -25896,7 +26033,7 @@ application.output(mybean.className);]]></sample>
         </function>
         <function clientSupport="ng,wc,sc" name="getBeans">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSBean[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSBean;"><![CDATA[the list of all JSbuttons on this forms]]></return>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSBean[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSBean;"><![CDATA[the list of all JSBeans on this forms]]></return>
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Returns all JSBeans of this form.]]></description>
           </descriptions>
@@ -25916,7 +26053,7 @@ for (var b in beans)
           <argumentsTypes>
             <argumentType typecode="boolean"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSBean[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSBean;"><![CDATA[the list of all JSbuttons on this forms]]></return>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSBean[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSBean;"><![CDATA[the list of all JSBeans on this forms]]></return>
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Returns all JSBeans of this form.]]></description>
           </descriptions>
@@ -25960,7 +26097,7 @@ application.output(btn.text);]]></sample>
         </function>
         <function clientSupport="ng,mc,wc,sc" name="getButtons">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSButton[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSButton;"><![CDATA[the list of all JSbuttons on this forms]]></return>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSButton[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSButton;"><![CDATA[the list of all JSButtons on this forms]]></return>
           <descriptions>
             <description clientSupport="ng,mc,wc,sc"><![CDATA[Returns all JSButtons of this form, including the ones without a name.]]></description>
           </descriptions>
@@ -25982,7 +26119,7 @@ for (var b in buttons)
           <argumentsTypes>
             <argumentType typecode="boolean"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSButton[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSButton;"><![CDATA[the list of all JSbuttons on this forms]]></return>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSButton[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSButton;"><![CDATA[the list of all JSButtons on this forms]]></return>
           <descriptions>
             <description clientSupport="ng,wc,sc"><![CDATA[Returns all JSButtons of this form, including the ones without a name.]]></description>
           </descriptions>
@@ -26009,12 +26146,12 @@ for (var b in buttons)
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent" typecode="com.servoy.j2db.scripting.solutionmodel.JSComponent"><![CDATA[a JSComponent object (might be a JSField, JSLabel, JSButton, JSPortal, JSBean or JSTabPanel)]]></return>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent" typecode="com.servoy.j2db.scripting.solutionmodel.JSComponent"><![CDATA[a JSComponent object (might be a JSField, JSLabel, JSButton, JSPortal, JSBean, JSWebComponent or JSTabPanel)]]></return>
           <descriptions>
-            <description clientSupport="ng,mc,wc,sc"><![CDATA[Returns a JSComponent that has the given name; if found it will be a JSField, JSLabel, JSButton, JSPortal, JSBean or JSTabPanel.]]></description>
+            <description clientSupport="ng,mc,wc,sc"><![CDATA[Returns a JSComponent that has the given name; if found it will be a JSField, JSLabel, JSButton, JSPortal, JSBean, JSWebComponent or JSTabPanel.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="ng,mc,wc,sc"><![CDATA[Returns a JSComponent that has the given name; if found it will be a JSField, JSLabel, JSButton, JSPortal, JSBean or JSTabPanel.]]></summary>
+            <summary clientSupport="ng,mc,wc,sc"><![CDATA[Returns a JSComponent that has the given name; if found it will be a JSField, JSLabel, JSButton, JSPortal, JSBean, JSWebComponent or JSTabPanel.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="ng,mc,wc,sc"><![CDATA[var frm = solutionModel.getForm("myForm");
@@ -26031,10 +26168,10 @@ application.output("Component type and name: " + cmp);]]></sample>
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSComponent;"><![CDATA[an array of all the JSComponents on the form.]]></return>
           <descriptions>
-            <description clientSupport="ng,mc,wc,sc"><![CDATA[Returns a array of all the JSComponents that a form has; they are of type JSField,JSLabel,JSButton,JSPortal,JSBean or JSTabPanel.]]></description>
+            <description clientSupport="ng,mc,wc,sc"><![CDATA[Returns a array of all the JSComponents that a form has; they are of type JSField,JSLabel,JSButton,JSPortal,JSBean, JSWebComponents or JSTabPanel.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="ng,mc,wc,sc"><![CDATA[Returns a array of all the JSComponents that a form has; they are of type JSField,JSLabel,JSButton,JSPortal,JSBean or JSTabPanel.]]></summary>
+            <summary clientSupport="ng,mc,wc,sc"><![CDATA[Returns a array of all the JSComponents that a form has; they are of type JSField,JSLabel,JSButton,JSPortal,JSBean, JSWebComponents or JSTabPanel.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="ng,mc,wc,sc"><![CDATA[var form = solutionModel.getForm("myForm");
@@ -26049,10 +26186,10 @@ for (var i in components)
           </argumentsTypes>
           <return type="com.servoy.j2db.scripting.solutionmodel.JSComponent[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSComponent;"><![CDATA[an array of all the JSComponents on the form.]]></return>
           <descriptions>
-            <description clientSupport="ng,wc,sc"><![CDATA[Returns a array of all the JSComponents that a form has; they are of type JSField,JSLabel,JSButton,JSPortal,JSBean or JSTabPanel.]]></description>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns a array of all the JSComponents that a form has; they are of type JSField,JSLabel,JSButton,JSPortal,JSBean, JSWebComponent or JSTabPanel.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="ng,wc,sc"><![CDATA[Returns a array of all the JSComponents that a form has; they are of type JSField,JSLabel,JSButton,JSPortal,JSBean or JSTabPanel.]]></summary>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns a array of all the JSComponents that a form has; they are of type JSField,JSLabel,JSButton,JSPortal,JSBean, JSWebComponent or JSTabPanel.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var form = solutionModel.getForm("myForm");
@@ -26384,6 +26521,70 @@ for (var i in tabPanels)
 		application.output("Tab " + tp.name + " has text " + tp.text);
 	else
 		application.output("Tab with text " + tp.text + " has no name");
+}]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="returnInheritedElements" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
+              <description><![CDATA[true to also return the elements from parent form]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="ng" name="getWebComponent">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSWebComponent" typecode="com.servoy.j2db.scripting.solutionmodel.JSWebComponent"><![CDATA[a JSWebComponent object]]></return>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[Returns a JSWebComponent that has the given name.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[Returns a JSWebComponent that has the given name.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[var btn = myForm.getWebComponent("mycomponent");
+application.output(mybean.typeName);]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified name of the web component]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="ng" name="getWebComponents">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSWebComponent[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSWebComponent;"><![CDATA[the list of all JSWebComponent on this forms]]></return>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[Returns all JSWebComponents of this form.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[Returns all JSWebComponents of this form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[var webComponents = myForm.getWebComponents();
+for (var i in webComponents)
+{
+	if (webComponents[i].name != null)
+		application.output(webComponents[i].name);
+}]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng" name="getWebComponents">
+          <argumentsTypes>
+            <argumentType typecode="boolean"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSWebComponent[]" typecode="[Lcom.servoy.j2db.scripting.solutionmodel.JSWebComponent;"><![CDATA[the list of all JSWebComponents on this forms]]></return>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[Returns all JSWebComponents of this form.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[Returns all JSWebComponents of this form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[var webComponents = myForm.getWebComponents(false);
+for (var i in webComponents)
+{
+	if (webComponents[i].name != null)
+		application.output(webComponents[i].name);
 }]]></sample>
           </samples>
           <parameters>
@@ -27268,6 +27469,48 @@ forms['newForm1'].controller.show();]]></sample>
             </parameter>
           </parameters>
         </function>
+        <function clientSupport="ng" name="newWebComponent">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
+            <argumentType typecode="int"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.scripting.solutionmodel.JSWebComponent" typecode="com.servoy.j2db.scripting.solutionmodel.JSWebComponent"><![CDATA[a JSWebComponent object]]></return>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[Creates a new JSWebComponent (spec based component) object on the form.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[Creates a new JSWebComponent (spec based component) object on the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[var form = solutionModel.newForm('newForm1', 'db:/server1/table1', null, true, 800, 600);
+var bean = form.newWebComponent('bean','mypackage-testcomponent',200,200,300,300);
+forms['newForm1'].controller.show();]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified name of the JSWebComponent object]]></description>
+            </parameter>
+            <parameter name="type" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the webcomponent name as it appears in the spec]]></description>
+            </parameter>
+            <parameter name="x" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the horizontal "x" position of the JSWebComponent object in pixels]]></description>
+            </parameter>
+            <parameter name="y" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the vertical "y" position of the JSWebComponent object in pixels]]></description>
+            </parameter>
+            <parameter name="width" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the width of the JSWebComponent object in pixels]]></description>
+            </parameter>
+            <parameter name="height" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
+              <description><![CDATA[the height of the JSWebComponent object in pixels]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function clientSupport="ng,wc,sc" name="putAttribute">
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
@@ -27335,11 +27578,11 @@ forms['newFormX'].controller.show();]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if component has been successfully deleted; false otherwise]]></return>
           <descriptions>
-            <description clientSupport="ng,mc,wc,sc"><![CDATA[Removes a component (JSLabel, JSButton, JSField, JSPortal, JSBean, JSTabpanel) that has the given name. It is the same as calling "if(!removeLabel(name) &amp;&amp; !removeButton(name) ....)".
+            <description clientSupport="ng,mc,wc,sc"><![CDATA[Removes a component (JSLabel, JSButton, JSField, JSPortal, JSBean, JSTabpanel, JSWebComponent) that has the given name. It is the same as calling "if(!removeLabel(name) &amp;&amp; !removeButton(name) ....)".
 Returns true if removal was successful, false otherwise.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="ng,mc,wc,sc"><![CDATA[Removes a component (JSLabel, JSButton, JSField, JSPortal, JSBean, JSTabpanel) that has the given name.]]></summary>
+            <summary clientSupport="ng,mc,wc,sc"><![CDATA[Removes a component (JSLabel, JSButton, JSField, JSPortal, JSBean, JSTabpanel, JSWebComponent) that has the given name.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="ng,mc,wc,sc"><![CDATA[var form = solutionModel.newForm('newFormX','db:/server1/parent_table',null,true,1000,750);
@@ -27485,6 +27728,27 @@ forms['newFormX'].controller.show();]]></sample>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[the specified name of the JSTabPanel to be removed]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="ng" name="removeWebComponent">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the JSWebComponent has been removed; false otherwise]]></return>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[Removes a JSWebComponent that has the specified name. Returns true if removal was successful, false otherwise.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[Removes a JSWebComponent that has the specified name.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[var form = solutionModel.getForm('myform');
+form.removeWebComponent('mybean')]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[the specified name of the JSWebComponent to be removed]]></description>
             </parameter>
           </parameters>
         </function>
@@ -34411,6 +34675,487 @@ for (var i in globalVariables)
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var dateVar = solutionModel.newGlobalVariable('globals', 'gDate', JSVariable.DATETIME);
 application.output(dateVar.getUUID().toString());]]></sample>
+          </samples>
+        </function>
+      </functions>
+    </object>
+    <object clientSupport="ng" extendsComponent="com.servoy.j2db.scripting.solutionmodel.JSComponent" publicName="JSWebComponent" qualifiedName="com.servoy.j2db.scripting.solutionmodel.JSWebComponent">
+      <properties>
+        <property clientSupport="ng,wc,sc" name="anchors">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Enables a component to stick to a specific side of form and/or to 
+grow or shrink when a window is resized. 
+
+If opposite anchors are activated then the component with grow or 
+shrink with the window. For example if Top and Bottom are activated, 
+then the component will grow/shrink when the window is vertically 
+resized. If Left and Right are activated then the component
+will grow/shrink when the window is horizontally resized. 
+
+If opposite anchors are not activated, then the component will 
+keep a constant distance from the sides of the window which
+correspond to the activated anchors.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Enables a component to stick to a specific side of form and/or to 
+grow or shrink when a window is resized.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var form = solutionModel.newForm('mediaForm', 'db:/example_data/parent_table', null, false, 400, 300);
+var strechAllDirectionsLabel = form.newLabel('Strech all directions', 10, 10, 380, 280);
+strechAllDirectionsLabel.background = 'red';
+strechAllDirectionsLabel.anchors = SM_ANCHOR.ALL;	
+var strechVerticallyLabel = form.newLabel('Strech vertically', 10, 10, 190, 280);
+strechVerticallyLabel.background = 'green';
+strechVerticallyLabel.anchors = SM_ANCHOR.WEST | SM_ANCHOR.NORTH | SM_ANCHOR.SOUTH;
+var strechHorizontallyLabel = form.newLabel('Strech horizontally', 10, 10, 380, 140);
+strechHorizontallyLabel.background = 'blue';
+strechHorizontallyLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST | SM_ANCHOR.EAST;
+var stickToTopLeftCornerLabel = form.newLabel('Stick to top-left corner', 10, 10, 200, 100);
+stickToTopLeftCornerLabel.background = 'orange';
+stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST; // This is equivalent to SM_ANCHOR.DEFAULT 
+var stickToBottomRightCornerLabel = form.newLabel('Stick to bottom-right corner', 190, 190, 200, 100);
+stickToBottomRightCornerLabel.background = 'pink';
+stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="ng" deprecated="true" name="background">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[The background color of the component.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[The background color of the component.]]></summary>
+          </summaries>
+          <deprecated><![CDATA[not supported]]></deprecated>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[// This property can be used on all types of components.
+// Here it is illustrated only for labels and fields.
+var greenLabel = form.newLabel('Green',10,10,100,50);
+greenLabel.background = 'green'; // Use generic names for colors.	
+var redField = form.newField('parent_table_text',JSField.TEXT_FIELD,10,110,100,30);
+redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="ng" deprecated="true" name="borderType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[The type, color and style of border of the component.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[The type, color and style of border of the component.]]></summary>
+          </summaries>
+          <deprecated><![CDATA[not supported]]></deprecated>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[//HINT: To know exactly the notation of this property set it in the designer and then read it once out through the solution model.
+var field = form.newField('my_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+field.borderType = solutionModel.createLineBorder(1,'#ff0000');]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="ng,wc,sc" name="enabled">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[The enable state of the component, default true.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[The enable state of the component, default true.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
+var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+field.enabled = false;]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="ng" deprecated="true" name="fontType">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[The font type of the component.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[The font type of the component.]]></summary>
+          </summaries>
+          <deprecated><![CDATA[not supported]]></deprecated>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[var label = form.newLabel('Text here', 10, 50, 100, 20);
+label.fontType = solutionModel.createFont('Times New Roman',1,14);]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="ng" deprecated="true" name="foreground">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[The foreground color of the component.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[The foreground color of the component.]]></summary>
+          </summaries>
+          <deprecated><![CDATA[not supported]]></deprecated>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[// This property can be used on all types of components.
+// Here it is illustrated only for labels and fields.
+var labelWithBlueText = form.newLabel('Blue text', 10, 10, 100, 30);
+labelWithBlueText.foreground = 'blue'; // Use generic names for colors.
+var fieldWithYellowText = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 50, 100, 20);
+fieldWithYellowText.foreground = '#FFFF00'; // Use RGB codes for colors.]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="ng,wc,sc" name="formIndex">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[The Z index of this component. If two components overlap,
+then the component with higher Z index is displayed above
+the component with lower Z index.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[The Z index of this component.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var labelBelow = form.newLabel('Green', 10, 10, 100, 50);
+labelBelow.background = 'green';	
+labelBelow.formIndex = 10;
+var fieldAbove = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 30);
+fieldAbove.background = '#FF0000';
+fieldAbove.formIndex = 20;]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="ng" deprecated="true" name="groupID">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[A String representing a group ID for this component. If several
+components have the same group ID then they belong to the same
+group of components. Using the group itself, all components can
+be disabled/enabled or made invisible/visible.
+The group id should be a javascript compatible identifier to allow access of the group in scripting.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[A String representing a group ID for this component.]]></summary>
+          </summaries>
+          <deprecated><![CDATA[not supported]]></deprecated>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[var form = solutionModel.newForm('someForm', 'db:/example_data/parent_table', null, false, 400, 300);
+var label = form.newLabel('Green', 10, 10, 100, 20);
+var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
+label.groupID = 'someGroup';
+field.groupID = 'someGroup';	
+forms['someForm'].elements.someGroup.enabled = false;]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="ng,wc,sc" name="height">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[The height in pixels of the component.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[The height in pixels of the component.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+application.output('original width: ' + field.width);
+application.output('original height: ' + field.height);
+field.width = 200;
+field.height = 100;
+application.output('modified width: ' + field.width);
+application.output('modified height: ' + field.height);]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="ng,wc,sc" name="name">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[The name of the component. Through this name it can also accessed in methods.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[The name of the component.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var form = solutionModel.newForm('someForm', 'db:/example_data/parent_table', null, false, 620, 300);
+var label = form.newLabel('Label', 10, 10, 150, 150);
+label.name = 'myLabel'; // Give a name to the component.
+forms['someForm'].controller.show()
+// Now use the name to access the component.
+forms['someForm'].elements['myLabel'].text = 'Updated text';]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="ng" deprecated="true" name="printSliding">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[Enables an element to resize based on its content and/or move when printing.
+The component can move horizontally or vertically and can grow or shrink in
+height and width, based on its content and the content of neighboring
+components.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[Enables an element to resize based on its content and/or move when printing.]]></summary>
+          </summaries>
+          <deprecated><![CDATA[not supported]]></deprecated>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
+var slidingLabel = form.newLabel('Some long text here', 10, 10, 5, 5);
+slidingLabel.printSliding = SM_PRINT_SLIDING.GROW_HEIGHT | SM_PRINT_SLIDING.GROW_WIDTH;
+slidingLabel.background = 'gray';
+forms['printForm'].controller.showPrintPreview();]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="ng" deprecated="true" name="printable">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[Flag that tells if the component should be printed or not when the form is printed.
+
+By default components are printable.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[Flag that tells if the component should be printed or not when the form is printed.]]></summary>
+          </summaries>
+          <deprecated><![CDATA[not supported]]></deprecated>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
+var printedField = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+var notPrintedField = form.newField('parent_table_id', JSField.TEXT_FIELD, 10, 40, 100, 20);
+notPrintedField.printable = false; // This field won't show up in print preview and won't be printed.
+forms['printForm'].controller.showPrintPreview()]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="ng" deprecated="true" name="styleClass">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[The name of the style class that should be applied to this component.
+
+When defining style classes for specific component types, their names
+must be prefixed according to the type of the component. For example 
+in order to define a class names 'fancy' for fields, in the style
+definition the class must be named 'field.fancy'. If it would be 
+intended for labels, then it would be named 'label.fancy'. When specifying
+the class name for a component, the prefix is dropped however. Thus the
+field or the label will have its styleClass property set to 'fancy' only.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[The name of the style class that should be applied to this component.]]></summary>
+          </summaries>
+          <deprecated><![CDATA[not supported]]></deprecated>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
+var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+var style = solutionModel.newStyle('myStyle','field.fancy { background-color: yellow; }');
+form.styleName = 'myStyle'; // First set the style on the form.
+field.styleClass = 'fancy'; // Then set the style class on the field.]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="ng" deprecated="true" name="transparent">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[Flag that tells if the component is transparent or not.
+
+The default value is "false", that is the components
+are not transparent.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[Flag that tells if the component is transparent or not.]]></summary>
+          </summaries>
+          <deprecated><![CDATA[not supported]]></deprecated>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[// Load an image from disk an create a Media object based on it.
+var imageBytes = plugins.file.readFile('d:/ball.jpg');
+var media = solutionModel.newMedia('ball.jpg', imageBytes);
+// Put on the form a label with the image.
+var image = form.newLabel('', 10, 10, 100, 100);
+image.imageMedia = media;
+// Put two fields over the image. The second one will be transparent and the
+// image will shine through.
+var nonTransparentField = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 20, 100, 20);
+var transparentField = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 50, 100, 20);
+transparentField.transparent = true;]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="ng" name="typeName">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[The webcomponent type (name from the spec).]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[The webcomponent type (name from the spec).]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[var wc = form.getWebComponent('mycomponent');
+application.output(bean.typeName);]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="ng,wc,sc" name="visible">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[The visible property of the component, default true.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[The visible property of the component, default true.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var form = solutionModel.newForm('printForm', 'db:/example_data/parent_table', null, false, 400, 300);
+var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+field.visible = false;]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="ng,wc,sc" name="width">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[The width in pixels of the component.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[The width in pixels of the component.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+application.output('original width: ' + field.width);
+application.output('original height: ' + field.height);
+field.width = 200;
+field.height = 100;
+application.output('modified width: ' + field.width);
+application.output('modified height: ' + field.height);]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="ng,wc,sc" name="x">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[The x coordinate of the component on the form.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[The x coordinate of the component on the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+application.output('original location: ' + field.x + ', ' + field.y);
+field.x = 90;
+field.y = 90;
+application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
+          </samples>
+        </property>
+        <property clientSupport="ng,wc,sc" name="y">
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[The y coordinate of the component on the form.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[The y coordinate of the component on the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 20);
+application.output('original location: ' + field.x + ', ' + field.y);
+field.x = 90;
+field.y = 90;
+application.output('changed location: ' + field.x + ', ' + field.y);]]></sample>
+          </samples>
+        </property>
+      </properties>
+      <functions>
+        <function clientSupport="ng,wc,sc" name="getDesignTimeProperty">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Get a design-time property of an element.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Get a design-time property of an element.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var frm = solutionModel.getForm('orders')
+var fld = frm.getField('fld')
+var prop = fld.getDesignTimeProperty('myprop')]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getDesignTimePropertyNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Get the design-time properties of an element.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Get the design-time properties of an element.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var frm = solutionModel.getForm('orders')
+var fld = frm.getField('fld')
+var propNames = fld.getDesignTimePropertyNames()]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng" name="getJSONProperty">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[Get a property value of the spec.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[Get a property value of the spec.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[var wc = form.getWebComponent('mycomponent');
+application.output(wc.getJSONProperty('mytext'));]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getUUID">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.util.UUID" typecode="com.servoy.j2db.util.UUID"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the UUID of this component.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the UUID of this component.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var button_uuid = solutionModel.getForm("my_form").getButton("my_button").getUUID();
+application.output(button_uuid.toString());]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="putDesignTimeProperty">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Set a design-time property of an element.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Set a design-time property of an element.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var frm = solutionModel.getForm('orders')
+var fld = frm.getField('fld')
+fld.putDesignTimeProperty('myprop', 'strawberry')]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="removeDesignTimeProperty">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Clear a design-time property of an element.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Clear a design-time property of an element.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var frm = solutionModel.getForm('orders')
+var fld = frm.getField('fld')
+fld.removeDesignTimeProperty('myprop')]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng" name="setJSONProperty">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.Object"/>
+          </argumentsTypes>
+          <return type="void" typecode="void"/>
+          <descriptions>
+            <description clientSupport="ng"><![CDATA[Set a property value of the spec.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng"><![CDATA[Set a property value of the spec.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng"><![CDATA[var wc = form.getWebComponent('mycomponent');
+wc.setJSONProperty('mytext','Hello World!');]]></sample>
           </samples>
         </function>
       </functions>
