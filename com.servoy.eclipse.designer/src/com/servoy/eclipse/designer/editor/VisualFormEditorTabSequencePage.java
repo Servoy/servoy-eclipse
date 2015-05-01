@@ -17,8 +17,8 @@
 package com.servoy.eclipse.designer.editor;
 
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -59,6 +59,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.json.JSONObject;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
 
@@ -71,16 +73,18 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.views.IndexedListViewer;
 import com.servoy.eclipse.ui.views.IndexedStructuredSelection;
-import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
-import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportTabSeq;
+import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.persistence.TabSeqComparator;
 import com.servoy.j2db.server.ngclient.property.types.NGTabSeqPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.SortedList;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Tab in form editor for managing tab sequences.
@@ -232,8 +236,8 @@ public class VisualFormEditorTabSequencePage extends Composite
 				DragSource ds = (DragSource)event.widget;
 				Table table = (Table)ds.getControl();
 				TableItem[] selection = table.getSelection();
-				if (selection != null && selection.length > 0) event.data = new Object[] { Platform.getAdapterManager().getAdapter(selection[0].getData(),
-					IDragData.class) };
+				if (selection != null && selection.length > 0) event.data = new Object[] { Platform.getAdapterManager().getAdapter(
+					((TabSeqProperty)selection[0].getData()).element, IDragData.class) };
 			}
 		});
 
@@ -280,13 +284,13 @@ public class VisualFormEditorTabSequencePage extends Composite
 						if (dragSource instanceof PersistDragData && event.item instanceof TableItem)
 						{
 							int targetIndex = Arrays.asList(table.getItems()).indexOf(event.item);
-							List<IPersist> input = (List<IPersist>)selectedTableViewer.getInput();
+							List<TabSeqProperty> input = (List<TabSeqProperty>)selectedTableViewer.getInput();
 							int sourceIndex = -1;
-							for (IPersist persist : input)
+							for (TabSeqProperty persistProperty : input)
 							{
-								if (persist.getUUID().equals(((PersistDragData)dragSource).uuid))
+								if (persistProperty.element.getUUID().equals(((PersistDragData)dragSource).uuid))
 								{
-									sourceIndex = input.indexOf(persist);
+									sourceIndex = input.indexOf(persistProperty);
 									break;
 								}
 							}
@@ -360,56 +364,81 @@ public class VisualFormEditorTabSequencePage extends Composite
 		ISelection availableSelection = availableListViewer.getSelection();
 		ISelection selectedSelection = selectedTableViewer.getSelection();
 
-		SortedList<ISupportTabSeq> available = new SortedList<ISupportTabSeq>(new Comparator<ISupportTabSeq>()
+		SortedList<TabSeqProperty> available = new SortedList<TabSeqProperty>(new Comparator<TabSeqProperty>()
 		{
-			public int compare(ISupportTabSeq o1, ISupportTabSeq o2)
+			public int compare(TabSeqProperty o1, TabSeqProperty o2)
 			{
 				String name1 = "";
 				String name2 = "";
-				if (o1 instanceof ISupportName && ((ISupportName)o1).getName() != null)
+				IFormElement el1 = o1.element;
+				IFormElement el2 = o2.element;
+				if (el1.getName() != null)
 				{
-					name1 += ((ISupportName)o1).getName();
+					name1 += el1.getName();
 				}
-				if (o2 instanceof ISupportName && ((ISupportName)o2).getName() != null)
+				if (el2.getName() != null)
 				{
-					name2 += ((ISupportName)o2).getName();
+					name2 += el2.getName();
 				}
-				if (o1 instanceof ISupportDataProviderID)
+				if (el1 instanceof ISupportDataProviderID)
 				{
-					name1 += ((ISupportDataProviderID)o1).getDataProviderID();
+					name1 += ((ISupportDataProviderID)el1).getDataProviderID();
 				}
-				if (o2 instanceof ISupportDataProviderID)
+				if (el2 instanceof ISupportDataProviderID)
 				{
-					name2 += ((ISupportDataProviderID)o2).getDataProviderID();
+					name2 += ((ISupportDataProviderID)el2).getDataProviderID();
 				}
 				return name1.compareTo(name2);
 			}
 		});
-		List<ISupportTabSeq> selected = new ArrayList<ISupportTabSeq>();
-		Iterator<ISupportTabSeq> iterator = ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm()).getTabSeqElementsByTabOrder();
+		SortedList<TabSeqProperty> selected = new SortedList<TabSeqProperty>(new Comparator<TabSeqProperty>()
+		{
+			public int compare(TabSeqProperty o1, TabSeqProperty o2)
+			{
+				return TabSeqComparator.compareTabSeq(o1.getSeqValue(), o1.element, o2.getSeqValue(), o2.element);
+			}
+		});
+		Iterator<IPersist> iterator = ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm()).getAllObjects();
 		for (int i = 0; iterator.hasNext(); i++)
 		{
-			ISupportTabSeq tabSeq = iterator.next();
-			if (tabSeq instanceof Bean)
+			IPersist persist = iterator.next();
+			if (FormTemplateGenerator.isWebcomponentBean(persist))
 			{
-				if (FormTemplateGenerator.isWebcomponentBean((Bean)tabSeq))
+				String componentType = FormTemplateGenerator.getComponentTypeName((IWebComponent)persist);
+				WebComponentSpecification specification = WebComponentSpecProvider.getInstance().getWebComponentSpecification(componentType);
+				if (specification != null)
 				{
-					WebComponentSpecification specification = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-						((Bean)tabSeq).getBeanClassName());
-					if (specification != null && specification.getProperties(NGTabSeqPropertyType.NG_INSTANCE).size() < 1)
+					Collection<PropertyDescription> properties = specification.getProperties(NGTabSeqPropertyType.NG_INSTANCE);
+					if (properties != null && properties.size() > 0)
 					{
-						continue;
+						JSONObject json = ((IWebComponent)persist).getJson();
+						for (PropertyDescription pd : properties)
+						{
+							int tabseq = json != null ? json.optInt(pd.getName()) : 0;
+							if (tabseq >= 0)
+							{
+								selected.add(new TabSeqProperty((IFormElement)persist, pd.getName()));
+							}
+							else
+							{
+								available.add(new TabSeqProperty((IFormElement)persist, pd.getName()));
+							}
+						}
 					}
 				}
 			}
-			if ((tabSeq).getTabSeq() >= 0)
+			else if (persist instanceof ISupportTabSeq)
 			{
-				selected.add(tabSeq);
+				if (((ISupportTabSeq)persist).getTabSeq() >= 0)
+				{
+					selected.add(new TabSeqProperty((IFormElement)persist, null));
+				}
+				else
+				{
+					available.add(new TabSeqProperty((IFormElement)persist, null));
+				}
 			}
-			else
-			{
-				available.add(tabSeq);
-			}
+
 		}
 		availableListViewer.setInput(available);
 		selectedTableViewer.setInput(selected);
@@ -441,8 +470,8 @@ public class VisualFormEditorTabSequencePage extends Composite
 		boolean enableDown = false;
 		if (selection.size() == 1)
 		{
-			int selectedIndex = ((List<IPersist>)selectedTableViewer.getInput()).indexOf(selection.getFirstElement());
-			int nSelected = ((List<IPersist>)selectedTableViewer.getInput()).size();
+			int selectedIndex = ((List)selectedTableViewer.getInput()).indexOf(selection.getFirstElement());
+			int nSelected = ((List)selectedTableViewer.getInput()).size();
 			enableUp = selectedIndex > 0;
 			enableDown = selectedIndex < nSelected - 1;
 		}
@@ -464,14 +493,14 @@ public class VisualFormEditorTabSequencePage extends Composite
 	protected Command getSaveCommand(int[] tabSeqs, String label)
 	{
 		CompoundCommand command = null;
-		List<ISupportTabSeq> available = (List<ISupportTabSeq>)availableListViewer.getInput();
-		List<ISupportTabSeq> selected = (List<ISupportTabSeq>)selectedTableViewer.getInput();
+		List<TabSeqProperty> available = (List<TabSeqProperty>)availableListViewer.getInput();
+		List<TabSeqProperty> selected = (List<TabSeqProperty>)selectedTableViewer.getInput();
 		int nAvailable = available.size();
 		int nSelected = selected.size();
 
 		for (int i = 0; i < tabSeqs.length; i++)
 		{
-			ISupportTabSeq ts = null;
+			TabSeqProperty ts = null;
 			if (i < nAvailable)
 			{
 				ts = available.get(i);
@@ -481,27 +510,25 @@ public class VisualFormEditorTabSequencePage extends Composite
 				ts = selected.get(i - nAvailable);
 			}
 
-			if (ts.getTabSeq() != tabSeqs[i] && ts instanceof IPersist)
+			if (ts.getSeqValue() != tabSeqs[i])
 			{
-				IPersist tsPersist = (IPersist)ts;
-				if (tsPersist instanceof IFlattenedPersistWrapper) tsPersist = ((IFlattenedPersistWrapper< ? >)tsPersist).getWrappedPersist();
-
 				if (command == null)
 				{
 					command = new CompoundCommand(label);
 				}
-
-				command.add(getSetTabSeqCommand(tsPersist, tabSeqs[i]));
+				command.add(getSetTabSeqCommand(ts, tabSeqs[i]));
 			}
 		}
 
 		return command;
 	}
 
-	protected Command getSetTabSeqCommand(IPersist persist, int tabSeq)
+	protected Command getSetTabSeqCommand(TabSeqProperty tabSeqProperty, int tabSeq)
 	{
+		IPersist persist = tabSeqProperty.element;
+		if (persist instanceof IFlattenedPersistWrapper) persist = ((IFlattenedPersistWrapper< ? >)persist).getWrappedPersist();
 		return SetValueCommand.createSetvalueCommand("", PersistPropertySource.createPersistPropertySource(persist, editor.getForm(), false),
-			StaticContentSpecLoader.PROPERTY_TABSEQ.getPropertyName(), new Integer(tabSeq));
+			tabSeqProperty.propertyName != null ? tabSeqProperty.propertyName : StaticContentSpecLoader.PROPERTY_TABSEQ.getPropertyName(), new Integer(tabSeq));
 	}
 
 	/**
@@ -550,11 +577,11 @@ public class VisualFormEditorTabSequencePage extends Composite
 	protected void handleRemoveElements()
 	{
 		final StructuredSelection selection = ((StructuredSelection)selectedTableViewer.getSelection());
-		int nAvailable = ((List<IPersist>)availableListViewer.getInput()).size();
+		int nAvailable = ((List)availableListViewer.getInput()).size();
 
 		int[] tabSeqs = getBaseTabIndexes();
 		Iterator it = selection.iterator();
-		List<IPersist> input = (List<IPersist>)selectedTableViewer.getInput();
+		List input = (List)selectedTableViewer.getInput();
 		while (it.hasNext())
 		{
 			int index = input.indexOf(it.next());
@@ -587,10 +614,10 @@ public class VisualFormEditorTabSequencePage extends Composite
 		final StructuredSelection selection = ((StructuredSelection)selectedTableViewer.getSelection());
 		if (selection.size() == 1)
 		{
-			int nAvailable = ((List<IPersist>)availableListViewer.getInput()).size();
-			int nSelected = ((List<IPersist>)selectedTableViewer.getInput()).size();
+			int nAvailable = ((List)availableListViewer.getInput()).size();
+			int nSelected = ((List)selectedTableViewer.getInput()).size();
 
-			int selectedIndex = ((List<IPersist>)selectedTableViewer.getInput()).indexOf(selection.getFirstElement());
+			int selectedIndex = ((List)selectedTableViewer.getInput()).indexOf(selection.getFirstElement());
 			int[] tabSeqs = getBaseTabIndexes();
 
 			// flip the selected with its sibling
@@ -624,8 +651,8 @@ public class VisualFormEditorTabSequencePage extends Composite
 
 	private int[] getBaseTabIndexes()
 	{
-		int nAvailable = ((List<IPersist>)availableListViewer.getInput()).size();
-		int nSelected = ((List<IPersist>)selectedTableViewer.getInput()).size();
+		int nAvailable = ((List)availableListViewer.getInput()).size();
+		int nSelected = ((List)selectedTableViewer.getInput()).size();
 
 		int[] tabSeqs = new int[nAvailable + nSelected];
 
@@ -646,13 +673,65 @@ public class VisualFormEditorTabSequencePage extends Composite
 
 	protected Command getSetDefaultCommand()
 	{
-		int nFields = ((List<IPersist>)availableListViewer.getInput()).size() + ((List<IPersist>)selectedTableViewer.getInput()).size();
+		int nFields = ((List)availableListViewer.getInput()).size() + ((List)selectedTableViewer.getInput()).size();
 		int[] tabSeqs = new int[nFields];
 		for (int i = 0; i < nFields; i++)
 		{
 			tabSeqs[i] = ISupportTabSeq.DEFAULT;
 		}
 		return getSaveCommand(tabSeqs, "set default tab sequence");
+	}
+
+	private class TabSeqProperty
+	{
+		IFormElement element;
+		String propertyName;
+
+		public TabSeqProperty(IFormElement element, String propertyName)
+		{
+			this.element = element;
+			this.propertyName = propertyName;
+		}
+
+		public int getSeqValue()
+		{
+			if (propertyName != null && element instanceof IWebComponent)
+			{
+				String componentType = FormTemplateGenerator.getComponentTypeName(element);
+				WebComponentSpecification specification = WebComponentSpecProvider.getInstance().getWebComponentSpecification(componentType);
+				if (specification != null)
+				{
+					PropertyDescription property = specification.getProperty(propertyName);
+					if (property != null)
+					{
+						JSONObject json = ((IWebComponent)element).getJson();
+						if (json != null)
+						{
+							return json.optInt(propertyName);
+						}
+						return 0;
+					}
+				}
+			}
+			else if (element instanceof ISupportTabSeq)
+			{
+				return ((ISupportTabSeq)element).getTabSeq();
+			}
+			return -1;
+		}
+
+		@Override
+		public String toString()
+		{
+			return element.toString() + (propertyName != null ? " [" + propertyName + "]" : "");
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (!(obj instanceof TabSeqProperty)) return false;
+			return Utils.equalObjects(element, ((TabSeqProperty)obj).element) && Utils.equalObjects(propertyName, ((TabSeqProperty)obj).propertyName);
+		}
 	}
 
 }

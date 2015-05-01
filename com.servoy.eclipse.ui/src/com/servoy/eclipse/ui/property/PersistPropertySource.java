@@ -72,7 +72,6 @@ import org.sablo.specification.property.types.PointPropertyType;
 import org.sablo.specification.property.types.ScrollbarsPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.specification.property.types.StyleClassPropertyType;
-import org.sablo.specification.property.types.TabSeqPropertyType;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.base.persistence.IMobileProperties;
@@ -155,8 +154,8 @@ import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
-import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Part;
@@ -189,6 +188,7 @@ import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormatPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.NGTabSeqPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
@@ -1490,7 +1490,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			{
 				type = NumberCellEditor.INTEGER;
 			}
-			else if (propertyType == TabSeqPropertyType.INSTANCE)
+			else if (propertyType == NGTabSeqPropertyType.NG_INSTANCE)
 			{
 				type = NumberCellEditor.INTEGER;
 			}
