@@ -28,6 +28,7 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
@@ -70,6 +71,7 @@ public class SetPropertiesHandler implements IServerService
 				{
 					String uuid = (String)keys.next();
 					final IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart, uuid);
+					PersistContext context = PersistContext.create(persist, editorPart.getForm());
 					if ((persist instanceof BaseComponent || persist instanceof Tab) && !(persist instanceof WebCustomType))
 					{
 						JSONObject properties = args.optJSONObject(uuid);
@@ -79,18 +81,18 @@ public class SetPropertiesHandler implements IServerService
 							String propertyName = (String)it.next();
 							if (!Arrays.asList("x", "y", "width", "height").contains(propertyName))
 							{
-								cc.add(new SetPropertyCommand("propertyName", PersistPropertySource.createPersistPropertySource(persist, false), propertyName,
+								cc.add(new SetPropertyCommand("propertyName", PersistPropertySource.createPersistPropertySource(context, false), propertyName,
 									properties.opt(propertyName)));
 							}
 						}
 						if (properties.has("x") && properties.has("y"))
 						{
-							cc.add(new SetPropertyCommand("move", PersistPropertySource.createPersistPropertySource(persist, false),
+							cc.add(new SetPropertyCommand("move", PersistPropertySource.createPersistPropertySource(context, false),
 								StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), new Point(properties.optInt("x"), properties.optInt("y"))));
 						}
 						if (properties.has("width") && properties.has("height"))
 						{
-							cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(persist, false),
+							cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(context, false),
 								StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), new Dimension(properties.optInt("width"), properties.optInt("height"))));
 						}
 					}
@@ -99,7 +101,7 @@ public class SetPropertiesHandler implements IServerService
 						JSONObject properties = args.optJSONObject(uuid);
 						if (properties.has("y"))
 						{
-							cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(persist, false),
+							cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(context, false),
 								StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), new Integer(properties.optInt("y"))));
 						}
 					}
@@ -108,7 +110,7 @@ public class SetPropertiesHandler implements IServerService
 						JSONObject properties = args.optJSONObject(uuid);
 						if (properties.has("width"))
 						{
-							cc.add(new SetPropertyCommand("formwidth", PersistPropertySource.createPersistPropertySource(persist, false),
+							cc.add(new SetPropertyCommand("formwidth", PersistPropertySource.createPersistPropertySource(context, false),
 								StaticContentSpecLoader.PROPERTY_WIDTH.getPropertyName(), new Integer(properties.optInt("width"))));
 						}
 
