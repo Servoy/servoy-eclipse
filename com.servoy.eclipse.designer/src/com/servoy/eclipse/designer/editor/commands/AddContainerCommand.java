@@ -1,20 +1,28 @@
 package com.servoy.eclipse.designer.editor.commands;
 
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Shell;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.WebComponentPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebLayoutSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -22,7 +30,11 @@ import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
+import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
+import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
@@ -48,23 +60,52 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			{
 				activeEditor.getCommandStack().execute(new BaseRestorableCommand("createLayoutContainer")
 				{
-					private LayoutContainer newContainer;
+					private IPersist persist;
 
 					@Override
 					public void execute()
 					{
 						try
 						{
-							newContainer = addLayoutComponent(DesignerUtil.getContentOutlineSelection(),
-								event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.spec"),
-								event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.package"),
-								new JSONObject(event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.config")),
-								computeNextIndex(DesignerUtil.getContentOutlineSelection()));
-							if (newContainer != null)
+							if (event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.spec") != null)
+							{
+								persist = addLayoutComponent(DesignerUtil.getContentOutlineSelection(),
+									event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.spec"),
+									event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.package"),
+									new JSONObject(event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.config")),
+									computeNextIndex(DesignerUtil.getContentOutlineSelection()));
+							}
+							else
+							{
+								List<String> specs = new ArrayList<String>();
+								WebComponentSpecification[] webComponentSpecifications = WebComponentSpecProvider.getInstance().getAllWebComponentSpecifications();
+								for (WebComponentSpecification webComponentSpec : webComponentSpecifications)
+								{
+									if (!webComponentSpec.getPackageName().equals("servoydefault"))
+									{
+										specs.add(webComponentSpec.getName());
+									}
+								}
+								Collections.sort(specs);
+								TreeSelectDialog dialog = new TreeSelectDialog(new Shell(), true, true, TreePatternFilter.FILTER_LEAFS,
+									FlatTreeContentProvider.INSTANCE, new LabelProvider(), null, null, SWT.NONE, "Select spec", specs.toArray(new String[0]),
+									null, false, "SpecDialog", null);
+								dialog.open();
+								if (dialog.getReturnCode() == Window.OK)
+								{
+									Object parentPersist = DesignerUtil.getContentOutlineSelection();
+									if (parentPersist instanceof AbstractContainer)
+									{
+										persist = ((AbstractContainer)parentPersist).createWebComponent(null,
+											(String)((StructuredSelection)dialog.getSelection()).getFirstElement());
+									}
+								}
+							}
+							if (persist != null)
 							{
 								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false,
-									Arrays.asList(new IPersist[] { newContainer }));
-								Object[] selection = new Object[] { newContainer };
+									Arrays.asList(new IPersist[] { persist }));
+								Object[] selection = new Object[] { persist };
 								IStructuredSelection structuredSelection = new StructuredSelection(selection);
 								DesignerUtil.getContentOutline().setSelection(structuredSelection);
 							}
@@ -80,11 +121,11 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 					{
 						try
 						{
-							if (newContainer != null)
+							if (persist != null)
 							{
-								((IDeveloperRepository)newContainer.getRootObject().getRepository()).deleteObject(newContainer);
+								((IDeveloperRepository)persist.getRootObject().getRepository()).deleteObject(persist);
 								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false,
-									Arrays.asList(new IPersist[] { newContainer }));
+									Arrays.asList(new IPersist[] { persist }));
 							}
 						}
 						catch (RepositoryException e)

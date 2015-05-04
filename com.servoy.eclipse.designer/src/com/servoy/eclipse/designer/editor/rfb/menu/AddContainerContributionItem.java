@@ -80,6 +80,10 @@ public class AddContainerContributionItem extends CompoundContributionItem
 							}
 						}
 					}
+					if (allowedChildren.contains("component"))
+					{
+						addMenuItem(list, null, null);
+					}
 				}
 			}
 		}
@@ -105,11 +109,19 @@ public class AddContainerContributionItem extends CompoundContributionItem
 	{
 		final CommandContributionItemParameter commandContributionItemParameter = new CommandContributionItemParameter(
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow(), null, AddContainerCommand.COMMAND_ID, CommandContributionItem.STYLE_PUSH);
-		commandContributionItemParameter.parameters = new HashMap<String, String>();
-		commandContributionItemParameter.parameters.put("com.servoy.eclipse.designer.editor.rfb.menu.add.spec", specification.getName());
-		commandContributionItemParameter.parameters.put("com.servoy.eclipse.designer.editor.rfb.menu.add.package", specification.getPackageName());
-		commandContributionItemParameter.parameters.put("com.servoy.eclipse.designer.editor.rfb.menu.add.config", config);
-		commandContributionItemParameter.label = specification.getDisplayName();
+		if (specification != null)
+		{
+			commandContributionItemParameter.parameters = new HashMap<String, String>();
+			commandContributionItemParameter.parameters.put("com.servoy.eclipse.designer.editor.rfb.menu.add.spec", specification.getName());
+			commandContributionItemParameter.parameters.put("com.servoy.eclipse.designer.editor.rfb.menu.add.package", specification.getPackageName());
+			commandContributionItemParameter.parameters.put("com.servoy.eclipse.designer.editor.rfb.menu.add.config", config);
+			commandContributionItemParameter.label = specification.getDisplayName();
+		}
+		else
+		{
+			// add a new web component
+			commandContributionItemParameter.label = "Component";
+		}
 		commandContributionItemParameter.visibleEnabled = true;
 		list.add(new CommandContributionItem(commandContributionItemParameter));
 	}
