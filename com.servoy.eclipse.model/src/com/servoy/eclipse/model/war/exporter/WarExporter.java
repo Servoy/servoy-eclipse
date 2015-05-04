@@ -64,6 +64,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
 import com.servoy.eclipse.model.repository.EclipseExportUserChannel;
@@ -78,6 +79,7 @@ import com.servoy.j2db.ILAFManagerInternal;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ComponentResourcesExporter;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -580,8 +582,30 @@ public class WarExporter
 			FlattenedSolution solution = ServoyModelFinder.getServoyModel().getActiveProject().getFlattenedSolution();
 			SolutionSerializer.writeRuntimeSolution(null, new File(tmpWarDir, "WEB-INF/solution.runtime"), solution.getSolution(),
 				ApplicationServerRegistry.get().getDeveloperRepository(), solution.getModules());
-
 			exportSolution(monitor, tmpWarDir.getCanonicalPath(), solution.getSolution(), false);
+
+			File preImportFolder = new File(tmpWarDir, "WEB-INF/preImport");
+			File postImportFolder = new File(tmpWarDir, "WEB-INF/postImport");
+			for (ServoyProject sp : ServoyModelFinder.getServoyModel().getModulesOfActiveProjectWithImportHooks())
+			{
+				File destinationFolder = null;
+				if (SolutionMetaData.isPreImportHook(sp.getSolution()))
+				{
+					destinationFolder = preImportFolder;
+				}
+				else if (SolutionMetaData.isPostImportHook(sp.getSolution()))
+				{
+					destinationFolder = postImportFolder;
+				}
+
+				if (destinationFolder != null)
+				{
+					if (!destinationFolder.exists()) destinationFolder.mkdir();
+					SolutionSerializer.writeRuntimeSolution(null, new File(destinationFolder, sp.getSolution().getName() + ".runtime"), sp.getSolution(),
+						ApplicationServerRegistry.get().getDeveloperRepository(), sp.getModules());
+				}
+			}
+
 		}
 		catch (Exception ex)
 		{
