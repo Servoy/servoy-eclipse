@@ -63,7 +63,7 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 								beanModel.size.width = beanModel.size.width + deltaX* resizeInfo.width;
 								beanModel.size.height = beanModel.size.height + deltaY* resizeInfo.height;
 								var css = { top: beanModel.location.y, left: beanModel.location.x, width: beanModel.size.width, height: beanModel.size.height}
-								$(selection).css(css);
+								$(node).css(css);
 							}
 							else {
 								var ghostObject = $scope.getGhost(node.getAttribute("svy-id"));
