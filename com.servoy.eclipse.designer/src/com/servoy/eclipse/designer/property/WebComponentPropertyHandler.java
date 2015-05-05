@@ -41,11 +41,13 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IWebObject;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormatPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGColorPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGConversions.IDesignToFormElement;
 import com.servoy.j2db.server.ngclient.property.types.NGDimensionPropertyType;
@@ -134,7 +136,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 
 		IPropertyType< ? > type = propertyDescription.getType();
 		if (type == FunctionPropertyType.INSTANCE || type == ServoyFunctionPropertyType.INSTANCE || type == ValueListPropertyType.INSTANCE ||
-			type == FormPropertyType.INSTANCE)
+			type == FormPropertyType.INSTANCE || type == MediaPropertyType.INSTANCE)
 		{
 			if (value == null) return Integer.valueOf(0);
 			if (value instanceof Integer) return value;
@@ -221,6 +223,11 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		{
 			Form frm = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getForm(((Integer)value).intValue());
 			convertedValue = (frm == null) ? null : frm.getUUID().toString();
+		}
+		else if (propertyDescription.getType() == MediaPropertyType.INSTANCE)
+		{
+			Media media = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getMedia(((Integer)value).intValue());
+			convertedValue = (media == null) ? null : media.getUUID().toString();
 		}
 		else
 		{
