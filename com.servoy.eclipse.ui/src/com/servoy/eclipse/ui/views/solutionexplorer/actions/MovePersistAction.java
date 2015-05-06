@@ -109,7 +109,7 @@ public class MovePersistAction extends AbstractMovePersistAction
 								duplicate = PersistCloner.duplicatePersist(editingNode, ((Media)editingNode).getName(), destination.getServoyProject(),
 									DummyValidator.INSTANCE);
 								idMap = Collections.singletonMap(new Integer(editingNode.getID()), new Integer(duplicate.getID()));
-								oldToNewID.put(editingNode.getUUID(), duplicate.getUUID());
+								oldToNewID.put(editingNode.getUUID(), editingNode.getUUID());
 								duplicates.put(editingNode.getUUID(), duplicate);
 								servoyProject.saveEditingSolutionNodes(new IPersist[] { duplicate }, true, false);
 							}
