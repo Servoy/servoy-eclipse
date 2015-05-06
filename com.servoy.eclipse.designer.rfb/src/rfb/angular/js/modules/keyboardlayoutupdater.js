@@ -115,10 +115,11 @@ angular.module('keyboardlayoutupdater', ['editor']).run(function($pluginRegistry
 						else {
 							var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
 							obj[node.getAttribute("svy-id")] = {x:ghostObject.location.x,y:ghostObject.location.y}
+							editorScope.refocusGlasspane = true;
 						}
 					}
 					$editorService.sendChanges(obj);
-					editorScope.refocusGlasspane = true;
+					
 				}	
 			},100);
 		}
