@@ -79,7 +79,7 @@
 								"type":"boolean"
 							},
 							"for": {
-								"type": "array"
+								"type": "any"
 							},
 							"blockingOn": {
 								"type": "boolean"
@@ -106,7 +106,16 @@
 							"forFoundset": {
 								"type":"string"
 							},
+							"displayTagsPropertyName": {
+								"type":"string"
+							},
+							"oppositeOf": {
+								"type":"string"
+							},
 							"dynamicDataproviders": {
+								"type":"boolean"
+							},
+							"stringformat": {
 								"type":"boolean"
 							},
 							"elementConfig": {
