@@ -389,13 +389,13 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 									boolean arrayReturnType = spec.isArrayReturnType(beanJSONKey);
 									if (!arrayReturnType)
 									{
-										WebCustomType ghostBean = new WebCustomType(parentBean, beanJSONKey, simpleTypeName, -1, arrayReturnType, false);
+										WebCustomType ghostBean = new WebCustomType(parentBean, beanJSONKey, simpleTypeName, -1, false);
 										ghostBean.setTypeName(simpleTypeName);
 										result.add(ghostBean);
 									}
 									else if (object instanceof JSONArray) for (int i = 0; i < ((JSONArray)object).length(); i++)
 									{
-										WebCustomType ghostBean = new WebCustomType(parentBean, beanJSONKey, simpleTypeName, i, arrayReturnType, false);
+										WebCustomType ghostBean = new WebCustomType(parentBean, beanJSONKey, simpleTypeName, i, false);
 										ghostBean.setTypeName(simpleTypeName);
 										result.add(ghostBean);
 									}

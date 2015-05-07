@@ -56,8 +56,8 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
-import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.IValidateName;
+import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.PositionComparator;
@@ -196,10 +196,37 @@ public class CreateComponentHandler implements IServerService
 					Object config = spec.getProperty(dropTargetFieldName).getConfig();
 					JSONObject configObject = new JSONObject(config.toString());
 					if (configObject.getString("type").endsWith("]")) isArray = true;
-					WebCustomType bean = new WebCustomType(parentBean, dropTargetFieldName, typeName, index, isArray, true);
+					WebCustomType[] arrayValue = null;
+					if (isArray)
+					{
+						if (parentBean instanceof WebComponent)
+						{
+							arrayValue = (WebCustomType[])((WebComponent)parentBean).getProperty(dropTargetFieldName);
+						}
+						index = arrayValue != null ? arrayValue.length : 0;
+					}
+					WebCustomType bean = new WebCustomType(parentBean, dropTargetFieldName, typeName, index, true);
 					bean.setName(compName);
 					bean.setTypeName(typeName);
-					if (parentBean instanceof WebComponent) ((WebComponent)parentBean).setProperty(dropTargetFieldName, bean);
+					if (parentBean instanceof WebComponent)
+					{
+						if (isArray)
+						{
+							if (arrayValue == null)
+							{
+								arrayValue = new WebCustomType[] { bean };
+							}
+							else
+							{
+								WebCustomType[] newArrayValue = new WebCustomType[arrayValue.length + 1];
+								System.arraycopy(arrayValue, 0, newArrayValue, 0, arrayValue.length);
+								newArrayValue[arrayValue.length] = bean;
+								arrayValue = newArrayValue;
+							}
+							((WebComponent)parentBean).setProperty(dropTargetFieldName, arrayValue);
+						}
+						else ((WebComponent)parentBean).setProperty(dropTargetFieldName, bean);
+					}
 					return bean;
 				}
 			}
