@@ -77,6 +77,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private int importUserPolicy;
 	private Set<String> exportedComponents;
 	private Set<String> exportedServices;
+	private boolean upgradeRepository;
 
 	/**
 	 * @param dialogSettings
@@ -105,6 +106,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		insertNewI18NKeysOnly = Utils.getAsBoolean(settings.get("export.insertNewI18NKeysOnly"));
 		overwriteGroups = Utils.getAsBoolean(settings.get("export.overwriteGroups"));
 		addUsersToAdminGroup = Utils.getAsBoolean(settings.get("export.addUsersToAdminGroup"));
+		upgradeRepository = Utils.getAsBoolean(settings.get("export.upgradeRepository"));
 		if (settings.getArray("export.components") != null)
 		{
 			exportedComponents = new TreeSet<String>(Arrays.asList(settings.getArray("export.components")));
@@ -217,6 +219,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		settings.put("export.insertNewI18NKeysOnly", insertNewI18NKeysOnly);
 		settings.put("export.overwriteGroups", overwriteGroups);
 		settings.put("export.addUsersToAdminGroup", addUsersToAdminGroup);
+		settings.put("export.upgradeRepository", upgradeRepository);
 		if (exportedComponents != null) settings.put("export.components", exportedComponents.toArray(new String[exportedComponents.size()]));
 		if (exportedServices != null) settings.put("export.services", exportedServices.toArray(new String[exportedServices.size()]));
 
@@ -729,7 +732,7 @@ public class ExportWarModel extends AbstractWarExportModel
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportUsers()
 	 */
 	@Override
@@ -773,7 +776,7 @@ public class ExportWarModel extends AbstractWarExportModel
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getExportedComponents()
 	 */
 	@Override
@@ -784,12 +787,33 @@ public class ExportWarModel extends AbstractWarExportModel
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getExportedServices()
 	 */
 	@Override
 	public Set<String> getExportedServices()
 	{
 		return exportedServices;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.model.war.exporter.AbstractWarExportModel#setAutomaticallyUpgradeRepository()
+	 */
+	public void setAutomaticallyUpgradeRepository()
+	{
+		upgradeRepository = true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#isAutomaticallyUpgradeRepository()
+	 */
+	@Override
+	public boolean isAutomaticallyUpgradeRepository()
+	{
+		return upgradeRepository;
 	}
 }

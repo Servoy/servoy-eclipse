@@ -62,7 +62,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter#createArgumentChest(org.eclipse.equinox.app.IApplicationContext)
 	 */
 	@Override
@@ -73,7 +73,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter#exportActiveSolution(com.servoy.eclipse.exporter.apps.common.IArgumentChest)
 	 */
 	@Override
@@ -380,6 +380,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			public boolean isUpdateSequences()
 			{
 				return configuration.isUpdateSequences();
+			}
+
+			@Override
+			public boolean isAutomaticallyUpgradeRepository()
+			{
+				return configuration.automaticallyUpdateRepository();
 			}
 		});
 		try

@@ -57,6 +57,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private static final String importUserPolicy = "importUserPolicy";// int \n"
 	private static final String addUsersToAdminGroup = "addUsersToAdminGroup";// adds Users To Admin Group \n"
 	private static final String updateSequences = "updateSequences";// updates Sequences \n";
+	private static final String upgradeRepository = "upgradeRepository";
 
 	private HashMap<String, String> argumentsMap;
 
@@ -68,7 +69,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest#getHelpMessage()
 	 */
 	@Override
@@ -138,7 +139,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        		Default: create users update groups = 1 \n"
 			+ "        				 overwrite completely = 2 \n"
 			+ "        -"+addUsersToAdminGroup+" ... adds Users To Admin Group \n"
-			+ "        -"+updateSequences+" ... updates Sequences \n";
+			+ "        -"+updateSequences+" ... updates Sequences \n"
+			+ "        -"+upgradeRepository+" ... automatically upgrade repository if needed \n";
 	}
 	@Override
 	protected void parseArguments(HashMap<String, String> argsMap)
@@ -329,5 +331,13 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public boolean isUpdateSequences()
 	{
 		return argumentsMap.containsKey(updateSequences);
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean automaticallyUpdateRepository()
+	{
+		return argumentsMap.containsKey(upgradeRepository );
 	}
 }

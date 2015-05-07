@@ -69,4 +69,6 @@ public interface IWarExportModel extends IExportSolutionModel
 	public boolean isAllowDataModelChanges();
 
 	public boolean isUpdateSequences();
+
+	boolean isAutomaticallyUpgradeRepository();
 }

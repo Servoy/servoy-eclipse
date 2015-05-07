@@ -86,6 +86,7 @@ public class FileSelectionPage extends WizardPage implements Listener
 	private Button addUsersToAdminGroupButton;
 	private Button createNoneExistingUsersButton;
 	private Button overwriteExistingUsersButton;
+	private Button automaticallyUpgradeRepository;
 
 	public FileSelectionPage(ExportWarModel exportModel, IWizardPage nextPage)
 	{
@@ -248,6 +249,18 @@ public class FileSelectionPage extends WizardPage implements Listener
 				rowsPerTableRadioButton.setEnabled(exportSampleDataButton.getSelection());
 			}
 		});
+
+		automaticallyUpgradeRepository = new Button(composite, SWT.CHECK);
+		automaticallyUpgradeRepository.setSelection(exportModel.isAutomaticallyUpgradeRepository());
+		automaticallyUpgradeRepository.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setAutomaticallyUpgradeRepository();
+			}
+		});
+		automaticallyUpgradeRepository.setText("Automatically upgrade repository if needed.");
 
 		Composite horizontalComposite = new Composite(composite, SWT.None);
 		GridLayout hcGridLayout = new GridLayout();

@@ -625,6 +625,7 @@ public class WarExporter
 			prop.setProperty("addUsersToAdminGroup", Boolean.toString(exportModel.isAddUsersToAdminGroup()));
 			prop.setProperty("allowDataModelChange", Boolean.toString(exportModel.isAllowDataModelChanges()));
 			prop.setProperty("updateSequences", Boolean.toString(exportModel.isUpdateSequences()));
+			prop.setProperty("automaticallyUpgradeRepository", Boolean.toString(exportModel.isAutomaticallyUpgradeRepository()));
 			FileWriter writer = new FileWriter(importProperties);
 			try
 			{
