@@ -89,18 +89,23 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 		gridData.grabExcessHorizontalSpace = true;
 		gridData.horizontalSpan = 2;
 		checkboxTableViewer.getTable().setLayoutData(gridData);
-
-		if (requiredServers != null && requiredServers.length > 0) checkboxTableViewer.addCheckStateListener(this);
+		checkboxTableViewer.addCheckStateListener(this);
 		selectionButtonsBar = new SelectionButtonsBar(checkboxTableViewer, container, requiredServers);
 		if (selectedServers.size() == 0)
 		{
-			selectionButtonsBar.disableButtons();
 			checkboxTableViewer.setAllChecked(true);
 		}
 		else
 		{
-			selectionButtonsBar.disableSelectAll();
 			checkboxTableViewer.setCheckedElements(appendRequiredLabel(selectedServers.toArray()));
+		}
+		if (checkboxTableViewer.getTable().getItems().length == 0)
+		{
+			selectionButtonsBar.disableButtons();
+		}
+		else
+		{
+			selectionButtonsBar.disableSelectAll();
 		}
 	}
 
@@ -192,11 +197,14 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 	public void checkStateChanged(CheckStateChangedEvent event)
 	{
 		ICheckable checkable = event.getCheckable();
-		for (String requiredServer : requiredServers)
-			if (!checkable.getChecked(requiredServer + DirectorySelectionPage.REQUIRED_LABEL))
-			{
-				checkable.setChecked(requiredServer + DirectorySelectionPage.REQUIRED_LABEL, true);
-			}
+		if (requiredServers != null)
+		{
+			for (String requiredServer : requiredServers)
+				if (!checkable.getChecked(requiredServer + DirectorySelectionPage.REQUIRED_LABEL))
+				{
+					checkable.setChecked(requiredServer + DirectorySelectionPage.REQUIRED_LABEL, true);
+				}
+		}
 		if (checkboxTableViewer.getCheckedElements().length < checkboxTableViewer.getTable().getItemCount())
 		{
 			selectionButtonsBar.enableAll();

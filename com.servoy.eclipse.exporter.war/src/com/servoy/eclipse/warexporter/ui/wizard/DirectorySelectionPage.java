@@ -94,17 +94,23 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 		gridData.grabExcessHorizontalSpace = true;
 		gridData.horizontalSpan = 2;
 		checkboxTableViewer.getTable().setLayoutData(gridData);
-		if (requiredFiles != null && requiredFiles.length > 0) checkboxTableViewer.addCheckStateListener(this);
+		checkboxTableViewer.addCheckStateListener(this);
 		selectionButtonsBar = new SelectionButtonsBar(checkboxTableViewer, container, requiredFiles);
 		if (files.size() == 0)
 		{
-			selectionButtonsBar.disableButtons();
 			checkboxTableViewer.setAllChecked(true);
 		}
 		else
 		{
-			selectionButtonsBar.disableSelectAll();
 			checkboxTableViewer.setCheckedElements(appendRequiredLabel(files.toArray()));
+		}
+		if (checkboxTableViewer.getTable().getItems().length == 0)
+		{
+			selectionButtonsBar.disableButtons();
+		}
+		else
+		{
+			selectionButtonsBar.disableSelectAll();
 		}
 	}
 
@@ -126,7 +132,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.jface.wizard.WizardPage#getNextPage()
 	 */
 	@Override
@@ -199,15 +205,18 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.jface.viewers.ICheckStateListener#checkStateChanged(org.eclipse.jface.viewers.CheckStateChangedEvent)
 	 */
 	@Override
 	public void checkStateChanged(CheckStateChangedEvent event)
 	{
 		ICheckable checkable = event.getCheckable();
-		for (String requiredFile : requiredFiles)
-			if (!checkable.getChecked(requiredFile + REQUIRED_LABEL)) checkable.setChecked(requiredFile + REQUIRED_LABEL, true);
+		if (requiredFiles != null)
+		{
+			for (String requiredFile : requiredFiles)
+				if (!checkable.getChecked(requiredFile + REQUIRED_LABEL)) checkable.setChecked(requiredFile + REQUIRED_LABEL, true);
+		}
 		if (checkboxTableViewer.getCheckedElements().length < checkboxTableViewer.getTable().getItemCount())
 		{
 			selectionButtonsBar.enableAll();
