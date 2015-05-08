@@ -361,21 +361,21 @@ stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST;]]></sample
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Adds a string of client information which gets stored on the server, 
+            <description clientSupport="wc,sc"><![CDATA[Adds a string of client information which gets stored on the server,
 and can be viewed on the Clients page of Servoy Server Administration Console.
 
-The new piece of client information is added on behalf of the running 
+The new piece of client information is added on behalf of the running
 Servoy client.
 
 This function can be called more than once, if you want to add multiple
 lines of client information.
 
-NOTE: 
+NOTE:
 This function can also be used with the function <em>getClientCountForInfo</em>
 to count the number of clients with matching addditional client information.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Adds a string of client information which gets stored on the server, 
+            <summary clientSupport="wc,sc"><![CDATA[Adds a string of client information which gets stored on the server,
 and can be viewed on the Clients page of Servoy Server Administration Console.]]></summary>
           </summaries>
           <samples>
@@ -479,7 +479,7 @@ if (qdialog == "Yes") {
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Closes the currently open solution and optionally opens another solution, calling a specified global method with the specified arguments.
 If the user has been logged in, this function keeps the user logged in and in the newly open solution, the login is skipped and the solution goes straight to the first form.
-If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client). 
+If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client).
 An alternative option is security.logout() which also does a log out for the user (for solutions that require authentication).]]></description>
           </descriptions>
           <summaries>
@@ -503,7 +503,7 @@ application.closeSolution();
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Closes the currently open solution and optionally opens another solution, calling a specified global method with the specified arguments.
 If the user has been logged in, this function keeps the user logged in and in the newly open solution, the login is skipped and the solution goes straight to the first form.
-If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client). 
+If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client).
 An alternative option is security.logout() which also does a log out for the user (for solutions that require authentication).]]></description>
           </descriptions>
           <summaries>
@@ -533,7 +533,7 @@ application.closeSolution();
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Closes the currently open solution and optionally opens another solution, calling a specified global method with the specified arguments.
 If the user has been logged in, this function keeps the user logged in and in the newly open solution, the login is skipped and the solution goes straight to the first form.
-If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client). 
+If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client).
 An alternative option is security.logout() which also does a log out for the user (for solutions that require authentication).]]></description>
           </descriptions>
           <summaries>
@@ -567,7 +567,7 @@ application.closeSolution();
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Closes the currently open solution and optionally opens another solution, calling a specified global method with the specified arguments.
 If the user has been logged in, this function keeps the user logged in and in the newly open solution, the login is skipped and the solution goes straight to the first form.
-If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client). 
+If you want to go to a different url, you need to call application.showURL(url) before calling application.closeSolution() (this is only applicable for Web Client).
 An alternative option is security.logout() which also does a log out for the user (for solutions that require authentication).]]></description>
           </descriptions>
           <summaries>
@@ -740,16 +740,16 @@ controller.showRecords(15, nmd); // 15 is a single-number pk in this case]]></sa
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
-// The same as above, but run the application in the user's home directory. 
-application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgram("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
@@ -780,16 +780,16 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
-// The same as above, but run the application in the user's home directory. 
-application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgram("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
@@ -824,16 +824,16 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
-// The same as above, but run the application in the user's home directory. 
-application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgram("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
@@ -872,16 +872,16 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
-// The same as above, but run the application in the user's home directory. 
-application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");
 application.executeProgram("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+application.executeProgram("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgram("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
@@ -917,16 +917,16 @@ Execute a program and returns output. Specify the cmd as you would do in a conso
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", "arg1", "arg2", "arg3");
-// The same as above, but run the application in the user's home directory. 
-application.executeProgram("c:\\Users\\myself\\myapp.exe", "arg1", "arg2", "arg3", "#", "#", "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgram("c:\\Users\\myself\\myapp.exe", "arg1", "arg2", "arg3", "#", "#", "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgram("c:\\Users\\myself\\myapp.exe", "arg1", "arg2", "arg3", "#", "MY_ENV_VAR=something", "#", "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgram("/home/myself/myapp", "arg1", "arg2", "arg3");
-application.executeProgram("/home/myself/myapp", "arg1", "arg2", "arg3", "#", "#", "/home/myself/");	
+application.executeProgram("/home/myself/myapp", "arg1", "arg2", "arg3", "#", "#", "/home/myself/");
 application.executeProgram("/home/myself/myapp", "arg1", "arg2", "arg3", "#", "MY_ENV_VAR=something", "#", "/home/myself/myapp");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgram("rundll32.exe", "url.dll,FileProtocolHandler", "filename");	
+application.executeProgram("rundll32.exe", "url.dll,FileProtocolHandler", "filename");
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgram("xdg-open", "filename");
 // Open a file with the default application associated with it. (on MacOS)
@@ -980,16 +980,16 @@ application.executeProgram("open", "-a", "OpenOffice.org.app", "filename.doc");]
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
-// The same as above, but run the application in the user's home directory. 
-application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgramInBackground("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
@@ -1020,16 +1020,16 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
-// The same as above, but run the application in the user's home directory. 
-application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgramInBackground("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
@@ -1064,16 +1064,16 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
-// The same as above, but run the application in the user's home directory. 
-application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgramInBackground("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
@@ -1112,16 +1112,16 @@ application.executeProgram("open", ["-a", "OpenOffice.org.app", "filename.doc"])
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"]);
-// The same as above, but run the application in the user's home directory. 
-application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], null, "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"]);
-application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");	
+application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], null, "/home/myself/");
 application.executeProgramInBackground("/home/myself/myapp", ["arg1", "arg2", "arg3"], ["MY_ENV_VAR=something"], "/home/myself/");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);	
+application.executeProgramInBackground("rundll32.exe", ["url.dll,FileProtocolHandler", "filename"]);
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgramInBackground("xdg-open", ["filename"]);
 // Open a file with the default application associated with it. (on MacOS)
@@ -1157,16 +1157,16 @@ Execute a program in the background. Specify the cmd as you would do in a consol
 // Runs a binary located in the user's home directory. The application will run in the current working
 // directory, which in general is the one where Servoy was started from.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", "arg1", "arg2", "arg3");
-// The same as above, but run the application in the user's home directory. 
-application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", "arg1", "arg2", "arg3", "#", "#", "c:\\Users\\myself\\");	
+// The same as above, but run the application in the user's home directory.
+application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", "arg1", "arg2", "arg3", "#", "#", "c:\\Users\\myself\\");
 // The same as above, but also set an environment variable for the called program.
 application.executeProgramInBackground("c:\\Users\\myself\\myapp.exe", "arg1", "arg2", "arg3", "#", "MY_ENV_VAR=something", "#", "c:\\Users\\myself\\");
 // For non-Windows systems:
 application.executeProgramInBackground("/home/myself/myapp", "arg1", "arg2", "arg3");
-application.executeProgramInBackground("/home/myself/myapp", "arg1", "arg2", "arg3", "#", "#", "/home/myself/");	
-application.executeProgramInBackground("/home/myself/myapp", "arg1", "arg2", "arg3", "#", "MY_ENV_VAR=something", "#", "/home/myself/myapp");	
+application.executeProgramInBackground("/home/myself/myapp", "arg1", "arg2", "arg3", "#", "#", "/home/myself/");
+application.executeProgramInBackground("/home/myself/myapp", "arg1", "arg2", "arg3", "#", "MY_ENV_VAR=something", "#", "/home/myself/myapp");
 // Open a file with the default application associated with it. (on Windows)
-application.executeProgramInBackground("rundll32.exe", "url.dll,FileProtocolHandler", "filename");	
+application.executeProgramInBackground("rundll32.exe", "url.dll,FileProtocolHandler", "filename");
 // Open a file with the default application associated with it. (on Linux)
 application.executeProgramInBackground("xdg-open", "filename");
 // Open a file with the default application associated with it. (on MacOS)
@@ -1257,7 +1257,7 @@ application.exit();]]></sample>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[This gets the currently focused active window; this can be the main application window or a modal dialog.
 For a webclient getWindow() can return the main window that is not really the main for the current tab in the browser
-that can return the previous tab that a user could have opened. For this method is better suited because this 
+that can return the previous tab that a user could have opened. For this method is better suited because this
 will give you the actual tab in the browser. Another call would be form.controller.getWindow() of a form that you know in which window it resides.]]></description>
           </descriptions>
           <summaries>
@@ -1288,11 +1288,11 @@ var activeWindow = application.getActiveWindow();]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[Number of clients]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Gets the count for all clients displaying the same additional information 
+            <description clientSupport="wc,sc"><![CDATA[Gets the count for all clients displaying the same additional information
 in the Clients page of Servoy Server Administration Console.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Gets the count for all clients displaying the same additional information 
+            <summary clientSupport="wc,sc"><![CDATA[Gets the count for all clients displaying the same additional information
 in the Clients page of Servoy Server Administration Console.]]></summary>
           </summaries>
           <samples>
@@ -1321,7 +1321,7 @@ application.output('Including yourself, there are ' + count + ' client(s) runnin
 //In smart client, use this to set javax.swing.UIDefaults properties.
 application.putClientProperty('ToolTip.hideAccelerator', true)
 //To change the comboboxes selection background color, do this:
-application.putClientProperty('ComboBox.selectionBackground', new Packages.javax.swing.plaf.ColorUIResource(java.awt.Color.RED)) 
+application.putClientProperty('ComboBox.selectionBackground', new Packages.javax.swing.plaf.ColorUIResource(java.awt.Color.RED))
 
 //In web client, use this to change the template directory.
 //To change the default dir of templates/default to templates/green_skin, do this:
@@ -1839,7 +1839,7 @@ for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
           <argumentsTypes/>
           <return type="com.servoy.j2db.scripting.JSWindow" typecode="com.servoy.j2db.scripting.JSWindow"><![CDATA[the main application JSWindow.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Get the main application window. This is the window that is created first for this client. 
+            <description clientSupport="wc,sc"><![CDATA[Get the main application window. This is the window that is created first for this client.
 
 In a smart client this is always just the first started window where the solution is loaded in.
 In a webclient the user may open the same solution in a new tab in the same browser. In that case the main solution
@@ -2155,7 +2155,7 @@ application.overrideStyle('mystyle','mystyle_mace')//in this case both styles sh
 //In smart client, use this to set javax.swing.UIDefaults properties.
 application.putClientProperty('ToolTip.hideAccelerator', true)
 //To change the comboboxes selection background color, do this:
-application.putClientProperty('ComboBox.selectionBackground', new Packages.javax.swing.plaf.ColorUIResource(java.awt.Color.RED)) 
+application.putClientProperty('ComboBox.selectionBackground', new Packages.javax.swing.plaf.ColorUIResource(java.awt.Color.RED))
 
 //In web client, use this to change the template directory.
 //To change the default dir of templates/default to templates/green_skin, do this:
@@ -2461,7 +2461,8 @@ For headless clients(including Batch Processors and Authentication clients) the 
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.
 
-NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects
+NOTE: This is expensive operation, which triggers refresh of all visible forms. Over usage of this method may inflict performance issues.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
@@ -2498,7 +2499,8 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.
 
-NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects
+NOTE: This is expensive operation, which triggers refresh of all visible forms. Over usage of this method may inflict performance issues.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
@@ -2537,7 +2539,8 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
           <descriptions>
             <description clientSupport="mc,wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.
 
-NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects
+NOTE: This is expensive operation, which triggers refresh of all visible forms. Over usage of this method may inflict performance issues.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="mc,wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
@@ -2574,7 +2577,8 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.
 
-NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects
+NOTE: This is expensive operation, which triggers refresh of all visible forms. Over usage of this method may inflict performance issues.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
@@ -2614,7 +2618,8 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
           <descriptions>
             <description clientSupport="mc,wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.
 
-NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects
+NOTE: This is expensive operation, which triggers refresh of all visible forms. Over usage of this method may inflict performance issues.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="mc,wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
@@ -2655,7 +2660,8 @@ application.setValueListItems('my_en_types',new Array('Item 1', 'Item 2', 'Item 
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.
 
-NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects]]></description>
+NOTE: if you modify values for checkbox/radio field, note that having one value in valuelist is a special case, so switching between one value and 0/multiple values after form is created may have side effects
+NOTE: This is expensive operation, which triggers refresh of all visible forms. Over usage of this method may inflict performance issues.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Fill a custom type valuelist with values from array(s) or dataset.]]></summary>
@@ -2996,7 +3002,7 @@ application.showFormInDialog(forms.contacts,100,80,500,300,'my own dialog title'
 
 NOTE:
 Forms in windows cannot be modal. They are more independent then dialogs, even non-modal ones. For example in SC, a non-modal dialog will always
-be shown on top of the parent window and it will not have a separate entry in the OS window manager (for example Windows taskbar). 
+be shown on top of the parent window and it will not have a separate entry in the OS window manager (for example Windows taskbar).
 
 NOTE:
 x, y, width and height coordinates are only applied the first time the specified window is shown.
@@ -3296,7 +3302,7 @@ application.sleep(3000);]]></sample>
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="sc"><![CDATA[Updates the UI (painting). If in a script an element changed and the script continues doing 
+            <description clientSupport="sc"><![CDATA[Updates the UI (painting). If in a script an element changed and the script continues doing
 things, you can give an number in ms how long this can take.
 Warning: this gives the UI time to paint, but this also means that it will give the ui time to respond to all other events,
 so if a user keeps clicking on other stuff this will also be handled right away inside this call.]]></description>
@@ -3315,7 +3321,7 @@ so if a user keeps clicking on other stuff this will also be handled right away 
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="sc"><![CDATA[Updates the UI (painting). If in a script an element changed and the script continues doing 
+            <description clientSupport="sc"><![CDATA[Updates the UI (painting). If in a script an element changed and the script continues doing
 things, you can give an number in ms how long this can take.
 Warning: this gives the UI time to paint, but this also means that it will give the ui time to respond to all other events,
 so if a user keeps clicking on other stuff this will also be handled right away inside this call.]]></description>
@@ -5416,7 +5422,7 @@ if(databaseManager.nullColumnValidatorEnabled) application.output('null validati
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the lock could be acquired.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Request lock(s) for a foundset, can be a normal or related foundset.
-The record_index can be -1 to lock all rows, 0 to lock the current row, or a specific row of > 0 
+The record_index can be -1 to lock all rows, 0 to lock the current row, or a specific row of > 0
 Optionally name the lock(s) so that it can be referenced it in releaseAllLocks()
 
 returns true if the lock could be acquired.]]></description>
@@ -5456,7 +5462,7 @@ if(!success)
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the lock could be acquired.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Request lock(s) for a foundset, can be a normal or related foundset.
-The record_index can be -1 to lock all rows, 0 to lock the current row, or a specific row of > 0 
+The record_index can be -1 to lock all rows, 0 to lock the current row, or a specific row of > 0
 Optionally name the lock(s) so that it can be referenced it in releaseAllLocks()
 
 returns true if the lock could be acquired.]]></description>
@@ -5527,7 +5533,7 @@ var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyna
 // the value may be null, this will result in 'column is null' sql condition.
 var success = databaseManager.addTableFilterParam('crm', 'companies', 'verified', '=', null)
 
-//if you want to add a filter for a column (created by you) in the i18n table 
+//if you want to add a filter for a column (created by you) in the i18n table
 databaseManager.addTableFilterParam('database', 'your_i18n_table', 'message_variant', 'in', [1, 2])]]></sample>
           </samples>
           <parameters>
@@ -5583,7 +5589,7 @@ var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyna
 // the value may be null, this will result in 'column is null' sql condition.
 var success = databaseManager.addTableFilterParam('crm', 'companies', 'verified', '=', null)
 
-//if you want to add a filter for a column (created by you) in the i18n table 
+//if you want to add a filter for a column (created by you) in the i18n table
 databaseManager.addTableFilterParam('database', 'your_i18n_table', 'message_variant', 'in', [1, 2])]]></sample>
           </samples>
           <parameters>
@@ -5642,7 +5648,7 @@ var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyna
 // the value may be null, this will result in 'column is null' sql condition.
 var success = databaseManager.addTableFilterParam('crm', 'companies', 'verified', '=', null)
 
-//if you want to add a filter for a column (created by you) in the i18n table 
+//if you want to add a filter for a column (created by you) in the i18n table
 databaseManager.addTableFilterParam('database', 'your_i18n_table', 'message_variant', 'in', [1, 2])]]></sample>
           </samples>
           <parameters>
@@ -5702,7 +5708,7 @@ var success = databaseManager.addTableFilterParam('crm', 'companies', 'companyna
 // the value may be null, this will result in 'column is null' sql condition.
 var success = databaseManager.addTableFilterParam('crm', 'companies', 'verified', '=', null)
 
-//if you want to add a filter for a column (created by you) in the i18n table 
+//if you want to add a filter for a column (created by you) in the i18n table
 databaseManager.addTableFilterParam('database', 'your_i18n_table', 'message_variant', 'in', [1, 2])]]></sample>
           </samples>
           <parameters>
@@ -5756,7 +5762,7 @@ if it has a column named 'columnName', its value will be set with 'value']]></de
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[if the transaction could be committed.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns true if a transaction is committed; rollback if commit fails. 
+            <description clientSupport="wc,sc"><![CDATA[Returns true if a transaction is committed; rollback if commit fails.
 Saves all edited records and commits the data.]]></description>
           </descriptions>
           <summaries>
@@ -5767,7 +5773,7 @@ Saves all edited records and commits the data.]]></description>
 databaseManager.startTransaction()
 //Now let users input data
 
-//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.  
+//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.
 if (cancel || !databaseManager.commitTransaction())
 {
 	databaseManager.rollbackTransaction();
@@ -5790,7 +5796,7 @@ if (cancel || !databaseManager.commitTransaction())
 databaseManager.startTransaction()
 //Now let users input data
 
-//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.  
+//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.
 if (cancel || !databaseManager.commitTransaction())
 {
 	databaseManager.rollbackTransaction();
@@ -5819,7 +5825,7 @@ if (cancel || !databaseManager.commitTransaction())
 databaseManager.startTransaction()
 //Now let users input data
 
-//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.  
+//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.
 if (cancel || !databaseManager.commitTransaction())
 {
 	databaseManager.rollbackTransaction();
@@ -5842,14 +5848,14 @@ if (cancel || !databaseManager.commitTransaction())
           <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"><![CDATA[The converted JSFoundset.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Creates a foundset that combines all the records of the specified one-to-many relation seen from the given parent/primary foundset.
-The created foundset will not contain records that have not been saved in the database, because the records in the foundset will be the 
+The created foundset will not contain records that have not been saved in the database, because the records in the foundset will be the
 result of a select query to the database.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Creates a foundset that combines all the records of the specified one-to-many relation seen from the given parent/primary foundset.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Convert in the order form a orders foundset into a orderdetails foundset, 
+            <sample clientSupport="wc,sc"><![CDATA[// Convert in the order form a orders foundset into a orderdetails foundset,
 // that has all the orderdetails from all the orders in the foundset.
 var convertedFoundSet = databaseManager.convertFoundSet(foundset,order_to_orderdetails);
 // or var convertedFoundSet = databaseManager.convertFoundSet(foundset,"order_to_orderdetails");
@@ -5872,14 +5878,14 @@ forms.orderdetails.controller.showRecords(convertedFoundSet);]]></sample>
           <return type="com.servoy.j2db.dataprocessing.FoundSet" typecode="com.servoy.j2db.dataprocessing.FoundSet"><![CDATA[The converted JSFoundset.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Creates a foundset that combines all the records of the specified one-to-many relation seen from the given parent/primary foundset.
-The created foundset will not contain records that have not been saved in the database, because the records in the foundset will be the 
+The created foundset will not contain records that have not been saved in the database, because the records in the foundset will be the
 result of a select query to the database.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Creates a foundset that combines all the records of the specified one-to-many relation seen from the given parent/primary foundset.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// Convert in the order form a orders foundset into a orderdetails foundset, 
+            <sample clientSupport="wc,sc"><![CDATA[// Convert in the order form a orders foundset into a orderdetails foundset,
 // that has all the orderdetails from all the orders in the foundset.
 var convertedFoundSet = databaseManager.convertFoundSet(foundset,order_to_orderdetails);
 // or var convertedFoundSet = databaseManager.convertFoundSet(foundset,"order_to_orderdetails");
@@ -6098,17 +6104,19 @@ databaseManager.saveData();]]></sample>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if no errors happened.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Copies all matching non empty columns (if overwrite boolean is given all columns except pk/ident, if array then all columns except pk and array names).
-The matching requires the properties and getter functions of the source to match those of the destination; for the getter functions, 
+The matching requires the properties and getter functions of the source to match those of the destination; for the getter functions,
 the 'get' will be removed and the remaining name will be converted to lowercase before attempting to match.
 Returns true if no error occurred.
 
-NOTE: This function could be used to store a copy of records in an archive table. Use the getRecord() function to get the record as an object.]]></description>
+NOTE: This function could be used to store a copy of records in an archive table. Use the getRecord() function to get the record as an object.
+Before trying this example, please make sure that the foundsets have some records loaded:]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Copies all matching non empty columns (if overwrite boolean is given all columns except pk/ident, if array then all columns except pk and array names).]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[for( var i = 1 ; i <= foundset.getSize() ; i++ )
+            <sample clientSupport="wc,sc"><![CDATA[otherfoundset.loadAllRecords();
+for( var i = 1 ; i <= foundset.getSize() ; i++ )
 {
 	var srcRecord = foundset.getRecord(i);
 	var destRecord = otherfoundset.getRecord(i);
@@ -6147,17 +6155,19 @@ databaseManager.saveData();
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if no errors happened.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Copies all matching non empty columns (if overwrite boolean is given all columns except pk/ident, if array then all columns except pk and array names).
-The matching requires the properties and getter functions of the source to match those of the destination; for the getter functions, 
+The matching requires the properties and getter functions of the source to match those of the destination; for the getter functions,
 the 'get' will be removed and the remaining name will be converted to lowercase before attempting to match.
 Returns true if no error occurred.
 
-NOTE: This function could be used to store a copy of records in an archive table. Use the getRecord() function to get the record as an object.]]></description>
+NOTE: This function could be used to store a copy of records in an archive table. Use the getRecord() function to get the record as an object.
+Before trying this example, please make sure that the foundsets have some records loaded:]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Copies all matching non empty columns (if overwrite boolean is given all columns except pk/ident, if array then all columns except pk and array names).]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[for( var i = 1 ; i <= foundset.getSize() ; i++ )
+            <sample clientSupport="wc,sc"><![CDATA[otherfoundset.loadAllRecords();
+for( var i = 1 ; i <= foundset.getSize() ; i++ )
 {
 	var srcRecord = foundset.getRecord(i);
 	var destRecord = otherfoundset.getRecord(i);
@@ -6186,7 +6196,7 @@ databaseManager.saveData();
               <description><![CDATA[The destination record to copy to.]]></description>
             </parameter>
             <parameter name="overwrite" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
-              <description><![CDATA[Boolean values to overwrite all values.]]></description>
+              <description><![CDATA[Boolean values to overwrite all values. If overwrite is false/not provided, then the non empty values are not overwritten in the destination record.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -6199,17 +6209,19 @@ databaseManager.saveData();
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if no errors happened.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Copies all matching non empty columns (if overwrite boolean is given all columns except pk/ident, if array then all columns except pk and array names).
-The matching requires the properties and getter functions of the source to match those of the destination; for the getter functions, 
+The matching requires the properties and getter functions of the source to match those of the destination; for the getter functions,
 the 'get' will be removed and the remaining name will be converted to lowercase before attempting to match.
 Returns true if no error occurred.
 
-NOTE: This function could be used to store a copy of records in an archive table. Use the getRecord() function to get the record as an object.]]></description>
+NOTE: This function could be used to store a copy of records in an archive table. Use the getRecord() function to get the record as an object.
+Before trying this example, please make sure that the foundsets have some records loaded:]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Copies all matching non empty columns (if overwrite boolean is given all columns except pk/ident, if array then all columns except pk and array names).]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[for( var i = 1 ; i <= foundset.getSize() ; i++ )
+            <sample clientSupport="wc,sc"><![CDATA[otherfoundset.loadAllRecords();
+for( var i = 1 ; i <= foundset.getSize() ; i++ )
 {
 	var srcRecord = foundset.getRecord(i);
 	var destRecord = otherfoundset.getRecord(i);
@@ -6272,8 +6284,8 @@ Using this variation of createDataSourceByQuery any Tablefilter on the involved 
 var q = databaseManager.createSelect("db:/example_data/customers");
 q.result.add(q.columns.address).add(q.columns.city).add(q.columns.country);
 q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
-var uri = databaseManager.createDataSourceByQuery('mydata', q, 999); 
-//var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT]); 
+var uri = databaseManager.createDataSourceByQuery('mydata', q, 999);
+//var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT]);
 
 // the uri can be used to create a form using solution model
 var myForm = solutionModel.newForm('newForm', uri, 'myStyleName', false, 800, 600);
@@ -6319,8 +6331,8 @@ Using this variation of createDataSourceByQuery any Tablefilter on the involved 
 var q = databaseManager.createSelect("db:/example_data/customers");
 q.result.add(q.columns.address).add(q.columns.city).add(q.columns.country);
 q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
-var uri = databaseManager.createDataSourceByQuery('mydata', q, 999); 
-//var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT]); 
+var uri = databaseManager.createDataSourceByQuery('mydata', q, 999);
+//var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT]);
 
 // the uri can be used to create a form using solution model
 var myForm = solutionModel.newForm('newForm', uri, 'myStyleName', false, 800, 600);
@@ -6370,8 +6382,8 @@ Using this variation of createDataSourceByQuery any Tablefilter on the involved 
 var q = databaseManager.createSelect("db:/example_data/customers");
 q.result.add(q.columns.customer_id).add(q.columns.city).add(q.columns.country);
 q.where.add(q.joins.customers_to_orders.columns.orderid.eq(1234));
-var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, null, ['customer_id']); 
-//var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT], ['customer_id']); 
+var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, null, ['customer_id']);
+//var uri = databaseManager.createDataSourceByQuery('mydata', q, 999, [JSColumn.TEXT, JSColumn.TEXT, JSColumn.TEXT], ['customer_id']);
 
 // the uri can be used to create a form using solution model
 var myForm = solutionModel.newForm('newForm', uri, 'myStyleName', false, 800, 600);
@@ -6820,7 +6832,7 @@ var args = new Array();
 args[0] = order_date //or  new Date()
 var dataset = databaseManager.getDataSetByQuery(databaseManager.getDataSourceServerName(controller.getDataSource()), query, args, maxReturnedRows);
 
-// place in label: 
+// place in label:
 // elements.myLabel.text = '<html>'+dataset.getAsHTML()+'</html>';
 
 //example to calc a strange total
@@ -6941,7 +6953,7 @@ NOTE: For more detail on named server connections, see the chapter on Database C
           <argumentsTypes/>
           <return type="com.servoy.j2db.dataprocessing.Record[]" typecode="[Lcom.servoy.j2db.dataprocessing.IRecordInternal;"><![CDATA[Array of outstanding/unsaved JSRecords.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns an array of edited records with outstanding (unsaved) data. 
+            <description clientSupport="wc,sc"><![CDATA[Returns an array of edited records with outstanding (unsaved) data.
 
 NOTE: To return a dataset of outstanding (unsaved) edited data for each record, see JSRecord.getChangedData();
 NOTE2: The fields focus may be lost in user interface in order to determine the edits.]]></description>
@@ -6981,7 +6993,7 @@ databaseManager.setAutoSave(true);]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.dataprocessing.Record[]" typecode="[Lcom.servoy.j2db.dataprocessing.IRecordInternal;"><![CDATA[Array of outstanding/unsaved JSRecords.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Returns an array of edited records with outstanding (unsaved) data. 
+            <description clientSupport="wc,sc"><![CDATA[Returns an array of edited records with outstanding (unsaved) data.
 
 NOTE: To return a dataset of outstanding (unsaved) edited data for each record, see JSRecord.getChangedData();
 NOTE2: The fields focus may be lost in user interface in order to determine the edits.]]></description>
@@ -7265,7 +7277,7 @@ while(fsUpdater.next())
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[The next sequence for the column, null if there was no sequence for that column 
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[The next sequence for the column, null if there was no sequence for that column
         or if there is no column with the given name.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Gets the next sequence for a column which has a sequence defined in its column dataprovider properties.
@@ -7302,7 +7314,7 @@ application.output(nextValue);]]></sample>
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[The next sequence for the column, null if there was no sequence for that column 
+          <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[The next sequence for the column, null if there was no sequence for that column
         or if there is no column with the given name.]]></return>
           <deprecated><![CDATA[Use getNextSequence(datasource,column)]]></deprecated>
           <parameters>
@@ -7974,21 +7986,21 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the records could me merged.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Merge records from the same foundset, updates entire datamodel (via foreign type on columns) with destination 
+            <description clientSupport="wc,sc"><![CDATA[Merge records from the same foundset, updates entire datamodel (via foreign type on columns) with destination
 record pk, deletes source record. Do use a transaction!
 
-This function is very handy in situations where duplicate data exists. It allows you to merge the two records 
-and move all related records in one go. Say the source_record is "Ikea" and the combined_destination_record is "IKEA", the 
-"Ikea" record is deleted and all records related to it (think of contacts and orders, for instance) will be related 
-to the "IKEA" record. 
+This function is very handy in situations where duplicate data exists. It allows you to merge the two records
+and move all related records in one go. Say the source_record is "Ikea" and the combined_destination_record is "IKEA", the
+"Ikea" record is deleted and all records related to it (think of contacts and orders, for instance) will be related
+to the "IKEA" record.
 
-The function takes an optional array of column names. If provided, the data in the named columns will be copied 
-from source_record to combined_destination_record. 
+The function takes an optional array of column names. If provided, the data in the named columns will be copied
+from source_record to combined_destination_record.
 
 Note that it is essential for both records to originate from the same foundset, as shown in the sample code.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Merge records from the same foundset, updates entire datamodel (via foreign type on columns) with destination 
+            <summary clientSupport="wc,sc"><![CDATA[Merge records from the same foundset, updates entire datamodel (via foreign type on columns) with destination
 record pk, deletes source record.]]></summary>
           </summaries>
           <samples>
@@ -8011,21 +8023,21 @@ record pk, deletes source record.]]></summary>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the records could me merged.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Merge records from the same foundset, updates entire datamodel (via foreign type on columns) with destination 
+            <description clientSupport="wc,sc"><![CDATA[Merge records from the same foundset, updates entire datamodel (via foreign type on columns) with destination
 record pk, deletes source record. Do use a transaction!
 
-This function is very handy in situations where duplicate data exists. It allows you to merge the two records 
-and move all related records in one go. Say the source_record is "Ikea" and the combined_destination_record is "IKEA", the 
-"Ikea" record is deleted and all records related to it (think of contacts and orders, for instance) will be related 
-to the "IKEA" record. 
+This function is very handy in situations where duplicate data exists. It allows you to merge the two records
+and move all related records in one go. Say the source_record is "Ikea" and the combined_destination_record is "IKEA", the
+"Ikea" record is deleted and all records related to it (think of contacts and orders, for instance) will be related
+to the "IKEA" record.
 
-The function takes an optional array of column names. If provided, the data in the named columns will be copied 
-from source_record to combined_destination_record. 
+The function takes an optional array of column names. If provided, the data in the named columns will be copied
+from source_record to combined_destination_record.
 
 Note that it is essential for both records to originate from the same foundset, as shown in the sample code.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Merge records from the same foundset, updates entire datamodel (via foreign type on columns) with destination 
+            <summary clientSupport="wc,sc"><![CDATA[Merge records from the same foundset, updates entire datamodel (via foreign type on columns) with destination
 record pk, deletes source record.]]></summary>
           </summaries>
           <samples>
@@ -8050,7 +8062,7 @@ record pk, deletes source record.]]></summary>
           <return type="void" typecode="void"/>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Can be used to recalculate a specified record or all rows in the specified foundset.
-May be necessary when data is changed from outside of servoy, or when there is data changed inside servoy 
+May be necessary when data is changed from outside of servoy, or when there is data changed inside servoy
 but records with calculations depending on that data where not loaded so not updated and you need to update
 the stored calculation values because you are depending on that with queries or aggregates.]]></description>
           </descriptions>
@@ -8181,7 +8193,7 @@ return true if the locks are released.]]></description>
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Reverts outstanding (not saved) in memory changes from edited records. 
+            <description clientSupport="wc,sc"><![CDATA[Reverts outstanding (not saved) in memory changes from edited records.
 Can specify a record or foundset as parameter to rollback.
 Best used in combination with the function databaseManager.setAutoSave()
 This does not include deletes, they do not honor the autosafe false flag so they cant be rollbacked by this call.]]></description>
@@ -8208,7 +8220,7 @@ databaseManager.setAutoSave(true)]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Reverts outstanding (not saved) in memory changes from edited records. 
+            <description clientSupport="wc,sc"><![CDATA[Reverts outstanding (not saved) in memory changes from edited records.
 Can specify a record or foundset as parameter to rollback.
 Best used in combination with the function databaseManager.setAutoSave()
 This does not include deletes, they do not honor the autosafe false flag so they cant be rollbacked by this call.]]></description>
@@ -8240,7 +8252,7 @@ databaseManager.setAutoSave(true)]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Reverts outstanding (not saved) in memory changes from edited records. 
+            <description clientSupport="wc,sc"><![CDATA[Reverts outstanding (not saved) in memory changes from edited records.
 Can specify a record or foundset as parameter to rollback.
 Best used in combination with the function databaseManager.setAutoSave()
 This does not include deletes, they do not honor the autosafe false flag so they cant be rollbacked by this call.]]></description>
@@ -8271,7 +8283,7 @@ databaseManager.setAutoSave(true)]]></sample>
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Rolls back in memory edited records that are outstanding (not saved). 
+            <description clientSupport="wc,sc"><![CDATA[Rolls back in memory edited records that are outstanding (not saved).
 Can specify a record or foundset as parameter to rollback.
 Best used in combination with the function databaseManager.setAutoSave()
 This does not include deletes, they do not honor the autosafe false flag so they cant be rollbacked by this call.]]></description>
@@ -8299,7 +8311,7 @@ databaseManager.setAutoSave(true)]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Rolls back in memory edited records that are outstanding (not saved). 
+            <description clientSupport="wc,sc"><![CDATA[Rolls back in memory edited records that are outstanding (not saved).
 Can specify a record or foundset as parameter to rollback.
 Best used in combination with the function databaseManager.setAutoSave()
 This does not include deletes, they do not honor the autosafe false flag so they cant be rollbacked by this call.]]></description>
@@ -8332,7 +8344,7 @@ databaseManager.setAutoSave(true)]]></sample>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Rolls back in memory edited records that are outstanding (not saved). 
+            <description clientSupport="wc,sc"><![CDATA[Rolls back in memory edited records that are outstanding (not saved).
 Can specify a record or foundset as parameter to rollback.
 Best used in combination with the function databaseManager.setAutoSave()
 This does not include deletes, they do not honor the autosafe false flag so they cant be rollbacked by this call.]]></description>
@@ -8364,9 +8376,9 @@ databaseManager.setAutoSave(true)]]></sample>
           <return type="void" typecode="void"/>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Rollback a transaction started by databaseManager.startTransaction().
-Note that when autosave is false, rollbackEditedRecords() will not handle deleted records, while rollbackTransaction() does.
+Note that when autosave is false, revertEditedRecords() will not handle deleted records, while rollbackTransaction() does.
 Also, rollbackEditedRecords() is called before rolling back the transaction see rollbackTransaction(boolean) to controll that behavior
-and saved records within the transactions are restored to the database values, so user input is lost, to controll this see rollbackTransaction(boolean,boolean)]]></description>
+and saved records within the transactions are restored to the database values, so user input is lost, to control this see rollbackTransaction(boolean,boolean)]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Rollback a transaction started by databaseManager.]]></summary>
@@ -8376,7 +8388,7 @@ and saved records within the transactions are restored to the database values, s
 databaseManager.startTransaction()
 //Now let users input data
 
-//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.  
+//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.
 if (cancel || !databaseManager.commitTransaction())
 {
 	databaseManager.rollbackTransaction();
@@ -8390,7 +8402,7 @@ if (cancel || !databaseManager.commitTransaction())
           <return type="void" typecode="void"/>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Rollback a transaction started by databaseManager.startTransaction().
-Note that when autosave is false, rollbackEditedRecords() will not handle deleted records, while rollbackTransaction() does.
+Note that when autosave is false, revertEditedRecords() will not handle deleted records, while rollbackTransaction() does.
 Also, saved records within the transactions are restored to the database values, so user input is lost, to controll this see rollbackTransaction(boolean,boolean)]]></description>
           </descriptions>
           <summaries>
@@ -8401,7 +8413,7 @@ Also, saved records within the transactions are restored to the database values,
 databaseManager.startTransaction()
 //Now let users input data
 
-//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.  
+//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.
 if (cancel || !databaseManager.commitTransaction())
 {
 	databaseManager.rollbackTransaction();
@@ -8421,7 +8433,7 @@ if (cancel || !databaseManager.commitTransaction())
           <return type="void" typecode="void"/>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Rollback a transaction started by databaseManager.startTransaction().
-Note that when autosave is false, rollbackEditedRecords() will not handle deleted records, while rollbackTransaction() does.]]></description>
+Note that when autosave is false, revertEditedRecords() will not handle deleted records, while rollbackTransaction() does.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Rollback a transaction started by databaseManager.]]></summary>
@@ -8431,7 +8443,7 @@ Note that when autosave is false, rollbackEditedRecords() will not handle delete
 databaseManager.startTransaction()
 //Now let users input data
 
-//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.  
+//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.
 if (cancel || !databaseManager.commitTransaction())
 {
 	databaseManager.rollbackTransaction();
@@ -8442,7 +8454,9 @@ if (cancel || !databaseManager.commitTransaction())
               <description><![CDATA[call rollbackEditedRecords() before rolling back the transaction]]></description>
             </parameter>
             <parameter name="revertSavedRecords" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean">
-              <description><![CDATA[if false then all records in the transaction do keep the user input and are back in the edited records list]]></description>
+              <description><![CDATA[if false then all records in the transaction do keep the user input and are back in the edited records list.
+Note that if the pks of such a record are no longer used by it's foundset (find/search or load by query or ...) it will just be rolled-back as
+it can't be put in editing records list.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -8450,13 +8464,13 @@ if (cancel || !databaseManager.commitTransaction())
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the save was done without an error.]]></return>
           <descriptions>
-            <description clientSupport="mc,wc,sc"><![CDATA[Saves all outstanding (unsaved) data and exits the current record. 
+            <description clientSupport="mc,wc,sc"><![CDATA[Saves all outstanding (unsaved) data and exits the current record.
 Optionally, by specifying a record or foundset, can save a single record or all records from foundset instead of all the data.
 
 NOTE: The fields focus may be lost in user interface in order to determine the edits.
-		 SaveData called from table events (like afterRecordInsert) is only partially supported depeding on how first saveData (that triggers the event) is called. 
+		 SaveData called from table events (like afterRecordInsert) is only partially supported depeding on how first saveData (that triggers the event) is called.
 		 If first saveData is called with no arguments, all saveData from table events are returning immediatelly with true value and records will be saved as part of first save.
-      If first saveData is called with record(s) as arguments, saveData from table event will try to save record(s) from arguments that are different than those in first call. 
+      If first saveData is called with record(s) as arguments, saveData from table event will try to save record(s) from arguments that are different than those in first call.
       SaveData with no arguments inside table events will always return true without saving anything.]]></description>
           </descriptions>
           <summaries>
@@ -8468,7 +8482,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 //databaseManager.saveData(foundset);//save all records from foundset
 
 // when creating many records in a loop do a batch save on an interval as every 10 records (to save on memory and roundtrips)
-// for (var recordIndex = 1; recordIndex <= 5000; recordIndex++) 
+// for (var recordIndex = 1; recordIndex <= 5000; recordIndex++)
 // {
 //		foundset.newRecord();
 //		someColumn = recordIndex;
@@ -8483,13 +8497,13 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the save was done without an error.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Saves all outstanding (unsaved) data and exits the current record. 
+            <description clientSupport="wc,sc"><![CDATA[Saves all outstanding (unsaved) data and exits the current record.
 Optionally, by specifying a record or foundset, can save a single record or all records from foundset instead of all the data.
 
 NOTE: The fields focus may be lost in user interface in order to determine the edits.
-		 SaveData called from table events (like afterRecordInsert) is only partially supported depeding on how first saveData (that triggers the event) is called. 
+		 SaveData called from table events (like afterRecordInsert) is only partially supported depeding on how first saveData (that triggers the event) is called.
 		 If first saveData is called with no arguments, all saveData from table events are returning immediatelly with true value and records will be saved as part of first save.
-      If first saveData is called with record(s) as arguments, saveData from table event will try to save record(s) from arguments that are different than those in first call. 
+      If first saveData is called with record(s) as arguments, saveData from table event will try to save record(s) from arguments that are different than those in first call.
       SaveData with no arguments inside table events will always return true without saving anything.]]></description>
           </descriptions>
           <summaries>
@@ -8501,7 +8515,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 //databaseManager.saveData(foundset);//save all records from foundset
 
 // when creating many records in a loop do a batch save on an interval as every 10 records (to save on memory and roundtrips)
-// for (var recordIndex = 1; recordIndex <= 5000; recordIndex++) 
+// for (var recordIndex = 1; recordIndex <= 5000; recordIndex++)
 // {
 //		foundset.newRecord();
 //		someColumn = recordIndex;
@@ -8521,13 +8535,13 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[true if the save was done without an error.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Saves all outstanding (unsaved) data and exits the current record. 
+            <description clientSupport="wc,sc"><![CDATA[Saves all outstanding (unsaved) data and exits the current record.
 Optionally, by specifying a record or foundset, can save a single record or all records from foundset instead of all the data.
 
 NOTE: The fields focus may be lost in user interface in order to determine the edits.
-		 SaveData called from table events (like afterRecordInsert) is only partially supported depeding on how first saveData (that triggers the event) is called. 
+		 SaveData called from table events (like afterRecordInsert) is only partially supported depeding on how first saveData (that triggers the event) is called.
 		 If first saveData is called with no arguments, all saveData from table events are returning immediatelly with true value and records will be saved as part of first save.
-      If first saveData is called with record(s) as arguments, saveData from table event will try to save record(s) from arguments that are different than those in first call. 
+      If first saveData is called with record(s) as arguments, saveData from table event will try to save record(s) from arguments that are different than those in first call.
       SaveData with no arguments inside table events will always return true without saving anything.]]></description>
           </descriptions>
           <summaries>
@@ -8539,7 +8553,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
 //databaseManager.saveData(foundset);//save all records from foundset
 
 // when creating many records in a loop do a batch save on an interval as every 10 records (to save on memory and roundtrips)
-// for (var recordIndex = 1; recordIndex <= 5000; recordIndex++) 
+// for (var recordIndex = 1; recordIndex <= 5000; recordIndex++)
 // {
 //		foundset.newRecord();
 //		someColumn = recordIndex;
@@ -8559,7 +8573,7 @@ NOTE: The fields focus may be lost in user interface in order to determine the e
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="boolean"><![CDATA[false if the current edited record could not be saved.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Set autosave, if false then no saves will happen by the ui (not including deletes!). 
+            <description clientSupport="wc,sc"><![CDATA[Set autosave, if false then no saves will happen by the ui (not including deletes!).
 Until you call databaseManager.saveData() or setAutoSave(true)
 
 If you also want to be able to rollback deletes then you have to use databaseManager.startTransaction().
@@ -8605,7 +8619,7 @@ databaseManager.setCreateEmptyFormFoundsets()]]></sample>
           <return type="void" typecode="void"/>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Start a database transaction.
-If you want to avoid round trips to the server or avoid the posibility of blocking other clients 
+If you want to avoid round trips to the server or avoid the posibility of blocking other clients
 because of your pending changes, you can use databaseManager.setAutoSave(false/true) and databaseManager.rollbackEditedRecords().
 
 startTransaction, commit/rollbackTransacton() does support rollbacking of record deletes which autoSave = false doesnt support.]]></description>
@@ -8618,7 +8632,7 @@ startTransaction, commit/rollbackTransacton() does support rollbacking of record
 databaseManager.startTransaction()
 //Now let users input data
 
-//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.  
+//when data has been entered do a commit or rollback if the data entry is canceld or the the commit did fail.
 if (cancel || !databaseManager.commitTransaction())
 {
 	databaseManager.rollbackTransaction();
@@ -8642,7 +8656,7 @@ Note that this only works if source and destination server are of the same datab
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[//dynamically changes a server for the entire solution, destination database server must contain the same tables/columns!
 //will fail if there is a lock, transaction , if repository_server is used or if destination server is invalid
-//in the solution keep using the sourceName every where to reference the server!  
+//in the solution keep using the sourceName every where to reference the server!
 var success = databaseManager.switchServer('crm', 'crm1')]]></sample>
           </samples>
           <parameters>
@@ -12102,6 +12116,21 @@ var column = table.getColumn('customerid')
 var sqlName = column.getSQLName()]]></sample>
           </samples>
         </function>
+        <function clientSupport="wc,sc" name="getSQLType">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int sql type.]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Get the raw JDBC type of the column, which allows to check database specific types, like sting/byte column type variations.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Get the raw JDBC type of the column, which allows to check database specific types, like sting/byte column type variations.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[var table = databaseManager.getTable('db:/example_data/orders')
+var column = table.getColumn('customerid')
+var sqlType = column.getSQLType();]]></sample>
+          </samples>
+        </function>
         <function clientSupport="wc,sc" name="getScale">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int column scale.]]></return>
@@ -12834,6 +12863,21 @@ plugins.rawSQL.executeSQL('udm',  quotedTableName,  'select * from ' + quotedTab
             <sample clientSupport="wc,sc"><![CDATA[var table = databaseManager.getTable('db:/example_data/orders')
 var column = table.getColumn('customerid')
 var sqlName = column.getSQLName()]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="wc,sc" name="getSQLType">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[int sql type.]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Get the raw JDBC type of the column, which allows to check database specific types, like sting/byte column type variations.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Get the raw JDBC type of the column, which allows to check database specific types, like sting/byte column type variations.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[var table = databaseManager.getTable('db:/example_data/orders')
+var column = table.getColumn('customerid')
+var sqlType = column.getSQLType();]]></sample>
           </samples>
         </function>
         <function clientSupport="wc,sc" name="getScale">
@@ -14385,13 +14429,19 @@ dataset.addRow(2, new Array(1,2,3,4,5,6,7,7)); //adds a row with 8 columns at ro
           <argumentsTypes>
             <argumentType typecode="java.lang.String"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String uri reference to the created data source.]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String uri reference to the created datasource.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Create a data source from the data set with specified name and using specified types.
-The types are inferred from the data if possible.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Create a datasource from the data set with specified name and using specified types.
+The types are inferred from the data if possible.
+
+A temporary datasource cannot be removed because once created there may always be forms or relations that refer to it.
+When the client exits, all datasources used by that client are removed automatically.
+
+Most resources used by the datasource can be released by deleting all records:
+  dataset.removeRow(-1) or databaseManager.getFoundSet(datasource).deleteAllRecords()]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Create a data source from the data set with specified name and using specified types.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Create a datasource from the data set with specified name and using specified types.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[ds.addColumn('my_id'); // note: use regular javascript identifiers so they can be used in scripting
@@ -14405,7 +14455,7 @@ var uri2 = ds2.createDataSource('mydata2'); // types are inferred from query res
           </samples>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[data source name]]></description>
+              <description><![CDATA[datasource name]]></description>
             </parameter>
           </parameters>
         </function>
@@ -14414,12 +14464,18 @@ var uri2 = ds2.createDataSource('mydata2'); // types are inferred from query res
             <argumentType typecode="java.lang.String"/>
             <argumentType typecode="java.lang.Object"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String uri reference to the created data source.]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String uri reference to the created datasource.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Create a data source from the data set with specified name and using specified types.]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Create a datasource from the data set with specified name and using specified types.
+
+A temporary datasource cannot be removed because once created there may always be forms or relations that refer to it.
+When the client exits, all datasources used by that client are removed automatically.
+
+Most resources used by the datasource can be released by deleting all records:
+  dataset.removeRow(-1) or databaseManager.getFoundSet(datasource).deleteAllRecords()]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Create a data source from the data set with specified name and using specified types.]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Create a datasource from the data set with specified name and using specified types.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[ds.addColumn('my_id'); // note: use regular javascript identifiers so they can be used in scripting
@@ -14433,7 +14489,7 @@ var uri2 = ds2.createDataSource('mydata2'); // types are inferred from query res
           </samples>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[data source name]]></description>
+              <description><![CDATA[datasource name]]></description>
             </parameter>
             <parameter name="types" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[array of types as defined in JSColumn]]></description>
@@ -14446,12 +14502,18 @@ var uri2 = ds2.createDataSource('mydata2'); // types are inferred from query res
             <argumentType typecode="java.lang.Object"/>
             <argumentType typecode="[Ljava.lang.String;"/>
           </argumentsTypes>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String uri reference to the created data source.]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String uri reference to the created datasource.]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Create a data source from the data set with specified name and using specified types, add .]]></description>
+            <description clientSupport="wc,sc"><![CDATA[Create a datasource from the data set with specified name and using specified types.
+
+A temporary datasource cannot be removed because once created there may always be forms or relations that refer to it.
+When the client exits, all datasources used by that client are removed automatically.
+
+Most resources used by the datasource can be released by deleting all records:
+  dataset.removeRow(-1) or databaseManager.getFoundSet(datasource).deleteAllRecords()]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="wc,sc"><![CDATA[Create a data source from the data set with specified name and using specified types, add .]]></summary>
+            <summary clientSupport="wc,sc"><![CDATA[Create a datasource from the data set with specified name and using specified types.]]></summary>
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[ds.addColumn('my_id'); // note: use regular javascript identifiers so they can be used in scripting
@@ -14465,7 +14527,7 @@ var uri2 = ds2.createDataSource('mydata2', null, ['customerid']); // types are i
           </samples>
           <parameters>
             <parameter name="name" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
-              <description><![CDATA[data source name]]></description>
+              <description><![CDATA[datasource name]]></description>
             </parameter>
             <parameter name="types" type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object">
               <description><![CDATA[array of types as defined in JSColumn, when null types are inferred from the query result]]></description>
@@ -15175,6 +15237,16 @@ function mySortFunction(r1, r2)
  q.where.add(q.columns.label_text.not.isin(null))
  datasources.db.example_data.book_nodes.getFoundSet().loadRecords(q)]]></sample>
           </samples>
+        </function>
+        <function clientSupport="wc,sc" name="getColumnNames">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[String[] column names]]></return>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Get the column names of a datasource.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Get the column names of a datasource.]]></summary>
+          </summaries>
         </function>
         <function clientSupport="wc,sc" name="getDatasource">
           <argumentsTypes/>
@@ -22739,7 +22811,7 @@ For example, "record.department_id = [1, 33, 99]"]]></description>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[Object the return value of the callback]]></return>
           <descriptions>
-            <description clientSupport="wc,sc"><![CDATA[Iterates over the records of a foundset taking into account inserts and deletes that may happen at the same time. 
+            <description clientSupport="wc,sc"><![CDATA[Iterates over the records of a foundset taking into account inserts and deletes that may happen at the same time.
 It will dynamically load all records in the foundset (using Servoy lazy loading mechanism). If callback function returns a non null value the traversal will be stopped and that value is returned.
 If no value is returned all records of the foundset will be traversed. Foundset modifications( like sort, omit...) cannot be performed in the callback function. If foundset is modified an exception will be thrown.
 When an exception is thrown from the callback function, the iteraion over the foundset will be stopped.]]></description>
@@ -22748,8 +22820,8 @@ When an exception is thrown from the callback function, the iteraion over the fo
             <summary clientSupport="wc,sc"><![CDATA[Iterates over the records of a foundset taking into account inserts and deletes that may happen at the same time.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[foundset.forEach(function(record,recordIndex,foundset) { 
- 	//handle the record here  
+            <sample clientSupport="wc,sc"><![CDATA[foundset.forEach(function(record,recordIndex,foundset) {
+ 	//handle the record here
  });]]></sample>
           </samples>
           <parameters>
@@ -22897,7 +22969,7 @@ for (var i = 0; params != null && i < params.length; i++)
           <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"><![CDATA[query.]]></return>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Get the query that the foundset is currently using.
-When the founset is in find mode, the find conditions are included in the resulting query. 
+When the founset is in find mode, the find conditions are included in the resulting query.
 So the query that would be used when just calling search() (or search(true,true)) is returned.
 Note that foundset filters are included and table filters are not included in the query.]]></description>
           </descriptions>
@@ -23123,7 +23195,7 @@ All records that are not in the foundset will become the current foundset.]]></d
 Filters on the foundset are applied.
 
 Before loading the records, all unsaved records will be saved in the database.
-If this fails (due to validation failures or sql errors) or is not allowed (autosave off), 
+If this fails (due to validation failures or sql errors) or is not allowed (autosave off),
 records will not be loaded,]]></description>
           </descriptions>
           <summaries>
@@ -23140,7 +23212,7 @@ records will not be loaded,]]></description>
             <description clientSupport="wc,sc"><![CDATA[Loads the records that are currently omitted as a foundset.
 
 Before loading the omitted records, all unsaved records will be saved in the database.
-If this fails (due to validation failures or sql errors) or is not allowed (autosave off), 
+If this fails (due to validation failures or sql errors) or is not allowed (autosave off),
 omitted records will not be loaded,]]></description>
           </descriptions>
           <summaries>
@@ -23176,7 +23248,7 @@ This will alter the foundset state to the state of the foundset that is given.
 If you really just want to use the given foundset on the form itself, then you need to use controller.loadRecords(foundset)
 that will change the instance of the foundset that is used for this form. Not just update an existing form.
 
-If you copy over a relation into this foundset, then this foundset will not be a related foundset, it will not automatically update its state 
+If you copy over a relation into this foundset, then this foundset will not be a related foundset, it will not automatically update its state
 of records are updated or added that belong to that relation. It will only be a snapshot of that related foundsets state.]]></description>
           </descriptions>
           <summaries>
@@ -23478,11 +23550,11 @@ The query will be wrapped when one of the following is true:
             <summary clientSupport="mc,wc,sc"><![CDATA[Create a new record on top of the foundset and change selection to it.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[// foreign key data is only filled in for equals (=) relation items 
+            <sample clientSupport="mc,wc,sc"><![CDATA[// foreign key data is only filled in for equals (=) relation items
 var idx = %%prefix%%foundset.newRecord(false); // add as last record
 // %%prefix%%foundset.newRecord(); // adds as first record
 // %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case of failure 
+if (idx >= 0) // returned index is -1 in case of failure
 {
 	%%prefix%%foundset.some_column = "some text";
 	application.output("added on position " + idx);
@@ -23503,11 +23575,11 @@ if (idx >= 0) // returned index is -1 in case of failure
             <summary clientSupport="wc,sc"><![CDATA[Create a new record in the foundset and change selection to it.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// foreign key data is only filled in for equals (=) relation items 
+            <sample clientSupport="wc,sc"><![CDATA[// foreign key data is only filled in for equals (=) relation items
 var idx = %%prefix%%foundset.newRecord(false); // add as last record
 // %%prefix%%foundset.newRecord(); // adds as first record
 // %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case of failure 
+if (idx >= 0) // returned index is -1 in case of failure
 {
 	%%prefix%%foundset.some_column = "some text";
 	application.output("added on position " + idx);
@@ -23534,11 +23606,11 @@ if (idx >= 0) // returned index is -1 in case of failure
             <summary clientSupport="wc,sc"><![CDATA[Create a new record in the foundset.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// foreign key data is only filled in for equals (=) relation items 
+            <sample clientSupport="wc,sc"><![CDATA[// foreign key data is only filled in for equals (=) relation items
 var idx = %%prefix%%foundset.newRecord(false); // add as last record
 // %%prefix%%foundset.newRecord(); // adds as first record
 // %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case of failure 
+if (idx >= 0) // returned index is -1 in case of failure
 {
 	%%prefix%%foundset.some_column = "some text";
 	application.output("added on position " + idx);
@@ -23567,11 +23639,11 @@ if (idx >= 0) // returned index is -1 in case of failure
             <summary clientSupport="wc,sc"><![CDATA[Create a new record in the foundset and change selection to it.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="wc,sc"><![CDATA[// foreign key data is only filled in for equals (=) relation items 
+            <sample clientSupport="wc,sc"><![CDATA[// foreign key data is only filled in for equals (=) relation items
 var idx = %%prefix%%foundset.newRecord(false); // add as last record
 // %%prefix%%foundset.newRecord(); // adds as first record
 // %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case of failure 
+if (idx >= 0) // returned index is -1 in case of failure
 {
 	%%prefix%%foundset.some_column = "some text";
 	application.output("added on position " + idx);
@@ -23598,11 +23670,11 @@ if (idx >= 0) // returned index is -1 in case of failure
             <summary clientSupport="mc,wc,sc"><![CDATA[Create a new record in the foundset.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="mc,wc,sc"><![CDATA[// foreign key data is only filled in for equals (=) relation items 
+            <sample clientSupport="mc,wc,sc"><![CDATA[// foreign key data is only filled in for equals (=) relation items
 var idx = %%prefix%%foundset.newRecord(false); // add as last record
 // %%prefix%%foundset.newRecord(); // adds as first record
 // %%prefix%%foundset.newRecord(2); //adds as second record
-if (idx >= 0) // returned index is -1 in case of failure 
+if (idx >= 0) // returned index is -1 in case of failure
 {
 	%%prefix%%foundset.some_column = "some text";
 	application.output("added on position " + idx);
@@ -23794,7 +23866,7 @@ Note: Omitted records are automatically excluded when performing a search - mean
             <description clientSupport="wc,sc"><![CDATA[Select the record based on pk data.
 Note that if the foundset has not loaded the record with the pk, selectrecord will fail.
 
-In case of a table with a composite key, the pk sequence must match the alphabetical 
+In case of a table with a composite key, the pk sequence must match the alphabetical
 ordering of the pk column names.]]></description>
           </descriptions>
           <summaries>
@@ -24024,7 +24096,7 @@ while(fsUpdater.next())
             <description clientSupport="wc,sc"><![CDATA[Do the actual update in the database, returns true if successful.
 There are 3 types of possible use with the foundset updater
 1) update entire foundset by a single sql statement; that is not possible when the table of the foundset has tracking enabled then it will loop over the whole foundset. 
-   When a single sql statement is done, modification columns will not be updated, because it does the update directly in the database, without getting the records.
+   When a single sql statement is done, modification columns will not be updated and associated Table Events won't be triggered, because it does the update directly in the database, without getting the records.
   NOTE: this mode will refresh all foundsets based on same datasource
 2) update part of foundset, for example the first 4 row (starts with selected row)
 3) safely loop through foundset (starts with selected row)
@@ -55845,7 +55917,7 @@ security.addUserToGroup(userUID, 'groupname');]]></sample>
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[authentication result from authenticator solution or boolean in case of servoy built-in authentication]]></return>
           <descriptions>
-            <description clientSupport="mc"><![CDATA[Authenticate the given credentials against the mobile service solution. 
+            <description clientSupport="mc"><![CDATA[Authenticate the given credentials against the mobile service solution.
 It will set the credentials and then do a sync call to the server.]]></description>
           </descriptions>
           <summaries>
@@ -55903,7 +55975,7 @@ ok = security.authenticate(null, null, [scopes.globals.userName, scopes.globals.
           </argumentsTypes>
           <return type="com.servoy.j2db.documentation.scripting.docs.Object" typecode="java.lang.Object"><![CDATA[authentication result from authenticator solution or boolean in case of servoy built-in authentication]]></return>
           <descriptions>
-            <description clientSupport="mc"><![CDATA[Authenticate the given credentials against the mobile service solution. First two parameters are not used in mobile solution, just the credentials. 
+            <description clientSupport="mc"><![CDATA[Authenticate the given credentials against the mobile service solution. First two parameters are not used in mobile solution, just the credentials.
 It will set the credentials and then do a sync call to the server.]]></description>
             <description clientSupport="wc,sc"><![CDATA[Authenticate to the Servoy Server using one of the installed authenticators or the Servoy default authenticator.
 
@@ -56225,7 +56297,7 @@ if (groupName)
 		// add user to group
 		security.addUserToGroup(uid, groupName);
 		// if not delete group, do delete group
-		if (deleteGroup) 
+		if (deleteGroup)
 		{
 			security.deleteGroup(groupName);
 		}
@@ -56383,7 +56455,7 @@ if (groupName)
 		// add user to group
 		security.addUserToGroup(uid, groupName);
 		// if not delete group, do delete group
-		if (deleteGroup) 
+		if (deleteGroup)
 		{
 			security.deleteGroup(groupName);
 		}
@@ -56653,7 +56725,7 @@ for(var i=1 ; i<=dsUsers.getMaxRowIndex() ; i++)
           <samples>
             <sample clientSupport="mc"><![CDATA[var username = security.getUserName();
 if (username != null) {
-  // user is logged in 
+  // user is logged in
 }]]></sample>
             <sample clientSupport="wc,sc"><![CDATA[//gets the current loggedIn username
 var userName = security.getUserName();]]></sample>
@@ -56675,7 +56747,7 @@ var userName = security.getUserName();]]></sample>
           <samples>
             <sample clientSupport="mc"><![CDATA[var username = security.getUserName();
 if (username != null) {
-  // user is logged in 
+  // user is logged in
 }]]></sample>
             <sample clientSupport="wc,sc"><![CDATA[//gets the current loggedIn username
 var userName = security.getUserName();]]></sample>
@@ -56697,10 +56769,10 @@ var userName = security.getUserName();]]></sample>
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[//gets the current loggedIn username
-var userName = security.getUserName(); 
+var userName = security.getUserName();
 //gets the uid of the given username
 var userUID = security.getUserUID(userName);
-//is the same as above 
+//is the same as above
 //var my_userUID = security.getUserUID();]]></sample>
           </samples>
         </function>
@@ -56717,10 +56789,10 @@ var userUID = security.getUserUID(userName);
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[//gets the current loggedIn username
-var userName = security.getUserName(); 
+var userName = security.getUserName();
 //gets the uid of the given username
 var userUID = security.getUserUID(userName);
-//is the same as above 
+//is the same as above
 //var my_userUID = security.getUserUID();]]></sample>
           </samples>
           <parameters>
@@ -57128,7 +57200,7 @@ else
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Sets the security settings; the entries contained in the given dataset will override those contained in the current security settings.
 
-NOTE: The security.getElementUUIDs and security.setSecuritySettings functions can be used to define custom security that overrides Servoy security. 
+NOTE: The security.getElementUUIDs and security.setSecuritySettings functions can be used to define custom security that overrides Servoy security.
 For additional information see the function security.getElementUUIDs.]]></description>
           </descriptions>
           <summaries>
@@ -57194,7 +57266,7 @@ if (groupName)
 		// add user to group
 		security.addUserToGroup(uid, groupName);
 		// if not delete group, do delete group
-		if (deleteGroup) 
+		if (deleteGroup)
 		{
 			security.deleteGroup(groupName);
 		}
@@ -61027,7 +61099,7 @@ forms.someForm.elements.typeAheadElement.putClientProperty(APP_UI_PROPERTY.DATE_
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Property that can be set on editable html area using element.putClientProperty()
 
-The value must be a valid json string according to TinyMCE editor configuration (http://www.tinymce.com/wiki.php/configuration). 
+The value must be a valid json string according to TinyMCE editor configuration (http://www.tinymce.com/wiki.php/configuration).
 It will be used to override/set configuration properties in order to customize the editor.]]></description>
           </descriptions>
           <summaries>
@@ -61070,7 +61142,7 @@ If set to true, table views in web client are scrollable by default
 If set to false, table views in web client are not scrollable, but pageable by default
 
 The value can be true/false
-DEFAULT: false 
+DEFAULT: false
 
 When this property is set to true, you can control the size of the page by setting the servoy property "servoy.webclient.scrolling.tableview.multiplier".
 The default value is 2. Setting the property to a higher value, will result in more data to be queried at once. You can also set it to a lower value, like 1 or 1.5 for example.
@@ -61099,6 +61171,24 @@ DEFAULT: false]]></description>
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[application.putClientProperty(APP_UI_PROPERTY.TABLEVIEW_WC_SCROLLABLE_KEEP_LOADED_ROWS, true)]]></sample>
+          </samples>
+        </constant>
+        <constant clientSupport="wc,sc" name="TABLEVIEW_WC_USE_KEY_NAVIGATION">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="wc,sc"><![CDATA[Property that can be set using application.putClientProperty().
+
+If set to true, you can change selection in webclient tableview using up/down keys
+If set to false, you cannot change selection via keyboard arrows
+
+The value can be true/false
+DEFAULT: true]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="wc,sc"><![CDATA[Property that can be set using application.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="wc,sc"><![CDATA[application.putClientProperty(APP_UI_PROPERTY.TABLEVIEW_WC_USE_KEY_NAVIGATION, false)]]></sample>
           </samples>
         </constant>
         <constant clientSupport="wc,sc" name="TOOLTIP_DISMISS_DELAY">
@@ -61192,7 +61282,7 @@ DEFAULT: false]]></description>
           <descriptions>
             <description clientSupport="wc,sc"><![CDATA[Property that can be set using application.putClientProperty()
 
-The value can be a positive integer representing the maximum number of rows that will be retrieved by query in database or related valuelist. 
+The value can be a positive integer representing the maximum number of rows that will be retrieved by query in database or related valuelist.
 Can have a maximum value of 1000.
 
 DEFAULT: 500]]></description>
