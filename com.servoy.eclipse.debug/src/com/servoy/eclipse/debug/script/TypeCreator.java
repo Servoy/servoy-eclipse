@@ -1222,6 +1222,12 @@ public class TypeCreator extends TypeCache
 			}
 			members.add(method);
 		}
+		if (!fullTypeName.contains("WebService"))
+		{
+			Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
+			method.setName("getFormName");
+			members.add(method);
+		}
 		return addType("WEB:COMPONENTS", type);
 	}
 
