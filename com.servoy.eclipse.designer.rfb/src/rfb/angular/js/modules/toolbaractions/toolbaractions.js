@@ -72,7 +72,15 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 				$editorService.toggleHighlight();
 			},
 	};
-
+	
+	$toolbar.add(btnPlaceField, TOOLBAR_CATEGORIES.ELEMENTS);
+	$toolbar.add(btnPlaceImage, TOOLBAR_CATEGORIES.ELEMENTS);
+	$toolbar.add(btnPlacePortal, TOOLBAR_CATEGORIES.ELEMENTS);
+	$toolbar.add(btnPlaceSplitPane, TOOLBAR_CATEGORIES.ELEMENTS);
+	$toolbar.add(btnPlaceTabPanel, TOOLBAR_CATEGORIES.ELEMENTS);
+	$toolbar.add(btnPlaceAccordion, TOOLBAR_CATEGORIES.ELEMENTS);
+	$toolbar.add(btnHighlightWebcomponents, TOOLBAR_CATEGORIES.ELEMENTS);
+	
 	var btnToggleShowData = {
 			text: "Toggle show data",
 			icon: "toolbaractions/icons/import.gif",
@@ -90,16 +98,10 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 				utils.toggleDesignMode();
 			},
 	};
+
 	
-	$toolbar.add(btnPlaceField, TOOLBAR_CATEGORIES.ELEMENTS);
-	$toolbar.add(btnPlaceImage, TOOLBAR_CATEGORIES.ELEMENTS);
-	$toolbar.add(btnPlacePortal, TOOLBAR_CATEGORIES.ELEMENTS);
-	$toolbar.add(btnPlaceSplitPane, TOOLBAR_CATEGORIES.ELEMENTS);
-	$toolbar.add(btnPlaceTabPanel, TOOLBAR_CATEGORIES.ELEMENTS);
-	$toolbar.add(btnPlaceAccordion, TOOLBAR_CATEGORIES.ELEMENTS);	
-	$toolbar.add(btnHighlightWebcomponents, TOOLBAR_CATEGORIES.ELEMENTS);	
-	$toolbar.add(btnToggleShowData, TOOLBAR_CATEGORIES.ELEMENTS);	
-	$toolbar.add(btnToggleDesignMode, TOOLBAR_CATEGORIES.ELEMENTS);
+	$toolbar.add(btnToggleShowData, TOOLBAR_CATEGORIES.SHOW_DATA);	
+	$toolbar.add(btnToggleDesignMode, TOOLBAR_CATEGORIES.DESIGN_MODE);
 	
 	var btnTabSequence = {
 			text: "Set tab sequence",

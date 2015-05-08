@@ -1,30 +1,30 @@
 <div>
 
-	<div class="toolbar element">
+	<div class="toolbar element" ng-if="elements.length > 0">
 		<toolbar-item ng-repeat="item in elements" model="item" class="toolbar-action"/>
 	</div>
 
-	<div class="toolbar ordering">
+	<div class="toolbar ordering" ng-if="ordering.length > 0">
 		<toolbar-item ng-repeat="item in ordering" model="item" class="toolbar-action"/>
 	</div>
 	
-	<div class="toolbar alignment">
+	<div class="toolbar alignment" ng-if="alignment.length > 0">
 		<toolbar-item ng-repeat="item in alignment" model="item" class="toolbar-action"/>
 	</div>
 	
-	<div class="toolbar distribution">
+	<div class="toolbar distribution" ng-if="distribution.length > 0">
 		<toolbar-item ng-repeat="item in distribution" model="item" class="toolbar-action"/>
 	</div>
 	
-	<div class="toolbar sizing">
+	<div class="toolbar sizing" ng-if="sizing.length > 0">
 		<toolbar-item ng-repeat="item in sizing" model="item" class="toolbar-action"/>
 	</div>
 	
-	<div class="toolbar form">
+	<div class="toolbar form" ng-if="form.length > 0">
 		<toolbar-item ng-repeat="item in form" model="item" class="toolbar-action"/>
 	</div>
 	
-	<div class="toolbar display">
+	<div class="toolbar display" ng-if="display.length > 0">
 		<toolbar-item ng-repeat="item in display" model="item" class="toolbar-action"/>
 	</div>
 	
@@ -32,9 +32,17 @@
 		<!-- toolbar-item ng-repeat="item in editor" model="item" class="toolbar-action"/ -->
 	</div>
 	
-	<!-- Right aligned toolbars included in DOM last, to get desired toolbar overflow behavior -->
+	<!-- This right aligned toolbar will expand its left margin so that it will be moved as far right as possible, 
+		 divs after this one will also be on the right side of the toolbar -->
 
-	<div class="toolbar right-aligned">	
+	<div class="toolbar show_data right-aligned" ng-if="show_data.length > 0">	
+    	<toolbar-item ng-repeat="item in show_data" model="item" class="toolbar-action"/>
+	</div>
+	<div class="toolbar design_mode" ng-if="design_mode.length > 0">	
+    	<toolbar-item ng-repeat="item in design_mode" model="item" class="toolbar-action"/>
+	</div>
+	<div class="toolbar sticky" ng-if="sticky.length > 0">	
     	<toolbar-item ng-repeat="item in sticky" model="item" class="toolbar-action"/>
 	</div>
+
 </div>

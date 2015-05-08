@@ -2,20 +2,29 @@ angular.module("palette",['ui.bootstrap']).directive("palette", function($editor
 	return {
 		restrict: 'E',
 		transclude: true,
-		controller: function($scope, $element, $attrs, $http) {
+		controller: function($scope, $element, $attrs, $http, $pluginRegistry) {
 			$scope.packages = [];
 			var utils = $selectionUtils.getUtilsForScope($scope);
-
+			
+			var layoutType = null;
 			var loadPalette = function()
 			{
-				$http({method: 'GET', url: '/designer/palette'}).success(function(data) {
+				$http({method: 'GET', url: '/designer/palette?layout='+layoutType}).success(function(data) {
 					$scope.packages = data;
 					for(var i = 0; i < data.length; i++) {
 						data[i].isOpen = "true";
 					}
 				});
 			}
-			loadPalette();
+			
+			$pluginRegistry.registerPlugin(function(scope) {
+				if (scope.isAbsoluteFormLayout())
+					layoutType = "Absolute-Layout"; // TODO extract as constant, this is a key in the main attributes of the manifest
+				else
+					layoutType = "Responsive-Layout";
+				loadPalette();
+			});
+			
 			$rootScope.$on(EDITOR_EVENTS.RELOAD_PALETTE, function(e){
 				loadPalette();
 			});

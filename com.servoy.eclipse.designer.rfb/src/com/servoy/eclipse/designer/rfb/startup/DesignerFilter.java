@@ -71,6 +71,7 @@ public class DesignerFilter implements Filter
 		{
 			HttpServletRequest request = (HttpServletRequest)servletRequest;
 			String uri = request.getRequestURI();
+			String layoutType = request.getParameter("layout");
 			if (uri != null && uri.endsWith("palette"))
 			{
 				WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
@@ -86,63 +87,66 @@ public class DesignerFilter implements Filter
 					// first add all the layout containers.
 					for (WebComponentPackageSpecification<WebLayoutSpecification> entry : provider.getLayoutSpecifications().values())
 					{
-						jsonWriter.object();
-						jsonWriter.key("packageName").value(entry.getPackageName());
-						jsonWriter.key("packageDisplayname").value(entry.getPackageDisplayname());
-						jsonWriter.key("components");
-						jsonWriter.array();
-
-						for (WebLayoutSpecification spec : entry.getSpecifications().values())
+						if (entry.isAccesibleInLayoutType(layoutType))
 						{
 							jsonWriter.object();
-							jsonWriter.key("name").value(spec.getName());
-							if (spec.getConfig() != null)
+							jsonWriter.key("packageName").value(entry.getPackageName());
+							jsonWriter.key("packageDisplayname").value(entry.getPackageDisplayname());
+							jsonWriter.key("components");
+							jsonWriter.array();
+
+							for (WebLayoutSpecification spec : entry.getSpecifications().values())
 							{
-								String layoutName = new JSONObject((String)spec.getConfig()).optString("layoutName", null);
-								if (layoutName != null)
+								jsonWriter.object();
+								jsonWriter.key("name").value(spec.getName());
+								if (spec.getConfig() != null)
 								{
-									jsonWriter.key("layoutName").value(layoutName);
+									String layoutName = new JSONObject((String)spec.getConfig()).optString("layoutName", null);
+									if (layoutName != null)
+									{
+										jsonWriter.key("layoutName").value(layoutName);
+									}
+									else jsonWriter.key("layoutName").value(spec.getName());
 								}
 								else jsonWriter.key("layoutName").value(spec.getName());
-							}
-							else jsonWriter.key("layoutName").value(spec.getName());
-							jsonWriter.key("componentType").value("layout");
-							jsonWriter.key("displayName").value(spec.getDisplayName());
-							JSONObject config = spec.getConfig() instanceof String ? new JSONObject((String)spec.getConfig()) : null;
-							if (config == null)
-							{
-								jsonWriter.key("tagName").value("<div style='border-style: dotted;'></div>"); //TODO is tagname configurable by the spec
-							}
-							else
-							{
-								jsonWriter.key("tagName").value(createLayoutDiv(config, new StringBuilder()).toString());
-							}
-							Map<String, Object> model = new HashMap<String, Object>();
-							PropertyDescription pd = spec.getProperty("size");
-							if (pd != null && pd.getDefaultValue() != null)
-							{
-								model.put("size", pd.getDefaultValue());
-							}
-							else
-							{
-								HashMap<String, Number> size = new HashMap<String, Number>();
-								size.put("height", Integer.valueOf(20));
-								size.put("width", Integer.valueOf(100));
-								model.put("size", size);
-							}
-							jsonWriter.key("model").value(new JSONObject(model));
-							if (spec.getIcon() != null)
-							{
-								jsonWriter.key("icon").value(spec.getIcon());
-							}
-							jsonWriter.key("topContainer").value(spec.isTopContainer());
+								jsonWriter.key("componentType").value("layout");
+								jsonWriter.key("displayName").value(spec.getDisplayName());
+								JSONObject config = spec.getConfig() instanceof String ? new JSONObject((String)spec.getConfig()) : null;
+								if (config == null)
+								{
+									jsonWriter.key("tagName").value("<div style='border-style: dotted;'></div>"); //TODO is tagname configurable by the spec
+								}
+								else
+								{
+									jsonWriter.key("tagName").value(createLayoutDiv(config, new StringBuilder()).toString());
+								}
+								Map<String, Object> model = new HashMap<String, Object>();
+								PropertyDescription pd = spec.getProperty("size");
+								if (pd != null && pd.getDefaultValue() != null)
+								{
+									model.put("size", pd.getDefaultValue());
+								}
+								else
+								{
+									HashMap<String, Number> size = new HashMap<String, Number>();
+									size.put("height", Integer.valueOf(20));
+									size.put("width", Integer.valueOf(100));
+									model.put("size", size);
+								}
+								jsonWriter.key("model").value(new JSONObject(model));
+								if (spec.getIcon() != null)
+								{
+									jsonWriter.key("icon").value(spec.getIcon());
+								}
+								jsonWriter.key("topContainer").value(spec.isTopContainer());
 
 
+								jsonWriter.endObject();
+							}
+
+							jsonWriter.endArray();
 							jsonWriter.endObject();
 						}
-
-						jsonWriter.endArray();
-						jsonWriter.endObject();
 					}
 
 					List<WebComponentPackageSpecification<WebComponentSpecification>> packages = new ArrayList<>(
@@ -161,49 +165,52 @@ public class DesignerFilter implements Filter
 
 					for (WebComponentPackageSpecification<WebComponentSpecification> pkg : packages)
 					{
-						jsonWriter.object();
-						jsonWriter.key("packageName").value(pkg.getPackageName());
-						jsonWriter.key("packageDisplayname").value(pkg.getPackageDisplayname());
-						jsonWriter.key("components");
-						jsonWriter.array();
-						for (WebComponentSpecification spec : pkg.getSpecifications().values())
+						if (pkg.isAccesibleInLayoutType(layoutType))
 						{
-							if (!IGNORE_LIST.contains(spec.getName()))
+							jsonWriter.object();
+							jsonWriter.key("packageName").value(pkg.getPackageName());
+							jsonWriter.key("packageDisplayname").value(pkg.getPackageDisplayname());
+							jsonWriter.key("components");
+							jsonWriter.array();
+							for (WebComponentSpecification spec : pkg.getSpecifications().values())
 							{
-								jsonWriter.object();
-								jsonWriter.key("name").value(spec.getName());
-								jsonWriter.key("componentType").value("component");
-								jsonWriter.key("displayName").value(spec.getDisplayName());
-								jsonWriter.key("tagName").value(FormTemplateGenerator.getTagName(spec.getName()));
-								Map<String, Object> model = new HashMap<String, Object>();
-								PropertyDescription pd = spec.getProperty("size");
-								if (pd != null && pd.getDefaultValue() != null)
+								if (!IGNORE_LIST.contains(spec.getName()))
 								{
-									model.put("size", pd.getDefaultValue());
+									jsonWriter.object();
+									jsonWriter.key("name").value(spec.getName());
+									jsonWriter.key("componentType").value("component");
+									jsonWriter.key("displayName").value(spec.getDisplayName());
+									jsonWriter.key("tagName").value(FormTemplateGenerator.getTagName(spec.getName()));
+									Map<String, Object> model = new HashMap<String, Object>();
+									PropertyDescription pd = spec.getProperty("size");
+									if (pd != null && pd.getDefaultValue() != null)
+									{
+										model.put("size", pd.getDefaultValue());
+									}
+									if (spec.getProperty("enabled") != null)
+									{
+										model.put("enabled", Boolean.TRUE);
+									}
+									if (spec.getProperty("editable") != null)
+									{
+										model.put("editable", Boolean.TRUE);
+									}
+									if ("servoydefault-label".equals(spec.getName()))
+									{
+										model.put("text", "label");
+									}
+									jsonWriter.key("model").value(new JSONObject(model));
+									if (spec.getIcon() != null)
+									{
+										jsonWriter.key("icon").value(spec.getIcon());
+									}
+									jsonWriter.key("types").value(new JSONArray(getPalleteTypeNames(spec)));
+									jsonWriter.endObject();
 								}
-								if (spec.getProperty("enabled") != null)
-								{
-									model.put("enabled", Boolean.TRUE);
-								}
-								if (spec.getProperty("editable") != null)
-								{
-									model.put("editable", Boolean.TRUE);
-								}
-								if ("servoydefault-label".equals(spec.getName()))
-								{
-									model.put("text", "label");
-								}
-								jsonWriter.key("model").value(new JSONObject(model));
-								if (spec.getIcon() != null)
-								{
-									jsonWriter.key("icon").value(spec.getIcon());
-								}
-								jsonWriter.key("types").value(new JSONArray(getPalleteTypeNames(spec)));
-								jsonWriter.endObject();
 							}
+							jsonWriter.endArray();
+							jsonWriter.endObject();
 						}
-						jsonWriter.endArray();
-						jsonWriter.endObject();
 					}
 					jsonWriter.endArray();
 				}

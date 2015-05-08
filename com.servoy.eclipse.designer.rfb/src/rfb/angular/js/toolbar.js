@@ -27,24 +27,32 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	      replace: true
 	    };
 }])
-.directive("toolbar", function(TOOLBAR_CATEGORIES){
+.directive("toolbar", function(TOOLBAR_CATEGORIES,$pluginRegistry){
 	return {
 	      restrict: 'E',
 	      transclude: true,
 	      scope: {
 	      },
 	      controller: function($scope, $element, $attrs, $toolbar) {
-	    	  $scope.loadToolbar = function() {
-		    	  $scope.elements = $toolbar.getButtons(TOOLBAR_CATEGORIES.ELEMENTS);
-		    	  $scope.ordering = $toolbar.getButtons(TOOLBAR_CATEGORIES.ORDERING);
-		    	  $scope.alignment = $toolbar.getButtons(TOOLBAR_CATEGORIES.ALIGNMENT);
-		    	  $scope.distribution = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISTRIBUTION);
-		    	  $scope.sizing = $toolbar.getButtons(TOOLBAR_CATEGORIES.SIZING);
-		    	  $scope.form = $toolbar.getButtons(TOOLBAR_CATEGORIES.FORM);
-		    	  $scope.display = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISPLAY);
-		    	  $scope.sticky = $toolbar.getButtons(TOOLBAR_CATEGORIES.STICKY);	    		  
-	    	  }
-	    	  $scope.loadToolbar();
+	    	  var editor;
+	    	  $pluginRegistry.registerPlugin(function(editorScope) {
+	    			editor = editorScope;
+	    			$scope.elements = $toolbar.getButtons(TOOLBAR_CATEGORIES.ELEMENTS);
+	    			$scope.form = $toolbar.getButtons(TOOLBAR_CATEGORIES.FORM);
+			    	$scope.display = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISPLAY);
+			    	$scope.show_data = $toolbar.getButtons(TOOLBAR_CATEGORIES.SHOW_DATA);
+	    			if(editor.isAbsoluteFormLayout()) {
+			    	  $scope.ordering = $toolbar.getButtons(TOOLBAR_CATEGORIES.ORDERING);
+			    	  $scope.alignment = $toolbar.getButtons(TOOLBAR_CATEGORIES.ALIGNMENT);
+			    	  $scope.distribution = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISTRIBUTION);
+			    	  $scope.sizing = $toolbar.getButtons(TOOLBAR_CATEGORIES.SIZING);
+	    			}
+	    			else {
+	    				$scope.design_mode = $toolbar.getButtons(TOOLBAR_CATEGORIES.DESIGN_MODE);
+	    				$scope.sticky = $toolbar.getButtons(TOOLBAR_CATEGORIES.STICKY);
+	    			}
+	    	  });
+	    	  
 	    	  $toolbar.registerPanel($scope);
 	      },
 	      templateUrl: 'templates/toolbar.html',
@@ -69,10 +77,6 @@ angular.module("toolbar",['toolbaractions','designsize'])
 		
 		getButtons: function(category) {
 			return buttons[category];
-		},
-		
-		refresh: function() {
-			if(panelScope) panelScope.loadToolbar()
 		}
 	}
 })
@@ -85,5 +89,7 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	FORM: "forms",
 	DISPLAY: "display",
 	EDITOR: "editor",
-	STICKY: "sticky"
+	STICKY: "sticky",
+	SHOW_DATA: "show_data",
+	DESIGN_MODE: "design_mode"
 })

@@ -72,19 +72,13 @@ angular.module('designsize',['toolbar','editor']).run(function($rootScope, $tool
 	var editor;
 	$pluginRegistry.registerPlugin(function(editorScope) {
 		editor = editorScope;
-		if(editor.isAbsoluteFormLayout()) {
-			btnDesktopSize.enabled = false;
-			btnTabletSize.enabled = false;
-			btnMobileSize.enabled = false;
-			btnCustomSize.enabled = false;
-			//btnRotate.enabled = false;
+		if(!editor.isAbsoluteFormLayout()) {
+			$toolbar.add(btnDesktopSize, TOOLBAR_CATEGORIES.STICKY);
+			$toolbar.add(btnTabletSize, TOOLBAR_CATEGORIES.STICKY);
+			$toolbar.add(btnMobileSize, TOOLBAR_CATEGORIES.STICKY);
+			$toolbar.add(btnCustomSize, TOOLBAR_CATEGORIES.STICKY);
+			//$toolbar.add(btnRotate, TOOLBAR_CATEGORIES.STICKY);
 		}
-		$toolbar.add(btnDesktopSize, TOOLBAR_CATEGORIES.STICKY);
-		$toolbar.add(btnTabletSize, TOOLBAR_CATEGORIES.STICKY);
-		$toolbar.add(btnMobileSize, TOOLBAR_CATEGORIES.STICKY);
-		$toolbar.add(btnCustomSize, TOOLBAR_CATEGORIES.STICKY);
-		//$toolbar.add(btnRotate, TOOLBAR_CATEGORIES.STICKY);
-		$toolbar.refresh();
 	});
 	
 	
