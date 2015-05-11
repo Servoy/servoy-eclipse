@@ -2588,7 +2588,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			}
 		}
 
-		if (propertyType == DataproviderPropertyType.INSTANCE)
+		if (propertyType instanceof DataproviderPropertyType)
 		{
 			Table table = null;
 			boolean listItemHeader = persistContext != null && persistContext.getPersist() instanceof AbstractBase &&
@@ -2689,7 +2689,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			};
 		}
 
-		if (propertyType == FormPropertyType.INSTANCE)
+		if (propertyType instanceof FormPropertyType)
 		{
 			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, false),
 				persistContext.getContext());
@@ -2738,7 +2738,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return tagStringController(persistContext, id, displayName, propertyDescription, flattenedEditingSolution, finalTable);
 		}
 
-		if (propertyType == FoundsetPropertyType.INSTANCE)
+		if (propertyType instanceof FoundsetPropertyType)
 		{
 			return new FoundsetPropertyController(id, displayName, flattenedEditingSolution, persistContext, (JSONObject)propertyDescription.getConfig());
 		}

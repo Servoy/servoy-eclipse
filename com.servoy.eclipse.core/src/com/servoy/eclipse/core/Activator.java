@@ -98,6 +98,7 @@ import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
 
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
+import com.servoy.eclipse.core.resource.DesignerTypes;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.DesignApplication;
@@ -135,6 +136,7 @@ import com.servoy.j2db.plugins.IMethodTemplatesProvider;
 import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.ngclient.property.types.Types;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
@@ -277,6 +279,7 @@ public class Activator extends Plugin
 		}
 		ss.nativeStartup();
 
+		Types.setTypesInstance(DesignerTypes.INSTANCE);
 		IExtensionRegistry reg = Platform.getExtensionRegistry();
 		IExtensionPoint ep = reg.getExtensionPoint(IPluginBaseClassLoaderProvider.EXTENSION_ID);
 		IExtension[] extensions = ep.getExtensions();
@@ -480,7 +483,7 @@ public class Activator extends Plugin
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -660,7 +663,7 @@ public class Activator extends Plugin
 
 				/*
 				 * (non-Javadoc)
-				 *
+				 * 
 				 * @see com.servoy.j2db.IDesignerCallback#testAndStartDebugger()
 				 */
 				public void testAndStartDebugger()
@@ -676,7 +679,7 @@ public class Activator extends Plugin
 
 				/*
 				 * (non-Javadoc)
-				 *
+				 * 
 				 * @see com.servoy.j2db.IDesignerCallback#addURLStreamHandler(java.lang.String, java.net.URLStreamHandler)
 				 */
 				@Override

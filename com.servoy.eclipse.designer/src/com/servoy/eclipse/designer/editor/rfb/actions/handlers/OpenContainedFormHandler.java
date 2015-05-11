@@ -29,6 +29,7 @@ import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.websocket.IServerService;
 
+import com.servoy.eclipse.core.resource.DesignerFormPropertyType;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Bean;
@@ -97,7 +98,8 @@ public class OpenContainedFormHandler implements IServerService
 									IPropertyType< ? > iPropertyType = spec.getFoundTypes().get(ghost.getTypeName());
 									if (iPropertyType instanceof ICustomType)
 									{
-										forms = ((ICustomType< ? >)iPropertyType).getCustomJSONTypeDefinition().getProperties(FormPropertyType.INSTANCE);
+										forms = ((ICustomType< ? >)iPropertyType).getCustomJSONTypeDefinition().getProperties(
+											DesignerFormPropertyType.DESIGNER_INSTANCE);
 									}
 									else
 									{

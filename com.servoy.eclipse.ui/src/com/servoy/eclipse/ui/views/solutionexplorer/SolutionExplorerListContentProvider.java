@@ -1687,7 +1687,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				String name = pd.getName();
 				// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
 				// and skip the dataprovider properties (those are not accesable through scripting)
-				if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && pd.getType() != DataproviderPropertyType.INSTANCE)
+				if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && !(pd.getType() instanceof DataproviderPropertyType))
 				{
 					nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS, prefixForWebComponentMembers + name, name, webcomponent, propertiesIcon));
 				}

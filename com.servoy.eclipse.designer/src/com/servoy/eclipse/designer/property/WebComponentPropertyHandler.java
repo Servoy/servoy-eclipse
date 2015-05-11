@@ -54,7 +54,6 @@ import com.servoy.j2db.server.ngclient.property.types.NGDimensionPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGFontPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGInsetsPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGPointPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.ServoyFunctionPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -135,8 +134,8 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		}
 
 		IPropertyType< ? > type = propertyDescription.getType();
-		if (type == FunctionPropertyType.INSTANCE || type == ServoyFunctionPropertyType.INSTANCE || type == ValueListPropertyType.INSTANCE ||
-			type == FormPropertyType.INSTANCE || type == MediaPropertyType.INSTANCE)
+		if (type instanceof FunctionPropertyType || type instanceof ValueListPropertyType || type instanceof FormPropertyType ||
+			type instanceof MediaPropertyType)
 		{
 			if (value == null) return Integer.valueOf(0);
 			if (value instanceof Integer) return value;
@@ -196,7 +195,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		IWebObject bean = (IWebObject)obj;
 
 		Object convertedValue = value;
-		if (propertyDescription.getType() == FunctionPropertyType.INSTANCE || propertyDescription.getType() == ServoyFunctionPropertyType.INSTANCE)
+		if (propertyDescription.getType() instanceof FunctionPropertyType)
 		{
 			//  value is methodid
 			ITable table = null;
@@ -214,17 +213,17 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			IScriptProvider scriptMethod = ModelUtils.getScriptMethod(bean, persistContext.getContext(), table, ((Integer)value).intValue());
 			convertedValue = scriptMethod == null ? null : scriptMethod.getUUID().toString();
 		}
-		else if (propertyDescription.getType() == ValueListPropertyType.INSTANCE)
+		else if (propertyDescription.getType() instanceof ValueListPropertyType)
 		{
 			ValueList val = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getValueList(((Integer)value).intValue());
 			convertedValue = (val == null) ? null : val.getUUID().toString();
 		}
-		else if (propertyDescription.getType() == FormPropertyType.INSTANCE)
+		else if (propertyDescription.getType() instanceof FormPropertyType)
 		{
 			Form frm = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getForm(((Integer)value).intValue());
 			convertedValue = (frm == null) ? null : frm.getUUID().toString();
 		}
-		else if (propertyDescription.getType() == MediaPropertyType.INSTANCE)
+		else if (propertyDescription.getType() instanceof MediaPropertyType)
 		{
 			Media media = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getMedia(((Integer)value).intValue());
 			convertedValue = (media == null) ? null : media.getUUID().toString();

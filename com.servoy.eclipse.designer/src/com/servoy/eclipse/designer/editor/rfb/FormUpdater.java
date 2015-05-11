@@ -141,7 +141,7 @@ public class FormUpdater implements Runnable
 								PropertyDescription prop = spec.getProperty(property);
 								if (prop != null)
 								{
-									if (prop.getType() == DataproviderPropertyType.INSTANCE)
+									if (prop.getType() instanceof DataproviderPropertyType)
 									{
 										// if it is a portal based component then the dataprovider is only the last part for this webcomponent
 										// so if the new value ends with the current value then it is still the same and it is not a big change (this also doesn't have to be set on the component)

@@ -502,7 +502,7 @@ public class TypeCreator extends TypeCache
 						String name = pd.getName();
 						// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
 						// and skip the dataprovider properties (those are not accesable through scripting)
-						if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && pd.getType() != DataproviderPropertyType.INSTANCE)
+						if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && !(pd.getType() instanceof DataproviderPropertyType))
 						{
 							JSType memberType = getType(null, pd);
 							if (memberType == null) memberType = getTypeRef(null, pd.getType().getName());
@@ -1169,7 +1169,7 @@ public class TypeCreator extends TypeCache
 			String name = pd.getName();
 			// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
 			// and skip the dataprovider properties (those are not accesable through scripting)
-			if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && pd.getType() != DataproviderPropertyType.INSTANCE)
+			if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && !(pd.getType() instanceof DataproviderPropertyType))
 			{
 				JSType memberType = getType(context, pd);
 				if (memberType == null) memberType = getTypeRef(null, pd.getType().getName());
