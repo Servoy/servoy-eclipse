@@ -8,7 +8,8 @@ Require-Bundle: org.apache.tomcat,
  slf4j.api,
  servoy_shared,
  sablo,
- servoy_ngclient
+ servoy_ngclient,
+ org.eclipse.equinox.preferences
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: javax.servlet,
@@ -17,4 +18,5 @@ Import-Package: javax.servlet,
  javax.websocket,
  javax.websocket.server,
  org.osgi.framework
-Export-Package: com.servoy.eclipse.designer.rfb.endpoint
+Export-Package: com.servoy.eclipse.designer.rfb.endpoint,
+ com.servoy.eclipse.designer.rfb.startup

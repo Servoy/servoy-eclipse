@@ -1,8 +1,8 @@
 <div>
-	<accordion close-others='false'>
+	 <accordion close-others='oneAtATime' ui-sortable="sortableOptions" ng-model="packages">
 		<accordion-group ng-repeat="package in packages" is-open="package.isOpen">
 			<accordion-heading>
-				<h1 class="palette-heading">{{package.packageDisplayname}}<span ng-class="package.isOpen ? 'glyphicon glyphicon-chevron-down' : 'glyphicon glyphicon-chevron-right'" style="float: right"></span></h1>
+				<h1 class="palette-heading handle"><i class="glyphicon glyphicon-move"></i>{{package.packageDisplayname}}<span ng-class="package.isOpen ? 'glyphicon glyphicon-chevron-down' : 'glyphicon glyphicon-chevron-right'" style="float: right"></span></h1>
 			</accordion-heading>
 		    <div>
 			    <ul>

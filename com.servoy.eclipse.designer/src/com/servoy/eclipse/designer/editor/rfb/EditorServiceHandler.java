@@ -43,6 +43,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetSelectionHandl
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetTabSequenceCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SpacingCentersPack;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdateFieldPositioner;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdatePaletteOrder;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand;
 import com.servoy.eclipse.model.util.ServoyLog;
 
@@ -98,6 +99,7 @@ public class EditorServiceHandler implements IServerService
 		configuredHandlers.put("openElementWizard", new OpenElementWizardHandler(editorPart, fieldPositioner, selectionProvider));
 		configuredHandlers.put("updateFieldPositioner", new UpdateFieldPositioner(fieldPositioner));
 		configuredHandlers.put("openScript", new OpenScriptHandler(editorPart));
+		configuredHandlers.put("updatePaletteOrder", new UpdatePaletteOrder());
 		configuredHandlers.put("openContainedForm", new OpenContainedFormHandler(editorPart));
 		configuredHandlers.put("setInlineEditMode", new IServerService()
 		{

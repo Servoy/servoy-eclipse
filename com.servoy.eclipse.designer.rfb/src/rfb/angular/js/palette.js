@@ -1,18 +1,43 @@
-angular.module("palette",['ui.bootstrap']).directive("palette", function($editorService,$compile,$selectionUtils,$rootScope, EDITOR_EVENTS){
+angular.module("palette",['ui.bootstrap', 'ui.sortable'])
+.config(['$provide', function ($provide){
+    $provide.decorator('accordionDirective', function($delegate) { 
+        var directive = $delegate[0];
+        directive.replace = true;
+        return $delegate;
+    });
+  }]).directive("palette", function($editorService,$compile,$selectionUtils,$rootScope, EDITOR_EVENTS){
 	return {
 		restrict: 'E',
 		transclude: true,
 		controller: function($scope, $element, $attrs, $http, $pluginRegistry) {
 			$scope.packages = [];
+			$scope.sortableOptions = {
+				        handle: ' .handle',
+				        // items: ' .panel:not(.panel-heading)'
+				        //axis: 'y'
+				        stop: function(e, ui) {
+				        	var data = $scope.packages;
+				        	packageOrder[layoutType] = [];
+				        	for(var i = 0; i < data.length; i++) {
+								packageOrder[layoutType].push(data[i].packageName);
+							}
+				        	$editorService.updatePaletteOrder(packageOrder);
+				        }	
+			};
+			
 			var utils = $selectionUtils.getUtilsForScope($scope);
 			
 			var layoutType = null;
+			var packageOrder = null;
 			var loadPalette = function()
 			{
 				$http({method: 'GET', url: '/designer/palette?layout='+layoutType}).success(function(data) {
 					$scope.packages = data;
+					packageOrder = {};
+					packageOrder[layoutType] = [];
 					for(var i = 0; i < data.length; i++) {
 						data[i].isOpen = "true";
+						packageOrder[layoutType].push(data[i].packageName);
 					}
 				});
 			}

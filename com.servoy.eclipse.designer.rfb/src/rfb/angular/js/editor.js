@@ -986,7 +986,11 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 		},
 		
 		toggleShowData: function(){
-			wsSession.callService('formeditor', 'toggleShowData', null, true)
+			return wsSession.callService('formeditor', 'toggleShowData', null, true)
+		},
+		
+		updatePaletteOrder: function(paletteOrder){
+			return wsSession.callService('formeditor', 'updatePaletteOrder', paletteOrder, true)
 		}
 		// add more service methods here
 	}
