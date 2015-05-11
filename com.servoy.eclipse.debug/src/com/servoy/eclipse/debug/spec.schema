@@ -79,7 +79,17 @@
 								"type":"boolean"
 							},
 							"for": {
-								"type": "any"
+								"oneOf": [
+									{
+										"type": "string"
+									},
+									{
+										"type": "array"
+									},
+									{
+										"type": "object"
+									}
+								]
 							},
 							"blockingOn": {
 								"type": "boolean"
