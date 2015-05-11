@@ -37,6 +37,7 @@ import com.servoy.base.persistence.constants.IContentSpecConstantsBase;
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
@@ -529,6 +530,21 @@ public class GhostHandler implements IServerService
 			IPersist persist = it.next();
 			if (persist instanceof IFormElement)
 			{
+				int persistExID = ((IFormElement)persist).getExtendsID();
+				if (persistExID > 0)
+				{
+					FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(persist);
+					boolean persistExFound = false;
+					for (IPersist p : fs.getAllObjectsAsList())
+					{
+						if (p.getID() == persistExID)
+						{
+							persistExFound = true;
+							break;
+						}
+					}
+					if (!persistExFound) continue;
+				}
 				Point location = ((IFormElement)persist).getLocation();
 				if ((location.x > editorPart.getForm().getWidth()) || (location.y > formHeight))
 				{
