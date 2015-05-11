@@ -36,6 +36,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import com.servoy.eclipse.ui.wizards.ICheckBoxView;
+import com.servoy.eclipse.ui.wizards.SelectAllButtonsBar;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -45,13 +47,13 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
  * @author jcompagner
  * @since 6.1
  */
-public class ServersSelectionPage extends WizardPage implements ICheckStateListener
+public class ServersSelectionPage extends WizardPage implements ICheckStateListener, ICheckBoxView
 {
 	private final SortedSet<String> selectedServers;
 	private CheckboxTableViewer checkboxTableViewer;
 	private final HashMap<String, IWizardPage> serverConfigurationPages;
 	private final String[] requiredServers;
-	private SelectionButtonsBar selectionButtonsBar;
+	private SelectAllButtonsBar selectAllButtons;
 
 	/**
 	 * @param string
@@ -90,7 +92,7 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 		gridData.horizontalSpan = 2;
 		checkboxTableViewer.getTable().setLayoutData(gridData);
 		checkboxTableViewer.addCheckStateListener(this);
-		selectionButtonsBar = new SelectionButtonsBar(checkboxTableViewer, container, requiredServers);
+		selectAllButtons = new SelectAllButtonsBar(this, container);
 		if (selectedServers.size() == 0)
 		{
 			checkboxTableViewer.setAllChecked(true);
@@ -99,13 +101,13 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 		{
 			checkboxTableViewer.setCheckedElements(appendRequiredLabel(selectedServers.toArray()));
 		}
-		if (checkboxTableViewer.getTable().getItems().length == 0)
+		if (checkboxTableViewer.getTable().getItemCount() == 0)
 		{
-			selectionButtonsBar.disableButtons();
+			selectAllButtons.disableButtons();
 		}
 		else
 		{
-			selectionButtonsBar.disableSelectAll();
+			selectAllButtons.enableAll();
 		}
 	}
 
@@ -207,12 +209,39 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 		}
 		if (checkboxTableViewer.getCheckedElements().length < checkboxTableViewer.getTable().getItemCount())
 		{
-			selectionButtonsBar.enableAll();
+			selectAllButtons.enableAll();
 		}
 		else
 		{
-			selectionButtonsBar.disableSelectAll();
+			selectAllButtons.disableSelectAll();
 		}
+	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.wizards.ICheckBoxView#selectAll()
+	 */
+	@Override
+	public void selectAll()
+	{
+		checkboxTableViewer.setAllChecked(true);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.wizards.ICheckBoxView#deselectAll()
+	 */
+	@Override
+	public void deselectAll()
+	{
+		checkboxTableViewer.setAllChecked(false);
+		if (requiredServers != null)
+		{
+			for (String requiredServer : requiredServers)
+				if (requiredServer != null && requiredServers.length > 0) checkboxTableViewer.setChecked(
+					requiredServer + DirectorySelectionPage.REQUIRED_LABEL, true);
+		}
 	}
 }

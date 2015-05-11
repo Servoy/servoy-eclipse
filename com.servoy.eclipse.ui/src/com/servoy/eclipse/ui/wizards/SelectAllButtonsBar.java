@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.ui.wizards;
 
-import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -29,12 +28,12 @@ import org.eclipse.swt.widgets.Composite;
  * @author rlazar
  * @since 8
  */
-public class SelectAllButtons
+public class SelectAllButtonsBar
 {
 	private final Button selectAll;
 	private final Button deselectAll;
 
-	public SelectAllButtons(final CheckboxTreeViewer checkboxTreeViewer, Composite container)
+	public SelectAllButtonsBar(final ICheckBoxView checkBoxView, Composite container)
 	{
 		selectAll = new Button(container, SWT.NONE);
 		GridData gridData = new GridData(SWT.BEGINNING);
@@ -42,13 +41,12 @@ public class SelectAllButtons
 		selectAll.setText("Select All");
 		selectAll.addSelectionListener(new SelectionAdapter()
 		{
-			@SuppressWarnings("deprecation")
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
 				deselectAll.setEnabled(true);
 				selectAll.setEnabled(false);
-				checkboxTreeViewer.setAllChecked(true);
+				checkBoxView.selectAll();
 			}
 
 		});
@@ -64,7 +62,7 @@ public class SelectAllButtons
 			{
 				selectAll.setEnabled(true);
 				deselectAll.setEnabled(false);
-				checkboxTreeViewer.setAllChecked(false);
+				checkBoxView.deselectAll();
 			}
 		});
 	}
@@ -87,4 +85,9 @@ public class SelectAllButtons
 		deselectAll.setEnabled(false);
 	}
 
+	public void enableAll()
+	{
+		selectAll.setEnabled(true);
+		deselectAll.setEnabled(true);
+	}
 }

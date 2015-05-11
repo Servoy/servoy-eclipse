@@ -36,12 +36,15 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import com.servoy.eclipse.ui.wizards.ICheckBoxView;
+import com.servoy.eclipse.ui.wizards.SelectAllButtonsBar;
+
 /**
  *
  * @author jcompagner
  * @since 6.1
  */
-public class DirectorySelectionPage extends WizardPage implements ICheckStateListener
+public class DirectorySelectionPage extends WizardPage implements ICheckStateListener, ICheckBoxView
 {
 	public static final String REQUIRED_LABEL = " (required)";
 
@@ -50,7 +53,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 	private final List<String> files;
 	private final String[] requiredFiles;
 	private CheckboxTableViewer checkboxTableViewer;
-	private SelectionButtonsBar selectionButtonsBar;
+	private SelectAllButtonsBar selectAllButtons;
 
 	public DirectorySelectionPage(String pagename, String title, String description, File directory, List<String> files, String[] requiredFiles)
 	{
@@ -95,7 +98,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 		gridData.horizontalSpan = 2;
 		checkboxTableViewer.getTable().setLayoutData(gridData);
 		checkboxTableViewer.addCheckStateListener(this);
-		selectionButtonsBar = new SelectionButtonsBar(checkboxTableViewer, container, requiredFiles);
+		selectAllButtons = new SelectAllButtonsBar(this, container);
 		if (files.size() == 0)
 		{
 			checkboxTableViewer.setAllChecked(true);
@@ -104,13 +107,13 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 		{
 			checkboxTableViewer.setCheckedElements(appendRequiredLabel(files.toArray()));
 		}
-		if (checkboxTableViewer.getTable().getItems().length == 0)
+		if (checkboxTableViewer.getTable().getItemCount() == 0)
 		{
-			selectionButtonsBar.disableButtons();
+			selectAllButtons.disableButtons();
 		}
 		else
 		{
-			selectionButtonsBar.disableSelectAll();
+			selectAllButtons.enableAll();
 		}
 	}
 
@@ -132,7 +135,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.wizard.WizardPage#getNextPage()
 	 */
 	@Override
@@ -205,7 +208,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.ICheckStateListener#checkStateChanged(org.eclipse.jface.viewers.CheckStateChangedEvent)
 	 */
 	@Override
@@ -219,11 +222,38 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 		}
 		if (checkboxTableViewer.getCheckedElements().length < checkboxTableViewer.getTable().getItemCount())
 		{
-			selectionButtonsBar.enableAll();
+			selectAllButtons.enableAll();
 		}
 		else
 		{
-			selectionButtonsBar.disableSelectAll();
+			selectAllButtons.disableSelectAll();
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.wizards.ICheckBoxView#selectAll()
+	 */
+	@Override
+	public void selectAll()
+	{
+		checkboxTableViewer.setAllChecked(true);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.ui.wizards.ICheckBoxView#deselectAll()
+	 */
+	@Override
+	public void deselectAll()
+	{
+		checkboxTableViewer.setAllChecked(false);
+		if (requiredFiles != null)
+		{
+			for (String requiredFile : requiredFiles)
+				if (requiredFile != null && requiredFiles.length > 0) checkboxTableViewer.setChecked(requiredFile + DirectorySelectionPage.REQUIRED_LABEL, true);
 		}
 	}
 }

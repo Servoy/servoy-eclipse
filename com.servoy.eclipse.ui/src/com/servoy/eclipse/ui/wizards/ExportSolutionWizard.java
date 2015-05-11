@@ -154,7 +154,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.wizard.Wizard#setContainer(org.eclipse.jface.wizard.IWizardContainer)
 	 */
 	@Override
@@ -699,12 +699,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		}
 	}
 
-	private class ModulesSelectionPage extends WizardPage implements ICheckStateListener
+	private class ModulesSelectionPage extends WizardPage implements ICheckStateListener, ICheckBoxView
 	{
-		CheckboxTreeViewer treeViewer;
+		private CheckboxTreeViewer treeViewer;
 		public int projectProblemsType = BuilderUtils.HAS_NO_MARKERS;
 		private boolean moduleDbDownErrors = false;
-		private SelectAllButtons selectAllButtons;
+		private SelectAllButtonsBar selectAllButtons;
 
 		protected ModulesSelectionPage()
 		{
@@ -775,14 +775,14 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			});
 			treeViewer.setInput(moduleNames);
 			treeViewer.setCheckedElements(moduleNames);
-			selectAllButtons = new SelectAllButtons(treeViewer, composite);
-			if (moduleNames.length == 0)
+			selectAllButtons = new SelectAllButtonsBar(this, composite);
+			if (treeViewer.getTree().getItemCount() == 0)
 			{
-				selectAllButtons.disableDeselectAll();
+				selectAllButtons.disableButtons();
 			}
 			else
 			{
-				selectAllButtons.disableSelectAll();
+				selectAllButtons.enableAll();
 			}
 			treeViewer.addCheckStateListener(this);
 			setControl(composite);
@@ -823,9 +823,13 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 			exportOptionsPage.refreshDBIDownFlag(hasDBDownErrors());
 
-			if (treeViewer.getCheckedElements().length < treeViewer.getTree().getItemCount())
+			if (treeViewer.getCheckedElements().length == treeViewer.getTree().getItemCount() && treeViewer.getCheckedElements().length == 0)
 			{
-				selectAllButtons.disableDeselectAll();
+				selectAllButtons.disableButtons();
+			}
+			else if (treeViewer.getCheckedElements().length < treeViewer.getTree().getItemCount())
+			{
+				selectAllButtons.enableAll();
 			}
 			else
 			{
@@ -865,6 +869,29 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		public boolean canFlipToNextPage()
 		{
 			return (projectProblemsType == BuilderUtils.HAS_NO_MARKERS || projectProblemsType == BuilderUtils.HAS_WARNING_MARKERS) && super.canFlipToNextPage();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.servoy.eclipse.ui.wizards.ICheckBoxView#selectAll()
+		 */
+		@Override
+		public void selectAll()
+		{
+			treeViewer.setAllChecked(true);
+		}
+
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.servoy.eclipse.ui.wizards.ICheckBoxView#deselectAll()
+		 */
+		@Override
+		public void deselectAll()
+		{
+			treeViewer.setAllChecked(false);
 		}
 	}
 
@@ -910,4 +937,5 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			return null;
 		}
 	}
+
 }
