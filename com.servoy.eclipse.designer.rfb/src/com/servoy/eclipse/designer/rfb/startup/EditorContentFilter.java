@@ -35,6 +35,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.sablo.IndexPageEnhancer;
+import org.sablo.specification.WebComponentPackageSpecification;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebLayoutSpecification;
 
 /**
  * @author jcompagner
@@ -67,6 +70,17 @@ public class EditorContentFilter implements Filter
 				variableSubstitution.put("orientation", String.valueOf(0)); // fs.getSolution().getTextOrientation()
 				ArrayList<String> css = new ArrayList<String>();
 				css.add("css/servoy.css");
+				for (WebComponentPackageSpecification<WebLayoutSpecification> entry : WebComponentSpecProvider.getInstance().getLayoutSpecifications().values())
+				{
+					if (entry.getCssLibrary() != null)
+					{
+						css.add(entry.getCssLibrary());
+					}
+					if (entry.getJsLibrary() != null)
+					{
+						formScripts.add(entry.getJsLibrary());
+					}
+				}
 				IndexPageEnhancer.enhance(getClass().getResource("editor-content.html"), httpServletRequest.getContextPath(), css, formScripts,
 					variableSubstitution, w);
 				w.flush();
