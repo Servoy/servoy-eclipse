@@ -17,6 +17,7 @@
 package com.servoy.eclipse.model;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.print.PageFormat;
@@ -86,6 +87,8 @@ import com.servoy.j2db.server.shared.IApplicationServerAccess;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.smart.J2DBClient;
 import com.servoy.j2db.smart.dataui.SwingItemFactory;
+import com.servoy.j2db.ui.IComponent;
+import com.servoy.j2db.ui.IFormUI;
 import com.servoy.j2db.ui.ItemFactory;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.PersistHelper;
@@ -264,7 +267,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 				String servoyMobileStyle = //
 
 				"label, label.a, label.b, label.c, label.d, label.e {"//
-					+ "color: #101010;" //  
+					+ "color: #101010;" //
 					+ "margin-left:5px;" //
 					+ "background-color: #414141;" //
 					+ "}"//
@@ -662,7 +665,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		if (pluginManager == null)
 		{
 			pluginAccess = new ClientPluginAccessProvider(this);
-			//getClient(); // do not create the client here, it needs to be created from within a job, otherwise the main thread 
+			//getClient(); // do not create the client here, it needs to be created from within a job, otherwise the main thread
 			// may be blocked on the awt thread which causes problems on the mac (debug SC does not paint)
 
 			// make sure appserver is started here, plugin manager depends on Settings being initialized
@@ -981,7 +984,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void refreshI18NMessages()
 	{
@@ -1044,7 +1047,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	/**
-	 *  
+	 *
 	 * @see com.servoy.j2db.ISmartClientApplication#registerWindow(java.lang.String, java.awt.Window)
 	 */
 	public void registerWindow(String name, Window d)
@@ -1053,7 +1056,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	/**
-	 * 
+	 *
 	 * @see com.servoy.j2db.ISmartClientApplication#getWindow(java.lang.String)
 	 */
 	public Window getWindow(String name)
@@ -1062,7 +1065,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	/**
-	 * 
+	 *
 	 * @see com.servoy.j2db.ISmartClientApplication#getToolbarPanel()
 	 */
 	public IToolbarPanel getToolbarPanel()
@@ -1071,7 +1074,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	/**
-	 * 
+	 *
 	 * @see com.servoy.j2db.ISmartClientApplication#showI18NDialog(java.lang.String, java.lang.String)
 	 */
 	public String showI18NDialog(String preselect_key, String preselect_language)
@@ -1080,7 +1083,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	/**
-	 * 
+	 *
 	 * @see com.servoy.j2db.ISmartClientApplication#showCalendar(java.lang.String, java.util.Date)
 	 */
 	public Date showCalendar(String pattern, Date date)
@@ -1089,7 +1092,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	/**
-	 * 
+	 *
 	 * @see com.servoy.j2db.ISmartClientApplication#showColorChooser(java.lang.String)
 	 */
 	public String showColorChooser(String originalColor)
@@ -1098,7 +1101,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	/**
-	 * 
+	 *
 	 * @see com.servoy.j2db.ISmartClientApplication#showFontChooser(java.lang.String)
 	 */
 	public String showFontChooser(String font)
@@ -1107,7 +1110,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	/**
-	 * 
+	 *
 	 * @see com.servoy.j2db.ISmartClientApplication#beep()
 	 */
 	public void beep()
@@ -1116,7 +1119,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	/**
-	 * 
+	 *
 	 * @see com.servoy.j2db.ISmartClientApplication#setClipboardContent(java.lang.String)
 	 */
 	public void setClipboardContent(String string)
@@ -1125,7 +1128,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	/**
-	 * 
+	 *
 	 * @see com.servoy.j2db.ISmartClientApplication#getClipboardString()
 	 */
 	public String getClipboardString()
@@ -1134,7 +1137,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	/**
-	 * 
+	 *
 	 * @see com.servoy.j2db.ISmartClientApplication#setNumpadEnterAsFocusNextEnabled(boolean)
 	 */
 	public void setNumpadEnterAsFocusNextEnabled(boolean enabled)
@@ -1143,7 +1146,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	/**
-	 * 
+	 *
 	 * @see com.servoy.j2db.ISmartClientApplication#exportObject(java.rmi.Remote)
 	 */
 	public int exportObject(Remote object) throws RemoteException
@@ -1152,7 +1155,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	/**
-	 * 
+	 *
 	 * @see com.servoy.j2db.ISmartClientApplication#setPaintTableImmediately(boolean)
 	 */
 	public void setPaintTableImmediately(boolean b)
@@ -1161,7 +1164,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	/**
-	 * 
+	 *
 	 * @see com.servoy.j2db.ISmartClientApplication#getPaintTableImmediately()
 	 */
 	public int getPaintTableImmediately()
@@ -1170,7 +1173,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	/**
-	 * 
+	 *
 	 * @see com.servoy.j2db.ISmartClientApplication#updateInsertModeIcon(com.servoy.j2db.dataprocessing.IDisplay)
 	 */
 	public void updateInsertModeIcon(IDisplay display)
@@ -1204,5 +1207,20 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	public void setValueListItems(String name, Object[] displayValues, Object[] realValues, boolean autoconvert)
 	{
 		client.setValueListItems(name, displayValues, realValues, autoconvert);
+	}
+
+	@Override
+	public String getFormNameFor(IComponent component)
+	{
+		if (component instanceof Component)
+		{
+			Container parent = ((Component)component).getParent();
+			while (!(parent instanceof IFormUI))
+			{
+				parent = parent.getParent();
+			}
+			return ((IFormUI)parent).getController().getName();
+		}
+		return "";
 	}
 }
