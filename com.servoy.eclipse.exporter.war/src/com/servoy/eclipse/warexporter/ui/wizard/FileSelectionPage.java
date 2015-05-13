@@ -250,18 +250,6 @@ public class FileSelectionPage extends WizardPage implements Listener
 			}
 		});
 
-		automaticallyUpgradeRepository = new Button(composite, SWT.CHECK);
-		automaticallyUpgradeRepository.setSelection(exportModel.isAutomaticallyUpgradeRepository());
-		automaticallyUpgradeRepository.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				exportModel.setAutomaticallyUpgradeRepository();
-			}
-		});
-		automaticallyUpgradeRepository.setText("Automatically upgrade repository if needed.");
-
 		Composite horizontalComposite = new Composite(composite, SWT.None);
 		GridLayout hcGridLayout = new GridLayout();
 		hcGridLayout.numColumns = 4;
@@ -484,6 +472,19 @@ public class FileSelectionPage extends WizardPage implements Listener
 			refreshDBIDownFlag(false);
 		}
 		enableSolutionExportData();
+
+		automaticallyUpgradeRepository = new Button(composite, SWT.CHECK);
+		automaticallyUpgradeRepository.setSelection(exportModel.isAutomaticallyUpgradeRepository());
+		automaticallyUpgradeRepository.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setAutomaticallyUpgradeRepository();
+			}
+		});
+		automaticallyUpgradeRepository.setText("Automatically upgrade repository if needed.");
+
 		setControl(composite);
 	}
 
