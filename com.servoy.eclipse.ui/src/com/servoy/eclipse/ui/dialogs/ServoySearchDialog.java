@@ -54,6 +54,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportName;
+import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Relation;
@@ -70,7 +71,7 @@ import com.servoy.j2db.util.UUID;
 
 /**
  * @author jcompagner
- * 
+ *
  */
 public class ServoySearchDialog extends FilteredItemsSelectionDialog
 {
@@ -182,7 +183,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 
 	/**
 	 * @author jcompagner
-	 * 
+	 *
 	 */
 	private class ShowAction extends Action
 	{
@@ -422,7 +423,10 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 						{
 							parent = "  (" + ((TableNode)persist).getDataSource() + ')' + parent;
 						}
-
+					}
+					if (element instanceof ISupportScope && ((ISupportScope)element).getScopeName() != null)
+					{
+						parent += "/" + ScriptVariable.SCOPES + "/" + ((ISupportScope)element).getScopeName();
 					}
 					name += " - " + parent.substring(1);
 				}
@@ -524,7 +528,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 
 	/**
 	 * Create contents of the dialog
-	 * 
+	 *
 	 * @param parent
 	 */
 	@Override
