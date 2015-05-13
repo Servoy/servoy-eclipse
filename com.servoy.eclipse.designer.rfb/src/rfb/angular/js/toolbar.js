@@ -6,6 +6,23 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	$http.get("templates/toolbaritemdropdown.html").then(function(result){
 		$templateCache.put("templates/toolbaritemdropdown.html", result.data);
     });	
+	$http.get("templates/toolbarswitch.html").then(function(result){
+		$templateCache.put("templates/toolbarswitch.html", result.data);
+    });	
+}])
+.directive("toolbarSwitch", ['$templateCache','$compile',function($templateCache,$compile){
+	return {
+	      restrict: 'E',
+	      transclude: true,
+	      scope: {
+	    	  model: "=model",
+	      },
+	      link: function($scope, $element, $attrs) {
+	    	  $element.html($templateCache.get("templates/toolbarswitch.html"));
+	          $compile($element.contents())($scope);
+	      },
+	      replace: true
+	    };
 }])
 .directive("toolbarItem", ['$templateCache','$compile',function($templateCache,$compile){
 	return {

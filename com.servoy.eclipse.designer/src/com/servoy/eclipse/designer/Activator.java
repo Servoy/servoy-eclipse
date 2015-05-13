@@ -154,7 +154,7 @@ public class Activator extends AbstractUIPlugin
 			boolean showData = client.getShowData();
 			showData = !showData;
 			client.setShowData(showData);
-			getPreferenceStore().putValue(SHOW_DATA_IN_ANGULAR_DESIGNER, String.valueOf(showData));
+			getPreferenceStore().setValue(SHOW_DATA_IN_ANGULAR_DESIGNER, showData);
 		}
 	}
 

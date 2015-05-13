@@ -9,6 +9,10 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 		{
 			btnToggleDesignMode.enabled = false;
 		}
+		var promise  =  $editorService.isShowData();
+		promise.then(function (result){
+			btnToggleShowData.state = result;
+		});
 	});
 	var btnPlaceField = {
 			text: "Place Field Wizard",
@@ -82,20 +86,22 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 	$toolbar.add(btnHighlightWebcomponents, TOOLBAR_CATEGORIES.ELEMENTS);
 	
 	var btnToggleShowData = {
-			text: "Toggle show data",
+			text: "Data",
 			icon: "toolbaractions/icons/import.gif",
 			enabled: true,
+			state: false,
 			onclick: function() {
 				$editorService.toggleShowData();
 			},
 	};
 	
 	var btnToggleDesignMode = {
-			text: "Toggle design mode",
+			text: "Preview",
 			icon: "toolbaractions/icons/edit.gif",
 			enabled: true,
+			state: false,
 			onclick: function() {
-				utils.toggleDesignMode();
+				this.state = utils.toggleDesignMode();
 			},
 	};
 

@@ -877,7 +877,11 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 		},
 
 		isInheritedForm: function() {
-			return wsSession.callService('formeditor', 'isInheritedForm')
+			return wsSession.callService('formeditor', 'getBooleanState', {"isInheritedForm":true}, false)
+		},
+		
+		isShowData: function() {
+			return wsSession.callService('formeditor', 'getBooleanState', {"showData":true}, false)
 		},
 		
 		createComponents: function(components) {
@@ -986,11 +990,11 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 		},
 		
 		toggleShowData: function(){
-			return wsSession.callService('formeditor', 'toggleShowData', null, true)
+			wsSession.callService('formeditor', 'toggleShowData', null, true);
 		},
 		
 		updatePaletteOrder: function(paletteOrder){
-			return wsSession.callService('formeditor', 'updatePaletteOrder', paletteOrder, true)
+			return wsSession.callService('formeditor', 'updatePaletteOrder', paletteOrder, false);
 		}
 		// add more service methods here
 	}

@@ -141,13 +141,23 @@ public class EditorServiceHandler implements IServerService
 				return null;
 			}
 		});
-		configuredHandlers.put("isInheritedForm", new IServerService()
+		configuredHandlers.put("getBooleanState", new IServerService()
 		{
 
+			@SuppressWarnings("boxing")
 			@Override
 			public Object executeMethod(String methodName, JSONObject args) throws Exception
 			{
-				return editorPart.getForm().getExtendsID() > 0;
+				if (args != null)
+				{
+					if (args.has("isInheritedForm")) return editorPart.getForm().getExtendsID() > 0;
+					if (args.has("showData"))
+					{
+						return Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_DATA_IN_ANGULAR_DESIGNER);
+					}
+
+				}
+				return false;
 			}
 
 		});

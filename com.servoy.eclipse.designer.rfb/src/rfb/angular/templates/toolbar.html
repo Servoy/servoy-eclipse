@@ -36,10 +36,10 @@
 		 divs after this one will also be on the right side of the toolbar -->
 
 	<div class="toolbar show_data right-aligned" ng-if="show_data.length > 0">	
-    	<toolbar-item ng-repeat="item in show_data" model="item" class="toolbar-action"/>
+    	<toolbar-switch ng-repeat="item in show_data" model="item" class="toolbar-action"/>
 	</div>
 	<div class="toolbar design_mode" ng-if="design_mode.length > 0">	
-    	<toolbar-item ng-repeat="item in design_mode" model="item" class="toolbar-action"/>
+    	<toolbar-switch ng-repeat="item in design_mode" model="item" class="toolbar-action"/>
 	</div>
 	<div class="toolbar sticky" ng-if="sticky.length > 0">	
     	<toolbar-item ng-repeat="item in sticky" model="item" class="toolbar-action"/>

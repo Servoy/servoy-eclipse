@@ -245,6 +245,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 				{
 					designMode = !designMode;
 					this.updateDesignMode(designMode);
+					return designMode;
 				},
 				updateDesignMode: function(design)
 				{
