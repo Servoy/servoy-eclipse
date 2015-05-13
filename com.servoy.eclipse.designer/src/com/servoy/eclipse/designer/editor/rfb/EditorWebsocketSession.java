@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
+import java.util.Locale;
+
 import org.sablo.specification.WebComponentSpecification;
 import org.sablo.websocket.BaseWebsocketSession;
 import org.sablo.websocket.IClientService;
@@ -52,6 +54,12 @@ public class EditorWebsocketSession extends BaseWebsocketSession
 	public boolean checkForWindowActivity()
 	{
 		return false;
+	}
+
+	@Override
+	public Locale getLocale()
+	{
+		return Locale.getDefault();
 	}
 
 	@Override
