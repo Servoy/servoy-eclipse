@@ -47,7 +47,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 			//set the focus on the target so that the editor area scrolls to that element
 			//this is also a workaround for IE bug: if the user clicks the editor area scroll bar then nothing else will ever gain focus 
 			//=> keyboard arrows will just scroll instead of moving selected elements
-			var isThisFormGhost = editorScope.getGhost(node.getAttribute("svy-id"));
+			var isThisFormGhost = editorScope.getGhost(event.target.getAttribute("svy-id"));
 			if (!isThisFormGhost || (isThisFormGhost.type !== EDITOR_CONSTANTS.GHOST_TYPE_FORM))
 				$(event.target).focus();
 			
