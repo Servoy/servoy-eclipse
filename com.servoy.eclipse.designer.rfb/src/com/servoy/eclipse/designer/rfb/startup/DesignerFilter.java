@@ -211,6 +211,10 @@ public class DesignerFilter implements Filter
 									{
 										jsonWriter.key("icon").value(spec.getIcon());
 									}
+									if (spec.getPreview() != null)
+									{
+										jsonWriter.key("preview").value(spec.getPreview());
+									}
 									jsonWriter.key("topContainer").value(spec.isTopContainer());
 
 

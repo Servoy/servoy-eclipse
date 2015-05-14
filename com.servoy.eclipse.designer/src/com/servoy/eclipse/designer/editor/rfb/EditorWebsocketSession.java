@@ -36,7 +36,7 @@ public class EditorWebsocketSession extends BaseWebsocketSession
 	public static final String EDITOR_SERVICE = "$editorService";
 
 	private static final WebComponentSpecification EDITOR_SERVICE_SPECIFICATION = new WebComponentSpecification(EDITOR_SERVICE, "", EDITOR_SERVICE, null, null,
-		"", null);
+		null, "", null);
 
 	public EditorWebsocketSession(String uuid)
 	{

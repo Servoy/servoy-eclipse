@@ -24,7 +24,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 				        	$editorService.updatePaletteOrder(packageOrder);
 				        }	
 			};
-			
+			$scope.searchText = '';
 			var utils = $selectionUtils.getUtilsForScope($scope);
 			
 			var layoutType = null;
@@ -49,6 +49,12 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 					layoutType = "Responsive-Layout";
 				loadPalette();
 			});
+			
+			$scope.openInNewWindow = function (preview)  {
+				  var host = $(location).attr('host');
+				  var protocol = $(location).attr('protocol');
+				  $editorService.openURLInNewWindow(protocol+"//"+host+"/"+preview);
+			};
 			
 			$rootScope.$on(EDITOR_EVENTS.RELOAD_PALETTE, function(e){
 				loadPalette();
@@ -108,7 +114,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 					}
 					else
 					{	
-						dragClone = $(event.target).clone()
+						dragClone = $(event.target).clone();
 						utils.setDraggingFromPallete(type);
 						$scope.setSelection(null);
 						dragClone.attr('id', 'dragNode')
@@ -231,9 +237,11 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 							$editorService.createComponent(component); 
 						}
 					} 
-					else if (angularElement)
-					{
-						angularElement.remove();
+					else {
+						 if (angularElement)
+						 {
+						 	angularElement.remove();
+						 }
 					}
 				});
 			}

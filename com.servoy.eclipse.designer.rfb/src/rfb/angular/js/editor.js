@@ -635,7 +635,7 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 					
 					$(document).mousedown(function(objEvent) {					
 						$editorService.activated(objEvent);
-						return false;
+						return true;
 					});					
 				});
 				
@@ -995,6 +995,10 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 		
 		updatePaletteOrder: function(paletteOrder){
 			return wsSession.callService('formeditor', 'updatePaletteOrder', paletteOrder, false);
+		},
+		
+		openURLInNewWindow: function(url){
+			wsSession.callService('formeditor', 'openURLInNewWindow', {"url":url}, true);
 		}
 		// add more service methods here
 	}

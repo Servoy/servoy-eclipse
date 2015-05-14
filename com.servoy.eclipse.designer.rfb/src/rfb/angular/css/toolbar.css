@@ -37,6 +37,20 @@
 	margin-left: 0px
 }
 
+.toolbar-switch {
+	display: -webkit-flex;
+  	display: flex;
+  	flex-wrap: wrap;
+    flex-direction: row;
+    -webkit-flex-wrap: wrap;
+    -webkit-flex-direction: row;
+    align-items: flex-start;
+    -webkit-align-items: flex-start;
+    flex-shrink : 0;
+    -webkit-flex-shrink : 0;
+    cursor:pointer;
+}
+
 .toolbar-action {
 	
 	display: -webkit-flex;
