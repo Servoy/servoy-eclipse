@@ -120,7 +120,7 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 			if (dragStartEvent) {
 				
 				if (!dragging) {
-					if ( Math.abs(dragStartEvent.screenX- event.screenX) > 0  || Math.abs(dragStartEvent.screenY- event.screenY) > 0) {
+					if ( Math.abs(dragStartEvent.screenX- event.screenX) > 5  || Math.abs(dragStartEvent.screenY- event.screenY) > 5) {
 						dragging = true;
 					}
 				}
