@@ -115,7 +115,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Content provider for the solution explorer tree.
- * 
+ *
  * @author jblok
  */
 public class SolutionExplorerTreeContentProvider implements IStructuredContentProvider, ITreeContentProvider
@@ -198,7 +198,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		createTypeNode(Messages.TreeStrings_Array, UserNodeType.ARRAY, com.servoy.j2db.documentation.scripting.docs.Array.class, jslib),//
 		createTypeNode(Messages.TreeStrings_Date, UserNodeType.DATE, com.servoy.j2db.documentation.scripting.docs.Date.class, jslib), //
 		createTypeNode(Messages.TreeStrings_String, UserNodeType.STRING, com.servoy.j2db.documentation.scripting.docs.String.class, jslib), //
-		createTypeNode(Messages.TreeStrings_Number, UserNodeType.NUMBER, com.servoy.j2db.documentation.scripting.docs.Number.class, jslib), // 
+		createTypeNode(Messages.TreeStrings_Number, UserNodeType.NUMBER, com.servoy.j2db.documentation.scripting.docs.Number.class, jslib), //
 		createTypeNode(Messages.TreeStrings_Math, UserNodeType.FUNCTIONS, com.servoy.j2db.documentation.scripting.docs.Math.class, jslib),//
 		createTypeNode(Messages.TreeStrings_RegExp, UserNodeType.REGEXP, com.servoy.j2db.documentation.scripting.docs.RegExp.class, jslib), //
 		createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib), //
@@ -950,6 +950,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			{
 				children.add(constants = new PlatformSimpleUserNode("Constants", UserNodeType.RETURNTYPE_CONSTANT, null,
 					uiActivator.loadImageFromBundle("constant.gif")));
+				constants.parent = node;
 			}
 
 			if (constants != null)
@@ -1419,7 +1420,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		for (SimpleUserNode element : elements)
 		{
 			elementRealObject = element.getRealObject();
-			if (elementRealObject instanceof Object[] && ((Object[])elementRealObject).length > 0 && ((Object[])elementRealObject)[0] instanceof Bean) continue; // children already added			
+			if (elementRealObject instanceof Object[] && ((Object[])elementRealObject).length > 0 && ((Object[])elementRealObject)[0] instanceof Bean) continue; // children already added
 			List<SimpleUserNode> nodeChildren = children.get(element);
 			int i;
 			if (element == elementsNode && parentElementsNode != null && parentElementsNode.children.length > 0)
@@ -1844,7 +1845,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	 * Starts calculation mode. The tree contents will now change to supply only what is available for the calculations of the given table stored in the given
 	 * solution. This will only make available parts of the "Solutions" node: only global variables of solution and it's submodules + relations (global or of
 	 * the given table) stored in the solution and it's submodules.
-	 * 
+	 *
 	 * @param solution the solution in which the calculation(s) is(are) stored.
 	 * @param table the table that has the calculation(s).
 	 */
@@ -1887,7 +1888,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	/**
 	 * Gives the node object that represents the solution with the given name.
-	 * 
+	 *
 	 * @param solutionName the name of the solution.
 	 * @return the node object that represents the solution with the given name.
 	 */
@@ -1901,7 +1902,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the database-servers node
 	 */
 	public PlatformSimpleUserNode getServers()
@@ -1911,7 +1912,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	/**
 	 * Gives the resources project node.
-	 * 
+	 *
 	 * @return the resources project node.
 	 */
 	public PlatformSimpleUserNode getResourcesNode()
