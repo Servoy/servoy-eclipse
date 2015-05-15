@@ -1158,6 +1158,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			{
 				children.add(constants = new PlatformSimpleUserNode("Constants", UserNodeType.RETURNTYPE_CONSTANT, null,
 					uiActivator.loadImageFromBundle("constant.gif")));
+				constants.parent = node;
 			}
 
 			if (constants != null)
@@ -2423,7 +2424,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.core.IWebResourceChangedListener#changed()
 	 */
 	@Override

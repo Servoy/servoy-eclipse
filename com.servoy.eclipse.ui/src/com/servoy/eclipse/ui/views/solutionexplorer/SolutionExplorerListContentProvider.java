@@ -655,9 +655,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					cls = real.getClass();
 				}
 				String elementName = ".";
-				if (un.parent != null && un.parent.getType() == UserNodeType.PLUGIN)
+				if (un.parent.parent != null && un.parent.parent.getType() == UserNodeType.PLUGIN)
 				{
-					elementName = PLUGIN_PREFIX + "." + un.parent.getName() + elementName;
+					elementName = PLUGIN_PREFIX + "." + un.parent.parent.getName() + elementName;
 				}
 				lm = getJSMethods(cls, elementName, null, UserNodeType.RETURNTYPE_ELEMENT, null, null);
 			}
