@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.jar.Manifest;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -68,6 +69,9 @@ public class DesignerFilter implements Filter
 
 	public static final String DROPPABLE = "droppable";
 	public static final String PREFERENCE_KEY = "com.servoy.eclipse.designer.rfb.palette.order";
+	@SuppressWarnings("nls")
+	private final static String[] layoutTypeNames = { "Absolute-Layout", "Responsive-Layout" };
+
 
 	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException
@@ -160,7 +164,7 @@ public class DesignerFilter implements Filter
 						if (provider.getLayoutSpecifications().containsKey(key))
 						{
 							WebComponentPackageSpecification<WebLayoutSpecification> entry = provider.getLayoutSpecifications().get(key);
-							if (entry.isAccesibleInLayoutType(layoutType))
+							if (isAccesibleInLayoutType(entry, layoutType))
 							{
 								jsonWriter.object();
 								jsonWriter.key("packageName").value(entry.getPackageName());
@@ -228,7 +232,7 @@ public class DesignerFilter implements Filter
 						else if (provider.getWebComponentSpecifications().containsKey(key))
 						{
 							WebComponentPackageSpecification<WebComponentSpecification> pkg = provider.getWebComponentSpecifications().get(key);
-							if (pkg.isAccesibleInLayoutType(layoutType))
+							if (isAccesibleInLayoutType(pkg, layoutType))
 							{
 								jsonWriter.object();
 								jsonWriter.key("packageName").value(pkg.getPackageName());
@@ -299,6 +303,24 @@ public class DesignerFilter implements Filter
 			throw e;
 		}
 	}
+
+
+	private boolean isAccesibleInLayoutType(WebComponentPackageSpecification< ? > pkg, String layoutType)
+	{
+		if ("True".equals(pkg.getManifest().getMainAttributes().getValue(layoutType))) return true;
+		if (noLayoutTypeSpecified(pkg.getManifest())) return true;
+		return false;
+	}
+
+	private boolean noLayoutTypeSpecified(Manifest mf)
+	{
+		for (String layoutTypeName : layoutTypeNames)
+		{
+			if (mf.getMainAttributes().getValue(layoutTypeName) != null) return false;
+		}
+		return true;
+	}
+
 
 	/**
 	 * @param config
