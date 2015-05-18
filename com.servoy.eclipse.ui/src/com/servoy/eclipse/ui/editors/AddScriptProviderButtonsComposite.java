@@ -52,7 +52,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * Composite for creating script providers (calc or global) for rowBGColorCalculation select dialog in Properties View.
- * 
+ *
  * @author gboros
  */
 
@@ -104,7 +104,7 @@ public class AddScriptProviderButtonsComposite extends Composite
 			public void widgetSelected(final SelectionEvent e)
 			{
 				ScriptMethod method = NewMethodAction.createNewMethod(getShell(), persist.getAncestor(IRepository.SOLUTIONS),
-					AddScriptProviderButtonsComposite.this.methodKey, false, null, null);
+					AddScriptProviderButtonsComposite.this.methodKey, false, null, null, null);
 				if (method != null)
 				{
 					dialog.refreshTree();

@@ -1806,19 +1806,23 @@ public class SolutionDeserializer
 							if ((JSDocTag.PARAM.equals(jsDocTagName) || JSDocTag.RETURNS.equals(jsDocTagName) || JSDocTag.RETURN.equals(jsDocTagName)))
 							{
 								String tagValueType = null;
+								String description = null;
 								if (jsDocTagValue.startsWith("{{") && (endBracketIdx = jsDocTagValue.indexOf("}}", 1)) != -1)
 								{
 									endBracketIdx++;
 									tagValueType = jsDocTagValue.substring(1, endBracketIdx);
+									if (jsDocTagValue.length() > jsDocTagValue.indexOf("}}") + 2) description = jsDocTagValue.substring(jsDocTagValue.indexOf("}}") + 2);
 								}
 								else if (jsDocTagValue.startsWith("{") && (endBracketIdx = jsDocTagValue.indexOf('}', 1)) != -1)
 								{
 									tagValueType = jsDocTagValue.substring(1, endBracketIdx);
+									if (jsDocTagValue.length() > jsDocTagValue.indexOf("}") + 2) description = jsDocTagValue.substring(jsDocTagValue.indexOf("}") + 2);
 								}
 
 								if (JSDocTag.RETURNS.equals(jsDocTagName) || JSDocTag.RETURN.equals(jsDocTagName))
 								{
-									((AbstractScriptProvider)retval).setRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE, tagValueType);
+									MethodArgument returnType = new MethodArgument("", ArgumentType.valueOf(tagValueType), description);
+									((AbstractScriptProvider)retval).setRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE, returnType);
 								}
 								else
 								{

@@ -129,7 +129,7 @@ public class NewMethodWizard extends Wizard implements INewWizard
 					if (editingSolution != null)
 					{
 						NewMethodAction.createNewMethod(null, editingSolution.getForm(selectedMethod.context), null, true, selectedMethod.selectedMethodName,
-							null);
+							null, null);
 					}
 				}
 				else
@@ -137,7 +137,7 @@ public class NewMethodWizard extends Wizard implements INewWizard
 					Solution editingSolution = servoyProject.getEditingSolution();
 					if (editingSolution != null)
 					{
-						NewMethodAction.createNewMethod(null, editingSolution, null, true, selectedMethod.selectedMethodName, selectedMethod.context);
+						NewMethodAction.createNewMethod(null, editingSolution, null, true, selectedMethod.selectedMethodName, selectedMethod.context, null);
 					}
 				}
 			}
@@ -185,7 +185,7 @@ public class NewMethodWizard extends Wizard implements INewWizard
 		}
 
 		/**
-		 * 
+		 *
 		 * @return a string[] with the selected combo items
 		 */
 		public SelectedMethod getSelectedItems()

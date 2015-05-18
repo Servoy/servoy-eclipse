@@ -101,7 +101,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * Action to create a new form/global method depending on the selection of a solution view.
- * 
+ *
  * @author acostescu
  */
 public class NewMethodAction extends Action implements ISelectionChangedListener
@@ -157,24 +157,25 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 			if (node.getType() == UserNodeType.FORM)
 			{
 				// add form method
-				createNewMethod(viewer.getSite().getShell(), (Form)node.getRealObject(), null, true, null, null);
+				createNewMethod(viewer.getSite().getShell(), (Form)node.getRealObject(), null, true, null, null, null);
 			}
 			else if (node.getType() == UserNodeType.GLOBALS_ITEM)
 			{
 				Pair<Solution, String> pair = (Pair<Solution, String>)node.getRealObject();
 				// add global method
-				createNewMethod(viewer.getSite().getShell(), pair.getLeft(), null, true, null, pair.getRight(), null, null);
+				createNewMethod(viewer.getSite().getShell(), pair.getLeft(), null, true, null, pair.getRight(), null, null, null);
 			}
 		}
 	}
 
-	public static ScriptMethod createNewMethod(Shell shell, IPersist parent, String methodKey, boolean activate, String forcedMethodName, String forcedScopeName)
+	public static ScriptMethod createNewMethod(Shell shell, IPersist parent, String methodKey, boolean activate, String forcedMethodName,
+		String forcedScopeName, MethodArgument forcedReturnType)
 	{
-		return createNewMethod(shell, parent, methodKey, activate, forcedMethodName, forcedScopeName, null, null);
+		return createNewMethod(shell, parent, methodKey, activate, forcedMethodName, forcedScopeName, null, null, forcedReturnType);
 	}
 
 	public static ScriptMethod createNewMethod(final Shell shell, IPersist parent, String methodKey, boolean activate, String forcedMethodName,
-		String forcedScopeName, Map<String, String> substitutions, IPersist persist)
+		String forcedScopeName, Map<String, String> substitutions, IPersist persist, MethodArgument forcedReturnType)
 	{
 		String methodType;
 		int tagFilter;
@@ -292,7 +293,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 					MethodTemplate template;
 					if (override)
 					{
-						template = MethodTemplate.getFormMethodOverrideTemplate(met.getClass(), methodKey, superArguments);
+						template = MethodTemplate.getFormMethodOverrideTemplate(met.getClass(), methodKey, superArguments, forcedReturnType);
 					}
 					else
 					{
@@ -366,7 +367,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 
 									public void run()
 									{
-										if (MessageDialog.openQuestion(shell,
+										if (MessageDialog.openQuestion(
+											shell,
 											"Javascript editor not saved",
 											"The javascript editor for this form is open and dirty.\nThe new method has been appended to it, but\nyou have to save it in order to be able to select/see the new method in Solution Explorer and other places.\n\nDo you want to save the editor?"))
 										{
@@ -661,7 +663,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.dialogs.InputDialog#getOkButton()
 		 */
 		@Override
@@ -672,7 +674,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.dialogs.InputDialog#buttonPressed(int)
 		 */
 		@Override
@@ -692,7 +694,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.dialogs.InputDialog#setErrorMessage(java.lang.String)
 		 */
 		@Override

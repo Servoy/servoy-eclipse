@@ -53,9 +53,9 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Property controller for method properties, subproperties are instance arguments
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class MethodPropertyController<P> extends PropertyController<P, Object>
 {
@@ -98,8 +98,8 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 						{
 							// the context is the currently viewed form
 							NewMethodAction.createNewMethod(getControl().getShell(), persistContext.getContext(), getId().toString(), true,
-								scriptMethod.getName(), null);
-							// Note: the original value is returned, but FormInheritenceMethodConverter.getScriptMethod() will find 
+								scriptMethod.getName(), null, null);
+							// Note: the original value is returned, but FormInheritenceMethodConverter.getScriptMethod() will find
 							// the new method via the form hierarchy
 						}
 					}
@@ -200,7 +200,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 	private static MethodArgument[] getCombinedParams(MethodArgument[] formalArguments, IPersist context, IScriptProvider scriptMethod, String methodKey)
 	{
 		if (formalArguments == null) return null;
-		ArrayList<MethodArgument> finalParamsList = new ArrayList<MethodArgument>(); // the returned computed list 
+		ArrayList<MethodArgument> finalParamsList = new ArrayList<MethodArgument>(); // the returned computed list
 		Pair<List<Object>, List<Object>> instanceParamsArgs = ((AbstractBase)context).getInstanceMethodParametersLocal(methodKey);
 		List<Object> persistParamNames = instanceParamsArgs.getLeft() != null ? instanceParamsArgs.getLeft() : new ArrayList<Object>();
 		List<Object> actualArguments = instanceParamsArgs.getRight() != null ? instanceParamsArgs.getRight() : new ArrayList<Object>();
@@ -393,7 +393,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 						mwa.paramNames.set(i, formalArguments[i].getName());
 					}
 					// one edit by the user should make the props view valid with current jsfunction signature
-					// clear the rest of the missing args 
+					// clear the rest of the missing args
 					if (idx < formalArguments.length)
 					{
 						for (int i = formalArguments.length; i < mwa.arguments.size(); i++)

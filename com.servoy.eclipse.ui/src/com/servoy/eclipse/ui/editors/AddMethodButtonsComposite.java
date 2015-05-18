@@ -74,7 +74,7 @@ public class AddMethodButtonsComposite extends Composite
 	/**
 	 * @param parent
 	 * @param style
-	 * @param iPersist 
+	 * @param iPersist
 	 */
 	public AddMethodButtonsComposite(Composite parent, int style)
 	{
@@ -205,7 +205,7 @@ public class AddMethodButtonsComposite extends Composite
 			if (substitutions != null) substitutions.put("dataSource", dataSource);
 			else substitutions = Collections.singletonMap("dataSource", dataSource);
 		}
-		return NewMethodAction.createNewMethod(getShell(), parent, methodKey, false, null, scopeName, substitutions, persistContext.getPersist());
+		return NewMethodAction.createNewMethod(getShell(), parent, methodKey, false, null, scopeName, substitutions, persistContext.getPersist(), null);
 	}
 
 	/**

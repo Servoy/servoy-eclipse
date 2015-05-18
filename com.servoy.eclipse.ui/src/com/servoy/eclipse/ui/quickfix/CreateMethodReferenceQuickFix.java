@@ -38,7 +38,7 @@ import com.servoy.j2db.util.UUID;
 
 /**
  * creates a missing method for an event/command
- * 
+ *
  * @author lvostinar
  *
  */
@@ -94,7 +94,7 @@ public class CreateMethodReferenceQuickFix implements IMarkerResolution
 
 			Map<String, String> substitutions = null;
 			if (dataSource != null) substitutions = Collections.singletonMap("dataSource", dataSource);
-			ScriptMethod method = NewMethodAction.createNewMethod(UIUtils.getActiveShell(), parent, eventName, true, null, null, substitutions, null);
+			ScriptMethod method = NewMethodAction.createNewMethod(UIUtils.getActiveShell(), parent, eventName, true, null, null, substitutions, null, null);
 			if (method != null)
 			{
 				PropertyDescriptor descriptor = new PropertyDescriptor(eventName, persist.getClass());
