@@ -458,6 +458,7 @@ public class CreateComponentHandler implements IServerService
 					{
 						compName = firstPart + "_" + id.incrementAndGet();
 					}
+
 					WebComponent webComponent = null;
 					if (parent instanceof Portal)
 					{
