@@ -6739,14 +6739,44 @@ var dataset2 = databaseManager.createEmptyDataSet(10,new Array ('a','b','c','d')
             <summary clientSupport="ng,wc,sc"><![CDATA[Create a QueryBuilder object for a datasource.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[var q = datasources.db.example_data.book_nodes.createSelect();
+            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/book_nodes>} */
+var q = databaseManager.createSelect('db:/example_data/book_nodes');
 q.result.addPk()
 q.where.add(q.columns.label_text.not.isin(null))
-databaseManager.getFoundSet('db:/example_data/book_nodes').loadRecords(q)]]></sample>
+datasources.db.example_data.book_nodes.getFoundSet().loadRecords(q)]]></sample>
           </samples>
           <parameters>
             <parameter name="dataSource" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
               <description><![CDATA[The data source to build a query for.]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="ng,wc,sc" name="createSelect">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"><![CDATA[query builder]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Create a QueryBuilder object for a datasource with given table alias.
+The alias can be used inside custom queries to bind to the outer table.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Create a QueryBuilder object for a datasource with given table alias.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[/** @type {QBSelect<db:/example_data/book_nodes>} */
+var q = databaseManager.createSelect('db:/example_data/book_nodes', 'b');
+q.result.addPk()
+q.where.add(q.columns.label_text.isin('select comment_text from book_text t where t.note_text = ? and t.node_id = b.node_id', ['test']))
+datasources.db.example_data.book_nodes.getFoundSet().loadRecords(q)]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="dataSource" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[The data source to build a query for.]]></description>
+            </parameter>
+            <parameter name="tableAlias" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[The alias for the main table.]]></description>
             </parameter>
           </parameters>
         </function>
@@ -9640,7 +9670,7 @@ grow or shrink when a window is resized.]]></summary>
             <sample clientSupport="ng,wc,sc"><![CDATA[var form = solutionModel.newForm('mediaForm', 'db:/example_data/parent_table', null, false, 400, 300);
 var strechAllDirectionsLabel = form.newLabel('Strech all directions', 10, 10, 380, 280);
 strechAllDirectionsLabel.background = 'red';
-strechAllDirectionsLabel.anchors = SM_ANCHOR.ALL;	
+strechAllDirectionsLabel.anchors = SM_ANCHOR.ALL;
 var strechVerticallyLabel = form.newLabel('Strech vertically', 10, 10, 190, 280);
 strechVerticallyLabel.background = 'green';
 strechVerticallyLabel.anchors = SM_ANCHOR.WEST | SM_ANCHOR.NORTH | SM_ANCHOR.SOUTH;
@@ -9649,7 +9679,7 @@ strechHorizontallyLabel.background = 'blue';
 strechHorizontallyLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST | SM_ANCHOR.EAST;
 var stickToTopLeftCornerLabel = form.newLabel('Stick to top-left corner', 10, 10, 200, 100);
 stickToTopLeftCornerLabel.background = 'orange';
-stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST; // This is equivalent to SM_ANCHOR.DEFAULT 
+stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST; // This is equivalent to SM_ANCHOR.DEFAULT
 var stickToBottomRightCornerLabel = form.newLabel('Stick to bottom-right corner', 190, 190, 200, 100);
 stickToBottomRightCornerLabel.background = 'pink';
 stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sample>
@@ -9668,7 +9698,7 @@ stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sa
             <sample clientSupport="ng,mc,wc,sc"><![CDATA[// This property can be used on all types of components.
 // Here it is illustrated only for labels and fields.
 var greenLabel = form.newLabel('Green',10,10,100,50);
-greenLabel.background = 'green'; // Use generic names for colors.	
+greenLabel.background = 'green'; // Use generic names for colors.
 var redField = form.newField('parent_table_text',JSField.TEXT_FIELD,10,110,100,30);
 redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           </samples>
@@ -9759,7 +9789,7 @@ the component with lower Z index.]]></description>
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var labelBelow = form.newLabel('Green', 10, 10, 100, 50);
-labelBelow.background = 'green';	
+labelBelow.background = 'green';
 labelBelow.formIndex = 10;
 var fieldAbove = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 30);
 fieldAbove.background = '#FF0000';
@@ -9783,7 +9813,7 @@ The group id should be a javascript compatible identifier to allow access of the
 var label = form.newLabel('Green', 10, 10, 100, 20);
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
 label.groupID = 'someGroup';
-field.groupID = 'someGroup';	
+field.groupID = 'someGroup';
 forms['someForm'].elements.someGroup.enabled = false;]]></sample>
           </samples>
         </property>
@@ -10020,6 +10050,10 @@ var prop = fld.getDesignTimeProperty('myprop')]]></sample>
 var fld = frm.getField('fld')
 var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName" undocumented="true">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[form name]]></return>
         </function>
         <function clientSupport="ng,wc,sc" name="getUUID">
           <argumentsTypes/>
@@ -10340,7 +10374,7 @@ grow or shrink when a window is resized.]]></summary>
             <sample clientSupport="ng,wc,sc"><![CDATA[var form = solutionModel.newForm('mediaForm', 'db:/example_data/parent_table', null, false, 400, 300);
 var strechAllDirectionsLabel = form.newLabel('Strech all directions', 10, 10, 380, 280);
 strechAllDirectionsLabel.background = 'red';
-strechAllDirectionsLabel.anchors = SM_ANCHOR.ALL;	
+strechAllDirectionsLabel.anchors = SM_ANCHOR.ALL;
 var strechVerticallyLabel = form.newLabel('Strech vertically', 10, 10, 190, 280);
 strechVerticallyLabel.background = 'green';
 strechVerticallyLabel.anchors = SM_ANCHOR.WEST | SM_ANCHOR.NORTH | SM_ANCHOR.SOUTH;
@@ -10349,7 +10383,7 @@ strechHorizontallyLabel.background = 'blue';
 strechHorizontallyLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST | SM_ANCHOR.EAST;
 var stickToTopLeftCornerLabel = form.newLabel('Stick to top-left corner', 10, 10, 200, 100);
 stickToTopLeftCornerLabel.background = 'orange';
-stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST; // This is equivalent to SM_ANCHOR.DEFAULT 
+stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST; // This is equivalent to SM_ANCHOR.DEFAULT
 var stickToBottomRightCornerLabel = form.newLabel('Stick to bottom-right corner', 190, 190, 200, 100);
 stickToBottomRightCornerLabel.background = 'pink';
 stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sample>
@@ -10367,7 +10401,7 @@ stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sa
             <sample clientSupport="ng,wc,sc"><![CDATA[// This property can be used on all types of components.
 // Here it is illustrated only for labels and fields.
 var greenLabel = form.newLabel('Green',10,10,100,50);
-greenLabel.background = 'green'; // Use generic names for colors.	
+greenLabel.background = 'green'; // Use generic names for colors.
 var redField = form.newField('parent_table_text',JSField.TEXT_FIELD,10,110,100,30);
 redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           </samples>
@@ -10478,7 +10512,7 @@ the component with lower Z index.]]></description>
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var labelBelow = form.newLabel('Green', 10, 10, 100, 50);
-labelBelow.background = 'green';	
+labelBelow.background = 'green';
 labelBelow.formIndex = 10;
 var fieldAbove = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 30);
 fieldAbove.background = '#FF0000';
@@ -10516,7 +10550,7 @@ The group id should be a javascript compatible identifier to allow access of the
 var label = form.newLabel('Green', 10, 10, 100, 20);
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
 label.groupID = 'someGroup';
-field.groupID = 'someGroup';	
+field.groupID = 'someGroup';
 forms['someForm'].elements.someGroup.enabled = false;]]></sample>
           </samples>
         </property>
@@ -11147,6 +11181,10 @@ var prop = fld.getDesignTimeProperty('myprop')]]></sample>
 var fld = frm.getField('fld')
 var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName" undocumented="true">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[form name]]></return>
         </function>
         <function clientSupport="ng,wc,sc" name="getUUID">
           <argumentsTypes/>
@@ -13483,7 +13521,7 @@ grow or shrink when a window is resized.]]></summary>
             <sample clientSupport="ng,wc,sc"><![CDATA[var form = solutionModel.newForm('mediaForm', 'db:/example_data/parent_table', null, false, 400, 300);
 var strechAllDirectionsLabel = form.newLabel('Strech all directions', 10, 10, 380, 280);
 strechAllDirectionsLabel.background = 'red';
-strechAllDirectionsLabel.anchors = SM_ANCHOR.ALL;	
+strechAllDirectionsLabel.anchors = SM_ANCHOR.ALL;
 var strechVerticallyLabel = form.newLabel('Strech vertically', 10, 10, 190, 280);
 strechVerticallyLabel.background = 'green';
 strechVerticallyLabel.anchors = SM_ANCHOR.WEST | SM_ANCHOR.NORTH | SM_ANCHOR.SOUTH;
@@ -13492,7 +13530,7 @@ strechHorizontallyLabel.background = 'blue';
 strechHorizontallyLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST | SM_ANCHOR.EAST;
 var stickToTopLeftCornerLabel = form.newLabel('Stick to top-left corner', 10, 10, 200, 100);
 stickToTopLeftCornerLabel.background = 'orange';
-stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST; // This is equivalent to SM_ANCHOR.DEFAULT 
+stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST; // This is equivalent to SM_ANCHOR.DEFAULT
 var stickToBottomRightCornerLabel = form.newLabel('Stick to bottom-right corner', 190, 190, 200, 100);
 stickToBottomRightCornerLabel.background = 'pink';
 stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sample>
@@ -13510,7 +13548,7 @@ stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sa
             <sample clientSupport="ng,wc,sc"><![CDATA[// This property can be used on all types of components.
 // Here it is illustrated only for labels and fields.
 var greenLabel = form.newLabel('Green',10,10,100,50);
-greenLabel.background = 'green'; // Use generic names for colors.	
+greenLabel.background = 'green'; // Use generic names for colors.
 var redField = form.newField('parent_table_text',JSField.TEXT_FIELD,10,110,100,30);
 redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           </samples>
@@ -13585,7 +13623,7 @@ the component with lower Z index.]]></description>
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var labelBelow = form.newLabel('Green', 10, 10, 100, 50);
-labelBelow.background = 'green';	
+labelBelow.background = 'green';
 labelBelow.formIndex = 10;
 var fieldAbove = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 30);
 fieldAbove.background = '#FF0000';
@@ -13609,7 +13647,7 @@ The group id should be a javascript compatible identifier to allow access of the
 var label = form.newLabel('Green', 10, 10, 100, 20);
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
 label.groupID = 'someGroup';
-field.groupID = 'someGroup';	
+field.groupID = 'someGroup';
 forms['someForm'].elements.someGroup.enabled = false;]]></sample>
           </samples>
         </property>
@@ -13831,6 +13869,10 @@ var prop = fld.getDesignTimeProperty('myprop')]]></sample>
 var fld = frm.getField('fld')
 var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName" undocumented="true">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[form name]]></return>
         </function>
         <function clientSupport="ng,wc,sc" name="getUUID">
           <argumentsTypes/>
@@ -15368,6 +15410,25 @@ function mySortFunction(r1, r2)
  datasources.db.example_data.book_nodes.getFoundSet().loadRecords(q)]]></sample>
           </samples>
         </function>
+        <function clientSupport="ng,wc,sc" name="createSelect">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect"><![CDATA[query builder]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Create a query builder for a data source with given table alias.
+ The alias can be used inside custom queries to bind to the outer table.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Create a query builder for a data source with given table alias.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var q = datasources.db.example_data.book_nodes.createSelect('b')
+ q.result.addPk()
+ q.where.add(q.columns.label_text.isin('select comment_text from book_text t where t.note_text = ? and t.node_id = b.node_id', ['test']))
+ datasources.db.example_data.book_nodes.getFoundSet().loadRecords(q)]]></sample>
+          </samples>
+        </function>
         <function clientSupport="ng,wc,sc" name="getColumnNames">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String[]" typecode="[Ljava.lang.String;"><![CDATA[String[] column names]]></return>
@@ -16285,7 +16346,7 @@ grow or shrink when a window is resized.]]></summary>
             <sample clientSupport="ng,wc,sc"><![CDATA[var form = solutionModel.newForm('mediaForm', 'db:/example_data/parent_table', null, false, 400, 300);
 var strechAllDirectionsLabel = form.newLabel('Strech all directions', 10, 10, 380, 280);
 strechAllDirectionsLabel.background = 'red';
-strechAllDirectionsLabel.anchors = SM_ANCHOR.ALL;	
+strechAllDirectionsLabel.anchors = SM_ANCHOR.ALL;
 var strechVerticallyLabel = form.newLabel('Strech vertically', 10, 10, 190, 280);
 strechVerticallyLabel.background = 'green';
 strechVerticallyLabel.anchors = SM_ANCHOR.WEST | SM_ANCHOR.NORTH | SM_ANCHOR.SOUTH;
@@ -16294,7 +16355,7 @@ strechHorizontallyLabel.background = 'blue';
 strechHorizontallyLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST | SM_ANCHOR.EAST;
 var stickToTopLeftCornerLabel = form.newLabel('Stick to top-left corner', 10, 10, 200, 100);
 stickToTopLeftCornerLabel.background = 'orange';
-stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST; // This is equivalent to SM_ANCHOR.DEFAULT 
+stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST; // This is equivalent to SM_ANCHOR.DEFAULT
 var stickToBottomRightCornerLabel = form.newLabel('Stick to bottom-right corner', 190, 190, 200, 100);
 stickToBottomRightCornerLabel.background = 'pink';
 stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sample>
@@ -16312,7 +16373,7 @@ stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sa
             <sample clientSupport="ng,wc,sc"><![CDATA[// This property can be used on all types of components.
 // Here it is illustrated only for labels and fields.
 var greenLabel = form.newLabel('Green',10,10,100,50);
-greenLabel.background = 'green'; // Use generic names for colors.	
+greenLabel.background = 'green'; // Use generic names for colors.
 var redField = form.newField('parent_table_text',JSField.TEXT_FIELD,10,110,100,30);
 redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           </samples>
@@ -16454,7 +16515,7 @@ the component with lower Z index.]]></description>
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var labelBelow = form.newLabel('Green', 10, 10, 100, 50);
-labelBelow.background = 'green';	
+labelBelow.background = 'green';
 labelBelow.formIndex = 10;
 var fieldAbove = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 30);
 fieldAbove.background = '#FF0000';
@@ -16502,7 +16563,7 @@ The group id should be a javascript compatible identifier to allow access of the
 var label = form.newLabel('Green', 10, 10, 100, 20);
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
 label.groupID = 'someGroup';
-field.groupID = 'someGroup';	
+field.groupID = 'someGroup';
 forms['someForm'].elements.someGroup.enabled = false;]]></sample>
           </samples>
         </property>
@@ -17018,6 +17079,10 @@ var prop = fld.getDesignTimeProperty('myprop')]]></sample>
 var fld = frm.getField('fld')
 var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName" undocumented="true">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[form name]]></return>
         </function>
         <function clientSupport="mc" name="getTitle">
           <argumentsTypes/>
@@ -24999,7 +25064,7 @@ grow or shrink when a window is resized.]]></summary>
             <sample clientSupport="ng,wc,sc"><![CDATA[var form = solutionModel.newForm('mediaForm', 'db:/example_data/parent_table', null, false, 400, 300);
 var strechAllDirectionsLabel = form.newLabel('Strech all directions', 10, 10, 380, 280);
 strechAllDirectionsLabel.background = 'red';
-strechAllDirectionsLabel.anchors = SM_ANCHOR.ALL;	
+strechAllDirectionsLabel.anchors = SM_ANCHOR.ALL;
 var strechVerticallyLabel = form.newLabel('Strech vertically', 10, 10, 190, 280);
 strechVerticallyLabel.background = 'green';
 strechVerticallyLabel.anchors = SM_ANCHOR.WEST | SM_ANCHOR.NORTH | SM_ANCHOR.SOUTH;
@@ -25008,7 +25073,7 @@ strechHorizontallyLabel.background = 'blue';
 strechHorizontallyLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST | SM_ANCHOR.EAST;
 var stickToTopLeftCornerLabel = form.newLabel('Stick to top-left corner', 10, 10, 200, 100);
 stickToTopLeftCornerLabel.background = 'orange';
-stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST; // This is equivalent to SM_ANCHOR.DEFAULT 
+stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST; // This is equivalent to SM_ANCHOR.DEFAULT
 var stickToBottomRightCornerLabel = form.newLabel('Stick to bottom-right corner', 190, 190, 200, 100);
 stickToBottomRightCornerLabel.background = 'pink';
 stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sample>
@@ -25026,7 +25091,7 @@ stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sa
             <sample clientSupport="ng,wc,sc"><![CDATA[// This property can be used on all types of components.
 // Here it is illustrated only for labels and fields.
 var greenLabel = form.newLabel('Green',10,10,100,50);
-greenLabel.background = 'green'; // Use generic names for colors.	
+greenLabel.background = 'green'; // Use generic names for colors.
 var redField = form.newField('parent_table_text',JSField.TEXT_FIELD,10,110,100,30);
 redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           </samples>
@@ -25137,7 +25202,7 @@ the component with lower Z index.]]></description>
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var labelBelow = form.newLabel('Green', 10, 10, 100, 50);
-labelBelow.background = 'green';	
+labelBelow.background = 'green';
 labelBelow.formIndex = 10;
 var fieldAbove = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 30);
 fieldAbove.background = '#FF0000';
@@ -25175,7 +25240,7 @@ The group id should be a javascript compatible identifier to allow access of the
 var label = form.newLabel('Green', 10, 10, 100, 20);
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
 label.groupID = 'someGroup';
-field.groupID = 'someGroup';	
+field.groupID = 'someGroup';
 forms['someForm'].elements.someGroup.enabled = false;]]></sample>
           </samples>
         </property>
@@ -25806,6 +25871,10 @@ var prop = fld.getDesignTimeProperty('myprop')]]></sample>
 var fld = frm.getField('fld')
 var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName" undocumented="true">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[form name]]></return>
         </function>
         <function clientSupport="mc" name="getTitle">
           <argumentsTypes/>
@@ -28682,7 +28751,7 @@ grow or shrink when a window is resized.]]></summary>
             <sample clientSupport="ng,wc,sc"><![CDATA[var form = solutionModel.newForm('mediaForm', 'db:/example_data/parent_table', null, false, 400, 300);
 var strechAllDirectionsLabel = form.newLabel('Strech all directions', 10, 10, 380, 280);
 strechAllDirectionsLabel.background = 'red';
-strechAllDirectionsLabel.anchors = SM_ANCHOR.ALL;	
+strechAllDirectionsLabel.anchors = SM_ANCHOR.ALL;
 var strechVerticallyLabel = form.newLabel('Strech vertically', 10, 10, 190, 280);
 strechVerticallyLabel.background = 'green';
 strechVerticallyLabel.anchors = SM_ANCHOR.WEST | SM_ANCHOR.NORTH | SM_ANCHOR.SOUTH;
@@ -28691,7 +28760,7 @@ strechHorizontallyLabel.background = 'blue';
 strechHorizontallyLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST | SM_ANCHOR.EAST;
 var stickToTopLeftCornerLabel = form.newLabel('Stick to top-left corner', 10, 10, 200, 100);
 stickToTopLeftCornerLabel.background = 'orange';
-stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST; // This is equivalent to SM_ANCHOR.DEFAULT 
+stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST; // This is equivalent to SM_ANCHOR.DEFAULT
 var stickToBottomRightCornerLabel = form.newLabel('Stick to bottom-right corner', 190, 190, 200, 100);
 stickToBottomRightCornerLabel.background = 'pink';
 stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sample>
@@ -28709,7 +28778,7 @@ stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sa
             <sample clientSupport="ng,wc,sc"><![CDATA[// This property can be used on all types of components.
 // Here it is illustrated only for labels and fields.
 var greenLabel = form.newLabel('Green',10,10,100,50);
-greenLabel.background = 'green'; // Use generic names for colors.	
+greenLabel.background = 'green'; // Use generic names for colors.
 var redField = form.newField('parent_table_text',JSField.TEXT_FIELD,10,110,100,30);
 redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           </samples>
@@ -28784,7 +28853,7 @@ the component with lower Z index.]]></description>
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var labelBelow = form.newLabel('Green', 10, 10, 100, 50);
-labelBelow.background = 'green';	
+labelBelow.background = 'green';
 labelBelow.formIndex = 10;
 var fieldAbove = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 30);
 fieldAbove.background = '#FF0000';
@@ -28808,7 +28877,7 @@ The group id should be a javascript compatible identifier to allow access of the
 var label = form.newLabel('Green', 10, 10, 100, 20);
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
 label.groupID = 'someGroup';
-field.groupID = 'someGroup';	
+field.groupID = 'someGroup';
 forms['someForm'].elements.someGroup.enabled = false;]]></sample>
           </samples>
         </property>
@@ -29461,6 +29530,10 @@ var allFields = childrenPortal.getFields();
 var calFieldBack = allFields[0];
 calFieldBack.foreground = 'red';]]></sample>
           </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName" undocumented="true">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[form name]]></return>
         </function>
         <function clientSupport="wc,sc" name="getIntercellSpacing">
           <argumentsTypes/>
@@ -31654,7 +31727,7 @@ grow or shrink when a window is resized.]]></summary>
             <sample clientSupport="ng,wc,sc"><![CDATA[var form = solutionModel.newForm('mediaForm', 'db:/example_data/parent_table', null, false, 400, 300);
 var strechAllDirectionsLabel = form.newLabel('Strech all directions', 10, 10, 380, 280);
 strechAllDirectionsLabel.background = 'red';
-strechAllDirectionsLabel.anchors = SM_ANCHOR.ALL;	
+strechAllDirectionsLabel.anchors = SM_ANCHOR.ALL;
 var strechVerticallyLabel = form.newLabel('Strech vertically', 10, 10, 190, 280);
 strechVerticallyLabel.background = 'green';
 strechVerticallyLabel.anchors = SM_ANCHOR.WEST | SM_ANCHOR.NORTH | SM_ANCHOR.SOUTH;
@@ -31663,7 +31736,7 @@ strechHorizontallyLabel.background = 'blue';
 strechHorizontallyLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST | SM_ANCHOR.EAST;
 var stickToTopLeftCornerLabel = form.newLabel('Stick to top-left corner', 10, 10, 200, 100);
 stickToTopLeftCornerLabel.background = 'orange';
-stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST; // This is equivalent to SM_ANCHOR.DEFAULT 
+stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST; // This is equivalent to SM_ANCHOR.DEFAULT
 var stickToBottomRightCornerLabel = form.newLabel('Stick to bottom-right corner', 190, 190, 200, 100);
 stickToBottomRightCornerLabel.background = 'pink';
 stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sample>
@@ -31681,7 +31754,7 @@ stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sa
             <sample clientSupport="ng,wc,sc"><![CDATA[// This property can be used on all types of components.
 // Here it is illustrated only for labels and fields.
 var greenLabel = form.newLabel('Green',10,10,100,50);
-greenLabel.background = 'green'; // Use generic names for colors.	
+greenLabel.background = 'green'; // Use generic names for colors.
 var redField = form.newField('parent_table_text',JSField.TEXT_FIELD,10,110,100,30);
 redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           </samples>
@@ -31760,7 +31833,7 @@ the component with lower Z index.]]></description>
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var labelBelow = form.newLabel('Green', 10, 10, 100, 50);
-labelBelow.background = 'green';	
+labelBelow.background = 'green';
 labelBelow.formIndex = 10;
 var fieldAbove = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 30);
 fieldAbove.background = '#FF0000';
@@ -31784,7 +31857,7 @@ The group id should be a javascript compatible identifier to allow access of the
 var label = form.newLabel('Green', 10, 10, 100, 20);
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
 label.groupID = 'someGroup';
-field.groupID = 'someGroup';	
+field.groupID = 'someGroup';
 forms['someForm'].elements.someGroup.enabled = false;]]></sample>
           </samples>
         </property>
@@ -32093,6 +32166,10 @@ var prop = fld.getDesignTimeProperty('myprop')]]></sample>
 var fld = frm.getField('fld')
 var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName" undocumented="true">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[form name]]></return>
         </function>
         <function clientSupport="ng,wc,sc" name="getTab">
           <argumentsTypes>
@@ -34705,7 +34782,7 @@ grow or shrink when a window is resized.]]></summary>
             <sample clientSupport="ng,wc,sc"><![CDATA[var form = solutionModel.newForm('mediaForm', 'db:/example_data/parent_table', null, false, 400, 300);
 var strechAllDirectionsLabel = form.newLabel('Strech all directions', 10, 10, 380, 280);
 strechAllDirectionsLabel.background = 'red';
-strechAllDirectionsLabel.anchors = SM_ANCHOR.ALL;	
+strechAllDirectionsLabel.anchors = SM_ANCHOR.ALL;
 var strechVerticallyLabel = form.newLabel('Strech vertically', 10, 10, 190, 280);
 strechVerticallyLabel.background = 'green';
 strechVerticallyLabel.anchors = SM_ANCHOR.WEST | SM_ANCHOR.NORTH | SM_ANCHOR.SOUTH;
@@ -34714,7 +34791,7 @@ strechHorizontallyLabel.background = 'blue';
 strechHorizontallyLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST | SM_ANCHOR.EAST;
 var stickToTopLeftCornerLabel = form.newLabel('Stick to top-left corner', 10, 10, 200, 100);
 stickToTopLeftCornerLabel.background = 'orange';
-stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST; // This is equivalent to SM_ANCHOR.DEFAULT 
+stickToTopLeftCornerLabel.anchors = SM_ANCHOR.NORTH | SM_ANCHOR.WEST; // This is equivalent to SM_ANCHOR.DEFAULT
 var stickToBottomRightCornerLabel = form.newLabel('Stick to bottom-right corner', 190, 190, 200, 100);
 stickToBottomRightCornerLabel.background = 'pink';
 stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sample>
@@ -34733,7 +34810,7 @@ stickToBottomRightCornerLabel.anchors = SM_ANCHOR.SOUTH | SM_ANCHOR.EAST;]]></sa
             <sample clientSupport="ng"><![CDATA[// This property can be used on all types of components.
 // Here it is illustrated only for labels and fields.
 var greenLabel = form.newLabel('Green',10,10,100,50);
-greenLabel.background = 'green'; // Use generic names for colors.	
+greenLabel.background = 'green'; // Use generic names for colors.
 var redField = form.newField('parent_table_text',JSField.TEXT_FIELD,10,110,100,30);
 redField.background = '#FF0000'; // Use RGB codes for colors.]]></sample>
           </samples>
@@ -34811,7 +34888,7 @@ the component with lower Z index.]]></description>
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var labelBelow = form.newLabel('Green', 10, 10, 100, 50);
-labelBelow.background = 'green';	
+labelBelow.background = 'green';
 labelBelow.formIndex = 10;
 var fieldAbove = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 10, 100, 30);
 fieldAbove.background = '#FF0000';
@@ -34836,7 +34913,7 @@ The group id should be a javascript compatible identifier to allow access of the
 var label = form.newLabel('Green', 10, 10, 100, 20);
 var field = form.newField('parent_table_text', JSField.TEXT_FIELD, 10, 40, 100, 20);
 label.groupID = 'someGroup';
-field.groupID = 'someGroup';	
+field.groupID = 'someGroup';
 forms['someForm'].elements.someGroup.enabled = false;]]></sample>
           </samples>
         </property>
@@ -35075,6 +35152,10 @@ var prop = fld.getDesignTimeProperty('myprop')]]></sample>
 var fld = frm.getField('fld')
 var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName" undocumented="true">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[form name]]></return>
         </function>
         <function clientSupport="ng" name="getJSONProperty">
           <argumentsTypes>
@@ -36901,6 +36982,30 @@ Operator: greaterThan]]></description>
             </parameter>
           </parameters>
         </function>
+        <function clientSupport="ng,wc,sc" name="isin">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Compare column with custom query result.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Compare column with custom query result.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[query.where.add(query.columns.ccy.isin("select ccycode from currencies c where c.category = " + query.getTableAlias() + ".currency_category and c.flag = ?", ['T']))]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="customQuery" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[custom query]]></description>
+            </parameter>
+            <parameter name="args" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
+              <description><![CDATA[query arguments]]></description>
+            </parameter>
+          </parameters>
+        </function>
         <function clientSupport="ng,wc,sc" name="le">
           <argumentsTypes>
             <argumentType typecode="java.lang.Object"/>
@@ -37708,6 +37813,30 @@ Operator: greaterThan]]></description>
           <parameters>
             <parameter name="values" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
               <description><![CDATA[array of values]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="ng,wc,sc" name="isin">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Compare column with custom query result.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Compare column with custom query result.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[query.where.add(query.columns.ccy.isin("select ccycode from currencies c where c.category = " + query.getTableAlias() + ".currency_category and c.flag = ?", ['T']))]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="customQuery" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[custom query]]></description>
+            </parameter>
+            <parameter name="args" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
+              <description><![CDATA[query arguments]]></description>
             </parameter>
           </parameters>
         </function>
@@ -38561,6 +38690,30 @@ Operator: greaterThan]]></description>
           <parameters>
             <parameter name="values" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
               <description><![CDATA[array of values]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="ng,wc,sc" name="isin">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBCondition" typecode="com.servoy.j2db.querybuilder.impl.QBCondition"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Compare column with custom query result.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Compare column with custom query result.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[query.where.add(query.columns.ccy.isin("select ccycode from currencies c where c.category = " + query.getTableAlias() + ".currency_category and c.flag = ?", ['T']))]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="customQuery" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[custom query]]></description>
+            </parameter>
+            <parameter name="args" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
+              <description><![CDATA[query arguments]]></description>
             </parameter>
           </parameters>
         </function>
@@ -40343,6 +40496,108 @@ query.where.add(query.columns.orderdate.isNull)]]></sample>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[query.result.addPk()]]></sample>
           </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="addSubSelect">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBResult" typecode="com.servoy.j2db.querybuilder.impl.QBResult"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Add a query to the query result.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Add a query to the query result.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[// make sure the query returns exactly 1 value.
+query.result.addSubSelect(subquery);]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
+              <description><![CDATA[query to add to result]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="ng,wc,sc" name="addSubSelect">
+          <argumentsTypes>
+            <argumentType typecode="com.servoy.j2db.querybuilder.impl.QBSelect"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBResult" typecode="com.servoy.j2db.querybuilder.impl.QBResult"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Add a query with alias to the query result.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Add a query with alias to the query result.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[// make sure the query returns exactly 1 value.
+query.result.addSubSelect(subquery, "mx");]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="query" type="com.servoy.j2db.querybuilder.impl.QBSelect" typecode="com.servoy.j2db.querybuilder.impl.QBSelect">
+              <description><![CDATA[query to add to result]]></description>
+            </parameter>
+            <parameter name="alias" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[result alias]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="ng,wc,sc" name="addSubSelect">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBResult" typecode="com.servoy.j2db.querybuilder.impl.QBResult"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Add a custom subquery to the query result.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Add a custom subquery to the query result.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[// make sure the subquery returns exactly 1 value.
+// select (select max from othertab where val = 'test') from tab
+query.result.addSubSelect("select max from othertab where val = ?", ["test"]);]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="customQuery" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[query to add to result]]></description>
+            </parameter>
+            <parameter name="args" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
+              <description><![CDATA[arguments to the query]]></description>
+            </parameter>
+          </parameters>
+        </function>
+        <function clientSupport="ng,wc,sc" name="addSubSelect">
+          <argumentsTypes>
+            <argumentType typecode="java.lang.String"/>
+            <argumentType typecode="[Ljava.lang.Object;"/>
+            <argumentType typecode="java.lang.String"/>
+          </argumentsTypes>
+          <return type="com.servoy.j2db.querybuilder.impl.QBResult" typecode="com.servoy.j2db.querybuilder.impl.QBResult"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Add a custom subquery with alias to the query result.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Add a custom subquery with alias to the query result.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[// make sure the subquery returns exactly 1 value.
+// select (select max from othertab where val = 'test') as mx from tab
+query.result.addSubSelect("select max from othertab where val = ?", ["test"], "mx");]]></sample>
+          </samples>
+          <parameters>
+            <parameter name="customQuery" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[query to add to result]]></description>
+            </parameter>
+            <parameter name="args" type="com.servoy.j2db.documentation.scripting.docs.Object[]" typecode="[Ljava.lang.Object;">
+              <description><![CDATA[arguments to the query]]></description>
+            </parameter>
+            <parameter name="alias" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
+              <description><![CDATA[result alias]]></description>
+            </parameter>
+          </parameters>
         </function>
         <function clientSupport="ng,wc,sc" name="addValue">
           <argumentsTypes>
@@ -42241,6 +42496,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
           </samples>
         </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
+        </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The height of the element in pixels.]]></return>
@@ -42991,6 +43259,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
           </samples>
         </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
+        </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The height of the element in pixels.]]></return>
@@ -43544,6 +43825,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
           </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
@@ -44139,6 +44433,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
           </samples>
         </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
+        </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The height of the element in pixels.]]></return>
@@ -44665,6 +44972,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
           </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
@@ -45236,6 +45556,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
           </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
@@ -45942,6 +46275,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
           </samples>
         </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
+        </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The height of the element in pixels.]]></return>
@@ -46468,6 +46814,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
           </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
@@ -47005,6 +47364,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
           </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
@@ -47616,6 +47988,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
           </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
@@ -48280,6 +48665,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
           </samples>
         </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
+        </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The height of the element in pixels.]]></return>
@@ -48839,6 +49237,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
           </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
@@ -49515,6 +49926,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
           </samples>
         </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
+        </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The height of the element in pixels.]]></return>
@@ -50102,6 +50526,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
           </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
@@ -50840,6 +51277,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
           </samples>
         </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
+        </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The height of the element in pixels.]]></return>
@@ -51387,6 +51837,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
           </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
@@ -52080,6 +52543,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
           </samples>
         </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
+        </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The height of the element in pixels.]]></return>
@@ -52642,6 +53118,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
           </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
@@ -53292,6 +53781,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
           </samples>
         </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
+        </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The height of the element in pixels.]]></return>
@@ -53861,6 +54363,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
           </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
@@ -54481,6 +54996,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
           </samples>
         </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
+        </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The height of the element in pixels.]]></return>
@@ -55040,6 +55568,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
           </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
@@ -55744,6 +56285,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
           </samples>
         </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
+        </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The height of the element in pixels.]]></return>
@@ -56377,6 +56931,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
           </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
@@ -57155,6 +57722,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
           </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
@@ -57999,6 +58579,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
           </samples>
         </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
+        </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int"><![CDATA[The height of the element in pixels.]]></return>
@@ -58731,6 +59324,19 @@ NOTE: Depending on the operating system, a user interface property name may be a
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[var et = %%prefix%%%%elementName%%.getElementType();]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getFormName">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
           </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getHeight">
