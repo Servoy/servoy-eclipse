@@ -446,13 +446,18 @@ public class CreateComponentHandler implements IServerService
 				WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(name);
 				if (spec != null)
 				{
-					// bean
-					String compName = "bean_" + id.incrementAndGet();
+					String compName = null;
+					String firstPart = name;
+					int index = firstPart.indexOf("-");
+					if (index != -1)
+					{
+						firstPart = firstPart.substring(index + 1);
+					}
+					compName = firstPart + "_" + id.incrementAndGet();
 					while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
 					{
-						compName = "bean_" + id.incrementAndGet();
+						compName = firstPart + "_" + id.incrementAndGet();
 					}
-
 					WebComponent webComponent = null;
 					if (parent instanceof Portal)
 					{
