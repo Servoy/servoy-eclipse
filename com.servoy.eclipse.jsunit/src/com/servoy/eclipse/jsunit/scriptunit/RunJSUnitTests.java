@@ -116,15 +116,16 @@ public abstract class RunJSUnitTests implements Runnable
 			// until more authentication options are supported, just warn the user about what won't work
 			try
 			{
-				if (sp.getSolution() != null && sp.getSolution().getLoginSolutionName() != null)
+				if (sp.getSolution() != null && (sp.getSolution().getMustAuthenticate() || sp.getSolution().getLoginSolutionName() != null))
 				{
 					UIUtils.runInUI(new Runnable()
 					{
 						public void run()
 						{
-							MessageDialog.openWarning(window == null ? Display.getCurrent().getActiveShell() : window.getShell(),
+							MessageDialog.openWarning(
+								window == null ? Display.getCurrent().getActiveShell() : window.getShell(),
 								"Unable to run unit tests",
-								"Running unit tests for solutions that require authentication through a login/authenticator solution is not currently supported.\n\nTo run unit tests for such a solution, create a new solution that does not require authentication and add the solution that requires authentication to it as a module.\nThis way you will be able to run tests without authenticating.");
+								"Running unit tests for solutions that require authentication through a login/authenticator form/solution is not currently supported.\n\nTo run unit tests for such a solution, create a new solution that does not require authentication and add the solution that requires authentication to it as a module.\nThis way you will be able to run tests without authenticating.");
 						}
 					}, false);
 					return;
