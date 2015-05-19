@@ -2002,6 +2002,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			String tooltip = null;
 			Class< ? > returnType = null;
+			String returnDescription = null;
 			String[] paramNames = null;
 			boolean namesOnly = false;
 			if (scriptObject != null)
@@ -2012,16 +2013,23 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					ClientSupport csp = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
 					description = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, parameterTypes, csp);
 					returnType = ((XMLScriptObjectAdapter)scriptObject).getReturnedType(name, parameterTypes);
+					returnDescription = ((XMLScriptObjectAdapter)scriptObject).getReturnDescription(name, parameterTypes);
 					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, parameterTypes);
+					tooltip = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, parameterTypes, csp);
 					if (parameters != null)
 					{
 						paramNames = new String[parameters.length];
 						for (int i = 0; i < parameters.length; i++)
 						{
 							paramNames[i] = parameters[i].getName();
+							tooltip = tooltip + "\n @param {" + parameters[i].getType() + "} " + parameters[i].getName() + " " + parameters[i].getDescription();
 						}
 					}
-					tooltip = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, parameterTypes, csp);
+					if (returnType != null)
+					{
+						tooltip = tooltip + "\n @return {" + getReturnTypeString(returnType) + "} ";
+						if (returnDescription != null) tooltip += returnDescription;
+					}
 				}
 				else
 				{
