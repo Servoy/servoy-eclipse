@@ -155,7 +155,8 @@ public class EditorServiceHandler implements IServerService
 					if (args.has("isInheritedForm")) return editorPart.getForm().getExtendsID() > 0;
 					if (args.has("showData"))
 					{
-						return Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_DATA_IN_ANGULAR_DESIGNER);
+						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_DATA_IN_ANGULAR_DESIGNER)
+							? Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_DATA_IN_ANGULAR_DESIGNER) : true;
 					}
 
 				}

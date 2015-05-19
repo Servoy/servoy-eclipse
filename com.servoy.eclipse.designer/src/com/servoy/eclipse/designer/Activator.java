@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.designer;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import java.util.Map;
 import javax.swing.ImageIcon;
 
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.preference.IPersistentPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
@@ -42,6 +44,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IDebugClientHandler;
 import com.servoy.j2db.server.ngclient.WebsocketSessionFactory;
 import com.servoy.j2db.server.ngclient.design.DesignNGClient;
@@ -76,7 +79,7 @@ public class Activator extends AbstractUIPlugin
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -154,13 +157,21 @@ public class Activator extends AbstractUIPlugin
 			boolean showData = client.getShowData();
 			showData = !showData;
 			client.setShowData(showData);
-			getPreferenceStore().setValue(SHOW_DATA_IN_ANGULAR_DESIGNER, showData);
+			getPreferenceStore().putValue(SHOW_DATA_IN_ANGULAR_DESIGNER, String.valueOf(showData));
+			try
+			{
+				((IPersistentPreferenceStore)getPreferenceStore()).save();
+			}
+			catch (IOException e)
+			{
+				ServoyLog.logError(e);
+			}
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
