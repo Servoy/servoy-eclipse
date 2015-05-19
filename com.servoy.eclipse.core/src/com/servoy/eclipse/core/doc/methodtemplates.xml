@@ -400,6 +400,7 @@ For more information on deeplinking, see the chapters on the different Clients i
   <event name="onRecordEditStartMethodID">
     <methodtemplate addtodo="true" name="onRecordEditStart" type="Boolean">
       <description><![CDATA[Callback method form when editing is started]]></description>
+      <code><![CDATA[return true]]></code>
       <arguments>
         <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
       </arguments>
