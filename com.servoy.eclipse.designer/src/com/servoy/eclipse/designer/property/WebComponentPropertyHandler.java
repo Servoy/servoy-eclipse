@@ -254,7 +254,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 
 		try
 		{
-			JSONObject jsonObject = bean.getJson() == null ? new ServoyJSONObject(true, true) : bean.getJson();
+			ServoyJSONObject jsonObject = bean.getJson() == null ? new ServoyJSONObject(true, true) : bean.getJson();
 			if (!jsonObject.has(getName()) || !jsonObject.get(getName()).equals(convertedValue))
 			{
 				jsonObject.put(getName(), convertedValue);
