@@ -72,13 +72,13 @@ public class EditorContentFilter implements Filter
 				css.add("css/servoy.css");
 				for (WebComponentPackageSpecification<WebLayoutSpecification> entry : WebComponentSpecProvider.getInstance().getLayoutSpecifications().values())
 				{
-					if (entry.getCssLibrary() != null)
+					if (entry.getCssDesignLibrary() != null)
 					{
-						css.addAll(entry.getCssLibrary());
+						css.addAll(entry.getCssDesignLibrary());
 					}
-					if (entry.getJsLibrary() != null)
+					if (entry.getJsDesignLibrary() != null)
 					{
-						formScripts.addAll(entry.getJsLibrary());
+						formScripts.addAll(entry.getJsDesignLibrary());
 					}
 				}
 				IndexPageEnhancer.enhance(getClass().getResource("editor-content.html"), httpServletRequest.getContextPath(), css, formScripts,

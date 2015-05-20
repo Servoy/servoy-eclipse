@@ -307,7 +307,8 @@ public class DesignerFilter implements Filter
 
 	private boolean isAccesibleInLayoutType(WebComponentPackageSpecification< ? > pkg, String layoutType)
 	{
-		if ("True".equals(pkg.getManifest().getMainAttributes().getValue(layoutType))) return true;
+		if (pkg.getManifest() != null && pkg.getManifest().getMainAttributes() != null &&
+			Boolean.valueOf(pkg.getManifest().getMainAttributes().getValue(layoutType))) return true;
 		if (noLayoutTypeSpecified(pkg.getManifest())) return true;
 		return false;
 	}
@@ -316,7 +317,7 @@ public class DesignerFilter implements Filter
 	{
 		for (String layoutTypeName : layoutTypeNames)
 		{
-			if (mf.getMainAttributes().getValue(layoutTypeName) != null) return false;
+			if (mf != null && mf.getMainAttributes() != null && mf.getMainAttributes().getValue(layoutTypeName) != null) return false;
 		}
 		return true;
 	}
