@@ -97,6 +97,7 @@ import org.osgi.service.prefs.Preferences;
 import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
 
+import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
 import com.servoy.eclipse.core.resource.DesignerTypes;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
@@ -135,6 +136,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.plugins.IMethodTemplatesProvider;
 import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
+import com.servoy.j2db.server.ngclient.BodyPortal;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.property.types.Types;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -929,6 +931,17 @@ public class Activator extends Plugin
 													affectedFormElements.add(parent);
 												}
 												parent = parent.getParent();
+											}
+											if (parent instanceof Form &&
+												(((Form)parent).getView() == IFormConstants.VIEW_TYPE_TABLE ||
+													((Form)parent).getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED ||
+													((Form)parent).getView() == IFormConstants.VIEW_TYPE_LIST || ((Form)parent).getView() == IFormConstants.VIEW_TYPE_LIST_LOCKED))
+											{
+												BodyPortal hiddenPortal = new BodyPortal((Form)parent);
+												if (!affectedFormElements.contains(hiddenPortal))
+												{
+													affectedFormElements.add(hiddenPortal);
+												}
 											}
 										}
 									}
