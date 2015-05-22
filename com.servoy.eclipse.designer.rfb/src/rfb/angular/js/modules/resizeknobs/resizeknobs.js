@@ -29,16 +29,26 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 				$editorService.sendChanges(obj)
 			}
 			var mousemovecallback;
-			var mouseupcallback;
+			var mouseupcallback, mouseleavecallback;
 			var revertresizecallback;
 			var cleanListeners = function(){
 				if (mousemovecallback) $scope.unregisterDOMEvent("mousemove","CONTENT_AREA",mousemovecallback);
 				if (mouseupcallback)  $scope.unregisterDOMEvent("mouseup","CONTENT_AREA",mouseupcallback);
+				if (mouseleavecallback)  $scope.unregisterDOMEvent("mouseleave","CONTENT_AREA",mouseleavecallback);
 				if (revertresizecallback)  $scope.unregisterDOMEvent("keydown","CONTENT_AREA",revertresizecallback);
 				mousemovecallback = null;
 				mouseupcallback = null;
+				mouseleavecallback = null;
 				revertresizecallback = null;
 			}
+			
+			var onmouseup = function(ev) {
+				$scope.setCursorStyle("");
+				cleanListeners();
+				resizeSelection(ev);
+				sendChanges();				
+			}
+			
 			$scope.enterResizeMode = function(event,resizeInfo)
 			{
 				if(event.button == 0)
@@ -94,12 +104,8 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 					}
 					cleanListeners();
 					mousemovecallback = $scope.registerDOMEvent("mousemove","CONTENT_AREA",resizeSelection);
-					mouseupcallback = $scope.registerDOMEvent("mouseup","CONTENT_AREA", function(ev){
-						$scope.setCursorStyle("");
-						cleanListeners();
-						resizeSelection(ev);
-						sendChanges();
-					});
+					mouseupcallback = $scope.registerDOMEvent("mouseup","CONTENT_AREA", onmouseup);
+					mouseleavecallback = $scope.registerDOMEvent("mouseleave","CONTENT_AREA", onmouseup);
 					revertresizecallback =  $scope.registerDOMEvent("keydown","CONTENT_AREA", function(ev){
 						if (ev.keyCode == 27)
 						{

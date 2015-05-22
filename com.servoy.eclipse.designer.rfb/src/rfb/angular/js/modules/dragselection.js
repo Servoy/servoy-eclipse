@@ -234,7 +234,7 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 				}
 			}
 		}
-		
+
 		$('body').keyup(function(event){
 			//if control is released during drag, the copy is deleted and selected element must be moved
 			if (dragStartEvent && dragStartEvent.ctrlKey && event.which == 17)
@@ -251,6 +251,7 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 		editorScope.registerDOMEvent("mousedown","CONTENTFRAME_OVERLAY", onmousedown); // real selection in editor content iframe
 		editorScope.registerDOMEvent("mouseup","CONTENTFRAME_OVERLAY", onmouseup); // real selection in editor content iframe
 		editorScope.registerDOMEvent("mousemove","CONTENTFRAME_OVERLAY", onmousemove); // real selection in editor content iframe
+		editorScope.registerDOMEvent("mouseleave","CONTENTFRAME_OVERLAY", onmouseup); // real selection in editor content iframe
 		
 	})
 		});
