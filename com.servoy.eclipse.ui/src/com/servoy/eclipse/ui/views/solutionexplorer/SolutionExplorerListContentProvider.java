@@ -105,6 +105,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportName;
+import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.NameComparator;
@@ -568,9 +569,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					prefix += ((ISupportName)model).getName();
 				}
 
-				if (model instanceof IPersist && FormTemplateGenerator.isWebcomponentBean((IPersist)model))
+				if (model instanceof IWebComponent && FormTemplateGenerator.isWebcomponentBean((IWebComponent)model))
 				{
-					lm = getWebComponentMembers(prefix, (Bean)model);
+					lm = getWebComponentMembers(prefix, (IWebComponent)model);
 					key = null; // for now don't cache this.
 				}
 				else if (specificClass == null)
@@ -1669,7 +1670,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return dlm.toArray(nodes);
 	}
 
-	private SimpleUserNode[] getWebComponentMembers(String prefix, Bean webcomponent)
+	private SimpleUserNode[] getWebComponentMembers(String prefix, IWebComponent webcomponent)
 	{
 		String prefixForWebComponentMembers = prefix + ".";
 		if (webcomponent == null)
