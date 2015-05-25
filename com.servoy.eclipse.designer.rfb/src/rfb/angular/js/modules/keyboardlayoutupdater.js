@@ -94,33 +94,33 @@ angular.module('keyboardlayoutupdater', ['editor']).run(function($pluginRegistry
 		editorScope.sendUpdates = null;
 		function onkeyup(event) {
 			if (editorScope.sendUpdates) $timeout.cancel(editorScope.sendUpdates);
+			var obj = {};
+			if(boundsUpdating) {
+				boundsUpdating = false;
+				var selection = editorScope.getSelection();
+
+				if (selection.length > 0)
+					highlightDiv.style.display = 'none';
+
+				selection = utils.addGhostsToSelection(selection);
+
+				for(var i=0;i<selection.length;i++) {
+					var node = selection[i];
+					var beanModel = editorScope.getBeanModel(node);
+					if (beanModel){
+						obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y,width:beanModel.size.width,height:beanModel.size.height}
+					}
+					else {
+						var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+						obj[node.getAttribute("svy-id")] = {x:ghostObject.location.x,y:ghostObject.location.y}
+						editorScope.refocusGlasspane = true;
+					}
+				}
+			}	
 			editorScope.sendUpdates = $timeout(function(){
 				editorScope.sendUpdates = null;
-				if(boundsUpdating) {
-					boundsUpdating = false;
-					var obj = {};
-					var selection = editorScope.getSelection();
-					
-					if (selection.length > 0)
-						highlightDiv.style.display = 'none';
-					
-					selection = utils.addGhostsToSelection(selection);
-					
-					for(var i=0;i<selection.length;i++) {
-						var node = selection[i];
-						var beanModel = editorScope.getBeanModel(node);
-						if (beanModel){
-							obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y,width:beanModel.size.width,height:beanModel.size.height}
-						}
-						else {
-							var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-							obj[node.getAttribute("svy-id")] = {x:ghostObject.location.x,y:ghostObject.location.y}
-							editorScope.refocusGlasspane = true;
-						}
-					}
-					$editorService.sendChanges(obj);
-					
-				}	
+				$editorService.sendChanges(obj);
+
 			},500);
 		}
 
