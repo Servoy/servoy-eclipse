@@ -405,7 +405,15 @@ public class CreateComponentHandler implements IServerService
 				{
 					compName = "tabpanel_" + id.incrementAndGet();
 				}
-				TabPanel tabPanel = editorPart.getForm().createNewTabPanel(compName);
+				TabPanel tabPanel = null;
+				if (parent instanceof AbstractContainer)
+				{
+					tabPanel = ((AbstractContainer)parent).createNewTabPanel(compName);
+				}
+				else
+				{
+					tabPanel = editorPart.getForm().createNewTabPanel(compName);
+				}
 				tabPanel.setLocation(new Point(x, y));
 				tabPanel.setSize(new Dimension(w, h));
 				return tabPanel;
@@ -417,7 +425,15 @@ public class CreateComponentHandler implements IServerService
 				{
 					compName = "tabpanel_" + id.incrementAndGet();
 				}
-				TabPanel tabPanel = editorPart.getForm().createNewTabPanel(compName);
+				TabPanel tabPanel = null;
+				if (parent instanceof AbstractContainer)
+				{
+					tabPanel = ((AbstractContainer)parent).createNewTabPanel(compName);
+				}
+				else
+				{
+					tabPanel = editorPart.getForm().createNewTabPanel(compName);
+				}
 				tabPanel.setLocation(new Point(x, y));
 				tabPanel.setTabOrientation(TabPanel.SPLIT_HORIZONTAL);
 				tabPanel.setSize(new Dimension(w, h));
@@ -430,7 +446,15 @@ public class CreateComponentHandler implements IServerService
 				{
 					compName = "portal_" + id.incrementAndGet();
 				}
-				Portal portal = editorPart.getForm().createNewPortal(compName, new Point(x, y));
+				Portal portal = null;
+				if (parent instanceof AbstractContainer)
+				{
+					portal = ((AbstractContainer)parent).createNewPortal(compName, new Point(x, y));
+				}
+				else
+				{
+					portal = editorPart.getForm().createNewPortal(compName, new Point(x, y));
+				}
 				portal.setSize(new Dimension(w, h));
 				return portal;
 			}
