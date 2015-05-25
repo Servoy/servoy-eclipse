@@ -1226,6 +1226,8 @@ public class TypeCreator extends TypeCache
 		{
 			Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
 			method.setName("getFormName");
+			method.setDescription("Returns the name of the form. (may be empty string as well)</br></br>var name = elements.elem.getFormName();"
+				+ "</br></br><b>@return</b> The name of the form.");
 			members.add(method);
 		}
 		return addType("WEB:COMPONENTS", type);
