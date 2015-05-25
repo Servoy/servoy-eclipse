@@ -575,8 +575,16 @@ public class CreateComponentHandler implements IServerService
 					for (int i = 0; i < array.length(); i++)
 					{
 						JSONObject jsonObject = array.getJSONObject(i);
-						WebLayoutSpecification spec = specifications.getSpecification(jsonObject.getString("layoutName"));
-						createLayoutContainer(container, spec, jsonObject.optJSONObject("model"), i + 1, specifications, packageName);
+						if (jsonObject.has("layoutName"))
+						{
+							WebLayoutSpecification spec = specifications.getSpecification(jsonObject.getString("layoutName"));
+							createLayoutContainer(container, spec, jsonObject.optJSONObject("model"), i + 1, specifications, packageName);
+						}
+						else if (jsonObject.has("componentName"))
+						{
+							String compName = "bean_" + id.incrementAndGet();
+							container.createWebComponent(compName, jsonObject.getString("componentName"));
+						}
 					}
 				} // children and layoutName are special
 				else if (!"layoutName".equals(key)) container.putAttribute(key, value.toString());
