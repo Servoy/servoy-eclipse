@@ -41,14 +41,7 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 				mouseleavecallback = null;
 				revertresizecallback = null;
 			}
-			
-			var onmouseup = function(ev) {
-				$scope.setCursorStyle("");
-				cleanListeners();
-				resizeSelection(ev);
-				sendChanges();				
-			}
-			
+
 			$scope.enterResizeMode = function(event,resizeInfo)
 			{
 				if(event.button == 0)
@@ -89,6 +82,14 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 								y: ev.screenY
 						}
 					}
+					
+					var onmouseup = function(ev) {
+						$scope.setCursorStyle("");
+						cleanListeners();
+						resizeSelection(ev);
+						sendChanges();				
+					}					
+					
 					var selection = $scope.getSelection();
 					for(var i=0;i<selection.length;i++) {
 						var node = selection[i];
