@@ -70,7 +70,7 @@ public class NewComponentAction extends Action
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	@Override
@@ -166,6 +166,7 @@ public class NewComponentAction extends Action
 				text = IOUtils.toString(in, "UTF-8");
 				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
 				text = text.replaceAll("\\$\\{NAME\\}", componentName);
+				text = text.replaceAll("\\$\\{DASHEDNAME\\}", getDashedName(componentName));
 				text = text.replaceAll("\\$\\{PACKAGENAME\\}", pack.getName());
 				createFile(componentName + ".spec", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
 
@@ -191,6 +192,26 @@ public class NewComponentAction extends Action
 				}
 			}
 		}
+	}
+
+	private String getDashedName(String name)
+	{
+		if (name != null && name.length() > 0)
+		{
+			StringBuilder dashedName = new StringBuilder();
+			dashedName.append(name.charAt(0));
+			for (int i = 1; i < name.length(); i++)
+			{
+				if (name.charAt(i) >= 'A' && name.charAt(i) <= 'Z')
+				{
+					dashedName.append('-');
+				}
+				dashedName.append(name.charAt(i));
+			}
+			return dashedName.toString();
+		}
+
+		return name;
 	}
 
 	/**
@@ -252,7 +273,7 @@ public class NewComponentAction extends Action
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.action.Action#isEnabled()
 	 */
 	@Override
