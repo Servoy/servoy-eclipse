@@ -121,7 +121,7 @@ angular.module('keyboardlayoutupdater', ['editor']).run(function($pluginRegistry
 					$editorService.sendChanges(obj);
 					
 				}	
-			},100);
+			},500);
 		}
 
 		editorScope.registerDOMEvent("keydown","CONTENTFRAME_OVERLAY", onkeydown);
