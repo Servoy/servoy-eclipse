@@ -111,7 +111,13 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		}
 		else
 		{
-			exportModel = new ExportWarModel(getDialogSettings());
+			IDialogSettings section = getDialogSettings().getSection(activeProject.getSolution().getName());
+			if (section == null)
+			{
+				section = getDialogSettings().addNewSection("WarExportWizard");
+			}
+			setDialogSettings(section);
+			exportModel = new ExportWarModel(section);
 		}
 	}
 
@@ -138,7 +144,14 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		lafSelectionPage.storeInput();
 		serversSelectionPage.storeInput();
 
-		exportModel.saveSettings(getDialogSettings());
+		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		IDialogSettings section = getDialogSettings().getSection(activeProject.getSolution().getName());
+		if (section == null)
+		{
+			section = getDialogSettings().addNewSection("WarExportWizard");
+		}
+		setDialogSettings(section);
+		exportModel.saveSettings(section);
 		errorFlag = false;
 		IRunnableWithProgress job = new IRunnableWithProgress()
 		{
