@@ -79,7 +79,7 @@ public class Activator extends AbstractUIPlugin
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -94,6 +94,11 @@ public class Activator extends AbstractUIPlugin
 			public void i18nChanged()
 			{
 				com.servoy.eclipse.core.Activator.getDefault().getDesignClient().refreshI18NMessages();
+
+				if (client != null)
+				{
+					client.refreshI18NMessages();
+				}
 
 				if (PlatformUI.getWorkbench().getActiveWorkbenchWindow() != null &&
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage() != null)
@@ -171,7 +176,7 @@ public class Activator extends AbstractUIPlugin
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
