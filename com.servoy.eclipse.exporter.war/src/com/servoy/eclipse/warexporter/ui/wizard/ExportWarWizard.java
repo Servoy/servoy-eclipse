@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -88,11 +89,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 	{
 		setWindowTitle("War Export");
 		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
-		IDialogSettings section = workbenchSettings.getSection("WarExportWizard");
-		if (section == null)
-		{
-			section = workbenchSettings.addNewSection("WarExportWizard");
-		}
+		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, activeProject.getSolution().getName());
 		setDialogSettings(section);
 		setNeedsProgressMonitor(true);
 	}
@@ -111,12 +109,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		}
 		else
 		{
-			IDialogSettings section = getDialogSettings().getSection(activeProject.getSolution().getName());
-			if (section == null)
-			{
-				section = getDialogSettings().addNewSection("WarExportWizard");
-			}
-			setDialogSettings(section);
+			IDialogSettings section = DialogSettings.getOrCreateSection(getDialogSettings(), activeProject.getSolution().getName());
 			exportModel = new ExportWarModel(section);
 		}
 	}
@@ -145,11 +138,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		serversSelectionPage.storeInput();
 
 		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		IDialogSettings section = getDialogSettings().getSection(activeProject.getSolution().getName());
-		if (section == null)
-		{
-			section = getDialogSettings().addNewSection("WarExportWizard");
-		}
+		IDialogSettings section = DialogSettings.getOrCreateSection(getDialogSettings(), activeProject.getSolution().getName());
 		setDialogSettings(section);
 		exportModel.saveSettings(section);
 		errorFlag = false;
