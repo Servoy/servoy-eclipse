@@ -90,7 +90,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		setWindowTitle("War Export");
 		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
 		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, activeProject.getSolution().getName());
+		IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard:" + activeProject.getSolution().getName());
 		setDialogSettings(section);
 		setNeedsProgressMonitor(true);
 	}
@@ -109,8 +109,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		}
 		else
 		{
-			IDialogSettings section = DialogSettings.getOrCreateSection(getDialogSettings(), activeProject.getSolution().getName());
-			exportModel = new ExportWarModel(section);
+			exportModel = new ExportWarModel(getDialogSettings());
 		}
 	}
 
@@ -137,10 +136,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		lafSelectionPage.storeInput();
 		serversSelectionPage.storeInput();
 
-		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		IDialogSettings section = DialogSettings.getOrCreateSection(getDialogSettings(), activeProject.getSolution().getName());
-		setDialogSettings(section);
-		exportModel.saveSettings(section);
+		exportModel.saveSettings(getDialogSettings());
 		errorFlag = false;
 		IRunnableWithProgress job = new IRunnableWithProgress()
 		{
