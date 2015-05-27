@@ -186,7 +186,9 @@
             var paletteSpace = 0.7; // allocate 70% of the remaining space for the palette
             paletteSpace = 1; header2Height = 0 // Servoy: categories is hidden so use full size
             used = header1Height + header2Height + resizeBarHeight;
-            e.height(Math.round((e.parent().height() - used) * paletteSpace));
+            var newHeight = Math.round((e.parent().height() - used) * paletteSpace);
+            setTimeout(function(){  e.height(newHeight); }, 1000);
+           
         }
     });
 })(jQuery);
