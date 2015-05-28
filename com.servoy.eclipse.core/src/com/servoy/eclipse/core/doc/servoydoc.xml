@@ -10051,9 +10051,18 @@ var fld = frm.getField('fld')
 var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
         </function>
-        <function clientSupport="ng,wc,sc" name="getFormName" undocumented="true">
+        <function clientSupport="ng,wc,sc" name="getFormName">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[form name]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getUUID">
           <argumentsTypes/>
@@ -11182,9 +11191,18 @@ var fld = frm.getField('fld')
 var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
         </function>
-        <function clientSupport="ng,wc,sc" name="getFormName" undocumented="true">
+        <function clientSupport="ng,wc,sc" name="getFormName">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[form name]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getUUID">
           <argumentsTypes/>
@@ -13870,9 +13888,18 @@ var fld = frm.getField('fld')
 var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
         </function>
-        <function clientSupport="ng,wc,sc" name="getFormName" undocumented="true">
+        <function clientSupport="ng,wc,sc" name="getFormName">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[form name]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getUUID">
           <argumentsTypes/>
@@ -17080,9 +17107,18 @@ var fld = frm.getField('fld')
 var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
         </function>
-        <function clientSupport="ng,wc,sc" name="getFormName" undocumented="true">
+        <function clientSupport="ng,wc,sc" name="getFormName">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[form name]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
         </function>
         <function clientSupport="mc" name="getTitle">
           <argumentsTypes/>
@@ -25872,9 +25908,18 @@ var fld = frm.getField('fld')
 var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
         </function>
-        <function clientSupport="ng,wc,sc" name="getFormName" undocumented="true">
+        <function clientSupport="ng,wc,sc" name="getFormName">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[form name]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
         </function>
         <function clientSupport="mc" name="getTitle">
           <argumentsTypes/>
@@ -29531,9 +29576,18 @@ var calFieldBack = allFields[0];
 calFieldBack.foreground = 'red';]]></sample>
           </samples>
         </function>
-        <function clientSupport="ng,wc,sc" name="getFormName" undocumented="true">
+        <function clientSupport="ng,wc,sc" name="getFormName">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[form name]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
         </function>
         <function clientSupport="wc,sc" name="getIntercellSpacing">
           <argumentsTypes/>
@@ -32167,9 +32221,18 @@ var fld = frm.getField('fld')
 var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
         </function>
-        <function clientSupport="ng,wc,sc" name="getFormName" undocumented="true">
+        <function clientSupport="ng,wc,sc" name="getFormName">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[form name]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getTab">
           <argumentsTypes>
@@ -35153,9 +35216,18 @@ var fld = frm.getField('fld')
 var propNames = fld.getDesignTimePropertyNames()]]></sample>
           </samples>
         </function>
-        <function clientSupport="ng,wc,sc" name="getFormName" undocumented="true">
+        <function clientSupport="ng,wc,sc" name="getFormName">
           <argumentsTypes/>
-          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[form name]]></return>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[The name of the form.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form. (may be empty string as well)]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Returns the name of the form.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var name = %%prefix%%%%elementName%%.getFormName();]]></sample>
+          </samples>
         </function>
         <function clientSupport="ng" name="getJSONProperty">
           <argumentsTypes>
