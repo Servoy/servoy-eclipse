@@ -181,7 +181,21 @@
 								},
 								"type": {
 									"description": "the type of the parameter",
-									"type": "object"
+									"oneOf": [
+										{
+											"type": "string"
+										},
+										{
+											"type": "object",
+											"properties": {
+											 	"type": {
+											 		"type": "string"
+											 	}
+											},
+											"required": ["type"],
+											"additionalProperties":true
+										}
+									]
 								},
 								"optional": {
 									"type":"boolean"
