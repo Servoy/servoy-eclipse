@@ -153,7 +153,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 		isExportActiveSolutionOnly = true;
 		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolutionOnly = false;
 		pluginLocations = parseArg("pluginLocations", null, argsMap);
-		if (pluginLocations == null) pluginLocations = "../plugins";
+		if (pluginLocations == null) pluginLocations = "developer/../plugins";
 		selectedComponents = parseComponentsArg("crefs", argsMap);
 		selectedServices = parseComponentsArg("srefs", argsMap);
 
