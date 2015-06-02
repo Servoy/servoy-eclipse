@@ -1,24 +1,33 @@
 <div>
-	<input type="text" class="form-control input-xs" placeholder="Search" ng-model="searchText"/>
-	<accordion close-others='oneAtATime' ui-sortable="sortableOptions" ng-model="packages">
-		<accordion-group ng-repeat="package in packages" is-open="package.isOpen" ng-if="(package.components | filter:{displayName:searchText}).length > 0">
-			<accordion-heading>
-				<h1 class="palette-heading handle"><i class="glyphicon glyphicon-move"></i>{{package.packageDisplayname}}<span ng-class="package.isOpen ? 'glyphicon glyphicon-chevron-down' : 'glyphicon glyphicon-chevron-right'" style="float: right"></span></h1>
-			</accordion-heading>
-		    <div>
-			    <ul>
-					<li ng-repeat="item in package.components | filter:{displayName:searchText} | orderBy:'displayName'" style="position:relative;">
-						<div ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.componentType,item.topContainer, item.layoutName) " title="Place component {{item.displayName}}"> 
-							<img draggable="false" ng-src="/{{item.icon}}" alt=""/>{{item.displayName}}
-						</div>
-						<img ng-click="openInNewWindow(item.preview)" draggable="false" ng-if="item.preview" src="images/images.jpeg" title="Open preview" alt="" style="position:absolute; right:0; bottom:0.14em; cursor:pointer;"/>
-						<ul>
-							<li ng-repeat="ghost in item.types" ng-mousedown="enterDragMode($event,ghost,null,null,null,ghost) " title="Place component {{ghost}}">
-								<img draggable="false" ng-src="/{{item.icon}}" alt=""/>{{ghost}}
-						</ul>
-					</li>
-			    </ul>
-			 </div>
-		</accordion-group>
-	</accordion>
+	<div id="paletteContent">
+		<input type="text" class="form-control input-xs" placeholder="Search" ng-model="searchText"/>
+		<accordion close-others='oneAtATime' ui-sortable="sortableOptions" ng-model="packages">
+			<accordion-group ng-repeat="package in packages" is-open="package.isOpen" ng-if="(package.components | filter:{displayName:searchText}).length > 0">
+				<accordion-heading>
+					<h1 class="palette-heading handle"><i class="glyphicon glyphicon-move"></i>{{package.packageDisplayname}}<span ng-class="package.isOpen ? 'glyphicon glyphicon-chevron-down' : 'glyphicon glyphicon-chevron-right'" style="float: right"></span></h1>
+				</accordion-heading>
+			    <div>
+				    <ul>
+						<li ng-repeat="item in package.components | filter:{displayName:searchText} | orderBy:'displayName'" style="position:relative;">
+							<div ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.componentType,item.topContainer, item.layoutName) " title="Place component {{item.displayName}}"> 
+								<img draggable="false" ng-src="/{{item.icon}}" alt=""/>{{item.displayName}}
+							</div>
+							<img ng-click="openInNewWindow(item.preview)" draggable="false" ng-if="item.preview" src="images/images.jpeg" title="Open preview" alt="" style="position:absolute; right:0; bottom:0.14em; cursor:pointer;"/>
+							<ul>
+								<li ng-repeat="ghost in item.types" ng-mousedown="enterDragMode($event,ghost,null,null,null,ghost) " title="Place component {{ghost}}">
+									<img draggable="false" ng-src="/{{item.icon}}" alt=""/>{{ghost}}
+							</ul>
+						</li>
+				    </ul>
+				 </div>
+			</accordion-group>
+		</accordion>
+	</div>
+	<div id="sidebar-resizer" 
+  		resizer="vertical" 
+  		resizer-width="3" 
+  		resizer-left="#paletteContent" 
+  		resizer-right="#directEdit"
+  		resizer-max="400">
+  	</div>
 </div>

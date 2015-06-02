@@ -3,10 +3,9 @@
 	-webkit-flex-shrink: 0;
 	color: #000;
 	border: 0px solid #C0C0C0;
-	border-right-width: 1px;
-	overflow: auto;
+	overflow-y: scroll;
 	padding-top: 6px;
-	padding-left: 2px;
+	margin-right: 6px;
 }
 
 .palette-heading {
@@ -76,4 +75,22 @@
 
 .palette .panel-group .panel-heading+.panel-collapse>.panel-body {
 	border-top: 0px;
+}
+
+#paletteContent {
+    top: 65px;
+    width: 185px;
+    flex-shrink: 0;
+	-webkit-flex-shrink: 0;
+	color: #000;
+}
+
+#sidebar-resizer {
+	background-color: #EEE;
+    position: absolute;
+    top: 65px;
+    bottom: 0;
+    left: 202px;
+    width: 5px;
+    cursor: e-resize;
 }
