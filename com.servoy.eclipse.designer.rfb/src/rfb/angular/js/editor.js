@@ -168,9 +168,9 @@ angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dr
 					var prevGhost = i > 0 ? ghosts[i-1] : undefined;
 					if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION)
 					{
-						if ($('[svy-id='+ghost.uuid+']')[0])
+						if ($('[svy-id="'+ghost.uuid+'"]')[0])
 						{
-							var element = $('[svy-id='+ghost.uuid+']')[0];
+							var element = $('[svy-id="'+ghost.uuid+'"]')[0];
 							var width = element.scrollWidth;
 							if (prevGhost != undefined && ghost.location.y == prevGhost.location.y)
 							{

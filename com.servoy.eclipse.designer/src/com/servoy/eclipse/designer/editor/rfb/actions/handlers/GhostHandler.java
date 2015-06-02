@@ -101,7 +101,7 @@ public class GhostHandler implements IServerService
 			private String computeGhostUUID(IWebComponent bean, PropertyDescription pd, String simpleTypeName, int index)
 			{
 				if (index < 0) return bean.getUUID() + "_" + pd.getName() + "_" + simpleTypeName;
-				return bean.getUUID() + "_" + pd.getName() + "[" + index + "]" + "_" + simpleTypeName;
+				return bean.getUUID() + "_" + pd.getName() + "." + + index + "_" + simpleTypeName;
 			}
 
 			private void writeGhostsForWebcomponentBeans(JSONWriter writer, IWebComponent bean)

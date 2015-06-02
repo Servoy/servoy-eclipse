@@ -63,10 +63,10 @@ public class PersistFinder
 			int index = -1;
 			IWebComponent parentBean = (IWebComponent)ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(parentUUID));
 
-			if (fieldName.indexOf('[') > 0)
+			if (fieldName.indexOf('.') > 0)
 			{
 				index = extractIndex(fieldName);
-				fieldName = fieldName.substring(0, fieldName.indexOf('['));
+				fieldName = fieldName.substring(0, fieldName.indexOf('.'));
 			}
 
 			if (parentBean instanceof WebComponent)
@@ -97,9 +97,9 @@ public class PersistFinder
 	private int extractIndex(String dropTargetFieldName)
 	{
 		int index = -1;
-		if (dropTargetFieldName.indexOf('[') > 0)
+		if (dropTargetFieldName.indexOf('.') > 0)
 		{
-			index = Integer.parseInt(dropTargetFieldName.substring(dropTargetFieldName.indexOf('[') + 1, dropTargetFieldName.indexOf(']')));
+			index = Integer.parseInt(dropTargetFieldName.substring(dropTargetFieldName.indexOf('.') + 1, dropTargetFieldName.length()));
 		}
 		return index;
 	}

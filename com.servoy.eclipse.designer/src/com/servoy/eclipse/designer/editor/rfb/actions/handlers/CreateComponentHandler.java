@@ -163,23 +163,6 @@ public class CreateComponentHandler implements IServerService
 			IPersist next = PersistFinder.INSTANCE.searchForPersist(editorPart, (String)args.get("dropTargetUUID"));
 			if (next instanceof BaseComponent)
 			{
-				if (args.getString("type").equals("tab"))
-				{
-					if (next instanceof ISupportChilds)
-					{
-						ISupportChilds iSupportChilds = (ISupportChilds)next;
-						Tab newTab = (Tab)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(iSupportChilds, IRepository.TABS);
-						String tabName = "tab_" + id.incrementAndGet();
-						while (!PersistFinder.INSTANCE.checkName(editorPart, tabName))
-						{
-							tabName = "tab_" + id.incrementAndGet();
-						}
-						newTab.setText(tabName);
-						newTab.setLocation(new Point(x, y));
-						iSupportChilds.addChild(newTab);
-						return newTab;
-					}
-				}
 				if (next instanceof IWebComponent)
 				{
 					IWebComponent parentBean = (IWebComponent)next;
@@ -228,6 +211,23 @@ public class CreateComponentHandler implements IServerService
 						else ((WebComponent)parentBean).setProperty(dropTargetFieldName, bean);
 					}
 					return bean;
+				}
+				else if (args.getString("type").equals("tab"))
+				{
+					if (next instanceof ISupportChilds)
+					{
+						ISupportChilds iSupportChilds = (ISupportChilds)next;
+						Tab newTab = (Tab)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(iSupportChilds, IRepository.TABS);
+						String tabName = "tab_" + id.incrementAndGet();
+						while (!PersistFinder.INSTANCE.checkName(editorPart, tabName))
+						{
+							tabName = "tab_" + id.incrementAndGet();
+						}
+						newTab.setText(tabName);
+						newTab.setLocation(new Point(x, y));
+						iSupportChilds.addChild(newTab);
+						return newTab;
+					}
 				}
 			}
 		}

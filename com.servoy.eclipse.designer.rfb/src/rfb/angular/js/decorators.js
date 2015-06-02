@@ -17,7 +17,7 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 					if (selection.length == 1){
 						//when resizing the form, the server sends a refreshGhosts message that updates the form ghost div => the selection references a stale form ghost,
 						//we need to search for the real form ghost div
-						var formDiv = angular.element($scope.glasspane).find("[svy-id="+selection[0].getAttribute("svy-id")+"]");
+						var formDiv = angular.element($scope.glasspane).find("[svy-id='"+selection[0].getAttribute("svy-id")+"']");
 						if (formDiv[0] && formDiv[0].getAttribute("svy-id") == selection[0].getAttribute("svy-id"))
 							selection[0] = formDiv[0];
 					}
