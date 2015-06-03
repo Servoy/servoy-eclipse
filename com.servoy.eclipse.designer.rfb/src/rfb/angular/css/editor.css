@@ -154,9 +154,13 @@ body {
 .sidebar-resizer {
 	flex-shrink: 0;
 	-webkit-flex-shrink: 0;
-	background-color: #EEE;
-    width: 5px;
+    width: 6px;
     cursor: e-resize;
+    background-color: #e5e5e5;
+}
+
+.sidebar-resizer:HOVER {
+	background-color: #CCC;
 }
 
 #lasso {
