@@ -1,4 +1,4 @@
-angular.module("palette",['ui.bootstrap', 'ui.sortable', 'mc.resizer'])
+angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 .config(['$provide', function ($provide){
     $provide.decorator('accordionDirective', function($delegate) { 
         var directive = $delegate[0];

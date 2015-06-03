@@ -1,4 +1,4 @@
-angular.module('editor', ['palette','toolbar','contextmenu','mouseselection',"dragselection",'inlineedit','decorators','webSocketModule','keyboardlayoutupdater','highlight']).factory("$pluginRegistry",function($rootScope) {
+angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouseselection',"dragselection",'inlineedit','decorators','webSocketModule','keyboardlayoutupdater','highlight']).factory("$pluginRegistry",function($rootScope) {
 	var plugins = [];
 
 	return {

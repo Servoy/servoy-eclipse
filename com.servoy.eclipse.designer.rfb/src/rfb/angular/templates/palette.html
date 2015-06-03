@@ -1,5 +1,4 @@
-<div>
-	<div id="paletteContent">
+<div id="paletteContent" class="paletteContent">
 		<input type="text" class="form-control input-xs" placeholder="Search" ng-model="searchText"/>
 		<accordion close-others='oneAtATime' ui-sortable="sortableOptions" ng-model="packages">
 			<accordion-group ng-repeat="package in packages" is-open="package.isOpen" ng-if="(package.components | filter:{displayName:searchText}).length > 0">
@@ -22,12 +21,4 @@
 				 </div>
 			</accordion-group>
 		</accordion>
-	</div>
-	<div id="sidebar-resizer" 
-  		resizer="vertical" 
-  		resizer-width="3" 
-  		resizer-left="#paletteContent" 
-  		resizer-right="#directEdit"
-  		resizer-max="400">
-  	</div>
 </div>

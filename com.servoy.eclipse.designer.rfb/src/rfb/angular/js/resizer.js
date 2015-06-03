@@ -19,15 +19,8 @@ angular.module('mc.resizer', []).directive('resizer', function($document) {
 					x = parseInt($attrs.resizerMax);
 				}
 
-				$element.css({
-					left: x + 'px'
-				});
-
 				$($attrs.resizerLeft).css({
 					width: (x - 17)+ 'px'
-				});
-				$($attrs.resizerRight).css({
-					left: (x + parseInt($attrs.resizerWidth)-15) + 'px'
 				});
 
 			} 

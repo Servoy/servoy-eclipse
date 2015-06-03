@@ -151,6 +151,14 @@ body {
     z-index: -1;
 }
 
+.sidebar-resizer {
+	flex-shrink: 0;
+	-webkit-flex-shrink: 0;
+	background-color: #EEE;
+    width: 5px;
+    cursor: e-resize;
+}
+
 #lasso {
 	position:relative; 
 	left: 0px; 
