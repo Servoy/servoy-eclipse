@@ -20,7 +20,7 @@ angular.module('mc.resizer', []).directive('resizer', function($document) {
 				}
 
 				$($attrs.resizerLeft).css({
-					width: (x - 17)+ 'px'
+					width: x + 'px'
 				});
 
 			} 
