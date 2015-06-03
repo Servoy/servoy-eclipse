@@ -81,10 +81,10 @@ import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabSeqComparator;
+import com.servoy.j2db.server.ngclient.FormElementHelper.TabSeqProperty;
 import com.servoy.j2db.server.ngclient.property.types.NGTabSeqPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.SortedList;
-import com.servoy.j2db.util.Utils;
 
 /**
  * Tab in form editor for managing tab sequences.
@@ -681,57 +681,4 @@ public class VisualFormEditorTabSequencePage extends Composite
 		}
 		return getSaveCommand(tabSeqs, "set default tab sequence");
 	}
-
-	private class TabSeqProperty
-	{
-		IFormElement element;
-		String propertyName;
-
-		public TabSeqProperty(IFormElement element, String propertyName)
-		{
-			this.element = element;
-			this.propertyName = propertyName;
-		}
-
-		public int getSeqValue()
-		{
-			if (propertyName != null && element instanceof IWebComponent)
-			{
-				String componentType = FormTemplateGenerator.getComponentTypeName(element);
-				WebComponentSpecification specification = WebComponentSpecProvider.getInstance().getWebComponentSpecification(componentType);
-				if (specification != null)
-				{
-					PropertyDescription property = specification.getProperty(propertyName);
-					if (property != null)
-					{
-						JSONObject json = ((IWebComponent)element).getJson();
-						if (json != null)
-						{
-							return json.optInt(propertyName);
-						}
-						return 0;
-					}
-				}
-			}
-			else if (element instanceof ISupportTabSeq)
-			{
-				return ((ISupportTabSeq)element).getTabSeq();
-			}
-			return -1;
-		}
-
-		@Override
-		public String toString()
-		{
-			return element.toString() + (propertyName != null ? " [" + propertyName + "]" : "");
-		}
-
-		@Override
-		public boolean equals(Object obj)
-		{
-			if (!(obj instanceof TabSeqProperty)) return false;
-			return Utils.equalObjects(element, ((TabSeqProperty)obj).element) && Utils.equalObjects(propertyName, ((TabSeqProperty)obj).propertyName);
-		}
-	}
-
 }
