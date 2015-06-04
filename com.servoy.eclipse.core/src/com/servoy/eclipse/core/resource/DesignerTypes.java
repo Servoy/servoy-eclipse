@@ -19,6 +19,8 @@ package com.servoy.eclipse.core.resource;
 
 import org.sablo.specification.property.types.TypesRegistry;
 
+import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.DataproviderTypeSabloValue;
 import com.servoy.j2db.server.ngclient.property.types.Types;
 
 /**
@@ -34,7 +36,8 @@ public class DesignerTypes extends Types
 	{
 		super.registerTypes();
 		TypesRegistry.addType(DesignerFormPropertyType.DESIGNER_INSTANCE);
-		TypesRegistry.addType(DesignerDataproviderPropertyType.DESIGNER_INSTANCE);
+		TypesRegistry.addType(new FoundsetLinkedPropertyType<String, DataproviderTypeSabloValue>(DesignerDataproviderPropertyType.DESIGNER_INSTANCE.getName(),
+			DesignerDataproviderPropertyType.DESIGNER_INSTANCE));
 		TypesRegistry.addType(DesignerFoundsetPropertyType.DESIGNER_INSTANCE);
 	}
 }
