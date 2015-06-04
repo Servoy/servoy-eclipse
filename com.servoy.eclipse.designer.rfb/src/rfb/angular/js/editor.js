@@ -29,7 +29,7 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 	GHOST_TYPE_COMPONENT: "comp",
 	GHOST_TYPE_PART: "part",
 	GHOST_TYPE_FORM: "form"
-}).directive("editor", function($window, $pluginRegistry, $rootScope, EDITOR_EVENTS, EDITOR_CONSTANTS, $timeout, $editorService, $webSocket) {
+}).directive("editor", function($window, $pluginRegistry, $rootScope, EDITOR_EVENTS, EDITOR_CONSTANTS, $timeout, $editorService, $webSocket, $q) {
 	return {
 		restrict: 'E',
 		transclude: true,
@@ -125,7 +125,58 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 				return null;
 			}
 
+			function getRealContainerElement(uuid)
+			{
+				var parent = $scope.ghostContainerElements[uuid];
+				
+				if (parent == undefined)
+				{
+					var defer = $q.defer();
+					$timeout(function() {
+
+						var p = $('.contentframe').contents().find('[svy-id="'+uuid+'"]');
+						if (p[0] != undefined)
+						{
+							parent = p[0];
+							$scope.ghostContainerElements[uuid] = parent;
+							defer.resolve(parent);
+						}
+						else
+						{
+							defer.reject();
+						}
+					}, 400);
+					$scope.ghostContainerElements[uuid] = defer.promise;
+					return defer.promise;
+				}
+				return parent;
+			}
+			function getBounds(ghostContainer, parent)
+			{
+				var bounds = parent.getBoundingClientRect();
+				ghostContainer.style.top = bounds.top;
+				ghostContainer.style.left = bounds.left;
+				ghostContainer.style.display = "block";
+			}
 			$scope.getGhostContainerStyle = function(ghostContainer) {
+				if (!$scope.isAbsoluteFormLayout()) 
+				{	
+					var p = getRealContainerElement(ghostContainer.uuid);
+					if (p.then)
+					{
+						p.then(function(parent)
+						{
+							getBounds(ghostContainer, parent);
+						}, function()
+						{
+							ghostContainer.style.display = "none";
+						});
+					}
+					else
+					{
+						getBounds(ghostContainer, p);
+					}
+				}
 				if(ghostContainer.style == undefined) {
 					//TODO refactor out this 20px addition
 					return {left: "20px", top: "20px", width: $scope.contentStyle.width, height: $scope.contentStyle.height};
@@ -524,6 +575,7 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 			
 			$scope.setGhosts = function(ghosts) {
 				$scope.ghosts = ghosts;
+				$scope.ghostContainerElements = {}
 				
 				if($scope.ghosts.ghostContainers) {
 					for (i = 0; i< $scope.ghosts.ghostContainers.length; i++) {
