@@ -34,17 +34,17 @@ public class FormatCellEditor extends TextDialogCellEditor
 {
 
 	private final IPersist persist;
-	private final String formatForPropertyname;
+	private final String[] formatForPropertyNames;
 
 	/**
 	 * @param parent
-	 * @param persist 
+	 * @param persist
 	 */
-	public FormatCellEditor(Composite parent, IPersist persist, String formatForPropertyname)
+	public FormatCellEditor(Composite parent, IPersist persist, String[] formatForPropertyNames)
 	{
 		super(parent, SWT.NONE, null);
 		this.persist = persist;
-		this.formatForPropertyname = formatForPropertyname;
+		this.formatForPropertyNames = formatForPropertyNames;
 	}
 
 	/**
@@ -55,7 +55,9 @@ public class FormatCellEditor extends TextDialogCellEditor
 	{
 
 		IPropertySource propertySource = (IPropertySource)Platform.getAdapterManager().getAdapter(persist, IPropertySource.class);
-		String dataProviderID = (String)propertySource.getPropertyValue(formatForPropertyname);
+		//TODO properly support property names, now DatabaseUtils.getDataproviderType is hard coded
+		String dataProviderID = formatForPropertyNames != null && formatForPropertyNames.length > 0 ? null
+			: (String)propertySource.getPropertyValue(formatForPropertyNames[0]);
 
 		String formatString = (String)getValue();
 		int type = DatabaseUtils.getDataproviderType(persist, formatString, dataProviderID);

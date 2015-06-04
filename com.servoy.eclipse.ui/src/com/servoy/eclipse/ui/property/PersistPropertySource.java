@@ -2684,7 +2684,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				@Override
 				public CellEditor createPropertyEditor(Composite parent)
 				{
-					return new FormatCellEditor(parent, persistContext.getPersist(), (String)propertyDescription.getConfig());
+					return new FormatCellEditor(parent, persistContext.getPersist(), (String[])propertyDescription.getConfig());
 				}
 			};
 		}
