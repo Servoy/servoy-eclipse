@@ -204,7 +204,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage#getAdapter(java.lang.Class)
 	 */
 	@Override
@@ -311,10 +311,14 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 	public void revert()
 	{
-		List<IFormController> cachedFormControllers = getContentWebsocketSession().getClient().getFormManager().getCachedFormControllers(editorPart.getForm());
-		for (IFormController iFormController : cachedFormControllers)
+		if (getContentWebsocketSession() != null)
 		{
-			iFormController.recreateUI();
+			List<IFormController> cachedFormControllers = getContentWebsocketSession().getClient().getFormManager().getCachedFormControllers(
+				editorPart.getForm());
+			for (IFormController iFormController : cachedFormControllers)
+			{
+				iFormController.recreateUI();
+			}
 		}
 	}
 
