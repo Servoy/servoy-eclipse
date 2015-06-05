@@ -31,6 +31,7 @@ import org.json.JSONWriter;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.base.persistence.constants.IContentSpecConstantsBase;
@@ -101,7 +102,7 @@ public class GhostHandler implements IServerService
 			private String computeGhostUUID(IWebComponent bean, PropertyDescription pd, String simpleTypeName, int index)
 			{
 				if (index < 0) return bean.getUUID() + "_" + pd.getName() + "_" + simpleTypeName;
-				return bean.getUUID() + "_" + pd.getName() + "." + + index + "_" + simpleTypeName;
+				return bean.getUUID() + "_" + pd.getName() + "." + +index + "_" + simpleTypeName;
 			}
 
 			private void writeGhostsForWebcomponentBeans(JSONWriter writer, IWebComponent bean)
@@ -196,7 +197,7 @@ public class GhostHandler implements IServerService
 				jsonWriter.object();
 				jsonWriter.key("uuid").value(computeGhostUUID(bean, pd, simpleTypeName, i));
 				jsonWriter.key("type").value(GHOST_TYPE_CONFIGURATION);
-				jsonWriter.key("text").value(pd.getName());
+				jsonWriter.key("text").value(pd.getType() instanceof CustomJSONArrayType ? simpleTypeName : pd.getName());
 				jsonWriter.key("location");
 				{
 					jsonWriter.object();

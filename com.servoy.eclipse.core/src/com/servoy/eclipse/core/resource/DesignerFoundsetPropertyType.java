@@ -22,7 +22,7 @@ import org.sablo.specification.PropertyDescription;
 
 import com.servoy.j2db.dataprocessing.IFoundSetInternal;
 import com.servoy.j2db.server.ngclient.DataAdapterList;
-import com.servoy.j2db.server.ngclient.FormElement;
+import com.servoy.j2db.server.ngclient.INGFormElement;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.design.DesignNGClient;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
@@ -42,7 +42,7 @@ public class DesignerFoundsetPropertyType extends FoundsetPropertyType
 	}
 
 	@Override
-	public FoundsetTypeSabloValue toSabloComponentValue(JSONObject formElementValue, PropertyDescription pd, FormElement formElement,
+	public FoundsetTypeSabloValue toSabloComponentValue(JSONObject formElementValue, PropertyDescription pd, INGFormElement formElement,
 		WebFormComponent component, final DataAdapterList dal)
 	{
 		return new FoundsetTypeSabloValue(formElementValue, pd.getName(), dal)
