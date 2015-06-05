@@ -556,7 +556,7 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 				delete $scope.contentStyle.bottom;
 				delete $scope.contentStyle.h
 				delete $scope.contentStyle.w
-				$scope.glasspaneStyle = {};
+				adjustGlassPaneSize();
 			}
 			$scope.setContentSizeFull = function() {
 				$scope.contentStyle = {top: "0px", left: "0px",paddingRight: "80px", bottom: "0px"};
@@ -564,8 +564,8 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 				delete $scope.contentStyle.height;
 				delete $scope.contentStyle.h
 				delete $scope.contentStyle.w
-				$scope.glasspaneStyle = {};
-			},
+				adjustGlassPaneSize();
+			}
 			$scope.getContentSize = function() {
 				return {width: $scope.contentStyle.width, height: $scope.contentStyle.height};
 			}
@@ -630,20 +630,38 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 						if(!$scope.isAbsoluteFormLayout()) {
 							$scope.contentStyle.height = (sizes.height + 20)  +"px"
 						}
-						$scope.glasspaneStyle.height = (sizes.height + 20)  +"px"
 					}
 					if ($scope.isContentSizeFull()) {
 						if (contentDiv.clientWidth < sizes.width && (!$scope.contentStyle.w || $scope.contentStyle.w + 20 < sizes.width || $scope.contentStyle.w - 20 > sizes.width)) {
-							$scope.contentStyle.w = sizes.width
-							if(!$scope.isAbsoluteFormLayout()) {
-								$scope.contentStyle.width = (sizes.width + 20)  +"px"	
-							}
-							$scope.glasspaneStyle.width = (sizes.width + 20)  +"px"
+								$scope.contentStyle.w = sizes.width
+								if(!$scope.isAbsoluteFormLayout()) {
+									$scope.contentStyle.width = (sizes.width + 20)  +"px"	
+								}
 						}
 					}
 				}
+				adjustGlassPaneSize();
 			}
 			
+			function adjustGlassPaneSize() {
+				var sizes = getScrollSizes($scope.contentDocument.querySelectorAll(".sfcontent"));
+				if (sizes.height > 0 && sizes.width > 0) {
+					var contentDiv = $element.find('.content-area')[0];
+					if (contentDiv.clientHeight < (sizes.height+40)) {
+						$scope.glasspaneStyle.height = (sizes.height + 40)  +"px";// 20 for the body ghost height
+					}
+					else {
+						$scope.glasspaneStyle.height = '100%';
+					}
+					
+					if (contentDiv.clientWidth < (sizes.width + 120)) {
+						$scope.glasspaneStyle.width = (sizes.width + 120)  +"px"; // 80 for the body ghost width
+					}
+					else 
+						$scope.glasspaneStyle.width = '100%';
+				}
+			}
+						
 			$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
 				$scope.setContentSizes();
 			})
@@ -692,7 +710,11 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 					$(document).mousedown(function(objEvent) {					
 						$editorService.activated(objEvent);
 						return true;
-					});					
+					});			
+					
+					$($element.find('.content-area')[0]).on("mousedown", null, function(){
+						$scope.setContentSizes();
+					});
 				});
 				
 				
