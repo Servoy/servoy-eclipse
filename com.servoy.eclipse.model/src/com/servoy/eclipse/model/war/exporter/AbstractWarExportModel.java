@@ -46,6 +46,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
@@ -69,15 +70,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 		while (forms.hasNext())
 		{
 			Form form = forms.next();
-			Iterator<IPersist> persists = form.getAllObjects();
-			while (persists.hasNext())
-			{
-				IPersist persist = persists.next();
-				if (persist instanceof IFormElement)
-				{
-					usedComponents.add(FormTemplateGenerator.getComponentTypeName((IFormElement)persist));
-				}
-			}
+			findUsedComponents(form);
 			extractUsedComponentsAndServices(SolutionSerializer.getRelativePath(form, false) + form.getName() + SolutionSerializer.JS_FILE_EXTENSION);
 			if (form.getNavigatorID() == Form.NAVIGATOR_DEFAULT)
 			{
@@ -99,6 +92,23 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 		if (servoyservices != null) usedServices.addAll(servoyservices.getSpecifications().keySet());
 	}
 
+	private void findUsedComponents(ISupportChilds parent)
+	{
+		Iterator<IPersist> persists = parent.getAllObjects();
+		while (persists.hasNext())
+		{
+			IPersist persist = persists.next();
+			if (persist instanceof IFormElement)
+			{
+				usedComponents.add(FormTemplateGenerator.getComponentTypeName((IFormElement)persist));
+			}
+			if (persist instanceof ISupportChilds)
+			{
+				findUsedComponents((ISupportChilds)persist);
+			}
+		}
+	}
+
 	public void extractUsedComponentsAndServices(String scriptPath)
 	{
 		IFile scriptFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(scriptPath));
@@ -118,7 +128,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 						/*
 						 * (non-Javadoc)
-						 * 
+						 *
 						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitCallExpression(org.eclipse.dltk.javascript.ast.CallExpression)
 						 */
 						@Override
@@ -166,7 +176,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getUsedComponents()
 	 */
 	@Override
@@ -177,7 +187,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getUsedServices()
 	 */
 	@Override
