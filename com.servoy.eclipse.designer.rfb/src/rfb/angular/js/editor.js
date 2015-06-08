@@ -145,7 +145,7 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 						{
 							defer.reject();
 						}
-					}, 400);
+					}, 200);
 					$scope.ghostContainerElements[uuid] = defer.promise;
 					return defer.promise;
 				}
