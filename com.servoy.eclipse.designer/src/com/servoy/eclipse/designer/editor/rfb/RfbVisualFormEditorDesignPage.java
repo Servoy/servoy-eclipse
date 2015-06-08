@@ -69,6 +69,7 @@ import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Tab;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.INGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.WebsocketSessionFactory;
@@ -204,7 +205,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage#getAdapter(java.lang.Class)
 	 */
 	@Override
@@ -344,12 +345,17 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		Media cssFile = null;
 		for (IPersist persist : persists)
 		{
-			if (persist instanceof IFormElement || persist instanceof Tab)
+			if (persist instanceof IFormElement || persist instanceof Tab || persist instanceof WebCustomType)
 			{
 				IPersist parent = persist;
 				if (persist instanceof Tab)
 				{
 					parent = ((Tab)persist).getParent();
+					persist = parent;
+				}
+				if (persist instanceof WebCustomType)
+				{
+					parent = persist.getParent();
 					persist = parent;
 				}
 				while (parent != null)

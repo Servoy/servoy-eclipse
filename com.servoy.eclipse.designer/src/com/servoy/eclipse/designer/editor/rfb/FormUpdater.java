@@ -111,6 +111,11 @@ public class FormUpdater implements Runnable
 									bigChange = true;
 									break outer;
 								}
+								if (property.equals("json"))
+								{
+									bigChange = true;
+									break outer;
+								}
 								if (property.equals("formIndex"))
 								{
 									bigChange = true;
