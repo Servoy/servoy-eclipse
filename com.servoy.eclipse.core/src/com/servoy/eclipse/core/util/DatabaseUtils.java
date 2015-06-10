@@ -23,12 +23,10 @@ import java.util.Iterator;
 
 import org.json.JSONException;
 
-import com.servoy.base.persistence.IBaseField;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
@@ -39,13 +37,11 @@ import com.servoy.j2db.persistence.IDataProviderLookup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServerInternal;
-import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
-import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
 import com.servoy.j2db.util.xmlxport.TableDef;
 
@@ -285,9 +281,6 @@ public final class DatabaseUtils
 	}
 
 
-	/**
-	 * @return
-	 */
 	public static int getDataproviderType(IPersist persist, String format, String dataProviderID)
 	{
 		int type = IColumnTypes.TEXT;
@@ -295,20 +288,10 @@ public final class DatabaseUtils
 		Form form = (Form)persist.getAncestor(IRepository.FORMS);
 		if (form != null)
 		{
-			FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
-			IDataProviderLookup dataproviderLookup = flattenedSolution.getDataproviderLookup(null, form);
-			ValueList vl = null;
-			if (persist instanceof IBaseField)
-			{
-				int vlID = ((IBaseField)persist).getValuelistID();
-				if (vlID > 0)
-				{
-					vl = flattenedSolution.getValueList(vlID);
-				}
-			}
-
+			IDataProviderLookup dataproviderLookup = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getDataproviderLookup(
+				null, form);
 			ComponentFormat componentFormat = null;
-			if (format != null && vl == null)
+			if (format != null)
 			{
 				componentFormat = ComponentFormat.getComponentFormat(format, dataProviderID, dataproviderLookup, Activator.getDefault().getDesignClient());
 			}
@@ -320,57 +303,15 @@ public final class DatabaseUtils
 			{
 				try
 				{
-					IDataProvider dataProvider = null;
-					// if it has valuelist, use the display type
-					if (vl != null)
-					{
-						ITable table;
-						if (vl.getRelationName() != null)
-						{
-							Relation[] relations = flattenedSolution.getRelationSequence(vl.getRelationName());
-							table = relations[relations.length - 1].getForeignTable();
-						}
-						else
-						{
-							table = vl.getTable();
-						}
-
-						if (table != null)
-						{
-							String dp = null;
-							int showDataProviders = vl.getShowDataProviders();
-							if (showDataProviders == 1)
-							{
-								dp = vl.getDataProviderID1();
-							}
-							else if (showDataProviders == 2)
-							{
-								dp = vl.getDataProviderID2();
-							}
-							else if (showDataProviders == 4)
-							{
-								dp = vl.getDataProviderID3();
-							}
-
-							if (dp != null)
-							{
-								dataProvider = flattenedSolution.getDataProviderForTable((Table)table, dp);
-							}
-						}
-					}
-
-					if (dataProvider == null && vl == null)
-					{
-						dataProvider = dataproviderLookup.getDataProvider(dataProviderID);
-					}
+					IDataProvider dataProvider = dataproviderLookup.getDataProvider(dataProviderID);
 					if (dataProvider != null)
 					{
 						type = dataProvider.getDataProviderType();
 					}
 				}
-				catch (Exception ex)
+				catch (RepositoryException re)
 				{
-					ServoyLog.logError(ex);
+					ServoyLog.logError(re);
 				}
 			}
 		}

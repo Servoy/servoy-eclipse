@@ -770,8 +770,10 @@ public class PersistPropertyHandler extends BasePropertyHandler
 
 		if (name.equals("format"))
 		{
-			return new PropertyDescription(name, FormatPropertyType.INSTANCE,
-				new String[] { StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName() });
+			return new PropertyDescription(
+				name,
+				FormatPropertyType.INSTANCE,
+				new String[] { StaticContentSpecLoader.PROPERTY_VALUELISTID.getPropertyName(), StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName() });
 		}
 
 		if (name.equals("relationName"))
