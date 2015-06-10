@@ -181,7 +181,7 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 				{
 					if(ghostContainer.style == undefined) {
 						//TODO refactor out this 20px addition
-						ghostContainer.style = {left: "20px", top: "20px", width: $scope.contentStyle.width, height: $scope.contentStyle.height};
+						return {display:"block", left: "20px", top: "20px", width: $scope.contentStyle.width, height: $scope.contentStyle.height};
 					}
 					ghostContainer.style.display = "block";
 				}
