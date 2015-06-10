@@ -145,7 +145,7 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 						{
 							defer.reject();
 						}
-					}, 200);
+					}, 400);
 					$scope.ghostContainerElements[uuid] = defer.promise;
 					return defer.promise;
 				}
@@ -181,7 +181,7 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 				{
 					if(ghostContainer.style == undefined) {
 						//TODO refactor out this 20px addition
-						return {left: "20px", top: "20px", width: $scope.contentStyle.width, height: $scope.contentStyle.height};
+						ghostContainer.style = {left: "20px", top: "20px", width: $scope.contentStyle.width, height: $scope.contentStyle.height};
 					}
 					ghostContainer.style.display = "block";
 				}
