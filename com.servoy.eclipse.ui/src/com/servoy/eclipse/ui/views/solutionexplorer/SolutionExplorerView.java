@@ -217,6 +217,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.CollapseTreeAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ContextAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.CopyAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.CopyTableAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.CreateMediaFileAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.CreateMediaFolderAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.CutAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DebugMethodAction;
@@ -540,6 +541,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private RenameMediaAction renameMediaAction;
 	private RenameMediaFolderAction renameMediaFolderAction;
 	private CreateMediaFolderAction createMediaFolderAction;
+	private CreateMediaFileAction createMediaFileAction;
 
 	private MovePersistAction movePersistAction;
 	private DuplicatePersistAction duplicatePersistAction;
@@ -2354,6 +2356,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		}
 
 		if (createMediaFolderAction.isEnabled()) manager.add(createMediaFolderAction);
+		if (createMediaFileAction.isEnabled()) manager.add(createMediaFileAction);
 		if (renameMediaFolderAction.isEnabled()) manager.add(renameMediaFolderAction);
 
 		manager.add(new Separator());
@@ -2737,6 +2740,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		importMediaFolder = new ImportMediaFolderAction(this);
 		renameMediaAction = new RenameMediaAction(this);
 		createMediaFolderAction = new CreateMediaFolderAction(this);
+		createMediaFileAction = new CreateMediaFileAction(this);
 		renameMediaFolderAction = new RenameMediaFolderAction(this);
 		movePersistAction = new MovePersistAction(this.getSite().getShell());
 		duplicatePersistAction = new DuplicatePersistAction(this.getSite().getShell());
@@ -2991,6 +2995,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		addTreeSelectionChangedListener(addComponentIcon);
 
 		addTreeSelectionChangedListener(createMediaFolderAction);
+		addTreeSelectionChangedListener(createMediaFileAction);
 		addTreeSelectionChangedListener(renameMediaFolderAction);
 
 		fRefreshAction = new RefreshAction(this);

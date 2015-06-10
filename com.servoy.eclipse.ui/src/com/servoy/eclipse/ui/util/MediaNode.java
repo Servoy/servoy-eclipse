@@ -43,7 +43,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Class used to represent a solution media folder or image in the developer
- * 
+ *
  * @author gboros
  *
  */
@@ -175,8 +175,7 @@ public class MediaNode
 					if (mediaNodeFilter.contains(TYPE.FOLDER))
 					{
 						String dirName = mediaPath.substring(0, pathSepIdx);
-						node = new MediaNode(dirName, ((mediaFolder == null ? ""
-							: mediaFolder) + dirName + '/'), TYPE.FOLDER, mediaProvider, context);
+						node = new MediaNode(dirName, ((mediaFolder == null ? "" : mediaFolder) + dirName + '/'), TYPE.FOLDER, mediaProvider, context);
 					}
 				}
 				else
