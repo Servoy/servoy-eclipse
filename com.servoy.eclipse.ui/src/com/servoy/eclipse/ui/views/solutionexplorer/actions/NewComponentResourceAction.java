@@ -107,7 +107,7 @@ public class NewComponentResourceAction extends Action implements ISelectionChan
 						try
 						{
 							file.create(new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
-							EditorUtil.openComponentFileEditor(file);
+							EditorUtil.openFileEditor(file);
 						}
 						catch (CoreException e)
 						{

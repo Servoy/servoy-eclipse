@@ -335,10 +335,10 @@ public class EditorUtil
 	}
 
 	/**
-	 * Open component file.
+	 * Open file.
 	 * @param resource
 	 */
-	public static void openComponentFileEditor(IFile resource)
+	public static void openFileEditor(IFile resource)
 	{
 		if (resource == null) return;
 		try

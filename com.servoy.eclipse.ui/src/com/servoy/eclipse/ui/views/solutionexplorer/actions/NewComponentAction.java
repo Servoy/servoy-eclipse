@@ -224,7 +224,7 @@ public class NewComponentAction extends Action
 	{
 		IFile file = folder.getFile(componentName);
 		file.create(in != null ? in : new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
-		EditorUtil.openComponentFileEditor(file);
+		EditorUtil.openFileEditor(file);
 	}
 
 	/**

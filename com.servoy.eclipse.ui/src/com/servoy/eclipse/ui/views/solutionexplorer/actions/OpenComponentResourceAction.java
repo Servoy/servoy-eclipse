@@ -74,7 +74,7 @@ public class OpenComponentResourceAction extends Action implements ISelectionCha
 	{
 		if (resource != null)
 		{
-			EditorUtil.openComponentFileEditor(resource);
+			EditorUtil.openFileEditor(resource);
 		}
 	}
 

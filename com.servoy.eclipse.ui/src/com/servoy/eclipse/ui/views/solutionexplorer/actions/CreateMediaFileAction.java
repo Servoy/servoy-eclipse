@@ -39,6 +39,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IMediaProvider;
@@ -90,56 +91,64 @@ public class CreateMediaFileAction extends Action implements ISelectionChangedLi
 	{
 		if (selectedFile == null) return;
 
-		final String regex = "[_a-zA-Z0-9\\-\\.]+";
-		InputDialog newFileNameDlg = new InputDialog(viewer.getSite().getShell(), "New media file", "Specify a file name", "", new IInputValidator()
+		String mediaFolder = null;
+		Object selectedFileRealObject = selectedFile.getRealObject();
+		if (selectedFileRealObject instanceof Solution)
 		{
-			public String isValid(String newText)
-			{
-				if (newText.length() < 1)
-				{
-					return "Name cannot be empty";
-				}
-				Pattern pattern = Pattern.compile(regex);
-				if (!pattern.matcher(newText).matches())
-				{
-					return "Invalid new media name";
-				}
-
-				return null;
-			}
-		});
-
-		newFileNameDlg.setBlockOnOpen(true);
-		newFileNameDlg.open();
-		if (newFileNameDlg.getReturnCode() == Window.OK)
+			solution = (Solution)selectedFileRealObject;
+			mediaFolder = "";
+		}
+		else if (selectedFileRealObject instanceof MediaNode)
 		{
-			Solution selectedSolution = null;
-			String mediaFolder = null;
-			Object selectedFileRealObject = selectedFile.getRealObject();
-			if (selectedFileRealObject instanceof Solution)
+			IMediaProvider mp = ((MediaNode)selectedFileRealObject).getMediaProvider();
+			if (mp instanceof Solution)
 			{
-				selectedSolution = (Solution)selectedFileRealObject;
-				mediaFolder = "";
+				solution = (Solution)mp;
+				mediaFolder = ((MediaNode)selectedFileRealObject).getPath();
 			}
-			else if (selectedFileRealObject instanceof MediaNode)
+		}
+		if (solution != null)
+		{
+			final String pathString = solution.getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + mediaFolder;
+			final String regex = "[_a-zA-Z0-9\\-\\.]+";
+			InputDialog newFileNameDlg = new InputDialog(viewer.getSite().getShell(), "New media file", "Specify a file name", "", new IInputValidator()
 			{
-				IMediaProvider mp = ((MediaNode)selectedFileRealObject).getMediaProvider();
-				if (mp instanceof Solution)
+				public String isValid(String newText)
 				{
-					selectedSolution = (Solution)mp;
-					mediaFolder = ((MediaNode)selectedFileRealObject).getPath();
-				}
-			}
+					if (newText.length() < 1)
+					{
+						return "Name cannot be empty";
+					}
+					Pattern pattern = Pattern.compile(regex);
+					if (!pattern.matcher(newText).matches())
+					{
+						return "Invalid new media name";
+					}
+					if (!newText.contains(".")) newText = newText + ".txt";
+					IPath path = new Path(pathString + newText);
+					if (ResourcesPlugin.getWorkspace().getRoot().getFile(path).exists())
+					{
+						return "A file with this name already exists. Please modify the file name.";
+					}
 
-			if (selectedSolution != null)
+					return null;
+				}
+			});
+
+			newFileNameDlg.setBlockOnOpen(true);
+			newFileNameDlg.open();
+
+			if (newFileNameDlg.getReturnCode() == Window.OK)
 			{
+
+
 				String fileName = newFileNameDlg.getValue();
-				if ((!fileName.endsWith(".js") || fileName.endsWith(".css"))) fileName = fileName + ".txt";
+				if (!fileName.contains(".")) fileName = fileName + ".txt";
 				WorkspaceFileAccess wsa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
 				try
 				{
-					wsa.createFolder(selectedSolution.getName() + "/" + SolutionSerializer.MEDIAS_DIR);
-					IPath path = new Path(selectedSolution.getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + mediaFolder + fileName);
+					wsa.createFolder(solution.getName() + "/" + SolutionSerializer.MEDIAS_DIR);
+					IPath path = new Path(pathString + fileName);
 					IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 					if (file != null && !file.exists())
 					{
@@ -147,6 +156,7 @@ public class CreateMediaFileAction extends Action implements ISelectionChangedLi
 						file.create(inputStream, false, null);
 						viewer.refreshTreeCompletely();
 						inputStream.close();
+						EditorUtil.openFileEditor(file);
 					}
 				}
 				catch (CoreException e)
