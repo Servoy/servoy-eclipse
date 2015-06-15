@@ -29,6 +29,7 @@ import org.sablo.Container;
 import org.sablo.WebComponent;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.property.CustomJSONObjectType;
 
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -166,6 +167,11 @@ public class FormUpdater implements Runnable
 										break outer;
 									}
 									if (property.equals("tabs"))
+									{
+										bigChange = true;
+										break outer;
+									}
+									else if (prop.getType() instanceof CustomJSONObjectType)
 									{
 										bigChange = true;
 										break outer;
