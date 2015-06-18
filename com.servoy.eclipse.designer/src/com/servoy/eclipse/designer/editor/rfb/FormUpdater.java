@@ -203,6 +203,8 @@ public class FormUpdater implements Runnable
 						new Object[] { });
 					websocketSession.getClientService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall("refreshDecorators",
 						new Object[] { });
+					websocketSession.getClientService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall("updateForm",
+						new Object[] { });
 				}
 			}
 		}
@@ -228,12 +230,9 @@ public class FormUpdater implements Runnable
 				}
 				websocketSession.getClientService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall("refreshGhosts",
 					new Object[] { });
-				if (!form.isResponsiveLayout())
-				{
-					websocketSession.getClientService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
-						"updateForm",
-						new Object[] { changedForm.getName(), changedForm.getUUID().toString(), Integer.valueOf((int)form.getSize().getWidth()), Integer.valueOf((int)form.getSize().getHeight()) });
-				}
+				websocketSession.getClientService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
+					"updateForm",
+					new Object[] { changedForm.getName(), changedForm.getUUID().toString(), Integer.valueOf((int)form.getSize().getWidth()), Integer.valueOf((int)form.getSize().getHeight()) });
 			}
 		}
 		else

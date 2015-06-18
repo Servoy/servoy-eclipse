@@ -787,17 +787,24 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 			});
 
 			$element.on('updateForm.content', function(event, formInfo) {
-				if(formName == formInfo.name) {
-					$scope.setContentSize(formInfo.w + "px", formInfo.h + "px");
-					var ghost = $scope.getGhost(formInfo.uuid);
-					if(ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM)) {						
-						ghost.size.width = formInfo.w;
-						ghost.size.height = formInfo.h;
-						
-						if(selection.length > 0 && selection[0].getAttribute("svy-id") == formInfo.uuid) {
-							$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection)
-						}
-					}	
+				if($scope.isAbsoluteFormLayout()) {
+					if(formName == formInfo.name) {
+						$scope.setContentSize(formInfo.w + "px", formInfo.h + "px");
+						var ghost = $scope.getGhost(formInfo.uuid);
+						if(ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM)) {						
+							ghost.size.width = formInfo.w;
+							ghost.size.height = formInfo.h;
+							
+							if(selection.length > 0 && selection[0].getAttribute("svy-id") == formInfo.uuid) {
+								$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED,selection)
+							}
+						}	
+					}
+				}
+				else {
+					$timeout(function() {
+						$editorService.refreshPreview();
+					}, 100);
 				}
 			});			
 			
@@ -811,7 +818,7 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 		replace: true
 	};
 
-}).factory("$editorService", function($rootScope, $webSocket, $log, $q,$window, EDITOR_EVENTS, $rootScope,$timeout) {
+}).factory("$editorService", function($rootScope, $webSocket, $log, $q,$window, EDITOR_EVENTS, $rootScope,$timeout, $selectionUtils) {
 	var realConsole = $window.console;
 	$window.console = {
 			log: function(msg) {
@@ -1077,6 +1084,11 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 		
 		openURLInNewWindow: function(url){
 			wsSession.callService('formeditor', 'openURLInNewWindow', {"url":url}, true);
+		},
+		
+		refreshPreview: function() {
+			var utils = $selectionUtils.getUtilsForScope(editorScope);
+			utils.refreshDesignMode();
 		}
 		// add more service methods here
 	}

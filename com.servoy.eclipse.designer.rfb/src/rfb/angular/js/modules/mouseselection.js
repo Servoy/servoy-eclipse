@@ -265,6 +265,12 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 						editorScope.refreshEditorContent();
 					}
 				},
+				refreshDesignMode: function()
+				{
+					if(designMode) {
+						this.updateDesignMode(true);
+					}
+				},
 				setDraggingFromPallete: function(dragging){
 					draggingFromPallete = dragging;
 					if (!designMode)
