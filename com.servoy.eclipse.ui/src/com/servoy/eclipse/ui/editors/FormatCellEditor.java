@@ -20,9 +20,12 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.sablo.specification.IYieldingType;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.property.CustomJSONArrayType;
+import org.sablo.specification.property.IPropertyType;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -41,9 +44,11 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
+import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -78,20 +83,49 @@ public class FormatCellEditor extends TextDialogCellEditor
 		int type = IColumnTypes.TEXT;
 		if (formatForPropertyNames != null && formatForPropertyNames.length > 0)
 		{
-			String webComponentClassName = FormTemplateGenerator.getComponentTypeName((IFormElement)persist);
-
+			String webComponentClassName = null;
+			if (persist instanceof IFormElement)
+			{
+				webComponentClassName = FormTemplateGenerator.getComponentTypeName((IFormElement)persist);
+			}
+			else if (persist instanceof WebCustomType)
+			{
+				webComponentClassName = FormTemplateGenerator.getComponentTypeName((IFormElement)persist.getAncestor(IRepository.WEBCOMPONENTS));
+			}
 			WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(webComponentClassName);
 			if (spec != null)
 			{
 				FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 				for (String propertyName : formatForPropertyNames)
 				{
-					PropertyDescription pd = spec.getProperty(propertyName);
+					PropertyDescription pd = null;
+					if (persist instanceof WebCustomType)
+					{
+						pd = spec.getProperty(((WebCustomType)persist).getJsonKey());
+						if (pd.getType() instanceof CustomJSONArrayType)
+						{
+							pd = ((CustomJSONArrayType)pd.getType()).getCustomJSONTypeDefinition();
+						}
+						pd = pd.getProperty(propertyName);
+					}
+					if (pd == null)
+					{
+						pd = spec.getProperty(propertyName);
+					}
 					if (pd != null)
 					{
-						if (pd.getType() instanceof DataproviderPropertyType)
+						IPropertyType propertyType = pd.getType();
+						if (propertyType instanceof IYieldingType)
+						{
+							propertyType = ((IYieldingType)propertyType).getPossibleYieldType();
+						}
+						if (propertyType instanceof DataproviderPropertyType)
 						{
 							String dataProviderID = (String)((AbstractBase)persist).getProperty(propertyName);
+							if (persist instanceof WebCustomType && ((WebCustomType)persist).getJson() != null)
+							{
+								dataProviderID = ((WebCustomType)persist).getJson().optString(propertyName);
+							}
 							if (dataProviderID != null)
 							{
 								Form form = (Form)persist.getAncestor(IRepository.FORMS);
@@ -105,67 +139,80 @@ public class FormatCellEditor extends TextDialogCellEditor
 								break;
 							}
 						}
-						else if (pd.getType() instanceof ValueListPropertyType)
+						else if (propertyType instanceof ValueListPropertyType)
 						{
-							int valuelistID = Utils.getAsInteger(((AbstractBase)persist).getProperty(propertyName));
-							if (valuelistID > 0)
+							ValueList vl = null;
+							if (persist instanceof WebCustomType && ((WebCustomType)persist).getJson() != null)
 							{
-								ValueList vl = flattenedSolution.getValueList(valuelistID);
-								if (vl != null)
+								UUID valuelistUUID = Utils.getAsUUID(((WebCustomType)persist).getJson().optString(propertyName), false);
+								if (valuelistUUID != null)
 								{
-									IDataProvider dataProvider = null;
-									ITable table = null;
-									try
-									{
-										if (vl.getRelationName() != null)
-										{
-											Relation[] relations = flattenedSolution.getRelationSequence(vl.getRelationName());
-											table = relations[relations.length - 1].getForeignTable();
-										}
-										else
-										{
-											table = vl.getTable();
-										}
-									}
-									catch (Exception ex)
-									{
-										ServoyLog.logError(ex);
-									}
-									if (table != null)
-									{
-										String dp = null;
-										int showDataProviders = vl.getShowDataProviders();
-										if (showDataProviders == 1)
-										{
-											dp = vl.getDataProviderID1();
-										}
-										else if (showDataProviders == 2)
-										{
-											dp = vl.getDataProviderID2();
-										}
-										else if (showDataProviders == 4)
-										{
-											dp = vl.getDataProviderID3();
-										}
-
-										if (dp != null)
-										{
-											try
-											{
-												dataProvider = flattenedSolution.getDataProviderForTable((Table)table, dp);
-											}
-											catch (Exception ex)
-											{
-												ServoyLog.logError(ex);
-											}
-											if (dataProvider != null)
-											{
-												type = dataProvider.getDataProviderType();
-											}
-										}
-									}
-									break;
+									vl = (ValueList)flattenedSolution.searchPersist(valuelistUUID);
 								}
+							}
+							else
+							{
+								int valuelistID = Utils.getAsInteger(((AbstractBase)persist).getProperty(propertyName));
+								if (valuelistID > 0)
+								{
+									vl = flattenedSolution.getValueList(valuelistID);
+								}
+							}
+
+							if (vl != null)
+							{
+								IDataProvider dataProvider = null;
+								ITable table = null;
+								try
+								{
+									if (vl.getRelationName() != null)
+									{
+										Relation[] relations = flattenedSolution.getRelationSequence(vl.getRelationName());
+										table = relations[relations.length - 1].getForeignTable();
+									}
+									else
+									{
+										table = vl.getTable();
+									}
+								}
+								catch (Exception ex)
+								{
+									ServoyLog.logError(ex);
+								}
+								if (table != null)
+								{
+									String dp = null;
+									int showDataProviders = vl.getShowDataProviders();
+									if (showDataProviders == 1)
+									{
+										dp = vl.getDataProviderID1();
+									}
+									else if (showDataProviders == 2)
+									{
+										dp = vl.getDataProviderID2();
+									}
+									else if (showDataProviders == 4)
+									{
+										dp = vl.getDataProviderID3();
+									}
+
+									if (dp != null)
+									{
+										try
+										{
+											dataProvider = flattenedSolution.getDataProviderForTable((Table)table, dp);
+										}
+										catch (Exception ex)
+										{
+											ServoyLog.logError(ex);
+										}
+										if (dataProvider != null)
+										{
+											type = dataProvider.getDataProviderType();
+										}
+									}
+								}
+								break;
 							}
 						}
 					}
