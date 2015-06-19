@@ -45,7 +45,7 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 						currentNode.name =  node.attr('name');
 						currentNode.node = node;
 						var ghost = $scope.getGhost(node.attr("svy-id"));
-						if (renderResizeKnobs)
+						if (renderResizeKnobs && $scope.isAbsoluteFormLayout())
 						{
 							if(ghost) {			
 								if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_COMPONENT) 
