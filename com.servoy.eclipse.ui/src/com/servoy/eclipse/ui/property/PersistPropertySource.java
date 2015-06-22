@@ -2547,7 +2547,8 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			}
 			try
 			{
-				Object object = json.get(forFoundsetName);
+				Object object = null;
+				if (json != null) object = json.opt(forFoundsetName);
 				String foundsetValue = "";
 				if (object instanceof JSONObject)
 				{
