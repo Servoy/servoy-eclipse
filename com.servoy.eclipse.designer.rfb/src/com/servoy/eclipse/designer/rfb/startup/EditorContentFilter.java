@@ -39,6 +39,8 @@ import org.sablo.specification.WebComponentPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 
+import com.servoy.j2db.server.ngclient.template.ClientModifiablePropertiesGenerator;
+
 /**
  * @author jcompagner
  *
@@ -81,6 +83,7 @@ public class EditorContentFilter implements Filter
 						formScripts.addAll(entry.getJsDesignLibrary());
 					}
 				}
+				formScripts.add("spec/" + ClientModifiablePropertiesGenerator.TWO_WAY_BINDINGS_LIST + ".js"); // lists properties that need to be watched for client to server changes for each component/service type
 				IndexPageEnhancer.enhance(getClass().getResource("editor-content.html"), httpServletRequest.getContextPath(), css, formScripts,
 					variableSubstitution, w);
 				w.flush();
