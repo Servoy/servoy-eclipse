@@ -184,11 +184,11 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 					{
 						if ("log".equals(arguments[0]))
 						{
-							ServoyLog.logInfo((String)arguments[1]);
+							ServoyLog.logInfo(arguments[1] != null ? arguments[1].toString() : null);
 						}
 						else if ("error".equals(arguments[0]))
 						{
-							ServoyLog.logError((String)arguments[1], null);
+							ServoyLog.logError(arguments[1] != null ? arguments[1].toString() : null, null);
 						}
 					}
 					return null;
@@ -205,7 +205,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage#getAdapter(java.lang.Class)
 	 */
 	@Override
