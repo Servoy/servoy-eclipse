@@ -42,6 +42,7 @@ import com.servoy.eclipse.designer.editor.commands.AddPortalAction;
 import com.servoy.eclipse.designer.editor.commands.AddSplitpaneAction;
 import com.servoy.eclipse.designer.editor.commands.AddTabpanelAction;
 import com.servoy.eclipse.designer.editor.commands.SaveAsTemplateAction;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -219,13 +220,14 @@ public class OpenElementWizardHandler implements IServerService
 						ISelection selection = selectionProvider.getSelection();
 						if (selection instanceof StructuredSelection && ((StructuredSelection)selection).size() == 1)
 						{
-							Object selectedElement = ((StructuredSelection)selection).getFirstElement();
-							if (selectedElement instanceof TabPanel)
+							PersistContext selectedElement = (PersistContext)(((StructuredSelection)selection).getFirstElement());
+							IPersist persist = selectedElement.getPersist();
+							if (persist instanceof TabPanel)
 							{
 								IApplication application = Activator.getDefault().getDesignClient();
 								Form form = formEditPart.getPersist();
-								PersistGraphicalEditPart persistGraphicalEditPart = new PersistGraphicalEditPart(application, (TabPanel)selectedElement, form,
-									Utils.isInheritedFormElement(selectedElement, form), new PersistGraphicalEditPartFigureFactory(application, form));
+								PersistGraphicalEditPart persistGraphicalEditPart = new PersistGraphicalEditPart(application, persist,
+									form, Utils.isInheritedFormElement(selectedElement, form), new PersistGraphicalEditPartFigureFactory(application, form));
 								persistGraphicalEditPart.installEditPolicy(EditPolicy.COMPONENT_ROLE, new PersistEditPolicy(application, fieldPositioner));
 
 								return new StructuredSelection(persistGraphicalEditPart);
