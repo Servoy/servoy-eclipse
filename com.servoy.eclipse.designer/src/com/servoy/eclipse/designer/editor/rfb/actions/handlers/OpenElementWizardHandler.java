@@ -220,14 +220,17 @@ public class OpenElementWizardHandler implements IServerService
 						ISelection selection = selectionProvider.getSelection();
 						if (selection instanceof StructuredSelection && ((StructuredSelection)selection).size() == 1)
 						{
-							PersistContext selectedElement = (PersistContext)(((StructuredSelection)selection).getFirstElement());
-							IPersist persist = selectedElement.getPersist();
-							if (persist instanceof TabPanel)
+							Object selectedElement = (((StructuredSelection)selection).getFirstElement());
+							if (selectedElement instanceof PersistContext)
+							{
+								selectedElement = ((PersistContext)selectedElement).getPersist();
+							}
+							if (selectedElement instanceof TabPanel)
 							{
 								IApplication application = Activator.getDefault().getDesignClient();
 								Form form = formEditPart.getPersist();
-								PersistGraphicalEditPart persistGraphicalEditPart = new PersistGraphicalEditPart(application, persist,
-									form, Utils.isInheritedFormElement(selectedElement, form), new PersistGraphicalEditPartFigureFactory(application, form));
+								PersistGraphicalEditPart persistGraphicalEditPart = new PersistGraphicalEditPart(application, (TabPanel)selectedElement, form,
+									Utils.isInheritedFormElement(selectedElement, form), new PersistGraphicalEditPartFigureFactory(application, form));
 								persistGraphicalEditPart.installEditPolicy(EditPolicy.COMPONENT_ROLE, new PersistEditPolicy(application, fieldPositioner));
 
 								return new StructuredSelection(persistGraphicalEditPart);
