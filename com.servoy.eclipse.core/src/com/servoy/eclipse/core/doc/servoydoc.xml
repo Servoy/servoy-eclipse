@@ -3315,39 +3315,43 @@ application.sleep(3000);]]></sample>
             <sample clientSupport="sc"><![CDATA[application.undo();]]></sample>
           </samples>
         </function>
-        <function clientSupport="sc" name="updateUI">
+        <function clientSupport="ng,sc" name="updateUI">
           <argumentsTypes/>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="sc"><![CDATA[Updates the UI (painting). If in a script an element changed and the script continues doing
+            <description clientSupport="ng,sc"><![CDATA[Updates the UI (painting). If in a script an element changed and the script continues doing
 things, you can give an number in ms how long this can take.
 Warning: this gives the UI time to paint, but this also means that it will give the ui time to respond to all other events,
-so if a user keeps clicking on other stuff this will also be handled right away inside this call.]]></description>
+so if a user keeps clicking on other stuff this will also be handled right away inside this call.
+
+NOTE:In NGClient, this method will send to browser all outstanding changes. If called too often (with many changes), can cause performance issues.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="sc"><![CDATA[Updates the UI (painting).]]></summary>
+            <summary clientSupport="ng,sc"><![CDATA[Updates the UI (painting).]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="sc"><![CDATA[application.updateUI(500);
+            <sample clientSupport="ng,sc"><![CDATA[application.updateUI(500);
 //continue doing things]]></sample>
           </samples>
         </function>
-        <function clientSupport="sc" name="updateUI">
+        <function clientSupport="ng,sc" name="updateUI">
           <argumentsTypes>
             <argumentType typecode="int"/>
           </argumentsTypes>
           <return type="void" typecode="void"/>
           <descriptions>
-            <description clientSupport="sc"><![CDATA[Updates the UI (painting). If in a script an element changed and the script continues doing
+            <description clientSupport="ng,sc"><![CDATA[Updates the UI (painting). If in a script an element changed and the script continues doing
 things, you can give an number in ms how long this can take.
 Warning: this gives the UI time to paint, but this also means that it will give the ui time to respond to all other events,
-so if a user keeps clicking on other stuff this will also be handled right away inside this call.]]></description>
+so if a user keeps clicking on other stuff this will also be handled right away inside this call.
+
+NOTE:In NGClient, this method will send to browser all outstanding changes. If called too often (with many changes), can cause performance issues.]]></description>
           </descriptions>
           <summaries>
-            <summary clientSupport="sc"><![CDATA[Updates the UI (painting).]]></summary>
+            <summary clientSupport="ng,sc"><![CDATA[Updates the UI (painting).]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="sc"><![CDATA[application.updateUI(500);
+            <sample clientSupport="ng,sc"><![CDATA[application.updateUI(500);
 //continue doing things]]></sample>
           </samples>
           <parameters>
@@ -65484,6 +65488,23 @@ DEFAULT: false]]></description>
           </summaries>
           <samples>
             <sample clientSupport="ng,wc,sc"><![CDATA[application.putClientProperty(APP_UI_PROPERTY.LEAVE_FIELDS_READONLY_IN_FIND_MODE, true)]]></sample>
+          </samples>
+        </constant>
+        <constant clientSupport="ng,wc,sc" name="TABLEVIEW_NG_OPTIMIZED_READONLY_MODE">
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"/>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Property that can be set using application.putClientProperty().
+
+If set to true, the tableview will be seens as fully readonly and NGClient will generate an optimized version (textfields are replaced)
+
+The value can be true/false
+DEFAULT: false]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Property that can be set using application.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[application.putClientProperty(APP_UI_PROPERTY.TABLEVIEW_NG_OPTIMIZED_READONLY_MODE, true)]]></sample>
           </samples>
         </constant>
         <constant clientSupport="ng,wc,sc" name="TABLEVIEW_WC_DEFAULT_SCROLLABLE">
