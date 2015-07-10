@@ -68,7 +68,7 @@ public class DBITableLoader implements ITableLoader
 							{
 								Column c = new Column(table, colInfo.name, colInfo.columnType.getSqlType(), colInfo.columnType.getLength(),
 									colInfo.columnType.getScale(), true);
-
+								if (colInfo.dataProviderID != null) c.setDataProviderID(colInfo.dataProviderID);
 								c.setAllowNull(colInfo.allowNull);
 								//c.setColumnInfo(colInfo);
 								if ((Column.PK_COLUMN & colInfo.flags) > 0) c.setDatabasePK(true);
