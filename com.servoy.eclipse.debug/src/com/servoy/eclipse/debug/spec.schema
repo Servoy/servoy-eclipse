@@ -94,6 +94,9 @@
 							"blockingOn": {
 								"type": "boolean"
 							},
+							"twoWay": {
+         					    "enum" : ["shallow", "deep"]
+							},
 							"tags": {
 								"type": "object"
 							},

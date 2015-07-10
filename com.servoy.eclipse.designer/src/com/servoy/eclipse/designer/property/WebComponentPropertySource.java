@@ -143,7 +143,7 @@ public class WebComponentPropertySource extends PersistPropertySource
 						config.addDefault(desc.getDefaultValue(), null);
 					}
 					props.add(new WebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config,
-						desc.getDefaultValue(), null, null, false)));
+						desc.getDefaultValue(), null, null, null, false)));
 				}
 				else
 				{
@@ -165,11 +165,11 @@ public class WebComponentPropertySource extends PersistPropertySource
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.servoy.eclipse.ui.property.PersistPropertySource#createPropertyCategory(com.servoy.eclipse.ui.property.PersistPropertySource.PropertyDescriptorWrapper
 	 * )
-	 * 
+	 *
 	 * Properties from spec should be dispayed under "Component" category except for handlers and BEAN_PROPERTIES. Properties found with reflection are handled
 	 * by the super class (they go under "Properties").
 	 */
