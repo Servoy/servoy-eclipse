@@ -31,7 +31,6 @@ import org.json.JSONWriter;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
-import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.base.persistence.constants.IContentSpecConstantsBase;
@@ -60,6 +59,7 @@ import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -139,7 +139,14 @@ public class GhostHandler implements IServerService
 									{
 										for (IPersist p : ((WebComponent)bean).getAllCustomProperties())
 										{
-											writeGhostToJSON(writer, bean, pd, ((WebCustomType)p).getTypeName(), ((WebCustomType)p).getIndex());
+											WebCustomType webCustomType = (WebCustomType)p;
+											String text = webCustomType.getTypeName();
+											if (webCustomType.getProperty("json") != null)
+											{
+												ServoyJSONObject json = (ServoyJSONObject)webCustomType.getProperty("json");
+												if (json.has("text")) text = json.getString("text");
+											}
+											writeGhostToJSON(writer, bean, pd, webCustomType.getTypeName(), webCustomType.getIndex(), text);
 										}
 									}
 									else if (bean instanceof Bean)
@@ -156,12 +163,12 @@ public class GhostHandler implements IServerService
 														JSONArray jsonArray = webComponentModelJson.getJSONArray(pd.getName());
 														for (int i = 0; i < jsonArray.length(); i++)
 														{
-															writeGhostToJSON(writer, bean, pd, simpleTypeName, i);
+															writeGhostToJSON(writer, bean, pd, simpleTypeName, i, simpleTypeName);
 														}
 													}
 													else
 													{
-														writeGhostToJSON(writer, bean, pd, simpleTypeName, -1);// -1 does not add a [0] at the end of the name
+														writeGhostToJSON(writer, bean, pd, simpleTypeName, -1, pd.getName());// -1 does not add a [0] at the end of the name
 													}
 												}
 											}
@@ -190,14 +197,16 @@ public class GhostHandler implements IServerService
 			 * @param pd
 			 * @param simpleTypeName
 			 * @param i
+			 * @param text
 			 * @throws JSONException
 			 */
-			private void writeGhostToJSON(JSONWriter jsonWriter, IWebComponent bean, PropertyDescription pd, String simpleTypeName, int i) throws JSONException
+			private void writeGhostToJSON(JSONWriter jsonWriter, IWebComponent bean, PropertyDescription pd, String simpleTypeName, int i, Object text)
+				throws JSONException
 			{
 				jsonWriter.object();
 				jsonWriter.key("uuid").value(computeGhostUUID(bean, pd, simpleTypeName, i));
 				jsonWriter.key("type").value(GHOST_TYPE_CONFIGURATION);
-				jsonWriter.key("text").value(pd.getType() instanceof CustomJSONArrayType ? simpleTypeName : pd.getName());
+				jsonWriter.key("text").value(text);
 				jsonWriter.key("location");
 				{
 					jsonWriter.object();
