@@ -46,8 +46,9 @@ body {
 	-webkit-flex-direction: row;
 	
 	overflow: auto; 
-	flex: 1 1 auto;
+	-ms-flex: 1 1 auto;
 	-webkit-flex: 1 1 auto;
+	flex: 1 1 auto;
     overflow-y: auto;
     min-height: 0px; /* or height:0px */
 }
@@ -84,8 +85,9 @@ body {
 
 .content-area {
 	position: relative;
-	flex: 1 1 auto;
 	-webkit-flex: 1 1 auto;
+	-ms-flex: 1 1 auto;
+	flex: 1 1 auto;
 	width: 100%;
 	overflow: auto;
 	background-image: url('../images/light-raster-background.png');
