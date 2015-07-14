@@ -82,7 +82,7 @@ public class EditorContentFilter implements Filter
 					}
 				}
 				IndexPageEnhancer.enhance(getClass().getResource("editor-content.html"), httpServletRequest.getContextPath(), css, formScripts,
-					variableSubstitution, w);
+					variableSubstitution, w, null);
 				w.flush();
 				return;
 			}
