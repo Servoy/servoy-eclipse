@@ -32,19 +32,23 @@ body {
 
 .column {
     height: 100%;
+    
 	display: flex;
   	display: -webkit-flex;
+  	display: -ms-flexbox;
 	flex-direction: column;
 	-webkit-flex-direction: column;
+	-ms-flex-direction: column;
 	
 }
 
 .fill-area {
 	display: flex;
   	display: -webkit-flex;
+  	display: -ms-flexbox;
 	flex-direction: row;
+	-ms-flex-direction: row;
 	-webkit-flex-direction: row;
-	
 	overflow: auto; 
 	-ms-flex: 1 1 auto;
 	-webkit-flex: 1 1 auto;
