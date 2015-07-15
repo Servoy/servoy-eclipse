@@ -347,7 +347,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 					{
 						String scopeName = memento.getString("scopename");
 						String solutionName = memento.getString("solutionname");
-						if (scopeName != null && solutionName != null)
+						if (scopeName != null && solutionName != null && servoyModel.getServoyProject(solutionName) != null)
 						{
 							Solution solution = servoyModel.getServoyProject(solutionName).getSolution();
 							if (solution != null && servoyModel.isSolutionActive(solutionName) && solution.getScopeNames().contains(scopeName))
