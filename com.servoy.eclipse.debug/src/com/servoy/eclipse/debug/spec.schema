@@ -32,7 +32,7 @@
 				"additionalProperties":false
 			},
 
-			"description": "Extra Javascript or CSS libraries that this componnet uses",
+			"description": "Extra Javascript or CSS libraries that this component uses",
 			"type": "array"
 		},
 		"icon": 
@@ -94,8 +94,8 @@
 							"blockingOn": {
 								"type": "boolean"
 							},
-							"twoWay": {
-         					    "enum" : ["shallow", "deep"]
+							"pushToServer": {
+         					    "enum" : ["reject", "allow", "shallow", "deep"]
 							},
 							"tags": {
 								"type": "object"
