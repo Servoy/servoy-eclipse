@@ -50,10 +50,10 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 				loadPalette();
 			});
 			
-			$scope.openInNewWindow = function (preview)  {
+			$scope.showPreviewImage = function (preview)  {
 				  var host = $(location).attr('host');
 				  var protocol = $(location).attr('protocol');
-				  $editorService.openURLInNewWindow(protocol+"//"+host+"/"+preview);
+				  $editorService.showImageInOverlayDiv(protocol+"//"+host+"/"+preview);
 			};
 			
 			$rootScope.$on(EDITOR_EVENTS.RELOAD_PALETTE, function(e){

@@ -11,7 +11,7 @@
 							<div ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.componentType,item.topContainer, item.layoutName) " title="Place component {{item.displayName}}"> 
 								<img draggable="false" ng-src="/{{item.icon}}" alt=""/>{{item.displayName}}
 							</div>
-							<img ng-click="openInNewWindow(item.preview)" draggable="false" ng-if="item.preview" src="images/images.jpeg" title="Open preview" alt="" style="position:absolute; right:0; bottom:0.14em; cursor:pointer;"/>
+							<img ng-click="showPreviewImage(item.preview)" draggable="false" ng-if="item.preview" src="images/images.jpeg" title="Open preview" alt="" style="position:absolute; right:0; bottom:0.14em; cursor:pointer;"/>
 							<ul>
 								<li ng-repeat="ghost in item.types" ng-mousedown="enterDragMode($event,ghost,null,null,null,ghost) " title="Place component {{ghost}}">
 									<img draggable="false" ng-src="/{{item.icon}}" alt=""/>{{ghost}}

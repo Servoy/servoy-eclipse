@@ -38,7 +38,6 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.MoveInResponsiveL
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenContainedFormHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenElementWizardHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenScriptHandler;
-import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenURLInNewWindow;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetPropertiesHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetSelectionHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetTabSequenceCommand;
@@ -101,7 +100,6 @@ public class EditorServiceHandler implements IServerService
 		configuredHandlers.put("updateFieldPositioner", new UpdateFieldPositioner(fieldPositioner));
 		configuredHandlers.put("openScript", new OpenScriptHandler(editorPart));
 		configuredHandlers.put("updatePaletteOrder", new UpdatePaletteOrder());
-		configuredHandlers.put("openURLInNewWindow", new OpenURLInNewWindow());
 		configuredHandlers.put("openContainedForm", new OpenContainedFormHandler(editorPart));
 		configuredHandlers.put("setInlineEditMode", new IServerService()
 		{
