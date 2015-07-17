@@ -45,7 +45,7 @@ public class DesignerFoundsetPropertyType extends FoundsetPropertyType
 	public FoundsetTypeSabloValue toSabloComponentValue(JSONObject formElementValue, PropertyDescription pd, INGFormElement formElement,
 		WebFormComponent component, final DataAdapterList dal)
 	{
-		return new FoundsetTypeSabloValue(formElementValue, pd.getName(), dal, dal.getApplication())
+		return new FoundsetTypeSabloValue(formElementValue, pd.getName(), dal)
 		{
 			@Override
 			public void updateFoundset(IFoundSetInternal newFoundset)
