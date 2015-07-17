@@ -66,7 +66,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * models servoy solution as project
- * 
+ *
  * @author jblok
  */
 public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
@@ -216,7 +216,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 
 	/**
 	 * Returns true if this is the currently active solution project in the workspace and false otherwise.
-	 * 
+	 *
 	 * @return true if this is the currently active solution project in the workspace and false otherwise.
 	 */
 	public boolean isActive()
@@ -238,7 +238,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 
 	/**
 	 * Get a working copy of the solution. Changes to this solution will not affect the real solution.
-	 * 
+	 *
 	 * @return
 	 */
 	public Solution getEditingSolution()
@@ -268,7 +268,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 
 	/**
 	 * Get a working copy of the node in the editing solution. Changes to this solution will not affect the real solution.
-	 * 
+	 *
 	 * @return
 	 * @throws RepositoryException
 	 */
@@ -298,6 +298,8 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 
 				public Object visit(IPersist src)
 				{
+					boolean goDeeperInItems = (recursive && src instanceof ISupportChilds && SolutionSerializer.isCompositeWithIndependentSerializationOfSubItems(src));
+
 					ISupportChilds currentParent = parent;
 					while (!(currentParent instanceof Solution) && !currentParent.getUUID().equals(src.getParent().getUUID()))
 					{
@@ -330,7 +332,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 					}
 					editingSolution.clearEditingState(dest);
 
-					if (recursive && src instanceof ISupportChilds)
+					if (goDeeperInItems)
 					{
 						/// parent for the next time.
 						parent = (ISupportChilds)dest;
@@ -362,7 +364,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 						}
 					}
 
-					return recursive ? IPersistVisitor.CONTINUE_TRAVERSAL : IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+					return goDeeperInItems ? IPersistVisitor.CONTINUE_TRAVERSAL : IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
 				}
 			});
 		}
@@ -385,7 +387,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 
 	/**
 	 * Apply all changes in editingSolution to the solution, starting from nodes.
-	 * 
+	 *
 	 * @param nodes
 	 * @param recursive
 	 */
@@ -420,7 +422,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 	/**
 	 * Returns the ServoyResourcesProject instance that this project references. Returns null if there is no such reference or if there is more than one project
 	 * that matches this criteria.
-	 * 
+	 *
 	 * @return the ServoyResourcesProject instance that this project references.
 	 */
 	public ServoyResourcesProject getResourcesProject()
@@ -455,7 +457,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 
 	/**
 	 * Push the version of the persist in the real solution to the in-memory editing solution.
-	 * 
+	 *
 	 * @param searchPersist
 	 * @param recursive
 	 * @return
@@ -649,7 +651,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 
 	/**
 	 * Returns a map of exceptions encountered during deserialization.
-	 * 
+	 *
 	 * @return a map of exceptions encountered during deserialization.
 	 */
 	public HashMap<File, String> getDeserializeExceptions()

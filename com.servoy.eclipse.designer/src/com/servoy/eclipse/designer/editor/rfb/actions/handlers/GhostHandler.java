@@ -31,7 +31,9 @@ import org.json.JSONWriter;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.websocket.IServerService;
+import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.base.persistence.constants.IContentSpecConstantsBase;
 import com.servoy.base.persistence.constants.IFormConstants;
@@ -56,6 +58,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.FormElement;
+import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
@@ -75,20 +78,11 @@ public class GhostHandler implements IServerService
 
 	private final BaseVisualFormEditor editorPart;
 
-	/**
-	 * @param editorPart2
-	 */
 	public GhostHandler(BaseVisualFormEditor editorPart)
 	{
 		this.editorPart = editorPart;
 	}
 
-	/**
-	 * @param methodName
-	 * @param args
-	 * @return
-	 * @throws JSONException
-	 */
 	public Object executeMethod(String methodName, final JSONObject args) throws JSONException
 	{
 		StringWriter stringWriter = new StringWriter();
@@ -99,11 +93,11 @@ public class GhostHandler implements IServerService
 		editorPart.getForm().acceptVisitor(new IPersistVisitor()
 		{
 
-			private String computeGhostUUID(IWebComponent bean, PropertyDescription pd, String simpleTypeName, int index)
-			{
-				if (index < 0) return bean.getUUID() + "_" + pd.getName() + "_" + simpleTypeName;
-				return bean.getUUID() + "_" + pd.getName() + "." + index + "_" + simpleTypeName;
-			}
+//			private String computeLegacyBeanGhostUUID(Bean bean, PropertyDescription pd, String simpleTypeName, int index)
+//			{
+//				if (index < 0) return bean.getUUID() + "_" + pd.getName() + "_" + simpleTypeName;
+//				return bean.getUUID() + "_" + pd.getName() + "." + +index + "_" + simpleTypeName;
+//			}
 
 			private void writeGhostsForWebcomponentBeans(JSONWriter writer, IWebComponent bean)
 			{
@@ -130,54 +124,67 @@ public class GhostHandler implements IServerService
 						writer.key("ghosts");
 						{
 							writer.array();
-							for (PropertyDescription pd : properties.values())
+							if (bean instanceof WebComponent)
 							{
-								String simpleTypeName = pd.getType().getName().replaceFirst(spec.getName() + ".", "");
-								if (spec.getFoundTypes().containsKey(simpleTypeName))
+								for (WebCustomType p : ((WebComponent)bean).getAllFirstLevelArrayOfOrCustomPropertiesFlattened())
 								{
-									if (bean instanceof WebComponent)
+									String text = p.getJsonKey() + (p.getIndex() >= 0 ? "[" + p.getIndex() + "]" : "");
+
+									// special case for tabPanels - text subproperty should be shown as label instead of tabs[0]...
+									if (p.getProperty("json") != null)
 									{
-										for (IPersist p : ((WebComponent)bean).getAllCustomProperties())
-										{
-											WebCustomType webCustomType = (WebCustomType)p;
-											String text = webCustomType.getTypeName();
-											if (webCustomType.getProperty("json") != null)
-											{
-												ServoyJSONObject json = (ServoyJSONObject)webCustomType.getProperty("json");
-												if (json.has("text")) text = json.getString("text");
-											}
-											writeGhostToJSON(writer, bean, pd, webCustomType.getTypeName(), webCustomType.getIndex(), text);
-										}
+										ServoyJSONObject json = (ServoyJSONObject)p.getProperty("json");
+										if (json.has("text")) text = json.getString("text");
 									}
-									else if (bean instanceof Bean)
+
+									Object configObject = p.getPropertyDescription().getConfig();
+									if (p.getPropertyDescription().getType() instanceof ComponentPropertyType ||
+										(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
 									{
-										try
+										writeGhostToJSON(writer, text, p.getUUID().toString(), p.getIndex());
+									}
+								}
+							}
+							else if (bean instanceof Bean)
+							{
+								try
+								{
+									if (((Bean)bean).getBeanXML() != null)
+									{
+										JSONObject webComponentModelJson = new JSONObject(((Bean)bean).getBeanXML());
+										for (PropertyDescription pd : properties.values())
 										{
-											if (((Bean)bean).getBeanXML() != null)
+											String simpleTypeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(pd.getType());
+											if (webComponentModelJson.has(pd.getName()))
 											{
-												JSONObject webComponentModelJson = new JSONObject(((Bean)bean).getBeanXML());
-												if (webComponentModelJson.has(pd.getName()))
+												Object configObject = pd.getConfig();
+												if (PropertyUtils.isCustomJSONObjectProperty(pd.getType()))
 												{
-													if (webComponentModelJson.get(pd.getName()).toString().startsWith("["))
+													if (pd.getType() instanceof ComponentPropertyType ||
+														(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
 													{
-														JSONArray jsonArray = webComponentModelJson.getJSONArray(pd.getName());
-														for (int i = 0; i < jsonArray.length(); i++)
-														{
-															writeGhostToJSON(writer, bean, pd, simpleTypeName, i, simpleTypeName);
-														}
+														writeGhostToJSON(writer, (Bean)bean, pd, simpleTypeName, -1);// -1 does not add a [0] at the end of the name
 													}
-													else
+												}
+												else if (PropertyUtils.isCustomJSONArrayPropertyType(pd.getType()))
+												{
+													JSONArray jsonArray = webComponentModelJson.getJSONArray(pd.getName());
+													for (int i = 0; i < jsonArray.length(); i++)
 													{
-														writeGhostToJSON(writer, bean, pd, simpleTypeName, -1, pd.getName());// -1 does not add a [0] at the end of the name
+														if (((CustomJSONArrayType)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType ||
+															(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
+														{
+															writeGhostToJSON(writer, (Bean)bean, pd, simpleTypeName, i);
+														}
 													}
 												}
 											}
 										}
-										catch (JSONException e)
-										{
-											Debug.error(e);
-										}
 									}
+								}
+								catch (JSONException e)
+								{
+									Debug.error(e);
 								}
 							}
 							writer.endArray();
@@ -191,26 +198,24 @@ public class GhostHandler implements IServerService
 				}
 			}
 
-			/**
-			 * @param jsonWriter
-			 * @param bean
-			 * @param pd
-			 * @param simpleTypeName
-			 * @param i
-			 * @param text
-			 * @throws JSONException
-			 */
-			private void writeGhostToJSON(JSONWriter jsonWriter, IWebComponent bean, PropertyDescription pd, String simpleTypeName, int i, Object text)
+			private void writeGhostToJSON(JSONWriter jsonWriter, Bean bean, PropertyDescription pd, String simpleTypeName, int indexForPositioning)
 				throws JSONException
 			{
+				writeGhostToJSON(writer, pd.getName() + (indexForPositioning >= 0 ? "[" + indexForPositioning + "]" : ""), UUID.randomUUID().toString(),
+					indexForPositioning);
+//				writeGhostToJSON(jsonWriter, pd.getName(), computeLegacyBeanGhostUUID(bean, pd, simpleTypeName, indexForPositioning), indexForPositioning);
+			}
+
+			private void writeGhostToJSON(JSONWriter jsonWriter, String text, String uuid, int indexForPositioning) throws JSONException
+			{
 				jsonWriter.object();
-				jsonWriter.key("uuid").value(computeGhostUUID(bean, pd, simpleTypeName, i));
+				jsonWriter.key("uuid").value(uuid);
 				jsonWriter.key("type").value(GHOST_TYPE_CONFIGURATION);
 				jsonWriter.key("text").value(text);
 				jsonWriter.key("location");
 				{
 					jsonWriter.object();
-					int position = i;
+					int position = indexForPositioning;
 					if (position < 0) position = 0;
 					jsonWriter.key("x").value(computeX(position));
 					jsonWriter.key("y").value(computeY(position));
@@ -375,10 +380,6 @@ public class GhostHandler implements IServerService
 				return IPersistVisitor.CONTINUE_TRAVERSAL;
 			}
 
-			/**
-			 * @param writer
-			 * @param f
-			 */
 			private void writeTableViewGhosts(final JSONWriter writer, Form f)
 			{
 				if (f.getProperty(IContentSpecConstantsBase.PROPERTY_VIEW) != null)

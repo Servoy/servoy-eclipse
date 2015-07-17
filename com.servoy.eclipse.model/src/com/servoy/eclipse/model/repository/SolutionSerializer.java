@@ -645,6 +645,26 @@ public class SolutionSerializer
 			p instanceof LayoutContainer; // can only return true for objects containing SolutionSerializer.PROP_ITEMS
 	}
 
+	/**
+	 * true in case this is a composite who's sub-items can be serialized/deserialized separately - independently; false if it is either not a composite
+	 * or it is a composite that handles itself the serialization/deserialization of it's items (so items cannot be serialized/deserialized independently).
+	 */
+	public static boolean isCompositeWithIndependentSerializationOfSubItems(IPersist p)
+	{
+		if (p != null)
+		{
+			Solution parentSolution = (Solution)p.getAncestor(IRepository.SOLUTIONS);
+			if (parentSolution != null && parentSolution.getSolutionMetaData().getFileVersion() < VERSION_38)
+			{
+				// backward compatibility mode
+				return p instanceof Relation;
+			}
+		}
+
+		return p instanceof Solution || p instanceof Relation || p instanceof TableNode || p instanceof Form || p instanceof TabPanel || p instanceof Portal ||
+			p instanceof LayoutContainer;
+	}
+
 	public static boolean isCompositeItem(IPersist p)
 	{
 		return !(p instanceof Media || p instanceof IRootObject || p instanceof Relation || p instanceof ValueList || p instanceof Form ||

@@ -25,8 +25,6 @@ import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
-import org.sablo.specification.property.ICustomType;
-import org.sablo.specification.property.IPropertyType;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.resource.DesignerFormPropertyType;
@@ -90,30 +88,16 @@ public class OpenContainedFormHandler implements IServerService
 								JSONObject beanXML = ghost.getJson();
 
 
-								WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-									ghost.getParentComponent().getTypeName());
-								if (spec != null)
-								{
-									Collection<PropertyDescription> forms = null;
-									IPropertyType< ? > iPropertyType = spec.getFoundTypes().get(ghost.getTypeName());
-									if (iPropertyType instanceof ICustomType)
-									{
-										forms = ((ICustomType< ? >)iPropertyType).getCustomJSONTypeDefinition().getProperties(
-											DesignerFormPropertyType.DESIGNER_INSTANCE);
-									}
-									else
-									{
-										Debug.warn("Unexpected propertyType " + iPropertyType.getName());
-									}
+								Collection<PropertyDescription> forms = null;
+								forms = ghost.getPropertyDescription().getProperties(DesignerFormPropertyType.DESIGNER_INSTANCE); // TODO what if form typed property is nested some more in the ghost? do we want to open that as well?
 
-									for (PropertyDescription pd : Utils.iterate(forms))
+								for (PropertyDescription pd : Utils.iterate(forms))
+								{
+									open = openFormDesignEditor(s, beanXML.opt(pd.getName()));
+									if (!open)
 									{
-										open = openFormDesignEditor(s, beanXML.opt(pd.getName()));
-										if (!open)
-										{
-											Debug.log("Cannot open form with id " + beanXML.opt(pd.getName()) + "in design editor (Container uuid " +
-												args.getString("uuid") + ")");
-										}
+										Debug.log("Cannot open form with id " + beanXML.opt(pd.getName()) + "in design editor (Container uuid " +
+											args.getString("uuid") + ")");
 									}
 								}
 							}

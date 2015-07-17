@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.designer.property;
+package com.servoy.eclipse.ui.property;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,8 +32,6 @@ import org.sablo.websocket.utils.DataConversion;
 
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.property.IPropertyHandler;
-import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
@@ -67,7 +65,8 @@ import com.servoy.j2db.util.UUID;
  */
 public class WebComponentPropertyHandler implements IPropertyHandler
 {
-	// this map can be filled by an extension point if we support 3th party types.
+	// this map can be filled by an extension point if we support 3rd party types.
+	// TODO extension point + maybe use another interface as values - something like IDesignValueConverter - cause this conversion is not related to what the javadoc in IPropertyConverter describes and it can be confusing
 	private static final Map<IPropertyType< ? >, IPropertyConverter< ? extends Object>> jsonConverters = new HashMap<IPropertyType< ? >, IPropertyConverter< ? extends Object>>();
 
 	static
@@ -82,10 +81,6 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 
 	private final PropertyDescription propertyDescription;
 
-	/**
-	 * @param key
-	 * @param value
-	 */
 	public WebComponentPropertyHandler(PropertyDescription propertyDescription)
 	{
 		this.propertyDescription = propertyDescription;
@@ -127,7 +122,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		Object value = null;
 		IWebObject bean = (IWebObject)obj;
 
-		JSONObject json = bean.getJson();
+		ServoyJSONObject json = bean.getJson();
 		if (json != null)
 		{
 			value = json.opt(getName());
@@ -230,42 +225,26 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		}
 		else
 		{
-			if (propertyDescription.getType() instanceof IPropertyConverter< ? >)
+			IPropertyConverter<Object> type = (IPropertyConverter<Object>)propertyDescription.getType();
+			IPropertyConverter<Object> converter = (IPropertyConverter<Object>)jsonConverters.get(type);
+			if (converter != null)
 			{
-				IPropertyConverter<Object> type = (IPropertyConverter<Object>)propertyDescription.getType();
-				IPropertyConverter<Object> converter = (IPropertyConverter<Object>)jsonConverters.get(type);
-				if (converter != null)
+				JSONStringer writer = new JSONStringer();
+				try
 				{
-					JSONStringer writer = new JSONStringer();
-					try
-					{
-						writer.object();
-						converter.toJSON(writer, getName(), convertedValue, new DataConversion(), null).toString();
-						writer.endObject();
-						convertedValue = new JSONObject(writer.toString()).get(getName());
-					}
-					catch (JSONException e)
-					{
-						ServoyLog.logError(e);
-					}
+					writer.object();
+					converter.toJSON(writer, getName(), convertedValue, new DataConversion(), null).toString();
+					writer.endObject();
+					convertedValue = new JSONObject(writer.toString()).get(getName());
+				}
+				catch (JSONException e)
+				{
+					ServoyLog.logError(e);
 				}
 			}
 		}
 
-		try
-		{
-			ServoyJSONObject jsonObject = bean.getJson() == null ? new ServoyJSONObject(true, true) : bean.getJson();
-			if (!jsonObject.has(getName()) || !jsonObject.get(getName()).equals(convertedValue))
-			{
-				jsonObject.put(getName(), convertedValue);
-				bean.setJson(jsonObject);
-				bean.flagChanged();
-			}
-		}
-		catch (JSONException e)
-		{
-			ServoyLog.logError(e);
-		}
+		bean.setJsonSubproperty(getName(), convertedValue);
 	}
 
 	public boolean shouldShow(Object obj)

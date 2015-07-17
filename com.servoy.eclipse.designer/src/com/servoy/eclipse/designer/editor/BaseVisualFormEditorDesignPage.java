@@ -378,7 +378,7 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 		{
 			public void run()
 			{
-				if (editorPart.isClosing())
+				if (editorPart.isClosing() || getEditorSite().getShell().isDisposed())
 				{
 					return;
 				}

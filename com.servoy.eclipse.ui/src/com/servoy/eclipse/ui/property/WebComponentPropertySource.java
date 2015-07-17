@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.designer.property;
+package com.servoy.eclipse.ui.property;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -25,24 +25,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.WebComponentSpecification;
-import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.property.BeanPropertyHandler;
-import com.servoy.eclipse.ui.property.IPropertyHandler;
-import com.servoy.eclipse.ui.property.PersistContext;
-import com.servoy.eclipse.ui.property.PersistPropertySource;
-import com.servoy.eclipse.ui.property.PropertyCategory;
-import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.BaseComponent;
-import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.IWebObject;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Properties for ngclient components.
@@ -50,7 +42,7 @@ import com.servoy.j2db.server.ngclient.WebFormComponent;
  * @author rgansevles
  *
  */
-public class WebComponentPropertySource extends PersistPropertySource
+public class WebComponentPropertySource extends PDPropertySource
 {
 	private static final Map<String, PropertyDescriptor> BEAN_PROPERTIES = new HashMap<String, PropertyDescriptor>();
 	static
@@ -75,26 +67,34 @@ public class WebComponentPropertySource extends PersistPropertySource
 		}
 	}
 
-	private final PropertyDescription propertyDescription;
-
 	public WebComponentPropertySource(PersistContext persistContext, boolean readonly, PropertyDescription propertyDescription)
 	{
-		super(persistContext, readonly);
-		if (!(persistContext.getPersist() instanceof IWebObject))
+		super(persistContext, readonly, propertyDescription);
+		if (!(persistContext.getPersist() instanceof IWebComponent))
 		{
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Expected persist to be IWebComponent but it is not: " + persistContext.getPersist());
 		}
-		this.propertyDescription = propertyDescription;
+		if (!(propertyDescription instanceof WebComponentSpecification))
+		{
+			throw new IllegalArgumentException("Expected pd to be WebComponentSpecification but it is not: " + propertyDescription);
+		}
 	}
 
 	@Override
-	protected Object getValueObject(FlattenedSolution flattenedEditingSolution, Form form)
+	protected WebComponentSpecification getPropertyDescription()
 	{
-		return persistContext.getPersist();
+		return (WebComponentSpecification)super.getPropertyDescription();
 	}
 
 	@Override
 	protected IPropertyHandler[] createPropertyHandlers(Object valueObject)
+	{
+		IPropertyHandler[] tmp1 = super.createPropertyHandlers(valueObject);
+		IPropertyHandler[] tmp2 = createComponentSpecificPropertyHandlersFromSpec(getPropertyDescription());
+		return Utils.arrayJoin(tmp1, tmp2);
+	}
+
+	public static IPropertyHandler[] createComponentSpecificPropertyHandlersFromSpec(PropertyDescription propertyDescription)
 	{
 		List<IPropertyHandler> props = new ArrayList<IPropertyHandler>();
 
@@ -113,43 +113,6 @@ public class WebComponentPropertySource extends PersistPropertySource
 				// handled by bean, not in web component spec
 				props.add(new BeanPropertyHandler(beanPropertyDescriptor));
 			}
-			else
-			{
-				List<Object> values = desc.getValues();
-				if (values != null && values.size() > 0 && !desc.getName().equals(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()))
-				{
-					ValuesConfig config = new ValuesConfig();
-					if (!(values.get(0) instanceof JSONObject))
-					{
-						config.setValues(values.toArray(new Object[0]));
-					}
-					else
-					{
-						List<String> displayValues = new ArrayList<String>();
-						List<Object> realValues = new ArrayList<Object>();
-						for (Object jsonObject : values)
-						{
-							if (jsonObject instanceof JSONObject && ((JSONObject)jsonObject).keys().hasNext())
-							{
-								String key = (String)((JSONObject)jsonObject).keys().next();
-								displayValues.add(key);
-								realValues.add(((JSONObject)jsonObject).opt(key));
-							}
-						}
-						config.setValues(realValues.toArray(new Object[realValues.size()]), displayValues.toArray(new String[displayValues.size()]));
-					}
-					if (desc.getDefaultValue() != null)
-					{
-						config.addDefault(desc.getDefaultValue(), null);
-					}
-					props.add(new WebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config,
-						desc.getDefaultValue(), null, null, null, false)));
-				}
-				else
-				{
-					props.add(new WebComponentPropertyHandler(desc));
-				}
-			}
 		}
 
 		if (propertyDescription instanceof WebComponentSpecification)
@@ -164,30 +127,21 @@ public class WebComponentPropertySource extends PersistPropertySource
 	}
 
 	/*
-	 * (non-Javadoc)
-	 *
-	 * @see
-	 * com.servoy.eclipse.ui.property.PersistPropertySource#createPropertyCategory(com.servoy.eclipse.ui.property.PersistPropertySource.PropertyDescriptorWrapper
-	 * )
-	 *
 	 * Properties from spec should be dispayed under "Component" category except for handlers and BEAN_PROPERTIES. Properties found with reflection are handled
 	 * by the super class (they go under "Properties").
 	 */
 	@Override
 	protected PropertyCategory createPropertyCategory(PropertyDescriptorWrapper propertyDescriptor)
 	{
-		if (propertyDescription instanceof WebComponentSpecification && BEAN_PROPERTIES.containsKey(propertyDescriptor.propertyDescriptor.getName())) return super.createPropertyCategory(propertyDescriptor);
-		if (propertyDescription instanceof WebComponentSpecification &&
-			((WebComponentSpecification)propertyDescription).getHandlers().containsKey(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Events;
-		if (propertyDescription.getProperties().containsKey(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Component;
+		if (BEAN_PROPERTIES.containsKey(propertyDescriptor.propertyDescriptor.getName())) return super.createPropertyCategory(propertyDescriptor);
+		if (getPropertyDescription().getHandlers().containsKey(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Events;
+		if (getPropertyDescription().getProperties().containsKey(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Component;
 		return super.createPropertyCategory(propertyDescriptor);
 	}
 
 	@Override
 	public String toString()
 	{
-		if (propertyDescription instanceof WebComponentSpecification) return ((WebComponentSpecification)propertyDescription).getDisplayName() + " - " +
-			((IWebObject)persistContext.getPersist()).getName();
-		return propertyDescription.getName();
+		return getPropertyDescription().getDisplayName() + " - " + ((IWebObject)persistContext.getPersist()).getName();
 	}
 }

@@ -1412,7 +1412,7 @@ public class ServoyModel extends AbstractServoyModel
 										public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 										{
 											if (activeResourcesProject == null) return Status.OK_STATUS;
-											
+
 											IProjectDescription description = activeResourcesProject.getProject().getDescription();
 											String[] natures = description.getNatureIds();
 											String[] newNatures = new String[natures.length + 1];
@@ -1831,7 +1831,7 @@ public class ServoyModel extends AbstractServoyModel
 		{
 			/*
 			 * (non-Javadoc)
-			 *
+			 * 
 			 * @see org.eclipse.ui.progress.UIJob#runInUIThread(org.eclipse.core.runtime.IProgressMonitor)
 			 */
 			@Override
@@ -2695,7 +2695,8 @@ public class ServoyModel extends AbstractServoyModel
 						changedScriptElements.add(persist);
 					}
 				}
-				return IPersistVisitor.CONTINUE_TRAVERSAL;
+				return SolutionSerializer.isCompositeWithIndependentSerializationOfSubItems(persist) ? IPersistVisitor.CONTINUE_TRAVERSAL
+					: IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
 			}
 		});
 

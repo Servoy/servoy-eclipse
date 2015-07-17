@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.viewers.TextCellEditor;
@@ -33,6 +33,10 @@ public abstract class ObjectCellEditor extends TextCellEditor
 	public ObjectCellEditor(Composite parent)
 	{
 		super(parent);
+	}
+
+	public ObjectCellEditor()
+	{
 	}
 
 	/**
@@ -60,7 +64,7 @@ public abstract class ObjectCellEditor extends TextCellEditor
 
 	/**
 	 * This override to doSetValue allows nulls to be entered. It will pass the value entered to doGetString() to return the string to send on up to the text editor.
-	 * 
+	 *
 	 * doSetObject will be called to allow the implementers to save it if they wish.
 	 */
 	@Override
@@ -74,17 +78,16 @@ public abstract class ObjectCellEditor extends TextCellEditor
 
 	/**
 	 * This is called when a doSetValue has been called.
-	 * 
+	 *
 	 * This is not abstract, but a default implementation of doSetObject. It does nothing. Implementers may do something else with it, such as store for easier retrieval later.
 	 */
-	protected void doSetObject(@SuppressWarnings("unused")
-	Object value)
+	protected void doSetObject(@SuppressWarnings("unused") Object value)
 	{
 	}
 
 	/**
 	 * The object is being passed in, return the string to be used in the editor.
-	 * 
+	 *
 	 * It should return null if the value can't be converted to a string. The errormsg will have already been set in this case.
 	 */
 	protected abstract String doGetString(Object value);

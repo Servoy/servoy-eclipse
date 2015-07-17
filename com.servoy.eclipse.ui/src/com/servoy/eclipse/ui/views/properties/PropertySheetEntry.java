@@ -48,9 +48,9 @@ import org.eclipse.ui.views.properties.IPropertySourceProvider;
  * Entries do not listen for changes in their objects. Since there is no restriction on properties being independent, a change in one property may affect other
  * properties. The value of a parent's property may also change. As a result we are forced to refresh the entire entry tree when a property changes value.
  * </p>
- * 
+ *
  * Copied from org.eclipse.ui.views.properties.PropertySheetEntry with more visibility
- * 
+ *
  * @since 3.0 (was previously internal)
  */
 public class PropertySheetEntry extends EventManager implements IPropertySheetEntry
@@ -170,7 +170,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 
 	/**
 	 * Return the unsorted intersection of all the <code>IPropertyDescriptor</code>s for the objects.
-	 * 
+	 *
 	 * @return List
 	 */
 	protected List computeMergedPropertyDescriptors()
@@ -242,7 +242,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 
 	/**
 	 * Returns an map of property descritptors (keyed on id) for the given property source.
-	 * 
+	 *
 	 * @param source a property source for which to obtain descriptors
 	 * @return a table of decriptors keyed on their id
 	 */
@@ -287,7 +287,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 	 * <p>
 	 * Subclasses may overwrite to create new instances of their own class.
 	 * </p>
-	 * 
+	 *
 	 * @return a new <code>PropertySheetEntry</code> instance for the descriptor passed in
 	 * @since 3.1
 	 */
@@ -393,7 +393,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 
 	/**
 	 * Returns the descriptor for this entry.
-	 * 
+	 *
 	 * @return the descriptor for this entry
 	 * @since 3.1 (was previously private)
 	 */
@@ -436,7 +436,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 
 	/**
 	 * Returns the edit value for the object at the given index.
-	 * 
+	 *
 	 * @param index the value object index
 	 * @return the edit value for the object at the given index
 	 */
@@ -490,7 +490,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 
 	/**
 	 * Returns the parent of this entry.
-	 * 
+	 *
 	 * @return the parent entry, or <code>null</code> if it has no parent
 	 * @since 3.1
 	 */
@@ -501,7 +501,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 
 	/**
 	 * Returns an property source for the given object.
-	 * 
+	 *
 	 * @param object an object for which to obtain a property source or <code>null</code> if a property source is not available
 	 * @return an property source for the given object
 	 * @since 3.1 (was previously private)
@@ -555,7 +555,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 
 	/**
 	 * Returns the value objects of this entry.
-	 * 
+	 *
 	 * @return the value objects of this entry
 	 * @since 3.1 (was previously private)
 	 */
@@ -652,7 +652,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 
 	/**
 	 * Refresh the entry tree from the root down.
-	 * 
+	 *
 	 * @since 3.1 (was previously private)
 	 */
 	protected void refreshFromRoot()
@@ -736,7 +736,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 
 	/**
 	 * Set the descriptor.
-	 * 
+	 *
 	 * @param newDescriptor
 	 */
 	private void setDescriptor(IPropertyDescriptor newDescriptor)
@@ -763,7 +763,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 
 	/**
 	 * Sets the parent of the entry to be propertySheetEntry.
-	 * 
+	 *
 	 * @param propertySheetEntry
 	 */
 	private void setParent(PropertySheetEntry propertySheetEntry)
@@ -774,7 +774,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 	/**
 	 * Sets a property source provider for this entry. This provider is used to obtain an <code>IPropertySource</code> for each of this entries objects. If no
 	 * provider is set then a default provider is used.
-	 * 
+	 *
 	 * @param provider IPropertySourceProvider
 	 */
 	public void setPropertySourceProvider(IPropertySourceProvider provider)
@@ -788,7 +788,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 	 * We set the given value as the value for all our value objects. We then call our parent to update the property we represent with the given value. We then
 	 * trigger a model refresh.
 	 * <p>
-	 * 
+	 *
 	 * @param newValue the new value
 	 */
 	public void setValue(Object newValue)
@@ -812,7 +812,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 	 * <p>
 	 * Updating the child entries will typically call this method on the child entries and thus the entire entry tree is updated
 	 * </p>
-	 * 
+	 *
 	 * @param objects the new values for this entry
 	 */
 	public void setValues(Object[] objects)
@@ -853,7 +853,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 	 * <p>
 	 * Subclasses may override to set the property value in some custom way.
 	 * </p>
-	 * 
+	 *
 	 * @param child the child entry that changed its value
 	 */
 	protected void valueChanged(PropertySheetEntry child)

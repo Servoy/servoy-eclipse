@@ -116,6 +116,8 @@ import com.servoy.eclipse.ui.labelproviders.ValuelistLabelProvider;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.MediaPropertyController.MediaPropertyControllerConfig;
 import com.servoy.eclipse.ui.property.MethodWithArguments.UnresolvedMethodWithArguments;
+import com.servoy.eclipse.ui.property.types.ITypePropertyDescriptorFactory;
+import com.servoy.eclipse.ui.property.types.UITypesRegistry;
 import com.servoy.eclipse.ui.resource.FontResource;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -181,7 +183,6 @@ import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
-import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetTypeSabloValue;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
@@ -565,6 +566,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 
 		PropertyCategory category;
 		String id;
+		// TODO when you click on a droppable custom object property ghost Properties should not get grouped under "Component"
 		if (propertyDescriptor.valueObject == persistContext.getPersist())
 		{
 			category = createPropertyCategory(propertyDescriptor);
@@ -1818,7 +1820,14 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		{
 			return ((IPropertySetter)pd).isPropertySet(this);
 		}
+		else
+		{
+			return isPersistPropertySet(id);
+		}
+	}
 
+	public boolean isPersistPropertySet(Object id)
+	{
 		if (persistContext.getContext() instanceof Form && (persistContext.getPersist().getAncestor(IRepository.FORMS) != persistContext.getContext()))
 		{
 			return false;
@@ -2536,7 +2545,6 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			else if (persistContext.getPersist() instanceof WebCustomType)
 			{
 				WebCustomType webCustomType = (WebCustomType)persistContext.getPersist();
-				//TODO should this find the actual top-level/on-the-form component once https://support.servoy.com/browse/SVY-8143 is done
 				IWebComponent ancestor = webCustomType.getParentComponent();
 				json = ancestor.getJson();
 			}
@@ -2739,9 +2747,10 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return tagStringController(persistContext, id, displayName, propertyDescription, flattenedEditingSolution, finalTable);
 		}
 
-		if (propertyType instanceof FoundsetPropertyType)
+		ITypePropertyDescriptorFactory sabloOrNgTypeFactory = UITypesRegistry.getTypePropertyDescriptorFactory(propertyDescription.getType());
+		if (sabloOrNgTypeFactory != null)
 		{
-			return new FoundsetPropertyController(id, displayName, flattenedEditingSolution, persistContext, (JSONObject)propertyDescription.getConfig());
+			return sabloOrNgTypeFactory.createPropertyDescriptor(id, displayName, flattenedEditingSolution, persistContext, propertyDescription);
 		}
 
 		if (id.equals("name"))

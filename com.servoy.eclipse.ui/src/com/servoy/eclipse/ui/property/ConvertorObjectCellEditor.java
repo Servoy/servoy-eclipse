@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Composite;
 
 /**
  * Cell editor with a converter to validate the typed text and convert to an object.
- * 
+ *
  * @author rgansevles
  */
 
@@ -32,6 +32,11 @@ public class ConvertorObjectCellEditor extends ObjectCellEditor
 	public ConvertorObjectCellEditor(Composite parent, IObjectTextConverter converter)
 	{
 		super(parent);
+		this.convertor = converter;
+	}
+
+	public ConvertorObjectCellEditor(IObjectTextConverter converter)
+	{
 		this.convertor = converter;
 	}
 

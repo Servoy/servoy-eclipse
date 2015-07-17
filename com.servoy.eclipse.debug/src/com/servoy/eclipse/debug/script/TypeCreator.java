@@ -478,7 +478,7 @@ public class TypeCreator extends TypeCache
 		Collections.addAll(specs, webServiceSpecifications);
 		for (WebComponentSpecification webComponentSpecification : specs)
 		{
-			Map<String, IPropertyType< ? >> foundTypes = webComponentSpecification.getFoundTypes();
+			Map<String, IPropertyType< ? >> foundTypes = webComponentSpecification.getDeclaredCustomObjectTypes();
 			for (String typeName : foundTypes.keySet())
 			{
 				IPropertyType< ? > iPropertyType = foundTypes.get(typeName);
@@ -1110,7 +1110,7 @@ public class TypeCreator extends TypeCache
 
 						/*
 						 * (non-Javadoc)
-						 *
+						 * 
 						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitObjectInitializer(org.eclipse.dltk.javascript.ast.
 						 * ObjectInitializer)
 						 */

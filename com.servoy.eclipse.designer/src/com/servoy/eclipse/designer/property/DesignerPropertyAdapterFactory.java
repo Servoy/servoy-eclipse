@@ -27,8 +27,6 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.property.ICustomType;
-import org.sablo.specification.property.IPropertyType;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -46,11 +44,13 @@ import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.DimensionPropertySource;
 import com.servoy.eclipse.ui.property.IModelSavePropertySource;
 import com.servoy.eclipse.ui.property.MobileListModel;
+import com.servoy.eclipse.ui.property.PDPropertySource;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PointPropertySource;
 import com.servoy.eclipse.ui.property.RetargetToEditorPersistProperties;
 import com.servoy.eclipse.ui.property.SavingPersistPropertySource;
+import com.servoy.eclipse.ui.property.WebComponentPropertySource;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -278,13 +278,15 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 				if (FormTemplateGenerator.isWebcomponentBean(persist) || persist instanceof WebCustomType)
 				{
 					PropertyDescription propertyDescription = null;
+					boolean customTypeNotComponent;
 					if (persist instanceof WebCustomType)
 					{
 						WebCustomType ghostBean = (WebCustomType)persist;
-						IWebComponent parentBean = ghostBean.getParentComponent();
-						IPropertyType< ? > iPropertyType = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-							FormTemplateGenerator.getComponentTypeName(parentBean)).getFoundTypes().get(ghostBean.getTypeName());
-						if (iPropertyType instanceof ICustomType< ? >) propertyDescription = ((ICustomType< ? >)iPropertyType).getCustomJSONTypeDefinition();
+//						IWebComponent parentBean = ghostBean.getParentComponent();
+//						IPropertyType< ? > iPropertyType = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+//							FormTemplateGenerator.getComponentTypeName(parentBean)).getFoundTypes().get(ghostBean.getTypeName());
+//						if (iPropertyType instanceof ICustomType< ? >) propertyDescription = ((ICustomType< ? >)iPropertyType).getCustomJSONTypeDefinition();
+						propertyDescription = ghostBean.getPropertyDescription();
 					}
 					else if (persist.getParent() != null)
 					{
@@ -294,7 +296,8 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 
 					if (propertyDescription != null)
 					{
-						persistProperties = new WebComponentPropertySource(persistContext, false, propertyDescription);
+						persistProperties = (persist instanceof WebCustomType) ? new PDPropertySource(persistContext, false, propertyDescription)
+							: new WebComponentPropertySource(persistContext, false, propertyDescription);
 					}
 				}
 

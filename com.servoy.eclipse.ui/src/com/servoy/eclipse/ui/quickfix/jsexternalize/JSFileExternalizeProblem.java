@@ -34,6 +34,6 @@ public enum JSFileExternalizeProblem implements IProblemIdentifier
 	 */
 	public String contributor()
 	{
-		return Activator.getDefault().toString();
+		return Activator.getDefault() != null ? Activator.getDefault().toString() : null;
 	}
 }

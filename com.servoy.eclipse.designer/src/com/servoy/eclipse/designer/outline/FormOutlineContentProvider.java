@@ -21,7 +21,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -32,9 +31,12 @@ import org.eclipse.swt.graphics.Image;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.IPropertyType;
+import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -58,6 +60,7 @@ import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.SortedList;
 
 /**
@@ -139,8 +142,8 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			}
 			if (((PersistContext)parentElement).getPersist() instanceof Bean)
 			{
-				List<IPersist> allGhostElements = getAllGhostElements((Bean)((PersistContext)parentElement).getPersist());
-				for (IPersist ghost : allGhostElements)
+				List<WebCustomType> allGhostElements = getAllGhostElements((Bean)((PersistContext)parentElement).getPersist());
+				for (WebCustomType ghost : allGhostElements)
 				{
 					list.add(PersistContext.create(ghost, ((PersistContext)parentElement).getContext()));
 				}
@@ -357,11 +360,11 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 	{
 	}
 
-	private List<IPersist> getAllGhostElements(IWebComponent parentBean)
+	private List<WebCustomType> getAllGhostElements(IWebComponent parentBean)
 	{
-		if (parentBean instanceof WebComponent) return ((WebComponent)parentBean).getAllCustomProperties();
+		if (parentBean instanceof WebComponent) return ((WebComponent)parentBean).getAllFirstLevelArrayOfOrCustomPropertiesFlattened();
 
-		List<IPersist> result = new ArrayList<IPersist>();
+		List<WebCustomType> result = new ArrayList<WebCustomType>();
 		if (parentBean instanceof Bean && FormTemplateGenerator.isWebcomponentBean(parentBean))
 		{
 			String beanXML = ((Bean)parentBean).getBeanXML();
@@ -371,33 +374,39 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 					((Bean)parentBean).getBeanClassName());
 				if (webComponentSpecification != null)
 				{
-					Map<String, IPropertyType< ? >> foundTypes = webComponentSpecification.getFoundTypes();
 					try
 					{
 						JSONObject beanJSON = new JSONObject(beanXML);
-						for (String beanJSONKey : JSONObject.getNames(beanJSON))
+						for (String beanJSONKey : ServoyJSONObject.getNames(beanJSON))
 						{
 							Object object = beanJSON.get(beanJSONKey);
 							if (object != null)
 							{
-								IPropertyType< ? > type = webComponentSpecification.getProperty(beanJSONKey).getType();
-								String simpleTypeName = type.getName().replaceFirst(webComponentSpecification.getName() + ".", "");
-								if (foundTypes.containsKey(simpleTypeName))
+								PropertyDescription pd = webComponentSpecification.getProperty(beanJSONKey);
+								IPropertyType< ? > type = pd.getType();
+								String simpleTypeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(type);
+
+								if (PropertyUtils.isCustomJSONProperty(type))
 								{
-									WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-										((Bean)parentBean).getBeanClassName());
-									boolean arrayReturnType = spec.isArrayReturnType(beanJSONKey);
+									boolean arrayReturnType = PropertyUtils.isCustomJSONArrayPropertyType(type);
 									if (!arrayReturnType)
 									{
-										WebCustomType ghostBean = new WebCustomType(parentBean, beanJSONKey, simpleTypeName, -1, false);
+										WebCustomType ghostBean = new WebCustomType(parentBean, pd, beanJSONKey, -1, false);
 										ghostBean.setTypeName(simpleTypeName);
 										result.add(ghostBean);
 									}
-									else if (object instanceof JSONArray) for (int i = 0; i < ((JSONArray)object).length(); i++)
+									else if (object instanceof JSONArray)
 									{
-										WebCustomType ghostBean = new WebCustomType(parentBean, beanJSONKey, simpleTypeName, i, false);
-										ghostBean.setTypeName(simpleTypeName);
-										result.add(ghostBean);
+										PropertyDescription elementTypePD = ((ICustomType< ? >)type).getCustomJSONTypeDefinition();
+										if (PropertyUtils.isCustomJSONObjectProperty(elementTypePD.getType()))
+										{
+											for (int i = 0; i < ((JSONArray)object).length(); i++)
+											{
+												WebCustomType ghostBean = new WebCustomType(parentBean, elementTypePD, beanJSONKey, i, false);
+												ghostBean.setTypeName(simpleTypeName);
+												result.add(ghostBean);
+											}
+										}
 									}
 								}
 							}

@@ -51,6 +51,7 @@ import org.sablo.specification.WebComponentPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
@@ -67,7 +68,6 @@ public class DesignerFilter implements Filter
 {
 	private static final List<String> IGNORE_LIST = Arrays.asList(new String[] { "servoydefault-checkgroup", FormElement.ERROR_BEAN, "servoydefault-navigator", "servoydefault-radiogroup", "servoydefault-htmlview", "colorthefoundset" });
 
-	public static final String DROPPABLE = "droppable";
 	public static final String PREFERENCE_KEY = "com.servoy.eclipse.designer.rfb.palette.order";
 	@SuppressWarnings("nls")
 	private final static String[] layoutTypeNames = { "Absolute-Layout", "Responsive-Layout" };
@@ -367,10 +367,9 @@ public class DesignerFilter implements Filter
 		for (PropertyDescription propertyDescription : properties.values())
 		{
 			Object configObject = propertyDescription.getConfig();
-			if (configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(DROPPABLE)))
+			if (configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE)))
 			{
-				String simpleTypeName = propertyDescription.getType().getName().replaceFirst(spec.getName() + ".", "");
-				if (spec.getFoundTypes().containsKey(simpleTypeName)) result.add(simpleTypeName);
+				if (PropertyUtils.isCustomJSONProperty(propertyDescription.getType())) result.add(PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(propertyDescription.getType()));
 			}
 		}
 		return result;

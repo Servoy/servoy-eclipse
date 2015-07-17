@@ -38,6 +38,7 @@ import org.sablo.specification.WebComponentPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.property.ICustomType;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -159,7 +160,8 @@ public class CreateComponentHandler implements IServerService
 		int w = args.optInt("w");
 		int h = args.optInt("h");
 		if (args.has("type"))
-		{//a ghost dragged from the pallete. it is defined in the "types" section of the .spec file
+		{
+			// a ghost dragged from the pallete. it is defined in the "types" section of the .spec file
 			IPersist next = PersistFinder.INSTANCE.searchForPersist(editorPart, (String)args.get("dropTargetUUID"));
 			if (next instanceof BaseComponent)
 			{
@@ -174,21 +176,20 @@ public class CreateComponentHandler implements IServerService
 					}
 					String dropTargetFieldName = getFirstFieldWithType(parentBean, typeName);
 					int index = -1;
-					boolean isArray = false;
 					WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getTypeName());
-					Object config = spec.getProperty(dropTargetFieldName).getConfig();
-					JSONObject configObject = new JSONObject(config.toString());
-					if (configObject.getString("type").endsWith("]")) isArray = true;
+					boolean isArray = spec.isArrayReturnType(dropTargetFieldName);
+					PropertyDescription targetPD = spec.getProperty(dropTargetFieldName);
 					WebCustomType[] arrayValue = null;
 					if (isArray)
 					{
+						targetPD = ((ICustomType< ? >)targetPD.getType()).getCustomJSONTypeDefinition();
 						if (parentBean instanceof WebComponent)
 						{
 							arrayValue = (WebCustomType[])((WebComponent)parentBean).getProperty(dropTargetFieldName);
 						}
 						index = arrayValue != null ? arrayValue.length : 0;
 					}
-					WebCustomType bean = new WebCustomType(parentBean, dropTargetFieldName, typeName, index, true);
+					WebCustomType bean = new WebCustomType(parentBean, targetPD, dropTargetFieldName, index, true);
 					bean.setName(compName);
 					bean.setTypeName(typeName);
 					if (parentBean instanceof WebComponent)

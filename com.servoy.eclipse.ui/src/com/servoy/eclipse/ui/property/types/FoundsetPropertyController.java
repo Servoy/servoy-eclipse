@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.ui.property;
+package com.servoy.eclipse.ui.property.types;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -41,7 +41,15 @@ import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
+import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
+import com.servoy.eclipse.ui.property.ComplexPropertySource;
+import com.servoy.eclipse.ui.property.DataProviderConverter;
+import com.servoy.eclipse.ui.property.ICellEditorFactory;
+import com.servoy.eclipse.ui.property.IPropertyConverter;
+import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.property.PropertyController;
+import com.servoy.eclipse.ui.property.RelationPropertyController;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;

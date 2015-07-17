@@ -27,7 +27,6 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -86,12 +85,10 @@ public class RfbSelectionListener implements ISelectionListener
 			IPersist persist = (IPersist)Platform.getAdapterManager().getAdapter(sel, IPersist.class);
 			if (persist != null)
 			{
-				if (persist instanceof WebCustomType)
-				{
-					WebCustomType ghostBean = (WebCustomType)persist;
-					uuids.add(ghostBean.getUUIDString());
-				}
-				else uuids.add(persist.getUUID().toString());
+				/*
+				 * if (persist instanceof WebCustomType) { WebCustomType ghostBean = (WebCustomType)persist; uuids.add(ghostBean.getUUIDString()); } else
+				 */
+				uuids.add(persist.getUUID().toString());
 			}
 		}
 		return uuids;
