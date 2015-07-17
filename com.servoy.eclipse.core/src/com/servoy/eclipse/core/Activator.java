@@ -282,22 +282,7 @@ public class Activator extends Plugin
 		ss.nativeStartup();
 
 		Types.setTypesInstance(DesignerTypes.INSTANCE);
-		IExtensionRegistry reg = Platform.getExtensionRegistry();
-		IExtensionPoint ep = reg.getExtensionPoint(IPluginBaseClassLoaderProvider.EXTENSION_ID);
-		IExtension[] extensions = ep.getExtensions();
-		if (extensions != null && extensions.length > 0)
-		{
-			for (IExtension extension : extensions)
-			{
-				IPluginBaseClassLoaderProvider provider = (IPluginBaseClassLoaderProvider)extension.getConfigurationElements()[0].createExecutableExtension("class");
-				ss.setBaseClassloader(provider.getClassLoader());
-				break; //we support only one
-			}
-		}
-		else
-		{
-			throw new IllegalStateException("Could not load plugin base classloader provider");
-		}
+
 		IPreferenceStore prefs = PlatformUI.getPreferenceStore();
 		prefs.setValue(IWorkbenchPreferenceConstants.SHOW_PROGRESS_ON_STARTUP, true);
 
@@ -485,7 +470,7 @@ public class Activator extends Plugin
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -665,7 +650,7 @@ public class Activator extends Plugin
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see com.servoy.j2db.IDesignerCallback#testAndStartDebugger()
 				 */
 				public void testAndStartDebugger()
@@ -681,7 +666,7 @@ public class Activator extends Plugin
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see com.servoy.j2db.IDesignerCallback#addURLStreamHandler(java.lang.String, java.net.URLStreamHandler)
 				 */
 				@Override

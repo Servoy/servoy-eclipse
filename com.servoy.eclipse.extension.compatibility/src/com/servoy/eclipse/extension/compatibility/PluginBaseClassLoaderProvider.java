@@ -1,6 +1,6 @@
 package com.servoy.eclipse.extension.compatibility;
 
-import com.servoy.eclipse.core.IPluginBaseClassLoaderProvider;
+import com.servoy.eclipse.model.IPluginBaseClassLoaderProvider;
 
 public class PluginBaseClassLoaderProvider implements IPluginBaseClassLoaderProvider 
 {

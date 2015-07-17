@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.core;
+package com.servoy.eclipse.model;
 
 /**
  * Interface to provide possible base/parent class loader
@@ -23,7 +23,7 @@ package com.servoy.eclipse.core;
  */
 public interface IPluginBaseClassLoaderProvider
 {
-	public static final String EXTENSION_ID = "com.servoy.eclipse.core.pluginbaseclassloaderprovider";
+	public static final String EXTENSION_ID = "com.servoy.eclipse.model.pluginbaseclassloaderprovider";
 
 	public ClassLoader getClassLoader();
 }

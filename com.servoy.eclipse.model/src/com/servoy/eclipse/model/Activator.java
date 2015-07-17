@@ -19,11 +19,17 @@ package com.servoy.eclipse.model;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.server.starter.IServerStarter;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -54,6 +60,30 @@ public class Activator extends Plugin
 	{
 		super.start(context);
 		plugin = this;
+
+		ServiceReference ref = context.getServiceReference(IServerStarter.class);
+		IServerStarter ss = (IServerStarter)context.getService(ref);
+		if (ss == null)
+		{
+			throw new IllegalStateException("Could not load application server plugin");
+		}
+
+		IExtensionRegistry reg = Platform.getExtensionRegistry();
+		IExtensionPoint ep = reg.getExtensionPoint(IPluginBaseClassLoaderProvider.EXTENSION_ID);
+		IExtension[] extensions = ep.getExtensions();
+		if (extensions != null && extensions.length > 0)
+		{
+			for (IExtension extension : extensions)
+			{
+				IPluginBaseClassLoaderProvider provider = (IPluginBaseClassLoaderProvider)extension.getConfigurationElements()[0].createExecutableExtension("class");
+				ss.setBaseClassloader(provider.getClassLoader());
+				break; //we support only one
+			}
+		}
+		else
+		{
+			throw new IllegalStateException("Could not load plugin base classloader provider");
+		}
 	}
 
 	@Override

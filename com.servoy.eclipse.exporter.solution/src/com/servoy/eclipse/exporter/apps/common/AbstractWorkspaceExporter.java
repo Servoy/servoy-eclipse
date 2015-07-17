@@ -51,7 +51,6 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.Messages;
 import com.servoy.j2db.dataprocessing.IDataServer;
-import com.servoy.j2db.debug.DebugClientHandler;
 import com.servoy.j2db.persistence.ITableLoader;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IUserManager;
@@ -61,7 +60,7 @@ import com.servoy.j2db.util.Settings;
 
 /**
  * Common implementation for workspace based exporter applications.
- * 
+ *
  * @author acostescu
  */
 public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implements IApplication, IBundleStopListener
@@ -163,7 +162,8 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 							{
 								ServoyLog.logError(e);
 								// continuing would only lead to potential deadlock, if auto-build cannot be turned off
-								outputError("EXPORT FAILED. Cannot export solution(s) '" + configuration.getSolutionNamesAsString() + "'; unable to turn off auto-build. Check workspace log.");
+								outputError("EXPORT FAILED. Cannot export solution(s) '" + configuration.getSolutionNamesAsString() +
+									"'; unable to turn off auto-build. Check workspace log.");
 								exitCode = EXIT_EXPORT_FAILED;
 							}
 						}
@@ -243,7 +243,8 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		List<IProject> existingClosedProjects = new ArrayList<IProject>();
 		try
 		{
-			outputExtra("Importing existing projects into workspace and opening closed ones if needed. " + (configuration.shouldAggregateWorkspace() ? "(checking child folders for projects as well)" : ""));
+			outputExtra("Importing existing projects into workspace and opening closed ones if needed. " +
+				(configuration.shouldAggregateWorkspace() ? "(checking child folders for projects as well)" : ""));
 			IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
 			File wr = workspaceRoot.getLocation().toFile();
 			importExistingAndOpenClosedProjects(wr, workspaceRoot, importedProjects, existingClosedProjects);
@@ -537,7 +538,6 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 						return new WorkspaceUserManager();
 					}
 				});
-				ss.setBaseClassloader(DebugClientHandler.class.getClassLoader());
 				ss.start();
 			}
 			catch (Exception e)

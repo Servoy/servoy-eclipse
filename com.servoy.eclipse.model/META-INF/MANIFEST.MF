@@ -20,7 +20,8 @@ Require-Bundle: servoy_shared,
  org.apache.commons.dbcp,
  org.apache.commons.io,
  org.eclipse.swt,
- org.eclipse.jface
+ org.eclipse.jface,
+ j2db_server
 Export-Package: com.servoy.eclipse.model,
  com.servoy.eclipse.model.builder,
  com.servoy.eclipse.model.export,

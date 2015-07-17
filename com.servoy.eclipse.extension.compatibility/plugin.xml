@@ -2,7 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="com.servoy.eclipse.core.pluginbaseclassloaderprovider">
+         point="com.servoy.eclipse.model.pluginbaseclassloaderprovider">
       <pluginbaseclassloaderprovider
             class="com.servoy.eclipse.extension.compatibility.PluginBaseClassLoaderProvider"
             id="com.servoy.eclipse.extension.compatibility.pluginbaseclassloaderprovider1">
