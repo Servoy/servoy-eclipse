@@ -30,6 +30,10 @@ import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.equinox.app.IApplication;
@@ -40,6 +44,7 @@ import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.exporter.apps.Activator;
 import com.servoy.eclipse.model.DBITableLoader;
+import com.servoy.eclipse.model.IPluginBaseClassLoaderProvider;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -448,7 +453,8 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				else if (useLinks && !p.getLocation().toFile().equals(f))
 				{
 					outputError("Cannot use project in alternate location '" + f.getAbsolutePath() +
-						"'. Another project with that name is already present in workspace from location '" + p.getLocation().toFile().getAbsolutePath() + "'.");
+						"'. Another project with that name is already present in workspace from location '" + p.getLocation().toFile().getAbsolutePath() +
+						"'.");
 				}
 			}
 		}
@@ -529,6 +535,23 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 		{
 			try
 			{
+				IExtensionRegistry reg = Platform.getExtensionRegistry();
+				IExtensionPoint ep = reg.getExtensionPoint(IPluginBaseClassLoaderProvider.EXTENSION_ID);
+				IExtension[] extensions = ep.getExtensions();
+				if (extensions != null && extensions.length > 0)
+				{
+					for (IExtension extension : extensions)
+					{
+						IPluginBaseClassLoaderProvider provider = (IPluginBaseClassLoaderProvider)extension.getConfigurationElements()[0].createExecutableExtension(
+							"class");
+						ss.setBaseClassloader(provider.getClassLoader());
+						break; //we support only one
+					}
+				}
+				else
+				{
+					throw new IllegalStateException("Could not load plugin base classloader provider");
+				}
 				ss.init();
 				ss.setRepositoryFactory(new EclipseRepositoryFactory());
 				ss.setUserManagerFactory(new IUserManagerFactory()
