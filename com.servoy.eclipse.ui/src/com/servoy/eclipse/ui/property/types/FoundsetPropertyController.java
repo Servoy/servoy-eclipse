@@ -54,6 +54,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
 
@@ -180,10 +181,10 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 		@Override
 		public Object convertProperty(Object id, JSONObject value)
 		{
-			JSONObject copy = null;
+			ServoyJSONObject copy = null;
 			try
 			{
-				copy = new JSONObject(value, JSONObject.getNames(value));
+				if (value != null) copy = new ServoyJSONObject(value, ServoyJSONObject.getNames(value), true, true);
 			}
 			catch (Exception ex)
 			{

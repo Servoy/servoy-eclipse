@@ -137,7 +137,10 @@ public class GhostHandler implements IServerService
 										if (json.has("text")) text = json.getString("text");
 									}
 
-									Object configObject = p.getPropertyDescription().getConfig();
+									Object configObject;
+									if (p.getIndex() >= 0) configObject = ((WebComponent)bean).getPropertyDescription().getProperty(p.getJsonKey()).getConfig();
+									else configObject = p.getPropertyDescription().getConfig();
+
 									if (p.getPropertyDescription().getType() instanceof ComponentPropertyType ||
 										(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
 									{
@@ -459,10 +462,6 @@ public class GhostHandler implements IServerService
 			}
 
 
-			/**
-			 * @param writer
-			 * @param f
-			 */
 			private void writePartGhosts(final JSONWriter writer, Form f)
 			{
 				try
