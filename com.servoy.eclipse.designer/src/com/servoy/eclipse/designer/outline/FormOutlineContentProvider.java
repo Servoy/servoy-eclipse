@@ -47,11 +47,11 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptElement;
 import com.servoy.j2db.persistence.ISupportName;
-import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -360,7 +360,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 	{
 	}
 
-	private List<WebCustomType> getAllGhostElements(IWebComponent parentBean)
+	private List<WebCustomType> getAllGhostElements(IBasicWebComponent parentBean)
 	{
 		if (parentBean instanceof WebComponent) return ((WebComponent)parentBean).getAllFirstLevelArrayOfOrCustomPropertiesFlattened();
 

@@ -143,6 +143,7 @@ import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDataProviderLookup;
@@ -2545,7 +2546,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			else if (persistContext.getPersist() instanceof WebCustomType)
 			{
 				WebCustomType webCustomType = (WebCustomType)persistContext.getPersist();
-				IWebComponent ancestor = webCustomType.getParentComponent();
+				IBasicWebComponent ancestor = webCustomType.getParentComponent();
 				json = ancestor.getJson();
 			}
 			else if (persistContext.getPersist() instanceof IWebComponent)
