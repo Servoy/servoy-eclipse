@@ -495,7 +495,7 @@ public class CreateComponentHandler implements IServerService
 					}
 					else if (parent instanceof AbstractContainer)
 					{
-						webComponent = ((AbstractContainer)parent).createWebComponent(compName, name);
+						webComponent = ((AbstractContainer)parent).createNewWebComponent(compName, name);
 
 					}
 					else if (parent instanceof Bean)
@@ -584,7 +584,7 @@ public class CreateComponentHandler implements IServerService
 						else if (jsonObject.has("componentName"))
 						{
 							String compName = "bean_" + id.incrementAndGet();
-							container.createWebComponent(compName, jsonObject.getString("componentName"));
+							container.createNewWebComponent(compName, jsonObject.getString("componentName"));
 						}
 					}
 				} // children and layoutName are special

@@ -96,7 +96,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 									Object parentPersist = DesignerUtil.getContentOutlineSelection();
 									if (parentPersist instanceof AbstractContainer)
 									{
-										persist = ((AbstractContainer)parentPersist).createWebComponent(null,
+										persist = ((AbstractContainer)parentPersist).createNewWebComponent(null,
 											(String)((StructuredSelection)dialog.getSelection()).getFirstElement());
 									}
 								}
