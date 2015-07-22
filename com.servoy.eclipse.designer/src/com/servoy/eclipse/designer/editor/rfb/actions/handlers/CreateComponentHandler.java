@@ -51,6 +51,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -58,7 +59,6 @@ import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.IValidateName;
-import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.PositionComparator;
@@ -165,9 +165,9 @@ public class CreateComponentHandler implements IServerService
 			IPersist next = PersistFinder.INSTANCE.searchForPersist(editorPart, (String)args.get("dropTargetUUID"));
 			if (next instanceof BaseComponent)
 			{
-				if (next instanceof IWebComponent)
+				if (next instanceof IBasicWebComponent)
 				{
-					IWebComponent parentBean = (IWebComponent)next;
+					IBasicWebComponent parentBean = (IBasicWebComponent)next;
 					String typeName = args.getString("type");
 					String compName = "bean_" + id.incrementAndGet();
 					while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
@@ -599,7 +599,7 @@ public class CreateComponentHandler implements IServerService
 	 * @param typeName
 	 * @return the first key name in the model that has a value of type @param typeName
 	 */
-	private String getFirstFieldWithType(IWebComponent parentBean, String typeName)
+	private String getFirstFieldWithType(IBasicWebComponent parentBean, String typeName)
 	{
 		WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getTypeName());
 		Map<String, PropertyDescription> properties = spec.getProperties();

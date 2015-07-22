@@ -365,6 +365,8 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 		if (parentBean instanceof WebComponent) return ((WebComponent)parentBean).getAllFirstLevelArrayOfOrCustomPropertiesFlattened();
 
 		List<WebCustomType> result = new ArrayList<WebCustomType>();
+
+		// TODO the following code is legacy; please treat here new WebComponent persists as well
 		if (parentBean instanceof Bean && FormTemplateGenerator.isWebcomponentBean(parentBean))
 		{
 			String beanXML = ((Bean)parentBean).getBeanXML();

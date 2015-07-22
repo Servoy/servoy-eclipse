@@ -30,8 +30,8 @@ import org.sablo.specification.WebComponentSpecification;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IWebComponent;
-import com.servoy.j2db.persistence.IWebObject;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.util.Utils;
@@ -142,6 +142,6 @@ public class WebComponentPropertySource extends PDPropertySource
 	@Override
 	public String toString()
 	{
-		return getPropertyDescription().getDisplayName() + " - " + ((IWebObject)persistContext.getPersist()).getName();
+		return getPropertyDescription().getDisplayName() + " - " + ((IBasicWebObject)persistContext.getPersist()).getName();
 	}
 }

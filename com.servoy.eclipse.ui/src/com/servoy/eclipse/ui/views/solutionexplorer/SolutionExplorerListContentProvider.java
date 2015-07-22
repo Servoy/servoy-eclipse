@@ -96,6 +96,7 @@ import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnListener;
 import com.servoy.j2db.persistence.IPersist;
@@ -105,7 +106,6 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportName;
-import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.NameComparator;
@@ -570,9 +570,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					prefix += ((ISupportName)model).getName();
 				}
 
-				if (model instanceof IWebComponent && FormTemplateGenerator.isWebcomponentBean((IWebComponent)model))
+				if (model instanceof IBasicWebComponent && FormTemplateGenerator.isWebcomponentBean((IBasicWebComponent)model))
 				{
-					lm = getWebComponentMembers(prefix, (IWebComponent)model);
+					lm = getWebComponentMembers(prefix, (IBasicWebComponent)model);
 					key = null; // for now don't cache this.
 				}
 				else if (specificClass == null)
@@ -1738,7 +1738,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return dlm.toArray(nodes);
 	}
 
-	private SimpleUserNode[] getWebComponentMembers(String prefix, IWebComponent webcomponent)
+	private SimpleUserNode[] getWebComponentMembers(String prefix, IBasicWebComponent webcomponent)
 	{
 		String prefixForWebComponentMembers = prefix + ".";
 		if (webcomponent == null)

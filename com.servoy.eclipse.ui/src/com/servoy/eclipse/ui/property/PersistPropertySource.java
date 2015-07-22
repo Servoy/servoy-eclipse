@@ -2549,9 +2549,9 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				IBasicWebComponent ancestor = webCustomType.getParentComponent();
 				json = ancestor.getJson();
 			}
-			else if (persistContext.getPersist() instanceof IWebComponent)
+			else if (persistContext.getPersist() instanceof IBasicWebComponent)
 			{
-				IWebComponent bean = (IWebComponent)persistContext.getPersist();
+				IBasicWebComponent bean = (IBasicWebComponent)persistContext.getPersist();
 				json = bean.getJson();
 			}
 			try

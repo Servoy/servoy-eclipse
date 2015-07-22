@@ -35,10 +35,10 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.IWebObject;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValueList;
@@ -120,7 +120,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 	public Object getValue(Object obj, PersistContext persistContext)
 	{
 		Object value = null;
-		IWebObject bean = (IWebObject)obj;
+		IBasicWebObject bean = (IBasicWebObject)obj;
 
 		ServoyJSONObject json = bean.getJson();
 		if (json != null)
@@ -187,7 +187,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 	@Override
 	public void setValue(Object obj, Object value, PersistContext persistContext)
 	{
-		IWebObject bean = (IWebObject)obj;
+		IBasicWebObject bean = (IBasicWebObject)obj;
 
 		Object convertedValue = value;
 		if (propertyDescription.getType() instanceof FunctionPropertyType)

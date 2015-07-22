@@ -24,8 +24,8 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
 import org.mozilla.javascript.Scriptable;
-import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebComponentSpecification;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
@@ -179,7 +179,7 @@ public class DesignComponentFactory extends ComponentFactory
 						ComponentAccordionPanel tabs = new ComponentAccordionPanel();
 						applyBasicComponentProperties(application, tabs, (BaseComponent)meta, getStyleForBasicComponent(application, (BaseComponent)meta, form));
 						tabs.setAllTabsAlignment(((TabPanel)meta).getHorizontalAlignment());
-						tabs.addTab("position example", new JLabel("form will appear here", SwingConstants.LEFT)); 
+						tabs.addTab("position example", new JLabel("form will appear here", SwingConstants.LEFT));
 						tabs.addTab("position 2", new JLabel("another form showup here", SwingConstants.CENTER));
 						tabs.addTab("position 3", new JLabel("another form showup here", SwingConstants.CENTER));
 						retval = tabs;
@@ -188,7 +188,7 @@ public class DesignComponentFactory extends ComponentFactory
 					{
 						ComponentJTabbedPane tabs = new ComponentJTabbedPane();
 						applyBasicComponentProperties(application, tabs, (BaseComponent)meta, getStyleForBasicComponent(application, (BaseComponent)meta, form));
-						tabs.addTab("position example", new JLabel("form will appear here", SwingConstants.CENTER)); 
+						tabs.addTab("position example", new JLabel("form will appear here", SwingConstants.CENTER));
 						tabs.addTab("position 2", new JLabel("another form showup here", SwingConstants.CENTER));
 						if (orient == SwingConstants.TOP || orient == SwingConstants.LEFT || orient == SwingConstants.BOTTOM || orient == SwingConstants.RIGHT)
 						{

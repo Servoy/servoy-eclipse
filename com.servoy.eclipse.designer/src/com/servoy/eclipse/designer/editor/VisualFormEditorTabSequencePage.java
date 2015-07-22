@@ -73,12 +73,12 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.views.IndexedListViewer;
 import com.servoy.eclipse.ui.views.IndexedStructuredSelection;
+import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportTabSeq;
-import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabSeqComparator;
 import com.servoy.j2db.server.ngclient.FormElementHelper.TabSeqProperty;
@@ -404,14 +404,14 @@ public class VisualFormEditorTabSequencePage extends Composite
 			IPersist persist = iterator.next();
 			if (FormTemplateGenerator.isWebcomponentBean(persist))
 			{
-				String componentType = FormTemplateGenerator.getComponentTypeName((IWebComponent)persist);
+				String componentType = FormTemplateGenerator.getComponentTypeName((IBasicWebComponent)persist);
 				WebComponentSpecification specification = WebComponentSpecProvider.getInstance().getWebComponentSpecification(componentType);
 				if (specification != null)
 				{
 					Collection<PropertyDescription> properties = specification.getProperties(NGTabSeqPropertyType.NG_INSTANCE);
 					if (properties != null && properties.size() > 0)
 					{
-						JSONObject json = ((IWebComponent)persist).getJson();
+						JSONObject json = ((IBasicWebComponent)persist).getJson();
 						for (PropertyDescription pd : properties)
 						{
 							int tabseq = json != null ? json.optInt(pd.getName()) : 0;

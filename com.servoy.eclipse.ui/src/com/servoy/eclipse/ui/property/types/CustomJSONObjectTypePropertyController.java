@@ -45,8 +45,8 @@ import com.servoy.eclipse.ui.property.PDPropertySource;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PropertyController;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IWebObject;
 import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
@@ -58,7 +58,7 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<J
 	IPropertySetter<JSONObject, PersistPropertySource>
 {
 
-	private static IObjectTextConverter JSONOBJECT_TEXT_CONVERTER = new JSONOobjectTextConverter();
+	private static IObjectTextConverter JSONOBJECT_TEXT_CONVERTER = new JSONObjectTextConverter();
 	private static ILabelProvider labelProvider = null;
 
 	private final PersistContext persistContext;
@@ -137,7 +137,7 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<J
 		return cellEditor;
 	}
 
-	public static class JSONOobjectTextConverter implements IObjectTextConverter
+	public static class JSONObjectTextConverter implements IObjectTextConverter
 	{
 
 		public String isCorrectString(String value)
@@ -220,9 +220,9 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<J
 		protected PDPropertySource getUnderlyingPropertySource()
 		{
 			IPersist persist = persistContext.getPersist(); // parent persist holding property with propertyDescription
-			if (persist instanceof IWebObject)
+			if (persist instanceof IBasicWebObject)
 			{
-				persist = (IPersist)((IWebObject)persist).getProperty(propertyDescription.getName());
+				persist = (IPersist)((IBasicWebObject)persist).getProperty(propertyDescription.getName());
 				if (persist != null)
 				{
 					if (underlyingPropertySource == null || persist != underlyingPropertySource.getPersist())

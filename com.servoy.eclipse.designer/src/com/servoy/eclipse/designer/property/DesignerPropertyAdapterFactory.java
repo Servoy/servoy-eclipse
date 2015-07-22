@@ -54,10 +54,10 @@ import com.servoy.eclipse.ui.property.WebComponentPropertySource;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptElement;
-import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -291,7 +291,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 					else if (persist.getParent() != null)
 					{
 						propertyDescription = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-							FormTemplateGenerator.getComponentTypeName((IWebComponent)persist));
+							FormTemplateGenerator.getComponentTypeName((IBasicWebComponent)persist));
 					}
 
 					if (propertyDescription != null)

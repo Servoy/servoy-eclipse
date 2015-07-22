@@ -43,6 +43,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -50,7 +51,6 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportName;
-import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Tab;
@@ -99,7 +99,7 @@ public class GhostHandler implements IServerService
 //				return bean.getUUID() + "_" + pd.getName() + "." + +index + "_" + simpleTypeName;
 //			}
 
-			private void writeGhostsForWebcomponentBeans(JSONWriter writer, IWebComponent bean)
+			private void writeGhostsForWebcomponentBeans(JSONWriter writer, IBasicWebComponent bean)
 			{
 				if (FormTemplateGenerator.isWebcomponentBean(bean))
 				{
@@ -375,9 +375,9 @@ public class GhostHandler implements IServerService
 						Debug.error(e);
 					}
 				}
-				else if (o instanceof IWebComponent)
+				else if (o instanceof IBasicWebComponent)
 				{
-					writeGhostsForWebcomponentBeans(writer, (IWebComponent)o);
+					writeGhostsForWebcomponentBeans(writer, (IBasicWebComponent)o);
 				}
 
 				return IPersistVisitor.CONTINUE_TRAVERSAL;
@@ -599,9 +599,9 @@ public class GhostHandler implements IServerService
 			Object label = ((AbstractBase)next).getProperty("text");
 			if (label != null) return label.toString();
 		}
-		if (next instanceof IWebComponent)
+		if (next instanceof IBasicWebComponent)
 		{
-			return ((IWebComponent)next).getTypeName();
+			return ((IBasicWebComponent)next).getTypeName();
 		}
 		if (next instanceof ISupportDataProviderID)
 		{
