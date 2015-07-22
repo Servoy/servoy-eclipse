@@ -140,6 +140,7 @@ import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
+import com.servoy.j2db.server.ngclient.scripting.WebServiceScriptable;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
@@ -1399,6 +1400,73 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	private SimpleUserNode[] getJSMethods(Object o, String elementName, String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames)
 	{
 		if (o == null) return EMPTY_LIST;
+		if (o instanceof WebComponentSpecification)
+		{
+			WebComponentSpecification spec = ((WebComponentSpecification)o);
+			WebServiceScriptable scriptable = new WebServiceScriptable(null, spec, null);
+			Object[] ids = scriptable.getIds();
+			if (ids != null)
+			{
+				List<SimpleUserNode> serviceIds = new ArrayList<SimpleUserNode>();
+				for (Object element : ids)
+				{
+					Image icon = propertiesIcon;
+					String pluginsPrefix = "plugins." + ((WebComponentSpecification)o).getName() + ".";
+					IDeveloperFeedback feedback = new FieldFeedback((String)element, pluginsPrefix, null, null, null);
+					if (spec.getApiFunction((String)element) != null)
+					{
+						final WebComponentApiDefinition api = spec.getApiFunction((String)element);
+						icon = functionIcon;
+						final List<String> parNames = new ArrayList<String>();
+						List<String> parTypes = new ArrayList<String>();
+						for (PropertyDescription pd : api.getParameters())
+						{
+							parNames.add(pd.getName());
+							parTypes.add(pd.getType().getName());
+						}
+						feedback = new MethodFeedback((String)element, parTypes.toArray(new String[0]), pluginsPrefix, null, new IScriptObject()
+						{
+
+							@Override
+							public Class< ? >[] getAllReturnedTypes()
+							{
+								return null;
+							}
+
+							@Override
+							public String getSample(String methodName)
+							{
+								return null;
+							}
+
+							@Override
+							public String getToolTip(String methodName)
+							{
+								return null;
+							}
+
+							@Override
+							public String[] getParameterNames(String methodName)
+							{
+								return parNames.toArray(new String[0]);
+							}
+
+							@Override
+							public boolean isDeprecated(String methodName)
+							{
+								return false;
+							}
+
+						}, null, api.getReturnType() != null ? api.getReturnType().getType().getName() : "void");
+					}
+					UserNode node = new UserNode((String)element, actionType, feedback, real, icon);
+					node.setClientSupport(ClientSupport.ng);
+					serviceIds.add(node);
+				}
+				return serviceIds.toArray(new SimpleUserNode[serviceIds.size()]);
+			}
+
+		}
 		boolean current = (Context.getCurrentContext() != null);
 		InstanceJavaMembers ijm = null;
 		try
@@ -1658,8 +1726,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					codePrefix = elementName;
 				}
 
-				SimpleUserNode node = new UserNode(displayName, actionType, new MethodFeedback(id, parameterTypes, codePrefix, resolver, scriptObject, njm),
-					(Object)null, functionIcon);
+				SimpleUserNode node = new UserNode(displayName, actionType, new MethodFeedback(id, parameterTypes, codePrefix, resolver, scriptObject, njm,
+					null), (Object)null, functionIcon);
 
 				node.setClientSupport(AnnotationManagerReflection.getInstance().getClientSupport(method.method(), originalClass, ClientSupport.Default));
 
@@ -1923,11 +1991,13 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		private final ITagResolver resolver;
 		private final IScriptObject scriptObject;
 		private final String name;
-		private final Class[] parameterTypes;
+		private final Object[] parameterTypes;
 		private final NativeJavaMethod njm;
 		private final String prefix;
+		private final String returnTypeString;
 
-		MethodFeedback(String name, Class[] parameterTypes, String prefix, ITagResolver resolver, IScriptObject scriptObject, NativeJavaMethod njm)
+		MethodFeedback(String name, Object[] parameterTypes, String prefix, ITagResolver resolver, IScriptObject scriptObject, NativeJavaMethod njm,
+			String returnTypeString)
 		{
 			this.name = name;
 			this.parameterTypes = parameterTypes;
@@ -1935,6 +2005,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			this.resolver = resolver;
 			this.scriptObject = ScriptObjectRegistry.getAdapterIfAny(scriptObject);
 			this.njm = njm;
+			this.returnTypeString = returnTypeString;
 		}
 
 		/**
@@ -1945,11 +2016,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			String sample = null;
 			if (scriptObject != null)
 			{
-				if (parameterTypes != null && scriptObject instanceof XMLScriptObjectAdapter)
+				if (parameterTypes instanceof Class[] && scriptObject instanceof XMLScriptObjectAdapter)
 				{
-					sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name, parameterTypes,
+					sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name, (Class[])parameterTypes,
 						ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType());
-					if (sample == null) sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name, parameterTypes);
+					if (sample == null) sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name, (Class[])parameterTypes);
 				}
 				else
 				{
@@ -1976,9 +2047,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			String[] paramNames = null;
 			if (scriptObject != null)
 			{
-				if (scriptObject instanceof XMLScriptObjectAdapter && parameterTypes != null)
+				if (scriptObject instanceof XMLScriptObjectAdapter && parameterTypes instanceof Class[])
 				{
-					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, parameterTypes);
+					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, (Class[])parameterTypes);
 					if (parameters != null)
 					{
 						paramNames = new String[parameters.length];
@@ -2009,14 +2080,14 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			if (scriptObject != null)
 			{
 				String description = "";
-				if (scriptObject instanceof XMLScriptObjectAdapter && parameterTypes != null)
+				if (scriptObject instanceof XMLScriptObjectAdapter && parameterTypes instanceof Class[])
 				{
 					ClientSupport csp = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
-					description = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, parameterTypes, csp);
-					returnType = ((XMLScriptObjectAdapter)scriptObject).getReturnedType(name, parameterTypes);
-					returnDescription = ((XMLScriptObjectAdapter)scriptObject).getReturnDescription(name, parameterTypes);
-					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, parameterTypes);
-					tooltip = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, parameterTypes, csp);
+					description = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, (Class[])parameterTypes, csp);
+					returnType = ((XMLScriptObjectAdapter)scriptObject).getReturnedType(name, (Class[])parameterTypes);
+					returnDescription = ((XMLScriptObjectAdapter)scriptObject).getReturnDescription(name, (Class[])parameterTypes);
+					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, (Class[])parameterTypes);
+					tooltip = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, (Class[])parameterTypes, csp);
 					if (parameters != null)
 					{
 						paramNames = new String[parameters.length];
@@ -2047,8 +2118,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			if (tooltip == null) tooltip = "";
 
-			String tmp = "<html><body><b>" + getReturnTypeString(returnType) + " " + name + "(" + getPrettyParameterTypesString(paramNames, namesOnly) +
-				")</b>";
+			String tmp = "<html><body><b>" + (returnTypeString != null ? returnTypeString : getReturnTypeString(returnType)) + " " + name + "(" +
+				getPrettyParameterTypesString(paramNames, namesOnly) + ")</b>";
 			if ("".equals(tooltip))
 			{
 				tooltip = tmp + "</body></html>";
@@ -2062,42 +2133,50 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		private Class getMethodReturnType()
 		{
-			MemberBox method = njm.getMethods()[0];
-			for (MemberBox mthd : njm.getMethods())
+			if (njm != null)
 			{
-				if (Utils.equalObjects(mthd.getParameterTypes(), parameterTypes))
+				MemberBox method = njm.getMethods()[0];
+				for (MemberBox mthd : njm.getMethods())
 				{
-					method = mthd;
+					if (Utils.equalObjects(mthd.getParameterTypes(), parameterTypes))
+					{
+						method = mthd;
+					}
 				}
+				return method.getReturnType();
 			}
-			return method.getReturnType();
+			return null;
 		}
 
 		private String getPrettyParameterTypesString(String[] names, boolean namesOnly)
 		{
-			if (parameterTypes.length == 0) return "";
+			if (parameterTypes == null || parameterTypes.length == 0) return "";
 
 			StringBuilder paramTypes = new StringBuilder(32);
 			if (names == null || names.length != parameterTypes.length)
 			{
-				//Object[] varargs backward compatibility
-				if (parameterTypes.length == 1 && parameterTypes[0].isArray() && (parameterTypes[0].getComponentType() == Object.class))
+				if (parameterTypes instanceof Class[])
 				{
-					if (names == null || names.length == 0) paramTypes.append("Object[]");
-					else
+					//Object[] varargs backward compatibility
+					if (parameterTypes.length == 1 && ((Class[])parameterTypes)[0].isArray() &&
+						(((Class[])parameterTypes)[0].getComponentType() == Object.class))
 					{
-						for (int k = 0; k < names.length; k++)
+						if (names == null || names.length == 0) paramTypes.append("Object[]");
+						else
 						{
-							paramTypes.append(names[k]);
-							if (k < names.length - 1) paramTypes.append(", ");
+							for (int k = 0; k < names.length; k++)
+							{
+								paramTypes.append(names[k]);
+								if (k < names.length - 1) paramTypes.append(", ");
+							}
 						}
+						return paramTypes.toString();
 					}
-					return paramTypes.toString();
-				}
-				else for (Class param : parameterTypes)
-				{
-					paramTypes.append(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(param));
-					paramTypes.append(", ");
+					else for (Class param : (Class[])parameterTypes)
+					{
+						paramTypes.append(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(param));
+						paramTypes.append(", ");
+					}
 				}
 			}
 			else if (names != null)
@@ -2108,23 +2187,30 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					if (!namesOnly)
 					{
 						paramTypes.append(':');
-						if (i == parameterTypes.length - 1 && parameterTypes[i].isArray() && scriptObject instanceof XMLScriptObjectAdapter)
+						if (parameterTypes instanceof Class[])
 						{
-							IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(this.name, parameterTypes);
-							if (parameters != null && parameters[i].isVarArgs())
+							if (i == parameterTypes.length - 1 && ((Class[])parameterTypes)[i].isArray() && scriptObject instanceof XMLScriptObjectAdapter)
 							{
-								paramTypes.append(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(
-									parameterTypes[i].getComponentType()));
-								paramTypes.append("...");
+								IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(this.name, (Class[])parameterTypes);
+								if (parameters != null && parameters[i].isVarArgs())
+								{
+									paramTypes.append(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(
+										((Class[])parameterTypes)[i].getComponentType()));
+									paramTypes.append("...");
+								}
+								else
+								{
+									paramTypes.append(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(((Class[])parameterTypes)[i]));
+								}
 							}
 							else
 							{
-								paramTypes.append(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(parameterTypes[i]));
+								paramTypes.append(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(((Class[])parameterTypes)[i]));
 							}
 						}
 						else
 						{
-							paramTypes.append(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(parameterTypes[i]));
+							paramTypes.append(parameterTypes[i].toString());
 						}
 					}
 					paramTypes.append(", ");
@@ -2203,24 +2289,27 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			if (toolTip == null) toolTip = "";
 
-			Object bp = ijm.getField(name, false);
 			String tmp = "";
-			if (bp instanceof JavaMembers.BeanProperty)
+			if (ijm != null)
 			{
-				tmp = "<html><body><b>" + getReturnTypeString(((JavaMembers.BeanProperty)bp).getGetter().getReturnType()) + " " + name + "</b>";
-			}
-			else if (bp instanceof Field)
-			{
-				tmp = "<html><body><b>" + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(((Field)bp).getType()) + " " + name +
-					"</b>";
-			}
-			else if (bp == null)
-			{
-				// test if it is a Constant.
-				bp = ijm.getField(name, true);
-				if (bp instanceof Field)
+				Object bp = ijm.getField(name, false);
+				if (bp instanceof JavaMembers.BeanProperty)
 				{
-					tmp = "<html><body><b>" + prefix + name + "</b>";
+					tmp = "<html><body><b>" + getReturnTypeString(((JavaMembers.BeanProperty)bp).getGetter().getReturnType()) + " " + name + "</b>";
+				}
+				else if (bp instanceof Field)
+				{
+					tmp = "<html><body><b>" + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(((Field)bp).getType()) + " " + name +
+						"</b>";
+				}
+				else if (bp == null)
+				{
+					// test if it is a Constant.
+					bp = ijm.getField(name, true);
+					if (bp instanceof Field)
+					{
+						tmp = "<html><body><b>" + prefix + name + "</b>";
+					}
 				}
 			}
 			if ("".equals(toolTip))

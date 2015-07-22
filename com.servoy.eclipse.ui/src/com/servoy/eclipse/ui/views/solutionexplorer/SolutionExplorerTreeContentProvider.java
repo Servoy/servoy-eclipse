@@ -127,6 +127,7 @@ import com.servoy.j2db.scripting.JSUnitAssertFunctions;
 import com.servoy.j2db.scripting.JSUtils;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
+import com.servoy.j2db.server.ngclient.scripting.WebServiceScriptable;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
@@ -1094,6 +1095,30 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					ServoyLog.logError("Error loading plugin " + plugin.getName() + " exception: ", e);
 					PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName() + " (not loaded!)", UserNodeType.PLUGIN, null, null,
 						e.toString(), null, uiActivator.loadImageFromBundle("warning.gif"));
+					plugins.add(node);
+					node.parent = pluginNode;
+				}
+			}
+			WebComponentSpecification[] serviceSpecifications = WebServiceSpecProvider.getInstance().getAllWebServiceSpecifications();
+			Arrays.sort(serviceSpecifications, new Comparator<WebComponentSpecification>()
+			{
+				@Override
+				public int compare(WebComponentSpecification o1, WebComponentSpecification o2)
+				{
+					return o1.getName().compareTo(o2.getName());
+				}
+
+			});
+			for (WebComponentSpecification spec : serviceSpecifications)
+			{
+				if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)
+				{
+					if (("servoyservices".equals(spec.getPackageName()) || "sablo".equals(spec.getPackageName())) && !"testservice".equals(spec.getName()))
+					{
+						continue;
+					}
+					PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getName(), UserNodeType.PLUGIN, spec,
+						uiActivator.loadImageFromBundle("plugin_conn.gif"), WebServiceScriptable.class);
 					plugins.add(node);
 					node.parent = pluginNode;
 				}
@@ -2424,7 +2449,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.core.IWebResourceChangedListener#changed()
 	 */
 	@Override
