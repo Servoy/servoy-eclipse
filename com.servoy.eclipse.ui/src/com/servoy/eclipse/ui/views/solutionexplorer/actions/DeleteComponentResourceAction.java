@@ -71,7 +71,7 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	@Override
@@ -100,8 +100,15 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 				{
 					try
 					{
-						resource.delete(true, new NullProgressMonitor());
-						resources.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+						if (resource instanceof IFolder)
+						{
+							deleteFolder((IFolder)resource);
+						}
+						else
+						{
+							resource.delete(true, new NullProgressMonitor());
+							resources.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+						}
 					}
 					catch (CoreException e)
 					{
@@ -110,6 +117,22 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 				}
 			}
 		}
+	}
+
+	private void deleteFolder(IFolder folder) throws CoreException
+	{
+		for (IResource resource : folder.members())
+		{
+			if (resource instanceof IFolder)
+			{
+				deleteFolder((IFolder)resource);
+			}
+			else
+			{
+				resource.delete(true, new NullProgressMonitor());
+			}
+		}
+		folder.delete(true, new NullProgressMonitor());
 	}
 
 	private IResource getComponentFolderToDelete(IProject resources, SimpleUserNode next)
@@ -166,7 +189,7 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
 	 */
 	@Override
