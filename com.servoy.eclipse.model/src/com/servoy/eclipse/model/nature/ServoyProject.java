@@ -61,6 +61,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServer;
+import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -121,22 +122,26 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 	public Solution getSolution()
 	{
 		Solution solution = null;
-		IDeveloperRepository repository = ApplicationServerRegistry.get().getDeveloperRepository();
-		if (repository != null)
+		IApplicationServerSingleton registry = ApplicationServerRegistry.get();
+		if (registry != null) // otherwise NPE can happen if during eclipse shutdown a DLTK build is running for some reason
 		{
-			try
+			IDeveloperRepository repository = registry.getDeveloperRepository();
+			if (repository != null)
 			{
-				solution = (Solution)repository.getActiveRootObject(project.getName(), IRepository.SOLUTIONS);
+				try
+				{
+					solution = (Solution)repository.getActiveRootObject(project.getName(), IRepository.SOLUTIONS);
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError("Cannot get solution object for project " + project.getName(), e);
+				}
 			}
-			catch (Exception e)
+			else
 			{
-				ServoyLog.logError("Cannot get solution object for project " + project.getName(), e);
+				ModelUtils.getUnexpectedSituationHandler().cannotFindRepository();
+				ServoyLog.logError("Repository error. Cannot find Servoy Eclipse repository.", null);
 			}
-		}
-		else
-		{
-			ModelUtils.getUnexpectedSituationHandler().cannotFindRepository();
-			ServoyLog.logError("Repository error. Cannot find Servoy Eclipse repository.", null);
 		}
 		return solution;
 	}

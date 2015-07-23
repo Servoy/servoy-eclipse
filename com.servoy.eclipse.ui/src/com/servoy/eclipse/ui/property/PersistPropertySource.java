@@ -158,7 +158,6 @@ import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Part;
@@ -431,7 +430,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 					ServoyLog.logError("Could not register property " + element.getName(), e);
 				}
 			}
-			if (!(persistContext.getPersist() instanceof IWebComponent))
+			if (!(persistContext.getPersist() instanceof IBasicWebComponent))
 			{
 				// check for pseudo properties
 				IPropertyHandler[] pseudoProperties = getPseudoProperties(persistContext.getPersist().getClass());
