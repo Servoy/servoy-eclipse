@@ -33,9 +33,7 @@ import org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor;
 import org.eclipse.dltk.javascript.ast.CallExpression;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
-import org.sablo.specification.WebComponentPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -88,8 +86,6 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 		//these are always required
 		usedComponents.add("servoydefault-errorbean");
 		usedComponents.add("servoydefault-portal");
-		WebComponentPackageSpecification<WebComponentSpecification> servoyservices = WebServiceSpecProvider.getInstance().getServicesInPackage("servoyservices");
-		if (servoyservices != null) usedServices.addAll(servoyservices.getSpecifications().keySet());
 	}
 
 	private void findUsedComponents(ISupportChilds parent)
@@ -128,7 +124,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 						/*
 						 * (non-Javadoc)
-						 *
+						 * 
 						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitCallExpression(org.eclipse.dltk.javascript.ast.CallExpression)
 						 */
 						@Override
@@ -176,7 +172,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getUsedComponents()
 	 */
 	@Override
@@ -187,7 +183,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getUsedServices()
 	 */
 	@Override

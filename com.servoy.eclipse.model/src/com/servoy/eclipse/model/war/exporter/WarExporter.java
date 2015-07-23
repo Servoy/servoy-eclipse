@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
@@ -55,7 +56,10 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.json.JSONException;
+import org.sablo.specification.WebComponentPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebServiceSpecProvider;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -203,7 +207,14 @@ public class WarExporter
 		{
 			components.append(component + ",");
 		}
-		for (String service : exportModel.getExportedServices())
+
+		TreeSet<String> allServices = new TreeSet<String>();
+		// append internal servoy services
+		WebComponentPackageSpecification<WebComponentSpecification> servoyservices = WebServiceSpecProvider.getInstance().getServicesInPackage("servoyservices");
+		if (servoyservices != null) allServices.addAll(servoyservices.getSpecifications().keySet());
+		// append user services
+		if (exportModel.getExportedServices() != null) allServices.addAll(exportModel.getExportedServices());
+		for (String service : allServices)
 		{
 			components.append(service + ",");
 		}
