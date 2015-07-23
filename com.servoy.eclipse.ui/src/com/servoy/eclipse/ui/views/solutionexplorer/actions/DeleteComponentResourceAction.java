@@ -102,6 +102,7 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 					{
 						if (resource instanceof IFolder)
 						{
+							resources.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 							deleteFolder((IFolder)resource);
 						}
 						else
@@ -129,7 +130,16 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 			}
 			else
 			{
-				resource.delete(true, new NullProgressMonitor());
+				try
+				{
+					resource.delete(true, new NullProgressMonitor());
+				}
+				catch (CoreException e)
+				{
+					// can go wrong once, try again with a refresh
+					resource.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+					resource.delete(true, new NullProgressMonitor());
+				}
 			}
 		}
 		folder.delete(true, new NullProgressMonitor());
