@@ -152,7 +152,9 @@ public class NewComponentAction extends Action
 				folder.create(IResource.FORCE, true, new NullProgressMonitor());
 				if (type.equals("Component"))
 				{
-					createFile(componentName + ".html", folder, uiActivator.getBundle().getEntry("/component-templates/component.html").openStream());
+					in = uiActivator.getBundle().getEntry("/component-templates/component.html").openStream();
+					createFile(componentName + ".html", folder, in);
+					in.close();
 				}
 				in = uiActivator.getBundle().getEntry("/component-templates/" + type.toLowerCase() + ".js").openStream();
 				String text = IOUtils.toString(in, "UTF-8");
@@ -169,6 +171,7 @@ public class NewComponentAction extends Action
 				text = text.replaceAll("\\$\\{DASHEDNAME\\}", getDashedName(componentName));
 				text = text.replaceAll("\\$\\{PACKAGENAME\\}", pack.getName());
 				createFile(componentName + ".spec", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
+				in.close();
 
 				addToManifest(componentName, type, pack);
 			}
