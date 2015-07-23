@@ -1,4 +1,4 @@
-angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $toolbar, TOOLBAR_CATEGORIES, $editorService, $pluginRegistry,$selectionUtils, EDITOR_EVENTS){
+angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $toolbar, TOOLBAR_CATEGORIES, $editorService, $pluginRegistry,$selectionUtils,$window, EDITOR_EVENTS){
 
 	var editorScope = null;
 	var utils = null;
@@ -543,13 +543,24 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 				$editorService.executeAction('vertical_pack');
 			},
 	};
-
+	
 	$toolbar.add(btnDistributeHorizontalSpacing, TOOLBAR_CATEGORIES.DISTRIBUTION);
 	$toolbar.add(btnDistributeHorizontalCenters, TOOLBAR_CATEGORIES.DISTRIBUTION);
 	$toolbar.add(btnDistributeLeftward, TOOLBAR_CATEGORIES.DISTRIBUTION);
 	$toolbar.add(btnDistributeVerticalSpacing, TOOLBAR_CATEGORIES.DISTRIBUTION);
 	$toolbar.add(btnDistributeVerticalCenters, TOOLBAR_CATEGORIES.DISTRIBUTION);
 	$toolbar.add(btnDistributeUpward, TOOLBAR_CATEGORIES.DISTRIBUTION);
+	
+	var btnReload = {
+			text: "Reload designer (use when component changes must be reflected)",
+			icon: "../../images/reload.png",
+			enabled: true,
+			onclick: function() {
+				$window.location.reload();
+			},
+	}
+	
+	$toolbar.add(btnReload, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 
 	$rootScope.$on(EDITOR_EVENTS.INITIALIZED, function() {
 		// disable or enable buttons.

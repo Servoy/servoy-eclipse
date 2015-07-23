@@ -68,6 +68,7 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	    				$scope.design_mode = $toolbar.getButtons(TOOLBAR_CATEGORIES.DESIGN_MODE);
 	    				$scope.sticky = $toolbar.getButtons(TOOLBAR_CATEGORIES.STICKY);
 	    			}
+	    			$scope.standard_actions = $toolbar.getButtons(TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 	    	  });
 	    	  
 	    	  $toolbar.registerPanel($scope);
@@ -108,5 +109,6 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	EDITOR: "editor",
 	STICKY: "sticky",
 	SHOW_DATA: "show_data",
-	DESIGN_MODE: "design_mode"
+	DESIGN_MODE: "design_mode",
+	STANDARD_ACTIONS: "standard_actions"
 })
