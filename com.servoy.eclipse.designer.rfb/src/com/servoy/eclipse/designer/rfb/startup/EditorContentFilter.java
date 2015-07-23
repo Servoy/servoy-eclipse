@@ -65,6 +65,7 @@ public class EditorContentFilter implements Filter
 				((HttpServletResponse)response).setContentType("text/html");
 				PrintWriter w = response.getWriter();
 				Set<String> formScripts = new HashSet<String>();
+				formScripts.add("js/servoy-components.js?x=" + System.currentTimeMillis());
 				formScripts.add("solutions/" + solution + "/forms/" + form + ".js");
 				HashMap<String, String> variableSubstitution = new HashMap<String, String>();
 				variableSubstitution.put("orientation", String.valueOf(0)); // fs.getSolution().getTextOrientation()
