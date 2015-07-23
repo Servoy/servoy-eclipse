@@ -24,7 +24,6 @@ import org.sablo.specification.property.IDataConverterContext;
 import org.sablo.websocket.utils.DataConversion;
 import org.sablo.websocket.utils.JSONUtils;
 
-import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.server.ngclient.FormElementContext;
 import com.servoy.j2db.server.ngclient.design.DesignNGClient;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
@@ -44,7 +43,7 @@ public class DesignerFormPropertyType extends FormPropertyType
 
 	@Override
 	public JSONWriter toTemplateJSONValue(JSONWriter writer, String key, Object formElementValue, PropertyDescription pd,
-		DataConversion browserConversionMarkers, FlattenedSolution fs, FormElementContext formElementContext) throws JSONException
+		DataConversion browserConversionMarkers, FormElementContext formElementContext) throws JSONException
 	{
 		if (formElementContext.getContext().getApplication() instanceof DesignNGClient &&
 			!((DesignNGClient)formElementContext.getContext().getApplication()).getShowData())
@@ -53,7 +52,7 @@ public class DesignerFormPropertyType extends FormPropertyType
 			writer.value(null);
 			return writer;
 		}
-		return super.toTemplateJSONValue(writer, key, formElementValue, pd, browserConversionMarkers, fs, formElementContext);
+		return super.toTemplateJSONValue(writer, key, formElementValue, pd, browserConversionMarkers, formElementContext);
 	}
 
 	@Override
