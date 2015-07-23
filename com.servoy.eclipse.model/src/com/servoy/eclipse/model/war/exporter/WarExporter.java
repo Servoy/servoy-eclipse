@@ -56,7 +56,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.json.JSONException;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebServiceSpecProvider;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -82,6 +81,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ComponentResourcesExporter;
+import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IUserManager;
@@ -194,7 +194,7 @@ public class WarExporter
 	{
 		if (exportModel.getExportedComponents() == null && exportModel.getExportedServices() == null ||
 			exportModel.getExportedComponents().size() == WebComponentSpecProvider.getInstance().getWebComponentSpecifications().size() &&
-			exportModel.getExportedServices().size() == WebServiceSpecProvider.getInstance().getAllWebServiceSpecifications().length) return;
+			exportModel.getExportedServices().size() == NGUtils.getAllPublicWebServiceSpecifications().length) return;
 
 		File exported = new File(tmpWarDir, "WEB-INF/exported_components.properties");
 		Properties properties = new Properties();

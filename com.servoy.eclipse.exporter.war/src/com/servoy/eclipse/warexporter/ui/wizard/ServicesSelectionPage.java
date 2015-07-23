@@ -26,6 +26,7 @@ import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
+import com.servoy.j2db.server.ngclient.utils.NGUtils;
 
 /**
  * Shows the user the list of needed services and allows him to select more to export.
@@ -51,7 +52,7 @@ public class ServicesSelectionPage extends AbstractComponentsSelectionPage
 	protected Set<String> getAvailableItems()
 	{
 		Set<String> availableComponents = new TreeSet<String>();
-		for (WebComponentSpecification spec : WebServiceSpecProvider.getInstance().getAllWebServiceSpecifications())
+		for (WebComponentSpecification spec : NGUtils.getAllPublicWebServiceSpecifications())
 		{
 			if (!selectedComponents.contains(spec.getName())) availableComponents.add(spec.getName());
 		}

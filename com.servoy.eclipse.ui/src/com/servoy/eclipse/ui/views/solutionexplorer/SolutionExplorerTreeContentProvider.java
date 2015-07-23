@@ -129,6 +129,7 @@ import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.scripting.WebServiceScriptable;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
+import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
@@ -1099,7 +1100,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					node.parent = pluginNode;
 				}
 			}
-			WebComponentSpecification[] serviceSpecifications = WebServiceSpecProvider.getInstance().getAllWebServiceSpecifications();
+			WebComponentSpecification[] serviceSpecifications = NGUtils.getAllPublicWebServiceSpecifications();
 			Arrays.sort(serviceSpecifications, new Comparator<WebComponentSpecification>()
 			{
 				@Override
@@ -2449,7 +2450,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.core.IWebResourceChangedListener#changed()
 	 */
 	@Override

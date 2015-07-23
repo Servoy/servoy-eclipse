@@ -101,7 +101,6 @@ import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentApiDefinition;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
-import org.sablo.specification.WebServiceSpecProvider;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.IPropertyType;
@@ -233,6 +232,7 @@ import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
+import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.ui.IScriptAccordionPanelMethods;
 import com.servoy.j2db.ui.IScriptDataLabelMethods;
 import com.servoy.j2db.ui.IScriptInsetListComponentMethods;
@@ -472,7 +472,7 @@ public class TypeCreator extends TypeCache
 	private void createSpecTypeDefinitions()
 	{
 		WebComponentSpecification[] webComponentSpecifications = WebComponentSpecProvider.getInstance().getAllWebComponentSpecifications();
-		WebComponentSpecification[] webServiceSpecifications = WebServiceSpecProvider.getInstance().getAllWebServiceSpecifications();
+		WebComponentSpecification[] webServiceSpecifications = NGUtils.getAllPublicWebServiceSpecifications();
 		Collection<WebComponentSpecification> specs = new ArrayList<WebComponentSpecification>();
 		Collections.addAll(specs, webComponentSpecifications);
 		Collections.addAll(specs, webServiceSpecifications);
@@ -2898,7 +2898,7 @@ public class TypeCreator extends TypeCache
 			ClientSupport clientSupport = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
 			if (clientSupport != null && clientSupport.supports(ClientSupport.ng))
 			{
-				WebComponentSpecification[] serviceSpecifications = WebServiceSpecProvider.getInstance().getAllWebServiceSpecifications();
+				WebComponentSpecification[] serviceSpecifications = NGUtils.getAllPublicWebServiceSpecifications();
 				for (WebComponentSpecification spec : serviceSpecifications)
 				{
 					if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)

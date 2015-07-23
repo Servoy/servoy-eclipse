@@ -51,6 +51,7 @@ import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
+import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
@@ -62,7 +63,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter#createArgumentChest(org.eclipse.equinox.app.IApplicationContext)
 	 */
 	@Override
@@ -73,7 +74,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter#exportActiveSolution(com.servoy.eclipse.exporter.apps.common.IArgumentChest)
 	 */
 	@Override
@@ -251,7 +252,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 				WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
 				if (configuration.getSelectedServices().trim().equalsIgnoreCase("all"))
 				{
-					for (WebComponentSpecification spec : provider.getAllWebServiceSpecifications())
+					for (WebComponentSpecification spec : NGUtils.getAllPublicWebServiceSpecifications())
 					{
 						set.add(spec.getName());
 					}
