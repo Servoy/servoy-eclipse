@@ -30,8 +30,8 @@ import org.sablo.specification.WebComponentSpecification;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IBasicWebObject;
-import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.util.Utils;
@@ -70,7 +70,7 @@ public class WebComponentPropertySource extends PDPropertySource
 	public WebComponentPropertySource(PersistContext persistContext, boolean readonly, PropertyDescription propertyDescription)
 	{
 		super(persistContext, readonly, propertyDescription);
-		if (!(persistContext.getPersist() instanceof IWebComponent))
+		if (!(persistContext.getPersist() instanceof IBasicWebComponent))
 		{
 			throw new IllegalArgumentException("Expected persist to be IWebComponent but it is not: " + persistContext.getPersist());
 		}

@@ -27,7 +27,7 @@ import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IWebObject;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 
@@ -44,7 +44,7 @@ public class PDPropertySource extends PersistPropertySource
 	public PDPropertySource(PersistContext persistContext, boolean readonly, PropertyDescription propertyDescription)
 	{
 		super(persistContext, readonly);
-		if (!(persistContext.getPersist() instanceof IWebObject))
+		if (!(persistContext.getPersist() instanceof IBasicWebObject))
 		{
 			throw new IllegalArgumentException();
 		}
