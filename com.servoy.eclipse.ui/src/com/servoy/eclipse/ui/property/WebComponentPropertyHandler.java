@@ -225,8 +225,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		}
 		else
 		{
-			IPropertyConverter<Object> type = (IPropertyConverter<Object>)propertyDescription.getType();
-			IPropertyConverter<Object> converter = (IPropertyConverter<Object>)jsonConverters.get(type);
+			IPropertyConverter<Object> converter = (IPropertyConverter<Object>)jsonConverters.get(propertyDescription.getType());
 			if (converter != null)
 			{
 				JSONStringer writer = new JSONStringer();
