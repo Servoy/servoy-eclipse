@@ -41,6 +41,7 @@ import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
+import com.servoy.eclipse.ui.property.CheckboxPropertyDescriptor;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.ComplexPropertySource;
@@ -66,6 +67,9 @@ import com.servoy.j2db.util.Utils;
  */
 public class FoundsetPropertyController extends PropertyController<JSONObject, Object>
 {
+	private static final String USE_FORM_FOUNDSET = "useFormFoundset";
+	private static final String FOUNDSET_RELATION = "foundsetRelation";
+
 	private static final String FOUNDSET_SELECTOR = "foundsetSelector";
 	private static final String FOUNDSET_DP_COUNT = "foundsetDataprovidersCount";
 	private static final String DATAPROVIDERS = "dataproviders";
@@ -144,24 +148,30 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 						try
 						{
 							JSONObject elementJSON = (JSONObject)element;
-							StringBuilder sb = new StringBuilder();
-							String fs = elementJSON.optString(FOUNDSET_SELECTOR);
-							sb.append("".equals(fs) ? FORM_FOUNDSET : fs);
-							sb.append('[');
-							JSONObject dataproviders = elementJSON.optJSONObject(DATAPROVIDERS);
-							if (dataproviders != null)
+							if (elementJSON.has(FOUNDSET_SELECTOR))
 							{
-								Iterator dpKeysIte = dataproviders.keys();
-								while (dpKeysIte.hasNext())
+								StringBuilder sb = new StringBuilder();
+								String fs = elementJSON.optString(FOUNDSET_SELECTOR);
+								sb.append("".equals(fs) ? FORM_FOUNDSET : fs);
+								if (elementJSON.has(DATAPROVIDERS))
 								{
-									String key = dpKeysIte.next().toString();
-									sb.append(key).append(':').append(dataproviders.getString(key));
-									if (dpKeysIte.hasNext()) sb.append(',');
+									sb.append('[');
+									JSONObject dataproviders = elementJSON.optJSONObject(DATAPROVIDERS);
+									if (dataproviders != null)
+									{
+										Iterator< ? > dpKeysIte = dataproviders.keys();
+										while (dpKeysIte.hasNext())
+										{
+											String key = dpKeysIte.next().toString();
+											sb.append(key).append(':').append(dataproviders.getString(key));
+											if (dpKeysIte.hasNext()) sb.append(',');
+										}
+									}
+									sb.append(']');
 								}
-							}
-							sb.append(']');
 
-							return sb.toString();
+								return sb.toString();
+							}
 						}
 						catch (JSONException ex)
 						{
@@ -214,23 +224,13 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 		private RelationPropertyController relationPropertyController;
 		private Table table;
 
+		private final ComplexProperty<JSONObject> complexProperty;
+
 		public FoundsetPropertySource(ComplexProperty<JSONObject> complexProperty, FlattenedSolution flattenedSolution, PersistContext persistContext,
 			String[] dataproviders, boolean hasDynamicDataproviders)
 		{
 			super(complexProperty);
-			if (complexProperty.getValue() == null)
-			{
-				JSONObject v = new JSONObject();
-				try
-				{
-					v.put(FOUNDSET_SELECTOR, "");
-				}
-				catch (JSONException ex)
-				{
-					ServoyLog.logError(ex);
-				}
-				complexProperty.setValue(v);
-			}
+			this.complexProperty = complexProperty;
 			this.flattenedSolution = flattenedSolution;
 			this.persistContext = persistContext;
 			this.dataproviders = dataproviders;
@@ -250,7 +250,10 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 		public IPropertyDescriptor[] createPropertyDescriptors()
 		{
 			ArrayList<IPropertyDescriptor> propertyDescriptors = new ArrayList<IPropertyDescriptor>();
-			relationPropertyController = new RelationPropertyController(FOUNDSET_SELECTOR, FOUNDSET_SELECTOR, persistContext, table, null /* foreignTable */,
+
+			propertyDescriptors.add(new CheckboxPropertyDescriptor(USE_FORM_FOUNDSET, USE_FORM_FOUNDSET));
+
+			relationPropertyController = new RelationPropertyController(FOUNDSET_RELATION, FOUNDSET_RELATION, persistContext, table, null /* foreignTable */,
 				true, false);
 			relationPropertyController.setLabelProvider(new SolutionContextDelegateLabelProvider(RelationLabelProvider.INSTANCE_ALL_NO_IMAGE,
 				persistContext.getContext())
@@ -258,27 +261,32 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 				@Override
 				public String getText(Object value)
 				{
-					return value == null ? FORM_FOUNDSET : super.getText(value);
+					return "".equals(value) ? FORM_FOUNDSET : super.getText(value);
 				}
 			});
 			propertyDescriptors.add(relationPropertyController);
 
 			if (dataproviders != null)
 			{
-				for (String dp : dataproviders)
+				if (getEditableValue() != null)
 				{
-					propertyDescriptors.add(createDataproviderPropertyDescriptor(dp, dp));
+					for (String dp : dataproviders)
+					{
+						propertyDescriptors.add(createDataproviderPropertyDescriptor(dp, dp));
+					}
 				}
 			}
 			else if (hasDynamicDataproviders)
 			{
-				propertyDescriptors.add(new TextPropertyDescriptor(FOUNDSET_DP_COUNT, FOUNDSET_DP_COUNT));
-
 				JSONObject v = getEditableValue();
-				int foundsetDPCount = v.optInt(FOUNDSET_DP_COUNT);
-				for (int i = 1; i <= foundsetDPCount; i++)
+				if (v != null)
 				{
-					propertyDescriptors.add(createDataproviderPropertyDescriptor("dp" + i, "dp" + i));
+					propertyDescriptors.add(new TextPropertyDescriptor(FOUNDSET_DP_COUNT, FOUNDSET_DP_COUNT));
+					int foundsetDPCount = v.optInt(FOUNDSET_DP_COUNT);
+					for (int i = 1; i <= foundsetDPCount; i++)
+					{
+						propertyDescriptors.add(createDataproviderPropertyDescriptor("dp" + i, "dp" + i));
+					}
 				}
 			}
 
@@ -327,29 +335,41 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 		public Object getPropertyValue(Object id)
 		{
 			JSONObject v = getEditableValue();
-			if (FOUNDSET_SELECTOR.equals(id))
+
+			if (USE_FORM_FOUNDSET.equals(id))
 			{
-				String foundsetSelector = v.optString(FOUNDSET_SELECTOR);
-				return "".equals(foundsetSelector) ? null : relationPropertyController.getConverter().convertProperty(FOUNDSET_SELECTOR, foundsetSelector);
+				return v == null ? Boolean.FALSE : Boolean.valueOf("".equals(v.optString(FOUNDSET_SELECTOR)));
+			}
+			else if (FOUNDSET_RELATION.equals(id))
+			{
+				if (v != null)
+				{
+					String foundsetSelector = v.optString(FOUNDSET_SELECTOR);
+					return "".equals(foundsetSelector) ? null : relationPropertyController.getConverter().convertProperty(FOUNDSET_SELECTOR, foundsetSelector);
+				}
 			}
 			else if (FOUNDSET_DP_COUNT.equals(id))
 			{
-				return String.valueOf(v.optInt(FOUNDSET_DP_COUNT));
+				return v == null ? "0" : String.valueOf(v.optInt(FOUNDSET_DP_COUNT));
 			}
 			else
 			{
-				JSONObject dataprovidersValues = v.optJSONObject(DATAPROVIDERS);
-				if (dataprovidersValues != null && dataprovidersValues.has(id.toString()))
+				if (v != null)
 				{
-					String foundsetSelector = v.optString(FOUNDSET_SELECTOR);
-					String dp = dataprovidersValues.optString(id.toString());
-					if (dp != null && foundsetSelector.length() > 0)
+					JSONObject dataprovidersValues = v.optJSONObject(DATAPROVIDERS);
+					if (dataprovidersValues != null && dataprovidersValues.has(id.toString()))
 					{
-						dp = foundsetSelector + "." + dp;
+						String foundsetSelector = v.optString(FOUNDSET_SELECTOR);
+						String dp = dataprovidersValues.optString(id.toString());
+						if (dp != null && foundsetSelector.length() > 0)
+						{
+							dp = foundsetSelector + "." + dp;
+						}
+						return dp;
 					}
-					return dp;
 				}
 			}
+
 			return null;
 		}
 
@@ -357,12 +377,36 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 		public JSONObject setComplexPropertyValue(Object id, Object v)
 		{
 			JSONObject editableValue = getEditableValue();
+			if (editableValue == null)
+			{
+				editableValue = new JSONObject();
+				complexProperty.setValue(editableValue);
+			}
 			try
 			{
-				if (FOUNDSET_SELECTOR.equals(id))
+				if (USE_FORM_FOUNDSET.equals(id))
+				{
+					if (((Boolean)v).booleanValue())
+					{
+						editableValue.put(FOUNDSET_SELECTOR, "");
+					}
+					else
+					{
+						editableValue = null;
+						complexProperty.setValue(editableValue);
+					}
+				}
+				else if (FOUNDSET_RELATION.equals(id))
 				{
 					String foundsetSelector = relationPropertyController.getConverter().convertValue(FOUNDSET_SELECTOR, v);
-					editableValue.put(FOUNDSET_SELECTOR, foundsetSelector == null ? "" : foundsetSelector);
+					if (foundsetSelector == null)
+					{
+						editableValue.remove(FOUNDSET_SELECTOR);
+					}
+					else
+					{
+						editableValue.put(FOUNDSET_SELECTOR, foundsetSelector);
+					}
 				}
 				else if (FOUNDSET_DP_COUNT.equals(id))
 				{
@@ -370,7 +414,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 					{
 						int dpCount = Integer.parseInt(v.toString());
 						int oldValue = editableValue.optInt(FOUNDSET_DP_COUNT);
-						if (dpCount > 0 && dpCount < 51)
+						if (dpCount > -1 && dpCount < 51)
 						{
 							editableValue.put(FOUNDSET_DP_COUNT, v.toString());
 						}
@@ -379,7 +423,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 							JSONObject dataprovidersValues = editableValue.optJSONObject(DATAPROVIDERS);
 							if (dataprovidersValues != null)
 							{
-								Iterator it = dataprovidersValues.keys();
+								Iterator< ? > it = dataprovidersValues.keys();
 								while (it.hasNext())
 								{
 									String dp = (String)it.next();
@@ -406,13 +450,20 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 						editableValue.put(DATAPROVIDERS, dataprovidersValues);
 
 					}
-					String dpValue = v.toString();
-					String foundsetSelector = editableValue.optString(FOUNDSET_SELECTOR);
-					if (dpValue.startsWith(foundsetSelector + "."))
+					if (v != null)
 					{
-						dpValue = dpValue.substring(foundsetSelector.length() + 1);
+						String dpValue = v.toString();
+						String foundsetSelector = editableValue.optString(FOUNDSET_SELECTOR);
+						if (dpValue.startsWith(foundsetSelector + "."))
+						{
+							dpValue = dpValue.substring(foundsetSelector.length() + 1);
+						}
+						dataprovidersValues.put(id.toString(), dpValue);
 					}
-					dataprovidersValues.put(id.toString(), dpValue);
+					else
+					{
+						dataprovidersValues.remove(id.toString());
+					}
 				}
 			}
 			catch (JSONException ex)
