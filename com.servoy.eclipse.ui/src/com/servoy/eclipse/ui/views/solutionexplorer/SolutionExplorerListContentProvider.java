@@ -16,6 +16,9 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
@@ -33,11 +36,25 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.wicket.util.io.IOUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.dltk.ast.ASTNode;
+import org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor;
+import org.eclipse.dltk.javascript.ast.BinaryOperation;
+import org.eclipse.dltk.javascript.ast.CallExpression;
+import org.eclipse.dltk.javascript.ast.Comment;
+import org.eclipse.dltk.javascript.ast.FunctionStatement;
+import org.eclipse.dltk.javascript.ast.ObjectInitializer;
+import org.eclipse.dltk.javascript.ast.PropertyExpression;
+import org.eclipse.dltk.javascript.ast.PropertyInitializer;
+import org.eclipse.dltk.javascript.ast.ReturnStatement;
+import org.eclipse.dltk.javascript.ast.Script;
+import org.eclipse.dltk.javascript.parser.JavaScriptParser;
+import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -140,7 +157,6 @@ import com.servoy.j2db.scripting.annotations.JSSignature;
 import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
-import com.servoy.j2db.server.ngclient.scripting.WebServiceScriptable;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
@@ -1397,21 +1413,157 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return getJSMethodsViaJavaMembers(jm, beanClazz, null, elementName, prefix, actionType, null, null);
 	}
 
+	/**
+	 * Extract the docs for angular client side apis.
+	 * @param readTextFile
+	 */
+	public static void extractApiDocs(WebComponentSpecification spec)
+	{
+		if (spec.getApiFunctions().size() > 0 && spec.getDefinitionURL() != null)
+		{
+			final Map<String, WebComponentApiDefinition> apis = spec.getApiFunctions();
+			try
+			{
+				InputStream is = spec.getDefinitionURL().openStream();
+				String source = IOUtils.toString(is);
+				is.close();
+				if (source != null)
+				{
+					JavaScriptParser parser = new JavaScriptParser();
+					Script script = parser.parse(source, null);
+					script.visitAll(new AbstractNavigationVisitor<ASTNode>()
+					{
+						@Override
+						public ASTNode visitBinaryOperation(BinaryOperation node)
+						{
+							if (node.getOperationText().trim().equals("=") && node.getLeftExpression() instanceof PropertyExpression)
+							{
+								String expr = ((PropertyExpression)node.getLeftExpression()).toString();
+								if (expr.startsWith("$scope.api") || expr.startsWith("scope.api"))
+								{
+									WebComponentApiDefinition api = apis.get(((PropertyExpression)node.getLeftExpression()).getProperty().toString());
+									Comment doc = node.getDocumentation();
+									if (api != null && doc != null && doc.isDocumentation())
+									{
+										api.setDocumentation(doc.getText());
+									}
+								}
+							}
+							return super.visitBinaryOperation(node);
+						}
+
+
+						/*
+						 * (non-Javadoc)
+						 * 
+						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitObjectInitializer(org.eclipse.dltk.javascript.ast.
+						 * ObjectInitializer)
+						 */
+						@Override
+						public ASTNode visitObjectInitializer(ObjectInitializer node)
+						{
+							ReturnStatement ret = node.getParent() != null ? node.getAncestor(ReturnStatement.class) : null;
+							CallExpression call = null;
+							if (ret != null && (call = ret.getAncestor(CallExpression.class)) != null && call.getExpression().toString().endsWith(".factory"))
+							{
+								PropertyInitializer[] initializers = node.getPropertyInitializers();
+								for (PropertyInitializer initializer : initializers)
+								{
+									WebComponentApiDefinition api = apis.get(initializer.getNameAsString());
+									Comment doc = initializer.getName().getDocumentation();
+									if (api != null && initializer.getValue() instanceof FunctionStatement && doc != null && doc.isDocumentation())
+									{
+										api.setDocumentation(doc.getText());
+									}
+								}
+							}
+							return super.visitObjectInitializer(node);
+						}
+
+					});
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+
+	}
+
+	public static String getParsedComment(String comment)
+	{
+		if (comment == null) return null;
+		int currPos = 0;
+		int endPos = comment.length();
+		boolean newLine = true;
+		StringBuilder sb = new StringBuilder(comment.length());
+		outer : while (currPos < endPos)
+		{
+			char ch;
+			if (newLine)
+			{
+				do
+				{
+					ch = comment.charAt(currPos++);
+					if (currPos >= endPos) break outer;
+					if (ch == '\n' || ch == '\r') break;
+				}
+				while (Character.isWhitespace(ch) || ch == '*' || ch == '/');
+			}
+			else
+			{
+				ch = comment.charAt(currPos++);
+			}
+			newLine = ch == '\n' || ch == '\r';
+
+			if (newLine)
+			{
+				if (sb.length() != 0) sb.append("<br/>\n");
+			}
+			else
+			{
+				sb.append(ch);
+			}
+		}
+
+		JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(sb.toString()));
+		try
+		{
+			return reader.getString();
+		}
+		catch (IOException e)
+		{
+			return comment;
+		}
+	}
+
 	private SimpleUserNode[] getJSMethods(Object o, String elementName, String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames)
 	{
 		if (o == null) return EMPTY_LIST;
 		if (o instanceof WebComponentSpecification)
 		{
 			WebComponentSpecification spec = ((WebComponentSpecification)o);
-			WebServiceScriptable scriptable = new WebServiceScriptable(null, spec, null);
-			Object[] ids = scriptable.getIds();
+			extractApiDocs(spec);
+			Map<String, PropertyDescription> properties = spec.getProperties();
+			List<String> ids = new ArrayList<String>();
+			for (PropertyDescription pd : properties.values())
+			{
+				if (WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd))
+				{
+					// skip design and private properties
+					continue;
+				}
+				ids.add(pd.getName());
+			}
+			ids.addAll(spec.getApiFunctions().keySet());
 			if (ids != null)
 			{
 				List<SimpleUserNode> serviceIds = new ArrayList<SimpleUserNode>();
 				for (Object element : ids)
 				{
 					Image icon = propertiesIcon;
-					String pluginsPrefix = "plugins." + ((WebComponentSpecification)o).getName() + ".";
+					String pluginsPrefix = PLUGIN_PREFIX + "." + ((WebComponentSpecification)o).getName() + ".";
 					IDeveloperFeedback feedback = new FieldFeedback((String)element, pluginsPrefix, null, null, null);
 					if (spec.getApiFunction((String)element) != null)
 					{
@@ -1442,7 +1594,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							@Override
 							public String getToolTip(String methodName)
 							{
-								return null;
+								return getParsedComment(api.getDocumentation());
 							}
 
 							@Override
@@ -1454,7 +1606,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							@Override
 							public boolean isDeprecated(String methodName)
 							{
-								return false;
+								return api.getDocumentation() != null && api.getDocumentation().contains("@deprecated");
 							}
 
 						}, null, api.getReturnType() != null ? api.getReturnType().getType().getName() : "void");

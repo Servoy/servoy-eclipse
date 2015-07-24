@@ -17,9 +17,6 @@
 package com.servoy.eclipse.debug.script;
 
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.rmi.RemoteException;
@@ -41,7 +38,6 @@ import java.util.concurrent.ConcurrentMap;
 
 import javax.swing.Icon;
 
-import org.apache.wicket.util.io.IOUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
@@ -50,20 +46,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.internal.javascript.ti.TypeSystemImpl;
-import org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor;
-import org.eclipse.dltk.javascript.ast.BinaryOperation;
-import org.eclipse.dltk.javascript.ast.CallExpression;
-import org.eclipse.dltk.javascript.ast.Comment;
-import org.eclipse.dltk.javascript.ast.FunctionStatement;
-import org.eclipse.dltk.javascript.ast.ObjectInitializer;
-import org.eclipse.dltk.javascript.ast.PropertyExpression;
-import org.eclipse.dltk.javascript.ast.PropertyInitializer;
-import org.eclipse.dltk.javascript.ast.ReturnStatement;
-import org.eclipse.dltk.javascript.ast.Script;
-import org.eclipse.dltk.javascript.parser.JavaScriptParser;
-import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.dltk.javascript.typeinfo.DefaultMetaType;
 import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.ITypeNames;
@@ -129,6 +112,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
 import com.servoy.j2db.BasicFormController.JSForm;
 import com.servoy.j2db.FlattenedSolution;
@@ -1069,84 +1053,6 @@ public class TypeCreator extends TypeCache
 	}
 
 	/**
-	 * Extract the docs for angular client side apis.
-	 * @param readTextFile
-	 */
-	private void extractApiDocs(WebComponentSpecification spec)
-	{
-		if (spec.getApiFunctions().size() > 0 && spec.getDefinitionURL() != null)
-		{
-			final Map<String, WebComponentApiDefinition> apis = spec.getApiFunctions();
-			try
-			{
-				InputStream is = spec.getDefinitionURL().openStream();
-				String source = IOUtils.toString(is);
-				is.close();
-				if (source != null)
-				{
-					JavaScriptParser parser = new JavaScriptParser();
-					Script script = parser.parse(source, null);
-					script.visitAll(new AbstractNavigationVisitor<ASTNode>()
-					{
-						@Override
-						public ASTNode visitBinaryOperation(BinaryOperation node)
-						{
-							if (node.getOperationText().trim().equals("=") && node.getLeftExpression() instanceof PropertyExpression)
-							{
-								String expr = ((PropertyExpression)node.getLeftExpression()).toString();
-								if (expr.startsWith("$scope.api") || expr.startsWith("scope.api"))
-								{
-									WebComponentApiDefinition api = apis.get(((PropertyExpression)node.getLeftExpression()).getProperty().toString());
-									Comment doc = node.getDocumentation();
-									if (api != null && doc != null && doc.isDocumentation())
-									{
-										api.setDocumentation(doc.getText());
-									}
-								}
-							}
-							return super.visitBinaryOperation(node);
-						}
-
-
-						/*
-						 * (non-Javadoc)
-						 * 
-						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitObjectInitializer(org.eclipse.dltk.javascript.ast.
-						 * ObjectInitializer)
-						 */
-						@Override
-						public ASTNode visitObjectInitializer(ObjectInitializer node)
-						{
-							ReturnStatement ret = node.getParent() != null ? node.getAncestor(ReturnStatement.class) : null;
-							CallExpression call = null;
-							if (ret != null && (call = ret.getAncestor(CallExpression.class)) != null && call.getExpression().toString().endsWith(".factory"))
-							{
-								PropertyInitializer[] initializers = node.getPropertyInitializers();
-								for (PropertyInitializer initializer : initializers)
-								{
-									WebComponentApiDefinition api = apis.get(initializer.getNameAsString());
-									Comment doc = initializer.getName().getDocumentation();
-									if (api != null && initializer.getValue() instanceof FunctionStatement && doc != null && doc.isDocumentation())
-									{
-										api.setDocumentation(doc.getText());
-									}
-								}
-							}
-							return super.visitObjectInitializer(node);
-						}
-
-					});
-				}
-			}
-			catch (Exception e)
-			{
-				ServoyLog.logError(e);
-			}
-		}
-
-	}
-
-	/**
 	 * @param context
 	 * @param fullTypeName
 	 * @param spec
@@ -1180,7 +1086,7 @@ public class TypeCreator extends TypeCache
 				members.add(createProperty(name, false, memberType, "", null));
 			}
 		}
-		extractApiDocs(spec);
+		SolutionExplorerListContentProvider.extractApiDocs(spec);
 		Map<String, WebComponentApiDefinition> apis = spec.getApiFunctions();
 		for (WebComponentApiDefinition api : apis.values())
 		{
@@ -1188,7 +1094,7 @@ public class TypeCreator extends TypeCache
 			method.setName(api.getName());
 			if (api.getDocumentation() != null)
 			{
-				method.setDescription(getParsedComment(api.getDocumentation()));
+				method.setDescription(SolutionExplorerListContentProvider.getParsedComment(api.getDocumentation()));
 				method.setDeprecated(api.getDocumentation().contains("@deprecated"));
 			}
 			JSType returnType = getType(context, api.getReturnType());
@@ -2098,52 +2004,6 @@ public class TypeCreator extends TypeCache
 			property.setAttribute(RESOURCE, resource);
 		}
 		return property;
-	}
-
-	public static String getParsedComment(String comment)
-	{
-		int currPos = 0;
-		int endPos = comment.length();
-		boolean newLine = true;
-		StringBuilder sb = new StringBuilder(comment.length());
-		outer : while (currPos < endPos)
-		{
-			char ch;
-			if (newLine)
-			{
-				do
-				{
-					ch = comment.charAt(currPos++);
-					if (currPos >= endPos) break outer;
-					if (ch == '\n' || ch == '\r') break;
-				}
-				while (Character.isWhitespace(ch) || ch == '*' || ch == '/');
-			}
-			else
-			{
-				ch = comment.charAt(currPos++);
-			}
-			newLine = ch == '\n' || ch == '\r';
-
-			if (newLine)
-			{
-				if (sb.length() != 0) sb.append("<br/>\n");
-			}
-			else
-			{
-				sb.append(ch);
-			}
-		}
-
-		JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(sb.toString()));
-		try
-		{
-			return reader.getString();
-		}
-		catch (IOException e)
-		{
-			return comment;
-		}
 	}
 
 	private static final ConcurrentMap<MethodSignature, String> docCache = new ConcurrentHashMap<MethodSignature, String>(64, 0.9f, 16);
