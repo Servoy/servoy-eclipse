@@ -72,7 +72,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 				var mouseleavecallback;
 				var mouseupcallback;
 				var t;
-				var mousemovecallback = $scope.registerDOMEvent("mousemove","EDITOR", function(ev){					
+				var mousemovecallback = $scope.registerDOMEvent("mousemove","EDITOR", function(ev){
 					if (dragClone)
 					{
 						var css = { top: ev.pageY, left: ev.pageX}; 
@@ -84,7 +84,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 							angularElement.css($scope.convertToContentPoint(angularCss));
 						}
 
-						var canDrop = utils.getDropNode(type, topContainer,layoutName,ev);
+						var canDrop = utils.getDropNode(type, topContainer,layoutName,ev,componentName);
 						if (!canDrop.dropAllowed) {
 							$scope.glasspane.style.cursor="no-drop";
 						}
@@ -163,7 +163,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 						if ($scope.isAbsoluteFormLayout()) {
 							angularElement.css('opacity', '1');
 						}
-					}	
+					}
 				});
 				mouseleavecallback = $scope.registerDOMEvent("mouseenter","PALETTE", function(ev){
 					if (angularElement)
@@ -182,7 +182,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 					$scope.glasspane.style.cursor="";
 					if (dragClone)
 					{
-						var canDrop = utils.getDropNode(type, topContainer,layoutName,ev);
+						var canDrop = utils.getDropNode(type, topContainer,layoutName,ev,componentName);
 						utils.setDraggingFromPallete(null);
 						dragClone.remove();
 						if (angularElement)

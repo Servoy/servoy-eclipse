@@ -184,7 +184,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					return selection;
 				},
 				
-				getDropNode: function(type,topContainer,layoutName,event) {
+				getDropNode: function(type,topContainer,layoutName,event,componentName) {
 					var dropTarget = null;
 					if (type == "layout" || (type == "component" && !editorScope.isAbsoluteFormLayout())) {
 						var realName = layoutName?layoutName:"component";
@@ -237,6 +237,10 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					}
 					else {
 						dropTarget = this.getNode(event, true);
+						if (componentName !== undefined && dropTarget && dropTarget.getAttribute("svy-forbidden-components")){
+							if (dropTarget.getAttribute("svy-forbidden-components").indexOf(componentName) > 0)
+								return {dropAllowed:false}; // the drop target doesn't suppor this component
+						}						
 					}
 					return {dropAllowed:true,dropTarget:dropTarget};
 				},
