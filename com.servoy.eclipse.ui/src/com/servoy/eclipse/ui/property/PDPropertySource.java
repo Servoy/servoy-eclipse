@@ -74,50 +74,57 @@ public class PDPropertySource extends PersistPropertySource
 
 		for (PropertyDescription desc : propertyDescription.getProperties().values())
 		{
-			Object scope = desc.getTag(WebFormComponent.TAG_SCOPE);
-			if ("private".equals(scope) || "runtime".equals(scope))
-			{
-				// only show design properties
-				continue;
-			}
-
-			List<Object> values = desc.getValues();
-			if (values != null && values.size() > 0 && !desc.getName().equals(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()))
-			{
-				ValuesConfig config = new ValuesConfig();
-				if (!(values.get(0) instanceof JSONObject))
-				{
-					config.setValues(values.toArray(new Object[0]));
-				}
-				else
-				{
-					List<String> displayValues = new ArrayList<String>();
-					List<Object> realValues = new ArrayList<Object>();
-					for (Object jsonObject : values)
-					{
-						if (jsonObject instanceof JSONObject && ((JSONObject)jsonObject).keys().hasNext())
-						{
-							String key = (String)((JSONObject)jsonObject).keys().next();
-							displayValues.add(key);
-							realValues.add(((JSONObject)jsonObject).opt(key));
-						}
-					}
-					config.setValues(realValues.toArray(new Object[realValues.size()]), displayValues.toArray(new String[displayValues.size()]));
-				}
-				if (desc.getDefaultValue() != null)
-				{
-					config.addDefault(desc.getDefaultValue(), null);
-				}
-				props.add(new WebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config, desc.getDefaultValue(),
-					null, null, null, false)));
-			}
-			else
-			{
-				props.add(new WebComponentPropertyHandler(desc));
-			}
+			IPropertyHandler propHandler = createPropertyHandlerFromSpec(desc);
+			if (propHandler != null) props.add(propHandler);
 		}
 
 		return props.toArray(new IPropertyHandler[props.size()]);
+	}
+
+	public static IPropertyHandler createPropertyHandlerFromSpec(PropertyDescription desc)
+	{
+		IPropertyHandler createdPropertyHandler = null;
+		Object scope = desc.getTag(WebFormComponent.TAG_SCOPE);
+		if ("private".equals(scope) || "runtime".equals(scope))
+		{
+			return null;
+		}
+
+		List<Object> values = desc.getValues();
+		if (values != null && values.size() > 0 && !desc.getName().equals(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()))
+		{
+			ValuesConfig config = new ValuesConfig();
+			if (!(values.get(0) instanceof JSONObject))
+			{
+				config.setValues(values.toArray(new Object[0]));
+			}
+			else
+			{
+				List<String> displayValues = new ArrayList<String>();
+				List<Object> realValues = new ArrayList<Object>();
+				for (Object jsonObject : values)
+				{
+					if (jsonObject instanceof JSONObject && ((JSONObject)jsonObject).keys().hasNext())
+					{
+						String key = (String)((JSONObject)jsonObject).keys().next();
+						displayValues.add(key);
+						realValues.add(((JSONObject)jsonObject).opt(key));
+					}
+				}
+				config.setValues(realValues.toArray(new Object[realValues.size()]), displayValues.toArray(new String[displayValues.size()]));
+			}
+			if (desc.getDefaultValue() != null)
+			{
+				config.addDefault(desc.getDefaultValue(), null);
+			}
+			createdPropertyHandler = new WebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config,
+				desc.getDefaultValue(), null, null, null, false));
+		}
+		else
+		{
+			createdPropertyHandler = new WebComponentPropertyHandler(desc);
+		}
+		return createdPropertyHandler;
 	}
 
 	@Override

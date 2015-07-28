@@ -793,107 +793,15 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			return (IPropertyDescriptor)propertyDescription.getConfig();
 		}
 
-		IPropertyType< ? > propertyType = (propertyDescription == null ? null : propertyDescription.getType());
 
 		/*
 		 * Category based property controllers.
 		 */
-		if (propertyType != null && FunctionPropertyType.INSTANCE.getClass().isAssignableFrom(propertyType.getClass()))
-		{
-			final Table table = form == null ? null : form.getTable();
-			return new MethodPropertyController<Integer>(id, displayName, persistContext, new MethodListOptions(true,
-				Boolean.TRUE.equals(propertyDescription.getConfig()), form != null, true, allowFoundsetMethods(persistContext, id) && table != null, table))
-			{
-				@Override
-				protected IPropertyConverter<Integer, Object> createConverter()
-				{
-					IPropertyConverter<Integer, MethodWithArguments> id2MethodsWithArgumentConverter = new IPropertyConverter<Integer, MethodWithArguments>()
-					{
-						public MethodWithArguments convertProperty(Object id, Integer value)
-						{
-							if (value == null) return null;
+		MethodPropertyController<Integer> functionPropertyDescriptor = createFunctionPropertyDescriptorIfAppropriate(id, displayName, propertyDescription,
+			form, persistContext);
+		if (functionPropertyDescriptor != null) return functionPropertyDescriptor;
 
-							SafeArrayList<Object> args = null;
-							SafeArrayList<Object> params = null;
-							if (persistContext != null && persistContext.getPersist() instanceof AbstractBase)
-							{
-								Pair<List<Object>, List<Object>> instanceParamsArgs = ((AbstractBase)persistContext.getPersist()).getInstanceMethodParametersLocal(id.toString());
-								if (instanceParamsArgs != null)
-								{
-									if (instanceParamsArgs.getLeft() == null)
-									{ //solution is transitioning to updated frm version which includes parameter names in the frm json
-										IScriptProvider scriptMethod = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(),
-											table, value);
-										if (scriptMethod != null)
-										{
-											MethodArgument[] formalArguments = ((AbstractBase)scriptMethod).getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
-											params = new SafeArrayList<Object>();
-											for (MethodArgument methodArgument : formalArguments)
-											{
-												params.add(methodArgument.getName());
-											}
-										}
-										else
-										{
-											params = new SafeArrayList<Object>(new ArrayList<Object>());
-										}
-									}
-									else
-									{
-										params = new SafeArrayList<Object>(instanceParamsArgs.getLeft());
-									}
-									args = new SafeArrayList<Object>(instanceParamsArgs.getRight() == null ? new ArrayList<Object>()
-										: instanceParamsArgs.getRight());
-								}
-							}
-							return new MethodWithArguments(value.intValue(), params, args, table);
-						}
-
-						public Integer convertValue(Object id, MethodWithArguments value)
-						{
-							if (persistContext != null) setInstancMethodArguments(persistContext.getPersist(), id, value.paramNames, value.arguments);
-							return Integer.valueOf(value.methodId);
-						}
-					};
-
-					if (persistContext != null && persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getExtendsID() > 0)
-					{
-						// convert to the actual method called according to form inheritance
-						id2MethodsWithArgumentConverter = new ChainedPropertyConverter<Integer, MethodWithArguments, MethodWithArguments>(
-							id2MethodsWithArgumentConverter, new FormInheritenceMethodConverter(persistContext));
-					}
-
-					ComplexProperty.ComplexPropertyConverter<MethodWithArguments> mwa2complexConverter = new ComplexProperty.ComplexPropertyConverter<MethodWithArguments>()
-					{
-						@Override
-						public Object convertProperty(Object id, MethodWithArguments value)
-						{
-							return new ComplexProperty<MethodWithArguments>(value)
-							{
-								@Override
-								public IPropertySource getPropertySource()
-								{
-									return new MethodPropertySource(this, persistContext, table, getId().toString(), isReadOnly());
-								}
-							};
-						}
-
-						@Override
-						public MethodWithArguments convertValue(Object id, Object value)
-						{
-							if (value == null || value instanceof MethodWithArguments)
-							{
-								return (MethodWithArguments)value;
-							}
-							return ((ComplexProperty<MethodWithArguments>)value).getValue();
-						}
-					};
-
-					return new ChainedPropertyConverter<Integer, MethodWithArguments, Object>(id2MethodsWithArgumentConverter, mwa2complexConverter);
-				}
-			};
-		}
-
+		IPropertyType< ? > propertyType = (propertyDescription == null ? null : propertyDescription.getType());
 		/*
 		 * Property editors defined by beans
 		 */
@@ -1311,6 +1219,43 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			}
 		}
 
+		IPropertyDescriptor otherPropertyDescriptor = createOtherPropertyDescriptorIfAppropriate(id, displayName, propertyDescription, form, persistContext,
+			readOnly, propertyDescriptor, propertySource, flattenedEditingSolution);
+		if (otherPropertyDescriptor != null) return otherPropertyDescriptor;
+
+		// other bean properties
+		if (propertyDescriptor.propertyDescriptor instanceof BeanPropertyHandler)
+		{
+			return new PropertyController<Object, Object>(id, displayName, new ComplexPropertyConverter<Object>()
+			{
+				@Override
+				public Object convertProperty(Object id, Object value)
+				{
+					return new ComplexProperty<Object>(value)
+					{
+						@Override
+						public IPropertySource getPropertySource()
+						{
+							BeanSubpropertyPropertySource ps = new BeanSubpropertyPropertySource(this, propertyDescriptor.valueObject,
+								(BeanPropertyHandler)propertyDescriptor.propertyDescriptor, flattenedEditingSolution, form);
+							ps.setReadonly(readOnly);
+							return ps;
+						}
+					};
+				}
+
+			}, null, new DummyCellEditorFactory(NullDefaultLabelProvider.LABEL_DEFAULT));
+		}
+
+		return null;
+	}
+
+	private static IPropertyDescriptor createOtherPropertyDescriptorIfAppropriate(String id, String displayName, PropertyDescription propertyDescription,
+		Form form, PersistContext persistContext, final boolean readOnly, PropertyDescriptorWrapper propertyDescriptor, IPropertySource propertySource,
+		FlattenedSolution flattenedEditingSolution) throws RepositoryException
+	{
+		IPropertyType< ? > propertyType = (propertyDescription == null ? null : propertyDescription.getType());
+
 		if (propertyType != null)
 		{
 			/*
@@ -1522,30 +1467,108 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 				};
 			}
 		}
-		// other bean properties
-		if (propertyDescriptor.propertyDescriptor instanceof BeanPropertyHandler)
+		return null;
+	}
+
+	private static MethodPropertyController<Integer> createFunctionPropertyDescriptorIfAppropriate(String id, String displayName,
+		PropertyDescription propertyDescription, Form form, final PersistContext persistContext) throws RepositoryException
+	{
+		IPropertyType< ? > propertyType = (propertyDescription == null ? null : propertyDescription.getType());
+		if (propertyType != null && FunctionPropertyType.INSTANCE.getClass().isAssignableFrom(propertyType.getClass()))
 		{
-			return new PropertyController<Object, Object>(id, displayName, new ComplexPropertyConverter<Object>()
+			final Table table = form == null ? null : form.getTable();
+			return new MethodPropertyController<Integer>(id, displayName, persistContext, new MethodListOptions(true,
+				Boolean.TRUE.equals(propertyDescription.getConfig()), form != null, true, allowFoundsetMethods(persistContext, id) && table != null, table))
 			{
 				@Override
-				public Object convertProperty(Object id, Object value)
+				protected IPropertyConverter<Integer, Object> createConverter()
 				{
-					return new ComplexProperty<Object>(value)
+					IPropertyConverter<Integer, MethodWithArguments> id2MethodsWithArgumentConverter = new IPropertyConverter<Integer, MethodWithArguments>()
 					{
-						@Override
-						public IPropertySource getPropertySource()
+						public MethodWithArguments convertProperty(Object id, Integer value)
 						{
-							BeanSubpropertyPropertySource ps = new BeanSubpropertyPropertySource(this, propertyDescriptor.valueObject,
-								(BeanPropertyHandler)propertyDescriptor.propertyDescriptor, flattenedEditingSolution, form);
-							ps.setReadonly(readOnly);
-							return ps;
+							if (value == null) return null;
+
+							SafeArrayList<Object> args = null;
+							SafeArrayList<Object> params = null;
+							if (persistContext != null && persistContext.getPersist() instanceof AbstractBase)
+							{
+								Pair<List<Object>, List<Object>> instanceParamsArgs = ((AbstractBase)persistContext.getPersist()).getInstanceMethodParametersLocal(id.toString());
+								if (instanceParamsArgs != null)
+								{
+									if (instanceParamsArgs.getLeft() == null)
+									{ //solution is transitioning to updated frm version which includes parameter names in the frm json
+										IScriptProvider scriptMethod = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(),
+											table, value);
+										if (scriptMethod != null)
+										{
+											MethodArgument[] formalArguments = ((AbstractBase)scriptMethod).getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
+											params = new SafeArrayList<Object>();
+											for (MethodArgument methodArgument : formalArguments)
+											{
+												params.add(methodArgument.getName());
+											}
+										}
+										else
+										{
+											params = new SafeArrayList<Object>(new ArrayList<Object>());
+										}
+									}
+									else
+									{
+										params = new SafeArrayList<Object>(instanceParamsArgs.getLeft());
+									}
+									args = new SafeArrayList<Object>(instanceParamsArgs.getRight() == null ? new ArrayList<Object>()
+										: instanceParamsArgs.getRight());
+								}
+							}
+							return new MethodWithArguments(value.intValue(), params, args, table);
+						}
+
+						public Integer convertValue(Object id, MethodWithArguments value)
+						{
+							if (persistContext != null) setInstancMethodArguments(persistContext.getPersist(), id, value.paramNames, value.arguments);
+							return Integer.valueOf(value.methodId);
 						}
 					};
+
+					if (persistContext != null && persistContext.getContext() instanceof Form && ((Form)persistContext.getContext()).getExtendsID() > 0)
+					{
+						// convert to the actual method called according to form inheritance
+						id2MethodsWithArgumentConverter = new ChainedPropertyConverter<Integer, MethodWithArguments, MethodWithArguments>(
+							id2MethodsWithArgumentConverter, new FormInheritenceMethodConverter(persistContext));
+					}
+
+					ComplexProperty.ComplexPropertyConverter<MethodWithArguments> mwa2complexConverter = new ComplexProperty.ComplexPropertyConverter<MethodWithArguments>()
+					{
+						@Override
+						public Object convertProperty(Object id, MethodWithArguments value)
+						{
+							return new ComplexProperty<MethodWithArguments>(value)
+							{
+								@Override
+								public IPropertySource getPropertySource()
+								{
+									return new MethodPropertySource(this, persistContext, table, getId().toString(), isReadOnly());
+								}
+							};
+						}
+
+						@Override
+						public MethodWithArguments convertValue(Object id, Object value)
+						{
+							if (value == null || value instanceof MethodWithArguments)
+							{
+								return (MethodWithArguments)value;
+							}
+							return ((ComplexProperty<MethodWithArguments>)value).getValue();
+						}
+					};
+
+					return new ChainedPropertyConverter<Integer, MethodWithArguments, Object>(id2MethodsWithArgumentConverter, mwa2complexConverter);
 				}
-
-			}, null, new DummyCellEditorFactory(NullDefaultLabelProvider.LABEL_DEFAULT));
+			};
 		}
-
 		return null;
 	}
 
@@ -2339,7 +2362,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		public Object valueObject;
 		private PropertyEditor propertyEditor;
 
-		PropertyDescriptorWrapper(IPropertyHandler propertyDescriptor, Object valueObject)
+		public PropertyDescriptorWrapper(IPropertyHandler propertyDescriptor, Object valueObject)
 		{
 			this.propertyDescriptor = propertyDescriptor;
 			this.valueObject = valueObject;

@@ -54,7 +54,6 @@ import com.servoy.j2db.server.ngclient.property.types.NGInsetsPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGPointPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -122,7 +121,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		Object value = null;
 		IBasicWebObject bean = (IBasicWebObject)obj;
 
-		ServoyJSONObject json = bean.getJson();
+		JSONObject json = bean.getJson();
 		if (json != null)
 		{
 			value = json.opt(getName());
