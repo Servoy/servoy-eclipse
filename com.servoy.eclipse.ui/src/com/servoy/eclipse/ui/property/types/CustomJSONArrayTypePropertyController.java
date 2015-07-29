@@ -22,8 +22,11 @@ import java.util.ArrayList;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
@@ -151,10 +154,29 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<JS
 			{
 
 				@Override
+				protected Control createControl(Composite parentC)
+				{
+					Composite buttonVisibilityWrapper = new Composite(parentC, SWT.NONE); // cell editor activate/deactivate force control visibility; but we want to control the button visibility even if the editor is active so we add a wrapper here so that the button's visibility is not directly controlled by the cell editor
+					buttonVisibilityWrapper.setLayout(new FillLayout());
+
+					super.createControl(buttonVisibilityWrapper);
+					return buttonVisibilityWrapper;
+				}
+
+				@Override
 				protected void updateButtonState(Button buttonWidget, Object value)
 				{
 					buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ADD));
-					buttonWidget.setVisible(value != null);
+					buttonWidget.setEnabled(true);
+					if (buttonWidget.isVisible() != (value != null))
+					{
+						buttonWidget.setVisible(value != null);
+						// relayout as needed to not show blank area instead of button for no reason
+						Composite c = buttonWidget.getParent();
+						while (c != null && !ComposedCellEditor.isRootComposedCellEditor(c))
+							c = c.getParent();
+						if (ComposedCellEditor.isRootComposedCellEditor(c)) c.layout(true);
+					}
 					buttonWidget.setToolTipText("Adds a new array item below.");
 				}
 
@@ -178,7 +200,7 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<JS
 					return newValue;
 				}
 
-			}, false), false);
+			}, false, true), false, false);
 		cellEditor.create(parent);
 
 		return cellEditor;

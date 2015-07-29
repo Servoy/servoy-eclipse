@@ -131,7 +131,7 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<J
 				return oldPropertyValue != null ? null : new ServoyJSONObject();
 			}
 
-		}, false);
+		}, false, false);
 		cellEditor.create(parent);
 
 		return cellEditor;

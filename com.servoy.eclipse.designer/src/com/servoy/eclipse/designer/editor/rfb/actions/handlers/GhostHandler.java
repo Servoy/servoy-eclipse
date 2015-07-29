@@ -62,7 +62,6 @@ import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.PersistHelper;
-import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -133,7 +132,7 @@ public class GhostHandler implements IServerService
 									// special case for tabPanels - text subproperty should be shown as label instead of tabs[0]...
 									if (p.getProperty("json") != null)
 									{
-										ServoyJSONObject json = (ServoyJSONObject)p.getProperty("json");
+										JSONObject json = (JSONObject)p.getProperty("json");
 										if (json.has("text")) text = json.getString("text");
 									}
 

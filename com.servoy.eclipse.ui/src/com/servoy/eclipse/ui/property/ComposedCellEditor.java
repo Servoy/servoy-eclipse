@@ -24,9 +24,8 @@ import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ICellEditorListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
@@ -45,37 +44,56 @@ public class ComposedCellEditor extends CellEditor
 	protected CellEditor cellEditor2;
 	protected boolean cellEditor1IsMain;
 	protected Object oldValue;
+	protected boolean childNestedCellEditor;
+
 	private ICellEditorListener cellEditorListener;
-	private IPropertyChangeListener enablementListener;
 	private Listener hideL1sT3n3r;
+	private IPropertyChangeListener enablementListener;
 
 	// constructors the same as super follow - but with what we need here as well as args
-	public ComposedCellEditor(CellEditor cellEditor1, CellEditor cellEditor2, boolean cellEditor1IsMain)
+	/**
+	 * @param childNestedCellEditor this is a workaround for a bug in GridLayout (minimumWidth of GridData is ignored, and we rely
+	 * on widthHint to change minimumWidth); set this to false if ComposedCellEditor is the main cell editor that is shown in properties view and
+	 * set it to true if you have nested ComposedCellEditors for the child composed cell editors.
+	 */
+	public ComposedCellEditor(CellEditor cellEditor1, CellEditor cellEditor2, boolean cellEditor1IsMain, boolean childNestedCellEditor)
 	{
-		init(cellEditor1, cellEditor2, cellEditor1IsMain);
+		init(cellEditor1, cellEditor2, cellEditor1IsMain, childNestedCellEditor);
 	}
 
-	protected ComposedCellEditor(CellEditor cellEditor1, CellEditor cellEditor2, boolean cellEditor1IsMain, Composite parent)
+	/**
+	 * @param childNestedCellEditor this is a workaround for a bug in GridLayout (minimumWidth of GridData is ignored, and we rely
+	 * on widthHint to change minimumWidth); set this to false if ComposedCellEditor is the main cell editor that is shown in properties view and
+	 * set it to true if you have nested ComposedCellEditors for the child composed cell editors.
+	 */
+	protected ComposedCellEditor(CellEditor cellEditor1, CellEditor cellEditor2, boolean cellEditor1IsMain, Composite parent, boolean childNestedCellEditor)
 	{
 		super();
-		init(cellEditor1, cellEditor2, cellEditor1IsMain);
+		init(cellEditor1, cellEditor2, cellEditor1IsMain, childNestedCellEditor);
 		setStyle(SWT.NONE);
 		create(parent);
 	}
 
-	protected ComposedCellEditor(CellEditor cellEditor1, CellEditor cellEditor2, boolean cellEditor1IsMain, Composite parent, int style)
+	/**
+	 * @param childNestedCellEditor this is a workaround for a bug in GridLayout (minimumWidth of GridData is ignored, and we rely
+	 * on widthHint to change minimumWidth); set this to false if ComposedCellEditor is the main cell editor that is shown in properties view and
+	 * set it to true if you have nested ComposedCellEditors for the child composed cell editors.
+	 */
+	protected ComposedCellEditor(CellEditor cellEditor1, CellEditor cellEditor2, boolean cellEditor1IsMain, Composite parent, int style,
+		boolean childNestedCellEditor)
 	{
 		super();
-		init(cellEditor1, cellEditor2, cellEditor1IsMain);
+		init(cellEditor1, cellEditor2, cellEditor1IsMain, childNestedCellEditor);
 		setStyle(style);
 		create(parent);
 	}
 
-	protected void init(CellEditor cellEditor1, CellEditor cellEditor2, boolean cellEditor1IsMain)
+	protected void init(CellEditor cellEditor1, CellEditor cellEditor2, boolean cellEditor1IsMain, boolean childNestedCellEditor)
 	{
 		this.cellEditor1 = cellEditor1;
 		this.cellEditor2 = cellEditor2;
 		this.cellEditor1IsMain = cellEditor1IsMain;
+		this.childNestedCellEditor = childNestedCellEditor;
 
 		// TODO this listener might need to be a bit smarter
 		cellEditorListener = new ICellEditorListener()
@@ -121,8 +139,14 @@ public class ComposedCellEditor extends CellEditor
 	@Override
 	protected Control createControl(final Composite parent)
 	{
-		Composite composite = new Composite(parent, SWT.NONE);
-		composite.setLayout(new FormLayout());
+		Composite composite = (childNestedCellEditor ? new Composite(parent, SWT.NONE) : new MarkerComposite(parent, SWT.NONE));
+		GridLayout gridLayout = new GridLayout();
+		gridLayout.marginHeight = 0;
+		gridLayout.marginWidth = 0;
+		gridLayout.horizontalSpacing = 0;
+		gridLayout.verticalSpacing = 0;
+		composite.setLayout(gridLayout);
+		gridLayout.numColumns = 2;
 
 		Composite cellEditor1ControlParent = new Composite(composite, SWT.NONE);
 		cellEditor1ControlParent.setLayout(new FillLayout());
@@ -132,18 +156,21 @@ public class ComposedCellEditor extends CellEditor
 		cellEditor2ControlParent.setLayout(new FillLayout());
 		cellEditor2.create(cellEditor2ControlParent);
 
-		FormData fdCellEditor2 = new FormData();
-		fdCellEditor2.top = new FormAttachment(0);
-		fdCellEditor2.right = new FormAttachment(100);
-		fdCellEditor2.bottom = new FormAttachment(100);
-		cellEditor2ControlParent.setLayoutData(fdCellEditor2);
+		GridData gdCellEditor1 = new GridData();
+		gdCellEditor1.horizontalAlignment = SWT.FILL;
+//		gdCellEditor1.minimumWidth = 0; // this doesn't seem to work for text cell editor as editor1; setting widthHint instead... (but this workaround has the side effect that preferred size is then 0 as well, so nested ComposedCellEditors might not show the 'middle' components anymore as preferred is 0px), that is why the boolean on next line is used
+		if (!childNestedCellEditor) gdCellEditor1.widthHint = 0; // see comment above
+		gdCellEditor1.verticalAlignment = SWT.FILL;
+		gdCellEditor1.grabExcessHorizontalSpace = true;
+		gdCellEditor1.grabExcessVerticalSpace = true;
+		cellEditor1ControlParent.setLayoutData(gdCellEditor1);
 
-		FormData fdCellEditor1 = new FormData();
-		fdCellEditor1.top = new FormAttachment(0);
-		fdCellEditor1.left = new FormAttachment(0);
-		fdCellEditor1.bottom = new FormAttachment(100);
-		fdCellEditor1.right = new FormAttachment(cellEditor2ControlParent);
-		cellEditor1ControlParent.setLayoutData(fdCellEditor1);
+		GridData gdCellEditor2 = new GridData();
+		gdCellEditor2.horizontalAlignment = SWT.FILL;
+		gdCellEditor2.grabExcessHorizontalSpace = false;
+		gdCellEditor2.grabExcessVerticalSpace = true;
+		gdCellEditor2.verticalAlignment = SWT.FILL;
+		cellEditor2ControlParent.setLayoutData(gdCellEditor2);
 
 		setValueValid(true);
 
@@ -393,6 +420,21 @@ public class ComposedCellEditor extends CellEditor
 	{
 		cellEditor1.performUndo();
 		cellEditor2.performUndo();
+	}
+
+	public static boolean isRootComposedCellEditor(Composite c)
+	{
+		return c instanceof MarkerComposite;
+	}
+
+	protected static class MarkerComposite extends Composite
+	{
+
+		public MarkerComposite(Composite parent, int style)
+		{
+			super(parent, style);
+		}
+
 	}
 
 }
