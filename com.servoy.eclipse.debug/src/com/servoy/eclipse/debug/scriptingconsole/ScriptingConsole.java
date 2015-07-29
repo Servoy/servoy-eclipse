@@ -68,7 +68,7 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.part.ViewPart#init(org.eclipse.ui.IViewSite, org.eclipse.ui.IMemento)
 	 */
 	@Override
@@ -76,7 +76,7 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 	{
 		super.init(site, mem);
 
-		IPageService service = (IPageService)getSite().getService(IPageService.class);
+		IPageService service = getSite().getService(IPageService.class);
 		service.addPerspectiveListener(new PerspectiveAdapter()
 		{
 			@Override
@@ -123,7 +123,7 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.part.ViewPart#saveState(org.eclipse.ui.IMemento)
 	 */
 	@Override
@@ -135,7 +135,7 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.part.WorkbenchPart#dispose()
 	 */
 	@Override
@@ -152,7 +152,7 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.part.PageBookView#createDefaultPage(org.eclipse.ui.part.PageBook)
 	 */
 	@Override
@@ -166,7 +166,7 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.part.PageBookView#doCreatePage(org.eclipse.ui.IWorkbenchPart)
 	 */
 	@Override
@@ -184,7 +184,7 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.part.PageBookView#doDestroyPage(org.eclipse.ui.IWorkbenchPart, org.eclipse.ui.part.PageBookView.PageRec)
 	 */
 	@Override
@@ -197,7 +197,7 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.part.PageBookView#getBootstrapPart()
 	 */
 	@Override
@@ -209,7 +209,7 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.part.PageBookView#isImportant(org.eclipse.ui.IWorkbenchPart)
 	 */
 	@Override
@@ -220,7 +220,7 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.console.IConsoleView#display(org.eclipse.ui.console.IConsole)
 	 */
 	public void display(IConsole console)
@@ -229,7 +229,7 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.console.IConsoleView#setPinned(boolean)
 	 */
 	public void setPinned(boolean pin)
@@ -238,7 +238,7 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.console.IConsoleView#pin(org.eclipse.ui.console.IConsole)
 	 */
 	public void pin(IConsole console)
@@ -247,7 +247,7 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.console.IConsoleView#isPinned()
 	 */
 	public boolean isPinned()
@@ -257,7 +257,7 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.console.IConsoleView#getConsole()
 	 */
 	public IConsole getConsole()
@@ -267,7 +267,7 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.console.IConsoleView#warnOfContentChange(org.eclipse.ui.console.IConsole)
 	 */
 	public void warnOfContentChange(IConsole console)
@@ -276,7 +276,7 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.console.IConsoleView#setScrollLock(boolean)
 	 */
 	public void setScrollLock(boolean scrollLock)
@@ -285,11 +285,59 @@ public class ScriptingConsole extends PageBookView implements IConsoleView
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.console.IConsoleView#getScrollLock()
 	 */
 	public boolean getScrollLock()
 	{
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.console.IScrollLockStateProvider#setAutoScrollLock(boolean)
+	 */
+	@Override
+	public void setAutoScrollLock(boolean scrollLock)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.console.IScrollLockStateProvider#getAutoScrollLock()
+	 */
+	@Override
+	public boolean getAutoScrollLock()
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.console.IConsoleView#setWordWrap(boolean)
+	 */
+	@Override
+	public void setWordWrap(boolean wordWrap)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.ui.console.IConsoleView#getWordWrap()
+	 */
+	@Override
+	public boolean getWordWrap()
+	{
+		// TODO Auto-generated method stub
 		return false;
 	}
 }
