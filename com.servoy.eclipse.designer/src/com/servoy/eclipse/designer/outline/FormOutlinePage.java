@@ -23,12 +23,20 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.GraphicalViewer;
+import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.ViewerDropAdapter;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.DragSourceListener;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -39,10 +47,16 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
+import org.sablo.specification.WebComponentPackageSpecification;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebLayoutSpecification;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListGraphicalEditPart;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ChangeParentCommand;
+import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.MobileListModel;
@@ -50,9 +64,11 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.LayoutContainer;
 
 /**
  * ContentOutlinePage for Servoy form in outline view.
@@ -68,6 +84,9 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 	private final ActionRegistry registry;
 	private final static String CONTEXT_MENU_ID = "com.servoy.eclipse.designer.rfb.popup";
 	private volatile boolean refreshing;
+
+	private IPersist[] dragObjects;
+	private LayoutContainer dropTarget;
 
 	public FormOutlinePage(Form form, GraphicalViewer viewer, ActionRegistry registry)
 	{
@@ -87,6 +106,131 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			new FormContextDelegateLabelProvider(mobile ? MobileFormOutlineLabelprovider.MOBILE_FORM_OUTLINE_LABEL_PROVIDER_INSTANCE
 				: FormOutlineLabelprovider.FORM_OUTLINE_LABEL_PROVIDER_INSTANCE, form));
 		getTreeViewer().setInput(form);
+
+		if (form != null && form.isResponsiveLayout())
+		{
+			getTreeViewer().addDragSupport(DND.DROP_MOVE, new Transfer[] { FormElementTransfer.getInstance() }, new DragSourceListener()
+			{
+				@Override
+				public void dragStart(DragSourceEvent event)
+				{
+					dragObjects = null;
+					List<IPersist> lst = new ArrayList<IPersist>();
+					Iterator< ? > iterator = ((IStructuredSelection)getTreeViewer().getSelection()).iterator();
+					while (iterator.hasNext())
+					{
+						Object element = iterator.next();
+						if (element instanceof PersistContext)
+						{
+							IPersist real = ((PersistContext)element).getPersist();
+							if (real != null)
+							{
+								lst.add(real);
+							}
+						}
+					}
+
+					if (lst.size() > 0)
+					{
+						dragObjects = lst.toArray(new IPersist[lst.size()]);
+					}
+				}
+
+				@Override
+				public void dragSetData(DragSourceEvent event)
+				{
+					if (dragObjects != null && FormElementTransfer.getInstance().isSupportedType(event.dataType))
+					{
+						event.data = dragObjects;
+					}
+				}
+
+				@Override
+				public void dragFinished(DragSourceEvent event)
+				{
+					dragObjects = null;
+				}
+
+			});
+
+			getTreeViewer().addDropSupport(DND.DROP_MOVE, new Transfer[] { FormElementTransfer.getInstance() }, new ViewerDropAdapter(getTreeViewer())
+			{
+
+				@Override
+				public boolean performDrop(Object data)
+				{
+					if (dropTarget != null && dragObjects != null && dragObjects.length > 0)
+					{
+						final CompoundCommand cc = new CompoundCommand();
+						for (final IPersist p : dragObjects)
+						{
+							cc.add(new ChangeParentCommand(p, dropTarget)
+							{
+								@Override
+								public void execute()
+								{
+									super.execute();
+									ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, p, false);
+								}
+							});
+						}
+						if (!cc.isEmpty())
+						{
+							DesignerUtil.getActiveEditor().getCommandStack().execute(cc);
+						}
+						return true;
+					}
+					return false;
+				}
+
+				@Override
+				public boolean validateDrop(Object target, int operation, TransferData transferType)
+				{
+					Object input = (target == null && getViewer() instanceof ContentViewer) ? ((ContentViewer)getViewer()).getInput() : target;
+					if (input instanceof PersistContext && ((PersistContext)input).getPersist() instanceof LayoutContainer)
+					{
+						LayoutContainer container = (LayoutContainer)((PersistContext)input).getPersist();
+						WebComponentPackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+							container.getPackageName());
+						WebLayoutSpecification spec = null;
+						if (pkg != null && (spec = pkg.getSpecification(container.getSpecName())) != null)
+						{
+							List<String> allowedChildren = spec.getAllowedChildren();
+							if (dragObjects != null)
+							{
+								boolean doAllow = true;
+								for (IPersist p : dragObjects)
+								{
+									String sourceType = null;
+									if (p instanceof IFormElement)
+									{
+										sourceType = "component";
+									}
+									else if (p instanceof LayoutContainer)
+									{
+										sourceType = ((LayoutContainer)p).getSpecName();
+									}
+									if (sourceType != null)
+									{
+										doAllow = allowedChildren.indexOf(sourceType) != -1;
+									}
+									else doAllow = false;
+									if (!doAllow) break;
+								}
+								if (doAllow)
+								{
+									dropTarget = container;
+									return true;
+								}
+							}
+						}
+					}
+					dropTarget = null;
+					return false;
+				}
+
+			});
+		}
 
 		// when the outline view is reparented to another shell, you cannot use the form editor context menu here
 		if (viewer != null)
@@ -144,7 +288,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			while (iterator.hasNext())
 			{
 				selectionObject = iterator.next();
-				IPersist persist = (IPersist)Platform.getAdapterManager().getAdapter(selectionObject, IPersist.class);
+				IPersist persist = Platform.getAdapterManager().getAdapter(selectionObject, IPersist.class);
 				if (persist != null)
 				{
 					IPersist f = persist.getAncestor(IRepository.FORMS);
@@ -155,11 +299,11 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				}
 				else
 				{
-					FormElementGroup formElementGroup = (FormElementGroup)Platform.getAdapterManager().getAdapter(selectionObject, FormElementGroup.class);
+					FormElementGroup formElementGroup = Platform.getAdapterManager().getAdapter(selectionObject, FormElementGroup.class);
 					if (formElementGroup != null) selectionPath.add(formElementGroup);
 					else
 					{
-						MobileListModel mobileListModel = (MobileListModel)Platform.getAdapterManager().getAdapter(selectionObject, MobileListModel.class);
+						MobileListModel mobileListModel = Platform.getAdapterManager().getAdapter(selectionObject, MobileListModel.class);
 						if (mobileListModel == null && selectionObject instanceof MobileListGraphicalEditPart) mobileListModel = ((MobileListGraphicalEditPart)selectionObject).getModel();
 						if (mobileListModel != null) selectionPath.add(mobileListModel);
 					}

@@ -37,6 +37,7 @@ import com.servoy.j2db.IFormController;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.server.ngclient.DataAdapterList;
 import com.servoy.j2db.server.ngclient.FormElement;
@@ -93,6 +94,18 @@ public class FormUpdater implements Runnable
 					if (webComponent != null)
 					{
 						FormElement existingFe = webComponent.getFormElement();
+						IPersist existingFePersist = existingFe.getPersistIfAvailable();
+						if (existingFePersist != null)
+						{
+							IPersist existingFePersistParent = existingFePersist.getParent();
+							if (existingFePersistParent != null && !existingFePersistParent.equals(persist.getParent()))
+							{
+								// element has been moved to a new parent
+								bigChange = true;
+								break;
+							}
+						}
+
 
 						WebComponentSpecification spec = webComponent.getSpecification();
 						Set<String> allKeys = new HashSet<String>();
