@@ -18,22 +18,22 @@ package com.servoy.eclipse.core.util;
 
 /**
  * A Runnable that is able to remember a return value for later use (useful for async/sync calls that execute in other threads).
- * 
+ *
  * @author acostescu
  */
-public abstract class ReturnValueRunnable implements Runnable
+public abstract class ReturnValueRunnable<T> implements Runnable
 {
 	/**
 	 * The return value of this runnable. It's value must be set by the execution of run().
 	 */
-	protected Object returnValue = null;
+	protected T returnValue = null;
 
 	/**
 	 * Gives the return value of the code executed in run().
-	 * 
+	 *
 	 * @return the return value of the code executed in run().
 	 */
-	public Object getReturnValue()
+	public T getReturnValue()
 	{
 		return returnValue;
 	}

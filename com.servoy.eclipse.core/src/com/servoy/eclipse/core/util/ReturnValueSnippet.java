@@ -14,23 +14,21 @@
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
-package com.servoy.eclipse.ui.property;
-
+package com.servoy.eclipse.core.util;
 
 /**
- * Interface that handles get/set of a property on a IPropertySource.
+ * A Runnable for sync but only-when-needed-later execution that returns a value.
+ * Similar to passing functions in javascript :).
  *
- * @author rgansevles
- *
- * @param <T>
+ * @author acostescu
  */
-public interface IPropertySetter<T, S extends ISetterAwarePropertySource>
+public interface ReturnValueSnippet<T>
 {
-	void setProperty(S propertySource, T value);
+	/**
+	 * Executes whatever is needed and returns a value.
+	 *
+	 * @return the return value.
+	 */
+	public T run(Object... args);
 
-	T getProperty(S propertySource);
-
-	boolean isPropertySet(S propertySource);
-
-	void resetPropertyValue(S propertySource);
 }

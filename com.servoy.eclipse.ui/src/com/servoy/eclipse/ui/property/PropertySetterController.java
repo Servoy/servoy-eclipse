@@ -17,13 +17,12 @@
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.ui.views.properties.IPropertySource;
 
 /**
  * Property descriptor wrapper that implements IPropertySetter.
- * 
+ *
  */
-public abstract class PropertySetterController<P, E, S extends IPropertySource> extends PropertyController<P, E> implements IPropertySetter<E, S>
+public abstract class PropertySetterController<P, E, S extends ISetterAwarePropertySource> extends PropertyController<P, E> implements IPropertySetter<E, S>
 {
 	/**
 	 * @param id

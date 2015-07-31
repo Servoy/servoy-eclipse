@@ -20,7 +20,6 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.core.elements.ElementFactory.RelatedForm;
 import com.servoy.eclipse.core.util.DatabaseUtils;
@@ -37,7 +36,7 @@ import com.servoy.j2db.persistence.Form;
  *
  * @author rgansevles
  */
-public class RelatedTabController extends PropertyController<String, Object> implements IPropertySetter<Object, IPropertySource>
+public class RelatedTabController extends PropertyController<String, Object> implements IPropertySetter<Object, ISetterAwarePropertySource>
 {
 	private final String title;
 	private final Form form;
@@ -53,7 +52,7 @@ public class RelatedTabController extends PropertyController<String, Object> imp
 		setSupportsReadonly(true);
 	}
 
-	public void setProperty(IPropertySource propertySource, Object value)
+	public void setProperty(ISetterAwarePropertySource propertySource, Object value)
 	{
 		if (value instanceof RelatedForm)
 		{
@@ -70,7 +69,7 @@ public class RelatedTabController extends PropertyController<String, Object> imp
 		}
 	}
 
-	public Object getProperty(IPropertySource propertySource)
+	public Object getProperty(ISetterAwarePropertySource propertySource)
 	{
 		Integer containsFormID = (Integer)(propertySource.getPropertyValue("containsFormID"));
 		Object relation = propertySource.getPropertyValue("relationName"); // RelationContentProvider.NONE when no relation is set
@@ -90,7 +89,7 @@ public class RelatedTabController extends PropertyController<String, Object> imp
 		return new RelatedForm(relation instanceof RelationsWrapper ? ((RelationsWrapper)relation).relations : null, containsForm);
 	}
 
-	public void resetPropertyValue(IPropertySource propertySource)
+	public void resetPropertyValue(ISetterAwarePropertySource propertySource)
 	{
 		// allow reset only for inherited forms
 		if (form.getExtendsID() > 0)
@@ -106,7 +105,7 @@ public class RelatedTabController extends PropertyController<String, Object> imp
 		}
 	}
 
-	public boolean isPropertySet(IPropertySource propertySource)
+	public boolean isPropertySet(ISetterAwarePropertySource propertySource)
 	{
 		return form.getExtendsID() > 0 ? propertySource.isPropertySet("containsFormID") : false;
 	}

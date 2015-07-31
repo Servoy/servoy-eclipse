@@ -29,6 +29,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentSpecification;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
@@ -41,9 +42,9 @@ import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 import com.servoy.eclipse.ui.property.IPropertyConverter;
 import com.servoy.eclipse.ui.property.IPropertySetter;
+import com.servoy.eclipse.ui.property.ISetterAwarePropertySource;
 import com.servoy.eclipse.ui.property.PDPropertySource;
 import com.servoy.eclipse.ui.property.PersistContext;
-import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PropertyController;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IPersist;
@@ -54,8 +55,8 @@ import com.servoy.j2db.util.ServoyJSONObject;
  *
  * @author acostescu
  */
-public class CustomJSONObjectTypePropertyController extends PropertyController<JSONObject, Object> implements
-	IPropertySetter<JSONObject, PersistPropertySource>
+//unfortunately here we can't use JSONObject in generics cause the value can also be JSONObject.NULL which would give classcastexceptions...
+public class CustomJSONObjectTypePropertyController extends PropertyController<Object, Object> implements IPropertySetter<Object, ISetterAwarePropertySource>
 {
 
 	private static IObjectTextConverter JSONOBJECT_TEXT_CONVERTER = new JSONObjectTextConverter();
@@ -72,17 +73,17 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<J
 	}
 
 	@Override
-	protected IPropertyConverter<JSONObject, Object> createConverter()
+	protected IPropertyConverter<Object, Object> createConverter()
 	{
 		return new CustomJSONObjectPropertyConverter();
 	}
 
-	class CustomJSONObjectPropertyConverter extends ComplexPropertyConverter<JSONObject>
+	class CustomJSONObjectPropertyConverter extends ComplexPropertyConverter<Object>
 	{
 		@Override
-		public Object convertProperty(Object id, JSONObject value)
+		public Object convertProperty(Object id, Object value)
 		{
-			return new ComplexProperty<JSONObject>(value)
+			return new ComplexProperty<Object>(value)
 			{
 				@Override
 				public IPropertySource getPropertySource()
@@ -103,7 +104,7 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<J
 				@Override
 				public String getText(Object element)
 				{
-					return element != null ? "{...}" : Messages.LabelNone; // to suggest to the user that he can click to edit directly
+					return element != null ? (!ServoyJSONObject.isJavascriptNull(element) ? "{...}" : "null") : Messages.LabelNone; // to suggest to the user that he can click to edit directly
 				}
 			};
 		}
@@ -120,7 +121,7 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<J
 			protected void updateButtonState(Button buttonWidget, Object value)
 			{
 				buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(
-					value != null ? ISharedImages.IMG_TOOL_DELETE : ISharedImages.IMG_OBJ_ADD));
+					!ServoyJSONObject.isJavascriptNullOrUndefined(value) ? ISharedImages.IMG_TOOL_DELETE : ISharedImages.IMG_OBJ_ADD));
 				buttonWidget.setEnabled(true);
 				buttonWidget.setToolTipText(value != null ? "Clears the property value." : "Creates an empty property value '{}' to be able to expand node.");
 			}
@@ -128,7 +129,7 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<J
 			@Override
 			protected Object getValueToSetOnClick(Object oldPropertyValue)
 			{
-				return oldPropertyValue != null ? null : new ServoyJSONObject();
+				return !ServoyJSONObject.isJavascriptNullOrUndefined(oldPropertyValue) ? null : new ServoyJSONObject();
 			}
 
 		}, false, false);
@@ -142,7 +143,7 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<J
 
 		public String isCorrectString(String value)
 		{
-			if (value.length() > 0)
+			if (value.length() > 0 && !"null".equals(value))
 			{
 				try
 				{
@@ -151,7 +152,7 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<J
 				catch (JSONException e)
 				{
 					return "Please use valid JSON object content (eg. '{ \"a\" : 1, \"b\" : \"str\" }'). Error: " +
-						e.getMessage().replace("{", "'{'").replace("}", "'}'"); // the replace is needed as this string will go through eclipse MessageFormatter which has special meaning for { and }
+						e.getMessage().replace("'", "''").replace("{", "'{'").replace("}", "'}'"); // the replace is needed as this string will go through eclipse MessageFormatter which has special meaning for { and }
 				}
 			}
 			return null;
@@ -163,6 +164,8 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<J
 			{
 				return null;
 			}
+
+			if ("null".equals(value)) return ServoyJSONObject.NULL_FOR_JAVA;
 
 			try
 			{
@@ -177,7 +180,7 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<J
 
 		public String isCorrectObject(Object value)
 		{
-			if (value == null || (value instanceof JSONObject))
+			if (ServoyJSONObject.isJavascriptNullOrUndefined(value) || (value instanceof JSONObject))
 			{
 				return null;
 			}
@@ -190,9 +193,13 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<J
 
 		public String convertToString(Object value)
 		{
-			if (value == null)
+			if (ServoyJSONObject.isJavascriptUndefined(value))
 			{
 				return "";
+			}
+			if (ServoyJSONObject.isJavascriptNull(value))
+			{
+				return "null";
 			}
 			try
 			{
@@ -207,12 +214,12 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<J
 
 	}
 
-	protected class CustomJSONObjectPropertySource extends ComplexPropertySource<JSONObject>
+	protected class CustomJSONObjectPropertySource extends ComplexPropertySource<Object>
 	{
 
 		protected PDPropertySource underlyingPropertySource;
 
-		public CustomJSONObjectPropertySource(ComplexProperty<JSONObject> complexProperty)
+		public CustomJSONObjectPropertySource(ComplexProperty<Object> complexProperty)
 		{
 			super(complexProperty);
 		}
@@ -220,28 +227,41 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<J
 		protected PDPropertySource getUnderlyingPropertySource()
 		{
 			IPersist persist = persistContext.getPersist(); // parent persist holding property with propertyDescription
-			if (persist instanceof IBasicWebObject)
+			PersistContext pContext = persistContext;
+
+			String pdName = propertyDescription.getName();
+			if (persist != null && !WebComponentSpecification.ARRAY_ELEMENT_PD_NAME.equals(pdName))
 			{
-				persist = (IPersist)((IBasicWebObject)persist).getProperty(propertyDescription.getName());
-				if (persist != null)
+				persist = (IPersist)((IBasicWebObject)persist).getProperty(pdName);
+				// property of a custom object or property of a web component; persistContext points to parent in this case
+				pContext = PersistContext.create(persist, persistContext.getContext());
+			} // else persistContext already has correct persist (array element persist)
+
+
+			if (underlyingPropertySource == null || ((persist instanceof IBasicWebObject) && (((IBasicWebObject)persist).getJson() == null))) // so if we have no propertySource or if we have one but we shouldn't (json became null meanwhile)
+			{
+				if (persist instanceof IBasicWebObject)
 				{
-					if (underlyingPropertySource == null || persist != underlyingPropertySource.getPersist())
+					if (((IBasicWebObject)persist).getJson() != null)
 					{
-						underlyingPropertySource = new PDPropertySource(PersistContext.create(persist, persistContext.getContext()), readOnly,
-							propertyDescription);
+						underlyingPropertySource = new PDPropertySource(pContext, readOnly, propertyDescription);
+					}
+					else
+					{
+						underlyingPropertySource = null;
 					}
 				}
-				else
+				else if (persist == null)
 				{
 					// value of this property is null probably - so we don't show nested contents
 					underlyingPropertySource = null;
 				}
-			}
-			else
-			{
-				underlyingPropertySource = null;
-				ServoyLog.logError("Unexpected. Persist of custom json object handler is null or not instance of IWebObject: (" + propertyDescription + ", " +
-					persistContext + ")", new RuntimeException());
+				else
+				{
+					underlyingPropertySource = null;
+					ServoyLog.logError("Unexpected. Persist of custom json object handler is not instance of IBasicWebObject: (" + propertyDescription + ", " +
+						persistContext + ")", new RuntimeException());
+				}
 			}
 			return underlyingPropertySource;
 		}
@@ -257,39 +277,40 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<J
 		public Object getPropertyValue(Object id)
 		{
 			PDPropertySource underlying = getUnderlyingPropertySource();
-			return underlying != null ? underlying.getPropertyValue(id) : null;
+			return underlying != null ? ServoyJSONObject.adjustJavascriptNULLForJava(underlying.getPropertyValue(id)) : null;
 		}
 
 		@Override
-		public JSONObject setComplexPropertyValue(Object id, Object v)
+		public Object setComplexPropertyValue(Object id, Object v)
 		{
+			Object val = ServoyJSONObject.adjustJavascriptNULLForOrgJSON(v);
 			PDPropertySource underlying = getUnderlyingPropertySource();
-			if (underlying != null) underlying.setPropertyValue(id, v);
+			if (underlying != null) underlying.setPropertyValue(id, val);
 			return getEditableValue();
 		}
 
 	}
 
 	@Override
-	public void setProperty(PersistPropertySource propertySource, JSONObject value)
+	public void setProperty(ISetterAwarePropertySource propertySource, Object value)
 	{
-		propertySource.setPersistPropertyValue(getId(), value);
+		propertySource.defaultSetProperty(getId(), value);
 	}
 
 	@Override
-	public JSONObject getProperty(PersistPropertySource propertySource)
+	public Object getProperty(ISetterAwarePropertySource propertySource)
 	{
-		return (JSONObject)propertySource.getPersistPropertyValue(getId());
+		return propertySource.defaultGetProperty(getId());
 	}
 
 	@Override
-	public boolean isPropertySet(PersistPropertySource propertySource)
+	public boolean isPropertySet(ISetterAwarePropertySource propertySource)
 	{
-		return propertySource.isPersistPropertySet(getId());
+		return propertySource.defaultIsPropertySet(getId());
 	}
 
 	@Override
-	public void resetPropertyValue(PersistPropertySource propertySource)
+	public void resetPropertyValue(ISetterAwarePropertySource propertySource)
 	{
 		Object defValue = propertyDescription.getDefaultValue();
 		JSONObject toSet = null;

@@ -203,11 +203,6 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage#getAdapter(java.lang.Class)
-	 */
 	@Override
 	public Object getAdapter(Class type)
 	{
@@ -355,7 +350,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 				}
 				if (persist instanceof WebCustomType)
 				{
-					parent = persist.getParent();
+					parent = ((WebCustomType)persist).getParentComponent();
 					persist = parent;
 				}
 				while (parent != null)

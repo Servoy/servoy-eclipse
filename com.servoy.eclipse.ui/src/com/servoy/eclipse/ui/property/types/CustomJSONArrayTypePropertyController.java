@@ -23,7 +23,9 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -48,6 +50,7 @@ import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 import com.servoy.eclipse.ui.property.IPropertyConverter;
 import com.servoy.eclipse.ui.property.IPropertySetter;
+import com.servoy.eclipse.ui.property.ISetterAwarePropertySource;
 import com.servoy.eclipse.ui.property.PDPropertySource;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
@@ -60,6 +63,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.ServoyJSONArray;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -67,7 +71,8 @@ import com.servoy.j2db.util.Utils;
  *
  * @author acostescu
  */
-public class CustomJSONArrayTypePropertyController extends PropertyController<JSONArray, Object> implements IPropertySetter<JSONArray, PersistPropertySource>
+// unfortunately here we can't use JSONArray in generics cause the value can also be JSONObject.NULL which would give classcastexceptions...
+public class CustomJSONArrayTypePropertyController extends PropertyController<Object, Object> implements IPropertySetter<Object, ISetterAwarePropertySource>
 {
 
 	private static IObjectTextConverter JSONARRAY_TEXT_CONVERTER = new JSONArrayTextConverter();
@@ -89,17 +94,17 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<JS
 	}
 
 	@Override
-	protected IPropertyConverter<JSONArray, Object> createConverter()
+	protected IPropertyConverter<Object, Object> createConverter()
 	{
 		return new CustomJSONArrayPropertyConverter();
 	}
 
-	class CustomJSONArrayPropertyConverter extends ComplexPropertyConverter<JSONArray>
+	class CustomJSONArrayPropertyConverter extends ComplexPropertyConverter<Object>
 	{
 		@Override
-		public Object convertProperty(Object id, JSONArray value)
+		public Object convertProperty(Object id, Object value)
 		{
-			return new ComplexProperty<JSONArray>(value)
+			return new ComplexProperty<Object>(value)
 			{
 				@Override
 				public IPropertySource getPropertySource()
@@ -120,7 +125,8 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<JS
 				@Override
 				public String getText(Object element)
 				{
-					return element != null ? (((JSONArray)element).length() == 0 ? "[]" : "[...]") : Messages.LabelNone; // to suggest to the user that he can click to edit directly
+					return element != null ? (!ServoyJSONObject.isJavascriptNull(element) ? (((JSONArray)element).length() == 0 ? "[]" : "[...]") : "null")
+						: Messages.LabelNone; // to suggest to the user that he can click to edit directly
 				}
 			};
 		}
@@ -138,7 +144,7 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<JS
 				protected void updateButtonState(Button buttonWidget, Object value)
 				{
 					buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(
-						value != null ? ISharedImages.IMG_TOOL_DELETE : ISharedImages.IMG_OBJ_ADD));
+						!ServoyJSONObject.isJavascriptNullOrUndefined(value) ? ISharedImages.IMG_TOOL_DELETE : ISharedImages.IMG_OBJ_ADD));
 					buttonWidget.setEnabled(true);
 					buttonWidget.setToolTipText(value != null ? "Clears the property value."
 						: "Creates an empty property value '[]' to be able to expand node.");
@@ -147,19 +153,38 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<JS
 				@Override
 				protected Object getValueToSetOnClick(Object oldPropertyValue)
 				{
-					return oldPropertyValue != null ? null : new ServoyJSONArray();
+					return (!ServoyJSONObject.isJavascriptNullOrUndefined(oldPropertyValue)) ? null : new ServoyJSONArray();
 				}
 
 			}, new ButtonCellEditor()
 			{
 
+				private Control buttonEditorControl; // actually this is the button control
+				private boolean visible = true;
+
 				@Override
 				protected Control createControl(Composite parentC)
 				{
 					Composite buttonVisibilityWrapper = new Composite(parentC, SWT.NONE); // cell editor activate/deactivate force control visibility; but we want to control the button visibility even if the editor is active so we add a wrapper here so that the button's visibility is not directly controlled by the cell editor
-					buttonVisibilityWrapper.setLayout(new FillLayout());
+					GridLayout gridLayout = new GridLayout();
+					gridLayout.marginHeight = 0;
+					gridLayout.marginWidth = 0;
+					gridLayout.horizontalSpacing = 0;
+					gridLayout.verticalSpacing = 0;
+					gridLayout.numColumns = 1;
+					buttonVisibilityWrapper.setLayout(gridLayout);
 
-					super.createControl(buttonVisibilityWrapper);
+					buttonEditorControl = super.createControl(buttonVisibilityWrapper);
+
+					GridData gd = new GridData();
+					gd.horizontalAlignment = SWT.FILL;
+					gd.grabExcessHorizontalSpace = true;
+					gd.grabExcessVerticalSpace = true;
+					gd.verticalAlignment = SWT.FILL;
+					buttonEditorControl.setLayoutData(gd);
+
+					updateButtonVisibility();
+
 					return buttonVisibilityWrapper;
 				}
 
@@ -167,37 +192,43 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<JS
 				protected void updateButtonState(Button buttonWidget, Object value)
 				{
 					buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ADD));
+					buttonWidget.setToolTipText("Adds a new array item below.");
 					buttonWidget.setEnabled(true);
-					if (buttonWidget.isVisible() != (value != null))
+
+					if (visible != (value != null))
 					{
-						buttonWidget.setVisible(value != null);
+						visible = (value != null); // visibility is not enough - we don't want the space ocuppied at all so we change layout data as well
+						updateButtonVisibility();
+					}
+				}
+
+				private void updateButtonVisibility()
+				{
+					if (buttonEditorControl != null && buttonEditorControl.getLayoutData() != null)
+					{
+						if (visible)
+						{
+							((GridData)buttonEditorControl.getLayoutData()).exclude = false;
+						}
+						else
+						{
+							((GridData)buttonEditorControl.getLayoutData()).exclude = true; // layout no longer changes bounds of this control
+							buttonEditorControl.setSize(new Point(0, 0));
+						}
+
 						// relayout as needed to not show blank area instead of button for no reason
-						Composite c = buttonWidget.getParent();
+						Composite c = buttonEditorControl.getParent();
 						while (c != null && !ComposedCellEditor.isRootComposedCellEditor(c))
 							c = c.getParent();
 						if (ComposedCellEditor.isRootComposedCellEditor(c)) c.layout(true);
 					}
-					buttonWidget.setToolTipText("Adds a new array item below.");
 				}
 
 				@Override
 				protected Object getValueToSetOnClick(Object oldPropertyValue)
 				{
 					// insert at position 0 an empty/null value
-					JSONArray previousValue = (JSONArray)oldPropertyValue;
-					ServoyJSONArray newValue = new ServoyJSONArray();
-					for (int i = previousValue.length(); i >= 0; i--)
-					{
-						try
-						{
-							newValue.put(i + 1, previousValue.get(i));
-						}
-						catch (JSONException e)
-						{
-							ServoyLog.logError(e);
-						}
-					}
-					return newValue;
+					return ServoyJSONArray.insertAtIndexInJSONArray((JSONArray)oldPropertyValue, 0, null);
 				}
 
 			}, false, true), false, false);
@@ -211,7 +242,7 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<JS
 
 		public String isCorrectString(String value)
 		{
-			if (value.length() > 0)
+			if (value.length() > 0 && !"null".equals(value))
 			{
 				try
 				{
@@ -219,7 +250,8 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<JS
 				}
 				catch (JSONException e)
 				{
-					return "Please use valid JSON array content (eg. '[ \"a\", \"b\" ]'). Error: " + e.getMessage().replace("{", "'{'").replace("}", "'}'"); // the replace is needed as this string will go through eclipse MessageFormatter which has special meaning for { and }
+					return "Please use valid JSON array content (eg. '[ \"a\", \"b\" ]'). Error: " +
+						e.getMessage().replace("'", "''").replace("{", "'{'").replace("}", "'}'"); // the replace is needed as this string will go through eclipse MessageFormatter which has special meaning for { and }
 				}
 			}
 			return null;
@@ -231,6 +263,7 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<JS
 			{
 				return null;
 			}
+			if ("null".equals(value)) return ServoyJSONObject.NULL_FOR_JAVA; // temporary value that shouldn't reach the real JSONObject, but it is meant to not equal null (java-wise), cause JSONObject.NULL.equals(null) is true and then properties view cannot make the distinction correctly
 
 			try
 			{
@@ -245,7 +278,7 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<JS
 
 		public String isCorrectObject(Object value)
 		{
-			if (value == null || (value instanceof JSONArray))
+			if (ServoyJSONObject.isJavascriptNullOrUndefined(value) || (value instanceof JSONArray))
 			{
 				return null;
 			}
@@ -258,9 +291,13 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<JS
 
 		public String convertToString(Object value)
 		{
-			if (value == null)
+			if (ServoyJSONObject.isJavascriptUndefined(value))
 			{
 				return "";
+			}
+			if (ServoyJSONObject.isJavascriptNull(value))
+			{
+				return "null";
 			}
 			try
 			{
@@ -275,12 +312,12 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<JS
 
 	}
 
-	protected class CustomJSONArrayPropertySource extends ComplexPropertySource<JSONArray>
+	protected class CustomJSONArrayPropertySource extends ComplexPropertySource<Object> implements ISetterAwarePropertySource
 	{
 
 		protected IPropertyDescriptor[] elementPropertyDescriptors;
 
-		public CustomJSONArrayPropertySource(ComplexProperty<JSONArray> complexProperty)
+		public CustomJSONArrayPropertySource(ComplexProperty<Object> complexProperty)
 		{
 			super(complexProperty);
 		}
@@ -290,9 +327,10 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<JS
 		{
 			if (elementPropertyDescriptors == null)
 			{
-				JSONArray arrayValue = getEditableValue();
-				if (arrayValue != null)
+				Object arrayV = getEditableValue();
+				if (!ServoyJSONObject.isJavascriptNullOrUndefined(arrayV))
 				{
+					JSONArray arrayValue = (JSONArray)arrayV;
 					FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(),
 						persistContext.getContext());
 					Form form = (Form)(Utils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext()) ? persistContext.getContext()
@@ -312,13 +350,9 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<JS
 								persistContextForElement = PersistContext.create(((WebCustomType[])arrayElementInPersist)[i], persistContext.getContext());
 							}
 							PropertyDescriptorWrapper propertyDescriptorWrapper = new PersistPropertySource.PropertyDescriptorWrapper(
-								PDPropertySource.createPropertyHandlerFromSpec(getArrayElementPD()), arrayValue.get(i));
+								PDPropertySource.createPropertyHandlerFromSpec(getArrayElementPD()), arrayValue.opt(i));
 							createdPDs.add(PersistPropertySource.createPropertyDescriptor(CustomJSONArrayPropertySource.this, String.valueOf(i),
 								persistContextForElement, readOnly, propertyDescriptorWrapper, '[' + String.valueOf(i) + ']', flattenedEditingSolution, form));
-						}
-						catch (JSONException e)
-						{
-							ServoyLog.logError(e);
 						}
 						catch (RepositoryException e)
 						{
@@ -337,9 +371,10 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<JS
 		{
 			try
 			{
-				return getEditableValue().get(Integer.valueOf((String)id));
+				final int idx = Integer.valueOf((String)id).intValue();
+				return PersistPropertySource.adjustPropertyValueToGet(id, getPropertyDescriptors()[idx], this);
 			}
-			catch (NumberFormatException | JSONException e)
+			catch (NumberFormatException e)
 			{
 				ServoyLog.logError(e);
 			}
@@ -347,44 +382,88 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<JS
 		}
 
 		@Override
-		public JSONArray setComplexPropertyValue(Object id, Object v)
+		public Object setComplexPropertyValue(final Object id, Object v)
 		{
-			JSONArray newValue = getEditableValue();
 			try
 			{
-				newValue = new ServoyJSONArray(getEditableValue().toString()); // so that when saved in persist it sees it as changed (we make a copy so that it is a reference change)
-				newValue.put(Integer.valueOf((String)id), v);
-				((IBasicWebObject)persistContext.getPersist()).setJsonSubproperty(propertyDescription.getName(), newValue);
+				final int idx = Integer.valueOf((String)id);
+				PersistPropertySource.adjustPropertyValueAndSet(id, v, getPropertyDescriptors()[idx], this);
 			}
-			catch (NumberFormatException | JSONException e)
+			catch (NumberFormatException e)
 			{
 				ServoyLog.logError(e);
 			}
-			return newValue;
+			return getEditableValue();
 		}
 
+		@Override
+		public void defaultSetProperty(Object id, Object value)
+		{
+			Object newValue = getEditableValue();
+			Object val = ServoyJSONObject.adjustJavascriptNULLForOrgJSON(value);
+			try
+			{
+				final int idx = Integer.valueOf((String)id);
+				((JSONArray)newValue).put(idx, val);
+			}
+			catch (JSONException | NumberFormatException e)
+			{
+				ServoyLog.logError(e);
+			}
+			((IBasicWebObject)persistContext.getPersist()).setJsonSubproperty(propertyDescription.getName(), newValue);
+		}
+
+		@Override
+		public Object defaultGetProperty(Object id)
+		{
+			try
+			{
+				final int idx = Integer.valueOf((String)id);
+				return ServoyJSONObject.adjustJavascriptNULLForJava(((JSONArray)getEditableValue()).opt(idx));
+			}
+			catch (NumberFormatException e)
+			{
+				ServoyLog.logError(e);
+			}
+			return null;
+		}
+
+		@Override
+		public boolean defaultIsPropertySet(Object id)
+		{
+			try
+			{
+				final int idx = Integer.valueOf((String)id);
+				return ((JSONArray)getEditableValue()).length() > idx;
+			}
+			catch (NumberFormatException e)
+			{
+				ServoyLog.logError(e);
+			}
+			return false;
+		}
 	}
 
 	@Override
-	public void setProperty(PersistPropertySource propertySource, JSONArray value)
+	public void setProperty(ISetterAwarePropertySource propertySource, Object value)
 	{
-		propertySource.setPersistPropertyValue(getId(), value);
+		propertySource.defaultSetProperty(getId(), value);
 	}
 
 	@Override
-	public JSONArray getProperty(PersistPropertySource propertySource)
+	public Object getProperty(ISetterAwarePropertySource propertySource)
 	{
-		return (JSONArray)propertySource.getPersistPropertyValue(getId());
+		return propertySource.defaultGetProperty(getId());
 	}
 
 	@Override
-	public boolean isPropertySet(PersistPropertySource propertySource)
+	public boolean isPropertySet(ISetterAwarePropertySource propertySource)
 	{
-		return propertySource.isPersistPropertySet(getId());
+		return propertySource.defaultIsPropertySet(getId());
 	}
 
 	@Override
-	public void resetPropertyValue(PersistPropertySource propertySource)
+	public void resetPropertyValue(ISetterAwarePropertySource propertySource)
 	{
 		Object defValue = propertyDescription.getDefaultValue();
 		ServoyJSONArray toSet = null;

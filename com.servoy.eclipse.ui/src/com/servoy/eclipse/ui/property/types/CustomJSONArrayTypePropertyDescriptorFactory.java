@@ -24,7 +24,7 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 
 /**
- * Provides properties view look & feel for cusom JSON array sablo/ng property types.
+ * Provides properties view look & feel for custom JSON array sablo/ng property types.
  *
  * @author acostescu
  */

@@ -15,27 +15,21 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.ui.property.types;
+package com.servoy.eclipse.ui.property;
 
-import org.eclipse.ui.views.properties.IPropertyDescriptor;
-import org.sablo.specification.PropertyDescription;
-
-import com.servoy.eclipse.ui.property.PersistContext;
-import com.servoy.j2db.FlattenedSolution;
+import org.eclipse.ui.views.properties.IPropertySource;
 
 /**
- * Provides properties view look & feel for custom JSON object sablo/ng property types.
- *
+ * Property source tha allows {@link IPropertySetter} instances to use default actions as well.
  * @author acostescu
  */
-public class CustomJSONObjectTypePropertyDescriptorFactory implements ITypePropertyDescriptorFactory
+public interface ISetterAwarePropertySource extends IPropertySource
 {
 
-	@Override
-	public IPropertyDescriptor createPropertyDescriptor(String id, String displayName, FlattenedSolution flattenedEditingSolution,
-		PersistContext persistContext, PropertyDescription propertyDescription)
-	{
-		return new CustomJSONObjectTypePropertyController(id, displayName, persistContext, propertyDescription);
-	}
+	void defaultSetProperty(Object id, Object value);
+
+	Object defaultGetProperty(Object id);
+
+	boolean defaultIsPropertySet(Object id);
 
 }

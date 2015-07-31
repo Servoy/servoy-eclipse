@@ -213,7 +213,7 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  */
 
-public class PersistPropertySource implements IPropertySource, IAdaptable, IModelSavePropertySource
+public class PersistPropertySource implements ISetterAwarePropertySource, IAdaptable, IModelSavePropertySource
 {
 	public static final Comparator<IPropertyHandler> BEANS_PROPERTY_COMPARATOR = new Comparator<IPropertyHandler>()
 	{
@@ -1702,6 +1702,14 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 
 		IPropertyDescriptor propertyDescriptor = getPropertyDescriptor(id);
+		return adjustPropertyValueToGet(id, propertyDescriptor, this);
+	}
+
+	/**
+	 * 'Adjusts' a base property value to handle IDelegate, IPropertySetter and IPropertyConverter correctly.
+	 */
+	public static Object adjustPropertyValueToGet(Object id, IPropertyDescriptor propertyDescriptor, ISetterAwarePropertySource source)
+	{
 		while (propertyDescriptor instanceof IDelegate && !(propertyDescriptor instanceof IPropertySetter))
 		{
 			Object delegate = ((IDelegate)propertyDescriptor).getDelegate();
@@ -1718,11 +1726,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		if (propertyDescriptor instanceof IPropertySetter)
 		{
 			// a combined property
-			propertyValue = ((IPropertySetter)propertyDescriptor).getProperty(this);
+			propertyValue = ((IPropertySetter)propertyDescriptor).getProperty(source);
 		}
 		else
 		{
-			propertyValue = getPersistPropertyValue(id);
+			propertyValue = source.defaultGetProperty(id);
 		}
 		return convertGetPropertyValue(id, propertyDescriptor, propertyValue);
 	}
@@ -1798,7 +1806,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 	}
 
 
-	public boolean isPropertySet(Object id)
+	public boolean isPropertySet(final Object id)
 	{
 		if (readOnly) return false;
 
@@ -1827,6 +1835,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		{
 			pd = hiddenPropertyDescriptors.get(id);
 		}
+		return adjustedIsPropertySet(id, pd, this);
+	}
+
+	public static boolean adjustedIsPropertySet(final Object id, IPropertyDescriptor pd, ISetterAwarePropertySource source)
+	{
 		while (pd instanceof IDelegate && !(pd instanceof IPropertySetter))
 		{
 			Object delegate = ((IDelegate)pd).getDelegate();
@@ -1841,11 +1854,11 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		}
 		if (pd instanceof IPropertySetter)
 		{
-			return ((IPropertySetter)pd).isPropertySet(this);
+			return ((IPropertySetter)pd).isPropertySet(source);
 		}
 		else
 		{
-			return isPersistPropertySet(id);
+			return source.defaultIsPropertySet(id);
 		}
 	}
 
@@ -2084,7 +2097,7 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		return true;
 	}
 
-	public void setPropertyValue(Object id, Object value)
+	public void setPropertyValue(final Object id, Object value)
 	{
 		if (readOnly)
 		{
@@ -2124,32 +2137,37 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 			{
 				propertyDescriptor = hiddenPropertyDescriptors.get(id);
 			}
-			while (propertyDescriptor instanceof IDelegate && !(propertyDescriptor instanceof IPropertySetter))
-			{
-				Object delegate = ((IDelegate)propertyDescriptor).getDelegate();
-				if (delegate instanceof IPropertyDescriptor)
-				{
-					propertyDescriptor = (IPropertyDescriptor)delegate;
-				}
-				else
-				{
-					break;
-				}
-			}
-			Object convertedValue = convertSetPropertyValue(id, propertyDescriptor, val);
-			if (propertyDescriptor instanceof IPropertySetter)
-			{
-				((IPropertySetter)propertyDescriptor).setProperty(this, convertedValue);
-			}
-			else
-			{
-				setPersistPropertyValue(id, convertedValue);
-			}
+			adjustPropertyValueAndSet(id, val, propertyDescriptor, this);
 		}
 		catch (Exception e)
 		{
 			ServoyLog.logError("Could not set property value for id " + id + " on object " + persistContext.getPersist(), e);
 			MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not update property", e.getMessage());
+		}
+	}
+
+	public static void adjustPropertyValueAndSet(Object id, Object val, IPropertyDescriptor propertyDescriptor, ISetterAwarePropertySource source)
+	{
+		while (propertyDescriptor instanceof IDelegate && !(propertyDescriptor instanceof IPropertySetter))
+		{
+			Object delegate = ((IDelegate)propertyDescriptor).getDelegate();
+			if (delegate instanceof IPropertyDescriptor)
+			{
+				propertyDescriptor = (IPropertyDescriptor)delegate;
+			}
+			else
+			{
+				break;
+			}
+		}
+		Object convertedValue = convertSetPropertyValue(id, propertyDescriptor, val);
+		if (propertyDescriptor instanceof IPropertySetter)
+		{
+			((IPropertySetter)propertyDescriptor).setProperty(source, convertedValue);
+		}
+		else
+		{
+			source.defaultSetProperty(id, convertedValue);
 		}
 	}
 
@@ -2960,4 +2978,21 @@ public class PersistPropertySource implements IPropertySource, IAdaptable, IMode
 		return descs;
 	}
 
+	@Override
+	public void defaultSetProperty(Object id, Object value)
+	{
+		setPersistPropertyValue(id, value);
+	}
+
+	@Override
+	public Object defaultGetProperty(Object id)
+	{
+		return getPersistPropertyValue(id);
+	}
+
+	@Override
+	public boolean defaultIsPropertySet(Object id)
+	{
+		return isPersistPropertySet(id);
+	}
 }
