@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,14 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.property.IPropertyType;
+import org.sablo.specification.property.types.TypesRegistry;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -79,6 +88,7 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.persistence.ArgumentType;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -89,12 +99,14 @@ import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.MethodTemplate;
+import com.servoy.j2db.persistence.MethodTemplatesFactory;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
@@ -113,7 +125,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 
 	/**
 	 * Creates a new "create new method" action for the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public NewMethodAction(SolutionExplorerView sev)
@@ -290,14 +302,64 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 
 				if (met != null)
 				{
-					MethodTemplate template;
+					MethodTemplate template = null;
 					if (override)
 					{
 						template = MethodTemplate.getFormMethodOverrideTemplate(met.getClass(), methodKey, superArguments, forcedReturnType);
 					}
 					else
 					{
-						template = MethodTemplate.getTemplate(met.getClass(), methodKey);
+						if (persist instanceof WebComponent)
+						{
+							WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+								((WebComponent)persist).getTypeName());
+							PropertyDescription def = spec.getHandler(methodKey);
+							if (def != null && def.getConfig() instanceof JSONObject)
+							{
+								JSONObject config = (JSONObject)def.getConfig();
+								ArgumentType returnType = null;
+								String defaultMethodCode = config.optString("code", "");
+								String returnTypeDescription = "";
+								if (config.has("returns"))
+								{
+									if (config.get("returns") instanceof JSONObject)
+									{
+										JSONObject returns = config.getJSONObject("returns");
+										returnType = ArgumentType.valueOf(returns.optString("type", ""));
+										returnTypeDescription = returns.optString("description", "");
+									}
+									else
+									{
+										returnType = ArgumentType.valueOf(config.getString("returns"));
+									}
+									IPropertyType< ? > pt = null;
+									if (!returnType.getName().equals("") && defaultMethodCode.equals("") &&
+										(pt = TypesRegistry.getType(returnType.getName())) != null)
+									{
+										Object defaultValue = pt.defaultValue(def);
+										if (defaultValue != null)
+										{
+											defaultMethodCode = "return " + defaultValue + ";";
+										}
+									}
+								}
+								List<MethodArgument> arguments = new ArrayList<MethodArgument>();
+								if (config.has("parameters") && config.get("parameters") instanceof JSONArray)
+								{
+									JSONArray parameters = config.getJSONArray("parameters");
+									for (int i = 0; i < parameters.length(); i++)
+									{
+										JSONObject parameter = parameters.getJSONObject(i);
+										arguments.add(new MethodArgument(parameter.optString("name"), ArgumentType.valueOf(parameter.optString("type")),
+											parameter.optString("description", "")));
+									}
+								}
+								template = (MethodTemplate)MethodTemplatesFactory.getInstance().createMethodTemplate(methodKey,
+									config.optString("description", ""), returnType, returnTypeDescription,
+									arguments.toArray(new MethodArgument[arguments.size()]), defaultMethodCode, true);
+							}
+						}
+						if (template == null) template = MethodTemplate.getTemplate(met.getClass(), methodKey);
 					}
 					String scriptPath = SolutionSerializer.getScriptPath(met, false);
 					IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(scriptPath));
@@ -367,9 +429,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 
 									public void run()
 									{
-										if (MessageDialog.openQuestion(
-											shell,
-											"Javascript editor not saved",
+										if (MessageDialog.openQuestion(shell, "Javascript editor not saved",
 											"The javascript editor for this form is open and dirty.\nThe new method has been appended to it, but\nyou have to save it in order to be able to select/see the new method in Solution Explorer and other places.\n\nDo you want to save the editor?"))
 										{
 											openEditor.doSave(null);
@@ -447,6 +507,11 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 			catch (IOException e)
 			{
 				MessageDialog.openWarning(shell, "Cannot modify JS file contents for new " + methodType + " method", "Reason: " + e.getMessage());
+				ServoyLog.logWarning("Cannot create method", e);
+			}
+			catch (JSONException e)
+			{
+				MessageDialog.openWarning(shell, "Cannot create the new " + methodType + " method", "Reason: " + e.getMessage());
 				ServoyLog.logWarning("Cannot create method", e);
 			}
 		}
@@ -559,8 +624,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		dialog.setBlockOnOpen(true);
 		dialog.open();
 
-		return (dialog.getReturnCode() == Window.CANCEL) ? null : new Pair<Pair<String, String>, Integer>(new Pair<String, String>(dialog.getExtendedValue(),
-			dialog.getValue()), Integer.valueOf(dialog.tagToOutput));
+		return (dialog.getReturnCode() == Window.CANCEL) ? null : new Pair<Pair<String, String>, Integer>(
+			new Pair<String, String>(dialog.getExtendedValue(), dialog.getValue()), Integer.valueOf(dialog.tagToOutput));
 	}
 
 	private static String makePrettyName(String simpleMethodName, String elementName)

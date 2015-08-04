@@ -26,7 +26,7 @@
 					"mimetype": {
 						"type": "string"
 					}
-					
+
 				},
 				"required": ["name","version","url","mimetype"],
 				"additionalProperties":false
@@ -66,90 +66,90 @@
 			"type":"object",
 			"additionalProperties": {
 				"oneOf": [
-					{
-						"type": "string"
-					},
-					{
-						"type": "object",
-						"properties": {
-							"type": {
-								"type":"string"
-							},
-							"droppable": {
-								"type":"boolean"
-							},
-							"for": {
-								"oneOf": [
-									{
-										"type": "string"
-									},
-									{
-										"type": "array"
-									},
-									{
-										"type": "object"
-									}
-								]
-							},
-							"blockingOn": {
-								"type": "boolean"
-							},
-							"pushToServer": {
-         					    "enum" : ["reject", "allow", "shallow", "deep"]
-							},
-							"tags": {
-								"type": "object"
-							},
-							"values":{
-								"type": "array"
-							},
-							"default": {
-							},
-							"ondatachange" : {
-								"description": "object that configures that this dataprovider type has ondatachange support",
-								"type": "object",
-								"properties": {
-									"onchange": {"type":"string"},
-									"callback": {"type":"string"},
-									"parsehtml": {"type":"boolean"}
-								},
-								"required": ["onchange"],
-								"additionalProperties": false
-							},
-							"forFoundset": {
-								"type":"string"
-							},
-							"displayTagsPropertyName": {
-								"type":"string"
-							},
-							"oppositeOf": {
-								"type":"string"
-							},
-							"dynamicDataproviders": {
-								"type":"boolean"
-							},
-							"stringformat": {
-								"type":"boolean"
-							},
-							"elementConfig": {
-								"type":"object",
-								"properties":{
-									"forFoundset": {
-										"type":"string"
-									}
-								}
-							},
-							"dataproviders":{
-								"type":"array",
-								"items": {
-									"type": "string"
-								}
-							}
-						},
-						"required":["type"],
-						"additionalProperties": false
-					}
-				]
+				          {
+				        	  "type": "string"
+				          },
+				          {
+				        	  "type": "object",
+				        	  "properties": {
+				        		  "type": {
+				        			  "type":"string"
+				        		  },
+				        		  "droppable": {
+				        			  "type":"boolean"
+				        		  },
+				        		  "for": {
+				        			  "oneOf": [
+				        			            {
+				        			            	"type": "string"
+				        			            },
+				        			            {
+				        			            	"type": "array"
+				        			            },
+				        			            {
+				        			            	"type": "object"
+				        			            }
+				        			            ]
+				        		  },
+				        		  "blockingOn": {
+				        			  "type": "boolean"
+				        		  },
+				        		  "pushToServer": {
+				        			  "enum" : ["reject", "allow", "shallow", "deep"]
+				        		  },
+				        		  "tags": {
+				        			  "type": "object"
+				        		  },
+				        		  "values":{
+				        			  "type": "array"
+				        		  },
+				        		  "default": {
+				        		  },
+				        		  "ondatachange" : {
+				        			  "description": "object that configures that this dataprovider type has ondatachange support",
+				        			  "type": "object",
+				        			  "properties": {
+				        				  "onchange": {"type":"string"},
+				        				  "callback": {"type":"string"},
+				        				  "parsehtml": {"type":"boolean"}
+				        			  },
+				        			  "required": ["onchange"],
+				        			  "additionalProperties": false
+				        		  },
+				        		  "forFoundset": {
+				        			  "type":"string"
+				        		  },
+				        		  "displayTagsPropertyName": {
+				        			  "type":"string"
+				        		  },
+				        		  "oppositeOf": {
+				        			  "type":"string"
+				        		  },
+				        		  "dynamicDataproviders": {
+				        			  "type":"boolean"
+				        		  },
+				        		  "stringformat": {
+				        			  "type":"boolean"
+				        		  },
+				        		  "elementConfig": {
+				        			  "type":"object",
+				        			  "properties":{
+				        				  "forFoundset": {
+				        					  "type":"string"
+				        				  }
+				        			  }
+				        		  },
+				        		  "dataproviders":{
+				        			  "type":"array",
+				        			  "items": {
+				        				  "type": "string"
+				        			  }
+				        		  }
+				        	  },
+				        	  "required":["type"],
+				        	  "additionalProperties": false
+				          }
+				          ]
 			}
 		},
 		"handlers":
@@ -157,8 +157,84 @@
 			"description": "The event handlers this component has",
 			"type":"object",
 			"additionalProperties": {
-				"type": "string",
-				"enum": ["function"]
+				"oneOf": [
+				          { 
+				        	  "type": "string" ,
+				        	  "enum" : ["function"]
+				          },
+				          {
+				        	  "type": "object",
+				        	  "description": "The description of this component handler", 
+				        	  "properties": {
+				        		  "returns":{ 
+				        			  "description":"the datatype this handler call returns",
+				        			  "oneOf": [
+				        			            {
+
+				        			            	"type":"string"
+				        			            },
+				        			            {
+				        			            	"type":"object",
+				        			            	"properties": {
+				        			            		"description": {
+				        			            			"description":"the description of the result",
+				        			            			"type":"string"
+				        			            		},
+				        			            		"type":{  
+				        			            			"type":"string"
+				        			            		}
+				        			            	}
+				        			            }
+				        			            ]
+				        		  },
+				        		  "parameters":{  
+				        			  "description":"the parameter types this handler call accepts",
+				        			  "type":"array",
+				        			  "items":{  
+				        				  "type":"object",
+				        				  "properties":{  
+				        					  "name":{  
+				        						  "description":"the name of the parameter",
+				        						  "type":"string"
+				        					  },
+				        					  "description": {
+				        						  "description":"the description of the parameter",
+				        						  "type":"string"
+				        					  },
+				        					  "type":{  
+				        						  "description":"the type of the parameter",
+				        						  "oneOf":[  
+				        						           {  
+				        						        	   "type":"string"
+				        						           },
+				        						           {  
+				        						        	   "type":"object",
+				        						        	   "properties":{  
+				        						        		   "type":{  
+				        						        			   "type":"string"
+				        						        		   }
+				        						        	   },
+				        						        	   "required":[  
+				        						        	               "type"
+				        						        	               ],
+				        						        	               "additionalProperties":true
+				        						           }
+				        						           ]
+				        					  },
+				        					  "optional":{  
+				        						  "type":"boolean"
+				        					  }
+				        				  },
+				        				  "required":[  
+				        				              "name",
+				        				              "type"
+				        				              ],
+				        				              "additionalProperties":false
+				        			  }
+				        		  }
+				        	  }
+				          }
+				          ]
 			}
 		},
 		"api":
@@ -185,20 +261,20 @@
 								"type": {
 									"description": "the type of the parameter",
 									"oneOf": [
-										{
-											"type": "string"
-										},
-										{
-											"type": "object",
-											"properties": {
-											 	"type": {
-											 		"type": "string"
-											 	}
-											},
-											"required": ["type"],
-											"additionalProperties":true
-										}
-									]
+									          {
+									        	  "type": "string"
+									          },
+									          {
+									        	  "type": "object",
+									        	  "properties": {
+									        		  "type": {
+									        			  "type": "string"
+									        		  }
+									        	  },
+									        	  "required": ["type"],
+									        	  "additionalProperties":true
+									          }
+									          ]
 								},
 								"optional": {
 									"type":"boolean"
@@ -223,39 +299,39 @@
 				"type":"object",
 				"additionalProperties": {
 					"oneOf": [
-						{
-							"type": "string"
-						},
-						{
-							"type": "object",
-							"properties": {
-								"type": {
-									"type":"string"
-								},
-								"values":{
-									"type": "array"
-								},
-								"default": {
-								},
-								"forFoundset":{
-									"type":"string"
-								}
-							},
-							"required":["type"],
-							"additionalProperties": false
-						}
-					]
+					          {
+					        	  "type": "string"
+					          },
+					          {
+					        	  "type": "object",
+					        	  "properties": {
+					        		  "type": {
+					        			  "type":"string"
+					        		  },
+					        		  "values":{
+					        			  "type": "array"
+					        		  },
+					        		  "default": {
+					        		  },
+					        		  "forFoundset":{
+					        			  "type":"string"
+					        		  }
+					        	  },
+					        	  "required":["type"],
+					        	  "additionalProperties": false
+					          }
+					          ]
 				}
 			}
 		}
 	},
 
 	"required": 
-	[
-		"name",
-		"displayName",
-		"definition",
-		"version"
-	],
-	"additionalProperties":false
+		[
+		 "name",
+		 "displayName",
+		 "definition",
+		 "version"
+		 ],
+		 "additionalProperties":false
 }
