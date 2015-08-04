@@ -140,8 +140,7 @@ public class GhostHandler implements IServerService
 									if (p.getIndex() >= 0) configObject = ((WebComponent)bean).getPropertyDescription().getProperty(p.getJsonKey()).getConfig();
 									else configObject = p.getPropertyDescription().getConfig();
 
-									if (p.getPropertyDescription().getType() instanceof ComponentPropertyType ||
-										(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
+									if (isDroppable(p.getPropertyDescription(), configObject))
 									{
 										writeGhostToJSON(writer, text, p.getUUID().toString(), p.getIndex());
 									}
@@ -199,6 +198,7 @@ public class GhostHandler implements IServerService
 					}
 				}
 			}
+
 
 			private void writeGhostToJSON(JSONWriter jsonWriter, Bean bean, PropertyDescription pd, String simpleTypeName, int indexForPositioning)
 				throws JSONException
@@ -609,4 +609,11 @@ public class GhostHandler implements IServerService
 		}
 		return "";
 	}
+
+	public static boolean isDroppable(PropertyDescription propertyDescription, Object configObject)
+	{
+		return propertyDescription.getType() instanceof ComponentPropertyType ||
+			(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE)));
+	}
+
 }

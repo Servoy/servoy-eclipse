@@ -185,11 +185,6 @@ public class EditorServiceHandler implements IServerService
 		});
 	}
 
-	/**
-	 * @param uuid
-	 * @return
-	 */
-
 	@Override
 	public Object executeMethod(final String methodName, final JSONObject args)
 	{

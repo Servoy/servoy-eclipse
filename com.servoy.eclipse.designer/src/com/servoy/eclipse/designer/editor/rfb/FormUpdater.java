@@ -29,9 +29,9 @@ import org.sablo.Container;
 import org.sablo.WebComponent;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecification;
-import org.sablo.specification.property.CustomJSONObjectType;
 
 import com.servoy.base.persistence.constants.IFormConstants;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.GhostHandler;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.IFormController;
 import com.servoy.j2db.persistence.Field;
@@ -179,16 +179,14 @@ public class FormUpdater implements Runnable
 										bigChange = true;
 										break outer;
 									}
-									if (property.equals("tabs"))
+									if (GhostHandler.isDroppable(prop, prop.getConfig()))
 									{
-										bigChange = true;
+										bigChange = true; // TODO we should really let component spec tell us what changes need a full refresh or not - instead of trying to guess which is not really possible (some simple property that is not watched for changes on client might need full refresh while
+										// a very complex property might be fully watched and might have no need for a full recreate of the form); for example if the component doesn't need full recreation
+										// when ghosts change, we could simply refresh ghosts only!
 										break outer;
 									}
-									else if (prop.getType() instanceof CustomJSONObjectType)
-									{
-										bigChange = true;
-										break outer;
-									}
+
 									webComponent.setFormElement(newFe);
 									webComponent.setProperty(property, newFe.getPropertyValueConvertedForWebComponent(property, webComponent,
 										formUI.getDataAdapterList() instanceof DataAdapterList ? (DataAdapterList)formUI.getDataAdapterList() : null));
