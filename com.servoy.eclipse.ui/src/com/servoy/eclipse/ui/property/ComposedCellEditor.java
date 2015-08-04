@@ -31,6 +31,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 
+import com.servoy.eclipse.core.util.ReturnValueSnippet;
+
 /**
  * Cell editor useful for visually aggregating horizontally 2 cell editors.
  * Depending on the value of {@link #cellEditor1IsMain} one or the other cell editor has priority when setting values, getting focus, ...
@@ -49,51 +51,92 @@ public class ComposedCellEditor extends CellEditor
 	private ICellEditorListener cellEditorListener;
 	private Listener hideL1sT3n3r;
 	private IPropertyChangeListener enablementListener;
+	private int freeSpaceInPixels;
+	private ReturnValueSnippet<CellEditor, Composite> cellEditorCreator1;
+	private ReturnValueSnippet<CellEditor, Composite> cellEditorCreator2;
 
-	// constructors the same as super follow - but with what we need here as well as args
 	/**
+	 * When using this constructor please make sure to call either ({@link #setCellEditor1(CellEditor)} or {@link #setCellEditorCreator1(ReturnValueSnippet)})
+	 * and ({@link #setCellEditor2(CellEditor)} or {@link #setCellEditorCreator2(ReturnValueSnippet)}) before {@link #create(Composite)} or {@link #createControl(Composite)} are called.
+	 *
 	 * @param childNestedCellEditor this is a workaround for a bug in GridLayout (minimumWidth of GridData is ignored, and we rely
 	 * on widthHint to change minimumWidth); set this to false if ComposedCellEditor is the main cell editor that is shown in properties view and
 	 * set it to true if you have nested ComposedCellEditors for the child composed cell editors.
+	 * @param freeSpaceInPixels empty space between the two sub-cell-editors; usually 0 would be fine.
 	 */
-	public ComposedCellEditor(CellEditor cellEditor1, CellEditor cellEditor2, boolean cellEditor1IsMain, boolean childNestedCellEditor)
+	public ComposedCellEditor(boolean cellEditor1IsMain, boolean childNestedCellEditor, int freeSpaceInPixels)
 	{
-		init(cellEditor1, cellEditor2, cellEditor1IsMain, childNestedCellEditor);
+		init(cellEditor1IsMain, childNestedCellEditor, freeSpaceInPixels);
 	}
 
 	/**
 	 * @param childNestedCellEditor this is a workaround for a bug in GridLayout (minimumWidth of GridData is ignored, and we rely
 	 * on widthHint to change minimumWidth); set this to false if ComposedCellEditor is the main cell editor that is shown in properties view and
 	 * set it to true if you have nested ComposedCellEditors for the child composed cell editors.
+	 * @param freeSpaceInPixels empty space between the two sub-cell-editors; usually 0 would be fine.
 	 */
-	protected ComposedCellEditor(CellEditor cellEditor1, CellEditor cellEditor2, boolean cellEditor1IsMain, Composite parent, boolean childNestedCellEditor)
-	{
-		super();
-		init(cellEditor1, cellEditor2, cellEditor1IsMain, childNestedCellEditor);
-		setStyle(SWT.NONE);
-		create(parent);
-	}
-
-	/**
-	 * @param childNestedCellEditor this is a workaround for a bug in GridLayout (minimumWidth of GridData is ignored, and we rely
-	 * on widthHint to change minimumWidth); set this to false if ComposedCellEditor is the main cell editor that is shown in properties view and
-	 * set it to true if you have nested ComposedCellEditors for the child composed cell editors.
-	 */
-	protected ComposedCellEditor(CellEditor cellEditor1, CellEditor cellEditor2, boolean cellEditor1IsMain, Composite parent, int style,
-		boolean childNestedCellEditor)
-	{
-		super();
-		init(cellEditor1, cellEditor2, cellEditor1IsMain, childNestedCellEditor);
-		setStyle(style);
-		create(parent);
-	}
-
-	protected void init(CellEditor cellEditor1, CellEditor cellEditor2, boolean cellEditor1IsMain, boolean childNestedCellEditor)
+	public ComposedCellEditor(CellEditor cellEditor1, CellEditor cellEditor2, boolean cellEditor1IsMain, boolean childNestedCellEditor, int freeSpaceInPixels)
 	{
 		this.cellEditor1 = cellEditor1;
 		this.cellEditor2 = cellEditor2;
+
+		init(cellEditor1IsMain, childNestedCellEditor, freeSpaceInPixels);
+	}
+
+	/**
+	 * In case you must use a cell editor that gets it's parent and calls create in it's own constructor, then we need getters for the editors instead of direct references.
+	 * This way the editors are created only when {@link #createControl(Composite)} is called on this instance.
+	 *
+	 * @param childNestedCellEditor this is a workaround for a bug in GridLayout (minimumWidth of GridData is ignored, and we rely
+	 * on widthHint to change minimumWidth); set this to false if ComposedCellEditor is the main cell editor that is shown in properties view and
+	 * set it to true if you have nested ComposedCellEditors for the child composed cell editors.
+	 * @param freeSpaceInPixels empty space between the two sub-cell-editors; usually 0 would be fine.
+	 */
+	public ComposedCellEditor(ReturnValueSnippet<CellEditor, Composite> cellEditorCreator1, ReturnValueSnippet<CellEditor, Composite> cellEditorCreator2,
+		boolean cellEditor1IsMain, boolean childNestedCellEditor, int freeSpaceInPixels)
+	{
+		this.cellEditorCreator1 = cellEditorCreator1;
+		this.cellEditorCreator2 = cellEditorCreator2;
+		init(cellEditor1IsMain, childNestedCellEditor, freeSpaceInPixels);
+	}
+
+	/**
+	 * @param cellEditor1 the cellEditor1 to set
+	 */
+	public void setCellEditor1(CellEditor cellEditor1)
+	{
+		this.cellEditor1 = cellEditor1;
+	}
+
+	/**
+	 * @param cellEditor2 the cellEditor2 to set
+	 */
+	public void setCellEditor2(CellEditor cellEditor2)
+	{
+		this.cellEditor2 = cellEditor2;
+	}
+
+	/**
+	 * @param cellEditorCreator1 the cellEditorCreator1 to set
+	 */
+	public void setCellEditorCreator1(ReturnValueSnippet<CellEditor, Composite> cellEditorCreator1)
+	{
+		this.cellEditorCreator1 = cellEditorCreator1;
+	}
+
+	/**
+	 * @param cellEditorCreator2 the cellEditorCreator2 to set
+	 */
+	public void setCellEditorCreator2(ReturnValueSnippet<CellEditor, Composite> cellEditorCreator2)
+	{
+		this.cellEditorCreator2 = cellEditorCreator2;
+	}
+
+	protected void init(boolean cellEditor1IsMain, boolean childNestedCellEditor, int freeSpaceInPixels)
+	{
 		this.cellEditor1IsMain = cellEditor1IsMain;
 		this.childNestedCellEditor = childNestedCellEditor;
+		this.freeSpaceInPixels = freeSpaceInPixels;
 
 		// TODO this listener might need to be a bit smarter
 		cellEditorListener = new ICellEditorListener()
@@ -119,8 +162,6 @@ public class ComposedCellEditor extends CellEditor
 
 		};
 
-		cellEditor1.addListener(cellEditorListener);
-		cellEditor2.addListener(cellEditorListener);
 
 		// TODO this listener might need to be a bit smarter
 		enablementListener = new IPropertyChangeListener()
@@ -131,7 +172,12 @@ public class ComposedCellEditor extends CellEditor
 				fireEnablementChanged(event.getProperty());
 			}
 		};
+	}
 
+	protected void addChildEditorListeners()
+	{
+		cellEditor1.addListener(cellEditorListener);
+		cellEditor2.addListener(cellEditorListener);
 		cellEditor1.addPropertyChangeListener(enablementListener);
 		cellEditor2.addPropertyChangeListener(enablementListener);
 	}
@@ -143,18 +189,22 @@ public class ComposedCellEditor extends CellEditor
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.marginHeight = 0;
 		gridLayout.marginWidth = 0;
-		gridLayout.horizontalSpacing = 0;
+		gridLayout.horizontalSpacing = freeSpaceInPixels;
 		gridLayout.verticalSpacing = 0;
 		composite.setLayout(gridLayout);
 		gridLayout.numColumns = 2;
 
 		Composite cellEditor1ControlParent = new Composite(composite, SWT.NONE);
 		cellEditor1ControlParent.setLayout(new FillLayout());
-		cellEditor1.create(cellEditor1ControlParent);
+		if (cellEditor1 != null) cellEditor1.create(cellEditor1ControlParent);
+		else cellEditor1 = cellEditorCreator1.run(cellEditor1ControlParent);
 
 		Composite cellEditor2ControlParent = new Composite(composite, SWT.NONE);
 		cellEditor2ControlParent.setLayout(new FillLayout());
-		cellEditor2.create(cellEditor2ControlParent);
+		if (cellEditor2 != null) cellEditor2.create(cellEditor2ControlParent);
+		else cellEditor2 = cellEditorCreator2.run(cellEditor2ControlParent);
+
+		addChildEditorListeners();
 
 		GridData gdCellEditor1 = new GridData();
 		gdCellEditor1.horizontalAlignment = SWT.FILL;

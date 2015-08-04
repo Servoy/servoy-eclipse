@@ -35,9 +35,11 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.ICustomType;
 
+import com.servoy.eclipse.core.util.ReturnValueSnippet;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
@@ -46,8 +48,11 @@ import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.ComplexPropertySource;
 import com.servoy.eclipse.ui.property.ComposedCellEditor;
+import com.servoy.eclipse.ui.property.ConvertingCellEditor;
+import com.servoy.eclipse.ui.property.ConvertingCellEditor.ICellEditorConverter;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
+import com.servoy.eclipse.ui.property.IPropertyController;
 import com.servoy.eclipse.ui.property.IPropertyConverter;
 import com.servoy.eclipse.ui.property.IPropertySetter;
 import com.servoy.eclipse.ui.property.ISetterAwarePropertySource;
@@ -62,6 +67,7 @@ import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.util.IDelegate;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
@@ -144,9 +150,9 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<Ob
 				protected void updateButtonState(Button buttonWidget, Object value)
 				{
 					buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(
-						!ServoyJSONObject.isJavascriptNullOrUndefined(value) ? ISharedImages.IMG_TOOL_DELETE : ISharedImages.IMG_OBJ_ADD));
+						!ServoyJSONObject.isJavascriptNullOrUndefined(value) ? ISharedImages.IMG_ETOOL_CLEAR : ISharedImages.IMG_OBJ_ADD));
 					buttonWidget.setEnabled(true);
-					buttonWidget.setToolTipText(value != null ? "Clears the property value."
+					buttonWidget.setToolTipText(!ServoyJSONObject.isJavascriptNullOrUndefined(value) ? "Clears the property value."
 						: "Creates an empty property value '[]' to be able to expand node.");
 				}
 
@@ -228,10 +234,10 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<Ob
 				protected Object getValueToSetOnClick(Object oldPropertyValue)
 				{
 					// insert at position 0 an empty/null value
-					return ServoyJSONArray.insertAtIndexInJSONArray((JSONArray)oldPropertyValue, 0, null);
+					return ServoyJSONArray.insertAtIndexInJSONArray((JSONArray)oldPropertyValue, 0, JSONObject.NULL);
 				}
 
-			}, false, true), false, false);
+			}, false, true, 0), false, false, 0);
 		cellEditor.create(parent);
 
 		return cellEditor;
@@ -351,8 +357,9 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<Ob
 							}
 							PropertyDescriptorWrapper propertyDescriptorWrapper = new PersistPropertySource.PropertyDescriptorWrapper(
 								PDPropertySource.createPropertyHandlerFromSpec(getArrayElementPD()), arrayValue.opt(i));
-							createdPDs.add(PersistPropertySource.createPropertyDescriptor(CustomJSONArrayPropertySource.this, String.valueOf(i),
-								persistContextForElement, readOnly, propertyDescriptorWrapper, '[' + String.valueOf(i) + ']', flattenedEditingSolution, form));
+							createdPDs.add(addButtonsToPD(PersistPropertySource.createPropertyDescriptor(CustomJSONArrayPropertySource.this, String.valueOf(i),
+								persistContextForElement, readOnly, propertyDescriptorWrapper, '[' + String.valueOf(i) + ']', flattenedEditingSolution, form),
+								i, this));
 						}
 						catch (RepositoryException e)
 						{
@@ -364,6 +371,19 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<Ob
 				else elementPropertyDescriptors = new IPropertyDescriptor[0];
 			}
 			return elementPropertyDescriptors;
+		}
+
+		/**
+		 * Adds the + and - buttons on the right side of the cell editor. Those buttons are needed for inserting/removing items in/from the array.
+		 * @param index the index of this child property inside the array.
+		 * @param customJSONArrayPropertySource
+		 * @param createPropertyDescriptor the real property descriptor that is able to handle the value
+		 * @return a wrapper IPropertyDescriptor that forwards everything to the given one, but it alters the cell editor as needed.
+		 */
+		protected IPropertyDescriptor addButtonsToPD(IPropertyDescriptor realPropertyDescriptor, int index,
+			CustomJSONArrayPropertySource customJSONArrayPropertySource)
+		{
+			return new ArrayItemPropertyDescriptorWrapper(realPropertyDescriptor, index, customJSONArrayPropertySource);
 		}
 
 		@Override
@@ -387,7 +407,19 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<Ob
 			try
 			{
 				final int idx = Integer.valueOf((String)id);
-				PersistPropertySource.adjustPropertyValueAndSet(id, v, getPropertyDescriptors()[idx], this);
+
+				if (v == ArrayItemPropertyDescriptorWrapper.DELETE_CURRENT_COMMAND_VALUE)
+				{
+					return ServoyJSONArray.removeIndexFromJSONArray((JSONArray)getEditableValue(), idx);
+				}
+				else if (v == ArrayItemPropertyDescriptorWrapper.INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE)
+				{
+					return ServoyJSONArray.insertAtIndexInJSONArray((JSONArray)getEditableValue(), idx + 1, JSONObject.NULL);
+				}
+				else
+				{
+					PersistPropertySource.adjustPropertyValueAndSet(id, v, getPropertyDescriptors()[idx], this);
+				}
 			}
 			catch (NumberFormatException e)
 			{
@@ -442,6 +474,256 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<Ob
 			}
 			return false;
 		}
+
+		@Override
+		public Object resetComplexPropertyValue(Object id)
+		{
+			try
+			{
+				final int idx = Integer.valueOf((String)id);
+				PersistPropertySource.adjustPropertyValueAndReset(id, getPropertyDescriptors()[idx], this);
+				return ((JSONArray)getEditableValue()).opt(idx);
+			}
+			catch (NumberFormatException e)
+			{
+				ServoyLog.logError(e);
+			}
+			return null;
+		}
+
+		@Override
+		public void defaultResetProperty(Object id)
+		{
+			defaultSetProperty(id, getArrayElementPD().getDefaultValue()); // if id would be of object or array type in which case we would need to create JSONObject or JSONArray, it shouldn't reach this code; it should be intercepted before this by the IPropertySetter method of the controller of those types; so we just use the default value here directly
+		}
+
+	}
+
+	/**
+	 * Just a proxy/wrapper class that is trying to affect only the cell editor of the given property descriptor.
+	 * It will add the insert/remove buttons required for inserting/removing into/from arrays.
+	 *
+	 * @author acostescu
+	 */
+	protected static class ArrayItemPropertyDescriptorWrapper implements IPropertyController, IPropertySetter<Object, ISetterAwarePropertySource>
+	{
+
+		protected final static Object DELETE_CURRENT_COMMAND_VALUE = new Object();
+		protected final static Object INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE = new Object();
+
+		protected final IPropertyDescriptor basePD;
+		protected final String index;
+		protected final CustomJSONArrayPropertySource customJSONArrayPropertySource;
+
+		public ArrayItemPropertyDescriptorWrapper(IPropertyDescriptor basePD, int index, CustomJSONArrayPropertySource customJSONArrayPropertySource)
+		{
+			this.basePD = basePD;
+			this.index = String.valueOf(index);
+			this.customJSONArrayPropertySource = customJSONArrayPropertySource;
+		}
+
+		protected IPropertyDescriptor getRootBasePD()
+		{
+			IPropertyDescriptor base = basePD;
+			while (base instanceof IDelegate)
+			{
+				Object delegate = ((IDelegate)base).getDelegate();
+				if (delegate instanceof IPropertyDescriptor)
+				{
+					base = (IPropertyDescriptor)delegate;
+				}
+				else
+				{
+					break;
+				}
+			}
+			return base;
+		}
+
+		@Override
+		public CellEditor createPropertyEditor(Composite parent)
+		{
+			ComposedCellEditor cellEditor = new ComposedCellEditor(false, false, 10);
+
+			// make sure our special values don't reach the real editor - as it could lead to exceptions (real editor doesn't expect such values)
+			cellEditor.setCellEditor1(new ConvertingCellEditor<Object, Object>(new ReturnValueSnippet<CellEditor, Composite>()
+			{
+				@Override
+				public CellEditor run(Composite... args)
+				{
+					return basePD.createPropertyEditor(args[0]);
+				}
+			}, new ICellEditorConverter<Object, Object>()
+			{
+
+				@Override
+				public Object convertValueToBaseEditor(Object outsideWorldValue)
+				{
+					return outsideWorldValue;
+				}
+
+				@Override
+				public Object convertValueFromBaseEditor(Object baseEditorValue)
+				{
+					return baseEditorValue;
+				}
+
+				@Override
+				public boolean allowSetToBaseEditor(Object outsideWorldValue)
+				{
+					return outsideWorldValue != DELETE_CURRENT_COMMAND_VALUE && outsideWorldValue != INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
+				}
+
+			}));
+
+			cellEditor.setCellEditor2(new ComposedCellEditor(new ButtonCellEditor()
+			{
+
+				@Override
+				protected void updateButtonState(Button buttonWidget, Object value)
+				{
+					buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ELCL_REMOVE));
+					buttonWidget.setEnabled(true);
+					buttonWidget.setToolTipText("Remove this array item.");
+				}
+
+				@Override
+				protected Object getValueToSetOnClick(Object oldPropertyValue)
+				{
+					return DELETE_CURRENT_COMMAND_VALUE;
+				}
+
+			}, new ButtonCellEditor()
+			{
+
+				@Override
+				protected void updateButtonState(Button buttonWidget, Object value)
+				{
+					buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ADD));
+					buttonWidget.setEnabled(true);
+					buttonWidget.setToolTipText("Insert a new array item below.");
+				}
+
+				@Override
+				protected Object getValueToSetOnClick(Object oldPropertyValue)
+				{
+					return INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE;
+				}
+
+			}, false, true, 0));
+
+			cellEditor.create(parent);
+
+			return cellEditor;
+		}
+
+		@Override
+		public String getCategory()
+		{
+			return getRootBasePD().getCategory();
+		}
+
+		@Override
+		public String getDescription()
+		{
+			return getRootBasePD().getDescription();
+		}
+
+		@Override
+		public String getDisplayName()
+		{
+			return getRootBasePD().getDisplayName();
+		}
+
+		@Override
+		public String[] getFilterFlags()
+		{
+			return getRootBasePD().getFilterFlags();
+		}
+
+		@Override
+		public Object getHelpContextIds()
+		{
+			return getRootBasePD().getHelpContextIds();
+		}
+
+		@Override
+		public Object getId()
+		{
+			return getRootBasePD().getId();
+		}
+
+		@Override
+		public ILabelProvider getLabelProvider()
+		{
+			return getRootBasePD().getLabelProvider();
+		}
+
+		@Override
+		public boolean isCompatibleWith(IPropertyDescriptor anotherProperty)
+		{
+			return getRootBasePD().isCompatibleWith(anotherProperty);
+		}
+
+		@Override
+		public void setProperty(ISetterAwarePropertySource propertySource, Object value)
+		{
+			IPropertyDescriptor basePD = getRootBasePD();
+			if (basePD instanceof IPropertySetter< ? , ? >) ((IPropertySetter)basePD).setProperty(propertySource, value);
+			else propertySource.defaultSetProperty(getId(), value);
+		}
+
+		@Override
+		public Object getProperty(ISetterAwarePropertySource propertySource)
+		{
+			IPropertyDescriptor basePD = getRootBasePD();
+			if (basePD instanceof IPropertySetter< ? , ? >) return ((IPropertySetter)basePD).getProperty(propertySource);
+			else return propertySource.defaultGetProperty(getId());
+		}
+
+		@Override
+		public boolean isPropertySet(ISetterAwarePropertySource propertySource)
+		{
+			IPropertyDescriptor basePD = getRootBasePD();
+			if (basePD instanceof IPropertySetter< ? , ? >) return ((IPropertySetter)basePD).isPropertySet(propertySource);
+			else return propertySource.isPropertySet(getId());
+		}
+
+		@Override
+		public void resetPropertyValue(ISetterAwarePropertySource propertySource)
+		{
+			IPropertyDescriptor basePD = getRootBasePD();
+			if (basePD instanceof IPropertySetter< ? , ? >) ((IPropertySetter)basePD).resetPropertyValue(propertySource);
+			else propertySource.defaultResetProperty(getId());
+		}
+
+		@Override
+		public IPropertyConverter getConverter()
+		{
+			return basePD instanceof IPropertyController< ? , ? > ? ((IPropertyController)basePD).getConverter() : null;
+		}
+
+		@Override
+		public boolean supportsReadonly()
+		{
+			return basePD instanceof IPropertyController< ? , ? > ? ((IPropertyController)basePD).supportsReadonly() : false;
+		}
+
+		@Override
+		public boolean isReadOnly()
+		{
+			return basePD instanceof IPropertyController< ? , ? > ? ((IPropertyController)basePD).isReadOnly() : false;
+		}
+
+		@Override
+		public void setReadonly(boolean readonly)
+		{
+			if (basePD instanceof IPropertyController< ? , ? >)
+			{
+				((IPropertyController)basePD).setReadonly(readonly);
+			}
+		}
+
 	}
 
 	@Override

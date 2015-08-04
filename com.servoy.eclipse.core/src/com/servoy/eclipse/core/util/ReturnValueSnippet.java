@@ -22,13 +22,13 @@ package com.servoy.eclipse.core.util;
  *
  * @author acostescu
  */
-public interface ReturnValueSnippet<T>
+public interface ReturnValueSnippet<T, P>
 {
 	/**
 	 * Executes whatever is needed and returns a value.
 	 *
 	 * @return the return value.
 	 */
-	public T run(Object... args);
+	public T run(@SuppressWarnings("unchecked") P... args);
 
 }

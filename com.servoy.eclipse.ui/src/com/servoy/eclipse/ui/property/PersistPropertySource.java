@@ -669,7 +669,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Object propertyValue = getPropertyValue(propId.substring(0, dot));
 				if (propertyValue instanceof IAdaptable)
 				{
-					IPropertySource propertySource = (IPropertySource)((IAdaptable)propertyValue).getAdapter(IPropertySource.class);
+					IPropertySource propertySource = ((IAdaptable)propertyValue).getAdapter(IPropertySource.class);
 					if (propertySource != null)
 					{
 						String subProp = propId.substring(dot + 1);
@@ -1692,7 +1692,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Object propertyValue = getPropertyValue(propId.substring(0, dot));
 				if (propertyValue instanceof IAdaptable)
 				{
-					IPropertySource propertySource = (IPropertySource)((IAdaptable)propertyValue).getAdapter(IPropertySource.class);
+					IPropertySource propertySource = ((IAdaptable)propertyValue).getAdapter(IPropertySource.class);
 					if (propertySource != null)
 					{
 						return propertySource.getPropertyValue(propId.substring(dot + 1));
@@ -1789,7 +1789,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				if (desc != null)
 				{
 					if (desc.getDefaultValue() != null) return desc.getDefaultValue();
-					if (desc.getType() != null) return desc.getType().defaultValue(desc);
+					if (desc.getType() != null) return desc.getType().defaultValue(desc); // TODO this might be of wrong type - it's meant as a runtime value
 				}
 			}
 			catch (RepositoryException e)
@@ -1820,7 +1820,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Object propertyValue = getPropertyValue(propId.substring(0, dot));
 				if (propertyValue instanceof IAdaptable)
 				{
-					IPropertySource propertySource = (IPropertySource)((IAdaptable)propertyValue).getAdapter(IPropertySource.class);
+					IPropertySource propertySource = ((IAdaptable)propertyValue).getAdapter(IPropertySource.class);
 					if (propertySource != null)
 					{
 						return propertySource.isPropertySet(propId.substring(dot + 1));
@@ -1899,7 +1899,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					Object propertyValue = getPropertyValue(propId.substring(0, dot));
 					if (propertyValue instanceof IAdaptable)
 					{
-						IPropertySource propertySource = (IPropertySource)((IAdaptable)propertyValue).getAdapter(IPropertySource.class);
+						IPropertySource propertySource = ((IAdaptable)propertyValue).getAdapter(IPropertySource.class);
 						if (propertySource != null)
 						{
 							propertySource.resetPropertyValue(propId.substring(dot + 1));
@@ -1914,88 +1914,109 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			{
 				pd = hiddenPropertyDescriptors.get(id);
 			}
-			while (pd instanceof IDelegate && !(pd instanceof IPropertySetter))
-			{
-				Object delegate = ((IDelegate)pd).getDelegate();
-				if (delegate instanceof IPropertyDescriptor)
-				{
-					pd = (IPropertyDescriptor)delegate;
-				}
-				else
-				{
-					break;
-				}
-			}
-			if (pd instanceof IPropertySetter)
-			{
-				((IPropertySetter)pd).resetPropertyValue(this);
-				return;
-			}
 
-			PropertyDescriptorWrapper beanPropertyDescriptor = getBeansProperties().get(id);
-			if (beanPropertyDescriptor != null)
-			{
-				createOverrideElementIfNeeded();
-
-				if (persistContext.getPersist() instanceof AbstractBase && beanPropertyDescriptor.valueObject == persistContext.getPersist() /*
-																																			 * not a bean
-																																			 * property
-																																			 */)
-				{
-					((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
-					if (persistContext.getPersist() instanceof ISupportExtendsID &&
-						PersistHelper.isOverrideElement((ISupportExtendsID)persistContext.getPersist()) &&
-						!((AbstractBase)persistContext.getPersist()).hasOverrideProperties() && !PersistHelper.hasOverrideChildren(persistContext.getPersist()))
-					{
-						// last property was reset, remove overriding persist
-						IPersist superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist());
-						try
-						{
-							((IDeveloperRepository)((AbstractBase)persistContext.getPersist()).getRootObject().getRepository()).deleteObject(persistContext.getPersist());
-							persistContext.getPersist().getParent().removeChild(persistContext.getPersist());
-							persistContext = PersistContext.create(superPersist, persistContext.getContext());
-							beansProperties = null;
-							propertyDescriptors = null;
-							hiddenPropertyDescriptors = null;
-						}
-						catch (RepositoryException e)
-						{
-							ServoyLog.logError(e);
-						}
-					}
-
-					if (persistContext.getPersist() instanceof Bean && "size".equals(id))
-					{
-						// size, location and name are set on persist, not on bean instance
-						Object beanDesignInstance = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist()).getBeanDesignInstance(
-							(Bean)persistContext.getPersist());
-						if (beanDesignInstance instanceof Component)
-						{
-							((Component)beanDesignInstance).setSize((Dimension)getPersistPropertyValue(id));
-						}
-					}
-				}
-				else
-				{
-					setPersistPropertyValue(id, getDefaultPersistValue(id));
-				}
-
-				if ("groupID".equals(id))
-				{
-					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist().getParent(), true);
-				}
-				else
-				{
-					// fire persist change recursively if the style is changed
-					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist(),
-						"styleName".equals(id) || "extendsID".equals(id));
-				}
-			}
+			adjustPropertyValueAndReset(id, pd, this);
 		}
 		catch (Exception e)
 		{
-			ServoyLog.logError("Could not rest set property value for id " + id + " on object " + persistContext.getPersist(), e);
+			ServoyLog.logError("Could not reset property value for id " + id + " on object " + persistContext.getPersist(), e);
 			MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not reset property", e.getMessage());
+		}
+	}
+
+	public void defaultResetProperty(Object id)
+	{
+		PropertyDescriptorWrapper beanPropertyDescriptor = getBeansProperties().get(id);
+		if (beanPropertyDescriptor != null)
+		{
+			try
+			{
+				createOverrideElementIfNeeded();
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError("Could not reset property value for id " + id + " on object " + persistContext.getPersist(), e);
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Could not reset property", e.getMessage());
+				return;
+			}
+
+			if (persistContext.getPersist() instanceof AbstractBase && beanPropertyDescriptor.valueObject == persistContext.getPersist() /*
+																																		 * not a bean property
+																																		 */)
+			{
+				((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
+				if (persistContext.getPersist() instanceof ISupportExtendsID &&
+					PersistHelper.isOverrideElement((ISupportExtendsID)persistContext.getPersist()) &&
+					!((AbstractBase)persistContext.getPersist()).hasOverrideProperties() && !PersistHelper.hasOverrideChildren(persistContext.getPersist()))
+				{
+					// last property was reset, remove overriding persist
+					IPersist superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist());
+					try
+					{
+						((IDeveloperRepository)((AbstractBase)persistContext.getPersist()).getRootObject().getRepository()).deleteObject(persistContext.getPersist());
+						persistContext.getPersist().getParent().removeChild(persistContext.getPersist());
+						persistContext = PersistContext.create(superPersist, persistContext.getContext());
+						beansProperties = null;
+						propertyDescriptors = null;
+						hiddenPropertyDescriptors = null;
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+
+				if (persistContext.getPersist() instanceof Bean && "size".equals(id))
+				{
+					// size, location and name are set on persist, not on bean instance
+					Object beanDesignInstance = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist()).getBeanDesignInstance(
+						(Bean)persistContext.getPersist());
+					if (beanDesignInstance instanceof Component)
+					{
+						((Component)beanDesignInstance).setSize((Dimension)getPersistPropertyValue(id));
+					}
+				}
+			}
+			else
+			{
+				setPersistPropertyValue(id, getDefaultPersistValue(id));
+			}
+
+			if ("groupID".equals(id))
+			{
+				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist().getParent(), true);
+			}
+			else
+			{
+				// fire persist change recursively if the style is changed
+				ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist(),
+					"styleName".equals(id) || "extendsID".equals(id));
+			}
+		}
+	}
+
+	public static void adjustPropertyValueAndReset(Object id, IPropertyDescriptor pd, ISetterAwarePropertySource propertySource)
+	{
+		while (pd instanceof IDelegate && !(pd instanceof IPropertySetter))
+		{
+			Object delegate = ((IDelegate)pd).getDelegate();
+			if (delegate instanceof IPropertyDescriptor)
+			{
+				pd = (IPropertyDescriptor)delegate;
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		if (pd instanceof IPropertySetter)
+		{
+			((IPropertySetter)pd).resetPropertyValue(propertySource);
+		}
+		else
+		{
+			propertySource.defaultResetProperty(id);
 		}
 	}
 
@@ -2028,7 +2049,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							{
 								if (ref.getId().equals("org.eclipse.ui.views.PropertySheet"))
 								{
-									PropertySheetPage psp = (PropertySheetPage)ref.getView(false).getAdapter(PropertySheetPage.class);
+									PropertySheetPage psp = ref.getView(false).getAdapter(PropertySheetPage.class);
 									if (psp != null) psp.refresh();
 								}
 							}
@@ -2120,7 +2141,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					Object propertyValue = getPropertyValue(subPropId);
 					if (propertyValue instanceof IAdaptable)
 					{
-						IPropertySource propertySource = (IPropertySource)((IAdaptable)propertyValue).getAdapter(IPropertySource.class);
+						IPropertySource propertySource = ((IAdaptable)propertyValue).getAdapter(IPropertySource.class);
 						if (propertySource != null)
 						{
 							propertySource.setPropertyValue(propId.substring(dot + 1), value);

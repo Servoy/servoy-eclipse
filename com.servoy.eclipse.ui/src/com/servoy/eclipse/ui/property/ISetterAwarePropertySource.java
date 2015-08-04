@@ -32,4 +32,6 @@ public interface ISetterAwarePropertySource extends IPropertySource
 
 	boolean defaultIsPropertySet(Object id);
 
+	void defaultResetProperty(Object id);
+
 }

@@ -121,9 +121,10 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<O
 			protected void updateButtonState(Button buttonWidget, Object value)
 			{
 				buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(
-					!ServoyJSONObject.isJavascriptNullOrUndefined(value) ? ISharedImages.IMG_TOOL_DELETE : ISharedImages.IMG_OBJ_ADD));
+					!ServoyJSONObject.isJavascriptNullOrUndefined(value) ? ISharedImages.IMG_ETOOL_CLEAR : ISharedImages.IMG_OBJ_ADD));
 				buttonWidget.setEnabled(true);
-				buttonWidget.setToolTipText(value != null ? "Clears the property value." : "Creates an empty property value '{}' to be able to expand node.");
+				buttonWidget.setToolTipText(!ServoyJSONObject.isJavascriptNullOrUndefined(value) ? "Clears the property value."
+					: "Creates an empty property value '{}' to be able to expand node.");
 			}
 
 			@Override
@@ -132,7 +133,7 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<O
 				return !ServoyJSONObject.isJavascriptNullOrUndefined(oldPropertyValue) ? null : new ServoyJSONObject();
 			}
 
-		}, false, false);
+		}, false, false, 0);
 		cellEditor.create(parent);
 
 		return cellEditor;
