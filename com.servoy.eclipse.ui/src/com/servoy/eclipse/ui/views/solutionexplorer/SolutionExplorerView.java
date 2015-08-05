@@ -891,7 +891,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		list.getControl().addKeyListener(refreshListener);
 		addResizeListener(parent);
 
-		IWorkbenchSiteProgressService siteService = (IWorkbenchSiteProgressService)this.getSite().getAdapter(IWorkbenchSiteProgressService.class);
+		IWorkbenchSiteProgressService siteService = this.getSite().getAdapter(IWorkbenchSiteProgressService.class);
 		Job job = new WorkbenchJob("Setting up solution explorer tree")
 		{
 			@Override
@@ -1009,7 +1009,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	public void init(IViewSite site, IMemento memento) throws PartInitException
 	{
 		super.init(site, memento);
-		IContextService contextService = (IContextService)getSite().getService(IContextService.class);
+		IContextService contextService = getSite().getService(IContextService.class);
 		contextService.activateContext(SOLUTION_EXPLORER_CONTEXT);
 
 		// workaround until https://bugs.eclipse.org/bugs/show_bug.cgi?id=119948 gets implemented
@@ -1568,7 +1568,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 									if (servoyProjectNode != null)
 									{
 										SimpleUserNode solutionNodeFromAllSolutions = cp.getSolutionFromAllSolutionsNode(servoyProjectNode.getName());
-										if (solutionNodeFromAllSolutions != null && changedUserNodeA.indexOf(solutionNodeFromAllSolutions) == -1) changedUserNodeA.add(solutionNodeFromAllSolutions);
+										if (solutionNodeFromAllSolutions != null && changedUserNodeA.indexOf(solutionNodeFromAllSolutions) == -1)
+											changedUserNodeA.add(solutionNodeFromAllSolutions);
 									}
 
 									changedUserNodeA.add(simpleUserNode);
@@ -1919,13 +1920,13 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 								try
 								{
 									ServoyModel.getWorkspace().run(new IWorkspaceRunnable() // TODO this should be done nicer by controlling the sequence resource listeners execute; maybe add a proxy resource listener mechanism to ServoyModel that is able to do that
-										{
+									{
 
-											public void run(IProgressMonitor monitor) throws CoreException
-											{
-												refreshTreeCompletely();
-											}
-										}, null);
+										public void run(IProgressMonitor monitor) throws CoreException
+										{
+											refreshTreeCompletely();
+										}
+									}, null);
 								}
 								catch (CoreException e)
 								{
@@ -2530,7 +2531,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			{
 				final Text searchFld = new Text(parent, SWT.SEARCH | SWT.ICON_CANCEL);
 				searchFld.setMessage(Messages.SolutionExplorerView_filter);
-				final FilterDelayJob filterDelayJob = new FilterDelayJob(SolutionExplorerView.this, TREE_FILTER_DELAY_TIME, "Applying Solution Explorer filter");
+				final FilterDelayJob filterDelayJob = new FilterDelayJob(SolutionExplorerView.this, TREE_FILTER_DELAY_TIME,
+					"Applying Solution Explorer filter");
 
 				Listener listener = new Listener()
 				{
@@ -2719,7 +2721,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		openSqlEditorAction = new OpenSqlEditorAction();
 
 		IAction newForm = new OpenNewFormWizardAction();
-		IAction newSolution = new OpenWizardAction(NewSolutionWizard.class, Activator.loadImageDescriptorFromBundle("solution_icon.gif"), "Create new solution");
+		IAction newSolution = new OpenWizardAction(NewSolutionWizard.class, Activator.loadImageDescriptorFromBundle("solution_icon.gif"),
+			"Create new solution");
 		IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("solution_module_m.gif"), "Create new module");
 		IAction newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.gif"), "Create new style");
 		exportActiveSolutionAction = new OpenWizardAction(ExportSolutionWizard.class, Activator.loadImageDescriptorFromOldLocations("export_wiz.gif"),
@@ -2748,8 +2751,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction importService = new ImportComponentAction(this, "service", "services");
 		IAction importComponentFolder = new ImportComponentFolderAction(this, "component", "components");
 		IAction importServicesFolder = new ImportComponentFolderAction(this, "services", "services");
-		IAction newComponentAction = new NewComponentAction(this, getSite().getShell(), "Create new component");
-		IAction newServiceAction = new NewComponentAction(this, getSite().getShell(), "Create new service");
+		IAction newComponentAction = new NewComponentAction(this, getSite().getShell(), "Component", "Create new component");
+		IAction newLayoutAction = new NewComponentAction(this, getSite().getShell(), "Layout", "Create new layout");
+		IAction newServiceAction = new NewComponentAction(this, getSite().getShell(), "Service", "Create new service");
 		IAction newComponentPackageAction = new NewComponentPackageAction(this, getSite().getShell(), "Create component package");
 		IAction newServicePackageAction = new NewComponentPackageAction(this, getSite().getShell(), "Create service package");
 
@@ -2774,12 +2778,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS, importComponent);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES, importService);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS_PACKAGE, newComponentAction);
+
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_PACKAGE, newServiceAction);
 
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA_FOLDER, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS, importComponentFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.SERVICES, importServicesFolder);
+		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS_PACKAGE, newLayoutAction);
 		createActionInTree.registerAction(UserNodeType.COMPONENTS, newComponentPackageAction);
 		createActionInTree.registerAction(UserNodeType.SERVICES, newServicePackageAction);
 		importMediaFolder = new ImportMediaFolderAction(this);
@@ -3095,11 +3101,13 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					EditorUtil.openScriptEditor((Form)doubleClickedItem.getRealObject(), null, true);
 				}
 				else if (doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE ||
-					(doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM && !expandable && (SolutionMetaData.isImportHook(((ServoyProject)doubleClickedItem.getRealObject()).getSolutionMetaData()) || ((ServoyProject)doubleClickedItem.getRealObject()).getSolutionMetaData().getSolutionType() == SolutionMetaData.MODULE)))
+					(doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM && !expandable &&
+						(SolutionMetaData.isImportHook(((ServoyProject)doubleClickedItem.getRealObject()).getSolutionMetaData()) ||
+							((ServoyProject)doubleClickedItem.getRealObject()).getSolutionMetaData().getSolutionType() == SolutionMetaData.MODULE)))
 				{
 					Object clickedRealObject = doubleClickedItem.getRealObject();
-					if (clickedRealObject instanceof ServoyProject) ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject(
-						(ServoyProject)clickedRealObject, true);
+					if (clickedRealObject instanceof ServoyProject)
+						ServoyModelManager.getServoyModelManager().getServoyModel().setActiveProject((ServoyProject)clickedRealObject, true);
 				}
 				else if ((!expandable || ctrlPressed) && openActionInTree.isEnabled())
 				{
@@ -3550,8 +3558,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						{
 							for (SimpleUserNode un : formsNode.children) // find the form
 							{
-								if (((un.getName() + SolutionSerializer.FORM_FILE_EXTENSION).equals(segments[2]) || (un.getName() + SolutionSerializer.JS_FILE_EXTENSION).equals(segments[2])) &&
-									segments.length == 3) return new SimpleUserNode[] { un };
+								if (((un.getName() + SolutionSerializer.FORM_FILE_EXTENSION).equals(segments[2]) ||
+									(un.getName() + SolutionSerializer.JS_FILE_EXTENSION).equals(segments[2])) && segments.length == 3)
+									return new SimpleUserNode[] { un };
 							}
 						}
 					}

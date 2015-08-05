@@ -43,7 +43,6 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
@@ -58,12 +57,14 @@ public class NewComponentAction extends Action
 	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 	private final Shell shell;
 	private final SolutionExplorerView viewer;
+	private final String type;
 
-	public NewComponentAction(SolutionExplorerView viewer, Shell shell, String text)
+	public NewComponentAction(SolutionExplorerView viewer, Shell shell, String type, String text)
 	{
 		super();
 		this.viewer = viewer;
 		this.shell = shell;
+		this.type = type;
 		setText(text);
 		setToolTipText(text);
 	}
@@ -77,7 +78,6 @@ public class NewComponentAction extends Action
 	public void run()
 	{
 		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
-		final String type = UserNodeType.COMPONENTS_PACKAGE == node.getType() ? "Component" : "Service";
 
 		String componentName = UIUtils.showTextFieldDialog(shell, getText(), "Please provide the " + type.toLowerCase() + " name.");
 		if (componentName == null) return;
@@ -122,11 +122,11 @@ public class NewComponentAction extends Action
 
 	/**
 	 * @param folder
-	 * @param type
+	 * @param elementType
 	 * @param componentName
 	 * @param displayName
 	 */
-	void createComponent(IResource packageRoot, final String type, final String componentName)
+	void createComponent(IResource packageRoot, final String elementType, final String componentName)
 	{
 		if (packageRoot instanceof IFolder)
 		{
@@ -141,7 +141,7 @@ public class NewComponentAction extends Action
 					{
 						public void run()
 						{
-							MessageDialog.openError(shell, getText(), type + " " + componentName + " already exists in package " + folder.getName());
+							MessageDialog.openError(shell, getText(), elementType + " " + componentName + " already exists in package " + folder.getName());
 						}
 					});
 					return;
@@ -150,30 +150,48 @@ public class NewComponentAction extends Action
 				String moduleName = pack.getName() + componentName.substring(0, 1).toUpperCase() + componentName.substring(1);
 
 				folder.create(IResource.FORCE, true, new NullProgressMonitor());
-				if (type.equals("Component"))
+				if (elementType.equals("Component"))
 				{
 					in = uiActivator.getBundle().getEntry("/component-templates/component.html").openStream();
 					createFile(componentName + ".html", folder, in);
 					in.close();
 				}
-				in = uiActivator.getBundle().getEntry("/component-templates/" + type.toLowerCase() + ".js").openStream();
-				String text = IOUtils.toString(in, "UTF-8");
-				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
-				text = text.replaceAll("\\$\\{NAME\\}", componentName);
-				text = text.replaceAll("\\$\\{PACKAGENAME\\}", pack.getName());
-				createFile(componentName + ".js", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
-				in.close();
+				if (!elementType.equals("Layout"))
+				{
+					in = uiActivator.getBundle().getEntry("/component-templates/" + elementType.toLowerCase() + ".js").openStream();
+					String text = IOUtils.toString(in, "UTF-8");
+					text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
+					text = text.replaceAll("\\$\\{NAME\\}", componentName);
+					text = text.replaceAll("\\$\\{PACKAGENAME\\}", pack.getName());
+					createFile(componentName + ".js", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
+					in.close();
+					in = uiActivator.getBundle().getEntry("/component-templates/" + elementType.toLowerCase() + ".spec").openStream();
+					text = IOUtils.toString(in, "UTF-8");
+					text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
+					text = text.replaceAll("\\$\\{NAME\\}", componentName);
+					text = text.replaceAll("\\$\\{DASHEDNAME\\}", getDashedName(componentName));
+					text = text.replaceAll("\\$\\{PACKAGENAME\\}", pack.getName());
+					createFile(componentName + ".spec", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
+					in.close();
+				}
+				else
+				{
+					in = uiActivator.getBundle().getEntry("/component-templates/" + elementType.toLowerCase() + ".json").openStream();
+					String text = IOUtils.toString(in, "UTF-8");
+					createFile(componentName + ".json", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
+					in.close();
+					in = uiActivator.getBundle().getEntry("/component-templates/" + elementType.toLowerCase() + ".spec").openStream();
+					text = IOUtils.toString(in, "UTF-8");
+					text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
+					text = text.replaceAll("\\$\\{NAME\\}", componentName);
+					text = text.replaceAll("\\$\\{DASHEDNAME\\}", getDashedName(componentName));
+					text = text.replaceAll("\\$\\{PACKAGENAME\\}", pack.getName());
+					createFile(componentName + ".spec", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
+					in.close();
+				}
 
-				in = uiActivator.getBundle().getEntry("/component-templates/" + type.toLowerCase() + ".spec").openStream();
-				text = IOUtils.toString(in, "UTF-8");
-				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
-				text = text.replaceAll("\\$\\{NAME\\}", componentName);
-				text = text.replaceAll("\\$\\{DASHEDNAME\\}", getDashedName(componentName));
-				text = text.replaceAll("\\$\\{PACKAGENAME\\}", pack.getName());
-				createFile(componentName + ".spec", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
-				in.close();
 
-				addToManifest(componentName, type, pack);
+				addToManifest(componentName, elementType, pack);
 			}
 			catch (IOException e)
 			{
@@ -238,20 +256,13 @@ public class NewComponentAction extends Action
 	 * @throws CoreException
 	 * @throws FileNotFoundException
 	 */
-	private void addToManifest(String componentName, String type, IFolder pack) throws IOException, CoreException, FileNotFoundException
+	private void addToManifest(String componentName, String elementType, IFolder pack) throws IOException, CoreException, FileNotFoundException
 	{
 		IFile m = pack.getFile("META-INF/MANIFEST.MF");
 		m.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
 		Manifest manifest = new Manifest(m.getContents());
 		Attributes attr = new Attributes();
-		if (type.equals("Component"))
-		{
-			attr.put(new Attributes.Name("Web-Component"), "True");
-		}
-		else
-		{
-			attr.put(new Attributes.Name("Web-Service"), "True");
-		}
+		attr.put(new Attributes.Name("Web-" + elementType), "True");
 		manifest.getEntries().put(componentName + "/" + componentName + ".spec", attr);
 
 		OutputStream out = null;

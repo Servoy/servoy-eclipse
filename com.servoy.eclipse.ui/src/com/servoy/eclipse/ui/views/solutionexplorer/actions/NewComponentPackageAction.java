@@ -198,7 +198,7 @@ public class NewComponentPackageAction extends Action
 					pack.create(IResource.FORCE, true, monitor);
 					createManifest(pack);
 
-					NewComponentAction newComponent = new NewComponentAction(viewer, shell, "");
+					NewComponentAction newComponent = new NewComponentAction(viewer, shell, "Component", "");
 					newComponent.createComponent(pack, type, componentName);
 				}
 				catch (Exception e)
@@ -240,8 +240,8 @@ public class NewComponentPackageAction extends Action
 			}
 			if (p.getPackageDisplayname().equals(packageDisplayName))
 			{
-				MessageDialog.openError(shell, getText(), "A " + node.getName().toLowerCase() + " package with display name " + packageDisplayName +
-					" already exists.");
+				MessageDialog.openError(shell, getText(),
+					"A " + node.getName().toLowerCase() + " package with display name " + packageDisplayName + " already exists.");
 				return false;
 			}
 		}

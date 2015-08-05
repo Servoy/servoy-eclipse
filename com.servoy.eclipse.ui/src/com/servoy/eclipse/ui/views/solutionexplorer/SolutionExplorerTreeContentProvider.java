@@ -65,6 +65,7 @@ import org.mozilla.javascript.JavaMembers;
 import org.sablo.specification.WebComponentPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.core.Activator;
@@ -766,6 +767,23 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							for (String component : components)
 							{
 								WebComponentSpecification spec = provider.getWebComponentSpecification(component);
+								Image img = loadImageFromFolder(folder, spec.getIcon());
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec,
+									img != null ? img : componentIcon);
+								node.parent = un;
+								children.add(node);
+							}
+						}
+						List<String> layouts = new ArrayList<>(provider.getLayoutsInPackage(un.getName()));
+						if (layouts.size() > 0)
+						{
+							Collections.sort(layouts);
+							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
+								SolutionSerializer.COMPONENTS_DIR_NAME);
+							Image componentIcon = uiActivator.loadImageFromBundle("bean.gif");
+							for (String layout : layouts)
+							{
+								WebLayoutSpecification spec = provider.getLayoutSpecifications().get(un.getName()).getSpecification(layout);
 								Image img = loadImageFromFolder(folder, spec.getIcon());
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec,
 									img != null ? img : componentIcon);

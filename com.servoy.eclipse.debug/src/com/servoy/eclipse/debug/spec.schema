@@ -40,6 +40,21 @@
 			"description": "The icon that is displayed in the designer",
 			"type": "string"
 		},
+		"preview": 
+		{
+			"description": "The preview gif",
+			"type": "string"
+		},
+		"contains": 
+		{
+			"description": "Array of allowed elements this layout cand contain",
+			"type": "array"
+		},
+		"topContainer": 
+		{
+			"description": "True if this layout is can be dropped directly on the form",
+			"type": "boolean"
+		},
 		"definition": 
 		{
 			"description": "The javascript definition",
