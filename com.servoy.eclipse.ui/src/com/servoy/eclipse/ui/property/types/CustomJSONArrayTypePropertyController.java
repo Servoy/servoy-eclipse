@@ -37,6 +37,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.property.CustomJSONObjectType;
 import org.sablo.specification.property.ICustomType;
 
 import com.servoy.eclipse.core.util.ReturnValueSnippet;
@@ -234,13 +235,20 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<Ob
 				protected Object getValueToSetOnClick(Object oldPropertyValue)
 				{
 					// insert at position 0 an empty/null value
-					return ServoyJSONArray.insertAtIndexInJSONArray((JSONArray)oldPropertyValue, 0, JSONObject.NULL);
+					return ServoyJSONArray.insertAtIndexInJSONArray((JSONArray)oldPropertyValue, 0, getNewElementInitialValue());
 				}
 
 			}, false, true, 0), false, false, 0);
 		cellEditor.create(parent);
 
 		return cellEditor;
+	}
+
+	protected Object getNewElementInitialValue()
+	{
+		// when user adds/inserts a new item in the array normally a null is inserted
+		// but for custom object properties most of the time the uses will want to have an object so that it can be directly expanded (without clicking one more time to make it {} from null)
+		return (getArrayElementPD().getType() instanceof CustomJSONObjectType< ? , ? >) ? new ServoyJSONObject() : JSONObject.NULL;
 	}
 
 	public static class JSONArrayTextConverter implements IObjectTextConverter
@@ -414,7 +422,7 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<Ob
 				}
 				else if (v == ArrayItemPropertyDescriptorWrapper.INSERT_NEW_AFTER_CURRENT_COMMAND_VALUE)
 				{
-					return ServoyJSONArray.insertAtIndexInJSONArray((JSONArray)getEditableValue(), idx + 1, JSONObject.NULL);
+					return ServoyJSONArray.insertAtIndexInJSONArray((JSONArray)getEditableValue(), idx + 1, getNewElementInitialValue());
 				}
 				else
 				{
