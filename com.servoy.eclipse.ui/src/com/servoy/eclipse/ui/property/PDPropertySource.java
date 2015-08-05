@@ -30,6 +30,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Sablo {@link PropertyDescription} based property source.
@@ -104,11 +105,14 @@ public class PDPropertySource extends PersistPropertySource
 				List<Object> realValues = new ArrayList<Object>();
 				for (Object jsonObject : values)
 				{
-					if (jsonObject instanceof JSONObject && ((JSONObject)jsonObject).keys().hasNext())
+					if (jsonObject instanceof JSONObject)
 					{
-						String key = (String)((JSONObject)jsonObject).keys().next();
-						displayValues.add(key);
-						realValues.add(((JSONObject)jsonObject).opt(key));
+						for (Object object : Utils.iterate(((JSONObject)jsonObject).keys()))
+						{
+							String key = (String)object;
+							displayValues.add(key);
+							realValues.add(((JSONObject)jsonObject).opt(key));
+						}
 					}
 				}
 				config.setValues(realValues.toArray(new Object[realValues.size()]), displayValues.toArray(new String[displayValues.size()]));
@@ -117,8 +121,8 @@ public class PDPropertySource extends PersistPropertySource
 			{
 				config.addDefault(desc.getDefaultValue(), null);
 			}
-			createdPropertyHandler = new WebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config,
-				desc.getDefaultValue(), null, null, null, false));
+			createdPropertyHandler = new WebComponentPropertyHandler(
+				new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config, desc.getDefaultValue(), null, null, null, false));
 		}
 		else
 		{
