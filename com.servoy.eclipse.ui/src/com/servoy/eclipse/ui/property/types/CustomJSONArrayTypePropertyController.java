@@ -160,7 +160,13 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<Ob
 				@Override
 				protected Object getValueToSetOnClick(Object oldPropertyValue)
 				{
-					return (!ServoyJSONObject.isJavascriptNullOrUndefined(oldPropertyValue)) ? null : new ServoyJSONArray();
+					if (!ServoyJSONObject.isJavascriptNullOrUndefined(oldPropertyValue)) return null;
+					else
+					{
+						ServoyJSONArray v = new ServoyJSONArray();
+						v.put(getNewElementInitialValue()); // for convenience; usually when ppl want to use an array property they also want to add elements to it... not just have an empty array
+						return v;
+					}
 				}
 
 			}, new ButtonCellEditor()
