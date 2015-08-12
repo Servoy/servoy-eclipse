@@ -1093,4 +1093,10 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 		}
 		// add more service methods here
 	}
+}).factory("loadingIndicator",function() {
+	//the loading indicator should not be shown in the editor
+	return {
+		showLoading: function() {},
+		hideLoading: function() {}
+	}
 });

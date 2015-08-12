@@ -78,4 +78,10 @@ angular.module('editorContent',['servoyApp'])
 			 updateForm({name:name, uuid:uuid, w:w, h:h});
 		 }
 	 }
- });
+ }).factory("loadingIndicator",function() {
+	//the loading indicator should not be shown in the editor
+	return {
+		showLoading: function() {},
+		hideLoading: function() {}
+	}
+});
