@@ -12169,6 +12169,21 @@ var column = table.getColumn('customerid')
 var dataProviderId = column.getDataProviderID()]]></sample>
           </samples>
         </function>
+        <function clientSupport="ng,wc,sc" name="getDefaultFormat">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String column default format.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Get the default format of the column.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Get the default format of the column.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var table = databaseManager.getTable('db:/example_data/orders')
+var column = table.getColumn('customerid')
+var format = column.getDefaultFormat()]]></sample>
+          </samples>
+        </function>
         <function clientSupport="ng,wc,sc" name="getDescription">
           <argumentsTypes/>
           <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String column description.]]></return>
@@ -12948,6 +12963,21 @@ if (server)
             <sample clientSupport="ng,wc,sc"><![CDATA[var table = databaseManager.getTable('db:/example_data/orders')
 var column = table.getColumn('customerid')
 var dataProviderId = column.getDataProviderID()]]></sample>
+          </samples>
+        </function>
+        <function clientSupport="ng,wc,sc" name="getDefaultFormat">
+          <argumentsTypes/>
+          <return type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String"><![CDATA[String column default format.]]></return>
+          <descriptions>
+            <description clientSupport="ng,wc,sc"><![CDATA[Get the default format of the column.]]></description>
+          </descriptions>
+          <summaries>
+            <summary clientSupport="ng,wc,sc"><![CDATA[Get the default format of the column.]]></summary>
+          </summaries>
+          <samples>
+            <sample clientSupport="ng,wc,sc"><![CDATA[var table = databaseManager.getTable('db:/example_data/orders')
+var column = table.getColumn('customerid')
+var format = column.getDefaultFormat()]]></sample>
           </samples>
         </function>
         <function clientSupport="ng,wc,sc" name="getDescription">
@@ -24057,7 +24087,8 @@ if (idx >= 0) // returned index is -1 in case of failure
           </samples>
           <parameters>
             <parameter name="onTop" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
-              <description><![CDATA[when true the new record is added as the topmost record.]]></description>
+              <description><![CDATA[when true the new record is added as the topmost record; when false
+the record is added to the end, if all records are loaded, otherwise it will be added to the top]]></description>
             </parameter>
             <parameter name="changeSelection" type="com.servoy.j2db.documentation.scripting.docs.Boolean" typecode="java.lang.Boolean">
               <description><![CDATA[when true the selection is changed to the new record.]]></description>

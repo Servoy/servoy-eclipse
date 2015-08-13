@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Servoy Developer" uid="servoy" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="8.0.0.3018-b3" useFeatures="true" includeLaunchers="true">
+<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="8.0.0.3019-rc1" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="icons/installer_image.png"/>
@@ -743,5 +743,12 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
       <plugin id="org.eclipse.equinox.transforms.xslt.plugin" autoStart="true" startLevel="1" />
       <plugin id="org.eclipse.update.configurator" autoStart="true" startLevel="0" />
    </configurations>
+
+   <preferencesInfo>
+      <targetfile overwrite="false"/>
+   </preferencesInfo>
+
+   <cssInfo>
+   </cssInfo>
 
 </product>
