@@ -39,7 +39,7 @@ and will be prosecuted to the maximum extent possible under law.
       </vmArgsMac>
    </launcherArgs>
 
-   <windowImages i16="icons/windowicon16.png" i32="icons/windowIcon.png" i48="icons/windowIcon48.png" i64="icons/windowIcon64.png" i128="icons/windowIcon128.png"/>
+   <windowImages i16="icons/windowicon16.png" i32="icons/windowIcon.png" i48="icons/windowIcon48.png" i64="icons/windowIcon64.png" i128="icons/windowIcon128.png" i256="icons/windowIcon256.png"/>
 
    <splash
       location="com.servoy.eclipse.core" />
