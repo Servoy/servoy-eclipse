@@ -105,24 +105,24 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 	private static final String ELEMENTS_MULTISELECT_LISTBOX_ID = "multiselect listbox";
 	private static final String ELEMENTS_SPINNER_ID = "spinner";
 	private static final String[] ELEMENTS_IDS = new String[] {
-	/* */ELEMENTS_BUTTON_ID,
-	/* */ELEMENTS_RADIOS_ID,
-	/* */ELEMENTS_CHECKS_ID,
-	/* */ELEMENTS_LABEL_ID,
-	/* */ELEMENTS_TEXT_FIELD_ID,
-	/* */ELEMENTS_TEXT_AREA_ID,
-	/* */ELEMENTS_HTML_AREA_ID,
-	/* */ELEMENTS_RTF_AREA_ID,
-	/* */ELEMENTS_PASSWORD_ID,
-	/* */ELEMENTS_CALENDAR_ID,
-	/* */ELEMENTS_IMAGE_MEDIA_ID,
-	/* */ELEMENTS_COMBOBOX_ID,
-	/* */ELEMENTS_LISTBOX_ID,
-	/* */ELEMENTS_MULTISELECT_LISTBOX_ID,
-	/* */ELEMENTS_TYPE_AHEAD_ID,
-	/* */ELEMENTS_SPINNER_ID,
-	/* */ELEMENTS_PORTAL_ID
-	/* */};
+		/* */ELEMENTS_BUTTON_ID,
+		/* */ELEMENTS_RADIOS_ID,
+		/* */ELEMENTS_CHECKS_ID,
+		/* */ELEMENTS_LABEL_ID,
+		/* */ELEMENTS_TEXT_FIELD_ID,
+		/* */ELEMENTS_TEXT_AREA_ID,
+		/* */ELEMENTS_HTML_AREA_ID,
+		/* */ELEMENTS_RTF_AREA_ID,
+		/* */ELEMENTS_PASSWORD_ID,
+		/* */ELEMENTS_CALENDAR_ID,
+		/* */ELEMENTS_IMAGE_MEDIA_ID,
+		/* */ELEMENTS_COMBOBOX_ID,
+		/* */ELEMENTS_LISTBOX_ID,
+		/* */ELEMENTS_MULTISELECT_LISTBOX_ID,
+		/* */ELEMENTS_TYPE_AHEAD_ID,
+		/* */ELEMENTS_SPINNER_ID,
+		/* */ELEMENTS_PORTAL_ID
+		/* */ };
 
 	private static final String SHAPES_ID = "shapes";
 	private static final String SHAPES_BORDER_PANEL_ID = "border panel";
@@ -132,13 +132,13 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 	private static final String SHAPES_HORIZONTAL_LINE_ID = "horizontal line";
 	private static final String SHAPES_VERTICAL_LINE_ID = "vertical line";
 	private static final String[] SHAPES_IDS = new String[] {
-	/* */SHAPES_BORDER_PANEL_ID,
-	/* */SHAPES_RECTANGLE_ID,
-	/* */SHAPES_ROUNDED_RECTANGLE_ID,
-	/* */SHAPES_OVAL_ID,
-	/* */SHAPES_HORIZONTAL_LINE_ID,
-	/* */SHAPES_VERTICAL_LINE_ID
-	/* */};
+		/* */SHAPES_BORDER_PANEL_ID,
+		/* */SHAPES_RECTANGLE_ID,
+		/* */SHAPES_ROUNDED_RECTANGLE_ID,
+		/* */SHAPES_OVAL_ID,
+		/* */SHAPES_HORIZONTAL_LINE_ID,
+		/* */SHAPES_VERTICAL_LINE_ID
+		/* */ };
 
 	private static final String BEANS_ID_PREFIX = "beans:";
 	private static final String SERVOY_BEANS_ID = BEANS_ID_PREFIX + "servoy";
@@ -156,11 +156,11 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 	private static final String CONTAINERS_SPLIT_PANE_HORIZONTAL_ID = "split pane";
 	private static final String CONTAINERS_ACCORDION_PANEL_ID = "accordion panel";
 	private static final String[] CONTAINERS_IDS = new String[] {
-	/* */CONTAINERS_DEFAULT_PANEL_ID,
-	/* */CONTAINERS_TABLESS_PANEL_ID,
-	/* */CONTAINERS_SPLIT_PANE_HORIZONTAL_ID,
-	/* */CONTAINERS_ACCORDION_PANEL_ID
-	/* */};
+		/* */CONTAINERS_DEFAULT_PANEL_ID,
+		/* */CONTAINERS_TABLESS_PANEL_ID,
+		/* */CONTAINERS_SPLIT_PANE_HORIZONTAL_ID,
+		/* */CONTAINERS_ACCORDION_PANEL_ID
+		/* */ };
 
 	@Override
 	protected PaletteCustomization getDefaultPaletteCustomization()
@@ -234,8 +234,8 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 			if (bean instanceof BeanInfo)
 			{
 				BeanDescriptor beanDescriptor = ((BeanInfo)bean).getBeanDescriptor();
-				if (beanDescriptor.getBeanClass() != null &&
-					((IServoyBeanFactory.class.isAssignableFrom(beanDescriptor.getBeanClass()) || IServoyAwareBean.class.isAssignableFrom(beanDescriptor.getBeanClass())) == servoyBeans))
+				if (beanDescriptor.getBeanClass() != null && ((IServoyBeanFactory.class.isAssignableFrom(beanDescriptor.getBeanClass()) ||
+					IServoyAwareBean.class.isAssignableFrom(beanDescriptor.getBeanClass())) == servoyBeans))
 				{
 					String beanId = beanDescriptor.getBeanClass().getName();
 					beanIds.add(beanId);
@@ -260,7 +260,8 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		if (beanIds.size() > 0)
 		{
 			drawers.add(id);
-			entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL, servoyBeans ? Messages.LabelServoyBeansPalette : Messages.LabelJavaBeansPalette);
+			entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_LABEL,
+				servoyBeans ? Messages.LabelServoyBeansPalette : Messages.LabelJavaBeansPalette);
 			// by default hide java beans
 			entryProperties.put(id + '.' + PaletteCustomization.PROPERTY_HIDDEN, Boolean.valueOf(!servoyBeans));
 			drawerEntries.put(id, beanIds);
@@ -513,8 +514,8 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		{
 			icon = Activator.loadImageDescriptorFromBundle("titledBorder.gif");
 			shapeType = RectShape.BORDER_PANEL;
-			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE, new ComplexProperty<Border>(
-				BorderPropertyController.getDefaultBorderValuesMap().get(BorderType.Title)));
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE,
+				new ComplexProperty<Border>(BorderPropertyController.getDefaultBorderValuesMap().get(BorderType.Title)));
 		}
 
 		else if (SHAPES_RECTANGLE_ID.equals(id))
@@ -557,14 +558,12 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 			requestType = VisualFormEditor.REQ_PLACE_LABEL;
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TEXT, "");
-			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE, new ComplexProperty<Border>(
-				BorderPropertyController.getDefaultBorderValuesMap().get(BorderType.SpecialMatte)));
-			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE.getPropertyName() + '.' + "width", new ComplexProperty<Insets>(new Insets(
-				(int)top, (int)left, 0, 0)));
-			setProperty(
-				extendedData,
-				StaticContentSpecLoader.PROPERTY_HORIZONTALALIGNMENT,
-				Integer.valueOf(((ValuesConfig)PersistPropertyHandler.HORIZONTAL_ALIGNMENT_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(SwingConstants.RIGHT))));
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE,
+				new ComplexProperty<Border>(BorderPropertyController.getDefaultBorderValuesMap().get(BorderType.SpecialMatte)));
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE.getPropertyName() + '.' + "width",
+				new ComplexProperty<Insets>(new Insets((int)top, (int)left, 0, 0)));
+			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_HORIZONTALALIGNMENT, Integer.valueOf(
+				((ValuesConfig)PersistPropertyHandler.HORIZONTAL_ALIGNMENT_VALUES.getConfig()).getRealIndexOf(Integer.valueOf(SwingConstants.RIGHT))));
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TRANSPARENT, Boolean.TRUE);
 		}
 
@@ -645,8 +644,8 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 			{
 				try
 				{
-					java.awt.Dimension prefferredSize = ElementFactory.getBeanPrefferredSize(ComponentFactory.getBeanInstanceFromXML(
-						com.servoy.eclipse.core.Activator.getDefault().getDesignClient(), beanClassName, null));
+					java.awt.Dimension prefferredSize = ElementFactory.getBeanPrefferredSize(
+						ComponentFactory.getBeanInstanceFromXML(com.servoy.eclipse.core.Activator.getDefault().getDesignClient(), beanClassName, null));
 					if (prefferredSize != null)
 					{
 						return new Dimension(prefferredSize.width, prefferredSize.height);
@@ -723,7 +722,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		WebComponentSpecification webComponentDescription = WebComponentSpecProvider.getInstance().getWebComponentSpecification(webComponentClassName);
 		Dimension dimension = getDimensionFromSpec(webComponentDescription);
 		ImageDescriptor beanIcon = Activator.loadImageDescriptorFromBundle("bean.gif");
-		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_BEAN, dimension);
+		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_COMPONENT, dimension);
 		factory.setData(beanClassName);
 
 		return new ElementCreationToolEntry("", "", factory, beanIcon, beanIcon);
@@ -921,8 +920,8 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 					if (entry != null)
 					{
 						entry.setId(itemId);
-						entry.setUserModificationPermission(drawerId.startsWith(TEMPLATE_ID_PREFIX) ? PaletteEntry.PERMISSION_FULL_MODIFICATION
-							: PaletteEntry.PERMISSION_LIMITED_MODIFICATION);
+						entry.setUserModificationPermission(
+							drawerId.startsWith(TEMPLATE_ID_PREFIX) ? PaletteEntry.PERMISSION_FULL_MODIFICATION : PaletteEntry.PERMISSION_LIMITED_MODIFICATION);
 						applyPaletteCustomization(paletteCustomization.entryProperties, drawerId + '.' + itemId, entry,
 							defaultPaletteCustomization.entryProperties);
 

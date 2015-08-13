@@ -38,7 +38,7 @@ import com.servoy.j2db.persistence.TabPanel;
 
 /**
  * Command to place an element in the form designer.
- * 
+ *
  * @author rgansevles
  */
 
@@ -46,11 +46,11 @@ public class FormPlaceElementCommand extends BaseFormPlaceElementCommand
 {
 	/**
 	 * Command to add a field.
-	 * 
+	 *
 	 * @param parent
 	 * @param location
 	 * @param object
-	 * @param size 
+	 * @param size
 	 * @param
 	 */
 	public FormPlaceElementCommand(IApplication application, ISupportChilds parent, Object object, Object requestType, Map<Object, Object> objectProperties,
@@ -73,8 +73,8 @@ public class FormPlaceElementCommand extends BaseFormPlaceElementCommand
 			if (((RequestType)requestType).type == RequestType.TYPE_TAB)
 			{
 				command.setLabel("place tabpanel");
-				return ElementFactory.createTabs(application, parent, (Object[])object, location, TabPanel.DEFAULT_ORIENTATION, objectProperties == null ? null
-					: (String)objectProperties.get(ElementFactory.NAME_HINT_PROPERTY));
+				return ElementFactory.createTabs(application, parent, (Object[])object, location, TabPanel.DEFAULT_ORIENTATION,
+					objectProperties == null ? null : (String)objectProperties.get(ElementFactory.NAME_HINT_PROPERTY));
 			}
 
 			if (parent instanceof ISupportFormElements)
@@ -82,8 +82,8 @@ public class FormPlaceElementCommand extends BaseFormPlaceElementCommand
 				if (((RequestType)requestType).type == RequestType.TYPE_BUTTON)
 				{
 					command.setLabel("place button");
-					return toArrAy(ElementFactory.createButton((ISupportFormElements)parent, null, (object instanceof String) ? (String)object : "button",
-						location));
+					return toArrAy(
+						ElementFactory.createButton((ISupportFormElements)parent, null, (object instanceof String) ? (String)object : "button", location));
 				}
 			}
 		}
@@ -103,7 +103,11 @@ public class FormPlaceElementCommand extends BaseFormPlaceElementCommand
 
 			return toArrAy(ElementFactory.createBean((Form)parent, beanClassname, location));
 		}
-
+		if (parent instanceof Form && VisualFormEditor.REQ_PLACE_COMPONENT.equals(requestType))
+		{
+			command.setLabel("place component");
+			return toArrAy(ElementFactory.createWebComponent((Form)parent, (String)object, location));
+		}
 		if (parent instanceof ISupportFormElements)
 		{
 			if (VisualFormEditor.REQ_PLACE_MEDIA.equals(requestType))

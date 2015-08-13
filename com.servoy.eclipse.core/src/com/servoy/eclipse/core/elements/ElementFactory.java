@@ -38,6 +38,9 @@ import org.eclipse.swt.graphics.Point;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebComponentSpecification;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.Activator;
@@ -98,6 +101,7 @@ import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.headlessclient.dataui.WebDefaultRecordNavigator;
 import com.servoy.j2db.util.ComponentFactoryHelper;
 import com.servoy.j2db.util.Debug;
@@ -114,7 +118,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Class with static methods for creating elements in Servoy Developer.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -135,7 +139,8 @@ public class ElementFactory
 
 	public static GraphicalComponent createButton(ISupportFormElements parent, ScriptMethod method, String text, Point location) throws RepositoryException
 	{
-		GraphicalComponent button = parent.createNewGraphicalComponent(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
+		GraphicalComponent button = parent.createNewGraphicalComponent(
+			new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
 		button.setOnActionMethodID(method == null ? -1 : method.getID());
 		button.setOnDoubleClickMethodID(-1);
 		button.setOnRightClickMethodID(-1);
@@ -253,8 +258,8 @@ public class ElementFactory
 	public static IPersist copyComponent(ISupportChilds parent, AbstractBase component, int x, int y, int type, Map<String, String> groupMap)
 		throws RepositoryException
 	{
-		String name = (component instanceof ISupportUpdateableName) ? createUniqueName(parent, type, ((ISupportUpdateableName)component).getName(),
-			INameGenerate.GENERATE_NAME_PREPEND_CHAR) : null;
+		String name = (component instanceof ISupportUpdateableName)
+			? createUniqueName(parent, type, ((ISupportUpdateableName)component).getName(), INameGenerate.GENERATE_NAME_PREPEND_CHAR) : null;
 		// place copied group
 		String groupId = (component instanceof IFormElement) ? ((IFormElement)component).getGroupID() : null;
 		String newGroupId = null;
@@ -279,7 +284,8 @@ public class ElementFactory
 			}
 		}
 		IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-		AbstractBase copy = (AbstractBase)component.cloneObj(parent, false, validator, true, true, true /* when component is an override we want a flattened one */);
+		AbstractBase copy = (AbstractBase)component.cloneObj(parent, false, validator, true, true,
+			true /* when component is an override we want a flattened one */);
 		if (copy instanceof ISupportBounds)
 		{
 			((ISupportBounds)copy).setLocation(new java.awt.Point(x, y));
@@ -325,6 +331,39 @@ public class ElementFactory
 		placeElementOnTop(label);
 		return label;
 	}
+
+	public static IPersist createWebComponent(Form parent, String name, Point location) throws RepositoryException
+	{
+		WebComponent webComponent = null;
+		WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(name);
+		if (spec != null)
+		{
+			String compName = null;
+			String firstPart = name;
+			int index = firstPart.indexOf("-");
+			if (index != -1)
+			{
+				firstPart = firstPart.substring(index + 1);
+			}
+			compName = firstPart + "_" + random.nextInt(1024);
+			webComponent = parent.createNewWebComponent(compName, name);
+			if (webComponent != null)
+			{
+				webComponent.setLocation(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
+				webComponent.setSize(new Dimension(80, 80));
+				PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
+				if (description != null && description.getDefaultValue() instanceof JSONObject)
+				{
+					webComponent.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
+						((JSONObject)description.getDefaultValue()).optInt("height", 80)));
+				}
+			}
+			return webComponent;
+		}
+		placeElementOnTop(webComponent);
+		return webComponent;
+	}
+
 
 	public static IPersist createBean(Form form, String beanClassName, Point location) throws RepositoryException
 	{
@@ -531,7 +570,7 @@ public class ElementFactory
 					lst.add(label);
 
 					java.awt.Dimension labeldim = label.getSize();
-					labeldim.width = placeHorizontal ? 140 /* field width */: 80;
+					labeldim.width = placeHorizontal ? 140 /* field width */ : 80;
 					label.setSize(labeldim);
 
 					if (fillName)
@@ -736,7 +775,7 @@ public class ElementFactory
 
 	/**
 	 * Calculate form size, take border and navigator into account.
-	 * 
+	 *
 	 * @param form
 	 * @return
 	 */
@@ -831,7 +870,8 @@ public class ElementFactory
 		}
 
 		Portal portal = form.createNewPortal(
-			ElementFactory.createUniqueName(form, IRepository.ELEMENTS, portalName.toString(), INameGenerate.GENERATE_NAME_PREPEND_N), new java.awt.Point(x, y));
+			ElementFactory.createUniqueName(form, IRepository.ELEMENTS, portalName.toString(), INameGenerate.GENERATE_NAME_PREPEND_N),
+			new java.awt.Point(x, y));
 		if (dataProviders != null && dataProviders.length > 0)
 		{
 			Dimension portaldim = new Dimension(dataProviders.length * 140, 50);
@@ -855,10 +895,8 @@ public class ElementFactory
 		JSONObject json = new JSONObject();
 		if (templateType == StringResource.FORM_TEMPLATE)
 		{
-			json.put(
-				Template.PROP_FORM,
-				cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, false, repository, false, null),
-					null));
+			json.put(Template.PROP_FORM, cleanTemplateElement(repository, flattenedSolution, form,
+				SolutionSerializer.generateJSONObject(form, false, false, repository, false, null), null));
 		}
 		json.put(Template.PROP_LOCATION, PersistHelper.createPointString(location));
 		JSONArray elements = new JSONArray();
@@ -1267,7 +1305,7 @@ public class ElementFactory
 
 	/**
 	 * Resolve method names to UUIDs in json object.
-	 * 
+	 *
 	 * @param form
 	 * @param object
 	 * @return
@@ -1360,9 +1398,9 @@ public class ElementFactory
 
 	/**
 	 * Container for selected relation sequence (optional) and form.
-	 * 
+	 *
 	 * @author rgansevles
-	 * 
+	 *
 	 */
 	public static class RelatedForm
 	{

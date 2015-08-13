@@ -71,12 +71,12 @@ public class FormEditPolicy extends ComponentEditPolicy
 		if (VisualFormEditor.REQ_PLACE_TAB.equals(request.getType()) || VisualFormEditor.REQ_PLACE_MEDIA.equals(request.getType()) ||
 			VisualFormEditor.REQ_PLACE_BEAN.equals(request.getType()) || VisualFormEditor.REQ_PLACE_BUTTON.equals(request.getType()) ||
 			VisualFormEditor.REQ_PLACE_LABEL.equals(request.getType()) || VisualFormEditor.REQ_PLACE_RECT_SHAPE.equals(request.getType()) ||
-			VisualFormEditor.REQ_PLACE_TEMPLATE.equals(request.getType()))
+			VisualFormEditor.REQ_PLACE_TEMPLATE.equals(request.getType()) || VisualFormEditor.REQ_PLACE_COMPONENT.equals(request.getType()))
 		{
 			Object data = request instanceof DataRequest ? ((DataRequest)request).getData() : null;
 			final org.eclipse.draw2d.geometry.Point location = request instanceof DataRequest ? ((DataRequest)request).getlocation() : null;
-			command = new FormPlaceElementCommand(application, form, data, request.getType(), request.getExtendedData(), fieldPositioner, location == null
-				? null : location.getSWTPoint(), null, form);
+			command = new FormPlaceElementCommand(application, form, data, request.getType(), request.getExtendedData(), fieldPositioner,
+				location == null ? null : location.getSWTPoint(), null, form);
 		}
 		else if (VisualFormEditor.REQ_PLACE_PORTAL.equals(request.getType()) && request instanceof DataFieldRequest)
 		{
@@ -89,9 +89,9 @@ public class FormEditPolicy extends ComponentEditPolicy
 		{
 			DataFieldRequest dataFieldRequest = ((DataFieldRequest)request);
 			command = new FormPlaceFieldCommand(application, form, form, dataFieldRequest.getData(), dataFieldRequest.getType(),
-				dataFieldRequest.getExtendedData(), fieldPositioner, dataFieldRequest.getlocation() == null ? null
-					: dataFieldRequest.getlocation().getSWTPoint(), null, dataFieldRequest.placeAsLabels, dataFieldRequest.placeWithLabels,
-				dataFieldRequest.placeHorizontal, dataFieldRequest.fillText, dataFieldRequest.fillName, form);
+				dataFieldRequest.getExtendedData(), fieldPositioner,
+				dataFieldRequest.getlocation() == null ? null : dataFieldRequest.getlocation().getSWTPoint(), null, dataFieldRequest.placeAsLabels,
+				dataFieldRequest.placeWithLabels, dataFieldRequest.placeHorizontal, dataFieldRequest.fillText, dataFieldRequest.fillName, form);
 		}
 		else if ((BaseVisualFormEditor.REQ_COPY.equals(request.getType()) || BaseVisualFormEditor.REQ_CUT.equals(request.getType())) &&
 			request instanceof GroupRequest)

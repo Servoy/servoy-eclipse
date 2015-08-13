@@ -89,8 +89,8 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 				Rectangle oldBounds = ((GraphicalEditPart)childEditPart).getFigure().getBounds();
 				Rectangle newBounds = (Rectangle)constraint;
 
-				compoundCommand.add(new ChangeBoundsCommand(childEditPart, new Point(newBounds.x - oldBounds.x, newBounds.y - oldBounds.y), new Dimension(
-					newBounds.width - oldBounds.width, newBounds.height - oldBounds.height)));
+				compoundCommand.add(new ChangeBoundsCommand(childEditPart, new Point(newBounds.x - oldBounds.x, newBounds.y - oldBounds.y),
+					new Dimension(newBounds.width - oldBounds.width, newBounds.height - oldBounds.height)));
 
 				// set properties via request.extendedData
 				Map<Object, Object> objectProperties = request.getExtendedData();
@@ -143,7 +143,8 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 
 			Form form = ((FormGraphicalEditPart)getHost()).getPersist();
 			if (requestType.type == RequestType.TYPE_BUTTON || requestType.type == RequestType.TYPE_LABEL || requestType.type == RequestType.TYPE_TEMPLATE ||
-				requestType.type == RequestType.TYPE_BEAN || requestType.type == RequestType.TYPE_TAB || requestType.type == RequestType.TYPE_SHAPE)
+				requestType.type == RequestType.TYPE_COMPONENT || requestType.type == RequestType.TYPE_BEAN || requestType.type == RequestType.TYPE_TAB ||
+				requestType.type == RequestType.TYPE_SHAPE)
 			{
 				command = new FormPlaceElementCommand(application, form, data, requestType, extendedData, null, loc.getSWTPoint(), size, parent.getPersist());
 			}

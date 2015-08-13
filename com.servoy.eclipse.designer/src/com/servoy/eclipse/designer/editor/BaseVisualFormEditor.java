@@ -87,8 +87,8 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  */
 
-public abstract class BaseVisualFormEditor extends MultiPageEditorPart implements CommandStackListener, IActiveProjectListener, IPersistChangeListener,
-	IShowEditorInput
+public abstract class BaseVisualFormEditor extends MultiPageEditorPart
+	implements CommandStackListener, IActiveProjectListener, IPersistChangeListener, IShowEditorInput
 {
 	private static final String COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.context";
 	private static final String COM_SERVOY_ECLIPSE_RFB_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.rfb.context";
@@ -159,7 +159,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.IEditorPart#init(org.eclipse.ui.IEditorSite, org.eclipse.ui.IEditorInput)
 	 */
 	@Override
@@ -400,7 +400,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 			{
 				boolean wasClosed = getSite().getPage().closeEditor(BaseVisualFormEditor.this, save);
 				if (save && !wasClosed) // the user clicked cancel
-				getSite().getPage().closeEditor(BaseVisualFormEditor.this, false);
+					getSite().getPage().closeEditor(BaseVisualFormEditor.this, false);
 			}
 		});
 	}
@@ -575,9 +575,9 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 						{
 							public Object visit(IPersist o)
 							{
-								if (o instanceof ISupportExtendsID &&
-									changed.getID() == ((ISupportExtendsID)o).getExtendsID() ||
-									(((ISupportExtendsID)changed).getExtendsID() > 0 && ((ISupportExtendsID)changed).getExtendsID() == ((ISupportExtendsID)o).getExtendsID()))
+								if (o instanceof ISupportExtendsID && changed.getID() == ((ISupportExtendsID)o).getExtendsID() ||
+									(((ISupportExtendsID)changed).getExtendsID() > 0 &&
+										((ISupportExtendsID)changed).getExtendsID() == ((ISupportExtendsID)o).getExtendsID()))
 								{
 									return o;
 								}
@@ -727,7 +727,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 	{
 		if (activateContext == null)
 		{
-			IContextService service = (IContextService)getSite().getService(IContextService.class);
+			IContextService service = getSite().getService(IContextService.class);
 			if (service != null)
 			{
 				if (!new DesignerPreferences().getClassicFormEditor())
@@ -746,7 +746,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 	{
 		if (activateContext != null)
 		{
-			IContextService service = (IContextService)getSite().getService(IContextService.class);
+			IContextService service = getSite().getService(IContextService.class);
 			service.deactivateContext(activateContext);
 			activateContext = null;
 		}
@@ -796,6 +796,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 		public static final int TYPE_BUTTON = 9;
 		public static final int TYPE_TAB = 10;
 		public static final int TYPE_PART = 11;
+		public static final int TYPE_COMPONENT = 12;
 
 		private static final int UNSPECIFIED = -1;
 

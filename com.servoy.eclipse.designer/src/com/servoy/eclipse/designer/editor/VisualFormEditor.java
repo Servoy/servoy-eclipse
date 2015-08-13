@@ -49,6 +49,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	public static final RequestType REQ_PLACE_PORTAL = new RequestType(RequestType.TYPE_PORTAL);
 	public static final RequestType REQ_PLACE_MEDIA = new RequestType(RequestType.TYPE_MEDIA);
 	public static final RequestType REQ_PLACE_BEAN = new RequestType(RequestType.TYPE_BEAN);
+	public static final RequestType REQ_PLACE_COMPONENT = new RequestType(RequestType.TYPE_COMPONENT);
 	public static final RequestType REQ_PLACE_BUTTON = new RequestType(RequestType.TYPE_BUTTON);
 	public static final RequestType REQ_PLACE_FIELD = new RequestType(RequestType.TYPE_FIELD);
 	public static final RequestType REQ_PLACE_LABEL = new RequestType(RequestType.TYPE_LABEL);
