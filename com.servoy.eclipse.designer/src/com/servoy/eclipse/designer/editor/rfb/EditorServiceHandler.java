@@ -18,10 +18,10 @@
 package com.servoy.eclipse.designer.editor.rfb;
 
 import java.util.HashMap;
+import java.util.concurrent.Callable;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.ui.PlatformUI;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
@@ -127,38 +127,30 @@ public class EditorServiceHandler implements IServerService
 		{
 
 			@Override
-			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			public Object executeMethod(String methodName, JSONObject args)
 			{
 				Activator.getDefault().toggleShowData();
-				UIUtils.runInUI(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
-					}
-				}, false);
+				((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
 				return null;
 			}
 		});
 		configuredHandlers.put("getBooleanState", new IServerService()
 		{
 
-			@SuppressWarnings("boxing")
 			@Override
 			public Object executeMethod(String methodName, JSONObject args) throws Exception
 			{
 				if (args != null)
 				{
-					if (args.has("isInheritedForm")) return editorPart.getForm().getExtendsID() > 0;
+					if (args.has("isInheritedForm")) return Boolean.valueOf(editorPart.getForm().getExtendsID() > 0);
 					if (args.has("showData"))
 					{
 						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_DATA_IN_ANGULAR_DESIGNER)
-							? Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_DATA_IN_ANGULAR_DESIGNER) : true;
+							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_DATA_IN_ANGULAR_DESIGNER)) : Boolean.TRUE;
 					}
 
 				}
-				return false;
+				return Boolean.FALSE;
 			}
 
 		});
@@ -168,17 +160,10 @@ public class EditorServiceHandler implements IServerService
 			@Override
 			public Object executeMethod(String methodName, JSONObject args) throws Exception
 			{
-				UIUtils.runInUI(new Runnable()
+				if (editorPart != PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart())
 				{
-					@Override
-					public void run()
-					{
-						if (editorPart != PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart())
-						{
-							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(editorPart);
-						}
-					}
-				}, false);
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(editorPart);
+				}
 
 				return null;
 			}
@@ -190,16 +175,20 @@ public class EditorServiceHandler implements IServerService
 	{
 		try
 		{
-			return configuredHandlers.get(methodName).executeMethod(methodName, args);
-		}
-		catch (JSONException e)
-		{
-			ServoyLog.logError(e);
+			return UIUtils.runInUI(new Callable<Object>()
+			{
+				@Override
+				public Object call() throws Exception
+				{
+					return configuredHandlers.get(methodName).executeMethod(methodName, args);
+				}
+			});
 		}
 		catch (Exception e)
 		{
 			ServoyLog.logError(e);
 		}
+
 		return null;
 	}
 }

@@ -31,6 +31,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
@@ -886,6 +887,36 @@ public class UIUtils
 				Display.getDefault().asyncExec(r);
 			}
 		}
+	}
+
+	public static <T> T runInUI(final Callable<T> c) throws Exception
+	{
+		if (Display.getCurrent() != null)
+		{
+			return c.call();
+		}
+
+		final Object[] ret = { null };
+		final Exception[] ex = { null };
+		Display.getDefault().syncExec(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					ret[0] = c.call();
+				}
+				catch (Exception e)
+				{
+					ex[0] = e;
+				}
+
+			}
+		});
+
+		if (ex[0] != null) throw ex[0];
+		return (T)ret[0];
 	}
 
 	/**
