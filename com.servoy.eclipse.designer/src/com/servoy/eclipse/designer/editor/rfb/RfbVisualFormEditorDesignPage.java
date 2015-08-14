@@ -307,7 +307,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 	public void revert()
 	{
-		if (getContentWebsocketSession() != null)
+		if (getContentWebsocketSession() != null && CurrentWindow.exists())
 		{
 			List<IFormController> cachedFormControllers = getContentWebsocketSession().getClient().getFormManager().getCachedFormControllers(
 				editorPart.getForm());
