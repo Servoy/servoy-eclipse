@@ -44,6 +44,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.smart.dataui.ComponentAccordionPanel;
 import com.servoy.j2db.smart.dataui.ComponentJTabbedPane;
@@ -104,38 +105,37 @@ public class DesignComponentFactory extends ComponentFactory
 		Component c = null;
 		if (meta.getTypeID() == IRepository.BEANS)
 		{
-			if (FormTemplateGenerator.isWebcomponentBean(meta))
+			// can cast, design should always be a swing
+			IComponent comp = createBean(application, form, (Bean)meta, flattenedSolution);
+			if (comp instanceof InvisibleBean)
+			{
+				c = (InvisibleBean)comp;
+			}
+			else if (comp instanceof VisibleBean)
+			{
+				c = ((VisibleBean)comp).getDelegate();
+			}
+			else if (comp instanceof Component)
+			{
+				c = (Component)comp;
+			}
+		}
+		else if (meta.getTypeID() == IRepository.WEBCOMPONENTS)
+		{
+			if (meta instanceof WebComponent)
 			{
 				WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-					FormTemplateGenerator.getComponentTypeName((Bean)meta));
+					FormTemplateGenerator.getComponentTypeName((WebComponent)meta));
 				String label;
 				if (spec == null)
 				{
-					label = "Web component not found " + ((Bean)meta).getBeanClassName();
+					label = "Web component not found " + ((WebComponent)meta).getName();
 				}
 				else
 				{
 					label = "Web component (" + spec.getDisplayName() + ')';
 				}
-				c = (Component)application.getItemFactory().createLabel(((Bean)meta).getName(), label);
-			}
-			else
-			{
-
-				// can cast, design should always be a swing
-				IComponent comp = createBean(application, form, (Bean)meta, flattenedSolution);
-				if (comp instanceof InvisibleBean)
-				{
-					c = (InvisibleBean)comp;
-				}
-				else if (comp instanceof VisibleBean)
-				{
-					c = ((VisibleBean)comp).getDelegate();
-				}
-				else if (comp instanceof Component)
-				{
-					c = (Component)comp;
-				}
+				c = (Component)application.getItemFactory().createLabel(((WebComponent)meta).getName(), label);
 			}
 		}
 		else
@@ -170,14 +170,15 @@ public class DesignComponentFactory extends ComponentFactory
 							else splitPane.getSplitPane().setRightComponent(label);
 						}
 
-						splitPane.setRuntimeDividerLocation((orient == TabPanel.SPLIT_HORIZONTAL ? splitPane.getSize().width / 2
-							: splitPane.getSize().height / 2));
+						splitPane.setRuntimeDividerLocation(
+							(orient == TabPanel.SPLIT_HORIZONTAL ? splitPane.getSize().width / 2 : splitPane.getSize().height / 2));
 						retval = splitPane;
 					}
 					else if (orient == TabPanel.ACCORDION_PANEL)
 					{
 						ComponentAccordionPanel tabs = new ComponentAccordionPanel();
-						applyBasicComponentProperties(application, tabs, (BaseComponent)meta, getStyleForBasicComponent(application, (BaseComponent)meta, form));
+						applyBasicComponentProperties(application, tabs, (BaseComponent)meta,
+							getStyleForBasicComponent(application, (BaseComponent)meta, form));
 						tabs.setAllTabsAlignment(((TabPanel)meta).getHorizontalAlignment());
 						tabs.addTab("position example", new JLabel("form will appear here", SwingConstants.LEFT));
 						tabs.addTab("position 2", new JLabel("another form showup here", SwingConstants.CENTER));
@@ -187,7 +188,8 @@ public class DesignComponentFactory extends ComponentFactory
 					else
 					{
 						ComponentJTabbedPane tabs = new ComponentJTabbedPane();
-						applyBasicComponentProperties(application, tabs, (BaseComponent)meta, getStyleForBasicComponent(application, (BaseComponent)meta, form));
+						applyBasicComponentProperties(application, tabs, (BaseComponent)meta,
+							getStyleForBasicComponent(application, (BaseComponent)meta, form));
 						tabs.addTab("position example", new JLabel("form will appear here", SwingConstants.CENTER));
 						tabs.addTab("position 2", new JLabel("another form showup here", SwingConstants.CENTER));
 						if (orient == SwingConstants.TOP || orient == SwingConstants.LEFT || orient == SwingConstants.BOTTOM || orient == SwingConstants.RIGHT)
