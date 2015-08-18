@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 /***
- * 
+ *
  * @author laurian
  *
  *	fixes the doubleclick issue in editor (doubleclick will cancel the editing), so when user will click too fast he won't be able to edit
@@ -59,7 +59,7 @@ public class FixedComboBoxCellEditor extends ComboBoxCellEditor
 		int count = combo.getItems().length;
 		if (count <= VISIBLE_ITEM_COUNT)
 		{
-			combo.setVisibleItemCount(count == 0 ? count : count - 1);
+			combo.setVisibleItemCount(count == 0 ? count : count);
 		}
 		else combo.setVisibleItemCount(VISIBLE_ITEM_COUNT); //default count - fixing bug introduced by eclipse 4.3
 	}
