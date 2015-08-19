@@ -330,7 +330,23 @@
 					        		  },
 					        		  "forFoundset":{
 					        			  "type":"string"
-					        		  }
+					        		  },
+					        		  "for": {
+					        			  "oneOf": [
+					        			            {
+					        			            	"type": "string"
+					        			            },
+					        			            {
+					        			            	"type": "array"
+					        			            },
+					        			            {
+					        			            	"type": "object"
+					        			            }
+					        			           ]
+				        		  	},
+				        		 	"tags": {
+				        			  "type": "object"
+				        		  	}
 					        	  },
 					        	  "required":["type"],
 					        	  "additionalProperties": false
