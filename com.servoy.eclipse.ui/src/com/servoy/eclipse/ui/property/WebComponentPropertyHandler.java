@@ -25,7 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.property.IPropertyConverter;
+import org.sablo.specification.property.IPropertyConverterForBrowser;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.FunctionPropertyType;
 import org.sablo.websocket.utils.DataConversion;
@@ -66,7 +66,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 {
 	// this map can be filled by an extension point if we support 3rd party types.
 	// TODO extension point + maybe use another interface as values - something like IDesignValueConverter - cause this conversion is not related to what the javadoc in IPropertyConverter describes and it can be confusing
-	private static final Map<IPropertyType< ? >, IPropertyConverter< ? extends Object>> jsonConverters = new HashMap<IPropertyType< ? >, IPropertyConverter< ? extends Object>>();
+	private static final Map<IPropertyType< ? >, IPropertyConverterForBrowser< ? extends Object>> jsonConverters = new HashMap<IPropertyType< ? >, IPropertyConverterForBrowser< ? extends Object>>();
 
 	static
 	{
@@ -146,10 +146,10 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		{
 			if (!(type instanceof IDesignToFormElement) && propertyDescription.getDefaultValue() != null)
 			{
-				IPropertyConverter<Object> converter = (IPropertyConverter<Object>)jsonConverters.get(type);
+				IPropertyConverterForBrowser<Object> converter = (IPropertyConverterForBrowser<Object>)jsonConverters.get(type);
 				if (converter != null)
 				{
-					return converter.fromJSON(propertyDescription.getDefaultValue(), null, null);
+					return converter.fromJSON(propertyDescription.getDefaultValue(), null, propertyDescription, null);
 				}
 				return propertyDescription.getDefaultValue();
 			}
@@ -160,14 +160,14 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		}
 		else
 		{
-			IPropertyConverter<Object> converter = (IPropertyConverter<Object>)jsonConverters.get(type);
+			IPropertyConverterForBrowser<Object> converter = (IPropertyConverterForBrowser<Object>)jsonConverters.get(type);
 			if (converter != null)
 			{
 				if (value instanceof String && ((String)value).startsWith("{"))
 				{
 					try
 					{
-						value = converter.fromJSON(new JSONObject((String)value), null, null);
+						value = converter.fromJSON(new JSONObject((String)value), null, propertyDescription, null);
 					}
 					catch (Exception e)
 					{
@@ -176,7 +176,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 				}
 				else
 				{
-					value = converter.fromJSON(value, null, null);
+					value = converter.fromJSON(value, null, propertyDescription, null);
 				}
 			}
 		}
@@ -224,14 +224,14 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		}
 		else
 		{
-			IPropertyConverter<Object> converter = (IPropertyConverter<Object>)jsonConverters.get(propertyDescription.getType());
+			IPropertyConverterForBrowser<Object> converter = (IPropertyConverterForBrowser<Object>)jsonConverters.get(propertyDescription.getType());
 			if (converter != null)
 			{
 				JSONStringer writer = new JSONStringer();
 				try
 				{
 					writer.object();
-					converter.toJSON(writer, getName(), convertedValue, new DataConversion(), null).toString();
+					converter.toJSON(writer, getName(), convertedValue, propertyDescription, new DataConversion(), null).toString();
 					writer.endObject();
 					convertedValue = new JSONObject(writer.toString()).get(getName());
 				}

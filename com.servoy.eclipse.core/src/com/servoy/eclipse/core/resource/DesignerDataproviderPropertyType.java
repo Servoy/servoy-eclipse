@@ -19,7 +19,8 @@ package com.servoy.eclipse.core.resource;
 
 import org.json.JSONException;
 import org.json.JSONWriter;
-import org.sablo.specification.property.IDataConverterContext;
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.property.IBrowserConverterContext;
 import org.sablo.websocket.utils.DataConversion;
 import org.sablo.websocket.utils.JSONUtils;
 
@@ -36,8 +37,8 @@ public class DesignerDataproviderPropertyType extends DataproviderPropertyType
 	public static final DesignerDataproviderPropertyType DESIGNER_INSTANCE = new DesignerDataproviderPropertyType();
 
 	@Override
-	public JSONWriter toJSON(JSONWriter writer, String key, DataproviderTypeSabloValue sabloValue, DataConversion clientConversion,
-		IDataConverterContext dataConverterContext) throws JSONException
+	public JSONWriter toJSON(JSONWriter writer, String key, DataproviderTypeSabloValue sabloValue, PropertyDescription pd, DataConversion clientConversion,
+		IBrowserConverterContext dataConverterContext) throws JSONException
 	{
 		if (!NGUtils.shouldShowData(dataConverterContext))
 		{
@@ -45,6 +46,6 @@ public class DesignerDataproviderPropertyType extends DataproviderPropertyType
 			writer.value(null);
 			return writer;
 		}
-		return super.toJSON(writer, key, sabloValue, clientConversion, dataConverterContext);
+		return super.toJSON(writer, key, sabloValue, pd, clientConversion, dataConverterContext);
 	}
 }
