@@ -1955,7 +1955,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 								}
 								r = r.getParent();
 							}
-							while (r.getType() != IResource.ROOT);
+							while (r != null && r.getType() != IResource.ROOT);
 						}
 
 						problemDecorator.fireChanged(changedProblemResources.toArray(new IResource[changedProblemResources.size()]));
