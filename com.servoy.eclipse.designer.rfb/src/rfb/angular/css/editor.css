@@ -138,7 +138,7 @@ body {
 	cursor: move;
 	cursor: -webkit-grab;
 	cursor: -moz-grab;
-	cursor: grab
+	cursor: grab;
 }
 
 .glasspane {
@@ -169,7 +169,6 @@ body {
     -ms-user-select: none;
     user-select: none;
     z-index: -1;
-    cursor: default;
 }
 
 .sidebar-resizer {
