@@ -38,7 +38,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.internal.browser.BrowserManager;
-import org.eclipse.ui.internal.browser.ExternalBrowserInstance;
 import org.eclipse.ui.internal.browser.IBrowserDescriptor;
 import org.eclipse.ui.internal.browser.Messages;
 
@@ -56,7 +55,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * @author jcompagner
- * 
+ *
  */
 public class StartWebClientHandler extends StartDebugHandler implements IRunnableWithProgress, IHandler
 {
@@ -70,7 +69,7 @@ public class StartWebClientHandler extends StartDebugHandler implements IRunnabl
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
 	@Override
@@ -129,8 +128,8 @@ public class StartWebClientHandler extends StartDebugHandler implements IRunnabl
 					{
 						public void run()
 						{
-							MessageDialog.openError(Display.getDefault().getActiveShell(),
-								"Solution type problem", "Cant open this solution type in this client");
+							MessageDialog.openError(Display.getDefault().getActiveShell(), "Solution type problem",
+								"Cant open this solution type in this client");
 						}
 					});
 					return;
@@ -154,7 +153,8 @@ public class StartWebClientHandler extends StartDebugHandler implements IRunnabl
 							}
 							try
 							{
-								String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/servoy-webclient/solutions/solution/" + solution.getName();
+								String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() +
+									"/servoy-webclient/solutions/solution/" + solution.getName();
 								EditorUtil.openURL(getWebBrowser(), url);
 							}
 							catch (final Throwable e)//catch all for apple mac
@@ -182,7 +182,7 @@ public class StartWebClientHandler extends StartDebugHandler implements IRunnabl
 
 	/**
 	 * @return the webBrowser
-	 * @throws PartInitException 
+	 * @throws PartInitException
 	 */
 	protected IWebBrowser getWebBrowser() throws PartInitException
 	{
@@ -203,7 +203,7 @@ public class StartWebClientHandler extends StartDebugHandler implements IRunnabl
 					org.eclipse.ui.internal.browser.IBrowserExt ext = null;
 					if (ewb != null && !ewb.getName().equals(Messages.prefSystemBrowser))
 					{
-						//ext := "org.eclipse.ui.browser." + specifiId 
+						//ext := "org.eclipse.ui.browser." + specifiId
 						ext = org.eclipse.ui.internal.browser.WebBrowserUIPlugin.findBrowsers(ewb.getLocation());
 						if (ext != null)
 						{
@@ -212,13 +212,13 @@ public class StartWebClientHandler extends StartDebugHandler implements IRunnabl
 						}
 						else
 						{
-							if (ewb.getLocation() != null) webBrowser = new ExternalBrowserInstance("org.eclipse.ui.browser." +
-								ewb.getName().toLowerCase().replace(" ", "_"), ewb);
+							if (ewb.getLocation() != null)
+								webBrowser = new ExternalBrowserInstance("org.eclipse.ui.browser." + ewb.getName().toLowerCase().replace(" ", "_"), ewb);
 						}
 					}
 
-					if (webBrowser == null ||
-						((ewb != null && ewb.getName().equals(Messages.prefSystemBrowser)) && (webBrowser != null && !webBrowser.equals(support.getExternalBrowser()))))
+					if (webBrowser == null || ((ewb != null && ewb.getName().equals(Messages.prefSystemBrowser)) &&
+						(webBrowser != null && !webBrowser.equals(support.getExternalBrowser()))))
 					{
 
 						webBrowser = support.getExternalBrowser();
