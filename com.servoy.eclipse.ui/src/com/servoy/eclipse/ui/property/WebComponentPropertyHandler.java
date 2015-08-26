@@ -121,7 +121,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		Object value = null;
 		IBasicWebObject bean = (IBasicWebObject)obj;
 
-		JSONObject json = bean.getJson();
+		JSONObject json = bean.getFlattenedJson();
 		if (json != null)
 		{
 			value = json.opt(getName());
