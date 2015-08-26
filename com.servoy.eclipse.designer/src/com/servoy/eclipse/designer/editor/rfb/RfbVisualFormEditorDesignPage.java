@@ -231,7 +231,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		Form form = editorPart.getForm();
 		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
 		String newLayout = computeLayout(flattenedForm);
-		if (!Utils.equalObjects(layout, newLayout))
+		if (!Utils.equalObjects(layout, newLayout) || force)
 		{
 			layout = newLayout;
 			Dimension formSize = flattenedForm.getSize();
@@ -247,10 +247,6 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			{
 				ServoyLog.logError("couldn't load the editor: " + url, ex);
 			}
-		}
-		else if (force)
-		{
-			browser.refresh();
 		}
 	}
 

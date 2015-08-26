@@ -168,6 +168,15 @@ public class EditorServiceHandler implements IServerService
 				return null;
 			}
 		});
+		configuredHandlers.put("reload", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
+				return null;
+			}
+		});
 	}
 
 	@Override

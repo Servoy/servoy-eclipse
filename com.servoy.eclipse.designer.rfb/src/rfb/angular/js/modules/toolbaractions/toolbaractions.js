@@ -556,7 +556,7 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 			icon: "../../images/reload.png",
 			enabled: true,
 			onclick: function() {
-				$window.location.reload();
+				$editorService.executeAction('reload');
 			},
 	}
 	
