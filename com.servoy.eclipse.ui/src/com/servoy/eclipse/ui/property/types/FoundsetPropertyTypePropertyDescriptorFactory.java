@@ -18,11 +18,11 @@
 package com.servoy.eclipse.ui.property.types;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
-import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.server.ngclient.property.FoundsetPropertyTypeConfig;
 
 /**
  * Provides properties view look & feel for foundset ng property types.
@@ -36,7 +36,8 @@ public class FoundsetPropertyTypePropertyDescriptorFactory implements ITypePrope
 	public IPropertyDescriptor createPropertyDescriptor(String id, String displayName, FlattenedSolution flattenedEditingSolution,
 		PersistContext persistContext, PropertyDescription propertyDescription)
 	{
-		return new FoundsetPropertyController(id, displayName, flattenedEditingSolution, persistContext, (JSONObject)propertyDescription.getConfig());
+		return new FoundsetPropertyController(id, displayName, flattenedEditingSolution, persistContext,
+			(FoundsetPropertyTypeConfig)propertyDescription.getConfig());
 	}
 
 }

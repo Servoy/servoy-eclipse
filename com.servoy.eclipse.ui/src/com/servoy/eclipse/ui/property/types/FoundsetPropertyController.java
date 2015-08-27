@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -55,6 +54,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.server.ngclient.property.FoundsetPropertyTypeConfig;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
@@ -72,57 +72,24 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 
 	private static final String FOUNDSET_SELECTOR = "foundsetSelector";
 	private static final String FOUNDSET_DP_COUNT = "foundsetDataprovidersCount";
-	private static final String DATAPROVIDERS = "dataproviders";
-	private static final String DYNAMIC_DATAPROVIDERS = "dynamicDataproviders";
 
 	private static final String FORM_FOUNDSET = "formFoundset";
 
 	private final FlattenedSolution flattenedSolution;
 	private final PersistContext persistContext;
-	private final JSONObject config;
+	private final FoundsetPropertyTypeConfig config;
 
 	/**
 	 * @param id
 	 * @param displayName
 	 */
-	public FoundsetPropertyController(Object id, String displayName, FlattenedSolution flattenedSolution, PersistContext persistContext, JSONObject config)
+	public FoundsetPropertyController(Object id, String displayName, FlattenedSolution flattenedSolution, PersistContext persistContext,
+		FoundsetPropertyTypeConfig foundsetPropertyTypeConfig)
 	{
 		super(id, displayName);
 		this.flattenedSolution = flattenedSolution;
 		this.persistContext = persistContext;
-		this.config = config;
-	}
-
-	protected boolean hasDynamicDataproviders()
-	{
-		return config != null && config.optBoolean(DYNAMIC_DATAPROVIDERS);
-	}
-
-	protected String[] getDataproviders()
-	{
-		if (config != null)
-		{
-			JSONArray dataprovidersJSON = config.optJSONArray(DATAPROVIDERS);
-			if (dataprovidersJSON != null)
-			{
-				try
-				{
-					String[] dataproviders = new String[dataprovidersJSON.length()];
-					for (int i = 0; i < dataprovidersJSON.length(); i++)
-					{
-						dataproviders[i] = dataprovidersJSON.get(i).toString();
-					}
-
-					return dataproviders;
-				}
-				catch (JSONException ex)
-				{
-					ServoyLog.logError(ex);
-				}
-			}
-		}
-
-		return null;
+		this.config = foundsetPropertyTypeConfig;
 	}
 
 	@Override
@@ -153,10 +120,10 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 								StringBuilder sb = new StringBuilder();
 								String fs = elementJSON.optString(FOUNDSET_SELECTOR);
 								sb.append("".equals(fs) ? FORM_FOUNDSET : fs);
-								if (elementJSON.has(DATAPROVIDERS))
+								if (elementJSON.has(FoundsetPropertyTypeConfig.DATAPROVIDERS))
 								{
 									sb.append('[');
-									JSONObject dataproviders = elementJSON.optJSONObject(DATAPROVIDERS);
+									JSONObject dataproviders = elementJSON.optJSONObject(FoundsetPropertyTypeConfig.DATAPROVIDERS);
 									if (dataproviders != null)
 									{
 										Iterator< ? > dpKeysIte = dataproviders.keys();
@@ -205,8 +172,8 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 				@Override
 				public IPropertySource getPropertySource()
 				{
-					FoundsetPropertySource foundsetPropertySource = new FoundsetPropertySource(this, flattenedSolution, persistContext, getDataproviders(),
-						hasDynamicDataproviders());
+					FoundsetPropertySource foundsetPropertySource = new FoundsetPropertySource(this, flattenedSolution, persistContext, config.dataproviders,
+						config.hasDynamicDataproviders);
 					foundsetPropertySource.setReadonly(FoundsetPropertyController.this.isReadOnly());
 					return foundsetPropertySource;
 				}
@@ -356,7 +323,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 			{
 				if (v != null)
 				{
-					JSONObject dataprovidersValues = v.optJSONObject(DATAPROVIDERS);
+					JSONObject dataprovidersValues = v.optJSONObject(FoundsetPropertyTypeConfig.DATAPROVIDERS);
 					if (dataprovidersValues != null && dataprovidersValues.has(id.toString()))
 					{
 						String foundsetSelector = v.optString(FOUNDSET_SELECTOR);
@@ -420,7 +387,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 						}
 						if (dpCount < oldValue)
 						{
-							JSONObject dataprovidersValues = editableValue.optJSONObject(DATAPROVIDERS);
+							JSONObject dataprovidersValues = editableValue.optJSONObject(FoundsetPropertyTypeConfig.DATAPROVIDERS);
 							if (dataprovidersValues != null)
 							{
 								Iterator< ? > it = dataprovidersValues.keys();
@@ -443,11 +410,11 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 				}
 				else
 				{
-					JSONObject dataprovidersValues = editableValue.optJSONObject(DATAPROVIDERS);
+					JSONObject dataprovidersValues = editableValue.optJSONObject(FoundsetPropertyTypeConfig.DATAPROVIDERS);
 					if (dataprovidersValues == null)
 					{
 						dataprovidersValues = new JSONObject();
-						editableValue.put(DATAPROVIDERS, dataprovidersValues);
+						editableValue.put(FoundsetPropertyTypeConfig.DATAPROVIDERS, dataprovidersValues);
 
 					}
 					if (v != null)

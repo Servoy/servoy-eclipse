@@ -109,6 +109,9 @@
 				        		  "blockingOn": {
 				        			  "type": "boolean"
 				        		  },
+				        		  "provideColumnFormats": {
+				        			  "type": "boolean"
+				        		  },
 				        		  "pushToServer": {
 				        			  "enum" : ["reject", "allow", "shallow", "deep"]
 				        		  },
