@@ -22814,12 +22814,18 @@ Multiple filters can be added to the same dataprovider, they will all be applied
             <summary clientSupport="ng,wc,sc"><![CDATA[Add a filter parameter that is permanent per user session to limit a specified foundset of records.]]></summary>
           </summaries>
           <samples>
-            <sample clientSupport="ng,wc,sc"><![CDATA[// Filter a fondset on a dataprovider value.
-// Note that multiple filters can be added to the same dataprovider, they will all be applied.
+            <sample clientSupport="ng,wc,sc"><![CDATA[var success = %%prefix%%foundset.addFoundSetFilterParam('customerid', '=', 'BLONP', 'custFilter');//possible to add multiple
+// Named filters can be removed using %%prefix%%foundset.removeFoundSetFilterParam(filterName)
 
-var success = %%prefix%%foundset.addFoundSetFilterParam('customerid', '=', 'BLONP', 'custFilter');//possible to add multiple
-%%prefix%%foundset.loadAllRecords();//to make param(s) effective
-// Named filters can be removed using %%prefix%%foundset.removeFoundSetFilterParam(filterName)]]></sample>
+// you can use modifiers in the operator as well, filter on companies where companyname is null or equals-ignore-case 'servoy'
+var ok = %%prefix%%foundset.addFoundSetFilterParam('companyname', '#^||=', 'servoy')
+
+// Filters with in-conditions can be used with arrays or with custom queries:
+success = foundset.addFoundSetFilterParam("productcode", "in", [120, 144, 200]);
+success = foundset.addFoundSetFilterParam("city", "in", ["London", "Paris"]);
+success = foundset.addFoundSetFilterParam("countrycode", "in", "select country code from countries where region in ('Europe', 'Asia')");
+
+%%prefix%%foundset.loadAllRecords();//to make param(s) effective]]></sample>
           </samples>
           <parameters>
             <parameter name="dataprovider" type="com.servoy.j2db.documentation.scripting.docs.String" typecode="java.lang.String">
@@ -22855,6 +22861,11 @@ The filter is removed again using removeFoundSetFilterParam(name).]]></descripti
 
 // you can use modifiers in the operator as well, filter on companies where companyname is null or equals-ignore-case 'servoy'
 var ok = %%prefix%%foundset.addFoundSetFilterParam('companyname', '#^||=', 'servoy')
+
+// Filters with in-conditions can be used with arrays or with custom queries:
+success = foundset.addFoundSetFilterParam("productcode", "in", [120, 144, 200]);
+success = foundset.addFoundSetFilterParam("city", "in", ["London", "Paris"]);
+success = foundset.addFoundSetFilterParam("countrycode", "in", "select country code from countries where region in ('Europe', 'Asia')");
 
 %%prefix%%foundset.loadAllRecords();//to make param(s) effective]]></sample>
           </samples>
