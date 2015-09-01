@@ -49,6 +49,7 @@ import com.servoy.j2db.server.ngclient.component.WebFormController;
 import com.servoy.j2db.server.ngclient.design.DesignNGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
+import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.util.Utils;
 
 public class FormUpdater implements Runnable
@@ -114,6 +115,11 @@ public class FormUpdater implements Runnable
 						boolean changed = false;
 						for (String property : allKeys)
 						{
+							if (spec.getProperty(property).getType() instanceof ValueListPropertyType)
+							{
+								bigChange = true;
+								break outer;
+							}
 							Object currentPropValue = existingFe.getPropertyValue(property);
 							Object newPropValue = newFe.getPropertyValue(property);
 							if (!Utils.equalObjects(currentPropValue, newPropValue))

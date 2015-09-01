@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 
 package com.servoy.eclipse.core.resource;
 
@@ -21,9 +21,11 @@ import java.util.ArrayList;
 
 import org.sablo.specification.PropertyDescription;
 
+import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.dataprocessing.IValueList;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.ngclient.DataAdapterList;
+import com.servoy.j2db.server.ngclient.INGApplication;
 import com.servoy.j2db.server.ngclient.INGFormElement;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.design.DesignNGClient;
@@ -50,14 +52,14 @@ public class DesignerValueListPropertyType extends ValueListPropertyType
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType#toSabloComponentValue(java.lang.Object,
 	 * org.sablo.specification.PropertyDescription, com.servoy.j2db.server.ngclient.INGFormElement, com.servoy.j2db.server.ngclient.WebFormComponent,
 	 * com.servoy.j2db.server.ngclient.DataAdapterList)
 	 */
 	@Override
-	public ValueListTypeSabloValue toSabloComponentValue(Object formElementValue, PropertyDescription pd, INGFormElement formElement,
-		WebFormComponent component, DataAdapterList dataAdapterList)
+	public ValueListTypeSabloValue toSabloComponentValue(final Object formElementValue, final PropertyDescription pd, final INGFormElement formElement,
+		final WebFormComponent component, DataAdapterList dataAdapterList)
 	{
 		ValueList val = null;
 		IValueList valueList = null;
@@ -68,7 +70,6 @@ public class DesignerValueListPropertyType extends ValueListPropertyType
 
 		return valueList != null ? new ValueListTypeSabloValue(valueList, dataAdapterList, config, dataproviderID, pd)
 		{
-
 			@Override
 			protected java.util.List<java.util.Map<String, Object>> getJavaValueForJSON()
 			{
@@ -76,8 +77,19 @@ public class DesignerValueListPropertyType extends ValueListPropertyType
 				{
 					return new ArrayList<>();
 				}
-				else return super.getJavaValueForJSON();
+				else
+				{
+					setValueList(getIValueList(formElementValue, pd, formElement, component, dataAdapterList, null, valueList, config, dataproviderID));
+					return super.getJavaValueForJSON();
+				}
 			}
 		} : null;
+	}
+
+	@Override
+	protected IValueList getRealValueList(INGApplication application, ValueList val, ComponentFormat fieldFormat, String dataproviderID)
+	{
+		return com.servoy.j2db.component.ComponentFactory.getRealValueList(application, val, true, fieldFormat.dpType, fieldFormat.parsedFormat,
+			dataproviderID, true);
 	}
 }
