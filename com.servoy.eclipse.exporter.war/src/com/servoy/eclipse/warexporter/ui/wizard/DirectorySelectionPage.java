@@ -54,10 +54,12 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 	private final String[] requiredFiles;
 	private CheckboxTableViewer checkboxTableViewer;
 	private SelectAllButtonsBar selectAllButtons;
+	private final boolean selectAll;
 
-	public DirectorySelectionPage(String pagename, String title, String description, File directory, List<String> files, String[] requiredFiles)
+	public DirectorySelectionPage(String pagename, String title, String description, File directory, List<String> files, String[] requiredFiles,
+		boolean selectAll)
 	{
-		this(pagename, title, description, directory, files, requiredFiles, null);
+		this(pagename, title, description, directory, files, requiredFiles, selectAll, null);
 	}
 
 	/**
@@ -68,13 +70,14 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 	 * @param beanSelectionPage
 	 */
 	public DirectorySelectionPage(String pagename, String title, String description, File directory, List<String> files, String[] requiredFiles,
-		IWizardPage nextPage)
+		boolean selectAll, IWizardPage nextPage)
 	{
 		super(pagename);
 		this.directory = directory;
 		this.files = files;
 		this.requiredFiles = requiredFiles;
 		this.nextPage = nextPage;
+		this.selectAll = selectAll;
 		setTitle(title);
 		setDescription(description);
 	}
@@ -99,7 +102,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 		checkboxTableViewer.getTable().setLayoutData(gridData);
 		checkboxTableViewer.addCheckStateListener(this);
 		selectAllButtons = new SelectAllButtonsBar(this, container);
-		if (files.size() == 0)
+		if (selectAll)
 		{
 			checkboxTableViewer.setAllChecked(true);
 		}
@@ -232,7 +235,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.ICheckBoxView#selectAll()
 	 */
 	@Override
@@ -243,7 +246,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.ICheckBoxView#deselectAll()
 	 */
 	@Override

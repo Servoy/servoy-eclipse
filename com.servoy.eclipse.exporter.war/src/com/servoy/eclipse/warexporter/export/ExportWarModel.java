@@ -239,6 +239,7 @@ public class ExportWarModel extends AbstractWarExportModel
 			}
 			settings.put("export.plugins", sb.toString());
 		}
+		else settings.put("export.plugins", "");
 		if (beans.size() > 0)
 		{
 			StringBuilder sb = new StringBuilder(128);
@@ -249,6 +250,7 @@ public class ExportWarModel extends AbstractWarExportModel
 			}
 			settings.put("export.beans", sb.toString());
 		}
+		else settings.put("export.beans", "");
 
 		if (lafs.size() > 0)
 		{
@@ -260,6 +262,7 @@ public class ExportWarModel extends AbstractWarExportModel
 			}
 			settings.put("export.lafs", sb.toString());
 		}
+		else settings.put("export.lafs", "");
 
 		if (drivers.size() > 0)
 		{
@@ -271,6 +274,7 @@ public class ExportWarModel extends AbstractWarExportModel
 			}
 			settings.put("export.drivers", sb.toString());
 		}
+		else settings.put("export.drivers", "");
 
 		if (servers.size() > 0)
 		{
