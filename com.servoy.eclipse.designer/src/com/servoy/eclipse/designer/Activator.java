@@ -79,7 +79,7 @@ public class Activator extends AbstractUIPlugin
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -144,10 +144,18 @@ public class Activator extends AbstractUIPlugin
 					@Override
 					public IWebsocketSession createSession(String uuid) throws Exception
 					{
-						DesignNGClientWebsocketSession designerSession = new DesignNGClientWebsocketSession(uuid);
-						designerSession.setClient(client = new DesignNGClient(designerSession, ApplicationServerRegistry.getServiceRegistry().getService(
-							IDesignerSolutionProvider.class), getPreferenceStore().contains(SHOW_DATA_IN_ANGULAR_DESIGNER) ? getPreferenceStore().getBoolean(
-							SHOW_DATA_IN_ANGULAR_DESIGNER) : true));
+						DesignNGClientWebsocketSession designerSession = new DesignNGClientWebsocketSession(uuid)
+						{
+							@Override
+							public void init() throws Exception
+							{
+								setClient(client = new DesignNGClient(this,
+									ApplicationServerRegistry.getServiceRegistry().getService(IDesignerSolutionProvider.class),
+									getPreferenceStore().contains(SHOW_DATA_IN_ANGULAR_DESIGNER)
+										? getPreferenceStore().getBoolean(SHOW_DATA_IN_ANGULAR_DESIGNER) : true));
+							}
+						};
+
 						return designerSession;
 					}
 				});
@@ -176,7 +184,7 @@ public class Activator extends AbstractUIPlugin
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
