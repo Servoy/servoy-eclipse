@@ -161,8 +161,8 @@ public class GhostHandler implements IServerService
 												Object configObject = pd.getConfig();
 												if (PropertyUtils.isCustomJSONObjectProperty(pd.getType()))
 												{
-													if (pd.getType() instanceof ComponentPropertyType ||
-														(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
+													if (pd.getType() instanceof ComponentPropertyType || (configObject instanceof JSONObject &&
+														Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
 													{
 														writeGhostToJSON(writer, (Bean)bean, pd, simpleTypeName, -1);// -1 does not add a [0] at the end of the name
 													}
@@ -173,7 +173,8 @@ public class GhostHandler implements IServerService
 													for (int i = 0; i < jsonArray.length(); i++)
 													{
 														if (((CustomJSONArrayType)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType ||
-															(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
+															(configObject instanceof JSONObject &&
+																Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
 														{
 															writeGhostToJSON(writer, (Bean)bean, pd, simpleTypeName, i);
 														}
@@ -418,8 +419,8 @@ public class GhostHandler implements IServerService
 											IPersist next = fields.next();
 											// TODO check responsive/relative layout and ghosts...
 											Part p = null;
-											if (!f.getParts().hasNext() ||
-												(next instanceof ISupportBounds && (p = f.getPartAt(((ISupportBounds)next).getLocation().y)) != null && p.getPartType() == Part.BODY))
+											if (!f.getParts().hasNext() || (next instanceof ISupportBounds &&
+												(p = f.getPartAt(((ISupportBounds)next).getLocation().y)) != null && p.getPartType() == Part.BODY))
 											{
 												ISupportBounds iSupportBounds = (ISupportBounds)next;
 												int x = iSupportBounds.getLocation().x;
@@ -533,7 +534,19 @@ public class GhostHandler implements IServerService
 		});
 		List<IFormElement> outsideElements = new ArrayList<IFormElement>();
 		Iterator<IPersist> it = editorPart.getForm().getAllObjects();
-		int formHeight = editorPart.getForm().getParts().hasNext() ? editorPart.getForm().getSize().height : 0;
+		int formHeight = 0;
+		if (editorPart.getForm().getParts().hasNext())
+		{
+			formHeight = editorPart.getForm().getSize().height;
+		}
+		else
+		{
+			Form form = editorPart.getForm();
+			while (formHeight == 0 && (form = form.extendsForm) != null)
+			{
+				formHeight = form.getParts().hasNext() ? form.getSize().height : 0;
+			}
+		}
 		while (it.hasNext())
 		{
 			IPersist persist = it.next();
