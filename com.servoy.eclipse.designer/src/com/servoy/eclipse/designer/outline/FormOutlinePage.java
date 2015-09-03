@@ -67,8 +67,10 @@ import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
+import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.LayoutContainer;
+import com.servoy.j2db.util.UUID;
 
 /**
  * ContentOutlinePage for Servoy form in outline view.
@@ -294,6 +296,22 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 					IPersist f = persist.getAncestor(IRepository.FORMS);
 					if (f != null && formHierarchy.contains(f))
 					{
+						final UUID uuid = persist.getUUID();
+						Object searchPersist = editingFlattenedSolution.getFlattenedForm(form).acceptVisitor(new IPersistVisitor()
+						{
+							public Object visit(IPersist o)
+							{
+								if (uuid.equals(o.getUUID()))
+								{
+									return o;
+								}
+								return IPersistVisitor.CONTINUE_TRAVERSAL;
+							}
+						});
+						if (searchPersist instanceof IPersist)
+						{
+							persist = (IPersist)searchPersist;
+						}
 						selectionPath.add(PersistContext.create(persist, form));
 					}
 				}
