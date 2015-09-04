@@ -15138,7 +15138,7 @@ Use row = -1, to set columnnames.]]></description>
           </summaries>
           <samples>
             <sample clientSupport="wc,sc"><![CDATA[//assuming the variable dataset contains a dataset
-dataset.getValue(2, 1,'data');]]></sample>
+dataset.setValue(2, 1,'data');]]></sample>
           </samples>
           <parameters>
             <parameter name="row" type="com.servoy.j2db.documentation.scripting.docs.Number" typecode="int">
