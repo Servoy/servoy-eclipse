@@ -61,35 +61,42 @@ public class DesignerValueListPropertyType extends ValueListPropertyType
 	public ValueListTypeSabloValue toSabloComponentValue(final Object formElementValue, final PropertyDescription pd, final INGFormElement formElement,
 		final WebFormComponent component, DataAdapterList dataAdapterList)
 	{
-		ValueList val = null;
-		IValueList valueList = null;
-		ValueListConfig config = (ValueListConfig)pd.getConfig();
-		String dataproviderID = (pd.getConfig() != null ? (String)formElement.getPropertyValue(config.getFor()) : null);
-
-		valueList = getIValueList(formElementValue, pd, formElement, component, dataAdapterList, val, valueList, config, dataproviderID);
-
-		return valueList != null ? new ValueListTypeSabloValue(valueList, dataAdapterList, config, dataproviderID, pd)
+		if (dataAdapterList.getApplication() instanceof DesignNGClient)
 		{
-			@Override
-			protected java.util.List<java.util.Map<String, Object>> getJavaValueForJSON()
+			ValueList val = null;
+			IValueList valueList = null;
+			ValueListConfig config = (ValueListConfig)pd.getConfig();
+			String dataproviderID = (pd.getConfig() != null ? (String)formElement.getPropertyValue(config.getFor()) : null);
+
+			valueList = getIValueList(formElementValue, pd, formElement, component, dataAdapterList, val, valueList, config, dataproviderID);
+
+			return valueList != null ? new ValueListTypeSabloValue(valueList, dataAdapterList, config, dataproviderID, pd)
 			{
-				if (dataAdapterList.getApplication() instanceof DesignNGClient && !((DesignNGClient)dataAdapterList.getApplication()).getShowData())
+				@Override
+				protected java.util.List<java.util.Map<String, Object>> getJavaValueForJSON()
 				{
-					return new ArrayList<>();
+					if (dataAdapterList.getApplication() instanceof DesignNGClient && !((DesignNGClient)dataAdapterList.getApplication()).getShowData())
+					{
+						return new ArrayList<>();
+					}
+					else
+					{
+						setValueList(getIValueList(formElementValue, pd, formElement, component, dataAdapterList, null, valueList, config, dataproviderID));
+						return super.getJavaValueForJSON();
+					}
 				}
-				else
-				{
-					setValueList(getIValueList(formElementValue, pd, formElement, component, dataAdapterList, null, valueList, config, dataproviderID));
-					return super.getJavaValueForJSON();
-				}
-			}
-		} : null;
+			} : null;
+		}
+		else
+		{
+			return super.toSabloComponentValue(formElementValue, pd, formElement, component, dataAdapterList);
+		}
 	}
 
 	@Override
 	protected IValueList getRealValueList(INGApplication application, ValueList val, ComponentFormat fieldFormat, String dataproviderID)
 	{
-		return com.servoy.j2db.component.ComponentFactory.getRealValueList(application, val, true, fieldFormat.dpType, fieldFormat.parsedFormat,
-			dataproviderID, true);
+		return application instanceof DesignNGClient ? com.servoy.j2db.component.ComponentFactory.getRealValueList(application, val, true, fieldFormat.dpType,
+			fieldFormat.parsedFormat, dataproviderID, true) : super.getRealValueList(application, val, fieldFormat, dataproviderID);
 	}
 }
