@@ -149,10 +149,13 @@ public class Activator extends AbstractUIPlugin
 							@Override
 							public void init() throws Exception
 							{
-								setClient(client = new DesignNGClient(this,
-									ApplicationServerRegistry.getServiceRegistry().getService(IDesignerSolutionProvider.class),
-									getPreferenceStore().contains(SHOW_DATA_IN_ANGULAR_DESIGNER)
-										? getPreferenceStore().getBoolean(SHOW_DATA_IN_ANGULAR_DESIGNER) : true));
+								if (client == null)
+								{
+									setClient(client = new DesignNGClient(this,
+										ApplicationServerRegistry.getServiceRegistry().getService(IDesignerSolutionProvider.class),
+										getPreferenceStore().contains(SHOW_DATA_IN_ANGULAR_DESIGNER)
+											? getPreferenceStore().getBoolean(SHOW_DATA_IN_ANGULAR_DESIGNER) : true));
+								}
 							}
 						};
 
