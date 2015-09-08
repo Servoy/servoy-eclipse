@@ -25,13 +25,13 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.dnd.Clipboard;
-import org.eclipse.swt.dnd.TextTransfer;
-import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
@@ -232,7 +232,7 @@ public class I18NEditor extends EditorPart
 				{
 					onDelete(item.getText(I18nComposite.CI_KEY));
 				}
-				if (item != null && item.getBounds(I18nComposite.CI_COPY).contains(pt))
+				if (item != null && !item.isDisposed() && item.getBounds(I18nComposite.CI_COPY).contains(pt))
 				{
 					String txt = item.getText(I18nComposite.CI_KEY);
 					txt = "i18n:" + txt; //$NON-NLS-1$
