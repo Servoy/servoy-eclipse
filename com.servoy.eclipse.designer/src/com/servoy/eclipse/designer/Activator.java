@@ -149,7 +149,7 @@ public class Activator extends AbstractUIPlugin
 							@Override
 							public void init() throws Exception
 							{
-								if (client == null)
+								if (getClient() == null)
 								{
 									setClient(client = new DesignNGClient(this,
 										ApplicationServerRegistry.getServiceRegistry().getService(IDesignerSolutionProvider.class),
