@@ -64,7 +64,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Class that creates the WAR file.
- * 
+ *
  * @author jcompagner
  * @since 6.1
  */
@@ -82,7 +82,7 @@ public class Exporter
 	}
 
 	/**
-	 * @param monitor 
+	 * @param monitor
 	 * @return
 	 */
 	public void doExport(IProgressMonitor monitor) throws ExportException
@@ -271,14 +271,12 @@ public class Exporter
 			for (String lafName : lafs)
 			{
 				String[] fileNames = getExtensions(loadedLafDefs, lafName);
-				if (fileNames != null)
+				if (fileNames == null) fileNames = new String[] { lafName };
+				for (String filename : fileNames)
 				{
-					for (String filename : fileNames)
-					{
-						File sourceFile = new File(lafSourceDir, filename);
-						copyFile(sourceFile, new File(lafTargetDir, filename));
-						writeFileEntry(fw, sourceFile, filename, writtenFiles);
-					}
+					File sourceFile = new File(lafSourceDir, filename);
+					copyFile(sourceFile, new File(lafTargetDir, filename));
+					writeFileEntry(fw, sourceFile, filename, writtenFiles);
 				}
 			}
 		}
@@ -328,7 +326,7 @@ public class Exporter
 		monitor.worked(1);
 
 
-		// copy lib/images dir 
+		// copy lib/images dir
 		File libImagesDir = new File(appServerDir, "lib/images");
 		File targetLibImagesDir = new File(tmpWarDir, "lib/images");
 		targetLibImagesDir.mkdirs();
@@ -517,7 +515,7 @@ public class Exporter
 		// TODO ask for a keystore?
 		properties.setProperty("SocketFactory.useSSL", "true");
 		properties.setProperty("SocketFactory.tunnelUseSSLForHttp", "false");
-		//{ "SocketFactory.SSLKeystorePath", "", "The SSL keystore path on the server", "text" }, // 
+		//{ "SocketFactory.SSLKeystorePath", "", "The SSL keystore path on the server", "text" }, //
 		//{ "SocketFactory.SSLKeystorePassphrase", "", "The SSL passphrase to access the keystore", "password" }, //
 
 		properties.setProperty("servoy.use.client.timezone", "true");
@@ -584,7 +582,7 @@ public class Exporter
 			{
 				properties.put("server." + i + ".dataModelCloneFrom", sc.getDataModelCloneFrom()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			properties.put("server." + i + ".enabled", Boolean.toString(true)); //$NON-NLS-1$ //$NON-NLS-2$ 
+			properties.put("server." + i + ".enabled", Boolean.toString(true)); //$NON-NLS-1$ //$NON-NLS-2$
 //			if (sc.getDialectClass() != null)
 //			{
 //				properties.put("server." + i + ".dialect", sc.getDialectClass()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -692,7 +690,7 @@ public class Exporter
 	 * @param tmpWarDir
 	 * @param appServerDir
 	 * @param pluginJnlpName
-	 * @param fw 
+	 * @param fw
 	 * @throws ExportException
 	 */
 	private void copyJnlp(File tmpWarDir, String appServerDir, String pluginJnlpName, Writer fw, Set<File> writtenFiles) throws ExportException, IOException
