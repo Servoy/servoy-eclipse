@@ -870,14 +870,23 @@ public class WarExporter
 			for (String lafName : lafs)
 			{
 				List<ExtensionResource> fileNames = JarManager.getExtensions(loadedLafDefs, lafName);
+				ArrayList<String> files = new ArrayList<String>();
 				if (fileNames != null)
 				{
 					for (ExtensionResource ext : fileNames)
 					{
-						File sourceFile = new File(lafSourceDir, ext.jarFileName);
-						copyFile(sourceFile, new File(lafTargetDir, ext.jarFileName));
-						writeFileEntry(fw, sourceFile, ext.jarFileName, writtenFiles);
+						files.add(ext.jarFileName);
 					}
+				}
+				else
+				{
+					files.add(lafName);
+				}
+				for (String f : files)
+				{
+					File sourceFile = new File(lafSourceDir, f);
+					copyFile(sourceFile, new File(lafTargetDir, f));
+					writeFileEntry(fw, sourceFile, f, writtenFiles);
 				}
 			}
 		}
