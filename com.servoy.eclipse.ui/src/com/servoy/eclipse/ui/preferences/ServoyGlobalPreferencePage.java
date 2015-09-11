@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -43,12 +44,13 @@ import com.servoy.j2db.util.ObjectWrapper;
 
 /**
  * Main preference page for Servoy settings.
- * 
+ *
  * @author rgansevles
  *
  */
 public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkbenchPreferencePage
 {
+
 	private Button toolbarsInFormWindowButton;
 	private Button closeEditorOnExitButton;
 	private Button openFirstFormDesignerButton;
@@ -57,10 +59,8 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private ComboViewer primaryKeySequenceTypeCombo;
 	private Button showNavigatorDefaultButton;
 	private ComboViewer encapsulationTypeCombo;
+	private Spinner waitForSolutionToBeLoadedInTestClientSpinner;
 
-	/*
-	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
-	 */
 	public void init(IWorkbench workbench)
 	{
 		/*
@@ -78,13 +78,13 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		Composite rootContainer = new Composite(parent, SWT.NONE);
 
 		rootContainer.setLayout(new GridLayout(1, false));
-		rootContainer.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
+		rootContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		// Servoy Design Perspective
 		Group formEditorOptionsContainer = new Group(rootContainer, SWT.NONE);
 		formEditorOptionsContainer.setText("Servoy Design Perspective Options");
 		formEditorOptionsContainer.setLayout(new GridLayout(2, false));
-		formEditorOptionsContainer.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
+		formEditorOptionsContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		toolbarsInFormWindowButton = new Button(formEditorOptionsContainer, SWT.CHECK);
 		toolbarsInFormWindowButton.setText("Show Form Editing Toolbars inside Form Editor");
@@ -112,7 +112,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		Group wizardOptionsContainer = new Group(rootContainer, SWT.NONE);
 		wizardOptionsContainer.setText("Wizard options");
 		wizardOptionsContainer.setLayout(new GridLayout(1, false));
-		wizardOptionsContainer.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
+		wizardOptionsContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Group columnsOrderGroup = new Group(wizardOptionsContainer, SWT.NONE);
 		columnsOrderGroup.setText("Show table columns");
@@ -128,7 +128,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		Group tableCreationSettings = new Group(rootContainer, SWT.NONE);
 		tableCreationSettings.setText("Table Creation Settings");
 		tableCreationSettings.setLayout(new GridLayout(1, false));
-		tableCreationSettings.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
+		tableCreationSettings.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Group defaultPrimaryKeySequenceType = new Group(tableCreationSettings, SWT.NONE);
 		defaultPrimaryKeySequenceType.setText("Default Primary Key Sequence Type");
@@ -145,7 +145,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		Group formProperties = new Group(rootContainer, SWT.NONE);
 		formProperties.setText("Form Properties");
 		formProperties.setLayout(new GridLayout(1, true));
-		formProperties.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
+		formProperties.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		showNavigatorDefaultButton = new Button(formProperties, SWT.CHECK);
 		showNavigatorDefaultButton.setText("Set default navigator on new forms");
@@ -157,8 +157,29 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		encapsulationTypeCombo = new ComboViewer(encapsulationProperties);
 		encapsulationTypeCombo.setContentProvider(new ArrayContentProvider());
 		encapsulationTypeCombo.setLabelProvider(new LabelProvider());
-		encapsulationTypeCombo.setInput(new ObjectWrapper[] { new ObjectWrapper(
-			"Public, Hide All", new Integer(DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)), new ObjectWrapper("Public", new Integer(DesignerPreferences.ENCAPSULATION_PUBLIC)) });
+		encapsulationTypeCombo.setInput(new ObjectWrapper[] { new ObjectWrapper("Public, Hide All", new Integer(
+			DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)), new ObjectWrapper("Public", new Integer(DesignerPreferences.ENCAPSULATION_PUBLIC)) });
+
+		Group launcherSettings = new Group(rootContainer, SWT.NONE); // TODO it would really be nicer to have these in a real launch configuration page (similar to what mobile client lauchers do)
+		launcherSettings.setText("Launcher settings");
+		launcherSettings.setLayout(new GridLayout(3, false));
+		launcherSettings.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		Label testSolutionLoadTimeoutLabel = new Label(launcherSettings, SWT.NONE);
+		testSolutionLoadTimeoutLabel.setText("Maximum time to wait for a solution to load in (non-mobile) jsunit test client: ");
+		waitForSolutionToBeLoadedInTestClientSpinner = new Spinner(launcherSettings, SWT.BORDER);
+		waitForSolutionToBeLoadedInTestClientSpinner.setMinimum(5);
+		waitForSolutionToBeLoadedInTestClientSpinner.setMaximum(Integer.MAX_VALUE);
+		waitForSolutionToBeLoadedInTestClientSpinner.setDigits(0);
+		waitForSolutionToBeLoadedInTestClientSpinner.setIncrement(10); // 10 sec
+		waitForSolutionToBeLoadedInTestClientSpinner.setPageIncrement(60); // 1 min
+//		waitForSolutionToBeLoadedInTestClientSpinner.setLayoutData(new GridData(SWT.FILL, SWT.END, true, false));
+		Label testSolutionLoadTimeoutLabelUnits = new Label(launcherSettings, SWT.NONE);
+		testSolutionLoadTimeoutLabelUnits.setText(" sec.");
+		String tt = "Maximum number of seconds in which a solution should load and be ready for testing.\nSolutions with long running onOpen handlers might want to change this.\nIf a solution doesn't load in this time frame, the tests will fail.\n\nDefault value: 300 sec.";
+		testSolutionLoadTimeoutLabel.setToolTipText(tt);
+		waitForSolutionToBeLoadedInTestClientSpinner.setToolTipText(tt);
+		testSolutionLoadTimeoutLabelUnits.setToolTipText(tt);
 
 		initializeFields();
 
@@ -177,6 +198,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		setPrimaryKeySequenceTypeValue(prefs.getPrimaryKeySequenceType());
 		showNavigatorDefaultButton.setSelection(prefs.getShowNavigatorDefault());
 		setEncapsulationTypeValue(prefs.getEncapsulationType());
+		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(prefs.getTestClientLoadTimeout());
 	}
 
 	@Override
@@ -191,6 +213,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		setPrimaryKeySequenceTypeValue(DesignerPreferences.PK_SEQUENCE_TYPE_DEFAULT);
 		showNavigatorDefaultButton.setSelection(DesignerPreferences.SHOW_NAVIGATOR_DEFAULT);
 		setEncapsulationTypeValue(DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL);
+		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(DesignerPreferences.WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT);
 
 		super.performDefaults();
 	}
@@ -208,6 +231,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		prefs.setPrimaryKeySequenceType(((Integer)((ObjectWrapper)((IStructuredSelection)primaryKeySequenceTypeCombo.getSelection()).getFirstElement()).getType()).intValue());
 		prefs.setShowNavigatorDefault(showNavigatorDefaultButton.getSelection());
 		prefs.setEncapsulationType(((Integer)((ObjectWrapper)((IStructuredSelection)encapsulationTypeCombo.getSelection()).getFirstElement()).getType()).intValue());
+		prefs.setTestClientLoadTimeout(waitForSolutionToBeLoadedInTestClientSpinner.getSelection());
 		prefs.save();
 
 		return true;

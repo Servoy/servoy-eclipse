@@ -36,6 +36,7 @@ import com.servoy.eclipse.jsunit.Activator;
 import com.servoy.eclipse.jsunit.scriptunit.RunJSUnitTests;
 import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.debug.RemoteDebugScriptEngine;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
@@ -117,7 +118,7 @@ public class RunSmartClientTests extends RunJSUnitTests
 								monitor.setTaskName("waiting for solution to be loaded in client...");
 
 								// wait for solution to load
-								timeout = 60 * 10; // 60 sec max wait for sol. to load
+								timeout = Math.max(new DesignerPreferences().getTestClientLoadTimeout(), 5) * 10; // default is 5 min; getTestClientLoadTimeout is in seconds
 								while (!testApp.isDoneLoading() && timeout > 0 && !monitor.isCanceled())
 								{
 									timeout--;
@@ -133,6 +134,15 @@ public class RunSmartClientTests extends RunJSUnitTests
 								if (!testApp.isDoneLoading())
 								{
 									ServoyLog.logError("Timeout/cancel while waiting for solution to be loaded in test app.", null);
+									try
+									{
+										if (RemoteDebugScriptEngine.isConnected(1)) RemoteDebugScriptEngine.stopExecutingCurrentFunction();
+									}
+									catch (Exception e)
+									{
+										ServoyLog.logError("Exception caught when trying to force client shutdown after test client load solution timeout:", e);
+									}
+
 									if (monitor.isCanceled())
 									{
 										return Status.CANCEL_STATUS;
