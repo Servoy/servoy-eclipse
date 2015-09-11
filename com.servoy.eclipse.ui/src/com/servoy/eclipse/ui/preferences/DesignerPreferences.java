@@ -40,9 +40,9 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Preferences holder for designer settings.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class DesignerPreferences
 {
@@ -86,6 +86,9 @@ public class DesignerPreferences
 	public static final String PK_SEQUENCE_TYPE_SETTING = "primaryKeySequenceType";
 	public static final String SHOW_NAVIGATOR_DEFAULT_SETTING = "showNavigatorDefault";
 	public static final String ENCAPSULATION_TYPE = "encapsulationType";
+
+	// if you change this, please change it in ServoyJSUnitTestRunner as well
+	public static final String WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_TIMEOUT_PROPERTY_NAME = "servoy.test.solution-load.timeout"; // in seconds; if you modify this, modify it in ServoyGlobalPreferencePage
 
 	public static final String SNAP_TO_ALIGMNENT = "alignment";
 	public static final String SNAP_TO_GRID = "grid";
@@ -135,6 +138,9 @@ public class DesignerPreferences
 	public static final int ENCAPSULATION_PUBLIC_HIDE_ALL = PersistEncapsulation.HIDE_CONTROLLER | PersistEncapsulation.HIDE_DATAPROVIDERS |
 		PersistEncapsulation.HIDE_ELEMENTS | PersistEncapsulation.HIDE_FOUNDSET;
 	public static final int ENCAPSULATION_PUBLIC = PersistEncapsulation.DEFAULT;
+
+	// if you change this, please change it in ServoyJSUnitTestRunner as well
+	public static final int WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT = 300; // 5 min (in hundreds of milliseconds); can be overridden via 'servoy.test.solution-load.timeout' system property
 
 	protected final IEclipsePreferences eclipsePreferences;
 
@@ -791,6 +797,17 @@ public class DesignerPreferences
 			this.drawerEntries = drawerEntries;
 			this.entryProperties = entryProperties;
 		}
+	}
+
+	public int getTestClientLoadTimeout()
+	{
+		return getProperty(WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_TIMEOUT_PROPERTY_NAME, WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT);
+	}
+
+	public void setTestClientLoadTimeout(int timeout)
+	{
+		if (timeout == WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT) removeProperty(WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_TIMEOUT_PROPERTY_NAME);
+		else setProperty(WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_TIMEOUT_PROPERTY_NAME, timeout);
 	}
 
 }

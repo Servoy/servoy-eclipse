@@ -37,7 +37,7 @@ import com.servoy.j2db.util.Debug;
 
 /**
  * Debug smart client specialised for unit test runs.
- * 
+ *
  * @author acostescu
  */
 public class DebugJ2DBTestClient extends DebugJ2DBClient
@@ -89,16 +89,14 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 		return userManager;
 	}
 
-	/**
-	 * 
-	 */
 	private void runEvents()
 	{
-		if (events.size() == 0) return;
+		if (events.size() == 0 || isShutDown()) return;
 		Runnable[] runnables = events.toArray(new Runnable[events.size()]);
 		events.clear();
 		for (Runnable runnable : runnables)
 		{
+			if (isShutDown()) return;
 			runnable.run();
 		}
 		runEvents();
