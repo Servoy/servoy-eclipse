@@ -97,12 +97,12 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 
 	private void runEvents()
 	{
-		if (events.size() == 0 || isShutDown()) return;
+		if (events.size() == 0/* || isShutDown() */) return;
 		Runnable[] runnables = events.toArray(new Runnable[events.size()]);
 		events.clear();
 		for (Runnable runnable : runnables)
 		{
-			if (isShutDown()) return;
+//			if (isShutDown()) return;
 			runnable.run();
 		}
 		runEvents();

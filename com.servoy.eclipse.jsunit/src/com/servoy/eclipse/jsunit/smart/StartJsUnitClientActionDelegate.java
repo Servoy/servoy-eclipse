@@ -32,7 +32,7 @@ import com.servoy.j2db.IDebugJ2DBClient;
 
 /**
  * @author jcompagner
- * 
+ *
  */
 public class StartJsUnitClientActionDelegate extends StartDebugHandler implements IRunnableWithProgress
 {
@@ -44,11 +44,6 @@ public class StartJsUnitClientActionDelegate extends StartDebugHandler implement
 		this.window = w;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
-	 */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException
 	{
@@ -86,7 +81,7 @@ public class StartJsUnitClientActionDelegate extends StartDebugHandler implement
 
 	/**
 	 * Returns whether or not the client was successfully started on the last run(). Will be false if the user canceled the run or if some problem ocurred.
-	 * 
+	 *
 	 * @return whether or not the client was successfully started on the last run().
 	 */
 	public boolean clientStartSucceeded()
