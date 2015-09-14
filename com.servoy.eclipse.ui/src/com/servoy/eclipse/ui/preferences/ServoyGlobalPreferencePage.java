@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -46,7 +47,7 @@ import com.servoy.j2db.util.ObjectWrapper;
 
 /**
  * Main preference page for Servoy settings.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -62,6 +63,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private ComboViewer primaryKeySequenceTypeCombo;
 	private Button showNavigatorDefaultButton;
 	private ComboViewer encapsulationTypeCombo;
+	private Spinner waitForSolutionToBeLoadedInTestClientSpinner;
 
 	public void init(IWorkbench workbench)
 	{
