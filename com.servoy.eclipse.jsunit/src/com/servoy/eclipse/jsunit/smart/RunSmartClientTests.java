@@ -118,7 +118,9 @@ public class RunSmartClientTests extends RunJSUnitTests
 
 								// wait for solution to load
 								timeout = Math.max(new DesignerPreferences().getTestClientLoadTimeout(), 5) * 10; // default is 5 min; getTestClientLoadTimeout is in seconds
-								while (!testApp.isDoneLoading() && timeout > 0 && !monitor.isCanceled())
+								boolean startedToLoad = !testApp.isShutDown(); // TODO should we find another way; if client already started to load and also user stopped it (unlikely) then we won't detect that and still wait
+								while (!testApp.isDoneLoading() && (!startedToLoad || (startedToLoad && !testApp.isShutDown())) && timeout > 0 &&
+									!monitor.isCanceled())
 								{
 									timeout--;
 									try
@@ -129,13 +131,14 @@ public class RunSmartClientTests extends RunJSUnitTests
 									{
 										ServoyLog.logError(e);
 									}
+									startedToLoad = startedToLoad || !testApp.isShutDown();
 								}
 								if (!testApp.isDoneLoading())
 								{
-									ServoyLog.logError("Timeout/cancel while waiting for solution to be loaded in test app.", null);
+									ServoyLog.logError("Timeout or cancel while waiting for solution to be loaded in test app.", null);
 									try
 									{
-										if (RemoteDebugScriptEngine.isConnected(1)) RemoteDebugScriptEngine.stopExecutingCurrentFunction();
+										if (RemoteDebugScriptEngine.isConnected(0)) RemoteDebugScriptEngine.stopExecutingCurrentFunction();
 									}
 									catch (Exception e)
 									{
@@ -243,34 +246,41 @@ public class RunSmartClientTests extends RunJSUnitTests
 			Activator plugin = Activator.getDefault();
 			if (plugin != null)
 			{
-				plugin.getJSUnitJ2DBClient().invokeLater(new Runnable()
+				if (!plugin.getJSUnitJ2DBClient().isShutDown())
 				{
-					public void run()
+					plugin.getJSUnitJ2DBClient().invokeLater(new Runnable()
 					{
-						Activator plugin = Activator.getDefault();
-						if (plugin != null)
+						public void run()
 						{
-							plugin.getJSUnitJ2DBClient().shutDown(false);
-							try
-							{
-								Thread.sleep(1000);
-								plugin = Activator.getDefault();
-								if (plugin != null)
-								{
-									plugin.getJSUnitJ2DBClient().shutDown(true);
-								}
-							}
-							catch (InterruptedException e)
-							{
-							}
-							plugin = Activator.getDefault();
+							Activator plugin = Activator.getDefault();
 							if (plugin != null)
 							{
-								plugin.getJSUnitJ2DBClient().getClientInfo().clearUserInfo();
+								plugin.getJSUnitJ2DBClient().shutDown(false);
+								try
+								{
+									Thread.sleep(1000);
+									plugin = Activator.getDefault(); // TODO what is this line for? can it change back to null here?
+									if (plugin != null)
+									{
+										plugin.getJSUnitJ2DBClient().shutDown(true);
+									}
+								}
+								catch (InterruptedException e)
+								{
+								}
+								plugin = Activator.getDefault(); // TODO what is this line for? can it change back to null here?
+								if (plugin != null)
+								{
+									plugin.getJSUnitJ2DBClient().getClientInfo().clearUserInfo();
+								}
 							}
 						}
-					}
-				});
+					});
+				}
+				else
+				{
+					plugin.getJSUnitJ2DBClient().getClientInfo().clearUserInfo();
+				}
 			}
 		}
 	}
