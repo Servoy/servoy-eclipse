@@ -2777,7 +2777,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			pd.setLabelProvider(formLabelProvider);
 			return pd;
 		}
-		if (propertyType == ValueListPropertyType.INSTANCE)
+		if (propertyType instanceof ValueListPropertyType)
 		{
 			return new ValuelistPropertyController<Integer>(id, displayName, persistContext, true);
 		}
