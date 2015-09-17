@@ -209,7 +209,7 @@ public class CreateComponentHandler implements IServerService
 							}
 							((WebComponent)parentBean).setProperty(dropTargetFieldName, arrayValue);
 						}
-						else ((WebComponent)parentBean).setProperty(dropTargetFieldName, bean);
+						else((WebComponent)parentBean).setProperty(dropTargetFieldName, bean);
 					}
 					return bean;
 				}
@@ -472,16 +472,17 @@ public class CreateComponentHandler implements IServerService
 				if (spec != null)
 				{
 					String compName = null;
-					String firstPart = name;
-					int index = firstPart.indexOf("-");
+					String componentName = name;
+					int index = componentName.indexOf("-");
 					if (index != -1)
 					{
-						firstPart = firstPart.substring(index + 1);
+						componentName = componentName.substring(index + 1);
 					}
-					compName = firstPart + "_" + id.incrementAndGet();
+					componentName = componentName.replaceAll("-", "_");
+					compName = componentName + "_" + id.incrementAndGet();
 					while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
 					{
-						compName = firstPart + "_" + id.incrementAndGet();
+						compName = componentName + "_" + id.incrementAndGet();
 					}
 
 					WebComponent webComponent = null;
