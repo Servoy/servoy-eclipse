@@ -37,6 +37,7 @@ import org.sablo.specification.property.types.PointPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.specification.property.types.TypesRegistry;
 
+import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.component.ComponentFactory;
@@ -45,6 +46,7 @@ import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RepositoryHelper;
@@ -63,7 +65,7 @@ public class BasePropertyHandler implements IPropertyHandler
 {
 	// null type: use property controller internally
 	public static final PropertyDescription ANCHORS_DESCRIPTION = new PropertyDescription("anchors", null, new AnchorPropertyController("anchors",
-		RepositoryHelper.getDisplayName("anchors", GraphicalComponent.class)));
+			RepositoryHelper.getDisplayName("anchors", GraphicalComponent.class)));
 
 	protected final PropertyDescriptor propertyDescriptor;
 
@@ -235,6 +237,12 @@ public class BasePropertyHandler implements IPropertyHandler
 				dispType = ((Field)persist).getDisplayType();
 			}
 
+			if (IContentSpecConstants.PROPERTY_NG_READONLY_MODE.equals(name) && obj instanceof Form)
+			{
+				Form form = (Form)obj;
+				return form.getView() != IFormConstants.VIEW_TYPE_RECORD && form.getView() != IFormConstants.VIEW_TYPE_RECORD_LOCKED;
+			}
+
 			if (!RepositoryHelper.shouldShow(name, element, persist.getClass(), dispType))
 			{
 				return false;
@@ -279,7 +287,7 @@ public class BasePropertyHandler implements IPropertyHandler
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
