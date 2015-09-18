@@ -291,7 +291,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 					public CellEditor createPropertyEditor(Composite parent)
 					{
 						return new DataProviderCellEditor(parent, labelProviderHidePrefix, new DataProviderValueEditor(converter),
-							flattenedSolution.getFlattenedForm(persistContext.getPersist()), flattenedSolution, readOnly, options, converter);
+							flattenedSolution.getFlattenedForm(persistContext.getPersist()), flattenedSolution, readOnly, options, converter, null);
 					}
 				});
 			propertyController.setSupportsReadonly(true);

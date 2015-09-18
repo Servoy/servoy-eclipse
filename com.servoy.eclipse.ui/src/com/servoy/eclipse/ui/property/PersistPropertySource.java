@@ -1097,7 +1097,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							public CellEditor createPropertyEditor(Composite parent)
 							{
 								return new DataProviderCellEditor(parent, labelProviderHidePrefix, new DataProviderValueEditor(converter), form,
-									flattenedEditingSolution, readOnly, options, converter);
+									flattenedEditingSolution, readOnly, options, converter, null);
 							}
 						});
 					propertyController.setSupportsReadonly(true);
@@ -2933,7 +2933,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	 * @return
 	 */
 	private static IPropertyDescriptor createDataproviderController(final PersistContext persistContext, final boolean readOnly, final String id,
-		final String displayName, final FlattenedSolution flattenedEditingSolution, final Form form, Table table, final DataProviderOptions options)
+		final String displayName, final FlattenedSolution flattenedEditingSolution, final Form form, final Table table, final DataProviderOptions options)
 	{
 		final DataProviderConverter converter = new DataProviderConverter(flattenedEditingSolution, persistContext.getPersist(), table);
 		DataProviderLabelProvider showPrefix = new DataProviderLabelProvider(false);
@@ -2951,7 +2951,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				public CellEditor createPropertyEditor(Composite parent)
 				{
 					return new DataProviderCellEditor(parent, labelProviderHidePrefix, new DataProviderValueEditor(converter), form, flattenedEditingSolution,
-						readOnly, options, converter);
+						readOnly, options, converter, table);
 				}
 			});
 		propertyController.setSupportsReadonly(true);
