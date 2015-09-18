@@ -334,65 +334,74 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		final Map<Form, List<IFormElement>> frms = new HashMap<Form, List<IFormElement>>();
 		final List<Form> changedForms = new ArrayList<Form>();
 		Media cssFile = null;
-		for (IPersist persist : persists)
+
+		if (persists == null)
 		{
-			if (persist instanceof IFormElement || persist instanceof Tab || persist instanceof WebCustomType)
+			// this is supposed to mean "refresh everything"
+			changedForms.add(getEditorPart().getForm());
+		}
+		else
+		{
+			for (IPersist persist : persists)
 			{
-				IPersist parent = persist;
-				if (persist instanceof Tab)
+				if (persist instanceof IFormElement || persist instanceof Tab || persist instanceof WebCustomType)
 				{
-					parent = ((Tab)persist).getParent();
-					persist = parent;
-				}
-				if (persist instanceof WebCustomType)
-				{
-					parent = ((WebCustomType)persist).getParentComponent();
-					persist = parent;
-				}
-				while (parent != null)
-				{
-					if (parent instanceof Form)
+					IPersist parent = persist;
+					if (persist instanceof Tab)
 					{
-						List<IFormElement> list = frms.get(parent);
-						if (list == null)
-						{
-							frms.put((Form)parent, list = new ArrayList<IFormElement>());
-						}
-						list.add((IFormElement)persist);
-						break;
+						parent = ((Tab)persist).getParent();
+						persist = parent;
 					}
-					parent = parent.getParent();
+					if (persist instanceof WebCustomType)
+					{
+						parent = ((WebCustomType)persist).getParentComponent();
+						persist = parent;
+					}
+					while (parent != null)
+					{
+						if (parent instanceof Form)
+						{
+							List<IFormElement> list = frms.get(parent);
+							if (list == null)
+							{
+								frms.put((Form)parent, list = new ArrayList<IFormElement>());
+							}
+							list.add((IFormElement)persist);
+							break;
+						}
+						parent = parent.getParent();
+					}
 				}
-			}
-			else if (persist instanceof Form)
-			{
-				Form changedForm = (Form)persist;
-				if (!changedForms.contains(changedForm))
+				else if (persist instanceof Form)
 				{
-					changedForms.add(changedForm);
+					Form changedForm = (Form)persist;
+					if (!changedForms.contains(changedForm))
+					{
+						changedForms.add(changedForm);
+					}
 				}
-			}
-			else if (persist instanceof Part)
-			{
-				Form changedForm = (Form)persist.getParent();
-				if (!changedForms.contains(changedForm))
+				else if (persist instanceof Part)
 				{
-					changedForms.add(changedForm);
+					Form changedForm = (Form)persist.getParent();
+					if (!changedForms.contains(changedForm))
+					{
+						changedForms.add(changedForm);
+					}
 				}
-			}
-			else if (persist instanceof LayoutContainer)
-			{
-				Form changedForm = (Form)persist.getAncestor(IRepository.FORMS);
-				if (!changedForms.contains(changedForm))
+				else if (persist instanceof LayoutContainer)
 				{
-					changedForms.add(changedForm);
+					Form changedForm = (Form)persist.getAncestor(IRepository.FORMS);
+					if (!changedForms.contains(changedForm))
+					{
+						changedForms.add(changedForm);
+					}
 				}
-			}
-			else if (persist instanceof Media)
-			{
-				if (((Media)persist).getName().endsWith(".css"))
+				else if (persist instanceof Media)
 				{
-					cssFile = (Media)persist;
+					if (((Media)persist).getName().endsWith(".css"))
+					{
+						cssFile = (Media)persist;
+					}
 				}
 			}
 		}
