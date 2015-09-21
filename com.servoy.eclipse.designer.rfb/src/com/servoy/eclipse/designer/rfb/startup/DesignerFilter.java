@@ -53,6 +53,11 @@ import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.websocket.utils.PropertyUtils;
 
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.StringResource;
+import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
@@ -98,6 +103,7 @@ public class DesignerFilter implements Filter
 
 					//Step 1: create a list with all keys containing first the layout and then the component packages
 					ArrayList<String> orderedKeys = new ArrayList<String>();
+					orderedKeys.add("Templates");
 					Set<String> keySet = provider.getLayoutSpecifications().keySet();
 					for (String key : keySet)
 					{
@@ -186,6 +192,47 @@ public class DesignerFilter implements Filter
 							jsonWriter.key("components");
 							jsonWriter.array();
 							startedArray = true;
+						}
+						else if (key.equals("Templates"))
+						{
+							List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(
+								IRepository.TEMPLATES);
+							if (templates.size() > 0)
+							{
+								jsonWriter.object();
+								jsonWriter.key("packageName").value("Templates");
+								jsonWriter.key("packageDisplayname").value("Templates");
+								jsonWriter.key("components");
+								jsonWriter.array();
+								for (IRootObject iRootObject : templates)
+								{
+									if (iRootObject instanceof StringResource)
+									{
+										StringResource stringResource = (StringResource)iRootObject;
+										String content = stringResource.getContent();
+										JSONObject templateJSON = new JSONObject(content);
+										if ((layoutType.equals(layoutTypeNames[0]) && (!templateJSON.has(Template.PROP_LAYOUT)) ||
+											(templateJSON.has(Template.PROP_LAYOUT) && templateJSON.get(Template.PROP_LAYOUT).equals(layoutType))))
+										{
+											jsonWriter.object();
+											jsonWriter.key("name").value(iRootObject.getName());
+											jsonWriter.key("componentType").value("template");
+											jsonWriter.key("displayName").value(iRootObject.getName());
+											jsonWriter.key("tagName").value("<div></div>");
+											Map<String, Object> model = new HashMap<String, Object>();
+											HashMap<String, Number> size = new HashMap<String, Number>();
+											size.put("height", Integer.valueOf(20));
+											size.put("width", Integer.valueOf(100));
+											model.put("size", size);
+											jsonWriter.key("model").value(new JSONObject(model));
+											jsonWriter.key("icon").value("rfb/angular/js/modules/toolbaractions/icons/template.gif");
+											jsonWriter.endObject();
+										}
+									}
+								}
+								jsonWriter.endArray();
+								jsonWriter.endObject();
+							}
 						}
 						if (provider.getLayoutSpecifications().containsKey(key))
 						{

@@ -37,6 +37,7 @@ import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
@@ -44,6 +45,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptElement;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Template;
@@ -179,6 +181,11 @@ public class SaveAsTemplateAction extends SelectionAction
 					persists.add((IPersist)model);
 				}
 			}
+			else if (selected instanceof PersistContext)
+			{
+				IPersist persist = ((PersistContext)selected).getPersist();
+				persists.add(persist);
+			}
 		}
 
 		int resourceType = StringResource.ELEMENTS_TEMPLATE;
@@ -238,11 +245,12 @@ public class SaveAsTemplateAction extends SelectionAction
 			ServoyLog.logError("Cannot save template", e);
 			MessageDialog.openError(getWorkbenchPart().getSite().getShell(), "Cannot save template", "Reason: " + e.getMessage());
 		}
+		com.servoy.eclipse.core.Activator.getDefault().webResourcesChanged(true);
 	}
 
 	/**
 	 * Replace selected subelements with their parent nodes, for instance replace a tab with its tabpanel
-	 * 
+	 *
 	 * @param form
 	 * @param persists
 	 * @return
@@ -263,6 +271,7 @@ public class SaveAsTemplateAction extends SelectionAction
 						retval.add(persist);
 					}
 					persist = persist.getParent();
+					if (persist instanceof LayoutContainer) break;
 				}
 			}
 		}

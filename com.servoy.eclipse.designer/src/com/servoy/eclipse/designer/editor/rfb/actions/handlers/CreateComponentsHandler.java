@@ -78,14 +78,17 @@ public class CreateComponentsHandler extends CreateComponentHandler
 								newPersists = new ArrayList<IPersist>();
 								for (int i = 0; i < components.length(); i++)
 								{
-									IPersist persist = createComponent(components.getJSONObject(i));
-									if (persist != null)
+									IPersist[] persist = createComponent(components.getJSONObject(i));
+									for (IPersist iPersist : persist)
 									{
-										newPersists.add(persist);
-									}
-									else
-									{
-										Debug.error("Could not create the component " + components.getJSONObject(i).toString());
+										if (persist != null)
+										{
+											newPersists.add(iPersist);
+										}
+										else
+										{
+											Debug.error("Could not create the component " + components.getJSONObject(i).toString());
+										}
 									}
 								}
 							}

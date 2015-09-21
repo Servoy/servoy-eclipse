@@ -281,7 +281,7 @@ public class OpenElementWizardHandler implements IServerService
 					@Override
 					protected ISelection getSelection()
 					{
-						return OpenElementWizard.this.getSelection();
+						return selectionProvider.getSelection();
 					}
 				};
 			}

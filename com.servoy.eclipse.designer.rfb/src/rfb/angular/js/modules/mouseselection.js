@@ -5,7 +5,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 		var mouseDownPosition = {"left":-1, "top":-1};
 		var lassoDiv = editorScope.glasspane.firstElementChild
 		var utils = $selectionUtils.getUtilsForScope(editorScope);
-		
+
 		function select(event, node) {
 			if (event.ctrlKey) {
 				if (editorScope.getSelection().indexOf(node) !== -1) {
@@ -34,7 +34,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 				else {
 					editorScope.setSelection(node);
 				}
-			} 
+			}
 			else if (event.button == 2 && editorScope.getSelection().indexOf(node) !== -1 && editorScope.getSelection().length > 1)
 			{
 				// if we right click on selected element while multiple selection,just show context menu and do not modify selection
@@ -43,14 +43,14 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 			else {
 				editorScope.setSelection(node);
 			}
-			
+
 			//set the focus on the target so that the editor area scrolls to that element
-			//this is also a workaround for IE bug: if the user clicks the editor area scroll bar then nothing else will ever gain focus 
+			//this is also a workaround for IE bug: if the user clicks the editor area scroll bar then nothing else will ever gain focus
 			//=> keyboard arrows will just scroll instead of moving selected elements
 			var isThisFormGhost = editorScope.getGhost(event.target.getAttribute("svy-id"));
 			if (!isThisFormGhost || (isThisFormGhost.type !== EDITOR_CONSTANTS.GHOST_TYPE_FORM))
 				$(event.target).focus();
-			
+
 		}
 		function onmousedown(event) {
 				var node = utils.getNode(event);
@@ -86,7 +86,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
 					canStartLasso = (ghostObject && ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM);
 				}
-				
+
 				if(canStartLasso) {
 					startLasso(event);
 				}
@@ -114,7 +114,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 				var p2 = lassoMouseSelectPosition;
 				if(Math.abs(p1.left - p2.left) > 1 && Math.abs(p1.top - p2.top) > 1) {
 					var selectedElements = utils.getElementsByRectangle(p1,p2,100,true,true);
-					editorScope.setSelection(selectedElements);	
+					editorScope.setSelection(selectedElements);
 				}
 				lassoStarted = false;
 				lassoDiv.style.display = 'none';
@@ -136,37 +136,37 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 				lassoDiv.style.display = 'block';
 			}
 		}
-		
+
 		// register event on editor form iframe (see register event in the editor.js)
 		editorScope.registerDOMEvent("mousedown","CONTENTFRAME_OVERLAY", onmousedown); // real selection in editor content iframe
 		editorScope.registerDOMEvent("mouseup","CONTENTFRAME_OVERLAY", onmouseup); // real selection in editor content iframe
 
-		editorScope.registerDOMEvent("mousedown","CONTENTFRAME_OVERLAY", onmousedownLasso); 
-		editorScope.registerDOMEvent("mouseup","CONTENTFRAME_OVERLAY", onmouseupLasso); 
+		editorScope.registerDOMEvent("mousedown","CONTENTFRAME_OVERLAY", onmousedownLasso);
+		editorScope.registerDOMEvent("mouseup","CONTENTFRAME_OVERLAY", onmouseupLasso);
 		editorScope.registerDOMEvent("mousemove","CONTENTFRAME_OVERLAY", onmousemove);
 	})
 }).factory("$selectionUtils", function(EDITOR_CONSTANTS) {
 	function hasClass(element, cls) {
 		return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
 	}
-	
+
 	function isGhostAlreadySelected(selection, ghost) {
 		for(var i=0; i < selection.length; i++) {
 			if (selection[i].getAttribute("svy-id") == ghost.getAttribute("svy-id")) return true;
 		}
 		return false;
 	}
-	
-	
+
+
 	var draggingFromPallete = null;
 	var designMode = false;
 
 	return {
 		getUtilsForScope: function(editorScope) {
 			return {
-				
+
 				addGhostsToSelection: function(selection) {
-					
+
 					var addToSelection = [];
 
 					for(var i=0;i<selection.length;i++) {
@@ -183,12 +183,12 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					selection = selection.concat(addToSelection);
 					return selection;
 				},
-				
+
 				getDropNode: function(type,topContainer,layoutName,event,componentName) {
 					var dropTarget = null;
 					if (type == "layout" || (type == "component" && !editorScope.isAbsoluteFormLayout())) {
 						var realName = layoutName?layoutName:"component";
-						
+
 						dropTarget = this.getNode(event, true);
 						if (!dropTarget){
 							// this is on the form, can this layout container be dropped on the form?
@@ -227,7 +227,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 							}
 						}
 					}
-					else if (type != "component"){
+					else if (type != "component" && type != "template"){
 						dropTarget = this.getNode(event);
 						if (dropTarget && dropTarget.getAttribute("svy-types")){
 							if (dropTarget.getAttribute("svy-types").indexOf(type) <= 0)
@@ -240,11 +240,11 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 						if (componentName !== undefined && dropTarget && dropTarget.getAttribute("svy-forbidden-components")){
 							if (dropTarget.getAttribute("svy-forbidden-components").indexOf(componentName) > 0)
 								return {dropAllowed:false}; // the drop target doesn't suppor this component
-						}						
+						}
 					}
 					return {dropAllowed:true,dropTarget:dropTarget};
 				},
-				
+
 				toggleDesignMode: function()
 				{
 					designMode = !designMode;
@@ -259,12 +259,12 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 							var designClass = $(this).attr('svy-designclass');
 							if (design)
 							{
-								$(this).addClass(designClass ); 
-							}	  
+								$(this).addClass(designClass );
+							}
 							else
 							{
 								$(this).removeClass(designClass );
-							} 
+							}
 						});
 						editorScope.refreshEditorContent();
 					}
@@ -280,18 +280,18 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					if (!designMode)
 					{
 						this.updateDesignMode(dragging != null);
-					}	
+					}
 				},
 				getDraggingFromPallete: function(){
 					return draggingFromPallete;
 				},
-				
+
 				adjustForPadding:function (mousePosition) {
 					mousePosition.left -= parseInt(angular.element(editorScope.glasspane.parentElement).css("padding-left").replace("px",""));
 					mousePosition.top  -= parseInt(angular.element(editorScope.glasspane.parentElement).css("padding-top").replace("px",""));
 					return mousePosition;
 				},
-				
+
 				getMousePosition: function(event,lassoStarted) {
 					var xMouseDown = -1;
 					var yMouseDown = -1;
@@ -299,10 +299,10 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 						xMouseDown = event.pageX;
 						yMouseDown = event.pageY;
 					}
-					else 
+					else
 						if (event.clientX || event.clientY){
 							xMouseDown = event.clientX;
-							yMouseDown = event.clientY;			
+							yMouseDown = event.clientY;
 						}
 					if (lassoStarted || hasClass(event.target,"contentframe-overlay") || hasClass(event.target,"ghost") || hasClass(event.target, "knob") || event.target.id == "highlight") {
 						xMouseDown -= editorScope.glasspane.parentElement.offsetLeft;
@@ -321,10 +321,10 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					var glassPaneMousePosition1 = {top:glassPaneMousePosition.top + 1,left:glassPaneMousePosition.left + 1};
 					var glassPaneMousePosition2 = {top:glassPaneMousePosition.top - 1,left:glassPaneMousePosition.left - 1};
 					var elements = this.getElementsByRectangle(glassPaneMousePosition1,glassPaneMousePosition2,0.000001,true,!skipGlass);
-						
+
 					if (elements.length == 1)
 						return elements[0];
-					else 
+					else
 						if (elements.length > 1) {
 							var node = elements[elements.length-1];
 							var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
@@ -334,7 +334,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 							// always return the one on top (visible); this is due to formIndex implementation
 							return elements[elements.length-1]
 						}
-					
+
 					return null;
 				},
 
@@ -344,7 +344,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 						var rect = element.getBoundingClientRect();
 						var left = rect.left;
 						var top = rect.top;
-						
+
 						if (element.parentElement.parentElement == editorScope.glasspane) {
 							top = top - element.parentElement.parentElement.getBoundingClientRect().top;
 							left = left - element.parentElement.parentElement.getBoundingClientRect().left;
@@ -360,8 +360,8 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 							else
 							{
 								clientWidth = element.offsetWidth;
-							}	
-						}	
+							}
+						}
 						var clientHeight = element.clientHeight;
 						if (clientHeight == 0)
 						{
@@ -372,9 +372,9 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 							else
 							{
 								clientHeight = element.offsetHeight;
-							}	
+							}
 						}
-						
+
 						if (percentage == undefined || percentage == 100) { //Element must be fully enclosed
 							if (p1.top <= top && p1.left <= left && p2.top >= top + clientHeight && p2.left >= left + clientWidth) {
 								matchedElements.push(element)
@@ -389,7 +389,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 						}
 					}
 				},
-				
+
 				getElementsByRectangle: function(p1, p2, percentage, fromDoc, fromGlass) {
 					var temp = 0;
 					if (p1.left > p2.left) {
@@ -401,22 +401,22 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 						var temp = p1.top;
 						p1.top = p2.top;
 						p2.top = temp;
-					}	
+					}
 					var nodes = [];
 					var ghosts = [];
 					if (fromDoc)
 						nodes = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[svy-id]"));
-					
+
 					if (fromGlass)
 						ghosts = Array.prototype.slice.call(editorScope.glasspane.querySelectorAll("[svy-id]"));
-					
+
 					var matchedFromDoc = [];
 					var matchedFromGlass = [];
 					this.collectMatchedElements(matchedFromGlass, ghosts, p1, p2, percentage);
 					p1 = this.adjustForPadding(p1);
 					p2 = this.adjustForPadding(p2);
 					this.collectMatchedElements(matchedFromDoc, nodes, p1, p2, percentage);
-					
+
 					var concat = matchedFromDoc.concat(matchedFromGlass);
 					return concat;
 				},

@@ -69,6 +69,7 @@ import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Tab;
+import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.INGClientWebsocketSession;
@@ -317,6 +318,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	@Override
 	public void refreshPersists(List<IPersist> persists)
 	{
+		if (persists == null) return;
 		IWindow window = null;
 		final INGClientWebsocketSession editorContentWebsocketSession = (INGClientWebsocketSession)WebsocketSessionManager.getSession(
 			WebsocketSessionFactory.DESIGN_ENDPOINT, CONTENT_SESSION_ID);
@@ -388,7 +390,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 						changedForms.add(changedForm);
 					}
 				}
-				else if (persist instanceof LayoutContainer)
+				else if (persist instanceof LayoutContainer || persist instanceof Template)
 				{
 					Form changedForm = (Form)persist.getAncestor(IRepository.FORMS);
 					if (!changedForms.contains(changedForm))

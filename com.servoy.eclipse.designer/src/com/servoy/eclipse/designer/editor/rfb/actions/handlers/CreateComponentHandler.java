@@ -42,6 +42,8 @@ import org.sablo.specification.property.ICustomType;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.elements.ElementFactory;
+import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -50,11 +52,14 @@ import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
+import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IDeveloperRepository;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
@@ -67,6 +72,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.Debug;
@@ -101,7 +107,7 @@ public class CreateComponentHandler implements IServerService
 			{
 				editorPart.getCommandStack().execute(new BaseRestorableCommand("createComponent")
 				{
-					private IPersist newPersist;
+					private IPersist[] newPersist;
 
 					@Override
 					public void execute()
@@ -111,10 +117,8 @@ public class CreateComponentHandler implements IServerService
 							newPersist = createComponent(args);
 							if (newPersist != null)
 							{
-								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false,
-									Arrays.asList(new IPersist[] { newPersist }));
-								Object[] selection = new Object[] { newPersist };
-								IStructuredSelection structuredSelection = new StructuredSelection(selection);
+								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, Arrays.asList(newPersist));
+								IStructuredSelection structuredSelection = new StructuredSelection(newPersist);
 								selectionProvider.setSelection(structuredSelection);
 							}
 						}
@@ -131,9 +135,12 @@ public class CreateComponentHandler implements IServerService
 						{
 							if (newPersist != null)
 							{
-								((IDeveloperRepository)newPersist.getRootObject().getRepository()).deleteObject(newPersist);
-								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false,
-									Arrays.asList(new IPersist[] { newPersist }));
+								for (IPersist iPersist : newPersist)
+								{
+									((IDeveloperRepository)iPersist.getRootObject().getRepository()).deleteObject(iPersist);
+								}
+
+								ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, Arrays.asList(newPersist));
 							}
 						}
 						catch (RepositoryException e)
@@ -153,7 +160,7 @@ public class CreateComponentHandler implements IServerService
 	* @throws JSONException
 	* @throws RepositoryException
 	*/
-	protected IPersist createComponent(final JSONObject args) throws JSONException, RepositoryException
+	protected IPersist[] createComponent(final JSONObject args) throws JSONException, RepositoryException
 	{
 		int x = args.getInt("x");
 		int y = args.getInt("y");
@@ -211,7 +218,7 @@ public class CreateComponentHandler implements IServerService
 						}
 						else((WebComponent)parentBean).setProperty(dropTargetFieldName, bean);
 					}
-					return bean;
+					return new IPersist[] { bean };
 				}
 				else if (args.getString("type").equals("tab"))
 				{
@@ -227,7 +234,7 @@ public class CreateComponentHandler implements IServerService
 						newTab.setText(tabName);
 						newTab.setLocation(new Point(x, y));
 						iSupportChilds.addChild(newTab);
-						return newTab;
+						return new IPersist[] { newTab };
 					}
 				}
 			}
@@ -305,91 +312,91 @@ public class CreateComponentHandler implements IServerService
 				gc.setText("button");
 				gc.setOnActionMethodID(-1);
 				gc.setSize(new Dimension(w, h));
-				return gc;
+				return new IPersist[] { gc };
 			}
 			else if ("servoydefault-label".equals(name))
 			{
 				GraphicalComponent gc = parent.createNewGraphicalComponent(new Point(x, y));
 				gc.setText("label");
 				gc.setSize(new Dimension(w, h));
-				return gc;
+				return new IPersist[] { gc };
 			}
 			else if ("servoydefault-combobox".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.COMBOBOX);
 				field.setSize(new Dimension(w, h));
-				return field;
+				return new IPersist[] { field };
 			}
 			else if ("servoydefault-textfield".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.TEXT_FIELD);
 				field.setSize(new Dimension(w, h));
-				return field;
+				return new IPersist[] { field };
 			}
 			else if ("servoydefault-textarea".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.TEXT_AREA);
 				field.setSize(new Dimension(w, h));
-				return field;
+				return new IPersist[] { field };
 			}
 			else if ("servoydefault-password".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.PASSWORD);
 				field.setSize(new Dimension(w, h));
-				return field;
+				return new IPersist[] { field };
 			}
 			else if ("servoydefault-calendar".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.CALENDAR);
 				field.setSize(new Dimension(w, h));
-				return field;
+				return new IPersist[] { field };
 			}
 			else if ("servoydefault-typeahead".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.TYPE_AHEAD);
 				field.setSize(new Dimension(w, h));
-				return field;
+				return new IPersist[] { field };
 			}
 			else if ("servoydefault-spinner".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.SPINNER);
 				field.setSize(new Dimension(w, h));
-				return field;
+				return new IPersist[] { field };
 			}
 			else if ("servoydefault-check".equals(name) || "servoydefault-checkgroup".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.CHECKS);
 				field.setSize(new Dimension(w, h));
-				return field;
+				return new IPersist[] { field };
 			}
 			else if ("servoydefault-radio".equals(name) || "servoydefault-radiogroup".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.RADIOS);
 				field.setSize(new Dimension(w, h));
-				return field;
+				return new IPersist[] { field };
 			}
 			else if ("servoydefault-imagemedia".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.IMAGE_MEDIA);
 				field.setSize(new Dimension(w, h));
-				return field;
+				return new IPersist[] { field };
 			}
 			else if ("servoydefault-listbox".equals(name))
 			{
 				Field field = parent.createNewField(new Point(x, y));
 				field.setDisplayType(Field.LIST_BOX);
 				field.setSize(new Dimension(w, h));
-				return field;
+				return new IPersist[] { field };
 			}
 			else if ("servoydefault-htmlarea".equals(name))
 			{
@@ -397,7 +404,7 @@ public class CreateComponentHandler implements IServerService
 				field.setDisplayType(Field.HTML_AREA);
 				field.setEditable(true);
 				field.setSize(new Dimension(w, h));
-				return field;
+				return new IPersist[] { field };
 			}
 			else if ("servoydefault-tabpanel".equals(name))
 			{
@@ -417,7 +424,7 @@ public class CreateComponentHandler implements IServerService
 				}
 				tabPanel.setLocation(new Point(x, y));
 				tabPanel.setSize(new Dimension(w, h));
-				return tabPanel;
+				return new IPersist[] { tabPanel };
 			}
 			else if ("servoydefault-splitpane".equals(name))
 			{
@@ -438,7 +445,7 @@ public class CreateComponentHandler implements IServerService
 				tabPanel.setLocation(new Point(x, y));
 				tabPanel.setTabOrientation(TabPanel.SPLIT_HORIZONTAL);
 				tabPanel.setSize(new Dimension(w, h));
-				return tabPanel;
+				return new IPersist[] { tabPanel };
 			}
 			else if ("servoydefault-portal".equals(name))
 			{
@@ -457,14 +464,14 @@ public class CreateComponentHandler implements IServerService
 					portal = editorPart.getForm().createNewPortal(compName, new Point(x, y));
 				}
 				portal.setSize(new Dimension(w, h));
-				return portal;
+				return new IPersist[] { portal };
 			}
 			else if ("servoydefault-rectangle".equals(name))
 			{
 				RectShape shape = editorPart.getForm().createNewRectangle(new Point(x, y));
 				shape.setLineSize(1);
 				shape.setSize(new Dimension(w, h));
-				return shape;
+				return new IPersist[] { shape };
 			}
 			else
 			{
@@ -511,7 +518,7 @@ public class CreateComponentHandler implements IServerService
 						webComponent.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
 							((JSONObject)description.getDefaultValue()).optInt("height", 80)));
 					}
-					return webComponent;
+					return new IPersist[] { webComponent };
 				}
 				else
 				{
@@ -523,7 +530,37 @@ public class CreateComponentHandler implements IServerService
 						if (layoutSpec != null)
 						{
 							JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
-							return createLayoutContainer(parent, layoutSpec, config, x, specifications, args.optString("packageName"));
+							return new IPersist[] { createLayoutContainer(parent, layoutSpec, config, x, specifications, args.optString("packageName")) };
+						}
+					}
+					else
+					{
+						for (IRootObject template : ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES))
+						{
+							if (template.getName().equals(name))
+							{
+								Object[] applyTemplate = ElementFactory.applyTemplate(parent, new TemplateElementHolder((Template)template),
+									new org.eclipse.swt.graphics.Point(x, y), false);
+								if (applyTemplate.length > 0)
+								{
+									if (applyTemplate[0] instanceof FormElementGroup)
+									{
+										Iterator<IFormElement> elements = ((FormElementGroup)applyTemplate[0]).getElements();
+										//convert iterator to []
+										ArrayList<IFormElement> list = new ArrayList<>();
+										while (elements.hasNext())
+										{
+											IFormElement next = elements.next();
+											list.add(next);
+										}
+										return list.toArray(new IPersist[list.size()]);
+									}
+									else
+									{ //Object[] to IPersist[]
+										return Arrays.asList(applyTemplate).toArray(new IPersist[applyTemplate.length]);
+									}
+								}
+							}
 						}
 					}
 				}
@@ -538,7 +575,7 @@ public class CreateComponentHandler implements IServerService
 				IPersist newPersist = ((AbstractBase)persist).cloneObj(persist.getParent(), true, validator, true, true, true);
 				((ISupportBounds)newPersist).setLocation(new Point(x, y));
 				if (w > 0 && h > 0) ((ISupportBounds)newPersist).setSize(new Dimension(w, h));
-				return newPersist;
+				return new IPersist[] { newPersist };
 			}
 		}
 		return null;

@@ -1,6 +1,6 @@
 angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 .config(['$provide', function ($provide){
-    $provide.decorator('accordionDirective', function($delegate) { 
+    $provide.decorator('accordionDirective', function($delegate) {
         var directive = $delegate[0];
         directive.replace = true;
         return $delegate;
@@ -22,11 +22,11 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 								packageOrder[layoutType].push(data[i].packageName);
 							}
 				        	$editorService.updatePaletteOrder(packageOrder);
-				        }	
+				        }
 			};
 			$scope.searchText = '';
 			var utils = $selectionUtils.getUtilsForScope($scope);
-			
+
 			var layoutType = null;
 			var packageOrder = null;
 			var loadPalette = function()
@@ -41,7 +41,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 					}
 				});
 			}
-			
+
 			$pluginRegistry.registerPlugin(function(scope) {
 				if (scope.isAbsoluteFormLayout())
 					layoutType = "Absolute-Layout"; // TODO extract as constant, this is a key in the main attributes of the manifest
@@ -49,20 +49,20 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 					layoutType = "Responsive-Layout";
 				loadPalette();
 			});
-			
+
 			$scope.showPreviewImage = function (preview)  {
 				  var host = $(location).attr('host');
 				  var protocol = $(location).attr('protocol');
 				  $editorService.showImageInOverlayDiv(protocol+"//"+host+"/"+preview);
 			};
-			
+
 			$rootScope.$on(EDITOR_EVENTS.RELOAD_PALETTE, function(e){
 				loadPalette();
 			});
-			
+
 			/**
 			 * enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.topContainer,layoutName)  for new components from the pallete
-			 * enterDragMode($event,ghost,null,null,null,ghost,null) for a ghost 
+			 * enterDragMode($event,ghost,null,null,null,ghost,null) for a ghost
 			 */
 			$scope.enterDragMode = function(event,componentName,packageName,tagName,model,type, topContainer,layoutName)
 			{
@@ -75,7 +75,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 				var mousemovecallback = $scope.registerDOMEvent("mousemove","EDITOR", function(ev){
 					if (dragClone)
 					{
-						var css = { top: ev.pageY, left: ev.pageX}; 
+						var css = { top: ev.pageY, left: ev.pageX};
 						dragClone.css(css);
 						if (angularElement && $scope.isAbsoluteFormLayout()) {
 							var x = (window.pageXOffset !== undefined) ? window.pageXOffset : document.documentElement.scrollLeft;
@@ -89,7 +89,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 							$scope.glasspane.style.cursor="no-drop";
 						}
 						else $scope.glasspane.style.cursor="";
-						
+
 						if ( canDrop.dropTarget  && !$scope.isAbsoluteFormLayout()  && angularElement) {
 							if ($scope.glasspane.style.cursor=="") {
 
@@ -113,7 +113,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 						}
 					}
 					else
-					{	
+					{
 						dragClone = $(event.target).clone();
 						utils.setDraggingFromPallete(type);
 						$scope.setSelection(null);
@@ -127,7 +127,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 							'list-style-type': 'none'
 						})
 						$('body').append(dragClone);
-						if (type=='component' || type == "layout") {
+						if (type=='component' || type == "layout" || type == "template") {
 							if (type=='component') {
 								angularElement = $scope.getEditorContentRootScope().createComponent('<div style="border-style: dotted;"><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-autoapply-disabled=\'true\'/></div>',model);
 							}
@@ -188,7 +188,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 						if (angularElement)
 						{
 							// if the drop was still allowed an the beforeChild is not set
-							// then ask the current angularelement for the next sibling because it 
+							// then ask the current angularelement for the next sibling because it
 							// is in the location where it should be dropped but the canDrop matched purely on the parent
 							if (canDrop.dropAllowed && !canDrop.beforeChild) {
 								canDrop.beforeChild = angularElement[0].nextElementSibling;
@@ -196,12 +196,12 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 							angularElement.remove();
 						}
 						if (!canDrop.dropAllowed) return;
-						
+
 						var component = {};
 						if (canDrop.dropTarget) {
 							component.dropTargetUUID = canDrop.dropTarget.getAttribute("svy-id");
 						}
-						
+
 						if (canDrop.beforeChild) {
 							component.rightSibling = canDrop.beforeChild.getAttribute("svy-id");
 						}
@@ -210,14 +210,14 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 
 						component.x = ev.pageX;
 						component.y = ev.pageY;
-						
+
 						if (angularElement && $scope.isAbsoluteFormLayout()) {
 							var x = (window.pageXOffset !== undefined) ? window.pageXOffset : document.documentElement.scrollLeft;
 							var y = (window.pageYOffset !== undefined) ? window.pageYOffset : document.documentElement.scrollTop;
 							component.x = component.x - x;
 							component.y = component.y - y;
-						}												
-						
+						}
+
 						if (model){
 							component.w = model.size ? model.size.width : 100;
 							component.h = model.size ? model.size.height : 100;
@@ -226,17 +226,17 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 							component.w = 100;
 							component.h = 100;
 						}
-						if (type != "component" && type != "layout") {		
+						if (type != "component" && type != "layout" && type != "template") {
 							component.type = type;
-								if (!(canDrop.dropTarget.getAttribute("svy-types").indexOf(type) > 0))		
-									return; // releasing a ghost, but component does not support this ghost type		
+								if (!(canDrop.dropTarget.getAttribute("svy-types").indexOf(type) > 0))
+									return; // releasing a ghost, but component does not support this ghost type
 						}
 						component = $scope.convertToContentPoint(component);
 						if (component.x >0 && component.y >0)
 						{
-							$editorService.createComponent(component); 
+							$editorService.createComponent(component);
 						}
-					} 
+					}
 					else {
 						 if (angularElement)
 						 {
