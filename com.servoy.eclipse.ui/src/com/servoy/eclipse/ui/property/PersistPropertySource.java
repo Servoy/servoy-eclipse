@@ -145,6 +145,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IColumnTypes;
+import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDataProviderLookup;
 import com.servoy.j2db.persistence.IDeveloperRepository;
@@ -1217,6 +1218,12 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					}
 				}
 			}
+		}
+		if (IContentSpecConstants.PROPERTY_NG_READONLY_MODE.equals(propertyDescription.getName()))
+		{
+			ComboboxPropertyModel<Boolean> model = new ComboboxPropertyModel<Boolean>(new Boolean[] { null, Boolean.TRUE, Boolean.FALSE },
+				new String[] { Messages.LabelDefault, "true", "false" });
+			return new ComboboxPropertyController<Boolean>(id, displayName, model, Messages.LabelUnresolved);
 		}
 
 		IPropertyDescriptor otherPropertyDescriptor = createOtherPropertyDescriptorIfAppropriate(id, displayName, propertyDescription, form, persistContext,
