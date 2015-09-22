@@ -448,7 +448,7 @@ public class TypeCreator extends TypeCache
 		addScopeType(MemDataSource.class.getSimpleName(), new MemDataSourceCreator());
 		addScopeType(DBDataSource.class.getSimpleName(), new DBDataSourceCreator());
 		addScopeType(DBDataSourceServer.class.getSimpleName(), new DBDataSourceServerCreator());
-		addScopeType(JSDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSDataSource.class, ClientSupport.wc_sc));
+		addScopeType(JSDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSDataSource.class, ClientSupport.ng_wc_sc));
 		addScopeType(JSDataSources.class.getSimpleName(), new JSDataSourcesCreator());
 		createSpecTypeDefinitions();
 	}
@@ -2613,7 +2613,7 @@ public class TypeCreator extends TypeCache
 
 		public ClientSupport getClientSupport()
 		{
-			return ClientSupport.wc_sc;
+			return ClientSupport.ng_wc_sc;
 		}
 
 		@Override
@@ -2968,7 +2968,7 @@ public class TypeCreator extends TypeCache
 
 		public ClientSupport getClientSupport()
 		{
-			return ClientSupport.wc_sc;
+			return ClientSupport.ng_wc_sc;
 		}
 
 		@Override
@@ -3051,7 +3051,7 @@ public class TypeCreator extends TypeCache
 
 		public ClientSupport getClientSupport()
 		{
-			return ClientSupport.wc_sc;
+			return ClientSupport.ng_wc_sc;
 		}
 
 		@Override
@@ -3143,7 +3143,7 @@ public class TypeCreator extends TypeCache
 
 		public ClientSupport getClientSupport()
 		{
-			return ClientSupport.wc_sc;
+			return ClientSupport.ng_wc_sc;
 		}
 
 		@Override
@@ -3165,7 +3165,7 @@ public class TypeCreator extends TypeCache
 
 		public ClientSupport getClientSupport()
 		{
-			return ClientSupport.wc_sc;
+			return ClientSupport.ng_wc_sc;
 		}
 
 		@Override
@@ -3259,7 +3259,7 @@ public class TypeCreator extends TypeCache
 		@Override
 		public ClientSupport getClientSupport()
 		{
-			return ClientSupport.wc_sc;
+			return ClientSupport.ng_wc_sc;
 		}
 
 		@Override
@@ -3341,7 +3341,7 @@ public class TypeCreator extends TypeCache
 	{
 		JSDataSourcesCreator()
 		{
-			super(JSDataSources.class, ClientSupport.wc_sc);
+			super(JSDataSources.class, ClientSupport.ng_wc_sc);
 		}
 	}
 
