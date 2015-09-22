@@ -132,7 +132,7 @@ public class WarExporter
 	 */
 	public void doExport(IProgressMonitor monitor) throws ExportException
 	{
-		monitor.beginTask("Creating War File", 18);
+		monitor.beginTask("Creating War File", 19);
 		File warFile = createNewWarFile();
 		monitor.worked(1);
 		File tmpWarDir = createTempDir();
@@ -163,6 +163,9 @@ public class WarExporter
 		monitor.worked(1);
 		monitor.subTask("Creating web.xml");
 		copyWebXml(tmpWarDir);
+		monitor.worked(1);
+		monitor.subTask("Creating context.xml");
+		createTomcatContextXML(monitor, tmpWarDir);
 		monitor.worked(1);
 		addServoyProperties(tmpWarDir);
 		monitor.worked(1);
@@ -198,7 +201,8 @@ public class WarExporter
 	{
 		if (exportModel.getExportedComponents() == null && exportModel.getExportedServices() == null ||
 			exportModel.getExportedComponents().size() == WebComponentSpecProvider.getInstance().getWebComponentSpecifications().size() &&
-			exportModel.getExportedServices().size() == NGUtils.getAllPublicWebServiceSpecifications().length) return;
+				exportModel.getExportedServices().size() == NGUtils.getAllPublicWebServiceSpecifications().length)
+			return;
 
 		File exported = new File(tmpWarDir, "WEB-INF/exported_components.properties");
 		Properties properties = new Properties();
@@ -210,7 +214,8 @@ public class WarExporter
 
 		TreeSet<String> allServices = new TreeSet<String>();
 		// append internal servoy services
-		WebComponentPackageSpecification<WebComponentSpecification> servoyservices = WebServiceSpecProvider.getInstance().getServicesInPackage("servoyservices");
+		WebComponentPackageSpecification<WebComponentSpecification> servoyservices = WebServiceSpecProvider.getInstance().getServicesInPackage(
+			"servoyservices");
 		if (servoyservices != null) allServices.addAll(servoyservices.getSpecifications().keySet());
 		// append user services
 		if (exportModel.getExportedServices() != null) allServices.addAll(exportModel.getExportedServices());
@@ -280,8 +285,8 @@ public class WarExporter
 	{
 		List<String> pluginLocations = exportModel.getPluginLocations();
 		File parent = null;
-		if (System.getProperty("eclipse.home.location") != null) parent = new File(
-			URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
+		if (System.getProperty("eclipse.home.location") != null)
+			parent = new File(URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
 		else parent = new File(System.getProperty("user.dir"));
 		for (String libName : NG_LIBS)
 		{
@@ -653,8 +658,44 @@ public class WarExporter
 		}
 	}
 
-	private void exportSolution(IProgressMonitor monitor, String tmpWarDir, Solution activeSolution, boolean exportSolution) throws CoreException,
-		ExportException
+	/**
+	 * @param tmpWarDir
+	 * @param monitor
+	 * @throws ExportException
+	 */
+	protected void createTomcatContextXML(IProgressMonitor monitor, File tmpWarDir) throws ExportException
+	{
+		if (!exportModel.isCreateTomcatContextXML()) return;
+		try
+		{
+			File metaDir = new File(tmpWarDir, "META-INF");
+			metaDir.mkdir();
+			File contextFile = new File(tmpWarDir, "META-INF/context.xml");
+			contextFile.createNewFile();
+			FileWriter writer = new FileWriter(contextFile);
+			try
+			{
+				String fileContent = "<Context ";
+				if (exportModel.isAntiResourceLocking()) fileContent += "antiResourceLocking=\"true\" ";
+				if (exportModel.isClearReferencesStatic()) fileContent += "clearReferencesStatic=\"true\" ";
+				if (exportModel.isClearReferencesStopThreads()) fileContent += "clearReferencesStopThreads=\"true\" ";
+				if (exportModel.isClearReferencesStopTimerThreads()) fileContent += "clearReferencesStopTimerThreads=\"true\" ";
+				fileContent += "></Context>";
+				writer.write(fileContent);
+			}
+			finally
+			{
+				writer.close();
+			}
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
+	}
+
+	private void exportSolution(IProgressMonitor monitor, String tmpWarDir, Solution activeSolution, boolean exportSolution)
+		throws CoreException, ExportException
 	{
 		int totalDuration = IProgressMonitor.UNKNOWN;
 		if (exportModel.getModulesToExport() != null) totalDuration = (int)(1.42 * exportModel.getModulesToExport().length); // make the main export be 70% of the time, leave the rest for sample data
@@ -684,9 +725,9 @@ public class WarExporter
 				}
 			}
 			exporter.exportSolutionToFile(activeSolution, new File(tmpWarDir, "WEB-INF/solution.servoy"), ClientVersion.getVersion(),
-				ClientVersion.getReleaseNumber(), exportModel.isExportMetaData(), exportModel.isExportSampleData(),
-				exportModel.getNumberOfSampleDataExported(), exportModel.isExportI18NData(), exportModel.isExportUsers(),
-				exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword(), tableDefManager, metadataDefManager, exportSolution);
+				ClientVersion.getReleaseNumber(), exportModel.isExportMetaData(), exportModel.isExportSampleData(), exportModel.getNumberOfSampleDataExported(),
+				exportModel.isExportI18NData(), exportModel.isExportUsers(), exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword(),
+				tableDefManager, metadataDefManager, exportSolution);
 
 			monitor.done();
 		}
@@ -1518,8 +1559,8 @@ public class WarExporter
 	public String searchExportedPlugins()
 	{
 		File parent = null;
-		if (System.getProperty("eclipse.home.location") != null) parent = new File(
-			URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
+		if (System.getProperty("eclipse.home.location") != null)
+			parent = new File(URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
 		else parent = new File(System.getProperty("user.dir"));
 
 		List<String> pluginLocations = exportModel.getPluginLocations();

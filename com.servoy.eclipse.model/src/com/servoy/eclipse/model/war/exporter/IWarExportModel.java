@@ -71,4 +71,15 @@ public interface IWarExportModel extends IExportSolutionModel
 	public boolean isUpdateSequences();
 
 	boolean isAutomaticallyUpgradeRepository();
+
+	boolean isCreateTomcatContextXML();
+
+	boolean isAntiResourceLocking();
+
+	boolean isClearReferencesStatic();
+
+	boolean isClearReferencesStopThreads();
+
+	boolean isClearReferencesStopTimerThreads();
+
 }

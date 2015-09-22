@@ -88,6 +88,12 @@ public class FileSelectionPage extends WizardPage implements Listener
 	private Button overwriteExistingUsersButton;
 	private Button automaticallyUpgradeRepository;
 
+	private Button createTomcatContextXML;
+	private Button antiResourceLocking;
+	private Button clearReferencesStatic;
+	private Button clearReferencesStopThreads;
+	private Button clearReferencesStopTimerThreads;
+
 	public FileSelectionPage(ExportWarModel exportModel, IWizardPage nextPage)
 	{
 		super("warfileselection");
@@ -484,6 +490,94 @@ public class FileSelectionPage extends WizardPage implements Listener
 			}
 		});
 		automaticallyUpgradeRepository.setText("Automatically upgrade repository if needed.");
+
+		createTomcatContextXML = new Button(composite, SWT.CHECK);
+		createTomcatContextXML.setText("Create META-INF/context.xml");
+		createTomcatContextXML.setSelection(exportModel.isCreateTomcatContextXML());
+		createTomcatContextXML.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				clearReferencesStatic.setEnabled(createTomcatContextXML.getSelection());
+				clearReferencesStopThreads.setEnabled(createTomcatContextXML.getSelection());
+				clearReferencesStopTimerThreads.setEnabled(createTomcatContextXML.getSelection());
+				antiResourceLocking.setEnabled(createTomcatContextXML.getSelection());
+				exportModel.setCreateTomcatContextXML(createTomcatContextXML.getSelection());
+			}
+		});
+		horizontalComposite = new Composite(composite, SWT.None);
+		hcGridLayout = new GridLayout();
+		hcGridLayout.numColumns = 4;
+		hcGridLayout.marginHeight = 0;
+		hcGridLayout.marginWidth = 0;
+		horizontalComposite.setLayout(hcGridLayout);
+
+
+		new Label(horizontalComposite, SWT.NONE);
+		new Label(horizontalComposite, SWT.NONE);
+		new Label(horizontalComposite, SWT.NONE);
+		antiResourceLocking = new Button(horizontalComposite, SWT.CHECK);
+		antiResourceLocking.setText("Set antiResourceLocking to true");
+		antiResourceLocking.setSelection(exportModel.isAntiResourceLocking());
+		antiResourceLocking.setEnabled(createTomcatContextXML.getSelection());
+		antiResourceLocking.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setAntiResourceLocking(antiResourceLocking.getSelection());
+			}
+		});
+
+		new Label(horizontalComposite, SWT.NONE);
+		new Label(horizontalComposite, SWT.NONE);
+		new Label(horizontalComposite, SWT.NONE);
+		clearReferencesStatic = new Button(horizontalComposite, SWT.CHECK);
+		clearReferencesStatic.setText("Set clearReferencesStatic to true");
+		clearReferencesStatic.setSelection(exportModel.isClearReferencesStatic());
+		clearReferencesStatic.setEnabled(createTomcatContextXML.getSelection());
+		clearReferencesStatic.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setClearReferencesStatic(clearReferencesStatic.getSelection());
+			}
+		});
+
+		new Label(horizontalComposite, SWT.NONE);
+		new Label(horizontalComposite, SWT.NONE);
+		new Label(horizontalComposite, SWT.NONE);
+		clearReferencesStopThreads = new Button(horizontalComposite, SWT.CHECK);
+		clearReferencesStopThreads.setText("Set clearReferencesStopThreads to true (USE WITH CARE)");
+		clearReferencesStopThreads.setSelection(exportModel.isClearReferencesStopThreads());
+		clearReferencesStopThreads.setEnabled(createTomcatContextXML.getSelection());
+		clearReferencesStopThreads.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setClearReferencesStopThreads(clearReferencesStopThreads.getSelection());
+			}
+		});
+
+		new Label(horizontalComposite, SWT.NONE);
+		new Label(horizontalComposite, SWT.NONE);
+		new Label(horizontalComposite, SWT.NONE);
+		clearReferencesStopTimerThreads = new Button(horizontalComposite, SWT.CHECK);
+		clearReferencesStopTimerThreads.setText("Set clearReferencesStopTimerThreads to true");
+		clearReferencesStopTimerThreads.setSelection(exportModel.isClearReferencesStopTimerThreads());
+		clearReferencesStopTimerThreads.setEnabled(createTomcatContextXML.getSelection());
+		clearReferencesStopTimerThreads.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setClearReferencesStopTimerThreads(clearReferencesStopTimerThreads.getSelection());
+			}
+		});
+
 
 		setControl(composite);
 	}

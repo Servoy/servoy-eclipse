@@ -63,7 +63,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter#createArgumentChest(org.eclipse.equinox.app.IApplicationContext)
 	 */
 	@Override
@@ -74,7 +74,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter#exportActiveSolution(com.servoy.eclipse.exporter.apps.common.IArgumentChest)
 	 */
 	@Override
@@ -387,6 +387,36 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			public boolean isAutomaticallyUpgradeRepository()
 			{
 				return configuration.automaticallyUpdateRepository();
+			}
+
+			@Override
+			public boolean isCreateTomcatContextXML()
+			{
+				return configuration.isCreateTomcatContextXML();
+			}
+
+			@Override
+			public boolean isClearReferencesStatic()
+			{
+				return configuration.isClearReferencesStatic();
+			}
+
+			@Override
+			public boolean isClearReferencesStopThreads()
+			{
+				return configuration.isClearReferencesStopThreads();
+			}
+
+			@Override
+			public boolean isClearReferencesStopTimerThreads()
+			{
+				return configuration.isClearReferencesStopTimerThreads();
+			}
+
+			@Override
+			public boolean isAntiResourceLocking()
+			{
+				return configuration.isAntiResourceLocking();
 			}
 		});
 		try

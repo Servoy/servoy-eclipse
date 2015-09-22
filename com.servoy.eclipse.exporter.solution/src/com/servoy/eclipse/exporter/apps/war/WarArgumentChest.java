@@ -59,6 +59,12 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private static final String updateSequences = "updateSequences";// updates Sequences \n";
 	private static final String upgradeRepository = "upgradeRepository";
 
+	private static final String createTomcatContextXML = "createTomcatContextXML";
+	private static final String antiResourceLocking = "antiResourceLocking";
+	private static final String clearReferencesStatic = "clearReferencesStatic";
+	private static final String clearReferencesStopThreads = "clearReferencesStopThreads";
+	private static final String clearReferencesStopTimerThreads = "clearReferencesStopTimerThreads";
+
 	private HashMap<String, String> argumentsMap;
 
 	public WarArgumentChest(String[] args)
@@ -69,7 +75,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest#getHelpMessage()
 	 */
 	@Override
@@ -124,7 +130,13 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        				 overwrite completely = 2 \n"
 			+ "        -"+addUsersToAdminGroup+" ... adds Users To Admin Group \n"
 			+ "        -"+updateSequences+" ... updates Sequences \n"
-			+ "        -"+upgradeRepository+" ... automatically upgrade repository if needed \n";
+			+ "        -"+upgradeRepository+" ... automatically upgrade repository if needed \n"
+
+			+ "        -"+createTomcatContextXML+" create a META-INF/context.xml file \n"
+			+ "        -"+antiResourceLocking+" add antiResourceLocking=\"true\" to Context element, may only be used with createTomcatContextXML \n"
+			+ "        -"+clearReferencesStatic+" add clearReferencesStatic=\"true\" to Context element, may only be used with createTomcatContextXML \n"
+			+ "        -"+clearReferencesStopThreads+" add clearReferencesStopThreads=\"true\" to Context element, may only be used with createTomcatContextXML \n"
+			+ "        -"+clearReferencesStopTimerThreads+" add clearReferencesStopTimerThreads=\"true\" to Context element, may only be used with createTomcatContextXML \n";
 	}
 	@Override
 	protected void parseArguments(HashMap<String, String> argsMap)
@@ -322,6 +334,46 @@ public class WarArgumentChest extends AbstractArgumentChest
 	 */
 	public boolean automaticallyUpdateRepository()
 	{
-		return argumentsMap.containsKey(upgradeRepository );
+		return argumentsMap.containsKey(upgradeRepository);
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isCreateTomcatContextXML()
+	{
+		return argumentsMap.containsKey(createTomcatContextXML);
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isClearReferencesStatic()
+	{
+		return argumentsMap.containsKey(clearReferencesStatic);
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isClearReferencesStopThreads()
+	{
+		return argumentsMap.containsKey(clearReferencesStopThreads);
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isClearReferencesStopTimerThreads()
+	{
+		return argumentsMap.containsKey(clearReferencesStopTimerThreads);
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isAntiResourceLocking()
+	{
+		return argumentsMap.containsKey(antiResourceLocking);
 	}
 }

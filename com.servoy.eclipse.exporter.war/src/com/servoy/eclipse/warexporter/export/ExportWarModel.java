@@ -78,6 +78,11 @@ public class ExportWarModel extends AbstractWarExportModel
 	private Set<String> exportedComponents;
 	private Set<String> exportedServices;
 	private boolean upgradeRepository;
+	private boolean createTomcatContextXML;
+	private boolean antiResourceLocking;
+	private boolean clearReferencesStatic;
+	private boolean clearReferencesStopThreads;
+	private boolean clearReferencesStopTimerThreads;
 
 	/**
 	 * @param dialogSettings
@@ -107,6 +112,13 @@ public class ExportWarModel extends AbstractWarExportModel
 		overwriteGroups = Utils.getAsBoolean(settings.get("export.overwriteGroups"));
 		addUsersToAdminGroup = Utils.getAsBoolean(settings.get("export.addUsersToAdminGroup"));
 		upgradeRepository = Utils.getAsBoolean(settings.get("export.upgradeRepository"));
+
+		createTomcatContextXML = Utils.getAsBoolean(settings.get("export.tomcat.createTomcatContextXML"));
+		antiResourceLocking = Utils.getAsBoolean(settings.get("export.tomcat.antiResourceLocking"));
+		clearReferencesStatic = Utils.getAsBoolean(settings.get("export.tomcat.clearReferencesStatic"));
+		clearReferencesStopThreads = Utils.getAsBoolean(settings.get("export.tomcat.clearReferencesStopThreads"));
+		clearReferencesStopTimerThreads = Utils.getAsBoolean(settings.get("export.tomcat.clearReferencesStopTimerThreads"));
+
 		if (settings.getArray("export.components") != null)
 		{
 			exportedComponents = new TreeSet<String>(Arrays.asList(settings.getArray("export.components")));
@@ -220,6 +232,13 @@ public class ExportWarModel extends AbstractWarExportModel
 		settings.put("export.overwriteGroups", overwriteGroups);
 		settings.put("export.addUsersToAdminGroup", addUsersToAdminGroup);
 		settings.put("export.upgradeRepository", upgradeRepository);
+		settings.put("export.tomcat.createTomcatContextXML", createTomcatContextXML);
+		settings.put("export.tomcat.antiResourceLocking", antiResourceLocking);
+		settings.put("export.tomcat.clearReferencesStatic", clearReferencesStatic);
+		settings.put("export.tomcat.clearReferencesStopThreads", clearReferencesStopThreads);
+		settings.put("export.tomcat.clearReferencesStopTimerThreads", clearReferencesStopTimerThreads);
+
+
 		if (exportedComponents != null) settings.put("export.components", exportedComponents.toArray(new String[exportedComponents.size()]));
 		if (exportedServices != null) settings.put("export.services", exportedServices.toArray(new String[exportedServices.size()]));
 
@@ -736,7 +755,7 @@ public class ExportWarModel extends AbstractWarExportModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportUsers()
 	 */
 	@Override
@@ -780,7 +799,7 @@ public class ExportWarModel extends AbstractWarExportModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getExportedComponents()
 	 */
 	@Override
@@ -791,7 +810,7 @@ public class ExportWarModel extends AbstractWarExportModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getExportedServices()
 	 */
 	@Override
@@ -802,7 +821,7 @@ public class ExportWarModel extends AbstractWarExportModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.model.war.exporter.AbstractWarExportModel#setAutomaticallyUpgradeRepository()
 	 */
 	public void setAutomaticallyUpgradeRepository()
@@ -819,5 +838,85 @@ public class ExportWarModel extends AbstractWarExportModel
 	public boolean isAutomaticallyUpgradeRepository()
 	{
 		return upgradeRepository;
+	}
+
+	/**
+	 * @return the createTomcatContextXML
+	 */
+	public boolean isCreateTomcatContextXML()
+	{
+		return createTomcatContextXML;
+	}
+
+	/**
+	 * @param createTomcatContextXML the createTomcatContextXML to set
+	 */
+	public void setCreateTomcatContextXML(boolean createTomcatContextXML)
+	{
+		this.createTomcatContextXML = createTomcatContextXML;
+	}
+
+	/**
+	 * @return the clearReferencesStatic
+	 */
+	public boolean isClearReferencesStatic()
+	{
+		return clearReferencesStatic;
+	}
+
+	/**
+	 * @param clearReferencesStatic the clearReferencesStatic to set
+	 */
+	public void setClearReferencesStatic(boolean clearReferencesStatic)
+	{
+		this.clearReferencesStatic = clearReferencesStatic;
+	}
+
+	/**
+	 * @return the clearReferencesStopThreads
+	 */
+	public boolean isClearReferencesStopThreads()
+	{
+		return clearReferencesStopThreads;
+	}
+
+	/**
+	 * @param clearReferencesStopThreads the clearReferencesStopThreads to set
+	 */
+	public void setClearReferencesStopThreads(boolean clearReferencesStopThreads)
+	{
+		this.clearReferencesStopThreads = clearReferencesStopThreads;
+	}
+
+	/**
+	 * @return the clearReferencesStopTimerThreads
+	 */
+	public boolean isClearReferencesStopTimerThreads()
+	{
+		return clearReferencesStopTimerThreads;
+	}
+
+	/**
+	 * @param clearReferencesStopTimerThreads the clearReferencesStopTimerThreads to set
+	 */
+	public void setClearReferencesStopTimerThreads(boolean clearReferencesStopTimerThreads)
+	{
+		this.clearReferencesStopTimerThreads = clearReferencesStopTimerThreads;
+	}
+
+	/**
+	 * @return the clearReferencesStopTimerThreads
+	 */
+	public boolean isAntiResourceLocking()
+	{
+		return antiResourceLocking;
+	}
+
+	/**
+	 * @param clearReferencesStopTimerThreads the clearReferencesStopTimerThreads to set
+	 */
+	public void setAntiResourceLocking(boolean antiResourceLocking)
+	{
+		this.antiResourceLocking = antiResourceLocking;
 	}
 }
