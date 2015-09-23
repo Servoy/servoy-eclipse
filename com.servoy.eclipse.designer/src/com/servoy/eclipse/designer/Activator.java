@@ -19,6 +19,8 @@ package com.servoy.eclipse.designer;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,16 +42,26 @@ import org.sablo.websocket.WebsocketSessionManager;
 
 import com.servoy.eclipse.core.I18NChangeListener;
 import com.servoy.eclipse.core.IActiveProjectListener;
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.rfb.property.types.DesignerTypes;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IDebugClientHandler;
+import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistChangeListener;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.ngclient.WebsocketSessionFactory;
 import com.servoy.j2db.server.ngclient.design.DesignNGClient;
 import com.servoy.j2db.server.ngclient.design.DesignNGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.design.IDesignerSolutionProvider;
+import com.servoy.j2db.server.ngclient.property.types.Types;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
@@ -89,7 +101,27 @@ public class Activator extends AbstractUIPlugin
 
 		super.start(context);
 		plugin = this;
-		ServoyModelManager.getServoyModelManager().getServoyModel().addI18NChangeListener(i18nChangeListener = new I18NChangeListener()
+
+		Types.setTypesInstance(DesignerTypes.INSTANCE);
+		ApplicationServerRegistry.getServiceRegistry().registerService(IDesignerSolutionProvider.class, new IDesignerSolutionProvider()
+		{
+			@Override
+			public Solution getActiveEditingSolution()
+			{
+				return ServoyModelFinder.getServoyModel().getActiveProject().getEditingSolution();
+			}
+
+			@Override
+			public Solution getEditingSolution(String name)
+			{
+				ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(name);
+				if (servoyProject != null) return servoyProject.getEditingSolution();
+				return null;
+			}
+		});
+
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		servoyModel.addI18NChangeListener(i18nChangeListener = new I18NChangeListener()
 		{
 			public void i18nChanged()
 			{
@@ -116,7 +148,7 @@ public class Activator extends AbstractUIPlugin
 			}
 		});
 
-		ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(new IActiveProjectListener.ActiveProjectListener()
+		servoyModel.addActiveProjectListener(new IActiveProjectListener.ActiveProjectListener()
 		{
 			@Override
 			public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
@@ -131,6 +163,37 @@ public class Activator extends AbstractUIPlugin
 					client.shutDown(true);
 				}
 				return true;
+			}
+		});
+
+		// add editing solution change listener that should update the design NG client - that is used inside form designers;
+		// it should not hold on to stale/deleted forms for example
+		servoyModel.addPersistChangeListener(false, new IPersistChangeListener()
+		{
+			public void persistChanges(final Collection<IPersist> changes)
+			{
+				UIUtils.invokeLaterOnAWT(new Runnable() // TODO this is a bit strange calling on AWT here - this is inspired from DebugClientHandler listener code in .core. activator
+				{
+					public void run()
+					{
+						com.servoy.eclipse.model.Activator.getDefault().getDesignClient();
+						if (client != null)
+						{
+							// TODO why not allow normal debugNGClient refresh here? maybe we should but we have to coordinate that with code in FormUpdater that already refreshes things
+//							client.refreshPersists(changes);
+
+							for (IPersist p : changes)
+							{
+								if (p instanceof Form && !((AbstractBase)p.getParent()).getAllObjectsAsList().contains(p))
+								{
+									// for now I only fixed the case where deleted forms still remained in design client and caused exceptions... if we fully refresh all changes
+									// as mentioned in above TO DO then this code can be removed as it will be done anyway
+									client.refreshPersists(Arrays.asList(p));
+								}
+							}
+						}
+					}
+				});
 			}
 		});
 
@@ -151,10 +214,9 @@ public class Activator extends AbstractUIPlugin
 							{
 								if (getClient() == null)
 								{
-									setClient(client = new DesignNGClient(this,
-										ApplicationServerRegistry.getServiceRegistry().getService(IDesignerSolutionProvider.class),
-										getPreferenceStore().contains(SHOW_DATA_IN_ANGULAR_DESIGNER)
-											? getPreferenceStore().getBoolean(SHOW_DATA_IN_ANGULAR_DESIGNER) : true));
+									setClient(client = new DesignNGClient(this, ApplicationServerRegistry.getServiceRegistry().getService(
+										IDesignerSolutionProvider.class), getPreferenceStore().contains(SHOW_DATA_IN_ANGULAR_DESIGNER)
+										? getPreferenceStore().getBoolean(SHOW_DATA_IN_ANGULAR_DESIGNER) : true));
 								}
 							}
 						};

@@ -37,6 +37,13 @@ import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
+import net.sourceforge.sqlexplorer.ExplorerException;
+import net.sourceforge.sqlexplorer.dbproduct.Alias;
+import net.sourceforge.sqlexplorer.dbproduct.AliasManager;
+import net.sourceforge.sqlexplorer.dbproduct.ManagedDriver;
+import net.sourceforge.sqlexplorer.dbproduct.User;
+import net.sourceforge.sqlexplorer.plugin.SQLExplorerPlugin;
+
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -92,7 +99,6 @@ import org.osgi.service.url.URLStreamHandlerService;
 
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
-import com.servoy.eclipse.core.resource.DesignerTypes;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.DesignApplication;
@@ -132,7 +138,6 @@ import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.InstanceJavaMembers;
 import com.servoy.j2db.server.ngclient.BodyPortal;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
-import com.servoy.j2db.server.ngclient.property.types.Types;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 import com.servoy.j2db.server.shared.IDebugHeadlessClient;
@@ -144,13 +149,6 @@ import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.IDeveloperURLStreamHandler;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
-
-import net.sourceforge.sqlexplorer.ExplorerException;
-import net.sourceforge.sqlexplorer.dbproduct.Alias;
-import net.sourceforge.sqlexplorer.dbproduct.AliasManager;
-import net.sourceforge.sqlexplorer.dbproduct.ManagedDriver;
-import net.sourceforge.sqlexplorer.dbproduct.User;
-import net.sourceforge.sqlexplorer.plugin.SQLExplorerPlugin;
 
 
 /**
@@ -222,8 +220,8 @@ public class Activator extends Plugin
 							IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(getId());
 							try
 							{
-								return new net.sourceforge.sqlexplorer.dbproduct.SQLConnection(user, server.getRawConnection(), this,
-									"Servoy server: " + getId());
+								return new net.sourceforge.sqlexplorer.dbproduct.SQLConnection(user, server.getRawConnection(), this, "Servoy server: " +
+									getId());
 							}
 							catch (RepositoryException e)
 							{
@@ -282,8 +280,6 @@ public class Activator extends Plugin
 		}
 		ss.nativeStartup();
 
-		Types.setTypesInstance(DesignerTypes.INSTANCE);
-
 		IExtensionRegistry reg = Platform.getExtensionRegistry();
 		IExtensionPoint ep = reg.getExtensionPoint(IPluginBaseClassLoaderProvider.EXTENSION_ID);
 		IExtension[] extensions = ep.getExtensions();
@@ -291,8 +287,7 @@ public class Activator extends Plugin
 		{
 			for (IExtension extension : extensions)
 			{
-				IPluginBaseClassLoaderProvider provider = (IPluginBaseClassLoaderProvider)extension.getConfigurationElements()[0].createExecutableExtension(
-					"class");
+				IPluginBaseClassLoaderProvider provider = (IPluginBaseClassLoaderProvider)extension.getConfigurationElements()[0].createExecutableExtension("class");
 				ss.setBaseClassloader(provider.getClassLoader());
 				break; //we support only one
 			}
@@ -658,8 +653,8 @@ public class Activator extends Plugin
 					Context.enter();
 					try
 					{
-						scope.put("servoyDeveloper", scope,
-							new NativeJavaObject(scope, new JSDeveloperSolutionModel(client), new InstanceJavaMembers(scope, JSDeveloperSolutionModel.class)));
+						scope.put("servoyDeveloper", scope, new NativeJavaObject(scope, new JSDeveloperSolutionModel(client), new InstanceJavaMembers(scope,
+							JSDeveloperSolutionModel.class)));
 					}
 					finally
 					{
@@ -683,11 +678,6 @@ public class Activator extends Plugin
 
 				private final HashMap<String, DeveloperURLStreamHandlerService> urlStreamServices = new HashMap<String, DeveloperURLStreamHandlerService>();
 
-				/*
-				 * (non-Javadoc)
-				 *
-				 * @see com.servoy.j2db.IDesignerCallback#addURLStreamHandler(java.lang.String, java.net.URLStreamHandler)
-				 */
 				@Override
 				public void addURLStreamHandler(String protocolName, IDeveloperURLStreamHandler handler)
 				{
@@ -936,10 +926,10 @@ public class Activator extends Plugin
 												}
 												parent = parent.getParent();
 											}
-											if (parent instanceof Form && (((Form)parent).getView() == IFormConstants.VIEW_TYPE_TABLE ||
-												((Form)parent).getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED ||
-												((Form)parent).getView() == IFormConstants.VIEW_TYPE_LIST ||
-												((Form)parent).getView() == IFormConstants.VIEW_TYPE_LIST_LOCKED))
+											if (parent instanceof Form &&
+												(((Form)parent).getView() == IFormConstants.VIEW_TYPE_TABLE ||
+													((Form)parent).getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED ||
+													((Form)parent).getView() == IFormConstants.VIEW_TYPE_LIST || ((Form)parent).getView() == IFormConstants.VIEW_TYPE_LIST_LOCKED))
 											{
 												BodyPortal hiddenPortal = new BodyPortal((Form)parent);
 												if (!affectedFormElements.contains(hiddenPortal))
@@ -1056,8 +1046,8 @@ public class Activator extends Plugin
 
 			if (extensions == null || extensions.length == 0)
 			{
-				ServoyLog.logWarning(
-					"Could not find documentation provider server starter plugin (extension point " + IDocumentationManagerProvider.EXTENSION_ID + ")", null);
+				ServoyLog.logWarning("Could not find documentation provider server starter plugin (extension point " +
+					IDocumentationManagerProvider.EXTENSION_ID + ")", null);
 				return null;
 			}
 			if (extensions.length > 1)
@@ -1072,8 +1062,8 @@ public class Activator extends Plugin
 			}
 			if (ce.length > 1)
 			{
-				ServoyLog.logWarning(
-					"Multiple extensions for documentation manager plugins found (extension point " + IDocumentationManagerProvider.EXTENSION_ID + ")", null);
+				ServoyLog.logWarning("Multiple extensions for documentation manager plugins found (extension point " +
+					IDocumentationManagerProvider.EXTENSION_ID + ")", null);
 			}
 			try
 			{
@@ -1192,8 +1182,8 @@ public class Activator extends Plugin
 
 	private int updateAppServerFromSerclipse(java.io.File parentFile, int version, int releaseNumber, ActionListener listener) throws Exception
 	{
-		URLClassLoader loader = URLClassLoader.newInstance(
-			new URL[] { new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory() + "/../servoy_updater.jar").toURI().toURL() });
+		URLClassLoader loader = URLClassLoader.newInstance(new URL[] { new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory() +
+			"/../servoy_updater.jar").toURI().toURL() });
 		Class< ? > versionCheckClass = loader.loadClass("com.servoy.updater.VersionCheck");
 		Method updateAppServerFromSerclipse = versionCheckClass.getMethod("updateAppServerFromSerclipse",
 			new Class[] { java.io.File.class, int.class, int.class, ActionListener.class });
@@ -1212,8 +1202,8 @@ public class Activator extends Plugin
 			{
 				public void run()
 				{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "No Servoy ApplicationServer found!",
-						"No application server found at: " + appServerDir + "\nPlease make sure that you installed Servoy Developer correctly");
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "No Servoy ApplicationServer found!", "No application server found at: " +
+						appServerDir + "\nPlease make sure that you installed Servoy Developer correctly");
 				}
 			});
 		}
@@ -1265,12 +1255,12 @@ public class Activator extends Plugin
 													monitor.beginTask("Updating...", IProgressMonitor.UNKNOWN);
 													updatedToVersion[0] = updateAppServerFromSerclipse(new File(appServerDir).getParentFile(), version,
 														ClientVersion.getReleaseNumber(), new ActionListener()
-													{
-														public void actionPerformed(ActionEvent e)
 														{
-															monitor.worked(1);
-														}
-													});
+															public void actionPerformed(ActionEvent e)
+															{
+																monitor.worked(1);
+															}
+														});
 												}
 												catch (Exception e)
 												{

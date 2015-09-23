@@ -137,11 +137,6 @@ public class NewFormWizard extends Wizard implements INewWizard
 		setWindowTitle("New form");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.wizard.IWizard#addPages()
-	 */
 	@Override
 	public void addPages()
 	{
@@ -157,11 +152,6 @@ public class NewFormWizard extends Wizard implements INewWizard
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench, org.eclipse.jface.viewers.IStructuredSelection)
-	 */
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
 		Form selectedForm = null;
@@ -257,11 +247,6 @@ public class NewFormWizard extends Wizard implements INewWizard
 		return EditorUtil.getDialogSettings("newFormWizard");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
-	 */
 	@Override
 	public boolean performFinish()
 	{
@@ -795,6 +780,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				fillProjectCombo();
 
 				formNameField.setFocus();
+				formNameField.selectAll();
 				setPageComplete(validatePage());
 			}
 		}
@@ -847,11 +833,6 @@ public class NewFormWizard extends Wizard implements INewWizard
 			}
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.jface.wizard.WizardPage#getNextPage()
-		 */
 		@Override
 		public IWizardPage getNextPage()
 		{

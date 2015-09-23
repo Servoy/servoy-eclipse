@@ -208,9 +208,6 @@ public class AddMethodButtonsComposite extends Composite
 		return NewMethodAction.createNewMethod(getShell(), parent, methodKey, false, null, scopeName, substitutions, persistContext.getPersist(), null);
 	}
 
-	/**
-	 * @param form
-	 */
 	public void setContext(PersistContext persistContext, String methodKey)
 	{
 		this.persistContext = persistContext;
@@ -226,9 +223,6 @@ public class AddMethodButtonsComposite extends Composite
 		this.selectedScope = scope;
 	}
 
-	/**
-	 * @param dialog
-	 */
 	public void setDialog(TreeSelectDialog dialog)
 	{
 		this.dialog = dialog;

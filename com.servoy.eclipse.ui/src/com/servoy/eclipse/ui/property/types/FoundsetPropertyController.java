@@ -377,35 +377,36 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 				}
 				else if (FOUNDSET_DP_COUNT.equals(id))
 				{
+					int dpCount;
 					try
 					{
-						int dpCount = Integer.parseInt(v.toString());
-						int oldValue = editableValue.optInt(FOUNDSET_DP_COUNT);
-						if (dpCount > -1 && dpCount < 51)
-						{
-							editableValue.put(FOUNDSET_DP_COUNT, v.toString());
-						}
-						if (dpCount < oldValue)
-						{
-							JSONObject dataprovidersValues = editableValue.optJSONObject(FoundsetPropertyTypeConfig.DATAPROVIDERS);
-							if (dataprovidersValues != null)
-							{
-								Iterator< ? > it = dataprovidersValues.keys();
-								while (it.hasNext())
-								{
-									String dp = (String)it.next();
-									int dpid = Utils.getAsInteger(dp.substring(2));
-									if (dpid > dpCount)
-									{
-										it.remove();
-									}
-								}
-							}
-						}
+						dpCount = Integer.parseInt(v.toString());
 					}
 					catch (NumberFormatException ex)
 					{
-						ServoyLog.logError(ex);
+						dpCount = 0;
+					}
+					int oldValue = editableValue.optInt(FOUNDSET_DP_COUNT);
+					if (dpCount > -1 && dpCount < 51)
+					{
+						editableValue.put(FOUNDSET_DP_COUNT, v.toString());
+					}
+					if (dpCount < oldValue)
+					{
+						JSONObject dataprovidersValues = editableValue.optJSONObject(FoundsetPropertyTypeConfig.DATAPROVIDERS);
+						if (dataprovidersValues != null)
+						{
+							Iterator< ? > it = dataprovidersValues.keys();
+							while (it.hasNext())
+							{
+								String dp = (String)it.next();
+								int dpid = Utils.getAsInteger(dp.substring(2));
+								if (dpid > dpCount)
+								{
+									it.remove();
+								}
+							}
+						}
 					}
 				}
 				else

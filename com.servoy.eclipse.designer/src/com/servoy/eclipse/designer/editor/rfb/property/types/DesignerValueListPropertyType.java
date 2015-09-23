@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.core.resource;
+package com.servoy.eclipse.designer.editor.rfb.property.types;
 
 import java.util.ArrayList;
 

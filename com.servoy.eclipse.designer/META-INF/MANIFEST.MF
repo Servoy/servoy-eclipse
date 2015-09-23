@@ -30,8 +30,10 @@ Require-Bundle: org.eclipse.core.databinding,
  javax.websocket,
  org.apache.commons.lang,
  servoy_headless_client,
- org.eclipse.ui.browser
+ org.eclipse.ui.browser,
+ org.eclipse.dltk.javascript.rhino,
+ slf4j.api
 Bundle-ActivationPolicy: lazy
-Export-Package: com.servoy.eclipse.designer;uses:="org.eclipse.jface.re
- source,org.eclipse.ui.plugin,org.osgi.framework"
+Export-Package: com.servoy.eclipse.designer;uses:="org.eclipse.jface.resource,org.eclipse.ui.plugin,org.osgi.framework",
+ com.servoy.j2db.server.ngclient.design
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

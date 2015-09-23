@@ -27,8 +27,8 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
 import org.sablo.websocket.IServerService;
 
-import com.servoy.eclipse.core.resource.DesignerFormPropertyType;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.rfb.property.types.DesignerFormPropertyType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;

@@ -64,10 +64,7 @@ import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.ngclient.design.IDesignerSolutionProvider;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
-import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -185,22 +182,6 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			}
 		};
 
-		ApplicationServerRegistry.getServiceRegistry().registerService(IDesignerSolutionProvider.class, new IDesignerSolutionProvider()
-		{
-			@Override
-			public Solution getActiveEditingSolution()
-			{
-				return ServoyModelFinder.getServoyModel().getActiveProject().getEditingSolution();
-			}
-
-			@Override
-			public Solution getEditingSolution(String name)
-			{
-				ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(name);
-				if (servoyProject != null) return servoyProject.getEditingSolution();
-				return null;
-			}
-		});
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 	}
 
