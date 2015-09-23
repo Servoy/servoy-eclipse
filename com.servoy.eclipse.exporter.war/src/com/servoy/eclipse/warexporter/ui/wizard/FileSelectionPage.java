@@ -492,8 +492,11 @@ public class FileSelectionPage extends WizardPage implements Listener
 		automaticallyUpgradeRepository.setText("Automatically upgrade repository if needed.");
 
 		createTomcatContextXML = new Button(composite, SWT.CHECK);
-		createTomcatContextXML.setText("Create META-INF/context.xml");
+		createTomcatContextXML.setText("Create Tomcat META-INF/context.xml");
 		createTomcatContextXML.setSelection(exportModel.isCreateTomcatContextXML());
+		createTomcatContextXML.setToolTipText("Adds a Tomcat specific META-INF/context.xml file in the war file which allows enabling the options below.\n" +
+			"Please note that the file is copied (and renamed) to $CATALINA_BASE/conf/[enginename]/[hostname]/ only the first time the war is deployed.\n" +
+			"Subsequent updates of META-INF/context.xml in the war file will be ignored by tomcat.");
 		createTomcatContextXML.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -520,6 +523,9 @@ public class FileSelectionPage extends WizardPage implements Listener
 		antiResourceLocking = new Button(horizontalComposite, SWT.CHECK);
 		antiResourceLocking.setText("Set antiResourceLocking to true");
 		antiResourceLocking.setSelection(exportModel.isAntiResourceLocking());
+		antiResourceLocking.setToolTipText(
+			"Recomended for Tomcat instalations running on Windows. It avoids a file locking issue when undeploying the war. \n" +
+				"This will impact the startup time of the application.");
 		antiResourceLocking.setEnabled(createTomcatContextXML.getSelection());
 		antiResourceLocking.addSelectionListener(new SelectionAdapter()
 		{
@@ -537,6 +543,8 @@ public class FileSelectionPage extends WizardPage implements Listener
 		clearReferencesStatic.setText("Set clearReferencesStatic to true");
 		clearReferencesStatic.setSelection(exportModel.isClearReferencesStatic());
 		clearReferencesStatic.setEnabled(createTomcatContextXML.getSelection());
+		clearReferencesStatic.setToolTipText(
+			"In order to avoid memory leaks, Tomcat will null out static fields from loaded classes after the application has been stopped.");
 		clearReferencesStatic.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -553,6 +561,9 @@ public class FileSelectionPage extends WizardPage implements Listener
 		clearReferencesStopThreads.setText("Set clearReferencesStopThreads to true (USE WITH CARE)");
 		clearReferencesStopThreads.setSelection(exportModel.isClearReferencesStopThreads());
 		clearReferencesStopThreads.setEnabled(createTomcatContextXML.getSelection());
+		clearReferencesStopThreads.setToolTipText(
+			"In order to avoid memory leaks, Tomcat will attempt to terminate threads that have been started by the web application.\n" +
+				"Still running threads are stopped via the deprecated Thread.stop() method.");
 		clearReferencesStopThreads.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -568,7 +579,12 @@ public class FileSelectionPage extends WizardPage implements Listener
 		clearReferencesStopTimerThreads = new Button(horizontalComposite, SWT.CHECK);
 		clearReferencesStopTimerThreads.setText("Set clearReferencesStopTimerThreads to true");
 		clearReferencesStopTimerThreads.setSelection(exportModel.isClearReferencesStopTimerThreads());
+		clearReferencesStopTimerThreads.setToolTipText(
+			"In order to avoid memory leaks, Tomcat attempts to terminate java.util.Timer threads that have been started by the web application.\n" +
+				"Unlike standard threads, timer threads can be stopped safely although there may still be side-effects for the application.");
+
 		clearReferencesStopTimerThreads.setEnabled(createTomcatContextXML.getSelection());
+
 		clearReferencesStopTimerThreads.addSelectionListener(new SelectionAdapter()
 		{
 			@Override

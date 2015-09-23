@@ -132,7 +132,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -"+updateSequences+" ... updates Sequences \n"
 			+ "        -"+upgradeRepository+" ... automatically upgrade repository if needed \n"
 
-			+ "        -"+createTomcatContextXML+" create a META-INF/context.xml file \n"
+			+ "        -"+createTomcatContextXML+" create a META-INF/context.xml file, please see https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Standard_Implementation for more information \n"
 			+ "        -"+antiResourceLocking+" add antiResourceLocking=\"true\" to Context element, may only be used with createTomcatContextXML \n"
 			+ "        -"+clearReferencesStatic+" add clearReferencesStatic=\"true\" to Context element, may only be used with createTomcatContextXML \n"
 			+ "        -"+clearReferencesStopThreads+" add clearReferencesStopThreads=\"true\" to Context element, may only be used with createTomcatContextXML \n"
