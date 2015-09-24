@@ -157,6 +157,7 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.LiteralDataprovider;
+import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
@@ -3789,8 +3790,7 @@ public class TypeCreator extends TypeCache
 							formToUse = fs.getFlattenedForm(form);
 						}
 						IApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
-						Iterator<IPersist> formObjects = formToUse.getAllObjects();
-						createFormElementProperties(context, application, members, formObjects);
+						createFormElementProperties(context, application, members, formToUse.getFlattenedObjects(NameComparator.INSTANCE));
 					}
 					catch (Exception e)
 					{
@@ -3807,52 +3807,57 @@ public class TypeCreator extends TypeCache
 		 * @param members
 		 * @param formObjects
 		 */
-		private void createFormElementProperties(String context, IApplication application, EList<Member> members, Iterator<IPersist> formObjects)
+		private void createFormElementProperties(String context, IApplication application, EList<Member> members, List<IFormElement> formElements)
 		{
-			while (formObjects.hasNext())
+			for (IFormElement formElement : formElements)
 			{
-				IPersist persist = formObjects.next();
-				if (persist instanceof IFormElement)
+				if (!Utils.stringIsEmpty(formElement.getName()))
 				{
-					IFormElement formElement = (IFormElement)persist;
-					if (!Utils.stringIsEmpty(formElement.getName()))
+					SimpleType elementType = null;
+					if (FormTemplateGenerator.isWebcomponentBean(formElement))
 					{
-						SimpleType elementType = null;
-						if (FormTemplateGenerator.isWebcomponentBean(formElement))
+						String typeName = FormTemplateGenerator.getComponentTypeName(formElement);
+						wcTypeNames.put(typeName, typeName);
+						elementType = getTypeRef(context, typeName);
+					}
+					else
+					{
+						Class< ? > persistClass = ElementUtil.getPersistScriptClass(application, formElement);
+						if (persistClass != null && formElement instanceof Bean)
 						{
-							String typeName = FormTemplateGenerator.getComponentTypeName(formElement);
-							wcTypeNames.put(typeName, typeName);
-							elementType = getTypeRef(context, typeName);
-						}
-						else
-						{
-							Class< ? > persistClass = ElementUtil.getPersistScriptClass(application, persist);
-							if (persistClass != null && formElement instanceof Bean)
+							String beanClassName = ((Bean)formElement).getBeanClassName();
+							if (persistClass != IScriptMobileBean.class && beanClassName != null)
 							{
-								String beanClassName = ((Bean)formElement).getBeanClassName();
-								if (persistClass != IScriptMobileBean.class && beanClassName != null)
-								{
-									// map the persist class that is registered in the initialize() method under the beanclassname under that same name.
-									// So SwingDBTreeView class/name points to "DBTreeView" which points to that class again of the class types
-									typeNames.put(persistClass.getSimpleName(), beanClassName.substring(beanClassName.lastIndexOf('.') + 1));
-								}
+								// map the persist class that is registered in the initialize() method under the beanclassname under that same name.
+								// So SwingDBTreeView class/name points to "DBTreeView" which points to that class again of the class types
+								typeNames.put(persistClass.getSimpleName(), beanClassName.substring(beanClassName.lastIndexOf('.') + 1));
 							}
-							elementType = getElementType(context, persistClass);
 						}
-						members.add(createProperty(formElement.getName(), true, elementType, null, PROPERTY));
+						elementType = getElementType(context, persistClass);
 					}
-					if (formElement.getGroupID() != null)
+					members.add(createProperty(formElement.getName(), true, elementType, null, PROPERTY));
+				}
+				if (formElement.getGroupID() != null)
+				{
+					String groupName = FormElementGroup.getName(formElement.getGroupID());
+					if (groupName != null)
 					{
-						String groupName = FormElementGroup.getName(formElement.getGroupID());
-						if (groupName != null)
+						members.add(createProperty(groupName, true, getElementType(context, RuntimeGroup.class), null, PROPERTY));
+					}
+				}
+				if (formElement instanceof Portal && !((Portal)formElement).isMobileInsetList())
+				{
+					List<IFormElement> children = new ArrayList<IFormElement>();
+					Iterator<IPersist> it = ((Portal)formElement).getAllObjects();
+					while (it.hasNext())
+					{
+						IPersist persist = it.next();
+						if (persist instanceof IFormElement)
 						{
-							members.add(createProperty(groupName, true, getElementType(context, RuntimeGroup.class), null, PROPERTY));
+							children.add((IFormElement)persist);
 						}
 					}
-					if (formElement instanceof Portal && !((Portal)formElement).isMobileInsetList())
-					{
-						createFormElementProperties(context, application, members, ((Portal)formElement).getAllObjects());
-					}
+					createFormElementProperties(context, application, members, children);
 				}
 			}
 		}
