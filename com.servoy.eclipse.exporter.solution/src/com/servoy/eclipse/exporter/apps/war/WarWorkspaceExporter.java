@@ -20,6 +20,7 @@ package com.servoy.eclipse.exporter.apps.war;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -195,14 +196,16 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 
 			List<String> getFiles(File dir, final Set<String> fileNames)
 			{
-				return Arrays.asList(dir.list(new FilenameFilter()
+				String[] list = dir.list(new FilenameFilter()
 				{
 					public boolean accept(File dir, String name)
 					{
 						boolean accept = fileNames != null ? fileNames.contains(name.toLowerCase()) : true;
 						return accept && (name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip"));
 					}
-				}));
+				});
+				if (list == null || list.length == 0) return Collections.emptyList();
+				return Arrays.asList(list);
 			}
 
 			@Override
