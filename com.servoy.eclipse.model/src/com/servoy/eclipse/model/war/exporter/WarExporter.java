@@ -164,7 +164,6 @@ public class WarExporter
 		monitor.subTask("Creating web.xml");
 		copyWebXml(tmpWarDir);
 		monitor.worked(1);
-		monitor.subTask("Creating context.xml");
 		createTomcatContextXML(monitor, tmpWarDir);
 		monitor.worked(1);
 		addServoyProperties(tmpWarDir);
@@ -668,6 +667,7 @@ public class WarExporter
 		if (!exportModel.isCreateTomcatContextXML()) return;
 		try
 		{
+			monitor.subTask("Creating context.xml");
 			File metaDir = new File(tmpWarDir, "META-INF");
 			metaDir.mkdir();
 			File contextFile = new File(tmpWarDir, "META-INF/context.xml");
