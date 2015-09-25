@@ -117,12 +117,12 @@ public class PDPropertySource extends PersistPropertySource
 				}
 				config.setValues(realValues.toArray(new Object[realValues.size()]), displayValues.toArray(new String[displayValues.size()]));
 			}
-			if (desc.getDefaultValue() != null)
+			if (desc.hasDefault())
 			{
 				config.addDefault(desc.getDefaultValue(), null);
 			}
-			createdPropertyHandler = new WebComponentPropertyHandler(
-				new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config, desc.getDefaultValue(), null, null, null, false));
+			createdPropertyHandler = new WebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config,
+				desc.getDefaultValue(), desc.hasDefault(), null, null, null, false));
 		}
 		else
 		{

@@ -42,6 +42,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
+import org.sablo.specification.property.types.BooleanPropertyType;
 import org.sablo.specification.property.types.FontPropertyType;
 import org.sablo.specification.property.types.FunctionPropertyType;
 import org.sablo.specification.property.types.ScrollbarsPropertyType;
@@ -130,6 +131,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 			new String[] { Messages.AlignTop, Messages.AlignCenter, Messages.AlignBottom }).addDefault(Integer.valueOf(-1), null));
 
 	public static final PropertyDescription SOLUTION_TYPE_VALUES;
+
 	static
 	{
 		Integer[] ia = new Integer[SolutionMetaData.solutionTypes.length];
@@ -137,80 +139,73 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		{
 			ia[i] = Integer.valueOf(SolutionMetaData.solutionTypes[i]);
 		}
-		SOLUTION_TYPE_VALUES = new PropertyDescription("solutionType", ValuesPropertyType.INSTANCE, new ValuesConfig().setValues(ia,
-			SolutionMetaData.solutionTypeNames));
+		SOLUTION_TYPE_VALUES = new PropertyDescription("solutionType", ValuesPropertyType.INSTANCE,
+			new ValuesConfig().setValues(ia, SolutionMetaData.solutionTypeNames));
 	}
 
-	public static final PropertyDescription TEXT_ORIENTATION_VALUES = new PropertyDescription(
-		"textOrientation",
-		ValuesPropertyType.INSTANCE,
+	public static final PropertyDescription TEXT_ORIENTATION_VALUES = new PropertyDescription("textOrientation", ValuesPropertyType.INSTANCE,
 		new ValuesConfig().setValues(
-			new Integer[] { Integer.valueOf(Solution.TEXT_ORIENTATION_LEFT_TO_RIGHT), Integer.valueOf(Solution.TEXT_ORIENTATION_RIGHT_TO_LEFT), Integer.valueOf(Solution.TEXT_ORIENTATION_LOCALE_SPECIFIC) },
+			new Integer[] { Integer.valueOf(Solution.TEXT_ORIENTATION_LEFT_TO_RIGHT), Integer.valueOf(Solution.TEXT_ORIENTATION_RIGHT_TO_LEFT), Integer.valueOf(
+				Solution.TEXT_ORIENTATION_LOCALE_SPECIFIC) },
 			new String[] { Messages.OrientationLeftToRight, Messages.OrientationRightToLeft, Messages.OrientationLocaleSpecific }).addDefault(
-			Integer.valueOf(Solution.TEXT_ORIENTATION_DEFAULT), null));
+				Integer.valueOf(Solution.TEXT_ORIENTATION_DEFAULT), null));
 
 	public static final PropertyDescription ROLLOVER_CURSOR_VALUES = new PropertyDescription("rolloverCursor", ValuesPropertyType.INSTANCE,
 		new ValuesConfig().setValues(new Integer[] { Integer.valueOf(Cursor.HAND_CURSOR) }, new String[] { Messages.CursorHand }).addDefault(
 			Integer.valueOf(Cursor.DEFAULT_CURSOR), null));
 
-	public static final PropertyDescription SHAPE_TYPE_VALUES = new PropertyDescription(
-		"shapeType",
-		ValuesPropertyType.INSTANCE,
-		new ValuesConfig().setValues(
-			new Integer[] { Integer.valueOf(RectShape.BORDER_PANEL), Integer.valueOf(RectShape.RECTANGLE), Integer.valueOf(RectShape.ROUNDED_RECTANGLE), Integer.valueOf(RectShape.OVAL) },
-			new String[] { "BORDER_PANEL", "RECTANGLE", "ROUNDED_RECTANGLE", "OVAL" }));
+	public static final PropertyDescription SHAPE_TYPE_VALUES = new PropertyDescription("shapeType", ValuesPropertyType.INSTANCE,
+		new ValuesConfig().setValues(new Integer[] { Integer.valueOf(RectShape.BORDER_PANEL), Integer.valueOf(RectShape.RECTANGLE), Integer.valueOf(
+			RectShape.ROUNDED_RECTANGLE), Integer.valueOf(RectShape.OVAL) }, new String[] { "BORDER_PANEL", "RECTANGLE", "ROUNDED_RECTANGLE", "OVAL" }));
 
-	public static final PropertyDescription VIEW_TYPE_VALUES = new PropertyDescription(
-		"view",
-		ValuesPropertyType.INSTANCE,
+	public static final PropertyDescription VIEW_TYPE_VALUES = new PropertyDescription("view", ValuesPropertyType.INSTANCE,
 		new ValuesConfig().setValues(
-			new Integer[] { Integer.valueOf(IForm.RECORD_VIEW), Integer.valueOf(IForm.LIST_VIEW), Integer.valueOf(IForm.LOCKED_RECORD_VIEW), Integer.valueOf(FormController.LOCKED_LIST_VIEW), Integer.valueOf(FormController.LOCKED_TABLE_VIEW) },
-			new String[] { "Record view", "List view", "Record view (locked)", "List view (locked)", "Table view (locked)" }));
+			new Integer[] { Integer.valueOf(IForm.RECORD_VIEW), Integer.valueOf(IForm.LIST_VIEW), Integer.valueOf(IForm.LOCKED_RECORD_VIEW), Integer.valueOf(
+				FormController.LOCKED_LIST_VIEW), Integer.valueOf(FormController.LOCKED_TABLE_VIEW) },
+		new String[] { "Record view", "List view", "Record view (locked)", "List view (locked)", "Table view (locked)" }));
 
 	public static final PropertyDescription SELECTION_MODE_VALUES = new PropertyDescription("selectionMode", ValuesPropertyType.INSTANCE,
 		new ValuesConfig().setValues(new Integer[] { Integer.valueOf(IForm.SELECTION_MODE_SINGLE), Integer.valueOf(IForm.SELECTION_MODE_MULTI) },
 			new String[] { Messages.SelectionModeSingle, Messages.SelectionModeMulti }).addDefault(Integer.valueOf(IForm.SELECTION_MODE_DEFAULT), null));
 
-	public static final PropertyDescription JOIN_TYPE_VALUES = new PropertyDescription("joinType", ValuesPropertyType.INSTANCE, new ValuesConfig().setValues(
-		new Integer[] { Integer.valueOf(ISQLJoin.INNER_JOIN), Integer.valueOf(ISQLJoin.LEFT_OUTER_JOIN) },
-		new String[] { ISQLJoin.JOIN_TYPES_NAMES[ISQLJoin.INNER_JOIN], ISQLJoin.JOIN_TYPES_NAMES[ISQLJoin.LEFT_OUTER_JOIN] }));
+	public static final PropertyDescription JOIN_TYPE_VALUES = new PropertyDescription("joinType", ValuesPropertyType.INSTANCE,
+		new ValuesConfig().setValues(new Integer[] { Integer.valueOf(ISQLJoin.INNER_JOIN), Integer.valueOf(ISQLJoin.LEFT_OUTER_JOIN) },
+			new String[] { ISQLJoin.JOIN_TYPES_NAMES[ISQLJoin.INNER_JOIN], ISQLJoin.JOIN_TYPES_NAMES[ISQLJoin.LEFT_OUTER_JOIN] }));
 
-	public static final PropertyDescription DISPLAY_TYPE_VALUES = new PropertyDescription(
-		"displayType",
-		ValuesPropertyType.INSTANCE,
+	public static final PropertyDescription DISPLAY_TYPE_VALUES = new PropertyDescription("displayType", ValuesPropertyType.INSTANCE,
 		new ValuesConfig().setValues(
-			new Integer[] { Integer.valueOf(Field.TEXT_FIELD), Integer.valueOf(Field.TEXT_AREA), Integer.valueOf(Field.RTF_AREA), Integer.valueOf(Field.HTML_AREA), Integer.valueOf(Field.TYPE_AHEAD), Integer.valueOf(Field.COMBOBOX), Integer.valueOf(Field.RADIOS), Integer.valueOf(Field.CHECKS), Integer.valueOf(Field.CALENDAR), Integer.valueOf(Field.IMAGE_MEDIA), Integer.valueOf(Field.PASSWORD), Integer.valueOf(Field.LIST_BOX), Integer.valueOf(Field.MULTISELECT_LISTBOX), Integer.valueOf(Field.SPINNER) },
+			new Integer[] { Integer.valueOf(Field.TEXT_FIELD), Integer.valueOf(Field.TEXT_AREA), Integer.valueOf(Field.RTF_AREA), Integer.valueOf(
+				Field.HTML_AREA), Integer.valueOf(Field.TYPE_AHEAD), Integer.valueOf(Field.COMBOBOX), Integer.valueOf(Field.RADIOS), Integer.valueOf(
+					Field.CHECKS), Integer.valueOf(Field.CALENDAR), Integer.valueOf(Field.IMAGE_MEDIA), Integer.valueOf(Field.PASSWORD), Integer.valueOf(
+						Field.LIST_BOX), Integer.valueOf(Field.MULTISELECT_LISTBOX), Integer.valueOf(Field.SPINNER) },
 			new String[] { "TEXT_FIELD", "TEXT_AREA", "RTF_AREA", "HTML_AREA", "TYPE_AHEAD", "COMBOBOX", "RADIOS", "CHECK", "CALENDAR", "IMAGE_MEDIA", "PASSWORD", "LISTBOX", "MULTISELECT_LISTBOX", "SPINNER" }));
 
-	public static final PropertyDescription TAB_ORIENTATION_VALUES = new PropertyDescription(
-		"tabOrientation",
-		ValuesPropertyType.INSTANCE,
+	public static final PropertyDescription TAB_ORIENTATION_VALUES = new PropertyDescription("tabOrientation", ValuesPropertyType.INSTANCE,
 		new ValuesConfig().setValues(
-			new Integer[] { Integer.valueOf(SwingConstants.TOP), Integer.valueOf(SwingConstants.RIGHT), Integer.valueOf(SwingConstants.BOTTOM), Integer.valueOf(SwingConstants.LEFT), Integer.valueOf(TabPanel.HIDE), Integer.valueOf(TabPanel.SPLIT_HORIZONTAL), Integer.valueOf(TabPanel.SPLIT_VERTICAL), Integer.valueOf(TabPanel.ACCORDION_PANEL) },
+			new Integer[] { Integer.valueOf(SwingConstants.TOP), Integer.valueOf(SwingConstants.RIGHT), Integer.valueOf(SwingConstants.BOTTOM), Integer.valueOf(
+				SwingConstants.LEFT), Integer.valueOf(TabPanel.HIDE), Integer.valueOf(TabPanel.SPLIT_HORIZONTAL), Integer.valueOf(
+					TabPanel.SPLIT_VERTICAL), Integer.valueOf(TabPanel.ACCORDION_PANEL) },
 			new String[] { Messages.AlignTop, Messages.AlignRight, Messages.AlignBottom, Messages.AlignLeft, "HIDE", "SPLIT HORIZONTAL", "SPLIT VERTICAL", "ACCORDION PANE" }).addDefault(
-			Integer.valueOf(TabPanel.DEFAULT_ORIENTATION), null));
+				Integer.valueOf(TabPanel.DEFAULT_ORIENTATION), null));
 
-	public static final PropertyDescription MNEMONIC_VALUES = new PropertyDescription(
-		"mnemonic",
-		ValuesPropertyType.INSTANCE,
+	public static final PropertyDescription MNEMONIC_VALUES = new PropertyDescription("mnemonic", ValuesPropertyType.INSTANCE,
 		new ValuesConfig().setValues(
 			new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" }).setEditable(
-			true));
+				true));
 
 
 	// null type: use property controller internally
-	public static final PropertyDescription SLIDING_OPTIONS_DESCRIPTION = new PropertyDescription("printSliding", null, new SlidingoptionsPropertyController(
-		"printSliding", RepositoryHelper.getDisplayName("printSliding", GraphicalComponent.class)));
+	public static final PropertyDescription SLIDING_OPTIONS_DESCRIPTION = new PropertyDescription("printSliding", null,
+		new SlidingoptionsPropertyController("printSliding", RepositoryHelper.getDisplayName("printSliding", GraphicalComponent.class)));
 
 
 	// null type: use property controller internally
 	public static final PropertyDescription FORM_ENCAPSULATION_DESCRIPTION = new PropertyDescription("encapsulation", null,
 		new EncapsulationPropertyController("encapsulation", RepositoryHelper.getDisplayName("encapsulation", Form.class)));
-	public static final PropertyDescription RELATION_ENCAPSULATION_VALUES = new PropertyDescription(
-		"encapsulation",
-		ValuesPropertyType.INSTANCE,
+	public static final PropertyDescription RELATION_ENCAPSULATION_VALUES = new PropertyDescription("encapsulation", ValuesPropertyType.INSTANCE,
 		new ValuesConfig().setValues(
-			new Integer[] { Integer.valueOf(PersistEncapsulation.DEFAULT), Integer.valueOf(PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE), Integer.valueOf(PersistEncapsulation.MODULE_SCOPE) },
+			new Integer[] { Integer.valueOf(PersistEncapsulation.DEFAULT), Integer.valueOf(
+				PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE), Integer.valueOf(PersistEncapsulation.MODULE_SCOPE) },
 			new String[] { Messages.Public, Messages.HideInScriptingModuleScope, Messages.ModuleScope }));
 	public static final PropertyDescription OTHER_ENCAPSULATION_VALUES = new PropertyDescription("encapsulation", ValuesPropertyType.INSTANCE,
 		new ValuesConfig().setValues(new Integer[] { Integer.valueOf(PersistEncapsulation.DEFAULT), Integer.valueOf(PersistEncapsulation.MODULE_SCOPE) },
@@ -286,8 +281,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		if (obj instanceof Media && ("mimeType".equals(name) || "name".equals(name)))
 		{
 			// null type: use property controller internally
-			return new PropertyDescription(name, null, new PropertyController<String, String>(name, displayName, PersistPropertySource.NULL_STRING_CONVERTER,
-				null, null));
+			return new PropertyDescription(name, null,
+				new PropertyController<String, String>(name, displayName, PersistPropertySource.NULL_STRING_CONVERTER, null, null));
 		}
 
 		if ("tabSeq".equals(name))
@@ -323,8 +318,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		{
 			if (persistContext.getPersist() instanceof Solution)
 			{
-				return new PropertyDescription(name, MediaPropertyType.INSTANCE, new MediaPropertyControllerConfig("Solution CSS picker (from media library)",
-					new IFilter()
+				return new PropertyDescription(name, MediaPropertyType.INSTANCE,
+					new MediaPropertyControllerConfig("Solution CSS picker (from media library)", new IFilter()
 					{
 						@Override
 						public boolean select(Object toTest)
@@ -346,8 +341,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 			{
 				NamedFoundsetComboboxModel model = new NamedFoundsetComboboxModel(form);
 				// null type: use property controller internally
-				return new PropertyDescription("namedFoundSet", null, new ComboboxPropertyController<String>(name, displayName, model,
-					Messages.LabelUnresolved, new ComboboxDelegateValueEditor<String>(new NamedFoundsetRelationValueEditor(form), model)));
+				return new PropertyDescription("namedFoundSet", null, new ComboboxPropertyController<String>(name, displayName, model, Messages.LabelUnresolved,
+					new ComboboxDelegateValueEditor<String>(new NamedFoundsetRelationValueEditor(form), model)));
 			}
 		}
 
@@ -399,77 +394,77 @@ public class PersistPropertyHandler extends BasePropertyHandler
 
 
 			// null type: use property controller internally
-			return new PropertyDescription(name, null, new PropertySetterDelegatePropertyController<Integer, PersistPropertySource>(
-				new ComboboxPropertyController<Integer>(name, displayName, new ComboboxPropertyModel<Integer>(integerTypes, stringTypes),
-					Messages.LabelUnresolved), name)
-			{
-				// handle setting of this property via a IPropertySetter so that we can do additional stuff when the property is set.
-				public void setProperty(PersistPropertySource propertySource, Integer value)
+			return new PropertyDescription(name, null,
+				new PropertySetterDelegatePropertyController<Integer, PersistPropertySource>(new ComboboxPropertyController<Integer>(name, displayName,
+					new ComboboxPropertyModel<Integer>(integerTypes, stringTypes), Messages.LabelUnresolved), name)
 				{
-					propertySource.setPersistPropertyValue(name, value);
-
-					// the variable type is being set; the default value should change if incompatible
-					ScriptVariable variable = (ScriptVariable)propertySource.getPersist();
-					String defaultValue = variable.getDefaultValue();
-					if (defaultValue != null)
+					// handle setting of this property via a IPropertySetter so that we can do additional stuff when the property is set.
+					public void setProperty(PersistPropertySource propertySource, Integer value)
 					{
-						String newDefault = null;
-						int type = value.intValue();
-						if (type == IColumnTypes.TEXT)
-						{
-							if (!isQuoted(defaultValue))
-							{
-								newDefault = Utils.makeJSExpression(defaultValue);
-							}
-						}
-						else if (type == IColumnTypes.INTEGER)
-						{
-							if (isQuoted(defaultValue))
-							{
-								newDefault = defaultValue.substring(1, defaultValue.length() - 1);
-							}
-							else
-							{
-								newDefault = defaultValue;
-							}
-							try
-							{
-								Integer.parseInt(newDefault);
-								newDefault = (defaultValue == newDefault) ? null : newDefault;
-							}
-							catch (NumberFormatException e)
-							{
-								newDefault = "";
-							}
-						}
-						else if (type == IColumnTypes.NUMBER)
-						{
-							if (isQuoted(defaultValue))
-							{
-								newDefault = defaultValue.substring(1, defaultValue.length() - 1);
-							}
-							else
-							{
-								newDefault = defaultValue;
-							}
-							try
-							{
-								Double.parseDouble(newDefault);
-								newDefault = (defaultValue == newDefault) ? null : newDefault;
-							}
-							catch (NumberFormatException e)
-							{
-								newDefault = "";
-							}
-						}
+						propertySource.setPersistPropertyValue(name, value);
 
-						if (newDefault != null)
+						// the variable type is being set; the default value should change if incompatible
+						ScriptVariable variable = (ScriptVariable)propertySource.getPersist();
+						String defaultValue = variable.getDefaultValue();
+						if (defaultValue != null)
 						{
-							variable.setDefaultValue(newDefault);
+							String newDefault = null;
+							int type = value.intValue();
+							if (type == IColumnTypes.TEXT)
+							{
+								if (!isQuoted(defaultValue))
+								{
+									newDefault = Utils.makeJSExpression(defaultValue);
+								}
+							}
+							else if (type == IColumnTypes.INTEGER)
+							{
+								if (isQuoted(defaultValue))
+								{
+									newDefault = defaultValue.substring(1, defaultValue.length() - 1);
+								}
+								else
+								{
+									newDefault = defaultValue;
+								}
+								try
+								{
+									Integer.parseInt(newDefault);
+									newDefault = (defaultValue == newDefault) ? null : newDefault;
+								}
+								catch (NumberFormatException e)
+								{
+									newDefault = "";
+								}
+							}
+							else if (type == IColumnTypes.NUMBER)
+							{
+								if (isQuoted(defaultValue))
+								{
+									newDefault = defaultValue.substring(1, defaultValue.length() - 1);
+								}
+								else
+								{
+									newDefault = defaultValue;
+								}
+								try
+								{
+									Double.parseDouble(newDefault);
+									newDefault = (defaultValue == newDefault) ? null : newDefault;
+								}
+								catch (NumberFormatException e)
+								{
+									newDefault = "";
+								}
+							}
+
+							if (newDefault != null)
+							{
+								variable.setDefaultValue(newDefault);
+							}
 						}
 					}
-				}
-			});
+				});
 		}
 
 
@@ -510,10 +505,10 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				{
 					// TODO: use PropertyType.form with options
 					boolean isMobile = form.getSolution().getSolutionMetaData().getSolutionType() == SolutionMetaData.MOBILE;
-					return new ListSelectCellEditor(parent, "Select navigator form", new FormContentProvider(flattenedEditingSolution, form),
-						formLabelProvider, new FormValueEditor(flattenedEditingSolution), false, new FormContentProvider.FormListOptions(
-							FormListOptions.FormListType.FORMS, Boolean.valueOf(isMobile), true, !isMobile, true), SWT.NONE, null, "navigatorFormDialog",
-						"Only forms that have navigator set to -none- and showInMenu deselected appear in this list.");
+					return new ListSelectCellEditor(parent, "Select navigator form", new FormContentProvider(flattenedEditingSolution, form), formLabelProvider,
+						new FormValueEditor(flattenedEditingSolution), false,
+						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, Boolean.valueOf(isMobile), true, !isMobile, true), SWT.NONE,
+						null, "navigatorFormDialog", "Only forms that have navigator set to -none- and showInMenu deselected appear in this list.");
 				}
 			};
 			pd.setLabelProvider(formLabelProvider);
@@ -533,8 +528,9 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				public CellEditor createPropertyEditor(Composite parent)
 				{
 					return new ListSelectCellEditor(parent, "Select parent form", new FormContentProvider(flattenedEditingSolution, form), formLabelProvider,
-						new FormValueEditor(flattenedEditingSolution), false, new FormContentProvider.FormListOptions(FormListOptions.FormListType.HIERARCHY,
-							null, true, false, false), SWT.NONE, null, "parentFormDialog")
+						new FormValueEditor(flattenedEditingSolution), false,
+						new FormContentProvider.FormListOptions(FormListOptions.FormListType.HIERARCHY, null, true, false, false), SWT.NONE, null,
+						"parentFormDialog")
 					{
 						@Override
 						protected Object openDialogBox(Control cellEditorWindow)
@@ -548,7 +544,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 									List<IPersist> overridePersists = new ArrayList<IPersist>();
 									for (IPersist child : f.getAllObjectsAsList())
 									{
-										if (child instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)child)) overridePersists.add(child);
+										if (child instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)child))
+											overridePersists.add(child);
 									}
 									if (overridePersists.size() > 0)
 									{
@@ -770,9 +767,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 
 		if (name.equals("format"))
 		{
-			return new PropertyDescription(
-				name,
-				FormatPropertyType.INSTANCE,
+			return new PropertyDescription(name, FormatPropertyType.INSTANCE,
 				new String[] { StaticContentSpecLoader.PROPERTY_VALUELISTID.getPropertyName(), StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName() });
 		}
 
@@ -906,6 +901,11 @@ public class PersistPropertyHandler extends BasePropertyHandler
 			}
 
 			return new PropertyDescription(name, ValuesPropertyType.INSTANCE, new ValuesConfig().setValues(availableSolutions.toArray()).setMultiple(true));
+		}
+
+		if (name.equals(IContentSpecConstants.PROPERTY_NG_READONLY_MODE))
+		{
+			return new PropertyDescription(name, BooleanPropertyType.INSTANCE, null, null, true, null, null, null, false);
 		}
 
 		return super.getPropertyDescription(obj, propertySource, persistContext);

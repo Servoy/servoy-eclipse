@@ -144,7 +144,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		}
 		if (value == null)
 		{
-			if (!(type instanceof IDesignToFormElement) && propertyDescription.getDefaultValue() != null)
+			if (!(type instanceof IDesignToFormElement) && propertyDescription.hasDefault())
 			{
 				IPropertyConverterForBrowser<Object> converter = (IPropertyConverterForBrowser<Object>)jsonConverters.get(type);
 				if (converter != null)
