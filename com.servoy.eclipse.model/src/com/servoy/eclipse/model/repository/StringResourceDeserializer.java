@@ -36,6 +36,7 @@ import org.json.JSONException;
 import com.servoy.eclipse.model.Activator;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.persistence.ChangeHandler;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -60,7 +61,7 @@ public class StringResourceDeserializer
 
 	/**
 	 * Deserialize string resource metadatas.
-	 * 
+	 *
 	 * @param eclipseRepository the repository
 	 * @param wsd the workspace directory (directory that contains the resources project).
 	 * @param resourcesProjectName the name of the resources project to use.
@@ -105,7 +106,7 @@ public class StringResourceDeserializer
 
 	/**
 	 * Deserialize metadata for one string resource specified by it's .obj file.
-	 * 
+	 *
 	 * @param eclipseRepository the repository.
 	 * @param resourceObjFile the .obj file for the string resource.
 	 * @return the meta data for this string resource.
@@ -207,7 +208,7 @@ public class StringResourceDeserializer
 		{
 			resource.loadFromFile(contentFile);
 		}
-		resource.setChangeHandler(new EclipseChangeHandler(eclipseRepository));
+		resource.setChangeHandler(new ChangeHandler(eclipseRepository));
 		return resource;
 	}
 

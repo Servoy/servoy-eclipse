@@ -47,7 +47,6 @@ import com.servoy.eclipse.core.util.RunInWorkspaceJob;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
-import com.servoy.eclipse.model.repository.EclipseChangeHandler;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -60,6 +59,7 @@ import com.servoy.j2db.dataprocessing.IDataServer;
 import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.persistence.AbstractRootObject;
+import com.servoy.j2db.persistence.ChangeHandler;
 import com.servoy.j2db.persistence.I18NUtil.MessageEntry;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -577,7 +577,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		IRootObject root = x11handler.importRootObject(rootObjectImportInfo);
 		if (root instanceof AbstractRootObject)
 		{
-			((AbstractRootObject)root).setChangeHandler(new EclipseChangeHandler(repository));
+			((AbstractRootObject)root).setChangeHandler(new ChangeHandler(repository));
 		}
 		return root;
 	}
@@ -599,7 +599,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 				{
 					continue;
 				}
-				// If the group already exists we ask if the user wants to 
+				// If the group already exists we ask if the user wants to
 				// update it.
 				int result = x11handler.getUserChannel().askGroupAlreadyExistsAction(groupInfo.name);
 				switch (result)
@@ -662,8 +662,8 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 							String columnName = target.substring(i + 1);
 							if (elementInfo.columnInfoAccess >= 0)
 							{
-								userManager.setTableSecurityAccess(ApplicationServerRegistry.get().getClientId(), groupInfo.name,
-									elementInfo.columnInfoAccess, serverName, tableName, columnName);
+								userManager.setTableSecurityAccess(ApplicationServerRegistry.get().getClientId(), groupInfo.name, elementInfo.columnInfoAccess,
+									serverName, tableName, columnName);
 							}
 						}
 						else

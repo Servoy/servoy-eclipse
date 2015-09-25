@@ -88,6 +88,7 @@ import com.servoy.j2db.persistence.AbstractPersistFactory;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AbstractScriptProvider;
 import com.servoy.j2db.persistence.ArgumentType;
+import com.servoy.j2db.persistence.ChangeHandler;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.Form;
@@ -203,7 +204,7 @@ public class SolutionDeserializer
 		if (smd == null) return null;
 
 		Solution solution = (Solution)repository.createRootObject(smd);
-		solution.setChangeHandler(new EclipseChangeHandler(repository));
+		solution.setChangeHandler(new ChangeHandler(repository));
 
 		HashSet<UUID> solutionUUIDs = getAlreadyUsedUUIDsForSolution(solution.getUUID());
 		solutionUUIDs.clear();
@@ -269,7 +270,7 @@ public class SolutionDeserializer
 				{
 					if (o.isChanged())
 					{
-						((EclipseChangeHandler)solution.getChangeHandler()).fireIPersistChanged(o);
+						solution.getChangeHandler().fireIPersistChanged(o);
 					}
 					return CONTINUE_TRAVERSAL;
 				}
