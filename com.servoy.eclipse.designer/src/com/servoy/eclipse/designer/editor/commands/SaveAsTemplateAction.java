@@ -184,7 +184,10 @@ public class SaveAsTemplateAction extends SelectionAction
 			else if (selected instanceof PersistContext)
 			{
 				IPersist persist = ((PersistContext)selected).getPersist();
-				persists.add(persist);
+
+				if (persist instanceof Form) form = (Form)persist;
+				else persists.add(persist);
+
 			}
 		}
 

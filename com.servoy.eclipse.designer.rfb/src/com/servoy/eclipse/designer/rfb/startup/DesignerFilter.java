@@ -218,11 +218,11 @@ public class DesignerFilter implements Filter
 											jsonWriter.key("name").value(iRootObject.getName());
 											jsonWriter.key("componentType").value("template");
 											jsonWriter.key("displayName").value(iRootObject.getName());
-											jsonWriter.key("tagName").value("<div></div>");
+											jsonWriter.key("tagName").value("<div  style=\"border-style: dotted;\"></div>");
 											Map<String, Object> model = new HashMap<String, Object>();
 											HashMap<String, Number> size = new HashMap<String, Number>();
-											size.put("height", Integer.valueOf(20));
-											size.put("width", Integer.valueOf(100));
+											size.put("height", Integer.valueOf(80));
+											size.put("width", Integer.valueOf(80));
 											model.put("size", size);
 											jsonWriter.key("model").value(new JSONObject(model));
 											jsonWriter.key("icon").value("rfb/angular/js/modules/toolbaractions/icons/template.gif");
