@@ -51,6 +51,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
@@ -240,7 +241,9 @@ public class BasePropertyHandler implements IPropertyHandler
 			if (IContentSpecConstants.PROPERTY_NG_READONLY_MODE.equals(name) && obj instanceof Form)
 			{
 				Form form = (Form)obj;
-				return form.getView() != IFormConstants.VIEW_TYPE_RECORD && form.getView() != IFormConstants.VIEW_TYPE_RECORD_LOCKED;
+				int type = form.getSolution().getSolutionType();
+				return (type == SolutionMetaData.SOLUTION || type == SolutionMetaData.NG_CLIENT_ONLY ||  type == SolutionMetaData.MODULE) && form.getView() != IFormConstants.VIEW_TYPE_RECORD &&
+					form.getView() != IFormConstants.VIEW_TYPE_RECORD_LOCKED;
 			}
 
 			if (!RepositoryHelper.shouldShow(name, element, persist.getClass(), dispType))
