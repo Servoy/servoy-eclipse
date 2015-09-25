@@ -1798,7 +1798,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					persistContext);
 				if (desc != null)
 				{
-					if (desc.getDefaultValue() != null || IContentSpecConstants.PROPERTY_NG_READONLY_MODE.equals(desc.getName())) return desc.getDefaultValue();
+					if (desc.getDefaultValue() != null) return desc.getDefaultValue();
 					if (desc.getType() != null) return desc.getType().defaultValue(desc); // TODO this might be of wrong type - it's meant as a runtime value
 				}
 			}
