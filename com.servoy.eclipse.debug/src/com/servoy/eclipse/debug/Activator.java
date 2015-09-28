@@ -99,11 +99,6 @@ public class Activator extends AbstractUIPlugin implements IStartup
 	{
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.core.runtime.Plugins#start(org.osgi.framework.BundleContext)
-	 */
 	@Override
 	public void start(BundleContext context) throws Exception
 	{
@@ -326,11 +321,6 @@ public class Activator extends AbstractUIPlugin implements IStartup
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
-	 */
 	@Override
 	public void stop(BundleContext context) throws Exception
 	{
@@ -439,11 +429,6 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			this.resource = resource;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.sablo.specification.WebComponentPackage.JarPackageReader#reportError(java.lang.String, java.lang.Exception)
-		 */
 		@Override
 		public void reportError(String specpath, Exception e)
 		{
@@ -501,11 +486,6 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			}
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.sablo.specification.WebComponentPackage.DirPackageReader#readTextFile(java.lang.String, java.nio.charset.Charset)
-		 */
 		@Override
 		public String readTextFile(String path, Charset charset) throws IOException
 		{
