@@ -43,6 +43,7 @@ import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.Debug;
 
 
@@ -172,8 +173,19 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 							for (int i = 0; i < array.length(); i++)
 							{
 								JSONObject jsonObject = array.getJSONObject(i);
-								WebLayoutSpecification spec = specifications.getSpecification(jsonObject.getString("layoutName"));
-								addLayoutComponent(container, spec.getName(), packageName, jsonObject.optJSONObject("model"), i + 1);
+								if (jsonObject.has("layoutName"))
+								{
+									WebLayoutSpecification spec = specifications.getSpecification(jsonObject.getString("layoutName"));
+									addLayoutComponent(container, spec.getName(), packageName, jsonObject.optJSONObject("model"), i + 1);
+								}
+								else if (jsonObject.has("componentName"))
+								{
+									WebComponent component = (WebComponent)((AbstractBase)parent).getRootObject().getChangeHandler().createNewObject(
+										((ISupportChilds)parent), IRepository.WEBCOMPONENTS);
+									component.setLocation(new Point(i + 1, i + 1));
+									component.setTypeName(jsonObject.getString("componentName"));
+									((AbstractBase)container).addChild(component);
+								}
 							}
 						} // children and layoutName are special
 						else if (!"layoutName".equals(key)) container.putAttribute(key, value.toString());
