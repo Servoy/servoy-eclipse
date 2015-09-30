@@ -921,6 +921,9 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 		registerEditor: function(scope) {
 			editorScope = scope;
 		},
+		getEditor: function() {
+			return editorScope;
+		},
 		connect: function() {
 			if (deferred) return deferred.promise;
 			deferred = $q.defer();

@@ -23,6 +23,13 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 						else
 						{
 							obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y,width:beanModel.size.width,height:beanModel.size.height}
+							var ghostsForNode = $editorService.getEditor().getContainedGhosts(node.getAttribute("svy-id"));
+							if (ghostsForNode){
+								for(var j=0; j < ghostsForNode.length; j++) {
+									var ghost = $editorService.getEditor().getGhost(ghostsForNode[j].uuid);
+									obj[ghostsForNode[j].uuid] = {x:ghost.location.x,y:ghost.location.y};
+								}
+							}							
 						}
 					}
 				}
@@ -67,6 +74,15 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 								beanModel.size.height = beanModel.size.height + deltaY* resizeInfo.height;
 								var css = { top: beanModel.location.y, left: beanModel.location.x, width: beanModel.size.width, height: beanModel.size.height}
 								$(node).css(css);
+								if(resizeInfo.position == 'l' || resizeInfo.position == 't' || resizeInfo.position == 'tl') {
+									var ghostsForNode = $editorService.getEditor().getContainedGhosts(node.getAttribute("svy-id"));
+									if (ghostsForNode){
+										for(var j=0; j < ghostsForNode.length; j++) {
+											var ghost = $editorService.getEditor().getGhost(ghostsForNode[j].uuid);
+											$scope.updateGhostLocation(ghost, ghost.location.x + deltaX*resizeInfo.left, ghost.location.y + deltaY*resizeInfo.top);
+										}
+									}
+								}
 							}
 							else {
 								var ghostObject = $scope.getGhost(node.getAttribute("svy-id"));
