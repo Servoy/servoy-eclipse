@@ -35,7 +35,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Sablo window for NGClient, used in developer.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -75,7 +75,7 @@ public class DesignNGClientWindow extends NGClientWindow
 	}
 
 	@Override
-	protected void updateController(Form form, String realFormName, String formUrl, boolean forceLoad)
+	protected void updateController(Form form, String realFormName, boolean forceLoad)
 	{
 		try
 		{
@@ -87,7 +87,8 @@ public class DesignNGClientWindow extends NGClientWindow
 				IWebFormController controller = getClient().getFormManager().getForm(realFormName);
 				currentWindow.setController(controller);
 			}
-			String realUrl = formUrl + "?lm:" + System.currentTimeMillis() + "&sessionId=" + getSession().getUuid();
+			String defaultStartFormURL = getDefaultFormURLStart(form, realFormName);
+			String realUrl = defaultStartFormURL + "?lm:" + System.currentTimeMillis() + "&sessionId=" + getSession().getUuid();
 			StringWriter sw = new StringWriter(512);
 			// for al js code design flag should be true.
 			new FormTemplateGenerator(new ServoyDataConverterContext(getClient()), true, true).generate(form, realFormName, "form_recordview_js.ftl", sw);
