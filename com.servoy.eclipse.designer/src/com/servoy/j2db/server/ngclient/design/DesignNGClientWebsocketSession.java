@@ -27,6 +27,7 @@ import org.sablo.websocket.impl.ClientService;
 import com.servoy.j2db.IFormController;
 import com.servoy.j2db.server.ngclient.INGClientWindow;
 import com.servoy.j2db.server.ngclient.NGClientWebsocketSession;
+import com.servoy.j2db.server.ngclient.eventthread.NGClientWebsocketSessionWindows;
 
 /**
  * @author jcompagner
@@ -74,6 +75,15 @@ public class DesignNGClientWebsocketSession extends NGClientWebsocketSession
 		{
 			sendSolutionCSSURL(getClient().getSolution());
 		}
+	}
+
+	@Override
+	public INGClientWindow getWindowWithForm(String formName)
+	{
+		// as in developer when we want to debug we will open the form editor in a browser we might end up with the same form showing in two places (developer and separate editor)
+		// both need to be used so we return here the all-windows-proxy
+		NGClientWebsocketSessionWindows proxyToAllWindows = new NGClientWebsocketSessionWindows(this);
+		return proxyToAllWindows.hasForm(formName) ? proxyToAllWindows : null;
 	}
 
 }

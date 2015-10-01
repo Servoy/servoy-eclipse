@@ -31,6 +31,7 @@ import com.servoy.j2db.server.ngclient.NGRuntimeWindowManager;
 import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -87,13 +88,12 @@ public class DesignNGClientWindow extends NGClientWindow
 				IWebFormController controller = getClient().getFormManager().getForm(realFormName);
 				currentWindow.setController(controller);
 			}
-			String defaultStartFormURL = getDefaultFormURLStart(form, realFormName);
-			String realUrl = defaultStartFormURL + "?lm:" + System.currentTimeMillis() + "&sessionId=" + getSession().getUuid();
+			String realUrl = getRealFormURLAndSeeIfItIsACopy(form, realFormName, true).getLeft();
 			StringWriter sw = new StringWriter(512);
 			// for al js code design flag should be true.
 			new FormTemplateGenerator(new ServoyDataConverterContext(getClient()), true, true).generate(form, realFormName, "form_recordview_js.ftl", sw);
 			getSession().getClientService(NGRuntimeWindowManager.WINDOW_SERVICE).executeAsyncServiceCall("updateController",
-				new Object[] { realFormName, sw.toString(), realUrl, Boolean.valueOf(forceLoad) });
+				new Object[] { realFormName, sw.toString(), realUrl, Boolean.valueOf(forceLoad) }, this);
 		}
 		catch (IOException e)
 		{
@@ -101,5 +101,11 @@ public class DesignNGClientWindow extends NGClientWindow
 		}
 	}
 
+	@Override
+	protected Pair<String, Boolean> getRealFormURLAndSeeIfItIsACopy(Form form, String realFormName, boolean addSessionID)
+	{
+		return new Pair<String, Boolean>(getDefaultFormURLStart(form, realFormName) + "?lm:" + System.currentTimeMillis() +
+			(addSessionID ? "&sessionId=" + getSession().getUuid() : ""), Boolean.FALSE);
+	}
 
 }
