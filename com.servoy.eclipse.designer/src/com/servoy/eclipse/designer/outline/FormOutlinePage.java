@@ -70,6 +70,7 @@ import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.LayoutContainer;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -89,6 +90,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 
 	private IPersist[] dragObjects;
 	private LayoutContainer dropTarget;
+	private IPersist dropTargetComponent;
 
 	public FormOutlinePage(Form form, GraphicalViewer viewer, ActionRegistry registry)
 	{
@@ -166,7 +168,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 						final CompoundCommand cc = new CompoundCommand();
 						for (final IPersist p : dragObjects)
 						{
-							cc.add(new ChangeParentCommand(p, dropTarget)
+							cc.add(new ChangeParentCommand(p, dropTarget, dropTargetComponent)
 							{
 								@Override
 								public void execute()
@@ -188,46 +190,82 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				@Override
 				public boolean validateDrop(Object target, int operation, TransferData transferType)
 				{
+					dropTargetComponent = null;
+					dropTarget = null;
 					Object input = (target == null && getViewer() instanceof ContentViewer) ? ((ContentViewer)getViewer()).getInput() : target;
-					if (input instanceof PersistContext && ((PersistContext)input).getPersist() instanceof LayoutContainer)
+					if (input instanceof PersistContext)
 					{
-						LayoutContainer container = (LayoutContainer)((PersistContext)input).getPersist();
-						WebComponentPackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
-							container.getPackageName());
-						WebLayoutSpecification spec = null;
-						if (pkg != null && (spec = pkg.getSpecification(container.getSpecName())) != null)
+						LayoutContainer targetLayoutContainer = null;
+						if (((PersistContext)input).getPersist() instanceof WebComponent)
 						{
-							List<String> allowedChildren = spec.getAllowedChildren();
+							WebComponent wc = (WebComponent)((PersistContext)input).getPersist();
+							if (wc.getParent() instanceof LayoutContainer)
+							{
+								targetLayoutContainer = (LayoutContainer)wc.getParent();
+								dropTargetComponent = wc;
+							}
+						}
+						else if (((PersistContext)input).getPersist() instanceof LayoutContainer)
+						{
+							targetLayoutContainer = (LayoutContainer)((PersistContext)input).getPersist();
 							if (dragObjects != null)
 							{
-								boolean doAllow = true;
+								boolean containerMoveInsideTarget = true;
 								for (IPersist p : dragObjects)
 								{
-									String sourceType = null;
-									if (p instanceof IFormElement)
+									if (p == targetLayoutContainer || !(p instanceof LayoutContainer) ||
+										((LayoutContainer)p).getParent() != targetLayoutContainer.getParent())
 									{
-										sourceType = "component";
+										containerMoveInsideTarget = false;
+										break;
 									}
-									else if (p instanceof LayoutContainer)
-									{
-										sourceType = ((LayoutContainer)p).getSpecName();
-									}
-									if (sourceType != null)
-									{
-										doAllow = allowedChildren.indexOf(sourceType) != -1;
-									}
-									else doAllow = false;
-									if (!doAllow) break;
 								}
-								if (doAllow)
+								if (containerMoveInsideTarget)
 								{
-									dropTarget = container;
-									return true;
+									dropTargetComponent = targetLayoutContainer;
+									targetLayoutContainer = (LayoutContainer)targetLayoutContainer.getParent();
+								}
+							}
+						}
+
+						if (targetLayoutContainer != null)
+						{
+							WebComponentPackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+								targetLayoutContainer.getPackageName());
+							WebLayoutSpecification spec = null;
+							if (pkg != null && (spec = pkg.getSpecification(targetLayoutContainer.getSpecName())) != null)
+							{
+								List<String> allowedChildren = spec.getAllowedChildren();
+								if (dragObjects != null)
+								{
+									boolean doAllow = true;
+									for (IPersist p : dragObjects)
+									{
+										String sourceType = null;
+										if (p instanceof IFormElement)
+										{
+											sourceType = "component";
+										}
+										else if (p instanceof LayoutContainer)
+										{
+											sourceType = ((LayoutContainer)p).getSpecName();
+										}
+										if (sourceType != null)
+										{
+											doAllow = allowedChildren.indexOf(sourceType) != -1;
+										}
+										else doAllow = false;
+										if (!doAllow) break;
+									}
+									if (doAllow)
+									{
+										dropTarget = targetLayoutContainer;
+										return true;
+									}
 								}
 							}
 						}
 					}
-					dropTarget = null;
 					return false;
 				}
 

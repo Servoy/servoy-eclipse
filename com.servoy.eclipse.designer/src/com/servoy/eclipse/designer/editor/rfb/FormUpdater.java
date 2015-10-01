@@ -153,12 +153,13 @@ public class FormUpdater implements Runnable
 									break outer;
 								}
 								if ((property.equals("visible") || property.equals("text") || property.equals("labelFor")) &&
-										(fc.getForm().getView() == IFormConstants.VIEW_TYPE_TABLE || fc.getForm().getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED))
+									(fc.getForm().getView() == IFormConstants.VIEW_TYPE_TABLE || fc.getForm().getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED))
 								{
 									bigChange = true;
 									break outer;
 								}
-								if (webComponent.getParent() != formUI && (property.equals("location") || property.equals("size")))
+								if ((webComponent.getParent() != formUI || persist.getParent() instanceof LayoutContainer) &&
+									(property.equals("location") || property.equals("size")))
 								{
 									bigChange = true;
 									break outer;
@@ -171,7 +172,7 @@ public class FormUpdater implements Runnable
 										// if it is a portal based component then the dataprovider is only the last part for this webcomponent
 										// so if the new value ends with the current value then it is still the same and it is not a big change (this also doesn't have to be set on the component)
 										if (webComponent.getParent() == formUI ||
-												!((newPropValue instanceof String) && (currentPropValue instanceof String) && ((String)newPropValue).endsWith((String)currentPropValue)))
+											!((newPropValue instanceof String) && (currentPropValue instanceof String) && ((String)newPropValue).endsWith((String)currentPropValue)))
 										{
 											// this is a design property change so a big change
 											bigChange = true;
@@ -248,8 +249,8 @@ public class FormUpdater implements Runnable
 				websocketSession.getClientService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall("refreshGhosts",
 					new Object[] { });
 				websocketSession.getClientService(DesignNGClientWebsocketSession.EDITOR_CONTENT_SERVICE).executeAsyncServiceCall(
-						"updateForm",
-						new Object[] { changedForm.getName(), changedForm.getUUID().toString(), Integer.valueOf((int)form.getSize().getWidth()), Integer.valueOf((int)form.getSize().getHeight()) });
+					"updateForm",
+					new Object[] { changedForm.getName(), changedForm.getUUID().toString(), Integer.valueOf((int)form.getSize().getWidth()), Integer.valueOf((int)form.getSize().getHeight()) });
 			}
 		}
 		else

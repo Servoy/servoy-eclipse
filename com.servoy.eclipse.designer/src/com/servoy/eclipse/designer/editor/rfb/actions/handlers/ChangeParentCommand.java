@@ -17,13 +17,18 @@
 
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
+import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 
 import org.eclipse.gef.commands.Command;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.PositionComparator;
 
 /**
  * @author jcompagner
@@ -31,14 +36,20 @@ import com.servoy.j2db.persistence.ISupportChilds;
  */
 public class ChangeParentCommand extends Command
 {
-	private final IPersist child;
+	private final IPersist child, targetChild;
 	private final ISupportChilds newParent;
 	private ISupportChilds oldParent;
 
 	public ChangeParentCommand(IPersist child, ISupportChilds newParent)
 	{
+		this(child, newParent, null);
+	}
+
+	public ChangeParentCommand(IPersist child, ISupportChilds newParent, IPersist targetChild)
+	{
 		super("Change Parent");
 		this.child = child;
+		this.targetChild = targetChild;
 		this.newParent = newParent;
 	}
 
@@ -47,6 +58,35 @@ public class ChangeParentCommand extends Command
 	{
 		oldParent = child.getParent();
 		oldParent.removeChild(child);
+
+		if (child instanceof ISupportBounds && targetChild != null)
+		{
+			ArrayList<IPersist> children = new ArrayList<IPersist>();
+			Iterator<IPersist> it = newParent.getAllObjects();
+			while (it.hasNext())
+			{
+				IPersist persist = it.next();
+				if (persist instanceof ISupportBounds)
+				{
+					children.add(persist);
+				}
+			}
+			IPersist[] sortedChildArray = children.toArray(new IPersist[0]);
+			Arrays.sort(sortedChildArray, PositionComparator.XY_PERSIST_COMPARATOR);
+			children = new ArrayList<IPersist>(Arrays.asList(sortedChildArray));
+
+			int insertIdx = targetChild instanceof ISupportBounds ? children.indexOf(targetChild) : 0;
+			if (insertIdx == -1) insertIdx = 0;
+			children.add(insertIdx, child);
+
+			int counter = 1;
+			for (IPersist p : children)
+			{
+				((ISupportBounds)p).setLocation(new Point(counter, counter));
+				counter++;
+			}
+		}
+
 		newParent.addChild(child);
 	}
 
