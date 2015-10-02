@@ -18,9 +18,10 @@
 package com.servoy.j2db.server.ngclient.design;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.sablo.websocket.CurrentWindow;
 
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.server.ngclient.INGClientWebsocketSession;
@@ -28,8 +29,6 @@ import com.servoy.j2db.server.ngclient.IWebFormController;
 import com.servoy.j2db.server.ngclient.NGClientWindow;
 import com.servoy.j2db.server.ngclient.NGRuntimeWindow;
 import com.servoy.j2db.server.ngclient.NGRuntimeWindowManager;
-import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
-import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
@@ -76,29 +75,34 @@ public class DesignNGClientWindow extends NGClientWindow
 	}
 
 	@Override
-	protected void updateController(Form form, String realFormName, boolean forceLoad)
+	protected void updateController(Form form, final String realFormName, final boolean forceLoad, final IFormHTMLAndJSGenerator formTemplateGenerator)
 	{
-		try
+		// in design the controller should be quickly set in the current generated window.
+		// (only the first form is set as main, for tabs this should be already set)
+		NGRuntimeWindow currentWindow = getClient().getRuntimeWindowManager().getCurrentWindow();
+		if (currentWindow != null && currentWindow.getController() == null)
 		{
-			// in design the controller should be quickly set in the current generated window.
-			// (only the first form is set as main, for tabs this should be already set)
-			NGRuntimeWindow currentWindow = getClient().getRuntimeWindowManager().getCurrentWindow();
-			if (currentWindow != null && currentWindow.getController() == null)
+			IWebFormController controller = getClient().getFormManager().getForm(realFormName);
+			currentWindow.setController(controller);
+		}
+		final String realUrl = getRealFormURLAndSeeIfItIsACopy(form, realFormName, true).getLeft();
+		CurrentWindow.runForWindow(this, new Runnable()
+		{
+
+			@Override
+			public void run()
 			{
-				IWebFormController controller = getClient().getFormManager().getForm(realFormName);
-				currentWindow.setController(controller);
+				try
+				{
+					getSession().getClientService(NGRuntimeWindowManager.WINDOW_SERVICE).executeAsyncServiceCall("updateController",
+						new Object[] { realFormName, formTemplateGenerator.generateJS(), realUrl, Boolean.valueOf(forceLoad) });
+				}
+				catch (IOException e)
+				{
+					Debug.error(e);
+				}
 			}
-			String realUrl = getRealFormURLAndSeeIfItIsACopy(form, realFormName, true).getLeft();
-			StringWriter sw = new StringWriter(512);
-			// for al js code design flag should be true.
-			new FormTemplateGenerator(new ServoyDataConverterContext(getClient()), true, true).generate(form, realFormName, "form_recordview_js.ftl", sw);
-			getSession().getClientService(NGRuntimeWindowManager.WINDOW_SERVICE).executeAsyncServiceCall("updateController",
-				new Object[] { realFormName, sw.toString(), realUrl, Boolean.valueOf(forceLoad) }, this);
-		}
-		catch (IOException e)
-		{
-			Debug.error(e);
-		}
+		});
 	}
 
 	@Override
