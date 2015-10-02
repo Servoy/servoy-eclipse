@@ -59,7 +59,7 @@ public class ChangeParentCommand extends Command
 		oldParent = child.getParent();
 		oldParent.removeChild(child);
 
-		if (child instanceof ISupportBounds && targetChild != null)
+		if (child instanceof ISupportBounds)
 		{
 			ArrayList<IPersist> children = new ArrayList<IPersist>();
 			Iterator<IPersist> it = newParent.getAllObjects();
@@ -75,9 +75,9 @@ public class ChangeParentCommand extends Command
 			Arrays.sort(sortedChildArray, PositionComparator.XY_PERSIST_COMPARATOR);
 			children = new ArrayList<IPersist>(Arrays.asList(sortedChildArray));
 
-			int insertIdx = targetChild instanceof ISupportBounds ? children.indexOf(targetChild) : 0;
-			if (insertIdx == -1) insertIdx = 0;
-			children.add(insertIdx, child);
+			int insertIdx = targetChild instanceof ISupportBounds ? children.indexOf(targetChild) : -1;
+			if (insertIdx == -1) children.add(child);
+			else children.add(insertIdx, child);
 
 			int counter = 1;
 			for (IPersist p : children)
