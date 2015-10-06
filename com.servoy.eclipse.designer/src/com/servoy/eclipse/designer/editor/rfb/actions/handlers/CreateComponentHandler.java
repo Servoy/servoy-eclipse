@@ -41,12 +41,14 @@ import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.websocket.IServerService;
 
+import com.servoy.base.persistence.constants.IRepositoryConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -62,6 +64,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.LayoutContainer;
@@ -246,6 +249,11 @@ public class CreateComponentHandler implements IServerService
 			{
 
 				IPersist searchForPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, args.getString("dropTargetUUID"));
+				if (searchForPersist.getAncestor(IRepositoryConstants.FORMS).getID() == ((ISupportExtendsID)parent).getExtendsID() &&
+					searchForPersist instanceof LayoutContainer)
+				{
+					searchForPersist = ElementUtil.reconstructContainmentHeirarchy((ISupportChilds)searchForPersist, parent);
+				}
 				if (searchForPersist != null)
 				{
 					IPersist p = searchForPersist;

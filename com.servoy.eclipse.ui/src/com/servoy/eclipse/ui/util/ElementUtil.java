@@ -303,7 +303,7 @@ public class ElementUtil
 	 * @return
 	 *
 	 */
-	private static ISupportChilds reconstructContainmentHeirarchy(ISupportChilds originalParent, IPersist context)
+	public static ISupportChilds reconstructContainmentHeirarchy(ISupportChilds originalParent, IPersist context)
 	{
 		ISupportChilds parent = originalParent;
 		ArrayList<ISupportChilds> containmentHierrachy = new ArrayList<>();
