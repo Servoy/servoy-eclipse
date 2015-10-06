@@ -238,6 +238,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.EditSecurityAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EditVariableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EnableServerAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ExpandNodeAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.ExportPackageResourceAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.HideUnhideTablesAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NExternalizeAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NReadFromDBAction;
@@ -1516,6 +1517,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private ClientSupportViewerFilter clientSupportViewerFilter;
 	private ContextAction createActionInTree;
+	private ExportPackageResourceAction exportComponentPackage;
 
 	private void createTreeViewer(Composite parent)
 	{
@@ -2444,6 +2446,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (addModuleAction.isEnabled()) manager.add(addModuleAction);
 		if (moveFormAction.isEnabled()) manager.add(moveFormAction);
 		if (duplicateFormAction.isEnabled()) manager.add(duplicateFormAction);
+		if (exportComponentPackage.isEnabled()) manager.add(exportComponentPackage);
 		if (deleteActionInTree.isEnabled()) manager.add(deleteActionInTree);
 		if (renameActionInTree.isEnabled()) manager.add(renameActionInTree);
 
@@ -2872,6 +2875,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction deleteComponentPackage = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete component package",
 			UserNodeType.COMPONENTS_PACKAGE);
 		IAction deleteServicePackage = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete service package", UserNodeType.SERVICES_PACKAGE);
+		exportComponentPackage = new ExportPackageResourceAction(this, getSite().getShell());
 
 		IAction deleteComponent = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete component", UserNodeType.COMPONENT);
 		IAction deleteService = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete service", UserNodeType.SERVICE);
@@ -2988,6 +2992,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		addTreeSelectionChangedListener(replaceServerAction);
 		addTreeSelectionChangedListener(openSqlEditorAction);
 		addTreeSelectionChangedListener(duplicateFormAction);
+		addTreeSelectionChangedListener(exportComponentPackage);
 		addTreeSelectionChangedListener(moveFormAction);
 		addTreeSelectionChangedListener(changeResourcesProjectAction);
 		addTreeSelectionChangedListener(removeSolutionProtectionAction);
