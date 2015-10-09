@@ -18,6 +18,7 @@
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.bindings.keys.KeyStroke;
+import org.eclipse.jface.fieldassist.ContentProposal;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.fieldassist.IContentProposalListener;
@@ -58,16 +59,36 @@ public class StyleClassCellEditor extends TextCellEditor
 			@Override
 			public IContentProposal[] getProposals(String contents, int position)
 			{
+				IContentProposal[] proposals = null;
 				//find proposals for last inserted style class prefix
 				int lastIndexOfSpace = contents.substring(0, position).lastIndexOf(" ");
 				if (contents.length() > 0 && lastIndexOfSpace < contents.length() - 1)
 				{
 					setFiltering(true);
-					IContentProposal[] proposals = super.getProposals(contents.substring(lastIndexOfSpace + 1), position);
+					proposals = super.getProposals(contents.substring(lastIndexOfSpace + 1), position);
 					setFiltering(false);
-					return proposals;
 				}
-				return super.getProposals(contents, position);
+				else
+				{
+					proposals = super.getProposals(contents, position);
+				}
+				IContentProposal[] modifiedProposels = new IContentProposal[proposals.length];
+				for (int i = 0; i < proposals.length; i++)
+				{
+					String description = "";
+					if (multiSelect)
+					{
+						description = "Double click '" + proposals[i].getContent() +
+							"' to add it to styleClass. StyleClass editor is working in NGClient mode (because solution css is set).";
+					}
+					else
+					{
+						description = "Double click '" + proposals[i].getContent() +
+							"' to assign to styleClass. StyleClass editor is working in SmartClient/WebClient mode (because solution css is not set).";
+					}
+					modifiedProposels[i] = new ContentProposal(proposals[i].getContent(), proposals[i].getLabel(), description);
+				}
+				return modifiedProposels;
 			}
 		};
 		contentProposalAdapter = new ModifiedContentProposalAdapter(text, new TextContentAdapter(), provider, null, null);
