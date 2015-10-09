@@ -18,11 +18,14 @@
 package com.servoy.eclipse.warexporter.ui.wizard;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -74,7 +77,7 @@ public abstract class AbstractComponentsSelectionPage extends WizardPage
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
@@ -89,7 +92,7 @@ public abstract class AbstractComponentsSelectionPage extends WizardPage
 		Label availableLabel = new Label(container, SWT.NULL);
 		availableLabel.setText("Exported " + type + "s");
 
-		selectedComponentsList = new List(container, SWT.BORDER);
+		selectedComponentsList = new List(container, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
 		selectedComponentsList.setItems(selectedComponents.toArray(new String[selectedComponents.size()]));
 
 		btnSelect = new Button(container, SWT.NONE);
@@ -104,48 +107,70 @@ public abstract class AbstractComponentsSelectionPage extends WizardPage
 		btnSelectAll.setToolTipText("Export all " + type + "s");
 		btnSelectAll.setText(">>");
 
-		availableComponentsList = new List(container, SWT.BORDER);
+		availableComponentsList = new List(container, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
 		availableComponents = getAvailableItems();
 		availableComponentsList.setItems(availableComponents.toArray(new String[availableComponents.size()]));
 
-		SelectionListener selectedComponentsListener = new SelectionListener()
+		selectedComponentsList.addSelectionListener(new SelectionListener()
 		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
+			private void selected()
 			{
-				btnRemove.setEnabled(!componentsUsed.contains(selectedComponentsList.getSelection()[0]));
+				btnRemove.setEnabled(selectedComponentsList.getSelection().length > 0 &&
+					Collections.disjoint(componentsUsed, Arrays.asList(selectedComponentsList.getSelection())));
 				btnSelect.setEnabled(false);
 				availableComponentsList.setSelection(-1);
 			}
 
 			@Override
-			public void widgetDefaultSelected(SelectionEvent e)
-			{
-				btnRemove.setEnabled(!componentsUsed.contains(selectedComponentsList.getSelection()[0]));
-				btnSelect.setEnabled(false);
-				availableComponentsList.setSelection(-1);
-			}
-		};
-		selectedComponentsList.addSelectionListener(selectedComponentsListener);
-		SelectionListener availableComponentsListener = new SelectionListener()
-		{
-			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				btnRemove.setEnabled(false);
-				btnSelect.setEnabled(true);
-				selectedComponentsList.setSelection(-1);
+				selected();
 			}
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e)
 			{
+				selected();
+			}
+		});
+		selectedComponentsList.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseDoubleClick(MouseEvent e)
+			{
+				removeSelectedComponents();
+			}
+		});
+
+		availableComponentsList.addSelectionListener(new SelectionListener()
+		{
+			private void selected()
+			{
 				btnRemove.setEnabled(false);
-				btnSelect.setEnabled(true);
+				btnSelect.setEnabled(availableComponentsList.getSelection().length > 0);
 				selectedComponentsList.setSelection(-1);
 			}
-		};
-		availableComponentsList.addSelectionListener(availableComponentsListener);
+
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				selected();
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+				selected();
+			}
+		});
+		availableComponentsList.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseDoubleClick(MouseEvent e)
+			{
+				addSelectedComponents();
+			}
+		});
 
 		btnSelect.setEnabled(false);
 		btnRemove.setEnabled(false);
@@ -156,30 +181,19 @@ public abstract class AbstractComponentsSelectionPage extends WizardPage
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				String selection = availableComponentsList.getSelection()[0];
-				availableComponentsList.remove(selection);
-				selectedComponentsList.add(selection);
-				String[] selected = selectedComponentsList.getItems();
-				Arrays.sort(selected);
-				selectedComponentsList.setItems(selected);
-				btnSelect.setEnabled(false);
+				addSelectedComponents();
 			}
 		});
+
 		btnRemove.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				String selection = selectedComponentsList.getSelection()[0];
-				if (componentsUsed.contains(selection)) return;
-				availableComponentsList.add(selection);
-				String[] available = availableComponentsList.getItems();
-				Arrays.sort(available);
-				availableComponentsList.setItems(available);
-				selectedComponentsList.remove(selectedComponentsList.getSelectionIndex());
-				btnRemove.setEnabled(false);
+				removeSelectedComponents();
 			}
 		});
+
 		btnSelectAll.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -215,6 +229,37 @@ public abstract class AbstractComponentsSelectionPage extends WizardPage
 			groupLayout.createSequentialGroup().add(availableLabel).addPreferredGap(LayoutStyle.RELATED).add(selectedComponentsList,
 				GroupLayout.PREFERRED_SIZE, 250, Short.MAX_VALUE)));
 		container.setLayout(groupLayout);
+	}
+
+	private void addSelectedComponents()
+	{
+		for (String selection : availableComponentsList.getSelection())
+		{
+			availableComponentsList.remove(selection);
+			selectedComponentsList.add(selection);
+		}
+
+		String[] selected = selectedComponentsList.getItems();
+		Arrays.sort(selected);
+		selectedComponentsList.setItems(selected);
+		btnSelect.setEnabled(false);
+	}
+
+	private void removeSelectedComponents()
+	{
+		for (String selection : selectedComponentsList.getSelection())
+		{
+			if (!componentsUsed.contains(selection))
+			{
+				availableComponentsList.add(selection);
+				selectedComponentsList.remove(selection);
+			}
+		}
+
+		String[] available = availableComponentsList.getItems();
+		Arrays.sort(available);
+		availableComponentsList.setItems(available);
+		btnRemove.setEnabled(false);
 	}
 
 	protected abstract Set<String> getAvailableItems();
