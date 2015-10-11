@@ -370,7 +370,7 @@ public class CustomJSONArrayTypePropertyController extends PropertyController<Ob
 								persistContextForElement = PersistContext.create(((WebCustomType[])arrayElementInPersist)[i], persistContext.getContext());
 							}
 							PropertyDescriptorWrapper propertyDescriptorWrapper = new PersistPropertySource.PropertyDescriptorWrapper(
-								PDPropertySource.createPropertyHandlerFromSpec(getArrayElementPD()), arrayValue.opt(i));
+								PDPropertySource.createPropertyHandlerFromSpec(getArrayElementPD(), persistContext), arrayValue.opt(i));
 							createdPDs.add(addButtonsToPD(PersistPropertySource.createPropertyDescriptor(CustomJSONArrayPropertySource.this, String.valueOf(i),
 								persistContextForElement, readOnly, propertyDescriptorWrapper, '[' + String.valueOf(i) + ']', flattenedEditingSolution, form),
 								i, this));

@@ -26,7 +26,9 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.gef.EditPart;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebLayoutSpecification;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -58,6 +60,7 @@ import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptElement;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -275,20 +278,10 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 				PersistContext persistContext = PersistContext.create(persist, context);
 				PersistPropertySource persistProperties = null;
 
-				if (FormTemplateGenerator.isWebcomponentBean(persist) || persist instanceof WebCustomType)
+				if (FormTemplateGenerator.isWebcomponentBean(persist))
 				{
 					PropertyDescription propertyDescription = null;
-					boolean customTypeNotComponent;
-					if (persist instanceof WebCustomType)
-					{
-						WebCustomType ghostBean = (WebCustomType)persist;
-//						IWebComponent parentBean = ghostBean.getParentComponent();
-//						IPropertyType< ? > iPropertyType = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-//							FormTemplateGenerator.getComponentTypeName(parentBean)).getFoundTypes().get(ghostBean.getTypeName());
-//						if (iPropertyType instanceof ICustomType< ? >) propertyDescription = ((ICustomType< ? >)iPropertyType).getCustomJSONTypeDefinition();
-						propertyDescription = ghostBean.getPropertyDescription();
-					}
-					else if (persist.getParent() != null)
+					if (persist.getParent() != null)
 					{
 						propertyDescription = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
 							FormTemplateGenerator.getComponentTypeName((IBasicWebComponent)persist));
@@ -296,8 +289,39 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 
 					if (propertyDescription != null)
 					{
-						persistProperties = (persist instanceof WebCustomType) ? new PDPropertySource(persistContext, false, propertyDescription)
-							: new WebComponentPropertySource(persistContext, false, propertyDescription);
+						persistProperties = new WebComponentPropertySource(persistContext, false, propertyDescription);
+					}
+				}
+				else if (persist instanceof WebCustomType)
+				{
+
+					WebCustomType ghostBean = (WebCustomType)persist;
+					PropertyDescription propertyDescription = ghostBean.getPropertyDescription();
+
+
+					if (propertyDescription != null)
+					{
+						persistProperties = new PDPropertySource(persistContext, false, propertyDescription);
+					}
+				}
+				else if (persist instanceof LayoutContainer)
+				{
+					LayoutContainer layoutContainer = (LayoutContainer)persist;
+					PropertyDescription propertyDescription = null;
+					if (persist.getParent() != null)
+					{
+						WebComponentPackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+							layoutContainer.getPackageName());
+
+						if (pkg != null)
+						{
+							propertyDescription = pkg.getSpecification(layoutContainer.getSpecName());
+						}
+					}
+
+					if (propertyDescription != null)
+					{
+						persistProperties = new WebComponentPropertySource(persistContext, false, propertyDescription);
 					}
 				}
 
