@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.property;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
@@ -26,9 +27,12 @@ import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.LayoutContainer;
+import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.util.Utils;
@@ -79,7 +83,35 @@ public class PDPropertySource extends PersistPropertySource
 			IPropertyHandler propHandler = createPropertyHandlerFromSpec(desc, persistContext);
 			if (propHandler != null) props.add(propHandler);
 		}
+		if (persistContext.getPersist() instanceof LayoutContainer)
+		{
+			IPropertyHandler attributesPropertyHandler = new WebComponentPropertyHandler(
+				new PropertyDescription("attributes", null, new PropertySetterDelegatePropertyController<Map<String, Object>, PersistPropertySource>(
+					new MapEntriesPropertyController("attributes", RepositoryHelper.getDisplayName("attributes", Form.class)), "attributes")
+				{
+					@SuppressWarnings("unchecked")
+					@Override
+					public Map<String, Object> getProperty(PersistPropertySource propSource)
+					{
+						IPersist persist = propSource.getPersist();
+						if (persist instanceof LayoutContainer)
+						{
+							return (Map<String, Object>)((LayoutContainer)persist).getCustomProperty(new String[] { "attributes" }); // returns non-null map with copied/merged values, may be written to
+						}
+						return null;
+					}
 
+					public void setProperty(PersistPropertySource propSource, Map<String, Object> value)
+					{
+						IPersist persist = propSource.getPersist();
+						if (persist instanceof AbstractBase)
+						{
+							((LayoutContainer)persist).putCustomProperty(new String[] { "attributes" }, value);
+						}
+					}
+				}));
+			props.add(attributesPropertyHandler);
+		}
 		return props.toArray(new IPropertyHandler[props.size()]);
 	}
 
@@ -122,9 +154,8 @@ public class PDPropertySource extends PersistPropertySource
 			{
 				config.addDefault(desc.getDefaultValue(), null);
 			}
-			createdPropertyHandler = createWebComponentPropertyHandler(
-				new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config, desc.getDefaultValue(), desc.hasDefault(), null, null, null, false),
-				persistContext);
+			createdPropertyHandler = createWebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config,
+				desc.getDefaultValue(), desc.hasDefault(), null, null, null, false), persistContext);
 		}
 		else
 		{
