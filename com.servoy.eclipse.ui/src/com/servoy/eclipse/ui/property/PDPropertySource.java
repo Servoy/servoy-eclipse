@@ -21,11 +21,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
+import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
@@ -87,7 +90,52 @@ public class PDPropertySource extends PersistPropertySource
 		{
 			IPropertyHandler attributesPropertyHandler = new WebComponentPropertyHandler(
 				new PropertyDescription("attributes", null, new PropertySetterDelegatePropertyController<Map<String, Object>, PersistPropertySource>(
-					new MapEntriesPropertyController("attributes", RepositoryHelper.getDisplayName("attributes", Form.class)), "attributes")
+					new MapEntriesPropertyController("attributes", RepositoryHelper.getDisplayName("attributes", Form.class))
+					{ /*
+						 * (non-Javadoc)
+						 *
+						 * @see com.servoy.eclipse.ui.property.PropertyController#createConverter()
+						 */
+						@Override
+						protected ComplexPropertyConverter<Map<String, Object>> createConverter()
+						{
+							return new ComplexProperty.ComplexPropertyConverter<Map<String, Object>>()
+							{
+								@Override
+								public Object convertProperty(final Object id, Map<String, Object> value)
+								{
+									return new ComplexProperty<Map<String, Object>>(value)
+									{
+										@Override
+										public IPropertySource getPropertySource()
+										{
+											return new MapPropertySource(this)
+											{
+												@Override
+												public IPropertyDescriptor[] createPropertyDescriptors()
+												{
+
+													IPropertyDescriptor[] propertyDescriptors = super.createPropertyDescriptors();
+													IPropertyDescriptor[] result = new IPropertyDescriptor[propertyDescriptors.length - 1];
+													int k = 0;
+													for (int i = 0; i < propertyDescriptors.length; i++)
+													{
+														if (!propertyDescriptors[i].getId().equals("class"))
+														{
+															result[k] = propertyDescriptors[i];
+															k++;
+														}
+													}
+													return result;
+												}
+											};
+										}
+									};
+								}
+							};
+						}
+
+					}, "attributes")
 				{
 					@SuppressWarnings("unchecked")
 					@Override
