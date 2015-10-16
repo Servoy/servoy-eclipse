@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
+import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.graphics.Point;
@@ -77,6 +78,7 @@ import com.servoy.j2db.server.ngclient.WebsocketSessionFactory;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
+import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 
 /**
  * Design page for browser based rfb editor.
@@ -139,6 +141,8 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 	private Browser browser;
 
+	private com.teamdev.jxbrowser.chromium.Browser jxbrowser;
+
 	private EditorWebsocketSession editorWebsocketSession;
 
 	private String layout = null;
@@ -151,6 +155,45 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 
 	@Override
 	public void createPartControl(Composite parent)
+	{
+		createPartControlJx(parent);
+//		createPartControlSwt(parent);
+	}
+
+	public void createPartControlJx(Composite parent)
+	{
+		// always reload the current spec so that always the latest stuff is shown.
+		FormElementHelper.INSTANCE.reload(); // we can't reload just specs cause lately FormElement can add size/location/anchors to spec and we don't want to use old/cached/already initialized form elements while new specs were reloaded
+		// Serve requests for rfb editor
+		editorId = UUID.randomUUID().toString();
+		WebsocketSessionManager.addSession(editorWebsocketSession = new EditorWebsocketSession(editorId));
+		editorWebsocketSession.registerServerService("formeditor", new EditorServiceHandler(editorPart, selectionProvider, selectionListener, fieldPositioner));
+		selectionListener.setEditorWebsocketSession(editorWebsocketSession);
+		resourceChangedListener.setEditorWebsocketSession(editorWebsocketSession);
+		try
+		{
+			Composite treeComp = new Composite(parent, SWT.EMBEDDED);
+
+			treeComp.setBounds(5, 5, 300, 300);
+
+			java.awt.Frame fileTableFrame = SWT_AWT.new_Frame(treeComp);
+			jxbrowser = new com.teamdev.jxbrowser.chromium.Browser();
+
+			BrowserView browserView = new BrowserView(jxbrowser);
+			browserView.setDoubleBuffered(true);
+			fileTableFrame.add(browserView);
+
+		}
+		catch (SWTError e)
+		{
+			ServoyLog.logError(e);
+			return;
+		}
+
+		refreshBrowserUrl(false);
+	}
+
+	public void createPartControlSwt(Composite parent)
 	{
 		// always reload the current spec so that always the latest stuff is shown.
 		FormElementHelper.INSTANCE.reload(); // we can't reload just specs cause lately FormElement can add size/location/anchors to spec and we don't want to use old/cached/already initialized form elements while new specs were reloaded
@@ -228,6 +271,42 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	}
 
 	public void refreshBrowserUrl(boolean force)
+	{
+		if (browser == null)
+		{
+			refreshBrowserUrlJx(force);
+		}
+		else
+		{
+			refreshBrowserUrlSwt(force);
+		}
+	}
+
+	public void refreshBrowserUrlJx(boolean force)
+	{
+		Form form = editorPart.getForm();
+		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
+		String newLayout = computeLayout(flattenedForm);
+		if (!Utils.equalObjects(layout, newLayout) || force)
+		{
+			layout = newLayout;
+			Dimension formSize = flattenedForm.getSize();
+			String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/rfb/angular/index.html?s=" +
+				form.getSolution().getName() + "&l=" + layout + "&f=" + form.getName() + "&w=" + formSize.getWidth() + "&h=" + formSize.getHeight() +
+				"&editorid=" + editorId + "&c_sessionid=" + CONTENT_SESSION_ID;
+			try
+			{
+				ServoyLog.logInfo("Browser url for editor: " + url);
+				jxbrowser.loadURL(url /* + "&replacewebsocket=true" */);
+			}
+			catch (Exception ex)
+			{
+				ServoyLog.logError("couldn't load the editor: " + url, ex);
+			}
+		}
+	}
+
+	public void refreshBrowserUrlSwt(boolean force)
 	{
 		Form form = editorPart.getForm();
 		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
@@ -448,7 +527,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	@Override
 	public void setFocus()
 	{
-		browser.setFocus();
+		//browser.setFocus();
 	}
 
 	@Override

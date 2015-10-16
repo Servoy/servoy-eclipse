@@ -3,7 +3,13 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Designer Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.designer; singleton:=true
 Bundle-Version: 8.0.0.3020
-Bundle-ClassPath: .
+Bundle-ClassPath: .,
+ lib/jxbrowser-5.4.3.jar,
+ lib/license.jar,
+ lib/jxbrowser-linux32-5.4.3.jar,
+ lib/jxbrowser-mac-5.4.3.jar,
+ lib/jxbrowser-linux64-5.4.3.jar,
+ lib/jxbrowser-win-5.4.3.jar
 Bundle-Activator: com.servoy.eclipse.designer.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.core.databinding,
