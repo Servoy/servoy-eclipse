@@ -25,9 +25,9 @@ import com.servoy.j2db.persistence.Relation;
 
 /**
  * Convert relation to name and vv.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class RelationNameConverter implements IPropertyConverter<String, Object> // not <String, Relation> because we may get RelationContentProvider.NONE
 {
@@ -57,6 +57,10 @@ public class RelationNameConverter implements IPropertyConverter<String, Object>
 		if (value instanceof RelationsWrapper)
 		{
 			return DatabaseUtils.getRelationsString(((RelationsWrapper)value).relations);
+		}
+		if (value instanceof String)
+		{
+			return (String)value;
 		}
 		return null;
 	}
