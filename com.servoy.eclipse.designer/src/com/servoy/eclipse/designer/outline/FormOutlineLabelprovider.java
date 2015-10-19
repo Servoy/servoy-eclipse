@@ -108,8 +108,9 @@ public class FormOutlineLabelprovider extends LabelProvider implements IPersistL
 					tag.append(entry.getKey());
 					if (entry.getValue() != null && entry.getValue().length() > 0)
 					{
-						tag.append("=");
+						tag.append("=\"");
 						tag.append(entry.getValue());
+						tag.append("\"");
 					}
 				}
 				tag.append(">");

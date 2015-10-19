@@ -173,28 +173,38 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 				{
 					map = new HashMap<String, Object>();
 				}
-				String value;
-				if (v instanceof String && ((String)v).length() > 0)
-				{
-					Object parsed = Utils.parseJSExpression(v);
-					if (parsed == null)
-					{
-						// not a bool, number or string, convert to quoted string
-						value = Utils.makeJSExpression(v);
-					}
-					else
-					{
-						value = (String)v;
-					}
-				}
-				else
-				{
-					value = null;
-				}
+				String value = toJSExpression(v);
 
 				map.put((String)id, value);
 			}
 			return map.size() == 0 ? null : map;
+		}
+
+		/**
+		 * @param v
+		 * @return
+		 */
+		protected String toJSExpression(Object v)
+		{
+			String value;
+			if (v instanceof String && ((String)v).length() > 0)
+			{
+				Object parsed = Utils.parseJSExpression(v);
+				if (parsed == null)
+				{
+					// not a bool, number or string, convert to quoted string
+					value = Utils.makeJSExpression(v);
+				}
+				else
+				{
+					value = (String)v;
+				}
+			}
+			else
+			{
+				value = null;
+			}
+			return value;
 		}
 	}
 

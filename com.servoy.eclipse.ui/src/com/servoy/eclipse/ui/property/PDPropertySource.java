@@ -128,6 +128,27 @@ public class PDPropertySource extends PersistPropertySource
 													}
 													return result;
 												}
+
+												/*
+												 * (non-Javadoc)
+												 *
+												 * @see com.servoy.eclipse.ui.property.MapEntriesPropertyController.MapPropertySource#toJSExpression(java.lang.
+												 * Object)
+												 */
+												@Override
+												protected String toJSExpression(Object v)
+												{
+													String result;
+													if (v instanceof String && ((String)v).length() > 0)
+													{
+														result = v.toString();
+													}
+													else
+													{
+														result = null;
+													}
+													return result;
+												}
 											};
 										}
 									};
