@@ -69,6 +69,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.UUID;
@@ -210,16 +211,32 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							targetLayoutContainer = (LayoutContainer)((PersistContext)input).getPersist();
 							if (dragObjects != null)
 							{
+								boolean doAllow = true;
 								boolean containerMoveInsideTarget = true;
+
 								for (IPersist p : dragObjects)
 								{
-									if (p == targetLayoutContainer || !(p instanceof LayoutContainer) ||
-										((LayoutContainer)p).getParent() != targetLayoutContainer.getParent())
+									ISupportChilds parentContainer = targetLayoutContainer;
+									do
+									{
+										if (p.equals(parentContainer))
+										{
+											doAllow = false;
+											break;
+										}
+										parentContainer = parentContainer.getParent();
+									}
+									while (parentContainer != null);
+
+									if (!doAllow) return false;
+
+									if (containerMoveInsideTarget &&
+										(p == targetLayoutContainer || !(p instanceof LayoutContainer) || ((LayoutContainer)p).getParent() != targetLayoutContainer.getParent()))
 									{
 										containerMoveInsideTarget = false;
-										break;
 									}
 								}
+
 								if (containerMoveInsideTarget)
 								{
 									dropTargetComponent = targetLayoutContainer;
