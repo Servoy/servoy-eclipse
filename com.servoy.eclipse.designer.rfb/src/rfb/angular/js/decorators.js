@@ -73,6 +73,15 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 						}	
 						
 						var offset = node.offset();
+						if (!node.is(":visible"))
+						{
+							var beanModel = $scope.getBeanModel(node[0]);
+							if (beanModel)
+							{
+								offset.top = beanModel.location.y;
+								offset.left = beanModel.location.x;
+							}
+						}
 						
 						//this is so that ghost elements decorators are positioned correctly
 						if(node.parent().hasClass("ghostcontainer") && node.parent().parent().offset() != undefined) {
