@@ -149,7 +149,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 				IPropertyConverterForBrowser<Object> converter = (IPropertyConverterForBrowser<Object>)jsonConverters.get(type);
 				if (converter != null)
 				{
-					return converter.fromJSON(propertyDescription.getDefaultValue(), null, propertyDescription, null);
+					return converter.fromJSON(propertyDescription.getDefaultValue(), null, propertyDescription, null, null);
 				}
 				return propertyDescription.getDefaultValue();
 			}
@@ -167,7 +167,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 				{
 					try
 					{
-						value = converter.fromJSON(new JSONObject((String)value), null, propertyDescription, null);
+						value = converter.fromJSON(new JSONObject((String)value), null, propertyDescription, null, null);
 					}
 					catch (Exception e)
 					{
@@ -176,7 +176,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 				}
 				else
 				{
-					value = converter.fromJSON(value, null, propertyDescription, null);
+					value = converter.fromJSON(value, null, propertyDescription, null, null);
 				}
 			}
 		}
