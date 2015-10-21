@@ -60,6 +60,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
@@ -72,7 +73,7 @@ import com.servoy.j2db.util.UUID;
 
 /**
  * @author jcompagner
- * 
+ *
  */
 public class LinkWithEditorAction extends Action
 {
@@ -114,7 +115,7 @@ public class LinkWithEditorAction extends Action
 			while (iterator.hasNext())
 			{
 				Object obj = iterator.next();
-				IPersist persist = (IPersist)Platform.getAdapterManager().getAdapter(obj, IPersist.class);
+				IPersist persist = Platform.getAdapterManager().getAdapter(obj, IPersist.class);
 				if (persist instanceof BaseComponent && ((BaseComponent)persist).getName() != null)
 				{
 					persists.add(persist);
@@ -127,7 +128,7 @@ public class LinkWithEditorAction extends Action
 		if (persists.size() == 0)
 		{
 			// none found, go via the editor
-			IPersist persist = (IPersist)activeEditor.getAdapter(IPersist.class);
+			IPersist persist = activeEditor.getAdapter(IPersist.class);
 			if (persist instanceof TableNode)
 			{
 				serverName = ((TableNode)persist).getServerName();
@@ -157,7 +158,7 @@ public class LinkWithEditorAction extends Action
 		}
 		else if (serverName == null)
 		{
-			IFile file = (IFile)activeEditor.getEditorInput().getAdapter(IFile.class);
+			IFile file = activeEditor.getEditorInput().getAdapter(IFile.class);
 			if (file != null)
 			{
 				// globals, scope or foundset
@@ -216,10 +217,10 @@ public class LinkWithEditorAction extends Action
 			}
 			else
 			{
-				ServerConfig config = (ServerConfig)activeEditor.getAdapter(ServerConfig.class);
+				ServerConfig config = activeEditor.getAdapter(ServerConfig.class);
 				if (config == null)
 				{
-					Table table = (Table)activeEditor.getAdapter(Table.class);
+					Table table = activeEditor.getAdapter(Table.class);
 					if (table != null)
 					{
 						serverName = table.getServerName();
@@ -279,6 +280,10 @@ public class LinkWithEditorAction extends Action
 		else if (persists.size() == 1 && persists.get(0) instanceof ValueList)
 		{
 			setProperSelection(persists.get(0), UserNodeType.VALUELISTS, contentProvider);
+		}
+		else if (persists.size() == 1 && persists.get(0) instanceof Media)
+		{
+			setProperSelection(persists.get(0), UserNodeType.MEDIA, contentProvider);
 		}
 		else if (files.size() > 0)
 		{
