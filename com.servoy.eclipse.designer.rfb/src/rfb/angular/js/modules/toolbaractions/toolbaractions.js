@@ -96,7 +96,7 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 	};
 	
 	var btnToggleDesignMode = {
-			text: "Preview",
+			text: "Wireframe",
 			icon: "toolbaractions/icons/edit.gif",
 			enabled: true,
 			state: false,
