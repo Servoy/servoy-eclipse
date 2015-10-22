@@ -28,6 +28,7 @@ import org.sablo.specification.WebLayoutSpecification;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
@@ -56,7 +57,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 	{
 		try
 		{
-			BaseVisualFormEditor activeEditor = DesignerUtil.getActiveEditor();
+			final BaseVisualFormEditor activeEditor = DesignerUtil.getActiveEditor();
 			if (activeEditor != null)
 			{
 				activeEditor.getCommandStack().execute(new BaseRestorableCommand("createLayoutContainer")
@@ -97,7 +98,21 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 									Object parentPersist = DesignerUtil.getContentOutlineSelection();
 									if (parentPersist instanceof AbstractContainer)
 									{
-										persist = ((AbstractContainer)parentPersist).createNewWebComponent(null,
+										String componentName = (String)((StructuredSelection)dialog.getSelection()).getFirstElement();
+										int index = componentName.indexOf("-");
+										if (index != -1)
+										{
+											componentName = componentName.substring(index + 1);
+										}
+										componentName = componentName.replaceAll("-", "_");
+										String baseName = componentName;
+										int i = 1;
+										while (!PersistFinder.INSTANCE.checkName(activeEditor, componentName))
+										{
+											componentName = baseName + "_" + i;
+											i++;
+										}
+										persist = ((AbstractContainer)parentPersist).createNewWebComponent(componentName,
 											(String)((StructuredSelection)dialog.getSelection()).getFirstElement());
 									}
 								}
