@@ -19,15 +19,23 @@ package com.servoy.eclipse.ui.property;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
+import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.LayoutContainer;
+import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.util.Utils;
@@ -45,7 +53,7 @@ public class PDPropertySource extends PersistPropertySource
 	public PDPropertySource(PersistContext persistContext, boolean readonly, PropertyDescription propertyDescription)
 	{
 		super(persistContext, readonly);
-		if (!(persistContext.getPersist() instanceof IBasicWebObject))
+		if (!(persistContext.getPersist() instanceof IBasicWebObject) && !(persistContext.getPersist() instanceof LayoutContainer))
 		{
 			throw new IllegalArgumentException();
 		}
@@ -66,23 +74,117 @@ public class PDPropertySource extends PersistPropertySource
 	@Override
 	protected IPropertyHandler[] createPropertyHandlers(Object valueObject)
 	{
-		return createPropertyHandlersFromSpec(propertyDescription);
+		return createPropertyHandlersFromSpec(propertyDescription, persistContext);
 	}
 
-	public static IPropertyHandler[] createPropertyHandlersFromSpec(PropertyDescription propertyDescription)
+	public static IPropertyHandler[] createPropertyHandlersFromSpec(PropertyDescription propertyDescription, PersistContext persistContext)
 	{
 		List<IPropertyHandler> props = new ArrayList<IPropertyHandler>();
 
 		for (PropertyDescription desc : propertyDescription.getProperties().values())
 		{
-			IPropertyHandler propHandler = createPropertyHandlerFromSpec(desc);
+			IPropertyHandler propHandler = createPropertyHandlerFromSpec(desc, persistContext);
 			if (propHandler != null) props.add(propHandler);
 		}
+		if (persistContext.getPersist() instanceof LayoutContainer)
+		{
+			IPropertyHandler attributesPropertyHandler = new WebComponentPropertyHandler(
+				new PropertyDescription("attributes", null, new PropertySetterDelegatePropertyController<Map<String, Object>, PersistPropertySource>(
+					new MapEntriesPropertyController("attributes", RepositoryHelper.getDisplayName("attributes", Form.class))
+					{ /*
+						 * (non-Javadoc)
+						 *
+						 * @see com.servoy.eclipse.ui.property.PropertyController#createConverter()
+						 */
+						@Override
+						protected ComplexPropertyConverter<Map<String, Object>> createConverter()
+						{
+							return new ComplexProperty.ComplexPropertyConverter<Map<String, Object>>()
+							{
+								@Override
+								public Object convertProperty(final Object id, Map<String, Object> value)
+								{
+									return new ComplexProperty<Map<String, Object>>(value)
+									{
+										@Override
+										public IPropertySource getPropertySource()
+										{
+											return new MapPropertySource(this)
+											{
+												@Override
+												public IPropertyDescriptor[] createPropertyDescriptors()
+												{
 
+													IPropertyDescriptor[] propertyDescriptors = super.createPropertyDescriptors();
+													IPropertyDescriptor[] result = new IPropertyDescriptor[propertyDescriptors.length - 1];
+													int k = 0;
+													for (int i = 0; i < propertyDescriptors.length; i++)
+													{
+														if (!propertyDescriptors[i].getId().equals("class"))
+														{
+															result[k] = propertyDescriptors[i];
+															k++;
+														}
+													}
+													return result;
+												}
+
+												/*
+												 * (non-Javadoc)
+												 *
+												 * @see com.servoy.eclipse.ui.property.MapEntriesPropertyController.MapPropertySource#toJSExpression(java.lang.
+												 * Object)
+												 */
+												@Override
+												protected String toJSExpression(Object v)
+												{
+													String result;
+													if (v instanceof String && ((String)v).length() > 0)
+													{
+														result = v.toString();
+													}
+													else
+													{
+														result = null;
+													}
+													return result;
+												}
+											};
+										}
+									};
+								}
+							};
+						}
+
+					}, "attributes")
+				{
+					@SuppressWarnings("unchecked")
+					@Override
+					public Map<String, Object> getProperty(PersistPropertySource propSource)
+					{
+						IPersist persist = propSource.getPersist();
+						if (persist instanceof LayoutContainer)
+						{
+							return (Map<String, Object>)((LayoutContainer)persist).getCustomProperty(new String[] { "attributes" }); // returns non-null map with copied/merged values, may be written to
+						}
+						return null;
+					}
+
+					public void setProperty(PersistPropertySource propSource, Map<String, Object> value)
+					{
+						IPersist persist = propSource.getPersist();
+						if (persist instanceof AbstractBase)
+						{
+							((LayoutContainer)persist).putCustomProperty(new String[] { "attributes" }, value);
+						}
+					}
+				}));
+			props.add(attributesPropertyHandler);
+		}
 		return props.toArray(new IPropertyHandler[props.size()]);
 	}
 
-	public static IPropertyHandler createPropertyHandlerFromSpec(PropertyDescription desc)
+	public static IPropertyHandler createPropertyHandlerFromSpec(PropertyDescription desc, PersistContext persistContext)
 	{
 		IPropertyHandler createdPropertyHandler = null;
 		Object scope = desc.getTag(WebFormComponent.TAG_SCOPE);
@@ -121,14 +223,23 @@ public class PDPropertySource extends PersistPropertySource
 			{
 				config.addDefault(desc.getDefaultValue(), null);
 			}
-			createdPropertyHandler = new WebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config,
-				desc.getDefaultValue(), desc.hasDefault(), null, null, null, false));
+			createdPropertyHandler = createWebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config,
+				desc.getDefaultValue(), desc.hasDefault(), null, null, null, false), persistContext);
 		}
 		else
 		{
-			createdPropertyHandler = new WebComponentPropertyHandler(desc);
+			createdPropertyHandler = createWebComponentPropertyHandler(desc, persistContext);
 		}
 		return createdPropertyHandler;
+	}
+
+	protected static IPropertyHandler createWebComponentPropertyHandler(PropertyDescription desc, PersistContext persistContext)
+	{
+		if (persistContext.getPersist() instanceof LayoutContainer)
+		{
+			return new LayoutContainerPropertyHandler(desc);
+		}
+		return new WebComponentPropertyHandler(desc);
 	}
 
 	@Override
