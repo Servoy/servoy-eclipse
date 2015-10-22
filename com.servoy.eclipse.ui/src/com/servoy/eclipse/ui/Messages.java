@@ -20,7 +20,7 @@ import org.eclipse.osgi.util.NLS;
 
 /**
  * Auto generated class that will read the constant strings from the .properties file.
- * 
+ *
  * @author acostescu
  */
 public class Messages extends NLS
@@ -233,6 +233,7 @@ public class Messages extends NLS
 	public static String ErrorWarningPreferencePage_formIncompatibleElementType;
 	public static String ErrorWarningPreferencePage_formLabelForElementNotFound;
 	public static String ErrorWarningPreferencePage_formElementDuplicateTabSequence;
+	public static String ErrorWarningPreferencePage_formElementExtendsDeletedElement;
 	public static String ErrorWarningPreferencePage_formElementOutsideBounds;
 	public static String ErrorWarningPreferencePage_formExtendsFormElementNotFound;
 	public static String ErrorWarningPreferencePage_formObsoleteElement;

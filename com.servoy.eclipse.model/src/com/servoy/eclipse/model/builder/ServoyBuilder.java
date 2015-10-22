@@ -125,6 +125,7 @@ import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.ISupportEncapsulation;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportMedia;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportScope;
@@ -307,6 +308,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE = _PREFIX + ".methodNumberOfArgsMismatch";
 	public static final String SERVER_CLONE_CYCLE_TYPE = _PREFIX + ".serverCloneCycle";
 	public static final String DEPRECATED_ELEMENT_USAGE = _PREFIX + ".deprecatedElementUsage";
+	public static final String ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE = _PREFIX + ".elementExtendsDeletedElement";
+
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels";
@@ -479,6 +482,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> TAB_SEQUENCE_NOT_SET = new Pair<String, ProblemSeverity>("tabpanelTabSequenceNotSet",
 		ProblemSeverity.INFO);
+	public final static Pair<String, ProblemSeverity> ELEMENT_EXTENDS_DELETED_ELEMENT = new Pair<String, ProblemSeverity>(
+		"elementExtendsDeletedElement", ProblemSeverity.WARNING); //$NON-NLS-1$
 
 	// relations related
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
@@ -1791,6 +1796,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, METHOD_NUMBER_OF_ARGUMENTS_MISMATCH_TYPE);
 		deleteMarkers(project, SERVER_CLONE_CYCLE_TYPE);
 		deleteMarkers(project, DEPRECATED_ELEMENT_USAGE);
+		deleteMarkers(project, ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE);
 
 		try
 		{
@@ -3613,7 +3619,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								addMarker(project, mk.getType(), mk.getText(), -1, MOBILE_NAVIGATOR_OVERLAPS_HEADER_BUTTON, IMarker.PRIORITY_NORMAL, null, o);
 							}
 						}
-
+						if (o instanceof ISupportExtendsID && PersistHelper.isOverrideOrphanElement((ISupportExtendsID)o))
+						{
+							IPersist parentForm = o.getAncestor(IRepository.FORMS);
+							ServoyMarker mk = MarkerMessages.ElementExtendsDeletedElement.fill(parentForm);
+							addMarker(project, mk.getType(), mk.getText(), -1, ELEMENT_EXTENDS_DELETED_ELEMENT, IMarker.PRIORITY_NORMAL, null, o);
+						}
 						checkCancel();
 						return IPersistVisitor.CONTINUE_TRAVERSAL;
 					}
@@ -5420,10 +5431,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				addExtensionMarkerAttributes(marker, persist);
 			}
 
-			if (type.equals(INVALID_TABLE_NODE_PROBLEM))
+			if (type.equals(INVALID_TABLE_NODE_PROBLEM) || type.equals(ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE))
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString());
-				marker.setAttribute("Name", ((ISupportName)persist).getName());
+				marker.setAttribute("Name", type.equals(ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE) ? "element" : ((ISupportName)persist).getName());
 				marker.setAttribute("SolutionName", resource.getName());
 			}
 			else if (type.equals(DUPLICATE_UUID) || type.equals(DUPLICATE_SIBLING_UUID) || type.equals(BAD_STRUCTURE_MARKER_TYPE) ||

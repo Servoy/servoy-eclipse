@@ -76,7 +76,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Class that gives the list of quick-fixes (available in the core plugin) for Servoy markers.
- * 
+ *
  * @author acostescu
  */
 public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
@@ -114,7 +114,7 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 			{
 				fixes = new IMarkerResolution[] { new OpenUsingEditor("com.servoy.eclipse.ui.editors.ValueListEditor", null) };
 			}
-			else if (type.equals(ServoyBuilder.INVALID_TABLE_NODE_PROBLEM))
+			else if (type.equals(ServoyBuilder.INVALID_TABLE_NODE_PROBLEM) || type.equals(ServoyBuilder.ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE))
 			{
 				String name = null;
 				String solName = null;
