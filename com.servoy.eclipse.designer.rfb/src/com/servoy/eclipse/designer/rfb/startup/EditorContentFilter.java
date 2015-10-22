@@ -39,6 +39,10 @@ import org.sablo.specification.WebComponentPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.j2db.persistence.Solution;
+
 /**
  * @author jcompagner
  *
@@ -59,7 +63,15 @@ public class EditorContentFilter implements Filter
 		if (httpServletRequest.getRequestURI().endsWith("editor-content.html"))
 		{
 			String solution = httpServletRequest.getParameter("s");
+			if (solution == null)
+			{
+				ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+				Solution activeSolution = activeProject.getSolution();
+				solution = activeSolution.getName();
+			}
+
 			String form = httpServletRequest.getParameter("f");
+
 			if (solution != null && form != null)
 			{
 				((HttpServletResponse)response).setContentType("text/html");
