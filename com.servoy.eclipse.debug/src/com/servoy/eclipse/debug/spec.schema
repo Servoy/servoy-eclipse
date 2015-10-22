@@ -73,7 +73,16 @@
 		"version":
 		{ 
 			"description": "The version of the component",
-			"type": "integer"
+			"type": {
+				"oneOf": [
+    			            {
+    			            	"type": "string"
+    			            },
+    			            {
+    			            	"type": "integer"
+    			            }
+    			         ]
+    		  }
 		},
 		"model":
 		{
