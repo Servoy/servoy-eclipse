@@ -90,7 +90,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 	private volatile boolean refreshing;
 
 	private IPersist[] dragObjects;
-	private LayoutContainer dropTarget;
+	private ISupportChilds dropTarget;
 	private IPersist dropTargetComponent;
 
 	public FormOutlinePage(Form form, GraphicalViewer viewer, ActionRegistry registry)
@@ -196,13 +196,13 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 					Object input = (target == null && getViewer() instanceof ContentViewer) ? ((ContentViewer)getViewer()).getInput() : target;
 					if (input instanceof PersistContext)
 					{
-						LayoutContainer targetLayoutContainer = null;
+						ISupportChilds targetLayoutContainer = null;
 						if (((PersistContext)input).getPersist() instanceof WebComponent)
 						{
 							WebComponent wc = (WebComponent)((PersistContext)input).getPersist();
 							if (wc.getParent() instanceof LayoutContainer)
 							{
-								targetLayoutContainer = (LayoutContainer)wc.getParent();
+								targetLayoutContainer = wc.getParent();
 								dropTargetComponent = wc;
 							}
 						}
@@ -240,17 +240,17 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 								if (containerMoveInsideTarget)
 								{
 									dropTargetComponent = targetLayoutContainer;
-									targetLayoutContainer = (LayoutContainer)targetLayoutContainer.getParent();
+									targetLayoutContainer = targetLayoutContainer.getParent();
 								}
 							}
 						}
 
-						if (targetLayoutContainer != null)
+						if (targetLayoutContainer instanceof LayoutContainer)
 						{
 							WebComponentPackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
-								targetLayoutContainer.getPackageName());
+								((LayoutContainer)targetLayoutContainer).getPackageName());
 							WebLayoutSpecification spec = null;
-							if (pkg != null && (spec = pkg.getSpecification(targetLayoutContainer.getSpecName())) != null)
+							if (pkg != null && (spec = pkg.getSpecification(((LayoutContainer)targetLayoutContainer).getSpecName())) != null)
 							{
 								List<String> allowedChildren = spec.getAllowedChildren();
 								if (dragObjects != null)
@@ -281,6 +281,11 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 									}
 								}
 							}
+						}
+						else if (targetLayoutContainer instanceof Form)
+						{
+							dropTarget = targetLayoutContainer;
+							return true;
 						}
 					}
 					return false;
