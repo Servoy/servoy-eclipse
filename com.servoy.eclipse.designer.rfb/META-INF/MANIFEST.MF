@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.servoy.eclipse.designer.rfb;singleton:=true
 Bundle-Version: 8.0.1.3021
 Bundle-Vendor: Servoy
 Require-Bundle: org.apache.tomcat,
- slf4j.api,
+ org.slf4j.api,
  servoy_shared,
  sablo,
  servoy_ngclient,

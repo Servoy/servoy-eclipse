@@ -32,7 +32,7 @@ Require-Bundle: org.eclipse.core.databinding,
  servoy_headless_client,
  org.eclipse.ui.browser,
  org.eclipse.dltk.javascript.rhino,
- slf4j.api
+ org.slf4j.api
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.designer;uses:="org.eclipse.jface.resource,org.eclipse.ui.plugin,org.osgi.framework",
  com.servoy.j2db.server.ngclient.design
