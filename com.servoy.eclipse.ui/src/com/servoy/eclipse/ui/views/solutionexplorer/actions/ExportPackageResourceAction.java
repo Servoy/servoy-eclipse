@@ -89,6 +89,7 @@ public class ExportPackageResourceAction extends Action implements ISelectionCha
 					String selectedFile = dialog.open();
 					if (selectedFile != null)
 					{
+						if (!selectedFile.toLowerCase().endsWith(".zip")) selectedFile += ".zip";
 						File file = new File(selectedFile);
 						while (file.exists() && !MessageDialog.openConfirm(shell, getText(), "Are you sure you want to override?"))
 						{
