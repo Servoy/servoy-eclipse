@@ -680,5 +680,25 @@
       <super
             type="com.servoy.eclipse.core.builderProblem">
       </super>
+   </extension>
+   <extension
+         id="com.servoy.eclipse.core.elementExtendsDeletedElement"
+         name="Element extends a deleted element from the parent form"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+      <attribute
+            name="Uuid">
+      </attribute>
+      <attribute
+            name="Name">
+      </attribute>
+      <attribute
+            name="SolutionName">
+      </attribute>
    </extension>   
 </plugin>

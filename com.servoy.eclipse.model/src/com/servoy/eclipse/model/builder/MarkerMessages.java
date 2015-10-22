@@ -20,7 +20,7 @@ import java.text.MessageFormat;
 
 /**
  * Be careful if you use ' inside the String constants listed in this class.
- * 
+ *
  * @see http://java.sun.com/j2se/1.5.0/docs/api/java/util/Formatter.html#syntax
  */
 public class MarkerMessages
@@ -77,7 +77,7 @@ public class MarkerMessages
 	/*
 	 * The following messages seem to no longer appear. They are filtered out by other checks and actions. Specific reasons are listed where I could find them.
 	 */
-	// If no resource project is found for a solution, the solution never gets 
+	// If no resource project is found for a solution, the solution never gets
 	// loaded (and so the message never gets displayed).
 	public static ServoyMarker ReferencesToMultipleResources = new ServoyMarker(
 		"Solution project \"{0}\" has references to more than one Servoy Resources Projects.", ServoyBuilder.MULTIPLE_RESOURCES_PROJECTS_MARKER_TYPE); //$NON-NLS-1$
@@ -126,8 +126,8 @@ public class MarkerMessages
 	 */
 
 	/**
-	 * When this message appears it means that the content in the files in the solution folder is 
-	 * corrupted. 
+	 * When this message appears it means that the content in the files in the solution folder is
+	 * corrupted.
 	 */
 	public static ServoyMarker SolutionBadStructure = new ServoyMarker(
 		"Structure of the files for solution \"{0}\" is broken (incorrect parent-child combination).", ServoyBuilder.BAD_STRUCTURE_MARKER_TYPE); //$NON-NLS-1$
@@ -139,7 +139,7 @@ public class MarkerMessages
 		"Error while reading solution \"{0}\": {1}.", ServoyBuilder.PROJECT_DESERIALIZE_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
-	 * This message appears when a checked-out solution/module has a higher fileVersion than the current version of the repository.    
+	 * This message appears when a checked-out solution/module has a higher fileVersion than the current version of the repository.
 	 */
 	public static ServoyMarker SolutionWithHigherFileVersion = new ServoyMarker(
 		"{0} \"{1}\" has a higher version of Servoy.", ServoyBuilder.SOLUTION_PROBLEM_MARKER_TYPE); //$NON-NLS-1$
@@ -291,7 +291,7 @@ public class MarkerMessages
 	public static ServoyMarker NonAccessibleFormInModuleUsedInParentSolutionForm = new ServoyMarker(
 		"Non-public {0} \"{1}\" from module \"{2}\" is used in solution \"{3}\", in form \"{4}\". This is not allowed.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
-	/** 
+	/**
 	 * This means that the sam tab sequence position is assigned to more than one element on a form.
 	 */
 	public static ServoyMarker FormNamedElementDuplicateTabSequence = new ServoyMarker(
@@ -371,14 +371,14 @@ public class MarkerMessages
 		"Element \"{0}\" from portal \"{1}\" has relation sequence \"{2}\" while portal has relationName \"{3}\". It should be the same value.", ServoyBuilder.PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
-	 * This means that the relations that build up the relation sequence of the portal do not fit together properly. At some point in the 
+	 * This means that the relations that build up the relation sequence of the portal do not fit together properly. At some point in the
 	 * sequence two relations are joined, but not on the same table.
 	 */
 	public static ServoyMarker FormPortalUnnamedInvalidRelationName = new ServoyMarker(
 		"Portal has invalid relationName (relation chain is not correct).", ServoyBuilder.PROJECT_FORM_MARKER_TYPE); //$NON-NLS-1$
 
 	/**
-	 * This means that the relations that build up the relation sequence of the portal do not fit together properly. At some point in the 
+	 * This means that the relations that build up the relation sequence of the portal do not fit together properly. At some point in the
 	 * sequence two relations are joined, but not on the same table.
 	 */
 	public static ServoyMarker FormPortalNamedInvalidRelationName = new ServoyMarker("Portal \"{0}\" has invalid relationName (relation chain not correct).", //$NON-NLS-1$
@@ -600,7 +600,7 @@ public class MarkerMessages
 		"Server \"{0}\" clone data model, cannot reference itself.", ServoyBuilder.SERVER_CLONE_CYCLE_TYPE); //$NON-NLS-1$
 
 	/**
-	 * The element uses deprecated script element. 
+	 * The element uses deprecated script element.
 	 */
 	public static ServoyMarker ElementUsingDeprecatedVariable = new ServoyMarker(
 		"Variable \"{0}\" in \"{1}\" as \"{2}\" property while deprecated.", ServoyBuilder.DEPRECATED_SCRIPT_ELEMENT_USAGE); //$NON-NLS-1$
@@ -608,4 +608,10 @@ public class MarkerMessages
 		"Function \"{0}\" is used in \"{1}\" as \"{2}\" property while deprecated.", ServoyBuilder.DEPRECATED_SCRIPT_ELEMENT_USAGE); //$NON-NLS-1$
 	public static ServoyMarker ElementUsingDeprecatedCalculation = new ServoyMarker(
 		"Calculation \"{0}\" is used in \"{1}\" as \"{2}\" property while deprecated.", ServoyBuilder.DEPRECATED_SCRIPT_ELEMENT_USAGE); //$NON-NLS-1$
+
+	/**
+	 * The element extends a deleted element
+	 */
+	public static ServoyMarker ElementExtendsDeletedElement = new ServoyMarker(
+		"Element in form \"{0}\" extends a deleted element from the parent form.", ServoyBuilder.ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE); //$NON-NLS-1$
 }

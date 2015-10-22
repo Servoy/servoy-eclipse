@@ -284,7 +284,11 @@
       <markerResolutionGenerator
             class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.formDuplicatePart">
-      </markerResolutionGenerator>  
+      </markerResolutionGenerator>
+      <markerResolutionGenerator
+            class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.elementExtendsDeletedElement">
+      </markerResolutionGenerator>        
    </extension>
    <extension
          point="org.eclipse.ui.splashHandlers">
