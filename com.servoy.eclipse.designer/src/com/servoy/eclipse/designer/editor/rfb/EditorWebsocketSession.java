@@ -43,11 +43,6 @@ public class EditorWebsocketSession extends BaseWebsocketSession
 		super(uuid);
 	}
 
-	@Override
-	public void init() throws Exception
-	{
-	}
-
 	// session will be destroyed when editor is closed
 	@Override
 	public boolean isValid()
