@@ -114,7 +114,7 @@ public class WarExporter
 	private static final String SERVICES_DIR_NAME = "services";
 	private final IWarExportModel exportModel;
 	private static final String[] EXCLUDE_FROM_NG_JAR = new String[] { "com/servoy/j2db/server/ngclient/startup", "war/", "META-INF/MANIFEST.", "META-INF/SERVOYCL." };
-	private static final String[] NG_LIBS = new String[] { "slf4j.api_*.jar", "log4j_*.jar", "org.freemarker*.jar", "org.jsoup*.jar", "servoy_ngclient_" +
+	private static final String[] NG_LIBS = new String[] { "org.slf4j.api_*.jar", "log4j_*.jar", "org.freemarker*.jar", "org.jsoup*.jar", "servoy_ngclient_" +
 		ClientVersion.getBundleVersion() + ".jar", "sablo_" + ClientVersion.getBundleVersion() + ".jar", "commons-lang3_*.jar", "wro4j-core_*.jar" };
 
 	/**
