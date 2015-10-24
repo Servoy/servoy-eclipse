@@ -28,7 +28,8 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 	GHOST_TYPE_CONFIGURATION: "config",
 	GHOST_TYPE_COMPONENT: "comp",
 	GHOST_TYPE_PART: "part",
-	GHOST_TYPE_FORM: "form"
+	GHOST_TYPE_FORM: "form",
+	GHOST_TYPE_INVISIBLE: "invisible"
 }).directive("editor", function($window, $pluginRegistry, $rootScope, EDITOR_EVENTS, EDITOR_CONSTANTS, $timeout, $editorService, $webSocket, $q) {
 	return {
 		restrict: 'E',
@@ -203,7 +204,12 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 					xOffset += 20;
 					yOffset += 20;
 				}
-				return {background: "#e4844a", opacity: 0.7, padding: "3px", left: ghost.location.x + xOffset, top: ghost.location.y + yOffset, width: ghost.size.width, height: ghost.size.height};
+				var style = {background: "#e4844a", opacity: 0.7, padding: "3px", left: ghost.location.x + xOffset, top: ghost.location.y + yOffset, width: ghost.size.width, height: ghost.size.height};
+				if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_INVISIBLE)
+				{
+					style.background = "#d0d0d0";
+				}
+				return style;
 			}
 			
 			$scope.getGhostHRStyle = function(ghost) {
@@ -268,7 +274,7 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 					else
 						{
 							var ghostObject = $scope.getGhost(node.getAttribute("svy-id"));
-							if (ghostObject && ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_COMPONENT)
+							if (ghostObject && (ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_COMPONENT || ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_INVISIBLE))
 								return ghostObject;
 						}
 				}
