@@ -266,7 +266,8 @@ public class DataModelManager implements IColumnInfoManager
 			{
 				IServerInternal s = (IServerInternal)sm.getServer(t.getServerName());
 				// checking if the server is a clone
-				if (s != null && s.getConfig() != null && s.getConfig().getDataModelCloneFrom() != null && s.getConfig().getDataModelCloneFrom().length() != 0) clonedServerWithoutTableDbiInDeveloper = true;
+				if (s != null && s.getConfig() != null && s.getConfig().getDataModelCloneFrom() != null && s.getConfig().getDataModelCloneFrom().length() != 0)
+					clonedServerWithoutTableDbiInDeveloper = true;
 			}
 			if (!clonedServerWithoutTableDbiInDeveloper)
 			{
@@ -335,10 +336,9 @@ public class DataModelManager implements IColumnInfoManager
 	{
 		int element_id = ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null);
 		ColumnInfo ci = new ColumnInfo(element_id, false);
-		if (createMissingServoySequence &&
-			c.getRowIdentType() != Column.NORMAL_COLUMN &&
-			c.getSequenceType() == ColumnInfo.NO_SEQUENCE_SELECTED &&
-			(Column.mapToDefaultType(c.getConfiguredColumnType().getSqlType()) == IColumnTypes.INTEGER || Column.mapToDefaultType(c.getConfiguredColumnType().getSqlType()) == IColumnTypes.NUMBER))
+		if (createMissingServoySequence && c.getRowIdentType() != Column.NORMAL_COLUMN && c.getSequenceType() == ColumnInfo.NO_SEQUENCE_SELECTED &&
+			(Column.mapToDefaultType(c.getConfiguredColumnType().getSqlType()) == IColumnTypes.INTEGER ||
+				Column.mapToDefaultType(c.getConfiguredColumnType().getSqlType()) == IColumnTypes.NUMBER))
 		{
 			ci.setAutoEnterType(ColumnInfo.SEQUENCE_AUTO_ENTER);
 			ci.setAutoEnterSubType(ColumnInfo.SERVOY_SEQUENCE);
@@ -834,8 +834,8 @@ public class DataModelManager implements IColumnInfoManager
 				cid.name = cobj.getString(SolutionSerializer.PROP_NAME);
 				// Note, since 6.1 dataType and length are interpreted as configured type/length
 				cid.columnType = ColumnType.getInstance(cobj.getInt(ColumnInfoDef.DATA_TYPE),
-					cobj.has(ColumnInfoDef.LENGTH) ? cobj.optInt(ColumnInfoDef.LENGTH) : 0, cobj.has(ColumnInfoDef.SCALE) ? cobj.optInt(ColumnInfoDef.SCALE)
-						: 0);
+					cobj.has(ColumnInfoDef.LENGTH) ? cobj.optInt(ColumnInfoDef.LENGTH) : 0,
+					cobj.has(ColumnInfoDef.SCALE) ? cobj.optInt(ColumnInfoDef.SCALE) : 0);
 				cid.compatibleColumnTypes = cobj.has(ColumnInfoDef.COMPATIBLE_COLUMN_TYPES)
 					? XMLUtils.parseColumnTypeArray(cobj.optString(ColumnInfoDef.COMPATIBLE_COLUMN_TYPES)) : null;
 				cid.allowNull = cobj.getBoolean(ColumnInfoDef.ALLOW_NULL);
@@ -1441,7 +1441,8 @@ public class DataModelManager implements IColumnInfoManager
 			this(serverName, tableName, null, DESERIALIZE_PROBLEM, null, null);
 		}
 
-		private TableDifference(String serverName, String tableName, String columnName, int type, ColumnInfoDef tableDefinition, ColumnInfoDef dbiFileDefinition)
+		private TableDifference(String serverName, String tableName, String columnName, int type, ColumnInfoDef tableDefinition,
+			ColumnInfoDef dbiFileDefinition)
 		{
 			this.serverName = serverName;
 			this.tableName = tableName;
@@ -1617,9 +1618,8 @@ public class DataModelManager implements IColumnInfoManager
 				ColumnType colColumnType = c.getColumnType(); // compare db column type with dbi file column type
 				ColumnType dbiColumnType = dbiFileDefinition.columnType;
 
-				if (!colColumnType.equals(dbiColumnType) &&
-					(c.getColumnInfo() == null || !c.getColumnInfo().isCompatibleColumnType(colColumnType) || !c.getColumnInfo().isCompatibleColumnType(
-						dbiColumnType)))
+				if (!colColumnType.equals(dbiColumnType) && (c.getColumnInfo() == null || !c.getColumnInfo().isCompatibleColumnType(colColumnType) ||
+					!c.getColumnInfo().isCompatibleColumnType(dbiColumnType)))
 				{
 					int t1 = Column.mapToDefaultType(colColumnType.getSqlType());
 					int t2 = Column.mapToDefaultType(dbiColumnType.getSqlType());
@@ -1633,6 +1633,12 @@ public class DataModelManager implements IColumnInfoManager
 					{
 						boolean compatibleLengths = (t1 == t2) && (t1 == IColumnTypes.MEDIA || t1 == IColumnTypes.TEXT) &&
 							(Math.abs(colColumnType.getLength() - (float)dbiColumnType.getLength()) > (Integer.MAX_VALUE / 2));
+						if (compatibleLengths && (colColumnType.getLength() == Integer.MAX_VALUE || dbiColumnType.getLength() == Integer.MAX_VALUE) &&
+							colColumnType.getLength() > 0 && dbiColumnType.getLength() > 0)
+						{
+							// one is max value, the other one way smaller; not compatible
+							compatibleLengths = false;
+						}
 						// this check is for -1 and big value lengths
 						if (!compatibleLengths)
 						{
