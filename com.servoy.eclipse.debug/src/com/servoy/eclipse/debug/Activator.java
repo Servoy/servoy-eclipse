@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.jar.Manifest;
 
 import javax.swing.Action;
@@ -47,6 +48,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -113,7 +116,21 @@ public class Activator extends AbstractUIPlugin implements IStartup
 			// GTK LaF causes crashes or hangs on linux in developer
 			System.setProperty("swing.defaultlaf", "javax.swing.plaf.metal.MetalLookAndFeel");
 		}
+		Set<String> defaultPackageNames = ResourceProvider.getDefaultPackageNames();
+		for (String packageName : defaultPackageNames)
+		{
+			getPreferenceStore().setDefault("com.servoy.eclipse.designer.rfb.packages.enable." + packageName, true);
+		}
+		getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener()
+		{
 
+			@Override
+			public void propertyChange(PropertyChangeEvent event)
+			{
+				registerResources(null);
+
+			}
+		});
 		registerResources(null);
 
 		resourceChangeListener = new IResourceChangeListener()
@@ -240,6 +257,14 @@ public class Activator extends AbstractUIPlugin implements IStartup
 								ServoyLog.logError(e);
 							}
 
+							Set<String> defaultPackageNames = ResourceProvider.getDefaultPackageNames();
+							List<String> toRemove = new ArrayList<String>();
+							for (String packageName : defaultPackageNames)
+							{
+								if (!isEnabledInPreferences(packageName)) toRemove.add(packageName);
+							}
+							ResourceProvider.setRemovedPackages(toRemove);
+
 							if (!Boolean.FALSE.equals(component))
 							{
 								if (componentReaders.size() > 0)
@@ -272,6 +297,12 @@ public class Activator extends AbstractUIPlugin implements IStartup
 					}
 					return Status.OK_STATUS;
 				}
+
+				private boolean isEnabledInPreferences(String packageName)
+				{
+					return Activator.getDefault().getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.packages.enable." + packageName);
+				}
+
 
 				/**
 				 * @param monitor
@@ -327,7 +358,8 @@ public class Activator extends AbstractUIPlugin implements IStartup
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
 		ResourceProvider.removeComponentResources(componentReaders.values());
 		ResourceProvider.removeServiceResources(serviceReaders.values());
-		if (activeProjectListenerForRegisteringResources != null) ((ServoyModel)ServoyModelFinder.getServoyModel()).removeActiveProjectListener(activeProjectListenerForRegisteringResources);
+		if (activeProjectListenerForRegisteringResources != null)
+			((ServoyModel)ServoyModelFinder.getServoyModel()).removeActiveProjectListener(activeProjectListenerForRegisteringResources);
 		plugin = null;
 		super.stop(context);
 		for (Image image : imageList)

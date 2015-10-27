@@ -11,7 +11,9 @@ Require-Bundle: org.apache.tomcat,
  servoy_ngclient,
  org.eclipse.equinox.preferences,
  com.servoy.eclipse.core,
- com.servoy.eclipse.model
+ com.servoy.eclipse.model,
+ com.servoy.eclipse.debug,
+ org.eclipse.ui
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: javax.servlet,

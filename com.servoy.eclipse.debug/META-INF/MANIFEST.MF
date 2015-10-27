@@ -37,7 +37,8 @@ Require-Bundle: org.eclipse.core.runtime,
  sj.jsonschemavalidation
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
-Export-Package: com.servoy.eclipse.debug.actions,
+Export-Package: com.servoy.eclipse.debug,
+ com.servoy.eclipse.debug.actions,
  com.servoy.eclipse.debug.handlers
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: org.eclipse.ui.internal.browser

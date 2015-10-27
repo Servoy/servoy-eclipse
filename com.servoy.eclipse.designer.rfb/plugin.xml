@@ -8,4 +8,13 @@
             id="cse.designer.rfb.servicesprovider">
       </serviceprovider>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="com.servoy.eclipse.ui.preference"
+            class="com.servoy.eclipse.designer.rfb.preferences.WebComponentPackagesPreferencePage"
+            id="com.servoy.eclipse.designer.rfb.webcomponents"
+            name="Default Web Component Packages">
+      </page>
+   </extension>
 </plugin>
