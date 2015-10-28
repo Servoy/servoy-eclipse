@@ -259,7 +259,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		PropertyCategory category = PropertyCategory.createPropertyCategory(name);
 		if (category == PropertyCategory.Events || category == PropertyCategory.Commands)
 		{
-			return new PropertyDescription(name, FunctionPropertyType.INSTANCE, Boolean.valueOf(category == PropertyCategory.Commands));
+			return new PropertyDescription(name, TypesRegistry.getType(FunctionPropertyType.TYPE_NAME), Boolean.valueOf(category == PropertyCategory.Commands));
 		}
 
 		final Form form = persistContext.getContext() instanceof Form ? (Form)persistContext.getContext() : null;
