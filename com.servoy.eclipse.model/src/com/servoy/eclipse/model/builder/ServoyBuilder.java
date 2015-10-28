@@ -3290,11 +3290,29 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										{
 											String[] parts = vl.getRelationName().split("\\.");
 											Relation relation = fieldFlattenedSolution.getRelation(parts[0]);
-											if (relation != null && !relation.isGlobal() && !relation.getPrimaryDataSource().equals(parentDataSource))
+											if (relation != null && !relation.isGlobal())
 											{
-												ServoyMarker mk = MarkerMessages.FormNamedFieldRelatedValuelist.fill(fieldName, vl.getName(), parentString);
-												addMarker(project, mk.getType(), mk.getText(), -1, FORM_FIELD_RELATED_VALUELIST, IMarker.PRIORITY_NORMAL, null,
-													field);
+												boolean addMarker = !relation.getPrimaryDataSource().equals(parentDataSource);
+												if (addMarker && field.getDataProviderID() != null)
+												{
+													int index = field.getDataProviderID().lastIndexOf('.');
+													if (index > 0)
+													{
+														Relation[] dpRelations = fieldFlattenedSolution.getRelationSequence(
+															field.getDataProviderID().substring(0, index));
+														if (dpRelations != null && dpRelations.length > 0 &&
+															dpRelations[dpRelations.length - 1].getForeignDataSource().equals(relation.getPrimaryDataSource()))
+														{
+															addMarker = false;
+														}
+													}
+												}
+												if (addMarker)
+												{
+													ServoyMarker mk = MarkerMessages.FormNamedFieldRelatedValuelist.fill(fieldName, vl.getName(), parentString);
+													addMarker(project, mk.getType(), mk.getText(), -1, FORM_FIELD_RELATED_VALUELIST, IMarker.PRIORITY_NORMAL,
+														null, field);
+												}
 											}
 										}
 										if (vl.getFallbackValueListID() > 0)
