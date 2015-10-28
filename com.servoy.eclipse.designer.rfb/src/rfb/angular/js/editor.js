@@ -1065,6 +1065,10 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 			wsSession.callService('formeditor', 'setInlineEditMode', {"inlineEdit":inlineEdit}, true)
 		},
 		
+		getComponentPropertyWithTags: function(svyId, propertyName) {
+			return wsSession.callService('formeditor', 'getComponentPropertyWithTags', {"svyId":svyId, "propertyName":propertyName}, false);
+		},
+		
 		reloadPalette: function() {
 			$rootScope.$emit(EDITOR_EVENTS.RELOAD_PALETTE, "")
 		},

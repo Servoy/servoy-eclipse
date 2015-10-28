@@ -38,6 +38,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.MoveInResponsiveL
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenContainedFormHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenElementWizardHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenScriptHandler;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetPropertiesHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetSelectionHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetTabSequenceCommand;
@@ -46,6 +47,8 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdateFieldPositi
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdatePaletteOrder;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.IPersist;
 
 /**
  * Handle requests from the rfb html editor.
@@ -174,6 +177,20 @@ public class EditorServiceHandler implements IServerService
 			public Object executeMethod(String methodName, JSONObject args) throws Exception
 			{
 				((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
+				return null;
+			}
+		});
+
+		configuredHandlers.put("getComponentPropertyWithTags", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart, args.optString("svyId"));
+				if (persist instanceof AbstractBase)
+				{
+					return ((AbstractBase)persist).getProperty(args.optString("propertyName"));
+				}
 				return null;
 			}
 		});

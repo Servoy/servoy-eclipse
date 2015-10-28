@@ -1,7 +1,72 @@
 angular.module('inlineedit', ['editor']).run(function($pluginRegistry, $editorService) {
 	
 	$pluginRegistry.registerPlugin(function(editorScope) {
-	
+		
+		function handleDirectEdit(nodeId, model, property, propertyValue) {
+			var obj = {};
+			var absolutePoint = editorScope.convertToAbsolutePoint({x: model.location.x + scrollX,y: model.location.y + scrollY});
+			var applyValue = function()
+			{
+				$("#directEdit").hide();
+				var newValue = $("#directEdit").text();
+				var oldValue = propertyValue;
+				if (oldValue != newValue)
+				{
+					var value = {};
+					value[property] = newValue;
+					obj[nodeId] = value;
+					$editorService.sendChanges(obj);
+				}
+				$editorService.setInlineEditMode(false);
+			}
+			$editorService.setInlineEditMode(true);
+			// double click on element
+			$("#directEdit")
+				.unbind('blur')
+				.unbind('keyup')
+				.unbind('keydown')
+				.html(propertyValue)
+				.css({
+					display: "block",
+					left: absolutePoint.x,
+					top: absolutePoint.y,
+					width: model.size.width+"px",
+					height: model.size.height+"px"
+				})
+				.bind('keyup',function(event)
+					{
+						if (event.keyCode == 27)
+						{
+							$("#directEdit").html(propertyValue).hide();
+							$editorService.setInlineEditMode(false);
+						}
+						if (event.keyCode == 13)
+						{
+							applyValue();
+						}
+						if (event.keyCode == 46)
+						{
+							return false;
+						}
+					})
+				.bind('keydown',function(event)
+					{
+						if (event.keyCode == 8)
+						{
+							event.stopPropagation();
+						}
+						if (event.keyCode == 65 && event.ctrlKey)
+						{
+							document.execCommand('selectAll',false,null);
+						}
+					})	
+				.bind('blur',function()
+						{
+							applyValue();
+						})
+				.focus();			
+		}
+		
 		editorScope.registerDOMEvent("dblclick","CONTENTFRAME_OVERLAY", function(event){
 			var selection = editorScope.getSelection();
 			if (selection && selection.length > 0)
@@ -19,68 +84,15 @@ angular.module('inlineedit', ['editor']).run(function($pluginRegistry, $editorSe
 						var directEditProperty = node.getAttribute("directEditPropertyName");
 						if (directEditProperty)
 						{
-							var obj = {};
-							var absolutePoint = editorScope.convertToAbsolutePoint({x: model.location.x + scrollX,y: model.location.y + scrollY});
-							var applyValue = function()
-							{
-								$("#directEdit").hide();
-								var newValue = $("#directEdit").text();
-								var oldValue = model[directEditProperty];
-								if (oldValue != newValue)
-								{
-									var value = {};
-									value[directEditProperty] = newValue;
-									obj[node.getAttribute("svy-id")] = value;
-									$editorService.sendChanges(obj);
-								}
-								$editorService.setInlineEditMode(false);
+							var nodeId = node.getAttribute("svy-id");
+							if(model.displaysTags) {
+								$editorService.getComponentPropertyWithTags(nodeId, directEditProperty).then(function(propertyValue) {
+									handleDirectEdit(nodeId, model, directEditProperty, propertyValue);
+								});
 							}
-							$editorService.setInlineEditMode(true);
-							// double click on element
-							$("#directEdit")
-								.unbind('blur')
-								.unbind('keyup')
-								.unbind('keydown')
-								.html(model[directEditProperty])
-								.css({
-									display: "block",
-									left: absolutePoint.x,
-									top: absolutePoint.y,
-									width: model.size.width+"px",
-									height: model.size.height+"px"
-								})
-								.bind('keyup',function(event)
-									{
-										if (event.keyCode == 27)
-										{
-											$("#directEdit").html(model[directEditProperty]).hide();
-											$editorService.setInlineEditMode(false);
-										}
-										if (event.keyCode == 13)
-										{
-											applyValue();
-										}
-										if (event.keyCode == 46)
-										{
-											return false;
-										}
-									})
-								.bind('keydown',function(event)
-									{
-										if (event.keyCode == 8)
-										{
-											event.stopPropagation();
-										}
-										if (event.keyCode == 65 && event.ctrlKey)
-										{
-											document.execCommand('selectAll',false,null);
-										}
-									})	
-								.bind('blur',function()
-										{
-											applyValue();
-										})
-								.focus();
+							else {
+								handleDirectEdit(nodeId, model, directEditProperty, model[directEditProperty]);
+							}
 							break;
 						}	
 					}
