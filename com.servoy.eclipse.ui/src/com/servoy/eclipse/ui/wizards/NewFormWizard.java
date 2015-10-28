@@ -337,7 +337,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			if (superForm != null) form.setExtendsID(superForm.getID());
 			// add selected data providers
 			DesignerPreferences designerPreferences = new DesignerPreferences();
-			if (dataProviderWizardPage != null)
+			if (dataProviderWizardPage != null  && !form.isResponsiveLayout())
 			{
 				Object[] dataProviders = dataProviderWizardPage.getDataProviders();
 				if (dataProviders != null && dataProviders.length > 0)
