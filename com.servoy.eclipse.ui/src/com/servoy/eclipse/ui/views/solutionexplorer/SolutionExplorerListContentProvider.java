@@ -1494,40 +1494,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	public static String getParsedComment(String comment)
 	{
 		if (comment == null) return null;
-		int currPos = 0;
-		int endPos = comment.length();
-		boolean newLine = true;
-		StringBuilder sb = new StringBuilder(comment.length());
-		outer : while (currPos < endPos)
-		{
-			char ch;
-			if (newLine)
-			{
-				do
-				{
-					ch = comment.charAt(currPos++);
-					if (currPos >= endPos) break outer;
-					if (ch == '\n' || ch == '\r') break;
-				}
-				while (Character.isWhitespace(ch) || ch == '*' || ch == '/');
-			}
-			else
-			{
-				ch = comment.charAt(currPos++);
-			}
-			newLine = ch == '\n' || ch == '\r';
-
-			if (newLine)
-			{
-				if (sb.length() != 0) sb.append("<br/>\n");
-			}
-			else
-			{
-				sb.append(ch);
-			}
-		}
-
-		JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(sb.toString()));
+		String c = comment.replaceAll("/\\*\\*|\\*/", "");
+		c = c.replaceAll(System.getProperty("line.separator"), "<br/>\n");
+		c = c.replaceAll("(\\s*)\\*", "$1").trim();
+		JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(c));
 		try
 		{
 			return reader.getString();
