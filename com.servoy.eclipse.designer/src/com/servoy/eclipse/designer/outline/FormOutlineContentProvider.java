@@ -55,8 +55,8 @@ import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.server.ngclient.persistence.WebComponentImpl;
-import com.servoy.j2db.server.ngclient.persistence.WebCustomType;
+import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
@@ -362,7 +362,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 
 	private List<WebCustomType> getAllGhostElements(IBasicWebComponent parentBean)
 	{
-		if (parentBean instanceof WebComponentImpl) return ((WebComponentImpl)parentBean).getAllFirstLevelArrayOfOrCustomPropertiesFlattened();
+		if (parentBean instanceof WebComponent) return ((WebComponent)parentBean).getAllFirstLevelArrayOfOrCustomPropertiesFlattened();
 
 		List<WebCustomType> result = new ArrayList<WebCustomType>();
 

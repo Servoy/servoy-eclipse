@@ -77,7 +77,7 @@ import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.server.ngclient.persistence.WebCustomType;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
 
@@ -219,7 +219,7 @@ public class CreateComponentHandler implements IServerService
 							}
 							((WebComponent)parentBean).setProperty(dropTargetFieldName, arrayValue);
 						}
-						else ((WebComponent)parentBean).setProperty(dropTargetFieldName, bean);
+						else((WebComponent)parentBean).setProperty(dropTargetFieldName, bean);
 					}
 					return new IPersist[] { bean };
 				}
