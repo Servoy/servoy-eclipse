@@ -598,7 +598,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 		{
 			if (childEntry != null)
 			{
-				entryCache.put(childEntry.getDescriptor().getId(), childEntry);
+				entryCache.put(childEntry.getDescriptor().getId() + childEntry.getCategory(), childEntry);
 			}
 		}
 
@@ -615,7 +615,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 		{
 			IPropertyDescriptor d = (IPropertyDescriptor)descriptors.get(i);
 			// see if we have an entry matching this descriptor
-			PropertySheetEntry entry = (PropertySheetEntry)entryCache.get(d.getId());
+			PropertySheetEntry entry = (PropertySheetEntry)entryCache.get(d.getId() + d.getCategory());
 			if (entry != null)
 			{
 				// reuse old entry
