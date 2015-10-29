@@ -85,14 +85,9 @@ angular.module('inlineedit', ['editor']).run(function($pluginRegistry, $editorSe
 						if (directEditProperty)
 						{
 							var nodeId = node.getAttribute("svy-id");
-							if(model.displaysTags) {
-								$editorService.getComponentPropertyWithTags(nodeId, directEditProperty).then(function(propertyValue) {
-									handleDirectEdit(nodeId, model, directEditProperty, propertyValue);
-								});
-							}
-							else {
-								handleDirectEdit(nodeId, model, directEditProperty, model[directEditProperty]);
-							}
+							$editorService.getComponentPropertyWithTags(nodeId, directEditProperty).then(function(propertyValue) {
+								handleDirectEdit(nodeId, model, directEditProperty, propertyValue);
+							});
 							break;
 						}	
 					}
