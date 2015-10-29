@@ -67,7 +67,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.server.ngclient.persistence.WebCustomType;
 import com.servoy.j2db.util.IDelegate;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;

@@ -57,8 +57,9 @@ import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.FormElement;
+import com.servoy.j2db.server.ngclient.persistence.WebComponentImpl;
+import com.servoy.j2db.server.ngclient.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
@@ -125,9 +126,9 @@ public class GhostHandler implements IServerService
 						writer.key("ghosts");
 						{
 							writer.array();
-							if (bean instanceof WebComponent)
+							if (bean instanceof WebComponentImpl)
 							{
-								for (WebCustomType p : ((WebComponent)bean).getAllFirstLevelArrayOfOrCustomPropertiesFlattened())
+								for (WebCustomType p : ((WebComponentImpl)bean).getAllFirstLevelArrayOfOrCustomPropertiesFlattened())
 								{
 									String text = p.getJsonKey() + (p.getIndex() >= 0 ? "[" + p.getIndex() + "]" : "");
 
@@ -139,7 +140,7 @@ public class GhostHandler implements IServerService
 									}
 
 									Object configObject;
-									if (p.getIndex() >= 0) configObject = ((WebComponent)bean).getPropertyDescription().getProperty(p.getJsonKey()).getConfig();
+									if (p.getIndex() >= 0) configObject = ((WebComponentImpl)bean).getPropertyDescription().getProperty(p.getJsonKey()).getConfig();
 									else configObject = p.getPropertyDescription().getConfig();
 
 									if (isDroppable(p.getPropertyDescription(), configObject))
@@ -163,8 +164,8 @@ public class GhostHandler implements IServerService
 												Object configObject = pd.getConfig();
 												if (PropertyUtils.isCustomJSONObjectProperty(pd.getType()))
 												{
-													if (pd.getType() instanceof ComponentPropertyType || (configObject instanceof JSONObject &&
-														Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
+													if (pd.getType() instanceof ComponentPropertyType ||
+														(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
 													{
 														writeGhostToJSON(writer, (Bean)bean, pd, simpleTypeName, -1);// -1 does not add a [0] at the end of the name
 													}
@@ -175,8 +176,7 @@ public class GhostHandler implements IServerService
 													for (int i = 0; i < jsonArray.length(); i++)
 													{
 														if (((CustomJSONArrayType)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType ||
-															(configObject instanceof JSONObject &&
-																Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
+															(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
 														{
 															writeGhostToJSON(writer, (Bean)bean, pd, simpleTypeName, i);
 														}
@@ -421,8 +421,8 @@ public class GhostHandler implements IServerService
 											IPersist next = fields.next();
 											// TODO check responsive/relative layout and ghosts...
 											Part p = null;
-											if (!f.getParts().hasNext() || (next instanceof ISupportBounds &&
-												(p = f.getPartAt(((ISupportBounds)next).getLocation().y)) != null && p.getPartType() == Part.BODY))
+											if (!f.getParts().hasNext() ||
+												(next instanceof ISupportBounds && (p = f.getPartAt(((ISupportBounds)next).getLocation().y)) != null && p.getPartType() == Part.BODY))
 											{
 												ISupportBounds iSupportBounds = (ISupportBounds)next;
 												int x = iSupportBounds.getLocation().x;

@@ -66,7 +66,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Style;
-import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.server.ngclient.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Pair;
 
