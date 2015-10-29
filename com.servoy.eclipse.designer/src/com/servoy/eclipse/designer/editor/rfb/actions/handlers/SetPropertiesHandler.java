@@ -36,7 +36,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
-import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.server.ngclient.persistence.WebCustomType;
 
 /**
  * @author user
