@@ -2,7 +2,7 @@ angular.module('inlineedit', ['editor']).run(function($pluginRegistry, $editorSe
 	
 	$pluginRegistry.registerPlugin(function(editorScope) {
 		
-		function handleDirectEdit(nodeId, model, property, propertyValue) {
+		function handleDirectEdit(nodeId, model, property, propertyValue, scrollX, scrollY) {
 			var obj = {};
 			var absolutePoint = editorScope.convertToAbsolutePoint({x: model.location.x + scrollX,y: model.location.y + scrollY});
 			var applyValue = function()
@@ -86,7 +86,7 @@ angular.module('inlineedit', ['editor']).run(function($pluginRegistry, $editorSe
 						{
 							var nodeId = node.getAttribute("svy-id");
 							$editorService.getComponentPropertyWithTags(nodeId, directEditProperty).then(function(propertyValue) {
-								handleDirectEdit(nodeId, model, directEditProperty, propertyValue);
+								handleDirectEdit(nodeId, model, directEditProperty, propertyValue, scrollX, scrollY);
 							});
 							break;
 						}	
