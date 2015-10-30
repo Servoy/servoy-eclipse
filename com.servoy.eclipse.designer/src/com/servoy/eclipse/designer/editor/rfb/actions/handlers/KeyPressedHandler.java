@@ -32,6 +32,7 @@ import org.sablo.websocket.IServerService;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.Utils;
@@ -79,7 +80,8 @@ public class KeyPressedHandler implements IServerService
 				{
 					public void run()
 					{
-						List<PersistContext> contextSelection = new ArrayList<PersistContext>(((IStructuredSelection)selectionProvider.getSelection()).toList());
+						List<PersistContext> contextSelection = new ArrayList<PersistContext>(
+							((IStructuredSelection)selectionProvider.getSelection()).toList());
 						List<IPersist> selection = new ArrayList<IPersist>();
 						for (PersistContext pc : contextSelection)
 						{
@@ -95,8 +97,8 @@ public class KeyPressedHandler implements IServerService
 						}
 						if (selection.size() > 0)
 						{
-							if (!containsInheritedElements(selection)) editorPart.getCommandStack().execute(
-								new FormElementDeleteCommand(selection.toArray(new IPersist[0])));
+							if (!containsInheritedElements(selection))
+								editorPart.getCommandStack().execute(new FormElementDeleteCommand(selection.toArray(new IPersist[0])));
 						}
 					}
 				});
@@ -110,6 +112,18 @@ public class KeyPressedHandler implements IServerService
 						{
 							IWorkbenchPage page = editorPart.getSite().getPage();
 							((WorkbenchPage)page).saveAllEditors(false, false, true);
+						}
+					});
+				}
+				break;
+			case 90 : //z
+				if (isCtrl && isShift)
+				{
+					Display.getDefault().asyncExec(new Runnable()
+					{
+						public void run()
+						{
+							EditorUtil.openScriptEditor(editorPart.getForm(), null, true);
 						}
 					});
 				}

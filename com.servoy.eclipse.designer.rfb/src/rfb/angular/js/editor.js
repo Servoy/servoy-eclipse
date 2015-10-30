@@ -701,10 +701,10 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 		                if(fixedKeyEvent.isCtrl)
 		                {
 		                	var k = String.fromCharCode(fixedKeyEvent.keyCode).toLowerCase();
-		                    if ('a' == k || 's' == k )
+		                    if ('a' == k || 's' == k || (fixedKeyEvent.isShift && 'z' == k))
 		                    {
-		                    	if(fixedKeyEvent.isShift && 's' == k) {
-									// send the CTRL+SHIFT+S (save all) key code to the server
+		                    	if(fixedKeyEvent.isShift && ('s' == k || 'z' == k)) {
+									// send the CTRL+SHIFT+S (save all) and CTRL+SHIFT+Z (open editor) key code to the server
 		                    		$editorService.keyPressed(objEvent);
 		                    	}                         
 			                   return false;
