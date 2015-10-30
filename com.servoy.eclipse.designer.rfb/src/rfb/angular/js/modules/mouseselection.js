@@ -7,7 +7,7 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 		var utils = $selectionUtils.getUtilsForScope(editorScope);
 
 		function select(event, node) {
-			if (event.ctrlKey) {
+			if (event.ctrlKey || event.metaKey) {
 				if (editorScope.getSelection().indexOf(node) !== -1) {
 					editorScope.reduceSelection(node)
 				} else {
