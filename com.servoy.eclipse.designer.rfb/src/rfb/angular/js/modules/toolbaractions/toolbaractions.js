@@ -9,6 +9,16 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 		{
 			btnToggleDesignMode.enabled = false;
 		}
+		else
+		{
+			btnPlaceField.hide = true;
+			btnPlaceImage.hide = true;
+			btnPlacePortal.hide = true;
+			btnPlaceSplitPane.hide = true;
+			btnPlaceTabPanel.hide = true;
+			btnPlaceAccordion.hide = true;
+			btnTabSequence.hide = true;
+		}
 		var promise  =  $editorService.isShowData();
 		promise.then(function (result){
 			btnToggleShowData.state = result;

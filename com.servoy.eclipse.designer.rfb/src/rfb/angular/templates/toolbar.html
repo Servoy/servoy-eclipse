@@ -1,31 +1,31 @@
 <div>
 
 	<div class="toolbar element" ng-if="elements.length > 0">
-		<toolbar-item ng-repeat="item in elements" model="item" class="toolbar-action"/>
+		<toolbar-item ng-repeat="item in elements" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>
 
 	<div class="toolbar ordering" ng-if="ordering.length > 0">
-		<toolbar-item ng-repeat="item in ordering" model="item" class="toolbar-action"/>
+		<toolbar-item ng-repeat="item in ordering" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>
 	
 	<div class="toolbar alignment" ng-if="alignment.length > 0">
-		<toolbar-item ng-repeat="item in alignment" model="item" class="toolbar-action"/>
+		<toolbar-item ng-repeat="item in alignment" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>
 	
 	<div class="toolbar distribution" ng-if="distribution.length > 0">
-		<toolbar-item ng-repeat="item in distribution" model="item" class="toolbar-action"/>
+		<toolbar-item ng-repeat="item in distribution" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>
 	
 	<div class="toolbar sizing" ng-if="sizing.length > 0">
-		<toolbar-item ng-repeat="item in sizing" model="item" class="toolbar-action"/>
+		<toolbar-item ng-repeat="item in sizing" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>
 	
 	<div class="toolbar form" ng-if="form.length > 0">
-		<toolbar-item ng-repeat="item in form" model="item" class="toolbar-action"/>
+		<toolbar-item ng-repeat="item in form" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>
 	
 	<div class="toolbar display" ng-if="display.length > 0">
-		<toolbar-item ng-repeat="item in display" model="item" class="toolbar-action"/>
+		<toolbar-item ng-repeat="item in display" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>
 	
 	<div class="toolbar editor">
