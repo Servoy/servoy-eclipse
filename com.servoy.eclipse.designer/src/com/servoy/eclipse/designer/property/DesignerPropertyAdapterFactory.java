@@ -296,7 +296,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 				{
 
 					WebCustomType ghostBean = (WebCustomType)persist;
-					PropertyDescription propertyDescription = ghostBean.getPropertyDescription();
+					PropertyDescription propertyDescription = (PropertyDescription)ghostBean.getPropertyDescription();
 
 
 					if (propertyDescription != null)

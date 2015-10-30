@@ -89,7 +89,7 @@ public class OpenContainedFormHandler implements IServerService
 
 
 								Collection<PropertyDescription> forms = null;
-								forms = ghost.getPropertyDescription().getProperties(DesignerFormPropertyType.DESIGNER_INSTANCE); // TODO what if form typed property is nested some more in the ghost? do we want to open that as well?
+								forms = ((PropertyDescription)ghost.getPropertyDescription()).getProperties(DesignerFormPropertyType.DESIGNER_INSTANCE); // TODO what if form typed property is nested some more in the ghost? do we want to open that as well?
 
 								for (PropertyDescription pd : Utils.iterate(forms))
 								{

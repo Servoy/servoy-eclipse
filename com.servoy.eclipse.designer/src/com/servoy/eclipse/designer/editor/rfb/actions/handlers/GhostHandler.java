@@ -139,10 +139,11 @@ public class GhostHandler implements IServerService
 									}
 
 									Object configObject;
-									if (p.getIndex() >= 0) configObject = ((WebComponent)bean).getPropertyDescription().getProperty(p.getJsonKey()).getConfig();
-									else configObject = p.getPropertyDescription().getConfig();
+									if (p.getIndex() >= 0) configObject = ((PropertyDescription)((WebComponent)bean).getPropertyDescription()).getProperty(
+										p.getJsonKey()).getConfig();
+									else configObject = ((PropertyDescription)p.getPropertyDescription()).getConfig();
 
-									if (isDroppable(p.getPropertyDescription(), configObject))
+									if (isDroppable((PropertyDescription)p.getPropertyDescription(), configObject))
 									{
 										writeGhostToJSON(writer, text, p.getUUID().toString(), p.getIndex());
 									}
@@ -163,8 +164,8 @@ public class GhostHandler implements IServerService
 												Object configObject = pd.getConfig();
 												if (PropertyUtils.isCustomJSONObjectProperty(pd.getType()))
 												{
-													if (pd.getType() instanceof ComponentPropertyType || (configObject instanceof JSONObject &&
-														Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
+													if (pd.getType() instanceof ComponentPropertyType ||
+														(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
 													{
 														writeGhostToJSON(writer, (Bean)bean, pd, simpleTypeName, -1);// -1 does not add a [0] at the end of the name
 													}
@@ -175,8 +176,7 @@ public class GhostHandler implements IServerService
 													for (int i = 0; i < jsonArray.length(); i++)
 													{
 														if (((CustomJSONArrayType)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType ||
-															(configObject instanceof JSONObject &&
-																Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
+															(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
 														{
 															writeGhostToJSON(writer, (Bean)bean, pd, simpleTypeName, i);
 														}
@@ -421,8 +421,8 @@ public class GhostHandler implements IServerService
 											IPersist next = fields.next();
 											// TODO check responsive/relative layout and ghosts...
 											Part p = null;
-											if (!f.getParts().hasNext() || (next instanceof ISupportBounds &&
-												(p = f.getPartAt(((ISupportBounds)next).getLocation().y)) != null && p.getPartType() == Part.BODY))
+											if (!f.getParts().hasNext() ||
+												(next instanceof ISupportBounds && (p = f.getPartAt(((ISupportBounds)next).getLocation().y)) != null && p.getPartType() == Part.BODY))
 											{
 												ISupportBounds iSupportBounds = (ISupportBounds)next;
 												int x = iSupportBounds.getLocation().x;
