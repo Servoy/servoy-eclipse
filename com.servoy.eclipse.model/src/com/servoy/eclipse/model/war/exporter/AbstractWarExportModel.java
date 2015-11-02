@@ -72,8 +72,8 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			extractUsedComponentsAndServices(SolutionSerializer.getRelativePath(form, false) + form.getName() + SolutionSerializer.JS_FILE_EXTENSION);
 			if (form.getNavigatorID() == Form.NAVIGATOR_DEFAULT)
 			{
-				usedComponents.add("servoydefault-navigator");
-				usedComponents.add("servoydefault-slider");
+				usedComponents.add("servoycore-navigator");
+				usedComponents.add("servoycore-slider");
 			}
 		}
 
@@ -84,8 +84,8 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 		}
 
 		//these are always required
-		usedComponents.add("servoydefault-errorbean");
-		usedComponents.add("servoydefault-portal");
+		usedComponents.add("servoycore-errorbean");
+		usedComponents.add("servoycore-portal");
 	}
 
 	private void findUsedComponents(ISupportChilds parent)

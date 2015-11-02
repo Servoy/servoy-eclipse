@@ -219,7 +219,7 @@ public class CreateComponentHandler implements IServerService
 							}
 							((WebComponent)parentBean).setProperty(dropTargetFieldName, arrayValue);
 						}
-						else((WebComponent)parentBean).setProperty(dropTargetFieldName, bean);
+						else ((WebComponent)parentBean).setProperty(dropTargetFieldName, bean);
 					}
 					return new IPersist[] { bean };
 				}
@@ -455,7 +455,7 @@ public class CreateComponentHandler implements IServerService
 				tabPanel.setSize(new Dimension(w, h));
 				return new IPersist[] { tabPanel };
 			}
-			else if ("servoydefault-portal".equals(name))
+			else if ("servoycore-portal".equals(name))
 			{
 				String compName = "portal_" + id.incrementAndGet();
 				while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
