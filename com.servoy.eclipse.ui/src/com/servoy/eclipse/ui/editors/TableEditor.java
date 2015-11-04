@@ -803,7 +803,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				if (flushTable)
 				{
 					flushTable = false;
-					Activator.getDefault().getDebugClientHandler().refreshDebugClients((Collection<IPersist>)table);
+					Activator.getDefault().getDebugClientHandler().refreshDebugClients(table);
 				}
 				columnComposite.refreshSelection();
 			}
