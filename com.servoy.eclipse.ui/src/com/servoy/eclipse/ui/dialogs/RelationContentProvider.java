@@ -39,9 +39,9 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Content provider class for relations.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 
 public class RelationContentProvider extends CachingContentProvider implements ITreeContentProvider, ISearchKeyAdapter
@@ -95,7 +95,7 @@ public class RelationContentProvider extends CachingContentProvider implements I
 
 	/**
 	 * Get all relations that are the first part of a possible path from primaryTable to foreignTable.
-	 * 
+	 *
 	 * @param primaryTable
 	 * @param foreignTable
 	 * @return
@@ -236,6 +236,16 @@ public class RelationContentProvider extends CachingContentProvider implements I
 		{
 			return obj instanceof RelationsWrapper && Arrays.equals(relations, ((RelationsWrapper)obj).relations);
 		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + Arrays.hashCode(relations);
+			return result;
+		}
+
 	}
 
 	public static class RelationListOptions

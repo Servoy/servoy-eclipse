@@ -49,12 +49,13 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
+import com.servoy.eclipse.ui.dialogs.CombinedTreeContentProvider.CombinedTreeOptions;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderNodeWrapper;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
 import com.servoy.eclipse.ui.dialogs.TagsAndI18NTextDialog.StandardTagsContentProvider.StandardTagsLeafNode;
 import com.servoy.eclipse.ui.dialogs.TagsAndI18NTextDialog.StandardTagsContentProvider.StandardTagsRelationNode;
-import com.servoy.eclipse.ui.labelproviders.CombinedLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.CombinedTreeLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
@@ -100,7 +101,7 @@ public class TagsAndI18NTextDialog extends Dialog
 	private final PersistContext persistContext;
 
 	/**
-	 * if the Dialog is independent of the solution/form/dataprovider context , then pass null as a value for persistContext (this is the case when it is used in table editor for the title of a column) 
+	 * if the Dialog is independent of the solution/form/dataprovider context , then pass null as a value for persistContext (this is the case when it is used in table editor for the title of a column)
 	 */
 	public TagsAndI18NTextDialog(Shell shell, PersistContext persistContext, FlattenedSolution flattenedSolution, Table table, Object value, String title,
 		IApplication application, boolean hideTags)
@@ -119,9 +120,6 @@ public class TagsAndI18NTextDialog extends Dialog
 	private Browser browser;
 	private TabItem htmlPreviewTabItem;
 
-	/*
-	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	protected Control createDialogArea(Composite parent)
 	{
@@ -160,10 +158,15 @@ public class TagsAndI18NTextDialog extends Dialog
 					INCLUDE_RELATIONS.NO, false, false, null);
 			}
 
-			dpTree = new DataProviderTreeViewer(composite_1, new CombinedLabelProvider(StandardTagsLabelProvider.INSTANCE_HIDEPREFIX,
-				solutionContextLabelProvider), new CombinedTreeContentProvider(new DataProviderContentProvider(persistContext, flattenedSolution, table),
-				StandardTagsContentProvider.getInstance(mobile)), dataProviderOptions, true, true, TreePatternFilter.getSavedFilterMode(
-				getDialogBoundsSettings(), TreePatternFilter.FILTER_PARENTS), SWT.MULTI);
+			CombinedTreeOptions mainInputOptions = new CombinedTreeContentProvider.CombinedTreeOptions(null, false, new Object[] { dataProviderOptions, null });
+
+			dpTree = new DataProviderTreeViewer(
+				composite_1,
+				new CombinedTreeLabelProvider(1, new ILabelProvider[] { StandardTagsLabelProvider.INSTANCE_HIDEPREFIX, solutionContextLabelProvider }),
+				new CombinedTreeContentProvider(
+					1,
+					new ITreeContentProvider[] { new DataProviderContentProvider(persistContext, flattenedSolution, table), StandardTagsContentProvider.getInstance(mobile) }),
+				mainInputOptions, true, true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), TreePatternFilter.FILTER_PARENTS), SWT.MULTI);
 
 			addButton = new Button(composite_1, SWT.NONE);
 			addButton.setText(">>");

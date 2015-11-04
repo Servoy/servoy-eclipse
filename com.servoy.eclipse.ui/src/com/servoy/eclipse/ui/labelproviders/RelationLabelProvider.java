@@ -28,11 +28,11 @@ import com.servoy.j2db.persistence.Relation;
 
 /**
  * Label provider for relations.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
-public class RelationLabelProvider extends SupportNameLabelProvider implements IPersistLabelProvider
+public class RelationLabelProvider extends SupportNameLabelProvider implements IPersistLabelProvider, IDefaultImageProvider
 {
 	public static final RelationLabelProvider INSTANCE_LAST_NAME_ONLY_NO_IMAGE = new RelationLabelProvider(Messages.LabelNone, false, true);
 	public static final RelationLabelProvider INSTANCE_ALL_NO_IMAGE = new RelationLabelProvider(Messages.LabelNone, false, false);
@@ -97,6 +97,16 @@ public class RelationLabelProvider extends SupportNameLabelProvider implements I
 			}
 		}
 		return fileName;
+	}
+
+	@Override
+	public Image getDefaultImage()
+	{
+//		if (showImage)
+//		{
+		return RELATION_IMAGE;
+//		}
+//		return null;
 	}
 
 	@Override

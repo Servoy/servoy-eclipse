@@ -185,7 +185,7 @@ import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
-import com.servoy.j2db.server.ngclient.property.FoundsetTypeSabloValue;
+import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
@@ -2651,7 +2651,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				String foundsetValue = "";
 				if (object instanceof JSONObject)
 				{
-					foundsetValue = (String)((JSONObject)object).get(FoundsetTypeSabloValue.FOUNDSET_SELECTOR);
+					foundsetValue = (String)((JSONObject)object).get(FoundsetPropertyType.FOUNDSET_SELECTOR);
 				}
 				if (foundsetValue.equals(""))
 				{

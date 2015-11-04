@@ -13,7 +13,7 @@
  You should have received a copy of the GNU Affero General Public License along
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
-*/
+ */
 package com.servoy.eclipse.ui.editors;
 
 
@@ -63,7 +63,7 @@ public abstract class DialogCellEditor extends org.eclipse.jface.viewers.DialogC
 
 	/**
 	 * Creates a new font cell editor parented under the given control.
-	 * 
+	 *
 	 * @param parent the parent control
 	 * @param valueEditor
 	 */
@@ -91,12 +91,17 @@ public abstract class DialogCellEditor extends org.eclipse.jface.viewers.DialogC
 
 	/**
 	 * Get a selection based on value
-	 * 
+	 *
 	 * @return
 	 */
 	public StructuredSelection getSelection()
 	{
 		Object value = getValue();
+		return getSelection(value);
+	}
+
+	protected StructuredSelection getSelection(Object value)
+	{
 		if (value == null) return StructuredSelection.EMPTY;
 		if (value instanceof Object[])
 		{
@@ -148,11 +153,7 @@ public abstract class DialogCellEditor extends org.eclipse.jface.viewers.DialogC
 
 		control.addKeyListener(new KeyAdapter()
 		{
-			/*
-			 * (non-Javadoc)
-			 * 
-			 * @see org.eclipse.swt.events.KeyListener#keyReleased(org.eclipse.swt.events.KeyEvent)
-			 */
+
 			@Override
 			public void keyReleased(KeyEvent e)
 			{

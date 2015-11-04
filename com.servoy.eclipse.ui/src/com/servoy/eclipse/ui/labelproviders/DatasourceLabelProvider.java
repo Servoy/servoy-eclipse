@@ -26,11 +26,11 @@ import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 
 /**
  * LabelProvider for data sources.
- * 
+ *
  * @author rgansevles
  */
 
-public class DatasourceLabelProvider extends LabelProvider
+public class DatasourceLabelProvider extends LabelProvider implements IDefaultImageProvider
 {
 //	public static final DatasourceLabelProvider INSTANCE_IMAGE_FULLY_QUALIFIED = new DatasourceLabelProvider(Messages.LabelNone, true, true);
 	public static final DatasourceLabelProvider INSTANCE_NO_IMAGE_FULLY_QUALIFIED = new DatasourceLabelProvider(Messages.LabelNone, false, true);
@@ -93,5 +93,11 @@ public class DatasourceLabelProvider extends LabelProvider
 			return TABLE_IMAGE;
 		}
 		return super.getImage(element);
+	}
+
+	@Override
+	public Image getDefaultImage()
+	{
+		return TABLE_IMAGE;
 	}
 }

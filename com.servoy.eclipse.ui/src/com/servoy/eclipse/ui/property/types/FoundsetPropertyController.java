@@ -22,7 +22,6 @@ import java.util.Iterator;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -30,6 +29,7 @@ import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
@@ -38,7 +38,6 @@ import com.servoy.eclipse.ui.editors.DataProviderCellEditor;
 import com.servoy.eclipse.ui.editors.DataProviderCellEditor.DataProviderValueEditor;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
-import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.CheckboxPropertyDescriptor;
 import com.servoy.eclipse.ui.property.ComplexProperty;
@@ -49,12 +48,13 @@ import com.servoy.eclipse.ui.property.ICellEditorFactory;
 import com.servoy.eclipse.ui.property.IPropertyConverter;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PropertyController;
-import com.servoy.eclipse.ui.property.RelationPropertyController;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyTypeConfig;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
@@ -67,22 +67,21 @@ import com.servoy.j2db.util.Utils;
  */
 public class FoundsetPropertyController extends PropertyController<JSONObject, Object>
 {
-	private static final String USE_FORM_FOUNDSET = "useFormFoundset";
-	private static final String FOUNDSET_RELATION = "foundsetRelation";
 
-	private static final String FOUNDSET_SELECTOR = "foundsetSelector";
-	private static final String FOUNDSET_DP_COUNT = "foundsetDataprovidersCount";
+	public static final String FOUNDSET_DP_COUNT = "foundsetDataprovidersCount";
+	private static final String LOAD_ALL_RECORDS_INITIALLY = "load all records";
 
-	private static final String FORM_FOUNDSET = "formFoundset";
+	public static final String FORM_FOUNDSET_TEXT = "(form foundset)";
 
 	private final FlattenedSolution flattenedSolution;
 	private final PersistContext persistContext;
 	private final FoundsetPropertyTypeConfig config;
 
-	/**
-	 * @param id
-	 * @param displayName
-	 */
+	private ILabelProvider labelProvider;
+	protected final FoundsetDesignToChooserConverter designToChooserConverter;
+
+	private Table formTable;
+
 	public FoundsetPropertyController(Object id, String displayName, FlattenedSolution flattenedSolution, PersistContext persistContext,
 		FoundsetPropertyTypeConfig foundsetPropertyTypeConfig)
 	{
@@ -90,6 +89,16 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 		this.flattenedSolution = flattenedSolution;
 		this.persistContext = persistContext;
 		this.config = foundsetPropertyTypeConfig;
+
+		try
+		{
+			formTable = flattenedSolution.getFlattenedForm(persistContext.getPersist()).getTable();
+		}
+		catch (RepositoryException ex)
+		{
+			ServoyLog.logError(ex);
+		}
+		designToChooserConverter = new FoundsetDesignToChooserConverter(flattenedSolution);
 	}
 
 	@Override
@@ -98,56 +107,12 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 		return new FoundsetPropertyConverter();
 	}
 
-	private ILabelProvider labelProvider;
-
 	@Override
 	public ILabelProvider getLabelProvider()
 	{
 		if (labelProvider == null)
 		{
-			labelProvider = new LabelProvider()
-			{
-				@Override
-				public String getText(Object element)
-				{
-					if (element != null)
-					{
-						try
-						{
-							JSONObject elementJSON = (JSONObject)element;
-							if (elementJSON.has(FOUNDSET_SELECTOR))
-							{
-								StringBuilder sb = new StringBuilder();
-								String fs = elementJSON.optString(FOUNDSET_SELECTOR);
-								sb.append("".equals(fs) ? FORM_FOUNDSET : fs);
-								if (elementJSON.has(FoundsetPropertyTypeConfig.DATAPROVIDERS))
-								{
-									sb.append('[');
-									JSONObject dataproviders = elementJSON.optJSONObject(FoundsetPropertyTypeConfig.DATAPROVIDERS);
-									if (dataproviders != null)
-									{
-										Iterator< ? > dpKeysIte = dataproviders.keys();
-										while (dpKeysIte.hasNext())
-										{
-											String key = dpKeysIte.next().toString();
-											sb.append(key).append(':').append(dataproviders.getString(key));
-											if (dpKeysIte.hasNext()) sb.append(',');
-										}
-									}
-									sb.append(']');
-								}
-
-								return sb.toString();
-							}
-						}
-						catch (JSONException ex)
-						{
-							ServoyLog.logError(ex);
-						}
-					}
-					return "";
-				}
-			};
+			labelProvider = FoundsetPropertyEditor.getFoundsetLabelProvider(persistContext.getContext(), designToChooserConverter);
 		}
 
 		return labelProvider;
@@ -173,12 +138,18 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 				public IPropertySource getPropertySource()
 				{
 					FoundsetPropertySource foundsetPropertySource = new FoundsetPropertySource(this, flattenedSolution, persistContext, config.dataproviders,
-						config.hasDynamicDataproviders);
+						config.hasDynamicDataproviders, formTable);
 					foundsetPropertySource.setReadonly(FoundsetPropertyController.this.isReadOnly());
 					return foundsetPropertySource;
 				}
 			};
 		}
+	}
+
+	@Override
+	public CellEditor createPropertyEditor(Composite parent)
+	{
+		return new FoundsetPropertyEditor(parent, persistContext, formTable, null /* foreignTable */, true, false, isReadOnly(), designToChooserConverter);
 	}
 
 	static class FoundsetPropertySource extends ComplexPropertySource<JSONObject>
@@ -188,13 +159,12 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 		private final String[] dataproviders;
 		private final boolean hasDynamicDataproviders;
 
-		private RelationPropertyController relationPropertyController;
-		private Table table;
-
 		private final ComplexProperty<JSONObject> complexProperty;
+		private final Table formTable;
+		private final boolean isSeparateDatasource;
 
 		public FoundsetPropertySource(ComplexProperty<JSONObject> complexProperty, FlattenedSolution flattenedSolution, PersistContext persistContext,
-			String[] dataproviders, boolean hasDynamicDataproviders)
+			String[] dataproviders, boolean hasDynamicDataproviders, Table formTable)
 		{
 			super(complexProperty);
 			this.complexProperty = complexProperty;
@@ -202,15 +172,8 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 			this.persistContext = persistContext;
 			this.dataproviders = dataproviders;
 			this.hasDynamicDataproviders = hasDynamicDataproviders;
-
-			try
-			{
-				table = flattenedSolution.getFlattenedForm(persistContext.getPersist()).getTable();
-			}
-			catch (RepositoryException ex)
-			{
-				ServoyLog.logError(ex);
-			}
+			this.formTable = formTable;
+			this.isSeparateDatasource = (complexProperty != null && complexProperty.getValue().has(FoundsetPropertyType.LOAD_ALL_RECORDS_FOR_SEPARATE));
 		}
 
 		@Override
@@ -218,20 +181,8 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 		{
 			ArrayList<IPropertyDescriptor> propertyDescriptors = new ArrayList<IPropertyDescriptor>();
 
-			propertyDescriptors.add(new CheckboxPropertyDescriptor(USE_FORM_FOUNDSET, USE_FORM_FOUNDSET));
 
-			relationPropertyController = new RelationPropertyController(FOUNDSET_RELATION, FOUNDSET_RELATION, persistContext, table, null /* foreignTable */,
-				true, false);
-			relationPropertyController.setLabelProvider(new SolutionContextDelegateLabelProvider(RelationLabelProvider.INSTANCE_ALL_NO_IMAGE,
-				persistContext.getContext())
-			{
-				@Override
-				public String getText(Object value)
-				{
-					return "".equals(value) ? FORM_FOUNDSET : super.getText(value);
-				}
-			});
-			propertyDescriptors.add(relationPropertyController);
+			if (isSeparateDatasource) propertyDescriptors.add(new CheckboxPropertyDescriptor(LOAD_ALL_RECORDS_INITIALLY, LOAD_ALL_RECORDS_INITIALLY));
 
 			if (dataproviders != null)
 			{
@@ -263,8 +214,11 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 		IPropertyDescriptor createDataproviderPropertyDescriptor(Object id, String displayName)
 		{
 			JSONObject v = getEditableValue();
-			Relation[] relations = flattenedSolution.getRelationSequence(v.optString(FOUNDSET_SELECTOR));
+			String foundsetSelector = v.optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
+			Relation[] relations = flattenedSolution.getRelationSequence(foundsetSelector);
 			final DataProviderOptions options;
+			Table baseTable = formTable;
+
 			if (relations != null)
 			{
 				options = new DataProviderTreeViewer.DataProviderOptions(true, false, false, true /* related calcs */, false, false, false, false,
@@ -272,17 +226,29 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 			}
 			else
 			{
-				options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, table != null, true, true, table != null,
-					table != null, INCLUDE_RELATIONS.NESTED, true, true, null);
+				if (!"".equals(foundsetSelector))
+				{
+					// must be a separate/random dataSource then
+					baseTable = (Table)DataSourceUtils.getTable(foundsetSelector, flattenedSolution.getSolution(), ServoyModel.getServerManager());
+					if (baseTable == null)
+					{
+						ServoyLog.logInfo("Cannot find a table with datasource " + foundsetSelector +
+							" for a foundset typed property. Using form table in dataprovider chooser.");
+						baseTable = formTable;
+					}
+				}
+				options = new DataProviderTreeViewer.DataProviderOptions(true, baseTable != null, baseTable != null, baseTable != null, true, true,
+					baseTable != null, baseTable != null, INCLUDE_RELATIONS.NESTED, true, true, null); // not sure all these params are ok - just used what was already used for form foundset
 			}
 
 
-			final DataProviderConverter converter = new DataProviderConverter(flattenedSolution, persistContext.getPersist(), table);
-			DataProviderLabelProvider showPrefix = new DataProviderLabelProvider(false);
-			showPrefix.setConverter(converter);
+			final DataProviderConverter converter = new DataProviderConverter(flattenedSolution, persistContext.getPersist(), baseTable);
+//			DataProviderLabelProvider showPrefix = new DataProviderLabelProvider(false);
+//			showPrefix.setConverter(converter);
 			DataProviderLabelProvider hidePrefix = new DataProviderLabelProvider(true);
 			hidePrefix.setConverter(converter);
 
+			final Table baseTableFinal = baseTable;
 			final ILabelProvider labelProviderHidePrefix = new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(hidePrefix,
 				persistContext.getContext()));
 			PropertyController<String, String> propertyController = new PropertyController<String, String>(id, displayName, null, labelProviderHidePrefix,
@@ -291,7 +257,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 					public CellEditor createPropertyEditor(Composite parent)
 					{
 						return new DataProviderCellEditor(parent, labelProviderHidePrefix, new DataProviderValueEditor(converter),
-							flattenedSolution.getFlattenedForm(persistContext.getPersist()), flattenedSolution, readOnly, options, converter, null);
+							flattenedSolution.getFlattenedForm(persistContext.getPersist()), flattenedSolution, readOnly, options, converter, baseTableFinal);
 					}
 				});
 			propertyController.setSupportsReadonly(true);
@@ -303,17 +269,9 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 		{
 			JSONObject v = getEditableValue();
 
-			if (USE_FORM_FOUNDSET.equals(id))
+			if (LOAD_ALL_RECORDS_INITIALLY.equals(id))
 			{
-				return v == null ? Boolean.FALSE : Boolean.valueOf("".equals(v.optString(FOUNDSET_SELECTOR)));
-			}
-			else if (FOUNDSET_RELATION.equals(id))
-			{
-				if (v != null)
-				{
-					String foundsetSelector = v.optString(FOUNDSET_SELECTOR);
-					return "".equals(foundsetSelector) ? null : relationPropertyController.getConverter().convertProperty(FOUNDSET_SELECTOR, foundsetSelector);
-				}
+				return v == null ? Boolean.FALSE : Boolean.valueOf(v.optBoolean(FoundsetPropertyType.LOAD_ALL_RECORDS_FOR_SEPARATE, false));
 			}
 			else if (FOUNDSET_DP_COUNT.equals(id))
 			{
@@ -326,7 +284,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 					JSONObject dataprovidersValues = v.optJSONObject(FoundsetPropertyTypeConfig.DATAPROVIDERS);
 					if (dataprovidersValues != null && dataprovidersValues.has(id.toString()))
 					{
-						String foundsetSelector = v.optString(FOUNDSET_SELECTOR);
+						String foundsetSelector = v.optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
 						String dp = dataprovidersValues.optString(id.toString());
 						if (dp != null && foundsetSelector.length() > 0)
 						{
@@ -351,29 +309,9 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 			}
 			try
 			{
-				if (USE_FORM_FOUNDSET.equals(id))
+				if (LOAD_ALL_RECORDS_INITIALLY.equals(id))
 				{
-					if (((Boolean)v).booleanValue())
-					{
-						editableValue.put(FOUNDSET_SELECTOR, "");
-					}
-					else
-					{
-						editableValue = null;
-						complexProperty.setValue(editableValue);
-					}
-				}
-				else if (FOUNDSET_RELATION.equals(id))
-				{
-					String foundsetSelector = relationPropertyController.getConverter().convertValue(FOUNDSET_SELECTOR, v);
-					if (foundsetSelector == null)
-					{
-						editableValue.remove(FOUNDSET_SELECTOR);
-					}
-					else
-					{
-						editableValue.put(FOUNDSET_SELECTOR, foundsetSelector);
-					}
+					editableValue.put(FoundsetPropertyType.LOAD_ALL_RECORDS_FOR_SEPARATE, ((Boolean)v).booleanValue());
 				}
 				else if (FOUNDSET_DP_COUNT.equals(id))
 				{
@@ -421,7 +359,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 					if (v != null)
 					{
 						String dpValue = v.toString();
-						String foundsetSelector = editableValue.optString(FOUNDSET_SELECTOR);
+						String foundsetSelector = editableValue.optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
 						if (dpValue.startsWith(foundsetSelector + "."))
 						{
 							dpValue = dpValue.substring(foundsetSelector.length() + 1);

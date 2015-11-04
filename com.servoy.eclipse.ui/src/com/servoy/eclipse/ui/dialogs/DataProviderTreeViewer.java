@@ -82,7 +82,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * JFace-like viewer for selecting a data provider from a tree. A filter is built-in.
- * 
+ *
  * @author rgansevles
  */
 
@@ -98,8 +98,8 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 	public static final String METHODS = "methods";
 	public static final Object[] EMPTY_ARRAY = new Object[0];
 
-	public DataProviderTreeViewer(Composite parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, DataProviderOptions input,
-		boolean showFilter, boolean showFilterMenu, int filterMode, int treeStyle)
+	public DataProviderTreeViewer(Composite parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, Object input, boolean showFilter,
+		boolean showFilterMenu, int filterMode, int treeStyle)
 	{
 		super(parent, showFilter, showFilterMenu,
 		// contentProvider
@@ -216,11 +216,6 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			this.persistContext = persistContext;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see com.servoy.eclipse.ui.dialogs.ISearchKeyAdapter#getSearchKey(java.lang.Object)
-		 */
 		public Object getSearchKey(Object element)
 		{
 			if (element instanceof DataProviderNodeWrapper)

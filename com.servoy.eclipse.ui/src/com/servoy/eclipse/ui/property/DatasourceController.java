@@ -36,13 +36,11 @@ import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
-import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Table;
-import com.servoy.j2db.util.DataSourceUtils;
 
 /**
  * Property controller for dataSources
- * 
+ *
  * @author rgansevles
  */
 
@@ -63,24 +61,7 @@ public class DatasourceController extends PropertyController<String, TableWrappe
 	@Override
 	protected IPropertyConverter<String, TableWrapper> createConverter()
 	{
-		return new IPropertyConverter<String, TableWrapper>()
-		{
-			public String convertValue(Object id, TableWrapper tw)
-			{
-				return tw == null ? null : DataSourceUtils.createDBTableDataSource(tw.getServerName(), tw.getTableName());
-			}
-
-			public TableWrapper convertProperty(Object id, String dataSource)
-			{
-				String[] servernameTablename = DataSourceUtils.getDBServernameTablename(dataSource);
-				if (servernameTablename == null)
-				{
-					return null;
-				}
-				return new TableWrapper(servernameTablename[0], servernameTablename[1], EditorUtil.isViewTypeTable(servernameTablename[0],
-					servernameTablename[1]));
-			}
-		};
+		return new DatasourcePropertyConverter();
 	}
 
 	@Override

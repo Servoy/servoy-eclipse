@@ -30,14 +30,13 @@ import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 
 
 /**
  * Property controller for selecting relations in Properties view.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -71,38 +70,44 @@ public class RelationPropertyController extends PropertyController<String, Objec
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext());
-		final RelationContentProvider.RelationListOptions relationListOptions = new RelationContentProvider.RelationListOptions(primaryTable, foreignTable,
-			incudeNone, includeNested);
-		ListSelectCellEditor editor = new ListSelectCellEditor(parent, "Select relation", new RelationContentProvider(flattenedEditingSolution,
-			persistContext.getContext()), new SolutionContextDelegateLabelProvider(RelationLabelProvider.INSTANCE_LAST_NAME_ONLY, persistContext.getContext()), RelationValueEditor.INSTANCE, isReadOnly(), relationListOptions, SWT.NONE, null,
-			"selectRelationDialog");
-		editor.setShowFilterMenu(true);
+		return new RelationPropertyEditor(parent, persistContext, primaryTable, foreignTable, incudeNone, includeNested, isReadOnly());
+	}
 
-		editor.setSelectionFilter(new IFilter()
+	public static class RelationPropertyEditor extends ListSelectCellEditor
+	{
+		public RelationPropertyEditor(Composite parent, PersistContext persistContext, Table primaryTable, final Table foreignTable, boolean incudeNone,
+			boolean includeNested, boolean isReadOnly)
 		{
-			public boolean select(Object toTest)
+			super(parent, "Select relation", new RelationContentProvider(ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(),
+				persistContext.getContext()), persistContext.getContext()), new SolutionContextDelegateLabelProvider(
+				RelationLabelProvider.INSTANCE_LAST_NAME_ONLY, persistContext.getContext()), RelationValueEditor.INSTANCE, isReadOnly,
+				new RelationContentProvider.RelationListOptions(primaryTable, foreignTable, incudeNone, includeNested), SWT.NONE, null, "selectRelationDialog");
+			setShowFilterMenu(true);
+
+			setSelectionFilter(new IFilter()
 			{
-				if (toTest == RelationContentProvider.NONE)
+				public boolean select(Object toTest)
 				{
-					return true;
-				}
-				if (toTest instanceof RelationsWrapper && ((RelationsWrapper)toTest).relations != null && ((RelationsWrapper)toTest).relations.length > 0)
-				{
-					try
+					if (toTest == RelationContentProvider.NONE)
 					{
-						return relationListOptions.foreignTable == null ||
-							relationListOptions.foreignTable.equals(((RelationsWrapper)toTest).relations[((RelationsWrapper)toTest).relations.length - 1].getForeignTable());
+						return true;
 					}
-					catch (RepositoryException e)
+					if (toTest instanceof RelationsWrapper && ((RelationsWrapper)toTest).relations != null && ((RelationsWrapper)toTest).relations.length > 0)
 					{
-						ServoyLog.logError(e);
+						try
+						{
+							return foreignTable == null ||
+								foreignTable.equals(((RelationsWrapper)toTest).relations[((RelationsWrapper)toTest).relations.length - 1].getForeignTable());
+						}
+						catch (RepositoryException e)
+						{
+							ServoyLog.logError(e);
+						}
 					}
+					return false;
 				}
-				return false;
-			}
-		});
-		return editor;
+			});
+		}
 	}
 
 	public static class RelationValueEditor implements IValueEditor<Object>
