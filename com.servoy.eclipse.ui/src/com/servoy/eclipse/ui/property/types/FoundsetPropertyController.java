@@ -149,7 +149,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		return new FoundsetPropertyEditor(parent, persistContext, formTable, null /* foreignTable */, true, false, isReadOnly(), designToChooserConverter);
+		return new FoundsetPropertyEditor(parent, persistContext, formTable, null /* foreignTable */, isReadOnly(), designToChooserConverter);
 	}
 
 	static class FoundsetPropertySource extends ComplexPropertySource<JSONObject>
