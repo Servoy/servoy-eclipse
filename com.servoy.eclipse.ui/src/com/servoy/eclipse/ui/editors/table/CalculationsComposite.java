@@ -65,11 +65,11 @@ import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 
@@ -103,7 +103,7 @@ public class CalculationsComposite extends Composite
 
 		myScrolledComposite.setContent(container);
 
-		final Table t = te.getTable();
+		final ITable t = te.getTable();
 		treeContainer = new Composite(container, SWT.NONE);
 
 		treeViewer = new TreeViewer(treeContainer, SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
@@ -189,8 +189,8 @@ public class CalculationsComposite extends Composite
 				if (selection != null && selection.length > 0 && selection[0].getData() instanceof ScriptCalculation)
 				{
 					ScriptCalculation calculation = (ScriptCalculation)selection[0].getData();
-					if (MessageDialog.openConfirm(getShell(), "Delete calculation", "Are you sure you want to delete calculation '" + calculation.getName() +
-						"'?"))
+					if (MessageDialog.openConfirm(getShell(), "Delete calculation",
+						"Are you sure you want to delete calculation '" + calculation.getName() + "'?"))
 					{
 						try
 						{
@@ -254,13 +254,11 @@ public class CalculationsComposite extends Composite
 			}
 		});
 		final GroupLayout groupLayout = new GroupLayout(container);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			GroupLayout.TRAILING,
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.LEADING, treeContainer, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE).add(
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
+			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.LEADING,
+				treeContainer, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE).add(
 					groupLayout.createSequentialGroup().add(addButton).addPreferredGap(LayoutStyle.RELATED).add(removeButton))).addContainerGap()));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			GroupLayout.TRAILING,
+		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
 			groupLayout.createSequentialGroup().addContainerGap().add(treeContainer, GroupLayout.PREFERRED_SIZE, 323, Short.MAX_VALUE).addPreferredGap(
 				LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(removeButton).add(addButton)).addContainerGap()));
 		container.setLayout(groupLayout);
@@ -373,7 +371,7 @@ public class CalculationsComposite extends Composite
 		if (treeViewer != null) treeViewer.refresh();
 	}
 
-	private void createTableColumns(Table table, final TableEditor te)
+	private void createTableColumns(ITable table, final TableEditor te)
 	{
 		TreeColumn nameColumn = new TreeColumn(treeViewer.getTree(), SWT.LEFT, CI_NAME);
 		nameColumn.setText("Name");
@@ -439,11 +437,11 @@ public class CalculationsComposite extends Composite
 		layout.setColumnData(codeColumn, new ColumnWeightData(10, 50, true));
 		layout.setColumnData(storedColumn, new ColumnPixelData(50, true));
 
-		treeViewer.setLabelProvider(new TextCutoffLabelProvider.TableCutoffLabelProvider(new CalculationLabelProvider(table,
-			ColorResource.INSTANCE.getColor(new RGB(255, 127, 0))), 100));
+		treeViewer.setLabelProvider(new TextCutoffLabelProvider.TableCutoffLabelProvider(
+			new CalculationLabelProvider(table, ColorResource.INSTANCE.getColor(new RGB(255, 127, 0))), 100));
 	}
 
-	protected void initDataBindings(Table t)
+	protected void initDataBindings(ITable t)
 	{
 		TableScriptsContentProvider columnViewContentProvider = new TableScriptsContentProvider(t, IRepository.SCRIPTCALCULATIONS);
 		treeViewer.setContentProvider(columnViewContentProvider);

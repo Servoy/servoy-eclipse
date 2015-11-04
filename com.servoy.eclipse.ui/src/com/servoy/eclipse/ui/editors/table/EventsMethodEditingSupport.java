@@ -37,17 +37,17 @@ import com.servoy.eclipse.ui.property.MethodPropertyController.MethodValueEditor
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 
 public class EventsMethodEditingSupport extends EditingSupport
 {
-	private final Table table;
+	private final ITable table;
 	private final IObservable observable;
 
-	public EventsMethodEditingSupport(TreeViewer viewer, Table table)
+	public EventsMethodEditingSupport(TreeViewer viewer, ITable table)
 	{
 		super(viewer);
 		this.table = table;
@@ -145,10 +145,11 @@ public class EventsMethodEditingSupport extends EditingSupport
 				return null;
 			}
 			PersistContext persistContext = PersistContext.create(tableNode);
-			editor = new MethodCellEditor(((TreeViewer)getViewer()).getTree(), new AccesCheckingContextDelegateLabelProvider(
-				new SolutionContextDelegateLabelProvider(new MethodLabelProvider(persistContext, false, true), tableNode)), new MethodValueEditor(
-				persistContext), persistContext, node.getType().getProperty().getPropertyName(), false, new MethodListOptions(false, true, false, true, true,
-				table));
+			editor = new MethodCellEditor(((TreeViewer)getViewer()).getTree(),
+				new AccesCheckingContextDelegateLabelProvider(
+					new SolutionContextDelegateLabelProvider(new MethodLabelProvider(persistContext, false, true), tableNode)),
+				new MethodValueEditor(persistContext), persistContext, node.getType().getProperty().getPropertyName(), false,
+				new MethodListOptions(false, true, false, true, true, table));
 		}
 		return editor;
 	}

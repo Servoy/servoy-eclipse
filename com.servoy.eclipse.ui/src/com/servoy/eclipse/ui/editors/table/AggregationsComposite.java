@@ -52,14 +52,13 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.DuplicatePersistActi
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.MoveTableNodeChildAction;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AggregateVariable;
-import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.query.QueryAggregate;
 import com.servoy.j2db.util.Debug;
@@ -79,7 +78,7 @@ public class AggregationsComposite extends Composite
 
 	/**
 	 * Create the composite
-	 * 
+	 *
 	 * @param parent
 	 * @param style
 	 */
@@ -96,7 +95,7 @@ public class AggregationsComposite extends Composite
 
 		myScrolledComposite.setContent(container);
 
-		final Table t = te.getTable();
+		final ITable t = te.getTable();
 		treeContainer = new Composite(container, SWT.NONE);
 
 		treeViewer = new TreeViewer(treeContainer, SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
@@ -181,8 +180,8 @@ public class AggregationsComposite extends Composite
 				if (selection != null && selection.length > 0 && selection[0].getData() instanceof AggregateVariable)
 				{
 					AggregateVariable aggregation = (AggregateVariable)selection[0].getData();
-					if (MessageDialog.openConfirm(getShell(), "Delete aggregation", "Are you sure you want to delete aggregation '" + aggregation.getName() +
-						"'?"))
+					if (MessageDialog.openConfirm(getShell(), "Delete aggregation",
+						"Are you sure you want to delete aggregation '" + aggregation.getName() + "'?"))
 					{
 						try
 						{
@@ -240,13 +239,11 @@ public class AggregationsComposite extends Composite
 			}
 		});
 		final GroupLayout groupLayout = new GroupLayout(container);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			GroupLayout.TRAILING,
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.LEADING, treeContainer, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE).add(
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
+			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.LEADING,
+				treeContainer, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE).add(
 					groupLayout.createSequentialGroup().add(addButton).addPreferredGap(LayoutStyle.RELATED).add(removeButton))).addContainerGap()));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			GroupLayout.TRAILING,
+		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
 			groupLayout.createSequentialGroup().addContainerGap().add(treeContainer, GroupLayout.PREFERRED_SIZE, 323, Short.MAX_VALUE).addPreferredGap(
 				LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(removeButton).add(addButton)).addContainerGap()));
 
@@ -268,10 +265,10 @@ public class AggregationsComposite extends Composite
 			String orgName = "type_here";
 			String newName = orgName;
 			int type = QueryAggregate.ALL_DEFINED_AGGREGATES[0];
-			Iterator<Column> it = te.getTable().getColumns().iterator();
+			Iterator<IColumn> it = te.getTable().getIColumns().iterator();
 			if (it.hasNext()) //we need to make sure there is one column
 			{
-				Column column = it.next();
+				IColumn column = it.next();
 				try
 				{
 					ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
@@ -338,7 +335,7 @@ public class AggregationsComposite extends Composite
 	public static final int CI_TYPE = 1;
 	static final int CI_COLUMN = 2;
 
-	private void createTreeColumns(Table table, final TableEditor te)
+	private void createTreeColumns(ITable table, final TableEditor te)
 	{
 		TreeColumn nameColumn = new TreeColumn(treeViewer.getTree(), SWT.LEFT, CI_NAME);
 		nameColumn.setText("Name");
@@ -392,7 +389,7 @@ public class AggregationsComposite extends Composite
 
 	}
 
-	protected void initDataBindings(Table t)
+	protected void initDataBindings(ITable t)
 	{
 		AggregationContentProvider columnViewContentProvider = new AggregationContentProvider(t);
 		treeViewer.setContentProvider(columnViewContentProvider);

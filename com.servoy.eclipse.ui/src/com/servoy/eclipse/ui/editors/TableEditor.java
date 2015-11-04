@@ -72,6 +72,7 @@ import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
@@ -89,7 +90,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	private IServerInternal server;
 
-	private Table table;
+	private ITable table;
 
 	private ColumnComposite columnComposite;
 
@@ -265,7 +266,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			{
 				if (server != null)
 				{
-					Iterator<Column> it = getTable().getColumns().iterator();
+					Iterator<IColumn> it = getTable().getIColumns().iterator();
 					while (it.hasNext())
 					{
 						it.next().removeColumnInfo();
@@ -376,7 +377,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private void disposeDynamicPages()
 	{
@@ -474,7 +475,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 						String columnName = (String)marker.getAttribute("columnName");
 						if (columnName != null)
 						{
-							Column column = getTable().getColumn(columnName);
+							IColumn column = getTable().getColumn(columnName);
 							if (column != null && columnComposite != null)
 							{
 								columnComposite.selectColumn(column);
@@ -505,7 +506,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		return super.getAdapter(adapter);
 	}
 
-	public Table getTable()
+	public ITable getTable()
 	{
 		return table;
 	}
@@ -517,7 +518,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			if (columnComposite != null && column instanceof Column)
 			{
 				setActivePage(getPageIndex(columnComposite));
-				columnComposite.selectColumn((Column)column);
+				columnComposite.selectColumn(column);
 			}
 			else if (aggregationsComposite != null && column instanceof AggregateVariable)
 			{
@@ -738,7 +739,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 					table.setHiddenInDeveloperBecauseNoPk(false);
 					server.setTableMarkedAsHiddenInDeveloper(table.getName(), false);
 				}
-				for (Column column : table.getColumns())
+				for (IColumn column : table.getIColumns())
 				{
 					if (column.getColumnInfo() != null)
 					{
@@ -802,7 +803,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				if (flushTable)
 				{
 					flushTable = false;
-					Activator.getDefault().getDebugClientHandler().refreshDebugClients(table);
+					Activator.getDefault().getDebugClientHandler().refreshDebugClients((Collection<IPersist>)table);
 				}
 				columnComposite.refreshSelection();
 			}
@@ -819,7 +820,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	private void validateColumnSettings() throws Exception
 	{
-		for (Column col : table.getColumns())
+		for (IColumn col : table.getIColumns())
 		{
 			int colType = Column.mapToDefaultType(col.getConfiguredColumnType().getSqlType());
 			// check UUID generator valid types
@@ -832,21 +833,21 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				}
 				if (colType != IColumnTypes.TEXT && colType != IColumnTypes.MEDIA)
 				{
-					throw new Exception("Column '" + col.getName() +
-						"' has sequence type as UUID generator and is only supported for TEXT and MEDIA column types.");
+					throw new Exception(
+						"Column '" + col.getName() + "' has sequence type as UUID generator and is only supported for TEXT and MEDIA column types.");
 				}
 				else if (col.getLength() > 0 &&
 					((colType == IColumnTypes.MEDIA && col.getLength() < 16) || (colType == IColumnTypes.TEXT && col.getLength() < 36)))
 				{
-					throw new Exception("Column '" + col.getName() +
-						"' with sequence type UUID generator has length to small (a minimum of 16 for MEDIA and 36 for TEXT).");
+					throw new Exception(
+						"Column '" + col.getName() + "' with sequence type UUID generator has length to small (a minimum of 16 for MEDIA and 36 for TEXT).");
 				}
 			}
 		}
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void refresh()
 	{

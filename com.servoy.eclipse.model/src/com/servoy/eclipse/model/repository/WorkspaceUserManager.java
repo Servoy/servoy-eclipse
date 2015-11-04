@@ -990,7 +990,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			User u = User.fromJSON(oldUsers.getJSONObject(i));
 			users.add(u);
 		}
-		Iterator<String> keys /* group names */= oldUsersForGroups.keys();
+		Iterator<String> keys /* group names */ = oldUsersForGroups.keys();
 		while (keys.hasNext())
 		{
 			String groupName = keys.next();
@@ -1047,7 +1047,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				if (getUserName(clientId, u.userUid) != null)
 				{
 					// duplicate UUID for users
-					throw new SecurityReadException(SecurityReadException.DUPLICATE_USER_UID, "Duplicate UUID for users security file: " + u.userUid, u.userUid);
+					throw new SecurityReadException(SecurityReadException.DUPLICATE_USER_UID, "Duplicate UUID for users security file: " + u.userUid,
+						u.userUid);
 				}
 				else if (getUserUID(clientId, u.name) != null)
 				{
@@ -1066,7 +1067,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 					u.toJSON().toString(true));
 			}
 		}
-		Iterator<String> keys /* group names */= usersForGroups.keySet().iterator();
+		Iterator<String> keys /* group names */ = usersForGroups.keySet().iterator();
 		while (keys.hasNext())
 		{
 			String groupName = keys.next();
@@ -1077,8 +1078,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				mustWriteBack = true;
 				if (!createGroupInternal(clientId, groupName))
 				{
-					throw new SecurityReadException(SecurityReadException.INVALID_GROUP_NAME_IN_USER_LIST, "Invalid group name '" + groupName +
-						"' is listing users in security file.", groupName);
+					throw new SecurityReadException(SecurityReadException.INVALID_GROUP_NAME_IN_USER_LIST,
+						"Invalid group name '" + groupName + "' is listing users in security file.", groupName);
 				}
 			}
 
@@ -1089,8 +1090,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 					if (userUID != null && userUID.trim().length() != 0)
 					{
 						// some user mentioned here does not exist...
-						throw new SecurityReadException(SecurityReadException.MISSING_USER_REFERENCED_IN_GROUP, "User with uid '" + userUID +
-							"' referenced in group '" + groupName + "' does not exist.", userUID);
+						throw new SecurityReadException(SecurityReadException.MISSING_USER_REFERENCED_IN_GROUP,
+							"User with uid '" + userUID + "' referenced in group '" + groupName + "' does not exist.", userUID);
 					}
 					else
 					{
@@ -1222,8 +1223,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 			}
 			else
 			{
-				throw new SecurityReadException(SecurityReadException.GROUP_NOT_DECLARED, "Group '" + groupName + "' not defined, but referenced in table '" +
-					serverName + "->" + tableName + "' security file.", groupName);
+				throw new SecurityReadException(SecurityReadException.GROUP_NOT_DECLARED,
+					"Group '" + groupName + "' not defined, but referenced in table '" + serverName + "->" + tableName + "' security file.", groupName);
 			}
 		}
 
@@ -1330,22 +1331,24 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 						if (replaced)
 						{
 							// this cannot happen with current structure of JSON file and the in-mem structures that are read (having more entries with same key in a JSON obj)
-							throw new SecurityReadException(SecurityReadException.DUPLICATE_ELEMENT_PERMISSION, "Element with UUID " + element.element_uid +
-								" on form " + form.getName() + " is mentioned multiple times within the same group " + groupName +
-								"; it can only have 1 access mask specified...", new String[] { element.element_uid, groupName });
+							throw new SecurityReadException(SecurityReadException.DUPLICATE_ELEMENT_PERMISSION,
+								"Element with UUID " + element.element_uid + " on form " + form.getName() +
+									" is mentioned multiple times within the same group " + groupName + "; it can only have 1 access mask specified...",
+								new String[] { element.element_uid, groupName });
 						}
 					}
 					else
 					{
-						throw new SecurityReadException(SecurityReadException.MISSING_ELEMENT, "Element with UUID " + element.element_uid + " on form " +
-							form.getName() + " does not exist, but has an access mask specified...", element.element_uid);
+						throw new SecurityReadException(SecurityReadException.MISSING_ELEMENT,
+							"Element with UUID " + element.element_uid + " on form " + form.getName() + " does not exist, but has an access mask specified...",
+							element.element_uid);
 					}
 				}
 			}
 			else
 			{
-				throw new SecurityReadException(SecurityReadException.GROUP_NOT_DECLARED, "Group '" + groupName + "' not defined, but referenced in form '" +
-					form.getName() + "' security file.", groupName);
+				throw new SecurityReadException(SecurityReadException.GROUP_NOT_DECLARED,
+					"Group '" + groupName + "' not defined, but referenced in form '" + form.getName() + "' security file.", groupName);
 			}
 		}
 
@@ -1388,7 +1391,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		return null;
 	}
 
-	public List<SecurityInfo> getSecurityInfos(String group, Table t)
+	public List<SecurityInfo> getSecurityInfos(String group, ITable t)
 	{
 		GroupSecurityInfo groupSecurityInfo = getGroupSecurityInfo(group);
 		if (groupSecurityInfo != null)
@@ -1576,8 +1579,8 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 				else
 				{
 					// table column
-					entry.setValue(Integer.valueOf(entry.getValue().intValue() |
-						(IRepository.READ + IRepository.INSERT + IRepository.UPDATE + IRepository.DELETE))); // default no TRACKING!
+					entry.setValue(
+						Integer.valueOf(entry.getValue().intValue() | (IRepository.READ + IRepository.INSERT + IRepository.UPDATE + IRepository.DELETE))); // default no TRACKING!
 				}
 			}
 		}

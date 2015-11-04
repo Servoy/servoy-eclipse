@@ -74,6 +74,7 @@ import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
@@ -99,7 +100,7 @@ public class ColumnComposite extends Composite
 
 	/**
 	 * Create the composite
-	 * 
+	 *
 	 * @param parent
 	 * @param style
 	 */
@@ -116,7 +117,7 @@ public class ColumnComposite extends Composite
 
 		myScrolledComposite.setContent(container);
 
-		final Table t = te.getTable();
+		final Table t = (Table)te.getTable();
 		tableContainer = new Composite(container, SWT.NONE);
 		tableViewer = new TableViewer(tableContainer, SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		tableViewer.getTable().setLinesVisible(true);
@@ -221,10 +222,10 @@ public class ColumnComposite extends Composite
 					{
 						ArrayList<Column> columns = new ArrayList<Column>(t.getColumns());
 						int index = columns.indexOf(column);
-						t.removeColumn((Column)column);
+						t.removeColumn((IColumn)column);
 						WritableList columnsList = new WritableList(new ArrayList<Column>(t.getColumns()), Column.class);
-						if (columnsList.size() > 0) tableViewer.setSelection(
-							new StructuredSelection(columnsList.get(index >= columnsList.size() ? index - 1 : index)), true);
+						if (columnsList.size() > 0)
+							tableViewer.setSelection(new StructuredSelection(columnsList.get(index >= columnsList.size() ? index - 1 : index)), true);
 					}
 				}
 			}
@@ -279,7 +280,7 @@ public class ColumnComposite extends Composite
 			{
 				String orgName = "type_here";
 				String newName = orgName;
-				Column c = t.getColumn(newName);
+				IColumn c = t.getColumn(newName);
 				boolean showWarning = false;
 				int i = 1;
 				while (c != null)
@@ -317,31 +318,29 @@ public class ColumnComposite extends Composite
 				showDataProviderColumn();
 			}
 		});
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582, Short.MAX_VALUE).add(
-					GroupLayout.LEADING, tabFolder, GroupLayout.PREFERRED_SIZE, 582, Short.MAX_VALUE).add(
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().addContainerGap().add(
+			groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582,
+				Short.MAX_VALUE).add(GroupLayout.LEADING, tabFolder, GroupLayout.PREFERRED_SIZE, 582, Short.MAX_VALUE).add(
 					groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582,
 						Short.MAX_VALUE).add(addButton).add(
-						groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582,
-							Short.MAX_VALUE).add(displayDataProviderID))))));
+							groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582,
+								Short.MAX_VALUE).add(displayDataProviderID))))));
 
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			GroupLayout.TRAILING,
+		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
 			groupLayout.createSequentialGroup().addContainerGap().add(tableContainer, GroupLayout.PREFERRED_SIZE, 185, Short.MAX_VALUE).addPreferredGap(
 				LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(addButton).add(displayDataProviderID)).addPreferredGap(
-				LayoutStyle.RELATED).add(tabFolder, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap()));
+					LayoutStyle.RELATED).add(tabFolder, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap()));
 
-		tableLayout.setHorizontalGroup(tableLayout.createParallelGroup(GroupLayout.TRAILING).add(
-			tableLayout.createSequentialGroup().addContainerGap().add(
-				tableLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582, Short.MAX_VALUE).add(
-					addButton).add(
+		tableLayout.setHorizontalGroup(tableLayout.createParallelGroup(GroupLayout.TRAILING).add(tableLayout.createSequentialGroup().addContainerGap().add(
+			tableLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582, Short.MAX_VALUE).add(
+				addButton).add(
 					tableLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 582,
 						Short.MAX_VALUE).add(displayDataProviderID))).addContainerGap()));
-		tableLayout.setVerticalGroup(tableLayout.createParallelGroup(GroupLayout.LEADING).add(
-			GroupLayout.TRAILING,
-			tableLayout.createSequentialGroup().addContainerGap().add(tableContainer, GroupLayout.PREFERRED_SIZE, 185, Short.MAX_VALUE).addPreferredGap(
-				LayoutStyle.RELATED).add(tableLayout.createParallelGroup(GroupLayout.BASELINE).add(addButton).add(displayDataProviderID)).addContainerGap()));
+		tableLayout.setVerticalGroup(
+			tableLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
+				tableLayout.createSequentialGroup().addContainerGap().add(tableContainer, GroupLayout.PREFERRED_SIZE, 185, Short.MAX_VALUE).addPreferredGap(
+					LayoutStyle.RELATED).add(
+						tableLayout.createParallelGroup(GroupLayout.BASELINE).add(addButton).add(displayDataProviderID)).addContainerGap()));
 		container.setLayout(tableLayout);
 		//
 
@@ -361,9 +360,9 @@ public class ColumnComposite extends Composite
 		}
 	}
 
-	public Column addColumn(Table t, String newName, int type, int length) throws RepositoryException
+	public IColumn addColumn(ITable t, String newName, int type, int length) throws RepositoryException
 	{
-		return t.createNewColumn(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), newName, type, length);
+		return t.createNewIColumn(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), newName, type, length);
 	}
 
 	private boolean hasDataProviderSet(Table table)
@@ -406,14 +405,14 @@ public class ColumnComposite extends Composite
 		tableViewer.setSelection(tableViewer.getSelection(), true);
 	}
 
-	public void refreshViewer(Table table)
+	public void refreshViewer(ITable table)
 	{
-		WritableList columnsList = new WritableList(new ArrayList<Column>(table.getColumns()), Column.class);
+		WritableList columnsList = new WritableList(new ArrayList<IColumn>(table.getIColumns()), IColumn.class);
 		tableViewer.setInput(columnsList);
 		tableViewer.refresh();
 	}
 
-	public void selectColumn(Column column)
+	public void selectColumn(IColumn column)
 	{
 		tableViewer.setSelection(new StructuredSelection(column));
 	}
@@ -507,9 +506,7 @@ public class ColumnComposite extends Composite
 		tableContainer.setLayout(getTableLayout());
 
 		tableViewer.setLabelProvider(new ColumnLabelProvider(ColorResource.INSTANCE.getColor(new RGB(255, 127, 0)), this));
-		tableViewer.setSorter(new ColumnsSorter(
-			tableViewer,
-			new TableColumn[] { nameColumn, typeColumn, lengthColumn, rowIdentColumn, allowNullColumn },
+		tableViewer.setSorter(new ColumnsSorter(tableViewer, new TableColumn[] { nameColumn, typeColumn, lengthColumn, rowIdentColumn, allowNullColumn },
 			new Comparator[] { NameComparator.INSTANCE, ColumnTypeComparator.INSTANCE, ColumnLengthComparator.INSTANCE, ColumnRowIdentComparator.INSTANCE, ColumnAllowNullComparator.INSTANCE }));
 
 	}

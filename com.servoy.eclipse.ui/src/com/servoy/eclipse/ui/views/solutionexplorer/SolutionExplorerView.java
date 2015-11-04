@@ -2773,6 +2773,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreePrimary.registerAction(UserNodeType.MEDIA, importMedia);
 		newActionInTreePrimary.registerAction(UserNodeType.MEDIA_FOLDER, importMedia);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVER, newTable);
+		newActionInTreePrimary.registerAction(UserNodeType.INMEMORY_DATASOURCE, newTable);
 		newActionInTreePrimary.registerAction(UserNodeType.FORMS, newForm);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.MODULES, newModule);

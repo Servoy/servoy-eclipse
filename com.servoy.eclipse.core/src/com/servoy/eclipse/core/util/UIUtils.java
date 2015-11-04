@@ -1059,8 +1059,8 @@ public class UIUtils
 	public static boolean showChangeResourceProjectDlg(Shell parentShell, ServoyProject sp)
 	{
 		// show resource project choice dialog
-		final ResourceProjectChoiceDialog dialog = new ResourceProjectChoiceDialog(parentShell, "Resources project for solution '" + sp.getProject().getName() +
-			"'", sp.getResourcesProject(), false);
+		final ResourceProjectChoiceDialog dialog = new ResourceProjectChoiceDialog(parentShell,
+			"Resources project for solution '" + sp.getProject().getName() + "'", sp.getResourcesProject(), false);
 
 		if (dialog.open() == Window.OK)
 		{

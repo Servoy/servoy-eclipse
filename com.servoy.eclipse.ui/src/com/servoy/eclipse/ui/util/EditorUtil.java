@@ -93,7 +93,6 @@ import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
-import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -220,10 +219,10 @@ public class EditorUtil
 				IWorkbenchPage activePage = getActivePage();
 				if (activePage != null)
 				{
-					return activePage.openEditor(
-						new PersistEditorInput(form.getName(), form.getSolution().getName(), form.getUUID()).setNew(newForm),
+					return activePage.openEditor(new PersistEditorInput(form.getName(), form.getSolution().getName(), form.getUUID()).setNew(newForm),
 						PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-							Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId(), activate);
+							Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId(),
+						activate);
 				}
 			}
 			catch (PartInitException ex)
@@ -259,10 +258,8 @@ public class EditorUtil
 			IWorkbenchPage activePage = getActivePage();
 			if (activePage != null)
 			{
-				return activePage.openEditor(
-					new TableEditorInput(serverName, tableName),
-					PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-						Platform.getContentTypeManager().getContentType(TableEditorInput.TABLE_RESOURCE_ID)).getId(), activate);
+				return activePage.openEditor(new TableEditorInput(serverName, tableName), PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+					Platform.getContentTypeManager().getContentType(TableEditorInput.TABLE_RESOURCE_ID)).getId(), activate);
 			}
 		}
 		catch (PartInitException ex)
@@ -285,10 +282,10 @@ public class EditorUtil
 			IWorkbenchPage activePage = getActivePage();
 			if (activePage != null)
 			{
-				return activePage.openEditor(
-					new PersistEditorInput(valueList.getName(), valueList.getRootObject().getName(), valueList.getUUID()),
+				return activePage.openEditor(new PersistEditorInput(valueList.getName(), valueList.getRootObject().getName(), valueList.getUUID()),
 					PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-						Platform.getContentTypeManager().getContentType(PersistEditorInput.VALUELIST_RESOURCE_ID)).getId(), activate);
+						Platform.getContentTypeManager().getContentType(PersistEditorInput.VALUELIST_RESOURCE_ID)).getId(),
+					activate);
 			}
 		}
 		catch (PartInitException ex)
@@ -321,8 +318,8 @@ public class EditorUtil
 					Platform.getContentTypeManager().getContentType(PersistEditorInput.MEDIA_RESOURCE_ID));
 				IEditorInput editorInput;
 
-				if (desc.getId().equals("com.servoy.eclipse.ui.editors.MediaViewer")) editorInput = new PersistEditorInput(media.getName(),
-					media.getRootObject().getName(), media.getUUID());
+				if (desc.getId().equals("com.servoy.eclipse.ui.editors.MediaViewer"))
+					editorInput = new PersistEditorInput(media.getName(), media.getRootObject().getName(), media.getUUID());
 				else editorInput = new FileEditorInput(file);
 				return page.openEditor(editorInput, desc.getId(), activate);
 			}
@@ -471,10 +468,10 @@ public class EditorUtil
 			IWorkbenchPage activePage = getActivePage();
 			if (activePage != null)
 			{
-				return activePage.openEditor(
-					new PersistEditorInput(relation.getName(), relation.getRootObject().getName(), relation.getUUID()),
+				return activePage.openEditor(new PersistEditorInput(relation.getName(), relation.getRootObject().getName(), relation.getUUID()),
 					PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-						Platform.getContentTypeManager().getContentType(PersistEditorInput.RELATION_RESOURCE_ID)).getId(), activate);
+						Platform.getContentTypeManager().getContentType(PersistEditorInput.RELATION_RESOURCE_ID)).getId(),
+					activate);
 			}
 		}
 		catch (PartInitException ex)
@@ -492,10 +489,9 @@ public class EditorUtil
 	public static IEditorPart openStyleEditor(Style style, boolean activate)
 	{
 		IWorkspace workspace = ServoyModel.getWorkspace();
-		IFile styleFile = workspace.getRoot().getFile(
-			new Path(StringResourceDeserializer.getStringResourceContentFilePath(
-				ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getProject().getName(), style.getName(),
-				IRepository.STYLES)));
+		IFile styleFile = workspace.getRoot().getFile(new Path(StringResourceDeserializer.getStringResourceContentFilePath(
+			ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getProject().getName(), style.getName(),
+			IRepository.STYLES)));
 		IEditorDescriptor editorDescriptor = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(styleFile.getName());
 		String editorId;
 		if (editorDescriptor == null)
@@ -532,8 +528,8 @@ public class EditorUtil
 		IEditorPart editor = openStyleEditor(style, activate);
 		if (editor instanceof StructuredTextEditor && lookup != null)
 		{
-			FindReplaceDocumentAdapter finder = new FindReplaceDocumentAdapter(((StructuredTextEditor)editor).getDocumentProvider().getDocument(
-				((StructuredTextEditor)editor).getEditorInput()));
+			FindReplaceDocumentAdapter finder = new FindReplaceDocumentAdapter(
+				((StructuredTextEditor)editor).getDocumentProvider().getDocument(((StructuredTextEditor)editor).getEditorInput()));
 			try
 			{
 				IRegion region = finder.find(0, lookup, true, true, true, false);
@@ -612,10 +608,8 @@ public class EditorUtil
 			IWorkbenchPage activePage = getActivePage();
 			if (activePage != null)
 			{
-				return activePage.openEditor(
-					sei,
-					PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-						Platform.getContentTypeManager().getContentType(ServerEditorInput.SERVER_RESOURCE_ID)).getId());
+				return activePage.openEditor(sei, PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+					Platform.getContentTypeManager().getContentType(ServerEditorInput.SERVER_RESOURCE_ID)).getId());
 			}
 		}
 		catch (PartInitException ex)
@@ -633,10 +627,8 @@ public class EditorUtil
 			IWorkbenchPage activePage = getActivePage();
 			if (activePage != null)
 			{
-				return activePage.openEditor(
-					new I18NEditorInput(i18nServer, i18nTable),
-					PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
-						Platform.getContentTypeManager().getContentType(I18NEditorInput.I18N_RESOURCE_ID)).getId());
+				return activePage.openEditor(new I18NEditorInput(i18nServer, i18nTable), PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+					Platform.getContentTypeManager().getContentType(I18NEditorInput.I18N_RESOURCE_ID)).getId());
 			}
 		}
 		catch (PartInitException ex)
@@ -657,8 +649,8 @@ public class EditorUtil
 				{
 					if ((object instanceof IPersist && object.equals(editor.getAdapter(IPersist.class))) ||
 						(object instanceof Table && object.equals(editor.getAdapter(Table.class))) ||
-						((object instanceof IServerInternal) && editor.getAdapter(ServerConfig.class) != null && ((IServerInternal)object).getConfig().getServerName().equals(
-							((ServerConfig)editor.getAdapter(ServerConfig.class)).getServerName())))
+						((object instanceof IServerInternal) && editor.getAdapter(ServerConfig.class) != null &&
+							((IServerInternal)object).getConfig().getServerName().equals(editor.getAdapter(ServerConfig.class).getServerName())))
 					{
 						page.closeEditor(editor, false);
 					}
@@ -673,7 +665,7 @@ public class EditorUtil
 		{
 			return null;
 		}
-		IFile file = (IFile)editorPart.getEditorInput().getAdapter(IFile.class);
+		IFile file = editorPart.getEditorInput().getAdapter(IFile.class);
 		if (file != null)
 		{
 			try
@@ -756,18 +748,18 @@ public class EditorUtil
 						{
 							TreeSelectDialog dialog = new TreeSelectDialog(shell, false, false, TreePatternFilter.FILTER_LEAFS,
 								FlatTreeContentProvider.INSTANCE, new LabelProvider()
+							{
+								@Override
+								public String getText(Object element)
 								{
-									@Override
-									public String getText(Object element)
+									if (element instanceof IEditorPart)
 									{
-										if (element instanceof IEditorPart)
-										{
-											IEditorPart part = (IEditorPart)element;
-											return part.getTitle();
-										}
-										return super.getText(element);
+										IEditorPart part = (IEditorPart)element;
+										return part.getTitle();
 									}
-								}, null, null, SWT.MULTI | SWT.CHECK, "Select editors to save", dirtyparts, new StructuredSelection(dirtyparts), true,
+									return super.getText(element);
+								}
+							}, null, null, SWT.MULTI | SWT.CHECK, "Select editors to save", dirtyparts, new StructuredSelection(dirtyparts), true,
 								"saveEditors", null);
 							dialog.open();
 							if (dialog.getReturnCode() == Window.OK)
@@ -843,16 +835,16 @@ public class EditorUtil
 	/*
 	 * Get the table columns in order as configured in the preferences.
 	 */
-	public static Iterator<Column> getTableColumns(Table table)
+	public static Iterator<IColumn> getTableColumns(ITable table)
 	{
 		if (table == null)
 		{
-			return Collections.<Column> emptyList().iterator();
+			return Collections.<IColumn> emptyList().iterator();
 		}
 		if (new DesignerPreferences().getShowColumnsInDbOrder())
 		{
 			// columns as they appear in the database
-			return table.getColumns().iterator();
+			return table.getIColumns().iterator();
 		}
 		// columns sorted by name (PK always first)
 		return table.getColumnsSortedByName();

@@ -18,7 +18,7 @@ package com.servoy.eclipse.ui.editors.table;
 
 /**
  * Composite for the methods-tab in table editor.
- * 
+ *
  * @author rgansevles
  */
 import java.util.ArrayList;
@@ -63,11 +63,11 @@ import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 
 public class FoundsetMethodsComposite extends Composite
@@ -94,7 +94,7 @@ public class FoundsetMethodsComposite extends Composite
 
 		myScrolledComposite.setContent(container);
 
-		final Table t = te.getTable();
+		final ITable t = te.getTable();
 		treeContainer = new Composite(container, SWT.NONE);
 
 		treeViewer = new TreeViewer(treeContainer, SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
@@ -207,13 +207,11 @@ public class FoundsetMethodsComposite extends Composite
 			}
 		});
 		final GroupLayout groupLayout = new GroupLayout(container);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			GroupLayout.TRAILING,
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.LEADING, treeContainer, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE).add(
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
+			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.LEADING,
+				treeContainer, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE).add(
 					groupLayout.createSequentialGroup().add(addButton).addPreferredGap(LayoutStyle.RELATED).add(removeButton))).addContainerGap()));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			GroupLayout.TRAILING,
+		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
 			groupLayout.createSequentialGroup().addContainerGap().add(treeContainer, GroupLayout.PREFERRED_SIZE, 323, Short.MAX_VALUE).addPreferredGap(
 				LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(removeButton).add(addButton)).addContainerGap()));
 		container.setLayout(groupLayout);
@@ -311,11 +309,11 @@ public class FoundsetMethodsComposite extends Composite
 		layout.setColumnData(nameColumn, new ColumnWeightData(20, 50, true));
 		layout.setColumnData(codeColumn, new ColumnWeightData(80, 50, true));
 
-		treeViewer.setLabelProvider(new TextCutoffLabelProvider.TableCutoffLabelProvider(new FoundsetMethodLabelProvider(
-			ColorResource.INSTANCE.getColor(new RGB(255, 127, 0))), 100));
+		treeViewer.setLabelProvider(
+			new TextCutoffLabelProvider.TableCutoffLabelProvider(new FoundsetMethodLabelProvider(ColorResource.INSTANCE.getColor(new RGB(255, 127, 0))), 100));
 	}
 
-	protected void initDataBindings(Table t)
+	protected void initDataBindings(ITable t)
 	{
 		TableScriptsContentProvider columnViewContentProvider = new TableScriptsContentProvider(t, IRepository.METHODS);
 		treeViewer.setContentProvider(columnViewContentProvider);

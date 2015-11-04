@@ -173,6 +173,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private final PlatformSimpleUserNode servers;
 
+	private final PlatformSimpleUserNode inmemoryDatasources;
+
+	private final PlatformSimpleUserNode devDatasources;
+
 	private final PlatformSimpleUserNode resources;
 
 	private final PlatformSimpleUserNode stylesNode;
@@ -308,14 +312,25 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		i18n = createTypeNode(Messages.TreeStrings_i18n, UserNodeType.I18N, JSI18N.class, invisibleRootNode);
 		addReturnTypeNodes(i18n, ScriptObjectRegistry.getScriptObjectForClass(JSI18N.class).getAllReturnedTypes());
 
+		devDatasources = new PlatformSimpleUserNode(Messages.TreeStrings_Datasources, UserNodeType.DEV_DATASOURCES, null,
+			uiActivator.loadImageFromBundle("database_srv.gif"));
+		devDatasources.parent = resources;
+
 		servers = new PlatformSimpleUserNode(Messages.TreeStrings_DBServers, UserNodeType.SERVERS, null, uiActivator.loadImageFromBundle("database_srv.gif"));
-		servers.parent = resources;
+		servers.parent = devDatasources;
+
+		inmemoryDatasources = new PlatformSimpleUserNode(Messages.TreeStrings_DBMemory, UserNodeType.INMEMORY_DATASOURCE, null,
+			uiActivator.loadImageFromBundle("database_srv.gif"));
+		inmemoryDatasources.parent = devDatasources;
+
 
 		final PlatformSimpleUserNode plugins = new PlatformSimpleUserNode(Messages.TreeStrings_Plugins, UserNodeType.PLUGINS, null,
 			uiActivator.loadImageFromBundle("plugin.gif"));
 		plugins.parent = invisibleRootNode;
 
-		resources.children = new PlatformSimpleUserNode[] { servers, stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsNode, servicesNode };
+		devDatasources.children = new PlatformSimpleUserNode[] { servers, inmemoryDatasources };
+
+		resources.children = new PlatformSimpleUserNode[] { devDatasources, stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsNode, servicesNode };
 
 		invisibleRootNode.children = new PlatformSimpleUserNode[] { resources, allSolutionsNode, activeSolutionNode, jslib, application, solutionModel, databaseManager, datasources, utils, history, security, i18n, jsunit, plugins };
 
@@ -327,18 +342,28 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 		// we want to load the plugins node in a background low prio job so that it will expand fast
 		// when used...
-		Job job = new Job("Background loading of plugins node")
+		Display.getDefault().asyncExec(new Runnable()
 		{
+
 			@Override
-			protected IStatus run(IProgressMonitor monitor)
+			public void run()
 			{
 				addPluginsNodeChildren(plugins);
-				return Status.OK_STATUS;
+
 			}
-		};
-		job.setSystem(true);
-		job.setPriority(Job.LONG);
-		job.schedule();
+		});
+//		Job job = new Job("Background loading of plugins node")
+//		{
+//			@Override
+//			protected IStatus run(IProgressMonitor monitor)
+//			{
+//				addPluginsNodeChildren(plugins);
+//				return Status.OK_STATUS;
+//			}
+//		};
+//		job.setSystem(true);
+//		job.setPriority(Job.LONG);
+//		job.schedule();
 
 		com.servoy.eclipse.core.Activator.getDefault().addWebComponentChangedListener(this);
 	}

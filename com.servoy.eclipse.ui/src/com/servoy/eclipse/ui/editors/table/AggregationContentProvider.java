@@ -25,15 +25,15 @@ import org.eclipse.jface.viewers.Viewer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 
 public class AggregationContentProvider implements ITreeContentProvider
 {
-	private final Table table;
+	private final ITable table;
 
-	public AggregationContentProvider(Table t)
+	public AggregationContentProvider(ITable t)
 	{
 		this.table = t;
 	}

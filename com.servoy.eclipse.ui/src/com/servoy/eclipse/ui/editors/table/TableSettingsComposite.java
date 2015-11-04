@@ -41,7 +41,6 @@ import com.servoy.eclipse.ui.editors.TableEditor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.SecurityInfo;
 
@@ -350,7 +349,7 @@ public class TableSettingsComposite extends Group
 			{
 				String group = groups.next();
 				Integer access = securityInfo.get(group);
-				Table t = tableEditor.getTable();
+				ITable t = tableEditor.getTable();
 				EclipseUserManager userManager = ServoyModelManager.getServoyModelManager().getServoyModel().getUserManager();
 				int writeMode = userManager.getWriteMode();
 				try

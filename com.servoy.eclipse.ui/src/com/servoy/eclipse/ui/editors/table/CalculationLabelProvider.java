@@ -25,16 +25,17 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE.SharedImages;
 
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.IColumn;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 
 public class CalculationLabelProvider extends LabelProvider implements ITableLabelProvider, ITableColorProvider
 {
-	private final Table table;
+	private final ITable table;
 	private final Color color;
 
-	public CalculationLabelProvider(Table table, Color color)
+	public CalculationLabelProvider(ITable table, Color color)
 	{
 		this.table = table;
 		this.color = color;
@@ -46,7 +47,7 @@ public class CalculationLabelProvider extends LabelProvider implements ITableLab
 		{
 			if (columnIndex == CalculationsComposite.CI_STORED)
 			{
-				Column c = table.getColumn(((ScriptCalculation)element).getName());
+				IColumn c = table.getColumn(((ScriptCalculation)element).getName());
 				if (c != null)
 				{
 					return ColumnLabelProvider.TRUE_IMAGE;

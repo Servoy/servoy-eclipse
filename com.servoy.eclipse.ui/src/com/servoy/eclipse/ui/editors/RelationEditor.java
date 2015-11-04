@@ -211,20 +211,17 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 		optionsComposite = new OptionsComposite(comp, SWT.NONE);
 
 		final GroupLayout groupLayout = new GroupLayout(comp);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 498, Short.MAX_VALUE).add(
-					GroupLayout.LEADING, optionsComposite, GroupLayout.PREFERRED_SIZE, 498, Short.MAX_VALUE).add(GroupLayout.LEADING,
-					datasourceSelectComposite, GroupLayout.PREFERRED_SIZE, 498, Short.MAX_VALUE).add(
-					GroupLayout.LEADING,
-					groupLayout.createSequentialGroup().add(nameLabel).addPreferredGap(LayoutStyle.RELATED).add(nameField, GroupLayout.DEFAULT_SIZE, 417,
-						Short.MAX_VALUE))).addContainerGap()));
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().addContainerGap().add(
+			groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 498,
+				Short.MAX_VALUE).add(GroupLayout.LEADING, optionsComposite, GroupLayout.PREFERRED_SIZE, 498, Short.MAX_VALUE).add(GroupLayout.LEADING,
+					datasourceSelectComposite, GroupLayout.PREFERRED_SIZE, 498, Short.MAX_VALUE).add(GroupLayout.LEADING,
+						groupLayout.createSequentialGroup().add(nameLabel).addPreferredGap(LayoutStyle.RELATED).add(nameField, GroupLayout.DEFAULT_SIZE, 417,
+							Short.MAX_VALUE))).addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(nameLabel).add(nameField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(datasourceSelectComposite).addPreferredGap(LayoutStyle.RELATED).add(
-				tableContainer, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(
-				optionsComposite).addContainerGap()));
+			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(nameLabel).add(nameField,
+				GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+					datasourceSelectComposite).addPreferredGap(LayoutStyle.RELATED).add(tableContainer, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+						Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(optionsComposite).addContainerGap()));
 		comp.setLayout(groupLayout);
 
 		createTableColumns();
@@ -243,8 +240,8 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 
 	protected void initDataBindings()
 	{
-		datasourceSelectComposite.initDataBindings(this, datasourceSelectComposite.new NameFiller(nameField, getRelation().getPrimaryTableName(),
-			getRelation().getForeignTableName()));
+		datasourceSelectComposite.initDataBindings(this,
+			datasourceSelectComposite.new NameFiller(nameField, getRelation().getPrimaryTableName(), getRelation().getForeignTableName()));
 		optionsComposite.initDataBindings(this);
 
 		m_bindingContext = BindingHelper.dispose(m_bindingContext);
@@ -424,9 +421,8 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 							if (input.size() > rowIdentColumns.indexOf(column))
 							{
 								int index = rowIdentColumns.indexOf(column);
-								if (input.get(index).getCIFrom() == null ||
-									!(ScopesUtils.isVariableScope(input.get(index).getCIFrom()) || input.get(index).getRawCIFrom().startsWith(
-										LiteralDataprovider.LITERAL_PREFIX)))
+								if (input.get(index).getCIFrom() == null || !(ScopesUtils.isVariableScope(input.get(index).getCIFrom()) ||
+									input.get(index).getRawCIFrom().startsWith(LiteralDataprovider.LITERAL_PREFIX)))
 								{
 									input.get(index).setCIFrom(column.getDataProviderID());
 								}
@@ -665,11 +661,11 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 			}
 			if (t != null)
 			{
-				Iterator<Column> cols = EditorUtil.getTableColumns(t);
+				Iterator<IColumn> cols = EditorUtil.getTableColumns(t);
 				while (cols.hasNext())
 				{
 					// stored calcs are shown in calculations section
-					Column col = cols.next();
+					IColumn col = cols.next();
 					if ((calcs == null || !calcs.containsKey(col.getDataProviderID())) && ((col.getFlags() & Column.EXCLUDED_COLUMN) != Column.EXCLUDED_COLUMN))
 					{
 						retval.add(col);

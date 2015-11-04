@@ -63,6 +63,7 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
@@ -102,7 +103,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		boolean showFilterMenu, int filterMode, int treeStyle)
 	{
 		super(parent, showFilter, showFilterMenu,
-		// contentProvider
+			// contentProvider
 			contentProvider,
 			//labelProvider
 			new DataProviderDialogLabelProvider(labelProvider),
@@ -201,7 +202,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		private final Map<Table, List<Relation>> relationsCache = new HashMap<Table, List<Relation>>();
 		private final Map<Table, List<AggregateVariable>> aggregatesCache = new HashMap<Table, List<AggregateVariable>>();
 		private final Map<Table, Map<String, ScriptCalculation>> calculationsCache = new HashMap<Table, Map<String, ScriptCalculation>>();
-		private final Map<Table, List<Column>> columnCache = new HashMap<Table, List<Column>>();
+		private final Map<Table, List<IColumn>> columnCache = new HashMap<Table, List<IColumn>>();
 
 		public DataProviderContentProvider(PersistContext persistContext, FlattenedSolution flattenedSolution, Table table)
 		{
@@ -661,14 +662,14 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				calculations = getCalculationMap(t);
 			}
 
-			List<Column> lst = columnCache.get(t);
+			List<IColumn> lst = columnCache.get(t);
 			if (lst == null)
 			{
-				lst = new ArrayList<Column>();
-				Iterator<Column> columns = EditorUtil.getTableColumns(t);
+				lst = new ArrayList<IColumn>();
+				Iterator<IColumn> columns = EditorUtil.getTableColumns(t);
 				while (columns.hasNext())
 				{
-					Column column = columns.next();
+					IColumn column = columns.next();
 					ColumnInfo ci = column.getColumnInfo();
 					if (ci != null && ci.isExcluded())
 					{

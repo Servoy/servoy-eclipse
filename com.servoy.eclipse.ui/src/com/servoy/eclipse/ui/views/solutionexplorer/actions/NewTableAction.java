@@ -45,7 +45,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * Action to create a new table depending on the selection of a solution view.
- * 
+ *
  * @author jblok
  */
 public class NewTableAction extends Action implements ISelectionChangedListener
@@ -55,7 +55,7 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 
 	/**
 	 * Creates a new action for the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public NewTableAction(SolutionExplorerView sev)
@@ -142,6 +142,10 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 				ServoyLog.logError(e);
 				MessageDialog.openError(UIUtils.getActiveShell(), "Error", e.getMessage());
 			}
+		}
+		else if (node.getRealType().equals(UserNodeType.INMEMORY_DATASOURCE))
+		{
+
 		}
 	}
 }

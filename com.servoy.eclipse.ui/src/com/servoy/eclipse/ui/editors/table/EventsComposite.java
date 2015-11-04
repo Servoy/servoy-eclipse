@@ -56,11 +56,11 @@ import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.StringTokenizerConverter;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
@@ -72,7 +72,7 @@ public class EventsComposite extends Composite
 
 	/**
 	 * Create the composite
-	 * 
+	 *
 	 * @param parent
 	 * @param style
 	 */
@@ -89,7 +89,7 @@ public class EventsComposite extends Composite
 
 		myScrolledComposite.setContent(container);
 
-		final Table t = te.getTable();
+		final ITable t = te.getTable();
 		treeContainer = new Composite(container, SWT.NONE);
 
 		treeViewer = new TreeViewer(treeContainer, SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
@@ -99,10 +99,9 @@ public class EventsComposite extends Composite
 		tree.setHeaderVisible(true);
 
 		final GroupLayout groupLayout = new GroupLayout(container);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			GroupLayout.TRAILING,
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, treeContainer, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE))));
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
+			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING,
+				treeContainer, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE))));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
 			groupLayout.createSequentialGroup().addContainerGap().add(treeContainer, GroupLayout.PREFERRED_SIZE, 323, Short.MAX_VALUE)));
 		container.setLayout(groupLayout);
@@ -118,13 +117,13 @@ public class EventsComposite extends Composite
 		}
 	}
 
-	public void refreshViewer(Table t)
+	public void refreshViewer(ITable table)
 	{
-		List<EventNode> rows = getViewerInput(t);
+		List<EventNode> rows = getViewerInput(table);
 
-		if (!getViewerInput(t).equals(treeViewer.getInput()))
+		if (!getViewerInput(table).equals(treeViewer.getInput()))
 		{
-			setViewerInput(t, false);
+			setViewerInput(table, false);
 		}
 		IBaseLabelProvider labelProvider = treeViewer.getLabelProvider();
 		if (labelProvider instanceof EventsLabelProvider)
@@ -175,7 +174,7 @@ public class EventsComposite extends Composite
 		}
 	}
 
-	protected void initDataBindings(Table t, final TableEditor te)
+	protected void initDataBindings(ITable t, final TableEditor te)
 	{
 		Tree tree = treeViewer.getTree();
 
@@ -213,7 +212,7 @@ public class EventsComposite extends Composite
 		setViewerInput(t, true);
 	}
 
-	private List<EventNode> getViewerInput(Table t)
+	private List<EventNode> getViewerInput(ITable t)
 	{
 		List<EventNode> rows = new ArrayList<EventNode>();
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -244,7 +243,7 @@ public class EventsComposite extends Composite
 	/**
 	 * @param t
 	 */
-	private void setViewerInput(Table t, boolean initialExpand)
+	private void setViewerInput(ITable t, boolean initialExpand)
 	{
 		List<EventNode> rows = getViewerInput(t);
 
@@ -356,9 +355,9 @@ public class EventsComposite extends Composite
 		private final EventNodeType type;
 		private MethodWithArguments mwa;
 		private final ILabelProvider methodLabelProvider;
-		private final Table table;
+		private final ITable table;
 
-		public EventNode(EventNodeType type, MethodWithArguments mwa, Solution solution, Table table)
+		public EventNode(EventNodeType type, MethodWithArguments mwa, Solution solution, ITable table)
 		{
 			if (type == null) throw new NullPointerException("Type can't be null");
 			this.type = type;
@@ -367,8 +366,8 @@ public class EventsComposite extends Composite
 			this.table = table;
 			this.children = null;
 
-			this.methodLabelProvider = new AccesCheckingContextDelegateLabelProvider(new SolutionContextDelegateLabelProvider(new MethodLabelProvider(
-				PersistContext.create(solution), true, true), solution), null)
+			this.methodLabelProvider = new AccesCheckingContextDelegateLabelProvider(
+				new SolutionContextDelegateLabelProvider(new MethodLabelProvider(PersistContext.create(solution), true, true), solution), null)
 			{
 				@Override
 				public com.servoy.j2db.persistence.IPersist getContext()
@@ -391,7 +390,7 @@ public class EventsComposite extends Composite
 			};
 		}
 
-		public EventNode(Solution solution, Table table)
+		public EventNode(Solution solution, ITable table)
 		{
 			this.solution = solution;
 			this.table = table;
@@ -415,8 +414,10 @@ public class EventsComposite extends Composite
 			{
 				for (EventNodeType tp : EventNodeType.values())
 				{
-					children.add(new EventNode(tp, tableNode == null ? MethodWithArguments.METHOD_DEFAULT : new MethodWithArguments(
-						((Integer)tableNode.getProperty(tp.getProperty().getPropertyName())).intValue(), tableNode.getTable()), solution, table));
+					children.add(new EventNode(tp,
+						tableNode == null ? MethodWithArguments.METHOD_DEFAULT
+							: new MethodWithArguments(((Integer)tableNode.getProperty(tp.getProperty().getPropertyName())).intValue(), tableNode.getTable()),
+						solution, table));
 				}
 			}
 			catch (RepositoryException e)
@@ -440,7 +441,7 @@ public class EventsComposite extends Composite
 			return type.toString();
 		}
 
-		public Table getTable()
+		public ITable getTable()
 		{
 			return table;
 		}
@@ -473,7 +474,7 @@ public class EventsComposite extends Composite
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Object#hashCode()
 		 */
 		@Override
@@ -486,7 +487,7 @@ public class EventsComposite extends Composite
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
 		@Override

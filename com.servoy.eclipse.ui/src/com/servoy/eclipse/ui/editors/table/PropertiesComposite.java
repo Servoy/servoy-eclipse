@@ -41,8 +41,8 @@ import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
@@ -54,13 +54,13 @@ public class PropertiesComposite extends Composite
 
 	private final Button btnHiddenInDeveloper;
 	private final Button btnMetadataTable;
-	private final Table table;
+	private final ITable table;
 	private final Button createMetaDataColumnsButton;
 
 	/**
 	 * @param parent
 	 * @param style
-	 * @param tableEditor 
+	 * @param tableEditor
 	 */
 	public PropertiesComposite(Composite parent, int style, final TableEditor tableEditor)
 	{
@@ -159,13 +159,14 @@ public class PropertiesComposite extends Composite
 			}
 		}
 
-		canMakeMetaDataColumns &= ((table.getColumn(MetaDataUtils.METADATA_MODIFICATION_COLUMN) == null) || (table.getColumn(MetaDataUtils.METADATA_DELETION_COLUMN) == null));
+		canMakeMetaDataColumns &= ((table.getColumn(MetaDataUtils.METADATA_MODIFICATION_COLUMN) == null) ||
+			(table.getColumn(MetaDataUtils.METADATA_DELETION_COLUMN) == null));
 		createMetaDataColumnsButton.setEnabled(canMakeMetaDataColumns);
 
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void saveValues()
 	{

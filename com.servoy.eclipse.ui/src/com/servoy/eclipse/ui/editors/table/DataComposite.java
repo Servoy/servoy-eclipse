@@ -16,26 +16,26 @@
 */
 package com.servoy.eclipse.ui.editors.table;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+
+import com.servoy.j2db.persistence.ITable;
+
 import net.sourceforge.sqlexplorer.dataset.DataSet;
 import net.sourceforge.sqlexplorer.dbdetail.tab.AbstractDataSetTab;
 import net.sourceforge.sqlexplorer.dbproduct.Alias;
 import net.sourceforge.sqlexplorer.dbproduct.Session;
 import net.sourceforge.sqlexplorer.plugin.SQLExplorerPlugin;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-
-import com.servoy.j2db.persistence.Table;
-
 /**
  * @author jcompagner
- * 
+ *
  */
 public class DataComposite extends Composite
 {
-	private final Table table;
+	private final ITable table;
 	private AbstractDataSetTab results;
 
 	/**
@@ -43,7 +43,7 @@ public class DataComposite extends Composite
 	 * @param table
 	 * @param style
 	 */
-	public DataComposite(Composite parent, Table table)
+	public DataComposite(Composite parent, ITable table)
 	{
 		super(parent, SWT.None);
 		this.table = table;

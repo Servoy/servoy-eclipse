@@ -559,7 +559,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.FOUNDSET_MANAGER)
 			{
-				lm = getJSMethods(JSDatabaseManager.class, IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null, null);
+				lm = getJSMethods(JSDatabaseManager.class, IExecutingEnviroment.TOPLEVEL_DATABASE_MANAGER, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null,
+					null);
 			}
 			else if (type == UserNodeType.DATASOURCES)
 			{
@@ -824,8 +825,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			for (IPersist persist : relations)
 			{
 				Relation relation = (Relation)persist;
-				SimpleUserNode un = new UserNode(getDisplayName(relation, solution), UserNodeType.RELATION, new SimpleDeveloperFeedback(relation.getName(),
-					null, null), relation, RelationLabelProvider.INSTANCE_ALL.getImage(relation));
+				SimpleUserNode un = new UserNode(getDisplayName(relation, solution), UserNodeType.RELATION,
+					new SimpleDeveloperFeedback(relation.getName(), null, null), relation, RelationLabelProvider.INSTANCE_ALL.getImage(relation));
 				rels.add(un);
 			}
 		}
@@ -938,8 +939,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						}
 						else
 						{
-							dlm.add(new UserNode(name, UserNodeType.VIEW, new TableWrapper(s.getName(), name, true),
-								uiActivator.loadImageFromBundle("view.png")));
+							dlm.add(
+								new UserNode(name, UserNodeType.VIEW, new TableWrapper(s.getName(), name, true), uiActivator.loadImageFromBundle("view.png")));
 						}
 					}
 					if (hiddenViews != null)
@@ -947,8 +948,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						// tables and views that are marked by user as "hiddenInDeveloper" will only be shown in this sol. ex. list and grayed-out + at the bottom of this list
 						for (String name : hiddenViews)
 						{
-							UserNode node = new UserNode(name, UserNodeType.VIEW, new TableWrapper(s.getName(), name, true), uiActivator.loadImageFromBundle(
-								"view.png", true));
+							UserNode node = new UserNode(name, UserNodeType.VIEW, new TableWrapper(s.getName(), name, true),
+								uiActivator.loadImageFromBundle("view.png", true));
 							node.setAppearenceFlags(SimpleUserNode.TEXT_GRAYED_OUT);
 							node.setToolTipText(Messages.SolutionExplorerListContentProvider_hidden);
 							dlm.add(node);
@@ -983,8 +984,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				else
 				{
-					UserNode node = new UserNode(tableName, UserNodeType.TABLE, new TableFeedback(s.getName(), tableName), new TableWrapper(s.getName(),
-						tableName, EditorUtil.isViewTypeTable(s.getName(), tableName)), uiActivator.loadImageFromBundle("portal.gif"));
+					UserNode node = new UserNode(tableName, UserNodeType.TABLE, new TableFeedback(s.getName(), tableName),
+						new TableWrapper(s.getName(), tableName, EditorUtil.isViewTypeTable(s.getName(), tableName)),
+						uiActivator.loadImageFromBundle("portal.gif"));
 					node.setClientSupport(ClientSupport.All);
 					dlm.add(node);
 				}
@@ -1035,10 +1037,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		solution.getReferencedModulesRecursive(modulesOfSolution);
 		modulesOfSolution.put(solution.getName(), solution);
 
-		Iterator<Column> cols = EditorUtil.getTableColumns(table);
+		Iterator<IColumn> cols = EditorUtil.getTableColumns(table);
 		while (cols.hasNext())
 		{
-			Column c = cols.next();
+			IColumn c = cols.next();
 			ColumnInfo ci = c.getColumnInfo();
 			if (ci != null && ci.isExcluded())
 			{
@@ -1127,8 +1129,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
 		try
 		{
-			dlm.add(new UserNode(form.getName(), UserNodeType.FORM_FOUNDSET, form.getName(), form.getName(), form,
-				ElementUtil.getImageForFormEncapsulation(form)));
+			dlm.add(
+				new UserNode(form.getName(), UserNodeType.FORM_FOUNDSET, form.getName(), form.getName(), form, ElementUtil.getImageForFormEncapsulation(form)));
 			TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.FOUNDSET_ITEM, null, dlm, "foundset", form,
 				uiActivator.loadImageFromBundle("foundset.gif"));
 			FlattenedSolution flatSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
@@ -1455,7 +1457,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 						/*
 						 * (non-Javadoc)
-						 * 
+						 *
 						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitObjectInitializer(org.eclipse.dltk.javascript.ast.
 						 * ObjectInitializer)
 						 */
@@ -1848,8 +1850,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					codePrefix = elementName;
 				}
 
-				SimpleUserNode node = new UserNode(displayName, actionType, new MethodFeedback(id, parameterTypes, codePrefix, resolver, scriptObject, njm,
-					null), (Object)null, functionIcon);
+				SimpleUserNode node = new UserNode(displayName, actionType,
+					new MethodFeedback(id, parameterTypes, codePrefix, resolver, scriptObject, njm, null), (Object)null, functionIcon);
 
 				node.setClientSupport(AnnotationManagerReflection.getInstance().getClientSupport(method.method(), originalClass, ClientSupport.Default));
 
@@ -2322,7 +2324,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								}
 								else
 								{
-									paramTypes.append(DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(((Class[])parameterTypes)[i]));
+									paramTypes.append(
+										DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(((Class[])parameterTypes)[i]));
 								}
 							}
 							else

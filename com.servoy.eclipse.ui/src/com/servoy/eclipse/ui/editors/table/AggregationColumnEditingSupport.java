@@ -34,17 +34,17 @@ import org.eclipse.swt.custom.CCombo;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AggregateVariable;
-import com.servoy.j2db.persistence.Column;
-import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.persistence.IColumn;
+import com.servoy.j2db.persistence.ITable;
 
 public class AggregationColumnEditingSupport extends EditingSupport
 {
-	private final Table table;
+	private final ITable table;
 	private final CellEditor editor;
 	private String[] columns;
 	private final IObservable observable;
 
-	public AggregationColumnEditingSupport(Table table, TreeViewer tv)
+	public AggregationColumnEditingSupport(ITable table, TreeViewer tv)
 	{
 		super(tv);
 		this.table = table;
@@ -102,7 +102,7 @@ public class AggregationColumnEditingSupport extends EditingSupport
 		{
 			AggregateVariable aggregateVariable = (AggregateVariable)element;
 			int index = Integer.parseInt(value.toString());
-			Column column = table.getColumn(columns[index]);
+			IColumn column = table.getColumn(columns[index]);
 			if (!column.getDataProviderID().equals(aggregateVariable.getDataProviderIDToAggregate()))
 			{
 				aggregateVariable.setDataProviderIDToAggregate(column.getDataProviderID());
@@ -122,11 +122,11 @@ public class AggregationColumnEditingSupport extends EditingSupport
 			int index = 0;
 			try
 			{
-				Iterator<Column> it = EditorUtil.getTableColumns(table);
+				Iterator<IColumn> it = EditorUtil.getTableColumns(table);
 				int i = 0;
 				while (it.hasNext())
 				{
-					Column column = it.next();
+					IColumn column = it.next();
 					if (column.getDataProviderID().equals(dataProviderId))
 					{
 						index = i;
@@ -159,7 +159,7 @@ public class AggregationColumnEditingSupport extends EditingSupport
 		columns = new String[table.getColumnCount()];
 		try
 		{
-			Iterator<Column> it = EditorUtil.getTableColumns(table);
+			Iterator<IColumn> it = EditorUtil.getTableColumns(table);
 			int i = 0;
 			while (it.hasNext())
 			{

@@ -24,26 +24,26 @@ import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.TypeIterator;
 import com.servoy.j2db.util.SortedList;
 
 /**
  * Content provider for methods/calculations in table editor.
- * 
+ *
  * @author lvostinar, rgansevles
  *
  */
 public class TableScriptsContentProvider extends FlatTreeContentProvider
 {
-	private final Table table;
+	private final ITable table;
 	private final int typeId;
 
-	public TableScriptsContentProvider(Table t, int typeId)
+	public TableScriptsContentProvider(ITable t, int typeId)
 	{
 		this.table = t;
 		this.typeId = typeId;

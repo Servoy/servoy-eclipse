@@ -69,6 +69,7 @@ import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
@@ -349,7 +350,7 @@ public class DataModelManager implements IColumnInfoManager
 	}
 
 	// delete file
-	public void removeAllColumnInfo(Table t) throws RepositoryException
+	public void removeAllColumnInfo(ITable t) throws RepositoryException
 	{
 		if (t == null) return;
 		IFile file = getDBIFile(t.getServerName(), t.getName());
@@ -876,7 +877,7 @@ public class DataModelManager implements IColumnInfoManager
 		return serializeTable(t, true);
 	}
 
-	public String serializeTable(Table t, boolean onlyStoredColumns) throws JSONException
+	public String serializeTable(ITable t, boolean onlyStoredColumns) throws JSONException
 	{
 		TableDef tableInfo = new TableDef();
 		tableInfo.name = t.getName();
@@ -885,16 +886,16 @@ public class DataModelManager implements IColumnInfoManager
 		tableInfo.tableType = t.getTableType();
 
 		List<String> colNames = new ArrayList<String>();
-		Collection<Column> col = t.getColumns();
-		for (Column column : col)
+		Collection<IColumn> col = t.getIColumns();
+		for (IColumn column : col)
 		{
 			colNames.add(column.getName());
 		}
 
-		Iterator<Column> it = t.getColumnsSortedByName();
+		Iterator<IColumn> it = t.getColumnsSortedByName();
 		while (it.hasNext())
 		{
-			Column column = it.next();
+			IColumn column = it.next();
 			ColumnInfoDef cid = getColumnInfoDef(column, colNames.indexOf(column.getName()), onlyStoredColumns);
 			if (cid != null)
 			{
@@ -919,7 +920,7 @@ public class DataModelManager implements IColumnInfoManager
 	 * @param creationOrderIndex the creationOrderIndex for this column.
 	 * @return all information about the given column into a ColumnInfoDef object, if the give column has column info and null otherwise.
 	 */
-	public static ColumnInfoDef getColumnInfoDef(Column column, int creationOrderIndex, boolean onlyStoredColumns)
+	public static ColumnInfoDef getColumnInfoDef(IColumn column, int creationOrderIndex, boolean onlyStoredColumns)
 	{
 		ColumnInfoDef cid = null;
 		ColumnInfo ci = column.getColumnInfo();

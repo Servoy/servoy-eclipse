@@ -36,18 +36,18 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.IColumn;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 import com.servoy.j2db.util.docvalidator.ValidatingDocument.IDocumentValidator;
 
 /**
  * Edit calculation name in table editor.
- * 
+ *
  * @author lvostinar
  *
  */
@@ -55,10 +55,10 @@ public class CalculationNameEditingSupport extends EditingSupport
 {
 	private final ComboBoxCellEditor editor;
 	private String[] columns;
-	private final Table table;
+	private final ITable table;
 	private final IObservable observable;
 
-	public CalculationNameEditingSupport(TreeViewer viewer, Table table)
+	public CalculationNameEditingSupport(TreeViewer viewer, ITable table)
 	{
 		super(viewer);
 		this.table = table;
@@ -131,7 +131,7 @@ public class CalculationNameEditingSupport extends EditingSupport
 		columns = new String[table.getColumnCount() + 1];
 		columns[0] = "type_here";
 		int i = 1;
-		Iterator<Column> it = EditorUtil.getTableColumns(table);
+		Iterator<IColumn> it = EditorUtil.getTableColumns(table);
 		while (it.hasNext())
 		{
 			columns[i++] = it.next().getName();
