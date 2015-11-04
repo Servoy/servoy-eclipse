@@ -14,7 +14,7 @@
             category="com.servoy.eclipse.ui.preference"
             class="com.servoy.eclipse.designer.rfb.preferences.WebComponentPackagesPreferencePage"
             id="com.servoy.eclipse.designer.rfb.webcomponents"
-            name="Default Web Component Packages">
+            name="Default Packages">
       </page>
    </extension>
 </plugin>
