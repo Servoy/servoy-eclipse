@@ -20,6 +20,7 @@ package com.servoy.eclipse.designer.rfb.startup;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -71,7 +72,8 @@ import com.servoy.j2db.util.HTTPUtils;
 @SuppressWarnings("nls")
 public class DesignerFilter implements Filter
 {
-	private static final List<String> IGNORE_LIST = Arrays.asList(new String[] { "servoydefault-checkgroup", FormElement.ERROR_BEAN, "servoycore-navigator", "servoydefault-radiogroup", "servoydefault-htmlview", "colorthefoundset" });
+	private static final List<String> IGNORE_PACKAGE_LIST = Arrays.asList(new String[] { "servoycore" });
+	private static final List<String> IGNORE_COMPONENT_LIST = Arrays.asList(new String[] { "servoydefault-checkgroup", FormElement.ERROR_BEAN, "servoycore-navigator", "servoydefault-radiogroup", "servoydefault-htmlview", "colorthefoundset" });
 
 	public static final String PREFERENCE_KEY = "com.servoy.eclipse.designer.rfb.palette.order";
 	@SuppressWarnings("nls")
@@ -115,6 +117,7 @@ public class DesignerFilter implements Filter
 					ArrayList<String> componentPackages = new ArrayList<String>();
 					for (String key : keySet)
 					{
+						if (IGNORE_PACKAGE_LIST.contains(key)) continue;
 						componentPackages.add(key);
 					}
 					Collections.sort(componentPackages, new Comparator<String>()
@@ -293,9 +296,17 @@ public class DesignerFilter implements Filter
 						if (provider.getWebComponentSpecifications().containsKey(key))
 						{
 							WebComponentPackageSpecification<WebComponentSpecification> pkg = provider.getWebComponentSpecifications().get(key);
-							for (WebComponentSpecification spec : pkg.getSpecifications().values())
+							Collection<WebComponentSpecification> webComponentSpecsCollection = pkg.getSpecifications().values();
+							if ("servoydefault".equals(key))
 							{
-								if (!IGNORE_LIST.contains(spec.getName()))
+								ArrayList<WebComponentSpecification> webComponentSpecsCollectionEx = new ArrayList<WebComponentSpecification>(
+									webComponentSpecsCollection);
+								webComponentSpecsCollectionEx.addAll(provider.getWebComponentSpecifications().get("servoycore").getSpecifications().values());
+								webComponentSpecsCollection = webComponentSpecsCollectionEx;
+							}
+							for (WebComponentSpecification spec : webComponentSpecsCollection)
+							{
+								if (!IGNORE_COMPONENT_LIST.contains(spec.getName()))
 								{
 									jsonWriter.object();
 									jsonWriter.key("name").value(spec.getName());
