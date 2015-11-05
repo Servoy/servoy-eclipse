@@ -36,9 +36,9 @@ import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
@@ -128,7 +128,7 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 				if (res == Window.OK)
 				{
 					String name = nameDialog.getValue();
-					Table t = s.getTable(name);
+					ITable t = s.getTable(name);
 					if (t == null)
 					{
 						IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
@@ -145,6 +145,41 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 		}
 		else if (node.getRealType().equals(UserNodeType.INMEMORY_DATASOURCE))
 		{
+
+			final IServerInternal s = (IServerInternal)node.getRealObject();
+			InputDialog nameDialog = new InputDialog(viewer.getViewSite().getShell(), "Create table", "Supply table name", "", new IInputValidator()
+			{
+				public String isValid(String newText)
+				{
+					boolean valid = IdentDocumentValidator.isSQLIdentifier(newText) &&
+						(!(newText.toUpperCase()).startsWith(DataModelManager.TEMP_UPPERCASE_PREFIX)) &&
+						(!(newText.toUpperCase()).startsWith(IServer.SERVOY_UPPERCASE_PREFIX));
+					return valid ? null : (newText.length() == 0 ? "" : "Invalid table name");
+				}
+			});
+
+			int res = nameDialog.open();
+			if (res == Window.OK)
+			{
+				String name = nameDialog.getValue();
+
+				ITable t;
+				try
+				{
+					t = s.getTable(name);
+					if (t == null)
+					{
+						IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
+						t = s.createNewTable(validator, name);
+						EditorUtil.openTableEditor(t);
+					}
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+
+			}
 
 		}
 	}

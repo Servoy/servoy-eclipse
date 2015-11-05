@@ -3079,7 +3079,7 @@ public class ServoyModel extends AbstractServoyModel
 							if (!dataModelManager.isWritingMarkerFreeDBIFile(file) &&
 								!tableName.toUpperCase().startsWith(DataModelManager.TEMP_UPPERCASE_PREFIX))
 							{
-								Table table = server.getTable(tableName);
+								ITable table = server.getTable(tableName);
 								columnInfoChanged = true;
 								dataModelManager.loadAllColumnInfo(table);
 							}

@@ -48,8 +48,8 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 public class CopyTableAction extends Action implements ISelectionChangedListener
@@ -115,7 +115,7 @@ public class CopyTableAction extends Action implements ISelectionChangedListener
 			String targetServerName = dialog.getComboSelectedServer();
 			String tableName = dialog.getTextBoxSelection();
 
-			Table selectedTable = null;
+			ITable selectedTable = null;
 			try
 			{
 				IServerInternal selectedServer = (IServerInternal)ServoyModel.getServerManager().getServer(selectedServerName);
@@ -129,7 +129,7 @@ public class CopyTableAction extends Action implements ISelectionChangedListener
 		}
 	}
 
-	private void copyTable(String targetServerName, String tableName, boolean copyColumnInfo, Table selectedTable)
+	private void copyTable(String targetServerName, String tableName, boolean copyColumnInfo, ITable selectedTable)
 	{
 		IServerInternal targetServer = (IServerInternal)ServoyModel.getServerManager().getServer(targetServerName);
 		if (tableName != null && targetServerName != null)
@@ -140,7 +140,7 @@ public class CopyTableAction extends Action implements ISelectionChangedListener
 				{
 					MessageDialog.openError(shell, "Error", "Could not copy table:\nA table with the name '" + tableName + "' already exists in server ");
 				}
-				Table newTable = targetServer.createNewTable(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), selectedTable,
+				ITable newTable = targetServer.createNewTable(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), selectedTable,
 					tableName);
 
 

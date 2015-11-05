@@ -76,6 +76,7 @@ import com.servoy.j2db.IDebugJ2DBClient;
 import com.servoy.j2db.IDebugWebClient;
 import com.servoy.j2db.dataprocessing.FoundSetManager;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SortedList;
@@ -89,24 +90,24 @@ import com.servoy.j2db.util.SortedList;
 public class UpdateMetaDataWziard extends Wizard
 {
 	// List of   Server name Table name Pair
-	private SplitInTwoWizardPage<String, Table> overwriteSelectionPage;
-	private List<Pair<String, Table>> tablesWithDataInDB = null;
-	private List<Pair<String, Table>> tablesWithoutDataInDB = null;
+	private SplitInTwoWizardPage<String, ITable> overwriteSelectionPage;
+	private List<Pair<String, ITable>> tablesWithDataInDB = null;
+	private List<Pair<String, ITable>> tablesWithoutDataInDB = null;
 	private Shell shell = null;
 
-	public UpdateMetaDataWziard(List<Table> tablesWithDataInDB, List<Table> tablesWithoutDataInDB, Shell shell)
+	public UpdateMetaDataWziard(List<ITable> tablesWithDataInDB, List<ITable> tablesWithoutDataInDB, Shell shell)
 	{
 		super();
 		setNeedsProgressMonitor(true);
-		this.tablesWithDataInDB = new ArrayList<Pair<String, Table>>();
-		this.tablesWithoutDataInDB = new ArrayList<Pair<String, Table>>();
-		for (Table t : tablesWithDataInDB)
+		this.tablesWithDataInDB = new ArrayList<Pair<String, ITable>>();
+		this.tablesWithoutDataInDB = new ArrayList<Pair<String, ITable>>();
+		for (ITable t : tablesWithDataInDB)
 		{
-			this.tablesWithDataInDB.add(new Pair<String, Table>(t.getServerName(), t));
+			this.tablesWithDataInDB.add(new Pair<String, ITable>(t.getServerName(), t));
 		}
-		for (Table t : tablesWithoutDataInDB)
+		for (ITable t : tablesWithoutDataInDB)
 		{
-			this.tablesWithoutDataInDB.add(new Pair<String, Table>(t.getServerName(), t));
+			this.tablesWithoutDataInDB.add(new Pair<String, ITable>(t.getServerName(), t));
 		}
 		this.shell = shell;//this.getShell();
 	}
@@ -127,9 +128,9 @@ public class UpdateMetaDataWziard extends Wizard
 		}
 		else
 		{
-			Comparator<Pair<String, Table>> comparator = new Comparator<Pair<String, Table>>()
+			Comparator<Pair<String, ITable>> comparator = new Comparator<Pair<String, ITable>>()
 			{
-				public int compare(Pair<String, Table> o1, Pair<String, Table> o2)
+				public int compare(Pair<String, ITable> o1, Pair<String, ITable> o2)
 				{
 					if (o1 == null && o2 == null) return 0;
 					if (o1 == null) return -1;
@@ -147,9 +148,9 @@ public class UpdateMetaDataWziard extends Wizard
 
 			Image serverImage = Activator.getDefault().loadImageFromBundle("server.gif");
 			Image tableImage = Activator.getDefault().loadImageFromBundle("portal.gif");
-			overwriteSelectionPage = new SplitInTwoWizardPage<String, Table>("The following tables are not empty",
-				"Data synchronize will overwrite existing data, continue?", "Skip", "Overwrite data", "Skip all/multiselection",
-				"Overwrite all/multiselection", tablesWithDataInDB, comparator, serverImage, tableImage);
+			overwriteSelectionPage = new SplitInTwoWizardPage<String, ITable>("The following tables are not empty",
+				"Data synchronize will overwrite existing data, continue?", "Skip", "Overwrite data", "Skip all/multiselection", "Overwrite all/multiselection",
+				tablesWithDataInDB, comparator, serverImage, tableImage);
 
 			addPage(overwriteSelectionPage);
 		}
@@ -157,7 +158,7 @@ public class UpdateMetaDataWziard extends Wizard
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.wizard.Wizard#performFinish()
 	 */
 	@Override
@@ -175,7 +176,7 @@ public class UpdateMetaDataWziard extends Wizard
 						{
 							public void run(IProgressMonitor monitor) throws CoreException
 							{
-								List<Pair<String, Table>> toUpdate = new ArrayList<Pair<String, Table>>();
+								List<Pair<String, ITable>> toUpdate = new ArrayList<Pair<String, ITable>>();
 								if (overwriteSelectionPage != null)
 								{
 									//set2  the selected column to overwrite
@@ -232,14 +233,14 @@ public class UpdateMetaDataWziard extends Wizard
 				 * @param overrideSet
 				 * @param subProgressMonitor
 				 * @param warnings
-				 * @param monitor 
+				 * @param monitor
 				 */
-				private StringBuilder updateMetaData(List<Pair<String, Table>> overrideSet, MultiStatus warnings, IProgressMonitor monitor)
+				private StringBuilder updateMetaData(List<Pair<String, ITable>> overrideSet, MultiStatus warnings, IProgressMonitor monitor)
 				{
 					StringBuilder sb = new StringBuilder();
-					for (Pair<String, Table> tablePair : overrideSet)
+					for (Pair<String, ITable> tablePair : overrideSet)
 					{
-						Table table = tablePair.getRight();
+						ITable table = tablePair.getRight();
 						IFile dataFile = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager().getMetaDataFile(
 							table.getDataSource());
 
@@ -247,16 +248,16 @@ public class UpdateMetaDataWziard extends Wizard
 						{
 							if (dataFile == null)
 							{
-								warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Cannot find data file for datasource '" + table.getDataSource() +
-									"'."));
+								warnings.add(
+									new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Cannot find data file for datasource '" + table.getDataSource() + "'."));
 								continue;
 							}
 
 							// import file into table
 							if (!dataFile.exists())
 							{
-								warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Data file for datasource '" + table.getDataSource() +
-									"' does not exist."));
+								warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID,
+									"Data file for datasource '" + table.getDataSource() + "' does not exist."));
 								continue;
 							}
 
@@ -312,7 +313,7 @@ public class UpdateMetaDataWziard extends Wizard
  * The wizard page that is used by the user to split a set of tables into two sets.<br>
  * UI consists of a single tree table with check boxes.
  * Similar to {@link SplitInThreeWizardPage}
- * 
+ *
  * @param <T1> the type of the first element in the pair.
  * @param <T2> the type of the second element in the pair.
  * @since 6.1.3

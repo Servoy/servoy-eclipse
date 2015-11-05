@@ -666,7 +666,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			if (lst == null)
 			{
 				lst = new ArrayList<IColumn>();
-				Iterator<IColumn> columns = EditorUtil.getTableColumns(t);
+				Iterator<Column> columns = EditorUtil.getTableColumns(t);
 				while (columns.hasNext())
 				{
 					IColumn column = columns.next();

@@ -52,6 +52,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.DuplicatePersistActi
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.MoveTableNodeChildAction;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AggregateVariable;
+import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IRepository;
@@ -265,10 +266,10 @@ public class AggregationsComposite extends Composite
 			String orgName = "type_here";
 			String newName = orgName;
 			int type = QueryAggregate.ALL_DEFINED_AGGREGATES[0];
-			Iterator<IColumn> it = te.getTable().getIColumns().iterator();
+			Iterator<Column> it = te.getTable().getColumns().iterator();
 			if (it.hasNext()) //we need to make sure there is one column
 			{
-				IColumn column = it.next();
+				Column column = it.next();
 				try
 				{
 					ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();

@@ -26,6 +26,7 @@ import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -34,7 +35,7 @@ import com.servoy.j2db.query.ColumnType;
 
 /**
  * Quick fix for differences between column info in the dbi file and columns in the DB. It will change the DB column to match the column information.
- * 
+ *
  * @author acostescu
  */
 public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
@@ -63,16 +64,16 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 	@Override
 	public boolean canHandleDifference(TableDifference difference)
 	{
-		return difference != null &&
-			difference.getType() == TableDifference.COLUMN_CONFLICT &&
-			(!difference.getDbiFileDefinition().columnType.equals(difference.getTableDefinition().columnType) || (difference.getDbiFileDefinition().allowNull && (!difference.getTableDefinition().allowNull)));
+		return difference != null && difference.getType() == TableDifference.COLUMN_CONFLICT &&
+			(!difference.getDbiFileDefinition().columnType.equals(difference.getTableDefinition().columnType) ||
+				(difference.getDbiFileDefinition().allowNull && (!difference.getTableDefinition().allowNull)));
 	}
 
 	@Override
 	public void run(TableDifference difference)
 	{
 		ColumnType columnType = difference.getDbiFileDefinition().columnType;
-		Column c;
+		IColumn c;
 		try
 		{
 			ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -106,7 +107,7 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 					};
 
 					// create a new column with the same name, but using column information
-					c = difference.getTable().createNewColumn(validator, difference.getColumnName(), columnType.getSqlType(), columnType.getLength());
+					c = difference.getTable().createNewIColumn(validator, difference.getColumnName(), columnType.getSqlType(), columnType.getLength());
 					c.setDatabasePK((difference.getDbiFileDefinition().flags & Column.PK_COLUMN) != 0);
 					c.setAllowNull(difference.getDbiFileDefinition().allowNull);
 					if (difference.getDbiFileDefinition().autoEnterType == ColumnInfo.SEQUENCE_AUTO_ENTER)
@@ -132,7 +133,8 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 							{
 								StringBuffer message = new StringBuffer("The DB information on column '");
 								message.append(difference.getColumnString());
-								message.append("' has type 'dbident'. As the table already exists, this column is only marked by Servoy as 'dbident' but it will not be created as such in the database.");
+								message.append(
+									"' has type 'dbident'. As the table already exists, this column is only marked by Servoy as 'dbident' but it will not be created as such in the database.");
 								MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Creating 'dbident' column in existing table",
 									message.toString());
 							}

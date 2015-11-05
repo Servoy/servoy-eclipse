@@ -63,6 +63,7 @@ import com.servoy.eclipse.ui.util.VerifyingTextCellEditor;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -76,12 +77,12 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 	public static class RelationData implements Comparable<RelationData>
 	{
 		public final String relationName;
-		public final Table table;
+		public final ITable table;
 		public final List<Column> primaryColumns;
 		public final List<Column> foreignColumns;
 		public final boolean defaultAdd;
 
-		public RelationData(String relationName, Table table, List<Column> primaryColumns, List<Column> foreignColumns, boolean defaultAdd)
+		public RelationData(String relationName, ITable table, List<Column> primaryColumns, List<Column> foreignColumns, boolean defaultAdd)
 		{
 			this.relationName = relationName;
 			this.table = table;
@@ -129,7 +130,7 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 								relationSelector.getRelationName());
 							if (relation == null)
 							{
-								Table table = relationSelector.getPrimaryTable();
+								ITable table = relationSelector.getPrimaryTable();
 								Relation newRelation = createRelation(table, ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(),
 									relationSelector.getRelationName(), relationSelector.getSolution(), relationSelector.getPrimaryColumns(),
 									relationSelector.getForeignColumns());
@@ -166,7 +167,7 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 		return true;
 	}
 
-	public static Relation createRelation(Table table, IValidateName v, String nm, Solution s, List<Column> primaryColumns, List<Column> foreignColumns)
+	public static Relation createRelation(ITable table, IValidateName v, String nm, Solution s, List<Column> primaryColumns, List<Column> foreignColumns)
 		throws RepositoryException
 	{
 		Table ft = foreignColumns.get(0).getTable();
@@ -261,9 +262,8 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 
 			final GroupLayout groupLayout = new GroupLayout(composite);
 			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
-				groupLayout.createSequentialGroup().addContainerGap().add(
-					groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tableContainer, GroupLayout.PREFERRED_SIZE, 450,
-						Short.MAX_VALUE)).addContainerGap()));
+				groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING,
+					tableContainer, GroupLayout.PREFERRED_SIZE, 450, Short.MAX_VALUE)).addContainerGap()));
 			groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
 				groupLayout.createSequentialGroup().addContainerGap().add(tableContainer, GroupLayout.PREFERRED_SIZE, 285, Short.MAX_VALUE).addContainerGap()));
 			composite.setLayout(groupLayout);
@@ -314,12 +314,12 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 	{
 		private String relationName;
 		private Solution solution;
-		private final Table primaryTable;
+		private final ITable primaryTable;
 		private final List<Column> primaryColumns;
 		private final List<Column> foreignColumns;
 		private boolean add;
 
-		public RelationSelectorModel(String relationName, Solution solution, Table primaryTable, List<Column> primaryColumns, List<Column> foreignColumns,
+		public RelationSelectorModel(String relationName, Solution solution, ITable primaryTable, List<Column> primaryColumns, List<Column> foreignColumns,
 			boolean add)
 		{
 			this.relationName = relationName;
@@ -370,7 +370,7 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 			return foreignColumns;
 		}
 
-		public Table getPrimaryTable()
+		public ITable getPrimaryTable()
 		{
 			return primaryTable;
 		}

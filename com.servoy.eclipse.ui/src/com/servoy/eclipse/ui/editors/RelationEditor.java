@@ -632,7 +632,7 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 		retval.add(EMPTY);
 		try
 		{
-			com.servoy.j2db.persistence.Table t = null;
+			com.servoy.j2db.persistence.ITable t = null;
 			Map<String, ScriptCalculation> calcs = null;
 			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(getPersist());
 			if (index == CI_FROM)
@@ -661,7 +661,7 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 			}
 			if (t != null)
 			{
-				Iterator<IColumn> cols = EditorUtil.getTableColumns(t);
+				Iterator<Column> cols = EditorUtil.getTableColumns(t);
 				while (cols.hasNext())
 				{
 					// stored calcs are shown in calculations section

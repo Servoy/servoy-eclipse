@@ -43,7 +43,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.IServerInternal;
-import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.persistence.ITable;
 
 public class UpdateServoySequencesAction extends Action implements ISelectionChangedListener
 {
@@ -163,7 +163,7 @@ public class UpdateServoySequencesAction extends Action implements ISelectionCha
 								String tableName = iterator.next();
 								try
 								{
-									Table table = server.getTable(tableName);
+									ITable table = server.getTable(tableName);
 									if (table != null)
 									{
 										server.syncColumnSequencesWithDB(table);

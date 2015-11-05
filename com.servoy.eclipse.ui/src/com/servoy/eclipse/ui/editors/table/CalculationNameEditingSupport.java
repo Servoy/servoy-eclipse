@@ -36,7 +36,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.j2db.persistence.IColumn;
+import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -131,7 +131,7 @@ public class CalculationNameEditingSupport extends EditingSupport
 		columns = new String[table.getColumnCount() + 1];
 		columns[0] = "type_here";
 		int i = 1;
-		Iterator<IColumn> it = EditorUtil.getTableColumns(table);
+		Iterator<Column> it = EditorUtil.getTableColumns(table);
 		while (it.hasNext())
 		{
 			columns[i++] = it.next().getName();

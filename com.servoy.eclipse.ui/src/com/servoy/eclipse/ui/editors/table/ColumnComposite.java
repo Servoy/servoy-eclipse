@@ -222,7 +222,7 @@ public class ColumnComposite extends Composite
 					{
 						ArrayList<Column> columns = new ArrayList<Column>(t.getColumns());
 						int index = columns.indexOf(column);
-						t.removeColumn((IColumn)column);
+						t.removeColumn((Column)column);
 						WritableList columnsList = new WritableList(new ArrayList<Column>(t.getColumns()), Column.class);
 						if (columnsList.size() > 0)
 							tableViewer.setSelection(new StructuredSelection(columnsList.get(index >= columnsList.size() ? index - 1 : index)), true);
@@ -407,7 +407,7 @@ public class ColumnComposite extends Composite
 
 	public void refreshViewer(ITable table)
 	{
-		WritableList columnsList = new WritableList(new ArrayList<IColumn>(table.getIColumns()), IColumn.class);
+		WritableList columnsList = new WritableList(new ArrayList<Column>(table.getColumns()), Column.class);
 		tableViewer.setInput(columnsList);
 		tableViewer.refresh();
 	}

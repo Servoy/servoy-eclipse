@@ -36,7 +36,7 @@ import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
-import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.persistence.ITable;
 
 /**
  * Property controller for dataSources
@@ -100,7 +100,7 @@ public class DatasourceController extends PropertyController<String, TableWrappe
 							{
 								serverName = dlg.getSelectedServerName();
 								String selectedTableName = dlg.getSelectedTableName();
-								Table newTable = I18NServerTableDialog.createDefaultMessagesTable(serverName, selectedTableName, shell);
+								ITable newTable = I18NServerTableDialog.createDefaultMessagesTable(serverName, selectedTableName, shell);
 
 								dialog.refreshTree();
 								dialog.getTreeViewer().setSelection(new StructuredSelection(new TableWrapper(newTable.getServerName(), newTable.getName())));

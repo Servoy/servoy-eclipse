@@ -57,8 +57,8 @@ import com.servoy.j2db.dataprocessing.IDataSet;
 import com.servoy.j2db.dataprocessing.MetaDataUtils;
 import com.servoy.j2db.dataprocessing.MetaDataUtils.TooManyRowsException;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.query.QuerySelect;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
@@ -142,7 +142,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			monitor.beginTask("Checking for metadata tables", tableNames.size());
 			for (String tableName : tableNames)
 			{
-				Table table = server.getTable(tableName);
+				ITable table = server.getTable(tableName);
 				if (table.isMarkedAsMetaData() && MetaDataUtils.canBeMarkedAsMetaData(table))
 				{
 					dataSources.add(table.getDataSource());
@@ -188,12 +188,12 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			}
 		}
 		MultiStatus warnings = new MultiStatus(Activator.PLUGIN_ID, 0, "For more information please click 'Details'.", null);
-		List<Table> tables = new ArrayList<Table>();
+		List<ITable> tables = new ArrayList<ITable>();
 		monitor.beginTask("Checking for metadata tables", dataSources.size());
 		for (String dataSource : dataSources)
 		{
 			String[] stn = DataSourceUtilsBase.getDBServernameTablename(dataSource);
-			Table table = null;
+			ITable table = null;
 
 			if (stn != null)
 			{
@@ -213,24 +213,25 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 
 			if (table == null)
 			{
-				warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Error updating table  " + "Cannot find selected table for datasource '" +
-					dataSource + "'."));
+				warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID,
+					"Error updating table  " + "Cannot find selected table for datasource '" + dataSource + "'."));
 				continue;
 			}
 
 
 			if (!MetaDataUtils.canBeMarkedAsMetaData(table))
 			{
-				warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Table not marked as metadata table " + "Table '" + table.getName() +
-					"' can't be a metadata table because it must have a UUID primary key, a " + MetaDataUtils.METADATA_MODIFICATION_COLUMN + " and a " +
-					MetaDataUtils.METADATA_DELETION_COLUMN + " date column."));
+				warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID,
+					"Table not marked as metadata table " + "Table '" + table.getName() +
+						"' can't be a metadata table because it must have a UUID primary key, a " + MetaDataUtils.METADATA_MODIFICATION_COLUMN + " and a " +
+						MetaDataUtils.METADATA_DELETION_COLUMN + " date column."));
 				continue;
 			}
 			//the folowing "if" is very rare in practice because when you define : 2 columns of type date with the name modification_date and deletion_date and id of type UUID you usually think about metadata tables
 			if (!table.isMarkedAsMetaData())
 			{
-				if (!UIUtils.askQuestion(shell, "Table not marked as metadata table", "Table " + table.getName() + " in server " + table.getServerName() +
-					" is not marked as metadata table; mark now?"))
+				if (!UIUtils.askQuestion(shell, "Table not marked as metadata table",
+					"Table " + table.getName() + " in server " + table.getServerName() + " is not marked as metadata table; mark now?"))
 				{
 					// well, then not
 					continue;
@@ -285,7 +286,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		}
 	}
 
-	private void importTableData(List<Table> tables)
+	private void importTableData(List<ITable> tables)
 	{
 		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
 		if (dmm == null)
@@ -293,7 +294,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 			UIUtils.reportWarning("Error updating table(s)", "Cannot find internal data model manager.");
 			return;
 		}
-		final Pair<List<Table>, List<Table>> result = getTablesThatContainDataInDb(tables);
+		final Pair<List<ITable>, List<ITable>> result = getTablesThatContainDataInDb(tables);
 		if (result.getLeft().isEmpty() && result.getRight().isEmpty())
 		{
 			UIUtils.reportWarning("Info", "There is no meta data to be imported in the DB.");
@@ -314,21 +315,21 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 	 * @param tables  - list of mixed tables (tables with data in DB and tables without data in DB)
 	 * @return List of tables that contain data in DB
 	 */
-	private Pair<List<Table>, List<Table>> getTablesThatContainDataInDb(List<Table> tables)
+	private Pair<List<ITable>, List<ITable>> getTablesThatContainDataInDb(List<ITable> tables)
 	{
 		//tables that contain data in the database
-		List<Table> tablesWithDataInDB = new ArrayList<Table>();
-		List<Table> tablesWithoutDataInDB = new ArrayList<Table>();
+		List<ITable> tablesWithDataInDB = new ArrayList<ITable>();
+		List<ITable> tablesWithoutDataInDB = new ArrayList<ITable>();
 
 		MultiStatus warnings = new MultiStatus(Activator.PLUGIN_ID, 0, "For more information please click 'Details'.", null);
 		//filter only tables that contain data in their corresponding database
-		for (Table table : tables)
+		for (ITable table : tables)
 		{
 			try
 			{ // check for existing data
 				QuerySelect query = MetaDataUtils.createTableMetadataQuery(table, null);
-				IDataSet ds = ApplicationServerRegistry.get().getDataServer().performQuery(ApplicationServerRegistry.get().getClientId(),
-					table.getServerName(), null, query, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
+				IDataSet ds = ApplicationServerRegistry.get().getDataServer().performQuery(ApplicationServerRegistry.get().getClientId(), table.getServerName(),
+					null, query, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
 				if (ds.getRowCount() > 0)
 				{
 					tablesWithDataInDB.add(table);
@@ -356,10 +357,10 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 				}
 			}, false);
 		}
-		return new Pair<List<Table>, List<Table>>(tablesWithDataInDB, tablesWithoutDataInDB);
+		return new Pair<List<ITable>, List<ITable>>(tablesWithDataInDB, tablesWithoutDataInDB);
 	}
 
-	private void generateTableDataFile(List<Table> tables, IProgressMonitor monitor)
+	private void generateTableDataFile(List<ITable> tables, IProgressMonitor monitor)
 	{
 		DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
 		if (dmm == null)
@@ -372,7 +373,7 @@ public class SynchronizeTableDataAction extends Action implements ISelectionChan
 		MultiStatus warnings = new MultiStatus(Activator.PLUGIN_ID, 0, "For more information please click 'Details'.", null);
 
 		monitor.beginTask("Creating metadata files for the tables", tables.size());
-		for (Table table : tables)
+		for (ITable table : tables)
 		{
 			try
 			{

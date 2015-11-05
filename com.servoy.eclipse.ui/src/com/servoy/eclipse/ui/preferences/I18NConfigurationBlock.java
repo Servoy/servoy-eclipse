@@ -52,7 +52,6 @@ import com.servoy.eclipse.ui.dialogs.I18NServerTableDialog;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Settings;
 
@@ -159,7 +158,7 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 		{
 			public void handleEvent(Event event)
 			{
-				Table table = I18NServerTableDialog.createDefaultMessagesTable(defaultI18NServer.getText(), defaultI18NTable.getText(), getShell());
+				ITable table = I18NServerTableDialog.createDefaultMessagesTable(defaultI18NServer.getText(), defaultI18NTable.getText(), getShell());
 
 				if (table != null)
 				{
@@ -214,8 +213,7 @@ public class I18NConfigurationBlock extends AbstractConfigurationBlock
 		locales = Locale.getAvailableLocales();
 		for (int i = 0; i < locales.length; i++)
 		{
-			if (locales[i].getCountry() != null && !locales[i].getCountry().equals(""))
-			al.add(locales[i]);
+			if (locales[i].getCountry() != null && !locales[i].getCountry().equals("")) al.add(locales[i]);
 		}
 		locales = new Locale[al.size()];
 		locales = al.toArray(locales);

@@ -39,8 +39,8 @@ import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.DummyValidator;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManager;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.ITransactionConnection;
 import com.servoy.j2db.util.Utils;
 
@@ -137,14 +137,14 @@ public class I18NServerTableDialog extends Dialog
 	/**
 	 * Creates a new I18N table in the specified server. The table name can be also specified. If a table name is specified, it is used exactly as provided. If
 	 * no table name is specified, then a default table name will be used.
-	 * 
+	 *
 	 * @param serverName The name of the server where to create the new I18N table.
 	 * @param tableName The name of the new I18N table.
 	 * @param shell A shell used for displaying message boxes.
 	 * @return Returns the table name that was used for the new I18N table. This will be the same table name as that which was provided, if a table name was
 	 *         provided. Otherwise this will be a default table name picked automatically.
 	 */
-	public static Table createDefaultMessagesTable(String serverName, String tableName, Shell shell)
+	public static ITable createDefaultMessagesTable(String serverName, String tableName, Shell shell)
 	{
 		if ((serverName == null) || serverName.equals(SELECTION_NONE) || (serverName.trim().length() == 0))
 		{
@@ -190,7 +190,7 @@ public class I18NServerTableDialog extends Dialog
 			try
 			{
 				IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(serverName);
-				Table table = server.getTable(adjustedTableName);
+				ITable table = server.getTable(adjustedTableName);
 				if (table != null)
 				{
 					MessageBox msg = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);

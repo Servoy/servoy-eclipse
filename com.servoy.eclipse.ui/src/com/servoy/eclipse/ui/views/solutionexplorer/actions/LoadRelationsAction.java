@@ -49,8 +49,8 @@ import com.servoy.eclipse.ui.wizards.LoadRelationsWizard;
 import com.servoy.eclipse.ui.wizards.LoadRelationsWizard.RelationData;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
@@ -124,8 +124,8 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 							}
 							else
 							{
-								MessageDialog.openInformation(Display.getDefault().getActiveShell(),
-									"Load relations", "No relation was found in server '" + server.getName() + "'.");
+								MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Load relations",
+									"No relation was found in server '" + server.getName() + "'.");
 							}
 						}
 					});
@@ -176,7 +176,7 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 					{
 						return null;
 					}
-					Table table = server.getTable(tableName);
+					ITable table = server.getTable(tableName);
 					Connection connection = null;
 					ResultSet resultSet = null;
 					try
@@ -208,7 +208,8 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 								rel_items_list.add(new ArrayList<String[]>());
 							}
 							// rel_items_list is a list of items-lists, we are adding items to the last of this list
-							rel_items_list.get(rel_items_list.size() - 1).add(new String[] { table.getSQLName(), pcolumnName, ftableName, fcolumnName, fkname });
+							rel_items_list.get(rel_items_list.size() - 1).add(
+								new String[] { table.getSQLName(), pcolumnName, ftableName, fcolumnName, fkname });
 						}
 						resultSet = Utils.closeResultSet(resultSet);
 
@@ -269,7 +270,7 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 									String fcolumnName = element[3];
 //									String fkname = element[4];
 
-									Table foreignTable = server.getTable(ftableName);
+									ITable foreignTable = server.getTable(ftableName);
 									if (foreignTable == null || foreignTable.isMarkedAsHiddenInDeveloper()) continue;
 
 									Column primaryColumn = table.getColumn(pcolumnName);
@@ -321,7 +322,7 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 			return relations;
 		}
 
-		private String createInversedFKRelationName(Table table, List<String[]> rel_items_list)
+		private String createInversedFKRelationName(ITable table, List<String[]> rel_items_list)
 		{
 			if (rel_items_list.size() == 0)
 			{

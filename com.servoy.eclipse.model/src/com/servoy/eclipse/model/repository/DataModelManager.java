@@ -210,7 +210,7 @@ public class DataModelManager implements IColumnInfoManager
 		sm.addServerListener(serverListener);
 	}
 
-	public void loadAllColumnInfo(final Table t) throws RepositoryException
+	public void loadAllColumnInfo(final ITable t) throws RepositoryException
 	{
 		if (t == null || !t.getExistInDB()) return;
 		removeErrorMarker(t.getServerName(), t.getName());
@@ -446,12 +446,12 @@ public class DataModelManager implements IColumnInfoManager
 		}
 	}
 
-	public void updateAllColumnInfo(final Table t) throws RepositoryException
+	public void updateAllColumnInfo(final ITable t) throws RepositoryException
 	{
 		updateAllColumnInfoImpl(t, true);
 	}
 
-	private void updateAllColumnInfoImpl(final Table t, boolean checkForMarkers) throws RepositoryException
+	private void updateAllColumnInfoImpl(final ITable t, boolean checkForMarkers) throws RepositoryException
 	{
 		if (t == null || !writeDBIFiles) return;
 
@@ -636,7 +636,7 @@ public class DataModelManager implements IColumnInfoManager
 	 * @param writeBackLater specifies whether the column info should be updater now or later.
 	 * @throws RepositoryException
 	 */
-	public void updateAllColumnInfo(final Table t, boolean writeBackLater) throws RepositoryException
+	public void updateAllColumnInfo(final ITable t, boolean writeBackLater) throws RepositoryException
 	{
 		updateAllColumnInfo(t, writeBackLater, true);
 	}
@@ -648,7 +648,7 @@ public class DataModelManager implements IColumnInfoManager
 	 * @param writeBackLater specifies whether the column info should be updater now or later.
 	 * @throws RepositoryException
 	 */
-	public void updateAllColumnInfo(final Table t, boolean writeBackLater, final boolean checkForMarkers) throws RepositoryException
+	public void updateAllColumnInfo(final ITable t, boolean writeBackLater, final boolean checkForMarkers) throws RepositoryException
 	{
 		if (writeBackLater)
 		{
@@ -689,7 +689,7 @@ public class DataModelManager implements IColumnInfoManager
 		return file.equals(writingMarkerFreeDBIFile);
 	}
 
-	private void deserializeTable(IServerInternal s, Table t, String json_table) throws RepositoryException, JSONException
+	private void deserializeTable(IServerInternal s, ITable t, String json_table) throws RepositoryException, JSONException
 	{
 		int existingColumnInfo = 0;
 		TableDef tableInfo = deserializeTableInfo(json_table);
@@ -782,7 +782,7 @@ public class DataModelManager implements IColumnInfoManager
 		t.fireIColumnsChanged(changedColumns);
 	}
 
-	private void addDifferenceMarkersIfNecessary(Column c, ColumnInfoDef cid, Table t, String columnName)
+	private void addDifferenceMarkersIfNecessary(Column c, ColumnInfoDef cid, ITable t, String columnName)
 	{
 		if (c == null)
 		{
@@ -872,7 +872,7 @@ public class DataModelManager implements IColumnInfoManager
 		return tableInfo;
 	}
 
-	public String serializeTable(Table t) throws JSONException
+	public String serializeTable(ITable t) throws JSONException
 	{
 		return serializeTable(t, true);
 	}
@@ -886,16 +886,16 @@ public class DataModelManager implements IColumnInfoManager
 		tableInfo.tableType = t.getTableType();
 
 		List<String> colNames = new ArrayList<String>();
-		Collection<IColumn> col = t.getIColumns();
-		for (IColumn column : col)
+		Collection<Column> col = t.getColumns();
+		for (Column column : col)
 		{
 			colNames.add(column.getName());
 		}
 
-		Iterator<IColumn> it = t.getColumnsSortedByName();
+		Iterator<Column> it = t.getColumnsSortedByName();
 		while (it.hasNext())
 		{
-			IColumn column = it.next();
+			Column column = it.next();
 			ColumnInfoDef cid = getColumnInfoDef(column, colNames.indexOf(column.getName()), onlyStoredColumns);
 			if (cid != null)
 			{
@@ -1430,7 +1430,7 @@ public class DataModelManager implements IColumnInfoManager
 
 		private final String serverName;
 		private final String tableName;
-		private Table table;
+		private ITable table;
 		private final String columnName;
 		private final int type;
 		private final ColumnInfoDef tableDefinition;
@@ -1453,13 +1453,13 @@ public class DataModelManager implements IColumnInfoManager
 			this.dbiFileDefinition = dbiFileDefinition;
 		}
 
-		private TableDifference(Table table, String columnName, int type, ColumnInfoDef tableDefinition, ColumnInfoDef dbiFileDefinition)
+		private TableDifference(ITable table, String columnName, int type, ColumnInfoDef tableDefinition, ColumnInfoDef dbiFileDefinition)
 		{
 			this(table.getServerName(), table.getName(), columnName, type, tableDefinition, dbiFileDefinition);
 			this.table = table;
 		}
 
-		private TableDifference(Table table, String columnName, int type, ColumnInfoDef tableDefinition, ColumnInfoDef dbiFileDefinition, boolean renamable)
+		private TableDifference(ITable table, String columnName, int type, ColumnInfoDef tableDefinition, ColumnInfoDef dbiFileDefinition, boolean renamable)
 		{
 			this(table, columnName, type, tableDefinition, dbiFileDefinition);
 			this.renamable = renamable;
@@ -1475,7 +1475,7 @@ public class DataModelManager implements IColumnInfoManager
 			return serverName;
 		}
 
-		public Table getTable()
+		public ITable getTable()
 		{
 			return table;
 		}
@@ -1745,7 +1745,7 @@ public class DataModelManager implements IColumnInfoManager
 			}
 		}
 
-		public synchronized int getDifferenceTypeForTable(Table t)
+		public synchronized int getDifferenceTypeForTable(ITable t)
 		{
 			Integer result = differenceTypes.get(t.getServerName() + '.' + t.getName());
 			return result == null ? -1 : result.intValue();

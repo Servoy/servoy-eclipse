@@ -31,12 +31,14 @@ import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDataProviderLookup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -108,7 +110,7 @@ public final class DatabaseUtils
 					}
 				}
 			};
-			Table table = server.createNewTable(validator, tableName, false);
+			ITable table = server.createNewTable(validator, tableName, false);
 			table.setMarkedAsMetaData(tableInfo.isMetaData);
 			server.setTableMarkedAsHiddenInDeveloper(tableName, tableInfo.hiddenInDeveloper);
 
@@ -137,7 +139,7 @@ public final class DatabaseUtils
 				ColumnInfoDef columnInfoInfo = columnInfoIt.next();
 
 				// Add the column with the appropriate information.
-				Column column = table.createNewColumn(validator, columnInfoInfo.name, columnInfoInfo.columnType.getSqlType(),
+				IColumn column = table.createNewColumn(validator, columnInfoInfo.name, columnInfoInfo.columnType.getSqlType(),
 					columnInfoInfo.columnType.getLength(), columnInfoInfo.columnType.getScale());
 				column.setDatabasePK((columnInfoInfo.flags & Column.PK_COLUMN) != 0);
 				column.setAllowNull(columnInfoInfo.allowNull);

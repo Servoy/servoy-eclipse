@@ -34,6 +34,7 @@ import org.eclipse.swt.custom.CCombo;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AggregateVariable;
+import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.ITable;
 
@@ -122,11 +123,11 @@ public class AggregationColumnEditingSupport extends EditingSupport
 			int index = 0;
 			try
 			{
-				Iterator<IColumn> it = EditorUtil.getTableColumns(table);
+				Iterator<Column> it = EditorUtil.getTableColumns(table);
 				int i = 0;
 				while (it.hasNext())
 				{
-					IColumn column = it.next();
+					Column column = it.next();
 					if (column.getDataProviderID().equals(dataProviderId))
 					{
 						index = i;
@@ -159,7 +160,7 @@ public class AggregationColumnEditingSupport extends EditingSupport
 		columns = new String[table.getColumnCount()];
 		try
 		{
-			Iterator<IColumn> it = EditorUtil.getTableColumns(table);
+			Iterator<Column> it = EditorUtil.getTableColumns(table);
 			int i = 0;
 			while (it.hasNext())
 			{

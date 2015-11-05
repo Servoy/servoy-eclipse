@@ -65,7 +65,6 @@ import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Settings;
 
@@ -106,7 +105,8 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 		if (activeProject == null)
 		{
 			new MessageDialog(shell, ACTION_EXTERNALIZE.equals(actionId) ? "Externalize Strings" : "Edit I18N messages", null,
-				"The dialog does not work when there is no active solution set.", MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0).open();
+				"The dialog does not work when there is no active solution set.", MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL },
+				0).open();
 			return;
 		}
 
@@ -168,7 +168,7 @@ public class ShowI18NDialogActionDelegate implements IWorkbenchWindowActionDeleg
 									{
 										serverName = dlg.getSelectedServerName();
 										String selectedTableName = dlg.getSelectedTableName();
-										Table newTable = I18NServerTableDialog.createDefaultMessagesTable(serverName, selectedTableName, shell);
+										ITable newTable = I18NServerTableDialog.createDefaultMessagesTable(serverName, selectedTableName, shell);
 
 										dialog.refreshTree();
 										dialog.getTreeViewer().setSelection(

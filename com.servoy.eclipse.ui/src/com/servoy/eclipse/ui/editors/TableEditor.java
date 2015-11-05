@@ -266,7 +266,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			{
 				if (server != null)
 				{
-					Iterator<IColumn> it = getTable().getIColumns().iterator();
+					Iterator<Column> it = getTable().getColumns().iterator();
 					while (it.hasNext())
 					{
 						it.next().removeColumnInfo();
@@ -739,7 +739,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 					table.setHiddenInDeveloperBecauseNoPk(false);
 					server.setTableMarkedAsHiddenInDeveloper(table.getName(), false);
 				}
-				for (IColumn column : table.getIColumns())
+				for (Column column : table.getColumns())
 				{
 					if (column.getColumnInfo() != null)
 					{
@@ -820,7 +820,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	private void validateColumnSettings() throws Exception
 	{
-		for (IColumn col : table.getIColumns())
+		for (Column col : table.getColumns())
 		{
 			int colType = Column.mapToDefaultType(col.getConfiguredColumnType().getSqlType());
 			// check UUID generator valid types

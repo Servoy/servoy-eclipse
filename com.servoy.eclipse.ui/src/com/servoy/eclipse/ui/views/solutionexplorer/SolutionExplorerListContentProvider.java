@@ -1037,7 +1037,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		solution.getReferencedModulesRecursive(modulesOfSolution);
 		modulesOfSolution.put(solution.getName(), solution);
 
-		Iterator<IColumn> cols = EditorUtil.getTableColumns(table);
+		Iterator<Column> cols = EditorUtil.getTableColumns(table);
 		while (cols.hasNext())
 		{
 			IColumn c = cols.next();

@@ -27,6 +27,7 @@ import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -35,7 +36,7 @@ import com.servoy.j2db.query.ColumnType;
 
 /**
  * Quick fix for missing columns in DB (although they are present in the dbi files). It will create a column.
- * 
+ *
  * @author acostescu
  */
 public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
@@ -71,7 +72,7 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 	public void run(TableDifference difference)
 	{
 		ColumnType columnType = difference.getDbiFileDefinition().columnType;
-		Column c;
+		IColumn c;
 		try
 		{
 			ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -104,7 +105,7 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 						}
 					};
 					// create the new column in memory
-					c = difference.getTable().createNewColumn(validator, difference.getColumnName(), columnType.getSqlType(), columnType.getLength());
+					c = difference.getTable().createNewIColumn(validator, difference.getColumnName(), columnType.getSqlType(), columnType.getLength());
 					c.setDatabasePK((difference.getDbiFileDefinition().flags & Column.PK_COLUMN) != 0);
 					c.setAllowNull(difference.getDbiFileDefinition().allowNull);
 					if (difference.getDbiFileDefinition().autoEnterType == ColumnInfo.SEQUENCE_AUTO_ENTER)
@@ -130,7 +131,8 @@ public class DBIQuickFixCreateColumnInDB extends TableDifferenceQuickFix
 							{
 								StringBuffer message = new StringBuffer("The DB information on column '");
 								message.append(difference.getColumnString());
-								message.append("' has type 'dbident'. As the table already exists, this column is only marked by Servoy as 'dbident' but it will not be created as such in the database.");
+								message.append(
+									"' has type 'dbident'. As the table already exists, this column is only marked by Servoy as 'dbident' but it will not be created as such in the database.");
 								MessageDialog.openWarning(Display.getCurrent().getActiveShell(), "Creating 'dbident' column in existing table",
 									message.toString());
 							}

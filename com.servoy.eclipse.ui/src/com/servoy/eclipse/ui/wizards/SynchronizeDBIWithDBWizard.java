@@ -98,8 +98,8 @@ import com.servoy.j2db.persistence.IColumnInfoBasedSequenceProvider;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.SortedList;
@@ -109,7 +109,7 @@ import com.servoy.j2db.util.Utils;
  * Wizard that allows the user to check for .dbi files that do not have a corresponding table in the database. If such files are found, the user can choose
  * either to create a new table according to that file, or delete the file.<BR>
  * This wizard will also automatically create default .dbi files for tables that exist, but do not have a corresponding file.
- * 
+ *
  * @author acostescu
  */
 public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWizard
@@ -149,7 +149,8 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 
 			};
 			errorPage.setTitle("No database information files found");
-			errorPage.setErrorMessage("Synchronizing database tables with the database information files requires an active resources project.\nThe database information files (.dbi) are located in resources projects.");
+			errorPage.setErrorMessage(
+				"Synchronizing database tables with the database information files requires an active resources project.\nThe database information files (.dbi) are located in resources projects.");
 			errorPage.setPageComplete(false);
 			page1 = null;
 			page2 = null;
@@ -255,8 +256,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 
 				if (foundMissingTables.size() > 0)
 				{
-					page1 = new SplitInThreeWizardPage<IServerInternal, String>(
-						"Missing tables",
+					page1 = new SplitInThreeWizardPage<IServerInternal, String>("Missing tables",
 						"Database information files (.dbi from resources project) can point to tables that do not exist in the database.\nYou can choose to create those tables according to the information or delete the unwanted information files.",
 						"Skip", "Create table", "Delete .dbi", "Skip all/multiselection", "Create all/multiselection", "Delete all/multiselection",
 						foundMissingTables, comparator, serverImage, tableImage, viewImage);
@@ -267,8 +267,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 				}
 				if (foundSupplementalTables.size() > 0)
 				{
-					page2 = new SplitInThreeWizardPage<IServerInternal, String>(
-						"Missing database information files",
+					page2 = new SplitInThreeWizardPage<IServerInternal, String>("Missing database information files",
 						"Tables in the database can lack an associated database information file (.dbi in the resources project).\nYou can choose to create the database information file or delete the table from the database.",
 						"Skip", "Create .dbi", "Delete table", "Skip all/multiselection", "Create all/multiselection", "Delete all/multiselection",
 						foundSupplementalTables, comparator, serverImage, tableImage, viewImage);
@@ -286,8 +285,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 
 			// page3 offers to read/load all available database information in the inspected servers
 			// so that the error markers that show differences in table columns will be created
-			page3 = new CheckBoxWizardPage(
-				"Synchronize at column level",
+			page3 = new CheckBoxWizardPage("Synchronize at column level",
 				"For tables that exist in the database and also have a database information file in the resources project,\ncolumn information can differ.",
 				"Column differences between the DB and the DB information files are only noticed when the DB information files are read.\nAs the files are read only when needed, you might want to trigger a load in order to see the differences\nin the 'Problems' view.",
 				"Read/check existing DB information files for existing tables", true);
@@ -354,7 +352,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 	private static List<Pair<IServerInternal, String>> getSupplementalTables(List<IServerInternal> servers, DataModelManager dmm)
 	{
 		// choose which of the missing files (tables that exist in the DB but have no corresponding .dbi file) will be created
-		// and which of the tables corresponding to these missing files will be deleted 
+		// and which of the tables corresponding to these missing files will be deleted
 		List<Pair<IServerInternal, String>> foundSupplementalTables = new ArrayList<Pair<IServerInternal, String>>();
 		for (IServerInternal s : servers)
 		{
@@ -533,8 +531,8 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 							else
 							{
 								ServoyLog.logError("Cannot find .dbi file to create missing table " + tableToCreate, null);
-								warnings.add(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Cannot find .dbi file to create missing table " +
-									tableToCreate.getLeft().getName() + " - " + tableToCreate.getRight()));
+								warnings.add(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
+									"Cannot find .dbi file to create missing table " + tableToCreate.getLeft().getName() + " - " + tableToCreate.getRight()));
 							}
 							monitor.worked(1);
 						}
@@ -604,7 +602,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 								try
 								{
 									// make sure the table is loaded
-									Table t = dbiFileToCreate.getLeft().getTable(dbiFileToCreate.getRight());
+									ITable t = dbiFileToCreate.getLeft().getTable(dbiFileToCreate.getRight());
 
 									// write the file
 									dmm.updateAllColumnInfo(t);
@@ -695,7 +693,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 
 		/**
 		 * Creates a new check box wizard page.
-		 * 
+		 *
 		 * @param title wizard page title.
 		 * @param description wizard page description.
 		 * @param labelText the text on the label above the check box.
@@ -768,7 +766,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 	/**
 	 * The wizard page that is used by the user to split a set of tables into three sets.<br>
 	 * UI consists of a single tree table with check boxes.
-	 * 
+	 *
 	 * @param <T1> the type of the first element in the pair.
 	 * @param <T2> the type of the second element in the pair.
 	 */
@@ -796,7 +794,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 
 		/**
 		 * Creates a new split-in-three wizard page. It will split the initial set "servers" into 3 subsets.
-		 * 
+		 *
 		 * @param fatherChildrenPairs the initial set to be split up.
 		 * @param title the title of the page.
 		 * @param description the description of the page.

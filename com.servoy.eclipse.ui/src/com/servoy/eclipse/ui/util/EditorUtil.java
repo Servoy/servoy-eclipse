@@ -93,6 +93,7 @@ import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.resource.FileEditorInputFactory;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
+import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -835,16 +836,16 @@ public class EditorUtil
 	/*
 	 * Get the table columns in order as configured in the preferences.
 	 */
-	public static Iterator<IColumn> getTableColumns(ITable table)
+	public static Iterator<Column> getTableColumns(ITable table)
 	{
 		if (table == null)
 		{
-			return Collections.<IColumn> emptyList().iterator();
+			return Collections.<Column> emptyList().iterator();
 		}
 		if (new DesignerPreferences().getShowColumnsInDbOrder())
 		{
 			// columns as they appear in the database
-			return table.getIColumns().iterator();
+			return table.getColumns().iterator();
 		}
 		// columns sorted by name (PK always first)
 		return table.getColumnsSortedByName();
