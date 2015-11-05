@@ -24,7 +24,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.IPersist;
 
 /**
  * IComboboxPropertyModel model for style classes.
@@ -38,10 +38,10 @@ public class StyleClassesComboboxModel implements IComboboxPropertyModel<String>
 {
 	private final String lookupName;
 	private final Form form;
-	private final IFormElement element;
+	private final IPersist element;
 	private final String propertyName;
 
-	public StyleClassesComboboxModel(Form form, IFormElement persist, String propertyName, String lookupName)
+	public StyleClassesComboboxModel(Form form, IPersist persist, String propertyName, String lookupName)
 	{
 		this.form = form;
 		this.lookupName = lookupName;

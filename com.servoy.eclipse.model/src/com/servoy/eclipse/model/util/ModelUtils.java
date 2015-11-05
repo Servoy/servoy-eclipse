@@ -34,8 +34,10 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebLayoutSpecification;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
@@ -54,6 +56,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -117,7 +120,7 @@ public class ModelUtils
 	 */
 	private final static WeakHashMap<IStyleSheet, Map<Pair<String, String>, String[]>> styleClassesCache = new WeakHashMap<IStyleSheet, Map<Pair<String, String>, String[]>>();
 
-	public static String[] getStyleClasses(FlattenedSolution flattenedSolution, Form form, IFormElement persist, String styleClassProperty, String lookupName)
+	public static String[] getStyleClasses(FlattenedSolution flattenedSolution, Form form, IPersist persist, String styleClassProperty, String lookupName)
 	{
 		if (flattenedSolution == null || form == null)
 		{
@@ -136,8 +139,21 @@ public class ModelUtils
 					List<Object> cssClasses = new ArrayList<Object>();
 					if (persist != null)
 					{
-						WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-							FormTemplateGenerator.getComponentTypeName(persist));
+						WebComponentSpecification spec = null;
+						if (persist instanceof IFormElement)
+						{
+							spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+								FormTemplateGenerator.getComponentTypeName((IFormElement)persist));
+						}
+						else if (persist instanceof LayoutContainer)
+						{
+							WebComponentPackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+								((LayoutContainer)persist).getPackageName());
+							if (pkg != null)
+							{
+								spec = pkg.getSpecification(((LayoutContainer)persist).getSpecName());
+							}
+						}
 						if (spec != null)
 						{
 							PropertyDescription pd = spec.getProperty(styleClassProperty);
@@ -281,16 +297,15 @@ public class ModelUtils
 			else
 			{
 				styleName = styleParts[styleParts.length - 1];
-				if (styleParts.length > 1 &&
-					(styleName.equals(ISupportRowStyling.CLASS_ODD) || styleName.equals(ISupportRowStyling.CLASS_EVEN) || styleName.equals(ISupportRowStyling.CLASS_SELECTED)))
+				if (styleParts.length > 1 && (styleName.equals(ISupportRowStyling.CLASS_ODD) || styleName.equals(ISupportRowStyling.CLASS_EVEN) ||
+					styleName.equals(ISupportRowStyling.CLASS_SELECTED)))
 				{
 					styleName = styleParts[styleParts.length - 2];
 					stylePartsCount--;
 				}
 
 				if ((matchedFormPrefix && stylePartsCount == 1) // found a match with form prefix, skip root matches
-					||
-					stylePartsCount > 2 || !styleName.startsWith(lookupName) || (stylePartsCount == 2 && !styleParts[0].equals(formPrefix)))
+				|| stylePartsCount > 2 || !styleName.startsWith(lookupName) || (stylePartsCount == 2 && !styleParts[0].equals(formPrefix)))
 				{
 					continue;
 				}
@@ -413,8 +428,9 @@ public class ModelUtils
 	{
 		// probably Servoy developer was started via a workspace exporter app. - it must not initialize core/ui and other related projects
 		// but some extension points these use (for example DLTK extension points) will cause them to get loaded; do not allow this!
-		if (ModelUtils.isUIDisabled()) throw new RuntimeException(bundleName != null ? "'" + bundleName +
-			"' bundle will not be started as Servoy is started without UI. Please ignore this log message." : "Assertion failed. UI is marked as not running.");
+		if (ModelUtils.isUIDisabled()) throw new RuntimeException(
+			bundleName != null ? "'" + bundleName + "' bundle will not be started as Servoy is started without UI. Please ignore this log message."
+				: "Assertion failed. UI is marked as not running.");
 	}
 
 	public static boolean isUIDisabled()

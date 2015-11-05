@@ -26,6 +26,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
+import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
@@ -36,7 +37,6 @@ import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.RepositoryHelper;
-import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.util.Utils;
 
@@ -194,7 +194,7 @@ public class PDPropertySource extends PersistPropertySource
 		}
 
 		List<Object> values = desc.getValues();
-		if (values != null && values.size() > 0 && !desc.getName().equals(StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName()))
+		if (values != null && values.size() > 0 && !(desc.getType() instanceof StyleClassPropertyType))
 		{
 			ValuesConfig config = new ValuesConfig();
 			if (!(values.get(0) instanceof JSONObject))
