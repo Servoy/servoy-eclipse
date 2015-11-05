@@ -550,7 +550,7 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 				return editorContentRootScope;
 			}
 
-			$scope.contentStyle = {top: "0px", left: "0px", paddingRight: "80px", bottom: "0px"};
+			$scope.contentStyle = {position: "absolute", top: "20px", left: "20px", minWidth: "992px", bottom: "0px"};
 			$scope.glasspaneStyle = {};
 
 			$scope.setContentSize = function(width, height) {
@@ -558,14 +558,15 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 				$scope.contentStyle.height = height;
 				delete $scope.contentStyle.top;
 				delete $scope.contentStyle.left;
-				delete $scope.contentStyle.paddingRight;
+				delete $scope.contentStyle.position;
+				delete $scope.contentStyle.minWidth;
 				delete $scope.contentStyle.bottom;
 				delete $scope.contentStyle.h
 				delete $scope.contentStyle.w
-				adjustGlassPaneSize();
+				adjustGlassPaneSize(width, height);
 			}
 			$scope.setContentSizeFull = function() {
-				$scope.contentStyle = {top: "0px", left: "0px",paddingRight: "80px", bottom: "0px"};
+				$scope.contentStyle = {position: "absolute", top: "20px", left: "20px", minWidth: "992px", bottom: "0px"};
 				delete $scope.contentStyle.width;
 				delete $scope.contentStyle.height;
 				delete $scope.contentStyle.h
@@ -650,22 +651,31 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 			}
 			
 			function adjustGlassPaneSize() {
-				var sizes = getScrollSizes($scope.contentDocument.querySelectorAll(".sfcontent"));
-				if (sizes.height > 0 && sizes.width > 0) {
-					var contentDiv = $element.find('.content-area')[0];
-					if (contentDiv.clientHeight < (sizes.height+40)) {
-						$scope.glasspaneStyle.height = (sizes.height + 40)  +"px";// 20 for the body ghost height
+				if($scope.isAbsoluteFormLayout()) {
+					var sizes = getScrollSizes($scope.contentDocument.querySelectorAll(".sfcontent"));
+					if (sizes.height > 0 && sizes.width > 0) {
+						var contentDiv = $element.find('.content-area')[0];
+						if (contentDiv.clientHeight < (sizes.height+40)) {
+							$scope.glasspaneStyle.height = (sizes.height + 40)  +"px";// 20 for the body ghost height
+						}
+						else {
+							$scope.glasspaneStyle.height = '100%';
+						}
+						
+						if (contentDiv.clientWidth < (sizes.width + 120)) {
+							$scope.glasspaneStyle.width = (sizes.width + 120)  +"px"; // 80 for the body ghost width
+						}
+						else 
+							$scope.glasspaneStyle.width = '100%';
 					}
-					else {
-						$scope.glasspaneStyle.height = '100%';
-					}
-					
-					if (contentDiv.clientWidth < (sizes.width + 120)) {
-						$scope.glasspaneStyle.width = (sizes.width + 120)  +"px"; // 80 for the body ghost width
-					}
-					else 
-						$scope.glasspaneStyle.width = '100%';
 				}
+				else {
+					var contentDiv = $($scope.contentDocument).find('.svy-form')[0];
+					if(contentDiv) {
+						$scope.glasspaneStyle.width = contentDiv.clientWidth + 20 + 'px';
+						$scope.glasspaneStyle.height = contentDiv.clientHeight + 20 + 'px';
+					}
+				}				
 			}
 						
 			$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
