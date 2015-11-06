@@ -165,7 +165,7 @@ public class GhostHandler implements IServerService
 												if (PropertyUtils.isCustomJSONObjectProperty(pd.getType()))
 												{
 													if (pd.getType() instanceof ComponentPropertyType ||
-														(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
+															(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
 													{
 														writeGhostToJSON(writer, (Bean)bean, pd, simpleTypeName, -1);// -1 does not add a [0] at the end of the name
 													}
@@ -176,7 +176,7 @@ public class GhostHandler implements IServerService
 													for (int i = 0; i < jsonArray.length(); i++)
 													{
 														if (((CustomJSONArrayType)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType ||
-															(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
+																(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
 														{
 															writeGhostToJSON(writer, (Bean)bean, pd, simpleTypeName, i);
 														}
@@ -419,10 +419,11 @@ public class GhostHandler implements IServerService
 										while (fields.hasNext())
 										{
 											IPersist next = fields.next();
+											if (!isVisible(next)) continue;
 											// TODO check responsive/relative layout and ghosts...
 											Part p = null;
 											if (!f.getParts().hasNext() ||
-												(next instanceof ISupportBounds && (p = f.getPartAt(((ISupportBounds)next).getLocation().y)) != null && p.getPartType() == Part.BODY))
+													(next instanceof ISupportBounds && (p = f.getPartAt(((ISupportBounds)next).getLocation().y)) != null && p.getPartType() == Part.BODY))
 											{
 												ISupportBounds iSupportBounds = (ISupportBounds)next;
 												int x = iSupportBounds.getLocation().x;
@@ -561,23 +562,7 @@ public class GhostHandler implements IServerService
 				{
 					outsideElements.add(fe);
 				}
-
-				boolean visible = true;
-				if (fe instanceof WebComponent && fe.getFlattenedPropertiesMap().containsKey("json"))
-				{
-					JSONObject obj = (JSONObject)fe.getFlattenedPropertiesMap().get("json");
-					WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)fe).getTypeName());
-					if (spec != null && !spec.getProperties(VisiblePropertyType.INSTANCE).isEmpty())
-					{
-						PropertyDescription pd = spec.getProperties(VisiblePropertyType.INSTANCE).iterator().next();
-						visible = obj.optBoolean(pd.getName(), true);
-					}
-				}
-				else
-				{
-					visible = fe.getVisible();
-				}
-				if (!visible) invisibleElements.add(fe);
+				if (!isVisible(fe)) invisibleElements.add(fe);
 			}
 		}
 		if (outsideElements.size() > 0 || invisibleElements.size() > 0)
@@ -600,6 +585,30 @@ public class GhostHandler implements IServerService
 		writer.endArray();
 		writer.endObject();
 		return new JSONObject(stringWriter.getBuffer().toString());
+	}
+
+	private boolean isVisible(IPersist persist)
+	{
+		boolean visible = true;
+		if (persist instanceof IFormElement)
+		{
+			IFormElement fe = (IFormElement)persist;
+			if (fe instanceof WebComponent && fe.getFlattenedPropertiesMap().containsKey("json"))
+			{
+				JSONObject obj = (JSONObject)fe.getFlattenedPropertiesMap().get("json");
+				WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)fe).getTypeName());
+				if (spec != null && !spec.getProperties(VisiblePropertyType.INSTANCE).isEmpty())
+				{
+					PropertyDescription pd = spec.getProperties(VisiblePropertyType.INSTANCE).iterator().next();
+					visible = obj.optBoolean(pd.getName(), true);
+				}
+			}
+			else
+			{
+				visible = fe.getVisible();
+			}
+		}
+		return visible;
 	}
 
 	/**
