@@ -319,8 +319,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		servers = new PlatformSimpleUserNode(Messages.TreeStrings_DBServers, UserNodeType.SERVERS, null, uiActivator.loadImageFromBundle("database_srv.gif"));
 		servers.parent = devDatasources;
 
-		inmemoryDatasources = new PlatformSimpleUserNode(Messages.TreeStrings_DBMemory, UserNodeType.INMEMORY_DATASOURCE, null,
-			uiActivator.loadImageFromBundle("database_srv.gif"));
+		inmemoryDatasources = new PlatformSimpleUserNode(Messages.TreeStrings_DBMemory, UserNodeType.INMEMORY_DATASOURCE,
+			ServoyModel.getServerManager().getMemServer(), uiActivator.loadImageFromBundle("database_srv.gif"));
 		inmemoryDatasources.parent = devDatasources;
 
 
@@ -1016,7 +1016,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		}
 		return false;
 	}
-
 
 	private void addServersNodeChildren(PlatformSimpleUserNode serversNode)
 	{

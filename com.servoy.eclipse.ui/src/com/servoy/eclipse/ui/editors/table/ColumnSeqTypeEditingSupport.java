@@ -43,7 +43,7 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IServerInternal;
-import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.query.ColumnType;
 
 public class ColumnSeqTypeEditingSupport extends EditingSupport
@@ -85,7 +85,7 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 	private Column column;
 	private final IObservable observable;
 
-	public ColumnSeqTypeEditingSupport(TableViewer tv, Table table)
+	public ColumnSeqTypeEditingSupport(TableViewer tv, ITable table)
 	{
 		super(tv);
 		int[] types = ColumnInfo.allDefinedSeqTypes;
@@ -96,12 +96,10 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 			IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(table.getServerName());
 			for (int element : types)
 			{
-				if (element == ColumnInfo.SERVOY_SEQUENCE || element == ColumnInfo.NO_SEQUENCE_SELECTED || server.supportsSequenceType(element, null/*
-																																					 * TODO: add
-																																					 * current
-																																					 * selected
-																																					 * column
-																																					 */))
+				if (element == ColumnInfo.SERVOY_SEQUENCE || element == ColumnInfo.NO_SEQUENCE_SELECTED ||
+					server.supportsSequenceType(element, null/*
+																 * TODO: add current selected column
+																 */))
 				{
 					seqType.add(ColumnInfo.getSeqDisplayTypeString(element));
 				}

@@ -26,15 +26,15 @@ import org.eclipse.swt.widgets.MessageBox;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.persistence.Column;
-import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.persistence.ITable;
 
 public class ColumnRowIdentEditingSupport extends EditingSupport
 {
 	private final CellEditor editor;
 	private String[] rowIdents;
-	private final Table table;
+	private final ITable table;
 
-	public ColumnRowIdentEditingSupport(Table table, TableViewer tv)
+	public ColumnRowIdentEditingSupport(ITable table, TableViewer tv)
 	{
 		super(tv);
 		this.table = table;
@@ -87,12 +87,13 @@ public class ColumnRowIdentEditingSupport extends EditingSupport
 			{
 				MessageBox dialog = new MessageBox(Display.getCurrent().getActiveShell(), SWT.ICON_WARNING | SWT.OK);
 				dialog.setText("Warning");
-				dialog.setMessage("Row identifiers should always be not null. \nIf you really need this column to be a row identifier you should make sure the contents of this column is always not null ");
+				dialog.setMessage(
+					"Row identifiers should always be not null. \nIf you really need this column to be a row identifier you should make sure the contents of this column is always not null ");
 				dialog.open();
 			}
 			boolean initialAllowNull = pi.getAllowNull();
 			pi.setRowIdentType(type);
-			if (type != 0 && !pi.getAllowNull() && initialAllowNull) pi.setAllowNull(true); // when a new column is added, force setting Allow Null to true even if Row Ident is set on column	  
+			if (type != 0 && !pi.getAllowNull() && initialAllowNull) pi.setAllowNull(true); // when a new column is added, force setting Allow Null to true even if Row Ident is set on column
 			getViewer().update(element, null);
 			pi.flagColumnInfoChanged();
 		}

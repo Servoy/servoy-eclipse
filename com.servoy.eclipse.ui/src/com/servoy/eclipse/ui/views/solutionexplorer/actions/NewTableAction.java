@@ -39,6 +39,7 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
@@ -76,7 +77,8 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 			if (node.getRealObject() instanceof IServerInternal)
 			{
 				IServerInternal s = (IServerInternal)node.getRealObject();
-				state = (node.getType() == UserNodeType.SERVER) && (s.getConfig().isEnabled() && s.isValid());
+				state = (node.getType() == UserNodeType.SERVER) && (s.getConfig().isEnabled() && s.isValid()) ||
+					(node.getType() == UserNodeType.INMEMORY_DATASOURCE);
 			}
 		}
 		setEnabled(state);
@@ -86,7 +88,7 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 	public void run()
 	{
 		SimpleUserNode node = viewer.getSelectedTreeNode();
-		if (node.getRealObject() instanceof IServerInternal)
+		if (node.getType().equals(UserNodeType.SERVER) && node.getRealObject() instanceof IServerInternal)
 		{
 			try
 			{
@@ -143,7 +145,7 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 				MessageDialog.openError(UIUtils.getActiveShell(), "Error", e.getMessage());
 			}
 		}
-		else if (node.getRealType().equals(UserNodeType.INMEMORY_DATASOURCE))
+		else if (node.getType().equals(UserNodeType.INMEMORY_DATASOURCE))
 		{
 
 			final IServerInternal s = (IServerInternal)node.getRealObject();
@@ -151,10 +153,18 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 			{
 				public String isValid(String newText)
 				{
-					boolean valid = IdentDocumentValidator.isSQLIdentifier(newText) &&
-						(!(newText.toUpperCase()).startsWith(DataModelManager.TEMP_UPPERCASE_PREFIX)) &&
-						(!(newText.toUpperCase()).startsWith(IServer.SERVOY_UPPERCASE_PREFIX));
-					return valid ? null : (newText.length() == 0 ? "" : "Invalid table name");
+					try
+					{
+						boolean valid = (s.getTable(newText) == null) && IdentDocumentValidator.isSQLIdentifier(newText) &&
+							(!(newText.toUpperCase()).startsWith(DataModelManager.TEMP_UPPERCASE_PREFIX)) &&
+							(!(newText.toUpperCase()).startsWith(IServer.SERVOY_UPPERCASE_PREFIX));
+						return valid ? null : (newText.length() == 0 ? "" : "Invalid table name");
+					}
+					catch (RepositoryException e)
+					{
+						Debug.log(e);
+					}
+					return "Invalid table name";
 				}
 			});
 

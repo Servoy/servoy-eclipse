@@ -417,6 +417,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = createTables((IServerInternal)un.getRealObject());
 			}
+			else if (type == UserNodeType.INMEMORY_DATASOURCE)
+			{
+				lm = createTables((IServerInternal)un.getRealObject());
+			}
 			else if (type == UserNodeType.VIEWS && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
 				lm = createViews((IServerInternal)un.getRealObject());

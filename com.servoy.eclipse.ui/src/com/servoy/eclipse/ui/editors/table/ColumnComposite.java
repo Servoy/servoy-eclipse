@@ -117,7 +117,7 @@ public class ColumnComposite extends Composite
 
 		myScrolledComposite.setContent(container);
 
-		final Table t = (Table)te.getTable();
+		final ITable t = te.getTable();
 		tableContainer = new Composite(container, SWT.NONE);
 		tableViewer = new TableViewer(tableContainer, SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		tableViewer.getTable().setLinesVisible(true);
@@ -443,7 +443,7 @@ public class ColumnComposite extends Composite
 	private TableColumn seqType;
 	private TableColumn delColumn;
 
-	private void createTableColumns(final Table table)
+	private void createTableColumns(final ITable table)
 	{
 		nameColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT, CI_NAME);
 		nameColumn.setText("Name");
