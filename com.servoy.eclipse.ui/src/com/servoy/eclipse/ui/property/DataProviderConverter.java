@@ -22,14 +22,15 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Table;
 
 /**
  * Convert between {@link IDataProvider} and String representation
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class DataProviderConverter implements IPropertyConverter<String, IDataProvider>
 {
@@ -61,7 +62,7 @@ public class DataProviderConverter implements IPropertyConverter<String, IDataPr
 		return null;
 	}
 
-	public static IDataProvider getDataProvider(FlattenedSolution flattenedSolution, IPersist persist, Table table, String value) throws RepositoryException
+	public static IDataProvider getDataProvider(FlattenedSolution flattenedSolution, IPersist persist, ITable table, String value) throws RepositoryException
 	{
 		IDataProvider dataProvider = null;
 		if (table != null)

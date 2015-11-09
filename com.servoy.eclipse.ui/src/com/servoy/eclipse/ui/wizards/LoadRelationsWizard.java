@@ -68,7 +68,6 @@ import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.query.ISQLJoin;
 import com.servoy.j2db.util.DataSourceUtils;
 
@@ -170,7 +169,7 @@ public class LoadRelationsWizard extends Wizard implements INewWizard
 	public static Relation createRelation(ITable table, IValidateName v, String nm, Solution s, List<Column> primaryColumns, List<Column> foreignColumns)
 		throws RepositoryException
 	{
-		Table ft = foreignColumns.get(0).getTable();
+		ITable ft = foreignColumns.get(0).getTable();
 		String rname = nm == null ? "db_" + table.getName().replace(' ', '_') + "_to_" + ft.getName().replace(' ', '_') : nm;
 
 		Relation relation = s.getRelation(rname);

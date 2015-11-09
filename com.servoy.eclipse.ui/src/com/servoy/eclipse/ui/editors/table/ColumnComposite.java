@@ -80,7 +80,6 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.Utils;
 
 public class ColumnComposite extends Composite
@@ -362,10 +361,10 @@ public class ColumnComposite extends Composite
 
 	public IColumn addColumn(ITable t, String newName, int type, int length) throws RepositoryException
 	{
-		return t.createNewIColumn(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), newName, type, length);
+		return t.createNewColumn(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), newName, type, length);
 	}
 
-	private boolean hasDataProviderSet(Table table)
+	private boolean hasDataProviderSet(ITable table)
 	{
 		for (Column c : table.getColumns())
 		{
@@ -584,7 +583,7 @@ public class ColumnComposite extends Composite
 		return layout;
 	}
 
-	protected void initDataBindings(Table t)
+	protected void initDataBindings(ITable t)
 	{
 		// if there are no columns in the table create a pk column
 		if (t.getColumns().size() == 0)
@@ -605,8 +604,6 @@ public class ColumnComposite extends Composite
 					id.setDatabasePK(true);
 					id.setSequenceType(defaultFirstColumnSequenceType);
 					id.setFlag(Column.UUID_COLUMN, true);
-
-
 				}
 				else
 				{

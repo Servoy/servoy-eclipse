@@ -90,11 +90,11 @@ import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RelationList;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SortedList;
 
@@ -123,7 +123,7 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 
 	/**
 	 * Create the composite
-	 * 
+	 *
 	 * @param parent
 	 * @param style
 	 */
@@ -185,7 +185,8 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			{
 				final DataProviderDialog dialog = new DataProviderDialog(control.getShell(), (ILabelProvider)getLabelProvider(), null,
 					ColumnAutoEnterComposite.this.flattenedSolution, column.getTable(), new DataProviderTreeViewer.DataProviderOptions(false, true, false,
-						false, false, true, false, false, INCLUDE_RELATIONS.NESTED, true, true, null), getSelection(), SWT.NONE, title);
+						false, false, true, false, false, INCLUDE_RELATIONS.NESTED, true, true, null),
+					getSelection(), SWT.NONE, title);
 				dialog.setContentProvider(new DataProviderContentProvider(null, ColumnAutoEnterComposite.this.flattenedSolution, column.getTable())
 				{
 					@Override
@@ -239,8 +240,8 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 						if (value instanceof ScriptMethod)
 						{
 							ScriptMethod scriptMethod = (ScriptMethod)value;
-							return new DataProviderNodeWrapper(scriptMethod.getScopeName(), new ScopeWithContext(scriptMethod.getScopeName(),
-								(Solution)scriptMethod.getParent()), DataProviderTreeViewer.METHODS);
+							return new DataProviderNodeWrapper(scriptMethod.getScopeName(),
+								new ScopeWithContext(scriptMethod.getScopeName(), (Solution)scriptMethod.getParent()), DataProviderTreeViewer.METHODS);
 						}
 						if (value instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)value).scope != null &&
 							((DataProviderNodeWrapper)value).type == DataProviderTreeViewer.METHODS)
@@ -323,27 +324,29 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		lookupValueControl = lookupValueSelect.getControl();
 
 		final GroupLayout groupLayout = new GroupLayout(this);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tabFolder, GroupLayout.PREFERRED_SIZE, 509, Short.MAX_VALUE).add(
-					groupLayout.createSequentialGroup().add(
+		groupLayout.setHorizontalGroup(
+			groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().addContainerGap().add(
+				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, tabFolder, GroupLayout.PREFERRED_SIZE, 509,
+					Short.MAX_VALUE).add(groupLayout.createSequentialGroup().add(
 						groupLayout.createParallelGroup(GroupLayout.LEADING).add(systemValueButton).add(customValueButton).add(databaseDefaultButton).add(
 							lookupValueButton).add(sequenceButton)).addPreferredGap(LayoutStyle.RELATED).add(
-						groupLayout.createParallelGroup(GroupLayout.LEADING).add(customValueText, GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE).add(
-							systemValueCombo, GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE).add(databaseDefaultValue, GroupLayout.PREFERRED_SIZE, 420,
-							Short.MAX_VALUE).add(sequenceCombo, GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE).add(lookupValueControl,
-							GroupLayout.DEFAULT_SIZE, 408, Short.MAX_VALUE)))).addContainerGap()));
+								groupLayout.createParallelGroup(GroupLayout.LEADING).add(customValueText, GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE).add(
+									systemValueCombo, GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE).add(databaseDefaultValue, GroupLayout.PREFERRED_SIZE,
+										420, Short.MAX_VALUE).add(sequenceCombo, GroupLayout.PREFERRED_SIZE, 420, Short.MAX_VALUE).add(lookupValueControl,
+											GroupLayout.DEFAULT_SIZE, 408, Short.MAX_VALUE)))).addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(systemValueButton).add(systemValueCombo, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(customValueButton).add(customValueText, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(databaseDefaultButton).add(databaseDefaultValue)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(lookupValueButton).add(lookupValueControl)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(sequenceButton).add(sequenceCombo, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(tabFolder, GroupLayout.PREFERRED_SIZE,
-				GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap()));
+			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(systemValueButton).add(
+				systemValueCombo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(customValueButton).add(customValueText, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(databaseDefaultButton).add(databaseDefaultValue)).addPreferredGap(
+								LayoutStyle.RELATED).add(
+									groupLayout.createParallelGroup(GroupLayout.LEADING).add(lookupValueButton).add(lookupValueControl)).addPreferredGap(
+										LayoutStyle.RELATED).add(
+											groupLayout.createParallelGroup(GroupLayout.BASELINE).add(sequenceButton).add(sequenceCombo,
+												GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
+													LayoutStyle.RELATED).add(tabFolder, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+														GroupLayout.PREFERRED_SIZE).addContainerGap()));
 		setLayout(groupLayout);
 
 		changeSupport = new ChangeSupport(Realm.getDefault())
@@ -407,19 +410,19 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_CREATION_DATETIME));
 			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_CREATION_SERVER_DATETIME));
 		}
-		if (type == IColumnTypes.TEXT) systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER,
-			ColumnInfo.SYSTEM_VALUE_CREATION_USERNAME));
-		if (type == IColumnTypes.TEXT || type == IColumnTypes.INTEGER || type == IColumnTypes.NUMBER) systemTypes.add(columnInfo.getAutoEnterSubTypeString(
-			ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_CREATION_USERUID));
+		if (type == IColumnTypes.TEXT)
+			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_CREATION_USERNAME));
+		if (type == IColumnTypes.TEXT || type == IColumnTypes.INTEGER || type == IColumnTypes.NUMBER)
+			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_CREATION_USERUID));
 		if (type == IColumnTypes.DATETIME)
 		{
 			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_MODIFICATION_DATETIME));
 			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_MODIFICATION_SERVER_DATETIME));
 		}
-		if (type == IColumnTypes.TEXT) systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER,
-			ColumnInfo.SYSTEM_VALUE_MODIFICATION_USERNAME));
-		if (type == IColumnTypes.TEXT || type == IColumnTypes.INTEGER || type == IColumnTypes.NUMBER) systemTypes.add(columnInfo.getAutoEnterSubTypeString(
-			ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_MODIFICATION_USERUID));
+		if (type == IColumnTypes.TEXT)
+			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_MODIFICATION_USERNAME));
+		if (type == IColumnTypes.TEXT || type == IColumnTypes.INTEGER || type == IColumnTypes.NUMBER)
+			systemTypes.add(columnInfo.getAutoEnterSubTypeString(ColumnInfo.SYSTEM_VALUE_AUTO_ENTER, ColumnInfo.SYSTEM_VALUE_MODIFICATION_USERUID));
 
 		String[] system = new String[systemTypes.size()];
 		for (int i = 0; i < systemTypes.size(); i++)
@@ -438,12 +441,10 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 			IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(c.getTable().getServerName());
 			for (int element : types)
 			{
-				if (element == ColumnInfo.SERVOY_SEQUENCE || element == ColumnInfo.NO_SEQUENCE_SELECTED || server.supportsSequenceType(element, null/*
-																																					 * TODO: add
-																																					 * current
-																																					 * selected
-																																					 * column
-																																					 */))
+				if (element == ColumnInfo.SERVOY_SEQUENCE || element == ColumnInfo.NO_SEQUENCE_SELECTED ||
+					server.supportsSequenceType(element, null/*
+																 * TODO: add current selected column
+																 */))
 				{
 					seqType.add(ColumnInfo.getSeqDisplayTypeString(element));
 				}
@@ -572,8 +573,8 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		if (column != null)
 		{
 			ColumnInfo columnInfo = column.getColumnInfo();
-			if (customValueButton.getSelection() || lookupValueButton.getSelection() || databaseDefaultButton.getSelection() &&
-				columnInfo.getAutoEnterSubType() > 0)
+			if (customValueButton.getSelection() || lookupValueButton.getSelection() ||
+				databaseDefaultButton.getSelection() && columnInfo.getAutoEnterSubType() > 0)
 			{
 				if (columnInfo.getAutoEnterType() == ColumnInfo.SEQUENCE_AUTO_ENTER)
 				{
@@ -805,9 +806,9 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 	public static class LookupValue2DataProviderConverter extends Converter
 	{
 		private final FlattenedSolution flattenedSolution;
-		private final Table table;
+		private final ITable table;
 
-		public LookupValue2DataProviderConverter(FlattenedSolution flattenedSolution, Table table)
+		public LookupValue2DataProviderConverter(FlattenedSolution flattenedSolution, ITable table)
 		{
 			super(String.class, IDataProvider.class);
 			this.flattenedSolution = flattenedSolution;

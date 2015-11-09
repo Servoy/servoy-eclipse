@@ -107,7 +107,7 @@ public class DBIQuickFixUpdateColumnFromInfo extends TableDifferenceQuickFix
 					};
 
 					// create a new column with the same name, but using column information
-					c = difference.getTable().createNewIColumn(validator, difference.getColumnName(), columnType.getSqlType(), columnType.getLength());
+					c = difference.getTable().createNewColumn(validator, difference.getColumnName(), columnType.getSqlType(), columnType.getLength());
 					c.setDatabasePK((difference.getDbiFileDefinition().flags & Column.PK_COLUMN) != 0);
 					c.setAllowNull(difference.getDbiFileDefinition().allowNull);
 					if (difference.getDbiFileDefinition().autoEnterType == ColumnInfo.SEQUENCE_AUTO_ENTER)

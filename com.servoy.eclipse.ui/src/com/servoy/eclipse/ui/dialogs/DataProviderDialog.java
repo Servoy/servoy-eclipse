@@ -36,8 +36,8 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewVariableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewVariableAction.VariableEditDialog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ScriptVariable;
-import com.servoy.j2db.persistence.Table;
 
 /**
  * A cell editor that manages a dataprovider field.
@@ -47,7 +47,7 @@ import com.servoy.j2db.persistence.Table;
  */
 public class DataProviderDialog extends TreeSelectDialog
 {
-	private final Table table;
+	private final ITable table;
 	private final int treeStyle;
 	private final FlattenedSolution flattenedSolution;
 	private final DataProviderOptions input;
@@ -59,10 +59,10 @@ public class DataProviderDialog extends TreeSelectDialog
 
 	/**
 	 * Creates a new dataprovider dialog editor parented under the given shell.
-	 * 
+	 *
 	 * @param parent the parent control
 	 */
-	public DataProviderDialog(Shell shell, ILabelProvider labelProvider, PersistContext persistContext, FlattenedSolution flattenedSolution, Table table,
+	public DataProviderDialog(Shell shell, ILabelProvider labelProvider, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
 		DataProviderOptions input, ISelection selection, int treeStyle, String title)
 	{
 		super(shell, true, true, TreePatternFilter.FILTER_LEAFS, null, null, null, null, treeStyle, title, null, selection, false,
@@ -78,9 +78,9 @@ public class DataProviderDialog extends TreeSelectDialog
 	@Override
 	protected FilteredTreeViewer createFilteredTreeViewer(Composite parent)
 	{
-		DataProviderTreeViewer dataProviderTreeViewer = new DataProviderTreeViewer(parent, labelProvider, contentProvider != null ? contentProvider
-			: new DataProviderContentProvider(persistContext, flattenedSolution, table), input, true, true, TreePatternFilter.getSavedFilterMode(
-			getDialogBoundsSettings(), TreePatternFilter.FILTER_LEAFS), treeStyle);
+		DataProviderTreeViewer dataProviderTreeViewer = new DataProviderTreeViewer(parent, labelProvider,
+			contentProvider != null ? contentProvider : new DataProviderContentProvider(persistContext, flattenedSolution, table), input, true, true,
+			TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), TreePatternFilter.FILTER_LEAFS), treeStyle);
 		return dataProviderTreeViewer;
 	}
 

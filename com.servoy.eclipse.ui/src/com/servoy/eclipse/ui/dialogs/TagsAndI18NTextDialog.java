@@ -65,10 +65,10 @@ import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationList;
 import com.servoy.j2db.persistence.SolutionMetaData;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Utils;
 
@@ -76,7 +76,7 @@ public class TagsAndI18NTextDialog extends Dialog
 {
 	private Text text;
 	private I18nComposite i18nComposite;
-	private final Table table;
+	private final ITable table;
 	private DataProviderTreeViewer dpTree;
 	private final String title;
 	private final IApplication application;
@@ -103,7 +103,7 @@ public class TagsAndI18NTextDialog extends Dialog
 	/**
 	 * if the Dialog is independent of the solution/form/dataprovider context , then pass null as a value for persistContext (this is the case when it is used in table editor for the title of a column)
 	 */
-	public TagsAndI18NTextDialog(Shell shell, PersistContext persistContext, FlattenedSolution flattenedSolution, Table table, Object value, String title,
+	public TagsAndI18NTextDialog(Shell shell, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table, Object value, String title,
 		IApplication application, boolean hideTags)
 	{
 		super(shell);
@@ -138,8 +138,8 @@ public class TagsAndI18NTextDialog extends Dialog
 			ILabelProvider solutionContextLabelProvider = null;
 			if (persistContext != null)
 			{
-				solutionContextLabelProvider = new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(
-					DataProviderLabelProvider.INSTANCE_HIDEPREFIX, persistContext.getContext()));
+				solutionContextLabelProvider = new SolutionContextDelegateLabelProvider(
+					new FormContextDelegateLabelProvider(DataProviderLabelProvider.INSTANCE_HIDEPREFIX, persistContext.getContext()));
 			}
 			else
 			{// i18n dialog is not dependent of solution (ex : table editor -> column detail -> title )
@@ -160,12 +160,11 @@ public class TagsAndI18NTextDialog extends Dialog
 
 			CombinedTreeOptions mainInputOptions = new CombinedTreeContentProvider.CombinedTreeOptions(null, false, new Object[] { dataProviderOptions, null });
 
-			dpTree = new DataProviderTreeViewer(
-				composite_1,
+			dpTree = new DataProviderTreeViewer(composite_1,
 				new CombinedTreeLabelProvider(1, new ILabelProvider[] { StandardTagsLabelProvider.INSTANCE_HIDEPREFIX, solutionContextLabelProvider }),
-				new CombinedTreeContentProvider(
-					1,
-					new ITreeContentProvider[] { new DataProviderContentProvider(persistContext, flattenedSolution, table), StandardTagsContentProvider.getInstance(mobile) }),
+				new CombinedTreeContentProvider(1,
+					new ITreeContentProvider[] { new DataProviderContentProvider(persistContext, flattenedSolution,
+						table), StandardTagsContentProvider.getInstance(mobile) }),
 				mainInputOptions, true, true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), TreePatternFilter.FILTER_PARENTS), SWT.MULTI);
 
 			addButton = new Button(composite_1, SWT.NONE);
@@ -174,10 +173,9 @@ public class TagsAndI18NTextDialog extends Dialog
 			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
 				groupLayout.createSequentialGroup().add(10, 10, 10).add(dpTree, GroupLayout.PREFERRED_SIZE, 232, Short.MAX_VALUE).addPreferredGap(
 					LayoutStyle.RELATED).add(addButton, GroupLayout.PREFERRED_SIZE, 56, GroupLayout.PREFERRED_SIZE).addContainerGap()));
-			groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-				groupLayout.createSequentialGroup().add(
-					groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(130, 130, 130).add(addButton)).add(
-						groupLayout.createSequentialGroup().add(10, 10, 10).add(dpTree, GroupLayout.PREFERRED_SIZE, 426, Short.MAX_VALUE))).add(24, 24, 24)));
+			groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(130, 130, 130).add(addButton)).add(
+					groupLayout.createSequentialGroup().add(10, 10, 10).add(dpTree, GroupLayout.PREFERRED_SIZE, 426, Short.MAX_VALUE))).add(24, 24, 24)));
 			composite_1.setLayout(groupLayout);
 		}
 
@@ -376,8 +374,8 @@ public class TagsAndI18NTextDialog extends Dialog
 			if (parentElement instanceof StandardTagsRelationNode)
 			{
 				Relation relation = ((StandardTagsRelationNode)parentElement).relation;
-				String[] standardTags = relation != null ? (mobile ? STANDARD_TAGS_ON_RELATION_MOBILE : STANDARD_TAGS_ON_RELATION_REGULAR) : (mobile
-					? STANDARD_TAGS_MOBILE : STANDARD_TAGS_REGULAR);
+				String[] standardTags = relation != null ? (mobile ? STANDARD_TAGS_ON_RELATION_MOBILE : STANDARD_TAGS_ON_RELATION_REGULAR)
+					: (mobile ? STANDARD_TAGS_MOBILE : STANDARD_TAGS_REGULAR);
 				Object[] tags = new Object[standardTags.length];
 				for (int i = 0; i < standardTags.length; i++)
 				{

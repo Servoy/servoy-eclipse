@@ -68,6 +68,7 @@ import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportDeprecated;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationList;
@@ -195,16 +196,16 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 
 		private PersistContext persistContext;
 		private final FlattenedSolution flattenedSolution;
-		private Table table;
+		private ITable table;
 
 		private DataProviderOptions options;
 
-		private final Map<Table, List<Relation>> relationsCache = new HashMap<Table, List<Relation>>();
-		private final Map<Table, List<AggregateVariable>> aggregatesCache = new HashMap<Table, List<AggregateVariable>>();
-		private final Map<Table, Map<String, ScriptCalculation>> calculationsCache = new HashMap<Table, Map<String, ScriptCalculation>>();
-		private final Map<Table, List<IColumn>> columnCache = new HashMap<Table, List<IColumn>>();
+		private final Map<ITable, List<Relation>> relationsCache = new HashMap<ITable, List<Relation>>();
+		private final Map<ITable, List<AggregateVariable>> aggregatesCache = new HashMap<ITable, List<AggregateVariable>>();
+		private final Map<ITable, Map<String, ScriptCalculation>> calculationsCache = new HashMap<ITable, Map<String, ScriptCalculation>>();
+		private final Map<ITable, List<IColumn>> columnCache = new HashMap<ITable, List<IColumn>>();
 
-		public DataProviderContentProvider(PersistContext persistContext, FlattenedSolution flattenedSolution, Table table)
+		public DataProviderContentProvider(PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table)
 		{
 			this.persistContext = persistContext;
 			this.flattenedSolution = flattenedSolution;
@@ -345,7 +346,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 				if (parentElement instanceof DataProviderNodeWrapper && ((DataProviderNodeWrapper)parentElement).node == CALCULATIONS)
 				{
 					DataProviderNodeWrapper nodeWrapper = (DataProviderNodeWrapper)parentElement;
-					Table calcsTable;
+					ITable calcsTable;
 					if (nodeWrapper.relations == null)
 					{
 						calcsTable = table;
@@ -432,7 +433,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					flattenedSolution != null)
 				{
 					DataProviderNodeWrapper nodeWrapper = (DataProviderNodeWrapper)parentElement;
-					Table aggsTable;
+					ITable aggsTable;
 					if (nodeWrapper.relations == null)
 					{
 						aggsTable = table;
@@ -569,7 +570,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 		 * @return
 		 * @throws RepositoryException
 		 */
-		private Map<String, ScriptCalculation> getCalculationMap(Table calcsTable) throws RepositoryException
+		private Map<String, ScriptCalculation> getCalculationMap(ITable calcsTable) throws RepositoryException
 		{
 			Map<String, ScriptCalculation> map = calculationsCache.get(calcsTable);
 			if (map == null)
@@ -652,7 +653,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			return value instanceof DataProviderNodeWrapper;
 		}
 
-		private ArrayList<Object> addTableColumns(ArrayList<Object> input, Table t, RelationList relations, boolean includeCalculations)
+		private ArrayList<Object> addTableColumns(ArrayList<Object> input, ITable t, RelationList relations, boolean includeCalculations)
 			throws RepositoryException
 		{
 			ArrayList<Object> retValue = input;

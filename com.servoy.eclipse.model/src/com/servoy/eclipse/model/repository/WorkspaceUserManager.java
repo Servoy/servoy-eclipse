@@ -73,7 +73,6 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.GroupSecurityInfo;
 import com.servoy.j2db.server.shared.IUserManager;
@@ -340,7 +339,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		// default implementation
 	}
 
-	protected void refreshLoadedAccessRights(Table table)
+	protected void refreshLoadedAccessRights(ITable table)
 	{
 		if (isOperational())
 		{
@@ -379,7 +378,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		}
 	}
 
-	private boolean isTableSecurityChanged(Table table, List<SecurityInfo> infos)
+	private boolean isTableSecurityChanged(ITable table, List<SecurityInfo> infos)
 	{
 		if (table.getColumnCount() != infos.size()) return true;
 		for (String columnName : table.getColumnNames())

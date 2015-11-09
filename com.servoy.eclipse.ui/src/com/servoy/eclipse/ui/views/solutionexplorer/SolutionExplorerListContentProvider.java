@@ -123,6 +123,7 @@ import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ISupportName;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.NameComparator;
@@ -2018,7 +2019,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	/**
 	 * @param column
 	 */
-	private void flushTable(Table table)
+	private void flushTable(ITable table)
 	{
 		leafList.remove(table);
 		List<Object> list = usedTables.get(table);
