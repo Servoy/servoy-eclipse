@@ -17,35 +17,20 @@
 
 package com.servoy.eclipse.ui.property.types;
 
-import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
-import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecification;
 
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.Messages;
-import com.servoy.eclipse.ui.property.ButtonCellEditor;
 import com.servoy.eclipse.ui.property.ComplexProperty;
-import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
-import com.servoy.eclipse.ui.property.ComplexPropertySource;
-import com.servoy.eclipse.ui.property.ComposedCellEditor;
-import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
-import com.servoy.eclipse.ui.property.IPropertyConverter;
-import com.servoy.eclipse.ui.property.IPropertySetter;
 import com.servoy.eclipse.ui.property.ISetterAwarePropertySource;
+import com.servoy.eclipse.ui.property.JSONObjectTypePropertyController;
 import com.servoy.eclipse.ui.property.PDPropertySource;
 import com.servoy.eclipse.ui.property.PersistContext;
-import com.servoy.eclipse.ui.property.PropertyController;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -55,8 +40,7 @@ import com.servoy.j2db.util.ServoyJSONObject;
  *
  * @author acostescu
  */
-//unfortunately here we can't use JSONObject in generics cause the value can also be JSONObject.NULL which would give classcastexceptions...
-public class CustomJSONObjectTypePropertyController extends PropertyController<Object, Object> implements IPropertySetter<Object, ISetterAwarePropertySource>
+public class CustomJSONObjectTypePropertyController extends JSONObjectTypePropertyController
 {
 
 	private static IObjectTextConverter JSONOBJECT_TEXT_CONVERTER = new JSONObjectTextConverter();
@@ -73,149 +57,12 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<O
 	}
 
 	@Override
-	protected IPropertyConverter<Object, Object> createConverter()
+	protected ObjectPropertySource getObjectChildPropertySource(ComplexProperty<Object> complexProperty)
 	{
-		return new CustomJSONObjectPropertyConverter();
+		return new CustomJSONObjectPropertySource(complexProperty);
 	}
 
-	class CustomJSONObjectPropertyConverter extends ComplexPropertyConverter<Object>
-	{
-		@Override
-		public Object convertProperty(Object id, Object value)
-		{
-			return new ComplexProperty<Object>(value)
-			{
-				@Override
-				public IPropertySource getPropertySource()
-				{
-					return new CustomJSONObjectPropertySource(this);
-				}
-			};
-		}
-	}
-
-	@Override
-	public ILabelProvider getLabelProvider()
-	{
-		if (labelProvider == null)
-		{
-			labelProvider = new LabelProvider()
-			{
-				@Override
-				public String getText(Object element)
-				{
-					return element != null ? (!ServoyJSONObject.isJavascriptNull(element) ? "{...}" : "null") : Messages.LabelNone; // to suggest to the user that he can click to edit directly
-				}
-			};
-		}
-		return labelProvider;
-	}
-
-	@Override
-	public CellEditor createPropertyEditor(Composite parent)
-	{
-		ComposedCellEditor cellEditor = new ComposedCellEditor(new ConvertorObjectCellEditor(JSONOBJECT_TEXT_CONVERTER), new ButtonCellEditor()
-		{
-
-			@Override
-			protected void updateButtonState(Button buttonWidget, Object value)
-			{
-				buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(
-					!ServoyJSONObject.isJavascriptNullOrUndefined(value) ? ISharedImages.IMG_ETOOL_CLEAR : ISharedImages.IMG_OBJ_ADD));
-				buttonWidget.setEnabled(true);
-				buttonWidget.setToolTipText(!ServoyJSONObject.isJavascriptNullOrUndefined(value) ? "Clears the property value."
-					: "Creates an empty property value '{}' to be able to expand node.");
-			}
-
-			@Override
-			protected Object getValueToSetOnClick(Object oldPropertyValue)
-			{
-				return !ServoyJSONObject.isJavascriptNullOrUndefined(oldPropertyValue) ? null : new ServoyJSONObject();
-			}
-
-		}, false, false, 0);
-		cellEditor.create(parent);
-
-		return cellEditor;
-	}
-
-	public static class JSONObjectTextConverter implements IObjectTextConverter
-	{
-
-		public String isCorrectString(String value)
-		{
-			if (value.length() > 0 && !"null".equals(value))
-			{
-				try
-				{
-					new JSONObject(value);
-				}
-				catch (JSONException e)
-				{
-					return "Please use valid JSON object content (eg. '{ \"a\" : 1, \"b\" : \"str\" }'). Error: " +
-						e.getMessage().replace("'", "''").replace("{", "'{'").replace("}", "'}'"); // the replace is needed as this string will go through eclipse MessageFormatter which has special meaning for { and }
-				}
-			}
-			return null;
-		}
-
-		public Object convertToObject(String value)
-		{
-			if (value == null || value.trim().length() == 0)
-			{
-				return null;
-			}
-
-			if ("null".equals(value)) return ServoyJSONObject.NULL_FOR_JAVA;
-
-			try
-			{
-				return new ServoyJSONObject(value, false);
-			}
-			catch (JSONException e)
-			{
-				ServoyLog.logError(e); // should never get here due to validation above in isCorrectString(...)
-				return null;
-			}
-		}
-
-		public String isCorrectObject(Object value)
-		{
-			if (ServoyJSONObject.isJavascriptNullOrUndefined(value) || (value instanceof JSONObject))
-			{
-				return null;
-			}
-			else
-			{
-				ServoyLog.logWarning("JSON object property contains non JSONObject content", null);
-				return "Value is not a JSONObject as expected";
-			}
-		}
-
-		public String convertToString(Object value)
-		{
-			if (ServoyJSONObject.isJavascriptUndefined(value))
-			{
-				return "";
-			}
-			if (ServoyJSONObject.isJavascriptNull(value))
-			{
-				return "null";
-			}
-			try
-			{
-				return ((JSONObject)value).toString(0).replace("\r\n", " ").replace('\n', ' ').replace('\r', ' ');
-			}
-			catch (JSONException e)
-			{
-				ServoyLog.logError(e); // should never happen
-				return "Cannot convert the JSONObject into a string";
-			}
-		}
-
-	}
-
-	protected class CustomJSONObjectPropertySource extends ComplexPropertySource<Object>
+	protected class CustomJSONObjectPropertySource extends JSONObjectPropertySource
 	{
 
 		protected PDPropertySource underlyingPropertySource;
@@ -290,24 +137,33 @@ public class CustomJSONObjectTypePropertyController extends PropertyController<O
 			return getEditableValue();
 		}
 
-	}
+		@Override
+		public void defaultSetProperty(Object id, Object value)
+		{
+			PDPropertySource underlying = getUnderlyingPropertySource();
+			underlying.defaultSetProperty(id, value);
+		}
 
-	@Override
-	public void setProperty(ISetterAwarePropertySource propertySource, Object value)
-	{
-		propertySource.defaultSetProperty(getId(), value);
-	}
+		@Override
+		public Object defaultGetProperty(Object id)
+		{
+			PDPropertySource underlying = getUnderlyingPropertySource();
+			return underlying.defaultGetProperty(id);
+		}
 
-	@Override
-	public Object getProperty(ISetterAwarePropertySource propertySource)
-	{
-		return propertySource.defaultGetProperty(getId());
-	}
+		@Override
+		public boolean defaultIsPropertySet(Object id)
+		{
+			PDPropertySource underlying = getUnderlyingPropertySource();
+			return underlying.defaultIsPropertySet(id);
+		}
 
-	@Override
-	public boolean isPropertySet(ISetterAwarePropertySource propertySource)
-	{
-		return propertySource.defaultIsPropertySet(getId());
+		@Override
+		protected Object getDefaultElementProperty(Object id)
+		{
+			return propertyDescription.getProperty((String)id).getDefaultValue();
+		}
+
 	}
 
 	@Override
