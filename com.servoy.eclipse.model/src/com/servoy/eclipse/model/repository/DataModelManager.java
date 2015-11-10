@@ -42,6 +42,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -76,6 +77,7 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -208,6 +210,59 @@ public class DataModelManager implements IColumnInfoManager
 			}
 		};
 		sm.addServerListener(serverListener);
+	}
+
+	public void loadInMemoryServerTable(final ITable t) throws RepositoryException
+	{
+		IFile file = getDBIFile(t.getServerName(), t.getName());
+		try
+		{
+			file.refreshLocal(IResource.DEPTH_ZERO, new NullProgressMonitor());
+		}
+		catch (CoreException e1)
+		{
+			Debug.error(e1);
+		}
+		if (file.exists())
+		{
+			InputStream is = null;
+			try
+			{
+				is = file.getContents(true);
+				String json_table = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+				IServerInternal s = (IServerInternal)sm.getServer(t.getServerName());
+				if (s != null && s.getConfig().isEnabled() && s.isValid() && json_table != null)
+				{
+					deserializeInMemoryTable(s, t, json_table);
+				}
+			}
+			catch (JSONException e)
+			{
+				// maybe the .dbi file content is corrupt... add an error marker
+				addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
+				throw new RepositoryException(e);
+			}
+			catch (CoreException e)
+			{
+				// maybe the .dbi file content is corrupt... add an error marker
+				addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
+				throw new RepositoryException(e);
+			}
+			catch (RepositoryException e)
+			{
+				// maybe the .dbi file content is corrupt... add an error marker
+				addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
+				throw e;
+			}
+			finally
+			{
+				if (is != null)
+				{
+					Utils.closeInputStream(is);
+					is = null;
+				}
+			}
+		}
 	}
 
 	public void loadAllColumnInfo(final ITable t) throws RepositoryException
@@ -687,6 +742,86 @@ public class DataModelManager implements IColumnInfoManager
 	public boolean isWritingMarkerFreeDBIFile(IFile file)
 	{
 		return file.equals(writingMarkerFreeDBIFile);
+	}
+
+	private void deserializeInMemoryTable(IServerInternal s, ITable t, String json_table) throws RepositoryException, JSONException
+	{
+		int existingColumnInfo = 0;
+		TableDef tableInfo = deserializeTableInfo(json_table);
+		if (!t.getName().equals(tableInfo.name))
+		{
+			throw new RepositoryException("Table name does not match dbi file name for " + t.getName());
+		}
+
+		List<IColumn> changedColumns = null;
+
+		if (tableInfo.columnInfoDefSet.size() > 0)
+		{
+			changedColumns = new ArrayList<IColumn>(tableInfo.columnInfoDefSet.size());
+			for (int j = 0; j < tableInfo.columnInfoDefSet.size(); j++)
+			{
+				ColumnInfoDef cid = tableInfo.columnInfoDefSet.get(j);
+
+				String cname = cid.name;
+				Column c = t.getColumn(cname);
+
+				if (c == null)
+				{
+					c = t.createNewColumn(null, cid.name, cid.columnType.getSqlType(), cid.columnType.getScale());
+					existingColumnInfo++;
+					int element_id = ApplicationServerRegistry.get().getDeveloperRepository().getNewElementID(null);
+					ColumnInfo ci = new ColumnInfo(element_id, true);
+					ci.setAutoEnterType(cid.autoEnterType);
+					ci.setAutoEnterSubType(cid.autoEnterSubType);
+					ci.setSequenceStepSize(cid.sequenceStepSize);
+					ci.setPreSequenceChars(cid.preSequenceChars);
+					ci.setPostSequenceChars(cid.postSequenceChars);
+					ci.setDefaultValue(cid.defaultValue);
+					ci.setLookupValue(cid.lookupValue);
+					ci.setDatabaseSequenceName(cid.databaseSequenceName);
+					ci.setTitleText(cid.titleText);
+					ci.setDescription(cid.description);
+					ci.setForeignType(cid.foreignType);
+					ci.setConverterName(cid.converterName);
+					ci.setConverterProperties(cid.converterProperties);
+					ci.setValidatorProperties(cid.validatorProperties);
+					ci.setValidatorName(cid.validatorName);
+					ci.setDefaultFormat(cid.defaultFormat);
+					ci.setElementTemplateProperties(cid.elementTemplateProperties);
+					ci.setDataProviderID(cid.dataProviderID);
+					ci.setContainsMetaData(cid.containsMetaData);
+					ci.setConfiguredColumnType(cid.columnType);
+					ci.setCompatibleColumnTypes(cid.compatibleColumnTypes);
+					ci.setFlags(cid.flags);
+					c.setDatabasePK((cid.flags & Column.PK_COLUMN) != 0);
+					c.setColumnInfo(ci);
+					changedColumns.add(c);
+				}
+			}
+		}
+
+		Iterator<Column> columns = t.getColumns().iterator();
+		while (columns.hasNext())
+		{
+			Column c = columns.next();
+			if (c.getColumnInfo() == null)
+			{
+				// only create servoy sequences when this was a new table and there is only 1 pk column
+				createNewColumnInfo(c, existingColumnInfo == 0 && t.getPKColumnTypeRowIdentCount() == 1);//was missing - create automatic sequences if missing
+			}
+		}
+
+//		if (t.getRowIdentColumnsCount() == 0)
+//		{
+//			t.setHiddenInDeveloperBecauseNoPk(true);
+//			s.setTableMarkedAsHiddenInDeveloper(t.getName(), true);
+//		}
+//		else s.setTableMarkedAsHiddenInDeveloper(t.getName(), tableInfo.hiddenInDeveloper);
+
+		t.setMarkedAsMetaData(tableInfo.isMetaData);
+
+		// let table editors and so on now that a columns are loaded
+		t.fireIColumnsChanged(changedColumns);
 	}
 
 	private void deserializeTable(IServerInternal s, ITable t, String json_table) throws RepositoryException, JSONException

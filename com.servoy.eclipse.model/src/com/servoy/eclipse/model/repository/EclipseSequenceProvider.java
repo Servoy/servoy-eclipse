@@ -101,6 +101,8 @@ public class EclipseSequenceProvider implements ISequenceProvider
 
 				IServerInternal tableServer = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(column.getTable().getServerName(),
 					false, true);
+				if (ApplicationServerRegistry.get().getServerManager().getMemServer().equals(tableServer)) return new Long(nextSequence);
+
 				QuerySelect select = SQLGenerator.createAggregateSelect(QueryAggregate.MAX, column.getTable(), column);
 
 				QuerySet querySet = tableServer.getSQLQuerySet(select, null, 0, -1, false);
@@ -123,8 +125,8 @@ public class EclipseSequenceProvider implements ISequenceProvider
 					clientId = client.getClientID();
 				}
 
-				rs = dataServer.performCustomQuery(clientId, column.getTable().getServerName(), column.getTable().getName(), tid, new QueryCustomSelect(
-					maxSeqSelect), null, 0, -1);
+				rs = dataServer.performCustomQuery(clientId, column.getTable().getServerName(), column.getTable().getName(), tid,
+					new QueryCustomSelect(maxSeqSelect), null, 0, -1);
 				String val = null;
 				if (rs.getRowCount() == 1)
 				{

@@ -852,9 +852,9 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	public void refresh()
 	{
 		flagModified(true);
-		if (propertiesComposite != null) propertiesComposite.refresh();
-		if (columnComposite != null) columnComposite.refreshViewer(table);
-		if (eventsComposite != null) eventsComposite.refreshViewer(table);
+		if (propertiesComposite != null && !propertiesComposite.isDisposed()) propertiesComposite.refresh();
+		if (columnComposite != null && !columnComposite.isDisposed()) columnComposite.refreshViewer(table);
+		if (eventsComposite != null && !eventsComposite.isDisposed()) eventsComposite.refreshViewer(table);
 	}
 
 	public void flagModified()
