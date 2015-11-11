@@ -47,7 +47,6 @@ import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormatPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGColorPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.NGConversions.IDesignToFormElement;
 import com.servoy.j2db.server.ngclient.property.types.NGDimensionPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGFontPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGInsetsPropertyType;
@@ -144,7 +143,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		}
 		if (value == null)
 		{
-			if (!(type instanceof IDesignToFormElement) && propertyDescription.hasDefault())
+			if (jsonConverters.containsKey(type) && propertyDescription.hasDefault())
 			{
 				IPropertyConverterForBrowser<Object> converter = (IPropertyConverterForBrowser<Object>)jsonConverters.get(type);
 				if (converter != null)
