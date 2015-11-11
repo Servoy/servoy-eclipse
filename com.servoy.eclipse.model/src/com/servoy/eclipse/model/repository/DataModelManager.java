@@ -212,7 +212,7 @@ public class DataModelManager implements IColumnInfoManager
 		sm.addServerListener(serverListener);
 	}
 
-	public void loadInMemoryServerTable(final ITable t) throws RepositoryException
+	public void loadMemServerTable(final ITable t) throws RepositoryException
 	{
 		IFile file = getDBIFile(t.getServerName(), t.getName());
 		try

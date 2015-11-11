@@ -258,7 +258,8 @@ public class Activator extends AbstractUIPlugin
 							try
 							{
 								ITable createNewTable = (ServoyModel.getServerManager()).getMemServer().createNewTable(null, tableName);
-								ServoyModelFinder.getServoyModel().getDataModelManager().loadInMemoryServerTable(createNewTable);
+								ServoyModelFinder.getServoyModel().getDataModelManager().loadMemServerTable(createNewTable);
+								createNewTable.setInitialized(true);
 							}
 							catch (RepositoryException e)
 							{
