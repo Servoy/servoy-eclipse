@@ -123,8 +123,8 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 					if ( Math.abs(dragStartEvent.screenX- event.screenX) > 5  || Math.abs(dragStartEvent.screenY- event.screenY) > 5) {
 						dragging = true;
 					}
+					else return;
 				}
-				
 				if (event.ctrlKey && selectionToDrag == null)
 				{
 					selectionToDrag = [];
@@ -160,75 +160,73 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 				}
 				
 				if (selectionToDrag.length > 0) {
-					if (dragging) {
-						if (!editorScope.isAbsoluteFormLayout()) {
+					if (!editorScope.isAbsoluteFormLayout()) {
 
-							var type = "component";
-							var layoutName = selectionToDrag[0].getAttribute("svy-layoutname");
-							if (layoutName) type = "layout"
-							utils.setDraggingFromPallete(type);
-							var topContainer = null;
-							var canDrop = utils.getDropNode(type, topContainer,layoutName,event);
-							if (!canDrop.dropAllowed) {
-								editorScope.glasspane.style.cursor="no-drop";
-							}
-							else editorScope.glasspane.style.cursor="";
-							
-							dragStartEvent = event;
-							
-							if (t) clearTimeout(t);
-							t = setTimeout(function(){
-								if (canDrop.dropTarget) {
-									for(var i=0;i<selectionToDrag.length;i++) {
-										var node = $(selectionToDrag[i]);
-										if (editorScope.glasspane.style.cursor=="") {
-											if (canDrop.beforeChild) {
-												node.insertBefore(canDrop.beforeChild);
-											}
-											else if (node.parent()[0] != canDrop.dropTarget || canDrop.append){
-												$(canDrop.dropTarget).append(node);
-											}
-										}
-									}
-									editorScope.refreshEditorContent();
-								}
-							}, 200);
+						var type = "component";
+						var layoutName = selectionToDrag[0].getAttribute("svy-layoutname");
+						if (layoutName) type = "layout"
+						utils.setDraggingFromPallete(type);
+						var topContainer = null;
+						var canDrop = utils.getDropNode(type, topContainer,layoutName,event);
+						if (!canDrop.dropAllowed) {
+							editorScope.glasspane.style.cursor="no-drop";
 						}
-						else {
-							var formState = editorScope.getFormState();
-							if (formState) {
-								var changeX = event.screenX- dragStartEvent.screenX;
-								var changeY = event.screenY- dragStartEvent.screenY;
+						else editorScope.glasspane.style.cursor="";
+						
+						dragStartEvent = event;
+						
+						if (t) clearTimeout(t);
+						t = setTimeout(function(){
+							if (canDrop.dropTarget) {
 								for(var i=0;i<selectionToDrag.length;i++) {
-									var node = selectionToDrag[i];
-									if (node[0] && node[0].getAttribute('cloneuuid'))
-									{
-										node[0].location.x += changeX;
-										node[0].location.y += changeY;
-										var css = { top: node[0].location.y, left: node[0].location.x }
-										node.css(css);
-									}
-									else {
-										var beanModel = editorScope.getBeanModel(node);
-										if (beanModel){
-											beanModel.location.y = beanModel.location.y + changeY;
-											beanModel.location.x = beanModel.location.x + changeX;
-											var css = { top: beanModel.location.y, left: beanModel.location.x }
-											$(node).css(css);
+									var node = $(selectionToDrag[i]);
+									if (editorScope.glasspane.style.cursor=="") {
+										if (canDrop.beforeChild) {
+											node.insertBefore(canDrop.beforeChild);
 										}
-										else 
-										{
-											var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-											if (ghostObject)
-											{
-												editorScope.updateGhostLocation(ghostObject, ghostObject.location.x + changeX, ghostObject.location.y + changeY)
-											}	
+										else if (node.parent()[0] != canDrop.dropTarget || canDrop.append){
+											$(canDrop.dropTarget).append(node);
 										}
 									}
 								}
 								editorScope.refreshEditorContent();
-								dragStartEvent = event;
 							}
+						}, 200);
+					}
+					else {
+						var formState = editorScope.getFormState();
+						if (formState) {
+							var changeX = event.screenX- dragStartEvent.screenX;
+							var changeY = event.screenY- dragStartEvent.screenY;
+							for(var i=0;i<selectionToDrag.length;i++) {
+								var node = selectionToDrag[i];
+								if (node[0] && node[0].getAttribute('cloneuuid'))
+								{
+									node[0].location.x += changeX;
+									node[0].location.y += changeY;
+									var css = { top: node[0].location.y, left: node[0].location.x }
+									node.css(css);
+								}
+								else {
+									var beanModel = editorScope.getBeanModel(node);
+									if (beanModel){
+										beanModel.location.y = beanModel.location.y + changeY;
+										beanModel.location.x = beanModel.location.x + changeX;
+										var css = { top: beanModel.location.y, left: beanModel.location.x }
+										$(node).css(css);
+									}
+									else 
+									{
+										var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+										if (ghostObject)
+										{
+											editorScope.updateGhostLocation(ghostObject, ghostObject.location.x + changeX, ghostObject.location.y + changeY)
+										}	
+									}
+								}
+							}
+							editorScope.refreshEditorContent();
+							dragStartEvent = event;
 						}
 					}
 				}
