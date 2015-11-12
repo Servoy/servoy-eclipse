@@ -26,9 +26,6 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceVisitor;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.preference.IPersistentPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -52,7 +49,6 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.property.types.DesignerTypes;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.IDebugClientHandler;
@@ -60,8 +56,6 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
-import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.ngclient.WebsocketSessionFactory;
 import com.servoy.j2db.server.ngclient.design.DesignNGClient;
@@ -69,7 +63,6 @@ import com.servoy.j2db.server.ngclient.design.DesignNGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.design.IDesignerSolutionProvider;
 import com.servoy.j2db.server.ngclient.property.types.Types;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.util.Debug;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -234,50 +227,9 @@ public class Activator extends AbstractUIPlugin
 				});
 			}
 		}
-		loadInMemTables();
-	}
-
-	private void loadInMemTables()
-	{
-		org.eclipse.core.resources.IFolder serverInformationFolder = ServoyModelFinder.getServoyModel().getDataModelManager().getDBIFileContainer("mem");
-
-		if (serverInformationFolder.exists())
-		{
-			try
-			{
-				serverInformationFolder.accept(new IResourceVisitor()
-				{
-					public boolean visit(IResource resource) throws CoreException
-					{
-						String extension = resource.getFileExtension();
-						if (extension != null && extension.equalsIgnoreCase(DataModelManager.COLUMN_INFO_FILE_EXTENSION))
-						{
-							//we found a dbi file
-							String tableName = resource.getName().substring(0,
-								resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
-							try
-							{
-								ITable createNewTable = (ServoyModel.getServerManager()).getMemServer().createNewTable(null, tableName);
-								ServoyModelFinder.getServoyModel().getDataModelManager().loadMemServerTable(createNewTable);
-								createNewTable.setInitialized(true);
-							}
-							catch (RepositoryException e)
-							{
-								Debug.error(e);
-							}
-						}
-						return true;
-					}
-
-				}, IResource.DEPTH_ONE, false);
-			}
-			catch (CoreException e)
-			{
-				Debug.error(e);
-			}
-		}
 
 	}
+
 
 	public void toggleShowData()
 	{

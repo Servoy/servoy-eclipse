@@ -59,12 +59,11 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 
 /**
  * Creates a new delete table action. It can be used to delete the table given by the selected SimpleUserNode.
- * 
+ *
  * @author acostescu
  */
 public class DeleteTableAction extends Action implements ISelectionChangedListener
@@ -114,7 +113,7 @@ public class DeleteTableAction extends Action implements ISelectionChangedListen
 
 								final IServer server = repository.getServer(selectedTable.getServerName());
 								final ITable table = server == null ? null : server.getTable(selectedTable.getTableName());
-								if (server instanceof IServerInternal && table instanceof Table)
+								if (server instanceof IServerInternal)
 								{
 									// see if the user also wants to delete the existing aggregations/calculations/tableEvents for this table
 									// that exist in the active modules (only ask if such info exists)
@@ -129,9 +128,9 @@ public class DeleteTableAction extends Action implements ISelectionChangedListen
 											{
 												deleteEACAsker = new YesYesToAllNoNoToAllAsker(shell, getText());
 											}
-											deleteEACAsker.setMessage("Table events, aggregattions and/or calculations exist for table '" +
-												selectedTable.getTableName() +
-												"' in the active solution and/or modules.\nDo you still want to delete the table?");
+											deleteEACAsker.setMessage(
+												"Table events, aggregattions and/or calculations exist for table '" + selectedTable.getTableName() +
+													"' in the active solution and/or modules.\nDo you still want to delete the table?");
 											// we have tableNode(s)... ask user if these should be deleted as well
 											if (deleteEACAsker.userSaidYes())
 											{
@@ -153,7 +152,7 @@ public class DeleteTableAction extends Action implements ISelectionChangedListen
 											{
 												try
 												{
-													((IServerInternal)server).removeTable((Table)table);
+													((IServerInternal)server).removeTable(table);
 												}
 												catch (SQLException e)
 												{

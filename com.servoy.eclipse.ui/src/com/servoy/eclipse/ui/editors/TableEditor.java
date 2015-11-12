@@ -460,7 +460,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	@Override
 	public Object getAdapter(Class adapter)
 	{
-		if (Table.class.equals(adapter))
+		if (ITable.class.equals(adapter))
 		{
 			return getTable();
 		}
@@ -573,9 +573,9 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 			{
 			}
 
-			public void tablesRemoved(IServerInternal s, Table tables[], boolean delete)
+			public void tablesRemoved(IServerInternal s, ITable tables[], boolean delete)
 			{
-				for (Table t : tables)
+				for (ITable t : tables)
 				{
 					if (t.getName().equalsIgnoreCase(table.getName()))
 					{

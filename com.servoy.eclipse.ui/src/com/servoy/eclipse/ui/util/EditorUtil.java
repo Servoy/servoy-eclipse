@@ -116,7 +116,6 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.util.Pair;
@@ -649,7 +648,7 @@ public class EditorUtil
 				if (editor != null)
 				{
 					if ((object instanceof IPersist && object.equals(editor.getAdapter(IPersist.class))) ||
-						(object instanceof Table && object.equals(editor.getAdapter(Table.class))) ||
+						(object instanceof ITable && object.equals(editor.getAdapter(ITable.class))) ||
 						((object instanceof IServerInternal) && editor.getAdapter(ServerConfig.class) != null &&
 							((IServerInternal)object).getConfig().getServerName().equals(editor.getAdapter(ServerConfig.class).getServerName())))
 					{

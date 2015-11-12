@@ -37,6 +37,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -48,6 +49,7 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
@@ -177,8 +179,10 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyUpdatingProject;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.dnd.FormElementTransfer;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -324,12 +328,14 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.MimeTypes;
@@ -903,6 +909,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				addActiveProjectListener();
 				addResourceListener();
 				addServerAndTableListeners();
+				loadInMemTables();
 				addI18NChangeListener();
 
 				SolutionExplorerTreeContentProvider treeContentProvider = (SolutionExplorerTreeContentProvider)tree.getContentProvider();
@@ -947,6 +954,95 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		};
 		siteService.schedule(job);
 	}
+
+
+	private void loadInMemTables()
+	{
+		org.eclipse.core.resources.IFolder serverInformationFolder = ServoyModelFinder.getServoyModel().getDataModelManager().getDBIFileContainer("mem");
+
+		if (serverInformationFolder.exists())
+		{
+			try
+			{
+				serverInformationFolder.accept(new IResourceVisitor()
+				{
+					public boolean visit(IResource resource) throws CoreException
+					{
+						String extension = resource.getFileExtension();
+						if (extension != null && extension.equalsIgnoreCase(DataModelManager.COLUMN_INFO_FILE_EXTENSION))
+						{
+							//we found a dbi file
+							String tableName = resource.getName().substring(0,
+								resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
+							try
+							{
+								ITable createNewTable = (ServoyModel.getServerManager()).getMemServer().createNewTable(null, tableName);
+								ServoyModelFinder.getServoyModel().getDataModelManager().loadMemServerTable(createNewTable);
+								createNewTable.setInitialized(true);
+							}
+							catch (RepositoryException e)
+							{
+								Debug.error(e);
+							}
+						}
+						return true;
+					}
+
+				}, IResource.DEPTH_ONE, false);
+			}
+			catch (CoreException e)
+			{
+				Debug.error(e);
+			}
+		}
+		ServoyModel.getServerManager().getMemServer().addTableListener(tableListener);
+		ServoyModel.getServerManager().getMemServer().addTableListener(new ITableListener()
+		{
+
+			@Override
+			public void tablesAdded(IServerInternal server, String[] tableNames)
+			{
+
+			}
+
+			@Override
+			public void tablesRemoved(IServerInternal server, ITable[] tables, boolean deleted)
+			{
+				for (ITable iTable : tables)
+				{
+					IFile dbiFile = ServoyModelFinder.getServoyModel().getDataModelManager().getDBIFile(server.getName(), iTable.getName());
+					try
+					{
+						dbiFile.delete(false, new NullProgressMonitor());
+					}
+					catch (CoreException e)
+					{
+						Debug.error(e);
+					}
+				}
+
+			}
+
+			@Override
+			public void hiddenTableChanged(IServerInternal server, Table table)
+			{
+
+			}
+
+			@Override
+			public void serverStateChanged(IServerInternal server, int oldState, int newState)
+			{
+
+			}
+
+			@Override
+			public void tableInitialized(Table t)
+			{
+
+			}
+		});
+	}
+
 
 	private void initializeEditmenuActions()
 	{
@@ -1987,12 +2083,12 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
 			}
 
-			public void tablesRemoved(IServerInternal server, Table[] tables, boolean deleted)
+			public void tablesRemoved(IServerInternal server, ITable[] tables, boolean deleted)
 			{
 				if (tables != null && tables.length > 0 && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
 				{
 					List<String> names = new ArrayList<String>();
-					for (Table table : tables)
+					for (ITable table : tables)
 					{
 						names.add(table.getName());
 					}

@@ -759,9 +759,9 @@ public class ServoyModel extends AbstractServoyModel
 		tableListener = new TableListener()
 		{
 			@Override
-			public void tablesRemoved(IServerInternal server, Table[] tables, boolean deleted)
+			public void tablesRemoved(IServerInternal server, ITable[] tables, boolean deleted)
 			{
-				for (Table table : tables)
+				for (ITable table : tables)
 				{
 					table.removeIColumnListener(columnListener);
 					flushDataProvidersForTable(table);

@@ -200,9 +200,9 @@ public class EclipseUserManager extends WorkspaceUserManager
 				}
 			}
 
-			public void tablesRemoved(IServerInternal server, Table tables[], boolean deleted)
+			public void tablesRemoved(IServerInternal server, ITable tables[], boolean deleted)
 			{
-				for (Table table : tables)
+				for (ITable table : tables)
 				{
 					table.removeIColumnListener(columnListener);
 				}
@@ -211,7 +211,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 					// delete .sec files as well if tables were deleted by user
 					try
 					{
-						for (Table table : tables)
+						for (ITable table : tables)
 						{
 							IPath path = new Path(DataModelManager.getRelativeServerPath(server.getName()) + IPath.SEPARATOR + getFileName(table.getName()));
 							IFile file = resourcesProject.getFile(path);
@@ -229,7 +229,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 				else if (isOperational())
 				{
 					// remove sec. info we have about this table
-					for (Table table : tables)
+					for (ITable table : tables)
 					{
 						reloadSecurityInfo(server.getName(), table.getName());
 					}

@@ -2378,6 +2378,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	public void refreshServerViewsNode(IServerInternal server)
 	{
 		PlatformSimpleUserNode node = (PlatformSimpleUserNode)findChildNode(servers, server.getName());
+		if (server == ServoyModel.getServerManager().getMemServer())
+			node = (PlatformSimpleUserNode)findChildNode(devDatasources, Messages.TreeStrings_DBMemory);
 		if (node != null)
 		{
 			handleServerViewsNode(server, node);

@@ -125,7 +125,7 @@ public class DataModelManager implements IColumnInfoManager
 				// not interested in this
 			}
 
-			public void tablesRemoved(IServerInternal server, Table tables[], boolean deleted)
+			public void tablesRemoved(IServerInternal server, ITable tables[], boolean deleted)
 			{
 				// not interested in this
 			}
