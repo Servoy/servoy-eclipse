@@ -140,9 +140,9 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			{
 				list.add(PersistContext.create(persist, ((PersistContext)parentElement).getContext()));
 			}
-			if (((PersistContext)parentElement).getPersist() instanceof Bean)
+			if (((PersistContext)parentElement).getPersist() instanceof IBasicWebComponent)
 			{
-				List<WebCustomType> allGhostElements = getAllGhostElements((Bean)((PersistContext)parentElement).getPersist());
+				List<WebCustomType> allGhostElements = getAllGhostElements((IBasicWebComponent)((PersistContext)parentElement).getPersist());
 				for (WebCustomType ghost : allGhostElements)
 				{
 					list.add(PersistContext.create(ghost, ((PersistContext)parentElement).getContext()));
@@ -338,13 +338,11 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 
 	public boolean hasChildren(Object element)
 	{
-		return element == ELEMENTS ||
-			element == PARTS ||
-			element instanceof Pair ||
-			element instanceof FormElementGroup ||
+		return element == ELEMENTS || element == PARTS || element instanceof Pair || element instanceof FormElementGroup ||
 			(element instanceof PersistContext && ((PersistContext)element).getPersist() instanceof AbstractBase &&
-				(((AbstractBase)((PersistContext)element).getPersist())).getAllObjects().hasNext() || (((PersistContext)element).getPersist() instanceof Bean &&
-				!(((PersistContext)element).getPersist() instanceof WebCustomType) && ((Bean)((PersistContext)element).getPersist()).getBeanXML() != null));
+				(((AbstractBase)((PersistContext)element).getPersist())).getAllObjects().hasNext() ||
+				(((PersistContext)element).getPersist() instanceof Bean && !(((PersistContext)element).getPersist() instanceof WebCustomType) &&
+					((Bean)((PersistContext)element).getPersist()).getBeanXML() != null));
 	}
 
 	public Object[] getElements(Object inputElement)

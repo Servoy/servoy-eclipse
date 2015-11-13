@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.ui.PlatformUI;
@@ -12,14 +13,20 @@ import org.eclipse.ui.menus.CommandContributionItem;
 import org.eclipse.ui.menus.CommandContributionItemParameter;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.GhostHandler;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.LayoutContainer;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.Debug;
 
 public class AddContainerContributionItem extends CompoundContributionItem
@@ -42,6 +49,7 @@ public class AddContainerContributionItem extends CompoundContributionItem
 	{
 		List<IContributionItem> list = new ArrayList<IContributionItem>();
 		Object persist = DesignerUtil.getContentOutlineSelection();
+		if (persist instanceof PersistContext) persist = ((PersistContext)persist).getPersist();
 		if (persist instanceof LayoutContainer)
 		{
 			WebComponentPackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
@@ -71,7 +79,7 @@ public class AddContainerContributionItem extends CompoundContributionItem
 								if (allowedChildName.equals(layoutName))
 								{
 									String config = specification.getConfig() instanceof String ? specification.getConfig().toString() : "{}";
-									addMenuItem(list, specification, config);
+									addMenuItem(list, specification, config, null);
 								}
 							}
 							catch (JSONException e)
@@ -82,7 +90,7 @@ public class AddContainerContributionItem extends CompoundContributionItem
 					}
 					if (allowedChildren.contains("component"))
 					{
-						addMenuItem(list, null, null);
+						addMenuItem(list, null, null, null);
 					}
 				}
 			}
@@ -97,15 +105,28 @@ public class AddContainerContributionItem extends CompoundContributionItem
 					if (specification.isTopContainer())
 					{
 						String config = specification.getConfig() instanceof String ? specification.getConfig().toString() : "{}";
-						addMenuItem(list, specification, config);
+						addMenuItem(list, specification, config, null);
 					}
+				}
+			}
+		}
+		else if (persist instanceof WebComponent)
+		{
+			WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)persist).getTypeName());
+			Map<String, PropertyDescription> properties = spec.getProperties();
+			for (PropertyDescription propertyDescription : properties.values())
+			{
+				if (GhostHandler.isDroppable(propertyDescription, propertyDescription.getConfig()))
+				{
+					addMenuItem(list, null, propertyDescription.getName(),
+						PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(propertyDescription.getType()) + " -> " + propertyDescription.getName());
 				}
 			}
 		}
 		return list.toArray(new IContributionItem[list.size()]);
 	}
 
-	private void addMenuItem(List<IContributionItem> list, WebLayoutSpecification specification, String config)
+	private void addMenuItem(List<IContributionItem> list, WebLayoutSpecification specification, String config, String displayName)
 	{
 		final CommandContributionItemParameter commandContributionItemParameter = new CommandContributionItemParameter(
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow(), null, AddContainerCommand.COMMAND_ID, CommandContributionItem.STYLE_PUSH);
@@ -116,6 +137,12 @@ public class AddContainerContributionItem extends CompoundContributionItem
 			commandContributionItemParameter.parameters.put("com.servoy.eclipse.designer.editor.rfb.menu.add.package", specification.getPackageName());
 			commandContributionItemParameter.parameters.put("com.servoy.eclipse.designer.editor.rfb.menu.add.config", config);
 			commandContributionItemParameter.label = specification.getDisplayName();
+		}
+		else if (config != null)
+		{
+			commandContributionItemParameter.parameters = new HashMap<String, String>();
+			commandContributionItemParameter.parameters.put("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property", config);
+			commandContributionItemParameter.label = displayName;
 		}
 		else
 		{

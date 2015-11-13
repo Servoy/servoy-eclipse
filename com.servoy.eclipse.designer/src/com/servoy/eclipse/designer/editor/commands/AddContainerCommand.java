@@ -20,10 +20,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.property.ICustomType;
+import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
@@ -34,9 +37,11 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -45,6 +50,7 @@ import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.Debug;
 
 
@@ -69,7 +75,18 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 					{
 						try
 						{
-							if (event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.spec") != null)
+							if (event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property") != null)
+							{
+								Object selection = DesignerUtil.getContentOutlineSelection();
+								if (selection instanceof PersistContext) selection = ((PersistContext)selection).getPersist();
+								if (selection instanceof IBasicWebComponent)
+								{
+									IBasicWebComponent parentBean = (IBasicWebComponent)selection;
+									addCustomType(parentBean, event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property"), null);
+									persist = parentBean;
+								}
+							}
+							else if (event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.spec") != null)
 							{
 								persist = addLayoutComponent(DesignerUtil.getContentOutlineSelection(),
 									event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.spec"),
@@ -240,5 +257,47 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			i = form.getAllObjectsAsList().size() + 1;
 		}
 		return i;
+	}
+
+	public static WebCustomType addCustomType(IBasicWebComponent parentBean, String propertyName, String compName)
+	{
+		int index = -1;
+		WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getTypeName());
+		boolean isArray = spec.isArrayReturnType(propertyName);
+		PropertyDescription targetPD = spec.getProperty(propertyName);
+		String typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(targetPD.getType());
+		WebCustomType[] arrayValue = null;
+		if (isArray)
+		{
+			targetPD = ((ICustomType< ? >)targetPD.getType()).getCustomJSONTypeDefinition();
+			if (parentBean instanceof WebComponent)
+			{
+				arrayValue = (WebCustomType[])((WebComponent)parentBean).getProperty(propertyName);
+			}
+			index = arrayValue != null ? arrayValue.length : 0;
+		}
+		WebCustomType bean = new WebCustomType(parentBean, targetPD, propertyName, index, true);
+		bean.setName(compName);
+		bean.setTypeName(typeName);
+		if (parentBean instanceof WebComponent)
+		{
+			if (isArray)
+			{
+				if (arrayValue == null)
+				{
+					arrayValue = new WebCustomType[] { bean };
+				}
+				else
+				{
+					WebCustomType[] newArrayValue = new WebCustomType[arrayValue.length + 1];
+					System.arraycopy(arrayValue, 0, newArrayValue, 0, arrayValue.length);
+					newArrayValue[arrayValue.length] = bean;
+					arrayValue = newArrayValue;
+				}
+				((WebComponent)parentBean).setProperty(propertyName, arrayValue);
+			}
+			else((WebComponent)parentBean).setProperty(propertyName, bean);
+		}
+		return bean;
 	}
 }
