@@ -266,7 +266,7 @@ public class Activator extends Plugin
 		ss = (IServerStarter)context.getService(ref);
 		if (ss == null)
 		{
-			throw new RuntimeException("Could not load application server plugin"); //$NON-NLS-1$ 
+			throw new RuntimeException("Could not load application server plugin"); //$NON-NLS-1$
 		}
 		ss.nativeStartup();
 
@@ -381,19 +381,26 @@ public class Activator extends Plugin
 					}
 				});
 
-				try
+				PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable()
 				{
-					if (!ApplicationServerSingleton.get().hasDeveloperLicense() ||
-						Utils.getAsBoolean(Settings.getInstance().getProperty("servoy.developer.showStartPage", "true")))
+					@Override
+					public void run()
 					{
-						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(StartPageBrowserEditor.INPUT,
-							StartPageBrowserEditor.STARTPAGE_BROWSER_EDITOR_ID);
+						try
+						{
+							if (!ApplicationServerSingleton.get().hasDeveloperLicense() ||
+								Utils.getAsBoolean(Settings.getInstance().getProperty("servoy.developer.showStartPage", "true")))
+							{
+								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(StartPageBrowserEditor.INPUT,
+									StartPageBrowserEditor.STARTPAGE_BROWSER_EDITOR_ID);
+							}
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError("Failed to open browser editor.", e); //$NON-NLS-1$
+						}
 					}
-				}
-				catch (Exception e)
-				{
-					ServoyLog.logError("Failed to open browser editor.", e); //$NON-NLS-1$
-				}
+				});
 			}
 		});
 	}
@@ -445,7 +452,7 @@ public class Activator extends Plugin
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private void generateSQLExplorerAliasses()
 	{
@@ -517,7 +524,7 @@ public class Activator extends Plugin
 				boolean allDisplaysDisposed = true;
 				// in mac os 10.8 with java 1.6_43 the display is disposed before the clients are closed
 				//  -- test first if we are in that specific case
-				//loop through all the threads to see if there is still a display associated with any of them 
+				//loop through all the threads to see if there is still a display associated with any of them
 				// if there is a display associated
 				Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
 				for (Thread thread : threadSet)
@@ -579,7 +586,7 @@ public class Activator extends Plugin
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public IDebugClientHandler getDebugClientHandler()
 	{
@@ -731,7 +738,7 @@ public class Activator extends Plugin
 
 	/**
 	* Returns the shared instance
-	* 
+	*
 	* @return the shared instance
 	*/
 	public static Activator getDefault()
@@ -770,7 +777,7 @@ public class Activator extends Plugin
 		MethodTemplatesLoader.loadMethodTemplatesFromXML();
 
 		// install servoy model listeners in separate job, when ServoyModel is created in bundle.activator thread
-		// a deadlock may occur (display thread waits for loading of ui bundle which waits for core bundle 
+		// a deadlock may occur (display thread waits for loading of ui bundle which waits for core bundle
 		// which waits for ServoyModel latch, but the ServoyModel runnable is never running because display thread is blocking in wait)
 		new Job("HookupToServoyModel") //$NON-NLS-1$
 		{
@@ -1028,7 +1035,7 @@ public class Activator extends Plugin
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public Object createExtensionPoint(String extensionId)
 	{
@@ -1050,7 +1057,7 @@ public class Activator extends Plugin
 		IConfigurationElement[] ce = extensions[0].getConfigurationElements();
 		if (ce == null || ce.length == 0)
 		{
-			ServoyLog.logWarning("Could not read  extension point " + extensionId, null); //$NON-NLS-1$ 
+			ServoyLog.logWarning("Could not read  extension point " + extensionId, null); //$NON-NLS-1$
 			return null;
 		}
 		if (ce.length > 1)
