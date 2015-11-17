@@ -48,6 +48,7 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
@@ -2633,8 +2634,16 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		treeFilter.setClientType(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType());
 		if (wasNull)
 		{
-			// cache contents as it may take a while the first time... (filter once outside of SWT UI thread - so we can show progress dialog)
-			treeFilter.filter(tree, tree.getInput(), ((IStructuredContentProvider)tree.getContentProvider()).getElements(tree.getInput()));
+			try
+			{
+				// cache contents as it may take a while the first time... (filter once outside of SWT UI thread - so we can show progress dialog)
+				treeFilter.filter(tree, tree.getInput(), ((IStructuredContentProvider)tree.getContentProvider()).getElements(tree.getInput()));
+			}
+			catch (OperationCanceledException ex)
+			{
+				treeFilter = null;
+				return;
+			}
 		}
 
 		Runnable updateUI = new Runnable()
