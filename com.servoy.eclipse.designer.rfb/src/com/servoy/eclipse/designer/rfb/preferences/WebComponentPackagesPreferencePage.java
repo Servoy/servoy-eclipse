@@ -7,6 +7,7 @@ import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 
@@ -27,7 +28,7 @@ public class WebComponentPackagesPreferencePage extends FieldEditorPreferencePag
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.jface.preference.FieldEditorPreferencePage#createFieldEditors()
 	 */
 	@Override
@@ -38,7 +39,13 @@ public class WebComponentPackagesPreferencePage extends FieldEditorPreferencePag
 		{
 			String displayName = packageName;
 			if (WebComponentSpecProvider.getInstance().getPackageDisplayName(packageName) != null)
+			{
 				displayName = WebComponentSpecProvider.getInstance().getPackageDisplayName(packageName);
+			}
+			else if (WebServiceSpecProvider.getInstance().getPackageDisplayName(packageName) != null)
+			{
+				displayName = WebServiceSpecProvider.getInstance().getPackageDisplayName(packageName);
+			}
 			if (packageName.equals("servoyservices")) continue;//we do not allow disabling the services package
 			if (packageName.equals("servoycore")) continue;//we do not allow disabling the core package
 			addField(new BooleanFieldEditor("com.servoy.eclipse.designer.rfb.packages.enable." + packageName, "Enable " + displayName + " package",
