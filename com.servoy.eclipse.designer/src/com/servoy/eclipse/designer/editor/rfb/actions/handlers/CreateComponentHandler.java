@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -38,7 +37,6 @@ import org.sablo.specification.WebComponentPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.WebLayoutSpecification;
-import org.sablo.specification.property.ICustomType;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.base.persistence.constants.IRepositoryConstants;
@@ -47,6 +45,7 @@ import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -178,49 +177,13 @@ public class CreateComponentHandler implements IServerService
 				if (next instanceof IBasicWebComponent)
 				{
 					IBasicWebComponent parentBean = (IBasicWebComponent)next;
-					String typeName = args.getString("type");
+					String propertyName = args.getString("propertyName");
 					String compName = "bean_" + id.incrementAndGet();
 					while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
 					{
 						compName = "bean_" + id.incrementAndGet();
 					}
-					String dropTargetFieldName = getFirstFieldWithType(parentBean, typeName);
-					int index = -1;
-					WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getTypeName());
-					boolean isArray = spec.isArrayReturnType(dropTargetFieldName);
-					PropertyDescription targetPD = spec.getProperty(dropTargetFieldName);
-					WebCustomType[] arrayValue = null;
-					if (isArray)
-					{
-						targetPD = ((ICustomType< ? >)targetPD.getType()).getCustomJSONTypeDefinition();
-						if (parentBean instanceof WebComponent)
-						{
-							arrayValue = (WebCustomType[])((WebComponent)parentBean).getProperty(dropTargetFieldName);
-						}
-						index = arrayValue != null ? arrayValue.length : 0;
-					}
-					WebCustomType bean = new WebCustomType(parentBean, targetPD, dropTargetFieldName, index, true);
-					bean.setName(compName);
-					bean.setTypeName(typeName);
-					if (parentBean instanceof WebComponent)
-					{
-						if (isArray)
-						{
-							if (arrayValue == null)
-							{
-								arrayValue = new WebCustomType[] { bean };
-							}
-							else
-							{
-								WebCustomType[] newArrayValue = new WebCustomType[arrayValue.length + 1];
-								System.arraycopy(arrayValue, 0, newArrayValue, 0, arrayValue.length);
-								newArrayValue[arrayValue.length] = bean;
-								arrayValue = newArrayValue;
-							}
-							((WebComponent)parentBean).setProperty(dropTargetFieldName, arrayValue);
-						}
-						else ((WebComponent)parentBean).setProperty(dropTargetFieldName, bean);
-					}
+					WebCustomType bean = AddContainerCommand.addCustomType(parentBean, propertyName, compName);
 					return new IPersist[] { bean };
 				}
 				else if (args.getString("type").equals("tab"))
@@ -639,25 +602,4 @@ public class CreateComponentHandler implements IServerService
 		}
 		return container;
 	}
-
-	/**
-	 * @param parentBean
-	 * @param typeName
-	 * @return the first key name in the model that has a value of type @param typeName
-	 */
-	private String getFirstFieldWithType(IBasicWebComponent parentBean, String typeName)
-	{
-		WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getTypeName());
-		Map<String, PropertyDescription> properties = spec.getProperties();
-		for (PropertyDescription pd : properties.values())
-		{
-			if (pd.getType().getName().replaceFirst(spec.getName() + ".", "").equals(typeName))
-			{
-				return pd.getName();
-			}
-		}
-		return null;
-	}
-
-
 }

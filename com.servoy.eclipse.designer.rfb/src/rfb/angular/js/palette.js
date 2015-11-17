@@ -64,7 +64,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 			 * enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.topContainer,layoutName)  for new components from the pallete
 			 * enterDragMode($event,ghost,null,null,null,ghost,null) for a ghost
 			 */
-			$scope.enterDragMode = function(event,componentName,packageName,tagName,model,type, topContainer,layoutName)
+			$scope.enterDragMode = function(event,componentName,packageName,tagName,model,type, topContainer,layoutName,propertyName)
 			{
 				var dragClone = null;
 				var angularElement = null;
@@ -210,7 +210,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 
 						component.x = ev.pageX;
 						component.y = ev.pageY;
-
+						if (propertyName) component.propertyName = propertyName;
 						if (angularElement && $scope.isAbsoluteFormLayout()) {
 							var x = (window.pageXOffset !== undefined) ? window.pageXOffset : document.documentElement.scrollLeft;
 							var y = (window.pageYOffset !== undefined) ? window.pageYOffset : document.documentElement.scrollTop;

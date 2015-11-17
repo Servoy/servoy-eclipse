@@ -73,7 +73,8 @@ import com.servoy.j2db.util.HTTPUtils;
 public class DesignerFilter implements Filter
 {
 	private static final List<String> IGNORE_PACKAGE_LIST = Arrays.asList(new String[] { "servoycore" });
-	private static final List<String> IGNORE_COMPONENT_LIST = Arrays.asList(new String[] { "servoydefault-checkgroup", FormElement.ERROR_BEAN, "servoycore-navigator", "servoydefault-radiogroup", "servoydefault-htmlview", "colorthefoundset" });
+	private static final List<String> IGNORE_COMPONENT_LIST = Arrays.asList(
+		new String[] { "servoydefault-checkgroup", FormElement.ERROR_BEAN, "servoycore-navigator", "servoydefault-radiogroup", "servoydefault-htmlview", "colorthefoundset" });
 
 	public static final String PREFERENCE_KEY = "com.servoy.eclipse.designer.rfb.palette.order";
 	@SuppressWarnings("nls")
@@ -158,8 +159,8 @@ public class DesignerFilter implements Filter
 							@Override
 							public int compare(String pkg1, String pkg2)
 							{
-								if (orderPreference.indexOf(pkg1) > -1 && orderPreference.indexOf(pkg2) > -1) return orderPreference.indexOf(pkg1) -
-									orderPreference.indexOf(pkg2);
+								if (orderPreference.indexOf(pkg1) > -1 && orderPreference.indexOf(pkg2) > -1)
+									return orderPreference.indexOf(pkg1) - orderPreference.indexOf(pkg2);
 								else
 								{
 									if (orderPreference.indexOf(pkg1) > 0) return -1;
@@ -173,8 +174,8 @@ public class DesignerFilter implements Filter
 					for (String key : orderedKeys)
 					{
 						boolean startedArray = false;
-						if ((provider.getLayoutSpecifications().containsKey(key) && isAccesibleInLayoutType(provider.getLayoutSpecifications().get(key),
-							layoutType)))
+						if ((provider.getLayoutSpecifications().containsKey(key) &&
+							isAccesibleInLayoutType(provider.getLayoutSpecifications().get(key), layoutType)))
 						{
 							WebComponentPackageSpecification<WebLayoutSpecification> pkg = provider.getLayoutSpecifications().get(key);
 							jsonWriter.object();
@@ -213,8 +214,8 @@ public class DesignerFilter implements Filter
 										StringResource stringResource = (StringResource)iRootObject;
 										String content = stringResource.getContent();
 										JSONObject templateJSON = new JSONObject(content);
-										if ((layoutType.equals(layoutTypeNames[0]) && (!templateJSON.has(Template.PROP_LAYOUT)) || (templateJSON.has(Template.PROP_LAYOUT) && templateJSON.get(
-											Template.PROP_LAYOUT).equals(layoutType))))
+										if ((layoutType.equals(layoutTypeNames[0]) && (!templateJSON.has(Template.PROP_LAYOUT)) ||
+											(templateJSON.has(Template.PROP_LAYOUT) && templateJSON.get(Template.PROP_LAYOUT).equals(layoutType))))
 										{
 											jsonWriter.object();
 											jsonWriter.key("name").value(iRootObject.getName());
@@ -427,16 +428,22 @@ public class DesignerFilter implements Filter
 		return sb.append("</div>");
 	}
 
-	private List<String> getPalleteTypeNames(WebComponentSpecification spec)
+	private List<JSONObject> getPalleteTypeNames(WebComponentSpecification spec)
 	{
-		List<String> result = new ArrayList<String>();
+		List<JSONObject> result = new ArrayList<JSONObject>();
 		Map<String, PropertyDescription> properties = spec.getProperties();
 		for (PropertyDescription propertyDescription : properties.values())
 		{
 			Object configObject = propertyDescription.getConfig();
 			if (configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE)))
 			{
-				if (PropertyUtils.isCustomJSONProperty(propertyDescription.getType())) result.add(PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(propertyDescription.getType()));
+				if (PropertyUtils.isCustomJSONProperty(propertyDescription.getType()))
+				{
+					JSONObject json = new JSONObject();
+					json.put("type", PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(propertyDescription.getType()));
+					json.put("propertyName", propertyDescription.getName());
+					result.add(json);
+				}
 			}
 		}
 		return result;
