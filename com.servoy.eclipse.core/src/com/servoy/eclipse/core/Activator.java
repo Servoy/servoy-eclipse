@@ -407,26 +407,26 @@ public class Activator extends Plugin
 					}
 				});
 
-				PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable()
+				if (!ApplicationServerRegistry.get().hasDeveloperLicense() ||
+					Utils.getAsBoolean(Settings.getInstance().getProperty("servoy.developer.showStartPage", "true")))
 				{
-					@Override
-					public void run()
+					PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable()
 					{
-						try
+						@Override
+						public void run()
 						{
-							if (!ApplicationServerRegistry.get().hasDeveloperLicense() ||
-								Utils.getAsBoolean(Settings.getInstance().getProperty("servoy.developer.showStartPage", "true")))
+							try
 							{
 								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(StartPageBrowserEditor.INPUT,
 									StartPageBrowserEditor.STARTPAGE_BROWSER_EDITOR_ID);
 							}
+							catch (Exception e)
+							{
+								ServoyLog.logError("Failed to open browser editor.", e);
+							}
 						}
-						catch (Exception e)
-						{
-							ServoyLog.logError("Failed to open browser editor.", e);
-						}
-					}
-				});
+					});
+				}
 			}
 		});
 	}
@@ -491,7 +491,7 @@ public class Activator extends Plugin
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -671,7 +671,7 @@ public class Activator extends Plugin
 
 				/*
 				 * (non-Javadoc)
-				 *
+				 * 
 				 * @see com.servoy.j2db.IDesignerCallback#testAndStartDebugger()
 				 */
 				public void testAndStartDebugger()
