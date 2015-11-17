@@ -103,6 +103,7 @@ public class Activator extends AbstractUIPlugin
 		plugin = this;
 
 		Types.setTypesInstance(DesignerTypes.INSTANCE);
+		Types.getTypesInstance().registerTypes();
 		ApplicationServerRegistry.getServiceRegistry().registerService(IDesignerSolutionProvider.class, new IDesignerSolutionProvider()
 		{
 			@Override
@@ -214,9 +215,10 @@ public class Activator extends AbstractUIPlugin
 							{
 								if (getClient() == null)
 								{
-									setClient(client = new DesignNGClient(this, ApplicationServerRegistry.getServiceRegistry().getService(
-										IDesignerSolutionProvider.class), getPreferenceStore().contains(SHOW_DATA_IN_ANGULAR_DESIGNER)
-										? getPreferenceStore().getBoolean(SHOW_DATA_IN_ANGULAR_DESIGNER) : true));
+									setClient(client = new DesignNGClient(this,
+										ApplicationServerRegistry.getServiceRegistry().getService(IDesignerSolutionProvider.class),
+										getPreferenceStore().contains(SHOW_DATA_IN_ANGULAR_DESIGNER)
+											? getPreferenceStore().getBoolean(SHOW_DATA_IN_ANGULAR_DESIGNER) : true));
 								}
 							}
 						};
