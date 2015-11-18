@@ -143,12 +143,15 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		}
 		if (value == null)
 		{
-			if (jsonConverters.containsKey(type) && propertyDescription.hasDefault())
+			if (propertyDescription.hasDefault())
 			{
-				IPropertyConverterForBrowser<Object> converter = (IPropertyConverterForBrowser<Object>)jsonConverters.get(type);
-				if (converter != null)
+				if (jsonConverters.containsKey(type))
 				{
-					return converter.fromJSON(propertyDescription.getDefaultValue(), null, propertyDescription, null, null);
+					IPropertyConverterForBrowser<Object> converter = (IPropertyConverterForBrowser<Object>)jsonConverters.get(type);
+					if (converter != null)
+					{
+						return converter.fromJSON(propertyDescription.getDefaultValue(), null, propertyDescription, null, null);
+					}
 				}
 				return propertyDescription.getDefaultValue();
 			}
