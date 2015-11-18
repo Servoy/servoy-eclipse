@@ -606,7 +606,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 	@Override
 	public void resetPropertyValue(ISetterAwarePropertySource propertySource)
 	{
-		propertySource.setPropertyValue(getId(), null);
+		propertySource.defaultResetProperty(getId());
 	}
 
 }
