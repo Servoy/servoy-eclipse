@@ -160,6 +160,7 @@ import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IWebComponent;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.Part;
@@ -432,7 +433,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					ServoyLog.logError("Could not register property " + element.getName(), e);
 				}
 			}
-			if (!(persistContext.getPersist() instanceof IBasicWebComponent))
+			if (!(persistContext.getPersist() instanceof IBasicWebComponent) && !(persistContext.getPersist() instanceof LayoutContainer))
 			{
 				// check for pseudo properties
 				IPropertyHandler[] pseudoProperties = getPseudoProperties(persistContext.getPersist().getClass());
@@ -461,8 +462,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					{
 						try
 						{ //if this is a IWebComponent, then only register the 'name' property
-							if (!(persistContext.getPersist() instanceof IWebComponent) ||
-								(element.getName().equals("name") && persistContext.getPersist() instanceof IWebComponent))
+							if ((!(persistContext.getPersist() instanceof IWebComponent) && !(persistContext.getPersist() instanceof LayoutContainer)) ||
+								(element.getName().equals("name") &&
+									(persistContext.getPersist() instanceof IWebComponent || persistContext.getPersist() instanceof LayoutContainer)))
 								registerProperty(new PropertyDescriptorWrapper(new BeanPropertyHandler(element), persistContext.getPersist()),
 									flattenedEditingSolution, form);
 						}
