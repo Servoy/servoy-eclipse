@@ -3248,7 +3248,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	{
 		if (type == org.eclipse.ui.views.properties.IPropertySheetPage.class)
 		{
-			PropertySheetPage page = new ModifiedPropertySheetPage();
+			PropertySheetPage page = new ModifiedPropertySheetPage(null);
 			page.setRootEntry(new ModifiedPropertySheetEntry());
 			return page;
 		}
