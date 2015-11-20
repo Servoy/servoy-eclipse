@@ -53,6 +53,7 @@ import com.servoy.j2db.server.ngclient.property.types.NGInsetsPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGPointPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -78,10 +79,16 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 	}
 
 	private final PropertyDescription propertyDescription;
+	private boolean canHandleJSONNull = false;
 
 	public WebComponentPropertyHandler(PropertyDescription propertyDescription)
 	{
 		this.propertyDescription = propertyDescription;
+	}
+
+	public void setCanHandleJSON(boolean canHandleJSONNull)
+	{
+		this.canHandleJSONNull = canHandleJSONNull;
 	}
 
 	@Override
@@ -182,7 +189,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 				}
 			}
 		}
-		return value;
+		return canHandleJSONNull ? value : ServoyJSONObject.jsonNullToNull(value);
 	}
 
 	@Override
@@ -190,7 +197,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 	{
 		IBasicWebObject bean = (IBasicWebObject)obj;
 
-		Object convertedValue = value;
+		Object convertedValue = canHandleJSONNull ? value : ServoyJSONObject.nullToJsonNull(value);
 		if (propertyDescription.getType() instanceof FunctionPropertyType)
 		{
 			//  value is methodid

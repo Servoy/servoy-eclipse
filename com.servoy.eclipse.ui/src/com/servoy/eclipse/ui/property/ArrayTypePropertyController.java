@@ -178,9 +178,9 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 					buttonWidget.setToolTipText("Adds a new array item below.");
 					buttonWidget.setEnabled(true);
 
-					if (visible != (value != null))
+					if (visible == isNotSet(value))
 					{
-						visible = (value != null); // visibility is not enough - we don't want the space ocuppied at all so we change layout data as well
+						visible = !isNotSet(value); // visibility is not enough - we don't want the space ocuppied at all so we change layout data as well
 						updateButtonVisibility();
 					}
 				}

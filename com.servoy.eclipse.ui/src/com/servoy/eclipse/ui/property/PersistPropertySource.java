@@ -1751,7 +1751,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	public static Object convertGetPropertyValue(Object id, IPropertyDescriptor propertyDescriptor, Object rawValue)
 	{
 		Object value = rawValue;
-		if (value == JSONObject.NULL) value = null;
 		if (propertyDescriptor instanceof IPropertyController)
 		{
 			IPropertyConverter propertyConverter = ((IPropertyController)propertyDescriptor).getConverter();

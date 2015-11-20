@@ -169,20 +169,24 @@ public class CustomJSONObjectTypePropertyController extends JSONObjectTypeProper
 	@Override
 	public void resetPropertyValue(ISetterAwarePropertySource propertySource)
 	{
-		Object defValue = propertyDescription.getDefaultValue();
-		JSONObject toSet = null;
-		if (defValue instanceof String)
+		if (propertyDescription.hasDefault())
 		{
-			try
+			Object defValue = propertyDescription.getDefaultValue();
+			JSONObject toSet = null;
+			if (defValue instanceof String)
 			{
-				toSet = new ServoyJSONObject((String)defValue, false);
+				try
+				{
+					toSet = new ServoyJSONObject((String)defValue, false);
+				}
+				catch (JSONException e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
-			catch (JSONException e)
-			{
-				ServoyLog.logError(e);
-			}
+			propertySource.setPropertyValue(getId(), toSet);
 		}
-		propertySource.setPropertyValue(getId(), toSet);
+		else propertySource.defaultResetProperty(getId());
 	}
 
 }

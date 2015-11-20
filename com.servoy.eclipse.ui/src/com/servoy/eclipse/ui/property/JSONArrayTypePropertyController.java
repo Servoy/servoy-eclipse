@@ -31,7 +31,7 @@ import com.servoy.j2db.util.ServoyJSONObject;
  * @author acostescu
  */
 // unfortunately here we can't use JSONArray in generics even if we would make ArrayTypePropertyController generic because the value can also be JSONObject.NULL which would give classcastexceptions...
-public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyController
+public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyController implements ICanHandleJSONNullValues
 {
 
 	private static IObjectTextConverter JSONARRAY_TEXT_CONVERTER = new JSONArrayTextConverter();

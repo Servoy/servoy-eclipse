@@ -31,7 +31,7 @@ import com.servoy.j2db.util.ServoyJSONObject;
  * @author acostescu
  */
 //unfortunately here we can't use JSONObject in generics cause the value can also be JSONObject.NULL which would give classcastexceptions...
-public abstract class JSONObjectTypePropertyController extends ObjectTypePropertyController
+public abstract class JSONObjectTypePropertyController extends ObjectTypePropertyController implements ICanHandleJSONNullValues
 {
 
 	private static IObjectTextConverter JSONOBJECT_TEXT_CONVERTER = new JSONObjectTextConverter();

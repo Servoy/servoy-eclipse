@@ -21,6 +21,7 @@ import java.util.ArrayList;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.CustomJSONObjectType;
@@ -29,6 +30,7 @@ import org.sablo.specification.property.ICustomType;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.ComplexProperty;
+import com.servoy.eclipse.ui.property.ISetterAwarePropertySource;
 import com.servoy.eclipse.ui.property.JSONArrayTypePropertyController;
 import com.servoy.eclipse.ui.property.PDPropertySource;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -40,6 +42,7 @@ import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
@@ -162,8 +165,33 @@ public class CustomJSONArrayTypePropertyController extends JSONArrayTypeProperty
 	}
 
 	@Override
+	public void resetPropertyValue(ISetterAwarePropertySource propertySource)
+	{
+		if (propertyDescription.hasDefault())
+		{
+			Object defValue = propertyDescription.getDefaultValue();
+			JSONArray toSet = null;
+			if (defValue instanceof String)
+			{
+				try
+				{
+					toSet = new ServoyJSONArray((String)defValue);
+				}
+				catch (JSONException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+			else if (defValue instanceof JSONArray) toSet = (JSONArray)defValue;
+			propertySource.setPropertyValue(getId(), toSet);
+		}
+		else propertySource.defaultResetProperty(getId());
+	}
+
+	@Override
 	protected Object getValueForReset()
 	{
+		// THIS is actually not called because we overwrite anyway the entire resetPropertyValue method
 		return propertyDescription.getDefaultValue();
 	}
 
