@@ -90,7 +90,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 
 		if (obj instanceof FormElementGroup && key == IPropertySource.class)
 		{
-			return createFormElementGroupPropertySource((FormElementGroup)obj, null);
+			return createFormElementGroupPropertySource((FormElementGroup)obj, ((FormElementGroup)obj).getParent());
 		}
 
 		IPersist persist = null;
