@@ -28,6 +28,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.EnumDataProvider;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
@@ -38,9 +39,9 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * This class filters out, in Developer only, things which should not be allowed, as (currently) improper usage
- * of import hooks (for instance, pre-import hooks need special attention as their objects cannot be used 
- * inside the main solution) 
- * 
+ * of import hooks (for instance, pre-import hooks need special attention as their objects cannot be used
+ * inside the main solution)
+ *
  * @author acostache
  *
  */
@@ -131,5 +132,11 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 		}
 
 		return null;
+	}
+
+	@Override
+	public ITable getTable(String dataSource)
+	{
+		return ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(dataSource);
 	}
 }

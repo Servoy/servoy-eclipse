@@ -30,8 +30,8 @@ import com.servoy.eclipse.ui.editors.ListSelectCellEditor;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Table;
 
 
 /**
@@ -42,14 +42,14 @@ import com.servoy.j2db.persistence.Table;
  */
 public class RelationPropertyController extends PropertyController<String, Object>
 {
-	private final Table primaryTable;
-	private final Table foreignTable;
+	private final ITable primaryTable;
+	private final ITable foreignTable;
 	private final boolean incudeNone;
 	private final boolean includeNested;
 	private final PersistContext persistContext;
 
-	public RelationPropertyController(Object id, String displayName, PersistContext persistContext, Table primaryTable, Table foreignTable, boolean incudeNone,
-		boolean includeNested)
+	public RelationPropertyController(Object id, String displayName, PersistContext persistContext, ITable primaryTable, ITable foreignTable,
+		boolean incudeNone, boolean includeNested)
 	{
 		super(id, displayName);
 		this.persistContext = persistContext;
@@ -75,12 +75,14 @@ public class RelationPropertyController extends PropertyController<String, Objec
 
 	public static class RelationPropertyEditor extends ListSelectCellEditor
 	{
-		public RelationPropertyEditor(Composite parent, PersistContext persistContext, Table primaryTable, final Table foreignTable, boolean incudeNone,
+		public RelationPropertyEditor(Composite parent, PersistContext persistContext, ITable primaryTable, final ITable foreignTable, boolean incudeNone,
 			boolean includeNested, boolean isReadOnly)
 		{
-			super(parent, "Select relation", new RelationContentProvider(ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(),
-				persistContext.getContext()), persistContext.getContext()), new SolutionContextDelegateLabelProvider(
-				RelationLabelProvider.INSTANCE_LAST_NAME_ONLY, persistContext.getContext()), RelationValueEditor.INSTANCE, isReadOnly,
+			super(parent, "Select relation",
+				new RelationContentProvider(ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(), persistContext.getContext()),
+					persistContext.getContext()),
+				new SolutionContextDelegateLabelProvider(RelationLabelProvider.INSTANCE_LAST_NAME_ONLY, persistContext.getContext()),
+				RelationValueEditor.INSTANCE, isReadOnly,
 				new RelationContentProvider.RelationListOptions(primaryTable, foreignTable, incudeNone, includeNested), SWT.NONE, null, "selectRelationDialog");
 			setShowFilterMenu(true);
 

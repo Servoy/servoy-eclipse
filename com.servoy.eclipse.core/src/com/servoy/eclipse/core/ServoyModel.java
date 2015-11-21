@@ -116,6 +116,7 @@ import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
+import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -233,6 +234,8 @@ public class ServoyModel extends AbstractServoyModel
 	private IServerListener serverTableListener;
 	private ITableListener tableListener;
 	private IColumnListener columnListener;
+
+	private final IServerInternal memServer = new MemServer();
 
 	private final Boolean initRepAsTeamProvider;
 	private IPropertyChangeListener workingSetChangeListener;
@@ -3741,5 +3744,10 @@ public class ServoyModel extends AbstractServoyModel
 		}
 	}
 
+	@Override
+	public IServerInternal getMemServer()
+	{
+		return memServer;
+	}
 
 }

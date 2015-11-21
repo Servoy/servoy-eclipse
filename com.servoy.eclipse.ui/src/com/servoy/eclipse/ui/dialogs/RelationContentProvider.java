@@ -30,11 +30,11 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -51,7 +51,7 @@ public class RelationContentProvider extends CachingContentProvider implements I
 	private final FlattenedSolution flattenedSolution;
 	private RelationListOptions options;
 	private final IPersist context;
-	private final Map<Table, List<Relation>> relationCache = new HashMap<Table, List<Relation>>();
+	private final Map<ITable, List<Relation>> relationCache = new HashMap<ITable, List<Relation>>();
 
 	public RelationContentProvider(FlattenedSolution flattenedSolution, IPersist context)
 	{
@@ -101,7 +101,8 @@ public class RelationContentProvider extends CachingContentProvider implements I
 	 * @return
 	 * @throws RepositoryException
 	 */
-	protected List<Relation> getRelations(Table primaryTable, Table foreignTable, boolean recursive, boolean excludeGlobalRelations) throws RepositoryException
+	protected List<Relation> getRelations(ITable primaryTable, ITable foreignTable, boolean recursive, boolean excludeGlobalRelations)
+		throws RepositoryException
 	{
 		List<Relation> relations = new ArrayList<Relation>();
 		Iterator<Relation> primaryrelations;
@@ -122,12 +123,11 @@ public class RelationContentProvider extends CachingContentProvider implements I
 				continue;
 			}
 			if (!relationNames.contains(relation.getName()) //
-				&&
-				(!excludeGlobalRelations || !relation.isGlobal()) //
-				&& //
+			&& (!excludeGlobalRelations || !relation.isGlobal()) //
+			&& //
 				(foreignTable == null || //
 					foreignTable.equals(relation.getForeignTable()) || //
-				(recursive && canReachTable(relation, relation.getForeignTable()))))
+					(recursive && canReachTable(relation, relation.getForeignTable()))))
 			{
 				relations.add(relation);
 				relationNames.add(relation.getName());
@@ -136,7 +136,7 @@ public class RelationContentProvider extends CachingContentProvider implements I
 		return relations;
 	}
 
-	protected boolean canReachTable(Relation relation, Table table) throws RepositoryException
+	protected boolean canReachTable(Relation relation, ITable table) throws RepositoryException
 	{
 		Set<Relation> visited = new HashSet<Relation>();
 		List<Relation> searchrelations = new ArrayList<Relation>();
@@ -146,7 +146,7 @@ public class RelationContentProvider extends CachingContentProvider implements I
 			Relation r = searchrelations.remove(0);
 			if (visited.add(r))
 			{
-				Table foreignTable = r.getForeignTable();
+				ITable foreignTable = r.getForeignTable();
 				if (foreignTable != null)
 				{
 					if (foreignTable.equals(table))
@@ -251,11 +251,11 @@ public class RelationContentProvider extends CachingContentProvider implements I
 	public static class RelationListOptions
 	{
 		public final boolean includeNone;
-		public final Table foreignTable;
-		public final Table primaryTable;
+		public final ITable foreignTable;
+		public final ITable primaryTable;
 		public final boolean includeNested;
 
-		public RelationListOptions(Table primaryTable, Table foreignTable, boolean includeNone, boolean includeNested)
+		public RelationListOptions(ITable primaryTable, ITable foreignTable, boolean includeNone, boolean includeNested)
 		{
 			this.primaryTable = primaryTable;
 			this.foreignTable = foreignTable;

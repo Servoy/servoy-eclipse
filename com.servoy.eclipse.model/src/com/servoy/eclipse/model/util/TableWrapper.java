@@ -20,11 +20,11 @@ import com.servoy.j2db.util.DataSourceUtils;
 
 /**
  * Wrapper to hold table and server name, used for l;azy loading of tables.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
-public class TableWrapper
+public class TableWrapper implements IDataSourceWrapper
 {
 	private final String serverName;
 	private final String tableName;

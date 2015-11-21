@@ -44,9 +44,9 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.MethodTemplate;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SafeArrayList;
 import com.servoy.j2db.util.Utils;
@@ -68,16 +68,16 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 		super(id, displayName);
 		this.options = options;
 		this.persistContext = persistContext;
-		setLabelProvider(new AccesCheckingContextDelegateLabelProvider(new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(
-			new MethodLabelProvider(persistContext, true, !options.includeDefault), persistContext.getContext()))));
+		setLabelProvider(new AccesCheckingContextDelegateLabelProvider(new SolutionContextDelegateLabelProvider(
+			new FormContextDelegateLabelProvider(new MethodLabelProvider(persistContext, true, !options.includeDefault), persistContext.getContext()))));
 		setSupportsReadonly(true);
 	}
 
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		ILabelProvider methodLabelProvider = new AccesCheckingContextDelegateLabelProvider(new FormContextDelegateLabelProvider(new MethodLabelProvider(
-			persistContext, false, !options.includeDefault), persistContext.getContext()));
+		ILabelProvider methodLabelProvider = new AccesCheckingContextDelegateLabelProvider(
+			new FormContextDelegateLabelProvider(new MethodLabelProvider(persistContext, false, !options.includeDefault), persistContext.getContext()));
 		return new MethodCellEditor(parent, methodLabelProvider, new MethodValueEditor(persistContext), persistContext, getId(), false, // readonly is handled in openDialogBox below
 			options)
 		{
@@ -211,8 +211,8 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			Object persistParamName = persistParamNames.size() > i ? persistParamNames.get(i) : "";
 			if (persistParamNames.size() > i && !methodArgument.getName().equals(persistParamName) && !methodArgument.getName().contains("("))
 			{
-				finalParamsList.add(new MethodArgument(methodArgument.getName() + " (" + persistParamName + ")", methodArgument.getType(),
-					methodArgument.getDescription()));
+				finalParamsList.add(
+					new MethodArgument(methodArgument.getName() + " (" + persistParamName + ")", methodArgument.getType(), methodArgument.getDescription()));
 			}
 			else
 			{
@@ -254,8 +254,8 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			else
 			{
 				// save a copy of the mwa.arguments list so that changes in mwa.arguments are not affecting customProperties
-				((AbstractBase)persist).putInstanceMethodParameters(id.toString(), len == 0 ? null : paramNames.subList(0, len), len == 0 ? null
-					: new ArrayList<Object>(arguments.subList(0, len)));
+				((AbstractBase)persist).putInstanceMethodParameters(id.toString(), len == 0 ? null : paramNames.subList(0, len),
+					len == 0 ? null : new ArrayList<Object>(arguments.subList(0, len)));
 			}
 		}
 	}
@@ -277,8 +277,8 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 
 		public void openEditor(MethodWithArguments value)
 		{
-			EditorUtil.openScriptEditor(ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), value.table, value.methodId),
-				null, true);
+			EditorUtil.openScriptEditor(ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), value.table, value.methodId), null,
+				true);
 		}
 	}
 
@@ -290,9 +290,9 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 		private IPropertyDescriptor[] propertyDescriptors = null;
 		private final PersistContext persistContext;
 		private final String methodKey;
-		private final Table table;
+		private final ITable table;
 
-		public MethodPropertySource(ComplexProperty<MethodWithArguments> complexProperty, PersistContext persistContext, Table table, String methodKey,
+		public MethodPropertySource(ComplexProperty<MethodWithArguments> complexProperty, PersistContext persistContext, ITable table, String methodKey,
 			boolean readOnly)
 		{
 			super(complexProperty);
@@ -328,8 +328,8 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 				}
 				IScriptProvider scriptMethod = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), table, methodId);
 				// make sure sub-properties are sorted in defined order
-				propertyDescriptors = PropertyController.applySequencePropertyComparator(createMethodPropertyDescriptors(scriptMethod, persistContext,
-					methodKey));
+				propertyDescriptors = PropertyController.applySequencePropertyComparator(
+					createMethodPropertyDescriptors(scriptMethod, persistContext, methodKey));
 			}
 			return propertyDescriptors;
 		}

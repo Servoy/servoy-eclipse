@@ -21,7 +21,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
-import com.servoy.eclipse.model.util.TableWrapper;
+import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -38,7 +38,7 @@ public class OpenTableAction extends Action implements ISelectionChangedListener
 
 	/**
 	 * Creates a new open action that uses the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public OpenTableAction(SolutionExplorerView sev)
@@ -57,7 +57,7 @@ public class OpenTableAction extends Action implements ISelectionChangedListener
 		if (state)
 		{
 			UserNodeType type = ((SimpleUserNode)sel.getFirstElement()).getType();
-			state = (type == UserNodeType.TABLE || type == UserNodeType.VIEW);
+			state = (type == UserNodeType.TABLE || type == UserNodeType.VIEW || type == UserNodeType.INMEMORY_DATASOURCE);
 		}
 		setEnabled(state);
 	}
@@ -66,9 +66,9 @@ public class OpenTableAction extends Action implements ISelectionChangedListener
 	public void run()
 	{
 		SimpleUserNode un = viewer.getSelectedListNode();
-		if (un.getType() == UserNodeType.TABLE || un.getType() == UserNodeType.VIEW)
+		if (un.getType() == UserNodeType.TABLE || un.getType() == UserNodeType.VIEW || un.getType() == UserNodeType.INMEMORY_DATASOURCE)
 		{
-			EditorUtil.openTableEditor(((TableWrapper)un.getRealObject()).getServerName(), ((TableWrapper)un.getRealObject()).getTableName());
+			EditorUtil.openTableEditor(((IDataSourceWrapper)un.getRealObject()).getDataSource());
 		}
 	}
 

@@ -69,9 +69,9 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 	public FoundsetPropertyEditor(Composite parent, PersistContext persistContext, Table primaryTableForRelation, final Table foreignTableForRelation,
 		boolean isReadOnly, FoundsetDesignToChooserConverter designToChooserConverter)
 	{
-		super(parent, "Please select a foundset", getFoundsetContentProvider(persistContext), getFoundsetLabelProvider(persistContext.getContext(),
-			designToChooserConverter), new FoundsetValueEditor(persistContext.getContext()), isReadOnly, getFoundsetInputOptions(primaryTableForRelation,
-			foreignTableForRelation), SWT.NONE, null, "selectFoundsetDialog");
+		super(parent, "Please select a foundset", getFoundsetContentProvider(persistContext),
+			getFoundsetLabelProvider(persistContext.getContext(), designToChooserConverter), new FoundsetValueEditor(persistContext.getContext()), isReadOnly,
+			getFoundsetInputOptions(primaryTableForRelation, foreignTableForRelation), SWT.NONE, null, "selectFoundsetDialog");
 		setShowFilterMenu(true);
 
 		this.designToChooserConverter = designToChooserConverter;
@@ -88,10 +88,10 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 				{
 					try
 					{
-						return ((RelationsWrapper)toTest).relations != null &&
-							((RelationsWrapper)toTest).relations.length > 0 &&
+						return ((RelationsWrapper)toTest).relations != null && ((RelationsWrapper)toTest).relations.length > 0 &&
 							foreignTableForRelation == null ||
-							foreignTableForRelation.equals(((RelationsWrapper)toTest).relations[((RelationsWrapper)toTest).relations.length - 1].getForeignTable());
+							foreignTableForRelation.equals(
+								((RelationsWrapper)toTest).relations[((RelationsWrapper)toTest).relations.length - 1].getForeignTable());
 					}
 					catch (RepositoryException e)
 					{
@@ -113,14 +113,8 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist());
 		IPersist contextPersist = persistContext.getContext();
 		CombinedTreeContentProvider foundsetContentProvider = new CombinedTreeContentProvider(1,
-			new ITreeContentProvider[] {
-				new FormFoundsetEntryContentProvider(),
-				new CombinedTreeContentProvider(2,
-					new ITreeContentProvider[] {
-						new RelationContentProvider(flattenedSolution, contextPersist),
-						new TableContentProvider()
-					})
-				});
+			new ITreeContentProvider[] { new FormFoundsetEntryContentProvider(), new CombinedTreeContentProvider(2,
+				new ITreeContentProvider[] { new RelationContentProvider(flattenedSolution, contextPersist), new TableContentProvider() }) });
 		// @formatter:on
 
 		return foundsetContentProvider;
@@ -130,25 +124,17 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 	{
 		// @formatter:off
 		CombinedTreeLabelProvider foundsetChooserLabelProvider = new CombinedTreeLabelProvider(1,
-			new ILabelProvider[] {
-				new FormFoundsetEntryLabelProvider(),
-				new CombinedTreeLabelProvider(2, new ILabelProvider[] {
-												new RelationLabelProvider("", true,	true),
-												new DatasourceLabelProvider("", true, false)
-												})
-				});
+			new ILabelProvider[] { new FormFoundsetEntryLabelProvider(), new CombinedTreeLabelProvider(2,
+				new ILabelProvider[] { new RelationLabelProvider("", true, true), new DatasourceLabelProvider("", true, false) }) });
 		CombinedTreeLabelProvider foundsetCellLabelProvider = new CombinedTreeLabelProvider(1,
-			new ILabelProvider[] {
-				new FormFoundsetEntryLabelProvider(),
-				new CombinedTreeLabelProvider(2, new ILabelProvider[] {
-												new RelationLabelProvider("", true,	true),
-												new DatasourceLabelProvider("", true, true)
-												})
-				});
+			new ILabelProvider[] { new FormFoundsetEntryLabelProvider(), new CombinedTreeLabelProvider(2,
+				new ILabelProvider[] { new RelationLabelProvider("", true, true), new DatasourceLabelProvider("", true, true) }) });
 
-		final SolutionContextDelegateLabelProvider withSolutionContextForChooser = new SolutionContextDelegateLabelProvider(foundsetChooserLabelProvider, contextPersist);
-		final SolutionContextDelegateLabelProvider withSolutionContextForCell = new SolutionContextDelegateLabelProvider(foundsetCellLabelProvider, contextPersist);
-		// @formatter:on
+		final SolutionContextDelegateLabelProvider withSolutionContextForChooser = new SolutionContextDelegateLabelProvider(foundsetChooserLabelProvider,
+			contextPersist);
+		final SolutionContextDelegateLabelProvider withSolutionContextForCell = new SolutionContextDelegateLabelProvider(foundsetCellLabelProvider,
+			contextPersist);
+			// @formatter:on
 
 		// this is a bit confusing as this label provider is used both in tree dialog and in properties view cell; but we don't have
 		// the same kind of things in those two so we need some conversions here; we can't use 2 separate label providers because ListSelectCellEditor only uses 1
@@ -174,16 +160,10 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 	protected static Object getFoundsetInputOptions(Table primaryTableForRelation, Table foreignTableForRelation)
 	{
 		// @formatter:off
-		return new CombinedTreeOptions(null, true, new Object[] {
-					null,
-					new CombinedTreeOptions(new String[] {
-								"Related foundset",
-								"Separate foundset (random table)"
-								}, false, new Object[] {
-										new RelationContentProvider.RelationListOptions(primaryTableForRelation, foreignTableForRelation, false, true),
-										new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, false)
-								}
-					)});
+		return new CombinedTreeOptions(null, true,
+			new Object[] { null, new CombinedTreeOptions(new String[] { "Related foundset", "Separate foundset (random table)" }, false,
+				new Object[] { new RelationContentProvider.RelationListOptions(primaryTableForRelation, foreignTableForRelation, false,
+					true), new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, false) }) });
 		// @formatter:on
 	}
 
@@ -224,15 +204,15 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 			else if (value == FormFoundsetEntryContentProvider.FORM_FOUNDSET)
 			{
 				Form form = (Form)contextPersist.getAncestor(IRepository.FORMS);
-				if (form.getDataSource() != null && form.getDataSource().length() > 0) EditorUtil.openTableEditor(form.getServerName(), form.getTableName());
+				if (form.getDataSource() != null && form.getDataSource().length() > 0) EditorUtil.openTableEditor(form.getDataSource());
 			}
 		}
 
 		public boolean canEdit(Object value)
 		{
-			return RelationValueEditor.INSTANCE.canEdit(value) ||
-				TableValueEditor.INSTANCE.canEdit(value) ||
-				(value == FormFoundsetEntryContentProvider.FORM_FOUNDSET && ((Form)contextPersist.getAncestor(IRepository.FORMS)).getDataSource() != null && ((Form)contextPersist.getAncestor(IRepository.FORMS)).getDataSource().length() > 0);
+			return RelationValueEditor.INSTANCE.canEdit(value) || TableValueEditor.INSTANCE.canEdit(value) ||
+				(value == FormFoundsetEntryContentProvider.FORM_FOUNDSET && ((Form)contextPersist.getAncestor(IRepository.FORMS)).getDataSource() != null &&
+					((Form)contextPersist.getAncestor(IRepository.FORMS)).getDataSource().length() > 0);
 		}
 	}
 

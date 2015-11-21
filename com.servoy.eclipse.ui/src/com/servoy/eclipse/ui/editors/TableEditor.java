@@ -46,6 +46,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.TableEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -79,6 +80,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
@@ -543,30 +545,29 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 	{
 		super.setInput(input);
 		TableEditorInput tableInput = (TableEditorInput)input;
-
-		server = (IServerInternal)ServoyModel.getServerManager().getServer(tableInput.getServerName(), true, true);
-		if (server == null)
-		{
-			throw new RuntimeException("Could not initialize table editor server is not enabled or valid");
-		}
-
-		try
-		{
-			table = server.getTable(tableInput.getName());
-		}
-		catch (Exception e)
-		{
-			ServoyLog.logError(e);
-			throw new RuntimeException("Could not initialize table editor: " + e.getMessage(), e);
-		}
+		table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(tableInput.getDataSource());
 
 		if (table == null)
 		{
 			throw new RuntimeException("Could not initialize table editor table could not be found");
 		}
 
-		// close this editor if the server or table get deleted
 		IServerManagerInternal serverManager = ServoyModel.getServerManager();
+
+		server = (IServerInternal)serverManager.getServer(table.getServerName(), true, true);
+		if (server == null)
+		{
+			if (DataSourceUtils.INMEM_DATASOURCE.equals(table.getServerName()))
+			{
+				server = ServoyModelFinder.getServoyModel().getMemServer();
+			}
+			if (server == null)
+			{
+				throw new RuntimeException("Could not initialize table editor server is not enabled or valid");
+			}
+		}
+
+		// close this editor if the server or table get deleted
 		tableListener = new ITableListener()
 		{
 			public void tablesAdded(IServerInternal s, String tableNames[])

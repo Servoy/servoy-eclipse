@@ -3244,12 +3244,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											ValueList fallback = fieldFlattenedSolution.getValueList(vl.getFallbackValueListID());
 											if (fallback != null && fallback.getValueListType() == IValueListConstants.DATABASE_VALUES)
 											{
-												Table table = null;
+												ITable table = null;
 												try
 												{
 													if (fallback.getDatabaseValuesType() == IValueListConstants.TABLE_VALUES)
 													{
-														table = (Table)fallback.getTable();
+														table = fallback.getTable();
 													}
 													else if (fallback.getDatabaseValuesType() == IValueListConstants.RELATED_VALUES &&
 														fallback.getRelationName() != null)
@@ -5113,90 +5113,123 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				checkCancel();
 				Relation element = it.next();
-				if (!missingServers.containsKey(element.getPrimaryServerName()) && !missingServers.containsKey(element.getForeignServerName()))
+				String primaryServerName = null;
+				String primaryTableName = null;
+				String foreignServerName = null;
+				String foreignTableName = null;
+
+				String[] snt = DataSourceUtils.getDBServernameTablename(element.getPrimaryDataSource());
+				if (snt != null)
+				{
+					primaryServerName = snt[0];
+					primaryTableName = snt[1];
+				}
+				else
+				{
+					primaryTableName = DataSourceUtils.getInmemDataSourceName(element.getPrimaryDataSource());
+					if (primaryTableName != null)
+					{
+						primaryServerName = DataSourceUtils.INMEM_DATASOURCE;
+					}
+					else continue; // just skip this relation, unknown datasource
+				}
+
+				snt = DataSourceUtils.getDBServernameTablename(element.getForeignDataSource());
+				if (snt != null)
+				{
+					foreignServerName = snt[0];
+					foreignTableName = snt[1];
+				}
+				else
+				{
+					foreignTableName = DataSourceUtils.getInmemDataSourceName(element.getForeignDataSource());
+					if (foreignTableName != null)
+					{
+						foreignServerName = DataSourceUtils.INMEM_DATASOURCE;
+					}
+					else continue; // just skip this relation, unknown datasource
+				}
+
+				if (!missingServers.containsKey(primaryServerName) && !missingServers.containsKey(foreignServerName))
 				{
 					FlattenedSolution relationFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(element, getServoyModel().getFlattenedSolution());
 					element.setValid(true);//if is reload
 					try
 					{
-						IServerInternal pserver = (IServerInternal)sm.getServer(element.getPrimaryServerName());
+						IServerInternal pserver = (IServerInternal)sm.getServer(primaryServerName);
 						if (pserver == null)
 						{
-							mk = MarkerMessages.RelationPrimaryServerWithProblems.fill(element.getName(), element.getPrimaryServerName());
+							mk = MarkerMessages.RelationPrimaryServerWithProblems.fill(element.getName(), primaryServerName);
 							element.setValid(false);
 							addMarker(project, mk.getType(), mk.getText(), -1, RELATION_PRIMARY_SERVER_WITH_PROBLEMS, IMarker.PRIORITY_NORMAL, null, element);
 							continue;
 						}
 						else
 						{
-							if (!pserver.getName().equals(element.getPrimaryServerName()))
+							if (!pserver.getName().equals(primaryServerName))
 							{
-								mk = MarkerMessages.RelationPrimaryServerDuplicate.fill(element.getName(), element.getPrimaryServerName());
+								mk = MarkerMessages.RelationPrimaryServerDuplicate.fill(element.getName(), primaryServerName);
 								addMarker(project, mk.getType(), mk.getText(), -1, RELATION_SERVER_DUPLICATE, IMarker.PRIORITY_NORMAL, null, element);
 							}
 						}
-						ITable ptable = pserver.getTable(element.getPrimaryTableName());
+						ITable ptable = pserver.getTable(primaryTableName);
 						boolean usingHiddenTableInPrimary = false;
 						if (ptable == null)
 						{
-							mk = MarkerMessages.RelationPrimaryTableNotFound.fill(element.getName(), element.getPrimaryTableName(),
-								element.getPrimaryServerName());
+							mk = MarkerMessages.RelationPrimaryTableNotFound.fill(element.getName(), primaryTableName, primaryServerName);
 							element.setValid(false);
 							addMarker(project, mk.getType(), mk.getText(), -1, RELATION_TABLE_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, element);
 							continue;
 						}
 						else
 						{
-							if (((Table)ptable).isMarkedAsHiddenInDeveloper())
+							if (ptable.isMarkedAsHiddenInDeveloper())
 							{
 								usingHiddenTableInPrimary = true;
 								mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(ptable.getDataSource(), "relation ", element.getName());
 								addMarker(project, mk.getType(), mk.getText(), -1, INVALID_TABLE_REFERENCE, IMarker.PRIORITY_LOW, null, element);
 							}
-							if (((Table)ptable).getRowIdentColumnsCount() == 0)
+							if (ptable.getRowIdentColumnsCount() == 0)
 							{
-								mk = MarkerMessages.RelationPrimaryTableWithoutPK.fill(element.getName(), element.getPrimaryTableName(),
-									element.getPrimaryServerName());
+								mk = MarkerMessages.RelationPrimaryTableWithoutPK.fill(element.getName(), primaryTableName, primaryServerName);
 								element.setValid(false);
 								addMarker(project, mk.getType(), mk.getText(), -1, RELATION_TABLE_WITHOUT_PK, IMarker.PRIORITY_NORMAL, null, element);
 								continue;
 							}
 						}
 
-						IServerInternal fserver = (IServerInternal)sm.getServer(element.getForeignServerName());
+						IServerInternal fserver = (IServerInternal)sm.getServer(foreignServerName);
 						if (fserver == null)
 						{
-							mk = MarkerMessages.RelationForeignServerWithProblems.fill(element.getName(), element.getForeignServerName());
+							mk = MarkerMessages.RelationForeignServerWithProblems.fill(element.getName(), foreignServerName);
 							element.setValid(false);
 							addMarker(project, mk.getType(), mk.getText(), -1, RELATION_FOREIGN_SERVER_WITH_PROBLEMS, IMarker.PRIORITY_NORMAL, null, element);
 							continue;
 						}
-						else if (!fserver.getName().equals(element.getForeignServerName()))
+						else if (!fserver.getName().equals(foreignServerName))
 						{
-							mk = MarkerMessages.RelationForeignServerDuplicate.fill(element.getName(), element.getForeignServerName());
+							mk = MarkerMessages.RelationForeignServerDuplicate.fill(element.getName(), foreignServerName);
 							addMarker(project, mk.getType(), mk.getText(), -1, RELATION_SERVER_DUPLICATE, IMarker.PRIORITY_NORMAL, null, element);
 						}
 
-						ITable ftable = fserver.getTable(element.getForeignTableName());
+						ITable ftable = fserver.getTable(foreignTableName);
 						if (ftable == null)
 						{
-							mk = MarkerMessages.RelationForeignTableNotFound.fill(element.getName(), element.getForeignTableName(),
-								element.getForeignServerName());
+							mk = MarkerMessages.RelationForeignTableNotFound.fill(element.getName(), foreignTableName, foreignServerName);
 							element.setValid(false);
 							addMarker(project, mk.getType(), mk.getText(), -1, RELATION_TABLE_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, element);
 							continue;
 						}
 						else
 						{
-							if (!usingHiddenTableInPrimary && ((Table)ftable).isMarkedAsHiddenInDeveloper())
+							if (!usingHiddenTableInPrimary && ftable.isMarkedAsHiddenInDeveloper())
 							{
 								mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(ftable.getDataSource(), "relation ", element.getName());
 								addMarker(project, mk.getType(), mk.getText(), -1, INVALID_TABLE_REFERENCE, IMarker.PRIORITY_LOW, null, element);
 							}
-							if (((Table)ftable).getRowIdentColumnsCount() == 0)
+							if (ftable.getRowIdentColumnsCount() == 0)
 							{
-								mk = MarkerMessages.RelationForeignTableWithoutPK.fill(element.getName(), element.getForeignTableName(),
-									element.getForeignServerName());
+								mk = MarkerMessages.RelationForeignTableWithoutPK.fill(element.getName(), foreignTableName, foreignServerName);
 								element.setValid(false);
 								addMarker(project, mk.getType(), mk.getText(), -1, RELATION_TABLE_WITHOUT_PK, IMarker.PRIORITY_NORMAL, null, element);
 								continue;
@@ -5244,7 +5277,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								}
 								else
 								{
-									dataProvider = relationFlattenedSolution.getDataProviderForTable((Table)ptable, primaryDataProvider);
+									dataProvider = relationFlattenedSolution.getDataProviderForTable(ptable, primaryDataProvider);
 								}
 								if (dataProvider == null)
 								{
@@ -5277,7 +5310,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 							else
 							{
-								column = relationFlattenedSolution.getDataProviderForTable((Table)ftable, foreignColumn);
+								column = relationFlattenedSolution.getDataProviderForTable(ftable, foreignColumn);
 								if (column == null)
 								{
 									mk = MarkerMessages.RelationItemForeignDataproviderNotFound.fill(element.getName(), foreignColumn);
@@ -5779,7 +5812,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		return false;
 	}
 
-	private boolean isUnstoredCalc(String dpid, Table table, FlattenedSolution flattenedSolution)
+	private boolean isUnstoredCalc(String dpid, ITable table, FlattenedSolution flattenedSolution)
 	{
 		return table != null && dpid != null && flattenedSolution.getScriptCalculation(dpid, table) != null && table.getColumn(dpid) == null;
 	}

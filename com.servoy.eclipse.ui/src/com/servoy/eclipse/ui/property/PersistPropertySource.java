@@ -2624,7 +2624,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			FoundsetLinkedPropertyType< ? , ? > foundsetLinkedPropertyType = (FoundsetLinkedPropertyType< ? , ? >)propertyType;
 			IPropertyType< ? > possibleYieldType = foundsetLinkedPropertyType.getPossibleYieldType();
-			Table table = null;
+			ITable table = null;
 			String forFoundsetName = ((FoundsetLinkedConfig)propertyDescription.getConfig()).getForFoundsetName();
 			JSONObject json = null; // we want the json of the component
 			if (persistContext.getPersist() instanceof WebComponent)
@@ -2662,7 +2662,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					if (DataSourceUtils.isDatasourceUri(foundsetValue))
 					{
 						ITable iTable = DataSourceUtils.getTable(foundsetValue, flattenedEditingSolution.getSolution(), null);
-						if (iTable instanceof Table) table = (Table)iTable;
+						if (iTable instanceof Table) table = iTable;
 					}
 					else if (flattenedEditingSolution.getRelation(foundsetValue) != null)
 					{
@@ -2747,7 +2747,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
 				}
 			}
-			Table foreignTable = null;
+			ITable foreignTable = null;
 			boolean incudeNone = false;
 			if (persistContext != null && persistContext.getPersist() instanceof Tab)
 			{
@@ -2923,7 +2923,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	 * @return
 	 */
 	private static IPropertyDescriptor tagStringController(final PersistContext persistContext, final String id, final String displayName,
-		final PropertyDescription propertyDescription, final FlattenedSolution flattenedEditingSolution, final Table finalTable)
+		final PropertyDescription propertyDescription, final FlattenedSolution flattenedEditingSolution, final ITable finalTable)
 	{
 		return new PropertyController<String, String>(id, displayName, new IPropertyConverter<String, String>()
 		{
@@ -2963,7 +2963,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	 * @return
 	 */
 	private static IPropertyDescriptor createDataproviderController(final PersistContext persistContext, final boolean readOnly, final String id,
-		final String displayName, final FlattenedSolution flattenedEditingSolution, final Form form, final Table table, final DataProviderOptions options)
+		final String displayName, final FlattenedSolution flattenedEditingSolution, final Form form, final ITable table, final DataProviderOptions options)
 	{
 		final DataProviderConverter converter = new DataProviderConverter(flattenedEditingSolution, persistContext.getPersist(), table);
 		DataProviderLabelProvider showPrefix = new DataProviderLabelProvider(false);

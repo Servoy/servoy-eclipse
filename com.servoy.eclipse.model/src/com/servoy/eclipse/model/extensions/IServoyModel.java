@@ -23,6 +23,7 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.AtomicIntegerWithListener;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.IServerInternal;
 
 /**
  * Aware of active solution/resources projects and other things is the current environment needed by the com.servoy.eclipse.model.repository classes.<br>
@@ -39,7 +40,7 @@ public interface IServoyModel
 	/**
 	 * Returns the active resources project. This is the only resources project referenced by the current active project. Will return null if the active project
 	 * is null or if the number of resources projects referenced by the active project != 1.
-	 * 
+	 *
 	 * @return the active resources project.
 	 */
 	ServoyResourcesProject getActiveResourcesProject();
@@ -47,9 +48,9 @@ public interface IServoyModel
 	/**
 	 * Returns an array containing the modules of the active project (including the active project). If there is no active project, will return an array of size
 	 * 0.<br>
-	 * 
+	 *
 	 * The result does not include the active solution's import hooks (which are not part of the flattened solution).
-	 * 
+	 *
 	 * @return an array containing the modules of the active project.
 	 */
 	ServoyProject[] getModulesOfActiveProject();
@@ -84,4 +85,15 @@ public interface IServoyModel
 	 * Handler for collecting changes, delay picking up of changes until handler goes to zero.
 	 */
 	AtomicIntegerWithListener getResourceChangesHandlerCounter();
+
+	/**
+	 * The datasource manger handles all the different kind of datasources a solution can have.
+	 *
+	 */
+	IDataSourceManager getDataSourceManager();
+
+	/**
+	 * returns the Server that handles the "mem" datasource
+	 */
+	IServerInternal getMemServer();
 }

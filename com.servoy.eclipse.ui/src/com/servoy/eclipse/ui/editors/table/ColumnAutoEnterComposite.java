@@ -63,6 +63,7 @@ import org.eclipse.swt.widgets.Text;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
@@ -438,15 +439,18 @@ public class ColumnAutoEnterComposite extends Composite implements SelectionList
 		try
 		{
 			List<String> seqType = new ArrayList<String>();
-			IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(c.getTable().getServerName());
-			for (int element : types)
+			if (!(c.getTable() instanceof MemTable))
 			{
-				if (element == ColumnInfo.SERVOY_SEQUENCE || element == ColumnInfo.NO_SEQUENCE_SELECTED ||
-					server.supportsSequenceType(element, null/*
-																 * TODO: add current selected column
-																 */))
+				IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(c.getTable().getServerName());
+				for (int element : types)
 				{
-					seqType.add(ColumnInfo.getSeqDisplayTypeString(element));
+					if (element == ColumnInfo.SERVOY_SEQUENCE || element == ColumnInfo.NO_SEQUENCE_SELECTED ||
+						server.supportsSequenceType(element, null/*
+																	 * TODO: add current selected column
+																	 */))
+					{
+						seqType.add(ColumnInfo.getSeqDisplayTypeString(element));
+					}
 				}
 			}
 			String[] comboSeqTypes = new String[seqType.size()];

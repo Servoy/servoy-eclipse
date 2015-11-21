@@ -242,23 +242,23 @@ public class EditorUtil
 	public static IEditorPart openTableEditor(ITable table, boolean activate)
 	{
 		if (table == null) return null;
-		return openTableEditor(table.getServerName(), table.getName(), activate);
+		return openTableEditor(table.getDataSource(), activate);
 	}
 
-	public static IEditorPart openTableEditor(String serverName, String tableName)
+	public static IEditorPart openTableEditor(String dataSource)
 	{
-		return openTableEditor(serverName, tableName, true);
+		return openTableEditor(dataSource, true);
 	}
 
-	public static IEditorPart openTableEditor(String serverName, String tableName, boolean activate)
+	public static IEditorPart openTableEditor(String dataSource, boolean activate)
 	{
-		if (serverName == null || tableName == null) return null;
+		if (dataSource == null) return null;
 		try
 		{
 			IWorkbenchPage activePage = getActivePage();
 			if (activePage != null)
 			{
-				return activePage.openEditor(new TableEditorInput(serverName, tableName), PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+				return activePage.openEditor(new TableEditorInput(dataSource), PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
 					Platform.getContentTypeManager().getContentType(TableEditorInput.TABLE_RESOURCE_ID)).getId(), activate);
 			}
 		}

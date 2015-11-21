@@ -62,8 +62,8 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ScriptingUtils;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -84,7 +84,7 @@ import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnListener;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.Relation;
@@ -362,8 +362,8 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 			RelationRow firstRow = input.get(0);
 			try
 			{
-				com.servoy.j2db.persistence.Table primaryTable = getRelation().getPrimaryTable();
-				com.servoy.j2db.persistence.Table foreignTable = getRelation().getForeignTable();
+				ITable primaryTable = getRelation().getPrimaryTable();
+				ITable foreignTable = getRelation().getForeignTable();
 				if (primaryTable != null && foreignTable != null)
 				{
 					if (!reuseSource)
@@ -409,7 +409,7 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 		{
 			try
 			{
-				com.servoy.j2db.persistence.Table primaryTable = getRelation().getPrimaryTable();
+				ITable primaryTable = getRelation().getPrimaryTable();
 				if (primaryTable != null)
 				{
 					// pk auto fill
@@ -450,8 +450,7 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 		{
 			try
 			{
-				com.servoy.j2db.persistence.Table foreignTable = (com.servoy.j2db.persistence.Table)getRelation().getForeignServer().getTable(
-					getRelation().getForeignTableName());
+				ITable foreignTable = getRelation().getForeignServer().getTable(getRelation().getForeignTableName());
 				if (foreignTable != null)
 				{
 					for (RelationRow row : input)
@@ -630,77 +629,61 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 	{
 		final List<Object> retval = new ArrayList<Object>();
 		retval.add(EMPTY);
-		try
+		ITable t = null;
+		Map<String, ScriptCalculation> calcs = null;
+		FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(getPersist());
+		if (index == CI_FROM)
 		{
-			com.servoy.j2db.persistence.ITable t = null;
-			Map<String, ScriptCalculation> calcs = null;
-			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(getPersist());
-			if (index == CI_FROM)
+			t = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(getRelation().getPrimaryDataSource());
+			calcs = new LinkedHashMap<String, ScriptCalculation>();
+			Iterator<ScriptCalculation> calcsIt = fs.getScriptCalculations(t, true);
+			while (calcsIt.hasNext())
 			{
-				IServerInternal s = (IServerInternal)ServoyModel.getServerManager().getServer(getRelation().getPrimaryServerName());
-				if (s != null)
-				{
-					t = s.getTable(getRelation().getPrimaryTableName());
-
-					calcs = new LinkedHashMap<String, ScriptCalculation>();
-					Iterator<ScriptCalculation> calcsIt = fs.getScriptCalculations(t, true);
-					while (calcsIt.hasNext())
-					{
-						ScriptCalculation calc = calcsIt.next();
-						calcs.put(calc.getDataProviderID(), calc);
-					}
-				}
+				ScriptCalculation calc = calcsIt.next();
+				calcs.put(calc.getDataProviderID(), calc);
 			}
-			else if (index == CI_TO)
+		}
+		else if (index == CI_TO)
+		{
+			t = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(getRelation().getForeignDataSource());
+		}
+		if (t != null)
+		{
+			Iterator<Column> cols = EditorUtil.getTableColumns(t);
+			while (cols.hasNext())
 			{
-				IServerInternal s = (IServerInternal)ServoyModel.getServerManager().getServer(getRelation().getForeignServerName());
-				if (s != null)
+				// stored calcs are shown in calculations section
+				IColumn col = cols.next();
+				if ((calcs == null || !calcs.containsKey(col.getDataProviderID())) && ((col.getFlags() & Column.EXCLUDED_COLUMN) != Column.EXCLUDED_COLUMN))
 				{
-					t = s.getTable(getRelation().getForeignTableName());
-				}
-			}
-			if (t != null)
-			{
-				Iterator<Column> cols = EditorUtil.getTableColumns(t);
-				while (cols.hasNext())
-				{
-					// stored calcs are shown in calculations section
-					IColumn col = cols.next();
-					if ((calcs == null || !calcs.containsKey(col.getDataProviderID())) && ((col.getFlags() & Column.EXCLUDED_COLUMN) != Column.EXCLUDED_COLUMN))
-					{
-						retval.add(col);
-					}
-				}
-			}
-			if (index == CI_FROM)
-			{
-				if (calcs != null && calcs.size() > 0)
-				{
-					retval.add(SEPARATOR);
-					retval.addAll(calcs.values());
-				}
-				Iterator<ScriptVariable> globs = fs.getScriptVariables(true);
-				if (globs.hasNext())
-				{
-					retval.add(SEPARATOR);
-				}
-				while (globs.hasNext())
-				{
-					final ScriptVariable global = globs.next();
-					if (global.isEnum())
-					{
-						retval.addAll(ScriptingUtils.getEnumDataProviders(global));
-					}
-					else
-					{
-						retval.add(global);
-					}
+					retval.add(col);
 				}
 			}
 		}
-		catch (RepositoryException e)
+		if (index == CI_FROM)
 		{
-			ServoyLog.logError(e);
+			if (calcs != null && calcs.size() > 0)
+			{
+				retval.add(SEPARATOR);
+				retval.addAll(calcs.values());
+			}
+			Iterator<ScriptVariable> globs = fs.getScriptVariables(true);
+			if (globs.hasNext())
+			{
+				retval.add(SEPARATOR);
+			}
+			while (globs.hasNext())
+			{
+				final ScriptVariable global = globs.next();
+				if (global.isEnum())
+				{
+					retval.addAll(ScriptingUtils.getEnumDataProviders(global));
+				}
+				else
+				{
+					retval.add(global);
+				}
+			}
 		}
 		return retval.toArray();
 	}
@@ -784,11 +767,11 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 	{
 		datasourceSelectComposite.checkInconsistency();
 
-		if ((getRelation().getPrimaryServerName() == null || getRelation().getPrimaryTableName() == null) && isEmptySelection(input.get(0).getCIFrom()))
+		if ((getRelation().getPrimaryDataSource() == null) && isEmptySelection(input.get(0).getCIFrom()))
 		{
 			throw new RepositoryException("Source server data not specified.");
 		}
-		if (getRelation().getForeignServerName() == null || getRelation().getForeignTableName() == null)
+		if (getRelation().getForeignDataSource() == null)
 		{
 			throw new RepositoryException("Destination server data not specified.");
 		}
@@ -860,23 +843,17 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 				}
 				if (items.length > 0) r.flagChanged();
 			}
-			String oldServerName = r.getPrimaryServerName();
-			String oldTableName = r.getPrimaryTableName();
-			if (oldServerName == null)
+			String oldDataSource = r.getPrimaryDataSource();
+			if (oldDataSource == null)
 			{
-				r.setPrimaryServerName(r.getForeignServerName());
-			}
-			if (oldTableName == null)
-			{
-				r.setPrimaryTableName(r.getForeignTableName());
+				r.setPrimaryDataSource(r.getForeignDataSource());
 			}
 			String errorMessage = r.checkKeyTypes(null);
-			if (errorMessage != null && (oldServerName == null || oldTableName == null))
+			if (errorMessage != null && oldDataSource == null)
 			{
-				r.setPrimaryServerName(oldServerName);
-				r.setPrimaryTableName(oldTableName);
+				r.setPrimaryDataSource(oldDataSource);
 			}
-			if (errorMessage == null && oldServerName == null)
+			if (errorMessage == null && oldDataSource == null)
 			{
 				IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 				getRelation().updateName(validator, r.getForeignTableName() + "_to_" + r.getForeignTableName());
@@ -909,7 +886,7 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 	{
 		try
 		{
-			com.servoy.j2db.persistence.Table table = null;
+			ITable table = null;
 			String from = null;
 			String to = null;
 
@@ -1001,55 +978,29 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 
 	public void registerListeners()
 	{
-		com.servoy.j2db.persistence.Table primaryTable = null;
-		try
+		ITable primaryTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(getRelation().getPrimaryDataSource());
+		if (primaryTable != null)
 		{
-			primaryTable = getRelation().getPrimaryTable();
-			if (primaryTable != null)
-			{
-				primaryTable.addIColumnListener(this);
-			}
+			primaryTable.addIColumnListener(this);
 		}
-		catch (RepositoryException ex)
+		ITable foreignTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(getRelation().getForeignDataSource());
+		if (foreignTable != null && !Utils.equalObjects(primaryTable, foreignTable))
 		{
-			ServoyLog.logError(ex);
-		}
-		try
-		{
-			if (getRelation().getForeignTable() != null && !Utils.equalObjects(primaryTable, getRelation().getForeignTable()))
-			{
-				getRelation().getForeignTable().addIColumnListener(this);
-			}
-		}
-		catch (RepositoryException ex)
-		{
-			ServoyLog.logError(ex);
+			foreignTable.addIColumnListener(this);
 		}
 	}
 
 	public void unregisterListeners()
 	{
-		try
+		ITable primaryTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(getRelation().getPrimaryDataSource());
+		if (primaryTable != null)
 		{
-			if (getRelation().getPrimaryTable() != null)
-			{
-				getRelation().getPrimaryTable().removeIColumnListener(this);
-			}
+			primaryTable.removeIColumnListener(this);
 		}
-		catch (RepositoryException ex)
+		ITable foreignTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(getRelation().getForeignDataSource());
+		if (foreignTable != null)
 		{
-			ServoyLog.logError(ex);
-		}
-		try
-		{
-			if (getRelation().getForeignTable() != null)
-			{
-				getRelation().getForeignTable().removeIColumnListener(this);
-			}
-		}
-		catch (Exception ex)
-		{
-			ServoyLog.logError(ex);
+			foreignTable.removeIColumnListener(this);
 		}
 	}
 }

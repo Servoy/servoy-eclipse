@@ -33,7 +33,7 @@ import com.servoy.j2db.util.UUID;
 
 /**
  * Factory for re-creating editor input from a previously saved memento.
- * 
+ *
  * @author rgansevles
  */
 
@@ -53,6 +53,7 @@ public class EditorInputFactory implements IElementFactory, IAdapterFactory
 	private static final String TAG_NAME = "name";
 	private static final String TAG_SOLUTION_NAME = "solutionName";
 	private static final String TAG_SERVER_NAME = "serverName";
+	private static final String TAG_DATASOURCE_NAME = "dataSource";
 
 	/**
 	 * Creates a new factory.
@@ -90,7 +91,7 @@ public class EditorInputFactory implements IElementFactory, IAdapterFactory
 
 		/**
 		 * Saves the state of the given editor input into the given memento.
-		 * 
+		 *
 		 * @param memento the storage area for element state
 		 * @param input the editor input
 		 */
@@ -131,7 +132,7 @@ public class EditorInputFactory implements IElementFactory, IAdapterFactory
 
 		/**
 		 * Saves the state of the given editor input into the given memento.
-		 * 
+		 *
 		 * @param memento the storage area for element state
 		 */
 		public void saveState(IMemento memento)
@@ -173,7 +174,7 @@ public class EditorInputFactory implements IElementFactory, IAdapterFactory
 
 		/**
 		 * Saves the state of the given editor input into the given memento.
-		 * 
+		 *
 		 * @param memento the storage area for element state
 		 * @param input the editor input
 		 */
@@ -181,19 +182,17 @@ public class EditorInputFactory implements IElementFactory, IAdapterFactory
 		public void saveState(IMemento memento)
 		{
 			memento.putString(TAG_TYPE, TYPE_TABLE);
-			memento.putString(TAG_SERVER_NAME, tableEditorInput.getServerName());
-			memento.putString(TAG_NAME, tableEditorInput.getName());
+			memento.putString(TAG_DATASOURCE_NAME, tableEditorInput.getDataSource());
 		}
 
 		public static IAdaptable createTableEditorInput(IMemento memento)
 		{
-			String serverName = memento.getString(TAG_SERVER_NAME);
-			String tableName = memento.getString(TAG_NAME);
-			if (serverName == null || tableName == null)
+			String dataSource = memento.getString(TAG_DATASOURCE_NAME);
+			if (dataSource == null)
 			{
 				return null;
 			}
-			return new TableEditorInput(serverName, tableName);
+			return new TableEditorInput(dataSource);
 		}
 	}
 

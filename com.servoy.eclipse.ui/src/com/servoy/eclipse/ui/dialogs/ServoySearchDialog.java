@@ -65,6 +65,7 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
@@ -322,25 +323,28 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 				String uuidString = memento.getString("UUID");
 				if (uuidString == null)
 				{
-					String serverName = memento.getString("servername");
-					String tableName = memento.getString("tablename");
-					if (serverName != null && tableName != null)
+					String dataSource = memento.getString("datasource");
+					if (dataSource != null)
 					{
-						IServer server = ServoyModel.getServerManager().getServer(serverName, true, true);
-						try
+						String[] snt = DataSourceUtils.getDBServernameTablename(dataSource);
+						if (snt != null)
 						{
-							if (server != null && server.getTableType(tableName) != ITable.UNKNOWN) // server.getTable() Initializes table (fetches columns)
+							IServer server = ServoyModel.getServerManager().getServer(snt[0], true, true);
+							try
 							{
-								return new Table(serverName, tableName);
+								if (server != null && server.getTableType(snt[1]) != ITable.UNKNOWN) // server.getTable() Initializes table (fetches columns)
+								{
+									return new Table(dataSource);
+								}
 							}
-						}
-						catch (RepositoryException e)
-						{
-							ServoyLog.logError(e);
-						}
-						catch (RemoteException e)
-						{
-							ServoyLog.logError(e);
+							catch (RepositoryException e)
+							{
+								ServoyLog.logError(e);
+							}
+							catch (RemoteException e)
+							{
+								ServoyLog.logError(e);
+							}
 						}
 					}
 					else
@@ -384,8 +388,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 				else if (item instanceof Table)
 				{
 					Table table = (Table)item;
-					memento.putString("servername", table.getServerName());
-					memento.putString("tablename", table.getTableName());
+					memento.putString("datasource", table.getDataSource());
 				}
 				else if (item instanceof Scope)
 				{
@@ -609,7 +612,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 				List<String> tableNames = ((IServerInternal)ServoyModel.getServerManager().getServer(serverName)).getTableAndViewNames(true, true);
 				for (String tableName : tableNames)
 				{
-					contentProvider.add(new Table(serverName, tableName), itemsFilter);
+					contentProvider.add(new Table(DataSourceUtils.createDBTableDataSource(serverName, tableName)), itemsFilter);
 				}
 			}
 			catch (Exception e)
@@ -672,13 +675,11 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 
 	public static class Table implements ISupportName
 	{
-		private final String serverName;
-		private final String tableName;
+		private final String dataSource;
 
-		public Table(String serverName, String tableName)
+		public Table(String dataSource)
 		{
-			this.serverName = serverName;
-			this.tableName = tableName;
+			this.dataSource = dataSource;
 		}
 
 		/**
@@ -686,25 +687,16 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 		 */
 		public String getName()
 		{
-			return tableName + " - " + serverName;
+			return dataSource;
 		}
 
 		/**
 		 * @return
 		 */
-		public String getServerName()
+		public String getDataSource()
 		{
-			return serverName;
+			return dataSource;
 		}
-
-		/**
-		 * @return
-		 */
-		public String getTableName()
-		{
-			return tableName;
-		}
-
 	}
 
 	public static class Scope implements ISupportName

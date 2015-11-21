@@ -61,8 +61,8 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Widget;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
@@ -147,7 +147,7 @@ public class ColumnComposite extends Composite
 							// info, because it will not be saved to disk unless the column exists in the DB;
 							// if we are using old table based column info provider, creating new column info would
 							// result in it being written into the database even if the column is not...
-							DataModelManager dmm = DataModelManager.getColumnInfoManager(ServoyModel.getServerManager(), c.getTable().getServerName());
+							DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();
 							if (dmm != null)
 							{
 								try

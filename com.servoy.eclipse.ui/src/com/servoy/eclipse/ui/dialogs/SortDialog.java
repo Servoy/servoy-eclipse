@@ -62,6 +62,7 @@ import com.servoy.j2db.dataprocessing.SortColumn;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.IColumn;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.smart.WebStart;
@@ -71,14 +72,14 @@ public class SortDialog extends Dialog
 	private TableViewer tableViewer;
 	private Table columnTable;
 	private DataProviderTreeViewer dataProviderViewer;
-	private final com.servoy.j2db.persistence.Table table;
+	private final ITable table;
 	private final String title;
 	private final Object value;
 	private Composite tableContainer;
 	private SortModel model;
 	private final FlattenedSolution flattenedEditingSolution;
 
-	public SortDialog(Shell shell, FlattenedSolution flattenedEditingSolution, com.servoy.j2db.persistence.Table table, Object value, String title)
+	public SortDialog(Shell shell, FlattenedSolution flattenedEditingSolution, ITable table, Object value, String title)
 	{
 		super(shell);
 		this.flattenedEditingSolution = flattenedEditingSolution;
@@ -99,10 +100,10 @@ public class SortDialog extends Dialog
 		Composite composite = (Composite)super.createDialogArea(parent);
 
 		applyDialogFont(composite);
-		dataProviderViewer = new DataProviderTreeViewer(composite, DataProviderLabelProvider.INSTANCE_HIDEPREFIX, new DataProviderContentProvider(null,
-			flattenedEditingSolution, table), new DataProviderTreeViewer.DataProviderOptions(false, true, false, false, false, false, false, true,
-			INCLUDE_RELATIONS.NESTED, false, true, null), true, true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(),
-			TreePatternFilter.FILTER_PARENTS), SWT.MULTI);
+		dataProviderViewer = new DataProviderTreeViewer(composite, DataProviderLabelProvider.INSTANCE_HIDEPREFIX,
+			new DataProviderContentProvider(null, flattenedEditingSolution, table),
+			new DataProviderTreeViewer.DataProviderOptions(false, true, false, false, false, false, false, true, INCLUDE_RELATIONS.NESTED, false, true, null),
+			true, true, TreePatternFilter.getSavedFilterMode(getDialogBoundsSettings(), TreePatternFilter.FILTER_PARENTS), SWT.MULTI);
 
 		final Button leftButton = new Button(composite, SWT.NONE);
 		leftButton.setText("<<");
@@ -244,21 +245,19 @@ public class SortDialog extends Dialog
 		});
 
 		final GroupLayout groupLayout = new GroupLayout(composite);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().add(10, 10, 10).add(dataProviderViewer, GroupLayout.PREFERRED_SIZE, 240, Short.MAX_VALUE).addPreferredGap(
-				LayoutStyle.RELATED).add(
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(10, 10, 10).add(
+			dataProviderViewer, GroupLayout.PREFERRED_SIZE, 240, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout.createParallelGroup(GroupLayout.LEADING).add(leftButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).add(
 					rightButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).add(upButton, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).add(downButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).add(
-					copyButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.RELATED).add(
-				tableContainer, GroupLayout.PREFERRED_SIZE, 240, Short.MAX_VALUE).add(10, 10, 10)));
+						GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).add(downButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).add(
+							copyButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.RELATED).add(
+								tableContainer, GroupLayout.PREFERRED_SIZE, 240, Short.MAX_VALUE).add(10, 10, 10)));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
-			groupLayout.createSequentialGroup().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-					groupLayout.createSequentialGroup().add(10, 10, 10).add(tableContainer, GroupLayout.PREFERRED_SIZE, 254, Short.MAX_VALUE)).add(
+			groupLayout.createSequentialGroup().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+				groupLayout.createSequentialGroup().add(10, 10, 10).add(tableContainer, GroupLayout.PREFERRED_SIZE, 254, Short.MAX_VALUE)).add(
 					groupLayout.createSequentialGroup().add(10, 10, 10).add(dataProviderViewer, GroupLayout.PREFERRED_SIZE, 254, Short.MAX_VALUE)).add(
-					groupLayout.createSequentialGroup().add(46, 46, 46).add(leftButton).add(6, 6, 6).add(rightButton).add(6, 6, 6).add(upButton).add(6, 6, 6).add(
-						downButton).add(6, 6, 6).add(copyButton))).addContainerGap()));
+						groupLayout.createSequentialGroup().add(46, 46, 46).add(leftButton).add(6, 6, 6).add(rightButton).add(6, 6, 6).add(upButton).add(6, 6,
+							6).add(downButton).add(6, 6, 6).add(copyButton))).addContainerGap()));
 		composite.setLayout(groupLayout);
 
 		createTableColumns();
@@ -407,7 +406,7 @@ public class SortDialog extends Dialog
 
 		private SortColumn getSortColumn(String dataProviderID) throws RepositoryException
 		{
-			com.servoy.j2db.persistence.Table lastTable = table;
+			ITable lastTable = table;
 			List<Relation> relations = new ArrayList<Relation>();
 			String[] split = dataProviderID.split("\\.");
 			for (int i = 0; i < split.length - 1; i++)

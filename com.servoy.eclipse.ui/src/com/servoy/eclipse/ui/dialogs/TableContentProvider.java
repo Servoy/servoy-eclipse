@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions.TableListType;
@@ -36,9 +37,9 @@ import com.servoy.j2db.persistence.RepositoryException;
 
 /**
  * Content provider class for tables.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 
 public class TableContentProvider extends ArrayContentProvider implements ITreeContentProvider
@@ -91,6 +92,10 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 					lst.addAll(Arrays.asList(tables));
 				}
 			}
+			if (options.serverName == null)
+			{
+				lst.add(new InMemServerWrapper(null));
+			}
 			return lst.toArray();
 		}
 
@@ -107,6 +112,10 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 				return new TableWrapper(tw.getServerName(), null);
 			}
 		}
+		else if (element instanceof InMemServerWrapper && ((InMemServerWrapper)element).getTableName() != null)
+		{
+			return new InMemServerWrapper(null);
+		}
 		return null;
 	}
 
@@ -119,6 +128,16 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 			{
 				return getTables(tw.getServerName(), options);
 			}
+		}
+		else if (parentElement instanceof InMemServerWrapper && ((InMemServerWrapper)parentElement).getTableName() == null)
+		{
+			List<String> tableNames = ((InMemServerWrapper)parentElement).getTableNames();
+			InMemServerWrapper[] wrappers = new InMemServerWrapper[tableNames.size()];
+			for (int i = 0; i < tableNames.size(); i++)
+			{
+				wrappers[i] = new InMemServerWrapper(tableNames.get(i));
+			}
+			return wrappers;
 		}
 
 		return new Object[0];
@@ -161,7 +180,8 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 
 	public boolean hasChildren(Object element)
 	{
-		return !TABLE_NONE.equals(element) && (element instanceof TableWrapper && ((TableWrapper)element).getTableName() == null);
+		return !TABLE_NONE.equals(element) && ((element instanceof TableWrapper && ((TableWrapper)element).getTableName() == null) ||
+			(element instanceof InMemServerWrapper && ((InMemServerWrapper)element).getTableName() == null));
 	}
 
 	public static class TableListOptions

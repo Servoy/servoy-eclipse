@@ -79,6 +79,7 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableDisplay;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
@@ -95,7 +96,6 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TabPanel;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.query.ISQLJoin;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
@@ -349,7 +349,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		if (name.endsWith("rowBGColorCalculation"))
 		{
 			if (form == null) return null;
-			Table table = null;
+			ITable table = null;
 			if (persistContext.getPersist() instanceof Portal)
 			{
 				Relation[] relations = flattenedEditingSolution.getRelationSequence(((Portal)persistContext.getPersist()).getRelationName());
@@ -687,9 +687,9 @@ public class PersistPropertyHandler extends BasePropertyHandler
 						return ((Portal)persistContext.getPersist()).getInitialSort();
 					}
 
-					public Table getTable() throws RepositoryException
+					public ITable getTable() throws RepositoryException
 					{
-						Table table = null;
+						ITable table = null;
 						Relation[] relations = flattenedEditingSolution.getRelationSequence(((Portal)persistContext.getPersist()).getRelationName());
 						if (relations != null)
 						{
@@ -712,7 +712,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 						return ((Relation)persistContext.getPersist()).getInitialSort();
 					}
 
-					public Table getTable() throws RepositoryException
+					public ITable getTable() throws RepositoryException
 					{
 						return ((Relation)persistContext.getPersist()).getForeignTable();
 					}

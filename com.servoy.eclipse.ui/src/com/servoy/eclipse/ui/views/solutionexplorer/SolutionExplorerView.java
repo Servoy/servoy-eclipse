@@ -976,7 +976,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 								resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
 							try
 							{
-								ITable createNewTable = (ServoyModel.getServerManager()).getMemServer().createNewTable(null, tableName);
+								ITable createNewTable = ServoyModelFinder.getServoyModel().getMemServer().createNewTable(null, tableName);
 								ServoyModelFinder.getServoyModel().getDataModelManager().loadMemServerTable(createNewTable);
 								createNewTable.setInitialized(true);
 							}
@@ -995,52 +995,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				Debug.error(e);
 			}
 		}
-		ServoyModel.getServerManager().getMemServer().addTableListener(tableListener);
-		ServoyModel.getServerManager().getMemServer().addTableListener(new ITableListener()
-		{
-
-			@Override
-			public void tablesAdded(IServerInternal server, String[] tableNames)
-			{
-
-			}
-
-			@Override
-			public void tablesRemoved(IServerInternal server, ITable[] tables, boolean deleted)
-			{
-				for (ITable iTable : tables)
-				{
-					IFile dbiFile = ServoyModelFinder.getServoyModel().getDataModelManager().getDBIFile(server.getName(), iTable.getName());
-					try
-					{
-						dbiFile.delete(false, new NullProgressMonitor());
-					}
-					catch (CoreException e)
-					{
-						Debug.error(e);
-					}
-				}
-
-			}
-
-			@Override
-			public void hiddenTableChanged(IServerInternal server, Table table)
-			{
-
-			}
-
-			@Override
-			public void serverStateChanged(IServerInternal server, int oldState, int newState)
-			{
-
-			}
-
-			@Override
-			public void tableInitialized(Table t)
-			{
-
-			}
-		});
+		ServoyModelFinder.getServoyModel().getMemServer().addTableListener(tableListener);
 	}
 
 
@@ -2105,6 +2060,24 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				}
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerViewsNode(server);
 				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
+
+
+				// TODO solution explorer should not be responsible to clean up the dbi files of mem tables
+				if (server == ServoyModelFinder.getServoyModel().getMemServer())
+				{
+					for (ITable iTable : tables)
+					{
+						IFile dbiFile = ServoyModelFinder.getServoyModel().getDataModelManager().getDBIFile(server.getName(), iTable.getName());
+						try
+						{
+							dbiFile.delete(false, new NullProgressMonitor());
+						}
+						catch (CoreException e)
+						{
+							Debug.error(e);
+						}
+					}
+				}
 			}
 
 			public void hiddenTableChanged(IServerInternal server, Table table)
@@ -2869,7 +2842,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreePrimary.registerAction(UserNodeType.MEDIA, importMedia);
 		newActionInTreePrimary.registerAction(UserNodeType.MEDIA_FOLDER, importMedia);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVER, newTable);
-		newActionInTreePrimary.registerAction(UserNodeType.INMEMORY_DATASOURCE, newTable);
+		newActionInTreePrimary.registerAction(UserNodeType.INMEMORY_DATASOURCES, newTable);
 		newActionInTreePrimary.registerAction(UserNodeType.FORMS, newForm);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.MODULES, newModule);
@@ -2947,6 +2920,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		openAction.registerAction(UserNodeType.VALUELIST_ITEM, new OpenValueListAction(this));
 		IAction openTable = new OpenTableAction(this);
 		openAction.registerAction(UserNodeType.TABLE, openTable);
+		openAction.registerAction(UserNodeType.INMEMORY_DATASOURCE, openTable);
 		openAction.registerAction(UserNodeType.VIEW, openTable);
 		openAction.registerAction(UserNodeType.RELATION, new OpenRelationAction());
 		openAction.registerAction(UserNodeType.MEDIA_IMAGE, new OpenMediaAction());
@@ -3312,6 +3286,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				IServerInternal server = (IServerInternal)serverManager.getServer(server_name, false, false);
 				server.removeTableListener(tableListener);
 			}
+
+			ServoyModelFinder.getServoyModel().getMemServer().removeTableListener(tableListener);
 			tableListener = null;
 		}
 

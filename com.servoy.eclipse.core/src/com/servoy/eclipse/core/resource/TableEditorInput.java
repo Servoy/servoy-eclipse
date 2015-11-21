@@ -25,6 +25,7 @@ import org.eclipse.ui.part.FileEditorInput;
 
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.j2db.util.DataSourceUtils;
 
 /**
  * Adapter for making a table resource a suitable input for an editor.
@@ -33,18 +34,16 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 public class TableEditorInput implements IEditorInput
 {
 	public static final String TABLE_RESOURCE_ID = "com.servoy.eclipse.core.resource.table";
-	private final String tableName;
-	private final String serverName;
+	private final String dataSource;
 
 	/**
 	 * Creates a form input.
-	 * 
+	 *
 	 * @param solution
 	 */
-	public TableEditorInput(String serverName, String tableName)
+	public TableEditorInput(String dataSource)
 	{
-		this.serverName = serverName;
-		this.tableName = tableName;
+		this.dataSource = dataSource;
 	}
 
 
@@ -59,8 +58,8 @@ public class TableEditorInput implements IEditorInput
 			if (segments.length >= 2 && segments[segments.length - 1].endsWith(DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT))
 			{
 				serverName = segments[segments.length - 2];
-				tableName = segments[segments.length - 1].substring(0, segments[segments.length - 1].length() -
-					DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
+				tableName = segments[segments.length - 1].substring(0,
+					segments[segments.length - 1].length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
 			}
 			// obj files: datasources: table nodes
 			else if (segments.length >= 3 && segments[segments.length - 3].equals(SolutionSerializer.DATASOURCES_DIR_NAME) &&
@@ -80,11 +79,27 @@ public class TableEditorInput implements IEditorInput
 			{
 				return null;
 			}
-			return new TableEditorInput(serverName, tableName);
+			return new TableEditorInput(DataSourceUtils.createDBTableDataSource(serverName, tableName));
 		}
 		// cannot find info for table editor input
 		return null;
 	}
+
+	@Override
+	public String getName()
+	{
+		return dataSource;
+	}
+
+
+	/**
+	 * @return
+	 */
+	public String getDataSource()
+	{
+		return dataSource;
+	}
+
 
 	/*
 	 * (non-Javadoc) Method declared on IEditorInput.
@@ -110,40 +125,18 @@ public class TableEditorInput implements IEditorInput
 		return PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor(null);
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on IEditorInput.
-	 */
-	public String getName()
-	{
-		return tableName;
-	}
-
-	public String getServerName()
-	{
-		return serverName;
-	}
-
-	/*
-	 * (non-Javadoc) Method declared on IEditorInput.
-	 */
 	public IPersistableElement getPersistable()
 	{
 		return (IPersistableElement)getAdapter(IPersistableElement.class);
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on IEditorInput.
-	 */
 	public String getToolTipText()
 	{
-		return serverName + '.' + tableName;
+		String[] snt = DataSourceUtils.getDBServernameTablename(dataSource);
+		if (snt != null) return snt[0] + '.' + snt[1];
+		return dataSource;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString()
 	{
@@ -155,8 +148,7 @@ public class TableEditorInput implements IEditorInput
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((serverName == null) ? 0 : serverName.hashCode());
-		result = prime * result + ((tableName == null) ? 0 : tableName.hashCode());
+		result = prime * result + ((dataSource == null) ? 0 : dataSource.hashCode());
 		return result;
 	}
 
@@ -167,17 +159,11 @@ public class TableEditorInput implements IEditorInput
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		final TableEditorInput other = (TableEditorInput)obj;
-		if (serverName == null)
+		if (dataSource == null)
 		{
-			if (other.serverName != null) return false;
+			if (other.dataSource != null) return false;
 		}
-		else if (!serverName.equals(other.serverName)) return false;
-		if (tableName == null)
-		{
-			if (other.tableName != null) return false;
-		}
-		else if (!tableName.equals(other.tableName)) return false;
+		else if (!dataSource.equals(other.dataSource)) return false;
 		return true;
 	}
-
 }

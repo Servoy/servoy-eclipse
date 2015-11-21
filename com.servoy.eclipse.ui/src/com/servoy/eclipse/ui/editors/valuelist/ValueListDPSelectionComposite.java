@@ -45,8 +45,8 @@ import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ScriptCalculation;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValueList;
 
 public class ValueListDPSelectionComposite extends Composite
@@ -61,7 +61,7 @@ public class ValueListDPSelectionComposite extends Composite
 	private boolean returnInDataProvider;
 	private ValueList valueList;
 	private int mask;
-	private Table table;
+	private ITable table;
 	private int methodNr;
 
 	public ValueListDPSelectionComposite(Composite parent, FlattenedSolution flattenedSolution, int style)
@@ -80,7 +80,7 @@ public class ValueListDPSelectionComposite extends Composite
 		final GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(tree, GroupLayout.PREFERRED_SIZE, 180, Short.MAX_VALUE).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(showInFieldButton).addContainerGap(67, Short.MAX_VALUE)).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(returnInDataproviderButton).addContainerGap(41, Short.MAX_VALUE)));
+				groupLayout.createSequentialGroup().addContainerGap().add(returnInDataproviderButton).addContainerGap(41, Short.MAX_VALUE)));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().add(showInFieldButton).addPreferredGap(LayoutStyle.RELATED).add(tree, GroupLayout.PREFERRED_SIZE, 84,
 				Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(returnInDataproviderButton)));
@@ -102,7 +102,8 @@ public class ValueListDPSelectionComposite extends Composite
 			editor.flagModified();
 			Object[] selectedObjects = ((IStructuredSelection)event.getSelection()).toArray();
 			String dataProvider = null;
-			if (selectedObjects != null && selectedObjects.length > 0 && selectedObjects[0] instanceof IDataProvider) dataProvider = ((IDataProvider)selectedObjects[0]).getDataProviderID();
+			if (selectedObjects != null && selectedObjects.length > 0 && selectedObjects[0] instanceof IDataProvider)
+				dataProvider = ((IDataProvider)selectedObjects[0]).getDataProviderID();
 			switch (methodNr)
 			{
 				case 1 :
@@ -124,7 +125,7 @@ public class ValueListDPSelectionComposite extends Composite
 
 	private SelectionChangedListener listener = null;
 
-	public void initDataBindings(final Table table)
+	public void initDataBindings(final ITable table)
 	{
 		((DataProviderContentProvider)tree.getContentProvider()).setTable(table, null);
 		tree.refreshTree();
@@ -220,7 +221,7 @@ public class ValueListDPSelectionComposite extends Composite
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void removeSelectionChangedListener()
 	{

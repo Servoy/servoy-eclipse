@@ -230,10 +230,9 @@ public class DataModelManager implements IColumnInfoManager
 			{
 				is = file.getContents(true);
 				String json_table = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
-				IServerInternal s = (IServerInternal)sm.getServer(t.getServerName());
-				if (s != null && s.getConfig().isEnabled() && s.isValid() && json_table != null)
+				if (json_table != null)
 				{
-					deserializeInMemoryTable(s, t, json_table);
+					deserializeInMemoryTable(ServoyModelFinder.getServoyModel().getMemServer(), t, json_table);
 				}
 			}
 			catch (JSONException e)
@@ -591,7 +590,7 @@ public class DataModelManager implements IColumnInfoManager
 		}
 	}
 
-	public void testTableAndCreateDBIFile(Table table)
+	public void testTableAndCreateDBIFile(ITable table)
 	{
 		if (table == null) return;
 		IFile dbiFile = getDBIFile(table.getDataSource());
@@ -1976,7 +1975,7 @@ public class DataModelManager implements IColumnInfoManager
 		for (String dataSource : dataSources)
 		{
 			String[] ds = DataSourceUtilsBase.getDBServernameTablename(dataSource);
-			if (serverNames.add(ds[0]))
+			if (ds != null && serverNames.add(ds[0]))
 			{
 				serversTables.put(ds[0], DataSourceUtils.getServerTablenames(dataSources, ds[0]));
 			}

@@ -70,6 +70,7 @@ import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.ISupportTabSeq;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Relation;
@@ -77,7 +78,6 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.UUID;
@@ -85,7 +85,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Command to place an element in the form designer.
- * 
+ *
  * @author rgansevles
  */
 
@@ -106,16 +106,15 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 
 	/**
 	 * Command to add a field.
-	 * 
+	 *
 	 * @param parent
 	 * @param location
 	 * @param object
-	 * @param size 
+	 * @param size
 	 * @param
 	 */
-	public BaseFormPlaceElementCommand(IApplication application, ISupportChilds parent, Object object, Object requestType,
-		Map<Object, Object> objectProperties, IFieldPositioner fieldPositioner, Point defaultLocation, org.eclipse.draw2d.geometry.Dimension size,
-		IPersist context)
+	public BaseFormPlaceElementCommand(IApplication application, ISupportChilds parent, Object object, Object requestType, Map<Object, Object> objectProperties,
+		IFieldPositioner fieldPositioner, Point defaultLocation, org.eclipse.draw2d.geometry.Dimension size, IPersist context)
 	{
 		this.application = application;
 		this.parent = parent;
@@ -194,8 +193,8 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 
 	public static void setProperiesOnModel(Object model, Map<Object, Object> objectProperties)
 	{
-		Command setPropertiesCommand = SetValueCommand.createSetPropertiesCommand(
-			(IPropertySource)Platform.getAdapterManager().getAdapter(model, IPropertySource.class), objectProperties);
+		Command setPropertiesCommand = SetValueCommand.createSetPropertiesCommand(Platform.getAdapterManager().getAdapter(model, IPropertySource.class),
+			objectProperties);
 		if (setPropertiesCommand != null)
 		{
 			setPropertiesCommand.execute();
@@ -300,10 +299,9 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			else if (o instanceof PersistDragData)
 			{
 				Object[] pasted = pastePersist((PersistDragData)o, loc, origLocations, groupMap);
-				if (pasted != null &&
-					pasted.length > 0 &&
-					pasted[0] instanceof IPersist &&
-					((!(parent instanceof TabPanel) && ((PersistDragData)o).type == IRepository.TABPANELS) || (!(parent instanceof Portal) && ((PersistDragData)o).type == IRepository.PORTALS)))
+				if (pasted != null && pasted.length > 0 && pasted[0] instanceof IPersist &&
+					((!(parent instanceof TabPanel) && ((PersistDragData)o).type == IRepository.TABPANELS) ||
+						(!(parent instanceof Portal) && ((PersistDragData)o).type == IRepository.PORTALS)))
 				{
 					alternativeParent = (IPersist)pasted[0];
 				}
@@ -362,8 +360,8 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 				if (template.getUUID().equals(dragData.uuid))
 				{
 					setLabel("place template");
-					return ElementFactory.applyTemplate((ISupportFormElements)parent, new TemplateElementHolder((Template)template, dragData.element),
-						location, false);
+					return ElementFactory.applyTemplate((ISupportFormElements)parent, new TemplateElementHolder((Template)template, dragData.element), location,
+						false);
 				}
 			}
 			ServoyLog.logWarning("place template: template " + dragData.uuid + " not found", null);
@@ -387,7 +385,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 					IEditorPart editor = editorRef.getEditor(false);
 					if (editor != null)
 					{
-						CommandStack commandStack = (CommandStack)editor.getAdapter(CommandStack.class);
+						CommandStack commandStack = editor.getAdapter(CommandStack.class);
 						if (commandStack != null)
 						{
 							draggedPersist = findDeletedPersist(commandStack.getCommands(), dragData.uuid);
@@ -499,7 +497,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 
 	/**
 	 * Look for a command that deleted the persist with the uuid.
-	 * 
+	 *
 	 * @param commands
 	 * @param uuid
 	 * @return
@@ -558,7 +556,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 			}
 			else
 			{
-				Table table = null;
+				ITable table = null;
 				Relation[] relations = null;
 				if (parent instanceof Form)
 				{

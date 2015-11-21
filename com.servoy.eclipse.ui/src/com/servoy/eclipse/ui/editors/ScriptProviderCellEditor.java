@@ -57,9 +57,9 @@ import com.servoy.eclipse.ui.util.IKeywordChecker;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
-import com.servoy.j2db.persistence.Table;
 
 /**
  * A cell editor that manages a script field (calculation & global methods only)
@@ -69,12 +69,12 @@ import com.servoy.j2db.persistence.Table;
  */
 public class ScriptProviderCellEditor extends DialogCellEditor
 {
-	private final Table table;
+	private final ITable table;
 	private final PersistContext persistContext;
 
 	private final String methodKey;
 
-	public ScriptProviderCellEditor(Composite parent, Table table, PersistContext persistContext, String methodKey, boolean readOnly)
+	public ScriptProviderCellEditor(Composite parent, ITable table, PersistContext persistContext, String methodKey, boolean readOnly)
 	{
 		super(parent, new SolutionContextDelegateLabelProvider(new ScriptDialogLabelProvider(persistContext, table, true), persistContext.getContext()),
 			new ScriptProviderValueEditor(persistContext.getPersist()), readOnly, SWT.NONE);
@@ -114,10 +114,10 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 		private static final String CALCULATIONS = "calculations";
 		private static final String GLOBAL_METHODS = "global methods";
 
-		ScriptDialog(Shell shell, PersistContext persistContext, Table table, ISelection selection, int treeStyle, String title)
+		ScriptDialog(Shell shell, PersistContext persistContext, ITable table, ISelection selection, int treeStyle, String title)
 		{
 			super(shell, true, false, TreePatternFilter.FILTER_LEAFS,
-			// content provider
+				// content provider
 				new ScriptTreeContentProvider(table, persistContext),
 				// label provider
 				new SolutionContextDelegateLabelProvider(new ScriptDialogLabelProvider(persistContext, table, false), persistContext.getContext()),
@@ -162,10 +162,10 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 
 		public static class ScriptTreeContentProvider extends ArrayContentProvider implements ITreeContentProvider, IKeywordChecker
 		{
-			private final Table table;
+			private final ITable table;
 			private final PersistContext persistContext;
 
-			public ScriptTreeContentProvider(Table table, PersistContext persistContext)
+			public ScriptTreeContentProvider(ITable table, PersistContext persistContext)
 			{
 				this.table = table;
 				this.persistContext = persistContext;
@@ -263,9 +263,9 @@ public class ScriptProviderCellEditor extends DialogCellEditor
 			private static final Image globalMethodsImage = Activator.getDefault().loadImageFromBundle("global_method.gif");
 			private final boolean showPrefix;
 			private final PersistContext persistContext;
-			private final Table table;
+			private final ITable table;
 
-			public ScriptDialogLabelProvider(PersistContext persistContext, Table table, boolean showPrefix)
+			public ScriptDialogLabelProvider(PersistContext persistContext, ITable table, boolean showPrefix)
 			{
 				this.persistContext = persistContext;
 				this.table = table;

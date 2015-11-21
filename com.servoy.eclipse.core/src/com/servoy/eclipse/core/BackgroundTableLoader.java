@@ -36,7 +36,7 @@ import com.servoy.j2db.util.Debug;
 /**
  * Loads table lists for servers in background job.<br>
  * When a solution is activated, it also starts loading in background the tables that are used in that solution (except for ones referenced in scripting).
- * 
+ *
  * @author acostescu
  */
 public class BackgroundTableLoader implements IActiveProjectListener
@@ -138,7 +138,7 @@ public class BackgroundTableLoader implements IActiveProjectListener
 						catch (Exception ex)
 						{
 							((IServerInternal)s).flagInvalid();
-							Debug.trace(ex); //report only when tracing 
+							Debug.trace(ex); //report only when tracing
 						}
 						if (!s.isValid()) invalidServersFound = true;
 					}
@@ -174,6 +174,7 @@ public class BackgroundTableLoader implements IActiveProjectListener
 			while (dataSource != null)
 			{
 				String[] serverAndTable = DataSourceUtils.getDBServernameTablename(dataSource);
+				if (serverAndTable == null) continue; // not a server/table datasource
 				IServer s = serverManager.getServer(serverAndTable[0], true, true);
 				if (s != null)
 				{

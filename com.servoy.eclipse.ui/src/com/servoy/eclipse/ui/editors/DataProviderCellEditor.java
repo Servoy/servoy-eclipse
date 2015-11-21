@@ -36,8 +36,8 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Table;
 
 /**
  * A cell editor that manages a dataprovider field.
@@ -53,7 +53,7 @@ public class DataProviderCellEditor extends DialogCellEditor
 	private final FlattenedSolution flattenedSolution;
 	private final DataProviderOptions input;
 	private final DataProviderConverter converter;
-	private final Table table;
+	private final ITable table;
 
 	/**
 	 * Creates a new dataprovider cell editor parented under the given control.
@@ -68,7 +68,7 @@ public class DataProviderCellEditor extends DialogCellEditor
 	 * @param converter
 	 */
 	public DataProviderCellEditor(Composite parent, ILabelProvider labelProvider, IValueEditor<Object> valueEditor, Form form,
-		FlattenedSolution flattenedSolution, boolean readOnly, DataProviderOptions input, DataProviderConverter converter, Table table)
+		FlattenedSolution flattenedSolution, boolean readOnly, DataProviderOptions input, DataProviderConverter converter, ITable table)
 	{
 		super(parent, labelProvider, valueEditor, readOnly, SWT.NONE);
 		this.form = form instanceof FlattenedForm ? flattenedSolution.getForm(form.getID()) : form;

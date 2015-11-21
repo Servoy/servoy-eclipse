@@ -58,14 +58,13 @@ public class SearchServoyAction implements IWorkbenchWindowActionDelegate
 			else if (result instanceof Table)
 			{
 				Table table = (Table)result;
-				EditorUtil.openTableEditor(table.getServerName(), table.getTableName());
+				EditorUtil.openTableEditor(table.getDataSource());
 			}
 			else if (result instanceof Scope)
 			{
 				Scope scope = (Scope)result;
-				EditorUtil.openScriptEditor(
-					ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(scope.getSolutionName()).getSolution(), scope.getScopeName(),
-					true);
+				EditorUtil.openScriptEditor(ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(scope.getSolutionName()).getSolution(),
+					scope.getScopeName(), true);
 			}
 		}
 	}

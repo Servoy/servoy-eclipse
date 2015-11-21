@@ -56,7 +56,7 @@ import com.servoy.j2db.util.Debug;
 
 /**
  * An {@link ISearchQuery} implementation for finding dataproviders (columns) in dbi, frm, rel, val, js files.
- * 
+ *
  * @author acostache
  */
 public class DataProviderSearch extends DLTKSearchEngineSearch
@@ -82,7 +82,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.search.ui.ISearchQuery#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public IStatus run(IProgressMonitor monitor) throws OperationCanceledException
@@ -112,7 +112,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.search.ui.ISearchQuery#getLabel()
 	 */
 	public String getLabel()
@@ -126,7 +126,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 		private final IColumn dataprovider;
 		private boolean found;
 		Pattern dataproviderIDPattern = null;
-		Pattern relatedDataproviderIDPattern; // matches related pattern 
+		Pattern relatedDataproviderIDPattern; // matches related pattern
 		private ISourceModule cachedJSModule = null;
 		private String currentJSFile = "";
 
@@ -137,7 +137,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 			/*
 			 * an explenation of this regex can be fond here:
 			 * http://rick.measham.id.au/paste/explain.pl?regex=.*dataProviderID%5Cs*%5C%3A%5Cs*%5B%22%27%5DmyDataprovider%24
-			 * 
+			 *
 			 * Matches the last occurrence of dataProviderID:"my_dataprovider in a multiline string. !Importat!: at the begining of the regex there is this
 			 * pattern [.\\s]* , we cannot use only dot "." because it matches everything except new lines . We needed to add \s because \s matches also
 			 * newlines
@@ -313,7 +313,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 						{
 							try
 							{
-								for (Column col : rel.getForeignColumns())
+								for (Column col : rel.getForeignColumns(flattenedSolution))
 								{
 									if (dataprovider.getDataProviderID().equals(col.getDataProviderID())) return true;
 								}
@@ -330,7 +330,7 @@ public class DataProviderSearch extends DLTKSearchEngineSearch
 						{
 							if (datasource.equals(rel.getForeignDataSource()))
 							{
-								for (Column col : rel.getForeignColumns())
+								for (Column col : rel.getForeignColumns(flattenedSolution))
 								{
 									if (dataprovider.getDataProviderID().equals(col.getDataProviderID())) return true;
 								}

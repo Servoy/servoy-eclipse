@@ -29,8 +29,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
+import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
@@ -39,10 +40,8 @@ import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
 import com.servoy.eclipse.ui.property.TableValueEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
-import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.util.DataSourceUtils;
 
 public class DatasourceSelectComposite extends Composite
 {
@@ -54,7 +53,7 @@ public class DatasourceSelectComposite extends Composite
 
 	/**
 	 * Create the composite
-	 * 
+	 *
 	 * @param parent
 	 * @param style
 	 */
@@ -90,22 +89,21 @@ public class DatasourceSelectComposite extends Composite
 		Label glue = new Label(this, SWT.NONE);
 
 		final GroupLayout groupLayout = new GroupLayout(this);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().add(6, 6, 6).add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
-					groupLayout.createSequentialGroup().add(sourceLabel, GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE).add(76, 76, 76)).add(
-					groupLayout.createSequentialGroup().add(sourceTableControl, GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE).addPreferredGap(
-						LayoutStyle.RELATED).add(glue, GroupLayout.PREFERRED_SIZE, 26, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED))).add(
-				6, 6, 6).add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
-					groupLayout.createSequentialGroup().add(destinationTableControl, GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE).addContainerGap()).add(
-					groupLayout.createSequentialGroup().add(destinationLabel, GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE).add(28, 28, 28)))));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(glue).add(
-					groupLayout.createSequentialGroup().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(sourceLabel).add(destinationLabel)).addPreferredGap(
-						LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(sourceTableControl).add(destinationTableControl)))).addContainerGap(
-				10, Short.MAX_VALUE)));
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(6, 6,
+			6).add(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
+				groupLayout.createSequentialGroup().add(sourceLabel, GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE).add(76, 76,
+					76)).add(groupLayout.createSequentialGroup().add(sourceTableControl, GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE).addPreferredGap(
+						LayoutStyle.RELATED).add(glue, GroupLayout.PREFERRED_SIZE, 26, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED))).add(6,
+							6, 6).add(
+								groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().add(destinationTableControl,
+									GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE).addContainerGap()).add(
+										groupLayout.createSequentialGroup().add(destinationLabel, GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE).add(28, 28,
+											28)))));
+		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
+			groupLayout.createParallelGroup(GroupLayout.TRAILING).add(glue).add(groupLayout.createSequentialGroup().add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(sourceLabel).add(destinationLabel)).addPreferredGap(LayoutStyle.RELATED).add(
+					groupLayout.createParallelGroup(GroupLayout.LEADING).add(sourceTableControl).add(destinationTableControl)))).addContainerGap(10,
+						Short.MAX_VALUE)));
 		setLayout(groupLayout);
 
 	}
@@ -133,7 +131,7 @@ public class DatasourceSelectComposite extends Composite
 					IStructuredSelection selection = (IStructuredSelection)destinationTable.getSelection();
 					if (!selection.isEmpty())
 					{
-						TableWrapper tableWrapper = ((TableWrapper)selection.getFirstElement());
+						IDataSourceWrapper tableWrapper = ((IDataSourceWrapper)selection.getFirstElement());
 						oldDestinationTable = tableWrapper.getTableName();
 					}
 					else
@@ -141,7 +139,7 @@ public class DatasourceSelectComposite extends Composite
 						oldDestinationTable = "";
 					}
 					selection = (IStructuredSelection)sourceTable.getSelection();
-					TableWrapper tableWrapper = ((TableWrapper)selection.getFirstElement());
+					IDataSourceWrapper tableWrapper = ((IDataSourceWrapper)selection.getFirstElement());
 					oldSourceTable = tableWrapper.getTableName();
 					nameFieldToModify.setText(getRelationNameWithDefaultDefault(oldSourceTable, oldDestinationTable));
 				}
@@ -169,37 +167,19 @@ public class DatasourceSelectComposite extends Composite
 
 	private void setSelection(RelationEditor relationEditor)
 	{
-		if (relationEditor.getRelation().getPrimaryServerName() != null && relationEditor.getRelation().getPrimaryTableName() != null)
+		IDataSourceWrapper primaryDataSourceWrapper = DataSourceWrapperFactory.getWrapper(relationEditor.getRelation().getPrimaryDataSource());
+		if (primaryDataSourceWrapper != null)
 		{
-			boolean isView = false;
-			try
-			{
-				isView = (relationEditor.getRelation().getPrimaryTable() != null && relationEditor.getRelation().getPrimaryTable().getTableType() == ITable.VIEW);
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
-			}
-			sourceTable.setSelection(new StructuredSelection(new TableWrapper(relationEditor.getRelation().getPrimaryServerName(),
-				relationEditor.getRelation().getPrimaryTableName(), isView)));
+			sourceTable.setSelection(new StructuredSelection(primaryDataSourceWrapper));
 		}
 		else
 		{
 			sourceTable.setSelection(StructuredSelection.EMPTY);
 		}
-		if (relationEditor.getRelation().getForeignServerName() != null && relationEditor.getRelation().getForeignTableName() != null)
+		IDataSourceWrapper foreignDataSourceWrapper = DataSourceWrapperFactory.getWrapper(relationEditor.getRelation().getForeignDataSource());
+		if (primaryDataSourceWrapper != null)
 		{
-			boolean isView = false;
-			try
-			{
-				isView = (relationEditor.getRelation().getForeignTable() != null && relationEditor.getRelation().getForeignTable().getTableType() == ITable.VIEW);
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
-			}
-			destinationTable.setSelection(new StructuredSelection(new TableWrapper(relationEditor.getRelation().getForeignServerName(),
-				relationEditor.getRelation().getForeignTableName(), isView)));
+			destinationTable.setSelection(new StructuredSelection(foreignDataSourceWrapper));
 		}
 		else
 		{
@@ -218,9 +198,8 @@ public class DatasourceSelectComposite extends Composite
 				if (!selection.isEmpty())
 				{
 					relationEditor.unregisterListeners();
-					TableWrapper tableWrapper = ((TableWrapper)selection.getFirstElement());
-					relationEditor.getRelation().setPrimaryDataSource(
-						DataSourceUtils.createDBTableDataSource(tableWrapper.getServerName(), tableWrapper.getTableName()));
+					IDataSourceWrapper tableWrapper = ((IDataSourceWrapper)selection.getFirstElement());
+					relationEditor.getRelation().setPrimaryDataSource(tableWrapper.getDataSource());
 					try
 					{
 						ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager().testTableAndCreateDBIFile(
@@ -245,12 +224,11 @@ public class DatasourceSelectComposite extends Composite
 				if (!selection.isEmpty())
 				{
 					relationEditor.unregisterListeners();
-					TableWrapper tableWrapper = ((TableWrapper)selection.getFirstElement());
+					IDataSourceWrapper tableWrapper = ((IDataSourceWrapper)selection.getFirstElement());
 					Relation relation = relationEditor.getRelation();
 					String oldServerName = relation.getForeignServerName();
 					String oldTableName = relation.getForeignTableName();
-					relationEditor.getRelation().setForeignDataSource(
-						DataSourceUtils.createDBTableDataSource(tableWrapper.getServerName(), tableWrapper.getTableName()));
+					relationEditor.getRelation().setForeignDataSource(tableWrapper.getDataSource());
 					try
 					{
 						ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager().testTableAndCreateDBIFile(
@@ -263,8 +241,7 @@ public class DatasourceSelectComposite extends Composite
 					relationEditor.registerListeners();
 					if (relationEditor.getRelation().getPrimaryDataSource() == null)
 					{
-						sourceTable.setSelection(new StructuredSelection(new TableWrapper(tableWrapper.getServerName(), tableWrapper.getTableName(),
-							tableWrapper.isView())));
+						sourceTable.setSelection(new StructuredSelection(tableWrapper));
 					}
 					if (relation.getInitialSort() != null && tableWrapper.getServerName() != null && tableWrapper.getTableName() != null &&
 						(!tableWrapper.getServerName().equals(oldServerName) || !tableWrapper.getTableName().equals(oldTableName)))

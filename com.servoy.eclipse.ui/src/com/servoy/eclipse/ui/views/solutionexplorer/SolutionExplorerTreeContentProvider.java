@@ -319,8 +319,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		servers = new PlatformSimpleUserNode(Messages.TreeStrings_DBServers, UserNodeType.SERVERS, null, uiActivator.loadImageFromBundle("database_srv.gif"));
 		servers.parent = devDatasources;
 
-		inmemoryDatasources = new PlatformSimpleUserNode(Messages.TreeStrings_DBMemory, UserNodeType.INMEMORY_DATASOURCE,
-			ServoyModel.getServerManager().getMemServer(), uiActivator.loadImageFromBundle("database_srv.gif"));
+		inmemoryDatasources = new PlatformSimpleUserNode(Messages.TreeStrings_DBMemory, UserNodeType.INMEMORY_DATASOURCES,
+			ServoyModelFinder.getServoyModel().getMemServer(), uiActivator.loadImageFromBundle("database_srv.gif"));
 		inmemoryDatasources.parent = devDatasources;
 
 
@@ -2378,7 +2378,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	public void refreshServerViewsNode(IServerInternal server)
 	{
 		PlatformSimpleUserNode node = (PlatformSimpleUserNode)findChildNode(servers, server.getName());
-		if (server == ServoyModel.getServerManager().getMemServer())
+		if (server == ServoyModelFinder.getServoyModel().getMemServer())
 			node = (PlatformSimpleUserNode)findChildNode(devDatasources, Messages.TreeStrings_DBMemory);
 		if (node != null)
 		{

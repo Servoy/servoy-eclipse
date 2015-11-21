@@ -38,6 +38,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.MethodTemplate;
@@ -45,7 +46,6 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
@@ -58,7 +58,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 public class AddScriptProviderButtonsComposite extends Composite
 {
-	private Table table;
+	private ITable table;
 	private IPersist persist;
 	private ScriptProviderCellEditor.ScriptDialog dialog;
 
@@ -120,14 +120,13 @@ public class AddScriptProviderButtonsComposite extends Composite
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().add(10, 10, 10).addPreferredGap(LayoutStyle.RELATED).add(createCalculationButton).add(10, 10, 10).add(
 				createGlobalMethodButton).add(13, 13, 13)));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(createCalculationButton).add(createGlobalMethodButton)).addContainerGap(
+		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(
+			groupLayout.createParallelGroup(GroupLayout.BASELINE).add(createCalculationButton).add(createGlobalMethodButton)).addContainerGap(
 				GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 		setLayout(groupLayout);
 	}
 
-	private static ScriptCalculation createCalculation(IPersist parent, String calcName, Table table, String methodKey)
+	private static ScriptCalculation createCalculation(IPersist parent, String calcName, ITable table, String methodKey)
 	{
 		if (parent instanceof Solution && table != null)
 		{
@@ -218,7 +217,7 @@ public class AddScriptProviderButtonsComposite extends Composite
 	}
 
 
-	public void setTable(Table table)
+	public void setTable(ITable table)
 	{
 		this.table = table;
 		createCalculationButton.setEnabled(table != null);

@@ -32,9 +32,9 @@ import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Relation;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -74,7 +74,7 @@ public class CreateColumnReferenceQuickFix implements IMarkerResolution
 						IPersist parent = persist.getAncestor(IRepository.FORMS);
 						if (parent != null)
 						{
-							Table table = null;
+							ITable table = null;
 							String columName = ((ISupportDataProviderID)persist).getDataProviderID();
 							int indx = columName.lastIndexOf('.');
 							if (indx > 0)

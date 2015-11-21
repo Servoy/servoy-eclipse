@@ -76,7 +76,6 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.IDelegate;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SortedList;
@@ -212,7 +211,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 			this.table = table;
 		}
 
-		public void setTable(Table table, PersistContext persistContext)
+		public void setTable(ITable table, PersistContext persistContext)
 		{
 			this.table = table;
 			this.persistContext = persistContext;

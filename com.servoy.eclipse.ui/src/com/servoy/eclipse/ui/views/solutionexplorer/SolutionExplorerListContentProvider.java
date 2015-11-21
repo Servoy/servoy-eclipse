@@ -77,6 +77,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Messages;
@@ -159,6 +160,7 @@ import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Pair;
@@ -188,7 +190,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	private boolean includeModules = false;
 
-	private final Map<Table, List<Object>> usedTables = new HashMap<Table, List<Object>>();
+	private final Map<ITable, List<Object>> usedTables = new HashMap<ITable, List<Object>>();
 
 	static
 	{
@@ -245,8 +247,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	public void dispose()
 	{
 		ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(true, this);
-		Set<Table> keySet = usedTables.keySet();
-		for (Table table : keySet)
+		Set<ITable> keySet = usedTables.keySet();
+		for (ITable table : keySet)
 		{
 			table.removeIColumnListener(this);
 		}
@@ -418,9 +420,20 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = createTables((IServerInternal)un.getRealObject());
 			}
-			else if (type == UserNodeType.INMEMORY_DATASOURCE)
+			else if (type == UserNodeType.INMEMORY_DATASOURCES)
 			{
-				lm = createTables((IServerInternal)un.getRealObject());
+				List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
+				IServerInternal server = (IServerInternal)un.getRealObject();
+				List<String> tableNames = server.getTableNames(true);
+				for (String tableName : tableNames)
+				{
+					UserNode node = new UserNode(tableName, UserNodeType.INMEMORY_DATASOURCE,
+						new DataSourceFeedback(DataSourceUtils.createInmemDataSource(tableName)), new InMemServerWrapper(tableName),
+						uiActivator.loadImageFromBundle("portal.gif"));
+					node.setClientSupport(ClientSupport.All);
+					dlm.add(node);
+				}
+				lm = dlm.toArray();
 			}
 			else if (type == UserNodeType.VIEWS && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
@@ -989,7 +1002,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				else
 				{
-					UserNode node = new UserNode(tableName, UserNodeType.TABLE, new TableFeedback(s.getName(), tableName),
+					UserNode node = new UserNode(tableName, UserNodeType.TABLE,
+						new DataSourceFeedback(DataSourceUtils.createDBTableDataSource(s.getName(), tableName)),
 						new TableWrapper(s.getName(), tableName, EditorUtil.isViewTypeTable(s.getName(), tableName)),
 						uiActivator.loadImageFromBundle("portal.gif"));
 					node.setClientSupport(ClientSupport.All);
@@ -1024,7 +1038,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return dlm.toArray();
 	}
 
-	private void genTableColumns(Table table, List<SimpleUserNode> dlm, UserNodeType type, Solution solution, Relation relation) throws RepositoryException
+	private void genTableColumns(ITable table, List<SimpleUserNode> dlm, UserNodeType type, Solution solution, Relation relation) throws RepositoryException
 	{
 		List<Object> tableUsers = usedTables.get(table);
 		if (tableUsers == null)
@@ -2081,20 +2095,17 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 	}
 
-	private static class TableFeedback implements IDeveloperFeedback
+	private static class DataSourceFeedback implements IDeveloperFeedback
 	{
-
-		private final String serverName;
-		private final String tableName;
+		private final String dataSource;
 
 		/**
 		 * @param name
 		 * @param tableName
 		 */
-		public TableFeedback(String serverName, String tableName)
+		public DataSourceFeedback(String dataSource)
 		{
-			this.serverName = serverName;
-			this.tableName = tableName;
+			this.dataSource = dataSource;
 		}
 
 		public String getSample()
@@ -2104,7 +2115,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		public String getCode()
 		{
-			return DataSourceUtilsBase.DB_DATASOURCE_SCHEME_COLON_SLASH + serverName + '/' + tableName;
+			return dataSource;
 		}
 
 		public String getToolTipText()

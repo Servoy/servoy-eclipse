@@ -51,6 +51,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -76,7 +77,7 @@ public class DataProviderEditingSupport extends EditingSupport
 			{
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.jface.viewers.ComboBoxCellEditor#doSetValue(java.lang.Object)
 				 */
 				@Override
@@ -161,7 +162,7 @@ public class DataProviderEditingSupport extends EditingSupport
 			int idx = items.indexOf(item);
 			if (re.canEditIndex(idx))
 			{
-				com.servoy.j2db.persistence.Table table = null;
+				ITable table = null;
 				if (index == RelationEditor.CI_FROM)
 				{
 					table = ((Relation)re.getPersist()).getPrimaryTable();
@@ -187,11 +188,12 @@ public class DataProviderEditingSupport extends EditingSupport
 					{
 						provider = DataProviderConverter.getDataProvider(flattenedEditingSolution, null, table, dataProviders[valueIndex.intValue()]);
 					}
-					DataProviderDialog dialog = new DataProviderDialog(re.getSite().getShell(), new SolutionContextDelegateLabelProvider(
-						DataProviderLabelProvider.INSTANCE_HIDEPREFIX, re.getPersist()), PersistContext.create(re.getPersist()), flattenedEditingSolution,
-						table, new DataProviderTreeViewer.DataProviderOptions(false, true, includeGlobalsAndCalcs, false, false, includeGlobalsAndCalcs, false,
-							false, INCLUDE_RELATIONS.NO, false, true, null), provider != null ? new StructuredSelection(provider) : null, SWT.NONE,
-						"Select Data Provider");
+					DataProviderDialog dialog = new DataProviderDialog(re.getSite().getShell(),
+						new SolutionContextDelegateLabelProvider(DataProviderLabelProvider.INSTANCE_HIDEPREFIX, re.getPersist()),
+						PersistContext.create(re.getPersist()), flattenedEditingSolution, table,
+						new DataProviderTreeViewer.DataProviderOptions(false, true, includeGlobalsAndCalcs, false, false, includeGlobalsAndCalcs, false, false,
+							INCLUDE_RELATIONS.NO, false, true, null),
+						provider != null ? new StructuredSelection(provider) : null, SWT.NONE, "Select Data Provider");
 					dialog.open();
 
 					if (dialog.getReturnCode() != Window.CANCEL)

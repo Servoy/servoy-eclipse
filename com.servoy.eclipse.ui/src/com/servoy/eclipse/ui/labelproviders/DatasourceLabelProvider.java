@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.labelproviders;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
+import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
@@ -74,6 +75,15 @@ public class DatasourceLabelProvider extends LabelProvider implements IDefaultIm
 			}
 			return tw.getTableName();
 		}
+		else if (value instanceof InMemServerWrapper)
+		{
+			if (((InMemServerWrapper)value).getTableName() != null)
+			{
+				if (fullyQualifiedName) return "In Memory/" + ((InMemServerWrapper)value).getTableName();
+				return ((InMemServerWrapper)value).getTableName();
+			}
+			return "In Memory";
+		}
 
 		return Messages.LabelUnresolved;
 	}
@@ -81,16 +91,28 @@ public class DatasourceLabelProvider extends LabelProvider implements IDefaultIm
 	@Override
 	public Image getImage(Object element)
 	{
-		if (showImage && !TableContentProvider.TABLE_NONE.equals(element) && element instanceof TableWrapper)
+		if (showImage && !TableContentProvider.TABLE_NONE.equals(element))
 		{
-			TableWrapper tw = ((TableWrapper)element);
-			if (tw.getTableName() == null)
+			if (element instanceof TableWrapper)
 			{
-				// server
-				return SERVER_IMAGE;
+				TableWrapper tw = ((TableWrapper)element);
+				if (tw.getTableName() == null)
+				{
+					// server
+					return SERVER_IMAGE;
+				}
+				if (tw.isView()) return VIEW_IMAGE;
+				return TABLE_IMAGE;
 			}
-			if (tw.isView()) return VIEW_IMAGE;
-			return TABLE_IMAGE;
+			else if (element instanceof InMemServerWrapper)
+			{
+				if (((InMemServerWrapper)element).getTableName() == null)
+				{
+					// server
+					return SERVER_IMAGE;
+				}
+				return TABLE_IMAGE;
+			}
 		}
 		return super.getImage(element);
 	}

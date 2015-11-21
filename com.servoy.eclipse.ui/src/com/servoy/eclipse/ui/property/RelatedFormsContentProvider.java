@@ -38,6 +38,7 @@ import com.servoy.eclipse.ui.util.IKeywordChecker;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -46,9 +47,9 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Content provider for forms with relations.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class RelatedFormsContentProvider extends CachingContentProvider implements ISearchKeyAdapter, IKeywordChecker
 {
@@ -58,7 +59,7 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 		 */
 		public int compare(Table o1, Table o2)
@@ -151,9 +152,9 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 		return list;
 	}
 
-	private final Map<Table, List<Relation>> relationCache = new HashMap<Table, List<Relation>>();
+	private final Map<ITable, List<Relation>> relationCache = new HashMap<ITable, List<Relation>>();
 
-	private List<Relation> getRelations(Table table) throws RepositoryException
+	private List<Relation> getRelations(ITable table) throws RepositoryException
 	{
 		List<Relation> list = relationCache.get(table);
 		if (list != null) return list;
@@ -331,7 +332,7 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.dialogs.ISearchKeyAdapter#getSearchKey(java.lang.Object)
 	 */
 	public Object getSearchKey(Object element)

@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -45,12 +46,14 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.Messages;
 import com.servoy.j2db.persistence.IActiveSolutionHandler;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServer;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -77,6 +80,52 @@ public abstract class AbstractServoyModel implements IServoyModel
 		Messages.customMessageLoader = messagesManager;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.extensions.IServoyModel#getDataSourceManager()
+	 */
+	@Override
+	public IDataSourceManager getDataSourceManager()
+	{
+		return new IDataSourceManager()
+		{
+
+			@Override
+			public ITable getDataSource(String dataSource)
+			{
+				String inMemTableName = DataSourceUtils.getInmemDataSourceName(dataSource);
+				if (inMemTableName != null)
+				{
+					try
+					{
+						return ServoyModelFinder.getServoyModel().getMemServer().getTable(inMemTableName);
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError("couldn't find in mem table for datasource: " + dataSource, e);
+					}
+				}
+				else
+				{
+					String[] dbServernameTablename = DataSourceUtils.getDBServernameTablename(dataSource);
+					if (dbServernameTablename != null)
+					{
+						try
+						{
+							return ApplicationServerRegistry.get().getServerManager().getServer(dbServernameTablename[0]).getTable(dbServernameTablename[1]);
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError("couldn't find in db table for datasource: " + dataSource, e);
+						}
+					}
+				}
+				return null;
+			}
+		};
+	}
+
 	public ServoyProject getActiveProject()
 	{
 		// if we would want to call autoSelectActiveProjectIfNull() here, it could generate a activeProjectChanged
@@ -87,7 +136,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 	/**
 	 * Returns the active resources project. This is the only resources project referenced by the current active project. Will return null if the active project
 	 * is null or if the number of resources projects referenced by the active project != 1.
-	 * 
+	 *
 	 * @return the active resources project.
 	 */
 	public ServoyResourcesProject getActiveResourcesProject()
@@ -109,9 +158,9 @@ public abstract class AbstractServoyModel implements IServoyModel
 	/**
 	 * Returns an array containing the modules of the active project (including the active project).
 	 * If there is no active project, will return an array of size 0.
-	 * 
+	 *
 	 * The result does not include the active solution's import hooks (which are not part of the flattened solution).
-	 * 
+	 *
 	 * @return an array containing the modules of the active project.
 	 * @see #getModulesOfActiveProjectWithImportHooks()
 	 */
@@ -210,7 +259,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 	/**
 	 * Gives the list of resource projects in the workspace. If you are looking for a resource project related to a solution project, please use
 	 * {@link #getActiveResourcesProject()} or {@link ServoyProject#getResourcesProject()} instead.
-	 * 
+	 *
 	 * @return the list of resource projects in the workspace.
 	 */
 	public ServoyResourcesProject[] getResourceProjects()
@@ -357,8 +406,8 @@ public abstract class AbstractServoyModel implements IServoyModel
 			}
 
 			@Override
-			protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef) throws RemoteException,
-				RepositoryException
+			protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef)
+				throws RemoteException, RepositoryException
 			{
 				return loadSolution(loginSolutionDef);
 			}
@@ -375,8 +424,8 @@ public abstract class AbstractServoyModel implements IServoyModel
 		try
 		{
 			ServoyProject[] modules = getModulesOfActiveProject();
-			SubMonitor monitor = SubMonitor.convert(m, "Building active solution...", 3 + ((activeResourcesProject != null) ? 7 : 0) +
-				((modules != null) ? modules.length * 10 : 0));
+			SubMonitor monitor = SubMonitor.convert(m, "Building active solution...",
+				3 + ((activeResourcesProject != null) ? 7 : 0) + ((modules != null) ? modules.length * 10 : 0));
 			ServoyBuilder.deleteAllBuilderMarkers();
 			monitor.internalWorked(3);
 			if (modules != null)

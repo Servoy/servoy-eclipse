@@ -101,7 +101,6 @@ public class EclipseSequenceProvider implements ISequenceProvider
 
 				IServerInternal tableServer = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(column.getTable().getServerName(),
 					false, true);
-				if (ApplicationServerRegistry.get().getServerManager().getMemServer().equals(tableServer)) return new Long(nextSequence);
 
 				QuerySelect select = SQLGenerator.createAggregateSelect(QueryAggregate.MAX, column.getTable(), column);
 

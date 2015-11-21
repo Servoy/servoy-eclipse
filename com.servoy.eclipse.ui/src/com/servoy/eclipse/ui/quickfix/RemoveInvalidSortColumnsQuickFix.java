@@ -28,6 +28,7 @@ import com.servoy.j2db.dataprocessing.FoundSetManager;
 import com.servoy.j2db.dataprocessing.SortColumn;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValueList;
@@ -61,7 +62,7 @@ public class RemoveInvalidSortColumnsQuickFix implements IMarkerResolution
 				{
 					IPersist persist = servoyProject.getEditingPersist(id);
 					String options = null;
-					Table table = null;
+					ITable table = null;
 					if (persist instanceof Relation)
 					{
 						options = ((Relation)persist).getInitialSort();

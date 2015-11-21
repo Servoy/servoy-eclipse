@@ -78,7 +78,7 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 			{
 				IServerInternal s = (IServerInternal)node.getRealObject();
 				state = (node.getType() == UserNodeType.SERVER) && (s.getConfig().isEnabled() && s.isValid()) ||
-					(node.getType() == UserNodeType.INMEMORY_DATASOURCE);
+					(node.getType() == UserNodeType.INMEMORY_DATASOURCES);
 			}
 		}
 		setEnabled(state);
@@ -145,7 +145,7 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 				MessageDialog.openError(UIUtils.getActiveShell(), "Error", e.getMessage());
 			}
 		}
-		else if (node.getType().equals(UserNodeType.INMEMORY_DATASOURCE))
+		else if (node.getType().equals(UserNodeType.INMEMORY_DATASOURCES))
 		{
 
 			final IServerInternal s = (IServerInternal)node.getRealObject();

@@ -63,7 +63,7 @@ import com.servoy.j2db.scripting.IExecutingEnviroment;
 /**
  * Class that resolves names in javascript like application or controller to a {@link Property} with a reference to the {@link Type} of that name.
  * It also lists all possible global names for the current context for the code completion to use.
- * 
+ *
  * @author jcompagner
  * @since 6.0
  */
@@ -344,7 +344,7 @@ public class ElementResolver implements IElementResolver
 			}
 			return null;
 		}
-		// some stuff that should just not report anything. 
+		// some stuff that should just not report anything.
 		if ("document".equals(name)) // dom model
 		{
 			Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
@@ -479,7 +479,7 @@ public class ElementResolver implements IElementResolver
 					deprecatedText = relation.getDeprecated();
 					try
 					{
-						description = TypeCreator.getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns());
+						description = TypeCreator.getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns(fs));
 					}
 					catch (RepositoryException e)
 					{

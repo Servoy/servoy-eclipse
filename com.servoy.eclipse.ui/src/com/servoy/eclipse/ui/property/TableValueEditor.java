@@ -18,11 +18,12 @@ package com.servoy.eclipse.ui.property;
 
 /**
  * IValueEditor for tables, opens table editor.
- * 
+ *
  * @author rgansevles
  */
 
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.editors.IValueEditor;
@@ -36,7 +37,7 @@ public class TableValueEditor implements IValueEditor<Object>
 
 	public void openEditor(Object value)
 	{
-		EditorUtil.openTableEditor(((TableWrapper)value).getServerName(), ((TableWrapper)value).getTableName());
+		EditorUtil.openTableEditor(((IDataSourceWrapper)value).getDataSource());
 	}
 
 	public boolean canEdit(Object value)

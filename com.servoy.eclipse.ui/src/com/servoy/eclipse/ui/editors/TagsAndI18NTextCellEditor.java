@@ -26,11 +26,11 @@ import com.servoy.eclipse.ui.dialogs.TagsAndI18NTextDialog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IApplication;
-import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.persistence.ITable;
 
 public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
 {
-	private final Table table;
+	private final ITable table;
 	private final String title;
 	private final IApplication application;
 	private final FlattenedSolution flattenedSolution;
@@ -38,7 +38,7 @@ public class TagsAndI18NTextCellEditor extends TextDialogCellEditor
 	private final boolean hideTags;
 
 	public TagsAndI18NTextCellEditor(Composite parent, PersistContext persistContext, FlattenedSolution flattenedSolution, ILabelProvider labelProvider,
-		Table table, String title, IApplication application, boolean hideTags)
+		ITable table, String title, IApplication application, boolean hideTags)
 	{
 		super(parent, SWT.NONE, labelProvider);
 		this.persistContext = persistContext;

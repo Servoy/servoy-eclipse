@@ -29,6 +29,7 @@ import com.servoy.eclipse.model.repository.EclipseSequenceProvider;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
@@ -79,14 +80,21 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 			dataModelManager = (activeResourcesProject != null ? new DataModelManager(activeResourcesProject.getProject(), sm) : null);
 			if (dataModelManager != null) sm.addGlobalColumnInfoProvider(dataModelManager);
 			sm.setGlobalSequenceProvider(dataModelManager != null ? new EclipseSequenceProvider(dataModelManager) : null);
-			((EclipseRepository)getActiveSolutionHandler().getRepository()).registerResourceMetaDatas(activeResourcesProject != null
-				? activeResourcesProject.getProject().getName() : null, IRepository.STYLES);
-			((EclipseRepository)getActiveSolutionHandler().getRepository()).registerResourceMetaDatas(activeResourcesProject != null
-				? activeResourcesProject.getProject().getName() : null, IRepository.TEMPLATES);
+			((EclipseRepository)getActiveSolutionHandler().getRepository()).registerResourceMetaDatas(
+				activeResourcesProject != null ? activeResourcesProject.getProject().getName() : null, IRepository.STYLES);
+			((EclipseRepository)getActiveSolutionHandler().getRepository()).registerResourceMetaDatas(
+				activeResourcesProject != null ? activeResourcesProject.getProject().getName() : null, IRepository.TEMPLATES);
 
 		}
-		((WorkspaceUserManager)ApplicationServerRegistry.get().getUserManager()).setResourcesProject(activeResourcesProject != null
-			? activeResourcesProject.getProject() : null); // this needs to always be done to refresh in case the main solution changed
+		((WorkspaceUserManager)ApplicationServerRegistry.get().getUserManager()).setResourcesProject(
+			activeResourcesProject != null ? activeResourcesProject.getProject() : null); // this needs to always be done to refresh in case the main solution changed
+	}
+
+	@Override
+	public IServerInternal getMemServer()
+	{
+		// does export need this?
+		return null;
 	}
 
 }

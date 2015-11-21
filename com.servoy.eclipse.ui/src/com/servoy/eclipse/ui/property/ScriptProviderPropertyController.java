@@ -34,32 +34,32 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.SafeArrayList;
 import com.servoy.j2db.util.ScopesUtils;
 
 /**
  * Property controller for String properties that are script names, subproperties are instance arguments
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class ScriptProviderPropertyController extends PropertyController<String, Object>
 {
 	public static final UnresolvedMethodWithArguments NONE = new UnresolvedMethodWithArguments(null);
 
 	private final PersistContext persistContext;
-	private final Table table;
+	private final ITable table;
 
-	public ScriptProviderPropertyController(String id, String displayName, Table table, PersistContext persistContext)
+	public ScriptProviderPropertyController(String id, String displayName, ITable table, PersistContext persistContext)
 	{
 		super(id, displayName);
 		this.table = table;
 		this.persistContext = persistContext;
-		setLabelProvider(new SolutionContextDelegateLabelProvider(new ScriptProviderCellEditor.ScriptDialog.ScriptDialogLabelProvider(persistContext, table,
-			true), persistContext.getContext()));
+		setLabelProvider(new SolutionContextDelegateLabelProvider(
+			new ScriptProviderCellEditor.ScriptDialog.ScriptDialogLabelProvider(persistContext, table, true), persistContext.getContext()));
 		setSupportsReadonly(true);
 	}
 
