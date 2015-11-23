@@ -91,7 +91,7 @@ public class GhostHandler implements IServerService
 		writer.object();
 		writer.key("ghostContainers");
 		writer.array();
-		editorPart.getForm().acceptVisitor(new IPersistVisitor()
+		ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm()).acceptVisitor(new IPersistVisitor()
 		{
 
 //			private String computeLegacyBeanGhostUUID(Bean bean, PropertyDescription pd, String simpleTypeName, int index)
