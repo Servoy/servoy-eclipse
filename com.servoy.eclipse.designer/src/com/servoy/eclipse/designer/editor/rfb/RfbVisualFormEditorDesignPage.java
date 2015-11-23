@@ -54,6 +54,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.DeleteAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.FixedSelectAllAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
@@ -454,7 +455,14 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	@Override
 	protected DeleteAction createDeleteAction()
 	{
-		return new DeleteAction(editorPart);
+		return new DeleteAction(editorPart)
+		{
+			@Override
+			public boolean calculateEnabled()
+			{
+				return super.calculateEnabled() && !DesignerUtil.containsInheritedElement(getSelectedObjects());
+			}
+		};
 	}
 
 	@Override
