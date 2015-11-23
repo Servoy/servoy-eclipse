@@ -562,6 +562,16 @@ public class CreateComponentHandler implements IServerService
 	protected IPersist createLayoutContainer(ISupportFormElements parent, WebLayoutSpecification layoutSpec, JSONObject config, int index,
 		WebComponentPackageSpecification<WebLayoutSpecification> specifications, String packageName) throws RepositoryException, JSONException
 	{
+		Iterator<IPersist> childContainersIte = parent.getObjects(IRepositoryConstants.LAYOUTCONTAINERS);
+		LayoutContainer sameTypeChildContainer = null;
+		while (childContainersIte.hasNext())
+		{
+			LayoutContainer childContainer = (LayoutContainer)childContainersIte.next();
+			if (layoutSpec.getName().equals(childContainer.getSpecName()))
+			{
+				sameTypeChildContainer = childContainer;
+			}
+		}
 		LayoutContainer container = (LayoutContainer)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(parent,
 			IRepository.LAYOUTCONTAINERS);
 		container.setSpecName(layoutSpec.getName());
@@ -597,7 +607,10 @@ public class CreateComponentHandler implements IServerService
 						}
 					}
 				} // children and layoutName are special
-				else if (!"layoutName".equals(key)) container.putAttribute(key, value.toString());
+				else if (!"layoutName".equals(key))
+				{
+					container.putAttribute(key, sameTypeChildContainer != null ? sameTypeChildContainer.getAttribute(key) : value.toString());
+				}
 			}
 		}
 		return container;
