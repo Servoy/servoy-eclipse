@@ -111,7 +111,16 @@ public class DesignerUtil
 			{
 				EditPart object = (EditPart)selectedEditParts.get(i);
 				EditPart parent = object.getParent();
-				if (parent != null && parent.getModel() instanceof IPersist && Utils.isInheritedFormElement(object.getModel(), (IPersist)parent.getModel())) return true;
+				if (parent != null && parent.getModel() instanceof IPersist && Utils.isInheritedFormElement(object.getModel(), (IPersist)parent.getModel()))
+					return true;
+			}
+		}
+		if (selectedEditParts != null && !selectedEditParts.isEmpty() && selectedEditParts.get(0) instanceof PersistContext)
+		{
+			for (int i = 0; i < selectedEditParts.size(); i++)
+			{
+				PersistContext persistContext = (PersistContext)selectedEditParts.get(i);
+				if (Utils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext())) return true;
 			}
 		}
 		return false;
