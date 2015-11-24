@@ -234,6 +234,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteTableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteWorkingSetAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DuplicatePersistAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DuplicateServerAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.EditDisplayNameAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EditI18nAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EditSecurityAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.EditVariableAction;
@@ -1519,6 +1520,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private ClientSupportViewerFilter clientSupportViewerFilter;
 	private ContextAction createActionInTree;
 	private ExportPackageResourceAction exportComponentPackage;
+	private EditDisplayNameAction editDisplayNameAction;
 
 	private void createTreeViewer(Composite parent)
 	{
@@ -2448,6 +2450,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (moveFormAction.isEnabled()) manager.add(moveFormAction);
 		if (duplicateFormAction.isEnabled()) manager.add(duplicateFormAction);
 		if (exportComponentPackage.isEnabled()) manager.add(exportComponentPackage);
+		if (editDisplayNameAction.isEnabled()) manager.add(editDisplayNameAction);
 		if (deleteActionInTree.isEnabled()) manager.add(deleteActionInTree);
 		if (renameActionInTree.isEnabled()) manager.add(renameActionInTree);
 
@@ -2790,7 +2793,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS, importComponent);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES, importService);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS_PACKAGE, newComponentAction);
-
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_PACKAGE, newServiceAction);
 
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA, importMediaFolder);
@@ -2885,6 +2887,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			UserNodeType.COMPONENTS_PACKAGE);
 		IAction deleteServicePackage = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete service package", UserNodeType.SERVICES_PACKAGE);
 		exportComponentPackage = new ExportPackageResourceAction(this, getSite().getShell());
+		editDisplayNameAction = new EditDisplayNameAction(this, getSite().getShell(), "Edit package display name");
 
 		IAction deleteComponent = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete component", UserNodeType.COMPONENT);
 		IAction deleteService = new DeleteComponentResourceAction(this, getSite().getShell(), "Delete service", UserNodeType.SERVICE);
@@ -3002,6 +3005,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		addTreeSelectionChangedListener(openSqlEditorAction);
 		addTreeSelectionChangedListener(duplicateFormAction);
 		addTreeSelectionChangedListener(exportComponentPackage);
+		addTreeSelectionChangedListener(editDisplayNameAction);
 		addTreeSelectionChangedListener(moveFormAction);
 		addTreeSelectionChangedListener(changeResourcesProjectAction);
 		addTreeSelectionChangedListener(removeSolutionProtectionAction);
