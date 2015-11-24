@@ -43,6 +43,7 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
 
 import com.servoy.base.persistence.IMobileProperties;
+import com.servoy.base.persistence.constants.IRepositoryConstants;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.DesignComponentFactory;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -1095,13 +1096,15 @@ public class ElementFactory
 			for (Entry<IPersist, String> entry : persists.entrySet())
 			{
 				String name = entry.getValue();
-				IPersist persist = entry.getKey();
+				final IPersist persist = entry.getKey();
 				if (name != null && persist instanceof ISupportUpdateableName)
 				{
 					((ISupportUpdateableName)persist).updateName(DummyValidator.INSTANCE, n == 0 ? name : (name + n));
 				}
 				if (awtLocation != null)
 				{
+					final ValidatorSearchContext nameSearchContext = new ValidatorSearchContext(persist.getAncestor(IRepositoryConstants.FORMS),
+						IRepository.ELEMENTS);
 					persist.acceptVisitor(new IPersistVisitor()
 					{
 						public Object visit(IPersist o)
@@ -1120,6 +1123,31 @@ public class ElementFactory
 									x = y = 0;
 								}
 								((ISupportBounds)o).setLocation(new java.awt.Point(awtLocation.x + x, awtLocation.y + y));
+							}
+							if (o instanceof ISupportUpdateableName)
+							{
+								ISupportUpdateableName supportsName = (ISupportUpdateableName)o;
+								if (supportsName.getName() != null)
+								{
+									IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
+									String[] parts = supportsName.getName().split("_");
+									String baseName = parts[0] + (parts.length > 1 ? "_" : "");
+									int n = parts.length > 1 ? Utils.getAsInteger(parts[1]) : 1;
+									String compName;
+									for (int i = n; i < n + 100; i++)
+									{
+										compName = baseName + i;
+										try
+										{
+											nameValidator.checkName(compName, -1, nameSearchContext, false);
+											supportsName.updateName(nameValidator, compName);
+											break;
+										}
+										catch (RepositoryException e)
+										{
+										}
+									}
+								}
 							}
 							return IPersistVisitor.CONTINUE_TRAVERSAL;
 						}
