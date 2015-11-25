@@ -249,7 +249,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	private void createDataPage()
 	{
-		if (com.servoy.eclipse.core.Activator.getDefault().isSqlExplorerLoaded())
+		if (com.servoy.eclipse.core.Activator.getDefault().isSqlExplorerLoaded() && DataSourceUtils.getDBServernameTablename(table.getDataSource()) != null)
 		{
 			addPage(800, dataComposite = new DataComposite(getContainer(), table), "Data");
 		}
