@@ -72,7 +72,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
-import com.servoy.j2db.persistence.I18NUtil;
+import com.servoy.j2db.persistence.I18NUtil.MessageEntry;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
@@ -367,24 +367,32 @@ public class MobileExporter
 				solutionModel.put("loginForm", flattenedSolution.getForm(solution.getLoginFormID()).getName());
 			}
 			I18NMessagesModel i18nModel = new I18NMessagesModel(solution.getI18nDataSource(), null, null, null, null);
+			// TODO why only german here?
 			// load default and german translations for now
 			i18nModel.setLanguage(Locale.GERMANY);
 			Map<String, I18NMessagesModelEntry> defaultProperties = i18nModel.getDefaultMap();
-			TreeMap<String, I18NUtil.MessageEntry> allI18nData = new TreeMap<String, I18NUtil.MessageEntry>();
+			TreeMap<String, String> allI18nData = new TreeMap<String, String>();
 			Iterator<Map.Entry<String, I18NMessagesModelEntry>> it = defaultProperties.entrySet().iterator();
 			while (it.hasNext())
 			{
 				Map.Entry<String, I18NMessagesModelEntry> entry = it.next();
 				if (entry.getKey().toLowerCase().startsWith(I18NProvider.MOBILE_KEY_PREFIX))
 				{
-					allI18nData.put("." + entry.getKey(), new I18NUtil.MessageEntry("", entry.getKey(), entry.getValue().defaultvalue));
-					allI18nData.put("de." + entry.getKey(), new I18NUtil.MessageEntry("de", entry.getKey(), entry.getValue().localeValue));
+					allI18nData.put("." + entry.getKey(), (entry.getValue().defaultvalue == null ? "" : entry.getValue().defaultvalue));
+					allI18nData.put("de." + entry.getKey(), (entry.getValue().localeValue == null ? "" : entry.getValue().localeValue));
 				}
 			}
 			if (solution.getI18nDataSource() != null)
 			{
 				EclipseMessages messagesManager = ServoyModelFinder.getServoyModel().getMessagesManager();
-				allI18nData.putAll(messagesManager.getDatasourceMessages(solution.getI18nDataSource()));
+				TreeMap<String, MessageEntry> allFromDataSource = messagesManager.getDatasourceMessages(solution.getI18nDataSource());
+				if (allFromDataSource != null)
+				{
+					for (Entry<String, MessageEntry> e : allFromDataSource.entrySet())
+					{
+						allI18nData.put(e.getKey(), e.getValue().getValue());
+					}
+				}
 			}
 			if (allI18nData.size() > 0)
 			{
