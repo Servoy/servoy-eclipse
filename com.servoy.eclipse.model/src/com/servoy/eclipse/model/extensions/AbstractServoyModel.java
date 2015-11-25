@@ -46,6 +46,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.Messages;
 import com.servoy.j2db.persistence.IActiveSolutionHandler;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RootObjectMetaData;
@@ -114,6 +115,39 @@ public abstract class AbstractServoyModel implements IServoyModel
 						try
 						{
 							return ApplicationServerRegistry.get().getServerManager().getServer(dbServernameTablename[0]).getTable(dbServernameTablename[1]);
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError("couldn't find in db table for datasource: " + dataSource, e);
+						}
+					}
+				}
+				return null;
+			}
+
+			@Override
+			public IServerInternal getServer(String dataSource)
+			{
+				String inMemTableName = DataSourceUtils.getInmemDataSourceName(dataSource);
+				if (inMemTableName != null)
+				{
+					try
+					{
+						return ServoyModelFinder.getServoyModel().getMemServer();
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError("couldn't find in mem table for datasource: " + dataSource, e);
+					}
+				}
+				else
+				{
+					String[] dbServernameTablename = DataSourceUtils.getDBServernameTablename(dataSource);
+					if (dbServernameTablename != null)
+					{
+						try
+						{
+							return (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(dbServernameTablename[0]);
 						}
 						catch (Exception e)
 						{

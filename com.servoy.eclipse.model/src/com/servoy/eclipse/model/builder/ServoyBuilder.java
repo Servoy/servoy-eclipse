@@ -73,6 +73,7 @@ import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.model.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
+import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.extensions.IMarkerAttributeContributor;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -5107,7 +5108,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		{
 			ServoyMarker mk = null;
 
-			IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
+			IDataSourceManager dsm = servoyModel.getDataSourceManager();
 			Iterator<Relation> it = servoyProject.getSolution().getRelations(false);
 			while (it.hasNext())
 			{
@@ -5156,7 +5157,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					element.setValid(true);//if is reload
 					try
 					{
-						IServerInternal pserver = (IServerInternal)sm.getServer(primaryServerName);
+						IServerInternal pserver = dsm.getServer(element.getPrimaryDataSource());
 						if (pserver == null)
 						{
 							mk = MarkerMessages.RelationPrimaryServerWithProblems.fill(element.getName(), primaryServerName);
@@ -5198,7 +5199,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 						}
 
-						IServerInternal fserver = (IServerInternal)sm.getServer(foreignServerName);
+						IServerInternal fserver = dsm.getServer(element.getForeignDataSource());
 						if (fserver == null)
 						{
 							mk = MarkerMessages.RelationForeignServerWithProblems.fill(element.getName(), foreignServerName);

@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.model.extensions;
 
+import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 
 /**
@@ -27,4 +28,6 @@ import com.servoy.j2db.persistence.ITable;
 public interface IDataSourceManager
 {
 	ITable getDataSource(String datasource);
+
+	IServerInternal getServer(String datasource);
 }
