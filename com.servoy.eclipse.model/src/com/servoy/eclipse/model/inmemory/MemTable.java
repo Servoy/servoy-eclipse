@@ -22,6 +22,7 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IColumnListener;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.util.DataSourceUtils;
 
 /**
  * @author gganea
@@ -114,7 +115,7 @@ public class MemTable extends AbstractTable
 	@Override
 	public String getDataSource()
 	{
-		return null;
+		return DataSourceUtils.createInmemDataSource(name);
 	}
 
 	/*
