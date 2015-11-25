@@ -1224,7 +1224,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 			}
 		}
-		if (IContentSpecConstants.PROPERTY_NG_READONLY_MODE.equals(propertyDescription.getName()))
+		if (propertyDescription != null && IContentSpecConstants.PROPERTY_NG_READONLY_MODE.equals(propertyDescription.getName()))
 		{
 			ComboboxPropertyModel<Boolean> model = new ComboboxPropertyModel<Boolean>(new Boolean[] { null, Boolean.TRUE, Boolean.FALSE },
 				new String[] { Messages.LabelDefault, "true", "false" });
