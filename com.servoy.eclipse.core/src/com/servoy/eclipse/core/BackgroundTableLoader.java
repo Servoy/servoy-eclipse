@@ -174,39 +174,41 @@ public class BackgroundTableLoader implements IActiveProjectListener
 			while (dataSource != null)
 			{
 				String[] serverAndTable = DataSourceUtils.getDBServernameTablename(dataSource);
-				if (serverAndTable == null) continue; // not a server/table datasource
-				IServer s = serverManager.getServer(serverAndTable[0], true, true);
-				if (s != null)
+				if (serverAndTable != null)
 				{
-					try
+					IServer s = serverManager.getServer(serverAndTable[0], true, true);
+					if (s != null)
 					{
-						synchronized (this)
+						try
 						{
-							while (paused)
-								wait();
-							if (s.getTable(serverAndTable[1]) == null) // loads all columns names as well - this is the main purpose
+							synchronized (this)
 							{
-								missingTablesUsedByActive = true;
-
-								// if there is a dbi file for this table - add a dbi marker as well (as it might be helpful to use quick-fixes to create the table used by solution)
-								DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
-								if (dmm != null && dmm.getDBIFile(dataSource).exists())
+								while (paused)
+									wait();
+								if (s.getTable(serverAndTable[1]) == null) // loads all columns names as well - this is the main purpose
 								{
-									dmm.updateMarkerStatesForMissingTable(null, serverAndTable[0], serverAndTable[1]);
+									missingTablesUsedByActive = true;
+
+									// if there is a dbi file for this table - add a dbi marker as well (as it might be helpful to use quick-fixes to create the table used by solution)
+									DataModelManager dmm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
+									if (dmm != null && dmm.getDBIFile(dataSource).exists())
+									{
+										dmm.updateMarkerStatesForMissingTable(null, serverAndTable[0], serverAndTable[1]);
+									}
 								}
 							}
 						}
+						catch (Exception e)
+						{
+							((IServerInternal)s).flagInvalid();
+							missingTablesUsedByActive = true;
+							Debug.error(e);
+						}
 					}
-					catch (Exception e)
+					else
 					{
-						((IServerInternal)s).flagInvalid();
 						missingTablesUsedByActive = true;
-						Debug.error(e);
 					}
-				}
-				else
-				{
-					missingTablesUsedByActive = true;
 				}
 				synchronized (this)
 				{
