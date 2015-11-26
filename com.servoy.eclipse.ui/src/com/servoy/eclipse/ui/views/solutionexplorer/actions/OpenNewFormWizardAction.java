@@ -29,7 +29,7 @@ import com.servoy.eclipse.ui.wizards.NewFormWizard;
 
 /**
  * Action for opening the new form wizard. It is only enabled on the active solution node if there is an active solution.
- * 
+ *
  * @author acostescu
  */
 public class OpenNewFormWizardAction extends OpenWizardAction implements ISelectionChangedListener
@@ -47,7 +47,8 @@ public class OpenNewFormWizardAction extends OpenWizardAction implements ISelect
 		if (state)
 		{
 			UserNodeType type = ((SimpleUserNode)sel.getFirstElement()).getType();
-			state = (type == UserNodeType.FORMS || type == UserNodeType.TABLE || type == UserNodeType.VIEW || type == UserNodeType.SOLUTION);
+			state = (type == UserNodeType.FORMS || type == UserNodeType.TABLE || type == UserNodeType.INMEMORY_DATASOURCE || type == UserNodeType.VIEW ||
+				type == UserNodeType.SOLUTION);
 		}
 		setEnabled(state);
 	}

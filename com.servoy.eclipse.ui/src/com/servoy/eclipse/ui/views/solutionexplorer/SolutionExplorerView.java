@@ -2906,6 +2906,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInListPrimary.registerAction(UserNodeType.MODULES, newModule);
 
 		newActionInListSecondary.registerAction(UserNodeType.TABLE, newForm);
+		newActionInListSecondary.registerAction(UserNodeType.INMEMORY_DATASOURCE, newForm);
 		newActionInListSecondary.registerAction(UserNodeType.VIEW, newForm);
 
 		openAction = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.gif"), "Open");
