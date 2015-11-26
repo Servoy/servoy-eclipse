@@ -759,7 +759,7 @@ public class Activator extends Plugin
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -944,7 +944,7 @@ public class Activator extends Plugin
 
 				/*
 				 * (non-Javadoc)
-				 *
+				 * 
 				 * @see com.servoy.j2db.IDesignerCallback#testAndStartDebugger()
 				 */
 				public void testAndStartDebugger()
@@ -1110,12 +1110,11 @@ public class Activator extends Plugin
 								IDebugClientHandler dch = getDebugClientHandler();
 								if (project != null)
 								{
-									dch.reloadDebugSolution(project.getSolution());
-									dch.reloadDebugSolutionSecurity();
+									dch.setSolution(project.getSolution());
 								}
 								else
 								{
-									dch.reloadDebugSolution(null);
+									dch.setSolution(null);
 								}
 							}
 						});
@@ -1207,7 +1206,7 @@ public class Activator extends Plugin
 												parent = parent.getParent();
 											}
 											if (parent instanceof Form && (((Form)parent).getView() == IFormConstants.VIEW_TYPE_TABLE ||
-												((Form)parent).getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED ||
+													((Form)parent).getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED ||
 												((Form)parent).getView() == IFormConstants.VIEW_TYPE_LIST ||
 												((Form)parent).getView() == IFormConstants.VIEW_TYPE_LIST_LOCKED))
 											{
@@ -1535,12 +1534,12 @@ public class Activator extends Plugin
 													monitor.beginTask("Updating...", IProgressMonitor.UNKNOWN);
 													updatedToVersion[0] = updateAppServerFromSerclipse(new File(appServerDir).getParentFile(), version,
 														ClientVersion.getReleaseNumber(), new ActionListener()
-													{
-														public void actionPerformed(ActionEvent e)
 														{
-															monitor.worked(1);
-														}
-													});
+															public void actionPerformed(ActionEvent e)
+															{
+																monitor.worked(1);
+															}
+														});
 												}
 												catch (Exception e)
 												{
