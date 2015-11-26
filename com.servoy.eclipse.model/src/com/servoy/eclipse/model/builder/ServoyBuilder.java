@@ -2360,7 +2360,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										if (!missingServers.containsKey(parentForm.getServerName()))
 										{
 											FlattenedSolution persistFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution);
-											IDataProvider dataProvider = persistFlattenedSolution.getDataProviderForTable(parentForm.getTable(), id);
+											IDataProvider dataProvider = persistFlattenedSolution.getDataProviderForTable(
+												servoyModel.getDataSourceManager().getDataSource(parentForm.getDataSource()), id);
 											if (dataProvider == null)
 											{
 												Form flattenedForm = persistFlattenedSolution.getFlattenedForm(o);
@@ -2767,7 +2768,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							Form form = (Form)o;
 							FlattenedSolution formFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(form, flattenedSolution);
-							Table table = null;
+							ITable table = null;
 							String path = form.getSerializableRuntimeProperty(IScriptProvider.FILENAME);
 							if (path != null && !path.endsWith(SolutionSerializer.getFileName(form, false)))
 							{
@@ -2778,7 +2779,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							{
 								try
 								{
-									table = form.getTable();
+									table = servoyModel.getDataSourceManager().getDataSource(form.getDataSource());
 									if (table != null && !table.getExistInDB())
 									{
 										// the table was probably deleted - update the form table as well

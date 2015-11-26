@@ -29,7 +29,7 @@ import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
@@ -49,12 +49,10 @@ import com.servoy.eclipse.ui.property.IPropertyConverter;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PropertyController;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
-import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyTypeConfig;
-import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
@@ -80,7 +78,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 	private ILabelProvider labelProvider;
 	protected final FoundsetDesignToChooserConverter designToChooserConverter;
 
-	private Table formTable;
+	private final ITable formTable;
 
 	public FoundsetPropertyController(Object id, String displayName, FlattenedSolution flattenedSolution, PersistContext persistContext,
 		FoundsetPropertyTypeConfig foundsetPropertyTypeConfig)
@@ -89,15 +87,8 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 		this.flattenedSolution = flattenedSolution;
 		this.persistContext = persistContext;
 		this.config = foundsetPropertyTypeConfig;
-
-		try
-		{
-			formTable = flattenedSolution.getFlattenedForm(persistContext.getPersist()).getTable();
-		}
-		catch (RepositoryException ex)
-		{
-			ServoyLog.logError(ex);
-		}
+		this.formTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
+			flattenedSolution.getFlattenedForm(persistContext.getPersist()).getDataSource());
 		designToChooserConverter = new FoundsetDesignToChooserConverter(flattenedSolution);
 	}
 
@@ -160,11 +151,11 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 		private final boolean hasDynamicDataproviders;
 
 		private final ComplexProperty<JSONObject> complexProperty;
-		private final Table formTable;
+		private final ITable formTable;
 		private final boolean isSeparateDatasource;
 
 		public FoundsetPropertySource(ComplexProperty<JSONObject> complexProperty, FlattenedSolution flattenedSolution, PersistContext persistContext,
-			String[] dataproviders, boolean hasDynamicDataproviders, Table formTable)
+			String[] dataproviders, boolean hasDynamicDataproviders, ITable formTable)
 		{
 			super(complexProperty);
 			this.complexProperty = complexProperty;
@@ -218,7 +209,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 			String foundsetSelector = v.optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
 			Relation[] relations = flattenedSolution.getRelationSequence(foundsetSelector);
 			final DataProviderOptions options;
-			Table baseTable = formTable;
+			ITable baseTable = formTable;
 
 			if (relations != null)
 			{
@@ -230,7 +221,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 				if (!"".equals(foundsetSelector))
 				{
 					// must be a separate/random dataSource then
-					baseTable = (Table)DataSourceUtils.getTable(foundsetSelector, flattenedSolution.getSolution(), ServoyModel.getServerManager());
+					baseTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(foundsetSelector);
 					if (baseTable == null)
 					{
 						ServoyLog.logInfo("Cannot find a table with datasource " + foundsetSelector +
@@ -249,7 +240,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 			DataProviderLabelProvider hidePrefix = new DataProviderLabelProvider(true);
 			hidePrefix.setConverter(converter);
 
-			final Table baseTableFinal = baseTable;
+			final ITable baseTableFinal = baseTable;
 			final ILabelProvider labelProviderHidePrefix = new SolutionContextDelegateLabelProvider(
 				new FormContextDelegateLabelProvider(hidePrefix, persistContext.getContext()));
 			PropertyController<String, String> propertyController = new PropertyController<String, String>(id, displayName, null, labelProviderHidePrefix,

@@ -25,7 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
@@ -37,7 +37,6 @@ import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.RepositoryException;
 
 /**
  * A cell editor that manages a dataprovider field.
@@ -81,20 +80,15 @@ public class DataProviderCellEditor extends DialogCellEditor
 	@Override
 	public Object openDialogBox(Control cellEditorWindow)
 	{
-		try
-		{
-			DataProviderDialog dialog = new DataProviderDialog(cellEditorWindow.getShell(), getLabelProvider(), PersistContext.create(form), flattenedSolution,
-				table != null ? table : flattenedSolution.getFlattenedForm(form).getTable(), input, getSelection(), SWT.NONE, "Select Data Provider");
-			dialog.open();
+		DataProviderDialog dialog = new DataProviderDialog(cellEditorWindow.getShell(), getLabelProvider(), PersistContext.create(form), flattenedSolution,
+			table != null ? table
+				: ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(flattenedSolution.getFlattenedForm(form).getDataSource()),
+			input, getSelection(), SWT.NONE, "Select Data Provider");
+		dialog.open();
 
-			if (dialog.getReturnCode() != Window.CANCEL)
-			{
-				return ((IStructuredSelection)dialog.getSelection()).getFirstElement(); // single select
-			}
-		}
-		catch (RepositoryException e)
+		if (dialog.getReturnCode() != Window.CANCEL)
 		{
-			ServoyLog.logError("Could not get table for form " + form, e);
+			return ((IStructuredSelection)dialog.getSelection()).getFirstElement(); // single select
 		}
 		return null;
 	}

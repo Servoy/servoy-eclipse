@@ -52,8 +52,8 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Table;
 
 /**
  * Editor for a foundset typed property (NG).
@@ -66,7 +66,7 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 
 	protected final FoundsetDesignToChooserConverter designToChooserConverter;
 
-	public FoundsetPropertyEditor(Composite parent, PersistContext persistContext, Table primaryTableForRelation, final Table foreignTableForRelation,
+	public FoundsetPropertyEditor(Composite parent, PersistContext persistContext, ITable primaryTableForRelation, final ITable foreignTableForRelation,
 		boolean isReadOnly, FoundsetDesignToChooserConverter designToChooserConverter)
 	{
 		super(parent, "Please select a foundset", getFoundsetContentProvider(persistContext),
@@ -157,7 +157,7 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 
 	}
 
-	protected static Object getFoundsetInputOptions(Table primaryTableForRelation, Table foreignTableForRelation)
+	protected static Object getFoundsetInputOptions(ITable primaryTableForRelation, ITable foreignTableForRelation)
 	{
 		// @formatter:off
 		return new CombinedTreeOptions(null, true,

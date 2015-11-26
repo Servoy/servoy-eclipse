@@ -27,7 +27,7 @@ import com.servoy.j2db.persistence.ITable;
  */
 public interface IDataSourceManager
 {
-	ITable getDataSource(String datasource);
+	ITable getDataSource(String dataSource);
 
-	IServerInternal getServer(String datasource);
+	IServerInternal getServer(String dataSource);
 }

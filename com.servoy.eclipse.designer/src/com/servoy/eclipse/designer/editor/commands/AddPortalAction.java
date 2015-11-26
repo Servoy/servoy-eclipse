@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
@@ -38,12 +39,12 @@ import com.servoy.eclipse.ui.views.PlaceFieldOptionGroup;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Table;
 
 /**
  * Action to add a portal in form designer, show selection dialog
- * 
+ *
  * @author rgansevles
  *
  */
@@ -66,10 +67,10 @@ public class AddPortalAction extends DesignerToolbarAction
 		}
 
 		FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
-		Table table = null;
+		ITable table = null;
 		try
 		{
-			table = editingFlattenedSolution.getFlattenedForm(form).getTable();
+			table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(editingFlattenedSolution.getFlattenedForm(form).getDataSource());
 			if (!editingFlattenedSolution.getRelations(table, true, false).hasNext())
 			{
 				org.eclipse.jface.dialogs.MessageDialog.openConfirm(getShell(), "Add Portal", "No relations are defined on form table " + table);
@@ -83,8 +84,9 @@ public class AddPortalAction extends DesignerToolbarAction
 		}
 
 		DataProviderDialog dialog = new DataProviderDialog(getShell(), DataProviderLabelProvider.INSTANCE_HIDEPREFIX, PersistContext.create(form),
-			editingFlattenedSolution, table, new DataProviderTreeViewer.DataProviderOptions(false, false, false, true, false, false, false, false,
-				INCLUDE_RELATIONS.NESTED, true, false, null), null, SWT.MULTI, "Select Data Providers");
+			editingFlattenedSolution, table,
+			new DataProviderTreeViewer.DataProviderOptions(false, false, false, true, false, false, false, false, INCLUDE_RELATIONS.NESTED, true, false, null),
+			null, SWT.MULTI, "Select Data Providers");
 		dialog.setOptionsAreaFactory(new IControlFactory()
 		{
 			public Control createControl(Composite composite)

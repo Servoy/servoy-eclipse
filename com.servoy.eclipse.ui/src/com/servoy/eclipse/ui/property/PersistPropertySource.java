@@ -80,6 +80,8 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.DesignComponentFactory;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.I18NMessagesUtil;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -1035,16 +1037,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.dataprovider && beanHandler.getPropertyType() == String.class)
 				{
 					// String property, select a data provider
-					Table table = null;
-					try
-					{
-						table = flattenedEditingSolution.getFlattenedForm(form).getTable();
-					}
-					catch (RepositoryException ex)
-					{
-						ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
-						return null;
-					}
+					ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
+						flattenedEditingSolution.getFlattenedForm(form).getDataSource());
 
 					INCLUDE_RELATIONS includeRelations;
 					if (Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeRelations)))
@@ -2653,20 +2647,20 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				{
 					foundsetValue = (String)((JSONObject)object).get(FoundsetPropertyType.FOUNDSET_SELECTOR);
 				}
+				IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
 				if (foundsetValue.equals(""))
 				{
-					table = flattenedEditingSolution.getFlattenedForm(form).getTable();
+					table = dsm.getDataSource(flattenedEditingSolution.getFlattenedForm(form).getDataSource());
 				}
 				else
 				{
 					if (DataSourceUtils.isDatasourceUri(foundsetValue))
 					{
-						ITable iTable = DataSourceUtils.getTable(foundsetValue, flattenedEditingSolution.getSolution(), null);
-						if (iTable instanceof Table) table = iTable;
+						table = dsm.getDataSource(foundsetValue);
 					}
 					else if (flattenedEditingSolution.getRelation(foundsetValue) != null)
 					{
-						table = flattenedEditingSolution.getRelation(foundsetValue).getForeignTable();
+						table = dsm.getDataSource(flattenedEditingSolution.getRelation(foundsetValue).getForeignDataSource());
 					}
 				}
 			}
@@ -2690,7 +2684,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 		if (propertyType instanceof DataproviderPropertyType)
 		{
-			Table table = null;
+			ITable table = null;
 			boolean listItemHeader = persistContext != null && persistContext.getPersist() instanceof AbstractBase &&
 				((AbstractBase)persistContext.getPersist()).getCustomMobileProperty(IMobileProperties.LIST_ITEM_HEADER.propertyName) != null;
 
@@ -2715,16 +2709,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			else
 			{
 				if (form == null) return null;
-				try
-				{
-					table = flattenedEditingSolution.getFlattenedForm(form).getTable();
-				}
-				catch (RepositoryException ex)
-				{
-					ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
-					return null;
-				}
-
+				table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
+					flattenedEditingSolution.getFlattenedForm(form).getDataSource());
 				options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, table != null, true, true, table != null,
 					table != null, INCLUDE_RELATIONS.NESTED, true, true, null);
 

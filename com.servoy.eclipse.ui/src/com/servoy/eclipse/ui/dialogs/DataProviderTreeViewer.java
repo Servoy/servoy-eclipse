@@ -45,6 +45,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
@@ -481,9 +482,10 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					((DataProviderNodeWrapper)parentElement).relations != null)
 				{
 					Relation relation = ((DataProviderNodeWrapper)parentElement).relations.getRelation();
-					if (relation.getForeignTable() != null)
+					ITable foreignTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(relation.getForeignDataSource());
+					if (foreignTable != null)
 					{
-						children = addTableColumns(children, relation.getForeignTable(), ((DataProviderNodeWrapper)parentElement).relations,
+						children = addTableColumns(children, foreignTable, ((DataProviderNodeWrapper)parentElement).relations,
 							options.includeRelatedCalculations);
 
 						// related calculations
@@ -503,12 +505,12 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 						// nested relations
 						if (options.includeRelations == INCLUDE_RELATIONS.NESTED && flattenedSolution != null)
 						{
-							List<Relation> tableRelations = relationsCache.get(relation.getForeignTable());
+							List<Relation> tableRelations = relationsCache.get(foreignTable);
 							if (tableRelations == null)
 							{
 								tableRelations = new ArrayList<Relation>();
 								Set<String> relationNames = new HashSet<String>();
-								Iterator<Relation> relations = flattenedSolution.getRelations(relation.getForeignTable(), true, true);
+								Iterator<Relation> relations = flattenedSolution.getRelations(foreignTable, true, true);
 								while (relations.hasNext())
 								{
 									Relation rel = relations.next();
@@ -522,7 +524,7 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 										tableRelations.add(rel);
 									}
 								}
-								relationsCache.put(relation.getForeignTable(), tableRelations);
+								relationsCache.put(foreignTable, tableRelations);
 							}
 							if (tableRelations.size() > 0)
 							{

@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
+import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.dialogs.I18NServerTableDialog;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
@@ -44,7 +45,7 @@ import com.servoy.j2db.persistence.ITable;
  * @author rgansevles
  */
 
-public class DatasourceController extends PropertyController<String, TableWrapper>
+public class DatasourceController extends PropertyController<String, IDataSourceWrapper>
 {
 	private final Object input;
 	private final String title;
@@ -59,7 +60,7 @@ public class DatasourceController extends PropertyController<String, TableWrappe
 	}
 
 	@Override
-	protected IPropertyConverter<String, TableWrapper> createConverter()
+	protected IPropertyConverter<String, IDataSourceWrapper> createConverter()
 	{
 		return new DatasourcePropertyConverter();
 	}

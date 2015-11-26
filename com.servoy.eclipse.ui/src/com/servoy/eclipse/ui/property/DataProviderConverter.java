@@ -16,6 +16,7 @@
 */
 package com.servoy.eclipse.ui.property;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.j2db.FlattenedSolution;
@@ -23,6 +24,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 
 /**
@@ -78,6 +80,19 @@ public class DataProviderConverter implements IPropertyConverter<String, IDataPr
 		}
 		if (dataProvider == null)
 		{
+			// TODO should this be done somewhere else? Should the DeveloperFlattendSolution be able to handle this?
+			int lastIndex = value.lastIndexOf('.');
+			Relation[] relationSequence = flattenedSolution.getRelationSequence(value.substring(0, lastIndex));
+			if (relationSequence != null && relationSequence.length > 0)
+			{
+				ITable foreignTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
+					relationSequence[relationSequence.length - 1].getForeignDataSource());
+				if (foreignTable != null)
+				{
+					return flattenedSolution.getDataProviderForTable(foreignTable, value.substring(lastIndex + 1));
+				}
+
+			}
 			return flattenedSolution.getGlobalDataProvider(value);
 		}
 		return dataProvider;

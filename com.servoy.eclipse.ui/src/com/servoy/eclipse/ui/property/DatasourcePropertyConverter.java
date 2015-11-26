@@ -17,25 +17,18 @@
 
 package com.servoy.eclipse.ui.property;
 
-import com.servoy.eclipse.model.util.TableWrapper;
-import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
+import com.servoy.eclipse.model.util.IDataSourceWrapper;
 
-public class DatasourcePropertyConverter implements IPropertyConverter<String, TableWrapper>
+public class DatasourcePropertyConverter implements IPropertyConverter<String, IDataSourceWrapper>
 {
-	public String convertValue(Object id, TableWrapper tw)
+	public String convertValue(Object id, IDataSourceWrapper tw)
 	{
-		return tw == null ? null : DataSourceUtils.createDBTableDataSource(tw.getServerName(), tw.getTableName());
+		return tw == null ? null : tw.getDataSource();
 	}
 
-	public TableWrapper convertProperty(Object id, String dataSource)
+	public IDataSourceWrapper convertProperty(Object id, String dataSource)
 	{
-		String[] servernameTablename = DataSourceUtils.getDBServernameTablename(dataSource);
-		if (servernameTablename == null)
-		{
-			return null;
-		}
-		return new TableWrapper(servernameTablename[0], servernameTablename[1], EditorUtil.isViewTypeTable(servernameTablename[0],
-			servernameTablename[1]));
+		return DataSourceWrapperFactory.getWrapper(dataSource);
 	}
 }
