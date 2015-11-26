@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.ui.wizards;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,12 +58,14 @@ import org.json.JSONObject;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IFormConstants;
-import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
+import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Activator;
@@ -98,17 +99,15 @@ import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
-import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Style;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
-import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
@@ -260,9 +259,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 			settings.put("fillName", dataProviderWizardPage.optionsGroup.isFillName());
 		}
 
-		TableWrapper tw = newFormWizardPage.getTableWrapper();
-		settings.put("servername", tw == null ? null : tw.getServerName());
-		settings.put("tablename", tw == null ? null : tw.getTableName());
+		IDataSourceWrapper tw = newFormWizardPage.getTableWrapper();
+		settings.put("datasource", tw == null ? null : tw.getDataSource());
 		Style style = newFormWizardPage.getStyle();
 		settings.put("style", style == null ? null : style.getName());
 		Template template = newFormWizardPage.getTemplate();
@@ -286,7 +284,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 		try
 		{
 			// create empty form
-			String dataSource = DataSourceUtils.createDBTableDataSource(newFormWizardPage.getServerName(), newFormWizardPage.getTableName());
+			String dataSource = newFormWizardPage.getDataSource();
 			Form form = servoyProject.getEditingSolution().createNewForm(servoyModel.getNameValidator(), style, newFormWizardPage.getFormName(), dataSource,
 				true, null);
 			// use superform selected by user
@@ -337,16 +335,16 @@ public class NewFormWizard extends Wizard implements INewWizard
 			if (superForm != null) form.setExtendsID(superForm.getID());
 			// add selected data providers
 			DesignerPreferences designerPreferences = new DesignerPreferences();
-			if (dataProviderWizardPage != null  && !form.isResponsiveLayout())
+			if (dataProviderWizardPage != null && !form.isResponsiveLayout())
 			{
 				Object[] dataProviders = dataProviderWizardPage.getDataProviders();
 				if (dataProviders != null && dataProviders.length > 0)
 				{
 					ElementFactory.createFields(form, dataProviders, dataProviderWizardPage.optionsGroup.isPlaceAsLabels(),
 						dataProviderWizardPage.optionsGroup.isPlaceWithLabels(), dataProviderWizardPage.optionsGroup.isPlaceHorizontal(),
-						dataProviderWizardPage.optionsGroup.isFillText(), dataProviderWizardPage.optionsGroup.isFillName(), designerPreferences.getGridSnapTo()
-							? new SnapToGridFieldPositioner(designerPreferences) : null, dataProviderWizardPage.optionsGroup.isPlaceHorizontal() ? new Point(0,
-							0) : new Point(60, 70));
+						dataProviderWizardPage.optionsGroup.isFillText(), dataProviderWizardPage.optionsGroup.isFillName(),
+						designerPreferences.getGridSnapTo() ? new SnapToGridFieldPositioner(designerPreferences) : null,
+						dataProviderWizardPage.optionsGroup.isPlaceHorizontal() ? new Point(0, 0) : new Point(60, 70));
 
 					if (dataProviderWizardPage.optionsGroup.isPlaceHorizontal())
 					{
@@ -439,7 +437,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			settings.put("tablename", tableWrapper.getTableName());
 		}
 
-		private TableWrapper getTableWrapper()
+		private IDataSourceWrapper getTableWrapper()
 		{
 			IStructuredSelection selection = (IStructuredSelection)dataSourceViewer.getSelection();
 			if (selection.isEmpty())
@@ -451,19 +449,25 @@ public class NewFormWizard extends Wizard implements INewWizard
 			{
 				return null;
 			}
-			return (TableWrapper)sel;
+			return (IDataSourceWrapper)sel;
 		}
 
 		public String getTableName()
 		{
-			TableWrapper tw = getTableWrapper();
+			IDataSourceWrapper tw = getTableWrapper();
 			return tw == null ? null : tw.getTableName();
 		}
 
 		public String getServerName()
 		{
-			TableWrapper tw = getTableWrapper();
+			IDataSourceWrapper tw = getTableWrapper();
 			return tw == null ? null : tw.getServerName();
+		}
+
+		public String getDataSource()
+		{
+			IDataSourceWrapper tw = getTableWrapper();
+			return tw == null ? null : tw.getDataSource();
 		}
 
 		public String getFormName()
@@ -683,35 +687,38 @@ public class NewFormWizard extends Wizard implements INewWizard
 			});
 
 			final GroupLayout groupLayout = new GroupLayout(topLevel);
-			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-				groupLayout.createSequentialGroup().addContainerGap().add(
-					groupLayout.createParallelGroup(GroupLayout.LEADING).add(formNameLabel).add(extendsLabel).add(datasourceLabel).add(projectLabel).add(
-						styleLabel).add(templateLabel).add(listFormLabel)).add(15, 15, 15).add(
-					groupLayout.createParallelGroup(GroupLayout.LEADING).add(listFormCheck, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
-						projectComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(templateNameComboControl, GroupLayout.DEFAULT_SIZE, 159,
-						Short.MAX_VALUE).add(styleNameComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(extendsFormControl,
-						GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(dataSOurceControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
-						groupLayout.createSequentialGroup().add(formNameField, GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE).addPreferredGap(
-							LayoutStyle.RELATED))).addContainerGap()));
+			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(formNameLabel).add(extendsLabel).add(datasourceLabel).add(projectLabel).add(
+					styleLabel).add(templateLabel).add(listFormLabel)).add(15,
+						15,
+						15).add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(listFormCheck, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
+							projectComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(templateNameComboControl, GroupLayout.DEFAULT_SIZE, 159,
+								Short.MAX_VALUE).add(styleNameComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(extendsFormControl,
+									GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(dataSOurceControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
+										groupLayout.createSequentialGroup().add(formNameField, GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE).addPreferredGap(
+											LayoutStyle.RELATED))).addContainerGap()));
 			groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-				groupLayout.createSequentialGroup().addContainerGap().add(
-					groupLayout.createParallelGroup(GroupLayout.CENTER).add(formNameLabel).add(formNameField, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.CENTER).add(
-						groupLayout.createSequentialGroup().addPreferredGap(LayoutStyle.RELATED).add(dataSOurceControl)).add(datasourceLabel)).addPreferredGap(
-					LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.CENTER).add(extendsLabel).add(extendsFormControl, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.CENTER).add(styleNameComboControl, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-						GroupLayout.PREFERRED_SIZE).add(styleLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.CENTER).add(templateNameComboControl, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-						GroupLayout.PREFERRED_SIZE).add(templateLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.CENTER).add(projectLabel).add(projectComboControl, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.CENTER).add(listFormLabel).add(listFormCheck, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addContainerGap(100, Short.MAX_VALUE)));
+				groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.CENTER).add(formNameLabel).add(
+					formNameField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+						groupLayout.createParallelGroup(GroupLayout.CENTER).add(
+							groupLayout.createSequentialGroup().addPreferredGap(LayoutStyle.RELATED).add(dataSOurceControl)).add(
+								datasourceLabel)).addPreferredGap(LayoutStyle.RELATED).add(
+									groupLayout.createParallelGroup(GroupLayout.CENTER).add(extendsLabel).add(extendsFormControl, GroupLayout.PREFERRED_SIZE,
+										GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+											groupLayout.createParallelGroup(GroupLayout.CENTER).add(styleNameComboControl, GroupLayout.PREFERRED_SIZE,
+												GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(styleLabel)).addPreferredGap(LayoutStyle.RELATED).add(
+													groupLayout.createParallelGroup(GroupLayout.CENTER).add(templateNameComboControl,
+														GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
+															templateLabel)).addPreferredGap(LayoutStyle.RELATED).add(
+																groupLayout.createParallelGroup(GroupLayout.CENTER).add(projectLabel).add(projectComboControl,
+																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																	GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+																		groupLayout.createParallelGroup(GroupLayout.CENTER).add(listFormLabel).add(
+																			listFormCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																			GroupLayout.PREFERRED_SIZE)).addContainerGap(100, Short.MAX_VALUE)));
 			topLevel.setLayout(groupLayout);
-			topLevel.setTabList(new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl, listFormCheck });
+			topLevel.setTabList(
+				new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl, listFormCheck });
 
 			if (superForm != null)
 			{
@@ -730,8 +737,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 		{
 			extendsFormViewer.setContentProvider(new FormContentProvider(flattenedSolution, null));
 			extendsFormViewer.setInput(new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false));
-			extendsFormViewer.setLabelProvider(new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedSolution, true),
-				flattenedSolution.getSolution()));
+			extendsFormViewer.setLabelProvider(
+				new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedSolution, true), flattenedSolution.getSolution()));
 		}
 
 		/*
@@ -744,12 +751,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 			if (visible)
 			{
 				IDialogSettings settings = getDialogSettings();
-				String serverName = settings.get("servername");
-				String tableName = settings.get("tablename");
-				if (!Utils.stringIsEmpty(serverName) && !Utils.stringIsEmpty(tableName) && dataSourceViewer.getSelection().isEmpty())
+				String datasource = settings.get("datasource");
+				if (!Utils.stringIsEmpty(datasource) && dataSourceViewer.getSelection().isEmpty())
 				{
-					dataSourceViewer.setSelection(new StructuredSelection(new TableWrapper(serverName, tableName, EditorUtil.isViewTypeTable(serverName,
-						tableName))));
+					dataSourceViewer.setSelection(new StructuredSelection(DataSourceWrapperFactory.getWrapper(datasource)));
 				}
 
 				String styleName = settings.get("style");
@@ -879,7 +884,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			{
 				if (!formNameTyped)
 				{
-					TableWrapper tw = getTableWrapper();
+					IDataSourceWrapper tw = getTableWrapper();
 					if (tw != null)
 					{
 						setFormName(tw.getTableName());
@@ -910,8 +915,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			else
 			{
 				// if selected prefill table and style
-				dataSourceViewer.setSelection(new StructuredSelection(new TableWrapper(superForm.getServerName(), superForm.getTableName(),
-					EditorUtil.isViewTypeTable(superForm.getServerName(), superForm.getTableName()))));
+				dataSourceViewer.setSelection(new StructuredSelection(DataSourceWrapperFactory.getWrapper(superForm.getDataSource())));
 				dataSourceViewer.setEditable(false);
 				styleNameCombo.setSelection(new StructuredSelection(superForm.getStyleName() == null ? "" : superForm.getStyleName()));
 			}
@@ -934,10 +938,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 					// dataSource
 					if (formObject.has(StaticContentSpecLoader.PROPERTY_DATASOURCE.getPropertyName()))
 					{
-						String[] stn = DataSourceUtilsBase.getDBServernameTablename(formObject.getString(StaticContentSpecLoader.PROPERTY_DATASOURCE.getPropertyName()));
-						if (stn != null)
+						IDataSourceWrapper wrapper = DataSourceWrapperFactory.getWrapper(
+							formObject.getString(StaticContentSpecLoader.PROPERTY_DATASOURCE.getPropertyName()));
+						if (wrapper != null)
 						{
-							dataSourceViewer.setSelection(new StructuredSelection(new TableWrapper(stn[0], stn[1], EditorUtil.isViewTypeTable(stn[0], stn[1]))));
+							dataSourceViewer.setSelection(new StructuredSelection(wrapper));
 						}
 					}
 
@@ -1097,10 +1102,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 			topLevel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
 			setControl(topLevel);
-			treeViewer = new DataProviderTreeViewer(topLevel, DataProviderLabelProvider.INSTANCE_HIDEPREFIX,// label provider will be overwritten when superform is known
-				new DataProviderContentProvider(null, servoyProject.getEditingFlattenedSolution(), null), new DataProviderTreeViewer.DataProviderOptions(false,
-					true, true, true, true, true, true, true, INCLUDE_RELATIONS.NESTED, true, true, null), true, true, TreePatternFilter.getSavedFilterMode(
-					getDialogSettings(), TreePatternFilter.FILTER_LEAFS), SWT.MULTI);
+			treeViewer = new DataProviderTreeViewer(topLevel, DataProviderLabelProvider.INSTANCE_HIDEPREFIX, // label provider will be overwritten when superform is known
+				new DataProviderContentProvider(null, servoyProject.getEditingFlattenedSolution(), null),
+				new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true, true, true, true, INCLUDE_RELATIONS.NESTED, true, true, null),
+				true, true, TreePatternFilter.getSavedFilterMode(getDialogSettings(), TreePatternFilter.FILTER_LEAFS), SWT.MULTI);
 
 			IDialogSettings settings = NewFormWizard.this.getDialogSettings();
 			final boolean isPlaceHorizontal = settings.getBoolean("placeHorizontal");
@@ -1149,28 +1154,12 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 		public void fillDataproviderTree()
 		{
-			try
-			{
-				IServer server = ServoyModel.getDeveloperRepository().getServer(newFormWizardPage.getServerName());
-				Table table = null;
-				if (server != null)
-				{
-					table = (Table)server.getTable(newFormWizardPage.getTableName());
-				}
-				Form superForm = newFormWizardPage.getSuperForm();
-				((DataProviderContentProvider)treeViewer.getContentProvider()).setTable(table, PersistContext.create(superForm));
-				treeViewer.setLabelProvider(new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(
-					DataProviderLabelProvider.INSTANCE_HIDEPREFIX, superForm)));
-				treeViewer.refreshTree();
-			}
-			catch (RemoteException e)
-			{
-				ServoyLog.logError("Could not get data source for new form", e);
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError("Could not get data source for new form", e);
-			}
+			ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(newFormWizardPage.getDataSource());
+			Form superForm = newFormWizardPage.getSuperForm();
+			((DataProviderContentProvider)treeViewer.getContentProvider()).setTable(table, PersistContext.create(superForm));
+			treeViewer.setLabelProvider(
+				new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(DataProviderLabelProvider.INSTANCE_HIDEPREFIX, superForm)));
+			treeViewer.refreshTree();
 		}
 
 		private boolean validatePage()
