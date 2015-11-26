@@ -137,6 +137,20 @@ public class EditorServiceHandler implements IServerService
 				return null;
 			}
 		});
+
+		configuredHandlers.put("toggleShowWireframe", new IServerService()
+		{
+
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				Activator.getDefault().toggleShowWireframe();
+				return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_WIREFRAME_IN_ANGULAR_DESIGNER)
+					? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_WIREFRAME_IN_ANGULAR_DESIGNER)) : Boolean.FALSE;
+			}
+
+		});
+
 		configuredHandlers.put("getBooleanState", new IServerService()
 		{
 
@@ -150,6 +164,12 @@ public class EditorServiceHandler implements IServerService
 					{
 						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_DATA_IN_ANGULAR_DESIGNER)
 							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_DATA_IN_ANGULAR_DESIGNER)) : Boolean.TRUE;
+					}
+					if (args.has("showWireframe"))
+					{
+						return Activator.getDefault().getPreferenceStore().contains(Activator.SHOW_WIREFRAME_IN_ANGULAR_DESIGNER)
+							? Boolean.valueOf(Activator.getDefault().getPreferenceStore().getBoolean(Activator.SHOW_WIREFRAME_IN_ANGULAR_DESIGNER))
+							: Boolean.FALSE;
 					}
 
 				}

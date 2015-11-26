@@ -122,6 +122,7 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 				if (!dragging) {
 					if ( Math.abs(dragStartEvent.screenX- event.screenX) > 5  || Math.abs(dragStartEvent.screenY- event.screenY) > 5) {
 						dragging = true;
+						utils.setDraggingFromPallete(true);
 					}
 					else return;
 				}
@@ -165,7 +166,7 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 						var type = "component";
 						var layoutName = selectionToDrag[0].getAttribute("svy-layoutname");
 						if (layoutName) type = "layout"
-						utils.setDraggingFromPallete(type);
+						
 						var topContainer = null;
 						var canDrop = utils.getDropNode(type, topContainer,layoutName,event);
 						if (!canDrop.dropAllowed) {

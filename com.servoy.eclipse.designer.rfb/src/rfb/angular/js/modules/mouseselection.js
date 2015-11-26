@@ -245,42 +245,22 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					return {dropAllowed:true,dropTarget:dropTarget};
 				},
 
-				toggleDesignMode: function()
-				{
-					designMode = !designMode;
-					this.updateDesignMode(designMode);
-					return designMode;
-				},
 				updateDesignMode: function(design)
 				{
 					if (!editorScope.isAbsoluteFormLayout())
 					{
-						$(editorScope.contentDocument).find("div[svy-designclass]").each(function() {
-							var designClass = $(this).attr('svy-designclass');
-							if (design)
-							{
-								$(this).addClass(designClass );
-							}
-							else
-							{
-								$(this).removeClass(designClass );
-							}
-						});
-						editorScope.refreshEditorContent();
-					}
-				},
-				refreshDesignMode: function()
-				{
-					if(designMode) {
-						this.updateDesignMode(true);
+					    if (design) {
+						designMode = editorScope.getEditorContentRootScope().showWireframe;
+						editorScope.getEditorContentRootScope().showWireframe = true;
+					    }
+					    else
+						editorScope.getEditorContentRootScope().showWireframe = designMode;
+					    editorScope.getEditorContentRootScope().$digest();
 					}
 				},
 				setDraggingFromPallete: function(dragging){
 					draggingFromPallete = dragging;
-					if (!designMode)
-					{
-						this.updateDesignMode(dragging != null);
-					}
+					this.updateDesignMode(dragging != null);
 				},
 				getDraggingFromPallete: function(){
 					return draggingFromPallete;

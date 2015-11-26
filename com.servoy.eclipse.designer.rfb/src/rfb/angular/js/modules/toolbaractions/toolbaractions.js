@@ -23,6 +23,12 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 		promise.then(function (result){
 			btnToggleShowData.state = result;
 		});
+		var wireframePromise  =  $editorService.isShowWireframe();
+		wireframePromise.then(function (result){
+		    btnToggleDesignMode.state = result;
+		    editorScope.getEditorContentRootScope().showWireframe = result;
+		    editorScope.getEditorContentRootScope().$digest();
+		});
 	});
 	var btnPlaceField = {
 			text: "Place Field Wizard",
@@ -111,7 +117,12 @@ angular.module('toolbaractions',['toolbar','editor']).run(function($rootScope, $
 			enabled: true,
 			state: false,
 			onclick: function() {
-				this.state = utils.toggleDesignMode();
+			    	var promise = $editorService.toggleShowWireframe();
+			    	promise.then(function(result){
+			    	    btnToggleDesignMode.state = result;
+			    	    editorScope.getEditorContentRootScope().showWireframe = result;
+				    editorScope.getEditorContentRootScope().$digest();
+			    	});
 			},
 	};
 
