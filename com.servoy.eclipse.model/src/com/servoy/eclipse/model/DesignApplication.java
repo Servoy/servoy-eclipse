@@ -134,7 +134,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.j2db.IApplication#updateUI(int)
 	 */
 	public void updateUI(int time)
@@ -164,7 +164,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.j2db.IApplication#getOSName()
 	 */
 	public String getClientOSName()
@@ -267,95 +267,95 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 				String servoyMobileStyle = //
 
 				"label, label.a, label.b, label.c, label.d, label.e {"//
-					+ "color: #101010;" //
+				+ "color: #101010;" //
 					+ "margin-left:5px;" //
 					+ "background-color: #414141;" //
 					+ "}"//
 
-					+ "headertext, headertext.a {"//
+				+ "headertext, headertext.a {"//
 					+ "color: #ffffff;" //
 					+ "background-color: #414141;" //
 					+ "font-weight:bold;" //
 					+ "}"//
 
-					+ "field {"//
+				+ "field {"//
 					+ "color: #101010;" //
 					+ "background-color: #F9F9F9;" //
 					+ "}"//
 
-					+ "button, button.a, combobox.a, check.a, radio.a, portal.a {"//
+				+ "button, button.a, combobox.a, check.a, radio.a, portal.a {"//
 					+ "color: #FFFFFF;" //
 					+ "background-color: #414141;" + "font-weight:bold;" //
 					+ "}"//
 
-					+ "header, header.a, footer.a,  title_header, title_header.a, title_footer.a {" //
+				+ "header, header.a, footer.a,  title_header, title_header.a, title_footer.a {" //
 					+ "background-color: #262626;" //
 					+ "}" //
 
-					+ "headertext.b {"//
+				+ "headertext.b {"//
 					+ "color: #ffffff;" //
 					+ "background-color: #4C83B1;" //
 					+ "font-weight:bold;" //
 					+ "}" //
 
-					+ "button.b, combobox.b, check.b, radio.b, portal.b {"//
+				+ "button.b, combobox.b, check.b, radio.b, portal.b {"//
 					+ "color: #FFFFFF;" //
 					+ "background-color: #4C83B1;" //
 					+ "font-weight:bold;" //
 					+ "}" //
 
-					+ "header.b, footer.b, title_header.b, title_footer.b {" //
+				+ "header.b, footer.b, title_header.b, title_footer.b {" //
 					+ "background-color: #5A91BF;" //
 					+ "}" //
 
-					+ "headertext.c {"//
+				+ "headertext.c {"//
 					+ "color: #101010;" //
 					+ "background-color: #4C83B1;" //
 					+ "font-weight:bold;" //
 					+ "}" //
 
-					+ "button.c, combobox.c, check.c, radio.c, portal.c {" //
+				+ "button.c, combobox.c, check.c, radio.c, portal.c {" //
 					+ "color: #363636;" //
 					+ "background-color: #F6F6F6;"//
 					+ "font-weight:bold;" //
 					+ "}"//
 
-					+ "header.c, footer.c, title_header.c, title_footer.c {" //
+				+ "header.c, footer.c, title_header.c, title_footer.c {" //
 					+ "background-color: #E4E4E4;" //
 					+ "}" //
 
-					+ "headertext.d {"//
+				+ "headertext.d {"//
 					+ "color: #101010;" //
 					+ "background-color: #4C83B1;" //
 					+ "font-weight:bold;" //
 					+ "}" //
 
-					+ "button.d, combobox.d, check.d, radio.d, portal.d {" //
+				+ "button.d, combobox.d, check.d, radio.d, portal.d {" //
 					+ "color: #363636;" //
 					+ "background-color: #F8F8F8;" //
 					+ "font-weight:bold;" //
 					+ "}"//
 
-					+ "header.d, footer.d, title_header.d, title_footer.d {" //
+				+ "header.d, footer.d, title_header.d, title_footer.d {" //
 					+ "background-color: #C7C7C7;" //
 					+ "}" //
 
-					+ "headertext.e {"//
+				+ "headertext.e {"//
 					+ "color: #101010;" //
 					+ "background-color: #4C83B1;" //
 					+ "font-weight:bold;" //
 					+ "}" //
 
-					+ "button.e, combobox.e, check.e, radio.e, portal.e {" //
+				+ "button.e, combobox.e, check.e, radio.e, portal.e {" //
 					+ "color: #363636;" //
 					+ "background-color: #FFE87C;" //
 					+ "font-weight:bold;" //
 					+ "}" //
 
-					+ "header.e, footer.e, title_header.e, title_footer.e {" //
+				+ "header.e, footer.e, title_header.e, title_footer.e {" //
 					+ "background-color: #FBEE90;" //
 					+ "}" //
-				;
+					;
 				flattenedSolution.createStyle("_servoy_mobile", servoyMobileStyle);
 			}
 		}
@@ -381,6 +381,12 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 				{
 					foundSetManager = new FoundSetManager(this, new SwingFoundSetFactory())
 					{
+						@Override
+						public ITable getTable(String dataSource) throws RepositoryException
+						{
+							return ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(dataSource);
+						}
+
 						@Override
 						public IGlobalValueEntry getScopesScopeProvider()
 						{
@@ -758,7 +764,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.j2db.IServiceProvider#isSolutionLoaded()
 	 */
 	public boolean isSolutionLoaded()
@@ -1201,7 +1207,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.j2db.IApplication#setValueListItems(java.lang.String, java.lang.Object[], java.lang.Object[], boolean)
 	 */
 	public void setValueListItems(String name, Object[] displayValues, Object[] realValues, boolean autoconvert)
