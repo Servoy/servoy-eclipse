@@ -78,6 +78,7 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.StringMatcher;
 import com.servoy.eclipse.ui.editors.table.ColumnLabelProvider;
@@ -90,7 +91,6 @@ import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
@@ -101,7 +101,7 @@ import com.servoy.j2db.util.ScopesUtils;
 
 /**
  * Wizard to suggest foreign types for a column.
- * 
+ *
  * @author gersze
  *
  */
@@ -133,7 +133,7 @@ public class SuggestForeignTypesWizard extends Wizard
 	private String[] allTableNames;
 	private String[] arrayNamesWithEmptyEntry;
 
-	private IServer server = null;
+	private IServerInternal server = null;
 	private ForeignTypeSuggestionData data;
 
 	boolean listOnlyChangedColumns = true;
@@ -151,7 +151,7 @@ public class SuggestForeignTypesWizard extends Wizard
 	{
 		setWindowTitle("Suggest Foreign Types");
 		ServoyModelManager.getServoyModelManager().getServoyModel();
-		server = ServoyModel.getServerManager().getServer(serverName);
+		server = ServoyModelFinder.getServoyModel().getDataSourceManager().getServer(serverName);
 		hasServer = true;
 	}
 
@@ -201,9 +201,7 @@ public class SuggestForeignTypesWizard extends Wizard
 		return true;
 	}
 
-	public void init(@SuppressWarnings("unused")
-	IWorkbench workbench, @SuppressWarnings("unused")
-	IStructuredSelection selection)
+	public void init(@SuppressWarnings("unused") IWorkbench workbench, @SuppressWarnings("unused") IStructuredSelection selection)
 	{
 		if (!hasServer) serverSelectionPage = new ServerSelectionPage("serverSelection");
 		suggestionPage = new SuggestionPage("suggestionPage");
@@ -252,7 +250,7 @@ public class SuggestForeignTypesWizard extends Wizard
 				serversCombo.setItems(serverNames);
 				serversCombo.select(0);
 				ServoyModelManager.getServoyModelManager().getServoyModel();
-				server = ServoyModel.getServerManager().getServer(serverNames[0]);
+				server = ServoyModelFinder.getServoyModel().getDataSourceManager().getServer(serverNames[0]);
 
 				serversCombo.addSelectionListener(new SelectionAdapter()
 				{
@@ -260,8 +258,7 @@ public class SuggestForeignTypesWizard extends Wizard
 					public void widgetSelected(SelectionEvent event)
 					{
 						String serverName = serversCombo.getItem(serversCombo.getSelectionIndex());
-						ServoyModelManager.getServoyModelManager().getServoyModel();
-						server = ServoyModel.getServerManager().getServer(serverName);
+						server = ServoyModelFinder.getServoyModel().getDataSourceManager().getServer(serverName);
 					}
 				});
 			}
@@ -310,7 +307,8 @@ public class SuggestForeignTypesWizard extends Wizard
 			fd.left = new FormAttachment(0);
 			fd.right = new FormAttachment(100);
 			hintsLabel.setLayoutData(fd);
-			hintsLabel.setText("Below you can see the suggestions generated for foreign types. Please review them, make any adjustments that you consider necessary, and click the \"Finish\" button when you are ready to perform the changes.");
+			hintsLabel.setText(
+				"Below you can see the suggestions generated for foreign types. Please review them, make any adjustments that you consider necessary, and click the \"Finish\" button when you are ready to perform the changes.");
 
 			// Second row, buttons for grouping, expanding and collapsing.
 			final Button collapseAllButton = new Button(parent, SWT.PUSH);
@@ -560,7 +558,7 @@ public class SuggestForeignTypesWizard extends Wizard
 			{
 				try
 				{
-					List<String> tableNames = ((IServerInternal)server).getTableAndViewNames(true, true);
+					List<String> tableNames = server.getTableAndViewNames(true, true);
 					allTableNames = new String[tableNames.size()];
 					allTableNames = tableNames.toArray(allTableNames);
 					Arrays.sort(allTableNames);
@@ -636,7 +634,7 @@ public class SuggestForeignTypesWizard extends Wizard
 			{
 				monitor.setTaskName("Computing foreign types for table '" + fkTableName + "'");
 
-				Table fkTable = (Table)server.getTable(fkTableName);
+				ITable fkTable = server.getTable(fkTableName);
 
 				Map<String, Column> matchedFromRelations = new HashMap<String, Column>();
 
@@ -654,8 +652,8 @@ public class SuggestForeignTypesWizard extends Wizard
 							if (relItem.getOperator() == IBaseSQLCondition.EQUALS_OPERATOR && !ScopesUtils.isVariableScope(relItem.getPrimaryDataProviderID()))
 							{
 								// Don't use self-referencing columns.
-								if (!(rel.getPrimaryTableName().equals(rel.getForeignTableName()) && relItem.getPrimaryDataProviderID().equals(
-									relItem.getForeignColumnName())))
+								if (!(rel.getPrimaryTableName().equals(rel.getForeignTableName()) &&
+									relItem.getPrimaryDataProviderID().equals(relItem.getForeignColumnName())))
 								{
 									Table pkTable = (Table)server.getTable(rel.getPrimaryTableName());
 									Column pkCol = pkTable.getColumn(relItem.getPrimaryDataProviderID());
@@ -702,12 +700,12 @@ public class SuggestForeignTypesWizard extends Wizard
 
 						// Match against all tables and all relevant columns, and just pick the best score.
 						double bestScore = 0;
-						Table bestTable = null;
+						ITable bestTable = null;
 						for (String tabName : tableNames)
 						{
 							if (!fkTableName.equals(tabName))
 							{
-								Table table = (Table)server.getTable(tabName);
+								ITable table = server.getTable(tabName);
 								List< ? > pkColumns = table.getRowIdentColumns();
 								for (Object oo : pkColumns)
 								{
@@ -753,7 +751,8 @@ public class SuggestForeignTypesWizard extends Wizard
 			pkComponentFormat.dpType != IColumnTypes.TEXT) return 0;
 
 		if (!(pkComponentFormat.dpType == fkComponentFormat.dpType ||
-			(pkComponentFormat.dpType == IColumnTypes.NUMBER && fkComponentFormat.dpType == IColumnTypes.INTEGER) || (pkComponentFormat.dpType == IColumnTypes.INTEGER && fkComponentFormat.dpType == IColumnTypes.NUMBER))) return 0;
+			(pkComponentFormat.dpType == IColumnTypes.NUMBER && fkComponentFormat.dpType == IColumnTypes.INTEGER) ||
+			(pkComponentFormat.dpType == IColumnTypes.INTEGER && fkComponentFormat.dpType == IColumnTypes.NUMBER))) return 0;
 
 		// Compute two parameters:
 		// - how much the PK and the FK columns resemble
@@ -880,7 +879,8 @@ public class SuggestForeignTypesWizard extends Wizard
 					if (suggestedTable.isDoSave())
 					{
 						String foreignTypeToSet = null;
-						if ((suggestedTable != null) && (suggestedTable.getSuggestedForeignType() != null)) foreignTypeToSet = suggestedTable.getSuggestedForeignType().getName();
+						if ((suggestedTable != null) && (suggestedTable.getSuggestedForeignType() != null))
+							foreignTypeToSet = suggestedTable.getSuggestedForeignType().getName();
 
 						ColumnInfo ci = ((Column)parentColumn).getColumnInfo();
 						if (ci != null)
@@ -905,7 +905,7 @@ public class SuggestForeignTypesWizard extends Wizard
 				}
 				try
 				{
-					((IServerInternal)server).updateAllColumnInfo((Table)parentTable);
+					server.updateAllColumnInfo(parentTable);
 				}
 				catch (RepositoryException e)
 				{
@@ -1312,10 +1312,6 @@ public class SuggestForeignTypesWizard extends Wizard
 					getViewer().refresh();
 				}
 				catch (RepositoryException e)
-				{
-					ServoyLog.logError("Cannot find this table for foreign type: " + newTableName + ".", e);
-				}
-				catch (RemoteException e)
 				{
 					ServoyLog.logError("Cannot find this table for foreign type: " + newTableName + ".", e);
 				}

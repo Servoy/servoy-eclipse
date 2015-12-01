@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.ui.property;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,6 +28,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import com.servoy.eclipse.core.elements.ElementFactory.RelatedForm;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
@@ -37,12 +38,10 @@ import com.servoy.eclipse.ui.dialogs.ISearchKeyAdapter;
 import com.servoy.eclipse.ui.util.IKeywordChecker;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -53,7 +52,7 @@ import com.servoy.j2db.util.Utils;
  */
 public class RelatedFormsContentProvider extends CachingContentProvider implements ISearchKeyAdapter, IKeywordChecker
 {
-	private static class TableComparator implements Comparator<Table>
+	private static class TableComparator implements Comparator<ITable>
 	{
 		public static final TableComparator INSTANCE = new TableComparator();
 
@@ -62,14 +61,12 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 		 *
 		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 		 */
-		public int compare(Table o1, Table o2)
+		public int compare(ITable o1, ITable o2)
 		{
 			if (o1 == null && o2 == null) return 0;
-			if (o1 == null) return -1;
-			if (o2 == null) return 1;
-			String o1Name = o1.getServerName() + "." + o1.getName();
-			String o2Name = o2.getServerName() + "." + o2.getName();
-			return o1Name.compareToIgnoreCase(o2Name);
+			if (o1 == null || o1.getDataSource() == null) return -1;
+			if (o2 == null || o2.getDataSource() == null) return 1;
+			return o1.getDataSource().compareToIgnoreCase(o2.getDataSource());
 		}
 	}
 
@@ -91,7 +88,8 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 			List<Object> nodes = new ArrayList<Object>();
 			try
 			{
-				Iterator<Relation> relations = flattenedSolution.getRelations(form.getTable(), true, true);
+				Iterator<Relation> relations = flattenedSolution.getRelations(
+					ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(form.getDataSource()), true, true);
 				Set<String> relationNames = new HashSet<String>();
 				while (relations.hasNext())
 				{
@@ -114,9 +112,9 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 		return super.getElements(inputElement);
 	}
 
-	private final Map<String, Map<String, List<Form>>> formsCache = new HashMap<String, Map<String, List<Form>>>(5);
+	private final Map<String, List<Form>> formsCache = new HashMap<String, List<Form>>(5);
 
-	private List<Form> getFormsOfTable(String serverName, String tableName) throws RemoteException, RepositoryException
+	private List<Form> getFormsOfTable(String dataSource)
 	{
 		if (formsCache.isEmpty())
 		{
@@ -126,28 +124,18 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 				Form form = forms.next();
 				if (form == rootForm || PersistEncapsulation.isModuleScope(form, flattenedSolution.getSolution())) continue; //is rootForm accessible via self ref relation
 
-				IServer formServer = flattenedSolution.getSolution().getServer(form.getServerName());
-				if (formServer == null) continue;
-				Map<String, List<Form>> map = formsCache.get(formServer.getName());
-				if (map == null)
-				{
-					map = new HashMap<String, List<Form>>(100);
-					formsCache.put(formServer.getName(), map);
-				}
-
-				List<Form> formsByTable = map.get(form.getTableName());
+				if (form.getDataSource() == null) continue;
+				List<Form> formsByTable = formsCache.get(form.getDataSource());
 				if (formsByTable == null)
 				{
 					formsByTable = new ArrayList<Form>();
-					map.put(form.getTableName(), formsByTable);
+					formsCache.put(form.getDataSource(), formsByTable);
 				}
 				formsByTable.add(form);
 			}
 
 		}
-		Map<String, List<Form>> map = formsCache.get(serverName);
-		if (map == null) return Collections.emptyList();
-		List<Form> list = map.get(tableName);
+		List<Form> list = formsCache.get(dataSource);
 		if (list == null) return Collections.emptyList();
 		return list;
 	}
@@ -195,7 +183,7 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 
 				// add forms for this relation
 
-				Iterator<Form> forms = getFormsOfTable(lastRelation.getForeignServer().getName(), lastRelation.getForeignTableName()).iterator();
+				Iterator<Form> forms = getFormsOfTable(lastRelation.getForeignDataSource()).iterator();
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
@@ -214,29 +202,22 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 
 			if (Messages.LabelUnrelated == parentElement)
 			{
+				IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
 				boolean includeNoTable = false;
-				TreeSet<Table> tableSet = new TreeSet<Table>(TableComparator.INSTANCE);
+				TreeSet<ITable> tableSet = new TreeSet<ITable>(TableComparator.INSTANCE);
 				Iterator<Form> forms = flattenedSolution.getForms(true);
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
 					if (form == rootForm || PersistEncapsulation.isModuleScope(form, flattenedSolution.getSolution())) continue; //is rootForm accessible via self ref relation
-					try
+					ITable table = dsm.getDataSource(form.getDataSource());
+					if (table == null)
 					{
-						Table table = form.getTable();
-						if (table == null)
-						{
-							includeNoTable = true;
-						}
-						else
-						{
-							tableSet.add(table);
-						}
+						includeNoTable = true;
 					}
-					catch (RepositoryException e)
+					else
 					{
-						// cannot get table of one form, log and continue to the next
-						ServoyLog.logError(e);
+						tableSet.add(table);
 					}
 				}
 				if (includeNoTable)
@@ -248,8 +229,9 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 				return tableSet.toArray();
 			}
 
-			if (parentElement instanceof Table || Messages.LabelNoTable == parentElement)
+			if (parentElement instanceof ITable || Messages.LabelNoTable == parentElement)
 			{
+				IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
 				List<RelatedForm> children = new ArrayList<RelatedForm>();
 
 				Iterator<Form> forms = flattenedSolution.getForms(true);
@@ -257,17 +239,9 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 				{
 					Form form = forms.next();
 					if (form == rootForm || PersistEncapsulation.isModuleScope(form, flattenedSolution.getSolution())) continue; //is rootForm accessible via self ref relation
-					try
+					if (dsm.getDataSource(form.getDataSource()) == parentElement || (form.getDataSource() == null && Messages.LabelNoTable == parentElement))
 					{
-						if (form.getTable() == parentElement || (form.getDataSource() == null && Messages.LabelNoTable == parentElement))
-						{
-							children.add(new RelatedForm(null, form));
-						}
-					}
-					catch (RepositoryException e)
-					{
-						// cannot get table of one form, log and continue to the next
-						ServoyLog.logError(e);
+						children.add(new RelatedForm(null, form));
 					}
 				}
 				return children.toArray();
@@ -277,49 +251,38 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 		{
 			ServoyLog.logError(e);
 		}
-		catch (RemoteException e)
-		{
-			ServoyLog.logError(e);
-		}
-
 		return new Object[0];
 	}
 
 	public Object getParent(Object element)
 	{
-		try
+		if (element instanceof RelatedForm)
 		{
-			if (element instanceof RelatedForm)
+			RelatedForm rf = (RelatedForm)element;
+			if (rf.form == null)
 			{
-				RelatedForm rf = (RelatedForm)element;
-				if (rf.form == null)
+				if (rf.relations == null || rf.relations.length == 1)
 				{
-					if (rf.relations == null || rf.relations.length == 1)
-					{
-						return null;
-					}
-					// intermediate relations node
-					return new RelatedForm(Utils.arraySub(rf.relations, 0, rf.relations.length - 1), null);
+					return null;
 				}
-
-				if (rf.relations == null)
-				{
-					// form leaf node
-					Table table = rf.form.getTable();
-					return table == null ? Messages.LabelNoTable : table;
-				}
-
-				// form under relation
-				return new RelatedForm(rf.relations, null);
+				// intermediate relations node
+				return new RelatedForm(Utils.arraySub(rf.relations, 0, rf.relations.length - 1), null);
 			}
-			if (element instanceof Table)
+
+			if (rf.relations == null)
 			{
-				return Messages.LabelUnrelated;
+				IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
+				// form leaf node
+				ITable table = dsm.getDataSource(rf.form.getDataSource());
+				return table == null ? Messages.LabelNoTable : table;
 			}
+
+			// form under relation
+			return new RelatedForm(rf.relations, null);
 		}
-		catch (RepositoryException e)
+		if (element instanceof ITable)
 		{
-			ServoyLog.logError(e);
+			return Messages.LabelUnrelated;
 		}
 		return null;
 	}

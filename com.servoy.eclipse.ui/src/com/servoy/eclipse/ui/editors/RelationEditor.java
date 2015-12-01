@@ -65,6 +65,7 @@ import org.eclipse.ui.IEditorPart;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ScriptingUtils;
+import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.StringMatcher;
@@ -357,13 +358,14 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 			input.add(new RelationRow(null, Integer.valueOf(0), null, null));
 		}
 		boolean didAutoFill = false;
-		if (autoFill && getRelation().getPrimaryServerName() != null && getRelation().getForeignServerName() != null)
+		if (autoFill && getRelation().getPrimaryDataSource() != null && getRelation().getForeignDataSource() != null)
 		{
 			RelationRow firstRow = input.get(0);
 			try
 			{
-				ITable primaryTable = getRelation().getPrimaryTable();
-				ITable foreignTable = getRelation().getForeignTable();
+				IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
+				ITable primaryTable = dsm.getDataSource(getRelation().getPrimaryDataSource());
+				ITable foreignTable = dsm.getDataSource(getRelation().getForeignDataSource());
 				if (primaryTable != null && foreignTable != null)
 				{
 					if (!reuseSource)
@@ -405,11 +407,12 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 				ServoyLog.logError(ex);
 			}
 		}
-		if (autoFill && !didAutoFill && !reuseSource && getRelation().getPrimaryServerName() != null)
+		if (autoFill && !didAutoFill && !reuseSource && getRelation().getPrimaryDataSource() != null)
 		{
 			try
 			{
-				ITable primaryTable = getRelation().getPrimaryTable();
+				IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
+				ITable primaryTable = dsm.getDataSource(getRelation().getPrimaryDataSource());
 				if (primaryTable != null)
 				{
 					// pk auto fill
@@ -450,7 +453,8 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 		{
 			try
 			{
-				ITable foreignTable = getRelation().getForeignServer().getTable(getRelation().getForeignTableName());
+				IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
+				ITable foreignTable = dsm.getDataSource(getRelation().getForeignDataSource());
 				if (foreignTable != null)
 				{
 					for (RelationRow row : input)

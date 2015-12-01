@@ -82,4 +82,10 @@ public class InMemServerWrapper implements IDataSourceWrapper
 		else if (!tablename.equals(other.tablename)) return false;
 		return true;
 	}
+
+	@Override
+	public int hashCode()
+	{
+		return tablename == null ? 1 : tablename.hashCode();
+	}
 }

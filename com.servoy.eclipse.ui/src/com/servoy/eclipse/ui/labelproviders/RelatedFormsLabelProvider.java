@@ -38,9 +38,9 @@ import com.servoy.j2db.util.PersistHelper;
 
 /**
  * label provider for forms with relations.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class RelatedFormsLabelProvider extends LabelProvider implements IPersistLabelProvider
 {
@@ -81,9 +81,9 @@ public class RelatedFormsLabelProvider extends LabelProvider implements IPersist
 			return getText(((RelatedForm)element).form);
 		}
 
-		if (element instanceof Table)
+		if (element instanceof ITable)
 		{
-			return ((Table)element).getName() + "[" + ((Table)element).getServerName() + "]";
+			return ((ITable)element).getName() + "[" + ((ITable)element).getServerName() + "]";
 		}
 
 		String superText = super.getText(element);

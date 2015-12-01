@@ -796,8 +796,7 @@ public class MemServer implements IServerInternal, IServer
 	@Override
 	public List<String> getTableAndViewNames(boolean hideTempTables, boolean hideHiddenInDeveloper) throws RepositoryException
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return Arrays.asList(tables.keySet().toArray(new String[tables.size()]));
 	}
 
 	/*

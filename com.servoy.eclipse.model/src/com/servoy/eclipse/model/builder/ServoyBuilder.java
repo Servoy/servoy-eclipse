@@ -3123,7 +3123,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								else
 								{
 									Relation relation = relations[0];
-									if (!relation.isGlobal() && relation.getPrimaryServerName() != null && relation.getPrimaryTableName() != null)
+									if (!relation.isGlobal() && relation.getPrimaryDataSource() != null)
 									{
 										if (context instanceof Form && (!relation.getPrimaryDataSource().equals(((Form)context).getDataSource())))
 										{
@@ -3133,11 +3133,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										}
 									}
 									relation = relations[relations.length - 1];
-									if (!relation.isGlobal() && relation.getPrimaryServerName() != null && relation.getPrimaryTableName() != null)
+									if (!relation.isGlobal() && relation.getPrimaryDataSource() != null)
 									{
 										Form form = tabFlattenedSolution.getForm(tab.getContainsFormID());
-										if (form != null && (!relation.getForeignServerName().equals(form.getServerName()) ||
-											!relation.getForeignTableName().equals(form.getTableName())))
+										if (form != null && !relation.getForeignDataSource().equals(form.getDataSource()))
 										{
 											ServoyMarker mk = MarkerMessages.FormRelatedTabDifferentTable.fill(form.getName(), relation.getName());
 											addMarker(project, mk.getType(), mk.getText(), -1, FORM_RELATED_TAB_DIFFERENT_TABLE, IMarker.PRIORITY_NORMAL, null,

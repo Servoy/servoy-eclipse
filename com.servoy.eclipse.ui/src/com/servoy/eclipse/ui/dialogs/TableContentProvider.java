@@ -34,6 +34,7 @@ import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.util.DataSourceUtils;
 
 /**
  * Content provider class for tables.
@@ -95,6 +96,10 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 			if (options.serverName == null)
 			{
 				lst.add(new InMemServerWrapper(null));
+			}
+			else if (options.serverName.equals(DataSourceUtils.INMEM_DATASOURCE))
+			{
+				lst.addAll(Arrays.asList(getChildren(new InMemServerWrapper(null))));
 			}
 			return lst.toArray();
 		}
