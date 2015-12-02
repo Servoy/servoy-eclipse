@@ -58,15 +58,55 @@ angular.module('editorContent',['servoyApp'])
 	}
 	 $servoyInternal.connect();
 	 var formName = $webSocket.getURLParameter("f");
+	 var solutionName = $webSocket.getURLParameter("s");
 	 var high = $webSocket.getURLParameter("highlight");
 	 $rootScope.highlight = high;
 	 $scope.getUrl = function() {
 		 if ($webSocket.isConnected()) {
-			 var url = $windowService.getFormUrl(formName);
+			 var url = "solutions/" + solutionName + "/forms/" + formName + ".html"; //$windowService.getFormUrl(formName);
 			 // this main url is in design (the template must have special markers)
-			 return url?url+"&design=true"+"&highlight="+$rootScope.highlight:null;
+			 return url?url+"?design=true"+"&highlight="+$rootScope.highlight:null;
 		 }
 	 }
+ }).controller("DesignForm",function($scope){
+	
+	 var model = {}
+	 var api = {}
+	 var handlers = {}
+	 var servoyApi = {}
+	 
+	 $scope.model = function(name) {
+		 var ret = model[name];
+		 if (!ret) {
+			 ret = {}
+			 model[name] = ret;
+		 }
+		 return ret;
+	 } 
+	 $scope.api = function(name) {
+		 var ret = api[name];
+		 if (!ret) {
+			 ret = {}
+			 api[name] = ret;
+		 }
+		 return ret;
+	 } 
+	 $scope.handlers = function(name) {
+		 var ret = handlers[name];
+		 if (!ret) {
+			 ret = {}
+			 handlers[name] = ret;
+		 }
+		 return ret;
+	 } 
+	 $scope.servoyApi = function(name) {
+		 var ret = servoyApi[name];
+		 if (!ret) {
+			 ret = {}
+			 servoyApi[name] = ret;
+		 }
+		 return ret;
+	 } 
  }).factory("$editorContentService", function() {
 	 
 	 return  {

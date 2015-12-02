@@ -46,6 +46,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.rfb.DesignerWebsocketSession;
 import com.servoy.eclipse.designer.editor.rfb.property.types.DesignerTypes;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -59,7 +60,6 @@ import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.ngclient.WebsocketSessionFactory;
 import com.servoy.j2db.server.ngclient.design.DesignNGClient;
-import com.servoy.j2db.server.ngclient.design.DesignNGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.design.IDesignerSolutionProvider;
 import com.servoy.j2db.server.ngclient.property.types.Types;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -81,7 +81,7 @@ public class Activator extends AbstractUIPlugin
 
 	private final Map<String, ImageIcon> imageIcons = new HashMap<String, ImageIcon>();
 
-	private DesignNGClient client = null;
+	private final DesignNGClient client = null;
 	private boolean showWireframe = false;
 
 	/**
@@ -210,22 +210,7 @@ public class Activator extends AbstractUIPlugin
 					@Override
 					public IWebsocketSession createSession(String uuid) throws Exception
 					{
-						DesignNGClientWebsocketSession designerSession = new DesignNGClientWebsocketSession(uuid)
-						{
-							@Override
-							public void init() throws Exception
-							{
-								if (getClient() == null)
-								{
-									setClient(client = new DesignNGClient(this,
-										ApplicationServerRegistry.getServiceRegistry().getService(IDesignerSolutionProvider.class),
-										getPreferenceStore().contains(SHOW_DATA_IN_ANGULAR_DESIGNER)
-											? getPreferenceStore().getBoolean(SHOW_DATA_IN_ANGULAR_DESIGNER) : true));
-								}
-							}
-						};
-
-						return designerSession;
+						return new DesignerWebsocketSession(uuid);
 					}
 				});
 			}
