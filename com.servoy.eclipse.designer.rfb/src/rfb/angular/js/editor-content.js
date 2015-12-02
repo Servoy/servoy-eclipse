@@ -1,5 +1,5 @@
 angular.module('editorContent',['servoyApp'])
- .controller("MainController", function($scope, $window, $timeout, $windowService, $webSocket, $servoyInternal,$rootScope,$compile,$solutionSettings){
+ .controller("MainController", function($scope, $window, $timeout, $windowService, $webSocket,$sabloApplication, $servoyInternal,$rootScope,$compile,$solutionSettings, $editorContentService){
 	 $rootScope.createComponent = function(html,model) {
 			 var compScope = $scope.$new(true);
 			 compScope.model = model;
@@ -61,24 +61,41 @@ angular.module('editorContent',['servoyApp'])
 	 var solutionName = $webSocket.getURLParameter("s");
 	 var high = $webSocket.getURLParameter("highlight");
 	 $rootScope.highlight = high;
+	 var formModelData = null;
+	 var formUrl = null;
 	 $scope.getUrl = function() {
 		 if ($webSocket.isConnected()) {
-			 var url = "solutions/" + solutionName + "/forms/" + formName + ".html"; //$windowService.getFormUrl(formName);
-			 // this main url is in design (the template must have special markers)
-			 return url?url+"?design=true"+"&highlight="+$rootScope.highlight:null;
+			 if (formModelData == null) {
+				 formModelData = {}
+				 var promise = $sabloApplication.callService("$editor", "getData", {form:formName,solution:solutionName},false);
+				 promise.then(function(data){
+					 formModelData = JSON.parse(data);
+					 $editorContentService.formData(formModelData);
+					 formUrl = "solutions/" + solutionName + "/forms/" + formName + ".html?design=true&highlight="+$rootScope.highlight;
+				 })
+			 }
+			 else {
+				 // this main url is in design (the template must have special markers)
+				 return formUrl;
+			 }
 		 }
 	 }
- }).controller("DesignForm",function($scope){
+ }).controller("DesignForm",function($scope, $editorContentService){
 	
+	 var formData = $editorContentService.formData();
+	 // TODO should this be converted?
+	 
 	 var model = {}
 	 var api = {}
 	 var handlers = {}
 	 var servoyApi = {}
+	 var layout = {}
 	 
 	 $scope.model = function(name) {
 		 var ret = model[name];
 		 if (!ret) {
 			 ret = {}
+			 if (formData.components[name]) ret = formData.components[name]; 
 			 model[name] = ret;
 		 }
 		 return ret;
@@ -107,8 +124,22 @@ angular.module('editorContent',['servoyApp'])
 		 }
 		 return ret;
 	 } 
+	 $scope.layout = function(name) {
+		 var ret = layout[name];
+		 if (!ret) {
+			 ret = {}
+			 if (formData.components[name]) {
+				 ret.x = formData.components[name].location.x; 
+				 ret.y = formData.components[name].location.y;
+				 ret.width = formData.components[name].size.width; 
+				 ret.height = formData.components[name].size.height;
+			 }
+			 layout[name] = ret;
+		 }
+		 return ret;
+	 } 
  }).factory("$editorContentService", function() {
-	 
+	 var formData = null;
 	 return  {
 		 refreshDecorators: function() {
 			 renderDecorators();
@@ -118,6 +149,10 @@ angular.module('editorContent',['servoyApp'])
 		 },
 		 updateForm: function(name, uuid, w, h) {
 			 updateForm({name:name, uuid:uuid, w:w, h:h});
+		 },
+		 formData: function(data) {
+			 if (data) formData = data;
+			 else return formData;
 		 }
 	 }
  }).factory("loadingIndicator",function() {
