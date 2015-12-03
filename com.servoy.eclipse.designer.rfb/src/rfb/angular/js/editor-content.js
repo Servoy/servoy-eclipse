@@ -93,6 +93,8 @@ angular.module('editorContent',['servoyApp'])
 	 var servoyApi = {}
 	 var layout = {}
 	 
+	 $editorContentService.setLayoutData(layout);
+	 
 	 $scope.model = function(name) {
 		 var ret = model[name];
 		 if (!ret) {
@@ -143,6 +145,7 @@ angular.module('editorContent',['servoyApp'])
 	 } 
  }).factory("$editorContentService", function($rootScope) {
 	 var formData = null;
+	 var layoutData = null
 	 return  {
 		 refreshDecorators: function() {
 			 renderDecorators();
@@ -156,6 +159,9 @@ angular.module('editorContent',['servoyApp'])
 		 formData: function(data) {
 			 if (data) formData = data;
 			 else return formData;
+		 },
+		 setLayoutData: function(data) {
+			layoutData = data; 
 		 },
 		 updateFormData: function(updates) {
 			var data = JSON.parse(updates);
@@ -174,7 +180,15 @@ angular.module('editorContent',['servoyApp'])
 						else {
 							formData.components[name] = newCompData;
 						}
+						var compLayout = layoutData[name];
+						if (compLayout) {
+							compLayout.left = newCompData.location.x +"px"; 
+							compLayout.top = newCompData.location.y +"px";
+							compLayout.width = newCompData.size.width +"px"; 
+							compLayout.height = newCompData.size.height +"px";
+						}
 					}
+					renderDecorators();
 				});
 			}
 		 }
