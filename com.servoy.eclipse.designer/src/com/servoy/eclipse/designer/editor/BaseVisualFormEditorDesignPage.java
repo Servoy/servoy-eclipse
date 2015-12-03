@@ -68,6 +68,7 @@ import com.servoy.eclipse.designer.editor.commands.UngroupAction;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.property.UndoablePropertySheetEntry;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.j2db.persistence.IPersist;
 
@@ -172,11 +173,26 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 		ActionRegistry registry = getActionRegistry();
 		IAction action;
 
-		action = new UndoAction(editorPart);
+		action = new UndoAction(editorPart)
+		{
+			@Override
+			public void run()
+			{
+				PersistPropertySource.refreshPropertiesView();
+				super.run();
+			}
+		};
 		registry.registerAction(action);
 		getStackActions().add(action.getId());
-
-		action = new RedoAction(editorPart);
+		action = new RedoAction(editorPart)
+		{
+			@Override
+			public void run()
+			{
+				PersistPropertySource.refreshPropertiesView();
+				super.run();
+			}
+		};
 		registry.registerAction(action);
 		getStackActions().add(action.getId());
 
