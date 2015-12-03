@@ -17,20 +17,27 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 
 import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.json.JSONWriter;
+import org.sablo.specification.WebComponentSpecification;
 import org.sablo.websocket.BaseWebsocketSession;
+import org.sablo.websocket.IClientService;
 import org.sablo.websocket.IServerService;
+import org.sablo.websocket.impl.ClientService;
 
-import com.servoy.j2db.AbstractActiveSolutionHandler;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.ngclient.FormElement;
@@ -49,6 +56,11 @@ import com.servoy.j2db.util.Debug;
  */
 public class DesignerWebsocketSession extends BaseWebsocketSession implements IServerService
 {
+	public static final String EDITOR_CONTENT_SERVICE = "$editorContentService";
+
+	private static final WebComponentSpecification EDITOR_CONTENT_SERVICE_SPECIFICATION = new WebComponentSpecification(EDITOR_CONTENT_SERVICE, "",
+		EDITOR_CONTENT_SERVICE, null, null, null, "", null);
+
 	/**
 	 * @param uuid
 	 */
@@ -57,6 +69,18 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		super(uuid);
 		registerServerService("$editor", this);
 	}
+
+
+	@Override
+	protected IClientService createClientService(String name)
+	{
+		if (EDITOR_CONTENT_SERVICE.equals(name))
+		{
+			return new ClientService(EDITOR_CONTENT_SERVICE, EDITOR_CONTENT_SERVICE_SPECIFICATION);
+		}
+		return super.createClientService(name);
+	}
+
 
 	@Override
 	public Locale getLocale()
@@ -95,15 +119,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				}
 				else
 				{
-					FlattenedSolution fs = new FlattenedSolution(solutionMetaData, new AbstractActiveSolutionHandler(as)
-					{
-						@Override
-						public IRepository getRepository()
-						{
-							return ApplicationServerRegistry.get().getLocalRepository();
-						}
-					});
+					ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
 
+					FlattenedSolution fs = servoyProject.getEditingFlattenedSolution();
 					Form form = fs.getForm(formName);
 					Form flattenedForm = fs.getFlattenedForm(form);
 					ServoyDataConverterContext context = new ServoyDataConverterContext(fs);
@@ -121,15 +139,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					writer.key("formProperties");
 					writer.value(wrapper.getPropertiesString());
 					Collection<BaseComponent> baseComponents = wrapper.getBaseComponents();
-					writer.key("components");
-					writer.object();
-					for (BaseComponent baseComponent : baseComponents)
-					{
-						FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, context, null);
-						writer.key(fe.getName());
-						fe.propertiesAsTemplateJSON(writer, new FormElementContext(fe));
-					}
-					writer.endObject();
+					sendComponents(fs, writer, baseComponents);
 					writer.endObject();
 					return writer.toString();
 				}
@@ -137,5 +147,45 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			}
 		}
 		return null;
+	}
+
+	public String getComponentsJSON(FlattenedSolution fs, List<IPersist> persists)
+	{
+		List<BaseComponent> baseComponents = new ArrayList<>();
+		for (IPersist persist : persists)
+		{
+			if (persist instanceof BaseComponent)
+			{
+				baseComponents.add((BaseComponent)persist);
+			}
+			else
+			{
+				// TODO go to a parent? and serialize that?
+			}
+		}
+		JSONWriter writer = new JSONStringer();
+		writer.object();
+		sendComponents(fs, writer, baseComponents);
+		writer.endObject();
+		return writer.toString();
+	}
+
+	/**
+	 * @param fs
+	 * @param writer
+	 * @param baseComponents
+	 */
+	private void sendComponents(FlattenedSolution fs, JSONWriter writer, Collection<BaseComponent> baseComponents)
+	{
+		writer.key("components");
+		writer.object();
+		// TODO is this really all the data? or are there properties that would normally go through the webcomponents..
+		for (BaseComponent baseComponent : baseComponents)
+		{
+			FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
+			writer.key(fe.getName());
+			fe.propertiesAsTemplateJSON(writer, new FormElementContext(fe));
+		}
+		writer.endObject();
 	}
 }

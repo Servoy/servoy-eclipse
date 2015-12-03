@@ -36,6 +36,8 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+import org.sablo.eventthread.WebsocketSessionWindows;
+import org.sablo.websocket.CurrentWindow;
 import org.sablo.websocket.WebsocketSessionManager;
 
 import com.servoy.eclipse.core.Activator;
@@ -53,6 +55,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
@@ -300,6 +303,19 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	@Override
 	public void refreshPersists(List<IPersist> persists)
 	{
+		Form form = editorPart.getForm();
+		FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(form);
+		final String componentsJSON = designerWebsocketSession.getComponentsJSON(fs, persists);
+		CurrentWindow.runForWindow(new WebsocketSessionWindows(designerWebsocketSession), new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateFormData", new Object[] { componentsJSON });
+				designerWebsocketSession.valueChanged();
+			}
+		});
+
 		// TODO new impl
 //		IWindow window = null;
 //		final INGClientWebsocketSession editorContentWebsocketSession = (INGClientWebsocketSession)WebsocketSessionManager.getSession(

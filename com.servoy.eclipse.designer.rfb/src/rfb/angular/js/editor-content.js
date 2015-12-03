@@ -141,7 +141,7 @@ angular.module('editorContent',['servoyApp'])
 		 }
 		 return ret;
 	 } 
- }).factory("$editorContentService", function() {
+ }).factory("$editorContentService", function($rootScope) {
 	 var formData = null;
 	 return  {
 		 refreshDecorators: function() {
@@ -156,7 +156,29 @@ angular.module('editorContent',['servoyApp'])
 		 formData: function(data) {
 			 if (data) formData = data;
 			 else return formData;
+		 },
+		 updateFormData: function(updates) {
+			var data = JSON.parse(updates);
+			if (data && data.components) {
+				// TODO should it be converted??
+				$rootScope.$apply(function() {
+					for(name in data.components) {
+						var compData = formData.components[name];
+						var newCompData = data.components[name];
+						if (compData) {
+							// copy it inside so that we update the data inside the model
+							for(key in newCompData) {
+								compData[key] = newCompData[key];
+							}
+						}
+						else {
+							formData.components[name] = newCompData;
+						}
+					}
+				});
+			}
 		 }
+		 
 	 }
  }).factory("loadingIndicator",function() {
 	//the loading indicator should not be shown in the editor
