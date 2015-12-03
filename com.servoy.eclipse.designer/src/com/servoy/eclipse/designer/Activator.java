@@ -36,9 +36,6 @@ import org.eclipse.ui.internal.util.BundleUtility;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.sablo.websocket.IWebsocketSession;
-import org.sablo.websocket.IWebsocketSessionFactory;
-import org.sablo.websocket.WebsocketSessionManager;
 
 import com.servoy.eclipse.core.I18NChangeListener;
 import com.servoy.eclipse.core.IActiveProjectListener;
@@ -46,19 +43,16 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.rfb.DesignerWebsocketSession;
 import com.servoy.eclipse.designer.editor.rfb.property.types.DesignerTypes;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.IDebugClientHandler;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.ngclient.WebsocketSessionFactory;
 import com.servoy.j2db.server.ngclient.design.DesignNGClient;
 import com.servoy.j2db.server.ngclient.design.IDesignerSolutionProvider;
 import com.servoy.j2db.server.ngclient.property.types.Types;
@@ -200,21 +194,6 @@ public class Activator extends AbstractUIPlugin
 			}
 		});
 
-		if (ApplicationServerRegistry.getServiceRegistry() != null)
-		{
-			IDebugClientHandler service = ApplicationServerRegistry.getServiceRegistry().getService(IDebugClientHandler.class);
-			if (service != null)
-			{
-				WebsocketSessionManager.setWebsocketSessionFactory(WebsocketSessionFactory.DESIGN_ENDPOINT, new IWebsocketSessionFactory()
-				{
-					@Override
-					public IWebsocketSession createSession(String uuid) throws Exception
-					{
-						return new DesignerWebsocketSession(uuid);
-					}
-				});
-			}
-		}
 		showWireframe = getPreferenceStore().contains(Activator.SHOW_WIREFRAME_IN_ANGULAR_DESIGNER)
 			? getPreferenceStore().getBoolean(Activator.SHOW_WIREFRAME_IN_ANGULAR_DESIGNER) : false;
 
