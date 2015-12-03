@@ -82,6 +82,8 @@ angular.module('editorContent',['servoyApp'])
 	 }
  }).controller("DesignForm",function($scope, $editorContentService){
 	
+	 $scope.formStyle = {left:"0px",right:"0px",top:"0px",bottom:"0px"}
+	 
 	 var formData = $editorContentService.formData();
 	 // TODO should this be converted?
 	 
@@ -129,10 +131,11 @@ angular.module('editorContent',['servoyApp'])
 		 if (!ret) {
 			 ret = {}
 			 if (formData.components[name]) {
-				 ret.x = formData.components[name].location.x; 
-				 ret.y = formData.components[name].location.y;
-				 ret.width = formData.components[name].size.width; 
-				 ret.height = formData.components[name].size.height;
+				 ret.left = formData.components[name].location.x +"px"; 
+				 ret.top = formData.components[name].location.y +"px";
+				 ret.width = formData.components[name].size.width +"px"; 
+				 ret.height = formData.components[name].size.height +"px";
+				 ret.position = 'absolute'
 			 }
 			 layout[name] = ret;
 		 }
