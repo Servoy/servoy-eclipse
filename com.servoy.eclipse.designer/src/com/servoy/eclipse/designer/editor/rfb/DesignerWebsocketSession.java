@@ -64,6 +64,19 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		return Locale.getDefault();
 	}
 
+	// session will be destroyed when editor is closed
+	@Override
+	public boolean isValid()
+	{
+		return true;
+	}
+
+	@Override
+	public boolean checkForWindowActivity()
+	{
+		return false;
+	}
+
 	@Override
 	public Object executeMethod(String methodName, JSONObject args) throws Exception
 	{
