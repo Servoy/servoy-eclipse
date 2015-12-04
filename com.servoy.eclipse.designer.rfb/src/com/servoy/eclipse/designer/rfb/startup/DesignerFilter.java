@@ -152,7 +152,7 @@ public class DesignerFilter implements Filter
 							if (ordered.get(i) instanceof String) orderPreference.add(ordered.getString(i));
 						}
 					}
-					// orderPreference array has to contain all keys, otherwise sorting does not work correctly 
+					// orderPreference array has to contain all keys, otherwise sorting does not work correctly
 					for (String key : orderedKeys)
 					{
 						if (!orderPreference.contains(key)) orderPreference.add(key);
@@ -176,7 +176,6 @@ public class DesignerFilter implements Filter
 							}
 						});
 					}
-					System.out.println("ordered keys " + orderedKeys);
 					for (String key : orderedKeys)
 					{
 						boolean startedArray = false;
