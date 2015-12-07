@@ -143,7 +143,7 @@ angular.module('editorContent',['servoyApp'])
 		 }
 		 return ret;
 	 } 
- }).factory("$editorContentService", function($rootScope) {
+ }).factory("$editorContentService", function($rootScope,$applicationService,$sabloConstants) {
 	 var formData = null;
 	 var layoutData = null
 	 return  {
@@ -157,7 +157,12 @@ angular.module('editorContent',['servoyApp'])
 			 updateForm({name:name, uuid:uuid, w:w, h:h});
 		 },
 		 formData: function(data) {
-			 if (data) formData = data;
+			 if (data) {
+				 formData = data;
+				 if (formData.solutionProperties) {
+					 $applicationService.setStyleSheet(formData.solutionProperties.styleSheet);
+				 }
+			 }
 			 else return formData;
 		 },
 		 setLayoutData: function(data) {
@@ -168,13 +173,21 @@ angular.module('editorContent',['servoyApp'])
 			if (data && data.components) {
 				// TODO should it be converted??
 				$rootScope.$apply(function() {
-					for(name in data.components) {
+					for(var name in data.components) {
 						var compData = formData.components[name];
 						var newCompData = data.components[name];
 						if (compData) {
+							var modifyFunction = compData[$sabloConstants.modelChangeNotifier];
+							for(var key in compData) {
+								if (!newCompData[key]) {
+									compData[key] = null;
+									if (modifyFunction) modifyFunction(key,null)
+								}
+							}
 							// copy it inside so that we update the data inside the model
-							for(key in newCompData) {
+							for(var key in newCompData) {
 								compData[key] = newCompData[key];
+								if (modifyFunction) modifyFunction(key,newCompData[key])
 							}
 						}
 						else {
@@ -191,6 +204,9 @@ angular.module('editorContent',['servoyApp'])
 					renderDecorators();
 				});
 			}
+			if (data && data.solutionProperties && formData.solutionProperties.styleSheet) {
+				$applicationService.setStyleSheet(formData.solutionProperties.styleSheet);
+	 		}
 		 }
 		 
 	 }

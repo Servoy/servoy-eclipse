@@ -39,10 +39,12 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementContext;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
 import com.servoy.j2db.server.ngclient.template.FormWrapper;
 import com.servoy.j2db.server.ngclient.template.IFormElementValidator;
@@ -68,6 +70,20 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	{
 		super(uuid);
 		registerServerService("$editor", this);
+	}
+
+	private String getSolutionCSSURL(FlattenedSolution fs)
+	{
+		int styleSheetID = fs.getSolution().getStyleSheetID();
+		if (styleSheetID > 0)
+		{
+			Media styleSheetMedia = fs.getMedia(styleSheetID);
+			if (styleSheetMedia != null)
+			{
+				return "resources/" + MediaResourcesServlet.FLATTENED_SOLUTION_ACCESS + "/" + fs.getSolution().getName() + "/" + styleSheetMedia.getName();
+			}
+		}
+		return null;
 	}
 
 
@@ -140,6 +156,11 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					writer.value(wrapper.getPropertiesString());
 					Collection<BaseComponent> baseComponents = wrapper.getBaseComponents();
 					sendComponents(fs, writer, baseComponents);
+					writer.key("solutionProperties");
+					writer.object();
+					writer.key("styleSheet");
+					writer.value(getSolutionCSSURL(fs));
+					writer.endObject();
 					writer.endObject();
 					return writer.toString();
 				}
