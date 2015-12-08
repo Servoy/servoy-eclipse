@@ -82,15 +82,11 @@ angular.module('editorContent',['servoyApp'])
 		 }
 	 };
 	 
-	 $rootScope.getDesignFormControllerScope = function () {
-	     return $editorContentService.getControllerScope();
-	 };
-	 
- }).controller("DesignForm",function($scope, $editorContentService){
+
+ }).controller("DesignForm",function($scope, $editorContentService, $rootScope) {
 	
 	 $scope.formStyle = {left:"0px",right:"0px",top:"0px",bottom:"0px"}
 	 
-	 $editorContentService.setControllerScope($scope);
 	 $scope.removeComponent = function(name) {
 		 delete model[name];
 		 delete api[name];
@@ -98,6 +94,10 @@ angular.module('editorContent',['servoyApp'])
 		 delete servoyApi[name];
 		 delete layout[name];
 	 } 
+	 
+	 $rootScope.getDesignFormControllerScope = function () {
+	     return $scope;
+	 };
 	 
 	 var formData = $editorContentService.formData();
 	 // TODO should this be converted?
@@ -161,7 +161,6 @@ angular.module('editorContent',['servoyApp'])
  }).factory("$editorContentService", function($rootScope,$applicationService,$sabloApplication,$sabloConstants,$webSocket,$compile) {
 	 var formData = null;
 	 var layoutData = null
-	 var controllerScope = null;
 	 return  {
 		 refreshDecorators: function() {
 			 renderDecorators();
@@ -216,7 +215,7 @@ angular.module('editorContent',['servoyApp'])
 								var parentId = json.parentId;
 								if (!parentId) parentId = 'svyDesignForm';
 								var parent = angular.element(document.getElementById(parentId));
-								var tpl = $compile( json.template )( controllerScope );
+								var tpl = $compile( json.template )( $rootScope.getDesignFormControllerScope() );
 								parent.append(tpl)
 							 })
 							
@@ -232,7 +231,7 @@ angular.module('editorContent',['servoyApp'])
 					for(var index in data.deleted) {
 						var toDelete = $('[svy-id="'+data.deleted[index]+'"]');
 						var name = toDelete.attr("name");
-						if (name) controllerScope.removeComponent(name);
+						if (name) $rootScope.getDesignFormControllerScope().removeComponent(name);
 						toDelete.remove();
 						
 					}
@@ -242,13 +241,7 @@ angular.module('editorContent',['servoyApp'])
 			if (data && data.solutionProperties && formData.solutionProperties.styleSheet) {
 				$applicationService.setStyleSheet(formData.solutionProperties.styleSheet);
 	 		}
-		 },
-		 setControllerScope: function(scope) {
-			 controllerScope = scope;
-		 },
-		 getControllerScope: function() {
-			 return controllerScope;
-		 } 
+		 }
 		 
 	 }
  }).factory("loadingIndicator",function() {
