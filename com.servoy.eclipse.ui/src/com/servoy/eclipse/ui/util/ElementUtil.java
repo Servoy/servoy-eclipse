@@ -281,7 +281,7 @@ public class ElementUtil
 				if (parent == null && parentPersist.getParent() instanceof LayoutContainer)
 				{
 					ISupportChilds originalParent = parentPersist.getParent();
-					parent = reconstructContainmentHeirarchy(originalParent, context);
+					parent = reconstructContainmentHierarchy(originalParent, context);
 				}
 				else if (parent == null)
 				{
@@ -303,7 +303,7 @@ public class ElementUtil
 	 * @return
 	 *
 	 */
-	public static ISupportChilds reconstructContainmentHeirarchy(ISupportChilds originalParent, IPersist context)
+	private static ISupportChilds reconstructContainmentHierarchy(ISupportChilds originalParent, IPersist context)
 	{
 		ISupportChilds parent = originalParent;
 		ArrayList<ISupportChilds> containmentHierrachy = new ArrayList<>();

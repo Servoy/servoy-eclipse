@@ -47,6 +47,7 @@ import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
@@ -63,7 +64,6 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
-import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.LayoutContainer;
@@ -212,10 +212,9 @@ public class CreateComponentHandler implements IServerService
 			{
 
 				IPersist searchForPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, args.getString("dropTargetUUID"));
-				if (searchForPersist.getAncestor(IRepositoryConstants.FORMS).getID() == ((ISupportExtendsID)parent).getExtendsID() &&
-					searchForPersist instanceof LayoutContainer)
+				if (searchForPersist != null)
 				{
-					searchForPersist = ElementUtil.reconstructContainmentHeirarchy((ISupportChilds)searchForPersist, parent);
+					searchForPersist = ElementUtil.getOverridePersist(PersistContext.create(searchForPersist, editorPart.getForm()));
 				}
 				if (searchForPersist != null)
 				{
