@@ -18,6 +18,7 @@
 package com.servoy.eclipse.designer.editor.rfb;
 
 import java.awt.Dimension;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,6 +59,7 @@ import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Utils;
@@ -156,7 +158,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		try
 		{
 			// install fake WebSocket in case browser does not support it
-			SwtWebsocket.installFakeWebSocket(browser);
+			SwtWebsocket.installFakeWebSocket(browser, editorId, clientId);
 			// install console
 			new BrowserFunction(browser, "consoleLog")
 			{
