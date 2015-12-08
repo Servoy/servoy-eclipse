@@ -305,7 +305,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	{
 		Form form = editorPart.getForm();
 		FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(form);
-		final String componentsJSON = designerWebsocketSession.getComponentsJSON(fs, persists);
+		final String componentsJSON = designerWebsocketSession.getComponentsJSON(fs, filterByParent(persists, form));
 		CurrentWindow.runForWindow(new WebsocketSessionWindows(designerWebsocketSession), new Runnable()
 		{
 			@Override
@@ -434,6 +434,25 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 //				}
 //			}
 //		});
+	}
+
+	/**
+	 * @param persists
+	 * @param form
+	 * @return
+	 */
+	private List<IPersist> filterByParent(List<IPersist> persists, Form form)
+	{
+		List<IPersist> filtered = new ArrayList<>();
+		for (IPersist persist : persists)
+		{
+			IPersist ancestor = persist.getAncestor(IRepository.FORMS);
+			if (ancestor != null && ancestor.getUUID().equals(form.getUUID()))
+			{
+				filtered.add(persist);
+			}
+		}
+		return filtered;
 	}
 
 	@Override
