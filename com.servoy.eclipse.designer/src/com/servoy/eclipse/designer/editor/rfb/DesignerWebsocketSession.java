@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -144,7 +145,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				writer.key("formProperties");
 				writer.value(wrapper.getPropertiesString());
 				Collection<BaseComponent> baseComponents = wrapper.getBaseComponents();
-				sendComponents(fs, writer, baseComponents);
+				Collection<BaseComponent> deleted = Collections.emptyList();
+				sendComponents(fs, writer, baseComponents, deleted);
 				writer.key("solutionProperties");
 				writer.object();
 				writer.key("styleSheet");
@@ -195,11 +197,19 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	public String getComponentsJSON(FlattenedSolution fs, List<IPersist> persists)
 	{
 		List<BaseComponent> baseComponents = new ArrayList<>();
+		List<BaseComponent> deletedComponents = new ArrayList<>();
 		for (IPersist persist : persists)
 		{
 			if (persist instanceof BaseComponent)
 			{
-				baseComponents.add((BaseComponent)persist);
+				if (persist.getParent().getChild(persist.getUUID()) != null)
+				{
+					baseComponents.add((BaseComponent)persist);
+				}
+				else
+				{
+					deletedComponents.add((BaseComponent)persist);
+				}
 			}
 			else
 			{
@@ -208,7 +218,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		}
 		JSONWriter writer = new JSONStringer();
 		writer.object();
-		sendComponents(fs, writer, baseComponents);
+		sendComponents(fs, writer, baseComponents, deletedComponents);
 		writer.endObject();
 		return writer.toString();
 	}
@@ -218,17 +228,31 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	 * @param writer
 	 * @param baseComponents
 	 */
-	private void sendComponents(FlattenedSolution fs, JSONWriter writer, Collection<BaseComponent> baseComponents)
+	private void sendComponents(FlattenedSolution fs, JSONWriter writer, Collection<BaseComponent> baseComponents, Collection<BaseComponent> deletedComponents)
 	{
-		writer.key("components");
-		writer.object();
-		// TODO is this really all the data? or are there properties that would normally go through the webcomponents..
-		for (BaseComponent baseComponent : baseComponents)
+		if (baseComponents.size() > 0)
 		{
-			FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
-			writer.key(fe.getName());
-			fe.propertiesAsTemplateJSON(writer, new FormElementContext(fe));
+			writer.key("components");
+			writer.object();
+			// TODO is this really all the data? or are there properties that would normally go through the webcomponents..
+			for (BaseComponent baseComponent : baseComponents)
+			{
+				FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
+				writer.key(fe.getName());
+				fe.propertiesAsTemplateJSON(writer, new FormElementContext(fe));
+			}
+			writer.endObject();
 		}
-		writer.endObject();
+		if (deletedComponents.size() > 0)
+		{
+			writer.key("deleted");
+			writer.array();
+			for (BaseComponent baseComponent : deletedComponents)
+			{
+				FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
+				writer.value(FormLayoutGenerator.getDesignId(fe));
+			}
+			writer.endArray();
+		}
 	}
 }

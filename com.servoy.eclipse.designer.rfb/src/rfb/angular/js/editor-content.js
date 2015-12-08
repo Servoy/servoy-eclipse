@@ -86,6 +86,14 @@ angular.module('editorContent',['servoyApp'])
 	 $scope.formStyle = {left:"0px",right:"0px",top:"0px",bottom:"0px"}
 	 
 	 $editorContentService.setControllerScope($scope);
+	 $scope.removeComponent = function(name) {
+		 delete model[name];
+		 delete api[name];
+		 delete handlers[name];
+		 delete servoyApi[name];
+		 delete layout[name];
+	 } 
+	 
 	 var formData = $editorContentService.formData();
 	 // TODO should this be converted?
 	 
@@ -173,7 +181,7 @@ angular.module('editorContent',['servoyApp'])
 		 },
 		 updateFormData: function(updates) {
 			var data = JSON.parse(updates);
-			if (data && data.components) {
+			if (data && (data.components || data.deleted)) {
 				// TODO should it be converted??
 				$rootScope.$apply(function() {
 					for(var name in data.components) {
@@ -215,6 +223,13 @@ angular.module('editorContent',['servoyApp'])
 							compLayout.width = newCompData.size.width +"px"; 
 							compLayout.height = newCompData.size.height +"px";
 						}
+					}
+					for(var index in data.deleted) {
+						var toDelete = $('[svy-id="'+data.deleted[index]+'"]');
+						var name = toDelete.attr("name");
+						if (name) controllerScope.removeComponent(name);
+						toDelete.remove();
+						
 					}
 					renderDecorators();
 				});
