@@ -72,7 +72,7 @@ angular.module('editorContent',['servoyApp'])
 				 promise.then(function(data){
 					 formModelData = JSON.parse(data);
 					 $editorContentService.formData(formModelData);
-					 formUrl = "solutions/" + solutionName + "/forms/" + formName + ".html?design=true&highlight="+$rootScope.highlight;
+					 formUrl = "designertemplate/" + solutionName + "/" + formName + ".html?highlight="+$rootScope.highlight;
 				 })
 			 }
 			 else {

@@ -41,7 +41,15 @@ import org.sablo.specification.WebLayoutSpecification;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
+import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
+import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
+import com.servoy.j2db.util.HTTPUtils;
+import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner
@@ -51,6 +59,9 @@ import com.servoy.j2db.persistence.Solution;
 @SuppressWarnings("nls")
 public class EditorContentFilter implements Filter
 {
+	private static final String DESIGNER_TEMPLATE_PATH = "/designertemplate/";
+
+
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException
 	{
@@ -60,7 +71,8 @@ public class EditorContentFilter implements Filter
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException
 	{
 		HttpServletRequest httpServletRequest = (HttpServletRequest)request;
-		if (httpServletRequest.getRequestURI().endsWith("editor-content.html"))
+		String requestURI = httpServletRequest.getRequestURI();
+		if (requestURI.endsWith("editor-content.html"))
 		{
 			String solution = httpServletRequest.getParameter("s");
 			if (solution == null)
@@ -100,7 +112,45 @@ public class EditorContentFilter implements Filter
 				return;
 			}
 		}
+		else if (requestURI.startsWith(DESIGNER_TEMPLATE_PATH))
+		{
+			Pair<String, String> solutionAndFormName = getSolutionAndFormNameFromURI(requestURI);
+			ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionAndFormName.getLeft());
+			FlattenedSolution fs = servoyProject.getEditingFlattenedSolution();
+			Form flattenedForm = fs.getFlattenedForm(fs.getForm(solutionAndFormName.getRight()));
+			HTTPUtils.setNoCacheHeaders((HttpServletResponse)response);
+
+			PrintWriter w = response.getWriter();
+			if (flattenedForm.isResponsiveLayout())
+			{
+				((HttpServletResponse)response).setContentType("text/html");
+				FormLayoutStructureGenerator.generateLayout(flattenedForm, solutionAndFormName.getRight(), new ServoyDataConverterContext(fs), w, true,
+					Utils.getAsBoolean(request.getParameter("highlight")));
+			}
+			else
+			{
+				((HttpServletResponse)response).setContentType("text/html");
+				FormLayoutGenerator.generateRecordViewForm(w, flattenedForm, solutionAndFormName.getRight(), new ServoyDataConverterContext(fs), true,
+					Utils.getAsBoolean(request.getParameter("highlight")));
+			}
+			w.flush();
+			return;
+
+		}
 		chain.doFilter(request, response);
+	}
+
+	private Pair<String, String> getSolutionAndFormNameFromURI(String uri)
+	{
+		int solutionIndex = uri.indexOf(DESIGNER_TEMPLATE_PATH);
+		if (solutionIndex >= 0)
+		{
+			int formIndex = uri.indexOf("/", solutionIndex + DESIGNER_TEMPLATE_PATH.length() + 1);
+			String solutionName = uri.substring(solutionIndex + DESIGNER_TEMPLATE_PATH.length(), formIndex);
+			String formName = uri.substring(formIndex + 1, uri.lastIndexOf(".html"));
+			return new Pair<String, String>(solutionName, formName);
+		}
+		return null;
 	}
 
 	@Override
