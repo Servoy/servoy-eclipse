@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -38,19 +40,15 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.Media;
-import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementContext;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
+import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormWrapper;
 import com.servoy.j2db.server.ngclient.template.IFormElementValidator;
-import com.servoy.j2db.server.shared.ApplicationServerRegistry;
-import com.servoy.j2db.server.shared.IApplicationServer;
-import com.servoy.j2db.util.Debug;
 
 /**
  * @author jcompagner
@@ -63,12 +61,15 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	private static final WebComponentSpecification EDITOR_CONTENT_SERVICE_SPECIFICATION = new WebComponentSpecification(EDITOR_CONTENT_SERVICE, "",
 		EDITOR_CONTENT_SERVICE, null, null, null, "", null);
 
+	private final Form form;
+
 	/**
 	 * @param uuid
 	 */
-	public DesignerWebsocketSession(String uuid)
+	public DesignerWebsocketSession(String uuid, Form form)
 	{
 		super(uuid);
+		this.form = form;
 		registerServerService("$editor", this);
 	}
 
@@ -120,51 +121,72 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	@Override
 	public Object executeMethod(String methodName, JSONObject args) throws Exception
 	{
+		ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(form.getSolution().getName());
+		FlattenedSolution fs = servoyProject.getEditingFlattenedSolution();
+		Form flattenedForm = fs.getFlattenedForm(form);
+
+		ServoyDataConverterContext context = new ServoyDataConverterContext(fs);
+		FormWrapper wrapper = new FormWrapper(flattenedForm, flattenedForm.getName(), false, new IFormElementValidator()
+		{
+
+			@Override
+			public boolean isComponentSpecValid(IFormElement formElement)
+			{
+				return true;
+			}
+		}, context, true);
 		switch (methodName)
 		{
 			case "getData" :
 			{
-				String solutionName = args.getString("solution");
-				String formName = args.getString("form");
-				IApplicationServer as = ApplicationServerRegistry.getService(IApplicationServer.class);
-				SolutionMetaData solutionMetaData = (SolutionMetaData)ApplicationServerRegistry.get().getLocalRepository().getRootObjectMetaData(solutionName,
-					IRepository.SOLUTIONS);
-				if (solutionMetaData == null)
+				JSONWriter writer = new JSONStringer();
+				writer.object();
+				writer.key("formProperties");
+				writer.value(wrapper.getPropertiesString());
+				Collection<BaseComponent> baseComponents = wrapper.getBaseComponents();
+				sendComponents(fs, writer, baseComponents);
+				writer.key("solutionProperties");
+				writer.object();
+				writer.key("styleSheet");
+				writer.value(getSolutionCSSURL(fs));
+				writer.endObject();
+				writer.endObject();
+				return writer.toString();
+			}
+			case "getTemplate" :
+			{
+				String name = args.getString("name");
+				boolean highlight = !args.isNull("highlight") && args.getBoolean("highlight");
+				StringWriter htmlTemplate = new StringWriter(512);
+				PrintWriter w = new PrintWriter(htmlTemplate);
+
+				if (flattenedForm.isResponsiveLayout())
 				{
-					Debug.error("Solution '" + solutionName + "' was not found.");
+					// TODO support for responsive layout
+					// add a parentid to the output and maybe als the sibling?
 				}
 				else
 				{
-					ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
-
-					FlattenedSolution fs = servoyProject.getEditingFlattenedSolution();
-					Form form = fs.getForm(formName);
-					Form flattenedForm = fs.getFlattenedForm(form);
-					ServoyDataConverterContext context = new ServoyDataConverterContext(fs);
-					FormWrapper wrapper = new FormWrapper(flattenedForm, formName, false, new IFormElementValidator()
-					{
-
-						@Override
-						public boolean isComponentSpecValid(IFormElement formElement)
-						{
-							return true;
-						}
-					}, context, true);
-					JSONWriter writer = new JSONStringer();
-					writer.object();
-					writer.key("formProperties");
-					writer.value(wrapper.getPropertiesString());
 					Collection<BaseComponent> baseComponents = wrapper.getBaseComponents();
-					sendComponents(fs, writer, baseComponents);
-					writer.key("solutionProperties");
-					writer.object();
-					writer.key("styleSheet");
-					writer.value(getSolutionCSSURL(fs));
-					writer.endObject();
-					writer.endObject();
-					return writer.toString();
+					for (BaseComponent baseComponent : baseComponents)
+					{
+						FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
+						if (fe.getName().equals(name))
+						{
+							FormLayoutGenerator.generateFormElementWrapper(w, fe, true, flattenedForm);
+							FormLayoutGenerator.generateFormElement(w, fe, true, highlight);
+							FormLayoutGenerator.generateEndDiv(w);
+							break;
+						}
+					}
 				}
-				break;
+				w.flush();
+				JSONWriter writer = new JSONStringer();
+				writer.object();
+				writer.key("template");
+				writer.value(htmlTemplate.toString());
+				writer.endObject();
+				return writer.toString();
 			}
 		}
 		return null;

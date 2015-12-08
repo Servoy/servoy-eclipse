@@ -138,7 +138,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		editorId = UUID.randomUUID().toString();
 		clientId = UUID.randomUUID().toString();
 		WebsocketSessionManager.addSession(editorWebsocketSession = new EditorWebsocketSession(editorId));
-		WebsocketSessionManager.addSession(designerWebsocketSession = new DesignerWebsocketSession(clientId));
+		WebsocketSessionManager.addSession(designerWebsocketSession = new DesignerWebsocketSession(clientId, editorPart.getForm()));
 		editorWebsocketSession.registerServerService("formeditor", new EditorServiceHandler(editorPart, selectionProvider, selectionListener, fieldPositioner));
 		selectionListener.setEditorWebsocketSession(editorWebsocketSession);
 		resourceChangedListener.setEditorWebsocketSession(editorWebsocketSession);

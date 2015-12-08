@@ -64,6 +64,7 @@ angular.module('editorContent',['servoyApp'])
 	 var formModelData = null;
 	 var formUrl = null;
 	 $scope.getUrl = function() {
+		 if (formUrl) return formUrl;
 		 if ($webSocket.isConnected()) {
 			 if (formModelData == null) {
 				 formModelData = {}
@@ -84,6 +85,7 @@ angular.module('editorContent',['servoyApp'])
 	
 	 $scope.formStyle = {left:"0px",right:"0px",top:"0px",bottom:"0px"}
 	 
+	 $editorContentService.setControllerScope($scope);
 	 var formData = $editorContentService.formData();
 	 // TODO should this be converted?
 	 
@@ -143,9 +145,10 @@ angular.module('editorContent',['servoyApp'])
 		 }
 		 return ret;
 	 } 
- }).factory("$editorContentService", function($rootScope,$applicationService,$sabloConstants) {
+ }).factory("$editorContentService", function($rootScope,$applicationService,$sabloApplication,$sabloConstants,$webSocket,$compile) {
 	 var formData = null;
 	 var layoutData = null
+	 var controllerScope = null;
 	 return  {
 		 refreshDecorators: function() {
 			 renderDecorators();
@@ -192,6 +195,18 @@ angular.module('editorContent',['servoyApp'])
 						}
 						else {
 							formData.components[name] = newCompData;
+							var highlight = $webSocket.getURLParameter("highlight");
+							 var promise = $sabloApplication.callService("$editor", "getTemplate", {name:name,highlight:highlight},false);
+							 promise.then(function(data){
+								// append the template
+								var json = JSON.parse(data);
+								var parentId = json.parentId;
+								if (!parentId) parentId = 'svyDesignForm';
+								var parent = angular.element(document.getElementById(parentId));
+								var tpl = $compile( json.template )( controllerScope );
+								parent.append(tpl)
+							 })
+							
 						}
 						var compLayout = layoutData[name];
 						if (compLayout) {
@@ -207,7 +222,10 @@ angular.module('editorContent',['servoyApp'])
 			if (data && data.solutionProperties && formData.solutionProperties.styleSheet) {
 				$applicationService.setStyleSheet(formData.solutionProperties.styleSheet);
 	 		}
-		 }
+		 },
+		 setControllerScope: function(scope) {
+			 controllerScope = scope;
+		 } 
 		 
 	 }
  }).factory("loadingIndicator",function() {
