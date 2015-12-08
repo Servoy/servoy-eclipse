@@ -180,7 +180,7 @@ public abstract class JSONObjectTypePropertyController extends ObjectTypePropert
 		{
 			IPropertyDescriptor pd = findPD(id);
 			PersistPropertySource.adjustPropertyValueAndReset(id, pd, this);
-			return ((JSONObject)getEditableValue()).opt((String)id);
+			return PersistPropertySource.adjustPropertyValueToGet(id, pd, this);
 		}
 
 		protected IPropertyDescriptor findPD(Object id)
