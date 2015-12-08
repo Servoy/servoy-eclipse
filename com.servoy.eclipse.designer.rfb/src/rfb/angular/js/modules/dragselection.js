@@ -195,40 +195,34 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 						}, 200);
 					}
 					else {
-						var formState = editorScope.getFormState();
-						if (formState) {
-							var changeX = event.screenX- dragStartEvent.screenX;
-							var changeY = event.screenY- dragStartEvent.screenY;
-							for(var i=0;i<selectionToDrag.length;i++) {
-								var node = selectionToDrag[i];
-								if (node[0] && node[0].getAttribute('cloneuuid'))
-								{
+						var changeX = event.screenX- dragStartEvent.screenX;
+						var changeY = event.screenY- dragStartEvent.screenY;
+						for(var i=0;i<selectionToDrag.length;i++) {
+							var node = selectionToDrag[i];
+							if (node[0] && node[0].getAttribute('cloneuuid')){
 									node[0].location.x += changeX;
 									node[0].location.y += changeY;
 									var css = { top: node[0].location.y, left: node[0].location.x }
 									node.css(css);
+							}
+							else {
+								var beanModel = editorScope.getBeanModel(node);
+								if (beanModel){
+									beanModel.location.y = beanModel.location.y + changeY;
+									beanModel.location.x = beanModel.location.x + changeX;
+									var css = { top: beanModel.location.y, left: beanModel.location.x }
+									$(node).css(css);
 								}
 								else {
-									var beanModel = editorScope.getBeanModel(node);
-									if (beanModel){
-										beanModel.location.y = beanModel.location.y + changeY;
-										beanModel.location.x = beanModel.location.x + changeX;
-										var css = { top: beanModel.location.y, left: beanModel.location.x }
-										$(node).css(css);
-									}
-									else 
-									{
-										var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-										if (ghostObject)
-										{
-											editorScope.updateGhostLocation(ghostObject, ghostObject.location.x + changeX, ghostObject.location.y + changeY)
-										}	
-									}
+									var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+									if (ghostObject) {
+										editorScope.updateGhostLocation(ghostObject, ghostObject.location.x + changeX, ghostObject.location.y + changeY)
+									}	
 								}
 							}
-							editorScope.refreshEditorContent();
-							dragStartEvent = event;
 						}
+						editorScope.refreshEditorContent();
+						dragStartEvent = event;
 					}
 				}
 			}

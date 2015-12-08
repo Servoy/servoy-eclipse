@@ -80,7 +80,12 @@ angular.module('editorContent',['servoyApp'])
 				 return formUrl;
 			 }
 		 }
-	 }
+	 };
+	 
+	 $rootScope.getDesignFormControllerScope = function () {
+	     return $editorContentService.getControllerScope();
+	 };
+	 
  }).controller("DesignForm",function($scope, $editorContentService){
 	
 	 $scope.formStyle = {left:"0px",right:"0px",top:"0px",bottom:"0px"}
@@ -240,6 +245,9 @@ angular.module('editorContent',['servoyApp'])
 		 },
 		 setControllerScope: function(scope) {
 			 controllerScope = scope;
+		 },
+		 getControllerScope: function() {
+			 return controllerScope;
 		 } 
 		 
 	 }

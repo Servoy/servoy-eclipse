@@ -259,7 +259,7 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 				if(node)
 				{
 					var name = node.getAttribute("name");
-					return $scope.getFormState().model[name];
+					return editorContentRootScope.getDesignFormControllerScope().model(name);
 				}
 				return null;
 			}
@@ -270,7 +270,7 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 				{
 					var name = node.getAttribute("name");
 					if (name)
-						return $scope.getFormState().model[name];
+						return editorContentRootScope.getDesignFormControllerScope().model(name);
 					else
 						{
 							var ghostObject = $scope.getGhost(node.getAttribute("svy-id"));
@@ -401,7 +401,7 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 						var promise = $editorService.getPartsStyles();
 						promise.then(function (result){
 							var partsStyle = result.parts;
-							var formScope = $scope.getFormState().getScope();
+							var formScope = editorContentRootScope.getDesignFormControllerScope();
 							for (i = 0; i < partsStyle.length; i++) {
 								formScope[partsStyle[i].name + 'Style'] = partsStyle[i].style 
 							}
@@ -531,12 +531,6 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 			
 			$scope.isAbsoluteFormLayout = function() {
 				return formLayout == "absolute";
-			}
-
-			$scope.getFormState = function() {
-				var state = servoyInternal.initFormState(formName); // this is a normal direct get if no init config is given
-				if (state) $scope.lastState = state;
-				return $scope.lastState;
 			}
 
 			$scope.refreshEditorContent = function() {
