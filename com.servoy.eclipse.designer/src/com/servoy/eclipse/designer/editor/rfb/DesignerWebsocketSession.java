@@ -176,7 +176,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						if (fe.getName().equals(name))
 						{
 							FormLayoutGenerator.generateFormElementWrapper(w, fe, true, flattenedForm);
-							FormLayoutGenerator.generateFormElement(w, fe, true, highlight);
+							FormLayoutGenerator.generateFormElement(w, fe, flattenedForm, true, highlight);
 							FormLayoutGenerator.generateEndDiv(w);
 							break;
 						}
