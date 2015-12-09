@@ -166,13 +166,13 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.j2db.persistence.AbstractRepository#getRootObjectCache()
 	 */
 	@Override
 	protected RootObjectCache getRootObjectCache() throws RepositoryException
 	{
-		// first just call the servoy model so that we don't get sync block in RootObjectCache 
+		// first just call the servoy model so that we don't get sync block in RootObjectCache
 		// that again calls loadRootObject below that wants to load the ServoyModel
 		ServoyModelFinder.getServoyModel();
 		return super.getRootObjectCache();
@@ -322,7 +322,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 	/**
 	 * Reads the meta data for the given project and adds it to the cache. This is useful for Servoy-enabling projects in Eclipse (it will allow the creation of
 	 * solution objects for that project) during runtime (imported projects, checked-out projects).
-	 * 
+	 *
 	 * @param projectName the name of the Servoy Eclipse project.
 	 * @return the meta data for that project's solution.
 	 */
@@ -347,8 +347,6 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 	@Override
 	public UUID resolveUUIDForElementId(int id) throws RepositoryException
 	{
-		UUID uuid = UNRESOLVED_UUID;
-
 		Integer oID = new Integer(id);
 		if (foreignElementUUIDs.containsValue(oID))
 		{
@@ -358,8 +356,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 				if (foreignElementUUIDs.get(key).equals(oID)) return key;
 			}
 		}
-
-		return uuid;
+		return null;
 	}
 
 	@Override
@@ -377,6 +374,11 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 	}
 
 	private final Map<UUID, Integer> foreignElementUUIDs = new HashMap<UUID, Integer>();
+
+	public void loadForeignElementsIDs(Map<UUID, Integer> foreignUUIDs)
+	{
+		foreignElementUUIDs.putAll(foreignUUIDs);
+	}
 
 	public void loadForeignElementsIDs(final IPersist rootObject)
 	{
@@ -510,7 +512,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 
 	/**
 	 * Only for nodes that are part of a solution tree (not for styles).
-	 * 
+	 *
 	 * @param node
 	 * @param recursive
 	 * @throws RepositoryException
@@ -607,8 +609,8 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 										}
 
 										// forms/orders.obj has now been deleted, also delete the forms/orders directory if it exists
-										String elementsDirectory = fileRelativePath.substring(0, fileRelativePath.length() -
-											SolutionSerializer.JSON_FILE_EXTENSION_SIZE);
+										String elementsDirectory = fileRelativePath.substring(0,
+											fileRelativePath.length() - SolutionSerializer.JSON_FILE_EXTENSION_SIZE);
 										if (wsa.exists(elementsDirectory))
 										{
 											wsa.delete(elementsDirectory);
@@ -635,7 +637,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 					if (wsa.exists(fileRelativePath))
 					{
 						// use fileFromPath directory for accessing fileTo. Since we are visiting depth-first the super directory has not been processed yet.
-						// In case of rename of a form and a form element in 1 save we rename elementold to elementnew in directory formnameold; directory rename 
+						// In case of rename of a form and a form element in 1 save we rename elementold to elementnew in directory formnameold; directory rename
 						// formnameold to formnamenew will be done in the visit step going up the tree.
 						String fileToName = SolutionSerializer.getFileName(o, false);
 						try
@@ -658,8 +660,8 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 									(o instanceof TableNode && oldScriptPath != null && !oldScriptPath.equals(newScriptPath)))
 								{
 									// note that the directory will be renamed below, just need to rename the file
-									if (!(o instanceof TableNode)) newScriptPath = oldScriptPath.substring(0, oldScriptPath.length() - oldScriptName.length()) +
-										newScriptName;
+									if (!(o instanceof TableNode))
+										newScriptPath = oldScriptPath.substring(0, oldScriptPath.length() - oldScriptName.length()) + newScriptName;
 									if (wsa.exists(oldScriptPath))
 									{
 										try
@@ -694,8 +696,7 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 							if (o.getTypeID() == IRepository.FORMS) // move form security file
 							{
 								String oldSecFileRelativePath = fileRelativePath.substring(0,
-									fileRelativePath.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) +
-									WorkspaceUserManager.SECURITY_FILE_EXTENSION;
+									fileRelativePath.lastIndexOf(SolutionSerializer.FORM_FILE_EXTENSION)) + WorkspaceUserManager.SECURITY_FILE_EXTENSION;
 								if (wsa.exists(oldSecFileRelativePath))
 								{
 									wsa.move(oldSecFileRelativePath,
