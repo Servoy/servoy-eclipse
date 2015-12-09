@@ -180,7 +180,8 @@ public abstract class JSONObjectTypePropertyController extends ObjectTypePropert
 		{
 			IPropertyDescriptor pd = findPD(id);
 			PersistPropertySource.adjustPropertyValueAndReset(id, pd, this);
-			return ((JSONObject)getEditableValue()).opt((String)id);
+			return PersistPropertySource.adjustPropertyValueToGet(id, pd, this);
+//			((JSONObject)getEditableValue()).opt((String)id);// this didn't do all the proper conversions (for example it ended up setting JSONObject.NULL instead of null on a controller that doesn't support that)
 		}
 
 		protected IPropertyDescriptor findPD(Object id)

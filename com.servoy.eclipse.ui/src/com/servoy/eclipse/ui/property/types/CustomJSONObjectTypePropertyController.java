@@ -159,6 +159,14 @@ public class CustomJSONObjectTypePropertyController extends JSONObjectTypeProper
 		}
 
 		@Override
+		public void defaultResetProperty(Object id)
+		{
+			PropertyDescription childPD = propertyDescription.getProperty((String)id);
+			if (childPD.hasDefault()) super.defaultResetProperty(id);
+			else underlyingPropertySource.defaultResetProperty(id);
+		}
+
+		@Override
 		protected Object getDefaultElementProperty(Object id)
 		{
 			return propertyDescription.getProperty((String)id).getDefaultValue();

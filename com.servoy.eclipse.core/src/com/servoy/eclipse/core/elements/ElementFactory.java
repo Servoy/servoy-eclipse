@@ -140,8 +140,7 @@ public class ElementFactory
 
 	public static GraphicalComponent createButton(ISupportFormElements parent, ScriptMethod method, String text, Point location) throws RepositoryException
 	{
-		GraphicalComponent button = parent.createNewGraphicalComponent(
-			new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
+		GraphicalComponent button = parent.createNewGraphicalComponent(new java.awt.Point(location == null ? 0 : location.x, location == null ? 0 : location.y));
 		button.setOnActionMethodID(method == null ? -1 : method.getID());
 		button.setOnDoubleClickMethodID(-1);
 		button.setOnRightClickMethodID(-1);
@@ -259,8 +258,8 @@ public class ElementFactory
 	public static IPersist copyComponent(ISupportChilds parent, AbstractBase component, int x, int y, int type, Map<String, String> groupMap)
 		throws RepositoryException
 	{
-		String name = (component instanceof ISupportUpdateableName)
-			? createUniqueName(parent, type, ((ISupportUpdateableName)component).getName(), INameGenerate.GENERATE_NAME_PREPEND_CHAR) : null;
+		String name = (component instanceof ISupportUpdateableName) ? createUniqueName(parent, type, ((ISupportUpdateableName)component).getName(),
+			INameGenerate.GENERATE_NAME_PREPEND_CHAR) : null;
 		// place copied group
 		String groupId = (component instanceof IFormElement) ? ((IFormElement)component).getGroupID() : null;
 		String newGroupId = null;
@@ -285,8 +284,7 @@ public class ElementFactory
 			}
 		}
 		IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-		AbstractBase copy = (AbstractBase)component.cloneObj(parent, false, validator, true, true,
-			true /* when component is an override we want a flattened one */);
+		AbstractBase copy = (AbstractBase)component.cloneObj(parent, false, validator, true, true, true /* when component is an override we want a flattened one */);
 		if (copy instanceof ISupportBounds)
 		{
 			((ISupportBounds)copy).setLocation(new java.awt.Point(x, y));
@@ -571,7 +569,7 @@ public class ElementFactory
 					lst.add(label);
 
 					java.awt.Dimension labeldim = label.getSize();
-					labeldim.width = placeHorizontal ? 140 /* field width */ : 80;
+					labeldim.width = placeHorizontal ? 140 /* field width */: 80;
 					label.setSize(labeldim);
 
 					if (fillName)
@@ -871,8 +869,7 @@ public class ElementFactory
 		}
 
 		Portal portal = form.createNewPortal(
-			ElementFactory.createUniqueName(form, IRepository.ELEMENTS, portalName.toString(), INameGenerate.GENERATE_NAME_PREPEND_N),
-			new java.awt.Point(x, y));
+			ElementFactory.createUniqueName(form, IRepository.ELEMENTS, portalName.toString(), INameGenerate.GENERATE_NAME_PREPEND_N), new java.awt.Point(x, y));
 		if (dataProviders != null && dataProviders.length > 0)
 		{
 			Dimension portaldim = new Dimension(dataProviders.length * 140, 50);
@@ -896,8 +893,10 @@ public class ElementFactory
 		JSONObject json = new JSONObject();
 		if (templateType == StringResource.FORM_TEMPLATE)
 		{
-			json.put(Template.PROP_FORM, cleanTemplateElement(repository, flattenedSolution, form,
-				SolutionSerializer.generateJSONObject(form, false, false, repository, false, null), null));
+			json.put(
+				Template.PROP_FORM,
+				cleanTemplateElement(repository, flattenedSolution, form, SolutionSerializer.generateJSONObject(form, false, false, repository, false, null),
+					null));
 		}
 		json.put(Template.PROP_LOCATION, PersistHelper.createPointString(location));
 		JSONArray elements = new JSONArray();
@@ -1080,7 +1079,8 @@ public class ElementFactory
 						try
 						{
 							ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(n == 0 ? name : (name + n), -1,
-								new ValidatorSearchContext(parent, IRepository.ELEMENTS), false);
+								new ValidatorSearchContext(parent instanceof Form ? parent : parent.getAncestor(IRepository.FORMS), IRepository.ELEMENTS),
+								false);
 						}
 						catch (RepositoryException e)
 						{

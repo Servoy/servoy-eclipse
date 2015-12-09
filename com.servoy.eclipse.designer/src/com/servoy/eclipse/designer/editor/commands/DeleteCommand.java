@@ -1,7 +1,6 @@
 package com.servoy.eclipse.designer.editor.commands;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -41,25 +40,29 @@ public class DeleteCommand extends AbstractHandler implements IHandler
 	private List<IPersist> getSelection()
 	{
 		ArrayList<IPersist> result = new ArrayList<IPersist>();
-		ContentOutline contentOutline = DesignerUtil.getContentOutline();
-		if (contentOutline != null)
+		for (Object next : getSelectionList())
 		{
-			Iterator iterator = ((IStructuredSelection)contentOutline.getSelection()).iterator();
-			while (iterator.hasNext())
+			if (next instanceof PersistContext)
 			{
-				Object next = iterator.next();
-				if (next instanceof PersistContext)
-				{
-					PersistContext persistContext = (PersistContext)next;
-					if (persistContext.getPersist() != null) result.add(persistContext.getPersist());
-				}
-				else if (next instanceof IPersist)
-				{
-					result.add((IPersist)next);
-				}
+				PersistContext persistContext = (PersistContext)next;
+				if (persistContext.getPersist() != null) result.add(persistContext.getPersist());
+			}
+			else if (next instanceof IPersist)
+			{
+				result.add((IPersist)next);
 			}
 		}
 		return result;
+	}
+
+	private List<Object> getSelectionList()
+	{
+		ContentOutline contentOutline = DesignerUtil.getContentOutline();
+		if (contentOutline != null)
+		{
+			return ((IStructuredSelection)contentOutline.getSelection()).toList();
+		}
+		return new ArrayList<Object>();
 	}
 
 	private BaseVisualFormEditor getEditorPart()
@@ -81,7 +84,7 @@ public class DeleteCommand extends AbstractHandler implements IHandler
 	@Override
 	public boolean isEnabled()
 	{
-		return getSelection().size() > 0;
+		return getSelection().size() > 0 && !DesignerUtil.containsInheritedElement(getSelectionList());
 	}
 
 }

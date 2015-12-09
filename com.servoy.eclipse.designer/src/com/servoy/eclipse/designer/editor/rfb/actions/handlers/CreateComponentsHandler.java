@@ -36,26 +36,14 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.Debug;
 
-/**
- * @author user
- *
- */
 public class CreateComponentsHandler extends CreateComponentHandler
 {
 
-	/**
-	 * @param editorPart
-	 * @param selectionProvider
-	 */
 	public CreateComponentsHandler(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider)
 	{
 		super(editorPart, selectionProvider);
 	}
 
-	/**
-	 * @param methodName
-	 * @param args
-	 */
 	@Override
 	public Object executeMethod(String methodName, final JSONObject args)
 	{
@@ -130,4 +118,5 @@ public class CreateComponentsHandler extends CreateComponentHandler
 		});
 		return null;
 	}
+
 }

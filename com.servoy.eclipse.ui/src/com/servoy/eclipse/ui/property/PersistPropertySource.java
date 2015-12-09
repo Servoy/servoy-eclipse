@@ -138,12 +138,14 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
+import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IBasicWebComponent;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -181,12 +183,12 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.scripting.FunctionDefinition;
+import com.servoy.j2db.server.ngclient.property.ComponentTypeConfig;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
+import com.servoy.j2db.server.ngclient.property.ICanBeLinkedToFoundset;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
@@ -712,7 +714,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 	public static IPropertyDescriptor createPropertyDescriptor(IPropertySource propertySource, final String id, final PersistContext persistContext,
 		boolean readOnly, PropertyDescriptorWrapper propertyDescriptor, String displayName, FlattenedSolution flattenedEditingSolution, Form form)
-			throws RepositoryException
+		throws RepositoryException
 	{
 		if (!propertyDescriptor.propertyDescriptor.isProperty())
 		{
@@ -875,12 +877,12 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							// can be edited as text
 							return new PropertyController<Object, String>(id, displayName,
 								new BeanAsTextPropertyConverter(propertyDescriptor.getPropertyEditor()), null, new ICellEditorFactory()
+							{
+								public CellEditor createPropertyEditor(Composite parent)
 								{
-									public CellEditor createPropertyEditor(Composite parent)
-									{
-										return new TextCellEditor(parent);
-									}
-								});
+									return new TextCellEditor(parent);
+								}
+							});
 						}
 					}
 					catch (RuntimeException e)
@@ -986,9 +988,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					{
 						return new MethodPropertyController<FunctionDefinition>(id, displayName, persistContext,
 							new MethodListOptions(Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)), false,
-								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeForm)),
-								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeGlobal)),
-								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeFoundset)), form == null ? null : form.getTable()))
+							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeForm)),
+							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeGlobal)),
+							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeFoundset)), form == null ? null : form.getTable()))
 						{
 							@Override
 							protected IPropertyConverter<FunctionDefinition, Object> createConverter()
@@ -1003,9 +1005,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						// chain with String to FunctionDefinition converter
 						return new MethodPropertyController<String>(id, displayName, persistContext,
 							new MethodListOptions(Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)), false,
-								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeForm)),
-								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeGlobal)),
-								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeFoundset)), form == null ? null : form.getTable()))
+							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeForm)),
+							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeGlobal)),
+							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeFoundset)), form == null ? null : form.getTable()))
 						{
 							@Override
 							protected IPropertyConverter<String, Object> createConverter()
@@ -1958,8 +1960,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 			if (persistContext.getPersist() instanceof AbstractBase &&
 				beanPropertyDescriptor.valueObject == persistContext.getPersist() /*
-																					 * not a bean property
-																					 */)
+																																		 * not a bean property
+																																		 */)
 			{
 				((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
 				if (persistContext.getPersist() instanceof ISupportExtendsID &&
@@ -2459,7 +2461,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Form flattenedSuperForm = flattenedEditingSolution.getFlattenedForm(
 					flattenedEditingSolution.getForm(((Form)persistContext.getPersist()).getExtendsID()));
 				propertyReadOnly = flattenedSuperForm == null /* superform not found? make readonly for safety */
-				|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
+					|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
 
 				if (propertyReadOnly && flattenedSuperForm != null && ((Form)persistContext.getPersist()).getDataSource() != null &&
 					!((Form)persistContext.getPersist()).getDataSource().equals(flattenedSuperForm.getDataSource()))
@@ -2602,7 +2604,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				// the correct string for that font
 				return new PropertyController<String, String>(id, displayName,
 					new ChainedPropertyConverter<String, java.awt.Font, String>(
-						new InversedPropertyConverter<String, java.awt.Font>(PropertyFontConverter.INSTANCE), PropertyFontConverter.INSTANCE),
+					new InversedPropertyConverter<String, java.awt.Font>(PropertyFontConverter.INSTANCE), PropertyFontConverter.INSTANCE),
 					FontLabelProvider.INSTANCE, new ICellEditorFactory()
 					{
 						public CellEditor createPropertyEditor(Composite parent)
@@ -2624,29 +2626,32 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			}
 		}
 
-		if (propertyType instanceof FoundsetLinkedPropertyType< ? , ? >)
+		// see if the property (dataprovider/tagstring) needs to point to a different foundset (not the form's foundset)
+		IPersist persistContainingFoundsetProperty = persistContext.getPersist();
+		if (persistContainingFoundsetProperty instanceof IBasicWebObject)
 		{
-			FoundsetLinkedPropertyType< ? , ? > foundsetLinkedPropertyType = (FoundsetLinkedPropertyType< ? , ? >)propertyType;
-			IPropertyType< ? > possibleYieldType = foundsetLinkedPropertyType.getPossibleYieldType();
+			persistContainingFoundsetProperty = ((IBasicWebObject)persistContainingFoundsetProperty).getParentComponent();
+		}
+		String forFoundsetName = differentFoundsetDueToProperty(propertyDescription);
+		if (forFoundsetName == null)
+		{
+			forFoundsetName = differentFoundsetDueToComponent(propertyDescription, persistContainingFoundsetProperty);
+			if (forFoundsetName != null)
+			{
+				// so it's a child component linked to the foundset property of (another) parent component; so we must be looking in the parent component for the foundset property
+				persistContainingFoundsetProperty = persistContainingFoundsetProperty.getParent().getAncestor(IRepository.WEBCOMPONENTS);
+			}
+		}
+		if (forFoundsetName != null)
+		{
+			IPropertyType< ? > typeForPropertyController = (propertyType instanceof FoundsetLinkedPropertyType< ? , ? >)
+				? ((FoundsetLinkedPropertyType< ? , ? >)propertyType).getPossibleYieldType() : propertyType;
 			Table table = null;
-			String forFoundsetName = ((FoundsetLinkedConfig)propertyDescription.getConfig()).getForFoundsetName();
-			JSONObject json = null; // we want the json of the component
-			if (persistContext.getPersist() instanceof WebComponent)
-			{
-				WebComponent bean = (WebComponent)persistContext.getPersist();
-				json = bean.getJson();
 
-			}
-			else if (persistContext.getPersist() instanceof WebCustomType)
+			JSONObject json = null; // we want the json of the component
+			if (persistContainingFoundsetProperty instanceof IBasicWebComponent)
 			{
-				WebCustomType webCustomType = (WebCustomType)persistContext.getPersist();
-				IBasicWebComponent ancestor = webCustomType.getParentComponent();
-				json = ancestor.getJson();
-			}
-			else if (persistContext.getPersist() instanceof IBasicWebComponent)
-			{
-				IBasicWebComponent bean = (IBasicWebComponent)persistContext.getPersist();
-				json = bean.getJson();
+				json = ((IBasicWebComponent)persistContainingFoundsetProperty).getJson();
 			}
 			try
 			{
@@ -2679,11 +2684,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Debug.log(e);
 			}
 
-			if (possibleYieldType == TagStringPropertyType.INSTANCE)
+			if (typeForPropertyController instanceof TagStringPropertyType)
 			{
 				return tagStringController(persistContext, id, displayName, propertyDescription, flattenedEditingSolution, table);
 			}
-			else
+			else if (typeForPropertyController instanceof DataproviderPropertyType)
 			{
 				final DataProviderOptions options = new DataProviderTreeViewer.DataProviderOptions(true, table != null, table != null, table != null, true,
 					true, table != null, table != null, INCLUDE_RELATIONS.NESTED, true, true, null);
@@ -2918,14 +2923,32 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	}
 
 	/**
-	 * @param persistContext
-	 * @param id
-	 * @param displayName
-	 * @param propertyDescription
-	 * @param flattenedEditingSolution
-	 * @param finalTable
-	 * @return
+	 * Checks to see if a property should point to a different foundset then the form's foundset because it is a child property of a foundset(property)-linked child component.
+	 * If it is, then it return the name of the foundset property
+	 * @param webComponent context persist that could be a web component (if propertyDescription is a property or nested property of a webcomponent).
 	 */
+	private static String differentFoundsetDueToComponent(PropertyDescription propertyDescription, IPersist webComponent)
+	{
+		String forFoundsetName = null;
+		if (propertyDescription.getType() instanceof ICanBeLinkedToFoundset< ? , ? > && webComponent instanceof ChildWebComponent)
+		{
+			PropertyDescription childComponentPD = ((ChildWebComponent)webComponent).getPropertyDescription();
+			if (childComponentPD.getConfig() != null) forFoundsetName = ((ComponentTypeConfig)childComponentPD.getConfig()).forFoundset;
+		}
+		return forFoundsetName;
+	}
+
+	private static String differentFoundsetDueToProperty(PropertyDescription propertyDescription)
+	{
+		String forFoundsetName = null;
+		if (propertyDescription.getType() instanceof FoundsetLinkedPropertyType< ? , ? >)
+		{
+			FoundsetLinkedPropertyType< ? , ? > foundsetLinkedPropertyType = (FoundsetLinkedPropertyType< ? , ? >)propertyDescription.getType();
+			forFoundsetName = ((FoundsetLinkedConfig)propertyDescription.getConfig()).getForFoundsetName();
+		}
+		return forFoundsetName;
+	}
+
 	private static IPropertyDescriptor tagStringController(final PersistContext persistContext, final String id, final String displayName,
 		final PropertyDescription propertyDescription, final FlattenedSolution flattenedEditingSolution, final Table finalTable)
 	{

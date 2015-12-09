@@ -58,11 +58,6 @@ public class FormUpdater implements Runnable
 	private final List<Form> changedForms;
 	private final INGClientWebsocketSession websocketSession;
 
-	/**
-	 * @param frms
-	 * @param changedForm
-	 * @param changedSolution
-	 */
 	FormUpdater(INGClientWebsocketSession websocketSession, Map<Form, List<IFormElement>> frms, List<Form> changedForms)
 	{
 		this.websocketSession = websocketSession;
@@ -260,11 +255,6 @@ public class FormUpdater implements Runnable
 		}
 	}
 
-	/**
-	 * @param components
-	 * @param name
-	 * @return
-	 */
 	private static WebFormComponent findWebComponent(Collection<WebComponent> components, String name)
 	{
 		if (components == null) return null;

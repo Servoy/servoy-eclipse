@@ -143,6 +143,7 @@ public class DesignerFilter implements Filter
 					JSONObject jsonObject = new JSONObject(json);
 					JSONArray ordered = null;
 					if (jsonObject.has(layoutType)) ordered = (JSONArray)jsonObject.get(layoutType);
+
 					final ArrayList<String> orderPreference = new ArrayList<String>();
 					if (ordered != null)
 					{
@@ -150,6 +151,11 @@ public class DesignerFilter implements Filter
 						{
 							if (ordered.get(i) instanceof String) orderPreference.add(ordered.getString(i));
 						}
+					}
+					// orderPreference array has to contain all keys, otherwise sorting does not work correctly
+					for (String key : orderedKeys)
+					{
+						if (!orderPreference.contains(key)) orderPreference.add(key);
 					}
 
 					if (orderPreference.size() > 0)
@@ -170,7 +176,6 @@ public class DesignerFilter implements Filter
 							}
 						});
 					}
-
 					for (String key : orderedKeys)
 					{
 						boolean startedArray = false;

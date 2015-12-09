@@ -25,6 +25,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.GhostHandler;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.Debug;
@@ -48,8 +49,9 @@ public class AddContainerContributionItem extends CompoundContributionItem
 	protected IContributionItem[] getContributionItems()
 	{
 		List<IContributionItem> list = new ArrayList<IContributionItem>();
-		Object persist = DesignerUtil.getContentOutlineSelection();
-		if (persist instanceof PersistContext) persist = ((PersistContext)persist).getPersist();
+		PersistContext persistContext = DesignerUtil.getContentOutlineSelection();
+		IPersist persist = null;
+		if (persistContext != null) persist = persistContext.getPersist();
 		if (persist instanceof LayoutContainer)
 		{
 			WebComponentPackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
