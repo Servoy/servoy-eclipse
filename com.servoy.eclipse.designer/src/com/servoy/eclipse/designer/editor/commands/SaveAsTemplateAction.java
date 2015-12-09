@@ -189,6 +189,10 @@ public class SaveAsTemplateAction extends SelectionAction
 				else persists.add(persist);
 
 			}
+			else if (selected instanceof Form)
+			{
+				form = (Form)selected;
+			}
 		}
 
 		int resourceType = StringResource.ELEMENTS_TEMPLATE;

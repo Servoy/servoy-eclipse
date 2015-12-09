@@ -141,10 +141,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		exportModel.setExportReferencedModules(activeSolution.getModulesNames() != null);
 
 
-		int hasErrs = BuilderUtils.getMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
+		int hasErrs = BuilderUtils.getMarkers(
+			new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
 		if (hasErrs == BuilderUtils.HAS_ERROR_MARKERS)
 		{
-			activeSolutionDbDownErrors = TableDefinitionUtils.hasDbDownErrorMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
+			activeSolutionDbDownErrors = TableDefinitionUtils.hasDbDownErrorMarkers(
+				new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
 		}
 		else
 		{
@@ -171,6 +173,10 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 					if (event.getSelectedPage() == modulesSelectionPage)
 					{
 						modulesSelectionPage.checkStateChanged(null);
+					}
+					if (event.getSelectedPage() == passwordPage)
+					{
+						passwordPage.passwordText.setFocus();
 					}
 				}
 			});
@@ -268,7 +274,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			super("page1");
 			setTitle("Choose the destination file");
 			setDescription("Select the file where you want your solution exported to");
-			projectProblemsType = BuilderUtils.getMarkers(new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
+			projectProblemsType = BuilderUtils.getMarkers(
+				new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
 			if (projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS)
 			{
 				if (modulesSelectionPage.hasDBDownErrors())
@@ -678,7 +685,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			}
 			else if (event.widget == exportI18NDataButton) exportModel.setExportI18NData(exportI18NDataButton.getSelection());
 			else if (event.widget == exportUsersButton) exportModel.setExportUsers(exportUsersButton.getSelection());
-			else if (event.widget == exportAllTablesFromReferencedServers) exportModel.setExportAllTablesFromReferencedServers(exportAllTablesFromReferencedServers.getSelection());
+			else if (event.widget == exportAllTablesFromReferencedServers)
+				exportModel.setExportAllTablesFromReferencedServers(exportAllTablesFromReferencedServers.getSelection());
 			else if (event.widget == exportUsingDbiFileInfoOnlyButton)
 			{
 				exportModel.setExportUsingDbiFileInfoOnly(exportUsingDbiFileInfoOnlyButton.getSelection());
@@ -810,7 +818,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 					projectProblemsType = BuilderUtils.HAS_WARNING_MARKERS;
 					setMessage(DB_DOWN_WARNING, IMessageProvider.WARNING);
 				}
-				else setErrorMessage("There are errors in the modules that will prevent the solution from functioning well. Please solve errors (problems view) first.");
+				else setErrorMessage(
+					"There are errors in the modules that will prevent the solution from functioning well. Please solve errors (problems view) first.");
 			}
 			else if (projectProblemsType == BuilderUtils.HAS_WARNING_MARKERS)
 			{
@@ -873,7 +882,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see com.servoy.eclipse.ui.wizards.ICheckBoxView#selectAll()
 		 */
 		@Override
@@ -885,7 +894,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see com.servoy.eclipse.ui.wizards.ICheckBoxView#deselectAll()
 		 */
 		@Override

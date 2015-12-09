@@ -458,7 +458,7 @@ public class TypeCreator extends TypeCache
 	private void createSpecTypeDefinitions()
 	{
 		WebComponentSpecification[] webComponentSpecifications = WebComponentSpecProvider.getInstance().getAllWebComponentSpecifications();
-		WebComponentSpecification[] webServiceSpecifications = NGUtils.getAllPublicWebServiceSpecifications();
+		WebComponentSpecification[] webServiceSpecifications = NGUtils.getAllNonServoyWebServiceSpecifications();
 		Collection<WebComponentSpecification> specs = new ArrayList<WebComponentSpecification>();
 		Collections.addAll(specs, webComponentSpecifications);
 		Collections.addAll(specs, webServiceSpecifications);
@@ -2761,7 +2761,7 @@ public class TypeCreator extends TypeCache
 			ClientSupport clientSupport = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
 			if (clientSupport != null && clientSupport.supports(ClientSupport.ng))
 			{
-				WebComponentSpecification[] serviceSpecifications = NGUtils.getAllPublicWebServiceSpecifications();
+				WebComponentSpecification[] serviceSpecifications = NGUtils.getAllNonServoyWebServiceSpecifications();
 				for (WebComponentSpecification spec : serviceSpecifications)
 				{
 					if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)

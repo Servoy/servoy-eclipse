@@ -29,8 +29,8 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDeveloperRepository;
+import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
@@ -73,11 +73,16 @@ public class FormElementDeleteCommand extends Command
 		{
 			throw new IllegalArgumentException();
 		}
-		for (IPersist child : children)
+		for (int i = 0; i < children.length; i++)
 		{
+			IPersist child = children[i];
 			if (child == null || child.getParent() == null)
 			{
 				throw new IllegalArgumentException();
+			}
+			else if (child instanceof IFlattenedPersistWrapper)
+			{
+				children[i] = ((IFlattenedPersistWrapper)child).getWrappedPersist();
 			}
 		}
 		this.children = children;

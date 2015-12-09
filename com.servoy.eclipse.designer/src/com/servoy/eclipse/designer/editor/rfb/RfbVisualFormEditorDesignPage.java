@@ -318,7 +318,6 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	@Override
 	public void refreshPersists(List<IPersist> persists)
 	{
-		if (persists == null) return;
 		IWindow window = null;
 		final INGClientWebsocketSession editorContentWebsocketSession = (INGClientWebsocketSession)WebsocketSessionManager.getSession(
 			WebsocketSessionFactory.DESIGN_ENDPOINT, CONTENT_SESSION_ID);

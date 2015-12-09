@@ -16,7 +16,10 @@
  */
 package com.servoy.eclipse.ui.views;
 
+import java.util.Map;
+
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -46,6 +49,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISaveablePart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.views.properties.IPropertySheetEntry;
 import org.eclipse.ui.views.properties.IPropertySheetEntryListener;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -63,7 +67,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * PropertySheetPage with additional Servoy features.
- * 
+ *
  * @author acostescu
  */
 
@@ -71,6 +75,13 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 {
 	private Composite composite;
 	private Label propertiesLabel;
+	private final Map<String, IAction> actions;
+
+	public ModifiedPropertySheetPage(Map<String, IAction> actions)
+	{
+		super();
+		this.actions = actions;
+	}
 
 	@Override
 	public void createControl(Composite parent)
@@ -88,10 +99,10 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 				// try to delegate the sorting to the entries
 				if (entryA instanceof IAdaptable && entryB instanceof IAdaptable)
 				{
-					Comparable comparableA = (Comparable)((IAdaptable)entryA).getAdapter(Comparable.class);
+					Comparable comparableA = ((IAdaptable)entryA).getAdapter(Comparable.class);
 					if (comparableA != null)
 					{
-						Comparable comparableB = (Comparable)((IAdaptable)entryB).getAdapter(Comparable.class);
+						Comparable comparableB = ((IAdaptable)entryB).getAdapter(Comparable.class);
 						if (comparableB != null)
 						{
 							return comparableA.compareTo(comparableB);
@@ -220,8 +231,9 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 							{
 								String text = null;
 								if ((RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONFOCUSLOSTMETHODID.getPropertyName(), null).equals(
-									item.getText(0)) || RepositoryHelper.getDisplayName(
-									StaticContentSpecLoader.PROPERTY_ONELEMENTFOCUSLOSTMETHODID.getPropertyName(), null).equals(item.getText(0))) ||
+									item.getText(0)) ||
+									RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONELEMENTFOCUSLOSTMETHODID.getPropertyName(), null).equals(
+										item.getText(0))) ||
 									RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONDATACHANGEMETHODID.getPropertyName(), null).equals(
 										item.getText(0)))
 								{
@@ -298,10 +310,25 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 		}
 	}
 
+
 	@Override
 	public Control getControl()
 	{
 		return composite;
+	}
+
+	@Override
+	public void init(IPageSite pageSite)
+	{
+		super.init(pageSite);
+		if (actions != null && actions.size() > 0)
+		{
+			IActionBars bars = pageSite.getActionBars();
+			for (String id : actions.keySet())
+			{
+				bars.setGlobalActionHandler(id, actions.get(id));
+			}
+		}
 	}
 
 	/**

@@ -42,24 +42,14 @@ public class DesignerValueListPropertyType extends ValueListPropertyType
 
 	public static final DesignerValueListPropertyType DESIGNER_INSTANCE = new DesignerValueListPropertyType();
 
-	/**
-	*
-	*/
 	protected DesignerValueListPropertyType()
 	{
 		super();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType#toSabloComponentValue(java.lang.Object,
-	 * org.sablo.specification.PropertyDescription, com.servoy.j2db.server.ngclient.INGFormElement, com.servoy.j2db.server.ngclient.WebFormComponent,
-	 * com.servoy.j2db.server.ngclient.DataAdapterList)
-	 */
 	@Override
 	public ValueListTypeSabloValue toSabloComponentValue(final Object formElementValue, final PropertyDescription pd, final INGFormElement formElement,
-		final WebFormComponent component, DataAdapterList dataAdapterList)
+		final WebFormComponent comp, DataAdapterList dataAdapterList)
 	{
 		if (dataAdapterList.getApplication() instanceof DesignNGClient)
 		{
@@ -68,7 +58,7 @@ public class DesignerValueListPropertyType extends ValueListPropertyType
 			ValueListConfig config = (ValueListConfig)pd.getConfig();
 			String dataproviderID = (pd.getConfig() != null ? (String)formElement.getPropertyValue(config.getFor()) : null);
 
-			valueList = getIValueList(formElementValue, pd, formElement, component, dataAdapterList, val, valueList, config, dataproviderID);
+			valueList = getIValueList(formElementValue, pd, formElement, comp, dataAdapterList, val, valueList, config, dataproviderID);
 
 			return valueList != null ? new ValueListTypeSabloValue(valueList, dataAdapterList, config, dataproviderID, pd)
 			{
@@ -81,7 +71,7 @@ public class DesignerValueListPropertyType extends ValueListPropertyType
 					}
 					else
 					{
-						setValueList(getIValueList(formElementValue, pd, formElement, component, dataAdapterList, null, valueList, config, dataproviderID));
+						setValueList(getIValueList(formElementValue, pd, formElement, comp, dataAdapterList, null, valueList, config, dataproviderID));
 						return super.getJavaValueForJSON();
 					}
 				}
@@ -89,7 +79,7 @@ public class DesignerValueListPropertyType extends ValueListPropertyType
 		}
 		else
 		{
-			return super.toSabloComponentValue(formElementValue, pd, formElement, component, dataAdapterList);
+			return super.toSabloComponentValue(formElementValue, pd, formElement, comp, dataAdapterList);
 		}
 	}
 

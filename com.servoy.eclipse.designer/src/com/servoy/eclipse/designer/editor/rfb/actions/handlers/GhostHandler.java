@@ -32,6 +32,7 @@ import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
+import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.VisiblePropertyType;
 import org.sablo.websocket.IServerService;
 import org.sablo.websocket.utils.PropertyUtils;
@@ -45,6 +46,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebComponent;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -57,7 +59,6 @@ import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
@@ -91,7 +92,7 @@ public class GhostHandler implements IServerService
 		writer.object();
 		writer.key("ghostContainers");
 		writer.array();
-		editorPart.getForm().acceptVisitor(new IPersistVisitor()
+		ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm()).acceptVisitor(new IPersistVisitor()
 		{
 
 //			private String computeLegacyBeanGhostUUID(Bean bean, PropertyDescription pd, String simpleTypeName, int index)
@@ -127,7 +128,7 @@ public class GhostHandler implements IServerService
 							writer.array();
 							if (bean instanceof WebComponent)
 							{
-								for (WebCustomType p : ((WebComponent)bean).getAllFirstLevelArrayOfOrCustomPropertiesFlattened())
+								for (IChildWebObject p : ((WebComponent)bean).getAllPersistMappedProperties())
 								{
 									String text = p.getJsonKey() + (p.getIndex() >= 0 ? "[" + p.getIndex() + "]" : "");
 
@@ -139,11 +140,10 @@ public class GhostHandler implements IServerService
 									}
 
 									Object configObject;
-									if (p.getIndex() >= 0) configObject = ((PropertyDescription)((WebComponent)bean).getPropertyDescription()).getProperty(
-										p.getJsonKey()).getConfig();
-									else configObject = ((PropertyDescription)p.getPropertyDescription()).getConfig();
+									if (p.getIndex() >= 0) configObject = ((WebComponent)bean).getSpecification().getProperty(p.getJsonKey()).getConfig();
+									else configObject = p.getPropertyDescription().getConfig();
 
-									if (isDroppable((PropertyDescription)p.getPropertyDescription(), configObject))
+									if (isDroppable(p.getPropertyDescription(), configObject))
 									{
 										writeGhostToJSON(writer, text, p.getUUID().toString(), p.getIndex());
 									}
@@ -396,6 +396,7 @@ public class GhostHandler implements IServerService
 						typesSubset.add(IRepository.FIELDS);
 						typesSubset.add(IRepository.GRAPHICALCOMPONENTS);
 						typesSubset.add(IRepository.BEANS);
+						typesSubset.add(IRepository.WEBCOMPONENTS);
 						typesSubset.add(IRepository.SHAPES);
 						typesSubset.add(IRepository.RECTSHAPES);
 						try
@@ -419,6 +420,7 @@ public class GhostHandler implements IServerService
 										while (fields.hasNext())
 										{
 											IPersist next = fields.next();
+											if (!isVisible(next)) continue;
 											// TODO check responsive/relative layout and ghosts...
 											Part p = null;
 											if (!f.getParts().hasNext() ||
@@ -561,23 +563,7 @@ public class GhostHandler implements IServerService
 				{
 					outsideElements.add(fe);
 				}
-
-				boolean visible = true;
-				if (fe instanceof WebComponent && fe.getFlattenedPropertiesMap().containsKey("json"))
-				{
-					JSONObject obj = (JSONObject)fe.getFlattenedPropertiesMap().get("json");
-					WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)fe).getTypeName());
-					if (spec != null && !spec.getProperties(VisiblePropertyType.INSTANCE).isEmpty())
-					{
-						PropertyDescription pd = spec.getProperties(VisiblePropertyType.INSTANCE).iterator().next();
-						visible = obj.optBoolean(pd.getName(), true);
-					}
-				}
-				else
-				{
-					visible = fe.getVisible();
-				}
-				if (!visible) invisibleElements.add(fe);
+				if (!isVisible(fe)) invisibleElements.add(fe);
 			}
 		}
 		if (outsideElements.size() > 0 || invisibleElements.size() > 0)
@@ -600,6 +586,30 @@ public class GhostHandler implements IServerService
 		writer.endArray();
 		writer.endObject();
 		return new JSONObject(stringWriter.getBuffer().toString());
+	}
+
+	private boolean isVisible(IPersist persist)
+	{
+		boolean visible = true;
+		if (persist instanceof IFormElement)
+		{
+			IFormElement fe = (IFormElement)persist;
+			if (fe instanceof WebComponent && fe.getFlattenedPropertiesMap().containsKey("json"))
+			{
+				JSONObject obj = (JSONObject)fe.getFlattenedPropertiesMap().get("json");
+				WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)fe).getTypeName());
+				if (spec != null && !spec.getProperties(VisiblePropertyType.INSTANCE).isEmpty())
+				{
+					PropertyDescription pd = spec.getProperties(VisiblePropertyType.INSTANCE).iterator().next();
+					visible = obj.optBoolean(pd.getName(), true);
+				}
+			}
+			else
+			{
+				visible = fe.getVisible();
+			}
+		}
+		return visible;
 	}
 
 	/**
@@ -657,8 +667,10 @@ public class GhostHandler implements IServerService
 
 	public static boolean isDroppable(PropertyDescription propertyDescription, Object configObject)
 	{
-		return propertyDescription.getType() instanceof ComponentPropertyType ||
+		IPropertyType< ? > type = propertyDescription.getType();
+		return propertyDescription instanceof WebComponentSpecification ||
+			type instanceof ComponentPropertyType ||
+			(PropertyUtils.isCustomJSONArrayPropertyType(type) && ((CustomJSONArrayType< ? , ? >)type).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType) ||
 			(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE)));
 	}
-
 }

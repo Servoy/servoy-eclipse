@@ -36,6 +36,7 @@ import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
@@ -115,6 +116,10 @@ public class FormOutlineLabelprovider extends LabelProvider implements IPersistL
 				}
 				tag.append(">");
 				return tag.toString();
+			}
+			if (((PersistContext)element).getPersist() instanceof WebCustomType)
+			{
+				return ((WebCustomType)(((PersistContext)element).getPersist())).getTypeName();
 			}
 			return SupportNameLabelProvider.INSTANCE_DEFAULT_ANONYMOUS.getText(((PersistContext)element).getPersist());
 		}

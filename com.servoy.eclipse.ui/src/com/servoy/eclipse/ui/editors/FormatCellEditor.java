@@ -34,6 +34,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFormat;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDataProviderLookup;
@@ -122,9 +123,9 @@ public class FormatCellEditor extends TextDialogCellEditor
 						if (propertyType instanceof DataproviderPropertyType)
 						{
 							String dataProviderID = (String)((AbstractBase)persist).getProperty(propertyName);
-							if (persist instanceof WebCustomType && ((WebCustomType)persist).getJson() != null)
+							if (dataProviderID == null && persist instanceof IBasicWebObject && ((IBasicWebObject)persist).getJson() != null)
 							{
-								dataProviderID = ((WebCustomType)persist).getJson().optString(propertyName);
+								dataProviderID = ((IBasicWebObject)persist).getJson().optString(propertyName);
 							}
 							if (dataProviderID != null)
 							{

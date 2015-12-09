@@ -86,6 +86,7 @@ import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyJSONArray;
@@ -1139,7 +1140,7 @@ public class SolutionSerializer
 		property_values.put(PROP_UUID, persist.getUUID().toString());
 		property_values.put(PROP_TYPEID, new Integer(persist.getTypeID()));//just to be sure
 
-		if (persist instanceof ISupportChilds && (forceRecursive || isCompositeWithItems(persist)))
+		if (persist instanceof ISupportChilds && !(persist instanceof WebComponent) && (forceRecursive || isCompositeWithItems(persist)))
 		{
 			ArrayList<ServoyJSONObject> itemsArrayList = new ArrayList<ServoyJSONObject>();
 			Iterator<IPersist> it = ((ISupportChilds)persist).getAllObjects();

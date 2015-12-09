@@ -13,8 +13,8 @@
 							</div>
 							<img ng-click="showPreviewImage(item.preview)" draggable="false" ng-if="item.preview" src="images/images.jpeg" title="Open preview" alt="" style="position:absolute; right:0; bottom:0.14em; cursor:pointer;"/>
 							<ul>
-								<li ng-repeat="ghost in item.types" ng-mousedown="enterDragMode($event,ghost,null,null,null,ghost) " title="Place component {{ghost}}">
-									<img draggable="false" ng-src="/{{item.icon}}" alt=""/>{{ghost}}
+								<li ng-repeat="ghost in item.types" ng-mousedown="enterDragMode($event,ghost.type,null,null,null,ghost.type,null,null,ghost.propertyName) " title="Place component {{ghost.type}}">
+									<img draggable="false" ng-src="/{{item.icon}}" alt=""/>{{ghost.type}}
 							</ul>
 						</li>
 				    </ul>

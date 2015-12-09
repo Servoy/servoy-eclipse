@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.designer.editor;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +43,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.PropertySheetPage;
@@ -66,6 +68,7 @@ import com.servoy.eclipse.designer.editor.commands.UngroupAction;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.property.UndoablePropertySheetEntry;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.j2db.persistence.IPersist;
 
@@ -170,11 +173,26 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 		ActionRegistry registry = getActionRegistry();
 		IAction action;
 
-		action = new UndoAction(editorPart);
+		action = new UndoAction(editorPart)
+		{
+			@Override
+			public void run()
+			{
+				PersistPropertySource.refreshPropertiesView();
+				super.run();
+			}
+		};
 		registry.registerAction(action);
 		getStackActions().add(action.getId());
-
-		action = new RedoAction(editorPart);
+		action = new RedoAction(editorPart)
+		{
+			@Override
+			public void run()
+			{
+				PersistPropertySource.refreshPropertiesView();
+				super.run();
+			}
+		};
 		registry.registerAction(action);
 		getStackActions().add(action.getId());
 
@@ -347,7 +365,10 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 	{
 		if (type == IPropertySheetPage.class)
 		{
-			PropertySheetPage page = new ModifiedPropertySheetPage();
+			Map<String, IAction> actions = new HashMap<String, IAction>();
+			actions.put(ActionFactory.UNDO.getId(), getActionRegistry().getAction(ActionFactory.UNDO.getId()));
+			actions.put(ActionFactory.REDO.getId(), getActionRegistry().getAction(ActionFactory.REDO.getId()));
+			PropertySheetPage page = new ModifiedPropertySheetPage(actions);
 			page.setRootEntry(new UndoablePropertySheetEntry(getCommandStack()));
 			return page;
 		}
