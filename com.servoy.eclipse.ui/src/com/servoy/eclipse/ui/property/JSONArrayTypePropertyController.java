@@ -139,7 +139,8 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 		protected Object resetComplexElementValue(Object id, final int idx)
 		{
 			PersistPropertySource.adjustPropertyValueAndReset(id, getPropertyDescriptors()[idx], this);
-			return ((JSONArray)getEditableValue()).opt(idx);
+			return PersistPropertySource.adjustPropertyValueToGet(id, getPropertyDescriptors()[idx], this);
+//			return ((JSONArray)getEditableValue()).opt(idx);// this didn't do all the proper conversions (for example it ended up setting JSONObject.NULL instead of null on a controller that doesn't support that)
 		}
 
 		@Override

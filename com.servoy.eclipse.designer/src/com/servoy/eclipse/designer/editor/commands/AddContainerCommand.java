@@ -51,7 +51,10 @@ import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.UUID;
 
 
 public class AddContainerCommand extends AbstractHandler implements IHandler
@@ -276,7 +279,8 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			}
 			index = arrayValue != null ? arrayValue.length : 0;
 		}
-		WebCustomType bean = new WebCustomType(parentBean, targetPD, propertyName, index, true);
+		Pair<Integer, UUID> idAndUUID = WebObjectImpl.getNewIdAndUUID(parentBean);
+		WebCustomType bean = new WebCustomType(parentBean, targetPD, propertyName, index, true, idAndUUID.getLeft().intValue(), idAndUUID.getRight());
 		bean.setName(compName);
 		bean.setTypeName(typeName);
 		if (parentBean instanceof WebComponent)
@@ -296,7 +300,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 				}
 				((WebComponent)parentBean).setProperty(propertyName, arrayValue);
 			}
-			else((WebComponent)parentBean).setProperty(propertyName, bean);
+			else ((WebComponent)parentBean).setProperty(propertyName, bean);
 		}
 		return bean;
 	}

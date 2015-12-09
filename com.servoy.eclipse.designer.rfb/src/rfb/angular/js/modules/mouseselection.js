@@ -231,9 +231,9 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 						dropTarget = this.getNode(event);
 						if (dropTarget && dropTarget.getAttribute("svy-types")){
 							if (dropTarget.getAttribute("svy-types").indexOf(type) <= 0)
-								return {dropAllowed:false}; // the drop target doesn't suppor this type
+								return {dropAllowed:false}; // the drop target doesn't support this type
 						}
-						else return {dropAllowed:false}; // ghost has no drop target or the drop target doesnt support any types
+						else return {dropAllowed:false}; // ghost has no drop target or the drop target doesn't support any types
 					}
 					else {
 						dropTarget = this.getNode(event, true);
