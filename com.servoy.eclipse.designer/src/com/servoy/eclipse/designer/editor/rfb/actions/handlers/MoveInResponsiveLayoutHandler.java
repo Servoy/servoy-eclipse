@@ -86,7 +86,7 @@ public class MoveInResponsiveLayoutHandler implements IServerService
 						}
 
 						IPersist rightSiblingPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, rightSibling);
-						cc.add(new ChangeParentCommand(persist, parent, rightSiblingPersist));
+						cc.add(new ChangeParentCommand(persist, parent, rightSiblingPersist, false));
 					}
 				}
 				if (!cc.isEmpty()) editorPart.getCommandStack().execute(cc);
