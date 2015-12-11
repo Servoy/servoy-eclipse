@@ -544,7 +544,7 @@ public class Activator extends Plugin
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 	}
 
-	public void waitForRegiserOfResources()
+	public void waitForRegisterOfResources()
 	{
 		synchronized (PLUGIN_ID)
 		{

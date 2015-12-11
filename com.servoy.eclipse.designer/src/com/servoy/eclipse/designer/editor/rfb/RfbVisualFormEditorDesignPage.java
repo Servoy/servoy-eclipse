@@ -135,7 +135,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	@Override
 	public void createPartControl(Composite parent)
 	{
-		Activator.getDefault().waitForRegiserOfResources();
+		Activator.getDefault().waitForRegisterOfResources();
 		// always reload the current spec so that always the latest stuff is shown.
 		FormElementHelper.INSTANCE.reload(); // we can't reload just specs cause lately FormElement can add size/location/anchors to spec and we don't want to use old/cached/already initialized form elements while new specs were reloaded
 		// Serve requests for rfb editor
