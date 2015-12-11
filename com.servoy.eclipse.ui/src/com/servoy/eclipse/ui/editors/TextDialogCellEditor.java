@@ -66,7 +66,8 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 	/**
 	 * The button.
 	 */
-	private Button button;
+	private Button button1;
+	private Button button2;
 	private FocusListener buttonFocusListener;
 
 	/**
@@ -105,18 +106,13 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 		// This may create a Text or a label depending on the value
 		contents = null; // contents will be created later, it depends on the value// createContents(editor);
 
-		button = createButton(editor);
-		button.setFont(font);
+		button1 = createButton(editor);
+		button1.setFont(font);
 
-		button.addFocusListener(getButtonFocusListener());
+		button1.addFocusListener(getButtonFocusListener());
 
-		button.addKeyListener(new KeyAdapter()
+		button1.addKeyListener(new KeyAdapter()
 		{
-			/*
-			 * (non-Javadoc)
-			 * 
-			 * @see org.eclipse.swt.events.KeyListener#keyReleased(org.eclipse.swt.events.KeyEvent)
-			 */
 			@Override
 			public void keyReleased(KeyEvent e)
 			{
@@ -127,19 +123,43 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 			}
 		});
 
-		button.addSelectionListener(new SelectionAdapter()
+		button1.addSelectionListener(new SelectionAdapter()
 		{
-			/*
-			 * (non-Javadoc)
-			 * 
-			 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-			 */
 			@Override
 			public void widgetSelected(SelectionEvent event)
 			{
 				editValue(editor);
 			}
 		});
+
+		button2 = createButton2(editor);
+		if (button2 != null)
+		{
+			button2.setFont(font);
+
+			button2.addFocusListener(getButtonFocusListener());
+
+			button2.addKeyListener(new KeyAdapter()
+			{
+				@Override
+				public void keyReleased(KeyEvent e)
+				{
+					if (e.character == '\u001b')
+					{ // Escape
+						fireCancelEditor();
+					}
+				}
+			});
+
+			button2.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent event)
+				{
+					editValue2(editor);
+				}
+			});
+		}
 
 		setValueValid(true);
 
@@ -165,7 +185,7 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 
 	/**
 	 * Return a listener for button focus.
-	 * 
+	 *
 	 * @return FocusListener
 	 */
 	private FocusListener getButtonFocusListener()
@@ -177,7 +197,7 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.swt.events.FocusListener#focusGained(org.eclipse.swt.events.FocusEvent)
 				 */
 				public void focusGained(FocusEvent e)
@@ -187,7 +207,7 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see org.eclipse.swt.events.FocusListener#focusLost(org.eclipse.swt.events.FocusEvent)
 				 */
 				public void focusLost(FocusEvent e)
@@ -245,13 +265,17 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 		}
 	}
 
+	protected void editValue2(Control control)
+	{
+	}
+
 	/**
 	 * Creates the button for this cell editor under the given parent control.
 	 * <p>
 	 * The default implementation of this framework method creates the button display on the right hand side of the dialog cell editor. Subclasses may extend or
 	 * reimplement.
 	 * </p>
-	 * 
+	 *
 	 * @param parent the parent control
 	 * @return the new button control
 	 */
@@ -260,6 +284,15 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 		Button result = new Button(parent, SWT.DOWN);
 		result.setText("...");
 		return result;
+	}
+
+	/**
+	 * Optionally create a second button, when hit, editValue2 is called.
+	 * @param parent
+	 */
+	protected Button createButton2(Composite parent)
+	{
+		return null;
 	}
 
 	/*
@@ -277,7 +310,7 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 			}
 			else
 			{
-				button.setFocus();
+				button1.setFocus();
 			}
 		}
 	}
@@ -336,7 +369,7 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 	 * <p>
 	 * Subclasses may reimplement. If you reimplement this method, you should also reimplement <code>createContents</code>.
 	 * </p>
-	 * 
+	 *
 	 * @param val the new value of this cell editor
 	 */
 	protected void updateContents(Object val)
@@ -350,16 +383,7 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 				// state changed, delete old contents
 				contents.dispose();
 			}
-			if (singleLine)
-			{
-				// Single line text value
-				contents = super.createControl(editor);
-			}
-			else
-			{
-				// multiLine, cannot edit in Text widget nicely
-				contents = createMultineLabel(editor);
-			}
+			contents = createContents(editor, singleLine);
 		}
 
 		String stringValue = "";
@@ -379,6 +403,23 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 		}
 	}
 
+	protected Control createContents(Composite parent, boolean createSingleLine)
+	{
+		Control control;
+		if (createSingleLine)
+		{
+			// Single line text value
+			control = super.createControl(parent);
+		}
+		else
+		{
+			// multiLine, cannot edit in Text widget nicely
+			control = createMultineLabel(parent);
+		}
+
+		return control;
+	}
+
 	/**
 	 * Internal class for laying out the dialog.
 	 */
@@ -388,12 +429,21 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 		public void layout(Composite composite, boolean force)
 		{
 			Rectangle bounds = composite.getClientArea();
-			Point size = button.computeSize(SWT.DEFAULT, SWT.DEFAULT, force);
+
+			Point sizeButton1 = button1.computeSize(SWT.DEFAULT, SWT.DEFAULT, force);
+			button1.setBounds(bounds.width - sizeButton1.x, 0, sizeButton1.x, bounds.height);
+
+			int sizeButton2x = 0;
+			if (button2 != null)
+			{
+				Point sizeButton2 = button2.computeSize(SWT.DEFAULT, SWT.DEFAULT, force);
+				sizeButton2x = sizeButton2.x;
+				button2.setBounds(bounds.width - sizeButton1.x - sizeButton2.x, 0, sizeButton2.x, bounds.height);
+			}
 			if (contents != null)
 			{
-				contents.setBounds(0, 0, bounds.width - size.x, bounds.height);
+				contents.setBounds(0, 0, bounds.width - sizeButton1.x - sizeButton2x, bounds.height);
 			}
-			button.setBounds(bounds.width - size.x, 0, size.x, bounds.height);
 		}
 
 		@Override
@@ -404,12 +454,13 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 				return new Point(wHint, hHint);
 			}
 			Point contentsSize = contents.computeSize(SWT.DEFAULT, SWT.DEFAULT, force);
-			Point buttonSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT, force);
+			Point button1Size = button1.computeSize(SWT.DEFAULT, SWT.DEFAULT, force);
+			Point button2Size = button2 == null ? null : button2.computeSize(SWT.DEFAULT, SWT.DEFAULT, force);
 			// Just return the button width to ensure the button is not clipped
 			// if the label is long.
 			// The label will just use whatever extra width there is
-			Point result = new Point(contentsSize.x + buttonSize.x, Math.max(contentsSize.y, buttonSize.y));
-			return result;
+			return new Point(contentsSize.x + button1Size.x + (button2Size == null ? 0 : button2Size.x), Math.max(contentsSize.y,
+				Math.max(button1Size.y, button2Size == null ? 0 : button2Size.y)));
 		}
 	}
 

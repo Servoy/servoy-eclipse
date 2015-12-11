@@ -337,10 +337,11 @@ public class EditorUtil
 	/**
 	 * Open file.
 	 * @param resource
+	 * @return
 	 */
-	public static void openFileEditor(IFile resource)
+	public static IEditorPart openFileEditor(IFile resource)
 	{
-		if (resource == null) return;
+		if (resource == null) return null;
 		try
 		{
 			IWorkbenchPage page = getActivePage();
@@ -354,15 +355,15 @@ public class EditorUtil
 					{
 						PlatformUI.getWorkbench().getBrowserSupport().createBrowser("com.servoy.component.icon.browser").openURL(
 							resource.getLocationURI().toURL());
-						return;
+						return null;
 					}
-					else desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
+
+					desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
 						Platform.getContentTypeManager().getContentType("org.eclipse.core.runtime.text"));
 				}
 				if (desc != null)
 				{
-					IEditorInput editorInput = new FileEditorInput(resource);
-					page.openEditor(editorInput, desc.getId(), true);
+					return page.openEditor(new FileEditorInput(resource), desc.getId(), true);
 				}
 			}
 		}
@@ -370,6 +371,7 @@ public class EditorUtil
 		{
 			ServoyLog.logError(ex);
 		}
+		return null;
 	}
 
 	public static IEditorPart openPersistEditor(IPersist persist)
@@ -530,21 +532,31 @@ public class EditorUtil
 	public static IEditorPart openStyleEditor(Style style, String lookup, boolean activate)
 	{
 		IEditorPart editor = openStyleEditor(style, activate);
-		if (editor instanceof StructuredTextEditor && lookup != null)
+		if (editor instanceof StructuredTextEditor)
 		{
-			FindReplaceDocumentAdapter finder = new FindReplaceDocumentAdapter(((StructuredTextEditor)editor).getDocumentProvider().getDocument(
-				((StructuredTextEditor)editor).getEditorInput()));
+			selectAndReveal((StructuredTextEditor)editor, lookup);
+		}
+		return editor;
+	}
+
+	public static void selectAndReveal(StructuredTextEditor editor, String lookup)
+	{
+		if (lookup != null)
+		{
+			FindReplaceDocumentAdapter finder = new FindReplaceDocumentAdapter(editor.getDocumentProvider().getDocument(editor.getEditorInput()));
 			try
 			{
 				IRegion region = finder.find(0, lookup, true, true, true, false);
-				((StructuredTextEditor)editor).selectAndReveal(region.getOffset(), region.getLength());
+				if (region != null)
+				{
+					editor.selectAndReveal(region.getOffset(), region.getLength());
+				}
 			}
 			catch (Exception ex)
 			{
 				ServoyLog.logError(ex);
 			}
 		}
-		return editor;
 	}
 
 	public static IEditorPart openDataProviderEditor(IDataProvider dataProvider)
@@ -658,7 +670,7 @@ public class EditorUtil
 					if ((object instanceof IPersist && object.equals(editor.getAdapter(IPersist.class))) ||
 						(object instanceof Table && object.equals(editor.getAdapter(Table.class))) ||
 						((object instanceof IServerInternal) && editor.getAdapter(ServerConfig.class) != null && ((IServerInternal)object).getConfig().getServerName().equals(
-							((ServerConfig)editor.getAdapter(ServerConfig.class)).getServerName())))
+							editor.getAdapter(ServerConfig.class).getServerName())))
 					{
 						page.closeEditor(editor, false);
 					}
@@ -673,7 +685,7 @@ public class EditorUtil
 		{
 			return null;
 		}
-		IFile file = (IFile)editorPart.getEditorInput().getAdapter(IFile.class);
+		IFile file = editorPart.getEditorInput().getAdapter(IFile.class);
 		if (file != null)
 		{
 			try
