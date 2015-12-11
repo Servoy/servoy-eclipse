@@ -16,8 +16,6 @@
  */
 package com.servoy.eclipse.core;
 
-import java.util.concurrent.Semaphore;
-
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 
@@ -26,7 +24,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * Is similar to JavaModelManager, single entry point for anything about servoy in eclipse
- * 
+ *
  * @author jblok
  */
 public class ServoyModelManager
@@ -34,11 +32,10 @@ public class ServoyModelManager
 	/**
 	 * The singleton manager
 	 */
-	private static ServoyModelManager MANAGER = new ServoyModelManager();
+	private final static ServoyModelManager MANAGER = new ServoyModelManager();
 	private static boolean initializingModel = false;
 
 	private volatile ServoyModel servoyModel = null;
-	private final Semaphore asyncWaiter = new Semaphore(0);
 
 	/**
 	 * Constructs a new manager
@@ -85,7 +82,7 @@ public class ServoyModelManager
 				{
 					try
 					{
-						// just wait until it is ready 
+						// just wait until it is ready
 						Thread.sleep(500);
 					}
 					catch (InterruptedException e)
@@ -98,7 +95,6 @@ public class ServoyModelManager
 				}
 			}
 			// create servoy model in the display thread.
-			final boolean async[] = { false };
 			Runnable run = new Runnable()
 			{
 				public void run()
@@ -119,7 +115,10 @@ public class ServoyModelManager
 						finally
 						{
 							initializingModel = false;
-							if (async[0]) asyncWaiter.release();
+							synchronized (MANAGER)
+							{
+								MANAGER.notifyAll();
+							}
 						}
 					}
 				}
@@ -131,12 +130,17 @@ public class ServoyModelManager
 			}
 			else
 			{
-				async[0] = true;
 				Display.getDefault().asyncExec(run);
 
 				try
 				{
-					asyncWaiter.acquire(); // in case of async exec it will wait
+					synchronized (MANAGER)
+					{
+						if (servoyModel == null)
+						{
+							MANAGER.wait();
+						}
+					}
 				}
 				catch (InterruptedException e)
 				{

@@ -30,12 +30,11 @@ public class RfbWebResourceListener implements IWebResourceChangedListener
 
 	public RfbWebResourceListener()
 	{
-		com.servoy.eclipse.core.Activator.getDefault().addWebComponentChangedListener(this);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.core.IWebResourceChangedListener#changed()
 	 */
 	@Override
@@ -59,6 +58,7 @@ public class RfbWebResourceListener implements IWebResourceChangedListener
 	 */
 	public void setEditorWebsocketSession(EditorWebsocketSession editorWebsocketSession)
 	{
+		if (this.editorWebsocketSession == null) com.servoy.eclipse.core.Activator.getDefault().addWebComponentChangedListener(this);
 		this.editorWebsocketSession = editorWebsocketSession;
 	}
 }

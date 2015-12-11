@@ -208,7 +208,7 @@ public class Activator extends Plugin
 	private IResourceChangeListener resourceChangeListener;
 
 	private IActiveProjectListener activeProjectListenerForRegisteringResources;
-	private Job registerResourcesJob;
+	private volatile Job registerResourcesJob;
 
 	/**
 	 * @author jcompagner
@@ -544,158 +544,184 @@ public class Activator extends Plugin
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 	}
 
+	public void waitForRegiserOfResources()
+	{
+		synchronized (PLUGIN_ID)
+		{
+			if (registerResourcesJob != null)
+			{
+				try
+				{
+					ServoyModelFinder.getServoyModel();
+					PLUGIN_ID.wait();
+				}
+				catch (InterruptedException e)
+				{
+				}
+			}
+		}
+	}
+
 	/**
 	 * @param activeResourcesProject
 	 */
 	private void registerResources(final Boolean component)
 	{
-		if (registerResourcesJob == null)
+		synchronized (PLUGIN_ID)
 		{
-			registerResourcesJob = new Job("registering resources")
+			if (registerResourcesJob == null)
 			{
-				@Override
-				public IStatus run(IProgressMonitor monitor)
+				registerResourcesJob = new Job("registering resources")
 				{
-					try
+					@Override
+					public IStatus run(IProgressMonitor monitor)
 					{
-						if (activeProjectListenerForRegisteringResources == null)
+						final ServoyModel servoyModel = (ServoyModel)ServoyModelFinder.getServoyModel();
+						try
 						{
-							activeProjectListenerForRegisteringResources = new IActiveProjectListener()
+							if (activeProjectListenerForRegisteringResources == null)
 							{
-								public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+								activeProjectListenerForRegisteringResources = new IActiveProjectListener()
 								{
-									return true;
+									public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+									{
+										return true;
+									}
+
+									public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+									{
+										// todo maybe fush on certain things?
+									}
+
+									public void activeProjectChanged(ServoyProject activeProject)
+									{
+										registerResources(null);
+									}
+								};
+								servoyModel.addActiveProjectListener(activeProjectListenerForRegisteringResources);
+							}
+							ServoyResourcesProject activeResourcesProject = servoyModel.getActiveResourcesProject();
+							if (activeResourcesProject != null)
+							{
+								try
+								{
+									IFolder components = activeResourcesProject.getProject().getFolder(SolutionSerializer.COMPONENTS_DIR_NAME);
+									if (components != null && components.exists())
+									{
+										components.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+										components.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_INFINITE);
+										components.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+									}
+									IFolder services = activeResourcesProject.getProject().getFolder(SolutionSerializer.SERVICES_DIR_NAME);
+									if (services != null && services.exists())
+									{
+										services.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+										services.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_INFINITE);
+										services.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+									}
+								}
+								catch (CoreException e)
+								{
+									ServoyLog.logError(e);
 								}
 
-								public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+								Set<String> defaultPackageNames = ResourceProvider.getDefaultPackageNames();
+								List<String> toRemove = new ArrayList<String>();
+								for (String packageName : defaultPackageNames)
 								{
-									// todo maybe fush on certain things?
+									if (!isEnabledInPreferences(packageName)) toRemove.add(packageName);
+								}
+								ResourceProvider.setRemovedPackages(toRemove);
+
+								if (!Boolean.FALSE.equals(component))
+								{
+									if (componentReaders.size() > 0)
+									{
+										ResourceProvider.refreshComponentResources(componentReaders.values());
+										componentReaders.clear();
+									}
+									componentReaders.putAll(readDir(monitor, activeResourcesProject, SolutionSerializer.COMPONENTS_DIR_NAME));
+									ResourceProvider.addComponentResources(componentReaders.values());
 								}
 
-								public void activeProjectChanged(ServoyProject activeProject)
+								if (component == null || Boolean.FALSE.equals(component))
 								{
-									registerResources(null);
+									if (serviceReaders.size() > 0)
+									{
+										ResourceProvider.refreshServiceResources(serviceReaders.values());
+										serviceReaders.clear();
+									}
+									serviceReaders.putAll(readDir(monitor, activeResourcesProject, SolutionSerializer.SERVICES_DIR_NAME));
+
+									ResourceProvider.addServiceResources(serviceReaders.values());
 								}
-							};
-							((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(activeProjectListenerForRegisteringResources);
+
+								com.servoy.eclipse.core.Activator.getDefault().webResourcesChanged(component);
+							}
 						}
-						ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
-						if (activeResourcesProject != null)
+						finally
+						{
+							synchronized (PLUGIN_ID)
+							{
+								registerResourcesJob = null;
+								PLUGIN_ID.notifyAll();
+							}
+						}
+						return Status.OK_STATUS;
+					}
+
+					private boolean isEnabledInPreferences(String packageName)
+					{
+						return PlatformUI.getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.packages.enable." + packageName);
+					}
+
+
+					/**
+					 * @param monitor
+					 * @param activeResourcesProject
+					 */
+					private Map<String, IPackageReader> readDir(IProgressMonitor monitor, ServoyResourcesProject activeResourcesProject, String folderName)
+					{
+						Map<String, IPackageReader> readers = new HashMap<String, IPackageReader>();
+						IFolder folder = activeResourcesProject.getProject().getFolder(folderName);
+						if (folder.exists())
 						{
 							try
 							{
-								IFolder components = activeResourcesProject.getProject().getFolder(SolutionSerializer.COMPONENTS_DIR_NAME);
-								if (components != null && components.exists())
+								folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+								IResource[] members = folder.members();
+								for (IResource resource : members)
 								{
-									components.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-									components.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_INFINITE);
-									components.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-								}
-								IFolder services = activeResourcesProject.getProject().getFolder(SolutionSerializer.SERVICES_DIR_NAME);
-								if (services != null && services.exists())
-								{
-									services.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-									services.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_INFINITE);
-									services.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+									String name = resource.getName();
+									int index = name.lastIndexOf('.');
+									if (index != -1)
+									{
+										name = name.substring(0, index);
+									}
+									if (resource instanceof IFolder)
+									{
+										if (((IFolder)resource).getFile("META-INF/MANIFEST.MF").exists())
+										{
+											readers.put(name, new FolderPackageReader(new File(resource.getRawLocationURI()), (IFolder)resource));
+										}
+									}
+									else if (resource instanceof IFile)
+									{
+										readers.put(name, new FilePackageReader(resource));
+									}
 								}
 							}
 							catch (CoreException e)
 							{
 								ServoyLog.logError(e);
 							}
-
-							Set<String> defaultPackageNames = ResourceProvider.getDefaultPackageNames();
-							List<String> toRemove = new ArrayList<String>();
-							for (String packageName : defaultPackageNames)
-							{
-								if (!isEnabledInPreferences(packageName)) toRemove.add(packageName);
-							}
-							ResourceProvider.setRemovedPackages(toRemove);
-
-							if (!Boolean.FALSE.equals(component))
-							{
-								if (componentReaders.size() > 0)
-								{
-									ResourceProvider.refreshComponentResources(componentReaders.values());
-									componentReaders.clear();
-								}
-								componentReaders.putAll(readDir(monitor, activeResourcesProject, SolutionSerializer.COMPONENTS_DIR_NAME));
-								ResourceProvider.addComponentResources(componentReaders.values());
-							}
-
-							if (component == null || Boolean.FALSE.equals(component))
-							{
-								if (serviceReaders.size() > 0)
-								{
-									ResourceProvider.refreshServiceResources(serviceReaders.values());
-									serviceReaders.clear();
-								}
-								serviceReaders.putAll(readDir(monitor, activeResourcesProject, SolutionSerializer.SERVICES_DIR_NAME));
-
-								ResourceProvider.addServiceResources(serviceReaders.values());
-							}
-
-							com.servoy.eclipse.core.Activator.getDefault().webResourcesChanged(component);
 						}
+						return readers;
 					}
-					finally
-					{
-						registerResourcesJob = null;
-					}
-					return Status.OK_STATUS;
-				}
-
-				private boolean isEnabledInPreferences(String packageName)
-				{
-					return PlatformUI.getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.packages.enable." + packageName);
-				}
-
-
-				/**
-				 * @param monitor
-				 * @param activeResourcesProject
-				 */
-				private Map<String, IPackageReader> readDir(IProgressMonitor monitor, ServoyResourcesProject activeResourcesProject, String folderName)
-				{
-					Map<String, IPackageReader> readers = new HashMap<String, IPackageReader>();
-					IFolder folder = activeResourcesProject.getProject().getFolder(folderName);
-					if (folder.exists())
-					{
-						try
-						{
-							folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-							IResource[] members = folder.members();
-							for (IResource resource : members)
-							{
-								String name = resource.getName();
-								int index = name.lastIndexOf('.');
-								if (index != -1)
-								{
-									name = name.substring(0, index);
-								}
-								if (resource instanceof IFolder)
-								{
-									if (((IFolder)resource).getFile("META-INF/MANIFEST.MF").exists())
-									{
-										readers.put(name, new FolderPackageReader(new File(resource.getRawLocationURI()), (IFolder)resource));
-									}
-								}
-								else if (resource instanceof IFile)
-								{
-									readers.put(name, new FilePackageReader(resource));
-								}
-							}
-						}
-						catch (CoreException e)
-						{
-							ServoyLog.logError(e);
-						}
-					}
-					return readers;
-				}
-			};
-			registerResourcesJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
-			registerResourcesJob.schedule();
+				};
+				registerResourcesJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
+				registerResourcesJob.schedule();
+			}
 		}
 	}
 
@@ -759,7 +785,7 @@ public class Activator extends Plugin
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -944,7 +970,7 @@ public class Activator extends Plugin
 
 				/*
 				 * (non-Javadoc)
-				 * 
+				 *
 				 * @see com.servoy.j2db.IDesignerCallback#testAndStartDebugger()
 				 */
 				public void testAndStartDebugger()
@@ -1206,7 +1232,7 @@ public class Activator extends Plugin
 												parent = parent.getParent();
 											}
 											if (parent instanceof Form && (((Form)parent).getView() == IFormConstants.VIEW_TYPE_TABLE ||
-													((Form)parent).getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED ||
+												((Form)parent).getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED ||
 												((Form)parent).getView() == IFormConstants.VIEW_TYPE_LIST ||
 												((Form)parent).getView() == IFormConstants.VIEW_TYPE_LIST_LOCKED))
 											{
@@ -1534,12 +1560,12 @@ public class Activator extends Plugin
 													monitor.beginTask("Updating...", IProgressMonitor.UNKNOWN);
 													updatedToVersion[0] = updateAppServerFromSerclipse(new File(appServerDir).getParentFile(), version,
 														ClientVersion.getReleaseNumber(), new ActionListener()
+													{
+														public void actionPerformed(ActionEvent e)
 														{
-															public void actionPerformed(ActionEvent e)
-															{
-																monitor.worked(1);
-															}
-														});
+															monitor.worked(1);
+														}
+													});
 												}
 												catch (Exception e)
 												{
