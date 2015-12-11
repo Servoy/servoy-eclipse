@@ -42,6 +42,7 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.IBasicWebComponent;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -269,13 +270,13 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 		boolean isArray = spec.isArrayReturnType(propertyName);
 		PropertyDescription targetPD = spec.getProperty(propertyName);
 		String typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(targetPD.getType());
-		WebCustomType[] arrayValue = null;
+		IChildWebObject[] arrayValue = null;
 		if (isArray)
 		{
 			targetPD = ((ICustomType< ? >)targetPD.getType()).getCustomJSONTypeDefinition();
 			if (parentBean instanceof WebComponent)
 			{
-				arrayValue = (WebCustomType[])((WebComponent)parentBean).getProperty(propertyName);
+				arrayValue = (IChildWebObject[])((WebComponent)parentBean).getProperty(propertyName);
 			}
 			index = arrayValue != null ? arrayValue.length : 0;
 		}
@@ -289,18 +290,18 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			{
 				if (arrayValue == null)
 				{
-					arrayValue = new WebCustomType[] { bean };
+					arrayValue = new IChildWebObject[] { bean };
 				}
 				else
 				{
-					WebCustomType[] newArrayValue = new WebCustomType[arrayValue.length + 1];
+					IChildWebObject[] newArrayValue = new IChildWebObject[arrayValue.length + 1];
 					System.arraycopy(arrayValue, 0, newArrayValue, 0, arrayValue.length);
 					newArrayValue[arrayValue.length] = bean;
 					arrayValue = newArrayValue;
 				}
 				((WebComponent)parentBean).setProperty(propertyName, arrayValue);
 			}
-			else ((WebComponent)parentBean).setProperty(propertyName, bean);
+			else((WebComponent)parentBean).setProperty(propertyName, bean);
 		}
 		return bean;
 	}

@@ -25,11 +25,13 @@ import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.property.ICustomType;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.property.types.DesignerFormPropertyType;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -38,6 +40,7 @@ import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -89,15 +92,16 @@ public class OpenContainedFormHandler implements IServerService
 
 
 								Collection<PropertyDescription> forms = null;
-								forms = ((PropertyDescription)ghost.getPropertyDescription()).getProperties(DesignerFormPropertyType.DESIGNER_INSTANCE); // TODO what if form typed property is nested some more in the ghost? do we want to open that as well?
+								forms = ((ICustomType< ? >)ghost.getPropertyDescription().getType()).getCustomJSONTypeDefinition().getProperties(
+									DesignerFormPropertyType.DESIGNER_INSTANCE); // TODO what if form typed property is nested some more in the ghost? do we want to open that as well?
 
 								for (PropertyDescription pd : Utils.iterate(forms))
 								{
 									open = openFormDesignEditor(s, beanXML.opt(pd.getName()));
 									if (!open)
 									{
-										Debug.log("Cannot open form with id " + beanXML.opt(pd.getName()) + "in design editor (Container uuid " +
-											args.getString("uuid") + ")");
+										Debug.log("Cannot open form with uuid given by " + beanXML.opt(pd.getName()) +
+											" (or it is not a form) in design editor (Container uuid " + args.getString("uuid") + ")");
 									}
 								}
 							}
@@ -143,7 +147,14 @@ public class OpenContainedFormHandler implements IServerService
 			{
 				if (value != null)
 				{
-					Form toOpen = s.getForm((Integer)value);
+					Form toOpen = null;
+
+					if (value instanceof Integer) toOpen = s.getForm(((Integer)value).intValue());
+					else if (value instanceof String)
+					{
+						IPersist persistByUUID = AbstractRepository.searchPersist(s, UUID.fromString((String)value));
+						if (persistByUUID instanceof Form) toOpen = (Form)persistByUUID;
+					}
 					if (toOpen != null)
 					{
 						return EditorUtil.openFormDesignEditor(toOpen) != null;
