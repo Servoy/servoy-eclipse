@@ -447,12 +447,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	 */
 	private List<IPersist> filterByParent(List<IPersist> persists, Form form)
 	{
-		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
-		List<Form> allForms = null;
-		if (flattenedForm instanceof FlattenedForm)
-		{
-			allForms = ((FlattenedForm)flattenedForm).getAllForms();
-		}
+		// first add the stuff of the form itself to the map.
 		List<IPersist> filtered = new ArrayList<>();
 		for (IPersist persist : persists)
 		{
@@ -462,35 +457,46 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 				filtered.add(persist);
 			}
 		}
-		if (allForms != null && filtered.size() != persists.size())
+		// if there are other persist left, check if they are in the hierarchy
+		if (filtered.size() != persists.size())
 		{
-			for (IPersist persist : persists)
+			Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
+			if (flattenedForm instanceof FlattenedForm)
 			{
-				if (filtered.contains(persist)) continue;
-				IPersist ancestor = persist.getAncestor(IRepository.FORMS);
-				for (Form superForm : allForms)
+				// if it is a flattend form then walk over the forms.
+				List<Form> allForms = ((FlattenedForm)flattenedForm).getAllForms();
+				for (IPersist persist : persists)
 				{
-					if (superForm.getUUID().equals(ancestor.getUUID()))
+					// skip the one already there.
+					if (filtered.contains(persist)) continue;
+					IPersist ancestor = persist.getAncestor(IRepository.FORMS);
+					for (Form superForm : allForms)
 					{
-						boolean add = true;
-						for (IPersist filteredPersist : filtered)
+						if (superForm.getUUID().equals(ancestor.getUUID()))
 						{
-							if (filteredPersist instanceof ISupportExtendsID)
+							// the form uuid of the persist is the same as a superform
+							// check if we should add it
+							boolean add = true;
+							for (IPersist filteredPersist : filtered)
 							{
-								if (((ISupportExtendsID)filteredPersist).getExtendsID() == persist.getID())
+								if (filteredPersist instanceof ISupportExtendsID)
 								{
-									add = false;
-									break;
+									// if there is already one
+									if (((ISupportExtendsID)filteredPersist).getExtendsID() == persist.getID())
+									{
+										add = false;
+										break;
+									}
+									// TODO what the persist is 2 levels deep (so super of the super with a persist in the middle)
 								}
-							}
 
+							}
+							if (add) filtered.add(persist);
+							break;
 						}
-						if (add) filtered.add(persist);
-						break;
 					}
 				}
 			}
-
 		}
 		return filtered;
 	}
