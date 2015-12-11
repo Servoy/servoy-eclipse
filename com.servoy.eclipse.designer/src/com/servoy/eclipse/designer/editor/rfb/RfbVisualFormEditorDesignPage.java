@@ -56,9 +56,11 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Utils;
@@ -445,6 +447,12 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	 */
 	private List<IPersist> filterByParent(List<IPersist> persists, Form form)
 	{
+		Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
+		List<Form> allForms = null;
+		if (flattenedForm instanceof FlattenedForm)
+		{
+			allForms = ((FlattenedForm)flattenedForm).getAllForms();
+		}
 		List<IPersist> filtered = new ArrayList<>();
 		for (IPersist persist : persists)
 		{
@@ -453,6 +461,36 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			{
 				filtered.add(persist);
 			}
+		}
+		if (allForms != null && filtered.size() != persists.size())
+		{
+			for (IPersist persist : persists)
+			{
+				if (filtered.contains(persist)) continue;
+				IPersist ancestor = persist.getAncestor(IRepository.FORMS);
+				for (Form superForm : allForms)
+				{
+					if (superForm.getUUID().equals(ancestor.getUUID()))
+					{
+						boolean add = true;
+						for (IPersist filteredPersist : filtered)
+						{
+							if (filteredPersist instanceof ISupportExtendsID)
+							{
+								if (((ISupportExtendsID)filteredPersist).getExtendsID() == persist.getID())
+								{
+									add = false;
+									break;
+								}
+							}
+
+						}
+						if (add) filtered.add(persist);
+						break;
+					}
+				}
+			}
+
 		}
 		return filtered;
 	}
