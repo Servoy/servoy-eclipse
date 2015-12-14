@@ -132,7 +132,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 			ServoyJSONObject copy = null;
 			try
 			{
-				if (value != null) copy = new ServoyJSONObject(value, ServoyJSONObject.getNames(value), true, true);
+				if (value != null) copy = new ServoyJSONObject(value, ServoyJSONObject.getNames(value), false, false);
 			}
 			catch (Exception ex)
 			{
@@ -179,8 +179,8 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 			this.staticConfigDataproviders = staticConfigDataproviders;
 			this.hasDynamicDataproviders = hasDynamicDataproviders;
 			this.formTable = formTable;
-			this.isSeparateDatasource = (complexProperty != null && complexProperty.getValue() != null && complexProperty.getValue().has(
-				FoundsetPropertyType.LOAD_ALL_RECORDS_FOR_SEPARATE));
+			this.isSeparateDatasource = (complexProperty != null && complexProperty.getValue() != null &&
+				complexProperty.getValue().has(FoundsetPropertyType.LOAD_ALL_RECORDS_FOR_SEPARATE));
 		}
 
 		@Override
@@ -359,8 +359,8 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 			hidePrefix.setConverter(converter);
 
 			final Table baseTableFinal = baseTable;
-			final ILabelProvider labelProviderHidePrefix = new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(hidePrefix,
-				persistContext.getContext()));
+			final ILabelProvider labelProviderHidePrefix = new SolutionContextDelegateLabelProvider(
+				new FormContextDelegateLabelProvider(hidePrefix, persistContext.getContext()));
 			PropertyController<String, String> propertyController = new PropertyController<String, String>(id, displayName, null, labelProviderHidePrefix,
 				new ICellEditorFactory()
 				{
