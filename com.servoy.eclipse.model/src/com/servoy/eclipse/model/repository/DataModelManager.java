@@ -38,6 +38,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -127,7 +128,21 @@ public class DataModelManager implements IColumnInfoManager
 
 			public void tablesRemoved(IServerInternal server, ITable tables[], boolean deleted)
 			{
-				// not interested in this
+				if (server == ServoyModelFinder.getServoyModel().getMemServer())
+				{
+					for (ITable iTable : tables)
+					{
+						IFile dbiFile = getDBIFile(server.getName(), iTable.getName());
+						try
+						{
+							dbiFile.delete(false, new NullProgressMonitor());
+						}
+						catch (CoreException e)
+						{
+							Debug.error(e);
+						}
+					}
+				}
 			}
 
 			public void hiddenTableChanged(IServerInternal server, Table table)
@@ -210,7 +225,52 @@ public class DataModelManager implements IColumnInfoManager
 			}
 		};
 		sm.addServerListener(serverListener);
+
+		setupMemTables();
 	}
+
+	private void setupMemTables()
+	{
+		org.eclipse.core.resources.IFolder serverInformationFolder = getDBIFileContainer("mem");
+
+		if (serverInformationFolder.exists())
+		{
+			try
+			{
+				serverInformationFolder.accept(new IResourceVisitor()
+				{
+					public boolean visit(IResource resource) throws CoreException
+					{
+						String extension = resource.getFileExtension();
+						if (extension != null && extension.equalsIgnoreCase(DataModelManager.COLUMN_INFO_FILE_EXTENSION))
+						{
+							//we found a dbi file
+							String tableName = resource.getName().substring(0,
+								resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
+							try
+							{
+								ITable createNewTable = ServoyModelFinder.getServoyModel().getMemServer().createNewTable(null, tableName);
+								loadMemServerTable(createNewTable);
+								createNewTable.setInitialized(true);
+							}
+							catch (RepositoryException e)
+							{
+								Debug.error(e);
+							}
+						}
+						return true;
+					}
+
+				}, IResource.DEPTH_ONE, false);
+			}
+			catch (CoreException e)
+			{
+				Debug.error(e);
+			}
+			ServoyModelFinder.getServoyModel().getMemServer().addTableListener(tableListener);
+		}
+	}
+
 
 	public void loadMemServerTable(final ITable t) throws RepositoryException
 	{
