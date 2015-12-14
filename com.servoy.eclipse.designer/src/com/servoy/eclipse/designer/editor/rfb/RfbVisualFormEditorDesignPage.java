@@ -63,6 +63,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -465,7 +466,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			{
 				// if it is a flattend form then walk over the forms.
 				List<Form> allForms = ((FlattenedForm)flattenedForm).getAllForms();
-				for (IPersist persist : persists)
+				outer : for (IPersist persist : persists)
 				{
 					// skip the one already there.
 					if (filtered.contains(persist)) continue;
@@ -476,22 +477,24 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 						{
 							// the form uuid of the persist is the same as a superform
 							// check if we should add it
-							boolean add = true;
 							for (IPersist filteredPersist : filtered)
 							{
 								if (filteredPersist instanceof ISupportExtendsID)
 								{
-									// if there is already one
-									if (((ISupportExtendsID)filteredPersist).getExtendsID() == persist.getID())
+									IPersist superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)filteredPersist);
+									while (superPersist instanceof ISupportExtendsID)
 									{
-										add = false;
-										break;
+										// if there is already one
+										if (superPersist.getID() == persist.getID())
+										{
+											continue outer;
+										}
+										superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)superPersist);
 									}
-									// TODO what the persist is 2 levels deep (so super of the super with a persist in the middle)
 								}
 
 							}
-							if (add) filtered.add(persist);
+							filtered.add(persist);
 							break;
 						}
 					}
