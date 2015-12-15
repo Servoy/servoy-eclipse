@@ -1131,7 +1131,14 @@ public class SolutionSerializer
 			{
 				if (!isBoolean && !isNumber && !isJSON)
 				{
-					property_values.put(propertyName, propertyValue);//replace with textual version
+					if (propertyValue == null)
+					{	
+						property_values.put(propertyName, JSONObject.NULL);
+					}
+					else
+					{	
+						property_values.put(propertyName, propertyValue);//replace with textual version
+					}
 				}
 			}
 
