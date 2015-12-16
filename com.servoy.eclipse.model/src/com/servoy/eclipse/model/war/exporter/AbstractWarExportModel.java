@@ -141,7 +141,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 										usedServices.add(WebServiceSpecProvider.getInstance().getWebServiceSpecification(parts[1]).getName());
 									}
 								}
-								else if (expr.contains("newBean"))
+								else if (expr.contains("newWebComponent"))
 								{
 									if (node.getArguments().size() > 1)
 									{
