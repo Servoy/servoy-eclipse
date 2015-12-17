@@ -19,7 +19,7 @@ package com.servoy.eclipse.model.inmemory;
 
 import com.servoy.j2db.persistence.AbstractTable;
 import com.servoy.j2db.persistence.Column;
-import com.servoy.j2db.persistence.IColumnListener;
+import com.servoy.j2db.persistence.ColumnChangeHandler;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -179,11 +179,7 @@ public class MemTable extends AbstractTable
 
 	private void fireIColumnRemoved(Column c)
 	{
-		if (tableListeners == null) return;
-		for (IColumnListener columnListener : tableListeners)
-		{
-			columnListener.iColumnRemoved(c);
-		}
+		ColumnChangeHandler.getInstance().fireItemRemoved(this, c);
 	}
 
 	/*

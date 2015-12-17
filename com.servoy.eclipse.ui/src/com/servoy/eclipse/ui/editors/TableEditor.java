@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
@@ -66,8 +67,8 @@ import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumn;
-import com.servoy.j2db.persistence.IColumnListener;
 import com.servoy.j2db.persistence.IColumnTypes;
+import com.servoy.j2db.persistence.IItemChangeListener;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -77,7 +78,6 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableListener;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -112,7 +112,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 	private ITableListener tableListener;
 
-	private IColumnListener columnListener;
+	private IItemChangeListener<IColumn> columnListener;
 
 	private IServerListener serverListener;
 
@@ -568,12 +568,8 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		}
 
 		// close this editor if the server or table get deleted
-		tableListener = new ITableListener()
+		tableListener = new ITableListener.TableListener()
 		{
-			public void tablesAdded(IServerInternal s, String tableNames[])
-			{
-			}
-
 			public void tablesRemoved(IServerInternal s, ITable tables[], boolean delete)
 			{
 				for (ITable t : tables)
@@ -585,6 +581,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				}
 			}
 
+			@Override
 			public void serverStateChanged(IServerInternal s, int oldState, int newState)
 			{
 				if ((newState & (VALID | ENABLED)) != (VALID | ENABLED))
@@ -592,17 +589,6 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 					// the server is now either disabled or invalid
 					closeEditor(false);
 				}
-			}
-
-			public void tableInitialized(Table t)
-			{
-				// not interested
-			}
-
-			public void hiddenTableChanged(IServerInternal server, Table table)
-			{
-				// not interested; we still show the editor as the table is still there
-
 			}
 		};
 		server.addTableListener(tableListener);
@@ -623,9 +609,14 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		};
 		serverManager.addServerListener(serverListener);
 
-		columnListener = new IColumnListener()
+		columnListener = new IItemChangeListener<IColumn>()
 		{
-			public void iColumnsChanged(Collection<IColumn> columns)
+			public void itemChanged(IColumn column)
+			{
+				itemChanged(Collections.singletonList(column));
+			}
+
+			public void itemChanged(Collection<IColumn> columns)
 			{
 				UIUtils.runInUI(new Runnable()
 				{
@@ -636,7 +627,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				}, false);
 			}
 
-			public void iColumnCreated(IColumn column)
+			public void itemCreated(IColumn column)
 			{
 				UIUtils.runInUI(new Runnable()
 				{
@@ -647,7 +638,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				}, false);
 			}
 
-			public void iColumnRemoved(IColumn column)
+			public void itemRemoved(IColumn column)
 			{
 				UIUtils.runInUI(new Runnable()
 				{

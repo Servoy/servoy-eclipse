@@ -18,6 +18,7 @@ package com.servoy.eclipse.core.repository;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -39,8 +40,8 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IColumn;
-import com.servoy.j2db.persistence.IColumnListener;
 import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.IItemChangeListener;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
@@ -72,7 +73,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 	private ITableListener tableListener;
 	private IServerListener serverListener;
 	private IPersistChangeListener persistChangeListener;
-	private IColumnListener columnListener;
+	private IItemChangeListener<IColumn> columnListener;
 
 	/** Check if user is administrator.
 	 * <p> Some operations can only be done by admin user or own user (like change own password)
@@ -122,9 +123,14 @@ public class EclipseUserManager extends WorkspaceUserManager
 	{
 		// listen for TABLE / COLUMN changes
 		IServerManagerInternal serverManager = ServoyModel.getServerManager();
-		columnListener = new IColumnListener()
+		columnListener = new IItemChangeListener<IColumn>()
 		{
-			public void iColumnsChanged(Collection<IColumn> columns)
+			public void itemChanged(IColumn column)
+			{
+				itemChanged(Collections.singletonList(column));
+			}
+
+			public void itemChanged(Collection<IColumn> columns)
 			{
 				try
 				{
@@ -140,7 +146,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 				}
 			}
 
-			public void iColumnCreated(IColumn column)
+			public void itemCreated(IColumn column)
 			{
 				try
 				{
@@ -152,7 +158,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 				}
 			}
 
-			public void iColumnRemoved(IColumn column)
+			public void itemRemoved(IColumn column)
 			{
 				try
 				{
@@ -165,8 +171,9 @@ public class EclipseUserManager extends WorkspaceUserManager
 			}
 		};
 
-		tableListener = new ITableListener()
+		tableListener = new ITableListener.TableListener()
 		{
+			@Override
 			public void tablesAdded(IServerInternal server, String tableNames[])
 			{
 				try
@@ -236,21 +243,11 @@ public class EclipseUserManager extends WorkspaceUserManager
 				}
 			}
 
-			public void serverStateChanged(IServerInternal server, int oldState, int newState)
-			{
-				// do nothing
-			}
-
+			@Override
 			public void tableInitialized(Table t)
 			{
 				t.addIColumnListener(columnListener);
 			}
-
-			public void hiddenTableChanged(IServerInternal server, Table table)
-			{
-				// nothing to do here
-			}
-
 		};
 
 		// add listeners to initial servers & tables

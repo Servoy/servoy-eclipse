@@ -45,6 +45,7 @@ import com.servoy.j2db.persistence.QuerySet;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.persistence.TableChangeHandler;
 import com.servoy.j2db.query.ISQLQuery;
 import com.servoy.j2db.query.QueryColumn;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -60,7 +61,6 @@ public class MemServer implements IServerInternal, IServer
 	private final Map<String, ITable> tables = new HashMap<String, ITable>();
 	private volatile ISequenceProvider sequenceManager;
 	private final ServerConfig serverConfig;
-	private final List<ITableListener> tableListeners = new ArrayList<ITableListener>();
 
 	/**
 	 *
@@ -236,12 +236,7 @@ public class MemServer implements IServerInternal, IServer
 
 	protected void fireTablesRemoved(ITable removedTables[], boolean deleted)
 	{
-		if (removedTables.length == 0) return;
-
-		for (int i = 0; i < tableListeners.size(); i++)
-		{
-			(tableListeners.get(i)).tablesRemoved(this, removedTables, deleted);
-		}
+		TableChangeHandler.getInstance().fireTablesRemoved(this, removedTables, deleted);
 	}
 
 	/*
@@ -388,7 +383,7 @@ public class MemServer implements IServerInternal, IServer
 	@Override
 	public void removeTableListener(ITableListener tableListener)
 	{
-		this.tableListeners.remove(tableListener);
+		TableChangeHandler.getInstance().remove(this, tableListener);
 	}
 
 	/*
@@ -399,7 +394,7 @@ public class MemServer implements IServerInternal, IServer
 	@Override
 	public void addTableListener(ITableListener tableListener)
 	{
-		this.tableListeners.add(tableListener);
+		TableChangeHandler.getInstance().add(this, tableListener);
 	}
 
 	/*

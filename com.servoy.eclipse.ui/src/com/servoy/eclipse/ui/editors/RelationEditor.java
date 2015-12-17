@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.editors;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -82,8 +83,8 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumn;
-import com.servoy.j2db.persistence.IColumnListener;
 import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.persistence.IItemChangeListener;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
@@ -97,7 +98,7 @@ import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.Utils;
 
-public class RelationEditor extends PersistEditor implements IColumnListener
+public class RelationEditor extends PersistEditor implements IItemChangeListener<IColumn>
 {
 	public static int NUMBER_VISIBLE_ITEMS = 10;
 
@@ -936,17 +937,22 @@ public class RelationEditor extends PersistEditor implements IColumnListener
 		}
 	}
 
-	public void iColumnCreated(IColumn column)
+	public void itemCreated(IColumn column)
 	{
 		refreshTable(column);
 	}
 
-	public void iColumnRemoved(IColumn column)
+	public void itemRemoved(IColumn column)
 	{
 		refreshTable(column);
 	}
 
-	public void iColumnsChanged(Collection<IColumn> columns)
+	public void itemChanged(IColumn column)
+	{
+		itemChanged(Collections.singletonList(column));
+	}
+
+	public void itemChanged(Collection<IColumn> columns)
 	{
 		if (columns != null && columns.size() > 0)
 		{

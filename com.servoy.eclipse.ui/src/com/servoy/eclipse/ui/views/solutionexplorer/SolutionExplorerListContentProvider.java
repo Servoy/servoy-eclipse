@@ -116,7 +116,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IColumn;
-import com.servoy.j2db.persistence.IColumnListener;
+import com.servoy.j2db.persistence.IItemChangeListener;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IRepository;
@@ -170,7 +170,7 @@ import com.servoy.j2db.util.Text;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
-public class SolutionExplorerListContentProvider implements IStructuredContentProvider, IImageLookup, IPersistChangeListener, IColumnListener
+public class SolutionExplorerListContentProvider implements IStructuredContentProvider, IImageLookup, IPersistChangeListener, IItemChangeListener<IColumn>
 {
 	private final SolutionExplorerView view;
 
@@ -2046,11 +2046,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 	}
 
+	public void itemChanged(IColumn column)
+	{
+		itemChanged(Collections.singletonList(column));
+	}
 
-	/**
-	 * @see com.servoy.j2db.persistence.IColumnListener#iColumnsChanged(java.util.Collection)
-	 */
-	public void iColumnsChanged(Collection<IColumn> columns)
+	public void itemChanged(Collection<IColumn> columns)
 	{
 		if (columns != null && columns.size() > 0)
 		{
@@ -2065,10 +2066,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 	}
 
-	/**
-	 * @see com.servoy.j2db.persistence.IColumnListener#iColumnCreated(com.servoy.j2db.persistence.IColumn)
-	 */
-	public void iColumnCreated(IColumn column)
+	public void itemCreated(IColumn column)
 	{
 		try
 		{
@@ -2080,10 +2078,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 	}
 
-	/**
-	 * @see com.servoy.j2db.persistence.IColumnListener#iColumnRemoved(com.servoy.j2db.persistence.IColumn)
-	 */
-	public void iColumnRemoved(IColumn column)
+	public void itemRemoved(IColumn column)
 	{
 		try
 		{

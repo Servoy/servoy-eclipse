@@ -1983,8 +1983,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private void addServerAndTableListeners()
 	{
 		IServerManagerInternal serverManager = ServoyModel.getServerManager();
-		tableListener = new ITableListener()
+		tableListener = new ITableListener.TableListener()
 		{
+			@Override
 			public void tablesAdded(IServerInternal server, String[] tableNames)
 			{
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerViewsNode(server);
@@ -2015,6 +2016,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
 			}
 
+			@Override
 			public void hiddenTableChanged(IServerInternal server, Table table)
 			{
 				if (table.getTableType() == ITable.VIEW)
@@ -2027,6 +2029,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				}
 			}
 
+			@Override
 			public void serverStateChanged(IServerInternal server, int oldState, int newState)
 			{
 				((SolutionExplorerListContentProvider)list.getContentProvider()).refreshServer(server.getName());
@@ -2055,12 +2058,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					expandServersNode.schedule();
 				}
 			}
-
-			public void tableInitialized(Table t)
-			{
-				// not interested in this
-			}
-
 		};
 		// add listeners to initial server list
 		String[] array = serverManager.getServerNames(false, false, true, true);

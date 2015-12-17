@@ -148,8 +148,8 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnInfoBasedSequenceProvider;
-import com.servoy.j2db.persistence.IColumnListener;
 import com.servoy.j2db.persistence.IDeveloperRepository;
+import com.servoy.j2db.persistence.IItemChangeListener;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -233,7 +233,7 @@ public class ServoyModel extends AbstractServoyModel
 
 	private IServerListener serverTableListener;
 	private ITableListener tableListener;
-	private IColumnListener columnListener;
+	private IItemChangeListener<IColumn> columnListener;
 
 	private final IServerInternal memServer = new MemServer();
 
@@ -713,11 +713,15 @@ public class ServoyModel extends AbstractServoyModel
 	 */
 	private void installServerTableColumnListener()
 	{
-		columnListener = new IColumnListener()
+		columnListener = new IItemChangeListener<IColumn>()
 		{
+			public void itemChanged(IColumn column)
+			{
+				itemChanged(Collections.singletonList(column));
+			}
 
 			@Override
-			public void iColumnsChanged(Collection<IColumn> columns)
+			public void itemChanged(Collection<IColumn> columns)
 			{
 				try
 				{
@@ -733,7 +737,7 @@ public class ServoyModel extends AbstractServoyModel
 			}
 
 			@Override
-			public void iColumnRemoved(IColumn column)
+			public void itemRemoved(IColumn column)
 			{
 				try
 				{
@@ -746,7 +750,7 @@ public class ServoyModel extends AbstractServoyModel
 			}
 
 			@Override
-			public void iColumnCreated(IColumn column)
+			public void itemCreated(IColumn column)
 			{
 				try
 				{

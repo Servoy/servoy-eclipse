@@ -119,13 +119,8 @@ public class DataModelManager implements IColumnInfoManager
 		this.resourceProject = resourceProject;
 		this.sm = sm;
 
-		tableListener = new ITableListener()
+		tableListener = new ITableListener.TableListener()
 		{
-			public void tablesAdded(IServerInternal server, String tableNames[])
-			{
-				// not interested in this
-			}
-
 			public void tablesRemoved(IServerInternal server, ITable tables[], boolean deleted)
 			{
 				if (server == ServoyModelFinder.getServoyModel().getMemServer())
@@ -145,11 +140,7 @@ public class DataModelManager implements IColumnInfoManager
 				}
 			}
 
-			public void hiddenTableChanged(IServerInternal server, Table table)
-			{
-				// not interested in this
-			}
-
+			@Override
 			public void serverStateChanged(IServerInternal server, int oldState, int newState)
 			{
 				if ((oldState & ITableListener.ENABLED) == 0 && (newState & ITableListener.ENABLED) != 0 && (newState & ITableListener.VALID) != 0)
@@ -164,6 +155,7 @@ public class DataModelManager implements IColumnInfoManager
 				}
 			}
 
+			@Override
 			public void tableInitialized(Table t)
 			{
 				for (Column column : t.getColumns())
