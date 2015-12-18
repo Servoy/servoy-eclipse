@@ -197,7 +197,7 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 
 				/*
 				 * (non-Javadoc)
-				 *
+				 * 
 				 * @see org.eclipse.swt.events.FocusListener#focusGained(org.eclipse.swt.events.FocusEvent)
 				 */
 				public void focusGained(FocusEvent e)
@@ -207,7 +207,7 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 
 				/*
 				 * (non-Javadoc)
-				 *
+				 * 
 				 * @see org.eclipse.swt.events.FocusListener#focusLost(org.eclipse.swt.events.FocusEvent)
 				 */
 				public void focusLost(FocusEvent e)
@@ -386,10 +386,18 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 			contents = createContents(editor, singleLine);
 		}
 
-		String stringValue = "";
-		if (val != null)
+		String stringValue;
+		if (labelProvider != null)
+		{
+			stringValue = labelProvider.getText(val);
+		}
+		else if (val != null)
 		{
 			stringValue = val.toString();
+		}
+		else
+		{
+			stringValue = "";
 		}
 		if (contents instanceof Text)
 		{
@@ -399,7 +407,7 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 		}
 		if (contents instanceof Label)
 		{
-			((Label)contents).setText(labelProvider == null ? stringValue : labelProvider.getText(val));
+			((Label)contents).setText(stringValue);
 		}
 	}
 
