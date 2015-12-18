@@ -17,18 +17,11 @@
 
 package com.servoy.eclipse.ui.property;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONStringer;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.property.IPropertyConverterForBrowser;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.FunctionPropertyType;
-import org.sablo.websocket.utils.DataConversion;
 
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -42,17 +35,9 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.FormatPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.NGColorPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.NGDimensionPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.NGFontPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.NGInsetsPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.NGPointPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 
@@ -64,19 +49,6 @@ import com.servoy.j2db.util.UUID;
  */
 public class WebComponentPropertyHandler implements IPropertyHandler
 {
-	// this map can be filled by an extension point if we support 3rd party types.
-	// TODO extension point + maybe use another interface as values - something like IDesignValueConverter - cause this conversion is not related to what the javadoc in IPropertyConverter describes and it can be confusing
-	private static final Map<IPropertyType< ? >, IPropertyConverterForBrowser< ? extends Object>> jsonConverters = new HashMap<IPropertyType< ? >, IPropertyConverterForBrowser< ? extends Object>>();
-
-	static
-	{
-		jsonConverters.put(NGPointPropertyType.NG_INSTANCE, NGPointPropertyType.NG_INSTANCE);
-		jsonConverters.put(NGDimensionPropertyType.NG_INSTANCE, NGDimensionPropertyType.NG_INSTANCE);
-		jsonConverters.put(NGColorPropertyType.NG_INSTANCE, NGColorPropertyType.NG_INSTANCE);
-		jsonConverters.put(NGFontPropertyType.NG_INSTANCE, NGFontPropertyType.NG_INSTANCE);
-		jsonConverters.put(NGInsetsPropertyType.NG_INSTANCE, NGInsetsPropertyType.NG_INSTANCE);
-		jsonConverters.put(BorderPropertyType.INSTANCE, BorderPropertyType.INSTANCE);
-	}
 
 	private final PropertyDescription propertyDescription;
 	private boolean canHandleJSONNull = false;
@@ -148,48 +120,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 
 			return Integer.valueOf(-1);
 		}
-		if (value == null)
-		{
-			if (propertyDescription.hasDefault())
-			{
-				if (jsonConverters.containsKey(type))
-				{
-					IPropertyConverterForBrowser<Object> converter = (IPropertyConverterForBrowser<Object>)jsonConverters.get(type);
-					if (converter != null)
-					{
-						return converter.fromJSON(propertyDescription.getDefaultValue(), null, propertyDescription, null, null);
-					}
-				}
-				return propertyDescription.getDefaultValue();
-			}
-			// FormatPropertyType default is an Object, but the properties view expects string,
-			// so just return null as default
-			if (type == FormatPropertyType.INSTANCE) return null;
-			return type.defaultValue(propertyDescription);
-		}
-		else
-		{
-			IPropertyConverterForBrowser<Object> converter = (IPropertyConverterForBrowser<Object>)jsonConverters.get(type);
-			if (converter != null)
-			{
-				if (value instanceof String && ((String)value).startsWith("{"))
-				{
-					try
-					{
-						value = converter.fromJSON(new JSONObject((String)value), null, propertyDescription, null, null);
-					}
-					catch (Exception e)
-					{
-						Debug.error("can't parse '" + value + "' to the real type for property converter: " + type, e);
-					}
-				}
-				else
-				{
-					value = converter.fromJSON(value, null, propertyDescription, null, null);
-				}
-			}
-		}
-		return canHandleJSONNull ? value : ServoyJSONObject.jsonNullToNull(value);
+		return canHandleJSONNull ? bean.getProperty(getName()) : ServoyJSONObject.jsonNullToNull(value);
 	}
 
 	@Override
@@ -230,25 +161,6 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		{
 			Media media = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getMedia(((Integer)value).intValue());
 			convertedValue = (media == null) ? null : media.getUUID().toString();
-		}
-		else
-		{
-			IPropertyConverterForBrowser<Object> converter = (IPropertyConverterForBrowser<Object>)jsonConverters.get(propertyDescription.getType());
-			if (converter != null)
-			{
-				JSONStringer writer = new JSONStringer();
-				try
-				{
-					writer.object();
-					converter.toJSON(writer, getName(), convertedValue, propertyDescription, new DataConversion(), null).toString();
-					writer.endObject();
-					convertedValue = new JSONObject(writer.toString()).get(getName());
-				}
-				catch (JSONException e)
-				{
-					ServoyLog.logError(e);
-				}
-			}
 		}
 
 		bean.setJsonSubproperty(getName(), convertedValue);

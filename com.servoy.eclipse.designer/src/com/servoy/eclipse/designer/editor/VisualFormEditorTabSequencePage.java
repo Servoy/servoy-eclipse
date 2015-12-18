@@ -59,7 +59,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
-import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebComponentSpecification;
@@ -85,6 +84,7 @@ import com.servoy.j2db.server.ngclient.FormElementHelper.TabSeqProperty;
 import com.servoy.j2db.server.ngclient.property.types.NGTabSeqPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.SortedList;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Tab in form editor for managing tab sequences.
@@ -236,8 +236,8 @@ public class VisualFormEditorTabSequencePage extends Composite
 				DragSource ds = (DragSource)event.widget;
 				Table table = (Table)ds.getControl();
 				TableItem[] selection = table.getSelection();
-				if (selection != null && selection.length > 0) event.data = new Object[] { Platform.getAdapterManager().getAdapter(
-					((TabSeqProperty)selection[0].getData()).element, IDragData.class) };
+				if (selection != null && selection.length > 0)
+					event.data = new Object[] { Platform.getAdapterManager().getAdapter(((TabSeqProperty)selection[0].getData()).element, IDragData.class) };
 			}
 		});
 
@@ -313,31 +313,31 @@ public class VisualFormEditorTabSequencePage extends Composite
 		selectedElementsLabel.setText("Selected elements");
 		final GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-					groupLayout.createSequentialGroup().add(
-						groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-							groupLayout.createSequentialGroup().add(availableList, GroupLayout.PREFERRED_SIZE, 175, Short.MAX_VALUE).addPreferredGap(
-								LayoutStyle.RELATED).add(
-								groupLayout.createParallelGroup(GroupLayout.LEADING).add(addButton, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE).add(
-									removeButton, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))).add(availableElementsLabel)).addPreferredGap(
+			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+				groupLayout.createSequentialGroup().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+					groupLayout.createSequentialGroup().add(availableList, GroupLayout.PREFERRED_SIZE, 175, Short.MAX_VALUE).addPreferredGap(
 						LayoutStyle.RELATED).add(
-						groupLayout.createParallelGroup(GroupLayout.LEADING).add(selectedTable, GroupLayout.PREFERRED_SIZE, 175, Short.MAX_VALUE).add(
-							selectedElementsLabel, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-						groupLayout.createParallelGroup(GroupLayout.TRAILING).add(upButton, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE).add(
-							downButton, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))).add(defaultButton, GroupLayout.PREFERRED_SIZE, 81,
-					GroupLayout.PREFERRED_SIZE)).addContainerGap()));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(availableElementsLabel).add(selectedElementsLabel)).addPreferredGap(
+							groupLayout.createParallelGroup(GroupLayout.LEADING).add(addButton, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE).add(
+								removeButton, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))).add(availableElementsLabel)).addPreferredGap(
+									LayoutStyle.RELATED).add(
+										groupLayout.createParallelGroup(GroupLayout.LEADING).add(selectedTable, GroupLayout.PREFERRED_SIZE, 175,
+											Short.MAX_VALUE).add(selectedElementsLabel, GroupLayout.PREFERRED_SIZE, 134,
+												GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+													groupLayout.createParallelGroup(GroupLayout.TRAILING).add(upButton, GroupLayout.PREFERRED_SIZE, 60,
+														GroupLayout.PREFERRED_SIZE).add(downButton, GroupLayout.PREFERRED_SIZE, 60,
+															GroupLayout.PREFERRED_SIZE))).add(defaultButton, GroupLayout.PREFERRED_SIZE, 81,
+																GroupLayout.PREFERRED_SIZE)).addContainerGap()));
+		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
+			groupLayout.createParallelGroup(GroupLayout.TRAILING).add(availableElementsLabel).add(selectedElementsLabel)).addPreferredGap(
 				LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-					groupLayout.createSequentialGroup().add(upButton).addPreferredGap(LayoutStyle.RELATED).add(downButton)).add(
-					groupLayout.createParallelGroup(GroupLayout.LEADING).add(selectedTable, GroupLayout.PREFERRED_SIZE, 188, Short.MAX_VALUE).add(
-						groupLayout.createSequentialGroup().addPreferredGap(LayoutStyle.RELATED).add(
-							groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-								groupLayout.createSequentialGroup().add(removeButton).addPreferredGap(LayoutStyle.RELATED).add(addButton)).add(availableList,
-								GroupLayout.PREFERRED_SIZE, 188, Short.MAX_VALUE))))).add(10, 10, 10).add(defaultButton).addContainerGap()));
+					groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+						groupLayout.createSequentialGroup().add(upButton).addPreferredGap(LayoutStyle.RELATED).add(downButton)).add(
+							groupLayout.createParallelGroup(GroupLayout.LEADING).add(selectedTable, GroupLayout.PREFERRED_SIZE, 188, Short.MAX_VALUE).add(
+								groupLayout.createSequentialGroup().addPreferredGap(LayoutStyle.RELATED).add(
+									groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+										groupLayout.createSequentialGroup().add(removeButton).addPreferredGap(LayoutStyle.RELATED).add(addButton)).add(
+											availableList, GroupLayout.PREFERRED_SIZE, 188, Short.MAX_VALUE))))).add(10, 10, 10).add(
+												defaultButton).addContainerGap()));
 		container.setLayout(groupLayout);
 
 		scrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -404,17 +404,17 @@ public class VisualFormEditorTabSequencePage extends Composite
 			IPersist persist = iterator.next();
 			if (FormTemplateGenerator.isWebcomponentBean(persist))
 			{
-				String componentType = FormTemplateGenerator.getComponentTypeName((IBasicWebComponent)persist);
+				IBasicWebComponent webComponent = (IBasicWebComponent)persist;
+				String componentType = FormTemplateGenerator.getComponentTypeName(webComponent);
 				WebComponentSpecification specification = WebComponentSpecProvider.getInstance().getWebComponentSpecification(componentType);
 				if (specification != null)
 				{
 					Collection<PropertyDescription> properties = specification.getProperties(NGTabSeqPropertyType.NG_INSTANCE);
 					if (properties != null && properties.size() > 0)
 					{
-						JSONObject json = ((IBasicWebComponent)persist).getJson();
 						for (PropertyDescription pd : properties)
 						{
-							int tabseq = json != null ? json.optInt(pd.getName()) : 0;
+							int tabseq = Utils.getAsInteger(webComponent.getProperty(pd.getName()));
 							if (tabseq >= 0)
 							{
 								selected.add(new TabSeqProperty((IFormElement)persist, pd.getName()));

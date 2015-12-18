@@ -86,11 +86,11 @@ public class CustomJSONObjectTypePropertyController extends JSONObjectTypeProper
 			} // else persistContext already has correct persist (array element persist)
 
 
-			if (underlyingPropertySource == null || ((persist instanceof IBasicWebObject) && (((IBasicWebObject)persist).getJson() == null))) // so if we have no propertySource or if we have one but we shouldn't (json became null meanwhile)
+			if (underlyingPropertySource == null || ((persist instanceof IBasicWebObject) && (((IBasicWebObject)persist).getFlattenedJson() == null))) // so if we have no propertySource or if we have one but we shouldn't (json became null meanwhile)
 			{
 				if (persist instanceof IBasicWebObject)
 				{
-					if (((IBasicWebObject)persist).getJson() != null)
+					if (((IBasicWebObject)persist).getFlattenedJson() != null)
 					{
 						underlyingPropertySource = new PDPropertySource(pContext, readOnly, propertyDescription);
 					}
