@@ -143,13 +143,19 @@ public class DesignerFilter implements Filter
 					JSONObject jsonObject = new JSONObject(json);
 					JSONArray ordered = null;
 					if (jsonObject.has(layoutType)) ordered = (JSONArray)jsonObject.get(layoutType);
+
 					final ArrayList<String> orderPreference = new ArrayList<String>();
 					if (ordered != null)
 					{
 						for (int i = 0; i < ordered.length(); i++)
 						{
-							orderPreference.add(ordered.getString(i));
+							if (ordered.get(i) instanceof String) orderPreference.add(ordered.getString(i));
 						}
+					}
+					// orderPreference array has to contain all keys, otherwise sorting does not work correctly
+					for (String key : orderedKeys)
+					{
+						if (!orderPreference.contains(key)) orderPreference.add(key);
 					}
 
 					if (orderPreference.size() > 0)
@@ -170,7 +176,6 @@ public class DesignerFilter implements Filter
 							}
 						});
 					}
-
 					for (String key : orderedKeys)
 					{
 						boolean startedArray = false;
@@ -237,7 +242,7 @@ public class DesignerFilter implements Filter
 								jsonWriter.endObject();
 							}
 						}
-						if (provider.getLayoutSpecifications().containsKey(key))
+						if (startedArray && provider.getLayoutSpecifications().containsKey(key))
 						{
 							WebComponentPackageSpecification<WebLayoutSpecification> entry = provider.getLayoutSpecifications().get(key);
 
@@ -294,7 +299,7 @@ public class DesignerFilter implements Filter
 								jsonWriter.endObject();
 							}
 						}
-						if (provider.getWebComponentSpecifications().containsKey(key))
+						if (startedArray && provider.getWebComponentSpecifications().containsKey(key))
 						{
 							WebComponentPackageSpecification<WebComponentSpecification> pkg = provider.getWebComponentSpecifications().get(key);
 							Collection<WebComponentSpecification> webComponentSpecsCollection = pkg.getSpecifications().values();
@@ -376,7 +381,7 @@ public class DesignerFilter implements Filter
 	private boolean isAccesibleInLayoutType(WebComponentPackageSpecification< ? > pkg, String layoutType)
 	{
 		if (pkg.getManifest() != null && pkg.getManifest().getMainAttributes() != null &&
-			Boolean.valueOf(pkg.getManifest().getMainAttributes().getValue(layoutType))) return true;
+			Boolean.valueOf(pkg.getManifest().getMainAttributes().getValue(layoutType)).booleanValue()) return true;
 		if (noLayoutTypeSpecified(pkg.getManifest())) return true;
 		return false;
 	}

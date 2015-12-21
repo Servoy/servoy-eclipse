@@ -21,16 +21,15 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
-import org.eclipse.ui.views.properties.PropertySheetPage;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.IRestorer;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.SimplePersistFactory;
@@ -93,15 +92,7 @@ public class SolutionPropertiesPage extends PropertyPage
 	public boolean performOk()
 	{
 		//refresh the properties sheet page
-		IViewReference[] iv = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getViewReferences();
-		for (IViewReference ref : iv)
-		{
-			if (ref.getId().equals("org.eclipse.ui.views.PropertySheet"))
-			{
-				PropertySheetPage psp = ref.getView(false).getAdapter(PropertySheetPage.class);
-				if (psp != null) psp.refresh();
-			}
-		}
+		PersistPropertySource.refreshPropertiesView();
 		return true;
 	}
 

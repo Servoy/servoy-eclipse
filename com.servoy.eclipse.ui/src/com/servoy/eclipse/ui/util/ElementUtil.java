@@ -31,6 +31,7 @@ import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -66,6 +67,7 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
@@ -242,6 +244,12 @@ public class ElementUtil
 			// no override
 			return persist;
 		}
+		WebCustomType customType = null;
+		if (persist instanceof WebCustomType)
+		{
+			customType = (WebCustomType)persist;
+			persist = customType.getParent();
+		}
 		while (PersistHelper.getSuperPersist((ISupportExtendsID)persist) != null)
 		{
 			persist = PersistHelper.getSuperPersist((ISupportExtendsID)persist);
@@ -281,7 +289,7 @@ public class ElementUtil
 				if (parent == null && parentPersist.getParent() instanceof LayoutContainer)
 				{
 					ISupportChilds originalParent = parentPersist.getParent();
-					parent = reconstructContainmentHeirarchy(originalParent, context);
+					parent = reconstructContainmentHierarchy(originalParent, context);
 				}
 				else if (parent == null)
 				{
@@ -294,6 +302,22 @@ public class ElementUtil
 			((AbstractBase)newPersist).copyPropertiesMap(null, true);
 			((ISupportExtendsID)newPersist).setExtendsID(parentPersist.getID());
 		}
+		if (customType != null)
+		{
+			Object newCustomType = ((AbstractBase)newPersist).getProperty(customType.getJsonKey());
+			if (newCustomType instanceof WebCustomType)
+			{
+				return (WebCustomType)newCustomType;
+			}
+			else if (newCustomType instanceof Object[])
+			{
+				return (IPersist)((Object[])newCustomType)[customType.getIndex()];
+			}
+			else
+			{
+				ServoyLog.logError("Cannot find the override custom type in: " + newCustomType, null);
+			}
+		}
 		return newPersist;
 	}
 
@@ -303,7 +327,7 @@ public class ElementUtil
 	 * @return
 	 *
 	 */
-	public static ISupportChilds reconstructContainmentHeirarchy(ISupportChilds originalParent, IPersist context)
+	private static ISupportChilds reconstructContainmentHierarchy(ISupportChilds originalParent, IPersist context)
 	{
 		ISupportChilds parent = originalParent;
 		ArrayList<ISupportChilds> containmentHierrachy = new ArrayList<>();

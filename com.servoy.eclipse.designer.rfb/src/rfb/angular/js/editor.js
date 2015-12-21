@@ -817,11 +817,6 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 						}	
 					}
 				}
-				else {
-					$timeout(function() {
-						$editorService.refreshPreview();
-					}, 100);
-				}
 			});			
 			
 			$editorService.registerEditor($scope);
@@ -988,6 +983,14 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 			return wsSession.callService('formeditor', 'getBooleanState', {"showData":true}, false)
 		},
 		
+		isShowWireframe: function() {
+			return wsSession.callService('formeditor', 'getBooleanState', {"showWireframe":true}, false)
+		},
+		
+		toggleShowWireframe: function() {
+			return wsSession.callService('formeditor', 'toggleShowWireframe', null, false)
+		},
+		
 		createComponents: function(components) {
 			wsSession.callService('formeditor', 'createComponents', components, true)
 		},
@@ -1108,12 +1111,8 @@ angular.module('editor', ['mc.resizer','palette','toolbar','contextmenu','mouses
 		showImageInOverlayDiv: function(url){
 			editorScope.previewOverlayImgURL = url;
 			editorScope.displayOverlay = true;
-		},
-		
-		refreshPreview: function() {
-			var utils = $selectionUtils.getUtilsForScope(editorScope);
-			utils.refreshDesignMode();
 		}
+		
 		// add more service methods here
 	}
 }).factory("loadingIndicator",function() {

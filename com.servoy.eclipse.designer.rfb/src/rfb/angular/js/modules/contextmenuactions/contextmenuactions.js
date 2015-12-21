@@ -273,6 +273,18 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 			
 			$contextmenu.add(
 				{
+					text: "Save as template ...",
+					getIconStyle: function(){ return {'background-image':"url(toolbaractions/icons/template.gif)"}},
+					execute:function()
+					{
+						$("#contextMenu").hide();
+						$editorService.openElementWizard('saveastemplate');
+					}
+				}
+			);			
+			
+			$contextmenu.add(
+				{
 					text: "Open in Script Editor",
 					getIconStyle: function(){ return {'background-image':"url(images/js.gif)"}},
 					shortcut: shortcuts[SHORTCUT_IDS.OPEN_SCRIPT_ID],
@@ -282,7 +294,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 						$editorService.executeAction('openScript');
 					}
 				}
-			);	
+			);
 		});
 	});
 	

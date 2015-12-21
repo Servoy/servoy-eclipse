@@ -80,7 +80,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 		for (Pair<String, IRootObject> scope : solution.getAllScopes())
 		{
 			extractUsedComponentsAndServices(SolutionSerializer.getRelativePath(scope.getRight(), false) + scope.getLeft() +
-				SolutionSerializer.JS_FILE_EXTENSION);
+					SolutionSerializer.JS_FILE_EXTENSION);
 		}
 
 		//these are always required
@@ -124,32 +124,35 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 						/*
 						 * (non-Javadoc)
-						 * 
+						 *
 						 * @see org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor#visitCallExpression(org.eclipse.dltk.javascript.ast.CallExpression)
 						 */
 						@Override
 						public ASTNode visitCallExpression(CallExpression node)
 						{
-							String expr = node.getExpression().toString();
-							if (expr.startsWith("plugins."))
+							if (node.getExpression().getChilds().size() > 0)
 							{
-								String[] parts = expr.split("\\.");
-								if (parts.length > 1 && WebServiceSpecProvider.getInstance().getWebServiceSpecification(parts[1]) != null)
+								String expr = node.getExpression().getChilds().get(0).toString();
+								if (expr.startsWith("plugins."))
 								{
-									usedServices.add(WebServiceSpecProvider.getInstance().getWebServiceSpecification(parts[1]).getName());
-								}
-							}
-							else if (expr.contains("newBean"))
-							{
-								if (node.getArguments().size() > 1)
-								{
-									String componentName = node.getArguments().get(1).toString();
-									if (componentName.startsWith("\"") || componentName.startsWith("'"))
+									String[] parts = expr.split("\\.");
+									if (parts.length > 1 && WebServiceSpecProvider.getInstance().getWebServiceSpecification(parts[1]) != null)
 									{
-										componentName = componentName.replaceAll("'|\"", "");
-										if (WebComponentSpecProvider.getInstance().getWebComponentSpecification(componentName) != null)
+										usedServices.add(WebServiceSpecProvider.getInstance().getWebServiceSpecification(parts[1]).getName());
+									}
+								}
+								else if (expr.contains("newWebComponent"))
+								{
+									if (node.getArguments().size() > 1)
+									{
+										String componentName = node.getArguments().get(1).toString();
+										if (componentName.startsWith("\"") || componentName.startsWith("'"))
 										{
-											usedComponents.add(componentName);
+											componentName = componentName.replaceAll("'|\"", "");
+											if (WebComponentSpecProvider.getInstance().getWebComponentSpecification(componentName) != null)
+											{
+												usedComponents.add(componentName);
+											}
 										}
 									}
 								}
@@ -172,7 +175,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getUsedComponents()
 	 */
 	@Override
@@ -183,7 +186,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getUsedServices()
 	 */
 	@Override

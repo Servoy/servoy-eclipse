@@ -24,7 +24,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.Style;
 
 /**
  * IComboboxPropertyModel model for style classes.
@@ -38,15 +38,11 @@ public class StyleClassesComboboxModel implements IComboboxPropertyModel<String>
 {
 	private final String lookupName;
 	private final Form form;
-	private final IPersist element;
-	private final String propertyName;
 
-	public StyleClassesComboboxModel(Form form, IPersist persist, String propertyName, String lookupName)
+	public StyleClassesComboboxModel(Form form, String lookupName)
 	{
 		this.form = form;
 		this.lookupName = lookupName;
-		this.element = persist;
-		this.propertyName = propertyName;
 	}
 
 	public String[] getDisplayValues()
@@ -76,14 +72,15 @@ public class StyleClassesComboboxModel implements IComboboxPropertyModel<String>
 	protected String[] getStyleClasses()
 	{
 		List<String> styleClasses = new ArrayList<String>();
-		// always DEFAULT is first element
-		styleClasses.add(null);
+
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(form);
-		String[] classes = ModelUtils.getStyleClasses(flattenedSolution, form, element, propertyName, lookupName);
+		Style style = flattenedSolution.getStyleForForm(form, null);
+		String[] classes = ModelUtils.getStyleClasses(style, lookupName, form.getStyleClass());
 		if (classes != null && classes.length > 0)
 		{
 			styleClasses.addAll(Arrays.asList(classes));
 		}
+		styleClasses.add(0, null);
 		return styleClasses.toArray(new String[styleClasses.size()]);
 	}
 }

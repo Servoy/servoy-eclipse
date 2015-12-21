@@ -48,7 +48,6 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportEncapsulation;
-import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Solution;
@@ -236,15 +235,14 @@ public class DesignerUtil
 	}
 
 
-	public static Object getContentOutlineSelection()
+	public static PersistContext getContentOutlineSelection()
 	{
 		if (getContentOutline() != null)
 		{
 			Object firstElement = ((IStructuredSelection)getContentOutline().getSelection()).getFirstElement();
 			if (firstElement instanceof PersistContext)
 			{
-				PersistContext persistContext = (PersistContext)firstElement;
-				if (persistContext.getPersist() instanceof ISupportFormElements) return persistContext.getPersist();
+				return (PersistContext)firstElement;
 			}
 			if (firstElement == FormOutlineContentProvider.ELEMENTS)
 			{
@@ -259,10 +257,10 @@ public class DesignerUtil
 					ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
 						persistEditorInput.getSolutionName());
 					UUID uuid = persistEditorInput.getUuid();
-					return servoyProject.getEditingPersist(uuid);
+					IPersist persist = servoyProject.getEditingPersist(uuid);
+					return PersistContext.create(persist);
 				}
 			}
-			return firstElement;
 		}
 		return null;
 	}

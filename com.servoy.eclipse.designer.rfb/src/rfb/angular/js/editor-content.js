@@ -10,6 +10,7 @@ angular.module('editorContent',['servoyApp'])
 			 return el;
 		  }
 	$rootScope.highlight = false;
+	$rootScope.showWireframe = false;
 	$solutionSettings.enableAnchoring = false; 
 	$scope.solutionSettings = $solutionSettings; 
 	var realConsole = $window.console;
@@ -58,6 +59,7 @@ angular.module('editorContent',['servoyApp'])
 	 $servoyInternal.connect();
 	 var formName = $webSocket.getURLParameter("f");
 	 var high = $webSocket.getURLParameter("highlight");
+	 $rootScope.highlight = high;
 	 $scope.getUrl = function() {
 		 if ($webSocket.isConnected()) {
 			 var url = $windowService.getFormUrl(formName);

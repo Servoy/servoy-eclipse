@@ -24,6 +24,7 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.designer.editor.commands.FormElementDeleteCommand;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -52,7 +53,7 @@ public class DeleteAction extends org.eclipse.gef.ui.actions.DeleteAction
 	@Override
 	public boolean calculateEnabled()
 	{
-		return super.calculateEnabled();
+		return super.calculateEnabled() && !DesignerUtil.containsInheritedElement(getSelectedObjects());
 	}
 
 	/**

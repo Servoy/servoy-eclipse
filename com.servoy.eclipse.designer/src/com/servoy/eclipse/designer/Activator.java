@@ -72,6 +72,7 @@ public class Activator extends AbstractUIPlugin
 	// The plug-in ID
 	public static final String PLUGIN_ID = "com.servoy.eclipse.designer";
 	public static final String SHOW_DATA_IN_ANGULAR_DESIGNER = "showDataInDesigner";
+	public static final String SHOW_WIREFRAME_IN_ANGULAR_DESIGNER = "showWireframeInDesigner";
 
 	// The shared instance
 	private static Activator plugin;
@@ -81,6 +82,7 @@ public class Activator extends AbstractUIPlugin
 	private final Map<String, ImageIcon> imageIcons = new HashMap<String, ImageIcon>();
 
 	private DesignNGClient client = null;
+	private boolean showWireframe = false;
 
 	/**
 	 * The constructor
@@ -227,6 +229,23 @@ public class Activator extends AbstractUIPlugin
 					}
 				});
 			}
+		}
+		showWireframe = getPreferenceStore().contains(Activator.SHOW_WIREFRAME_IN_ANGULAR_DESIGNER)
+			? getPreferenceStore().getBoolean(Activator.SHOW_WIREFRAME_IN_ANGULAR_DESIGNER) : false;
+
+	}
+
+	public void toggleShowWireframe()
+	{
+		showWireframe = !showWireframe;
+		getPreferenceStore().putValue(SHOW_WIREFRAME_IN_ANGULAR_DESIGNER, String.valueOf(showWireframe));
+		try
+		{
+			((IPersistentPreferenceStore)getPreferenceStore()).save();
+		}
+		catch (IOException e)
+		{
+			ServoyLog.logError(e);
 		}
 	}
 

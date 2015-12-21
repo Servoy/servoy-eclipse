@@ -32,7 +32,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Property controller for selecting a color in Properties view.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -42,6 +42,29 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 	public static final PropertyColorConverter PROPERTY_COLOR_CONVERTER = new PropertyColorConverter();
 	public static final ColorLabelProvider COLOR_LABEL_PROVIDER = new ColorLabelProvider();
 	public static final ColorStringValidator COLOR_STRING_VALIDATOR = new ColorStringValidator();
+
+	private static final TreeBidiMap<String, String> colorsMap = new TreeBidiMap<String, String>();
+	static
+	{
+		// The 17 standard css colors
+		colorsMap.put("black", "#000000");
+		colorsMap.put("silver", "#c0c0c0");
+//		colorsMap.put("gray", "#808080");
+		colorsMap.put("grey", "#808080");
+		colorsMap.put("white", "#ffffff");
+		colorsMap.put("maroon", "#800000");
+		colorsMap.put("red", "#ff0000");
+		colorsMap.put("purple", "#800080");
+		colorsMap.put("fuchsia", "#ff00ff");
+		colorsMap.put("green", "#008000");
+		colorsMap.put("lime", "#00ff00");
+		colorsMap.put("olive", "#808000");
+		colorsMap.put("yellow", "#ffff00");
+		colorsMap.put("navy", "#000080");
+		colorsMap.put("blue", "#0000ff");
+		colorsMap.put("teal", "#008080");
+		colorsMap.put("aqua", "#00ffff");
+	}
 
 	public ColorPropertyController(String id, String displayName)
 	{
@@ -90,35 +113,12 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 
 	/**
 	 * Converter class for colors, convert AWT to RGB.
-	 * 
+	 *
 	 * @author rgansevles
-	 * 
+	 *
 	 */
 	public static class PropertyColorConverter implements IPropertyConverter<java.awt.Color, String>
 	{
-		private static final TreeBidiMap<String, String> colorsMap = new TreeBidiMap<String, String>();
-		static
-		{
-			// The 17 standard css colors
-			colorsMap.put("black", "#000000");
-			colorsMap.put("silver", "#c0c0c0");
-//			colorsMap.put("gray", "#808080");
-			colorsMap.put("grey", "#808080");
-			colorsMap.put("white", "#ffffff");
-			colorsMap.put("maroon", "#800000");
-			colorsMap.put("red", "#ff0000");
-			colorsMap.put("purple", "#800080");
-			colorsMap.put("fuchsia", "#ff00ff");
-			colorsMap.put("green", "#008000");
-			colorsMap.put("lime", "#00ff00");
-			colorsMap.put("olive", "#808000");
-			colorsMap.put("yellow", "#ffff00");
-			colorsMap.put("navy", "#000080");
-			colorsMap.put("blue", "#0000ff");
-			colorsMap.put("teal", "#008080");
-			colorsMap.put("aqua", "#00ffff");
-		}
-
 		/**
 		 * Convert AWT color to SWT color
 		 */
@@ -135,14 +135,7 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 
 		public String convertProperty(Object id, java.awt.Color awtcolor)
 		{
-			if (awtcolor == null) return null;
-			String colorString = getColorString(awtcolor);
-			String named = colorsMap.getKey(colorString);
-			if (named != null)
-			{
-				return Utils.stringInitCap(named);
-			}
-			return colorString;
+			return getColorString(awtcolor);
 		}
 
 		/**
@@ -169,9 +162,9 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 
 	/**
 	 * Label provider for colors.
-	 * 
+	 *
 	 * @author rgansevles
-	 * 
+	 *
 	 */
 	public static class ColorLabelProvider extends LabelProvider
 	{
@@ -182,6 +175,13 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 			{
 				return Messages.LabelDefault;
 			}
+
+			String named = colorsMap.getKey(element);
+			if (named != null)
+			{
+				return Utils.stringInitCap(named);
+			}
+
 			return super.getText(element);
 		}
 
@@ -199,7 +199,7 @@ public class ColorPropertyController extends PropertyDescriptor implements IProp
 
 	/**
 	 * Validate color strings for the text cell editor.
-	 * 
+	 *
 	 * @author rgansevles
 	 *
 	 */

@@ -1110,7 +1110,7 @@ public class WarExporter
 		try
 		{
 			fis = new FileInputStream(sourceFile);
-			Properties properties = new Properties();
+			Properties properties = new SortedProperties();
 			properties.load(fis);
 
 			properties.setProperty("SocketFactory.rmiServerFactory", "com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory");
