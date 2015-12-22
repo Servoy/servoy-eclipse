@@ -31,10 +31,17 @@ import com.servoy.j2db.util.DataSourceUtils;
 public class MemTable extends AbstractTable
 {
 	private final String name;
+	private final MemServer memServer;
 
-	public MemTable(String name)
+	public MemTable(MemServer memServer, String name)
 	{
+		this.memServer = memServer;
 		this.name = name;
+	}
+
+	public MemServer getParent()
+	{
+		return memServer;
 	}
 
 	/*
@@ -350,5 +357,13 @@ public class MemTable extends AbstractTable
 		{
 			throw new RepositoryException("A column on table " + getName() + "/server " + getServerName() + " with name " + colname + " already exists");
 		}
+	}
+
+	/**
+	 *
+	 */
+	public void setContents(String contents)
+	{
+		memServer.setColumns(this, contents);
 	}
 }

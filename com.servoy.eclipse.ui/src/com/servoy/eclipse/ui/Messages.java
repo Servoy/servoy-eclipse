@@ -129,6 +129,7 @@ public class Messages extends NLS
 	public static String TreeStrings_Forms;
 	public static String TreeStrings_FromProject;
 	public static String TreeStrings_Scopes;
+	public static String TreeStrings_SolutionDataSources;
 	public static String TreeStrings_History;
 	public static String TreeStrings_SolutionModel;
 	public static String TreeStrings_i18n;

@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Control;
@@ -40,6 +41,7 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
+import org.json.JSONObject;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
@@ -48,8 +50,11 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.TableEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.inmemory.MemServer;
+import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.table.AggregationsComposite;
@@ -82,6 +87,7 @@ import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
 public class TableEditor extends MultiPageEditorPart implements IActiveProjectListener
@@ -559,7 +565,8 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		{
 			if (DataSourceUtils.INMEM_DATASOURCE.equals(table.getServerName()))
 			{
-				server = ServoyModelFinder.getServoyModel().getMemServer();
+				MemTable memTable = (MemTable)table;
+				server = memTable.getParent();
 			}
 			if (server == null)
 			{
@@ -859,34 +866,42 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		boolean modified = true;
 		if (checkChanges)
 		{
+
 			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 			DataModelManager dmm = servoyModel.getDataModelManager();
 			if (dmm != null)
 			{
-				IFile dbiFile = dmm.getDBIFile(table.getServerName(), table.getName());
-				InputStream is = null;
-				try
+				if (table instanceof MemTable)
 				{
-					if (dbiFile != null && dbiFile.exists())
-					{
-						is = dbiFile.getContents(true);
-						String disk = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
-						String mem = dmm.serializeTable(table, false);
-						modified = !mem.equals(disk);
-					}
+					modified = isChanged(((MemTable)table));
 				}
-				catch (Exception e)
+				else
 				{
-					Debug.error(e);
-				}
-				finally
-				{
+					IFile dbiFile = dmm.getDBIFile(table.getServerName(), table.getName());
+					InputStream is = null;
 					try
 					{
-						is.close();
+						if (dbiFile != null && dbiFile.exists())
+						{
+							is = dbiFile.getContents(true);
+							String disk = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
+							String mem = dmm.serializeTable(table, false);
+							modified = !mem.equals(disk);
+						}
 					}
 					catch (Exception e)
 					{
+						Debug.error(e);
+					}
+					finally
+					{
+						try
+						{
+							is.close();
+						}
+						catch (Exception e)
+						{
+						}
 					}
 				}
 			}
@@ -902,6 +917,43 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				}
 			});
 		}
+	}
+
+
+	/**
+	 * @param memTable
+	 * @return
+	 */
+	private boolean isChanged(MemTable memTable)
+	{
+		try
+		{
+			MemServer parent = memTable.getParent();
+
+			IFile file = parent.getServoyProject().getProject().getFile(
+				new Path("datasources/" + DataSourceUtils.INMEM_DATASOURCE + "/" + memTable.getName() + SolutionSerializer.TABLENODE_FILE_EXTENSION));
+			if (!file.exists()) return true;
+			InputStream contents = file.getContents();
+			String disk = Utils.getTXTFileContent(contents, Charset.forName("UTF8"));
+			ServoyJSONObject tblFile = new ServoyJSONObject(disk, true);
+			DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();
+			String mem = dmm.serializeTable(memTable, false);
+
+			ServoyJSONObject memoryVersion = new ServoyJSONObject(mem, true);
+			JSONObject driveColumns = (JSONObject)tblFile.get("columns");
+			Iterator<String> keys = driveColumns.keys();
+			while (keys.hasNext())
+			{
+				String next = keys.next();
+				if (!driveColumns.get(next).toString().equals(memoryVersion.get(next).toString())) return true;
+			}
+
+		}
+		catch (CoreException e)
+		{
+			ServoyLog.logError(e);
+		}
+		return false;
 	}
 
 	private boolean flushTable = false;

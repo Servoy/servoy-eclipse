@@ -38,12 +38,10 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -57,6 +55,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.MarkerMessages;
 import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
+import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ResourcesUtils;
@@ -78,7 +77,6 @@ import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.query.ColumnType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -123,21 +121,18 @@ public class DataModelManager implements IColumnInfoManager
 		{
 			public void tablesRemoved(IServerInternal server, ITable tables[], boolean deleted)
 			{
-				if (server == ServoyModelFinder.getServoyModel().getMemServer())
-				{
-					for (ITable iTable : tables)
-					{
-						IFile dbiFile = getDBIFile(server.getName(), iTable.getName());
-						try
-						{
-							dbiFile.delete(false, new NullProgressMonitor());
-						}
-						catch (CoreException e)
-						{
-							Debug.error(e);
-						}
-					}
-				}
+//				for (ITable iTable : tables)
+//				{
+//					IFile dbiFile = getDBIFile(server.getName(), iTable.getName());
+//					try
+//					{
+//						dbiFile.delete(false, new NullProgressMonitor());
+//					}
+//					catch (CoreException e)
+//					{
+//						Debug.error(e);
+//					}
+//				}
 			}
 
 			@Override
@@ -218,102 +213,6 @@ public class DataModelManager implements IColumnInfoManager
 		};
 		sm.addServerListener(serverListener);
 
-		setupMemTables();
-	}
-
-	private void setupMemTables()
-	{
-		org.eclipse.core.resources.IFolder serverInformationFolder = getDBIFileContainer("mem");
-
-		if (serverInformationFolder.exists())
-		{
-			try
-			{
-				serverInformationFolder.accept(new IResourceVisitor()
-				{
-					public boolean visit(IResource resource) throws CoreException
-					{
-						String extension = resource.getFileExtension();
-						if (extension != null && extension.equalsIgnoreCase(DataModelManager.COLUMN_INFO_FILE_EXTENSION))
-						{
-							//we found a dbi file
-							String tableName = resource.getName().substring(0,
-								resource.getName().length() - DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT.length());
-							try
-							{
-								ITable createNewTable = ServoyModelFinder.getServoyModel().getMemServer().createNewTable(null, tableName);
-								loadMemServerTable(createNewTable);
-								createNewTable.setInitialized(true);
-							}
-							catch (RepositoryException e)
-							{
-								Debug.error(e);
-							}
-						}
-						return true;
-					}
-
-				}, IResource.DEPTH_ONE, false);
-			}
-			catch (CoreException e)
-			{
-				Debug.error(e);
-			}
-			ServoyModelFinder.getServoyModel().getMemServer().addTableListener(tableListener);
-		}
-	}
-
-
-	public void loadMemServerTable(final ITable t) throws RepositoryException
-	{
-		IFile file = getDBIFile(t.getServerName(), t.getName());
-		try
-		{
-			file.refreshLocal(IResource.DEPTH_ZERO, new NullProgressMonitor());
-		}
-		catch (CoreException e1)
-		{
-			Debug.error(e1);
-		}
-		if (file.exists())
-		{
-			InputStream is = null;
-			try
-			{
-				is = file.getContents(true);
-				String json_table = Utils.getTXTFileContent(is, Charset.forName("UTF8"));
-				if (json_table != null)
-				{
-					deserializeInMemoryTable(ServoyModelFinder.getServoyModel().getMemServer(), t, json_table);
-				}
-			}
-			catch (JSONException e)
-			{
-				// maybe the .dbi file content is corrupt... add an error marker
-				addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
-				throw new RepositoryException(e);
-			}
-			catch (CoreException e)
-			{
-				// maybe the .dbi file content is corrupt... add an error marker
-				addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
-				throw new RepositoryException(e);
-			}
-			catch (RepositoryException e)
-			{
-				// maybe the .dbi file content is corrupt... add an error marker
-				addDeserializeErrorMarker(t.getServerName(), t.getName(), e.getMessage());
-				throw e;
-			}
-			finally
-			{
-				if (is != null)
-				{
-					Utils.closeInputStream(is);
-					is = null;
-				}
-			}
-		}
 	}
 
 	public void loadAllColumnInfo(final ITable t) throws RepositoryException
@@ -588,7 +487,12 @@ public class DataModelManager implements IColumnInfoManager
 			{
 				t.releaseReadLock();
 			}
-			try
+			if (t instanceof MemTable)
+			{
+				MemTable mem = (MemTable)t;
+				mem.setContents(out);
+			}
+			else try
 			{
 				InputStream source = new ByteArrayInputStream(out.getBytes("UTF8"));
 				IFile file = getDBIFile(t.getServerName(), t.getName());
@@ -795,10 +699,10 @@ public class DataModelManager implements IColumnInfoManager
 		return file.equals(writingMarkerFreeDBIFile);
 	}
 
-	private void deserializeInMemoryTable(IServerInternal s, ITable t, String json_table) throws RepositoryException, JSONException
+	public void deserializeInMemoryTable(IServerInternal s, ITable t, ServoyJSONObject property) throws RepositoryException, JSONException
 	{
 		int existingColumnInfo = 0;
-		TableDef tableInfo = deserializeTableInfo(json_table);
+		TableDef tableInfo = deserializeTableInfo(property);
 		if (!t.getName().equals(tableInfo.name))
 		{
 			throw new RepositoryException("Table name does not match dbi file name for " + t.getName());
@@ -1002,6 +906,18 @@ public class DataModelManager implements IColumnInfoManager
 	public TableDef deserializeTableInfo(String stringDBIContent) throws JSONException
 	{
 		ServoyJSONObject dbiContents = new ServoyJSONObject(stringDBIContent, true);
+		return deserializeTableInfo(dbiContents);
+	}
+
+	/**
+	 * Gets the table information from a .dbi (JSON format) file like structured String.
+	 *
+	 * @param stringDBIContent the table information in .dbi format
+	 * @return the deserialized table information.
+	 * @throws JSONException if the structure of the JSON in String stringDBIContent is bad.
+	 */
+	public TableDef deserializeTableInfo(ServoyJSONObject dbiContents) throws JSONException
+	{
 		TableDef tableInfo = new TableDef();
 		tableInfo.name = dbiContents.getString(SolutionSerializer.PROP_NAME);
 		tableInfo.tableType = dbiContents.getInt(TableDef.PROP_TABLE_TYPE);

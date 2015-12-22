@@ -30,9 +30,13 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.dataprocessing.TableFilter;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.IContentSpecConstants;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISequenceProvider;
 import com.servoy.j2db.persistence.IServer;
@@ -44,13 +48,16 @@ import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.QuerySet;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerConfig;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableChangeHandler;
+import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.query.ISQLQuery;
 import com.servoy.j2db.query.QueryColumn;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ITransactionConnection;
+import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
  * @author gganea
@@ -61,13 +68,68 @@ public class MemServer implements IServerInternal, IServer
 	private final Map<String, ITable> tables = new HashMap<String, ITable>();
 	private volatile ISequenceProvider sequenceManager;
 	private final ServerConfig serverConfig;
+	private final ServoyProject servoyProject;
 
 	/**
+	 * @param servoyProject
+	 * @param solution
 	 *
 	 */
-	public MemServer()
+	public MemServer(ServoyProject servoyProject, Solution solution)
 	{
+		this.servoyProject = servoyProject;
 		this.serverConfig = new ServerConfig(DataSourceUtils.INMEM_DATASOURCE, "", "", "", null, "", "", null, true, true, "");
+		List<IPersist> allObjectsAsList = solution.getAllObjectsAsList();
+		for (IPersist iPersist : allObjectsAsList)
+		{
+			if (iPersist instanceof TableNode)
+			{
+				TableNode tableNode = (TableNode)iPersist;
+				Object property = tableNode.getProperty(IContentSpecConstants.PROPERTY_COLUMNS);
+				if (property != null)
+				{
+					ITable createNewTable;
+					try
+					{
+						createNewTable = createNewTable(null, tableNode.getDataSource().substring(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON.length()));
+						tableNode.setITable(createNewTable);
+						ServoyModelFinder.getServoyModel().getDataModelManager().deserializeInMemoryTable(this, createNewTable, (ServoyJSONObject)property);
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError(e);
+					}
+
+				}
+
+			}
+		}
+	}
+
+
+	public ServoyProject getServoyProject()
+	{
+		return servoyProject;
+	}
+
+	/**
+	 * @param memTable
+	 * @param contents
+	 */
+	public void setColumns(MemTable memTable, String contents)
+	{
+		try
+		{
+			TableNode tableNode = servoyProject.getEditingSolution().getOrCreateTableNode(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON + memTable.getName());
+			tableNode.setITable(memTable);
+			tableNode.setColumns(new ServoyJSONObject(contents, true));
+
+		}
+		catch (RepositoryException e)
+		{
+			ServoyLog.logError(e);
+		}
+
 	}
 
 
@@ -92,11 +154,15 @@ public class MemServer implements IServerInternal, IServer
 	{
 		if (!tables.containsKey(tableName))
 		{
-			ITable table = new MemTable(tableName);
+			ITable table = new MemTable(this, tableName);
 			tables.put(tableName, table);
 			table.setExistInDB(true);
 		}
-		return tables.get(tableName);
+
+		TableNode tableNode = servoyProject.getEditingSolution().getOrCreateTableNode(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON + tableName);
+		ITable iTable = tables.get(tableName);
+		tableNode.setITable(iTable);
+		return iTable;
 	}
 
 	/*
@@ -932,5 +998,4 @@ public class MemServer implements IServerInternal, IServer
 	{
 		this.sequenceManager = sequenceManager;
 	}
-
 }

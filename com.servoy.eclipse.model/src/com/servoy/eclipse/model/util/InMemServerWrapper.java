@@ -20,7 +20,6 @@ package com.servoy.eclipse.model.util;
 import java.util.Collections;
 import java.util.List;
 
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.util.DataSourceUtils;
 
@@ -36,7 +35,7 @@ public class InMemServerWrapper implements IDataSourceWrapper
 	public InMemServerWrapper(String tablename)
 	{
 		this.tablename = tablename;
-		this.memServer = ServoyModelFinder.getServoyModel().getMemServer();
+		this.memServer = null;//ServoyModelFinder.getServoyModel().getMemServer();
 	}
 
 	@Override

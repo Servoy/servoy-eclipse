@@ -33,8 +33,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
+import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
@@ -55,6 +55,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServer;
 import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -100,7 +101,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 				{
 					try
 					{
-						return ServoyModelFinder.getServoyModel().getMemServer().getTable(inMemTableName);
+						return findInMemITable(inMemTableName);
 					}
 					catch (Exception e)
 					{
@@ -128,19 +129,19 @@ public abstract class AbstractServoyModel implements IServoyModel
 			@Override
 			public IServerInternal getServer(String dataSource)
 			{
-				String inMemTableName = DataSourceUtils.getInmemDataSourceName(dataSource);
-				if (inMemTableName != null)
-				{
-					try
-					{
-						return ServoyModelFinder.getServoyModel().getMemServer();
-					}
-					catch (Exception e)
-					{
-						ServoyLog.logError("couldn't find in mem table for datasource: " + dataSource, e);
-					}
-				}
-				else
+//				String inMemTableName = DataSourceUtils.getInmemDataSourceName(dataSource);
+//				if (inMemTableName != null)
+//				{
+//					try
+//					{
+//						return ServoyModelFinder.getServoyModel().getMemServer();
+//					}
+//					catch (Exception e)
+//					{
+//						ServoyLog.logError("couldn't find in mem table for datasource: " + dataSource, e);
+//					}
+//				}
+//				else
 				{
 					String[] dbServernameTablename = DataSourceUtils.getDBServernameTablename(dataSource);
 					if (dbServernameTablename != null)
@@ -566,5 +567,26 @@ public abstract class AbstractServoyModel implements IServoyModel
 	public void reportSaveError(Exception e)
 	{
 		ServoyLog.logError(e);
+	}
+
+	private ITable findInMemITable(String tablename)
+	{
+
+		MemServer memServer = getActiveProject().getMemServer();
+		try
+		{
+			ITable table = memServer.getTable(tablename);
+			if (table != null) return table;
+			ServoyProject[] modulesOfActiveProject = getModulesOfActiveProject();
+			for (ServoyProject servoyProject : modulesOfActiveProject)
+			{
+				if (servoyProject.getMemServer().getTable(tablename) != null) return servoyProject.getMemServer().getTable(tablename);
+			}
+		}
+		catch (RepositoryException e)
+		{
+			Debug.error(e);
+		}
+		return null;
 	}
 }

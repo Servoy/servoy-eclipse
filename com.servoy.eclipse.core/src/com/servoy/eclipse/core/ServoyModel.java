@@ -116,7 +116,6 @@ import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
-import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
@@ -235,8 +234,6 @@ public class ServoyModel extends AbstractServoyModel
 	private ITableListener tableListener;
 	private IItemChangeListener<IColumn> columnListener;
 
-	private final IServerInternal memServer = new MemServer();
-
 	private final Boolean initRepAsTeamProvider;
 	private IPropertyChangeListener workingSetChangeListener;
 	private final List<IWorkingSetChangedListener> workingSetChangedListeners = new ArrayList<IWorkingSetChangedListener>();
@@ -282,6 +279,7 @@ public class ServoyModel extends AbstractServoyModel
 				if (aProject != null)
 				{
 					Solution solution = aProject.getSolution();
+					aProject.refreshMemServer();
 					ServoyResourcesProject resourceProject = aProject.getResourcesProject();
 					if (solution != null && (solution.getI18nDataSource() != null || aProject.getModules().length > 1) && resourceProject != null &&
 						resourceProject.getProject().findMember(EclipseMessages.MESSAGES_DIR) == null)
@@ -3746,12 +3744,6 @@ public class ServoyModel extends AbstractServoyModel
 		{
 			activeResourcesProject.removeListener(workingSetChangedListener);
 		}
-	}
-
-	@Override
-	public IServerInternal getMemServer()
-	{
-		return memServer;
 	}
 
 }

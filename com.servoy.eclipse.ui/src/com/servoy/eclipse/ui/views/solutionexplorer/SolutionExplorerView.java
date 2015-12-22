@@ -178,7 +178,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ServoyUpdatingProject;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.dnd.FormElementTransfer;
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
@@ -2084,8 +2083,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		};
 		serverManager.addServerListener(serverListener);
 
-		// add listener for mem server
-		ServoyModelFinder.getServoyModel().getMemServer().addTableListener(tableListener);
 	}
 
 	private void addI18NChangeListener()
@@ -3233,7 +3230,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				server.removeTableListener(tableListener);
 			}
 
-			ServoyModelFinder.getServoyModel().getMemServer().removeTableListener(tableListener);
 			tableListener = null;
 		}
 

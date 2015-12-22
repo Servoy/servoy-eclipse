@@ -38,6 +38,7 @@ import com.servoy.eclipse.model.DeveloperFlattenedSolution;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ErrorKeeper;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
+import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -83,7 +84,10 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 
 	private final HashMap<File, String> deserializeExceptions = new HashMap<File, String>();
 
+	private MemServer memServer = null;
+
 	public ServoyProject()
+
 	{
 	}
 
@@ -303,7 +307,8 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 
 				public Object visit(IPersist src)
 				{
-					boolean goDeeperInItems = (recursive && src instanceof ISupportChilds && SolutionSerializer.isCompositeWithIndependentSerializationOfSubItems(src));
+					boolean goDeeperInItems = (recursive && src instanceof ISupportChilds &&
+						SolutionSerializer.isCompositeWithIndependentSerializationOfSubItems(src));
 
 					ISupportChilds currentParent = parent;
 					while (!(currentParent instanceof Solution) && !currentParent.getUUID().equals(src.getParent().getUUID()))
@@ -407,7 +412,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 		for (IPersist node : nodes)
 		{
 			IPersist searchNode = AbstractRepository.searchPersist(getEditingSolution(), node);
-			if (searchNode != null /* object was not deleted */&& searchNode != node)
+			if (searchNode != null /* object was not deleted */ && searchNode != node)
 			{
 				throw new RepositoryException("Object to save is out of sync");
 			}
@@ -528,8 +533,8 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 				}
 
 				@Override
-				protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef) throws RemoteException,
-					RepositoryException
+				protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef)
+					throws RemoteException, RepositoryException
 				{
 					return loadSolution(loginSolutionDef);
 				}
@@ -576,8 +581,8 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 						}
 
 						@Override
-						protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef) throws RemoteException,
-							RepositoryException
+						protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef)
+							throws RemoteException, RepositoryException
 						{
 							return loadSolution(loginSolutionDef);
 						}
@@ -680,4 +685,23 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 		}
 		return null;
 	}
+
+	/**
+	 * @return
+	 */
+	public MemServer getMemServer()
+	{
+		if (memServer == null) refreshMemServer();
+		return memServer;
+	}
+
+	/**
+	 *
+	 */
+	public void refreshMemServer()
+	{
+		memServer = new MemServer(this, this.getSolution());
+
+	}
+
 }

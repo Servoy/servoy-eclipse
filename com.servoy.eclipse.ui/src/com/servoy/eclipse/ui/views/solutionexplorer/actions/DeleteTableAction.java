@@ -44,8 +44,8 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils.YesYesToAllNoNoToAllAsker;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -95,7 +95,7 @@ public class DeleteTableAction extends Action implements ISelectionChangedListen
 				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 				{
 					Iterator<SimpleUserNode> it = selection.iterator();
-					TableWrapper selectedTable;
+					IDataSourceWrapper selectedTable;
 					final MultiStatus warnings = new MultiStatus(Activator.PLUGIN_ID, 0, "For more information please click 'Details'.", null);
 					YesYesToAllNoNoToAllAsker deleteEACAsker = null; // asks if you also want to delete table Events, Aggregations, Calculations from active modules
 
@@ -104,7 +104,7 @@ public class DeleteTableAction extends Action implements ISelectionChangedListen
 					{
 						while (it.hasNext())
 						{
-							selectedTable = (TableWrapper)it.next().getRealObject();
+							selectedTable = (IDataSourceWrapper)it.next().getRealObject();
 							boolean deleteTable = true;
 							try
 							{

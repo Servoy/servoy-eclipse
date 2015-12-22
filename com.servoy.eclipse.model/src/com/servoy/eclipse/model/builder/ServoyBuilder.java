@@ -1694,7 +1694,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				else missingServers.put(foreignServer, persist);
 			}
 		}
-		if (serverName != null && !missingServers.containsKey(serverName) && !goodServers.contains(serverName))
+		if (serverName != null && !missingServers.containsKey(serverName) && !goodServers.contains(serverName) &&
+			!serverName.equals(DataSourceUtils.INMEM_DATASOURCE))
 		{
 			IServerManagerInternal sm = ApplicationServerRegistry.get().getServerManager();
 			IServer server = sm.getServer(serverName);
@@ -2726,7 +2727,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							TableNode node = (TableNode)o;
 							if (!missingServers.containsKey(node.getServerName()))
 							{
-								Table table = null;
+								ITable table = null;
 								try
 								{
 									table = node.getTable();
@@ -3062,7 +3063,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											ServoyMarker mk = MarkerMessages.CalculationFormAccess.fill(calc.getName());
 											try
 											{
-												Table table = calc.getTable();
+												ITable table = calc.getTable();
 												if (table != null)
 												{
 													mk = MarkerMessages.CalculationInTableFormAccess.fill(calc.getName(), table.getName());
