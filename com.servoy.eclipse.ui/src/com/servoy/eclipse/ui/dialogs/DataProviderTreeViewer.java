@@ -353,7 +353,8 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					}
 					else
 					{
-						calcsTable = nodeWrapper.relations.getRelation().getForeignTable();
+						calcsTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
+							nodeWrapper.relations.getRelation().getForeignDataSource());
 					}
 					if (calcsTable != null)
 					{
@@ -440,7 +441,8 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					}
 					else
 					{
-						aggsTable = nodeWrapper.relations.getRelation().getForeignTable();
+						aggsTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
+							nodeWrapper.relations.getRelation().getForeignDataSource());
 					}
 					if (aggsTable != null)
 					{

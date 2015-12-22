@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMarkerResolution;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -63,7 +64,8 @@ public class CreateColumnReferenceQuickFix implements IMarkerResolution
 		if (uuid != null)
 		{
 			UUID id = UUID.fromString(uuid);
-			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
+			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			ServoyProject servoyProject = servoyModel.getServoyProject(solutionName);
 			if (servoyProject != null)
 			{
 				try
@@ -84,7 +86,7 @@ public class CreateColumnReferenceQuickFix implements IMarkerResolution
 								if (rel != null)
 								{
 									columName = columName.substring(indx + 1);
-									table = rel.getForeignTable();
+									table = servoyModel.getDataSourceManager().getDataSource(rel.getForeignDataSource());
 								}
 							}
 							else
@@ -95,7 +97,7 @@ public class CreateColumnReferenceQuickFix implements IMarkerResolution
 							{
 								if (table.getColumn(columName) == null)
 								{
-									IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
+									IValidateName nameValidator = servoyModel.getNameValidator();
 									Column column = table.createNewColumn(nameValidator, columName, IColumnTypes.TEXT, 50);
 									IEditorPart editor = EditorUtil.openTableEditor(table);
 									if (editor instanceof TableEditor)

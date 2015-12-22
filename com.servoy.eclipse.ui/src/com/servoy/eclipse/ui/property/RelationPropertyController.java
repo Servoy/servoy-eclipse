@@ -21,8 +21,8 @@ import org.eclipse.jface.viewers.IFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider.RelationsWrapper;
 import com.servoy.eclipse.ui.editors.IValueEditor;
@@ -31,7 +31,6 @@ import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.RepositoryException;
 
 
 /**
@@ -96,15 +95,8 @@ public class RelationPropertyController extends PropertyController<String, Objec
 					}
 					if (toTest instanceof RelationsWrapper && ((RelationsWrapper)toTest).relations != null && ((RelationsWrapper)toTest).relations.length > 0)
 					{
-						try
-						{
-							return foreignTable == null ||
-								foreignTable.equals(((RelationsWrapper)toTest).relations[((RelationsWrapper)toTest).relations.length - 1].getForeignTable());
-						}
-						catch (RepositoryException e)
-						{
-							ServoyLog.logError(e);
-						}
+						return foreignTable == null || foreignTable.equals(ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
+							((RelationsWrapper)toTest).relations[((RelationsWrapper)toTest).relations.length - 1].getForeignDataSource()));
 					}
 					return false;
 				}

@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
@@ -417,7 +418,7 @@ public class SortDialog extends Dialog
 					return null;
 				}
 				relations.add(r);
-				lastTable = r.getForeignTable();
+				lastTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(r.getForeignDataSource());
 			}
 
 			String colName = split[split.length - 1];

@@ -36,6 +36,8 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.TableItem;
 
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
@@ -54,9 +56,7 @@ import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.Relation;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptVariable;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
 public class DataProviderEditingSupport extends EditingSupport
@@ -158,6 +158,7 @@ public class DataProviderEditingSupport extends EditingSupport
 	{
 		try
 		{
+			IDataSourceManager dsm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataSourceManager();
 			List<TableItem> items = Arrays.asList(tv.getTable().getItems());
 			int idx = items.indexOf(item);
 			if (re.canEditIndex(idx))
@@ -165,11 +166,11 @@ public class DataProviderEditingSupport extends EditingSupport
 				ITable table = null;
 				if (index == RelationEditor.CI_FROM)
 				{
-					table = ((Relation)re.getPersist()).getPrimaryTable();
+					table = dsm.getDataSource(((Relation)re.getPersist()).getPrimaryDataSource());
 				}
 				else
 				{
-					table = ((Relation)re.getPersist()).getForeignTable();
+					table = dsm.getDataSource(((Relation)re.getPersist()).getForeignDataSource());
 				}
 				if (table != null || index == RelationEditor.CI_FROM)
 				{
@@ -258,22 +259,17 @@ public class DataProviderEditingSupport extends EditingSupport
 					{
 						Object parsed = null;
 						int foreignKeyColumnSQLType = Types.OTHER;
-						try
+						IDataSourceManager dsm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataSourceManager();
+						ITable foreignTable = dsm.getDataSource(relationEditor.getRelation().getForeignDataSource());
+						if (foreignTable != null)
 						{
-							if (relationEditor.getRelation().getForeignTable() != null)
+							String colName = pi.getCITo();
+							Column c = foreignTable.getColumn(colName);
+							if (c != null)
 							{
-								String colName = pi.getCITo();
-								Column c = relationEditor.getRelation().getForeignTable().getColumn(colName);
-								if (c != null)
-								{
-									foreignKeyColumnSQLType = c.getColumnType().getSqlType();
+								foreignKeyColumnSQLType = c.getColumnType().getSqlType();
 
-								}
 							}
-						}
-						catch (RepositoryException e)
-						{
-							Debug.log(e);
 						}
 						parsed = Utils.parseJSExpression(currentValue, foreignKeyColumnSQLType);
 						if (parsed == null && (foreignKeyColumnSQLType == Types.OTHER || IColumnTypes.TEXT == Column.mapToDefaultType(foreignKeyColumnSQLType)))

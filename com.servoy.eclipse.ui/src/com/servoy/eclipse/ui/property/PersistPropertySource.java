@@ -716,7 +716,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 	public static IPropertyDescriptor createPropertyDescriptor(IPropertySource propertySource, final String id, final PersistContext persistContext,
 		boolean readOnly, PropertyDescriptorWrapper propertyDescriptor, String displayName, FlattenedSolution flattenedEditingSolution, Form form)
-		throws RepositoryException
+			throws RepositoryException
 	{
 		if (!propertyDescriptor.propertyDescriptor.isProperty())
 		{
@@ -879,12 +879,12 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							// can be edited as text
 							return new PropertyController<Object, String>(id, displayName,
 								new BeanAsTextPropertyConverter(propertyDescriptor.getPropertyEditor()), null, new ICellEditorFactory()
-							{
-								public CellEditor createPropertyEditor(Composite parent)
 								{
-									return new TextCellEditor(parent);
-								}
-							});
+									public CellEditor createPropertyEditor(Composite parent)
+									{
+										return new TextCellEditor(parent);
+									}
+								});
 						}
 					}
 					catch (RuntimeException e)
@@ -990,9 +990,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					{
 						return new MethodPropertyController<FunctionDefinition>(id, displayName, persistContext,
 							new MethodListOptions(Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)), false,
-							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeForm)),
-							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeGlobal)),
-							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeFoundset)), form == null ? null : form.getTable()))
+								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeForm)),
+								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeGlobal)),
+								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeFoundset)), form == null ? null : form.getTable()))
 						{
 							@Override
 							protected IPropertyConverter<FunctionDefinition, Object> createConverter()
@@ -1007,9 +1007,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						// chain with String to FunctionDefinition converter
 						return new MethodPropertyController<String>(id, displayName, persistContext,
 							new MethodListOptions(Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)), false,
-							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeForm)),
-							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeGlobal)),
-							Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeFoundset)), form == null ? null : form.getTable()))
+								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeForm)),
+								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeGlobal)),
+								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeFoundset)), form == null ? null : form.getTable()))
 						{
 							@Override
 							protected IPropertyConverter<String, Object> createConverter()
@@ -1954,8 +1954,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 			if (persistContext.getPersist() instanceof AbstractBase &&
 				beanPropertyDescriptor.valueObject == persistContext.getPersist() /*
-																																		 * not a bean property
-																																		 */)
+																					 * not a bean property
+																					 */)
 			{
 				((AbstractBase)persistContext.getPersist()).clearProperty((String)id);
 				if (persistContext.getPersist() instanceof ISupportExtendsID &&
@@ -2455,7 +2455,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Form flattenedSuperForm = flattenedEditingSolution.getFlattenedForm(
 					flattenedEditingSolution.getForm(((Form)persistContext.getPersist()).getExtendsID()));
 				propertyReadOnly = flattenedSuperForm == null /* superform not found? make readonly for safety */
-					|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
+				|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
 
 				if (propertyReadOnly && flattenedSuperForm != null && ((Form)persistContext.getPersist()).getDataSource() != null &&
 					!((Form)persistContext.getPersist()).getDataSource().equals(flattenedSuperForm.getDataSource()))
@@ -2598,7 +2598,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				// the correct string for that font
 				return new PropertyController<String, String>(id, displayName,
 					new ChainedPropertyConverter<String, java.awt.Font, String>(
-					new InversedPropertyConverter<String, java.awt.Font>(PropertyFontConverter.INSTANCE), PropertyFontConverter.INSTANCE),
+						new InversedPropertyConverter<String, java.awt.Font>(PropertyFontConverter.INSTANCE), PropertyFontConverter.INSTANCE),
 					FontLabelProvider.INSTANCE, new ICellEditorFactory()
 					{
 						public CellEditor createPropertyEditor(Composite parent)
@@ -2766,7 +2766,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Relation[] relationSequence = flattenedEditingSolution.getRelationSequence(((Portal)persistContext.getPersist()).getRelationName());
 				if (relationSequence != null)
 				{
-					foreignTable = relationSequence[relationSequence.length - 1].getForeignTable();
+					foreignTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
+						relationSequence[relationSequence.length - 1].getForeignDataSource());
 				}
 			}
 			return new RelationPropertyController(id, displayName, persistContext, primaryTable, foreignTable, incudeNone, true);

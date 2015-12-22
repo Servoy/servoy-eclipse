@@ -191,7 +191,8 @@ public class RelatedFormsContentProvider extends CachingContentProvider implemen
 				}
 
 				// add relations 1 level deeper
-				Iterator<Relation> relations = getRelations(lastRelation.getForeignTable()).iterator();
+				Iterator<Relation> relations = getRelations(
+					ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(lastRelation.getForeignDataSource())).iterator();
 				while (relations.hasNext())
 				{
 					children.add(new RelatedForm(Utils.arrayAdd(rf.relations, relations.next(), true), null));

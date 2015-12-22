@@ -635,7 +635,7 @@ public class ValueListEditor extends PersistEditor
 				else
 				{
 					relationSelect.setSelection(new StructuredSelection(new RelationsWrapper(relations)));
-					table = relations[relations.length - 1].getForeignTable();
+					table = flattenedSolution.getTable(relations[relations.length - 1].getForeignDataSource());
 				}
 			}
 			else

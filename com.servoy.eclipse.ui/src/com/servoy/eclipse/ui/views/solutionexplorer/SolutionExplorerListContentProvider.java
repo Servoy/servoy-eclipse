@@ -75,6 +75,7 @@ import com.servoy.base.util.ITagResolver;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
@@ -1358,7 +1359,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			dlm.add(new UserNode(r.getName(), UserNodeType.RELATION, r.getName(), r.getName(), r, uiActivator.loadImageFromBundle("foundset.gif")));
 			SimpleUserNode[] methods = getJSMethods(RelatedFoundSet.class, r.getName(), null, UserNodeType.RELATION_METHODS, null, exludeMethods);
 
-			genTableColumns(r.getForeignTable(), dlm, UserNodeType.RELATION_COLUMN, (Solution)r.getRootObject(), r);
+			genTableColumns(ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(r.getForeignDataSource()), dlm,
+				UserNodeType.RELATION_COLUMN, (Solution)r.getRootObject(), r);
 			dlm.addAll(Arrays.asList(methods));
 		}
 		catch (Exception e)

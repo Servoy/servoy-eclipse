@@ -897,7 +897,7 @@ public class RelationEditor extends PersistEditor implements IItemChangeListener
 
 			if (index == CI_FROM)
 			{
-				table = getRelation().getForeignTable();
+				table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(getRelation().getForeignDataSource());
 				from = pi.getCIFrom();
 				to = pi.getCITo();
 			}

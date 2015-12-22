@@ -3258,7 +3258,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														Relation[] relations = fieldFlattenedSolution.getRelationSequence(fallback.getRelationName());
 														if (relations != null)
 														{
-															table = relations[relations.length - 1].getForeignTable();
+															table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
+																relations[relations.length - 1].getForeignDataSource());
 														}
 													}
 												}
@@ -4644,7 +4645,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													else if (relations.length > 0)
 													{
 														Relation r = relations[relations.length - 1];
-														lookupTable = r.getForeignTable();
+														lookupTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
+															r.getForeignDataSource());
 													}
 												}
 												String col = lookup.substring(indx + 1);
@@ -5042,6 +5044,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				ITable lastTable = table;
 				String[] split = columnName.split("\\.");
+				IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
 				for (int i = 0; i < split.length - 1; i++)
 				{
 					Relation relation = flattenedSolution.getRelation(split[i]);
@@ -5073,7 +5076,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									mk.getText()));
 							}
 						}
-						lastTable = relation.getForeignTable();
+						lastTable = dsm.getDataSource(relation.getForeignDataSource());
 					}
 				}
 				if (lastTable != null)

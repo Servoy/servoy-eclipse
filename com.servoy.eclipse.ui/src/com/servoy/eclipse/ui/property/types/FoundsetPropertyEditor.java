@@ -27,8 +27,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.dialogs.CombinedTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.CombinedTreeContentProvider.CombinedTreeOptions;
@@ -53,7 +53,6 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.RepositoryException;
 
 /**
  * Editor for a foundset typed property (NG).
@@ -86,17 +85,9 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 				}
 				if (toTest instanceof RelationsWrapper)
 				{
-					try
-					{
-						return ((RelationsWrapper)toTest).relations != null && ((RelationsWrapper)toTest).relations.length > 0 &&
-							foreignTableForRelation == null ||
-							foreignTableForRelation.equals(
-								((RelationsWrapper)toTest).relations[((RelationsWrapper)toTest).relations.length - 1].getForeignTable());
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
+					return ((RelationsWrapper)toTest).relations != null && ((RelationsWrapper)toTest).relations.length > 0 && foreignTableForRelation == null ||
+						foreignTableForRelation.equals(ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
+							((RelationsWrapper)toTest).relations[((RelationsWrapper)toTest).relations.length - 1].getForeignDataSource()));
 				}
 				else if (toTest instanceof TableWrapper)
 				{

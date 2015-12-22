@@ -576,7 +576,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 						{
 							return null;
 						}
-						table = relations[relations.length - 1].getForeignTable();
+						table = flattenedSolution.getTable(relations[relations.length - 1].getForeignDataSource());
 					}
 					if (dataProvider == null)
 					{
@@ -597,7 +597,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 						return null;
 					}
 
-					table = relations[relations.length - 1].getForeignTable();
+					table = flattenedSolution.getTable(relations[relations.length - 1].getForeignDataSource());
 				}
 				else
 				{

@@ -37,8 +37,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.SortDialog;
 import com.servoy.eclipse.ui.editors.RelationEditor;
@@ -47,7 +47,6 @@ import com.servoy.eclipse.ui.util.EditorUtil.Encapsulation2StringConverter;
 import com.servoy.eclipse.ui.util.EditorUtil.String2EncapsulationConverter;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Relation;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.query.ISQLJoin;
 
 public class OptionsComposite extends Group
@@ -102,26 +101,21 @@ public class OptionsComposite extends Group
 			{
 				Relation relation = relationEditor.getRelation();
 				SortDialog dialog;
-				try
+				if (relation.getForeignTableName() != null)
 				{
-					if (relation.getForeignTableName() != null)
-					{
-						FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(relation);
-						dialog = new SortDialog(getShell(), editingFlattenedSolution, relation.getForeignTable(), relation.getInitialSort(), "Sort options");
-						dialog.open();
+					FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(relation);
+					dialog = new SortDialog(getShell(), editingFlattenedSolution,
+						ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(relation.getForeignDataSource()), relation.getInitialSort(),
+						"Sort options");
+					dialog.open();
 
-						if (dialog.getReturnCode() != Window.CANCEL)
-						{
-							String sort = dialog.getValue().toString();
-							relation.setInitialSort(sort);
-							initalSort.setText(sort);
-							relationEditor.flagModified(false);
-						}
+					if (dialog.getReturnCode() != Window.CANCEL)
+					{
+						String sort = dialog.getValue().toString();
+						relation.setInitialSort(sort);
+						initalSort.setText(sort);
+						relationEditor.flagModified(false);
 					}
-				}
-				catch (RepositoryException e1)
-				{
-					ServoyLog.logError("Error showing initalsort dialog of relation " + relation, e1);
 				}
 			}
 		});
@@ -141,27 +135,28 @@ public class OptionsComposite extends Group
 		encapsulation.setItems(new String[] { Messages.Public, Messages.HideInScriptingModuleScope, Messages.ModuleScope });
 
 		final GroupLayout groupLayout = new GroupLayout(this);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().add(7, 7, 7).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(initialSortLabel).add(joinTypeLabel).add(deprecatedLabel).add(encapsulationLabel)).addPreferredGap(
-				LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(initalSort, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE).add(
-					joinCombo, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE).add(deprecated, GroupLayout.PREFERRED_SIZE, 228,
-					GroupLayout.PREFERRED_SIZE).add(encapsulation, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-				LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(button)).add(22, 22, 22).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(allowCreationOfButton).add(allowParentDeleteButton).add(deleteRelatedRecordsButton)).addContainerGap()));
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().add(7, 7, 7).add(
+			groupLayout.createParallelGroup(GroupLayout.LEADING).add(initialSortLabel).add(joinTypeLabel).add(deprecatedLabel).add(
+				encapsulationLabel)).addPreferredGap(LayoutStyle.RELATED).add(
+					groupLayout.createParallelGroup(GroupLayout.LEADING).add(initalSort, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE).add(
+						joinCombo, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE).add(deprecated, GroupLayout.PREFERRED_SIZE, 228,
+							GroupLayout.PREFERRED_SIZE).add(encapsulation, GroupLayout.PREFERRED_SIZE, 228, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
+								LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(button)).add(22, 22, 22).add(
+									groupLayout.createParallelGroup(GroupLayout.LEADING).add(allowCreationOfButton).add(allowParentDeleteButton).add(
+										deleteRelatedRecordsButton)).addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-					groupLayout.createSequentialGroup().add(9, 9, 9).add(
-						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(joinTypeLabel).add(joinCombo, GroupLayout.PREFERRED_SIZE,
-							GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+			groupLayout.createSequentialGroup().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+				groupLayout.createSequentialGroup().add(9, 9, 9).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(joinTypeLabel).add(joinCombo,
+					GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
 						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(initialSortLabel).add(initalSort).add(button)).addPreferredGap(
-						LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(deprecatedLabel).add(deprecated)).addPreferredGap(
-						LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(encapsulationLabel).add(encapsulation))).add(
-					groupLayout.createSequentialGroup().addContainerGap().add(allowCreationOfButton).addPreferredGap(LayoutStyle.RELATED).add(
-						groupLayout.createSequentialGroup().add(allowParentDeleteButton).addPreferredGap(LayoutStyle.RELATED).add(deleteRelatedRecordsButton)))).addContainerGap(
-				41, Short.MAX_VALUE)));
+							LayoutStyle.RELATED).add(
+								groupLayout.createParallelGroup(GroupLayout.BASELINE).add(deprecatedLabel).add(deprecated)).addPreferredGap(
+									LayoutStyle.RELATED).add(
+										groupLayout.createParallelGroup(GroupLayout.BASELINE).add(encapsulationLabel).add(encapsulation))).add(
+											groupLayout.createSequentialGroup().addContainerGap().add(allowCreationOfButton).addPreferredGap(
+												LayoutStyle.RELATED).add(
+													groupLayout.createSequentialGroup().add(allowParentDeleteButton).addPreferredGap(LayoutStyle.RELATED).add(
+														deleteRelatedRecordsButton)))).addContainerGap(41, Short.MAX_VALUE)));
 		setLayout(groupLayout);
 	}
 
@@ -206,8 +201,7 @@ public class OptionsComposite extends Group
 		m_bindingContext.bindValue(initialSortObserveWidget, initialSortObserveValue, new UpdateValueStrategy(), new UpdateValueStrategy());
 		m_bindingContext.bindValue(joinComboObserveWidget, joinTypeObserveValue, new UpdateValueStrategy().setConverter(String2JoinTypeConverter.INSTANCE),
 			new UpdateValueStrategy().setConverter(JoinType2StringConverter.INSTANCE));
-		m_bindingContext.bindValue(deprecatedObserveWidget, deprecatedObserveValue,
-			new UpdateValueStrategy().setConverter(EmptyStringToNullConverter.INSTANCE),
+		m_bindingContext.bindValue(deprecatedObserveWidget, deprecatedObserveValue, new UpdateValueStrategy().setConverter(EmptyStringToNullConverter.INSTANCE),
 			new UpdateValueStrategy().setConverter(EmptyStringToNullConverter.INSTANCE));
 		m_bindingContext.bindValue(encapsulationObserveWidget, encapsulationObserveValue,
 			new UpdateValueStrategy().setConverter(String2EncapsulationConverter.INSTANCE),

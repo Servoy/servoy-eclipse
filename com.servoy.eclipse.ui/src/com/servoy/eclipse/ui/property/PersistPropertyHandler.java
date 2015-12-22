@@ -50,6 +50,7 @@ import org.sablo.specification.property.types.TypesRegistry;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
@@ -355,14 +356,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				Relation[] relations = flattenedEditingSolution.getRelationSequence(((Portal)persistContext.getPersist()).getRelationName());
 				if (relations != null)
 				{
-					try
-					{
-						table = relations[relations.length - 1].getForeignTable();
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
+					table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(relations[relations.length - 1].getForeignDataSource());
 				}
 			}
 			else
@@ -693,7 +687,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 						Relation[] relations = flattenedEditingSolution.getRelationSequence(((Portal)persistContext.getPersist()).getRelationName());
 						if (relations != null)
 						{
-							table = relations[relations.length - 1].getForeignTable();
+							table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
+								relations[relations.length - 1].getForeignDataSource());
 						}
 						return table;
 					}
@@ -714,7 +709,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 
 					public ITable getTable() throws RepositoryException
 					{
-						return ((Relation)persistContext.getPersist()).getForeignTable();
+						return ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
+							((Relation)persistContext.getPersist()).getForeignDataSource());
 					}
 				};
 			}

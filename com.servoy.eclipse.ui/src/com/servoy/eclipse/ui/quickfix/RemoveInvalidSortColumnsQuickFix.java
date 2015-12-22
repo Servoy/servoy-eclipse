@@ -21,6 +21,7 @@ import java.util.List;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.ui.IMarkerResolution;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -30,7 +31,6 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.util.UUID;
 
@@ -55,7 +55,8 @@ public class RemoveInvalidSortColumnsQuickFix implements IMarkerResolution
 		if (uuid != null)
 		{
 			UUID id = UUID.fromString(uuid);
-			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
+			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+			ServoyProject servoyProject = servoyModel.getServoyProject(solutionName);
 			if (servoyProject != null)
 			{
 				try
@@ -66,7 +67,7 @@ public class RemoveInvalidSortColumnsQuickFix implements IMarkerResolution
 					if (persist instanceof Relation)
 					{
 						options = ((Relation)persist).getInitialSort();
-						table = ((Relation)persist).getForeignTable();
+						table = servoyModel.getDataSourceManager().getDataSource(((Relation)persist).getForeignDataSource());
 					}
 					else if (persist instanceof Form)
 					{
@@ -82,12 +83,12 @@ public class RemoveInvalidSortColumnsQuickFix implements IMarkerResolution
 							Relation[] relations = servoyProject.getEditingFlattenedSolution().getRelationSequence(vl.getRelationName());
 							if (relations != null)
 							{
-								table = relations[relations.length - 1].getForeignTable();
+								table = servoyModel.getDataSourceManager().getDataSource(relations[relations.length - 1].getForeignDataSource());
 							}
 						}
 						else
 						{
-							table = (Table)vl.getTable();
+							table = vl.getTable();
 						}
 					}
 					if (table != null && options != null)

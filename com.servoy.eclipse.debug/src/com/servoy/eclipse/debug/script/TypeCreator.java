@@ -3005,14 +3005,7 @@ public class TypeCreator extends TypeCache
 					Relation relation = fs.getRelation(typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1));
 					if (relation != null)
 					{
-						try
-						{
-							table = relation.getForeignTable();
-						}
-						catch (RepositoryException e)
-						{
-							ServoyLog.logError(e);
-						}
+						table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(relation.getForeignDataSource());
 					}
 				}
 			}
@@ -4141,21 +4134,14 @@ public class TypeCreator extends TypeCache
 			else
 			{
 				// relation
-				try
+				Relation relation = fs.getRelation(config);
+				if (relation != null && relation.isValid())
 				{
-					Relation relation = fs.getRelation(config);
-					if (relation != null && relation.isValid())
-					{
-						table = relation.getForeignTable();
-						superType = getType(context, superType.getName() + '<' + table.getDataSource() + '>');
-						table = null;
-					}
-					else return null;
+					table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(relation.getForeignDataSource());
+					superType = getType(context, superType.getName() + '<' + table.getDataSource() + '>');
+					table = null;
 				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-				}
+				else return null;
 			}
 		}
 

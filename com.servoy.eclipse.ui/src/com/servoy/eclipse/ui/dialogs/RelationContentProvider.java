@@ -27,6 +27,8 @@ import java.util.Set;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IPersist;
@@ -115,6 +117,7 @@ public class RelationContentProvider extends CachingContentProvider implements I
 			primaryrelations = flattenedSolution.getRelations(primaryTable, true, true);
 		}
 		Set<String> relationNames = new HashSet<String>();
+		IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
 		while (primaryrelations.hasNext())
 		{
 			Relation relation = primaryrelations.next();
@@ -122,12 +125,13 @@ public class RelationContentProvider extends CachingContentProvider implements I
 			{
 				continue;
 			}
+			ITable relationFT = dsm.getDataSource(relation.getForeignDataSource());
 			if (!relationNames.contains(relation.getName()) //
 			&& (!excludeGlobalRelations || !relation.isGlobal()) //
 			&& //
 				(foreignTable == null || //
-					foreignTable.equals(relation.getForeignTable()) || //
-					(recursive && canReachTable(relation, relation.getForeignTable()))))
+					foreignTable.equals(relationFT) || //
+					(recursive && canReachTable(relation, relationFT, dsm))))
 			{
 				relations.add(relation);
 				relationNames.add(relation.getName());
@@ -136,7 +140,7 @@ public class RelationContentProvider extends CachingContentProvider implements I
 		return relations;
 	}
 
-	protected boolean canReachTable(Relation relation, ITable table) throws RepositoryException
+	protected boolean canReachTable(Relation relation, ITable table, IDataSourceManager dsm) throws RepositoryException
 	{
 		Set<Relation> visited = new HashSet<Relation>();
 		List<Relation> searchrelations = new ArrayList<Relation>();
@@ -146,7 +150,7 @@ public class RelationContentProvider extends CachingContentProvider implements I
 			Relation r = searchrelations.remove(0);
 			if (visited.add(r))
 			{
-				ITable foreignTable = r.getForeignTable();
+				ITable foreignTable = dsm.getDataSource(r.getForeignDataSource());
 				if (foreignTable != null)
 				{
 					if (foreignTable.equals(table))
@@ -176,11 +180,13 @@ public class RelationContentProvider extends CachingContentProvider implements I
 					return new Object[0];
 				}
 				RelationsWrapper wrapper = (RelationsWrapper)parentElement;
-				List<Relation> relations = relationCache.get(wrapper.relations[wrapper.relations.length - 1].getForeignTable());
+				ITable foreignTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
+					wrapper.relations[wrapper.relations.length - 1].getForeignDataSource());
+				List<Relation> relations = relationCache.get(foreignTable);
 				if (relations == null)
 				{
-					relations = getRelations(wrapper.relations[wrapper.relations.length - 1].getForeignTable(), options.foreignTable, true, true);
-					relationCache.put(wrapper.relations[wrapper.relations.length - 1].getForeignTable(), relations);
+					relations = getRelations(foreignTable, options.foreignTable, true, true);
+					relationCache.put(foreignTable, relations);
 				}
 				Object[] children = new Object[relations.size()];
 

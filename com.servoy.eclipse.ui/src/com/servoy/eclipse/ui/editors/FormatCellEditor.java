@@ -43,7 +43,6 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
@@ -169,7 +168,8 @@ public class FormatCellEditor extends TextDialogCellEditor
 									if (vl.getRelationName() != null)
 									{
 										Relation[] relations = flattenedSolution.getRelationSequence(vl.getRelationName());
-										table = relations[relations.length - 1].getForeignTable();
+										table = ServoyModelManager.getServoyModelManager().getServoyModel().getDataSourceManager().getDataSource(
+											relations[relations.length - 1].getForeignDataSource());
 									}
 									else
 									{
@@ -201,7 +201,7 @@ public class FormatCellEditor extends TextDialogCellEditor
 									{
 										try
 										{
-											dataProvider = flattenedSolution.getDataProviderForTable((Table)table, dp);
+											dataProvider = flattenedSolution.getDataProviderForTable(table, dp);
 										}
 										catch (Exception ex)
 										{
