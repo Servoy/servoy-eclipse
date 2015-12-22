@@ -28,6 +28,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.EnumDataProvider;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -141,11 +142,12 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 		return ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(dataSource);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.FlattenedSolution#getGlobalDataProvider(java.lang.String, boolean)
-	 */
+	@Override
+	public IServer getServer(String dataSource)
+	{
+		return (IServer)ServoyModelFinder.getServoyModel().getDataSourceManager().getServer(dataSource);
+	}
+
 	@Override
 	public IDataProvider getGlobalDataProvider(String id, boolean quiet) throws RepositoryException
 	{
