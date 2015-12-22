@@ -3081,7 +3081,7 @@ public class TypeCreator extends TypeCache
 						try
 						{
 							Relation relation = relations.next();
-							if (relation.isValid())
+							if (Relation.isValid(relation, fs))
 							{
 								Property property = createProperty(relation.getName(), true,
 									getTypeRef(context, QBJoin.class.getSimpleName() + '<' + relation.getForeignDataSource() + '>'),
@@ -3897,7 +3897,7 @@ public class TypeCreator extends TypeCache
 			{
 				Relation relation = relations.next();
 				// show only relations that are valid and defined for this scope
-				if (relation.isValid() && (scopeName == null || relation.usesScope(scopeName)))
+				if (Relation.isValid(relation, fs) && (scopeName == null || relation.usesScope(scopeName)))
 				{
 					ImageDescriptor relationImage = RELATION_IMAGE;
 					if (PersistEncapsulation.hasEncapsulation(relation, PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE))
@@ -4137,7 +4137,7 @@ public class TypeCreator extends TypeCache
 			{
 				// relation
 				Relation relation = fs.getRelation(config);
-				if (relation != null && relation.isValid())
+				if (Relation.isValid(relation, fs))
 				{
 					table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(relation.getForeignDataSource());
 					superType = getType(context, superType.getName() + '<' + table.getDataSource() + '>');
