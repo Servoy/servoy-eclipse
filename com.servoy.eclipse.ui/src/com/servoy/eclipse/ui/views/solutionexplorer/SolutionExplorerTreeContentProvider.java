@@ -1996,7 +1996,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 								if (solutionOfCalculation != null)
 								{
 									node = (PlatformSimpleUserNode)findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Relations);
-									if (node != null && tableOfCalculation.equals(((Relation)persist).getPrimaryTable()))
+									if (node != null && tableOfCalculation.equals(
+										ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(((Relation)persist).getPrimaryDataSource())))
 									{
 										addRelationsNodeChildren(node, solutionOfCalculation, (Table)tableOfCalculation, UserNodeType.CALC_RELATION);
 										view.refreshTreeNodeFromModel(node);

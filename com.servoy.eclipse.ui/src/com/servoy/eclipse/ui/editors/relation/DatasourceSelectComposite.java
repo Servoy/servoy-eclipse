@@ -32,7 +32,6 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
@@ -201,15 +200,9 @@ public class DatasourceSelectComposite extends Composite
 					relationEditor.unregisterListeners();
 					IDataSourceWrapper tableWrapper = ((IDataSourceWrapper)selection.getFirstElement());
 					relationEditor.getRelation().setPrimaryDataSource(tableWrapper.getDataSource());
-					try
-					{
-						ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager().testTableAndCreateDBIFile(
-							relationEditor.getRelation().getPrimaryTable());
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
+					ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+					servoyModel.getDataModelManager().testTableAndCreateDBIFile(
+						servoyModel.getDataSourceManager().getDataSource(relationEditor.getRelation().getPrimaryDataSource()));
 					relationEditor.registerListeners();
 					relationEditor.createInput(false, true, true);
 					relationEditor.flagModified(false);

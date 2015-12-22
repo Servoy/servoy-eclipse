@@ -5064,7 +5064,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					}
 					else
 					{
-						if (!lastTable.equals(relation.getPrimaryTable()))
+						if (!lastTable.equals(dsm.getDataSource(relation.getPrimaryDataSource())))
 						{
 							String customSeverity = getSeverity(INVALID_SORT_OPTIONS_RELATION_DIFFERENT_PRIMARY_DATASOURCE.getLeft(),
 								INVALID_SORT_OPTIONS_RELATION_DIFFERENT_PRIMARY_DATASOURCE.getRight().name(), persist);

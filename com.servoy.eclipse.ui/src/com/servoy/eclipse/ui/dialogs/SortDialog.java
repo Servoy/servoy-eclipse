@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
@@ -410,15 +411,16 @@ public class SortDialog extends Dialog
 			ITable lastTable = table;
 			List<Relation> relations = new ArrayList<Relation>();
 			String[] split = dataProviderID.split("\\.");
+			IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
 			for (int i = 0; i < split.length - 1; i++)
 			{
 				Relation r = flattenedEditingSolution.getRelation(split[i]);
-				if (r == null || !lastTable.equals(r.getPrimaryTable()))
+				if (r == null || !lastTable.equals(dsm.getDataSource(r.getPrimaryDataSource())))
 				{
 					return null;
 				}
 				relations.add(r);
-				lastTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(r.getForeignDataSource());
+				lastTable = dsm.getDataSource(r.getForeignDataSource());
 			}
 
 			String colName = split[split.length - 1];
