@@ -79,6 +79,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.StringMatcher;
 import com.servoy.eclipse.ui.editors.table.ColumnLabelProvider;
@@ -639,11 +640,13 @@ public class SuggestForeignTypesWizard extends Wizard
 				Map<String, Column> matchedFromRelations = new HashMap<String, Column>();
 
 				Iterator<Relation> relationsIterator = sol.getRelations(fkTable, false, true);
+				IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
 				while (relationsIterator.hasNext())
 				{
 					Relation rel = relationsIterator.next();
-					if (rel.getPrimaryServer() != null && server.getName().equals(rel.getPrimaryServer().getName()) && rel.getForeignServer() != null &&
-						server.getName().equals(rel.getForeignServer().getName()))
+					IServerInternal foreignServer = dsm.getServer(rel.getForeignDataSource());
+					if (rel.getPrimaryServer() != null && server.getName().equals(rel.getPrimaryServer().getName()) && foreignServer != null &&
+						server.getName().equals(foreignServer.getName()))
 					{
 						List<IPersist> allRelationItems = rel.getAllObjectsAsList();
 						for (IPersist persist : allRelationItems)

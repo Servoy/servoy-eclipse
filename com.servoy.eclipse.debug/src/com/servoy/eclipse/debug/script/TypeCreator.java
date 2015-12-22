@@ -106,6 +106,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.debug.Activator;
 import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -3912,8 +3913,9 @@ public class TypeCreator extends TypeCache
 						relation.getDeprecated());
 					if (visible)
 					{
+						IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
 						IServerInternal sp = ((IServerInternal)relation.getPrimaryServer());
-						IServerInternal sf = ((IServerInternal)relation.getForeignServer());
+						IServerInternal sf = dsm.getServer(relation.getForeignDataSource());
 						if ((sp != null && sp.isTableMarkedAsHiddenInDeveloper(relation.getPrimaryTableName())) ||
 							(sf != null && sf.isTableMarkedAsHiddenInDeveloper(relation.getForeignTableName())))
 						{
