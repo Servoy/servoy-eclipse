@@ -1,0 +1,566 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<root>
+  <event name="onActionMethodID">
+    <methodtemplate addtodo="true" name="onAction">
+      <description><![CDATA[Perform the element default action]]></description>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onAfterCreateMethodID">
+    <methodtemplate addtodo="true" name="afterFoundSetRecordCreate">
+      <description><![CDATA[Record after-create trigger]]></description>
+      <arguments>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that is created]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onAfterDeleteMethodID">
+    <methodtemplate addtodo="true" name="afterRecordDelete">
+      <description><![CDATA[Record after-delete trigger]]></description>
+      <arguments>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that is deleted]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onAfterFindMethodID">
+    <methodtemplate addtodo="true" name="afterFoundSetFind">
+      <description><![CDATA[Foundset post-find trigger]]></description>
+      <code/>
+    </methodtemplate>
+  </event>
+  <event name="onAfterInsertMethodID">
+    <methodtemplate addtodo="true" name="afterRecordInsert">
+      <description><![CDATA[Record after-insert trigger]]></description>
+      <arguments>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that is inserted]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onAfterSearchMethodID">
+    <methodtemplate addtodo="true" name="afterFoundSetSearch">
+      <description><![CDATA[Foundset post-search trigger]]></description>
+      <code/>
+    </methodtemplate>
+  </event>
+  <event name="onAfterUpdateMethodID">
+    <methodtemplate addtodo="true" name="afterRecordUpdate">
+      <description><![CDATA[Record after-update trigger]]></description>
+      <arguments>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that is updated]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onChangeMethodID">
+    <methodtemplate addtodo="true" name="onTabChange">
+      <description><![CDATA[Callback method when the user changes tab in a tab panel or divider position in split pane]]></description>
+      <arguments>
+        <methodargument name="previousIndex" type="Number"><![CDATA[index of tab shown before the change]]></methodargument>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onCloseMethodID">
+    <methodtemplate addtodo="true" name="onSolutionClose" type="Boolean">
+      <description><![CDATA[Callback method for when solution is closed, force boolean argument tells if this is a force (not stoppable) close or not.]]></description>
+      <code><![CDATA[return true]]></code>
+      <arguments>
+        <methodargument name="force" type="Boolean"><![CDATA[if false then solution close can be stopped by returning false]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onCreateMethodID">
+    <methodtemplate addtodo="true" name="onFoundSetRecordCreate" type="Boolean">
+      <description><![CDATA[Record pre-create trigger
+When false is returned the record will not be created in the foundset.]]></description>
+      <code><![CDATA[// return true so that the record can be created
+return true]]></code>
+    </methodtemplate>
+  </event>
+  <event name="onDataBroadcastMethodID">
+    <methodtemplate addtodo="true" name="onDataBroadcast">
+      <description><![CDATA[Callback method for data broadcast]]></description>
+      <arguments>
+        <methodargument name="dataSource" type="String"><![CDATA[table data source]]></methodargument>
+        <methodargument name="action" type="Number"><![CDATA[see SQL_ACTION_TYPES constants]]></methodargument>
+        <methodargument name="pks" type="JSDataSet"><![CDATA[affected primary keys]]></methodargument>
+        <methodargument name="cached" type="Boolean"><![CDATA[data was cached]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onDataChangeMethodID">
+    <methodtemplate addtodo="true" name="onDataChange" type="Boolean">
+      <description><![CDATA[Handle changed data, return false if the value should not be accepted. In NGClient you can return also a (i18n) string, instead of false, which will be shown as a tooltip.]]></description>
+      <code><![CDATA[return true]]></code>
+      <arguments>
+        <methodargument name="oldValue" type="${dataproviderType}"><![CDATA[old value]]></methodargument>
+        <methodargument name="newValue" type="${dataproviderType}"><![CDATA[new value]]></methodargument>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onDeleteAllRecordsCmdMethodID">
+    <methodtemplate addtodo="true" name="deleteAllRecords">
+      <description><![CDATA[Perform delete all records]]></description>
+      <code><![CDATA[controller.deleteAllRecords()]]></code>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onDeleteMethodID">
+    <methodtemplate addtodo="true" name="onRecordDelete" type="Boolean">
+      <description><![CDATA[Record pre-delete trigger
+Validate the record to be deleted.
+When false is returned the record will not be deleted in the database.
+When an exception is thrown the record will also not be deleted in the database but it will be added to databaseManager.getFailedRecords(),
+the thrown exception can be retrieved via record.exception.getValue().]]></description>
+      <code><![CDATA[var not_valid = false;
+// test if it is valid.
+
+// throw exception to pass info to handler, will be returned in record.exception.getValue() when record.exception is a DataException
+if (not_valid) throw 'cannot delete'
+
+// return boolean to indicate success
+return true]]></code>
+      <arguments>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that will be deleted]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onDeleteRecordCmdMethodID">
+    <methodtemplate addtodo="true" name="deleteRecord">
+      <description><![CDATA[Perform delete record]]></description>
+      <code><![CDATA[controller.deleteRecord()]]></code>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onDoubleClickMethodID">
+    <methodtemplate addtodo="true" name="onDoubleClick">
+      <description><![CDATA[Perform the element double-click action]]></description>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onDragEndMethodID">
+    <methodtemplate addtodo="true" name="onDragEnd">
+      <description><![CDATA[Handle end of a drag]]></description>
+      <arguments>
+        <methodargument name="event" type="JSDNDEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onDragMethodID">
+    <methodtemplate addtodo="true" name="onDrag" private="true" type="Number">
+      <description><![CDATA[Handle start of a drag, it can set the data that should be transfered and should return a constant which dragndrop mode/modes is/are supported
+
+Should return a DRAGNDROP constant or a combination of 2 constants:
+DRAGNDROP.MOVE if only a move can happen,
+DRAGNDROP.COPY if only a copy can happen,
+DRAGNDROP.MOVE|DRAGNDROP.COPY if a move or copy can happen,
+DRAGNDROP.NONE if nothing is supported (drag should not start).]]></description>
+      <code><![CDATA[return DRAGNDROP.NONE]]></code>
+      <arguments>
+        <methodargument name="event" type="JSDNDEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onDragOverMethodID">
+    <methodtemplate addtodo="true" name="onDragOver" type="Boolean">
+      <description><![CDATA[Handle a drag over. Determines of a drop is allowed in this location.
+
+Return true is drop is allowed, otherwise false.]]></description>
+      <code><![CDATA[if(event.getSource() && event.data){
+   return true;
+ }
+ return false;]]></code>
+      <arguments>
+        <methodargument name="event" type="JSDNDEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onDropMethodID">
+    <methodtemplate addtodo="true" name="onDrop" type="Boolean">
+      <description><![CDATA[Handle a drop
+Return true if drop has been performed successfully, otherwise false.]]></description>
+      <code><![CDATA[return false]]></code>
+      <arguments>
+        <methodargument name="event" type="JSDNDEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onDuplicateRecordCmdMethodID">
+    <methodtemplate addtodo="true" name="duplicateRecord">
+      <description><![CDATA[Perform duplicate record]]></description>
+      <code><![CDATA[controller.duplicateRecord(true)]]></code>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onElementFocusGainedMethodID">
+    <methodtemplate addtodo="true" name="onElementFocusGained" type="Boolean">
+      <description><![CDATA[Handle focus gained event of an element on the form. Return false when the focus gained event of the element itself shouldn't be triggered.]]></description>
+      <code><![CDATA[return true]]></code>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onElementFocusLostMethodID">
+    <methodtemplate addtodo="true" name="onElementFocusLost" type="Boolean">
+      <description><![CDATA[Handle focus lost event of an element on the form. Return false when the focus lost event of the element itself shouldn't be triggered.]]></description>
+      <code><![CDATA[return true]]></code>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onErrorMethodID">
+    <methodtemplate addtodo="true" name="onError" type="Boolean">
+      <description><![CDATA[Callback method for when an error occurred (the error can be a JavaScript or Servoy Java error).]]></description>
+      <code><![CDATA[application.output('Exception Object: '+ex)
+application.output('MSG: '+ex.getMessage())
+if (ex instanceof ServoyException)
+{
+ /** @type {ServoyException} */
+ var servoyException = ex;
+	application.output("is a ServoyException")
+	application.output("Errorcode: "+servoyException.getErrorCode())
+ //var trace = servoyException.getStackTrace();
+	if (servoyException.getErrorCode() == ServoyException.SAVE_FAILED)
+	{
+ 		plugins.dialogs.showErrorDialog( 'Error',  'It seems you did not fill in a required field', 'OK');
+ 		//Get the failed records after a save
+ 		var array = databaseManager.getFailedRecords()
+ 		for( var i = 0 ; i < array.length ; i++ )
+ 		{
+			  var record = array[i];
+			  application.output(record.exception);
+			  if (record.exception instanceof DataException)
+			  {
+             /** @type {DataException} */
+             var dataException = record.exception;
+				application.output('SQL: '+dataException.getSQL())
+				application.output('SQLState: '+dataException.getSQLState())
+				application.output('VendorErrorCode: '+dataException.getVendorErrorCode())
+			  }
+		}
+		return false
+	}
+}
+//if returns false or no return, error is not reported to client; if returns true error is reported
+//by default error report means logging the error, in smart client an error dialog will also show up
+return true]]></code>
+      <arguments>
+        <methodargument name="ex" type="*"><![CDATA[exception to handle]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onFindCmdMethodID">
+    <methodtemplate addtodo="true" name="startFind">
+      <description><![CDATA[Perform find]]></description>
+      <code><![CDATA[controller.find()]]></code>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onFindMethodID">
+    <methodtemplate addtodo="true" name="onFoundSetFind" type="Boolean">
+      <description><![CDATA[Foundset pre-find trigger
+When false is returned the foundset will not go into find mode.]]></description>
+      <code><![CDATA[// return true so that it will go into find mode.
+return true]]></code>
+    </methodtemplate>
+  </event>
+  <event name="onFocusGainedMethodID">
+    <methodtemplate addtodo="true" name="onFocusGained">
+      <description><![CDATA[Handle focus gained event of the element]]></description>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onFocusLostMethodID">
+    <methodtemplate addtodo="true" name="onFocusLost">
+      <description><![CDATA[Handle focus lost event of the element]]></description>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onHideMethodID">
+    <methodtemplate addtodo="true" name="onHide" type="Boolean">
+      <description><![CDATA[Handle hide window]]></description>
+      <code><![CDATA[return true]]></code>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onInsertMethodID">
+    <methodtemplate addtodo="true" name="onRecordInsert" type="Boolean">
+      <description><![CDATA[Record pre-insert trigger
+Validate the record to be inserted.
+When false is returned the record will not be inserted in the database.
+When an exception is thrown the record will also not be inserted in the database but it will be added to databaseManager.getFailedRecords(),
+the thrown exception can be retrieved via record.exception.getValue().]]></description>
+      <code><![CDATA[var not_valid = false;
+// test if it is valid.
+
+// throw exception to pass info to handler, will be returned in record.exception.getValue() when record.exception is a DataException
+if (not_valid) throw 'cannot insert'
+
+// return boolean to indicate success
+return true]]></code>
+      <arguments>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that will be inserted]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onInvertRecordsCmdMethodID">
+    <methodtemplate addtodo="true" name="invertRecords">
+      <description><![CDATA[Perform invert records]]></description>
+      <code><![CDATA[controller.invertRecords()]]></code>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onLoadMethodID">
+    <methodtemplate addtodo="true" name="onLoad" private="true">
+      <description><![CDATA[Callback method when form is (re)loaded]]></description>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onNewRecordCmdMethodID">
+    <methodtemplate addtodo="true" name="newRecord">
+      <description><![CDATA[Perform create new record]]></description>
+      <code><![CDATA[controller.newRecord(true)]]></code>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onNextRecordCmdMethodID">
+    <methodtemplate addtodo="true" name="nextRecord">
+      <description><![CDATA[Select next record]]></description>
+      <code><![CDATA[controller.setSelectedIndex(controller.getSelectedIndex()+1)]]></code>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onOmitRecordCmdMethodID">
+    <methodtemplate addtodo="true" name="omitRecord">
+      <description><![CDATA[Perform omit record]]></description>
+      <code><![CDATA[controller.omitRecord()]]></code>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onOpenMethodID">
+    <methodtemplate addtodo="true" name="onSolutionOpen">
+      <description><![CDATA[Callback method for when solution is opened
+When deeplinking into solutions, the argument part of the deeplink url will be passed in as the first argument
+All query parameters + the argument of the deeplink url will be passed in as the second argument
+For more information on deeplinking, see the chapters on the different Clients in the Deployment Guide.]]></description>
+      <arguments>
+        <methodargument name="arg" type="String"><![CDATA[startup argument part of the deeplink url with which the Client was started]]></methodargument>
+        <methodargument name="queryParams" type="Object&lt;Array&lt;String&gt;&gt;"><![CDATA[all query parameters of the deeplink url with which the Client was started]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onPreviousRecordCmdMethodID">
+    <methodtemplate addtodo="true" name="previousRecord">
+      <description><![CDATA[Select previous record]]></description>
+      <code><![CDATA[controller.setSelectedIndex(controller.getSelectedIndex()-1)]]></code>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onPrintPreviewCmdMethodID">
+    <methodtemplate addtodo="true" name="printPreview">
+      <description><![CDATA[Perform print preview]]></description>
+      <code><![CDATA[controller.showPrintPreview(false, null, 100)]]></code>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onRecordEditStartMethodID">
+    <methodtemplate addtodo="true" name="onRecordEditStart" type="Boolean">
+      <description><![CDATA[Callback method form when editing is started]]></description>
+      <code><![CDATA[return true]]></code>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onRecordEditStopMethodID">
+    <methodtemplate addtodo="true" name="onRecordEditStop" type="Boolean">
+      <description><![CDATA[Callback method form when editing is stopped, return false if the record fails to validate then the user cannot leave the record.]]></description>
+      <code><![CDATA[return true]]></code>
+      <arguments>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record being saved]]></methodargument>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onRecordSelectionMethodID">
+    <methodtemplate addtodo="true" name="onRecordSelection">
+      <description><![CDATA[Handle record selected]]></description>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onRenderMethodID">
+    <methodtemplate addtodo="true" name="onRender">
+      <description><![CDATA[Called before the form component is rendered]]></description>
+      <code><![CDATA[// NOTE: a property set on the renderable, will be kept on the element only during onRender
+if (event.isRecordSelected()) {
+	event.getRenderable().fgcolor = '#00ff00';
+} else if (event.getRecordIndex() % 2) {
+	event.getRenderable().fgcolor = '#ff0000';
+}]]></code>
+      <arguments>
+        <methodargument name="event" type="JSRenderEvent"><![CDATA[the render event]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onResizeMethodID">
+    <methodtemplate addtodo="true" name="onResize">
+      <description><![CDATA[Callback method when form is resized]]></description>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onRightClickMethodID">
+    <methodtemplate addtodo="true" name="onRightClick">
+      <description><![CDATA[Perform the element right-click action]]></description>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onSearchCmdMethodID">
+    <methodtemplate addtodo="true" name="onSearch">
+      <description><![CDATA[Perform search]]></description>
+      <code><![CDATA[controller.search(clear, reduce)]]></code>
+      <arguments>
+        <methodargument name="clear" type="Boolean"><![CDATA[clear last results]]></methodargument>
+        <methodargument name="reduce" type="Boolean"><![CDATA[reduce search]]></methodargument>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onSearchMethodID">
+    <methodtemplate addtodo="true" name="onFoundSetSearch" type="Boolean">
+      <description><![CDATA[Foundset pre-search trigger
+When false is returned the search will not be executed and the foundset will stay in find mode.]]></description>
+      <code><![CDATA[// return true so that the search will go on.
+return true]]></code>
+      <arguments>
+        <methodargument name="clearLastResults" type="Boolean"/>
+        <methodargument name="reduceSearch" type="Boolean"/>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onShowAllRecordsCmdMethodID">
+    <methodtemplate addtodo="true" name="showAllRecords">
+      <description><![CDATA[Perform show-all-records]]></description>
+      <code><![CDATA[controller.loadAllRecords()]]></code>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onShowMethodID">
+    <methodtemplate addtodo="true" name="onShow">
+      <description><![CDATA[Callback method for when form is shown]]></description>
+      <arguments>
+        <methodargument name="firstShow" type="Boolean"><![CDATA[form is shown first time after load]]></methodargument>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onShowOmittedRecordsCmdMethodID">
+    <methodtemplate addtodo="true" name="showOmittedRecords">
+      <description><![CDATA[Perform show-omitted-records]]></description>
+      <code><![CDATA[controller.loadOmittedRecords()]]></code>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onSortCmdMethodID">
+    <methodtemplate addtodo="true" name="onSort">
+      <description><![CDATA[Perform sort]]></description>
+      <code><![CDATA[controller.sort(dataProviderID+(asc?' asc':' desc'), false)]]></code>
+      <arguments>
+        <methodargument name="dataProviderID" type="String"><![CDATA[element data provider]]></methodargument>
+        <methodargument name="asc" type="Boolean"><![CDATA[sort ascending [true] or descending [false]]]></methodargument>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onUnLoadMethodID">
+    <methodtemplate addtodo="true" name="onUnload" private="true">
+      <description><![CDATA[Callback method when form is destroyed]]></description>
+      <arguments>
+        <methodargument name="event" type="JSEvent"><![CDATA[the event that triggered the action]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="onUpdateMethodID">
+    <methodtemplate addtodo="true" name="onRecordUpdate" type="Boolean">
+      <description><![CDATA[Record pre-update trigger
+Validate the record to be updated.
+When false is returned the record will not be updated in the database.
+When an exception is thrown the record will also not be updated in the database but it will be added to databaseManager.getFailedRecords(),
+the thrown exception can be retrieved via record.exception.getValue().]]></description>
+      <code><![CDATA[var not_valid = false;
+// test if it is valid.
+
+// throw exception to pass info to handler, will be returned in record.exception.getValue() when record.exception is a DataException
+if (not_valid) throw 'cannot update'
+
+// return boolean to indicate success
+return true]]></code>
+      <arguments>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[record that will be updated]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+  <event name="rowBGColorCalculation">
+    <methodtemplate addtodo="true" name="rowBGColorCalculation" type="String">
+      <description><![CDATA[Calculate the row background color]]></description>
+      <code><![CDATA[if (selected)
+  return '#c4ffff';
+else if (index % 2)
+  return '#f4ffff';
+else
+  return '#FFFFFF';]]></code>
+      <arguments>
+        <methodargument name="index" type="Number"><![CDATA[row index]]></methodargument>
+        <methodargument name="selected" type="Boolean"><![CDATA[is the row selected]]></methodargument>
+        <methodargument name="elementType" type="String"><![CDATA[element type (not supported in webclient)]]></methodargument>
+        <methodargument name="dataProviderID" type="String"><![CDATA[element data provider (not supported in webclient)]]></methodargument>
+        <methodargument name="formName" type="String"><![CDATA[form name]]></methodargument>
+        <methodargument name="record" type="JSRecord&lt;${dataSource}&gt;"><![CDATA[selected record]]></methodargument>
+        <methodargument name="edited" type="Boolean"><![CDATA[is the record edited]]></methodargument>
+      </arguments>
+    </methodtemplate>
+  </event>
+</root>
