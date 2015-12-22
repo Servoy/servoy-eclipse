@@ -3914,7 +3914,7 @@ public class TypeCreator extends TypeCache
 					if (visible)
 					{
 						IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
-						IServerInternal sp = ((IServerInternal)relation.getPrimaryServer());
+						IServerInternal sp = dsm.getServer(relation.getPrimaryDataSource());
 						IServerInternal sf = dsm.getServer(relation.getForeignDataSource());
 						if ((sp != null && sp.isTableMarkedAsHiddenInDeveloper(relation.getPrimaryTableName())) ||
 							(sf != null && sf.isTableMarkedAsHiddenInDeveloper(relation.getForeignTableName())))

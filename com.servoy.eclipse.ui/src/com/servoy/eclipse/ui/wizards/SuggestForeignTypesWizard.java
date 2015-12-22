@@ -645,7 +645,8 @@ public class SuggestForeignTypesWizard extends Wizard
 				{
 					Relation rel = relationsIterator.next();
 					IServerInternal foreignServer = dsm.getServer(rel.getForeignDataSource());
-					if (rel.getPrimaryServer() != null && server.getName().equals(rel.getPrimaryServer().getName()) && foreignServer != null &&
+					IServerInternal primaryServer = dsm.getServer(rel.getPrimaryDataSource());
+					if (primaryServer != null && server.getName().equals(primaryServer.getName()) && foreignServer != null &&
 						server.getName().equals(foreignServer.getName()))
 					{
 						List<IPersist> allRelationItems = rel.getAllObjectsAsList();
