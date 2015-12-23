@@ -29,6 +29,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -39,7 +40,6 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
@@ -149,24 +149,21 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 		{
 
 			final IServerInternal s = (IServerInternal)node.getRealObject();
-			InputDialog nameDialog = new InputDialog(viewer.getViewSite().getShell(), "Create table", "Supply table name", "", new IInputValidator()
-			{
-				public String isValid(String newText)
+			InputDialog nameDialog = new InputDialog(viewer.getViewSite().getShell(), "Create in mem datasource", "Supply datasource name", "",
+				new IInputValidator()
 				{
-					try
+					public String isValid(String newText)
 					{
-						boolean valid = (s.getTable(newText) == null) && IdentDocumentValidator.isSQLIdentifier(newText) &&
+						if (new InMemServerWrapper().getTableNames().contains(newText))
+						{
+							return "Name already used";
+						}
+						boolean valid = (IdentDocumentValidator.isSQLIdentifier(newText) &&
 							(!(newText.toUpperCase()).startsWith(DataModelManager.TEMP_UPPERCASE_PREFIX)) &&
-							(!(newText.toUpperCase()).startsWith(IServer.SERVOY_UPPERCASE_PREFIX));
-						return valid ? null : (newText.length() == 0 ? "" : "Invalid table name");
+							(!(newText.toUpperCase()).startsWith(IServer.SERVOY_UPPERCASE_PREFIX)));
+						return valid ? null : (newText.length() == 0 ? "" : "Invalid datasource name");
 					}
-					catch (RepositoryException e)
-					{
-						Debug.log(e);
-					}
-					return "Invalid table name";
-				}
-			});
+				});
 
 			int res = nameDialog.open();
 			if (res == Window.OK)
