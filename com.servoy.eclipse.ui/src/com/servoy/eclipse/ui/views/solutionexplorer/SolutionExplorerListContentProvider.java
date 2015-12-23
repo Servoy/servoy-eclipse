@@ -426,6 +426,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
 				IServerInternal server = (IServerInternal)un.getRealObject();
 				List<String> tableNames = server.getTableNames(true);
+				Collections.sort(tableNames);
 				for (String tableName : tableNames)
 				{
 					UserNode node = new UserNode(tableName, UserNodeType.INMEMORY_DATASOURCE,

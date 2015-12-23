@@ -17,8 +17,9 @@
 
 package com.servoy.eclipse.model.util;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -59,9 +60,9 @@ public class InMemServerWrapper implements IDataSourceWrapper
 		return DataSourceUtils.INMEM_DATASOURCE;
 	}
 
-	public List<String> getTableNames()
+	public Collection<String> getTableNames()
 	{
-		List<String> names = new ArrayList<>();
+		Set<String> names = new TreeSet<>();
 		try
 		{
 			ServoyProject[] modulesOfActiveProject = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();

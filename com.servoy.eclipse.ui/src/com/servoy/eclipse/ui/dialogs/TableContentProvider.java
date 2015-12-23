@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.dialogs;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -136,11 +137,12 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 		}
 		else if (parentElement instanceof InMemServerWrapper && ((InMemServerWrapper)parentElement).getTableName() == null)
 		{
-			List<String> tableNames = ((InMemServerWrapper)parentElement).getTableNames();
+			Collection<String> tableNames = ((InMemServerWrapper)parentElement).getTableNames();
 			InMemServerWrapper[] wrappers = new InMemServerWrapper[tableNames.size()];
-			for (int i = 0; i < tableNames.size(); i++)
+			int i = 0;
+			for (String tableName : tableNames)
 			{
-				wrappers[i] = new InMemServerWrapper(tableNames.get(i));
+				wrappers[i++] = new InMemServerWrapper(tableName);
 			}
 			return wrappers;
 		}
