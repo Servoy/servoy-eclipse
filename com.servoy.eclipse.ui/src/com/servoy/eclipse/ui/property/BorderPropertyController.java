@@ -59,8 +59,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.Utils;
@@ -130,10 +129,10 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 								defaultBorderValues.put(BorderType.Line, new LineBorder(Color.BLACK));
 								defaultBorderValues.put(BorderType.Title, new TitledBorder("Title"));
 								defaultBorderValues.put(BorderType.Matte, new MatteBorder(0, 0, 0, 0, Color.BLACK));
-								defaultBorderValues.put(BorderType.SpecialMatte, new SpecialMatteBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK,
-									Color.BLACK));
-								defaultBorderValues.put(BorderType.RoundedWebBorder, new RoundedBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK,
-									Color.BLACK));
+								defaultBorderValues.put(BorderType.SpecialMatte,
+									new SpecialMatteBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK));
+								defaultBorderValues.put(BorderType.RoundedWebBorder,
+									new RoundedBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK, Color.BLACK));
 							}
 						}
 					}
@@ -529,11 +528,11 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			super(complexProperty);
 		}
 
-		private static final IPropertyDescriptor[] PROPERTY_DESCRIPTORS = PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] {//
-		new ModifiedComboBoxPropertyDescriptor(TOP_STYLE, "top style", IStyleSheet.BORDER_STYLES), //
-		new ModifiedComboBoxPropertyDescriptor(LEFT_STYLE, "left style", IStyleSheet.BORDER_STYLES),//
-		new ModifiedComboBoxPropertyDescriptor(BOTTOM_STYLE, "bottom style", IStyleSheet.BORDER_STYLES),//
-		new ModifiedComboBoxPropertyDescriptor(RIGHT_STYLE, "right style", IStyleSheet.BORDER_STYLES),//
+		private static final IPropertyDescriptor[] PROPERTY_DESCRIPTORS = PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { //
+			new ModifiedComboBoxPropertyDescriptor(TOP_STYLE, "top style", IStyleSheet.BORDER_STYLES), //
+			new ModifiedComboBoxPropertyDescriptor(LEFT_STYLE, "left style", IStyleSheet.BORDER_STYLES), //
+			new ModifiedComboBoxPropertyDescriptor(BOTTOM_STYLE, "bottom style", IStyleSheet.BORDER_STYLES), //
+			new ModifiedComboBoxPropertyDescriptor(RIGHT_STYLE, "right style", IStyleSheet.BORDER_STYLES),//
 		});
 
 		@Override
@@ -616,15 +615,15 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			super(complexProperty);
 		}
 
-		private static final IPropertyDescriptor[] PROPERTY_DESCRIPTORS = PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] {//
-		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, TOP_LEFT_HORIZONTAL, "top left horizontal"), //
-		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, TOP_RIGHT_HORIZONTAL, "top right horizontal"),//
-		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_RIGHT_HORIZONTAL, "bottom right horizontal"),//
-		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_LEFT_HORIZONTAL, "bottom left horizontal"),//
-		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, TOP_LEFT_VERTICAL, "top left vertical"), //
-		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, TOP_RIGHT_VERTICAL, "top right vertical"),//
-		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_RIGHT_VERTICAL, "bottom right vertical"),//
-		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_LEFT_VERTICAL, "bottom left vertical") //
+		private static final IPropertyDescriptor[] PROPERTY_DESCRIPTORS = PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { //
+			new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, TOP_LEFT_HORIZONTAL, "top left horizontal"), //
+			new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, TOP_RIGHT_HORIZONTAL, "top right horizontal"), //
+			new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_RIGHT_HORIZONTAL, "bottom right horizontal"), //
+			new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_LEFT_HORIZONTAL, "bottom left horizontal"), //
+			new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, TOP_LEFT_VERTICAL, "top left vertical"), //
+			new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, TOP_RIGHT_VERTICAL, "top right vertical"), //
+			new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_RIGHT_VERTICAL, "bottom right vertical"), //
+			new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, BOTTOM_LEFT_VERTICAL, "bottom left vertical") //
 		});
 
 		@Override
@@ -782,7 +781,8 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 				}
 				if (Arrays.equals(values, templateValue))
 				{
-					return new StringBuilder().append(values[0]).append(",").append(values[1]).append(",").append(values[2]).append(",").append(values[3]).toString();
+					return new StringBuilder().append(values[0]).append(",").append(values[1]).append(",").append(values[2]).append(",").append(
+						values[3]).toString();
 				}
 				for (int i = 0; i < values.length; i++)
 				{
@@ -883,7 +883,8 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 					return "";
 				}
 				String[] values = (String[])value;
-				return new StringBuilder().append(values[0]).append(",").append(values[1]).append(",").append(values[2]).append(",").append(values[3]).toString();
+				return new StringBuilder().append(values[0]).append(",").append(values[1]).append(",").append(values[2]).append(",").append(
+					values[3]).toString();
 			}
 
 			public String isCorrectString(String value)
@@ -983,8 +984,8 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			}
 
 			SpecialMatteBorder smb = super.setComplexPropertyValue(id, v);
-			RoundedBorder roundedBorder = new RoundedBorder(smb.getTop(), smb.getLeft(), smb.getBottom(), smb.getRight(), smb.getTopColor(),
-				smb.getLeftColor(), smb.getBottomColor(), smb.getRightColor());
+			RoundedBorder roundedBorder = new RoundedBorder(smb.getTop(), smb.getLeft(), smb.getBottom(), smb.getRight(), smb.getTopColor(), smb.getLeftColor(),
+				smb.getBottomColor(), smb.getRightColor());
 			if (ROUNDING_RADIUS.equals(id))
 			{
 				if (v instanceof float[])
@@ -1070,14 +1071,14 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		protected static final String BORDER_STYLE = "dash_pattern";
 
 		// make sure sub-properties are sorted in defined order
-		private static final IPropertyDescriptor[] PROPERTY_DESCRIPTORS = PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] {//
-		sizeController, //
-		new ColorPropertyController(TOP_COLOR, "top color"), //
-		new ColorPropertyController(LEFT_COLOR, "left color"),//
-		new ColorPropertyController(BOTTOM_COLOR, "bottom color"),//
-		new ColorPropertyController(RIGHT_COLOR, "right color"),//
-		new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, ROUNDING_RADIUS, "rounding radius"),//
-		new TextPropertyDescriptor(BORDER_STYLE, "dash pattern") //
+		private static final IPropertyDescriptor[] PROPERTY_DESCRIPTORS = PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { //
+			sizeController, //
+			new ColorPropertyController(TOP_COLOR, "top color"), //
+			new ColorPropertyController(LEFT_COLOR, "left color"), //
+			new ColorPropertyController(BOTTOM_COLOR, "bottom color"), //
+			new ColorPropertyController(RIGHT_COLOR, "right color"), //
+			new NumberTypePropertyDescriptor(NumberCellEditor.FLOAT, ROUNDING_RADIUS, "rounding radius"), //
+			new TextPropertyDescriptor(BORDER_STYLE, "dash pattern") //
 		});
 
 		public SpecialMatteBorderPropertySource(ComplexProperty<SpecialMatteBorder> complexProperty)
@@ -1240,10 +1241,10 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		private static final String RAISED = "raised";
 
 		// make sure sub-properties are sorted in defined order
-		private static final IPropertyDescriptor[] PROPERTY_DESCRIPTORS = PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] {//
-		new ColorPropertyController(HIGHLIGHT, "highlight color"), //
-		new ColorPropertyController(SHADOW, "shadow color"), //
-		new CheckboxPropertyDescriptor(RAISED, "raised") //
+		private static final IPropertyDescriptor[] PROPERTY_DESCRIPTORS = PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { //
+			new ColorPropertyController(HIGHLIGHT, "highlight color"), //
+			new ColorPropertyController(SHADOW, "shadow color"), //
+			new CheckboxPropertyDescriptor(RAISED, "raised") //
 		});
 
 		// delegate to InsetsPropertySource and ColorPropertyController
@@ -1295,8 +1296,8 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			}
 			if (SHADOW.equals(id))
 			{
-				return new EtchedBorder(border.getEtchType(), border.getHighlightColor(), ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id,
-					(String)v));
+				return new EtchedBorder(border.getEtchType(), border.getHighlightColor(),
+					ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(id, (String)v));
 			}
 			if (RAISED.equals(id))
 			{
@@ -1314,10 +1315,10 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		private static final String RAISED = "raised";
 
 		// make sure sub-properties are sorted in defined order
-		private static final IPropertyDescriptor[] PROPERTY_DESCRIPTORS = PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] {//
-		new ColorPropertyController(HIGHLIGHT_INNER, "highlight color"),//
-		new ColorPropertyController(SHADOW_OUTER, "shadow color"),//
-		new CheckboxPropertyDescriptor(RAISED, "raised") //
+		private static final IPropertyDescriptor[] PROPERTY_DESCRIPTORS = PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { //
+			new ColorPropertyController(HIGHLIGHT_INNER, "highlight color"), //
+			new ColorPropertyController(SHADOW_OUTER, "shadow color"), //
+			new CheckboxPropertyDescriptor(RAISED, "raised") //
 		});
 
 		public BevelBorderPropertySource(ComplexProperty<BevelBorder> complexProperty)
@@ -1400,8 +1401,8 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 
 		// make sure sub-properties are sorted in defined order
 		private static final IPropertyDescriptor[] PROPERTY_DESCRIPTORS = PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { //
-		new ColorPropertyController(COLOR, "color"), //
-		new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, THICKNESS, "thickness") //
+			new ColorPropertyController(COLOR, "color"), //
+			new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, THICKNESS, "thickness") //
 		});
 
 		public LineBorderPropertySource(ComplexProperty<LineBorder> complexProperty)
@@ -1475,8 +1476,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		private static final String FONT = "font";
 		private static final String COLOR = "color";
 
-		private static final IPropertyController<Integer, Integer> JUSTIFICATION_CONTROLLER = new ComboboxPropertyController<Integer>(
-			JUSTIFICATION,
+		private static final IPropertyController<Integer, Integer> JUSTIFICATION_CONTROLLER = new ComboboxPropertyController<Integer>(JUSTIFICATION,
 			"justification",
 			new ComboboxPropertyModel<Integer>(
 				new Integer[] { new Integer(TitledBorder.DEFAULT_JUSTIFICATION), new Integer(TitledBorder.LEFT), new Integer(TitledBorder.CENTER), new Integer(
@@ -1484,9 +1484,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 				new String[] { Messages.LabelDefault, Messages.AlignLeft, Messages.AlignCenter, Messages.AlignRight, Messages.JustifyLeading, Messages.JustifyTrailing }),
 			Messages.LabelUnresolved);
 
-		private static final IPropertyController<Integer, Integer> POSITION_CONTROLLER = new ComboboxPropertyController<Integer>(
-			POSITION,
-			"position",
+		private static final IPropertyController<Integer, Integer> POSITION_CONTROLLER = new ComboboxPropertyController<Integer>(POSITION, "position",
 			new ComboboxPropertyModel<Integer>(
 				new Integer[] { new Integer(TitledBorder.DEFAULT_POSITION), new Integer(TitledBorder.ABOVE_TOP), new Integer(TitledBorder.TOP), new Integer(
 					TitledBorder.BELOW_TOP), new Integer(TitledBorder.ABOVE_BOTTOM), new Integer(TitledBorder.BOTTOM), new Integer(TitledBorder.BELOW_BOTTOM) },
@@ -1507,28 +1505,26 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 		{
 			if (propertyDescriptors == null)
 			{
-				try
+				final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(),
+					persistContext.getContext());
+				final Form form = Utils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext())
+					? (Form)persistContext.getContext().getAncestor(IRepository.FORMS) : (Form)persistContext.getPersist().getAncestor(IRepository.FORMS);
+				final ITable table = form == null ? null : flattenedEditingSolution.getTable(form.getDataSource());
+				propertyDescriptors = new IPropertyDescriptor[] { new PropertyDescriptor(TITLE, "title text")
 				{
-					final FlattenedSolution flattenedEditingSolution = ModelUtils.getEditingFlattenedSolution(persistContext.getPersist(),
-						persistContext.getContext());
-					final Form form = Utils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext())
-						? (Form)persistContext.getContext().getAncestor(IRepository.FORMS) : (Form)persistContext.getPersist().getAncestor(IRepository.FORMS);
-					final Table table = form == null ? null : form.getTable();
-					propertyDescriptors = new IPropertyDescriptor[] { new PropertyDescriptor(TITLE, "title text")
+					@Override
+					public CellEditor createPropertyEditor(Composite parent)
 					{
-						@Override
-						public CellEditor createPropertyEditor(Composite parent)
-						{
-							return new TagsAndI18NTextCellEditor(parent, persistContext, flattenedEditingSolution, TextCutoffLabelProvider.DEFAULT, table,
-								"Edit text property", Activator.getDefault().getDesignClient(), false);
-						}
+						return new TagsAndI18NTextCellEditor(parent, persistContext, flattenedEditingSolution, TextCutoffLabelProvider.DEFAULT, table,
+							"Edit text property", Activator.getDefault().getDesignClient(), false);
+					}
 
-						@Override
-						public ILabelProvider getLabelProvider()
-						{
-							return TextCutoffLabelProvider.DEFAULT;
-						}
-					},
+					@Override
+					public ILabelProvider getLabelProvider()
+					{
+						return TextCutoffLabelProvider.DEFAULT;
+					}
+				},
 
 					JUSTIFICATION_CONTROLLER, POSITION_CONTROLLER, new PropertyController<java.awt.Font, String>(FONT, "font", PropertyFontConverter.INSTANCE,
 						FontLabelProvider.INSTANCE, new ICellEditorFactory()
@@ -1539,13 +1535,8 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 							}
 						}), new ColorPropertyController(COLOR, "color") };
 
-					// make sure sub-properties are sorted in defined order
-					propertyDescriptors = PropertyController.applySequencePropertyComparator(propertyDescriptors);
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-				}
+				// make sure sub-properties are sorted in defined order
+				propertyDescriptors = PropertyController.applySequencePropertyComparator(propertyDescriptors);
 			}
 			return propertyDescriptors;
 		}

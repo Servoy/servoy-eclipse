@@ -566,7 +566,7 @@ public abstract class BaseFormPlaceElementCommand extends AbstractModelsCommand
 						dataProvider = form.getScriptVariable(dragData.dataProviderId);
 						if (dataProvider == null)
 						{
-							table = form.getTable();
+							table = flattenedSolution.getTable(form.getDataSource());
 						}
 					}
 					else

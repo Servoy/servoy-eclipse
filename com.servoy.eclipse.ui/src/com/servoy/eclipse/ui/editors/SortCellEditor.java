@@ -23,9 +23,11 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.SortDialog;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.ITableDisplay;
 
 /**
@@ -53,7 +55,8 @@ public class SortCellEditor extends DialogCellEditor
 	{
 		try
 		{
-			SortDialog dialog = new SortDialog(cellEditorWindow.getShell(), flattenedEditingSolution, tableDisplay.getTable(), getValue(), title);
+			ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(tableDisplay.getDataSource());
+			SortDialog dialog = new SortDialog(cellEditorWindow.getShell(), flattenedEditingSolution, table, getValue(), title);
 			dialog.open();
 
 			if (dialog.getReturnCode() != Window.CANCEL)

@@ -2779,13 +2779,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							{
 								try
 								{
-									table = servoyModel.getDataSourceManager().getDataSource(form.getDataSource());
-									if (table != null && !table.getExistInDB())
-									{
-										// the table was probably deleted - update the form table as well
-										form.clearTable();
-										table = form.getTable();
-									}
+									table = formFlattenedSolution.getTable(form.getDataSource());
 
 									if (table == null && form.getDataSource() != null)
 									{

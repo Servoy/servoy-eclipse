@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -35,15 +36,15 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.keyword.Ident;
 
 /**
  * Class that gives the list of quick-fixes (available in the ui plugin) for Servoy markers.
- * 
+ *
  * @author acostescu
  */
 public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
@@ -78,8 +79,8 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				String solName = (String)marker.getAttribute("SolutionName");
 				String uuid = (String)marker.getAttribute("Uuid");
 
-				return new IMarkerResolution[] { new ResolveUuidRelationNameQuickFix(solName, uuid, propertyName, displayName), new ClearPropertyQuickFix(
-					solName, uuid, propertyName, displayName) };
+				return new IMarkerResolution[] { new ResolveUuidRelationNameQuickFix(solName, uuid, propertyName,
+					displayName), new ClearPropertyQuickFix(solName, uuid, propertyName, displayName) };
 			}
 
 			// add dynamic resolutions below this line
@@ -123,15 +124,15 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				int contextTypeId = marker.getAttribute("ContextTypeId", -1);
 
 				BaseSetPropertyQuickFix quickfix = type.equals(ServoyBuilder.INVALID_EVENT_METHOD) && contextTypeId == IRepository.FORMS
-					? new SetPropertyQuickFix(solName, uuid, eventName, eventName, MethodWithArguments.METHOD_NONE) : new ClearPropertyQuickFix(solName, uuid,
-						eventName, eventName);
+					? new SetPropertyQuickFix(solName, uuid, eventName, eventName, MethodWithArguments.METHOD_NONE)
+					: new ClearPropertyQuickFix(solName, uuid, eventName, eventName);
 				quickfix.setLabel("Clear property " + quickfix.getDisplayName());
 				resolutions.add(quickfix);
-				if (contextTypeId == IRepository.FORMS) resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, dataSource, eventName,
-					IRepository.FORMS, "form"));
+				if (contextTypeId == IRepository.FORMS)
+					resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, dataSource, eventName, IRepository.FORMS, "form"));
 				resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, dataSource, eventName, IRepository.SOLUTIONS, "global"));
-				if (dataSource != null) resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, dataSource, eventName, IRepository.TABLENODES,
-					"entity"));
+				if (dataSource != null)
+					resolutions.add(new CreateMethodReferenceQuickFix(uuid, solName, dataSource, eventName, IRepository.TABLENODES, "entity"));
 			}
 
 			else if (type.equals(ServoyBuilder.INVALID_DATAPROVIDERID))
@@ -144,7 +145,8 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 					StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName()));
 
 				UUID id = UUID.fromString(uuid);
-				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
+				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+				ServoyProject servoyProject = servoyModel.getServoyProject(solName);
 				try
 				{
 					IPersist persist = servoyProject.getEditingPersist(id);
@@ -153,15 +155,14 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 						IPersist parent = persist.getAncestor(IRepository.FORMS);
 						if (parent != null)
 						{
-							Table table = ((Form)parent).getTable();
+							ITable table = servoyModel.getDataSourceManager().getDataSource(((Form)parent).getDataSource());
 							if (table != null)
 							{
 								String columnName = ((ISupportDataProviderID)persist).getDataProviderID();
 								if (table.getColumn(Ident.RESERVED_NAME_PREFIX + columnName) != null)
 								{
 									//resolutions.add(new RenameDataProviderIDQuickFix((ISupportDataProviderID)persist, columnName));
-									resolutions.add(new RenamePropertyQuickFix(solName, uuid,
-										StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
+									resolutions.add(new RenamePropertyQuickFix(solName, uuid, StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(),
 										StaticContentSpecLoader.PROPERTY_DATAPROVIDERID.getPropertyName(), Ident.RESERVED_NAME_PREFIX + columnName));
 								}
 								else

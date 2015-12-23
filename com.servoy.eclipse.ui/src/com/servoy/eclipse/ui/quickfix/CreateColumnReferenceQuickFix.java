@@ -91,7 +91,7 @@ public class CreateColumnReferenceQuickFix implements IMarkerResolution
 							}
 							else
 							{
-								table = ((Form)parent).getTable();
+								table = servoyModel.getDataSourceManager().getDataSource(((Form)parent).getDataSource());
 							}
 							if (table != null)
 							{

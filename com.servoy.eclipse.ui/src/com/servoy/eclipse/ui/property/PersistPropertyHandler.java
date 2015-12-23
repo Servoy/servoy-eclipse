@@ -50,7 +50,6 @@ import org.sablo.specification.property.types.TypesRegistry;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
@@ -356,19 +355,12 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				Relation[] relations = flattenedEditingSolution.getRelationSequence(((Portal)persistContext.getPersist()).getRelationName());
 				if (relations != null)
 				{
-					table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(relations[relations.length - 1].getForeignDataSource());
+					table = flattenedEditingSolution.getTable(relations[relations.length - 1].getForeignDataSource());
 				}
 			}
 			else
 			{
-				try
-				{
-					table = flattenedEditingSolution.getFlattenedForm(form).getTable();
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logInfo("Table form not accessible: " + e.getMessage());
-				}
+				table = flattenedEditingSolution.getTable(flattenedEditingSolution.getFlattenedForm(form).getDataSource());
 			}
 
 			// null type: use property controller internally
@@ -681,16 +673,14 @@ public class PersistPropertyHandler extends BasePropertyHandler
 						return ((Portal)persistContext.getPersist()).getInitialSort();
 					}
 
-					public ITable getTable() throws RepositoryException
+					public String getDataSource()
 					{
-						ITable table = null;
 						Relation[] relations = flattenedEditingSolution.getRelationSequence(((Portal)persistContext.getPersist()).getRelationName());
 						if (relations != null)
 						{
-							table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
-								relations[relations.length - 1].getForeignDataSource());
+							return relations[relations.length - 1].getForeignDataSource();
 						}
-						return table;
+						return null;
 					}
 				};
 			}
@@ -707,10 +697,9 @@ public class PersistPropertyHandler extends BasePropertyHandler
 						return ((Relation)persistContext.getPersist()).getInitialSort();
 					}
 
-					public ITable getTable() throws RepositoryException
+					public String getDataSource()
 					{
-						return ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
-							((Relation)persistContext.getPersist()).getForeignDataSource());
+						return ((Relation)persistContext.getPersist()).getForeignDataSource();
 					}
 				};
 			}

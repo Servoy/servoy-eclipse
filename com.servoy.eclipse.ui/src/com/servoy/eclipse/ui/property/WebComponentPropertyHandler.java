@@ -32,6 +32,7 @@ import org.sablo.websocket.utils.DataConversion;
 
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
@@ -40,7 +41,6 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
@@ -204,14 +204,8 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			ITable table = null;
 			if (persistContext.getContext() instanceof Form)
 			{
-				try
-				{
-					table = ((Form)persistContext.getContext()).getTable();
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-				}
+				FlattenedSolution editingFlattenedSolution = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext());
+				table = editingFlattenedSolution.getTable(((Form)persistContext.getContext()).getDataSource());
 			}
 			IScriptProvider scriptMethod = ModelUtils.getScriptMethod(bean, persistContext.getContext(), table, ((Integer)value).intValue());
 			convertedValue = scriptMethod == null ? null : scriptMethod.getUUID().toString();

@@ -182,7 +182,6 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.scripting.FunctionDefinition;
@@ -992,7 +991,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							new MethodListOptions(Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)), false,
 								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeForm)),
 								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeGlobal)),
-								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeFoundset)), form == null ? null : form.getTable()))
+								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeFoundset)),
+								form == null ? null : flattenedEditingSolution.getTable(form.getDataSource())))
 						{
 							@Override
 							protected IPropertyConverter<FunctionDefinition, Object> createConverter()
@@ -1009,7 +1009,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							new MethodListOptions(Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)), false,
 								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeForm)),
 								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeGlobal)),
-								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeFoundset)), form == null ? null : form.getTable()))
+								Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeFoundset)),
+								form == null ? null : flattenedEditingSolution.getTable(form.getDataSource())))
 						{
 							@Override
 							protected IPropertyConverter<String, Object> createConverter()
@@ -1107,17 +1108,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				if (propertyEditorHint.getPropertyEditorClass() == PropertyEditorClass.relation && beanHandler.getPropertyType() == String.class)
 				{
 					// String property, select a relation
-					Table primaryTable = null;
+					ITable primaryTable = null;
 					if (form != null)
 					{
-						try
-						{
-							primaryTable = flattenedEditingSolution.getFlattenedForm(form).getTable();
-						}
-						catch (RepositoryException ex)
-						{
-							ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
-						}
+						primaryTable = flattenedEditingSolution.getTable(flattenedEditingSolution.getFlattenedForm(form).getDataSource());
 					}
 
 					return new RelationPropertyController(id, displayName, persistContext, primaryTable, null /* foreignTable */,
@@ -1484,7 +1478,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		IPropertyType< ? > propertyType = (propertyDescription == null ? null : propertyDescription.getType());
 		if (propertyType != null && FunctionPropertyType.INSTANCE.getClass().isAssignableFrom(propertyType.getClass()))
 		{
-			final Table table = form == null ? null : form.getTable();
+			final ITable table = form == null ? null : ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(form.getDataSource());
 			return new MethodPropertyController<Integer>(id, displayName, persistContext, new MethodListOptions(true,
 				Boolean.TRUE.equals(propertyDescription.getConfig()), form != null, true, allowFoundsetMethods(persistContext, id) && table != null, table))
 			{
@@ -2730,17 +2724,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 		if (propertyType == RelationPropertyType.INSTANCE)
 		{
-			Table primaryTable = null;
+			ITable primaryTable = null;
 			if (form != null)
 			{
-				try
-				{
-					primaryTable = flattenedEditingSolution.getFlattenedForm(form).getTable();
-				}
-				catch (RepositoryException ex)
-				{
-					ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
-				}
+				primaryTable = flattenedEditingSolution.getTable(flattenedEditingSolution.getFlattenedForm(form).getDataSource());
 			}
 			ITable foreignTable = null;
 			boolean incudeNone = false;
@@ -2749,14 +2736,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Form tabForm = flattenedEditingSolution.getForm(((Tab)persistContext.getPersist()).getContainsFormID());
 				if (tabForm != null)
 				{
-					try
-					{
-						foreignTable = tabForm.getTable();
-					}
-					catch (RepositoryException ex)
-					{
-						ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
-					}
+					foreignTable = flattenedEditingSolution.getTable(tabForm.getDataSource());
 				}
 				incudeNone = true; // unrelated tabs
 			}
@@ -2819,19 +2799,12 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 		if (propertyType == TagStringPropertyType.INSTANCE)
 		{
-			Table table = null;
+			ITable table = null;
 			if (form != null)
 			{
-				try
-				{
-					table = flattenedEditingSolution.getFlattenedForm(form).getTable();
-				}
-				catch (RepositoryException ex)
-				{
-					ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
-				}
+				table = flattenedEditingSolution.getTable(flattenedEditingSolution.getFlattenedForm(form).getDataSource());
 			}
-			final Table finalTable = table;
+			final ITable finalTable = table;
 
 			return tagStringController(persistContext, id, displayName, propertyDescription, flattenedEditingSolution, finalTable);
 		}

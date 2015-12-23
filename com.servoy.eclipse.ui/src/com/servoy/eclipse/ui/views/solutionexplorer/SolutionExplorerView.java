@@ -308,7 +308,6 @@ import com.servoy.eclipse.ui.wizards.NewFormWizard;
 import com.servoy.eclipse.ui.wizards.NewModuleWizard;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
 import com.servoy.eclipse.ui.wizards.NewStyleWizard;
-import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Bean;
@@ -1999,16 +1998,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					for (ITable table : tables)
 					{
 						names.add(table.getName());
-					}
-					FlattenedSolution editingSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingFlattenedSolution();
-					Iterator<Form> it = editingSolution.getForms((Table)null, false);
-					while (it.hasNext())
-					{
-						Form form = it.next();
-						if (names.contains(form.getTableName()))
-						{
-							form.clearTable(); // TODO wouldn't this be better located in ServoyModel or someplace else?
-						}
 					}
 				}
 				((SolutionExplorerTreeContentProvider)tree.getContentProvider()).refreshServerViewsNode(server);

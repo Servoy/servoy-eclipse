@@ -813,15 +813,7 @@ public class ServoyModel extends AbstractServoyModel
 				{
 					public Object visit(IPersist o)
 					{
-						if (o instanceof Form)
-						{
-							if (names.contains(((Form)o).getTableName()))
-							{
-								((Form)o).clearTable();
-							}
-						}
-
-						else if (o instanceof TableNode)
+						if (o instanceof TableNode)
 						{
 							if (names.contains(((TableNode)o).getTableName()))
 							{

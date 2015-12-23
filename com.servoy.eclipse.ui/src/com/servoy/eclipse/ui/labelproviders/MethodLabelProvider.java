@@ -21,8 +21,8 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
@@ -39,13 +39,12 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportDeprecatedAnnotation;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.MethodArgument;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.ScopesUtils;
 
 /**
  * Label provider for methods.
- * 
+ *
  * @author rgansevles
  */
 
@@ -139,14 +138,7 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 			Form form = (Form)persistContext.getContext().getAncestor(IRepository.FORMS);
 			if (form != null)
 			{
-				try
-				{
-					table = form.getTable();
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
-				}
+				table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(form.getDataSource());
 			}
 		}
 		return ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), table, mwa.methodId);
@@ -154,7 +146,7 @@ public class MethodLabelProvider extends LabelProvider implements IFontProvider,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.util.IDeprecationProvider#isDeprecated(java.lang.Object)
 	 */
 	@Override

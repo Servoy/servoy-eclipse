@@ -74,6 +74,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -113,7 +114,6 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IDeprecated;
@@ -1294,7 +1294,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					tableOfCalculation, solution, uiActivator.loadImageFromBundle("selected_record.gif"));
 				allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.RELATIONS, tableOfCalculation,
 					uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
-				addRelationsNodeChildren(allRelations, solution, (Table)tableOfCalculation, UserNodeType.CALC_RELATION);
+				addRelationsNodeChildren(allRelations, solution, tableOfCalculation, UserNodeType.CALC_RELATION);
 
 				dataProvidersNode.parent = projectNode;
 				allRelations.parent = projectNode;
@@ -1445,62 +1445,56 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	private void addFormNodeChildren(PlatformSimpleUserNode formNode)
 	{
 		Form f = (Form)formNode.getRealObject();
-		try
+		List<PlatformSimpleUserNode> node = new ArrayList<PlatformSimpleUserNode>();
+		PlatformSimpleUserNode functionsNode = new PlatformSimpleUserNode(Messages.TreeStrings_controller, UserNodeType.FORM_CONTROLLER, f,
+			uiActivator.loadImageFromBundle("formula.gif"));
+		functionsNode.parent = formNode;
+		node.add(functionsNode);
+
+		PlatformSimpleUserNode variables = new PlatformSimpleUserNode(Messages.TreeStrings_variables, UserNodeType.FORM_VARIABLES, f,
+			uiActivator.loadImageFromBundle("form_variabletree.gif"));
+		variables.parent = formNode;
+		node.add(variables);
+
+		PlatformSimpleUserNode elementsNode = new PlatformSimpleUserNode(Messages.TreeStrings_elements, UserNodeType.FORM_ELEMENTS, f,
+			uiActivator.loadImageFromBundle("elements.gif"));
+		elementsNode.parent = formNode;
+		node.add(elementsNode);
+		addFormElementsChildren(elementsNode);
+
+		if (f.getDataSource() != null)
 		{
-			List<PlatformSimpleUserNode> node = new ArrayList<PlatformSimpleUserNode>();
-			PlatformSimpleUserNode functionsNode = new PlatformSimpleUserNode(Messages.TreeStrings_controller, UserNodeType.FORM_CONTROLLER, f,
-				uiActivator.loadImageFromBundle("formula.gif"));
-			functionsNode.parent = formNode;
-			node.add(functionsNode);
-
-			PlatformSimpleUserNode variables = new PlatformSimpleUserNode(Messages.TreeStrings_variables, UserNodeType.FORM_VARIABLES, f,
-				uiActivator.loadImageFromBundle("form_variabletree.gif"));
-			variables.parent = formNode;
-			node.add(variables);
-
-			PlatformSimpleUserNode elementsNode = new PlatformSimpleUserNode(Messages.TreeStrings_elements, UserNodeType.FORM_ELEMENTS, f,
-				uiActivator.loadImageFromBundle("elements.gif"));
-			elementsNode.parent = formNode;
-			node.add(elementsNode);
-			addFormElementsChildren(elementsNode);
-
-			if (f.getDataSource() != null)
+			IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
+			PlatformSimpleUserNode columnsNode = null;
+			try
 			{
-				PlatformSimpleUserNode columnsNode = null;
-				try
-				{
-					columnsNode = new PlatformSimpleUserNode(Messages.TreeStrings_selectedrecord, UserNodeType.TABLE_COLUMNS, f.getTable(), f,
-						uiActivator.loadImageFromBundle("selected_record.gif"));
-					columnsNode.parent = formNode;
-					node.add(columnsNode);
-				}
-				catch (DbcpException e)
-				{
-					ServoyLog.logInfo("Cannot create 'selectedrecord' node for " + formNode.getName() + ": " + e.getMessage());
-					disableServer(f.getServerName());
-				}
-
-				PlatformSimpleUserNode relationsNode = new PlatformSimpleUserNode(Messages.TreeStrings_relations, UserNodeType.RELATIONS, f, f,
-					uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
-				relationsNode.parent = formNode;
-				node.add(relationsNode);
-				addFormRelationsNodeChildren(relationsNode);
-
-				// columns & relations not allowed in login solution
-				if (activeSolutionNode != null &&
-					((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION &&
-					solutionOfCalculation == null)
-				{
-					if (columnsNode != null) columnsNode.hide();
-					relationsNode.hide();
-				}
+				columnsNode = new PlatformSimpleUserNode(Messages.TreeStrings_selectedrecord, UserNodeType.TABLE_COLUMNS, dsm.getDataSource(f.getDataSource()),
+					f, uiActivator.loadImageFromBundle("selected_record.gif"));
+				columnsNode.parent = formNode;
+				node.add(columnsNode);
 			}
-			formNode.setChildren(node.toArray(new PlatformSimpleUserNode[node.size()]));
+			catch (DbcpException e)
+			{
+				ServoyLog.logInfo("Cannot create 'selectedrecord' node for " + formNode.getName() + ": " + e.getMessage());
+				disableServer(f.getServerName());
+			}
+
+			PlatformSimpleUserNode relationsNode = new PlatformSimpleUserNode(Messages.TreeStrings_relations, UserNodeType.RELATIONS, f, f,
+				uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
+			relationsNode.parent = formNode;
+			node.add(relationsNode);
+			addFormRelationsNodeChildren(relationsNode);
+
+			// columns & relations not allowed in login solution
+			if (activeSolutionNode != null &&
+				((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION &&
+				solutionOfCalculation == null)
+			{
+				if (columnsNode != null) columnsNode.hide();
+				relationsNode.hide();
+			}
 		}
-		catch (RepositoryException e)
-		{
-			ServoyLog.logError(e);
-		}
+		formNode.setChildren(node.toArray(new PlatformSimpleUserNode[node.size()]));
 	}
 
 	private void disableServer(String serverName)
@@ -1844,20 +1838,17 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		Form f = (Form)formRelationsNode.getRealObject();
 		try
 		{
-			addRelationsNodeChildren(formRelationsNode, f.getSolution(), f.getTable(), UserNodeType.RELATION);
+			ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(f.getDataSource());
+			addRelationsNodeChildren(formRelationsNode, f.getSolution(), table, UserNodeType.RELATION);
 		}
 		catch (DbcpException e)
 		{
 			ServoyLog.logInfo("Cannot create " + formRelationsNode.getName() + " node: " + e.getMessage());
 			disableServer(f.getServerName());
 		}
-		catch (RepositoryException e)
-		{
-			ServoyLog.logError(e);
-		}
 	}
 
-	private void addRelationsNodeChildren(PlatformSimpleUserNode relationsNode, Solution solution, Table table, UserNodeType type)
+	private void addRelationsNodeChildren(PlatformSimpleUserNode relationsNode, Solution solution, ITable table, UserNodeType type)
 	{
 		try
 		{
@@ -1966,96 +1957,89 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 									}
 								}
 							}
-							try
+							if (!solutionsRefreshedForRelations.contains(s.getName()))
 							{
-								if (!solutionsRefreshedForRelations.contains(s.getName()))
+								// refresh all affected form relation nodes
+								node = (PlatformSimpleUserNode)findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Forms);
+								if (node != null && node.children != null)
 								{
-									// refresh all affected form relation nodes
-									node = (PlatformSimpleUserNode)findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Forms);
-									if (node != null && node.children != null)
+									PlatformSimpleUserNode relationsNode;
+									Form form;
+									for (int i = node.children.length - 1; i >= 0; i--)
 									{
-										PlatformSimpleUserNode relationsNode;
-										Form form;
-										for (int i = node.children.length - 1; i >= 0; i--)
+										form = (Form)node.children[i].getRealObject();
+										if (form.getDataSource() != null)
 										{
-											form = (Form)node.children[i].getRealObject();
-											if (form.getTable() != null)
+											relationsNode = (PlatformSimpleUserNode)findChildNode(node.children[i], Messages.TreeStrings_relations);
+											if (relationsNode != null)
 											{
-												relationsNode = (PlatformSimpleUserNode)findChildNode(node.children[i], Messages.TreeStrings_relations);
-												if (relationsNode != null)
-												{
-													addFormRelationsNodeChildren(relationsNode);
-													view.refreshTreeNodeFromModel(relationsNode);
-												}
+												addFormRelationsNodeChildren(relationsNode);
+												view.refreshTreeNodeFromModel(relationsNode);
 											}
 										}
 									}
 								}
-								// if in calculation mode, refresh Relations node under
-								// solution node
-								if (solutionOfCalculation != null)
-								{
-									node = (PlatformSimpleUserNode)findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Relations);
-									if (node != null && tableOfCalculation.equals(
-										ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(((Relation)persist).getPrimaryDataSource())))
-									{
-										addRelationsNodeChildren(node, solutionOfCalculation, (Table)tableOfCalculation, UserNodeType.CALC_RELATION);
-										view.refreshTreeNodeFromModel(node);
-									}
-								}
 							}
-							catch (RepositoryException e)
+							// if in calculation mode, refresh Relations node under
+							// solution node
+							if (solutionOfCalculation != null)
 							{
-								ServoyLog.logWarning("Exception while trying to refresh relation: " + persist, e);
-							}
-							if (!solutionsRefreshedForRelations.contains(s.getName())) solutionsRefreshedForRelations.add(s.getName());
-						}
-						else if (persist instanceof Form)
-						{
-							// don't refresh if we also refresh the solution
-							if (persists.contains(s)) continue;
-
-							node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
-							if (node != null)
-							{
-								PlatformSimpleUserNode formNode = (PlatformSimpleUserNode)findChildNode(node, ((Form)persist).getName());
-								if (formNode == null)
+								node = (PlatformSimpleUserNode)findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Relations);
+								if (node != null && tableOfCalculation.equals(
+									ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(((Relation)persist).getPrimaryDataSource())))
 								{
-									if (!refreshedFormsNode)
-									{
-										refreshedFormsNode = true;
-										addFormsNodeChildren(node);
-									}
-									else
-									{
-										node = null;
-									}
-								}
-								else
-								{
-									node = formNode;
-									node.children = null;
-								}
-								if (node != null)
-								{
+									addRelationsNodeChildren(node, solutionOfCalculation, tableOfCalculation, UserNodeType.CALC_RELATION);
 									view.refreshTreeNodeFromModel(node);
 								}
 							}
 						}
-						else if (persist instanceof Solution)
+						if (!solutionsRefreshedForRelations.contains(s.getName())) solutionsRefreshedForRelations.add(s.getName());
+					}
+					else if (persist instanceof Form)
+					{
+						// don't refresh if we also refresh the solution
+						if (persists.contains(s)) continue;
+
+						node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
+						if (node != null)
 						{
-							PlatformSimpleUserNode solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
-							if (solutionChildNode != null)
+							PlatformSimpleUserNode formNode = (PlatformSimpleUserNode)findChildNode(node, ((Form)persist).getName());
+							if (formNode == null)
 							{
-								addFormsNodeChildren(solutionChildNode);
-								view.refreshTreeNodeFromModel(solutionChildNode);
+								if (!refreshedFormsNode)
+								{
+									refreshedFormsNode = true;
+									addFormsNodeChildren(node);
+								}
+								else
+								{
+									node = null;
+								}
 							}
-							solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Media);
-							if (solutionChildNode != null)
+							else
 							{
-								addMediaFolderChildrenNodes(solutionChildNode, (Solution)persist);
-								view.refreshTreeNodeFromModel(solutionChildNode);
+								node = formNode;
+								node.children = null;
 							}
+							if (node != null)
+							{
+								view.refreshTreeNodeFromModel(node);
+							}
+						}
+					}
+					else if (persist instanceof Solution)
+					{
+						PlatformSimpleUserNode solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
+						if (solutionChildNode != null)
+						{
+							addFormsNodeChildren(solutionChildNode);
+							view.refreshTreeNodeFromModel(solutionChildNode);
+						}
+						solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Media);
+						if (solutionChildNode != null)
+						{
+							addMediaFolderChildrenNodes(solutionChildNode, (Solution)persist);
+							view.refreshTreeNodeFromModel(solutionChildNode);
 						}
 					}
 				}

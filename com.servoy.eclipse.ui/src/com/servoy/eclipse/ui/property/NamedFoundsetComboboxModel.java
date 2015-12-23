@@ -23,15 +23,16 @@ import java.util.List;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 
 /**
  * IComboboxPropertyModel model for namedFoundset.
- * 
+ *
  * @author acostescu
- * 
+ *
  */
 public class NamedFoundsetComboboxModel implements IComboboxPropertyModel<String>
 {
@@ -79,7 +80,8 @@ public class NamedFoundsetComboboxModel implements IComboboxPropertyModel<String
 		Iterator<Relation> relations;
 		try
 		{
-			relations = ModelUtils.getEditingFlattenedSolution(form).getRelations(form.getTable(), false, true, true, false, true);
+			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(form);
+			relations = fs.getRelations(fs.getTable(form.getDataSource()), false, true, true, false, true);
 			while (relations.hasNext())
 			{
 				gr.add(relations.next().getName());

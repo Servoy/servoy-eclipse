@@ -53,6 +53,7 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
@@ -168,7 +169,7 @@ public class ElementResolver implements IElementResolver
 					}
 					try
 					{
-						Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(formToUse.getTable());
+						Map<String, IDataProvider> allDataProvidersForTable = fs.getAllDataProvidersForTable(fs.getTable(formToUse.getDataSource()));
 						if (allDataProvidersForTable != null)
 						{
 							typeNames.addAll(allDataProvidersForTable.keySet());
@@ -181,7 +182,7 @@ public class ElementResolver implements IElementResolver
 
 					try
 					{
-						Iterator<Relation> relations = fs.getRelations(formToUse.getTable(), true, false);
+						Iterator<Relation> relations = fs.getRelations(fs.getTable(formToUse.getDataSource()), true, false);
 						while (relations.hasNext())
 						{
 							typeNames.add(relations.next().getName());
@@ -490,17 +491,10 @@ public class ElementResolver implements IElementResolver
 				else
 				{
 					Form form = getForm(context);
-					Table table = null;
+					ITable table = null;
 					if (form != null)
 					{
-						try
-						{
-							table = form.getTable();
-						}
-						catch (RepositoryException e)
-						{
-							ServoyLog.logError(e);
-						}
+						table = fs.getTable(form.getDataSource());
 					}
 					else
 					{

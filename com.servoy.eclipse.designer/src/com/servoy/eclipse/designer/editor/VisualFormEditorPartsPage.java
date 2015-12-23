@@ -80,7 +80,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Tab in form editor for managing form parts.
- * 
+ *
  * @author rgansevles
  */
 
@@ -242,8 +242,8 @@ public class VisualFormEditorPartsPage extends Composite
 		});
 		org.eclipse.swt.widgets.List currentPartsList = currentParts.getList();
 		currentPartsList.setToolTipText("Parts on current form");
-		currentParts.setLabelProvider(new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(
-			new PartTypeLabelProvider(editor.getForm()), editor.getForm()), editor.getForm().getSolution(), false));
+		currentParts.setLabelProvider(new SolutionContextDelegateLabelProvider(
+			new FormContextDelegateLabelProvider(new PartTypeLabelProvider(editor.getForm()), editor.getForm()), editor.getForm().getSolution(), false));
 		currentParts.setContentProvider(new ArrayContentProvider());
 
 		upButton = new Button(partsGroup, SWT.NONE);
@@ -288,9 +288,8 @@ public class VisualFormEditorPartsPage extends Composite
 		occurrencesLabel.setText("occurrences");
 		final GroupLayout groupLayout_1 = new GroupLayout(container);
 		groupLayout_1.setHorizontalGroup(groupLayout_1.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout_1.createSequentialGroup().addContainerGap().add(
-				groupLayout_1.createParallelGroup(GroupLayout.LEADING).add(
-					groupLayout_1.createSequentialGroup().add(partsGroup, GroupLayout.PREFERRED_SIZE, 659, Short.MAX_VALUE).add(3, 3, 3)).add(optionsGroup,
+			groupLayout_1.createSequentialGroup().addContainerGap().add(groupLayout_1.createParallelGroup(GroupLayout.LEADING).add(
+				groupLayout_1.createSequentialGroup().add(partsGroup, GroupLayout.PREFERRED_SIZE, 659, Short.MAX_VALUE).add(3, 3, 3)).add(optionsGroup,
 					GroupLayout.PREFERRED_SIZE, 662, Short.MAX_VALUE)).add(9, 9, 9)));
 		groupLayout_1.setVerticalGroup(groupLayout_1.createParallelGroup(GroupLayout.TRAILING).add(
 			groupLayout_1.createSequentialGroup().addContainerGap().add(partsGroup, GroupLayout.PREFERRED_SIZE, 242, Short.MAX_VALUE).addPreferredGap(
@@ -319,58 +318,55 @@ public class VisualFormEditorPartsPage extends Composite
 		removeGroupByButton.setText("Remove");
 		final GroupLayout groupLayout_3 = new GroupLayout(groupByButtonGroup);
 		groupLayout_3.setHorizontalGroup(groupLayout_3.createParallelGroup(GroupLayout.TRAILING).add(
-			groupLayout_3.createSequentialGroup().add(0, 0, Short.MAX_VALUE).add(addGroupByButton, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE).add(
-				18, 18, 18).add(removeGroupByButton, GroupLayout.PREFERRED_SIZE, 89, GroupLayout.PREFERRED_SIZE).add(1, 1, 1)));
-		groupLayout_3.setVerticalGroup(groupLayout_3.createParallelGroup(GroupLayout.TRAILING).add(
-			groupLayout_3.createSequentialGroup().add(
-				groupLayout_3.createParallelGroup(GroupLayout.LEADING).add(removeGroupByButton, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE).add(
-					addGroupByButton, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)).addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+			groupLayout_3.createSequentialGroup().add(0, 0, Short.MAX_VALUE).add(addGroupByButton, GroupLayout.PREFERRED_SIZE, 85,
+				GroupLayout.PREFERRED_SIZE).add(18, 18, 18).add(removeGroupByButton, GroupLayout.PREFERRED_SIZE, 89, GroupLayout.PREFERRED_SIZE).add(1, 1, 1)));
+		groupLayout_3.setVerticalGroup(groupLayout_3.createParallelGroup(GroupLayout.TRAILING).add(groupLayout_3.createSequentialGroup().add(
+			groupLayout_3.createParallelGroup(GroupLayout.LEADING).add(removeGroupByButton, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE).add(
+				addGroupByButton, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)).addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 		groupByButtonGroup.setLayout(groupLayout_3);
 		final GroupLayout groupLayout_2 = new GroupLayout(optionsGroup);
 		groupLayout_2.setHorizontalGroup(groupLayout_2.createParallelGroup(GroupLayout.TRAILING).add(
-			groupLayout_2.createSequentialGroup().addContainerGap().add(
-				groupLayout_2.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, groupByFieldsList, GroupLayout.DEFAULT_SIZE, 235,
-					Short.MAX_VALUE).add(GroupLayout.LEADING, groupbyFieldsLabel).add(groupByButtonGroup, GroupLayout.PREFERRED_SIZE, 193,
-					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout_2.createParallelGroup(GroupLayout.LEADING).add(
-					groupLayout_2.createSequentialGroup().add(20, 20, 20).add(
-						groupLayout_2.createParallelGroup(GroupLayout.LEADING).add(pageBreakAfterGroup, GroupLayout.PREFERRED_SIZE, 318, Short.MAX_VALUE).add(
-							pageBreakBeforeButton, GroupLayout.PREFERRED_SIZE, 261, GroupLayout.PREFERRED_SIZE).add(sinkPartIfButton,
-							GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE).add(allowPartToButton, GroupLayout.PREFERRED_SIZE, 318,
-							Short.MAX_VALUE).add(restartPageNumbersButton)).add(73, 73, 73)).add(
-					groupLayout_2.createSequentialGroup().add(38, 38, 38).add(discardRemainderOfButton).addContainerGap()))));
+			groupLayout_2.createSequentialGroup().addContainerGap().add(groupLayout_2.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING,
+				groupByFieldsList, GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE).add(GroupLayout.LEADING, groupbyFieldsLabel).add(groupByButtonGroup,
+					GroupLayout.PREFERRED_SIZE, 193, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+						groupLayout_2.createParallelGroup(GroupLayout.LEADING).add(groupLayout_2.createSequentialGroup().add(20, 20,
+							20).add(groupLayout_2.createParallelGroup(GroupLayout.LEADING).add(pageBreakAfterGroup, GroupLayout.PREFERRED_SIZE, 318,
+								Short.MAX_VALUE).add(pageBreakBeforeButton, GroupLayout.PREFERRED_SIZE, 261, GroupLayout.PREFERRED_SIZE).add(sinkPartIfButton,
+									GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE).add(allowPartToButton, GroupLayout.PREFERRED_SIZE, 318,
+										Short.MAX_VALUE).add(restartPageNumbersButton)).add(73, 73, 73)).add(
+											groupLayout_2.createSequentialGroup().add(38, 38, 38).add(discardRemainderOfButton).addContainerGap()))));
 		groupLayout_2.setVerticalGroup(groupLayout_2.createParallelGroup(GroupLayout.TRAILING).add(
 			groupLayout_2.createSequentialGroup().addContainerGap().add(groupbyFieldsLabel).addPreferredGap(LayoutStyle.RELATED).add(
 				groupLayout_2.createParallelGroup(GroupLayout.LEADING).add(
 					groupLayout_2.createSequentialGroup().add(sinkPartIfButton).addPreferredGap(LayoutStyle.RELATED).add(pageBreakBeforeButton).addPreferredGap(
 						LayoutStyle.RELATED).add(pageBreakAfterGroup, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-						LayoutStyle.RELATED).add(restartPageNumbersButton).addPreferredGap(LayoutStyle.RELATED).add(allowPartToButton).add(3, 3, 3).add(
-						discardRemainderOfButton)).add(
-					groupLayout_2.createSequentialGroup().add(groupByFieldsList, GroupLayout.PREFERRED_SIZE, 118, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-						LayoutStyle.RELATED).add(groupByButtonGroup, GroupLayout.PREFERRED_SIZE, 31, GroupLayout.PREFERRED_SIZE))).add(101, 101, 101)));
+							LayoutStyle.RELATED).add(restartPageNumbersButton).addPreferredGap(LayoutStyle.RELATED).add(allowPartToButton).add(3, 3, 3).add(
+								discardRemainderOfButton)).add(
+									groupLayout_2.createSequentialGroup().add(groupByFieldsList, GroupLayout.PREFERRED_SIZE, 118,
+										GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(groupByButtonGroup, GroupLayout.PREFERRED_SIZE, 31,
+											GroupLayout.PREFERRED_SIZE))).add(101, 101, 101)));
 		optionsGroup.setLayout(groupLayout_2);
 		final GroupLayout groupLayout = new GroupLayout(partsGroup);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(availablePartsList, GroupLayout.DEFAULT_SIZE, 251, Short.MAX_VALUE).add(
-					availablePartsLabel, GroupLayout.PREFERRED_SIZE, 106, GroupLayout.PREFERRED_SIZE)).add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
-					groupLayout.createSequentialGroup().add(6, 6, 6).add(
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
+			groupLayout.createParallelGroup(GroupLayout.TRAILING).add(availablePartsList, GroupLayout.DEFAULT_SIZE, 251, Short.MAX_VALUE).add(
+				availablePartsLabel, GroupLayout.PREFERRED_SIZE, 106, GroupLayout.PREFERRED_SIZE)).add(
+					groupLayout.createParallelGroup(GroupLayout.TRAILING).add(groupLayout.createSequentialGroup().add(6, 6, 6).add(
 						groupLayout.createParallelGroup(GroupLayout.LEADING).add(addPartsButton, GroupLayout.DEFAULT_SIZE, 51, Short.MAX_VALUE).add(
 							removePartsButton, GroupLayout.DEFAULT_SIZE, 51, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.RELATED).add(currentPartsList,
-						GroupLayout.DEFAULT_SIZE, 233, Short.MAX_VALUE)).add(
-					groupLayout.createSequentialGroup().addPreferredGap(LayoutStyle.RELATED).add(onCurrentFormLabel, GroupLayout.PREFERRED_SIZE, 177,
-						GroupLayout.PREFERRED_SIZE))).add(6, 6, 6).add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(upButton, GroupLayout.PREFERRED_SIZE, 78, GroupLayout.PREFERRED_SIZE).add(downButton,
-					GroupLayout.PREFERRED_SIZE, 78, GroupLayout.PREFERRED_SIZE)).addContainerGap()));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.TRAILING).add(availablePartsLabel, GroupLayout.PREFERRED_SIZE, 17, GroupLayout.PREFERRED_SIZE).add(
-					onCurrentFormLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(currentPartsList, GroupLayout.PREFERRED_SIZE, 176, Short.MAX_VALUE).add(
-					availablePartsList, GroupLayout.PREFERRED_SIZE, 176, Short.MAX_VALUE).add(
-					groupLayout.createSequentialGroup().add(upButton).addPreferredGap(LayoutStyle.RELATED).add(downButton)).add(
-					groupLayout.createSequentialGroup().add(addPartsButton).addPreferredGap(LayoutStyle.RELATED).add(removePartsButton))).addContainerGap()));
+								GroupLayout.DEFAULT_SIZE, 233, Short.MAX_VALUE)).add(
+									groupLayout.createSequentialGroup().addPreferredGap(LayoutStyle.RELATED).add(onCurrentFormLabel, GroupLayout.PREFERRED_SIZE,
+										177, GroupLayout.PREFERRED_SIZE))).add(6, 6, 6).add(
+											groupLayout.createParallelGroup(GroupLayout.TRAILING).add(upButton, GroupLayout.PREFERRED_SIZE, 78,
+												GroupLayout.PREFERRED_SIZE).add(downButton, GroupLayout.PREFERRED_SIZE, 78,
+													GroupLayout.PREFERRED_SIZE)).addContainerGap()));
+		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
+			groupLayout.createParallelGroup(GroupLayout.TRAILING).add(availablePartsLabel, GroupLayout.PREFERRED_SIZE, 17, GroupLayout.PREFERRED_SIZE).add(
+				onCurrentFormLabel)).addPreferredGap(LayoutStyle.RELATED).add(
+					groupLayout.createParallelGroup(GroupLayout.LEADING).add(currentPartsList, GroupLayout.PREFERRED_SIZE, 176, Short.MAX_VALUE).add(
+						availablePartsList, GroupLayout.PREFERRED_SIZE, 176, Short.MAX_VALUE).add(
+							groupLayout.createSequentialGroup().add(upButton).addPreferredGap(LayoutStyle.RELATED).add(downButton)).add(
+								groupLayout.createSequentialGroup().add(addPartsButton).addPreferredGap(LayoutStyle.RELATED).add(
+									removePartsButton))).addContainerGap()));
 		partsGroup.setLayout(groupLayout);
 		container.setLayout(groupLayout_1);
 
@@ -456,7 +452,7 @@ public class VisualFormEditorPartsPage extends Composite
 
 	/**
 	 * Add an available part type to partTypes if part type may be added to the form.
-	 * 
+	 *
 	 * @param partType
 	 * @param lastSuperPart
 	 * @param currentTypes
@@ -542,15 +538,7 @@ public class VisualFormEditorPartsPage extends Composite
 			enableAdd &= ((IStructuredSelection)groupByFields.getSelection()).size() < 2;
 			enableRemove &= ((IStructuredSelection)groupByFields.getSelection()).size() > 0;
 
-			try
-			{
-				enableAdd &= (editor.getForm().getTable() != null);
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
-				enableAdd = false;
-			}
+			enableAdd &= (editor.getForm().getDataSource() != null);
 		}
 
 		addGroupByButton.setEnabled(enableAdd);
@@ -704,7 +692,7 @@ public class VisualFormEditorPartsPage extends Composite
 
 	/**
 	 * Execute a command on the command stack and refresh the views.
-	 * 
+	 *
 	 * @param command
 	 */
 	protected void executeCommand(Command command)
@@ -749,20 +737,13 @@ public class VisualFormEditorPartsPage extends Composite
 		}
 
 		DataProviderDialog dialog;
-		try
+		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(editor.getForm());
+		dialog = new DataProviderDialog(getShell(), DataProviderLabelProvider.INSTANCE_HIDEPREFIX, PersistContext.create(editor.getForm()), flattenedSolution,
+			flattenedSolution.getTable(flattenedSolution.getFlattenedForm(editor.getForm()).getDataSource()),
+			new DataProviderTreeViewer.DataProviderOptions(false, true, false, false, false, false, false, false, INCLUDE_RELATIONS.NESTED, false, true, null),
+			null, SWT.MULTI, "Select Group-by fields");
+		if (dialog.open() == SWT.CANCEL)
 		{
-			FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(editor.getForm());
-			dialog = new DataProviderDialog(getShell(), DataProviderLabelProvider.INSTANCE_HIDEPREFIX, PersistContext.create(editor.getForm()),
-				flattenedSolution, flattenedSolution.getFlattenedForm(editor.getForm()).getTable(), new DataProviderTreeViewer.DataProviderOptions(false, true,
-					false, false, false, false, false, false, INCLUDE_RELATIONS.NESTED, false, true, null), null, SWT.MULTI, "Select Group-by fields");
-			if (dialog.open() == SWT.CANCEL)
-			{
-				return;
-			}
-		}
-		catch (RepositoryException e)
-		{
-			ServoyLog.logError("Could not get table for form " + editor.getForm(), e);
 			return;
 		}
 
@@ -855,9 +836,9 @@ public class VisualFormEditorPartsPage extends Composite
 	 * Wrapper bean for the current part.
 	 * <p>
 	 * Changes to the bean properties are set via the command stack.
-	 * 
+	 *
 	 * @author rgansevles
-	 * 
+	 *
 	 */
 	public class PartBean
 	{
@@ -955,7 +936,7 @@ public class VisualFormEditorPartsPage extends Composite
 
 		/**
 		 * Set the property via a command that is executed on the editors' command stack.
-		 * 
+		 *
 		 * @param property
 		 * @param value
 		 */
@@ -979,7 +960,7 @@ public class VisualFormEditorPartsPage extends Composite
 
 		/**
 		 * Set the property via a command that is executed on the editors' command stack.
-		 * 
+		 *
 		 * @param property
 		 * @param value
 		 */

@@ -72,7 +72,7 @@ public class RemoveInvalidSortColumnsQuickFix implements IMarkerResolution
 					else if (persist instanceof Form)
 					{
 						options = ((Form)persist).getInitialSort();
-						table = ((Form)persist).getTable();
+						table = servoyModel.getDataSourceManager().getDataSource(((Form)persist).getDataSource());
 					}
 					else if (persist instanceof ValueList)
 					{
