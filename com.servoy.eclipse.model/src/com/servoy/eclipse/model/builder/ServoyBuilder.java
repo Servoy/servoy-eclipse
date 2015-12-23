@@ -3226,8 +3226,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													Relation[] relations = fieldFlattenedSolution.getRelationSequence(vl.getRelationName());
 													if (relations != null)
 													{
-														table = DataSourceUtils.getTable(relations[relations.length - 1].getForeignDataSource(), solution,
-															null); // we are not using directly .getForeignTable() because that one throws an exception if the table is not present
+														table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
+															relations[relations.length - 1].getForeignDataSource());
 													}
 												}
 											}
