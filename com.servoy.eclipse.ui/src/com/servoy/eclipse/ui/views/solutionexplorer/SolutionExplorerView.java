@@ -224,6 +224,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.CutAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DebugMethodAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteComponentResourceAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteI18NAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteInMemTableAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteMediaAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeletePersistAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteScopeAction;
@@ -2833,6 +2834,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInListPrimary.registerAction(UserNodeType.SCOPES_ITEM, newScope);
 		newActionInListPrimary.registerAction(UserNodeType.SCOPES_ITEM_CALCULATION_MODE, newScope);
 		newActionInListPrimary.registerAction(UserNodeType.MODULES, newModule);
+		newActionInListPrimary.registerAction(UserNodeType.INMEMORY_DATASOURCES, newTable);
 
 		newActionInListSecondary.registerAction(UserNodeType.TABLE, newForm);
 		newActionInListSecondary.registerAction(UserNodeType.INMEMORY_DATASOURCE, newForm);
@@ -2866,6 +2868,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction deleteMediaFolder = new DeleteMediaAction("Delete media", this);
 		IAction deleteValueList = new DeletePersistAction(UserNodeType.VALUELIST_ITEM, "Delete value list");
 		IAction deleteTable = new DeleteTableAction(getSite().getShell());
+		IAction deleteInMemDataSource = new DeleteInMemTableAction(getSite().getShell());
 		IAction deleteStyle = new DeletePersistAction(UserNodeType.STYLE_ITEM, "Delete style");
 		IAction deleteTemplate = new DeletePersistAction(UserNodeType.TEMPLATE_ITEM, "Delete template");
 		IAction deleteRelation = new DeletePersistAction(UserNodeType.RELATION, "Delete relation");
@@ -2898,6 +2901,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		deleteActionInList.registerAction(UserNodeType.RELATION, deleteRelation);
 		deleteActionInList.registerAction(UserNodeType.I18N_FILE_ITEM, deleteI18N);
 		deleteActionInList.registerAction(UserNodeType.COMPONENT_RESOURCE, deleteComponentResource);
+		deleteActionInList.registerAction(UserNodeType.INMEMORY_DATASOURCE, deleteInMemDataSource);
 
 		copyTable = new CopyTableAction(getSite().getShell());
 		editVariableAction = new EditVariableAction(this);

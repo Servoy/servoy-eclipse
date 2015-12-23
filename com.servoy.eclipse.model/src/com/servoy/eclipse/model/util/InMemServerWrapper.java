@@ -17,10 +17,12 @@
 
 package com.servoy.eclipse.model.util;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
-import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.DataSourceUtils;
 
 /**
@@ -29,13 +31,16 @@ import com.servoy.j2db.util.DataSourceUtils;
  */
 public class InMemServerWrapper implements IDataSourceWrapper
 {
-	private final IServerInternal memServer;
 	private final String tablename;
+
+	public InMemServerWrapper()
+	{
+		this.tablename = null;
+	}
 
 	public InMemServerWrapper(String tablename)
 	{
 		this.tablename = tablename;
-		this.memServer = null;//ServoyModelFinder.getServoyModel().getMemServer();
 	}
 
 	@Override
@@ -51,20 +56,25 @@ public class InMemServerWrapper implements IDataSourceWrapper
 
 	public String getServerName()
 	{
-		return memServer.getName();
+		return DataSourceUtils.INMEM_DATASOURCE;
 	}
 
 	public List<String> getTableNames()
 	{
+		List<String> names = new ArrayList<>();
 		try
 		{
-			return memServer.getTableNames(true);
+			ServoyProject[] modulesOfActiveProject = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
+			for (ServoyProject servoyProject : modulesOfActiveProject)
+			{
+				names.addAll(servoyProject.getMemServer().getTableNames(false));
+			}
 		}
-		catch (Exception e)
+		catch (RepositoryException e)
 		{
 			ServoyLog.logError(e);
 		}
-		return Collections.emptyList();
+		return names;
 	}
 
 	@Override

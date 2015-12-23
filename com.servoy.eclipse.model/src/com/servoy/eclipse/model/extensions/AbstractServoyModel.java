@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.SubMonitor;
 
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.inmemory.MemServer;
+import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
@@ -569,18 +570,27 @@ public abstract class AbstractServoyModel implements IServoyModel
 		ServoyLog.logError(e);
 	}
 
-	private ITable findInMemITable(String tablename)
+	@Override
+	public IServerInternal getMemServer(String tablename)
+	{
+		MemTable table = findInMemITable(tablename);
+		if (table != null) return table.getParent();
+		return null;
+	}
+
+	private MemTable findInMemITable(String tablename)
 	{
 
 		MemServer memServer = getActiveProject().getMemServer();
 		try
 		{
-			ITable table = memServer.getTable(tablename);
+			MemTable table = memServer.getTable(tablename);
 			if (table != null) return table;
 			ServoyProject[] modulesOfActiveProject = getModulesOfActiveProject();
 			for (ServoyProject servoyProject : modulesOfActiveProject)
 			{
-				if (servoyProject.getMemServer().getTable(tablename) != null) return servoyProject.getMemServer().getTable(tablename);
+				table = servoyProject.getMemServer().getTable(tablename);
+				if (table != null) return table;
 			}
 		}
 		catch (RepositoryException e)

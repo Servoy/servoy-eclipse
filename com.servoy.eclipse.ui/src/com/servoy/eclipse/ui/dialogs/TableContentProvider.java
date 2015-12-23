@@ -95,11 +95,11 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 			}
 			if (options.serverName == null)
 			{
-				lst.add(new InMemServerWrapper(null));
+				lst.add(new InMemServerWrapper());
 			}
 			else if (options.serverName.equals(DataSourceUtils.INMEM_DATASOURCE))
 			{
-				lst.addAll(Arrays.asList(getChildren(new InMemServerWrapper(null))));
+				lst.addAll(Arrays.asList(getChildren(new InMemServerWrapper())));
 			}
 			return lst.toArray();
 		}
@@ -119,7 +119,7 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 		}
 		else if (element instanceof InMemServerWrapper && ((InMemServerWrapper)element).getTableName() != null)
 		{
-			return new InMemServerWrapper(null);
+			return new InMemServerWrapper();
 		}
 		return null;
 	}

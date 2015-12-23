@@ -154,7 +154,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
 		Form selectedForm = null;
-		TableWrapper selectedDataSource = null;
+		IDataSourceWrapper selectedDataSource = null;
 		// find the Servoy project to which the new form will be added
 		if (selection.size() == 1)
 		{
@@ -171,9 +171,9 @@ public class NewFormWizard extends Wizard implements INewWizard
 				{
 					selectedForm = (Form)node.getRealObject();
 				}
-				else if (node.getRealObject() instanceof TableWrapper)
+				else if (node.getRealObject() instanceof IDataSourceWrapper)
 				{
-					selectedDataSource = (TableWrapper)node.getRealObject();
+					selectedDataSource = (IDataSourceWrapper)node.getRealObject();
 				}
 				SimpleUserNode projectNode = node.getAncestorOfType(ServoyProject.class);
 				if (projectNode != null)
@@ -429,12 +429,11 @@ public class NewFormWizard extends Wizard implements INewWizard
 		 * @param pageName the name of the page
 		 * @param superForm the pre selected super form
 		 */
-		public NewFormWizardPage(String pageName, TableWrapper tableWrapper)
+		public NewFormWizardPage(String pageName, IDataSourceWrapper tableWrapper)
 		{
 			this(pageName);
 			IDialogSettings settings = NewFormWizard.this.getDialogSettings();
-			settings.put("servername", tableWrapper.getServerName());
-			settings.put("tablename", tableWrapper.getTableName());
+			settings.put("datasource", tableWrapper == null ? null : tableWrapper.getDataSource());
 		}
 
 		private IDataSourceWrapper getTableWrapper()

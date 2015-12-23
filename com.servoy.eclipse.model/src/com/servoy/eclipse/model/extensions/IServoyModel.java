@@ -23,6 +23,7 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.AtomicIntegerWithListener;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.IServerInternal;
 
 /**
  * Aware of active solution/resources projects and other things is the current environment needed by the com.servoy.eclipse.model.repository classes.<br>
@@ -90,5 +91,11 @@ public interface IServoyModel
 	 *
 	 */
 	IDataSourceManager getDataSourceManager();
+
+	/**
+	 * @param tablename
+	 * @return
+	 */
+	IServerInternal getMemServer(String tablename);
 
 }

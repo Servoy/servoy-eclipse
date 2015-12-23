@@ -65,7 +65,7 @@ import com.servoy.j2db.util.ServoyJSONObject;
  */
 public class MemServer implements IServerInternal, IServer
 {
-	private final Map<String, ITable> tables = new HashMap<String, ITable>();
+	private final Map<String, MemTable> tables = new HashMap<String, MemTable>();
 	private volatile ISequenceProvider sequenceManager;
 	private final ServerConfig serverConfig;
 	private final ServoyProject servoyProject;
@@ -119,7 +119,7 @@ public class MemServer implements IServerInternal, IServer
 	{
 		try
 		{
-			TableNode tableNode = servoyProject.getEditingSolution().getOrCreateTableNode(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON + memTable.getName());
+			TableNode tableNode = servoyProject.getEditingSolution().getOrCreateTableNode(DataSourceUtils.createInmemDataSource(memTable.getName()));
 			tableNode.setColumns(new ServoyJSONObject(contents, true));
 
 		}
@@ -152,12 +152,10 @@ public class MemServer implements IServerInternal, IServer
 	{
 		if (!tables.containsKey(tableName))
 		{
-			ITable table = new MemTable(this, tableName);
+			MemTable table = new MemTable(this, tableName);
 			tables.put(tableName, table);
 			table.setExistInDB(true);
 		}
-
-		servoyProject.getEditingSolution().getOrCreateTableNode(DataSourceUtils.createInmemDataSource(tableName));
 		return tables.get(tableName);
 	}
 
@@ -558,10 +556,9 @@ public class MemServer implements IServerInternal, IServer
 	 * @see com.servoy.j2db.persistence.IServerInternal#getTable(java.lang.String)
 	 */
 	@Override
-	public ITable getTable(String tableName) throws RepositoryException
+	public MemTable getTable(String tableName) throws RepositoryException
 	{
-
-		ITable iTable = tables.get(tableName);
+		MemTable iTable = tables.get(tableName);
 		if (iTable != null)
 		{
 			initTableIfNecessary(iTable);
