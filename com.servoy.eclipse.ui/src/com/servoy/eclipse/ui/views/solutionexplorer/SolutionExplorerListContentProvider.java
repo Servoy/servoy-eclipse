@@ -40,10 +40,8 @@ import org.apache.wicket.util.io.IOUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor;
 import org.eclipse.dltk.javascript.ast.BinaryOperation;
@@ -80,7 +78,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
-import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
@@ -2001,33 +1998,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				leafList.remove(persist.getUUID());
 				if (persist instanceof TableNode)
 				{
-					try
-					{
-						String dataSource = ((TableNode)persist).getDataSource();
-						if (dataSource.startsWith(DataSourceUtils.INMEM_DATASOURCE))
-						{
-							String filePath = SolutionSerializer.getRelativePath(persist, true);
-							IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(filePath));
-							IProjectNature nature = file.getProject().getNature(ServoyProject.NATURE_ID);
-							if (nature instanceof ServoyProject)
-							{
-								ServoyProject servoyProject = (ServoyProject)nature;
-								ITable table = servoyProject.getMemServer().getTable(((TableNode)persist).getTableName());
-								//fix so that the getTable() does not try to read the table from a dbi file, mem tables are stored in .tbl files 
-								((TableNode)persist).setITable(table);
-							}
-
-						}
-						flushTable(((TableNode)persist).getTable());
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
-					catch (CoreException e)
-					{
-						ServoyLog.logError(e);
-					}
+					String dataSource = ((TableNode)persist).getDataSource();
+					flushTable(ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(dataSource));
 				}
 				if (persist instanceof Form)
 				{

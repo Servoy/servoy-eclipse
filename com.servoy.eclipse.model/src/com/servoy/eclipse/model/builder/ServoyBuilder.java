@@ -2726,14 +2726,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							TableNode node = (TableNode)o;
 							if (!missingServers.containsKey(node.getServerName()))
 							{
-								ITable table = null;
-								try
-								{
-									table = node.getTable();
-								}
-								catch (Exception e)
-								{
-								}
+								ITable table = servoyModel.getDataSourceManager().getDataSource(node.getDataSource());
 								if (table == null || table.isMarkedAsHiddenInDeveloper())
 								{
 									Iterator<IPersist> iterator = node.getAllObjects();

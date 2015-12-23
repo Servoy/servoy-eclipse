@@ -50,6 +50,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.TableEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -663,11 +664,12 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 
 			public void persistChanges(Collection<IPersist> changes)
 			{
+				IDataSourceManager dsm = ServoyModelManager.getServoyModelManager().getServoyModel().getDataSourceManager();
 				for (IPersist persist : changes)
 				{
 					try
 					{
-						if (persist instanceof TableNode && table.equals(((TableNode)persist).getTable()))
+						if (persist instanceof TableNode && table.equals(dsm.getDataSource(((TableNode)persist).getDataSource())))
 						{
 							final boolean changed = persist.isChanged();
 							UIUtils.runInUI(new Runnable()

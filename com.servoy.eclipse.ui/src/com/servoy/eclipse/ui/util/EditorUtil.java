@@ -76,6 +76,8 @@ import com.servoy.eclipse.core.resource.I18NEditorInput;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
 import com.servoy.eclipse.core.resource.TableEditorInput;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -424,14 +426,8 @@ public class EditorUtil
 		}
 		if (persist instanceof TableNode)
 		{
-			try
-			{
-				return openTableEditor(((TableNode)persist).getTable(), activate);
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
-			}
+			IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
+			return openTableEditor(dsm.getDataSource(((TableNode)persist).getDataSource()), activate);
 		}
 		return openScriptEditor(persist, null, activate);
 	}

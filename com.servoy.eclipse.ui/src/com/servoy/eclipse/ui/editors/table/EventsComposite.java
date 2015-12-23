@@ -47,6 +47,8 @@ import org.eclipse.swt.widgets.TreeColumn;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
@@ -410,19 +412,13 @@ public class EventsComposite extends Composite
 			{
 				ServoyLog.logError(e);
 			}
-			try
+			IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
+			for (EventNodeType tp : EventNodeType.values())
 			{
-				for (EventNodeType tp : EventNodeType.values())
-				{
-					children.add(new EventNode(tp,
-						tableNode == null ? MethodWithArguments.METHOD_DEFAULT
-							: new MethodWithArguments(((Integer)tableNode.getProperty(tp.getProperty().getPropertyName())).intValue(), tableNode.getTable()),
-						solution, table));
-				}
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
+				children.add(new EventNode(tp,
+					tableNode == null ? MethodWithArguments.METHOD_DEFAULT : new MethodWithArguments(
+						((Integer)tableNode.getProperty(tp.getProperty().getPropertyName())).intValue(), dsm.getDataSource(tableNode.getDataSource())),
+					solution, table));
 			}
 		}
 

@@ -136,7 +136,7 @@ public class AddScriptProviderButtonsComposite extends Composite
 				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 				IValidateName nameValidator = servoyModel.getNameValidator();
-				ScriptCalculation calc = solution.createNewScriptCalculation(nameValidator, table.getDataSource(), calcName, null);
+				ScriptCalculation calc = solution.createNewScriptCalculation(nameValidator, table, calcName, null);
 				if (calc != null)
 				{
 					calc.setType(IColumnTypes.TEXT);

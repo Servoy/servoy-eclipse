@@ -776,13 +776,13 @@ public class ServoyModel extends AbstractServoyModel
 				{
 					tableNames[i] = tables[i].getName();
 				}
-				clearCachedTables(tableNames);
+				clearCachedTables();
 			}
 
 			@Override
 			public void tablesAdded(IServerInternal server, String[] tableNames)
 			{
-				clearCachedTables(tableNames);
+				clearCachedTables();
 				try
 				{
 					for (String tableName : tableNames)
@@ -803,35 +803,16 @@ public class ServoyModel extends AbstractServoyModel
 			public void tableInitialized(Table t)
 			{
 				t.addIColumnListener(columnListener);
-				clearCachedTables(new String[] { t.getName() });
+				clearCachedTables();
 			}
 
-			private void clearCachedTables(String[] tableNames)
+			private void clearCachedTables()
 			{
-				final List<String> names = Arrays.asList(tableNames);
-				IPersistVisitor visitor = new IPersistVisitor()
-				{
-					public Object visit(IPersist o)
-					{
-						if (o instanceof TableNode)
-						{
-							if (names.contains(((TableNode)o).getTableName()))
-							{
-								((TableNode)o).clearTable();
-							}
-						}
-
-						return o.getParent() instanceof Solution ? CONTINUE_TRAVERSAL : CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
-					}
-				};
-
 				// flush flattened form caches and clear cached tables
 				getFlattenedSolution().flushFlattenedFormCache();
 				for (ServoyProject project : getModulesOfActiveProject())
 				{
 					project.getEditingFlattenedSolution().flushFlattenedFormCache();
-					project.getSolution().acceptVisitor(visitor);
-					project.getEditingSolution().acceptVisitor(visitor);
 				}
 			}
 		};

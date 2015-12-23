@@ -24,6 +24,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.ContentSpec;
@@ -32,6 +33,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportUpdateableName;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -39,13 +41,14 @@ import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.Utils;
 
 public class PersistCloner
 {
 	/**
 	 * Creates a copy of the given form at the specified location. Also updates references within the new form to form methods and form variables.
-	 * 
+	 *
 	 * @param formToDuplicate the form to be duplicated/copied.
 	 * @param location the location where the new form should be put. Object[2] - { newFormName, destinationSolutionServoyProject }
 	 * @param nameValidator the name validator to be used.
@@ -177,14 +180,17 @@ public class PersistCloner
 				AbstractBase clone = null;
 				if (persist instanceof ScriptCalculation)
 				{
-					clone = destinationEditingSolution.createNewScriptCalculation(nameValidator, ((ScriptCalculation)persist).getTable().getDataSource(),
-						newPersistName, null);
+					FlattenedSolution editingFlattenedSolution = servoyProject.getEditingFlattenedSolution();
+					ITable table = editingFlattenedSolution.getTable(((TableNode)((ScriptCalculation)persist).getParent()).getDataSource());
+					clone = destinationEditingSolution.createNewScriptCalculation(nameValidator, table, newPersistName, null);
 					clone.copyPropertiesMap(((ScriptCalculation)persist).getPropertiesMap(), true);
 				}
 				else if (persist instanceof AggregateVariable)
 				{
-					clone = destinationEditingSolution.createNewAggregateVariable(nameValidator, ((AggregateVariable)persist).getTable().getDataSource(),
-						newPersistName, ((AggregateVariable)persist).getType(), ((AggregateVariable)persist).getDataProviderIDToAggregate());
+					FlattenedSolution editingFlattenedSolution = servoyProject.getEditingFlattenedSolution();
+					ITable table = editingFlattenedSolution.getTable(((TableNode)((AggregateVariable)persist).getParent()).getDataSource());
+					clone = destinationEditingSolution.createNewAggregateVariable(nameValidator, table, newPersistName, ((AggregateVariable)persist).getType(),
+						((AggregateVariable)persist).getDataProviderIDToAggregate());
 					clone.copyPropertiesMap(((AggregateVariable)persist).getPropertiesMap(), true);
 				}
 				else

@@ -300,8 +300,8 @@ public class AggregationsComposite extends Composite
 								}
 							}
 
-							AggregateVariable aggregationVariable = solution.createNewAggregateVariable(nameValidator, te.getTable().getDataSource(), newName,
-								type, column.getDataProviderID());
+							AggregateVariable aggregationVariable = solution.createNewAggregateVariable(nameValidator, te.getTable(), newName, type,
+								column.getDataProviderID());
 							treeViewer.refresh(solution);
 							treeViewer.editElement(aggregationVariable, 0);
 							removeButton.setEnabled(true);

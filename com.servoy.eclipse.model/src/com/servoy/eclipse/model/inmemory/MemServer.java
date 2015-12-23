@@ -92,7 +92,6 @@ public class MemServer implements IServerInternal, IServer
 					try
 					{
 						createNewTable = createNewTable(null, tableNode.getDataSource().substring(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON.length()));
-						tableNode.setITable(createNewTable);
 						ServoyModelFinder.getServoyModel().getDataModelManager().deserializeInMemoryTable(this, createNewTable, (ServoyJSONObject)property);
 					}
 					catch (RepositoryException e)
@@ -121,7 +120,6 @@ public class MemServer implements IServerInternal, IServer
 		try
 		{
 			TableNode tableNode = servoyProject.getEditingSolution().getOrCreateTableNode(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON + memTable.getName());
-			tableNode.setITable(memTable);
 			tableNode.setColumns(new ServoyJSONObject(contents, true));
 
 		}
@@ -159,10 +157,8 @@ public class MemServer implements IServerInternal, IServer
 			table.setExistInDB(true);
 		}
 
-		TableNode tableNode = servoyProject.getEditingSolution().getOrCreateTableNode(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON + tableName);
-		ITable iTable = tables.get(tableName);
-		tableNode.setITable(iTable);
-		return iTable;
+		servoyProject.getEditingSolution().getOrCreateTableNode(DataSourceUtils.createInmemDataSource(tableName));
+		return tables.get(tableName);
 	}
 
 	/*

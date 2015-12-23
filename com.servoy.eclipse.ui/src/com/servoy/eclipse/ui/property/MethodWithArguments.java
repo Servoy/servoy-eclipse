@@ -16,18 +16,17 @@
  */
 package com.servoy.eclipse.ui.property;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.TableNode;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.SafeArrayList;
 
 /**
  * Holder for method id and actual arguments
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class MethodWithArguments
 {
@@ -66,14 +65,7 @@ public class MethodWithArguments
 		ITable table = null;
 		if (script.getParent() instanceof TableNode)
 		{
-			try
-			{
-				table = ((TableNode)script.getParent()).getTable();
-			}
-			catch (RepositoryException e)
-			{
-				Debug.error(e);
-			}
+			table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(((TableNode)script.getParent()).getDataSource());
 		}
 		return new MethodWithArguments(script.getID(), paramNames, arguments, table);
 	}

@@ -329,7 +329,7 @@ public class CalculationsComposite extends Composite
 					}
 					ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(solution.getName());
 					String userTemplate = JSDocScriptTemplates.getTemplates(project.getProject(), true).getMethodTemplate();
-					ScriptCalculation s = solution.createNewScriptCalculation(nameValidator, te.getTable().getDataSource(), calcName, userTemplate);
+					ScriptCalculation s = solution.createNewScriptCalculation(nameValidator, te.getTable(), calcName, userTemplate);
 					s.setType(Column.allDefinedTypes[0]);
 					treeViewer.refresh(solution);
 					treeViewer.editElement(s, 0);
