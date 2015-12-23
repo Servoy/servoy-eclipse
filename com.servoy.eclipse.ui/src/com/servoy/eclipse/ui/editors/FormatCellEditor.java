@@ -28,6 +28,7 @@ import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.IPropertyType;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
@@ -95,7 +96,8 @@ public class FormatCellEditor extends TextDialogCellEditor
 			WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(webComponentClassName);
 			if (spec != null)
 			{
-				FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
+				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+				FlattenedSolution flattenedSolution = servoyModel.getFlattenedSolution();
 				for (String propertyName : formatForPropertyNames)
 				{
 					PropertyDescription pd = null;
@@ -168,12 +170,11 @@ public class FormatCellEditor extends TextDialogCellEditor
 									if (vl.getRelationName() != null)
 									{
 										Relation[] relations = flattenedSolution.getRelationSequence(vl.getRelationName());
-										table = ServoyModelManager.getServoyModelManager().getServoyModel().getDataSourceManager().getDataSource(
-											relations[relations.length - 1].getForeignDataSource());
+										table = servoyModel.getDataSourceManager().getDataSource(relations[relations.length - 1].getForeignDataSource());
 									}
 									else
 									{
-										table = vl.getTable();
+										table = servoyModel.getDataSourceManager().getDataSource(vl.getDataSource());
 									}
 								}
 								catch (Exception ex)

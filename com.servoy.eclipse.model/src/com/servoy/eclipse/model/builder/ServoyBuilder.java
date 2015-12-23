@@ -151,7 +151,6 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -3215,20 +3214,20 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										boolean vlWithUnstoredCalcError = false;
 										if (vl.getValueListType() == IValueListConstants.DATABASE_VALUES)
 										{
-											Table table = null;
+											ITable table = null;
 											try
 											{
 												if (vl.getDatabaseValuesType() == IValueListConstants.TABLE_VALUES)
 												{
-													table = (Table)vl.getTable();
+													table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(vl.getDataSource());
 												}
 												else if (vl.getDatabaseValuesType() == IValueListConstants.RELATED_VALUES && vl.getRelationName() != null)
 												{
 													Relation[] relations = fieldFlattenedSolution.getRelationSequence(vl.getRelationName());
 													if (relations != null)
 													{
-														table = (Table)DataSourceUtils.getTable(relations[relations.length - 1].getForeignDataSource(),
-															solution, null); // we are not using directly .getForeignTable() because that one throws an exception if the table is not present
+														table = DataSourceUtils.getTable(relations[relations.length - 1].getForeignDataSource(), solution,
+															null); // we are not using directly .getForeignTable() because that one throws an exception if the table is not present
 													}
 												}
 											}
@@ -3251,7 +3250,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												{
 													if (fallback.getDatabaseValuesType() == IValueListConstants.TABLE_VALUES)
 													{
-														table = fallback.getTable();
+														table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
+															fallback.getDataSource());
 													}
 													else if (fallback.getDatabaseValuesType() == IValueListConstants.RELATED_VALUES &&
 														fallback.getRelationName() != null)

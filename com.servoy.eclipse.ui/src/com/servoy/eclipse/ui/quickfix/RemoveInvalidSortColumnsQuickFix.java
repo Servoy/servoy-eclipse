@@ -88,7 +88,7 @@ public class RemoveInvalidSortColumnsQuickFix implements IMarkerResolution
 						}
 						else
 						{
-							table = vl.getTable();
+							table = servoyModel.getDataSourceManager().getDataSource(vl.getDataSource());
 						}
 					}
 					if (table != null && options != null)
