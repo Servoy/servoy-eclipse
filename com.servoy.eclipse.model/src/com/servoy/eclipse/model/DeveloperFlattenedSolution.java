@@ -30,7 +30,6 @@ import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
-import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
@@ -146,26 +145,5 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 	public IServer getServer(String dataSource)
 	{
 		return (IServer)ServoyModelFinder.getServoyModel().getDataSourceManager().getServer(dataSource);
-	}
-
-	@Override
-	public IDataProvider getGlobalDataProvider(String id, boolean quiet) throws RepositoryException
-	{
-		int lastIndex = id.lastIndexOf('.');
-		if (lastIndex != -1)
-		{
-			Relation[] relationSequence = getRelationSequence(id.substring(0, lastIndex));
-			if (relationSequence != null && relationSequence.length > 0)
-			{
-				ITable foreignTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
-					relationSequence[relationSequence.length - 1].getForeignDataSource());
-				if (foreignTable != null)
-				{
-					return getDataProviderForTable(foreignTable, id.substring(lastIndex + 1));
-				}
-
-			}
-		}
-		return super.getGlobalDataProvider(id, quiet);
 	}
 }

@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.inmemory.MemTable;
@@ -130,19 +131,19 @@ public abstract class AbstractServoyModel implements IServoyModel
 			@Override
 			public IServerInternal getServer(String dataSource)
 			{
-//				String inMemTableName = DataSourceUtils.getInmemDataSourceName(dataSource);
-//				if (inMemTableName != null)
-//				{
-//					try
-//					{
-//						return ServoyModelFinder.getServoyModel().getMemServer();
-//					}
-//					catch (Exception e)
-//					{
-//						ServoyLog.logError("couldn't find in mem table for datasource: " + dataSource, e);
-//					}
-//				}
-//				else
+				String inMemTableName = DataSourceUtils.getInmemDataSourceName(dataSource);
+				if (inMemTableName != null)
+				{
+					try
+					{
+						return ServoyModelFinder.getServoyModel().getMemServer(inMemTableName);
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError("couldn't find in mem table for datasource: " + dataSource, e);
+					}
+				}
+				else
 				{
 					String[] dbServernameTablename = DataSourceUtils.getDBServernameTablename(dataSource);
 					if (dbServernameTablename != null)
