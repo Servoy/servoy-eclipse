@@ -2374,7 +2374,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											{
 												try
 												{
-													dataProvider = persistFlattenedSolution.getGlobalDataProvider(id, true);
+													dataProvider = persistFlattenedSolution.getGlobalDataProvider(id, false);
 												}
 												catch (Exception e)
 												{
@@ -3831,66 +3831,73 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 				if (dataSource != null)
 				{
-					String[] stn = DataSourceUtilsBase.getDBServernameTablename(dataSource);
-					if (stn == null || (stn != null && (stn.length == 0 || (stn.length > 0 && stn[0] == null))))
+					String inmemDataSourceName = DataSourceUtils.getInmemDataSourceName(dataSource);
+					if (inmemDataSourceName != null)
 					{
-						String customSeverity = getSeverity(VALUELIST_DB_MALFORMED_TABLE_DEFINITION.getLeft(),
-							VALUELIST_DB_MALFORMED_TABLE_DEFINITION.getRight().name(), vl);
-						if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-						{
-							ServoyMarker mk = MarkerMessages.ValuelistDBMalformedTableDefinition.fill(vl.getName(), dataSource);
-							problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_DB_MALFORMED_TABLE_DEFINITION.getRight()),
-								mk.getText()));
-						}
 					}
 					else
 					{
-						IServerInternal server = (IServerInternal)sm.getServer(stn[0]);
-						if (server != null)
+						String[] stn = DataSourceUtilsBase.getDBServernameTablename(dataSource);
+						if (stn == null || (stn != null && (stn.length == 0 || (stn.length > 0 && stn[0] == null))))
 						{
-							if (!server.getName().equals(stn[0]))
+							String customSeverity = getSeverity(VALUELIST_DB_MALFORMED_TABLE_DEFINITION.getLeft(),
+								VALUELIST_DB_MALFORMED_TABLE_DEFINITION.getRight().name(), vl);
+							if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
 							{
-								String customSeverity = getSeverity(VALUELIST_DB_SERVER_DUPLICATE.getLeft(), VALUELIST_DB_SERVER_DUPLICATE.getRight().name(),
-									vl);
-								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
-								{
-									ServoyMarker mk = MarkerMessages.ValuelistDBServerDuplicate.fill(vl.getName(), stn[0]);
-									problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_DB_SERVER_DUPLICATE.getRight()),
-										mk.getText()));
-								}
+								ServoyMarker mk = MarkerMessages.ValuelistDBMalformedTableDefinition.fill(vl.getName(), dataSource);
+								problems.add(new Problem(mk.getType(),
+									getTranslatedSeverity(customSeverity, VALUELIST_DB_MALFORMED_TABLE_DEFINITION.getRight()), mk.getText()));
 							}
-							table = server.getTable(stn[1]);
-							if (table == null)
+						}
+						else
+						{
+							IServerInternal server = (IServerInternal)sm.getServer(stn[0]);
+							if (server != null)
 							{
-								String customSeverity = getSeverity(VALUELIST_ENTITY_NOT_FOUND.getLeft(), VALUELIST_ENTITY_NOT_FOUND.getRight().name(), vl);
-								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+								if (!server.getName().equals(stn[0]))
 								{
-									ServoyMarker mk = MarkerMessages.ValuelistDBTableNotAccessible.fill(vl.getName(), stn[1]);
-									problems.add(
-										new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_ENTITY_NOT_FOUND.getRight()), mk.getText()));
+									String customSeverity = getSeverity(VALUELIST_DB_SERVER_DUPLICATE.getLeft(),
+										VALUELIST_DB_SERVER_DUPLICATE.getRight().name(), vl);
+									if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+									{
+										ServoyMarker mk = MarkerMessages.ValuelistDBServerDuplicate.fill(vl.getName(), stn[0]);
+										problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_DB_SERVER_DUPLICATE.getRight()),
+											mk.getText()));
+									}
 								}
-							}
-							else if (table.isMarkedAsHiddenInDeveloper())
-							{
-								String customSeverity = getSeverity(INVALID_TABLE_REFERENCE.getLeft(), INVALID_TABLE_REFERENCE.getRight().name(), vl);
-								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+								table = server.getTable(stn[1]);
+								if (table == null)
 								{
-									ServoyMarker mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(table.getDataSource(), "valuelist ", vl.getName());
-									problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, INVALID_TABLE_REFERENCE.getRight()),
-										IMarker.PRIORITY_LOW, mk.getText(), null));
+									String customSeverity = getSeverity(VALUELIST_ENTITY_NOT_FOUND.getLeft(), VALUELIST_ENTITY_NOT_FOUND.getRight().name(), vl);
+									if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+									{
+										ServoyMarker mk = MarkerMessages.ValuelistDBTableNotAccessible.fill(vl.getName(), stn[1]);
+										problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_ENTITY_NOT_FOUND.getRight()),
+											mk.getText()));
+									}
 								}
-							}
-							else if (table.getRowIdentColumnsCount() == 0)
-							{
-								String customSeverity = getSeverity(VALUELIST_DB_TABLE_NO_PK.getLeft(), VALUELIST_DB_TABLE_NO_PK.getRight().name(), vl);
-								if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+								else if (table.isMarkedAsHiddenInDeveloper())
 								{
-									ServoyMarker mk = MarkerMessages.ValuelistDBTableNoPk.fill(vl.getName(), stn[1]);
-									problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_DB_TABLE_NO_PK.getRight()),
-										IMarker.PRIORITY_LOW, mk.getText(), null));
+									String customSeverity = getSeverity(INVALID_TABLE_REFERENCE.getLeft(), INVALID_TABLE_REFERENCE.getRight().name(), vl);
+									if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+									{
+										ServoyMarker mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(table.getDataSource(), "valuelist ", vl.getName());
+										problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, INVALID_TABLE_REFERENCE.getRight()),
+											IMarker.PRIORITY_LOW, mk.getText(), null));
+									}
 								}
-							}
-						} // server not found is reported elsewhere
+								else if (table.getRowIdentColumnsCount() == 0)
+								{
+									String customSeverity = getSeverity(VALUELIST_DB_TABLE_NO_PK.getLeft(), VALUELIST_DB_TABLE_NO_PK.getRight().name(), vl);
+									if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
+									{
+										ServoyMarker mk = MarkerMessages.ValuelistDBTableNoPk.fill(vl.getName(), stn[1]);
+										problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_DB_TABLE_NO_PK.getRight()),
+											IMarker.PRIORITY_LOW, mk.getText(), null));
+									}
+								}
+							} // server not found is reported elsewhere
+						}
 					}
 				}
 				if (table != null)
