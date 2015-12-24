@@ -31,7 +31,7 @@ import com.servoy.eclipse.ui.resource.ColorResource;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
+ *
  * @author rgansevles
  */
 public class ColorCellEditor extends TextDialogCellEditor
@@ -39,7 +39,7 @@ public class ColorCellEditor extends TextDialogCellEditor
 
 	/**
 	 * Creates a new color cell editor parented under the given control. The cell editor value is black (<code>RGB(0,0,0)</code>) initially.
-	 * 
+	 *
 	 * @param parent the parent control
 	 * @param style the style bits
 	 */
@@ -62,6 +62,25 @@ public class ColorCellEditor extends TextDialogCellEditor
 		if (dialog.open() == null) return CANCELVALUE;
 
 		return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty(null, ColorResource.ColoRgb2Awt(dialog.getRGB()));
+	}
+
+	@Override
+	protected Object doGetValue()
+	{
+		Object val = super.doGetValue();
+		if (val instanceof String)
+		{
+			// convert to color and back so that 'blue' is converted to '#0000ff'.
+			// labelconverter will show 'Blue' in the editor
+			Color color = ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertValue(null, (String)val);
+			if (color != null)
+			{
+				return ColorPropertyController.PROPERTY_COLOR_CONVERTER.convertProperty(null, color);
+			}
+		}
+
+		return val;
+
 	}
 
 }

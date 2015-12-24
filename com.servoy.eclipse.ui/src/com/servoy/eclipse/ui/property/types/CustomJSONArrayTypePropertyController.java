@@ -39,9 +39,9 @@ import com.servoy.eclipse.ui.property.PersistPropertySource.PropertyDescriptorWr
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.ServoyJSONArray;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
@@ -120,9 +120,9 @@ public class CustomJSONArrayTypePropertyController extends JSONArrayTypeProperty
 					// array element can be either some value or it could be nested object types - in which case the persistContext of the
 					// child needs to use the child IBasicWebObject
 					PersistContext persistContextForElement = persistContext;
-					if (arrayElementInPersist instanceof WebCustomType[])
+					if (arrayElementInPersist instanceof IChildWebObject[])
 					{
-						persistContextForElement = PersistContext.create(((WebCustomType[])arrayElementInPersist)[i], persistContext.getContext());
+						persistContextForElement = PersistContext.create(((IChildWebObject[])arrayElementInPersist)[i], persistContext.getContext());
 					}
 					PropertyDescriptorWrapper propertyDescriptorWrapper = new PersistPropertySource.PropertyDescriptorWrapper(
 						PDPropertySource.createPropertyHandlerFromSpec(getArrayElementPD(), persistContext), arrayValue.opt(i));

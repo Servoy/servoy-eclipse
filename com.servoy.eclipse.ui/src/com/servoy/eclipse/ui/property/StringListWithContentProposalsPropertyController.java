@@ -33,12 +33,8 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout.ParallelGroup;
 import org.eclipse.swt.layout.grouplayout.GroupLayout.SequentialGroup;
@@ -46,12 +42,16 @@ import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.editors.DialogCellEditor;
+import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.editors.TextDialogCellEditor;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 
@@ -76,12 +76,14 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 
 	private final String[] proposals;
 	private final String tooltip;
+	private final IValueEditor<String> valueEditor;
 
-	public StringListWithContentProposalsPropertyController(String id, String displayName, String[] proposals, String tooltip)
+	public StringListWithContentProposalsPropertyController(String id, String displayName, String[] proposals, String tooltip, IValueEditor<String> valueEditor)
 	{
 		super(id, displayName);
 		this.proposals = proposals;
 		this.tooltip = tooltip;
+		this.valueEditor = valueEditor;
 	}
 
 	@Override
@@ -97,7 +99,7 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 					@Override
 					public IPropertySource getPropertySource()
 					{
-						ListPropertySource propertySource = new ListPropertySource(this);
+						ListPropertySource propertySource = new ListPropertySource(this, valueEditor);
 						propertySource.setReadonly(StringListWithContentProposalsPropertyController.this.isReadOnly());
 						return propertySource;
 					}
@@ -116,16 +118,31 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		return new AddEntriesCellEditor(parent, proposals, tooltip);
+		return new WordsWithContentProposalCellEditor(parent, proposals, tooltip, valueEditor);
+	}
+
+	private static String getWordAt(String txt, int pos)
+	{
+		int beginIndex = Math.max(txt.lastIndexOf(' ', Math.max(0, pos - 1)) + 1, 0);
+		int endIndex = txt.indexOf(' ', pos);
+		if (endIndex < 0)
+		{
+			endIndex = txt.length();
+		}
+
+		return beginIndex >= endIndex ? null : txt.substring(beginIndex, endIndex);
 	}
 
 	protected static class ListPropertySource extends ComplexPropertySource<List<String>>
 	{
 		private static final String REMOVE_VALUE = "<removed>&*^&^%&$#@^%$&%%^#$*$($l";
 
-		public ListPropertySource(ComplexProperty<List<String>> complexProperty)
+		private final IValueEditor<String> valueEditor;
+
+		public ListPropertySource(ComplexProperty<List<String>> complexProperty, IValueEditor<String> valueEditor)
 		{
 			super(complexProperty);
+			this.valueEditor = valueEditor;
 		}
 
 		@Override
@@ -148,6 +165,30 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 					{
 						return new TextDialogCellEditor(parent, SWT.NONE, new LabelProvider())
 						{
+							private Button openButton;
+
+							@Override
+							protected Control createContents(Composite parent, boolean createSingleLine)
+							{
+								Control contents = super.createContents(parent, createSingleLine);
+
+								if (valueEditor != null && contents instanceof Text)
+								{
+									final Text textContents = (Text)contents;
+									contents.addListener(SWT.Modify, new Listener()
+									{
+										@Override
+										public void handleEvent(Event arg0)
+										{
+											openButton.setEnabled(valueEditor != null && valueEditor.canEdit(textContents.getText()));
+										}
+									});
+								}
+
+
+								return contents;
+							}
+
 							@Override
 							protected Button createButton(Composite buttonParent)
 							{
@@ -157,10 +198,30 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 							}
 
 							@Override
+							protected Button createButton2(Composite buttonParent)
+							{
+								if (valueEditor == null)
+								{
+									return null;
+								}
+
+								openButton = new Button(buttonParent, SWT.FLAT);
+								openButton.setImage(DialogCellEditor.OPEN_IMAGE);
+								return openButton;
+
+							}
+
+							@Override
 							public Object openDialogBox(Control cellEditorWindow)
 							{
 								// button is hit
 								return REMOVE_VALUE;
+							}
+
+							@Override
+							protected void editValue2(Control control)
+							{
+								valueEditor.openEditor(text.getText());
 							}
 						};
 					}
@@ -222,13 +283,14 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 			@Override
 			public IContentProposal[] getProposals(String contents, int position)
 			{
-				IContentProposal[] contentProposals = null;
-				//find proposals for last inserted style class prefix
-				int lastIndexOfSpace = contents.substring(0, position).lastIndexOf(" ");
-				if (contents.length() > 0 && lastIndexOfSpace < contents.length() - 1)
+				// find proposals for last inserted style class prefix
+				String word = getWordAt(contents, position);
+				IContentProposal[] contentProposals;
+				if (word != null && word.length() > 0)
 				{
+					int beginIndex = Math.max(contents.lastIndexOf(' ', Math.max(0, position - 1)) + 1, 0);
 					setFiltering(true);
-					contentProposals = super.getProposals(contents.substring(lastIndexOfSpace + 1), position);
+					contentProposals = super.getProposals(word.substring(0, position - beginIndex), position);
 					setFiltering(false);
 				}
 				else
@@ -252,7 +314,8 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 			}
 		};
 
-		ModifiedContentProposalAdapter contentProposalAdapter = new ModifiedContentProposalAdapter(text, new TextContentAdapter(), provider, null, null);
+		ModifiedContentProposalAdapter contentProposalAdapter = new ModifiedContentProposalAdapter(text, new ReplaceWordsTextContentAdapter(), provider, null,
+			null);
 		contentProposalAdapter.addContentProposalListener(new IContentProposalListener2()
 		{
 			@Override
@@ -294,21 +357,65 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 		}
 	}
 
-	private static class AddEntriesCellEditor extends CellEditor
+	/**
+	 *
+	 * @author rgansevles
+	 *
+	 */
+	public static class ReplaceWordsTextContentAdapter extends TextContentAdapter
+	{
+		@Override
+		public void setControlContents(Control control, String text, int cursorPosition)
+		{
+			String replaced = replaceCurrentWord(((Text)control).getText(), ((Text)control).getCaretPosition(), text);
+			// set the cursor to the end of the current word
+			int pos = ((Text)control).getCaretPosition();
+			while (pos < replaced.length() && replaced.charAt(pos) != ' ')
+			{
+				pos++;
+			}
+			((Text)control).setText(replaced);
+			((Text)control).setSelection(pos, pos);
+		}
+
+		private String replaceCurrentWord(String text, int pos, String replacement)
+		{
+			String remainder = text.substring(pos);
+			while (remainder.length() > 0 && !remainder.startsWith(" "))
+			{
+				remainder = remainder.substring(1);
+			}
+			String begin = text.substring(0, pos);
+
+			for (int i = replacement.length(); i > 0; i--)
+			{
+				if (begin.endsWith(replacement.substring(0, i)))
+				{
+					begin = begin.substring(0, begin.length() - i);
+					break;
+				}
+			}
+
+			return begin + replacement + remainder;
+		}
+	}
+
+	private static class WordsWithContentProposalCellEditor extends CellEditor
 	{
 		private final String[] proposals;
 		private final String tooltip;
 
-		private List<String> value;
 		private Button button;
 		private Text text;
 		private ModifiedContentProposalAdapter contentProposalAdapter;
+		private final IValueEditor<String> valueEditor;
 
-		public AddEntriesCellEditor(Composite parent, String[] proposals, String tooltip)
+		public WordsWithContentProposalCellEditor(Composite parent, String[] proposals, String tooltip, IValueEditor<String> valueEditor)
 		{
 			super(parent);
 			this.proposals = proposals;
 			this.tooltip = tooltip;
+			this.valueEditor = valueEditor;
 		}
 
 		/**
@@ -336,39 +443,7 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 					}
 				});
 			}
-		}
-
-		protected boolean allowNewEntry(String txt)
-		{
-			return txt != null && txt.length() > 0 && (value == null || !value.contains(txt.trim()));
-		}
-
-		protected void addEntry(String txt)
-		{
-			// create a copy-list so that value is seen as modified
-			if (value != null)
-			{
-				value = new ArrayList<String>(value);
-			}
-			if (txt != null && txt.trim().length() > 0)
-			{
-				for (String split : txt.split(" "))
-				{
-					String val = split.trim();
-					if (val.length() > 0 && (value == null || !value.contains(val)))
-					{
-						if (value == null)
-						{
-							value = new ArrayList<>();
-						}
-						value.add(val);
-					}
-				}
-			}
-
-			text.setText("");
-			markDirty();
-			fireApplyEditorValue();
+			text.selectAll();
 		}
 
 		@Override
@@ -377,35 +452,29 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 			Composite composite = new Composite(parent, SWT.NONE);
 
 			text = new Text(composite, SWT.BORDER);
-			text.addModifyListener(new ModifyListener()
+			Listener listener = new Listener()
 			{
-				public void modifyText(ModifyEvent e)
+				@Override
+				public void handleEvent(Event arg0)
 				{
-					button.setEnabled(allowNewEntry(text.getText()));
+					button.setEnabled(valueEditor != null && valueEditor.canEdit(getCurrentWord()));
 				}
-			});
+			};
+			text.addListener(SWT.Modify, listener);
+			text.addListener(SWT.KeyUp, listener);
+			text.addListener(SWT.MouseUp, listener);
 
-			text.addTraverseListener(new TraverseListener()
-			{
-				public void keyTraversed(TraverseEvent e)
-				{
-					if (e.detail == SWT.TRAVERSE_RETURN &&
-						((contentProposalAdapter == null || !contentProposalAdapter.isProposalPopupOpen()) && allowNewEntry(text.getText())))
-					{
-						e.doit = false;
-						addEntry(text.getText());
-					}
-				}
-			});
-
-			button = new Button(composite, SWT.PUSH);
-			button.setText("add");
+			button = new Button(composite, SWT.FLAT);
+			button.setImage(DialogCellEditor.OPEN_IMAGE);
 			button.addSelectionListener(new SelectionAdapter()
 			{
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-					addEntry(text.getText());
+					if (valueEditor != null)
+					{
+						valueEditor.openEditor(getCurrentWord());
+					}
 				}
 			});
 			button.setEnabled(false);
@@ -427,16 +496,21 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 			return composite;
 		}
 
+		protected String getCurrentWord()
+		{
+			return getWordAt(text.getText(), text.getCaretPosition());
+		}
+
 		@Override
 		protected List<String> doGetValue()
 		{
-			return value;
+			return STRING_TO_LIST_CONVERTER.convertProperty(null, text.getText());
 		}
 
 		@Override
 		protected void doSetValue(Object val)
 		{
-			this.value = (List<String>)val;
+			text.setText(PersistPropertySource.NULL_STRING_CONVERTER.convertProperty(null, STRING_TO_LIST_CONVERTER.convertValue(null, (List<String>)val)));
 		}
 
 		@Override

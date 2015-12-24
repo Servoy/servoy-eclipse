@@ -17,7 +17,10 @@
 
 package com.servoy.eclipse.core;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -45,14 +48,16 @@ import com.servoy.j2db.documentation.ServoyDocumented;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.scripting.solutionmodel.JSForm;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.UUID;
 
 /**
  * Class that is a special interface in javascript only there in the developer that bridges between the runtime client and the developers workspace
- * 
+ *
  * @author jcompagner
  * @since 6.0
  */
@@ -61,6 +66,7 @@ public class JSDeveloperSolutionModel
 {
 
 	private final IDebugClient state;
+	private final Map<UUID, Integer> foreignElementUUIDs = new HashMap<UUID, Integer>();
 
 
 	public JSDeveloperSolutionModel(IDebugClient state)
@@ -83,7 +89,7 @@ public class JSDeveloperSolutionModel
 				try
 				{
 					EclipseRepository eclipseRepository = (EclipseRepository)ServoyModel.getDeveloperRepository();
-					eclipseRepository.loadForeignElementsIDs(solutionCopy);
+					eclipseRepository.loadForeignElementsIDs(loadForeignElementsIDs(solutionCopy));
 					List<IPersist> allObjectsAsList = solutionCopy.getAllObjectsAsList();
 					for (IPersist persist : allObjectsAsList)
 					{
@@ -111,7 +117,7 @@ public class JSDeveloperSolutionModel
 	/**
 	 * Saves just the give form into the developers workspace.
 	 * This must be a solution created or altered form.
-	 * 
+	 *
 	 * @param form The formname or JSForm object to save.
 	 */
 	public void js_save(Object form)
@@ -143,7 +149,7 @@ public class JSDeveloperSolutionModel
 						checkParent(frm);
 
 						EclipseRepository eclipseRepository = (EclipseRepository)ServoyModel.getDeveloperRepository();
-						eclipseRepository.loadForeignElementsIDs(frm);
+						eclipseRepository.loadForeignElementsIDs(loadForeignElementsIDs(frm));
 						SolutionSerializer.writePersist(frm, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
 						eclipseRepository.clearForeignElementsIds();
 
@@ -187,7 +193,7 @@ public class JSDeveloperSolutionModel
 
 	/**
 	 * Opens the form FormEditor in the developer.
-	 * 
+	 *
 	 * @param form The form name or JSForm object to open in an editor.
 	 */
 	public void js_openForm(Object form)
@@ -233,5 +239,28 @@ public class JSDeveloperSolutionModel
 				throw new IllegalArgumentException("form " + name + " is not a workspace stored (blueprint) form");
 			}
 		}
+	}
+
+	private Map<UUID, Integer> loadForeignElementsIDs(final IPersist rootObject)
+	{
+		rootObject.acceptVisitor(new IPersistVisitor()
+		{
+			public Object visit(IPersist o)
+			{
+				foreignElementUUIDs.put(o.getUUID(), new Integer(o.getID()));
+				Map<UUID, Integer> map = ((AbstractBase)o).getSerializableRuntimeProperty(AbstractBase.UUIDToIDMapProperty);
+				if (map != null)
+				{
+					Iterator<Map.Entry<UUID, Integer>> it = map.entrySet().iterator();
+					while (it.hasNext())
+					{
+						Map.Entry<UUID, Integer> entry = it.next();
+						foreignElementUUIDs.put(entry.getKey(), entry.getValue());
+					}
+				}
+				return IPersistVisitor.CONTINUE_TRAVERSAL;
+			}
+		});
+		return foreignElementUUIDs;
 	}
 }

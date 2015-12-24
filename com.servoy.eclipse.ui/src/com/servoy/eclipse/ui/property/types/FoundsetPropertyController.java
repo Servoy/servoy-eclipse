@@ -123,7 +123,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 			ServoyJSONObject copy = null;
 			try
 			{
-				if (value != null) copy = new ServoyJSONObject(value, ServoyJSONObject.getNames(value), true, true);
+				if (value != null) copy = new ServoyJSONObject(value, ServoyJSONObject.getNames(value), false, false);
 			}
 			catch (Exception ex)
 			{

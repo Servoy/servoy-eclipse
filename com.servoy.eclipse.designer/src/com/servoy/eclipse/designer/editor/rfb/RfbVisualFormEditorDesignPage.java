@@ -56,6 +56,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
 import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.j2db.IFormController;
@@ -64,6 +65,7 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
@@ -76,6 +78,7 @@ import com.servoy.j2db.server.ngclient.INGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.WebsocketSessionFactory;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -435,6 +438,25 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 				}
 			}
 		});
+		if (persists != null && persists.size() == 1)
+		{
+			IPersist changedPersist = persists.get(0);
+			StructuredSelection selection = (StructuredSelection)selectionProvider.getSelection();
+			if (!selection.isEmpty() && selection.size() == 1 && selection.getFirstElement() instanceof PersistContext)
+			{
+				PersistContext selectedPersistContext = (PersistContext)selection.getFirstElement();
+				if (changedPersist instanceof ISupportExtendsID && selectedPersistContext.getPersist() instanceof ISupportExtendsID)
+				{
+					IPersist changedSuperPersist = PersistHelper.getSuperPersist((ISupportExtendsID)changedPersist);
+					if (selectedPersistContext.getPersist() == changedSuperPersist)
+					{
+						//the selected persist was overriden, we must update selection
+						selectionProvider.setSelection(new StructuredSelection(PersistContext.create(changedPersist, selectedPersistContext.getContext())));
+					}
+				}
+
+			}
+		}
 	}
 
 	@Override
