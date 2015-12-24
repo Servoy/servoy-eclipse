@@ -43,6 +43,7 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.wizards.LoadRelationsWizard;
@@ -72,7 +73,7 @@ public class LoadRelationsAction extends Action implements ISelectionChangedList
 		if (sel.size() == 1)
 		{
 			SimpleUserNode node = (SimpleUserNode)sel.getFirstElement();
-			if (node.getRealObject() instanceof IServerInternal)
+			if (node.getRealObject() instanceof IServerInternal && node.getType() == UserNodeType.SERVER)
 			{
 				IServerInternal s = (IServerInternal)node.getRealObject();
 				if (s.isValid() && s.getConfig().isEnabled() && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject() != null)
