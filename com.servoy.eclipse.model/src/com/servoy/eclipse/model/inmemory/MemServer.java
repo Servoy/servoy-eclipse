@@ -30,14 +30,18 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.TableFilter;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISequenceProvider;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -88,11 +92,11 @@ public class MemServer implements IServerInternal, IServer
 				Object property = tableNode.getProperty(IContentSpecConstants.PROPERTY_COLUMNS);
 				if (property != null)
 				{
-					ITable createNewTable;
 					try
 					{
-						createNewTable = createNewTable(null, tableNode.getDataSource().substring(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON.length()));
-						ServoyModelFinder.getServoyModel().getDataModelManager().deserializeInMemoryTable(this, createNewTable, (ServoyJSONObject)property);
+						ITable table = createNewTable(null, tableNode.getDataSource().substring(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON.length()));
+						ServoyModelFinder.getServoyModel().getDataModelManager().deserializeInMemoryTable(this, table, (ServoyJSONObject)property);
+						table.setExistInDB(true);
 					}
 					catch (RepositoryException e)
 					{
@@ -121,6 +125,7 @@ public class MemServer implements IServerInternal, IServer
 		{
 			TableNode tableNode = servoyProject.getEditingSolution().getOrCreateTableNode(DataSourceUtils.createInmemDataSource(memTable.getName()));
 			tableNode.setColumns(new ServoyJSONObject(contents, true));
+			memTable.setExistInDB(true);
 
 		}
 		catch (RepositoryException e)
@@ -154,7 +159,6 @@ public class MemServer implements IServerInternal, IServer
 		{
 			MemTable table = new MemTable(this, tableName);
 			tables.put(tableName, table);
-			table.setExistInDB(true);
 		}
 		return tables.get(tableName);
 	}
@@ -287,10 +291,40 @@ public class MemServer implements IServerInternal, IServer
 	{
 		if (t != null)
 		{
+			// first delete all tablenodes representing this table.
+			IServoyModel sm = ServoyModelFinder.getServoyModel();
+			FlattenedSolution fs = sm.getFlattenedSolution();
+			Iterator<TableNode> tableNodes = fs.getTableNodes(t);
+			while (tableNodes.hasNext())
+			{
+				deletePersist(tableNodes.next());
+			}
+
 			tables.remove(t.getName());
 			fireTablesRemoved(new ITable[] { t }, true);
 		}
 		return null;
+	}
+
+	private void deletePersist(IPersist persist)
+	{
+		IRootObject rootObject = persist.getRootObject();
+
+		if (rootObject instanceof Solution)
+		{
+			EclipseRepository repository = (EclipseRepository)rootObject.getRepository();
+
+			try
+			{
+				IPersist editingNode = servoyProject.getEditingPersist(persist.getUUID());
+				repository.deleteObject(editingNode);
+				servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true, false);
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
 	}
 
 
@@ -536,7 +570,12 @@ public class MemServer implements IServerInternal, IServer
 	@Override
 	public List<String> getTableNames(boolean hideTempTables) throws RepositoryException
 	{
-		return Arrays.asList(tables.keySet().toArray(new String[tables.size()]));
+		ArrayList<String> names = new ArrayList<>();
+		for (MemTable table : tables.values())
+		{
+			if (table.getExistInDB()) names.add(table.getName());
+		}
+		return names;
 	}
 
 	/*

@@ -42,8 +42,6 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils.YesYesToAllNoNoToAllAsker;
-import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
@@ -51,14 +49,10 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.IDeveloperRepository;
-import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 
 /**
@@ -97,49 +91,42 @@ public class DeleteInMemTableAction extends Action implements ISelectionChangedL
 					Iterator<SimpleUserNode> it = selection.iterator();
 					IDataSourceWrapper selectedTable;
 					final MultiStatus warnings = new MultiStatus(Activator.PLUGIN_ID, 0, "For more information please click 'Details'.", null);
-					YesYesToAllNoNoToAllAsker deleteEACAsker = null; // asks if you also want to delete table Events, Aggregations, Calculations from active modules
 
 					monitor.beginTask("Deleting table(s)", selection.size());
 					try
 					{
 						while (it.hasNext())
 						{
-							selectedTable = (IDataSourceWrapper)it.next().getRealObject();
+							SimpleUserNode userNode = it.next();
+							selectedTable = (IDataSourceWrapper)userNode.getRealObject();
 							boolean deleteTable = true;
 							try
 							{
-								ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
-								IDeveloperRepository repository = ServoyModel.getDeveloperRepository();
-
-								final IServer server = repository.getServer(selectedTable.getServerName());
+								final IServer server = (IServer)userNode.parent.getRealObject();
 								final ITable table = server == null ? null : server.getTable(selectedTable.getTableName());
 								if (server instanceof IServerInternal)
 								{
+									ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
 									// see if the user also wants to delete the existing aggregations/calculations/tableEvents for this table
 									// that exist in the active modules (only ask if such info exists)
 									FlattenedSolution flatSolution = sm.getFlattenedSolution();
 									if (flatSolution != null)
 									{
 										Iterator<TableNode> tableNodes = flatSolution.getTableNodes(table);
+										// skip one, there is always 1 of the original table
+										if (tableNodes.hasNext()) tableNodes.next();
 
 										if (tableNodes.hasNext())
 										{
-											if (deleteEACAsker == null)
-											{
-												deleteEACAsker = new YesYesToAllNoNoToAllAsker(shell, getText());
-											}
+											YesYesToAllNoNoToAllAsker deleteEACAsker = new YesYesToAllNoNoToAllAsker(shell, getText());
 											deleteEACAsker.setMessage(
 												"Table events, aggregattions and/or calculations exist for table '" + selectedTable.getTableName() +
 													"' in the active solution and/or modules.\nDo you still want to delete the table?");
 											// we have tableNode(s)... ask user if these should be deleted as well
-											if (deleteEACAsker.userSaidYes())
+											if (!deleteEACAsker.userSaidYes())
 											{
-												while (tableNodes.hasNext())
-												{
-													deletePersist(tableNodes.next());
-												}
+												deleteTable = false;
 											}
-											else deleteTable = false;
 										}
 									}
 
@@ -229,28 +216,6 @@ public class DeleteInMemTableAction extends Action implements ISelectionChangedL
 			};
 			job.setUser(true);
 			job.schedule();
-		}
-	}
-
-	private void deletePersist(IPersist persist)
-	{
-		IRootObject rootObject = persist.getRootObject();
-
-		if (rootObject instanceof Solution)
-		{
-			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(rootObject.getName());
-			EclipseRepository repository = (EclipseRepository)rootObject.getRepository();
-
-			try
-			{
-				IPersist editingNode = servoyProject.getEditingPersist(persist.getUUID());
-				repository.deleteObject(editingNode);
-				servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true);
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
-			}
 		}
 	}
 

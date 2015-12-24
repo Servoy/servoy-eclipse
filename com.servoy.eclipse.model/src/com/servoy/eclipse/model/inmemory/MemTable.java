@@ -32,6 +32,7 @@ public class MemTable extends AbstractTable
 {
 	private final String name;
 	private final MemServer memServer;
+	private boolean existInDB;
 
 	public MemTable(MemServer memServer, String name)
 	{
@@ -125,39 +126,22 @@ public class MemTable extends AbstractTable
 		return DataSourceUtils.createInmemDataSource(name);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.persistence.ITable#getServerName()
-	 */
 	@Override
 	public String getServerName()
 	{
 		return "mem";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.persistence.ITable#getExistInDB()
-	 */
 	@Override
 	public boolean getExistInDB()
 	{
-		// TODO Auto-generated method stub
-		return true;
+		return existInDB;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.persistence.ITable#setExistInDB(boolean)
-	 */
 	@Override
 	public void setExistInDB(boolean b)
 	{
-		// TODO Auto-generated method stub
-
+		existInDB = b;
 	}
 
 	/*
