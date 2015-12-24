@@ -258,6 +258,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.NavigationToggleActi
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewComponentAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewComponentPackageAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewComponentResourceAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewInMemoryDataSourceAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewPostgresDbAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewRelationAction;
@@ -2708,7 +2709,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		overrideMethod = new OverrideMethodAction(this);
 		IAction newVariable = new NewVariableAction(this);
 		IAction newValueList = new NewValueListAction(this);
-		IAction newTable = new NewTableAction(this);
 		newPostgresqlDatabase = new NewPostgresDbAction(this);
 		newPostgresqlDatabase.setEnabledStatus();
 		newSybaseDatabase = new NewSybaseDbAction(this);
@@ -2772,8 +2772,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_RELATIONS, newRelation);
 		newActionInTreePrimary.registerAction(UserNodeType.MEDIA, importMedia);
 		newActionInTreePrimary.registerAction(UserNodeType.MEDIA_FOLDER, importMedia);
-		newActionInTreePrimary.registerAction(UserNodeType.SERVER, newTable);
-		newActionInTreePrimary.registerAction(UserNodeType.INMEMORY_DATASOURCES, newTable);
+		newActionInTreePrimary.registerAction(UserNodeType.SERVER, new NewTableAction(this));
+		newActionInTreePrimary.registerAction(UserNodeType.INMEMORY_DATASOURCES, new NewInMemoryDataSourceAction(this));
 		newActionInTreePrimary.registerAction(UserNodeType.FORMS, newForm);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.MODULES, newModule);
@@ -2805,8 +2805,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newMethod = new NewMethodAction(this);
 		newVariable = new NewVariableAction(this);
 		newValueList = new NewValueListAction(this);
-		newTable = new NewTableAction(this);
-
 
 		newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.gif"), "Create new style");
 		importMedia = new ImportMediaAction(this);
@@ -2822,7 +2820,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInListPrimary.registerAction(UserNodeType.VALUELISTS, newValueList);
 		newActionInListPrimary.registerAction(UserNodeType.MEDIA, importMedia);
 		newActionInListPrimary.registerAction(UserNodeType.MEDIA_FOLDER, importMedia);
-		newActionInListPrimary.registerAction(UserNodeType.SERVER, newTable);
+		newActionInListPrimary.registerAction(UserNodeType.SERVER, new NewTableAction(null));
 		newActionInListPrimary.registerAction(UserNodeType.COMPONENT, newComponentResource);
 		newActionInListPrimary.registerAction(UserNodeType.SERVICE, newComponentResource);
 
@@ -2834,7 +2832,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInListPrimary.registerAction(UserNodeType.SCOPES_ITEM, newScope);
 		newActionInListPrimary.registerAction(UserNodeType.SCOPES_ITEM_CALCULATION_MODE, newScope);
 		newActionInListPrimary.registerAction(UserNodeType.MODULES, newModule);
-		newActionInListPrimary.registerAction(UserNodeType.INMEMORY_DATASOURCES, newTable);
+		newActionInListPrimary.registerAction(UserNodeType.INMEMORY_DATASOURCES, new NewInMemoryDataSourceAction(this));
 
 		newActionInListSecondary.registerAction(UserNodeType.TABLE, newForm);
 		newActionInListSecondary.registerAction(UserNodeType.INMEMORY_DATASOURCE, newForm);

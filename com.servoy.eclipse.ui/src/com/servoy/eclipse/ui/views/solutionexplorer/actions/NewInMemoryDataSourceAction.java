@@ -19,16 +19,14 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.DataModelManager;
+import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -39,7 +37,6 @@ import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 
@@ -48,7 +45,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
  *
  * @author jblok
  */
-public class NewTableAction extends Action implements ISelectionChangedListener
+public class NewInMemoryDataSourceAction extends Action implements ISelectionChangedListener
 {
 
 	private final SolutionExplorerView viewer;
@@ -58,12 +55,12 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 	 *
 	 * @param sev the solution view to use.
 	 */
-	public NewTableAction(SolutionExplorerView sev)
+	public NewInMemoryDataSourceAction(SolutionExplorerView sev)
 	{
 		viewer = sev;
 
-		setText("Create table");
-		setToolTipText("Create table");
+		setText("Create in memory datasource");
+		setToolTipText("Create in memory datasource");
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)
@@ -76,7 +73,7 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 			if (node.getRealObject() instanceof IServerInternal)
 			{
 				IServerInternal s = (IServerInternal)node.getRealObject();
-				state = (node.getType() == UserNodeType.SERVER) && (s.getConfig().isEnabled() && s.isValid());
+				state = (node.getType() == UserNodeType.INMEMORY_DATASOURCES);
 			}
 		}
 		setEnabled(state);
@@ -86,49 +83,35 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 	public void run()
 	{
 		SimpleUserNode node = viewer.getSelectedTreeNode();
-		if (node.getType().equals(UserNodeType.SERVER) && node.getRealObject() instanceof IServerInternal)
+		if (node.getType().equals(UserNodeType.INMEMORY_DATASOURCES))
 		{
-			try
-			{
-				final IServerInternal s = (IServerInternal)node.getRealObject();
 
-				if (!ServoyModel.isClientRepositoryAccessAllowed(s.getName()))
-				{
-					MessageDialog.openWarning(viewer.getViewSite().getShell(), "User tables restricted",
-						"User tables in the repository_server have been turned off via setting " + Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_SETTING);
-					return;
-				}
-
-				InputDialog nameDialog = new InputDialog(viewer.getViewSite().getShell(), "Create table", "Supply table name", "", new IInputValidator()
+			final IServerInternal s = (IServerInternal)node.getRealObject();
+			InputDialog nameDialog = new InputDialog(viewer.getViewSite().getShell(), "Create in mem datasource", "Supply datasource name", "",
+				new IInputValidator()
 				{
 					public String isValid(String newText)
 					{
-						//check to see if a table with the same name does not already exist.
-						try
+						if (new InMemServerWrapper().getTableNames().contains(newText))
 						{
-							if (s.getTable(newText) != null)
-							{
-								return "A table with the same name already exists";
-							}
+							return "Name already used";
 						}
-						catch (RepositoryException e)
-						{
-							ServoyLog.logError(e);
-							MessageDialog.openError(UIUtils.getActiveShell(), "Error", e.getMessage());
-							return e.getMessage();
-						}
-
-						boolean valid = IdentDocumentValidator.isSQLIdentifier(newText) &&
+						boolean valid = (IdentDocumentValidator.isSQLIdentifier(newText) &&
 							(!(newText.toUpperCase()).startsWith(DataModelManager.TEMP_UPPERCASE_PREFIX)) &&
-							(!(newText.toUpperCase()).startsWith(IServer.SERVOY_UPPERCASE_PREFIX));
-						return valid ? null : (newText.length() == 0 ? "" : "Invalid table name");
+							(!(newText.toUpperCase()).startsWith(IServer.SERVOY_UPPERCASE_PREFIX)));
+						return valid ? null : (newText.length() == 0 ? "" : "Invalid datasource name");
 					}
 				});
-				int res = nameDialog.open();
-				if (res == Window.OK)
+
+			int res = nameDialog.open();
+			if (res == Window.OK)
+			{
+				String name = nameDialog.getValue();
+
+				ITable t;
+				try
 				{
-					String name = nameDialog.getValue();
-					ITable t = s.getTable(name);
+					t = s.getTable(name);
 					if (t == null)
 					{
 						IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
@@ -136,12 +119,13 @@ public class NewTableAction extends Action implements ISelectionChangedListener
 						EditorUtil.openTableEditor(t);
 					}
 				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+
 			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError(e);
-				MessageDialog.openError(UIUtils.getActiveShell(), "Error", e.getMessage());
-			}
+
 		}
 	}
 }
