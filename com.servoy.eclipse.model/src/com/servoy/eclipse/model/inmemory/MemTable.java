@@ -17,12 +17,15 @@
 
 package com.servoy.eclipse.model.inmemory;
 
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.AbstractTable;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnChangeHandler;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
  * @author gganea
@@ -344,10 +347,20 @@ public class MemTable extends AbstractTable
 	}
 
 	/**
-	 *
+	 * @param contents
 	 */
-	public void setContents(String contents)
+	public void setColumns(String contents)
 	{
-		memServer.setColumns(this, contents);
+		try
+		{
+			TableNode tableNode = memServer.getServoyProject().getEditingSolution().getOrCreateTableNode(DataSourceUtils.createInmemDataSource(getName()));
+			tableNode.setColumns(new ServoyJSONObject(contents, true));
+			setExistInDB(true);
+		}
+		catch (RepositoryException e)
+		{
+			ServoyLog.logError(e);
+		}
+
 	}
 }

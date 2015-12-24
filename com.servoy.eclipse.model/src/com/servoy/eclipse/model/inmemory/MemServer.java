@@ -115,32 +115,6 @@ public class MemServer implements IServerInternal, IServer
 		return servoyProject;
 	}
 
-	/**
-	 * @param memTable
-	 * @param contents
-	 */
-	public void setColumns(MemTable memTable, String contents)
-	{
-		try
-		{
-			TableNode tableNode = servoyProject.getEditingSolution().getOrCreateTableNode(DataSourceUtils.createInmemDataSource(memTable.getName()));
-			tableNode.setColumns(new ServoyJSONObject(contents, true));
-			memTable.setExistInDB(true);
-
-		}
-		catch (RepositoryException e)
-		{
-			ServoyLog.logError(e);
-		}
-
-	}
-
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.persistence.IServerInternal#flushTables(java.util.List)
-	 */
 	@Override
 	public void flushTables(List<ITable> tabelList) throws RepositoryException
 	{

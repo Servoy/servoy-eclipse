@@ -490,7 +490,7 @@ public class DataModelManager implements IColumnInfoManager
 			if (t instanceof MemTable)
 			{
 				MemTable mem = (MemTable)t;
-				mem.setContents(out);
+				mem.setColumns(out);
 			}
 			else try
 			{
