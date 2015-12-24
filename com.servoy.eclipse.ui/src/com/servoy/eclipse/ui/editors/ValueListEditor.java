@@ -16,7 +16,6 @@
  */
 package com.servoy.eclipse.ui.editors;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -57,15 +56,15 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
 
 import com.servoy.base.persistence.constants.IValueListConstants;
-import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.builder.ServoyBuilder.Problem;
+import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
+import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.MethodDialog;
@@ -90,7 +89,6 @@ import com.servoy.eclipse.ui.property.TableValueEditor;
 import com.servoy.eclipse.ui.property.ValuelistPropertyController;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
-import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.EditorUtil.Encapsulation2StringConverter;
 import com.servoy.eclipse.ui.util.EditorUtil.String2EncapsulationConverter;
 import com.servoy.eclipse.ui.util.IControlFactory;
@@ -99,7 +97,6 @@ import com.servoy.eclipse.ui.views.TreeSelectObservableValue;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Relation;
@@ -107,7 +104,6 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ScopesUtils;
 
@@ -241,7 +237,7 @@ public class ValueListEditor extends PersistEditor
 			public void selectionChanged(SelectionChangedEvent event)
 			{
 				IStructuredSelection selection = (IStructuredSelection)tableSelect.getSelection();
-				handleTableSelected(selection.isEmpty() ? null : (TableWrapper)selection.getFirstElement());
+				handleTableSelected(selection.isEmpty() ? null : (IDataSourceWrapper)selection.getFirstElement());
 				handleDataProvidersProperties();
 				flagModified();
 				refresh();
@@ -565,7 +561,8 @@ public class ValueListEditor extends PersistEditor
 	@Override
 	protected void doRefresh()
 	{
-		boolean activeSolutionIsMobile = ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile();
+		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		boolean activeSolutionIsMobile = servoyModel.isActiveSolutionMobile();
 
 		removeListeners();
 
@@ -608,16 +605,15 @@ public class ValueListEditor extends PersistEditor
 			ITable table = null;
 			if (valueList.getValueListType() == IValueListConstants.DATABASE_VALUES && databaseValuesType == IValueListConstants.TABLE_VALUES)
 			{
-				String[] stn = DataSourceUtilsBase.getDBServernameTablename(valueList.getDataSource());
-				if (stn == null)
+				IDataSourceWrapper wrapper = DataSourceWrapperFactory.getWrapper(valueList.getDataSource());
+				if (wrapper == null)
 				{
 					tableSelect.setSelection(StructuredSelection.EMPTY);
 				}
 				else
 				{
-					tableSelect.setSelection(new StructuredSelection(new TableWrapper(stn[0], stn[1], EditorUtil.isViewTypeTable(stn[0], stn[1]))));
-					IServer server = flattenedSolution.getSolution().getServer(stn[0]);
-					if (server != null) table = server.getTable(stn[1]);
+					tableSelect.setSelection(new StructuredSelection(wrapper));
+					table = flattenedSolution.getTable(valueList.getDataSource());
 				}
 			}
 			else
@@ -684,14 +680,6 @@ public class ValueListEditor extends PersistEditor
 			}
 
 			m_bindingContext.updateTargets();
-		}
-		catch (RepositoryException e)
-		{
-			ServoyLog.logError(e);
-		}
-		catch (RemoteException e)
-		{
-			ServoyLog.logError(e);
 		}
 		finally
 		{
@@ -954,7 +942,7 @@ public class ValueListEditor extends PersistEditor
 		}
 	}
 
-	private void handleTableSelected(TableWrapper tableWrapper)
+	private void handleTableSelected(IDataSourceWrapper tableWrapper)
 	{
 		if (tableWrapper == null)
 		{
@@ -963,12 +951,11 @@ public class ValueListEditor extends PersistEditor
 		else
 		{
 			handleDatabaseValuesButtonSelected();
-			String datasource = DataSourceUtils.createDBTableDataSource(tableWrapper.getServerName(), tableWrapper.getTableName());
-			getValueList().setDataSource(datasource);
+			getValueList().setDataSource(tableWrapper.getDataSource());
 			try
 			{
 				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-				servoyModel.getDataModelManager().testTableAndCreateDBIFile(servoyModel.getDataSourceManager().getDataSource(datasource));
+				servoyModel.getDataModelManager().testTableAndCreateDBIFile(servoyModel.getDataSourceManager().getDataSource(tableWrapper.getDataSource()));
 			}
 			catch (Exception e)
 			{
