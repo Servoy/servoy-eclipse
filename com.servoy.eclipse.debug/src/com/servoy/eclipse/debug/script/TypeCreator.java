@@ -109,6 +109,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
@@ -3155,6 +3156,22 @@ public class TypeCreator extends TypeCache
 			type.setName(typeName);
 			type.setKind(TypeKind.JAVA);
 			type.setSuperType(createArrayLookupType(context, JSDataSource.class));
+			InMemServerWrapper wrapper = new InMemServerWrapper();
+			Collection<String> tableNames = wrapper.getTableNames();
+			EList<Member> members = type.getMembers();
+			IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
+			for (String name : tableNames)
+			{
+				ITable table = dsm.getDataSource(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON + name);
+				Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+				property.setName(name);
+				property.setAttribute(RESOURCE, table);
+				property.setVisible(true);
+				property.setType(getTypeRef(context, JSDataSource.class.getSimpleName() + '<' + table.getDataSource() + '>'));
+				property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("portal.gif"));
+				property.setDescription(Table.getTableTypeAsString(table.getTableType()));
+				members.add(property);
+			}
 
 			return type;
 		}
