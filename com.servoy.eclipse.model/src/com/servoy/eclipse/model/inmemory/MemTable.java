@@ -363,4 +363,12 @@ public class MemTable extends AbstractTable
 		}
 
 	}
+
+	/**
+	 * @return
+	 */
+	public boolean isChanged()
+	{
+		return memServer.isChanged(this);
+	}
 }

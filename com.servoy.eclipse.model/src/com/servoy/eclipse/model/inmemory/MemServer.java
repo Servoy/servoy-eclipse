@@ -29,6 +29,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.json.JSONObject;
+
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -1003,5 +1005,25 @@ public class MemServer implements IServerInternal, IServer
 	public void setSequenceProvider(ISequenceProvider sequenceManager)
 	{
 		this.sequenceManager = sequenceManager;
+	}
+
+
+	/**Checks if the given memTable is different from the stored property of the TableNode that stores this MemTable
+	 * @param memTable
+	 * @return
+	 */
+	public boolean isChanged(MemTable memTable)
+	{
+		Iterator<TableNode> tableNodes = this.servoyProject.getSolution().getTableNodes(memTable.getDataSource());
+		if (tableNodes.hasNext())
+		{
+			TableNode next = tableNodes.next();
+			JSONObject driveColumns = (JSONObject)next.getPropertiesMap().get(IContentSpecConstants.PROPERTY_COLUMNS);
+			DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();
+			String mem = dmm.serializeTable(memTable, false);
+			ServoyJSONObject memoryVersion = new ServoyJSONObject(mem, true);
+			return !memoryVersion.equals(driveColumns);
+		}
+		else return true;
 	}
 }
