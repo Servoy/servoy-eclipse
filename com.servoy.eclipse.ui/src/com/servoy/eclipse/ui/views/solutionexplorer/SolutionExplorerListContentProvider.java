@@ -78,7 +78,8 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
-import com.servoy.eclipse.model.util.InMemServerWrapper;
+import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
+import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Messages;
@@ -101,6 +102,7 @@ import com.servoy.j2db.FormManager.HistoryProvider;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.dataprocessing.JSDatabaseManager;
 import com.servoy.j2db.dataprocessing.RelatedFoundSet;
+import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
 import com.servoy.j2db.dataprocessing.datasource.JSDataSources;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.documentation.DocumentationUtil;
@@ -419,23 +421,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.SERVER && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
-				lm = createTables((IServerInternal)un.getRealObject());
+				lm = createTables((IServerInternal)un.getRealObject(), UserNodeType.TABLE);
 			}
 			else if (type == UserNodeType.INMEMORY_DATASOURCES)
 			{
-				List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
-				IServerInternal server = (IServerInternal)un.getRealObject();
-				List<String> tableNames = server.getTableNames(true);
-				Collections.sort(tableNames);
-				for (String tableName : tableNames)
-				{
-					UserNode node = new UserNode(tableName, UserNodeType.INMEMORY_DATASOURCE,
-						new DataSourceFeedback(DataSourceUtils.createInmemDataSource(tableName)), new InMemServerWrapper(tableName),
-						uiActivator.loadImageFromBundle("portal.gif"));
-					node.setClientSupport(ClientSupport.All);
-					dlm.add(node);
-				}
-				lm = dlm.toArray();
+				lm = createTables((IServerInternal)un.getRealObject(), UserNodeType.INMEMORY_DATASOURCE);
 			}
 			else if (type == UserNodeType.VIEWS && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
@@ -585,6 +575,17 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			else if (type == UserNodeType.DATASOURCES)
 			{
 				lm = getJSMethods(JSDataSources.class, IExecutingEnviroment.TOPLEVEL_DATASOURCES, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null, null);
+			}
+			else if (type == UserNodeType.INMEMORY_DATASOURCE)
+			{
+				String prefix = '.' + DataSourceUtils.INMEM_DATASOURCE + '.' + ((IDataSourceWrapper)un.getRealObject()).getTableName();
+				lm = getJSMethods(JSDataSource.class, IExecutingEnviroment.TOPLEVEL_DATASOURCES + prefix, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null, null);
+			}
+			else if (type == UserNodeType.TABLE)
+			{
+				String prefix = '.' + DataSourceUtilsBase.DB_DATASOURCE_SCHEME + '.' + ((TableWrapper)un.getRealObject()).getServerName() + '.' +
+					((TableWrapper)un.getRealObject()).getTableName();
+				lm = getJSMethods(JSDataSource.class, IExecutingEnviroment.TOPLEVEL_DATASOURCES + prefix, null, UserNodeType.FOUNDSET_MANAGER_ITEM, null, null);
 			}
 			else if (type == UserNodeType.FORM_ELEMENTS)
 			{
@@ -985,47 +986,55 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return dlm.toArray();
 	}
 
-	private Object[] createTables(IServerInternal s) throws RepositoryException
+	public static SimpleUserNode[] createTables(IServerInternal s, UserNodeType type)
 	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
 		if (s.isValid() && s.getConfig().isEnabled())
 		{
-			Iterator<String> tableNames;
-			tableNames = s.getTableNames(true).iterator();
-
-			List<String> hiddenTables = null;
-			while (tableNames.hasNext())
+			try
 			{
-				String tableName = tableNames.next();
-				if (s.isTableMarkedAsHiddenInDeveloper(tableName))
+				com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
+				Iterator<String> tableNames;
+				tableNames = s.getTableNames(true).iterator();
+
+				List<String> hiddenTables = null;
+				while (tableNames.hasNext())
 				{
-					if (hiddenTables == null) hiddenTables = new ArrayList<String>();
-					hiddenTables.add(tableName);
+					String tableName = tableNames.next();
+					if (s.isTableMarkedAsHiddenInDeveloper(tableName))
+					{
+						if (hiddenTables == null) hiddenTables = new ArrayList<String>();
+						hiddenTables.add(tableName);
+					}
+					else
+					{
+						String dataSource = s.getTable(tableName).getDataSource();
+						UserNode node = new UserNode(tableName, type, new DataSourceFeedback(dataSource), DataSourceWrapperFactory.getWrapper(dataSource),
+							uiActivator.loadImageFromBundle("portal.gif"));
+						node.setClientSupport(ClientSupport.All);
+						dlm.add(node);
+					}
 				}
-				else
+				if (hiddenTables != null)
 				{
-					UserNode node = new UserNode(tableName, UserNodeType.TABLE,
-						new DataSourceFeedback(DataSourceUtils.createDBTableDataSource(s.getName(), tableName)),
-						new TableWrapper(s.getName(), tableName, EditorUtil.isViewTypeTable(s.getName(), tableName)),
-						uiActivator.loadImageFromBundle("portal.gif"));
-					node.setClientSupport(ClientSupport.All);
-					dlm.add(node);
+					// tables and views that are marked by user as "hiddenInDeveloper" will only be shown in this sol. ex. list and grayed-out + at the bottom of this list
+					for (String name : hiddenTables)
+					{
+						String dataSource = s.getTable(name).getDataSource();
+						UserNode node = new UserNode(name, type, DataSourceWrapperFactory.getWrapper(dataSource),
+							uiActivator.loadImageFromBundle("portal.gif", true));
+						node.setAppearenceFlags(SimpleUserNode.TEXT_GRAYED_OUT);
+						node.setToolTipText(Messages.SolutionExplorerListContentProvider_hidden);
+						dlm.add(node);
+					}
 				}
 			}
-			if (hiddenTables != null)
+			catch (RepositoryException e)
 			{
-				// tables and views that are marked by user as "hiddenInDeveloper" will only be shown in this sol. ex. list and grayed-out + at the bottom of this list
-				for (String name : hiddenTables)
-				{
-					UserNode node = new UserNode(name, UserNodeType.TABLE, new TableWrapper(s.getName(), name, EditorUtil.isViewTypeTable(s.getName(), name)),
-						uiActivator.loadImageFromBundle("portal.gif", true));
-					node.setAppearenceFlags(SimpleUserNode.TEXT_GRAYED_OUT);
-					node.setToolTipText(Messages.SolutionExplorerListContentProvider_hidden);
-					dlm.add(node);
-				}
+				ServoyLog.logError("error creating tables nodes for server: " + s, e);
 			}
 		}
-		return dlm.toArray();
+		return dlm.toArray(new SimpleUserNode[dlm.size()]);
 	}
 
 	private Object[] createTableColumns(Table table, SimpleUserNode un) throws RepositoryException

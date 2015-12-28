@@ -82,6 +82,7 @@ import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
 import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.node.UserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
@@ -164,8 +165,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	private PlatformSimpleUserNode allSolutionsNode;
 
 	private final PlatformSimpleUserNode databaseManager;
-
-	private final PlatformSimpleUserNode datasources;
 
 	private final PlatformSimpleUserNode solutionModel;
 
@@ -289,9 +288,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		databaseManager = createTypeNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, JSDatabaseManager.class, invisibleRootNode);
 		addReturnTypeNodes(databaseManager, ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class).getAllReturnedTypes());
 
-		datasources = createTypeNode(Messages.TreeStrings_Datasources, UserNodeType.DATASOURCES, JSDataSources.class, invisibleRootNode);
-		addReturnTypeNodes(datasources, ScriptObjectRegistry.getScriptObjectForClass(JSDataSources.class).getAllReturnedTypes());
-
 		PlatformSimpleUserNode utils = createTypeNode(Messages.TreeStrings_Utils, UserNodeType.UTILS, JSUtils.class, invisibleRootNode);
 
 		PlatformSimpleUserNode jsunit = createTypeNode(Messages.TreeStrings_JSUnit, UserNodeType.JSUNIT, JSUnitAssertFunctions.class, invisibleRootNode);
@@ -317,12 +313,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 		resources.children = new PlatformSimpleUserNode[] { servers, stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsNode, servicesNode };
 
-		invisibleRootNode.children = new PlatformSimpleUserNode[] { resources, allSolutionsNode, activeSolutionNode, jslib, application, solutionModel, databaseManager, datasources, utils, history, security, i18n, jsunit, plugins };
+		invisibleRootNode.children = new PlatformSimpleUserNode[] { resources, allSolutionsNode, activeSolutionNode, jslib, application, solutionModel, databaseManager, utils, history, security, i18n, jsunit, plugins };
 
-		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, datasources, utils, history, security, i18n, /*
-																																							 * exceptions
-																																							 * ,
-																																							 */jsunit, plugins };
+		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, utils, history, security, i18n, /*
+																																			 * exceptions ,
+																																			 */jsunit, plugins };
 		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsNode, servicesNode };
 
 		// we want to load the plugins node in a background low prio job so that it will expand fast
@@ -635,9 +630,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				if (((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION)
 					databaseManager.hide();
 				else databaseManager.unhide();
-				// datasources not allowed in login solution
-				if (((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION) datasources.hide();
-				else datasources.unhide();
 			}
 			activeSolutionNode.setDisplayName(name);
 
@@ -735,6 +727,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					else if (type == UserNodeType.SERVERS)
 					{
 						addServersNodeChildren(un);
+					}
+					else if (type == UserNodeType.SERVER || un.getType() == UserNodeType.INMEMORY_DATASOURCES)
+					{
+						addServerNodeChildren(un, type == UserNodeType.SERVER ? UserNodeType.TABLE : UserNodeType.INMEMORY_DATASOURCE);
 					}
 					else if (type == UserNodeType.PLUGINS)
 					{
@@ -950,6 +946,18 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				{
 					return ServoyModel.getServerManager().getServerNames(false, false, true, true).length > 0;
 				}
+				else if (un.getType() == UserNodeType.SERVER || un.getType() == UserNodeType.INMEMORY_DATASOURCES)
+				{
+					try
+					{
+						return ((IServerInternal)un.getRealObject()).getTableNames(true).size() > 0;
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError(e);
+						return false;
+					}
+				}
 				else if (un.getType() == UserNodeType.PLUGINS)
 				{
 					return true;
@@ -983,6 +991,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			}
 			return false;
 		}
+		else if (parent instanceof UserNode &&
+			(((UserNode)parent).getType() == UserNodeType.TABLE || ((UserNode)parent).getType() == UserNodeType.INMEMORY_DATASOURCE)) return false;
 		return true;
 	}
 
@@ -1024,6 +1034,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		}
 
 		serversNode.children = serverNodes.toArray(new PlatformSimpleUserNode[serverNodes.size()]);
+	}
+
+	private void addServerNodeChildren(PlatformSimpleUserNode serverNode, UserNodeType type)
+	{
+		IServerInternal server = (IServerInternal)serverNode.getRealObject();
+		serverNode.children = SolutionExplorerListContentProvider.createTables(server, type);
 	}
 
 	public static String getServerImageName(String serverName, IServerInternal server)

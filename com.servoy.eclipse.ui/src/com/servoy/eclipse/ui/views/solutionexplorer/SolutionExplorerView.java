@@ -246,6 +246,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.HideUnhideTablesActi
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NExternalizeAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NReadFromDBAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NWriteToDBAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.ISelectedNodeProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportComponentAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportComponentFolderAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportMediaAction;
@@ -2848,7 +2849,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		openAction.registerAction(UserNodeType.FORM_VARIABLE_ITEM, openScript);
 		openAction.registerAction(UserNodeType.STYLE_ITEM, new OpenStyleAction(this));
 		openAction.registerAction(UserNodeType.VALUELIST_ITEM, new OpenValueListAction(this));
-		IAction openTable = new OpenTableAction(this);
+		IAction openTable = new OpenTableAction(new ISelectedNodeProvider()
+		{
+			@Override
+			public SimpleUserNode getSelectedNode()
+			{
+				return getSelectedListNode();
+			}
+		});
 		openAction.registerAction(UserNodeType.TABLE, openTable);
 		openAction.registerAction(UserNodeType.INMEMORY_DATASOURCE, openTable);
 		openAction.registerAction(UserNodeType.VIEW, openTable);
@@ -2915,6 +2923,17 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		openActionInTree.registerAction(UserNodeType.SERVER, new OpenServerAction(this));
 		openActionInTree.registerAction(UserNodeType.USER_GROUP_SECURITY, new EditSecurityAction());
 		openActionInTree.registerAction(UserNodeType.I18N_FILES, new EditI18nAction());
+		IAction openTableInTree = new OpenTableAction(new ISelectedNodeProvider()
+		{
+			@Override
+			public SimpleUserNode getSelectedNode()
+			{
+				return getSelectedTreeNode();
+			}
+		});
+		openActionInTree.registerAction(UserNodeType.TABLE, openTableInTree);
+		openActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, openTableInTree);
+		openActionInTree.registerAction(UserNodeType.VIEW, openTableInTree);
 
 		deleteActionInTree = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE), "Delete");
 		IAction deleteForm = new DeletePersistAction(UserNodeType.FORM, "Delete form");
@@ -3109,6 +3128,16 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				else if (doubleClickedItem.getType() == UserNodeType.FORM_VARIABLES)
 				{
 					EditorUtil.openScriptEditor((Form)doubleClickedItem.getRealObject(), null, true);
+				}
+				else if (doubleClickedItem.getType() == UserNodeType.SERVER)
+				{
+					IServerInternal server = ((IServerInternal)doubleClickedItem.getRealObject());
+					if (server != null)
+					{
+						// re-lookup the server config here, when the server is a duplicate the server is actually the other server object.
+						ServerConfig serverConfig = server.getServerManager().getServerConfig(doubleClickedItem.getName());
+						EditorUtil.openServerEditor(serverConfig);
+					}
 				}
 				else if (doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE ||
 					(doubleClickedItem.getType() == UserNodeType.SOLUTION_ITEM && !expandable &&

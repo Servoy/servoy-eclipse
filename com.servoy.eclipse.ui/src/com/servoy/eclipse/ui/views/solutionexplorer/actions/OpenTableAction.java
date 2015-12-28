@@ -26,7 +26,6 @@ import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
 /**
  * This action opens in the editor the user script element currently selected in the outline of the solution view.
@@ -34,14 +33,14 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 public class OpenTableAction extends Action implements ISelectionChangedListener
 {
 
-	private final SolutionExplorerView viewer;
+	private final ISelectedNodeProvider viewer;
 
 	/**
 	 * Creates a new open action that uses the given solution view.
 	 *
 	 * @param sev the solution view to use.
 	 */
-	public OpenTableAction(SolutionExplorerView sev)
+	public OpenTableAction(ISelectedNodeProvider sev)
 	{
 		viewer = sev;
 
@@ -65,7 +64,7 @@ public class OpenTableAction extends Action implements ISelectionChangedListener
 	@Override
 	public void run()
 	{
-		SimpleUserNode un = viewer.getSelectedListNode();
+		SimpleUserNode un = viewer.getSelectedNode();
 		if (un.getType() == UserNodeType.TABLE || un.getType() == UserNodeType.VIEW || un.getType() == UserNodeType.INMEMORY_DATASOURCE)
 		{
 			EditorUtil.openTableEditor(((IDataSourceWrapper)un.getRealObject()).getDataSource());

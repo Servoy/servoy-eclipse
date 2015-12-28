@@ -52,6 +52,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.ActiveEditorListener;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Text;
 
 /**
@@ -177,9 +178,9 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 		}
 		else
 		{
-			if (!txt.startsWith(DataSourceUtilsBase.DB_DATASOURCE_SCHEME_COLON_SLASH))
+			if (!txt.startsWith(DataSourceUtilsBase.DB_DATASOURCE_SCHEME_COLON_SLASH) && !txt.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON))
 			{
-				IFile file = (IFile)ed.getEditorInput().getAdapter(IFile.class);
+				IFile file = ed.getEditorInput().getAdapter(IFile.class);
 				if (file.getName().toLowerCase().endsWith(SolutionSerializer.JS_FILE_EXTENSION))
 				{
 					txt = NewMethodAction.format(txt, file, caretOffset).trim();
@@ -324,7 +325,7 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 			{
 				// see if it is a calculation JS file
 				ScriptEditor scriptEditor = (ScriptEditor)newActiveEditor;
-				IResource resource = (IResource)scriptEditor.getEditorInput().getAdapter(IResource.class);
+				IResource resource = scriptEditor.getEditorInput().getAdapter(IResource.class);
 				if (resource == null && scriptEditor.getInputModelElement() != null && scriptEditor.getInputModelElement().getResource() != null &&
 					scriptEditor.getInputModelElement().getResource().exists())
 				{
