@@ -2129,7 +2129,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		IViewReference[] iv = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getViewReferences();
 		for (IViewReference ref : iv)
 		{
-			if (ref.getId().equals("org.eclipse.ui.views.PropertySheet"))
+			if (ref.getId().equals("org.eclipse.ui.views.PropertySheet") && ref.getView(false) != null)
 			{
 				PropertySheetPage psp = ref.getView(false).getAdapter(PropertySheetPage.class);
 				if (psp != null) psp.refresh();
