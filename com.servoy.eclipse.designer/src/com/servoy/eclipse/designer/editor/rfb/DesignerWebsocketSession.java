@@ -50,6 +50,7 @@ import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormWrapper;
 import com.servoy.j2db.server.ngclient.template.IFormElementValidator;
+import com.servoy.j2db.util.UUID;
 
 /**
  * @author jcompagner
@@ -161,25 +162,19 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				boolean highlight = !args.isNull("highlight") && args.getBoolean("highlight");
 				StringWriter htmlTemplate = new StringWriter(512);
 				PrintWriter w = new PrintWriter(htmlTemplate);
+				UUID parentuuid = null;
 
-				if (flattenedForm.isResponsiveLayout())
+				Collection<BaseComponent> baseComponents = wrapper.getBaseComponents();
+				for (BaseComponent baseComponent : baseComponents)
 				{
-					// TODO support for responsive layout
-					// add a parentid to the output and maybe als the sibling?
-				}
-				else
-				{
-					Collection<BaseComponent> baseComponents = wrapper.getBaseComponents();
-					for (BaseComponent baseComponent : baseComponents)
+					FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
+					if (fe.getName().equals(name))
 					{
-						FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
-						if (fe.getName().equals(name))
-						{
-							FormLayoutGenerator.generateFormElementWrapper(w, fe, true, flattenedForm);
-							FormLayoutGenerator.generateFormElement(w, fe, flattenedForm, true, highlight);
-							FormLayoutGenerator.generateEndDiv(w);
-							break;
-						}
+						if (!form.isResponsiveLayout()) FormLayoutGenerator.generateFormElementWrapper(w, fe, true, flattenedForm);
+						FormLayoutGenerator.generateFormElement(w, fe, flattenedForm, true, highlight);
+						if (!form.isResponsiveLayout()) FormLayoutGenerator.generateEndDiv(w);
+						if (form.isResponsiveLayout())parentuuid = fe.getPersistIfAvailable().getParent().getUUID();
+						break;
 					}
 				}
 				w.flush();
@@ -187,6 +182,11 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				writer.object();
 				writer.key("template");
 				writer.value(htmlTemplate.toString());
+				if (parentuuid != null)
+				{
+					writer.key("parentId");
+					writer.value(parentuuid);
+				}
 				writer.endObject();
 				return writer.toString();
 			}

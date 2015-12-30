@@ -450,52 +450,55 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	{
 		// first add the stuff of the form itself to the map.
 		List<IPersist> filtered = new ArrayList<>();
-		for (IPersist persist : persists)
+		if (persists != null)
 		{
-			IPersist ancestor = persist.getAncestor(IRepository.FORMS);
-			if (ancestor != null && ancestor.getUUID().equals(form.getUUID()))
+			for (IPersist persist : persists)
 			{
-				filtered.add(persist);
-			}
-		}
-		// if there are other persist left, check if they are in the hierarchy
-		if (filtered.size() != persists.size())
-		{
-			Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
-			if (flattenedForm instanceof FlattenedForm)
-			{
-				// if it is a flattend form then walk over the forms.
-				List<Form> allForms = ((FlattenedForm)flattenedForm).getAllForms();
-				outer : for (IPersist persist : persists)
+				IPersist ancestor = persist.getAncestor(IRepository.FORMS);
+				if (ancestor != null && ancestor.getUUID().equals(form.getUUID()))
 				{
-					// skip the one already there.
-					if (filtered.contains(persist)) continue;
-					IPersist ancestor = persist.getAncestor(IRepository.FORMS);
-					for (Form superForm : allForms)
+					filtered.add(persist);
+				}
+			}
+			// if there are other persist left, check if they are in the hierarchy
+			if (filtered.size() != persists.size())
+			{
+				Form flattenedForm = ModelUtils.getEditingFlattenedSolution(form).getFlattenedForm(form);
+				if (flattenedForm instanceof FlattenedForm)
+				{
+					// if it is a flattend form then walk over the forms.
+					List<Form> allForms = ((FlattenedForm)flattenedForm).getAllForms();
+					outer : for (IPersist persist : persists)
 					{
-						if (superForm.getUUID().equals(ancestor.getUUID()))
+						// skip the one already there.
+						if (filtered.contains(persist)) continue;
+						IPersist ancestor = persist.getAncestor(IRepository.FORMS);
+						for (Form superForm : allForms)
 						{
-							// the form uuid of the persist is the same as a superform
-							// check if we should add it
-							for (IPersist filteredPersist : filtered)
+							if (superForm.getUUID().equals(ancestor.getUUID()))
 							{
-								if (filteredPersist instanceof ISupportExtendsID)
+								// the form uuid of the persist is the same as a superform
+								// check if we should add it
+								for (IPersist filteredPersist : filtered)
 								{
-									IPersist superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)filteredPersist);
-									while (superPersist instanceof ISupportExtendsID)
+									if (filteredPersist instanceof ISupportExtendsID)
 									{
-										// if there is already one
-										if (superPersist.getID() == persist.getID())
+										IPersist superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)filteredPersist);
+										while (superPersist instanceof ISupportExtendsID)
 										{
-											continue outer;
+											// if there is already one
+											if (superPersist.getID() == persist.getID())
+											{
+												continue outer;
+											}
+											superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)superPersist);
 										}
-										superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)superPersist);
 									}
-								}
 
+								}
+								filtered.add(persist);
+								break;
 							}
-							filtered.add(persist);
-							break;
 						}
 					}
 				}

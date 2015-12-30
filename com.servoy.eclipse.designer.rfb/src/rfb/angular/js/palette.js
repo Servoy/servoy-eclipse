@@ -193,7 +193,11 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 							if (canDrop.dropAllowed && !canDrop.beforeChild) {
 								canDrop.beforeChild = angularElement[0].nextElementSibling;
 							}
-							angularElement.remove();
+							if (t) clearTimeout(t);
+							t = setTimeout(function(){
+							    angularElement.remove();
+							}, 200);
+							
 						}
 						if (!canDrop.dropAllowed) return;
 
