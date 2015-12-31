@@ -20,26 +20,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.border.Border;
+
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.servoy.eclipse.ui.views.properties.IMergeablePropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
 import com.servoy.eclipse.ui.views.properties.PropertySheetEntry;
+import com.servoy.j2db.util.ComponentFactoryHelper;
 
 /**
  * PropertySheetEntry with additional Servoy features.
- * 
+ *
  * @author acostescu
  */
 public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IAdaptable
 {
-
-	private CellEditor createdEditor;
 
 	public ModifiedPropertySheetEntry()
 	{
@@ -102,7 +102,7 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 
 	/**
 	 * Return the unsorted intersection of all the <code>IPropertyDescriptor</code>s for the objects.
-	 * 
+	 *
 	 * @return List
 	 */
 	@Override
@@ -223,14 +223,52 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 	}
 
 	@Override
-	public CellEditor getEditor(Composite parent)
+	public void applyEditorValue()
 	{
-		createdEditor = super.getEditor(parent);
-		return createdEditor;
+		if (editor == null)
+		{
+			return;
+		}
+
+		// Check if editor has a valid value
+		if (!editor.isValueValid())
+		{
+			setErrorText(editor.getErrorMessage());
+			return;
+		}
+
+		setErrorText(null);
+
+		// See if the value changed and if so update
+		Object newValue = editor.getValue();
+		boolean changed = values.length > 1 || !valueEquals(editValue, newValue);
+
+		// Set the editor value
+		if (changed)
+		{
+			setValue(newValue);
+		}
 	}
+
+	protected boolean valueEquals(Object val1, Object val2)
+	{
+		if (val1 == null)
+		{
+			return val2 == null;
+		}
+
+		// special cases, borders (like LineBorder) do not implement equals based on fields.
+		if (val1 instanceof Border && val2 instanceof Border)
+		{
+			return ComponentFactoryHelper.createBorderString((Border)val1).equals(ComponentFactoryHelper.createBorderString((Border)val2));
+		}
+
+		return val1.equals(val2);
+	}
+
 
 	public CellEditor getCreatedEditor()
 	{
-		return createdEditor;
+		return editor;
 	}
 }

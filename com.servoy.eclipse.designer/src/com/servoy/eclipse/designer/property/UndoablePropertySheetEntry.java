@@ -23,8 +23,6 @@ import org.eclipse.gef.commands.CommandStackListener;
 import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.commands.ForwardUndoCompoundCommand;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -46,8 +44,6 @@ import com.servoy.eclipse.ui.views.properties.PropertySheetEntry;
  */
 public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 {
-	private CellEditor editor;
-
 	private CommandStackListener commandStackListener;
 
 	private CommandStack stack;
@@ -60,7 +56,7 @@ public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 
 	/**
 	 * Constructs the root entry using the given command stack.
-	 * 
+	 *
 	 * @param stack the command stack
 	 * @since 3.1
 	 */
@@ -221,10 +217,4 @@ public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 		}
 	}
 
-	@Override
-	public CellEditor getEditor(Composite parent)
-	{
-		editor = super.getEditor(parent);
-		return editor;
-	}
 }
