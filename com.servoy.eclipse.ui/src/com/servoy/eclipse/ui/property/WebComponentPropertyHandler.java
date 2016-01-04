@@ -18,7 +18,6 @@
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.FunctionPropertyType;
@@ -96,14 +95,8 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 	@Override
 	public Object getValue(Object obj, PersistContext persistContext)
 	{
-		Object value = null;
 		IBasicWebObject bean = (IBasicWebObject)obj;
-
-		JSONObject json = bean.getFlattenedJson();
-		if (json != null)
-		{
-			value = json.opt(getName());
-		}
+		Object value = bean.getProperty(getName());
 
 		IPropertyType< ? > type = propertyDescription.getType();
 		if (type instanceof FunctionPropertyType || type instanceof ValueListPropertyType || type instanceof FormPropertyType ||
@@ -120,7 +113,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 
 			return Integer.valueOf(-1);
 		}
-		return canHandleJSONNull ? bean.getProperty(getName()) : ServoyJSONObject.jsonNullToNull(value);
+		return canHandleJSONNull ? value : ServoyJSONObject.jsonNullToNull(value);
 	}
 
 	@Override
