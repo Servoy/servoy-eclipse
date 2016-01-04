@@ -2952,6 +2952,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		deleteActionInTree.registerAction(UserNodeType.SERVICES_PACKAGE, deleteServicePackage);
 		deleteActionInTree.registerAction(UserNodeType.COMPONENT, deleteComponent);
 		deleteActionInTree.registerAction(UserNodeType.SERVICE, deleteService);
+		deleteActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, deleteInMemDataSource);
+		deleteActionInTree.registerAction(UserNodeType.TABLE, deleteTable);
 
 
 		renameActionInTree = new ContextAction(this, null, "Rename");

@@ -1040,6 +1040,13 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	{
 		IServerInternal server = (IServerInternal)serverNode.getRealObject();
 		serverNode.children = SolutionExplorerListContentProvider.createTables(server, type);
+		for (Object node : serverNode.children)
+		{
+			if (node instanceof SimpleUserNode)
+			{
+				((SimpleUserNode)node).parent = serverNode;
+			}
+		}
 	}
 
 	public static String getServerImageName(String serverName, IServerInternal server)
