@@ -994,13 +994,12 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			try
 			{
 				com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
-				Iterator<String> tableNames;
-				tableNames = s.getTableNames(true).iterator();
+				List<String> tableNames = s.getTableNames(true);
+				Collections.sort(tableNames);
 
 				List<String> hiddenTables = null;
-				while (tableNames.hasNext())
+				for (String tableName : tableNames)
 				{
-					String tableName = tableNames.next();
 					if (s.isTableMarkedAsHiddenInDeveloper(tableName))
 					{
 						if (hiddenTables == null) hiddenTables = new ArrayList<String>();
