@@ -334,6 +334,8 @@ import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.MimeTypes;
@@ -1658,6 +1660,11 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 							if (persist instanceof Relation)
 							{
 								// don't send the solution as refresh object, then would have to refresh everything (forms + relations)
+								parents.add(persist);
+							}
+							else if (persist instanceof TableNode && DataSourceUtils.getInmemDataSourceName(((TableNode)persist).getDataSource()) != null)
+							{
+								// for an in mem tablenode send just that tablenode so only that one is refreshed
 								parents.add(persist);
 							}
 							else

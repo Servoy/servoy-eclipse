@@ -121,7 +121,7 @@ public class Messages extends NLS
 	public static String TreeStrings_Datasources;
 	public static String TreeStrings_Date;
 	public static String TreeStrings_DBServers;
-	public static String TreeStrings_DBMemory;
+	public static String TreeStrings_InMemory;
 	public static String TreeStrings_elements;
 	public static String TreeStrings_Statements;
 	public static String TreeStrings_SpecialOperators;

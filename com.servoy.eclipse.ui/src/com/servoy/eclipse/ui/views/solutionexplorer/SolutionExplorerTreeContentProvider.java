@@ -115,6 +115,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.plugins.IClientPlugin;
 import com.servoy.j2db.scripting.IConstantsObject;
 import com.servoy.j2db.scripting.IDeprecated;
@@ -132,6 +133,7 @@ import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.scripting.WebServiceScriptable;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
@@ -1304,7 +1306,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				solution, IconProvider.instance().image(JSDataSources.class));
 			solutionDataSources.parent = projectNode;
 
-			PlatformSimpleUserNode solutionMemoryDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_DBMemory, UserNodeType.INMEMORY_DATASOURCES,
+			PlatformSimpleUserNode solutionMemoryDataSources = new PlatformSimpleUserNode(Messages.TreeStrings_InMemory, UserNodeType.INMEMORY_DATASOURCES,
 				servoyProject.getMemServer(), IconProvider.instance().image(JSDataSources.class));
 			solutionMemoryDataSources.parent = solutionDataSources;
 
@@ -2002,67 +2004,83 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 										}
 									}
 								}
-							}
-							// if in calculation mode, refresh Relations node under
-							// solution node
-							if (solutionOfCalculation != null)
-							{
-								node = (PlatformSimpleUserNode)findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Relations);
-								if (node != null && tableOfCalculation.equals(
-									ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(((Relation)persist).getPrimaryDataSource())))
+								// if in calculation mode, refresh Relations node under
+								// solution node
+								if (solutionOfCalculation != null)
 								{
-									addRelationsNodeChildren(node, solutionOfCalculation, tableOfCalculation, UserNodeType.CALC_RELATION);
+									node = (PlatformSimpleUserNode)findChildNode(getSolutionNode(s.getName()), Messages.TreeStrings_Relations);
+									if (node != null && tableOfCalculation.equals(
+										ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(((Relation)persist).getPrimaryDataSource())))
+									{
+										addRelationsNodeChildren(node, solutionOfCalculation, tableOfCalculation, UserNodeType.CALC_RELATION);
+										view.refreshTreeNodeFromModel(node);
+									}
+								}
+							}
+							if (!solutionsRefreshedForRelations.contains(s.getName())) solutionsRefreshedForRelations.add(s.getName());
+						}
+						else if (persist instanceof Form)
+						{
+							// don't refresh if we also refresh the solution
+							if (persists.contains(s)) continue;
+
+							node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
+							if (node != null)
+							{
+								PlatformSimpleUserNode formNode = (PlatformSimpleUserNode)findChildNode(node, ((Form)persist).getName());
+								if (formNode == null)
+								{
+									if (!refreshedFormsNode)
+									{
+										refreshedFormsNode = true;
+										addFormsNodeChildren(node);
+									}
+									else
+									{
+										node = null;
+									}
+								}
+								else
+								{
+									node = formNode;
+									node.children = null;
+								}
+								if (node != null)
+								{
 									view.refreshTreeNodeFromModel(node);
 								}
 							}
 						}
-						if (!solutionsRefreshedForRelations.contains(s.getName())) solutionsRefreshedForRelations.add(s.getName());
-					}
-					else if (persist instanceof Form)
-					{
-						// don't refresh if we also refresh the solution
-						if (persists.contains(s)) continue;
+						else if (persist instanceof TableNode)
+						{
+							// refresh the in mem datasource tree.
+							if (DataSourceUtils.getInmemDataSourceName(((TableNode)persist).getDataSource()) != null)
+							{
+								PlatformSimpleUserNode solutionChildNode = (PlatformSimpleUserNode)findChildNode(node,
+									Messages.TreeStrings_SolutionDataSources);
+								PlatformSimpleUserNode inMemNode = (PlatformSimpleUserNode)findChildNode(solutionChildNode, Messages.TreeStrings_InMemory);
+								if (inMemNode != null)
+								{
+									inMemNode.children = null;
+									view.refreshTreeNodeFromModel(inMemNode);
+								}
+							}
 
-						node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
-						if (node != null)
-						{
-							PlatformSimpleUserNode formNode = (PlatformSimpleUserNode)findChildNode(node, ((Form)persist).getName());
-							if (formNode == null)
-							{
-								if (!refreshedFormsNode)
-								{
-									refreshedFormsNode = true;
-									addFormsNodeChildren(node);
-								}
-								else
-								{
-									node = null;
-								}
-							}
-							else
-							{
-								node = formNode;
-								node.children = null;
-							}
-							if (node != null)
-							{
-								view.refreshTreeNodeFromModel(node);
-							}
 						}
-					}
-					else if (persist instanceof Solution)
-					{
-						PlatformSimpleUserNode solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
-						if (solutionChildNode != null)
+						else if (persist instanceof Solution)
 						{
-							addFormsNodeChildren(solutionChildNode);
-							view.refreshTreeNodeFromModel(solutionChildNode);
-						}
-						solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Media);
-						if (solutionChildNode != null)
-						{
-							addMediaFolderChildrenNodes(solutionChildNode, (Solution)persist);
-							view.refreshTreeNodeFromModel(solutionChildNode);
+							PlatformSimpleUserNode solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
+							if (solutionChildNode != null)
+							{
+								addFormsNodeChildren(solutionChildNode);
+								view.refreshTreeNodeFromModel(solutionChildNode);
+							}
+							solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Media);
+							if (solutionChildNode != null)
+							{
+								addMediaFolderChildrenNodes(solutionChildNode, (Solution)persist);
+								view.refreshTreeNodeFromModel(solutionChildNode);
+							}
 						}
 					}
 				}
@@ -2119,7 +2137,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	public SimpleUserNode findChildNode(SimpleUserNode node, String name)
 	{
 		SimpleUserNode result = null;
-		if (node.children != null)
+		if (node != null && node.children != null)
 		{
 			for (int i = node.children.length - 1; i >= 0; i--)
 			{
