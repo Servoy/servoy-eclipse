@@ -224,11 +224,6 @@ public class DesignNGClient extends DebugNGClient
 		//ignore
 	}
 
-	@Override
-	public boolean isInDesigner()
-	{
-		return true;
-	}
 
 	public boolean getShowData()
 	{

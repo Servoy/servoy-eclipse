@@ -234,7 +234,12 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
                     parent = angular.element(document.querySelectorAll("[svy-id='"+parentId+"']"));
                 }
                 var tpl = $compile(json.template)($rootScope.getDesignFormControllerScope());
-                parent.append(tpl)
+                if (json.insertBeforeUUID){
+                    var nextSibling = angular.element(document.querySelectorAll("[svy-id='"+json.insertBeforeUUID+"']"));
+                    tpl.insertBefore(nextSibling);
+                }
+                else
+                    parent.append(tpl)
               })
 
             }

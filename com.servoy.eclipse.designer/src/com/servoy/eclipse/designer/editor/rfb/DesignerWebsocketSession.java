@@ -41,7 +41,9 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementContext;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
@@ -163,6 +165,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				StringWriter htmlTemplate = new StringWriter(512);
 				PrintWriter w = new PrintWriter(htmlTemplate);
 				UUID parentuuid = null;
+				UUID insertBeforeUUID = null;
 
 				Collection<BaseComponent> baseComponents = wrapper.getBaseComponents();
 				for (BaseComponent baseComponent : baseComponents)
@@ -173,7 +176,12 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						if (!form.isResponsiveLayout()) FormLayoutGenerator.generateFormElementWrapper(w, fe, true, flattenedForm);
 						FormLayoutGenerator.generateFormElement(w, fe, flattenedForm, true, highlight);
 						if (!form.isResponsiveLayout()) FormLayoutGenerator.generateEndDiv(w);
-						if (form.isResponsiveLayout())parentuuid = fe.getPersistIfAvailable().getParent().getUUID();
+						if (form.isResponsiveLayout())
+						{
+							parentuuid = fe.getPersistIfAvailable().getParent().getUUID();
+							insertBeforeUUID = findNextSibling(fe);
+						}
+
 						break;
 					}
 				}
@@ -187,9 +195,31 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					writer.key("parentId");
 					writer.value(parentuuid);
 				}
+				if (insertBeforeUUID != null)
+				{
+					writer.key("insertBeforeUUID");
+					writer.value(insertBeforeUUID);
+				}
 				writer.endObject();
 				return writer.toString();
 			}
+		}
+		return null;
+	}
+
+	/**
+	 * @param fe
+	 * @return
+	 */
+	private UUID findNextSibling(FormElement fe)
+	{
+		if (fe.getPersistIfAvailable() != null && fe.getPersistIfAvailable().getParent() instanceof LayoutContainer)
+		{
+			LayoutContainer layoutContainer = (LayoutContainer)fe.getPersistIfAvailable().getParent();
+			List<IPersist> hierarchyChildren = layoutContainer.getHierarchyChildren();
+			hierarchyChildren.sort(PositionComparator.XY_PERSIST_COMPARATOR);
+			int indexOf = hierarchyChildren.indexOf(fe.getPersistIfAvailable());
+			if (indexOf > -1 && (indexOf + 1) < hierarchyChildren.size()) return hierarchyChildren.get(indexOf + 1).getUUID();
 		}
 		return null;
 	}
