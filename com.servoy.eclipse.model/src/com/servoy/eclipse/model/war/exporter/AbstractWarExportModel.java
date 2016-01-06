@@ -130,9 +130,9 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 						@Override
 						public ASTNode visitCallExpression(CallExpression node)
 						{
-							if (node.getExpression() instanceof CallExpression)
+							if (node.getExpression().getChilds().size() > 0)
 							{
-								String expr = node.getExpression().toString();
+								String expr = node.getExpression().getChilds().get(0).toString();
 								if (expr.startsWith("plugins."))
 								{
 									String[] parts = expr.split("\\.");
@@ -141,7 +141,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 										usedServices.add(WebServiceSpecProvider.getInstance().getWebServiceSpecification(parts[1]).getName());
 									}
 								}
-								else if (expr.contains("newBean"))
+								else if (expr.contains("newWebComponent"))
 								{
 									if (node.getArguments().size() > 1)
 									{

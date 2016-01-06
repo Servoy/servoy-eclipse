@@ -107,9 +107,9 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 		boolean mobile = form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) != null;
 
 		getTreeViewer().setContentProvider(mobile ? new MobileFormOutlineContentProvider(form) : new FormOutlineContentProvider(form));
-		getTreeViewer().setLabelProvider(
-			new FormContextDelegateLabelProvider(mobile ? MobileFormOutlineLabelprovider.MOBILE_FORM_OUTLINE_LABEL_PROVIDER_INSTANCE
-				: FormOutlineLabelprovider.FORM_OUTLINE_LABEL_PROVIDER_INSTANCE, form));
+		getTreeViewer().setLabelProvider(new FormContextDelegateLabelProvider(
+			mobile ? MobileFormOutlineLabelprovider.MOBILE_FORM_OUTLINE_LABEL_PROVIDER_INSTANCE : FormOutlineLabelprovider.FORM_OUTLINE_LABEL_PROVIDER_INSTANCE,
+			form));
 		getTreeViewer().setInput(form);
 
 		if (form != null && form.isResponsiveLayout())
@@ -169,7 +169,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 						final CompoundCommand cc = new CompoundCommand();
 						for (final IPersist p : dragObjects)
 						{
-							cc.add(new ChangeParentCommand(p, dropTarget, dropTargetComponent)
+							cc.add(new ChangeParentCommand(p, dropTarget, dropTargetComponent, getCurrentLocation() == LOCATION_AFTER)
 							{
 								@Override
 								public void execute()
@@ -209,11 +209,14 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 						else if (((PersistContext)input).getPersist() instanceof LayoutContainer)
 						{
 							targetLayoutContainer = (LayoutContainer)((PersistContext)input).getPersist();
+							if (getCurrentLocation() == LOCATION_BEFORE || getCurrentLocation() == LOCATION_AFTER)
+							{
+								dropTargetComponent = targetLayoutContainer;
+								targetLayoutContainer = targetLayoutContainer.getParent();
+							}
 							if (dragObjects != null)
 							{
 								boolean doAllow = true;
-								boolean containerMoveInsideTarget = true;
-
 								for (IPersist p : dragObjects)
 								{
 									ISupportChilds parentContainer = targetLayoutContainer;
@@ -229,18 +232,6 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 									while (parentContainer != null);
 
 									if (!doAllow) return false;
-
-									if (containerMoveInsideTarget &&
-										(p == targetLayoutContainer || !(p instanceof LayoutContainer) || ((LayoutContainer)p).getParent() != targetLayoutContainer.getParent()))
-									{
-										containerMoveInsideTarget = false;
-									}
-								}
-
-								if (containerMoveInsideTarget)
-								{
-									dropTargetComponent = targetLayoutContainer;
-									targetLayoutContainer = targetLayoutContainer.getParent();
 								}
 							}
 						}
@@ -382,7 +373,8 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 					else
 					{
 						MobileListModel mobileListModel = Platform.getAdapterManager().getAdapter(selectionObject, MobileListModel.class);
-						if (mobileListModel == null && selectionObject instanceof MobileListGraphicalEditPart) mobileListModel = ((MobileListGraphicalEditPart)selectionObject).getModel();
+						if (mobileListModel == null && selectionObject instanceof MobileListGraphicalEditPart)
+							mobileListModel = ((MobileListGraphicalEditPart)selectionObject).getModel();
 						if (mobileListModel != null) selectionPath.add(mobileListModel);
 					}
 				}

@@ -439,6 +439,25 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 //				}
 //			}
 //		});
+//		if (persists != null && persists.size() == 1)
+//		{
+//			IPersist changedPersist = persists.get(0);
+//			StructuredSelection selection = (StructuredSelection)selectionProvider.getSelection();
+//			if (!selection.isEmpty() && selection.size() == 1 && selection.getFirstElement() instanceof PersistContext)
+//			{
+//				PersistContext selectedPersistContext = (PersistContext)selection.getFirstElement();
+//				if (changedPersist instanceof ISupportExtendsID && selectedPersistContext.getPersist() instanceof ISupportExtendsID)
+//				{
+//					IPersist changedSuperPersist = PersistHelper.getSuperPersist((ISupportExtendsID)changedPersist);
+//					if (selectedPersistContext.getPersist() == changedSuperPersist)
+//					{
+//						//the selected persist was overriden, we must update selection
+//						selectionProvider.setSelection(new StructuredSelection(PersistContext.create(changedPersist, selectedPersistContext.getContext())));
+//					}
+//				}
+//
+//			}
+//		}
 	}
 
 	/**

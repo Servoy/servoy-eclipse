@@ -39,8 +39,8 @@ public class ServicesSelectionPage extends AbstractComponentsSelectionPage
 		super(exportModel, pageName, title, description, nextPage, "service");
 		componentsUsed = exportModel.getUsedServices();
 		selectedComponents = new TreeSet<String>(componentsUsed);
-		if (exportModel.getExportedServices() == null || exportModel.getExportedServices().containsAll(componentsUsed) &&
-			componentsUsed.containsAll(exportModel.getExportedServices())) return;
+		if (exportModel.getExportedServices() == null ||
+			exportModel.getExportedServices().containsAll(componentsUsed) && componentsUsed.containsAll(exportModel.getExportedServices())) return;
 		WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
 		for (String service : exportModel.getExportedServices())
 		{
@@ -52,7 +52,7 @@ public class ServicesSelectionPage extends AbstractComponentsSelectionPage
 	protected Set<String> getAvailableItems()
 	{
 		Set<String> availableComponents = new TreeSet<String>();
-		for (WebComponentSpecification spec : NGUtils.getAllPublicWebServiceSpecifications())
+		for (WebComponentSpecification spec : NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport())
 		{
 			if (!selectedComponents.contains(spec.getName())) availableComponents.add(spec.getName());
 		}

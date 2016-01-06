@@ -255,7 +255,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 				WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
 				if (configuration.getSelectedServices().trim().equalsIgnoreCase("all"))
 				{
-					for (WebComponentSpecification spec : NGUtils.getAllPublicWebServiceSpecifications())
+					for (WebComponentSpecification spec : NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport())
 					{
 						set.add(spec.getName());
 					}

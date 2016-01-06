@@ -39,18 +39,20 @@ public class ChangeParentCommand extends Command
 	private final IPersist child, targetChild;
 	private final ISupportChilds newParent;
 	private ISupportChilds oldParent;
+	private final boolean insertAfterTarget;
 
 	public ChangeParentCommand(IPersist child, ISupportChilds newParent)
 	{
-		this(child, newParent, null);
+		this(child, newParent, null, false);
 	}
 
-	public ChangeParentCommand(IPersist child, ISupportChilds newParent, IPersist targetChild)
+	public ChangeParentCommand(IPersist child, ISupportChilds newParent, IPersist targetChild, boolean insertAfterTarget)
 	{
 		super("Change Parent");
 		this.child = child;
 		this.targetChild = targetChild;
 		this.newParent = newParent;
+		this.insertAfterTarget = insertAfterTarget;
 	}
 
 	@Override
@@ -77,7 +79,12 @@ public class ChangeParentCommand extends Command
 
 			int insertIdx = targetChild instanceof ISupportBounds ? children.indexOf(targetChild) : -1;
 			if (insertIdx == -1) children.add(child);
-			else children.add(insertIdx, child);
+			else
+			{
+				if (insertAfterTarget) insertIdx++;
+				if (insertIdx < children.size()) children.add(insertIdx, child);
+				else children.add(child);
+			}
 
 			int counter = 1;
 			for (IPersist p : children)
@@ -103,7 +110,7 @@ public class ChangeParentCommand extends Command
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.gef.commands.Command#redo()
 	 */
 	@Override

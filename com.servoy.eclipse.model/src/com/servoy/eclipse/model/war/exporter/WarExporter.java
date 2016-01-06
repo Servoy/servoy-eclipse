@@ -200,7 +200,7 @@ public class WarExporter
 	{
 		if (exportModel.getExportedComponents() == null && exportModel.getExportedServices() == null ||
 			exportModel.getExportedComponents().size() == WebComponentSpecProvider.getInstance().getWebComponentSpecifications().size() &&
-				exportModel.getExportedServices().size() == NGUtils.getAllPublicWebServiceSpecifications().length)
+				exportModel.getExportedServices().size() == NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport().length)
 			return;
 
 		File exported = new File(tmpWarDir, "WEB-INF/exported_components.properties");
@@ -1110,7 +1110,7 @@ public class WarExporter
 		try
 		{
 			fis = new FileInputStream(sourceFile);
-			Properties properties = new Properties();
+			Properties properties = new SortedProperties();
 			properties.load(fis);
 
 			properties.setProperty("SocketFactory.rmiServerFactory", "com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory");

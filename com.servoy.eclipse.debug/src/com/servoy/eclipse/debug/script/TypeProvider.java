@@ -44,21 +44,11 @@ public class TypeProvider implements ITypeProvider
 {
 	private final TypeCreator TYPES = new TypeCreator();
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.dltk.javascript.typeinfo.ITypeProvider#initialize(org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext)
-	 */
 	public boolean initialize(ITypeInfoContext context)
 	{
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.eclipse.debug.script.TypeCreator#getType(org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext, java.lang.String)
-	 */
 	public Type getType(ITypeInfoContext context, TypeMode mode, String typeName)
 	{
 		// use the projectname of the resource, also when the file does not belong to the active solution

@@ -42,6 +42,7 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.IBasicWebComponent;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -86,7 +87,8 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 									if (persistContext.getPersist() instanceof IBasicWebComponent)
 									{
 										IBasicWebComponent parentBean = (IBasicWebComponent)ElementUtil.getOverridePersist(persistContext);
-										addCustomType(parentBean, event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property"), null);
+										addCustomType(parentBean, event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property"), null,
+											-1);
 										persist = parentBean;
 									}
 								}
@@ -262,46 +264,58 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 		return i;
 	}
 
-	public static WebCustomType addCustomType(IBasicWebComponent parentBean, String propertyName, String compName)
+	public static WebCustomType addCustomType(IBasicWebComponent parentBean, String propertyName, String compName, int arrayIndex)
 	{
-		int index = -1;
+		int index = arrayIndex;
 		WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getTypeName());
 		boolean isArray = spec.isArrayReturnType(propertyName);
 		PropertyDescription targetPD = spec.getProperty(propertyName);
 		String typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(targetPD.getType());
-		WebCustomType[] arrayValue = null;
+		IChildWebObject[] arrayValue = null;
 		if (isArray)
 		{
 			targetPD = ((ICustomType< ? >)targetPD.getType()).getCustomJSONTypeDefinition();
 			if (parentBean instanceof WebComponent)
 			{
-				arrayValue = (WebCustomType[])((WebComponent)parentBean).getProperty(propertyName);
+				arrayValue = (IChildWebObject[])((WebComponent)parentBean).getProperty(propertyName);
 			}
-			index = arrayValue != null ? arrayValue.length : 0;
+			if (index == -1) index = arrayValue != null ? arrayValue.length : 0;
 		}
-		Pair<Integer, UUID> idAndUUID = WebObjectImpl.getNewIdAndUUID(parentBean);
-		WebCustomType bean = new WebCustomType(parentBean, targetPD, propertyName, index, true, idAndUUID.getLeft().intValue(), idAndUUID.getRight());
-		bean.setName(compName);
-		bean.setTypeName(typeName);
 		if (parentBean instanceof WebComponent)
 		{
+			Pair<Integer, UUID> idAndUUID = WebObjectImpl.getNewIdAndUUID(parentBean);
+			WebCustomType bean = new WebCustomType(parentBean, targetPD, propertyName, index, true, idAndUUID.getLeft().intValue(), idAndUUID.getRight());
+			bean.setName(compName);
+			bean.setTypeName(typeName);
 			if (isArray)
 			{
 				if (arrayValue == null)
 				{
-					arrayValue = new WebCustomType[] { bean };
+					arrayValue = new IChildWebObject[] { bean };
 				}
 				else
 				{
-					WebCustomType[] newArrayValue = new WebCustomType[arrayValue.length + 1];
-					System.arraycopy(arrayValue, 0, newArrayValue, 0, arrayValue.length);
-					newArrayValue[arrayValue.length] = bean;
-					arrayValue = newArrayValue;
+					if (index > -1)
+					{
+						ArrayList<IChildWebObject> arrayList = new ArrayList<IChildWebObject>();
+						arrayList.addAll(Arrays.asList(arrayValue));
+						arrayList.add(index, bean);
+						arrayValue = arrayList.toArray(new IChildWebObject[arrayList.size()]);
+					}
+					else
+					{
+						IChildWebObject[] newArrayValue = new IChildWebObject[arrayValue.length + 1];
+						System.arraycopy(arrayValue, 0, newArrayValue, 0, arrayValue.length);
+						newArrayValue[arrayValue.length] = bean;
+						arrayValue = newArrayValue;
+					}
 				}
 				((WebComponent)parentBean).setProperty(propertyName, arrayValue);
 			}
-			else ((WebComponent)parentBean).setProperty(propertyName, bean);
+			else((WebComponent)parentBean).setProperty(propertyName, bean);
+
+			return bean;
 		}
-		return bean;
+		return null;
 	}
 }
