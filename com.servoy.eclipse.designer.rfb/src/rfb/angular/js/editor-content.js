@@ -196,7 +196,7 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
     },
     updateFormData: function(updates) {
       var data = JSON.parse(updates);
-      if (data && (data.components || data.deleted)) {
+      if (data && (data.components || data.deleted || data.renderGhosts)) {
         // TODO should it be converted??
         $rootScope.$apply(function() {
           for (var name in data.components) {
@@ -267,6 +267,7 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
             toDelete.remove();
 
           }
+          if (data.renderGhosts) renderGhosts();
           renderDecorators();
         });
       }

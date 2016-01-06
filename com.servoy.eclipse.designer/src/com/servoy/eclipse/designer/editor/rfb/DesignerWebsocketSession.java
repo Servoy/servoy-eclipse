@@ -239,6 +239,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	{
 		List<BaseComponent> baseComponents = new ArrayList<>();
 		List<BaseComponent> deletedComponents = new ArrayList<>();
+		boolean renderGhosts = false;
 		for (IPersist persist : persists)
 		{
 			if (persist instanceof BaseComponent)
@@ -252,14 +253,20 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					deletedComponents.add((BaseComponent)persist);
 				}
 			}
-			else
+			else if (!(persist instanceof Form))
 			{
-				// TODO go to a parent? and serialize that?
+				// if it is not a base component then it is a child thing, very likely the ghost must be refreshed.
+				renderGhosts = true;
 			}
 		}
 		JSONWriter writer = new JSONStringer();
 		writer.object();
 		sendComponents(fs, writer, baseComponents, deletedComponents);
+		if (renderGhosts)
+		{
+			writer.key("renderGhosts");
+			writer.value(true);
+		}
 		writer.endObject();
 		return writer.toString();
 	}
