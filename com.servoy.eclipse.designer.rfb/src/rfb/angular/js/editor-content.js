@@ -226,6 +226,10 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
               promise.then(function(data) {
                 // append the template
                 var json = JSON.parse(data);
+                if (json.renderGhosts) {
+                	renderGhosts();
+                	return;
+                }
                 var parentId = json.parentId;
                 if (!parentId) parentId = 'svyDesignForm';
                 

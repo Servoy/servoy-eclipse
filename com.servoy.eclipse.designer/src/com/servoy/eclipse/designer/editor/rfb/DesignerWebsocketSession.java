@@ -168,6 +168,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				UUID insertBeforeUUID = null;
 
 				Collection<BaseComponent> baseComponents = wrapper.getBaseComponents();
+				boolean componentFound = false;
 				for (BaseComponent baseComponent : baseComponents)
 				{
 					FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
@@ -181,9 +182,19 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							parentuuid = fe.getPersistIfAvailable().getParent().getUUID();
 							insertBeforeUUID = findNextSibling(fe);
 						}
-
+						componentFound = true;
 						break;
 					}
+				}
+				// no component is found, very likely a ghost, re render those
+				if (!componentFound)
+				{
+					JSONWriter writer = new JSONStringer();
+					writer.object();
+					writer.key("renderGhosts");
+					writer.value(true);
+					writer.endObject();
+					return writer.toString();
 				}
 				w.flush();
 				JSONWriter writer = new JSONStringer();
