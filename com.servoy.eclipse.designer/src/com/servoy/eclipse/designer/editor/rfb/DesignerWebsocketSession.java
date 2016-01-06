@@ -217,7 +217,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		{
 			LayoutContainer layoutContainer = (LayoutContainer)fe.getPersistIfAvailable().getParent();
 			List<IPersist> hierarchyChildren = layoutContainer.getHierarchyChildren();
-			hierarchyChildren.sort(PositionComparator.XY_PERSIST_COMPARATOR);
+			Collections.sort(hierarchyChildren, PositionComparator.XY_PERSIST_COMPARATOR);
 			int indexOf = hierarchyChildren.indexOf(fe.getPersistIfAvailable());
 			if (indexOf > -1 && (indexOf + 1) < hierarchyChildren.size()) return hierarchyChildren.get(indexOf + 1).getUUID();
 		}
