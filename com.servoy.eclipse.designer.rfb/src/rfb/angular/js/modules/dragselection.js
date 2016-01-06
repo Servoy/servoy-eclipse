@@ -52,6 +52,9 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 								var type = "component";
 								var topContainer = null;
 								var layoutName = null;
+								var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+								if (ghostObject)
+								    type = ghostObject.propertyType;
 								var canDrop = utils.getDropNode(type, topContainer,layoutName,event);
 								if (!canDrop.dropAllowed)  {
 									// full refresh the editor content, it can be moved to different places already.
@@ -70,12 +73,15 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 							
 								obj[key] = {};
 								
-								if (canDrop.dropTarget) {
-									obj[key].dropTargetUUID = canDrop.dropTarget.getAttribute("svy-id");
-								}
-								
-								if (canDrop.beforeChild) {
-									obj[key].rightSibling = canDrop.beforeChild.getAttribute("svy-id");
+								//support for reordering ghosts in responsive layout - if this is a ghost then only allow dropping on top of a sibling ghost
+								if (!ghostObject || (angular.element(canDrop.dropTarget).parent() !== angular.element(node).parent)){
+            								if (canDrop.dropTarget) {
+            									obj[key].dropTargetUUID = canDrop.dropTarget.getAttribute("svy-id");
+            								}
+            								
+            								if (canDrop.beforeChild) {
+            									obj[key].rightSibling = canDrop.beforeChild.getAttribute("svy-id");
+            								}
 								}
 							}
 							$editorService.moveResponsiveComponent(obj);
@@ -168,6 +174,10 @@ angular.module('dragselection',['mouseselection']).run(function($rootScope, $plu
 						if (layoutName) type = "layout"
 						
 						var topContainer = null;
+						
+						var ghostObject = editorScope.getGhost(selectionToDrag[0].getAttribute("svy-id"));
+						if (ghostObject) return;
+						
 						var canDrop = utils.getDropNode(type, topContainer,layoutName,event);
 						if (!canDrop.dropAllowed) {
 							editorScope.glasspane.style.cursor="no-drop";
