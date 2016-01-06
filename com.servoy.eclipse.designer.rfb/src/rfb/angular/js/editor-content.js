@@ -73,7 +73,6 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
 
         promise.then(function(data) {
           formModelData = JSON.parse(data);
-          console.log(formModelData);
           $editorContentService.formData(formModelData);
           formUrl = "designertemplate/" + solutionName + "/" + formName + ".html?highlight=" + $rootScope.highlight;
         });
@@ -117,11 +116,11 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
 
   $editorContentService.setLayoutData(layout);
 
-  $scope.model = function(name) {
+  $scope.model = function(name, noCreate) {
     var ret = model[name];
-    if (!ret) {
-      ret = {}
+    if (!ret && !noCreate) {
       if (formData.components[name]) ret = formData.components[name];
+      else ret = {}
       model[name] = ret;
     }
     return ret;
@@ -218,6 +217,10 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
               }
             } else {
               formData.components[name] = newCompData;
+            }
+            // always test if the model is really already initialized.
+            // if not then there is no template yet.
+            if (!$rootScope.getDesignFormControllerScope().model(name,true)) {
               var highlight = $webSocket.getURLParameter("highlight");
               var promise = $sabloApplication.callService("$editor", "getTemplate", {
                 name: name,
@@ -230,6 +233,8 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
                 	renderGhosts();
                 	return;
                 }
+                // was there already a template generated before this, then just skip it
+                if ($rootScope.getDesignFormControllerScope().model(name,true)) return;
                 var parentId = json.parentId;
                 if (!parentId) parentId = 'svyDesignForm';
                 
