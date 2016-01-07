@@ -75,7 +75,15 @@ public class SetSelectionHandler implements IServerService
 			public void run()
 			{
 				IStructuredSelection structuredSelection = new StructuredSelection(selection);
-				selectionProvider.setSelection(selection.size() == 0 ? null : structuredSelection);
+				selectionListener.ignoreSelectionChange(true);
+				try
+				{
+					selectionProvider.setSelection(selection.size() == 0 ? null : structuredSelection);
+				}
+				finally
+				{
+					selectionListener.ignoreSelectionChange(false);
+				}
 			}
 		});
 		return null;
