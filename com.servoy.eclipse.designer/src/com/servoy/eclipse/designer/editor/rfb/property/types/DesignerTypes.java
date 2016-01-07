@@ -37,5 +37,6 @@ public class DesignerTypes extends Types
 		super.registerTypes();
 		TypesRegistry.addType(new FoundsetLinkedPropertyType<String, DataproviderTypeSabloValue>(DesignerDataproviderPropertyType.DESIGNER_INSTANCE.getName(),
 			DesignerDataproviderPropertyType.DESIGNER_INSTANCE));
+		TypesRegistry.addType(DesignerTagStringPropertyType.DESIGNER_INSTANCE);
 	}
 }
