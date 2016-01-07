@@ -19,11 +19,12 @@ package com.servoy.eclipse.designer.editor.rfb;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.json.JSONObject;
 import org.json.JSONStringer;
@@ -41,6 +42,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.PositionComparator;
@@ -237,8 +239,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 
 	public String getComponentsJSON(FlattenedSolution fs, List<IPersist> persists)
 	{
-		List<BaseComponent> baseComponents = new ArrayList<>();
-		List<BaseComponent> deletedComponents = new ArrayList<>();
+		Set<BaseComponent> baseComponents = new HashSet<>();
+		Set<BaseComponent> deletedComponents = new HashSet<>();
 		boolean renderGhosts = false;
 		for (IPersist persist : persists)
 		{
@@ -257,6 +259,17 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			{
 				// if it is not a base component then it is a child thing, very likely the ghost must be refreshed.
 				renderGhosts = true;
+				ISupportChilds parent = persist.getParent();
+				// do add the child base component so that it gets this new update
+				while (parent != null && !(parent instanceof Form))
+				{
+					if (parent instanceof BaseComponent)
+					{
+						baseComponents.add((BaseComponent)parent);
+						parent = null;
+					}
+					else parent = parent.getParent();
+				}
 			}
 		}
 		JSONWriter writer = new JSONStringer();

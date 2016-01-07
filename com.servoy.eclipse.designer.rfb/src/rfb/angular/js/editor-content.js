@@ -141,13 +141,26 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
     }
     return ret;
   }
+  // dummy servoy api, ignore all calls
+  var servoyApi = {
+			formWillShow: function(formname,relationname,formIndex) {
+			},
+			hideForm: function(formname,relationname,formIndex) {
+				return null;
+			},
+			getFormUrl: function(formUrl) {
+				return null;
+			},
+			startEdit: function(propertyName) {
+			},
+			apply: function(propertyName) {
+			},
+			callServerSideApi: function(methodName,args) {
+				return null;
+			}
+		}
   $scope.servoyApi = function(name) {
-    var ret = servoyApi[name];
-    if (!ret) {
-      ret = {}
-      servoyApi[name] = ret;
-    }
-    return ret;
+	return servoyApi;
   }
   $scope.layout = function(name) {
     var ret = layout[name];
@@ -165,7 +178,7 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
     return ret;
   }
 }).factory("$editorContentService", function($rootScope, $applicationService, $sabloApplication, $sabloConstants,
-  $webSocket, $compile) {
+  $webSocket, $compile,$sabloConverters) {
   var formData = null;
   var layoutData = null
   return {
@@ -186,6 +199,12 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
     formData: function(data) {
       if (data) {
         formData = data;
+        for( var name in data.components) {
+        	var compData = data.components[name];
+        	if (compData.conversions) {
+        		data.components[name] = $sabloConverters.convertFromServerToClient(compData, compData.conversions, undefined, undefined, undefined)
+			}
+        }
         if (formData.solutionProperties) {
           $applicationService.setStyleSheet(formData.solutionProperties.styleSheet);
         }
@@ -202,6 +221,9 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
           for (var name in data.components) {
             var compData = formData.components[name];
             var newCompData = data.components[name];
+            if (newCompData.conversions) {
+            	newCompData = $sabloConverters.convertFromServerToClient(newCompData, newCompData.conversions, compData, undefined, undefined)
+			}
             if (compData) {
               var modifyFunction = compData[$sabloConstants.modelChangeNotifier];
               for (var key in compData) {
