@@ -54,4 +54,10 @@ public class DesignerTagStringPropertyType extends TagStringPropertyType
 		return super.toTemplateJSONValue(writer, key, formElementValue, pd, browserConversionMarkers, formElementContext);
 	}
 
+	@Override
+	public boolean valueInTemplate(String formElementVal, PropertyDescription pd, FormElementContext formElementContext)
+	{
+		return formElementContext.getFormElement().getDesignId() != null ? true : super.valueInTemplate(formElementVal, pd, formElementContext);
+	}
+
 }
