@@ -248,7 +248,24 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			{
 				if (persist.getParent().getChild(persist.getUUID()) != null)
 				{
-					baseComponents.add((BaseComponent)persist);
+					ISupportChilds parent = persist.getParent();
+					if (parent instanceof Form)
+					{
+						baseComponents.add((BaseComponent)persist);
+					}
+					else while (parent instanceof BaseComponent)
+					{
+						if (parent.getParent() instanceof Form)
+						{
+							baseComponents.add((BaseComponent)parent);
+							break;
+						}
+						else
+						{
+							parent = parent.getParent();
+						}
+
+					}
 				}
 				else
 				{

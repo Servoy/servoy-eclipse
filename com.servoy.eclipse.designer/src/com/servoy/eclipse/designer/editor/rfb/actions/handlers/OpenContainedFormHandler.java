@@ -29,7 +29,6 @@ import org.sablo.specification.property.ICustomType;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.rfb.property.types.DesignerFormPropertyType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Bean;
@@ -93,7 +92,7 @@ public class OpenContainedFormHandler implements IServerService
 
 								Collection<PropertyDescription> forms = null;
 								forms = ((ICustomType< ? >)ghost.getPropertyDescription().getType()).getCustomJSONTypeDefinition().getProperties(
-									DesignerFormPropertyType.DESIGNER_INSTANCE); // TODO what if form typed property is nested some more in the ghost? do we want to open that as well?
+									FormPropertyType.INSTANCE); // TODO what if form typed property is nested some more in the ghost? do we want to open that as well?
 
 								for (PropertyDescription pd : Utils.iterate(forms))
 								{

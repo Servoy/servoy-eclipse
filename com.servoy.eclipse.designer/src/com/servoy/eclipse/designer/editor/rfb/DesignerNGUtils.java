@@ -17,11 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
-import org.sablo.BaseWebObject;
 import org.sablo.specification.property.IBrowserConverterContext;
-
-import com.servoy.j2db.server.ngclient.IContextProvider;
-import com.servoy.j2db.server.ngclient.design.DesignNGClient;
 
 /**
  * NG client utility methods relevant only for designer.
@@ -32,16 +28,8 @@ public class DesignerNGUtils
 
 	public static boolean shouldShowData(IBrowserConverterContext dataConverterContext)
 	{
-		boolean showData = true;
-		if (dataConverterContext != null)
-		{
-			BaseWebObject webObject = dataConverterContext.getWebObject();
-			if (webObject instanceof IContextProvider && ((IContextProvider)webObject).getDataConverterContext().getApplication() instanceof DesignNGClient)
-			{
-				showData = ((DesignNGClient)((IContextProvider)webObject).getDataConverterContext().getApplication()).getShowData();
-			}
-		}
-		return showData;
+		// TODO should this become sample data show?
+		return false;
 	}
 
 }
