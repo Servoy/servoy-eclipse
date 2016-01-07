@@ -27,7 +27,9 @@ import org.sablo.websocket.IServerService;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportFormElements;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.Debug;
 
 /**
@@ -68,25 +70,33 @@ public class MoveInResponsiveLayoutHandler implements IServerService
 
 						ISupportFormElements parent = editorPart.getForm();
 						IPersist searchForPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, dropTarget);
-						if (searchForPersist != null)
+						if (persist.getTypeID() == IRepository.WEBCUSTOMTYPES)
 						{
-							IPersist p = searchForPersist;
-							while (!(p instanceof ISupportFormElements) && p != null)
-							{
-								p = p.getParent();
-							}
-							if (p instanceof ISupportFormElements)
-							{
-								parent = (ISupportFormElements)p;
-							}
+							if (searchForPersist.getTypeID() == IRepository.WEBCUSTOMTYPES)
+								cc.add(new ReorderCustomTypesCommand((WebCustomType)searchForPersist, (WebCustomType)persist));
 						}
 						else
 						{
-							Debug.error("drop target with uuid: " + dropTarget + " not found in form: " + parent);
-						}
+							if (searchForPersist != null)
+							{
+								IPersist p = searchForPersist;
+								while (!(p instanceof ISupportFormElements) && p != null)
+								{
+									p = p.getParent();
+								}
+								if (p instanceof ISupportFormElements)
+								{
+									parent = (ISupportFormElements)p;
+								}
+							}
+							else
+							{
+								Debug.error("drop target with uuid: " + dropTarget + " not found in form: " + parent);
+							}
 
-						IPersist rightSiblingPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, rightSibling);
-						cc.add(new ChangeParentCommand(persist, parent, rightSiblingPersist, false));
+							IPersist rightSiblingPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, rightSibling);
+							cc.add(new ChangeParentCommand(persist, parent, rightSiblingPersist, false));
+						}
 					}
 				}
 				if (!cc.isEmpty()) editorPart.getCommandStack().execute(cc);
@@ -94,4 +104,5 @@ public class MoveInResponsiveLayoutHandler implements IServerService
 		});
 		return null;
 	}
+
 }

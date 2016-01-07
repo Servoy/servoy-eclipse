@@ -2071,7 +2071,16 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					changed = true;
 				}
 
-				if ("name".equals(id) && beanPropertyDescriptor.valueObject instanceof ISupportUpdateableName)
+				boolean hasInheritedValue = (value == null && persistContext.getPersist() instanceof ISupportExtendsID &&
+					beanPropertyDescriptor.valueObject == persistContext.getPersist() &&
+					PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist()) != null && ((AbstractBase)PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist())).getProperty((String)id) != null);
+				if (beanPropertyDescriptor.valueObject instanceof AbstractBase && value == null && !hasInheritedValue)
+				{
+					// just clear the property because we do not need to store null in order to override a value
+					changed |= (((AbstractBase)beanPropertyDescriptor.valueObject).getProperty((String)id) != null);
+					((AbstractBase)beanPropertyDescriptor.valueObject).clearProperty((String)id);
+				}
+				else if ("name".equals(id) && beanPropertyDescriptor.valueObject instanceof ISupportUpdateableName)
 				{
 					if (value instanceof String || value == null)
 					{
@@ -2135,7 +2144,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		IViewReference[] iv = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getViewReferences();
 		for (IViewReference ref : iv)
 		{
-			if (ref.getId().equals("org.eclipse.ui.views.PropertySheet"))
+			if (ref.getId().equals("org.eclipse.ui.views.PropertySheet") && ref.getView(false) != null)
 			{
 				PropertySheetPage psp = ref.getView(false).getAdapter(PropertySheetPage.class);
 				if (psp != null) psp.refresh();
