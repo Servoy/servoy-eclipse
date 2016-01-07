@@ -45,6 +45,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementContext;
@@ -54,6 +55,7 @@ import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormWrapper;
 import com.servoy.j2db.server.ngclient.template.IFormElementValidator;
+import com.servoy.j2db.server.ngclient.template.PartWrapper;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -157,6 +159,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				writer.key("styleSheet");
 				writer.value(getSolutionCSSURL(fs));
 				writer.endObject();
+				generateParts(flattenedForm, context, writer, wrapper.getParts());
 				writer.endObject();
 				return writer.toString();
 			}
@@ -221,6 +224,25 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	}
 
 	/**
+	 * @param flattenedForm
+	 * @param context
+	 * @param writer
+	 * @param parts
+	 */
+	private void generateParts(Form flattenedForm, ServoyDataConverterContext context, JSONWriter writer, Collection<Part> parts)
+	{
+		writer.key("parts");
+		writer.object();
+		for (Part part : parts)
+		{
+			PartWrapper partWrapper = new PartWrapper(part, flattenedForm, context, true);
+			writer.key(partWrapper.getName() + "Style");
+			writer.value(partWrapper.getStyle());
+		}
+		writer.endObject();
+	}
+
+	/**
 	 * @param fe
 	 * @return
 	 */
@@ -241,6 +263,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	{
 		Set<BaseComponent> baseComponents = new HashSet<>();
 		Set<BaseComponent> deletedComponents = new HashSet<>();
+		Set<Part> parts = new HashSet<>();
 		boolean renderGhosts = false;
 		for (IPersist persist : persists)
 		{
@@ -272,6 +295,10 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					deletedComponents.add((BaseComponent)persist);
 				}
 			}
+			else if (persist instanceof Part)
+			{
+				parts.add((Part)persist);
+			}
 			else if (!(persist instanceof Form))
 			{
 				// if it is not a base component then it is a child thing, very likely the ghost must be refreshed.
@@ -296,6 +323,10 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		{
 			writer.key("renderGhosts");
 			writer.value(true);
+		}
+		if (parts.size() > 0)
+		{
+			generateParts(fs.getFlattenedForm(form), new ServoyDataConverterContext(fs), writer, parts);
 		}
 		writer.endObject();
 		return writer.toString();

@@ -90,7 +90,8 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
     left: "0px",
     right: "0px",
     top: "0px",
-    bottom: "0px"
+    bottom: "0px",
+    overflow:"hidden"
   }
 
   $scope.removeComponent = function(name) {
@@ -106,8 +107,12 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
   };
 
   var formData = $editorContentService.formData();
-  // TODO should this be converted?
 
+  if (formData.parts) {
+	  for(var name in formData.parts) {
+		  $scope[name] = JSON.parse(formData.parts[name]);
+	  }
+  }
   var model = {}
   var api = {}
   var handlers = {}
@@ -215,7 +220,7 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
     },
     updateFormData: function(updates) {
       var data = JSON.parse(updates);
-      if (data && (data.components || data.deleted || data.renderGhosts)) {
+      if (data && (data.components || data.deleted || data.renderGhosts || data.parts)) {
         // TODO should it be converted??
         $rootScope.$apply(function() {
           for (var name in data.components) {
@@ -290,6 +295,12 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
 
           }
           if (data.renderGhosts) renderGhosts();
+          if (data.parts) {
+        	  var scope = $rootScope.getDesignFormControllerScope();
+        	  for(var name in data.parts) {
+        		  scope[name] = JSON.parse(data.parts[name]);
+        	  }
+          }
           renderDecorators();
         });
       }
