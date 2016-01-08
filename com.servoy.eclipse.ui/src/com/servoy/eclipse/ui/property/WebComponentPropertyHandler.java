@@ -156,7 +156,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			convertedValue = (media == null) ? null : media.getUUID().toString();
 		}
 
-		bean.setJsonSubproperty(getName(), convertedValue);
+		bean.setProperty(getName(), convertedValue);
 	}
 
 	public boolean shouldShow(Object obj)
