@@ -35,7 +35,7 @@ public class CustomJSONArrayTypePropertyDescriptorFactory implements ITypeProper
 	public IPropertyDescriptor createPropertyDescriptor(String id, String displayName, FlattenedSolution flattenedEditingSolution,
 		PersistContext persistContext, PropertyDescription propertyDescription)
 	{
-		return new CustomJSONArrayTypePropertyController(id, displayName, persistContext, propertyDescription);
+		return new CustomArrayTypePropertyController(id, displayName, persistContext, propertyDescription);
 	}
 
 }
