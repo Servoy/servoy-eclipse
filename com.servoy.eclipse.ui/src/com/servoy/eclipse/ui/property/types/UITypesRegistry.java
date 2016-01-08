@@ -40,7 +40,7 @@ public class UITypesRegistry
 	static
 	{
 		addTypePropertyDescriptorFactory(CustomJSONArrayType.TYPE_NAME, new CustomJSONArrayTypePropertyDescriptorFactory());
-		addTypePropertyDescriptorFactory(CustomJSONObjectType.TYPE_NAME, new CustomJSONObjectTypePropertyDescriptorFactory());
+		addTypePropertyDescriptorFactory(CustomJSONObjectType.TYPE_NAME, new CustomObjectTypePropertyDescriptorFactory());
 		addTypePropertyDescriptorFactory(FoundsetPropertyType.TYPE_NAME, new FoundsetPropertyTypePropertyDescriptorFactory());
 	}
 

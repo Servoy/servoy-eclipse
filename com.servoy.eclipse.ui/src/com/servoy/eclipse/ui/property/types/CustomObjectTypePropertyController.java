@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.ui.property.types;
 
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,7 +27,8 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 import com.servoy.eclipse.ui.property.ISetterAwarePropertySource;
-import com.servoy.eclipse.ui.property.JSONObjectTypePropertyController;
+import com.servoy.eclipse.ui.property.JSONObjectTypePropertyController.JSONObjectTextConverter;
+import com.servoy.eclipse.ui.property.ObjectTypePropertyController;
 import com.servoy.eclipse.ui.property.PDPropertySource;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.IBasicWebObject;
@@ -36,38 +36,93 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
- * Property controller to be used in properties view for custom json objects.
+ * Property controller to be used in properties view for custom objects.
  *
  * @author acostescu
  */
-public class CustomJSONObjectTypePropertyController extends JSONObjectTypePropertyController
+public class CustomObjectTypePropertyController extends ObjectTypePropertyController
 {
 
-	private static IObjectTextConverter JSONOBJECT_TEXT_CONVERTER = new JSONObjectTextConverter();
-	private static ILabelProvider labelProvider = null;
+	private static IObjectTextConverter OBJECT_TEXT_CONVERTER;
 
 	private final PersistContext persistContext;
 	private final PropertyDescription propertyDescription;
 
-	public CustomJSONObjectTypePropertyController(Object id, String displayName, PersistContext persistContext, PropertyDescription propertyDescription)
+	public CustomObjectTypePropertyController(Object id, String displayName, PersistContext persistContext, PropertyDescription propertyDescription)
 	{
 		super(id, displayName);
 		this.persistContext = persistContext;
 		this.propertyDescription = propertyDescription;
+		OBJECT_TEXT_CONVERTER = new CustomObjectTextConverter();
 	}
 
 	@Override
-	protected ObjectPropertySource getObjectChildPropertySource(ComplexProperty<Object> complexProperty)
+	protected CustomObjectPropertySource getObjectChildPropertySource(ComplexProperty<Object> complexProperty)
 	{
-		return new CustomJSONObjectPropertySource(complexProperty);
+		return new CustomObjectPropertySource(complexProperty);
 	}
 
-	protected class CustomJSONObjectPropertySource extends JSONObjectPropertySource
+	private class CustomObjectTextConverter extends JSONObjectTextConverter
+	{
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter#convertToObject(java.lang.String)
+		 */
+		@Override
+		public Object convertToObject(String value)
+		{
+			IPersist persist = persistContext.getPersist();
+			if (persist instanceof IBasicWebObject)
+			{
+				IBasicWebObject wo = (IBasicWebObject)persist;
+				JSONObject obj = (JSONObject)super.convertToObject(value);
+				for (String key : obj.keySet())
+				{
+					wo.setJsonSubproperty(key, obj.opt(key));
+				}
+			}
+			return null;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter#convertToString(java.lang.Object)
+		 */
+		@Override
+		public String convertToString(Object value)
+		{
+			if (value instanceof IBasicWebObject)
+			{
+				return super.convertToString(((IBasicWebObject)value).getFlattenedJson());
+			}
+			return null;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter#isCorrectObject(java.lang.Object)
+		 */
+		@Override
+		public String isCorrectObject(Object value)
+		{
+			if (value instanceof IBasicWebObject)
+			{
+				return super.isCorrectObject(((IBasicWebObject)value).getFlattenedJson());
+			}
+			return null;
+		}
+
+	}
+
+	protected class CustomObjectPropertySource extends ObjectPropertySource
 	{
 
 		protected PDPropertySource underlyingPropertySource;
 
-		public CustomJSONObjectPropertySource(ComplexProperty<Object> complexProperty)
+		public CustomObjectPropertySource(ComplexProperty<Object> complexProperty)
 		{
 			super(complexProperty);
 		}
@@ -125,7 +180,7 @@ public class CustomJSONObjectTypePropertyController extends JSONObjectTypeProper
 		public Object getPropertyValue(Object id)
 		{
 			PDPropertySource underlying = getUnderlyingPropertySource();
-			return underlying != null ? ServoyJSONObject.adjustJavascriptNULLForJava(underlying.getPropertyValue(id)) : null;
+			return underlying != null ? underlying.getPropertyValue(id) : null;
 		}
 
 		@Override
@@ -161,15 +216,7 @@ public class CustomJSONObjectTypePropertyController extends JSONObjectTypeProper
 		@Override
 		public void defaultResetProperty(Object id)
 		{
-			PropertyDescription childPD = propertyDescription.getProperty((String)id);
-			if (childPD.hasDefault()) super.defaultResetProperty(id);
-			else underlyingPropertySource.defaultResetProperty(id);
-		}
-
-		@Override
-		protected Object getDefaultElementProperty(Object id)
-		{
-			return propertyDescription.getProperty((String)id).getDefaultValue();
+			underlyingPropertySource.defaultResetProperty(id);
 		}
 
 	}
@@ -195,6 +242,28 @@ public class CustomJSONObjectTypePropertyController extends JSONObjectTypeProper
 			propertySource.setPropertyValue(getId(), toSet);
 		}
 		else propertySource.defaultResetProperty(getId());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.ui.property.ObjectTypePropertyController#getLabelText(java.lang.Object)
+	 */
+	@Override
+	protected String getLabelText(Object element)
+	{
+		return (element == null ? "null" : "{...}");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.ui.property.ObjectTypePropertyController#getMainObjectTextConverter()
+	 */
+	@Override
+	protected IObjectTextConverter getMainObjectTextConverter()
+	{
+		return OBJECT_TEXT_CONVERTER;
 	}
 
 }
