@@ -114,7 +114,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	};
 
 	// for updating selection in editor when selection changes in IDE
-	private final RfbSelectionListener selectionListener = new RfbSelectionListener();
+	private RfbSelectionListener selectionListener;
 
 	// for reloading palette when components change
 	private final RfbWebResourceListener resourceChangedListener = new RfbWebResourceListener();
@@ -142,10 +142,13 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		// Serve requests for rfb editor
 		editorId = UUID.randomUUID().toString();
 		clientId = UUID.randomUUID().toString();
+
 		WebsocketSessionManager.addSession(editorWebsocketSession = new EditorWebsocketSession(editorId));
 		WebsocketSessionManager.addSession(designerWebsocketSession = new DesignerWebsocketSession(clientId, editorPart.getForm()));
+		selectionListener = new RfbSelectionListener(editorPart.getForm(), editorWebsocketSession);
+		getSite().setSelectionProvider(selectionProvider);
+		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(selectionListener);
 		editorWebsocketSession.registerServerService("formeditor", new EditorServiceHandler(editorPart, selectionProvider, selectionListener, fieldPositioner));
-		selectionListener.setEditorWebsocketSession(editorWebsocketSession);
 		resourceChangedListener.setEditorWebsocketSession(editorWebsocketSession);
 		try
 		{
@@ -242,8 +245,6 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException
 	{
 		super.init(site, input);
-		site.setSelectionProvider(selectionProvider);
-		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(selectionListener);
 	}
 
 	@Override
@@ -251,6 +252,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	{
 		super.dispose();
 		getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(selectionListener);
+		getSite().setSelectionProvider(null);
 		WebsocketSessionManager.removeSession(editorWebsocketSession.getUuid());
 		WebsocketSessionManager.removeSession(designerWebsocketSession.getUuid());
 	}

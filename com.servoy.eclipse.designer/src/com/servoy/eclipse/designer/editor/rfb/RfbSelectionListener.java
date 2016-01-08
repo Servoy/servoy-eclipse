@@ -23,10 +23,14 @@ import java.util.List;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -35,11 +39,15 @@ import com.servoy.j2db.util.Utils;
  */
 public class RfbSelectionListener implements ISelectionListener
 {
-	private EditorWebsocketSession editorWebsocketSession;
+	private final EditorWebsocketSession editorWebsocketSession;
 	private List<String> lastSelection = new ArrayList<String>();
+	private final Form form;
+	private ISelection currentSelection;
 
-	public RfbSelectionListener()
+	public RfbSelectionListener(Form form, EditorWebsocketSession editorWebsocketSession)
 	{
+		this.form = form;
+		this.editorWebsocketSession = editorWebsocketSession;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -48,29 +56,29 @@ public class RfbSelectionListener implements ISelectionListener
 	{
 		if (selection instanceof IStructuredSelection)
 		{
-			final List<String> uuids = getPersistUUIDS((IStructuredSelection)selection);
-			if (uuids.size() > 0 && (uuids.size() != lastSelection.size() || !uuids.containsAll(lastSelection)))
-			{
-				lastSelection = uuids;
-				editorWebsocketSession.getEventDispatcher().addEvent(new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						editorWebsocketSession.getClientService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("updateSelection",
-							new Object[] { uuids.toArray() });
-					}
-				});
-			}
-		}
-	}
+			currentSelection = selection;
 
-	/**
-	 * @param editorWebsocketSession the editorWebsocketSession to set
-	 */
-	public void setEditorWebsocketSession(EditorWebsocketSession editorWebsocketSession)
-	{
-		this.editorWebsocketSession = editorWebsocketSession;
+			Display.getCurrent().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					final List<String> uuids = getPersistUUIDS((IStructuredSelection)currentSelection);
+					if (uuids != null && (uuids.size() > 0 && (uuids.size() != lastSelection.size() || !uuids.containsAll(lastSelection))))
+					{
+						lastSelection = uuids;
+						editorWebsocketSession.getEventDispatcher().addEvent(new Runnable()
+						{
+							@Override
+							public void run()
+							{
+								editorWebsocketSession.getClientService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("updateSelection",
+									new Object[] { uuids.toArray() });
+							}
+						});
+					}
+				}
+			});
+		}
 	}
 
 	/**
@@ -79,19 +87,44 @@ public class RfbSelectionListener implements ISelectionListener
 	 */
 	private List<String> getPersistUUIDS(IStructuredSelection selection)
 	{
+		// ignore persist that are not from the current form.
+		boolean forCurrentForm = false;
 		final List<String> uuids = new ArrayList<String>();
 		for (Object sel : Utils.iterate(selection.iterator()))
 		{
-			IPersist persist = (IPersist)Platform.getAdapterManager().getAdapter(sel, IPersist.class);
+			IPersist persist = Platform.getAdapterManager().getAdapter(sel, IPersist.class);
 			if (persist != null)
 			{
-				/*
-				 * if (persist instanceof WebCustomType) { WebCustomType ghostBean = (WebCustomType)persist; uuids.add(ghostBean.getUUIDString()); } else
-				 */
-				uuids.add(persist.getUUID().toString());
+				IPersist ancestor = persist.getAncestor(IRepository.FORMS);
+				if (form.getID() == ancestor.getID())
+				{
+					/*
+					 * if (persist instanceof WebCustomType) { WebCustomType ghostBean = (WebCustomType)persist; uuids.add(ghostBean.getUUIDString()); } else
+					 */
+					uuids.add(persist.getUUID().toString());
+					forCurrentForm = true;
+				}
+				else
+				{
+					List<Form> formHierarchy = ServoyModelFinder.getServoyModel().getActiveProject().getFlattenedSolution().getFormHierarchy(form);
+					if (formHierarchy.contains(ancestor))
+					{
+						uuids.add(persist.getUUID().toString());
+						forCurrentForm = true;
+					}
+				}
 			}
 		}
-		return uuids;
+		return forCurrentForm ? uuids : null;
+	}
+
+	/**
+	 * @param lastSelection the lastSelection to set
+	 */
+	public void setLastSelection(IStructuredSelection selection)
+	{
+		List<String> persistUUIDS = getPersistUUIDS(selection);
+		this.lastSelection = persistUUIDS != null ? persistUUIDS : lastSelection;
 	}
 
 }
