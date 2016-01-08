@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import com.servoy.eclipse.ui.property.ColorPropertyController;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.resource.ColorResource;
 
 /**
@@ -68,6 +69,10 @@ public class ColorCellEditor extends TextDialogCellEditor
 	protected Object doGetValue()
 	{
 		Object val = super.doGetValue();
+		if (val instanceof String)
+		{
+			val = PersistPropertySource.DEFAULT_STRING_CONVERTER.convertValue(null, (String)val);
+		}
 		if (val instanceof String)
 		{
 			// convert to color and back so that 'blue' is converted to '#0000ff'.
