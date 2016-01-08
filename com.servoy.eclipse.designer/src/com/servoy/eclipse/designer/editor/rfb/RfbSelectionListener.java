@@ -37,7 +37,6 @@ public class RfbSelectionListener implements ISelectionListener
 {
 	private EditorWebsocketSession editorWebsocketSession;
 	private List<String> lastSelection = new ArrayList<String>();
-	private boolean ignoreSelectionChange = false;
 
 	public RfbSelectionListener()
 	{
@@ -47,7 +46,7 @@ public class RfbSelectionListener implements ISelectionListener
 	@Override
 	public void selectionChanged(IWorkbenchPart part, ISelection selection)
 	{
-		if (selection instanceof IStructuredSelection && !ignoreSelectionChange)
+		if (selection instanceof IStructuredSelection)
 		{
 			final List<String> uuids = getPersistUUIDS((IStructuredSelection)selection);
 			if (uuids.size() > 0 && (uuids.size() != lastSelection.size() || !uuids.containsAll(lastSelection)))
@@ -83,7 +82,7 @@ public class RfbSelectionListener implements ISelectionListener
 		final List<String> uuids = new ArrayList<String>();
 		for (Object sel : Utils.iterate(selection.iterator()))
 		{
-			IPersist persist = Platform.getAdapterManager().getAdapter(sel, IPersist.class);
+			IPersist persist = (IPersist)Platform.getAdapterManager().getAdapter(sel, IPersist.class);
 			if (persist != null)
 			{
 				/*
@@ -95,11 +94,4 @@ public class RfbSelectionListener implements ISelectionListener
 		return uuids;
 	}
 
-	/**
-	 * @param ignoreSelectionChange
-	 */
-	public void ignoreSelectionChange(boolean ignore)
-	{
-		this.ignoreSelectionChange = ignore;
-	}
 }
