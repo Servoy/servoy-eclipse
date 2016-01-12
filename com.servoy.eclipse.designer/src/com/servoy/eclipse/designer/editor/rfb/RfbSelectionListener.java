@@ -96,6 +96,7 @@ public class RfbSelectionListener implements ISelectionListener
 			if (persist != null)
 			{
 				IPersist ancestor = persist.getAncestor(IRepository.FORMS);
+				if (ancestor == null) continue;
 				if (form.getID() == ancestor.getID())
 				{
 					/*
