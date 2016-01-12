@@ -132,8 +132,11 @@ public class CustomJSONObjectTypePropertyController extends JSONObjectTypeProper
 		public Object setComplexPropertyValue(Object id, Object v)
 		{
 			Object val = ServoyJSONObject.adjustJavascriptNULLForOrgJSON(v);
-			PDPropertySource underlying = getUnderlyingPropertySource();
-			if (underlying != null) underlying.setPropertyValue(id, val);
+			Object editableValue = getEditableValue();
+			if (editableValue instanceof JSONObject)
+			{
+				((JSONObject)editableValue).put(id.toString(), val);
+			}
 			return getEditableValue();
 		}
 

@@ -115,7 +115,7 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 				Object val = ServoyJSONObject.adjustJavascriptNULLForOrgJSON(value);
 				((JSONArray)newValue).put(idx, val);
 
-				defaultElementWasSet(newValue);
+//				defaultElementWasSet(newValue);
 			}
 			catch (JSONException e)
 			{
