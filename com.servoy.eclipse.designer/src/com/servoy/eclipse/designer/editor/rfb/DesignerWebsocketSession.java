@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.json.JSONObject;
@@ -53,6 +55,7 @@ import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
+import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
 import com.servoy.j2db.server.ngclient.template.FormWrapper;
 import com.servoy.j2db.server.ngclient.template.IFormElementValidator;
 import com.servoy.j2db.server.ngclient.template.PartWrapper;
@@ -165,30 +168,48 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			}
 			case "getTemplate" :
 			{
-				String name = args.getString("name");
+				String name = args.optString("name", null);
 				boolean highlight = !args.isNull("highlight") && args.getBoolean("highlight");
 				StringWriter htmlTemplate = new StringWriter(512);
 				PrintWriter w = new PrintWriter(htmlTemplate);
 				UUID parentuuid = null;
 				UUID insertBeforeUUID = null;
 
-				Collection<BaseComponent> baseComponents = wrapper.getBaseComponents();
 				boolean componentFound = false;
-				for (BaseComponent baseComponent : baseComponents)
+				if (name != null)
 				{
-					FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
-					if (fe.getName().equals(name))
+					Collection<BaseComponent> baseComponents = wrapper.getBaseComponents();
+					for (BaseComponent baseComponent : baseComponents)
 					{
-						if (!form.isResponsiveLayout()) FormLayoutGenerator.generateFormElementWrapper(w, fe, true, flattenedForm);
-						FormLayoutGenerator.generateFormElement(w, fe, flattenedForm, true, highlight);
-						if (!form.isResponsiveLayout()) FormLayoutGenerator.generateEndDiv(w);
-						if (form.isResponsiveLayout())
+						FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
+						if (fe.getName().equals(name))
 						{
-							parentuuid = fe.getPersistIfAvailable().getParent().getUUID();
-							insertBeforeUUID = findNextSibling(fe);
+							if (!form.isResponsiveLayout()) FormLayoutGenerator.generateFormElementWrapper(w, fe, true, flattenedForm);
+							FormLayoutGenerator.generateFormElement(w, fe, flattenedForm, true, highlight);
+							if (!form.isResponsiveLayout()) FormLayoutGenerator.generateEndDiv(w);
+							if (form.isResponsiveLayout())
+							{
+								parentuuid = fe.getPersistIfAvailable().getParent().getUUID();
+								insertBeforeUUID = findNextSibling(fe.getPersistIfAvailable());
+							}
+							componentFound = true;
+							break;
 						}
-						componentFound = true;
-						break;
+					}
+				}
+				else
+				{
+					String layoutId = args.optString("layoutId");
+					if (layoutId != null)
+					{
+						IPersist child = flattenedForm.findChild(UUID.fromString(layoutId));
+						if (child instanceof LayoutContainer)
+						{
+							componentFound = true;
+							parentuuid = child.getParent().getUUID();
+							insertBeforeUUID = findNextSibling(child);
+							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context, w, true, highlight);
+						}
 					}
 				}
 				// no component is found, very likely a ghost, re render those
@@ -246,14 +267,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	 * @param fe
 	 * @return
 	 */
-	private UUID findNextSibling(FormElement fe)
+	private UUID findNextSibling(IPersist persist)
 	{
-		if (fe.getPersistIfAvailable() != null && fe.getPersistIfAvailable().getParent() instanceof LayoutContainer)
+		if (persist != null && persist.getParent() instanceof LayoutContainer)
 		{
-			LayoutContainer layoutContainer = (LayoutContainer)fe.getPersistIfAvailable().getParent();
+			LayoutContainer layoutContainer = (LayoutContainer)persist.getParent();
 			List<IPersist> hierarchyChildren = layoutContainer.getHierarchyChildren();
 			Collections.sort(hierarchyChildren, PositionComparator.XY_PERSIST_COMPARATOR);
-			int indexOf = hierarchyChildren.indexOf(fe.getPersistIfAvailable());
+			int indexOf = hierarchyChildren.indexOf(persist);
 			if (indexOf > -1 && (indexOf + 1) < hierarchyChildren.size()) return hierarchyChildren.get(indexOf + 1).getUUID();
 		}
 		return null;
@@ -264,6 +285,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		Set<BaseComponent> baseComponents = new HashSet<>();
 		Set<BaseComponent> deletedComponents = new HashSet<>();
 		Set<Part> parts = new HashSet<>();
+		Set<LayoutContainer> containers = new HashSet<>();
 		boolean renderGhosts = false;
 		for (IPersist persist : persists)
 		{
@@ -303,6 +325,10 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			{
 				parts.add((Part)persist);
 			}
+			else if (persist instanceof LayoutContainer)
+			{
+				containers.add((LayoutContainer)persist);
+			}
 			else if (!(persist instanceof Form))
 			{
 				// if it is not a base component then it is a child thing, very likely the ghost must be refreshed.
@@ -331,6 +357,25 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		if (parts.size() > 0)
 		{
 			generateParts(fs.getFlattenedForm(form), new ServoyDataConverterContext(fs), writer, parts);
+		}
+		if (containers.size() > 0)
+		{
+			writer.key("containers");
+			writer.object();
+			for (LayoutContainer container : containers)
+			{
+				// TODO what the send over, if new then just the id? but what about the properties?
+				Map<String, String> attributes = container.getAttributes();
+				writer.key(container.getUUID().toString());
+				writer.object();
+				for (Entry<String, String> attribute : attributes.entrySet())
+				{
+					writer.key(attribute.getKey());
+					writer.value(attribute.getValue());
+				}
+				writer.endObject();
+			}
+			writer.endObject();
 		}
 		writer.endObject();
 		return writer.toString();

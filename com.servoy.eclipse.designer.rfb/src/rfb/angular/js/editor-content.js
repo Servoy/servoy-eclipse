@@ -220,7 +220,7 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
     },
     updateFormData: function(updates) {
       var data = JSON.parse(updates);
-      if (data && (data.components || data.deleted || data.renderGhosts || data.parts)) {
+      if (data && (data.components || data.deleted || data.renderGhosts || data.parts || data.containers)) {
         // TODO should it be converted??
         $rootScope.$apply(function() {
           for (var name in data.components) {
@@ -245,15 +245,7 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
             } else {
               formData.components[name] = newCompData;
             }
-            // always test if the model is really already initialized.
-            // if not then there is no template yet.
-            if (!$rootScope.getDesignFormControllerScope().model(name,true)) {
-              var highlight = $webSocket.getURLParameter("highlight");
-              var promise = $sabloApplication.callService("$editor", "getTemplate", {
-                name: name,
-                highlight: highlight
-              }, false);
-              promise.then(function(data) {
+            function handleTemplate(data) {
                 // append the template
                 var json = JSON.parse(data);
                 if (json.renderGhosts) {
@@ -276,7 +268,16 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
                 }
                 else
                     parent.append(tpl)
-              })
+              }
+            // always test if the model is really already initialized.
+            // if not then there is no template yet.
+            if (!$rootScope.getDesignFormControllerScope().model(name,true)) {
+              var highlight = $webSocket.getURLParameter("highlight");
+              var promise = $sabloApplication.callService("$editor", "getTemplate", {
+                name: name,
+                highlight: highlight
+              }, false);
+              promise.then(handleTemplate)
 
             }
             var compLayout = layoutData[name];
@@ -299,6 +300,22 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
         	  var scope = $rootScope.getDesignFormControllerScope();
         	  for(var name in data.parts) {
         		  scope[name] = JSON.parse(data.parts[name]);
+        	  }
+          }
+          if (data.containers) {
+        	  for(var key in data.containers) {
+        		  var element = angular.element(document.querySelectorAll("[svy-id='"+key+"']"));
+        		  if (element && element.length > 0) {
+        			  // TODO just update the attributes?
+        		  }
+        		  else {
+        			var highlight = $webSocket.getURLParameter("highlight");
+					var promise = $sabloApplication.callService("$editor", "getTemplate", {
+					layoutId: key,
+					highlight: highlight
+					}, false);
+					promise.then(handleTemplate)
+        		  }
         	  }
           }
           renderDecorators();
