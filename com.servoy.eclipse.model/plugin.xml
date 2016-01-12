@@ -550,6 +550,17 @@
       </persistent>
    </extension>
    <extension
+         id="com.servoy.eclipse.core.lingeringTableFiles"
+         name="Lingering table files"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="com.servoy.eclipse.core.servoyProblem">
+      </super>
+      <persistent
+            value="false">
+      </persistent>
+   </extension>
+   <extension
          id="com.servoy.eclipse.core.servoyProblem"
          name="Base marker type for all Servoy markers."
          point="org.eclipse.core.resources.markers">
