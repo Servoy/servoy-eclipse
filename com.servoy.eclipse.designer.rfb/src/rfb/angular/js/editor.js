@@ -536,7 +536,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 
 			$scope.refreshEditorContent = function() {
 				if (editorContentRootScope) {
-					editorContentRootScope.$digest();
+					// TODO this digest makes it slow when moving, do we really need this?
+					//editorContentRootScope.$digest();
 					$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_MOVED, selection)
 				}
 			}
