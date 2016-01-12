@@ -17,16 +17,10 @@
 
 package com.servoy.eclipse.designer.editor.rfb.property.types;
 
-import org.json.JSONException;
-import org.json.JSONWriter;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.property.IBrowserConverterContext;
-import org.sablo.websocket.utils.DataConversion;
-import org.sablo.websocket.utils.JSONUtils;
 
-import com.servoy.eclipse.designer.editor.rfb.DesignerNGUtils;
+import com.servoy.j2db.server.ngclient.FormElementContext;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
-import com.servoy.j2db.server.ngclient.property.types.DataproviderTypeSabloValue;
 
 /**
  * @author lvostinar
@@ -37,15 +31,10 @@ public class DesignerDataproviderPropertyType extends DataproviderPropertyType
 	public static final DesignerDataproviderPropertyType DESIGNER_INSTANCE = new DesignerDataproviderPropertyType();
 
 	@Override
-	public JSONWriter toJSON(JSONWriter writer, String key, DataproviderTypeSabloValue sabloValue, PropertyDescription pd, DataConversion clientConversion,
-		IBrowserConverterContext dataConverterContext) throws JSONException
+	public boolean valueInTemplate(String object, PropertyDescription pd, FormElementContext formElementContext)
 	{
-		if (!DesignerNGUtils.shouldShowData(dataConverterContext))
-		{
-			JSONUtils.addKeyIfPresent(writer, key);
-			writer.value(null);
-			return writer;
-		}
-		return super.toJSON(writer, key, sabloValue, pd, clientConversion, dataConverterContext);
+		// TODO return true here for sample data?
+		return super.valueInTemplate(object, pd, formElementContext);
 	}
+
 }
