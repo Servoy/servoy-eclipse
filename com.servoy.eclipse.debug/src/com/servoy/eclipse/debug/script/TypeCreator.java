@@ -460,7 +460,7 @@ public class TypeCreator extends TypeCache
 	private void createSpecTypeDefinitions()
 	{
 		WebComponentSpecification[] webComponentSpecifications = WebComponentSpecProvider.getInstance().getAllWebComponentSpecifications();
-		WebComponentSpecification[] webServiceSpecifications = NGUtils.getAllNonServoyWebServiceSpecifications();
+		WebComponentSpecification[] webServiceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList();
 		Collection<WebComponentSpecification> specs = new ArrayList<WebComponentSpecification>();
 		Collections.addAll(specs, webComponentSpecifications);
 		Collections.addAll(specs, webServiceSpecifications);
@@ -1077,8 +1077,8 @@ public class TypeCreator extends TypeCache
 				continue;
 			}
 			String name = pd.getName();
-			// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
-			// and skip the dataprovider properties (those are not accesable through scripting)
+			// skip the default ones added by servoy, see WebComponentPackage.getWebComponentDescriptions()
+			// and skip the dataprovider properties (those are not accessible through scripting)
 			if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && !(pd.getType() instanceof DataproviderPropertyType))
 			{
 				JSType memberType = getType(context, pd);
@@ -2763,7 +2763,7 @@ public class TypeCreator extends TypeCache
 			ClientSupport clientSupport = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
 			if (clientSupport != null && clientSupport.supports(ClientSupport.ng))
 			{
-				WebComponentSpecification[] serviceSpecifications = NGUtils.getAllNonServoyWebServiceSpecifications();
+				WebComponentSpecification[] serviceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList();
 				for (WebComponentSpecification spec : serviceSpecifications)
 				{
 					if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)
@@ -2886,6 +2886,7 @@ public class TypeCreator extends TypeCache
 	}
 
 	private final static Map<String, Class< ? >> QUERY_BUILDER_CLASSES = new ConcurrentHashMap<String, Class< ? >>();
+
 	static
 	{
 		addClass(QBAggregate.class);

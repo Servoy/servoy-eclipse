@@ -753,8 +753,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							IResource resource = getResource(entry.getValue());
 							if (resource != null)
 							{
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(entry.getKey(), UserNodeType.COMPONENTS_PACKAGE, resource,
-									packageIcon);
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(provider.getPackageDisplayName(entry.getKey()),
+									UserNodeType.COMPONENTS_PACKAGE, resource, packageIcon);
 								node.parent = un;
 								children.add(node);
 							}
@@ -764,7 +764,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					else if (type == UserNodeType.COMPONENTS_PACKAGE)
 					{
 						WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
-						List<String> components = new ArrayList<>(provider.getComponentsInPackage(un.getName()));
+						String packageName = provider.getPackageName(un.getName());
+						List<String> components = new ArrayList<>(provider.getComponentsInPackage(packageName));
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (components.size() > 0)
 						{
@@ -782,7 +783,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 								children.add(node);
 							}
 						}
-						List<String> layouts = new ArrayList<>(provider.getLayoutsInPackage(un.getName()));
+						List<String> layouts = new ArrayList<>(provider.getLayoutsInPackage(packageName));
 						if (layouts.size() > 0)
 						{
 							Collections.sort(layouts);
@@ -791,7 +792,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							Image componentIcon = uiActivator.loadImageFromBundle("bean.gif");
 							for (String layout : layouts)
 							{
-								WebLayoutSpecification spec = provider.getLayoutSpecifications().get(un.getName()).getSpecification(layout);
+								WebLayoutSpecification spec = provider.getLayoutSpecifications().get(packageName).getSpecification(layout);
 								Image img = loadImageFromFolder(folder, spec.getIcon());
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec,
 									img != null ? img : componentIcon);
@@ -812,7 +813,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							IResource resource = getResource(entry.getValue());
 							if (resource != null)
 							{
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(entry.getKey(), UserNodeType.SERVICES_PACKAGE, resource, packageIcon);
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(provider.getPackageDisplayName(entry.getKey()),
+									UserNodeType.SERVICES_PACKAGE, resource, packageIcon);
 								node.parent = un;
 								children.add(node);
 							}
@@ -822,7 +824,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					else if (type == UserNodeType.SERVICES_PACKAGE)
 					{
 						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
-						WebComponentPackageSpecification<WebComponentSpecification> servicesPackage = provider.getServicesInPackage(un.getName());
+						String packageName = provider.getPackageName(un.getName());
+						WebComponentPackageSpecification<WebComponentSpecification> servicesPackage = provider.getServicesInPackage(packageName);
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (servicesPackage != null)
 						{
@@ -978,12 +981,13 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 				else if (un.getType() == UserNodeType.COMPONENTS_PACKAGE)
 				{
-					return !WebComponentSpecProvider.getInstance().getComponentsInPackage(un.getName()).isEmpty();
+					return !WebComponentSpecProvider.getInstance().getComponentsInPackage(
+						WebComponentSpecProvider.getInstance().getPackageName(un.getName())).isEmpty();
 				}
 				else if (un.getType() == UserNodeType.SERVICES_PACKAGE)
 				{
 					WebComponentPackageSpecification<WebComponentSpecification> services = WebServiceSpecProvider.getInstance().getServicesInPackage(
-						un.getName());
+						WebServiceSpecProvider.getInstance().getPackageName(un.getName()));
 					return services != null && !services.getSpecifications().isEmpty();
 				}
 			}
@@ -1155,7 +1159,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					node.parent = pluginNode;
 				}
 			}
-			WebComponentSpecification[] serviceSpecifications = NGUtils.getAllNonServoyWebServiceSpecifications();
+			WebComponentSpecification[] serviceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList();
 			Arrays.sort(serviceSpecifications, new Comparator<WebComponentSpecification>()
 			{
 				@Override

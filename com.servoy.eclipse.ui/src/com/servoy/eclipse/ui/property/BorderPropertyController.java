@@ -270,10 +270,10 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			@Override
 			public Border convertValue(Object id, Object value)
 			{
-				if (value instanceof Integer)
+				if (value instanceof BorderType)
 				{
 					// border type selected from dropdown
-					BorderType borderType = comboboxController.getConverter().convertValue(null, (Integer)value);
+					BorderType borderType = (BorderType)value;
 					ComplexProperty<Border> oldValue = (ComplexProperty<Border>)propertySource.getPropertyValue(id);
 					if (getBorderTypeConstant(oldValue.getValue()) == borderType)
 					{
@@ -339,12 +339,19 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 				}
 				super.doSetValue(comboboxController.getConverter().convertProperty(null, getBorderTypeConstant(border)));
 			}
+
+			@Override
+			protected Object doGetValue()
+			{
+				return getConverter().convertValue(BorderPropertyController.this.getId(),
+					comboboxController.getConverter().convertValue(null, (Integer)super.doGetValue()));
+			}
 		};
 	}
 
 	/*
 	 * Border source property implementations
-	 *
+	 * 
 	 * @author rgansevles
 	 */
 

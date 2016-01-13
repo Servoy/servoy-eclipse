@@ -78,6 +78,7 @@ import com.servoy.eclipse.model.extensions.IMarkerAttributeContributor;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
@@ -309,6 +310,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String SERVER_CLONE_CYCLE_TYPE = _PREFIX + ".serverCloneCycle";
 	public static final String DEPRECATED_ELEMENT_USAGE = _PREFIX + ".deprecatedElementUsage";
 	public static final String ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE = _PREFIX + ".elementExtendsDeletedElement";
+	public static final String LINGERING_TABLE_FILES_TYPE = _PREFIX + ".lingeringTableFiles";
 
 
 	// warning/error level settings keys/defaults
@@ -381,6 +383,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> DBI_FILE_MISSING = new Pair<String, ProblemSeverity>("DBIFileMissing", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> DBI_COLUMN_INFO_SEQ_TYPE_OVERRIDE = new Pair<String, ProblemSeverity>("DBIColumnSequenceTypeOverride",
 		ProblemSeverity.WARNING);
+	public static final Pair<String, ProblemSeverity> LINGERING_TABLE_FILES = new Pair<String, ProblemSeverity>("LingeringTableFiles", ProblemSeverity.ERROR);
 
 	// column problems
 	public final static Pair<String, ProblemSeverity> COLUMN_UUID_FLAG_NOT_SET = new Pair<String, ProblemSeverity>("ColumnUUIDFlagNotSet",
@@ -1800,6 +1803,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, SERVER_CLONE_CYCLE_TYPE);
 		deleteMarkers(project, DEPRECATED_ELEMENT_USAGE);
 		deleteMarkers(project, ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE);
+		deleteMarkers(project, LINGERING_TABLE_FILES_TYPE);
 
 		try
 		{
@@ -1840,6 +1844,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				refreshDBIMarkers();
 				checkPersistDuplication();
 				checkServers(project);
+				checkDataSources(project);
 
 				final Solution solution = servoyProject.getSolution();
 				if (servoyModel.getActiveProject().getSolution().getName().equals(solution.getName()))
@@ -4818,7 +4823,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 				if (styleName != null)
 				{
-					if (!"_servoy_mobile".equals(styleName))// internal style for mobile
+					if (!"_servoy_mobile".equals(styleName)) // internal style for mobile
 					{
 						Style style = null;
 						try
@@ -5405,6 +5410,55 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		catch (CoreException e)
 		{
 			ServoyLog.logError("Exception while reading referenced projects for " + project.getName(), e);
+		}
+	}
+
+	private void checkDataSources(IProject project)
+	{
+		ServoyProject activeProject = getServoyModel().getActiveProject();
+		if (activeProject != null && activeProject.getProject().getName().equals(project.getName()) && getServoyModel().getDataModelManager() != null)
+		{
+			final DataModelManager dm = getServoyModel().getDataModelManager();
+			ServoyProject[] modules = ServoyModelFinder.getServoyModel().getModulesOfActiveProjectWithImportHooks();
+			IPersistVisitor visitor = new IPersistVisitor()
+			{
+
+				@Override
+				public Object visit(IPersist o)
+				{
+					if (o instanceof TableNode)
+					{
+						TableNode node = (TableNode)o;
+						IFile f = dm.getDBIFile(node.getDataSource());
+						if (f == null || !f.exists())
+						{
+							String parentName = ((Solution)node.getParent()).getSolutionMetaData().getName();
+							ServoyMarker mk = MarkerMessages.LingeringTableFiles.fill(node.getTableName());
+							IMarker marker = addMarker(getServoyModel().getServoyProject(parentName).getProject(), mk.getType(), mk.getText(), -1,
+								LINGERING_TABLE_FILES, IMarker.PRIORITY_NORMAL, null, node);
+							try
+							{
+								marker.setAttribute("Uuid", node.getUUID().toString());
+								marker.setAttribute("SolutionName", parentName);
+							}
+							catch (CoreException e)
+							{
+								Debug.error(e);
+							}
+
+						}
+					}
+					if (o instanceof Form)
+					{
+						return CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+					}
+					return CONTINUE_TRAVERSAL;
+				}
+			};
+			for (ServoyProject module : modules)
+			{
+				module.getEditingSolution().acceptVisitor(visitor);
+			}
 		}
 	}
 

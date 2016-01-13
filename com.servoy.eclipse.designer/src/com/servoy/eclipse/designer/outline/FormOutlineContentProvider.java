@@ -151,6 +151,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 					list.add(PersistContext.create(ghost, ((PersistContext)parentElement).getContext()));
 				}
 			}
+			if (form.isResponsiveLayout()) return list.toArray();
 			return new SortedList(comparator, list).toArray();
 		}
 		else if (parentElement instanceof FormElementGroup)

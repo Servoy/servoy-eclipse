@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.websocket.CloseReason;
+import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.EncodeException;
 import javax.websocket.Extension;
 import javax.websocket.MessageHandler;
@@ -134,7 +135,7 @@ public class SwtWebsocket
 
 	private void close()
 	{
-		websocketEndpoint.onClose();
+		websocketEndpoint.onClose(new CloseReason(CloseCodes.NORMAL_CLOSURE, "swt websocket close"));
 	}
 
 	public static void installFakeWebSocket(final Browser browser)
