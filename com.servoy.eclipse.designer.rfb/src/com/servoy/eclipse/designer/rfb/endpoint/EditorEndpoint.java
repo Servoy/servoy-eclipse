@@ -20,6 +20,7 @@ package com.servoy.eclipse.designer.rfb.endpoint;
 
 import java.io.IOException;
 
+import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -48,8 +49,7 @@ public class EditorEndpoint extends WebsocketEndpoint
 	}
 
 	@OnOpen
-	public void start(Session newSession, @PathParam("editorid")
-	String editorid) throws Exception
+	public void start(Session newSession, @PathParam("editorid") String editorid) throws Exception
 	{
 		super.start(newSession, editorid, null, null);
 	}
@@ -63,11 +63,12 @@ public class EditorEndpoint extends WebsocketEndpoint
 
 	@Override
 	@OnClose
-	public void onClose()
+	public void onClose(CloseReason closeReason)
 	{
-		super.onClose();
+		super.onClose(closeReason);
 	}
 
+	@Override
 	@OnError
 	public void onError(Throwable t)
 	{
