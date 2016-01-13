@@ -39,14 +39,13 @@ import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.ConvertingCellEditor.ICellEditorConverter;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 import com.servoy.j2db.util.IDelegate;
-import com.servoy.j2db.util.ServoyJSONArray;
 
 /**
  * Property controller to be used in properties view for custom json arrays.
  *
  * @author acostescu
  */
-public abstract class ArrayTypePropertyController extends PropertyController<Object, Object> implements IPropertySetter<Object, ISetterAwarePropertySource>
+public abstract class ArrayTypePropertyController extends PropertyController<Object, Object>implements IPropertySetter<Object, ISetterAwarePropertySource>
 {
 
 	protected ILabelProvider labelProvider = null;
@@ -119,17 +118,17 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 	public CellEditor createPropertyEditor(Composite parent)
 	{
 		ComposedCellEditor cellEditor = new ComposedCellEditor(new ConvertorObjectCellEditor(getMainObjectTextConverter()), new ComposedCellEditor(
-			new ButtonCellEditor()
+				new ButtonCellEditor()
 			{
 
 				@Override
 				protected void updateButtonState(Button buttonWidget, Object value)
 				{
 					buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(
-						isNotSet(value) ? ISharedImages.IMG_OBJ_ADD : ISharedImages.IMG_ETOOL_CLEAR));
-					buttonWidget.setEnabled(true);
-					buttonWidget.setToolTipText(isNotSet(value) ? "Creates an empty property value '[]' to be able to expand node."
-						: "Clears the property value.");
+							isNotSet(value) ? ISharedImages.IMG_OBJ_ADD : ISharedImages.IMG_ETOOL_CLEAR));
+						buttonWidget.setEnabled(true);
+						buttonWidget.setToolTipText(isNotSet(value) ? "Creates an empty property value '[]' to be able to expand node."
+							: "Clears the property value.");
 				}
 
 				@Override
@@ -220,7 +219,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		return cellEditor;
 	}
 
-	protected abstract class ArrayPropertySource extends ComplexPropertySource<Object> implements ISetterAwarePropertySource
+	protected abstract class ArrayPropertySource extends ComplexPropertySource<Object>implements ISetterAwarePropertySource
 	{
 
 		protected IPropertyDescriptor[] elementPropertyDescriptors;
@@ -236,7 +235,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 
 		protected abstract Object insertNewElementAfterIndex(int idx);
 
-		protected abstract ServoyJSONArray deleteElementAtIndex(final int idx);
+		protected abstract Object deleteElementAtIndex(final int idx);
 
 		protected abstract Object setComplexElementValueImpl(int idx, Object v);
 

@@ -28,7 +28,7 @@ import com.servoy.j2db.FlattenedSolution;
  *
  * @author acostescu
  */
-public class CustomJSONArrayTypePropertyDescriptorFactory implements ITypePropertyDescriptorFactory
+public class CustomArrayTypePropertyDescriptorFactory implements ITypePropertyDescriptorFactory
 {
 
 	@Override

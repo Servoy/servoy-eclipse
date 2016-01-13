@@ -33,6 +33,7 @@ import com.servoy.eclipse.ui.property.ArrayTypePropertyController;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 import com.servoy.eclipse.ui.property.ISetterAwarePropertySource;
+import com.servoy.eclipse.ui.property.JSONArrayTypePropertyController.JSONArrayTextConverter;
 import com.servoy.eclipse.ui.property.PDPropertySource;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
@@ -55,6 +56,10 @@ import com.servoy.j2db.util.Utils;
 public class CustomArrayTypePropertyController extends ArrayTypePropertyController
 {
 
+	/**
+	 *
+	 */
+	private static final CustomArrayTextConverter CUSTOM_ARRAY_TEXT_CONVERTER = new CustomArrayTextConverter();
 	protected final PropertyDescription propertyDescription;
 	protected final PersistContext persistContext;
 
@@ -76,6 +81,14 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		// when user adds/inserts a new item in the array normally a null is inserted
 		// but for custom object properties most of the time the uses will want to have an object so that it can be directly expanded (without clicking one more time to make it {} from null)
 		return (getArrayElementPD().getType() instanceof CustomJSONObjectType< ? , ? >) ? new ServoyJSONObject() : JSONObject.NULL;
+
+//		PropertyDescription arrayElementPD = getArrayElementPD();
+//		if (arrayElementPD.getType() instanceof IPropertyType)
+//		{
+//			return arrayElementPD.getConfig();
+//		}
+//		return JSONObject.NULL;//TODO JSONObject.NULL ?
+
 	}
 
 	@Override
@@ -160,7 +173,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		@Override
 		public void defaultResetProperty(Object id)
 		{
-			// TODO Auto-generated method stub
+			defaultSetProperty(id, getDefaultElementProperty(id));
 
 		}
 
@@ -172,8 +185,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		@Override
 		protected Object insertNewElementAfterIndex(int idx)
 		{
-			// TODO Auto-generated method stub
-			return null;
+			return insertElementAtIndex(idx + 1, null, getEditableValue());
 		}
 
 		/*
@@ -182,10 +194,13 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayPropertySource#deleteElementAtIndex(int)
 		 */
 		@Override
-		protected ServoyJSONArray deleteElementAtIndex(int idx)
+		protected Object deleteElementAtIndex(int idx)
 		{
-			// TODO Auto-generated method stub
-			return null;
+			Object[] arrayValue = (Object[])getEditableValue();
+			Object[] newArrayValue = new Object[arrayValue.length - 1];
+			System.arraycopy(arrayValue, 0, newArrayValue, 0, idx);
+			System.arraycopy(arrayValue, idx + 1, newArrayValue, idx, arrayValue.length - idx - 1);
+			return newArrayValue;
 		}
 
 		/*
@@ -196,8 +211,9 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		@Override
 		protected void defaultSetElement(Object value, int idx)
 		{
-			// TODO Auto-generated method stub
-
+			if (idx < 0 || idx >= ((Object[])getEditableValue()).length) return;
+			((Object[])getEditableValue())[idx] = value;
+			defaultElementWasSet(value);
 		}
 
 		/*
@@ -208,8 +224,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		@Override
 		protected Object defaultGetElement(int idx)
 		{
-			// TODO Auto-generated method stub
-			return null;
+			return ((Object[])getEditableValue())[idx];
 		}
 
 		/*
@@ -220,8 +235,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		@Override
 		protected boolean defaultIsElementSet(int idx)
 		{
-			// TODO Auto-generated method stub
-			return false;
+			return ((Object[])getEditableValue()).length > idx;
 		}
 
 		/*
@@ -232,22 +246,19 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		@Override
 		protected Object resetComplexElementValue(Object id, int idx)
 		{
-			// TODO Auto-generated method stub
-			return null;
+			PersistPropertySource.adjustPropertyValueAndReset(id, getPropertyDescriptors()[idx], this);
+			return PersistPropertySource.adjustPropertyValueToGet(id, getPropertyDescriptors()[idx], this);
 		}
 
-		//TODO
-//		@Override
-//		protected void defaultElementWasSet(Object newMainValue)
-//		{
-//			((IBasicWebObject)persistContext.getPersist()).setJsonSubproperty(propertyDescription.getName(), newMainValue);
-//		}
-//
-//		@Override
-//		protected Object getDefaultElementProperty(Object id)
-//		{
-//			return getArrayElementPD().getDefaultValue();
-//		}
+		protected void defaultElementWasSet(Object newMainValue)
+		{
+			((IBasicWebObject)persistContext.getPersist()).setProperty(propertyDescription.getName(), newMainValue);
+		}
+
+		protected Object getDefaultElementProperty(Object id)
+		{
+			return getArrayElementPD().getDefaultValue();
+		}
 
 	}
 
@@ -294,8 +305,58 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	@Override
 	protected IObjectTextConverter getMainObjectTextConverter()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return CUSTOM_ARRAY_TEXT_CONVERTER;
+	}
+
+	static class CustomArrayTextConverter extends JSONArrayTextConverter
+	{
+		@Override
+		public String convertToString(Object value)
+		{
+			if (value instanceof Object[])
+			{
+				if (value instanceof IChildWebObject[])
+				{
+					IChildWebObject[] arr = (IChildWebObject[])value;
+					ServoyJSONArray json = new ServoyJSONArray();
+					for (IChildWebObject element : arr)
+					{
+						json.put(element.getFlattenedJson());
+					}
+					return super.convertToString(json);
+				}
+				return super.convertToString(new ServoyJSONArray(value));
+			}
+			return null;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see com.servoy.eclipse.ui.property.JSONArrayTypePropertyController.JSONArrayTextConverter#convertToObject(java.lang.String)
+		 */
+		@Override
+		public Object convertToObject(String value)
+		{
+			return super.convertToObject(value);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see com.servoy.eclipse.ui.property.JSONArrayTypePropertyController.JSONArrayTextConverter#isCorrectObject(java.lang.Object)
+		 */
+		@Override
+		public String isCorrectObject(Object value)
+		{
+			if (value instanceof Object[])
+			{
+				return super.isCorrectString(convertToString(value));
+			}
+			return null;
+		}
+
+
 	}
 
 	/*
@@ -306,8 +367,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	@Override
 	protected boolean isNotSet(Object value)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return value == null;
 	}
 
 	/*
@@ -318,7 +378,6 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	@Override
 	protected Object createEmptyPropertyValue()
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -330,8 +389,12 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	@Override
 	protected Object insertElementAtIndex(int i, Object elementValue, Object oldMainValue)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		Object[] arrayValue = (Object[])oldMainValue;
+		Object[] newArrayValue = new Object[arrayValue.length + 1];
+		System.arraycopy(arrayValue, 0, newArrayValue, 0, i);
+		newArrayValue[i] = elementValue;
+		System.arraycopy(arrayValue, i, newArrayValue, i + 1, arrayValue.length - i);
+		return newArrayValue;
 	}
 
 }
