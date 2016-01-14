@@ -87,7 +87,8 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 									if (persistContext.getPersist() instanceof IBasicWebComponent)
 									{
 										IBasicWebComponent parentBean = (IBasicWebComponent)ElementUtil.getOverridePersist(persistContext);
-										addCustomType(parentBean, event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property"), null);
+										addCustomType(parentBean, event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property"), null,
+											-1);
 										persist = parentBean;
 									}
 								}
@@ -263,9 +264,9 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 		return i;
 	}
 
-	public static WebCustomType addCustomType(IBasicWebComponent parentBean, String propertyName, String compName)
+	public static WebCustomType addCustomType(IBasicWebComponent parentBean, String propertyName, String compName, int arrayIndex)
 	{
-		int index = -1;
+		int index = arrayIndex;
 		WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getTypeName());
 		boolean isArray = spec.isArrayReturnType(propertyName);
 		PropertyDescription targetPD = spec.getProperty(propertyName);
@@ -278,14 +279,14 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			{
 				arrayValue = (IChildWebObject[])((WebComponent)parentBean).getProperty(propertyName);
 			}
-			index = arrayValue != null ? arrayValue.length : 0;
+			if (index == -1) index = arrayValue != null ? arrayValue.length : 0;
 		}
-		Pair<Integer, UUID> idAndUUID = WebObjectImpl.getNewIdAndUUID(parentBean);
-		WebCustomType bean = new WebCustomType(parentBean, targetPD, propertyName, index, true, idAndUUID.getLeft().intValue(), idAndUUID.getRight());
-		bean.setName(compName);
-		bean.setTypeName(typeName);
 		if (parentBean instanceof WebComponent)
 		{
+			Pair<Integer, UUID> idAndUUID = WebObjectImpl.getNewIdAndUUID(parentBean);
+			WebCustomType bean = new WebCustomType(parentBean, targetPD, propertyName, index, true, idAndUUID.getLeft().intValue(), idAndUUID.getRight());
+			bean.setName(compName);
+			bean.setTypeName(typeName);
 			if (isArray)
 			{
 				if (arrayValue == null)
@@ -294,15 +295,27 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 				}
 				else
 				{
-					IChildWebObject[] newArrayValue = new IChildWebObject[arrayValue.length + 1];
-					System.arraycopy(arrayValue, 0, newArrayValue, 0, arrayValue.length);
-					newArrayValue[arrayValue.length] = bean;
-					arrayValue = newArrayValue;
+					if (index > -1)
+					{
+						ArrayList<IChildWebObject> arrayList = new ArrayList<IChildWebObject>();
+						arrayList.addAll(Arrays.asList(arrayValue));
+						arrayList.add(index, bean);
+						arrayValue = arrayList.toArray(new IChildWebObject[arrayList.size()]);
+					}
+					else
+					{
+						IChildWebObject[] newArrayValue = new IChildWebObject[arrayValue.length + 1];
+						System.arraycopy(arrayValue, 0, newArrayValue, 0, arrayValue.length);
+						newArrayValue[arrayValue.length] = bean;
+						arrayValue = newArrayValue;
+					}
 				}
 				((WebComponent)parentBean).setProperty(propertyName, arrayValue);
 			}
 			else((WebComponent)parentBean).setProperty(propertyName, bean);
+
+			return bean;
 		}
-		return bean;
+		return null;
 	}
 }

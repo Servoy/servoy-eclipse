@@ -18,6 +18,7 @@
 package com.servoy.eclipse.designer.rfb.endpoint;
 
 
+import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -46,8 +47,7 @@ public class EditorContentEndpoint extends BaseNGClientEndpoint
 
 	@Override
 	@OnOpen
-	public void start(Session newSession, @PathParam("sessionid")
-	String sessionid, @PathParam("windowName")
+	public void start(Session newSession, @PathParam("sessionid") String sessionid, @PathParam("windowName")
 	final String windowName, @PathParam("windowid")
 	final String windowid) throws Exception
 	{
@@ -63,9 +63,9 @@ public class EditorContentEndpoint extends BaseNGClientEndpoint
 
 	@Override
 	@OnClose
-	public void onClose()
+	public void onClose(CloseReason closeReason)
 	{
-		super.onClose();
+		super.onClose(closeReason);
 	}
 
 	@Override

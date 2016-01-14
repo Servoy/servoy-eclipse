@@ -60,7 +60,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 	 * The values we are displaying/editing. These objects repesent the value of one of the properties of the values of our parent entry. Except for the root
 	 * entry where they represent the input (selected) objects.
 	 */
-	private Object[] values = new Object[0];
+	protected Object[] values = new Object[0];
 
 	/**
 	 * The property sources for the values we are displaying/editing.
@@ -71,7 +71,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 	 * The value of this entry is defined as the the first object in its value array or, if that object is an <code>IPropertySource</code>, the value it
 	 * returns when sent <code>getEditableValue</code>
 	 */
-	private Object editValue;
+	protected Object editValue;
 
 	private PropertySheetEntry parent;
 
@@ -79,7 +79,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 
 	private IPropertyDescriptor descriptor;
 
-	private CellEditor editor;
+	protected CellEditor editor;
 
 	private String errorText;
 
@@ -167,6 +167,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 			setValue(newValue);
 		}
 	}
+
 
 	/**
 	 * Return the unsorted intersection of all the <code>IPropertyDescriptor</code>s for the objects.
@@ -515,7 +516,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 
 		if (provider == null && object != null)
 		{
-			provider = (IPropertySourceProvider)ViewsPlugin.getAdapter(object, IPropertySourceProvider.class, false);
+			provider = ViewsPlugin.getAdapter(object, IPropertySourceProvider.class, false);
 		}
 
 		if (provider != null)
@@ -524,7 +525,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 		}
 		else
 		{
-			result = (IPropertySource)ViewsPlugin.getAdapter(object, IPropertySource.class, false);
+			result = ViewsPlugin.getAdapter(object, IPropertySource.class, false);
 		}
 
 		sources.put(object, result);
@@ -754,7 +755,7 @@ public class PropertySheetEntry extends EventManager implements IPropertySheetEn
 	/**
 	 * Set the error text. This should be set to null when the current value is valid, otherwise it should be set to a error string
 	 */
-	private void setErrorText(String newErrorText)
+	protected void setErrorText(String newErrorText)
 	{
 		errorText = newErrorText;
 		// inform listeners

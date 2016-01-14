@@ -439,7 +439,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 				}
 			}
 		});
-		if (persists.size() == 1)
+		if (persists != null && persists.size() == 1)
 		{
 			IPersist changedPersist = persists.get(0);
 			StructuredSelection selection = (StructuredSelection)selectionProvider.getSelection();

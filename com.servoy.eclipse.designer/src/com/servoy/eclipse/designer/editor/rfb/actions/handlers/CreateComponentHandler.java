@@ -168,8 +168,14 @@ public class CreateComponentHandler implements IServerService
 		int h = args.optInt("h");
 		if (args.has("type"))
 		{
-			// a ghost dragged from the pallete. it is defined in the "types" section of the .spec file
+			// a ghost dragged from the palette. it is defined in the "types" section of the .spec file
 			IPersist next = PersistFinder.INSTANCE.searchForPersist(editorPart, (String)args.get("dropTargetUUID"));
+			int arrayIndex = -1;
+			if (next instanceof IChildWebObject)
+			{
+				arrayIndex = ((IChildWebObject)next).getIndex();
+				next = next.getParent();
+			}
 			if (next instanceof BaseComponent)
 			{
 				if (next instanceof IBasicWebComponent)
@@ -181,7 +187,7 @@ public class CreateComponentHandler implements IServerService
 					{
 						compName = "bean_" + id.incrementAndGet();
 					}
-					WebCustomType bean = AddContainerCommand.addCustomType(parentBean, propertyName, compName);
+					WebCustomType bean = AddContainerCommand.addCustomType(parentBean, propertyName, compName, arrayIndex);
 					return new IPersist[] { bean };
 				}
 				else if (args.getString("type").equals("tab"))

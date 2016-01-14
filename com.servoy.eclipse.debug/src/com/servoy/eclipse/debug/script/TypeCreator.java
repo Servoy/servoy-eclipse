@@ -267,69 +267,69 @@ public class TypeCreator extends TypeCache
 
 	public static final String PLUGIN_TYPE_PREFIX = "plugins.";
 
-	protected final static ImageDescriptor METHOD = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
-		new Path("/icons/function.gif"), null));
-	protected final static ImageDescriptor PROPERTY = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
-		new Path("/icons/properties_icon.gif"), null));
-	protected final static ImageDescriptor CONSTANT = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
-		new Path("/icons/constant.gif"), null));
+	protected final static ImageDescriptor METHOD = ImageDescriptor.createFromURL(
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/function.gif"), null));
+	protected final static ImageDescriptor PROPERTY = ImageDescriptor.createFromURL(
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/properties_icon.gif"), null));
+	protected final static ImageDescriptor CONSTANT = ImageDescriptor.createFromURL(
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/constant.gif"), null));
 
-	protected final static ImageDescriptor ELEMENTS = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
-		new Path("/icons/elements.gif"), null));
+	protected final static ImageDescriptor ELEMENTS = ImageDescriptor.createFromURL(
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/elements.gif"), null));
 
-	protected final static ImageDescriptor SPECIAL_PROPERTY = ImageDescriptor.createFromURL(FileLocator.find(
-		com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/special_properties_icon.gif"), null));
+	protected final static ImageDescriptor SPECIAL_PROPERTY = ImageDescriptor.createFromURL(
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/special_properties_icon.gif"), null));
 
-	protected final static ImageDescriptor PUBLIC_GLOBAL_VAR_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
-		new Path("/icons/variable_public.gif"), null));
-	protected final static ImageDescriptor PRIVATE_GLOBAL_VAR_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
-		new Path("/icons/variable_private.gif"), null));
-	protected final static ImageDescriptor PUBLIC_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
-		new Path("/icons/public_method.gif"), null));
-	protected final static ImageDescriptor PROTECTED_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
-		new Path("/icons/protected_method.gif"), null));
-	protected final static ImageDescriptor PRIVATE_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
-		new Path("/icons/private_method.gif"), null));
+	protected final static ImageDescriptor PUBLIC_GLOBAL_VAR_IMAGE = ImageDescriptor.createFromURL(
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_public.gif"), null));
+	protected final static ImageDescriptor PRIVATE_GLOBAL_VAR_IMAGE = ImageDescriptor.createFromURL(
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_private.gif"), null));
+	protected final static ImageDescriptor PUBLIC_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/public_method.gif"), null));
+	protected final static ImageDescriptor PROTECTED_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/protected_method.gif"), null));
+	protected final static ImageDescriptor PRIVATE_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/private_method.gif"), null));
 
-	protected final static ImageDescriptor FORM_PUBLIC_METHOD_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
-		new Path("/icons/public_method.gif"), null));
-	protected final static ImageDescriptor FORM_PROTECTED_METHOD_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
-		new Path("/icons/protected_method.gif"), null));
-	protected final static ImageDescriptor FORM_PRIVATE_METHOD_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
-		new Path("/icons/private_method.gif"), null));
-	protected final static ImageDescriptor FORM_PUBLIC_VARIABLE_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
-		new Path("/icons/variable_public.gif"), null));
-	protected final static ImageDescriptor FORM_PRIVATE_VARIABLE_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
-		new Path("/icons/variable_private.gif"), null));
+	protected final static ImageDescriptor FORM_PUBLIC_METHOD_IMAGE = ImageDescriptor.createFromURL(
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/public_method.gif"), null));
+	protected final static ImageDescriptor FORM_PROTECTED_METHOD_IMAGE = ImageDescriptor.createFromURL(
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/protected_method.gif"), null));
+	protected final static ImageDescriptor FORM_PRIVATE_METHOD_IMAGE = ImageDescriptor.createFromURL(
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/private_method.gif"), null));
+	protected final static ImageDescriptor FORM_PUBLIC_VARIABLE_IMAGE = ImageDescriptor.createFromURL(
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_public.gif"), null));
+	protected final static ImageDescriptor FORM_PRIVATE_VARIABLE_IMAGE = ImageDescriptor.createFromURL(
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_private.gif"), null));
 
-	protected final static ImageDescriptor FOUNDSET_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
-		"/icons/foundset.gif"), null));
-	protected final static ImageDescriptor RELATION_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
-		"/icons/relation.gif"), null));
-	protected final static ImageDescriptor RELATION_PROTECTED_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(
-		com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/relation_protected.gif"), null));
-	protected final static ImageDescriptor RELATION_PRIVATE_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(
-		com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/relation_private.gif"), null));
+	protected final static ImageDescriptor FOUNDSET_IMAGE = ImageDescriptor.createFromURL(
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/foundset.gif"), null));
+	protected final static ImageDescriptor RELATION_IMAGE = ImageDescriptor.createFromURL(
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/relation.gif"), null));
+	protected final static ImageDescriptor RELATION_PROTECTED_IMAGE = ImageDescriptor.createFromURL(
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/relation_protected.gif"), null));
+	protected final static ImageDescriptor RELATION_PRIVATE_IMAGE = ImageDescriptor.createFromURL(
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/relation_private.gif"), null));
 
-	protected final static ImageDescriptor COLUMN_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
-		"/icons/column.gif"), null));
-	protected final static ImageDescriptor COLUMN_AGGR_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
-		"/icons/columnaggr.gif"), null));
-	protected final static ImageDescriptor COLUMN_CALC_IMAGE = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(
-		"/icons/columncalc.gif"), null));
+	protected final static ImageDescriptor COLUMN_IMAGE = ImageDescriptor.createFromURL(
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/column.gif"), null));
+	protected final static ImageDescriptor COLUMN_AGGR_IMAGE = ImageDescriptor.createFromURL(
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/columnaggr.gif"), null));
+	protected final static ImageDescriptor COLUMN_CALC_IMAGE = ImageDescriptor.createFromURL(
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/columncalc.gif"), null));
 
-	protected final static ImageDescriptor GLOBALS = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
-		new Path("/icons/globe.gif"), null));
-	protected final static ImageDescriptor SCOPES = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
-		new Path("/icons/scopes.gif"), null));
-	protected final static ImageDescriptor FORMS = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
-		new Path("/icons/forms.gif"), null));
+	protected final static ImageDescriptor GLOBALS = ImageDescriptor.createFromURL(
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/globe.gif"), null));
+	protected final static ImageDescriptor SCOPES = ImageDescriptor.createFromURL(
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/scopes.gif"), null));
+	protected final static ImageDescriptor FORMS = ImageDescriptor.createFromURL(
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/forms.gif"), null));
 
-	protected final static ImageDescriptor PLUGINS = ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(),
-		new Path("/icons/plugin.gif"), null));
+	protected final static ImageDescriptor PLUGINS = ImageDescriptor.createFromURL(
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/plugin.gif"), null));
 
-	protected final static ImageDescriptor PLUGIN_DEFAULT = ImageDescriptor.createFromURL(FileLocator.find(
-		com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/plugin_conn.gif"), null));
+	protected final static ImageDescriptor PLUGIN_DEFAULT = ImageDescriptor.createFromURL(
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/plugin_conn.gif"), null));
 
 	public static final String ARRAY_INDEX_PROPERTY_PREFIX = "array__indexedby_";
 
@@ -369,7 +369,8 @@ public class TypeCreator extends TypeCache
 	protected final ConcurrentMap<Class< ? >, String> prefixedTypes = new ConcurrentHashMap<Class< ? >, String>();
 	private final ConcurrentMap<String, ClientSupport> typesClientSupport = new ConcurrentHashMap<String, ClientSupport>();
 	private volatile boolean initialized;
-	protected static final List<String> objectMethods = Arrays.asList(new String[] { "wait", "toString", "hashCode", "equals", "notify", "notifyAll", "getClass" });
+	protected static final List<String> objectMethods = Arrays.asList(
+		new String[] { "wait", "toString", "hashCode", "equals", "notify", "notifyAll", "getClass" });
 
 
 	private final TypeSystemImpl servoyStaticTypeSystem = new TypeSystemImpl()
@@ -457,7 +458,7 @@ public class TypeCreator extends TypeCache
 	private void createSpecTypeDefinitions()
 	{
 		WebComponentSpecification[] webComponentSpecifications = WebComponentSpecProvider.getInstance().getAllWebComponentSpecifications();
-		WebComponentSpecification[] webServiceSpecifications = NGUtils.getAllNonServoyWebServiceSpecifications();
+		WebComponentSpecification[] webServiceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList();
 		Collection<WebComponentSpecification> specs = new ArrayList<WebComponentSpecification>();
 		Collections.addAll(specs, webComponentSpecifications);
 		Collections.addAll(specs, webServiceSpecifications);
@@ -1074,8 +1075,8 @@ public class TypeCreator extends TypeCache
 				continue;
 			}
 			String name = pd.getName();
-			// skip the default once added by servoy, see WebComponentPackage.getWebComponentDescriptions()
-			// and skip the dataprovider properties (those are not accesable through scripting)
+			// skip the default ones added by servoy, see WebComponentPackage.getWebComponentDescriptions()
+			// and skip the dataprovider properties (those are not accessible through scripting)
 			if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && !(pd.getType() instanceof DataproviderPropertyType))
 			{
 				JSType memberType = getType(context, pd);
@@ -1133,8 +1134,8 @@ public class TypeCreator extends TypeCache
 		{
 			Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
 			method.setName("getFormName");
-			method.setDescription("Returns the name of the form. (may be empty string as well)</br></br>var name = elements.elem.getFormName();"
-				+ "</br></br><b>@return</b> The name of the form.");
+			method.setDescription("Returns the name of the form. (may be empty string as well)</br></br>var name = elements.elem.getFormName();" +
+				"</br></br><b>@return</b> The name of the form.");
 			members.add(method);
 		}
 		return addType("WEB:COMPONENTS", type);
@@ -1149,10 +1150,10 @@ public class TypeCreator extends TypeCache
 		if (pd == null) return null;
 		IPropertyType< ? > type = pd.getType();
 		if (type == BooleanPropertyType.INSTANCE) return getTypeRef(context, ITypeNames.BOOLEAN);
-		if (type == IntPropertyType.INSTANCE || type == LongPropertyType.INSTANCE || type == FloatPropertyType.INSTANCE || type == DoublePropertyType.INSTANCE) return getTypeRef(
-			context, ITypeNames.NUMBER);
-		if (type == StringPropertyType.INSTANCE || type == ServoyStringPropertyType.INSTANCE || type == TagStringPropertyType.INSTANCE) return getTypeRef(
-			context, ITypeNames.STRING);
+		if (type == IntPropertyType.INSTANCE || type == LongPropertyType.INSTANCE || type == FloatPropertyType.INSTANCE || type == DoublePropertyType.INSTANCE)
+			return getTypeRef(context, ITypeNames.NUMBER);
+		if (type == StringPropertyType.INSTANCE || type == ServoyStringPropertyType.INSTANCE || type == TagStringPropertyType.INSTANCE)
+			return getTypeRef(context, ITypeNames.STRING);
 		if (DatePropertyType.TYPE_NAME.equals(type.getName())) return getTypeRef(context, ITypeNames.DATE);
 		if (FoundsetPropertyType.TYPE_NAME.equals(type.getName()))
 		{
@@ -1229,8 +1230,8 @@ public class TypeCreator extends TypeCache
 		if (anno != null && anno.extendsComponent() != null && !anno.extendsComponent().trim().equals(""))
 		{
 			superT = getType(context, anno.extendsComponent().trim());
-			if (superT == null) ServoyLog.logWarning(
-				"@ServoyDocumented.extendsComponent for type '" + typeName + "' was not found. Value: " + anno.extendsComponent(), null);
+			if (superT == null)
+				ServoyLog.logWarning("@ServoyDocumented.extendsComponent for type '" + typeName + "' was not found. Value: " + anno.extendsComponent(), null);
 		}
 		else if (cls != IRuntimeComponent.class && IRuntimeComponent.class.isAssignableFrom(cls))
 		{
@@ -1450,8 +1451,8 @@ public class TypeCreator extends TypeCache
 											parameter.setType(getTypeRef(context, param.getType()));
 										}
 									}
-									parameter.setKind(param.isVarArgs() ? ParameterKind.VARARGS : param.isOptional() ? ParameterKind.OPTIONAL
-										: ParameterKind.NORMAL);
+									parameter.setKind(
+										param.isVarArgs() ? ParameterKind.VARARGS : param.isOptional() ? ParameterKind.OPTIONAL : ParameterKind.NORMAL);
 									parameters.add(parameter);
 								}
 							}
@@ -2069,7 +2070,8 @@ public class TypeCreator extends TypeCache
 					if ((returnedType != Void.class && returnedType != void.class && returnedType != null) || returnDescription != null)
 					{
 						returnText = "<b>@return</b> ";
-						if (returnedType != null) returnText += DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnedType) + ' ';
+						if (returnedType != null)
+							returnText += DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(returnedType) + ' ';
 						if (returnDescription != null) returnText += returnDescription;
 					}
 				}
@@ -2719,14 +2721,14 @@ public class TypeCreator extends TypeCache
 
 					if (clientPlugin.getName().equals("window"))
 					{
-						members.add(makeDeprecated(createProperty("kioskmode", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'),
-							"Window plugin", null)));
-						members.add(makeDeprecated(createProperty("popupmenu", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'),
-							"Window plugin", null)));
-						members.add(makeDeprecated(createProperty("menubar", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'),
-							"Window plugin", null)));
-						members.add(makeDeprecated(createProperty("it2be_menubar", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'),
-							"Window plugin", null)));
+						members.add(makeDeprecated(
+							createProperty("kioskmode", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'), "Window plugin", null)));
+						members.add(makeDeprecated(
+							createProperty("popupmenu", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'), "Window plugin", null)));
+						members.add(makeDeprecated(
+							createProperty("menubar", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'), "Window plugin", null)));
+						members.add(makeDeprecated(
+							createProperty("it2be_menubar", true, getTypeRef(context, "Plugin<" + clientPlugin.getName() + '>'), "Window plugin", null)));
 					}
 
 					Image clientImage = null;
@@ -2759,7 +2761,7 @@ public class TypeCreator extends TypeCache
 			ClientSupport clientSupport = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
 			if (clientSupport != null && clientSupport.supports(ClientSupport.ng))
 			{
-				WebComponentSpecification[] serviceSpecifications = NGUtils.getAllNonServoyWebServiceSpecifications();
+				WebComponentSpecification[] serviceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList();
 				for (WebComponentSpecification spec : serviceSpecifications)
 				{
 					if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)
@@ -2882,6 +2884,7 @@ public class TypeCreator extends TypeCache
 	}
 
 	private final static Map<String, Class< ? >> QUERY_BUILDER_CLASSES = new ConcurrentHashMap<String, Class< ? >>();
+
 	static
 	{
 		addClass(QBAggregate.class);
@@ -3130,11 +3133,10 @@ public class TypeCreator extends TypeCache
 					property.setName(serverName);
 					property.setAttribute(RESOURCE, server.getConfig());
 					property.setVisible(true);
-					property.setType(getTypeRef(context,
-						DBDataSourceServer.class.getSimpleName() + '<' + DataSourceUtils.createDBTableDataSource(serverName, null) + '>'));
-					property.setAttribute(
-						IMAGE_DESCRIPTOR,
-						com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle(SolutionExplorerTreeContentProvider.getServerImageName(serverName, server)));
+					property.setType(
+						getTypeRef(context, DBDataSourceServer.class.getSimpleName() + '<' + DataSourceUtils.createDBTableDataSource(serverName, null) + '>'));
+					property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle(
+						SolutionExplorerTreeContentProvider.getServerImageName(serverName, server)));
 					property.setDescription("Server");
 					type.getMembers().add(property);
 				}
@@ -4239,8 +4241,10 @@ public class TypeCreator extends TypeCache
 	{
 		String imgPath = "/icons/designer.gif";
 		if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE) imgPath = "/icons/designer_protected.gif";
-		else if ((encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) imgPath = "/icons/designer_private.gif";
-		else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) imgPath = "/icons/designer_public.gif";
+		else if ((encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE)
+			imgPath = "/icons/designer_private.gif";
+		else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)
+			imgPath = "/icons/designer_public.gif";
 		return ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path(imgPath), null));
 	}
 }

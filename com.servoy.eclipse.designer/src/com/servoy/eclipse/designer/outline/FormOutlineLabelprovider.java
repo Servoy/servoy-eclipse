@@ -16,6 +16,10 @@
  */
 package com.servoy.eclipse.designer.outline;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -25,6 +29,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.property.IPropertyType;
 
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
@@ -37,6 +44,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.server.ngclient.property.types.NGCustomJSONObjectType;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
@@ -119,7 +127,49 @@ public class FormOutlineLabelprovider extends LabelProvider implements IPersistL
 			}
 			if (((PersistContext)element).getPersist() instanceof WebCustomType)
 			{
-				return ((WebCustomType)(((PersistContext)element).getPersist())).getTypeName();
+				WebCustomType webCustomType = ((WebCustomType)(((PersistContext)element).getPersist()));
+
+				String typeName = webCustomType.getTypeName();
+				IPropertyType< ? > iPropertyType = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+					webCustomType.getParent().getTypeName()).getDeclaredCustomObjectTypes().get(typeName);
+				String postFix = "";
+				if (iPropertyType instanceof NGCustomJSONObjectType)
+				{
+					NGCustomJSONObjectType ngCustomJSONObjectType = (NGCustomJSONObjectType)iPropertyType;
+					Collection<PropertyDescription> taggedProperties = ngCustomJSONObjectType.getCustomJSONTypeDefinition().getTaggedProperties(
+						"showInOutlineView");
+
+					//we got an unsorted collection, add it to a list and sort it so that we show consistent labels
+					ArrayList<PropertyDescription> asList = new ArrayList<PropertyDescription>(taggedProperties);
+
+					Collections.sort(asList, new Comparator<PropertyDescription>()
+					{
+
+						@Override
+						public int compare(PropertyDescription o1, PropertyDescription o2)
+						{
+							return o1.getName().compareTo(o2.getName());
+						}
+
+					});
+					for (PropertyDescription propertyDescription : asList)
+					{
+						Object showInOutlineView = propertyDescription.getTag("showInOutlineView");
+						if (Boolean.valueOf(showInOutlineView.toString()).booleanValue())
+						{
+							if (webCustomType.getJson().has(propertyDescription.getName()))
+							{
+								Object property = webCustomType.getJson().get(propertyDescription.getName());
+								postFix += "_" + property;
+							}
+							else if (propertyDescription.hasDefault())
+							{
+								postFix += "_" + propertyDescription.getDefaultValue();
+							}
+						}
+					}
+				}
+				return typeName + postFix;
 			}
 			return SupportNameLabelProvider.INSTANCE_DEFAULT_ANONYMOUS.getText(((PersistContext)element).getPersist());
 		}
