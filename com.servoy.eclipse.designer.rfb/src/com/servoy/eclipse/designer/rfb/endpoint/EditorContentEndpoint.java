@@ -18,6 +18,7 @@
 package com.servoy.eclipse.designer.rfb.endpoint;
 
 
+import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -61,9 +62,9 @@ public class EditorContentEndpoint extends BaseNGClientEndpoint
 
 	@Override
 	@OnClose
-	public void onClose()
+	public void onClose(CloseReason closeReason)
 	{
-		super.onClose();
+		super.onClose(closeReason);
 	}
 
 	@Override
