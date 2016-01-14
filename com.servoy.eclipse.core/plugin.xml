@@ -287,7 +287,11 @@
       <markerResolutionGenerator
             class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.elementExtendsDeletedElement">
-      </markerResolutionGenerator>        
+      </markerResolutionGenerator>  
+      <markerResolutionGenerator
+            class="com.servoy.eclipse.core.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.lingeringTableFiles">
+      </markerResolutionGenerator>      
    </extension>
    <extension
          point="org.eclipse.ui.splashHandlers">
