@@ -245,7 +245,7 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
     },
     updateFormData: function(updates) {
       var data = JSON.parse(updates);
-      if (data && (data.components || data.deleted || data.renderGhosts || data.parts || data.containers)) {
+      if (data && (data.components || data.deleted || data.renderGhosts || data.parts || data.containers || data.deletedContainers)) {
         // TODO should it be converted??
         $rootScope.$apply(function() {
           
@@ -319,6 +319,11 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
 					promise.then(handleTemplate)
         		  }
         	  }
+          }
+          for (var index in data.deletedContainers) {
+              var toDelete = angular.element('[svy-id="' + data.deletedContainers[index] + '"]');
+              toDelete.remove();
+
           }
           renderDecorators();
         });

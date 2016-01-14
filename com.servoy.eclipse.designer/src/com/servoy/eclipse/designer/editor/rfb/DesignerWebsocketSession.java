@@ -284,6 +284,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	{
 		Set<BaseComponent> baseComponents = new HashSet<>();
 		Set<BaseComponent> deletedComponents = new HashSet<>();
+		Set<LayoutContainer> deletedLayoutContainers = new HashSet<>();
 		Set<Part> parts = new HashSet<>();
 		Set<LayoutContainer> containers = new HashSet<>();
 		boolean renderGhosts = false;
@@ -327,7 +328,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			}
 			else if (persist instanceof LayoutContainer)
 			{
-				containers.add((LayoutContainer)persist);
+				if (persist.getParent().getChild(persist.getUUID()) != null)
+				{
+					containers.add((LayoutContainer)persist);
+				}
+				else
+				{
+					deletedLayoutContainers.add((LayoutContainer)persist);
+				}
 			}
 			else if (!(persist instanceof Form))
 			{
@@ -376,6 +384,16 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				writer.endObject();
 			}
 			writer.endObject();
+		}
+		if (deletedLayoutContainers.size() > 0)
+		{
+			writer.key("deletedContainers");
+			writer.array();
+			for (LayoutContainer container : deletedLayoutContainers)
+			{
+				writer.value(container.getUUID().toString());
+			}
+			writer.endArray();
 		}
 		writer.endObject();
 		return writer.toString();
