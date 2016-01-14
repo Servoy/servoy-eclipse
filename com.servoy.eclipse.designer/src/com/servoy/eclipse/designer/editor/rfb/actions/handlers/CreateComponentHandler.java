@@ -81,10 +81,8 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
-import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -602,9 +600,7 @@ public class CreateComponentHandler implements IServerService
 				compName = componentName + "_" + id.incrementAndGet();
 			}
 
-			Pair<Integer, UUID> newIDAndUUID = WebObjectImpl.getNewIdAndUUID(parentWC);
-			ChildWebComponent webComponent = new ChildWebComponent(parentWC, newIDAndUUID.getLeft().intValue(), newIDAndUUID.getRight(), propertyName,
-				indexIfInArray, true, pd);
+			ChildWebComponent webComponent = ChildWebComponent.createNewInstance(parentWC, propertyName, indexIfInArray, true, pd);
 			webComponent.setTypeName(componentSpecName);
 
 			// not sure if location and size are still needed to be set in children here... maybe it is (if parent wants to use them at runtime)
