@@ -185,7 +185,32 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
 }).factory("$editorContentService", function($rootScope, $applicationService, $sabloApplication, $sabloConstants,
   $webSocket, $compile,$sabloConverters) {
   var formData = null;
-  var layoutData = null
+  var layoutData = null;
+  
+  function handleTemplate(data) {
+	  // append the template
+	  var json = JSON.parse(data);
+	  if (json.renderGhosts) {
+	  	renderGhosts();
+	  	return;
+	  }
+	  // was there already a template generated before this, then just skip it
+	  if ($rootScope.getDesignFormControllerScope().model(name,true)) return;
+	  var parentId = json.parentId;
+	  if (!parentId) parentId = 'svyDesignForm';
+	  
+	  var parent = angular.element(document.getElementById(parentId));
+	  if (!parent.length){
+	      parent = angular.element(document.querySelectorAll("[svy-id='"+parentId+"']"));
+	  }
+	  var tpl = $compile(json.template)($rootScope.getDesignFormControllerScope());
+	  if (json.insertBeforeUUID){
+	      var nextSibling = angular.element(document.querySelectorAll("[svy-id='"+json.insertBeforeUUID+"']"));
+	      tpl.insertBefore(nextSibling);
+	  }
+	  else
+	      parent.append(tpl)
+  }
   return {
     refreshDecorators: function() {
       renderDecorators();
@@ -223,6 +248,7 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
       if (data && (data.components || data.deleted || data.renderGhosts || data.parts || data.containers)) {
         // TODO should it be converted??
         $rootScope.$apply(function() {
+          
           for (var name in data.components) {
             var compData = formData.components[name];
             var newCompData = data.components[name];
@@ -245,30 +271,6 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
             } else {
               formData.components[name] = newCompData;
             }
-            function handleTemplate(data) {
-                // append the template
-                var json = JSON.parse(data);
-                if (json.renderGhosts) {
-                	renderGhosts();
-                	return;
-                }
-                // was there already a template generated before this, then just skip it
-                if ($rootScope.getDesignFormControllerScope().model(name,true)) return;
-                var parentId = json.parentId;
-                if (!parentId) parentId = 'svyDesignForm';
-                
-                var parent = angular.element(document.getElementById(parentId));
-                if (!parent.length){
-                    parent = angular.element(document.querySelectorAll("[svy-id='"+parentId+"']"));
-                }
-                var tpl = $compile(json.template)($rootScope.getDesignFormControllerScope());
-                if (json.insertBeforeUUID){
-                    var nextSibling = angular.element(document.querySelectorAll("[svy-id='"+json.insertBeforeUUID+"']"));
-                    tpl.insertBefore(nextSibling);
-                }
-                else
-                    parent.append(tpl)
-              }
             // always test if the model is really already initialized.
             // if not then there is no template yet.
             if (!$rootScope.getDesignFormControllerScope().model(name,true)) {
