@@ -37,6 +37,7 @@ import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 
@@ -97,21 +98,28 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 	{
 		IBasicWebObject bean = (IBasicWebObject)obj;
 		Object value = bean.getProperty(getName());
-
-		IPropertyType< ? > type = propertyDescription.getType();
-		if (type instanceof FunctionPropertyType || type instanceof ValueListPropertyType || type instanceof FormPropertyType ||
-			type instanceof MediaPropertyType)
+		try
 		{
-			if (value == null) return Integer.valueOf(0);
-			if (value instanceof Integer) return value;
 
-			IPersist persist = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).searchPersist(UUID.fromString((String)value));
-			if (persist instanceof AbstractBase)
+			IPropertyType< ? > type = propertyDescription.getType();
+			if (type instanceof FunctionPropertyType || type instanceof ValueListPropertyType || type instanceof FormPropertyType ||
+				type instanceof MediaPropertyType)
 			{
-				return new Integer(persist.getID());
-			}
+				if (value == null) return Integer.valueOf(0);
+				if (value instanceof Integer) return value;
 
-			return Integer.valueOf(-1);
+				IPersist persist = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).searchPersist(UUID.fromString((String)value));
+				if (persist instanceof AbstractBase)
+				{
+					return new Integer(persist.getID());
+				}
+
+				return Integer.valueOf(-1);
+			}
+		}
+		catch (Exception e)
+		{
+			Debug.log("illegal value in bean, ignoring it: " + value);
 		}
 		return canHandleJSONNull ? value : ServoyJSONObject.jsonNullToNull(value);
 	}

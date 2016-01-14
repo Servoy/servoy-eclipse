@@ -213,7 +213,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		{
 			if (idx < 0 || idx >= ((Object[])getEditableValue()).length) return;
 			((Object[])getEditableValue())[idx] = value;
-			defaultElementWasSet(value);
+//			defaultElementWasSet(value);
 		}
 
 		/*

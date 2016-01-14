@@ -129,7 +129,7 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 
 		protected PDPropertySource getUnderlyingPropertySource()
 		{
-			IPersist persist = persistContext.getPersist(); // parent persist holding property with propertyDescription
+			IPersist persist = (IPersist)getEditableValue(); // parent persist holding property with propertyDescription
 			PersistContext pContext = persistContext;
 
 			String pdName = propertyDescription.getName();
