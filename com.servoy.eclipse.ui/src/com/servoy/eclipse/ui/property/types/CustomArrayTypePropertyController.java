@@ -17,14 +17,13 @@
 
 package com.servoy.eclipse.ui.property.types;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.property.CustomJSONObjectType;
 import org.sablo.specification.property.ICustomType;
 
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -39,13 +38,14 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PersistPropertySource.PropertyDescriptorWrapper;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.ServoyJSONArray;
-import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -75,21 +75,31 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		return ((ICustomType< ? >)propertyDescription.getType()).getCustomJSONTypeDefinition();
 	}
 
-	@Override
-	protected Object getNewElementInitialValue()
+	private Object getNewElementValue(int index)
 	{
 		// when user adds/inserts a new item in the array normally a null is inserted
 		// but for custom object properties most of the time the uses will want to have an object so that it can be directly expanded (without clicking one more time to make it {} from null)
-		return (getArrayElementPD().getType() instanceof CustomJSONObjectType< ? , ? >) ? new ServoyJSONObject() : JSONObject.NULL;
-
-//		PropertyDescription arrayElementPD = getArrayElementPD();
-//		if (arrayElementPD.getType() instanceof IPropertyType)
-//		{
-//			return arrayElementPD.getConfig();
-//		}
-//		return JSONObject.NULL;//TODO JSONObject.NULL ?
-
+		PropertyDescription arrayElementPD = getArrayElementPD();
+		if (arrayElementPD.getType() instanceof ICustomType< ? >)
+		{
+			String typeName = propertyDescription.getType().getName().indexOf(".") > 0 ? propertyDescription.getType().getName().split("\\.")[1]
+				: propertyDescription.getType().getName();
+			IBasicWebObject parent = (IBasicWebObject)persistContext.getPersist();
+			if (parent.getProperty(propertyDescription.getName()) instanceof WebCustomType[])
+			{
+				return WebCustomType.createNewInstance(parent, arrayElementPD, propertyDescription.getName(), index, true, null, typeName);
+			}
+			return ChildWebComponent.createNewInstance(parent, propertyDescription.getName(), index, true, arrayElementPD);
+		}
+		return null;
 	}
+
+	@Override
+	protected Object getNewElementInitialValue()
+	{
+		return getNewElementValue(0);
+	}
+
 
 	@Override
 	protected CustomArrayPropertySource getArrayElementPropertySource(ComplexProperty<Object> complexProperty)
@@ -185,7 +195,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		@Override
 		protected Object insertNewElementAfterIndex(int idx)
 		{
-			return insertElementAtIndex(idx + 1, null, getEditableValue());
+			return insertElementAtIndex(idx + 1, getNewElementValue(idx + 1), getEditableValue());
 		}
 
 		/*
@@ -197,9 +207,10 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		protected Object deleteElementAtIndex(int idx)
 		{
 			Object[] arrayValue = (Object[])getEditableValue();
-			Object[] newArrayValue = new Object[arrayValue.length - 1];
+			Object[] newArrayValue = (Object[])Array.newInstance(arrayValue.getClass().getComponentType(), arrayValue.length - 1);
 			System.arraycopy(arrayValue, 0, newArrayValue, 0, idx);
 			System.arraycopy(arrayValue, idx + 1, newArrayValue, idx, arrayValue.length - idx - 1);
+			resetIndexes(newArrayValue);
 			return newArrayValue;
 		}
 
@@ -212,8 +223,14 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		protected void defaultSetElement(Object value, int idx)
 		{
 			if (idx < 0 || idx >= ((Object[])getEditableValue()).length) return;
-			((Object[])getEditableValue())[idx] = value;
-//			defaultElementWasSet(value);
+			if (value == null && getEditableValue() instanceof IChildWebObject[])
+			{
+				((Object[])getEditableValue())[idx] = getNewElementValue(idx);
+			}
+			else
+			{
+				((Object[])getEditableValue())[idx] = value;
+			}
 		}
 
 		/*
@@ -390,11 +407,23 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	protected Object insertElementAtIndex(int i, Object elementValue, Object oldMainValue)
 	{
 		Object[] arrayValue = (Object[])oldMainValue;
-		Object[] newArrayValue = new Object[arrayValue.length + 1];
+		Object[] newArrayValue = (Object[])Array.newInstance(arrayValue.getClass().getComponentType(), arrayValue.length + 1);
 		System.arraycopy(arrayValue, 0, newArrayValue, 0, i);
 		newArrayValue[i] = elementValue;
 		System.arraycopy(arrayValue, i, newArrayValue, i + 1, arrayValue.length - i);
+		resetIndexes(newArrayValue);
 		return newArrayValue;
+	}
+
+	private void resetIndexes(Object[] newArrayValue)
+	{
+		if (newArrayValue instanceof IChildWebObject[])
+		{
+			for (int j = 0; j < newArrayValue.length; j++)
+			{
+				((IChildWebObject)newArrayValue[j]).setIndex(j);
+			}
+		}
 	}
 
 }
