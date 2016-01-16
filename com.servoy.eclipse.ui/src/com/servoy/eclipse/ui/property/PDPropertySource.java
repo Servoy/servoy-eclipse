@@ -88,75 +88,73 @@ public class PDPropertySource extends PersistPropertySource
 		}
 		if (persistContext.getPersist() instanceof LayoutContainer)
 		{
-			IPropertyHandler attributesPropertyHandler = new WebComponentPropertyHandler(
-				new PropertyDescription("attributes", null, new PropertySetterDelegatePropertyController<Map<String, Object>, PersistPropertySource>(
-					new MapEntriesPropertyController("attributes", RepositoryHelper.getDisplayName("attributes", Form.class))
-					{ /*
-						 * (non-Javadoc)
-						 *
-						 * @see com.servoy.eclipse.ui.property.PropertyController#createConverter()
-						 */
-						@Override
-						protected ComplexPropertyConverter<Map<String, Object>> createConverter()
+			IPropertyHandler attributesPropertyHandler = new WebComponentPropertyHandler(new PropertyDescription("attributes", null,
+				new PropertySetterDelegatePropertyController<Map<String, Object>, PersistPropertySource>(new MapEntriesPropertyController("attributes",
+					RepositoryHelper.getDisplayName("attributes", Form.class))
+				{ /*
+				 * (non-Javadoc)
+				 * 
+				 * @see com.servoy.eclipse.ui.property.PropertyController#createConverter()
+				 */
+					@Override
+					protected ComplexPropertyConverter<Map<String, Object>> createConverter()
+					{
+						return new ComplexProperty.ComplexPropertyConverter<Map<String, Object>>()
 						{
-							return new ComplexProperty.ComplexPropertyConverter<Map<String, Object>>()
+							@Override
+							public Object convertProperty(final Object id, Map<String, Object> value)
 							{
-								@Override
-								public Object convertProperty(final Object id, Map<String, Object> value)
+								return new ComplexProperty<Map<String, Object>>(value)
 								{
-									return new ComplexProperty<Map<String, Object>>(value)
+									@Override
+									public IPropertySource getPropertySource()
 									{
-										@Override
-										public IPropertySource getPropertySource()
+										return new MapPropertySource(this)
 										{
-											return new MapPropertySource(this)
+											@Override
+											public IPropertyDescriptor[] createPropertyDescriptors()
 											{
-												@Override
-												public IPropertyDescriptor[] createPropertyDescriptors()
+												// remove "class" property from super-property-descriptors
+												IPropertyDescriptor[] propertyDescriptors = super.createPropertyDescriptors();
+												List<IPropertyDescriptor> result = new ArrayList<>();
+												for (IPropertyDescriptor desc : propertyDescriptors)
 												{
-
-													IPropertyDescriptor[] propertyDescriptors = super.createPropertyDescriptors();
-													IPropertyDescriptor[] result = new IPropertyDescriptor[propertyDescriptors.length - 1];
-													int k = 0;
-													for (int i = 0; i < propertyDescriptors.length; i++)
+													if (!"class".equals(desc.getId()))
 													{
-														if (!propertyDescriptors[i].getId().equals("class"))
-														{
-															result[k] = propertyDescriptors[i];
-															k++;
-														}
+														result.add(desc);
 													}
-													return result;
 												}
+												return result.toArray(new IPropertyDescriptor[result.size()]);
+											}
 
-												/*
-												 * (non-Javadoc)
-												 *
-												 * @see com.servoy.eclipse.ui.property.MapEntriesPropertyController.MapPropertySource#toJSExpression(java.lang.
-												 * Object)
-												 */
-												@Override
-												protected String toJSExpression(Object v)
+											/*
+											 * (non-Javadoc)
+											 * 
+											 * @see com.servoy.eclipse.ui.property.MapEntriesPropertyController.MapPropertySource#toJSExpression(java.lang.
+											 * Object)
+											 */
+											@Override
+											protected String toJSExpression(Object v)
+											{
+												String result;
+												if (v instanceof String && ((String)v).length() > 0)
 												{
-													String result;
-													if (v instanceof String && ((String)v).length() > 0)
-													{
-														result = v.toString();
-													}
-													else
-													{
-														result = null;
-													}
-													return result;
+													result = v.toString();
 												}
-											};
-										}
-									};
-								}
-							};
-						}
+												else
+												{
+													result = null;
+												}
+												return result;
+											}
+										};
+									}
+								};
+							}
+						};
+					}
 
-					}, "attributes")
+				}, "attributes")
 				{
 					@SuppressWarnings("unchecked")
 					@Override
@@ -223,8 +221,9 @@ public class PDPropertySource extends PersistPropertySource
 			{
 				config.addDefault(desc.getDefaultValue(), null);
 			}
-			createdPropertyHandler = createWebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config,
-				desc.getDefaultValue(), desc.hasDefault(), null, null, null, false), persistContext);
+			createdPropertyHandler = createWebComponentPropertyHandler(
+				new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config, desc.getDefaultValue(), desc.hasDefault(), null, null, null, false),
+				persistContext);
 		}
 		else
 		{

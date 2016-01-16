@@ -29,9 +29,9 @@ import com.servoy.j2db.persistence.RepositoryException;
 
 /**
  * IComboboxPropertyModel model for namedFoundset.
- * 
+ *
  * @author acostescu
- * 
+ *
  */
 public class NamedFoundsetComboboxModel implements IComboboxPropertyModel<String>
 {
@@ -68,6 +68,12 @@ public class NamedFoundsetComboboxModel implements IComboboxPropertyModel<String
 			realValues[i] = Form.NAMED_FOUNDSET_GLOBAL_RELATION_PREFIX + globalRelations[i - 3];
 		}
 		return realValues;
+	}
+
+	@Override
+	public int getDefaultValueIndex()
+	{
+		return 0;
 	}
 
 	/**

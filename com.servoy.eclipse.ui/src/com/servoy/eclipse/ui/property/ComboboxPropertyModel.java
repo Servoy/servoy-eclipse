@@ -17,13 +17,14 @@
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.osgi.util.NLS;
 
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.j2db.util.Utils;
 
 /**
  * Simple combobox model with static real and display values.
- * 
+ *
  * @author rgansevles
  */
 
@@ -31,10 +32,11 @@ public class ComboboxPropertyModel<T> implements IComboboxPropertyModel<T>
 {
 	private T[] real;
 	private String[] display;
+	private int defaultValueIndex = -1;
 
 	/**
 	 * Display and real values are the same.
-	 * 
+	 *
 	 * @param display
 	 */
 	public ComboboxPropertyModel(T[] real)
@@ -49,19 +51,26 @@ public class ComboboxPropertyModel<T> implements IComboboxPropertyModel<T>
 
 	public ComboboxPropertyModel<T> addDefaultValue(T defaultReal)
 	{
-		return addDefaultValue(defaultReal, Messages.LabelDefault);
+		return addDefaultValue(defaultReal, defaultReal == null ? Messages.LabelDefault : NLS.bind(Messages.LabelDefault_arg, defaultReal));
 	}
 
 	public ComboboxPropertyModel<T> addDefaultValue(T defaultReal, String defaultDisplay)
 	{
 		real = Utils.arrayAdd(real, defaultReal, false);
 		display = Utils.arrayAdd(display, defaultDisplay, false);
+		defaultValueIndex = 0;
 		return this;
+	}
+
+	@Override
+	public int getDefaultValueIndex()
+	{
+		return defaultValueIndex;
 	}
 
 	/**
 	 * Display and real values are the same.
-	 * 
+	 *
 	 * @param display
 	 */
 	public ComboboxPropertyModel(T[] real, ILabelProvider labelProvider)
@@ -84,7 +93,7 @@ public class ComboboxPropertyModel<T> implements IComboboxPropertyModel<T>
 
 	/**
 	 * Display and real values are different.
-	 * 
+	 *
 	 * @param display
 	 */
 	public ComboboxPropertyModel(T[] real, String[] display)

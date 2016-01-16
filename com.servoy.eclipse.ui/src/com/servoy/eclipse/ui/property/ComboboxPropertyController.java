@@ -43,7 +43,7 @@ import com.servoy.j2db.util.IDelegate;
 
 /**
  * Property controller for properties with a fixed list of values to be shown in a combo box.
- * 
+ *
  * @author rgansevles
  */
 
@@ -173,9 +173,9 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 
 	/**
 	 * Convert values based on model index.
-	 * 
+	 *
 	 * @author rgansevles
-	 * 
+	 *
 	 */
 	public static class ComboboxModelConverter<T> implements IPropertyConverter<T, Integer>
 	{
@@ -193,10 +193,11 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 			{
 				if (real[i] == value || real[i] != null && real[i].equals(value))
 				{
-					return new Integer(i);
+					return Integer.valueOf(i);
 				}
 			}
-			return new Integer(-1); // not found
+
+			return Integer.valueOf(-1);
 		}
 
 		public T convertValue(Object id, Integer value)
@@ -205,7 +206,7 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 			if (value != null)
 			{
 				int index = value.intValue();
-				if (index >= 0 && index < real.length)
+				if (index >= 0 && index < real.length && index != model.getDefaultValueIndex())
 				{
 					return real[index];
 				}
@@ -258,9 +259,9 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 
 	/**
 	 * Merged ComboboxPropertyController.
-	 * 
+	 *
 	 * @author rgansevles
-	 * 
+	 *
 	 * @param <T>
 	 */
 	public static class MergedComboboxPropertyController<T> extends ComboboxPropertyController<T> implements IMergedPropertyDescriptor
@@ -273,7 +274,7 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 
 		/**
 		 * Merge 2 models, returns the intersection sorted as in the first model.
-		 * 
+		 *
 		 * @param <T>
 		 * @param model1
 		 * @param model2

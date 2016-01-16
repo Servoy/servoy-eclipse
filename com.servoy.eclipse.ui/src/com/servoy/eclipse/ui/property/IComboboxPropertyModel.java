@@ -18,10 +18,10 @@ package com.servoy.eclipse.ui.property;
 
 /**
  * Interface for model of ComboboxPropertyController, default implementation: ComboboxPropertyModel
- *  
+ *
  * @see ComboboxPropertyController
  * @see ComboboxPropertyModel
- * 
+ *
  * @author rgansevles
  */
 public interface IComboboxPropertyModel<T>
@@ -29,4 +29,9 @@ public interface IComboboxPropertyModel<T>
 	T[] getRealValues();
 
 	String[] getDisplayValues();
+
+	/**
+	 * @return -1 when no default value is defined on the model, otherwise the index of the default value.
+	 */
+	int getDefaultValueIndex();
 }

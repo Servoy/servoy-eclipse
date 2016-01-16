@@ -316,7 +316,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			return "".equals(value) ? null : value;
 		}
 	};
-	public static IPropertyConverter<String, String> DEFAULT_STRING_CONVERTER = new IPropertyConverter<String, String>()
+	public static final IPropertyConverter<String, String> DEFAULT_STRING_CONVERTER = new IPropertyConverter<String, String>()
 	{
 		public String convertProperty(Object id, String value)
 		{
@@ -411,7 +411,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		return null;
 	}
 
-	protected void init()
+	private void init()
 	{
 		if (propertyDescriptors == null)
 		{
@@ -1619,20 +1619,23 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 	public static PropertyController<String, ? > createStyleClassPropertyController(IPersist persist, String id, String displayName,
 		final String styleLookupname, Form form)
 	{
+		Pair<String[], String> styleClassesInfo = ModelUtils.getStyleClasses(ModelUtils.getEditingFlattenedSolution(form), form, persist, id, styleLookupname);
+		String[] styleClasses = styleClassesInfo.getLeft();
+		String defaultValue = styleClassesInfo.getRight();
+
 		boolean multiSelect = persist.getRootObject() instanceof Solution &&
 			((Solution)persist.getRootObject()).getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE &&
 			((Solution)persist.getRootObject()).getStyleSheetID() > 0;
 		if (multiSelect)
 		{
 			// ng client, style at solutionlevel
-			String[] styleClasses = ModelUtils.getStyleClasses(ModelUtils.getEditingFlattenedSolution(form), form, persist, id, styleLookupname);
 			String tooltip = "Double click '{}' to add it to styleClass. StyleClass editor is working in NGClient mode (because solution css is set).";
 			return new StringListWithContentProposalsPropertyController(id, displayName, styleClasses, tooltip, new SolutionStyleClassValueEditor(
 				(Solution)persist.getRootObject()));
 		}
 
 		// single select
-		StyleClassesComboboxModel model = new StyleClassesComboboxModel(form, styleLookupname);
+		ComboboxPropertyModel<String> model = new ComboboxPropertyModel<String>(styleClasses).addDefaultValue(defaultValue);
 		return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved,
 			((Solution)persist.getRootObject()).getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE ? new ComboboxDelegateValueEditor<String>(
 				new StyleClassValueEditor(form, persist), model) : null)
@@ -2068,7 +2071,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				boolean hasInheritedValue = (value == null && persistContext.getPersist() instanceof ISupportExtendsID &&
 					beanPropertyDescriptor.valueObject == persistContext.getPersist() &&
 					PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist()) != null && ((AbstractBase)PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist())).getProperty((String)id) != null);
-				if (beanPropertyDescriptor.valueObject instanceof AbstractBase && value == null && !hasInheritedValue)
+				if (beanPropertyDescriptor.valueObject instanceof AbstractBase && !(beanPropertyDescriptor.valueObject instanceof LayoutContainer) &&
+					value == null && !hasInheritedValue)
 				{
 					// just clear the property because we do not need to store null in order to override a value
 					changed |= (((AbstractBase)beanPropertyDescriptor.valueObject).getProperty((String)id) != null);
