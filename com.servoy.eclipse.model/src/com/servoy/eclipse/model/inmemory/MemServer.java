@@ -60,7 +60,9 @@ import com.servoy.j2db.persistence.TableChangeHandler;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.query.ISQLQuery;
 import com.servoy.j2db.query.QueryColumn;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ITransactionConnection;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -97,7 +99,8 @@ public class MemServer implements IServerInternal, IServer
 					try
 					{
 						ITable table = createNewTable(null, tableNode.getDataSource().substring(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON.length()));
-						ServoyModelFinder.getServoyModel().getDataModelManager().deserializeInMemoryTable(this, table, (ServoyJSONObject)property);
+						DatabaseUtils.deserializeInMemoryTable(ApplicationServerRegistry.get().getDeveloperRepository(), this, table,
+							(ServoyJSONObject)property);
 						table.setExistInDB(true);
 					}
 					catch (RepositoryException e)
