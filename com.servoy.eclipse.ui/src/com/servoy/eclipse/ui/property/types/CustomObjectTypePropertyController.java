@@ -43,9 +43,6 @@ import com.servoy.j2db.util.ServoyJSONObject;
  */
 public class CustomObjectTypePropertyController extends ObjectTypePropertyController
 {
-
-	private static IObjectTextConverter OBJECT_TEXT_CONVERTER;
-
 	private final PersistContext persistContext;
 	private final PropertyDescription propertyDescription;
 
@@ -54,7 +51,6 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 		super(id, displayName);
 		this.persistContext = persistContext;
 		this.propertyDescription = propertyDescription;
-		OBJECT_TEXT_CONVERTER = new CustomObjectTextConverter();
 	}
 
 	@Override
@@ -63,27 +59,24 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 		return new CustomObjectPropertySource(complexProperty);
 	}
 
-	private class CustomObjectTextConverter extends JSONObjectTextConverter
+	private static class CustomObjectTextConverter extends JSONObjectTextConverter
 	{
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter#convertToObject(java.lang.String)
-		 */
+		private final WebCustomType wo;
+
+		public CustomObjectTextConverter(WebCustomType persist)
+		{
+			this.wo = persist;
+		}
+
 		@Override
 		public Object convertToObject(String value)
 		{
-			IPersist persist = persistContext.getPersist();
-			if (persist instanceof IBasicWebObject)
+			JSONObject obj = (JSONObject)super.convertToObject(value);
+			for (String key : obj.keySet())
 			{
-				IBasicWebObject wo = (IBasicWebObject)persist;
-				JSONObject obj = (JSONObject)super.convertToObject(value);
-				for (String key : obj.keySet())
-				{
-					wo.setJsonSubproperty(key, obj.opt(key));
-				}
+				wo.setProperty(key, obj.opt(key));
 			}
-			return null;
+			return wo;
 		}
 
 		/*
@@ -94,9 +87,9 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 		@Override
 		public String convertToString(Object value)
 		{
-			if (value instanceof IBasicWebObject)
+			if (value instanceof WebCustomType)
 			{
-				return super.convertToString(((IBasicWebObject)value).getFlattenedJson());
+				return super.convertToString(((WebCustomType)value).getFlattenedJson());
 			}
 			return null;
 		}
@@ -132,16 +125,6 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 		{
 			IPersist persist = (IPersist)getEditableValue(); // parent persist holding property with propertyDescription
 			PersistContext pContext = PersistContext.create(persist, persistContext.getContext());
-			;
-
-			String pdName = propertyDescription.getName();
-			if (persist != null && !WebComponentSpecification.ARRAY_ELEMENT_PD_NAME.equals(pdName))
-			{
-				persist = (IPersist)((IBasicWebObject)persist).getProperty(pdName);
-				// property of a custom object or property of a web component; persistContext points to parent in this case
-				pContext = PersistContext.create(persist, persistContext.getContext());
-			} // else persistContext already has correct persist (array element persist)
-
 
 			if (underlyingPropertySource == null || ((persist instanceof IBasicWebObject) && (((IBasicWebObject)persist).getFlattenedJson() == null))) // so if we have no propertySource or if we have one but we shouldn't (json became null meanwhile)
 			{
@@ -271,7 +254,13 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 	@Override
 	protected IObjectTextConverter getMainObjectTextConverter()
 	{
-		return OBJECT_TEXT_CONVERTER;
+		IPersist persist = persistContext.getPersist();
+		String pdName = propertyDescription.getName();
+		if (persist != null && !WebComponentSpecification.ARRAY_ELEMENT_PD_NAME.equals(pdName))
+		{
+			persist = (IPersist)((IBasicWebObject)persist).getProperty(pdName);
+		}
+		return new CustomObjectTextConverter((WebCustomType)persist);
 	}
 
 	/*
@@ -282,7 +271,7 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 	@Override
 	protected Object toggleValue(Object oldPropertyValue)
 	{
-		WebCustomType ct = (WebCustomType)oldPropertyValue;
+		WebCustomType ct = (WebCustomType)(oldPropertyValue);
 		WebCustomType newPropertyValue = WebCustomType.createNewInstance(ct.getParent(), ct.getPropertyDescription(), ct.getJsonKey(), ct.getIndex(), true);
 		if (!isJSONNull(ct))
 		{
