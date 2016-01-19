@@ -98,6 +98,7 @@ public class MoveCustomTypeCommand extends Command
 
 		setIndexes(property);
 		source.getParent().setProperty(jsonKey, asList.toArray());
+		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, source.getParent(), true);
 	}
 
 	/** Sets the correct index in the array for each IChildWebObject
