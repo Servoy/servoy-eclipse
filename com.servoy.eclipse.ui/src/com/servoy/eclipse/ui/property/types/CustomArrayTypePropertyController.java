@@ -1,19 +1,19 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2015 Servoy BV
+	This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2015 Servoy BV
 
- This program is free software; you can redistribute it and/or modify it under
- the terms of the GNU Affero General Public License as published by the Free
- Software Foundation; either version 3 of the License, or (at your option) any
- later version.
+	This program is free software; you can redistribute it and/or modify it under
+	the terms of the GNU Affero General Public License as published by the Free
+	Software Foundation; either version 3 of the License, or (at your option) any
+	later version.
 
- This program is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+	This program is distributed in the hope that it will be useful, but WITHOUT
+	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+	FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
 
- You should have received a copy of the GNU Affero General Public License along
- with this program; if not, see http://www.gnu.org/licenses or write to the Free
- Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
- */
+	You should have received a copy of the GNU Affero General Public License along
+	with this program; if not, see http://www.gnu.org/licenses or write to the Free
+	Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
+	*/
 
 package com.servoy.eclipse.ui.property.types;
 
@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.ICustomType;
 
@@ -55,10 +56,6 @@ import com.servoy.j2db.util.Utils;
  */
 public class CustomArrayTypePropertyController extends ArrayTypePropertyController
 {
-
-	/**
-	 *
-	 */
 	private static final CustomArrayTextConverter CUSTOM_ARRAY_TEXT_CONVERTER = new CustomArrayTextConverter();
 	protected final PropertyDescription propertyDescription;
 	protected final PersistContext persistContext;
@@ -87,9 +84,12 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			IBasicWebObject parent = (IBasicWebObject)persistContext.getPersist();
 			if (parent.getProperty(propertyDescription.getName()) instanceof WebCustomType[])
 			{
-				return WebCustomType.createNewInstance(parent, arrayElementPD, propertyDescription.getName(), index, true, null, typeName);
+				WebCustomType customType = WebCustomType.createNewInstance(parent, arrayElementPD, propertyDescription.getName(), index, true);
+				customType.setTypeName(typeName);
+				return customType;
 			}
-			return ChildWebComponent.createNewInstance(parent, propertyDescription.getName(), index, true, arrayElementPD);
+			//TODO remove
+			return ChildWebComponent.createNewInstance(parent, arrayElementPD, propertyDescription.getName(), index, true);
 		}
 		return null;
 	}
@@ -223,14 +223,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		protected void defaultSetElement(Object value, int idx)
 		{
 			if (idx < 0 || idx >= ((Object[])getEditableValue()).length) return;
-			if (value == null && getEditableValue() instanceof IChildWebObject[])
-			{
-				((Object[])getEditableValue())[idx] = getNewElementValue(idx);
-			}
-			else
-			{
-				((Object[])getEditableValue())[idx] = value;
-			}
+			((Object[])getEditableValue())[idx] = value;
 		}
 
 		/*
@@ -338,7 +331,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 					ServoyJSONArray json = new ServoyJSONArray();
 					for (IChildWebObject element : arr)
 					{
-						json.put(element.getFlattenedJson());
+						json.put(element == null ? JSONObject.NULL : element.getFlattenedJson());
 					}
 					return super.convertToString(json);
 				}
@@ -421,7 +414,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		{
 			for (int j = 0; j < newArrayValue.length; j++)
 			{
-				((IChildWebObject)newArrayValue[j]).setIndex(j);
+				if (newArrayValue[j] != null) ((IChildWebObject)newArrayValue[j]).setIndex(j);
 			}
 		}
 	}

@@ -117,18 +117,18 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		ComposedCellEditor cellEditor = new ComposedCellEditor(new ConvertorObjectCellEditor(getMainObjectTextConverter()), new ComposedCellEditor(
-				new ButtonCellEditor()
+		ComposedCellEditor cellEditor = new ComposedCellEditor(new ConvertorObjectCellEditor(getMainObjectTextConverter()),
+			new ComposedCellEditor(new ButtonCellEditor()
 			{
 
 				@Override
 				protected void updateButtonState(Button buttonWidget, Object value)
 				{
-					buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(
-							isNotSet(value) ? ISharedImages.IMG_OBJ_ADD : ISharedImages.IMG_ETOOL_CLEAR));
-						buttonWidget.setEnabled(true);
-						buttonWidget.setToolTipText(isNotSet(value) ? "Creates an empty property value '[]' to be able to expand node."
-							: "Clears the property value.");
+					buttonWidget.setImage(
+						PlatformUI.getWorkbench().getSharedImages().getImage(isNotSet(value) ? ISharedImages.IMG_OBJ_ADD : ISharedImages.IMG_ETOOL_CLEAR));
+					buttonWidget.setEnabled(true);
+					buttonWidget.setToolTipText(
+						isNotSet(value) ? "Creates an empty property value '[]' to be able to expand node." : "Clears the property value.");
 				}
 
 				@Override

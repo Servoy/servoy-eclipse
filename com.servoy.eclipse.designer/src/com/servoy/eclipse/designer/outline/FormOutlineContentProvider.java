@@ -393,7 +393,8 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 									boolean arrayReturnType = PropertyUtils.isCustomJSONArrayPropertyType(type);
 									if (!arrayReturnType)
 									{
-										WebCustomType ghostBean = WebCustomType.createNewInstance(parentBean, pd, beanJSONKey, -1, false, null, simpleTypeName);
+										WebCustomType ghostBean = WebCustomType.createNewInstance(parentBean, pd, beanJSONKey, -1, false);
+										ghostBean.setTypeName(simpleTypeName);
 										result.add(ghostBean);
 									}
 									else if (object instanceof JSONArray)
@@ -403,8 +404,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 										{
 											for (int i = 0; i < ((JSONArray)object).length(); i++)
 											{
-												WebCustomType ghostBean = WebCustomType.createNewInstance(parentBean, elementTypePD, beanJSONKey, i, false,
-													null, simpleTypeName);
+												WebCustomType ghostBean = WebCustomType.createNewInstance(parentBean, elementTypePD, beanJSONKey, i, false);
 												ghostBean.setTypeName(simpleTypeName);
 												result.add(ghostBean);
 											}

@@ -600,7 +600,7 @@ public class CreateComponentHandler implements IServerService
 				compName = componentName + "_" + id.incrementAndGet();
 			}
 
-			ChildWebComponent webComponent = ChildWebComponent.createNewInstance(parentWC, propertyName, indexIfInArray, true, pd);
+			ChildWebComponent webComponent = ChildWebComponent.createNewInstance(parentWC, pd, propertyName, indexIfInArray, true);
 			webComponent.setTypeName(componentSpecName);
 
 			// not sure if location and size are still needed to be set in children here... maybe it is (if parent wants to use them at runtime)

@@ -33,6 +33,7 @@ import com.servoy.eclipse.ui.property.PDPropertySource;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
@@ -253,7 +254,13 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 	@Override
 	protected String getLabelText(Object element)
 	{
-		return (element == null ? "null" : "{...}");
+		return (isJSONNull(element) ? "null" : "{...}");
+	}
+
+	@Override
+	protected boolean isJSONNull(Object element)
+	{
+		return element == null || ((WebCustomType)element).getFlattenedJson() == null;
 	}
 
 	/*
@@ -265,6 +272,23 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 	protected IObjectTextConverter getMainObjectTextConverter()
 	{
 		return OBJECT_TEXT_CONVERTER;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.ui.property.ObjectTypePropertyController#toggleValue(java.lang.Object)
+	 */
+	@Override
+	protected Object toggleValue(Object oldPropertyValue)
+	{
+		WebCustomType ct = (WebCustomType)oldPropertyValue;
+		WebCustomType newPropertyValue = WebCustomType.createNewInstance(ct.getParent(), ct.getPropertyDescription(), ct.getJsonKey(), ct.getIndex(), true);
+		if (!isJSONNull(ct))
+		{
+			newPropertyValue.setJson(null);
+		}
+		return newPropertyValue;
 	}
 
 }

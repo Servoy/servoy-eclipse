@@ -280,7 +280,9 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 		}
 		if (parentBean instanceof WebComponent)
 		{
-			WebCustomType bean = WebCustomType.createNewInstance(parentBean, targetPD, propertyName, index, true, compName, typeName);
+			WebCustomType bean = WebCustomType.createNewInstance(parentBean, targetPD, propertyName, index, true);
+			bean.setName(compName);
+			bean.setTypeName(typeName);
 			if (isArray)
 			{
 				if (arrayValue == null)

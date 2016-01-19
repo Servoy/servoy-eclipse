@@ -129,7 +129,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 	{
 		IBasicWebObject bean = (IBasicWebObject)obj;
 
-		Object convertedValue = canHandleJSONNull ? value : ServoyJSONObject.nullToJsonNull(value);
+		Object convertedValue = value;
 		if (propertyDescription.getType() instanceof FunctionPropertyType)
 		{
 			//  value is methodid
