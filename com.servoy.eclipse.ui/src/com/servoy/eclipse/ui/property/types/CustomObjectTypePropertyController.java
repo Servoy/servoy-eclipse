@@ -71,12 +71,9 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 		@Override
 		public Object convertToObject(String value)
 		{
-			JSONObject obj = (JSONObject)super.convertToObject(value);
-			for (String key : obj.keySet())
-			{
-				wo.setProperty(key, obj.opt(key));
-			}
-			return wo;
+			WebCustomType newPropertyValue = WebCustomType.createNewInstance(wo.getParent(), wo.getPropertyDescription(), wo.getJsonKey(), wo.getIndex(), true);
+			newPropertyValue.setJson((JSONObject)super.convertToObject(value));
+			return newPropertyValue;
 		}
 
 		/*
