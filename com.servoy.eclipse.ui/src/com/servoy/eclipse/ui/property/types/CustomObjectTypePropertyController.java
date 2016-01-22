@@ -21,13 +21,11 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentSpecification;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 import com.servoy.eclipse.ui.property.ISetterAwarePropertySource;
-import com.servoy.eclipse.ui.property.JSONObjectTypePropertyController.JSONObjectTextConverter;
 import com.servoy.eclipse.ui.property.ObjectTypePropertyController;
 import com.servoy.eclipse.ui.property.PDPropertySource;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -57,55 +55,6 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 	protected CustomObjectPropertySource getObjectChildPropertySource(ComplexProperty<Object> complexProperty)
 	{
 		return new CustomObjectPropertySource(complexProperty);
-	}
-
-	private static class CustomObjectTextConverter extends JSONObjectTextConverter
-	{
-		private final WebCustomType wo;
-
-		public CustomObjectTextConverter(WebCustomType persist)
-		{
-			this.wo = persist;
-		}
-
-		@Override
-		public Object convertToObject(String value)
-		{
-			WebCustomType newPropertyValue = WebCustomType.createNewInstance(wo.getParent(), wo.getPropertyDescription(), wo.getJsonKey(), wo.getIndex(), true);
-			newPropertyValue.setJson((JSONObject)super.convertToObject(value));
-			return newPropertyValue;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter#convertToString(java.lang.Object)
-		 */
-		@Override
-		public String convertToString(Object value)
-		{
-			if (value instanceof WebCustomType)
-			{
-				return super.convertToString(((WebCustomType)value).getFlattenedJson());
-			}
-			return null;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter#isCorrectObject(java.lang.Object)
-		 */
-		@Override
-		public String isCorrectObject(Object value)
-		{
-			if (value instanceof IBasicWebObject)
-			{
-				return super.isCorrectObject(((IBasicWebObject)value).getFlattenedJson());
-			}
-			return null;
-		}
-
 	}
 
 	protected class CustomObjectPropertySource extends ObjectPropertySource
@@ -251,13 +200,7 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 	@Override
 	protected IObjectTextConverter getMainObjectTextConverter()
 	{
-		IPersist persist = persistContext.getPersist();
-		String pdName = propertyDescription.getName();
-		if (persist != null && !WebComponentSpecification.ARRAY_ELEMENT_PD_NAME.equals(pdName))
-		{
-			persist = (IPersist)((IBasicWebObject)persist).getProperty(pdName);
-		}
-		return new CustomObjectTextConverter((WebCustomType)persist);
+		return null;
 	}
 
 	/*

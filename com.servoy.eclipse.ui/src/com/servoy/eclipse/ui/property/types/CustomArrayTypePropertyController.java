@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.ICustomType;
 
@@ -33,13 +32,11 @@ import com.servoy.eclipse.ui.property.ArrayTypePropertyController;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 import com.servoy.eclipse.ui.property.ISetterAwarePropertySource;
-import com.servoy.eclipse.ui.property.JSONArrayTypePropertyController.JSONArrayTextConverter;
 import com.servoy.eclipse.ui.property.PDPropertySource;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PersistPropertySource.PropertyDescriptorWrapper;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IChildWebObject;
@@ -56,7 +53,6 @@ import com.servoy.j2db.util.Utils;
  */
 public class CustomArrayTypePropertyController extends ArrayTypePropertyController
 {
-	private static final CustomArrayTextConverter CUSTOM_ARRAY_TEXT_CONVERTER = new CustomArrayTextConverter();
 	protected final PropertyDescription propertyDescription;
 	protected final PersistContext persistContext;
 
@@ -82,14 +78,9 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			String typeName = propertyDescription.getType().getName().indexOf(".") > 0 ? propertyDescription.getType().getName().split("\\.")[1]
 				: propertyDescription.getType().getName();
 			IBasicWebObject parent = (IBasicWebObject)persistContext.getPersist();
-			if (parent.getProperty(propertyDescription.getName()) instanceof WebCustomType[])
-			{
-				WebCustomType customType = WebCustomType.createNewInstance(parent, arrayElementPD, propertyDescription.getName(), index, true);
-				customType.setTypeName(typeName);
-				return customType;
-			}
-			//TODO remove
-			return ChildWebComponent.createNewInstance(parent, arrayElementPD, propertyDescription.getName(), index, true);
+			WebCustomType customType = WebCustomType.createNewInstance(parent, arrayElementPD, propertyDescription.getName(), index, true);
+			customType.setTypeName(typeName);
+			return customType;
 		}
 		return null;
 	}
@@ -315,58 +306,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	@Override
 	protected IObjectTextConverter getMainObjectTextConverter()
 	{
-		return CUSTOM_ARRAY_TEXT_CONVERTER;
-	}
-
-	static class CustomArrayTextConverter extends JSONArrayTextConverter
-	{
-		@Override
-		public String convertToString(Object value)
-		{
-			if (value instanceof Object[])
-			{
-				if (value instanceof IChildWebObject[])
-				{
-					IChildWebObject[] arr = (IChildWebObject[])value;
-					ServoyJSONArray json = new ServoyJSONArray();
-					for (IChildWebObject element : arr)
-					{
-						json.put(element == null ? JSONObject.NULL : element.getFlattenedJson());
-					}
-					return super.convertToString(json);
-				}
-				return super.convertToString(new ServoyJSONArray(value));
-			}
-			return null;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.property.JSONArrayTypePropertyController.JSONArrayTextConverter#convertToObject(java.lang.String)
-		 */
-		@Override
-		public Object convertToObject(String value)
-		{
-			return super.convertToObject(value);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.property.JSONArrayTypePropertyController.JSONArrayTextConverter#isCorrectObject(java.lang.Object)
-		 */
-		@Override
-		public String isCorrectObject(Object value)
-		{
-			if (value instanceof Object[])
-			{
-				return super.isCorrectString(convertToString(value));
-			}
-			return null;
-		}
-
-
+		return null;
 	}
 
 	/*
@@ -418,5 +358,4 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			}
 		}
 	}
-
 }

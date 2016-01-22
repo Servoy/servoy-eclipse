@@ -98,7 +98,7 @@ public abstract class ObjectTypePropertyController extends PropertyController<Ob
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		ComposedCellEditor cellEditor = new ComposedCellEditor(new ConvertorObjectCellEditor(getMainObjectTextConverter()), new ButtonCellEditor()
+		CellEditor cellEditor = new ButtonCellEditor()
 		{
 
 			@Override
@@ -117,9 +117,12 @@ public abstract class ObjectTypePropertyController extends PropertyController<Ob
 				return toggleValue(oldPropertyValue);
 			}
 
-		}, false, false, 0);
+		};
+		if (getMainObjectTextConverter() != null)
+		{
+			cellEditor = new ComposedCellEditor(new ConvertorObjectCellEditor(getMainObjectTextConverter()), cellEditor, false, false, 0);
+		}
 		cellEditor.create(parent);
-
 		return cellEditor;
 	}
 
