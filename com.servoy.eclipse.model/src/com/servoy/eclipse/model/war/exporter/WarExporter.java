@@ -21,6 +21,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -328,7 +329,7 @@ public class WarExporter
 				}
 				catch (IOException e)
 				{
-					e.printStackTrace();
+					Debug.error(e);
 				}
 			}
 			if (!found) throw new ExportException(libName + " was not found. Please specify location");
@@ -526,11 +527,11 @@ public class WarExporter
 				fo.close();
 				is.close();
 			}
+			jarfile.close();
 		}
 		catch (IOException e)
 		{
-			Debug.error(e);
-			throw new ExportException(e.getMessage());
+			Debug.error("IO exception when extracting from file " + file.getAbsolutePath(), e);
 		}
 	}
 
@@ -794,7 +795,7 @@ public class WarExporter
 		}
 		catch (Exception e)
 		{
-			throw new ExportException("Can't create the web.xml file: " + webXMLFile, e);
+			throw new ExportException("Can't create the web.xml file: " + webXMLFile.getAbsolutePath(), e);
 		}
 		finally
 		{
@@ -933,7 +934,7 @@ public class WarExporter
 		}
 		catch (IOException e2)
 		{
-			throw new ExportException("Error creating laf dir", e2);
+			throw new ExportException("Error creating lafs properties file " + lafProperties.getAbsolutePath(), e2);
 		}
 		finally
 		{
@@ -1281,7 +1282,11 @@ public class WarExporter
 			fos = new FileOutputStream(new File(tmpWarDir, "WEB-INF/servoy.properties"));
 			properties.store(fos, "");
 		}
-		catch (Exception e)
+		catch (FileNotFoundException fileNotFoundException)
+		{
+			throw new ExportException("Couldn't find file " + tmpWarDir.getAbsolutePath() + "/WEB-INF/servoy.properties", fileNotFoundException);
+		}
+		catch (IOException e)
 		{
 			throw new ExportException("Couldn't generate the properties file", e);
 		}

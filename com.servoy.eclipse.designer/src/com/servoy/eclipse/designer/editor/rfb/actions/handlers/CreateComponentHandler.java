@@ -236,11 +236,13 @@ public class CreateComponentHandler implements IServerService
 			{
 				// see if target has a 'component' or 'component[]' typed property
 				WebComponent parentWC = (WebComponent)dropTarget;
+				PropertyDescription propertyDescription = ((WebObjectImpl)parentWC.getImplementation()).getPropertyDescription();
+
 				// TODO add a visual way for the user to drop to a specific property (if there is more then one property that supports components)
 				// TODO also add a way of adding to a specific index in a component array and also just moving component ghosts in a component array property
-				for (String propertyName : new TreeSet<String>(parentWC.getSpecification().getAllPropertiesNames()))
+				for (String propertyName : new TreeSet<String>(propertyDescription.getAllPropertiesNames()))
 				{
-					PropertyDescription property = parentWC.getSpecification().getProperty(propertyName);
+					PropertyDescription property = propertyDescription.getProperty(propertyName);
 					if (property.getType() instanceof ComponentPropertyType)
 					{
 						// simple component type

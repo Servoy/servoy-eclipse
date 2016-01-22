@@ -463,6 +463,15 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 			text.addListener(SWT.Modify, listener);
 			text.addListener(SWT.KeyUp, listener);
 			text.addListener(SWT.MouseUp, listener);
+			text.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e)
+				{
+					fireApplyEditorValue();
+					deactivate();
+				}
+			});
 
 			button = new Button(composite, SWT.FLAT);
 			button.setImage(DialogCellEditor.OPEN_IMAGE);
