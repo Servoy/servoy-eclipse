@@ -59,6 +59,7 @@ import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
@@ -108,7 +109,7 @@ public class GhostHandler implements IServerService
 					Map<String, PropertyDescription> properties = spec.getProperties();
 					for (String key : properties.keySet())
 					{
-						if (((WebComponent)bean).getSpecification().isArrayReturnType(key))
+						if (((WebObjectImpl)((WebComponent)bean).getImplementation()).getPropertyDescription().isArrayReturnType(key))
 						{
 							LocationCache.getINSTANCE().clearParent(bean.getUUID() + key);
 						}
@@ -141,7 +142,9 @@ public class GhostHandler implements IServerService
 									}
 
 									Object configObject;
-									if (p.getIndex() >= 0) configObject = ((WebComponent)bean).getSpecification().getProperty(p.getJsonKey()).getConfig();
+									if (p.getIndex() >= 0)
+										configObject = ((WebObjectImpl)((WebComponent)bean).getImplementation()).getPropertyDescription().getProperty(
+											p.getJsonKey()).getConfig();
 									else configObject = p.getPropertyDescription().getConfig();
 
 									if (isDroppable(p.getPropertyDescription(), configObject))
