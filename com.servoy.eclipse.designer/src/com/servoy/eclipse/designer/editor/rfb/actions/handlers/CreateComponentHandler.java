@@ -81,6 +81,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
