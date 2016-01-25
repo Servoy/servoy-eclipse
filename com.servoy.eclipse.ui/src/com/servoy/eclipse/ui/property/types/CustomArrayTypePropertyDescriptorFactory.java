@@ -28,14 +28,14 @@ import com.servoy.j2db.FlattenedSolution;
  *
  * @author acostescu
  */
-public class CustomJSONArrayTypePropertyDescriptorFactory implements ITypePropertyDescriptorFactory
+public class CustomArrayTypePropertyDescriptorFactory implements ITypePropertyDescriptorFactory
 {
 
 	@Override
 	public IPropertyDescriptor createPropertyDescriptor(String id, String displayName, FlattenedSolution flattenedEditingSolution,
 		PersistContext persistContext, PropertyDescription propertyDescription)
 	{
-		return new CustomJSONArrayTypePropertyController(id, displayName, persistContext, propertyDescription);
+		return new CustomArrayTypePropertyController(id, displayName, persistContext, propertyDescription);
 	}
 
 }

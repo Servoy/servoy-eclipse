@@ -84,7 +84,6 @@ public class Activator extends AbstractUIPlugin
 		plugin = this;
 
 		Types.setTypesInstance(DesignerTypes.INSTANCE);
-		Types.getTypesInstance().registerTypes();
 
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.addI18NChangeListener(i18nChangeListener = new I18NChangeListener()

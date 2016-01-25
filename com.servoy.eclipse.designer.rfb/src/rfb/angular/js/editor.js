@@ -12,7 +12,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 
 		registerPlugin: function(plugin) {
 			plugins[plugins.length] = plugin;
-		},
+		}
 	}
 }).value("EDITOR_EVENTS", {
 	SELECTION_CHANGED: "SELECTION_CHANGED",
@@ -38,7 +38,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		restrict: 'E',
 		transclude: true,
 		scope: {},
-		link: function($scope, $element, $attrs) {
+		link: function($scope, $element) {
 			var timeout;
 			var delta = {
 				addedNodes: [],
@@ -94,10 +94,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			$scope.getContentAreaStyle = function() {
 				var contentAreaStyle = {};
 				if ($scope.isAbsoluteFormLayout()) {
-					contentAreaStyle.minWidth = parseInt($scope.contentStyle.width, 10) + EDITOR_CONSTANTS.PART_LABEL_WIDTH + 20 +
-						'px';
-					contentAreaStyle.minHeight = parseInt($scope.contentStyle.height, 10) + EDITOR_CONSTANTS.PART_LABEL_HEIGHT +
-						20 + 'px';
+					contentAreaStyle.minWidth = parseInt($scope.contentStyle.width, 10) + EDITOR_CONSTANTS.PART_LABEL_WIDTH + 20 + 'px';
+					contentAreaStyle.minHeight = parseInt($scope.contentStyle.height, 10) + EDITOR_CONSTANTS.PART_LABEL_HEIGHT + 20 + 'px';
 				}
 				return contentAreaStyle;
 			}
@@ -456,8 +454,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 
 			$scope.convertToAbsolutePoint = function(point) {
-				var frameRect = $element.find('.contentframe')[0].getBoundingClientRect()
-				if (point.x && point.y) {
+				function isFiniteNumber(value) {
+					return angular.isNumber(value) && isFinite(value);
+				}
+				var frameRect = $element.find('.content')[0].getBoundingClientRect()
+				if (isFiniteNumber(point.x) && isFiniteNumber(point.y)) {
 					point.x = point.x + frameRect.left;
 					point.y = point.y + frameRect.top;
 				}

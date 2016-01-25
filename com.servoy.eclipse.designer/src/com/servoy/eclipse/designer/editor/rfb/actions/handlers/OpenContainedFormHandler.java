@@ -87,7 +87,7 @@ public class OpenContainedFormHandler implements IServerService
 							else if (persist instanceof WebCustomType)
 							{
 								WebCustomType ghost = (WebCustomType)persist;
-								JSONObject beanXML = ghost.getJson();
+								JSONObject beanXML = ghost.getFlattenedJson();
 
 
 								Collection<PropertyDescription> forms = null;

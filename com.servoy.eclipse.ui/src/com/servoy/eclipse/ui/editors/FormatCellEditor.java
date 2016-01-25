@@ -123,9 +123,9 @@ public class FormatCellEditor extends TextDialogCellEditor
 						if (propertyType instanceof DataproviderPropertyType)
 						{
 							String dataProviderID = (String)((AbstractBase)persist).getProperty(propertyName);
-							if (dataProviderID == null && persist instanceof IBasicWebObject && ((IBasicWebObject)persist).getJson() != null)
+							if (dataProviderID == null && persist instanceof IBasicWebObject)
 							{
-								dataProviderID = ((IBasicWebObject)persist).getJson().optString(propertyName);
+								dataProviderID = ((IBasicWebObject)persist).getProperty(propertyName) != null ? (String)((IBasicWebObject)persist).getProperty(propertyName) : null;
 							}
 							if (dataProviderID != null)
 							{
@@ -143,9 +143,9 @@ public class FormatCellEditor extends TextDialogCellEditor
 						else if (propertyType instanceof ValueListPropertyType)
 						{
 							ValueList vl = null;
-							if (persist instanceof WebCustomType && ((WebCustomType)persist).getJson() != null)
+							if (persist instanceof WebCustomType)
 							{
-								UUID valuelistUUID = Utils.getAsUUID(((WebCustomType)persist).getJson().optString(propertyName), false);
+								UUID valuelistUUID = Utils.getAsUUID(((WebCustomType)persist).getProperty(propertyName), false);
 								if (valuelistUUID != null)
 								{
 									vl = (ValueList)flattenedSolution.searchPersist(valuelistUUID);
