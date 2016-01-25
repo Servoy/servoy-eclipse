@@ -451,8 +451,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 
 			$scope.convertToAbsolutePoint = function(point) {
-				var frameRect = $element.find('.contentframe')[0].getBoundingClientRect()
-				if (point.x && point.y) {
+				function isFiniteNumber(value) {
+					return angular.isNumber(value) && isFinite(value);
+				}
+				var frameRect = $element.find('.content')[0].getBoundingClientRect()
+				if (isFiniteNumber(point.x) && isFiniteNumber(point.y)) {
 					point.x = point.x + frameRect.left;
 					point.y = point.y + frameRect.top;
 				}

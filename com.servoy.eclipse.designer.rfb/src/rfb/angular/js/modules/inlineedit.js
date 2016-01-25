@@ -70,8 +70,8 @@ angular.module('inlineedit', ['editor']).run(['$pluginRegistry', '$editorService
 								var nodeId = node.getAttribute("svy-id");
 								$editorService.getComponentPropertyWithTags(nodeId, directEditProperty).then(function(propertyValue) {
 									var absolutePoint = editorScope.convertToAbsolutePoint({
-										x: node.getBoundingClientRect().left + scrollX,
-										y: node.getBoundingClientRect().top + scrollY
+										x: node.getBoundingClientRect().left,
+										y: node.getBoundingClientRect().top
 									});
 									absolutePoint.width = node.getBoundingClientRect().right - node.getBoundingClientRect().left;
 									absolutePoint.height = node.getBoundingClientRect().bottom - node.getBoundingClientRect().top;
