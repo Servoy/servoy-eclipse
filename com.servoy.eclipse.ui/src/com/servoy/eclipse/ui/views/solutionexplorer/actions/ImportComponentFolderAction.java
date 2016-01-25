@@ -17,11 +17,23 @@
 
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map.Entry;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.sablo.specification.WebComponentPackage;
 
+import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.core.util.UIUtils.ScrollableDialog;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
@@ -31,13 +43,15 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
  */
 public class ImportComponentFolderAction extends ImportComponentAction
 {
+	private final String entityType;
 
 	/**
 	 * @param viewer
 	 */
-	public ImportComponentFolderAction(SolutionExplorerView viewer, String entity, String folder)
+	public ImportComponentFolderAction(SolutionExplorerView viewer, String entity, String folder, String entityType)
 	{
 		super(viewer, entity, folder);
+		this.entityType = entityType;
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("import_folder.gif"));
 		setText("Import " + entity + " folder package");
 		setToolTipText(getText());
@@ -70,4 +84,57 @@ public class ImportComponentFolderAction extends ImportComponentAction
 		}
 	}
 
+	@Override
+	protected File[] getImportFolderEntries(File importFolder)
+	{
+		ArrayList<File> importFolderEntries = new ArrayList<File>();
+		WebComponentPackage.DirPackageReader dirReader = new WebComponentPackage.DirPackageReader(importFolder);
+		try
+		{
+			Manifest mf = dirReader.getManifest();
+			importFolderEntries.add(new File(importFolder, "META-INF"));
+			for (Entry<String, Attributes> entry : mf.getEntries().entrySet())
+			{
+				if ("true".equalsIgnoreCase((String)entry.getValue().get(new Attributes.Name(entityType))))
+				{
+					File wcSpecFile = new File(importFolder, entry.getKey());
+					if (wcSpecFile.exists()) importFolderEntries.add(wcSpecFile.getParentFile());
+				}
+			}
+
+			final StringBuilder allComponents = new StringBuilder();
+			if (importFolderEntries.size() > 1)
+			{
+				for (int i = 1; i < importFolderEntries.size(); i++)
+				{
+					if (allComponents.length() > 0) allComponents.append("\n");
+					allComponents.append(importFolderEntries.get(i).getName());
+				}
+			}
+			UIUtils.runInUI(new Runnable()
+			{
+				public void run()
+				{
+					ScrollableDialog dialog = new ScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.INFORMATION, "Import component folder",
+						"The following components will be imported: ", allComponents.toString());
+					dialog.open();
+				}
+			}, true);
+		}
+		catch (final IOException ex)
+		{
+			ServoyLog.logError(ex);
+			UIUtils.runInUI(new Runnable()
+			{
+				public void run()
+				{
+					ScrollableDialog dialog = new ScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.ERROR, "Import component folder",
+						"The following error occured during import: ", ex.toString());
+					dialog.open();
+				}
+			}, true);
+		}
+
+		return importFolderEntries.toArray(new File[importFolderEntries.size()]);
+	}
 }

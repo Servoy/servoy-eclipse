@@ -118,8 +118,8 @@ public class ImportComponentAction extends Action
 			{
 				public void run()
 				{
-					ScrollableDialog dialog = new ScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.ERROR, "Error", "The folowing " + entity +
-						" files already exist: ", existingComponents.toString());
+					ScrollableDialog dialog = new ScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.ERROR, "Error",
+						"The folowing " + entity + " files already exist: ", existingComponents.toString());
 					List<Pair<Integer, String>> buttonsAndLabels = new ArrayList<Pair<Integer, String>>();
 					buttonsAndLabels.add(new Pair<Integer, String>(IDialogConstants.YES_TO_ALL_ID, "Overwrite all"));
 					buttonsAndLabels.add(new Pair<Integer, String>(IDialogConstants.CANCEL_ID, "Cancel"));
@@ -145,9 +145,17 @@ public class ImportComponentAction extends Action
 			{
 				if (javaFile.isDirectory())
 				{
-					deleteFolderIfWeAlreadyHaveIt(componentsFolder, javaFile);
-
-					importFolderComponent(componentsFolder, javaFile);
+					File[] importFolderEntries = getImportFolderEntries(javaFile);
+					if (importFolderEntries.length > 0)
+					{
+						deleteFolderIfWeAlreadyHaveIt(componentsFolder, javaFile);
+						importFolderComponent(componentsFolder, javaFile, false);
+						IFolder packageFolder = componentsFolder.getFolder(new Path(javaFile.getName()));
+						for (File f : importFolderEntries)
+						{
+							importFolderComponent(packageFolder, f, true);
+						}
+					}
 				}
 				else if (javaFile.isFile())
 				{
@@ -156,6 +164,11 @@ public class ImportComponentAction extends Action
 			}
 		}
 
+	}
+
+	protected File[] getImportFolderEntries(File importFolder)
+	{
+		return importFolder.listFiles();
 	}
 
 	/**
@@ -237,7 +250,7 @@ public class ImportComponentAction extends Action
 	/**
 	 * @param javaFile
 	 */
-	private void importFolderComponent(IFolder componentsFolder, File javaFile)
+	private void importFolderComponent(IFolder componentsFolder, File javaFile, boolean isImportChildFolders)
 	{
 		if (javaFile.isDirectory())
 		{
@@ -251,9 +264,12 @@ public class ImportComponentAction extends Action
 				ServoyLog.logError(e);
 			}
 
-			for (File file : javaFile.listFiles())
+			if (isImportChildFolders)
 			{
-				importFolderComponent(newFolder, file);
+				for (File file : javaFile.listFiles())
+				{
+					importFolderComponent(newFolder, file, isImportChildFolders);
+				}
 			}
 		}
 		else if (javaFile.isFile()) importZipFileComponent(componentsFolder, javaFile);
