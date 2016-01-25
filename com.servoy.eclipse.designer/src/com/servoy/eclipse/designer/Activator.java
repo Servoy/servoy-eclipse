@@ -105,7 +105,6 @@ public class Activator extends AbstractUIPlugin
 		plugin = this;
 
 		Types.setTypesInstance(DesignerTypes.INSTANCE);
-		Types.getTypesInstance().registerTypes();
 		ApplicationServerRegistry.getServiceRegistry().registerService(IDesignerSolutionProvider.class, new IDesignerSolutionProvider()
 		{
 			@Override
