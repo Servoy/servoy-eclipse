@@ -49,7 +49,6 @@ import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
 import com.servoy.j2db.util.HTTPUtils;
 import com.servoy.j2db.util.Pair;
-import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner
@@ -124,14 +123,12 @@ public class EditorContentFilter implements Filter
 			if (flattenedForm.isResponsiveLayout())
 			{
 				((HttpServletResponse)response).setContentType("text/html");
-				FormLayoutStructureGenerator.generateLayout(flattenedForm, solutionAndFormName.getRight(), new ServoyDataConverterContext(fs), w, true,
-					Utils.getAsBoolean(request.getParameter("highlight")));
+				FormLayoutStructureGenerator.generateLayout(flattenedForm, solutionAndFormName.getRight(), new ServoyDataConverterContext(fs), w, true);
 			}
 			else
 			{
 				((HttpServletResponse)response).setContentType("text/html");
-				FormLayoutGenerator.generateRecordViewForm(w, flattenedForm, solutionAndFormName.getRight(), new ServoyDataConverterContext(fs), true,
-					Utils.getAsBoolean(request.getParameter("highlight")));
+				FormLayoutGenerator.generateRecordViewForm(w, flattenedForm, solutionAndFormName.getRight(), new ServoyDataConverterContext(fs), true);
 			}
 			w.flush();
 			return;

@@ -46,8 +46,8 @@ public class ShortcutsHandler implements IServerService
 
 	private final BaseVisualFormEditor editorPart;
 
-	private static final Set<String> shortcutNames = new HashSet<String>(
-		Arrays.asList(new String[] { OpenScriptAction.OPEN_SCRIPT_ID, DesignerActionFactory.SET_TAB_SEQUENCE_ID, DesignerActionFactory.SAME_WIDTH_ID, DesignerActionFactory.SAME_HEIGHT_ID, ToggleAnchoringTop.TOGGLE_ANCHORING_TOP_ID, ToggleAnchoringRight.TOGGLE_ANCHORING_RIGHT_ID, ToggleAnchoringBottom.TOGGLE_ANCHORING_BOTTOM_ID, ToggleAnchoringLeft.TOGGLE_ANCHORING_LEFT_ID, DesignerActionFactory.BRING_TO_FRONT_ONE_STEP_ID, DesignerActionFactory.SEND_TO_BACK_ONE_STEP_ID, DesignerActionFactory.BRING_TO_FRONT_ID, DesignerActionFactory.SEND_TO_BACK_ID }));
+	private static final Set<String> shortcutNames = new HashSet<String>(Arrays.asList(
+		new String[] { OpenScriptAction.OPEN_SCRIPT_ID, DesignerActionFactory.SET_TAB_SEQUENCE_ID, DesignerActionFactory.SAME_WIDTH_ID, DesignerActionFactory.SAME_HEIGHT_ID, ToggleAnchoringTop.TOGGLE_ANCHORING_TOP_ID, ToggleAnchoringRight.TOGGLE_ANCHORING_RIGHT_ID, ToggleAnchoringBottom.TOGGLE_ANCHORING_BOTTOM_ID, ToggleAnchoringLeft.TOGGLE_ANCHORING_LEFT_ID, DesignerActionFactory.BRING_TO_FRONT_ONE_STEP_ID, DesignerActionFactory.SEND_TO_BACK_ONE_STEP_ID, DesignerActionFactory.BRING_TO_FRONT_ID, DesignerActionFactory.SEND_TO_BACK_ID }));
 
 	public ShortcutsHandler(BaseVisualFormEditor editorPart)
 	{
@@ -56,7 +56,7 @@ public class ShortcutsHandler implements IServerService
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.sablo.websocket.IServerService#executeMethod(java.lang.String, org.json.JSONObject)
 	 */
 	@Override
@@ -65,15 +65,15 @@ public class ShortcutsHandler implements IServerService
 		StringWriter stringWriter = new StringWriter();
 		final JSONWriter writer = new JSONWriter(stringWriter);
 		writer.object();
-		IBindingService bindingService = (IBindingService)editorPart.getSite().getService(IBindingService.class);
+		IBindingService bindingService = editorPart.getSite().getService(IBindingService.class);
+		Set<String> set = new HashSet<String>();
 		for (Binding binding : bindingService.getBindings())
 		{
-			if (binding.getParameterizedCommand() != null && shortcutNames.contains(binding.getParameterizedCommand().getId())) //binding.getParameterizedCommand().getCommand().getCategory().getName().equals("Servoy"))
+			ParameterizedCommand cmd = binding.getParameterizedCommand();
+			if (cmd != null && shortcutNames.contains(cmd.getId()) && !set.contains(cmd.getId())) //binding.getParameterizedCommand().getCommand().getCategory().getName().equals("Servoy"))
 			{
-				ParameterizedCommand cmd = binding.getParameterizedCommand();
-				{
-					writer.key(cmd.getId()).value(binding.getTriggerSequence().toString());
-				}
+				writer.key(cmd.getId()).value(binding.getTriggerSequence().toString());
+				set.add(cmd.getId());
 			}
 		}
 		writer.endObject();

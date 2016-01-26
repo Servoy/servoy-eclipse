@@ -1,6 +1,6 @@
 angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mouseselection', "dragselection",
 	'inlineedit', 'decorators', 'webSocketModule', 'keyboardlayoutupdater', 'highlight'
-]).factory("$pluginRegistry", function($rootScope) {
+]).factory("$pluginRegistry", function() {
 	var plugins = [];
 
 	return {
@@ -153,17 +153,17 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 			$scope.getGhostContainerStyle = function(ghostContainer) {
 				if (!$scope.isAbsoluteFormLayout()) {
-				    ghostContainer.style.display = "none";
-//					var p = getRealContainerElement(ghostContainer.uuid);
-//					if (p.then) {
-//						p.then(function(parent) {
-//							getBounds(ghostContainer, parent);
-//						}, function() {
-//							ghostContainer.style.display = "none";
-//						});
-//					} else {
-//						getBounds(ghostContainer, p);
-//					}
+					ghostContainer.style.display = "none";
+					//					var p = getRealContainerElement(ghostContainer.uuid);
+					//					if (p.then) {
+					//						p.then(function(parent) {
+					//							getBounds(ghostContainer, parent);
+					//						}, function() {
+					//							ghostContainer.style.display = "none";
+					//						});
+					//					} else {
+					//						getBounds(ghostContainer, p);
+					//					}
 				} else {
 					if (ghostContainer.style == undefined) {
 						//TODO refactor out this 20px addition
@@ -1111,12 +1111,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		},
 
 		toggleHighlight: function() {
-			if (editorScope.getEditorContentRootScope().highlight == undefined)
-				editorScope.getEditorContentRootScope().highlight = true;
-			else
-				editorScope.getEditorContentRootScope().highlight = !editorScope.getEditorContentRootScope().highlight;
+			if (!editorScope.getEditorContentRootScope().design_highlight)
+				editorScope.getEditorContentRootScope().design_highlight = "highlight_element";
+			else editorScope.getEditorContentRootScope().design_highlight = null;
 
-			editorScope.getEditorContentRootScope().$digest();
+			editorScope.getEditorContentRootScope().$apply();
 		},
 
 		toggleShowData: function() {

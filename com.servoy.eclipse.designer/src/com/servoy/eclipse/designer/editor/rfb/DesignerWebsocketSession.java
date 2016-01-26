@@ -169,7 +169,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			case "getTemplate" :
 			{
 				String name = args.optString("name", null);
-				boolean highlight = !args.isNull("highlight") && args.getBoolean("highlight");
 				StringWriter htmlTemplate = new StringWriter(512);
 				PrintWriter w = new PrintWriter(htmlTemplate);
 				UUID parentuuid = null;
@@ -185,7 +184,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						if (fe.getName().equals(name))
 						{
 							if (!form.isResponsiveLayout()) FormLayoutGenerator.generateFormElementWrapper(w, fe, true, flattenedForm);
-							FormLayoutGenerator.generateFormElement(w, fe, flattenedForm, true, highlight);
+							FormLayoutGenerator.generateFormElement(w, fe, flattenedForm, true);
 							if (!form.isResponsiveLayout()) FormLayoutGenerator.generateEndDiv(w);
 							if (form.isResponsiveLayout())
 							{
@@ -208,7 +207,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							componentFound = true;
 							parentuuid = child.getParent().getUUID();
 							insertBeforeUUID = findNextSibling(child);
-							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context, w, true, highlight);
+							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context, w, true);
 						}
 					}
 				}
