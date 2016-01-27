@@ -317,12 +317,20 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 
 					return null;
 				},
-
+				
+				isUnknownElement: function(element)
+				{
+					return Object.prototype.toString.call(element) === '[object HTMLUnknownElement]';
+				},
+				
 				collectMatchedElements: function (matchedElements, fromList, p1, p2, percentage) {
 					for (var i = 0; i < fromList.length; i++) {
 						var element = fromList[i]
 						var rect = element.getBoundingClientRect();
-						if(element.firstChild && element.firstChild.getBoundingClientRect) rect = element.firstChild.getBoundingClientRect();
+						if(this.isUnknownElement(element) && element.firstElementChild && !this.isUnknownElement(element.firstElementChild))
+						{
+							rect = element.firstElementChild.getBoundingClientRect();
+						}
 						var left = rect.left;
 						var top = rect.top;
 						if (element.parentElement.parentElement == editorScope.glasspane) {
