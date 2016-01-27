@@ -17,6 +17,7 @@
 package com.servoy.eclipse.designer.outline;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -137,7 +138,9 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 		else if (parentElement instanceof PersistContext && ((PersistContext)parentElement).getPersist() instanceof AbstractBase)
 		{
 			List<PersistContext> list = new ArrayList<PersistContext>();
-			for (IPersist persist : ((AbstractBase)((PersistContext)parentElement).getPersist()).getAllObjectsAsList())
+			List<IPersist> allObjectsAsList = new ArrayList<>(((AbstractBase)((PersistContext)parentElement).getPersist()).getAllObjectsAsList());
+			Collections.sort(allObjectsAsList, PositionComparator.XY_PERSIST_COMPARATOR);
+			for (IPersist persist : allObjectsAsList)
 			{
 				list.add(PersistContext.create(persist, ((PersistContext)parentElement).getContext()));
 			}
