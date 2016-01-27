@@ -322,39 +322,16 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 					for (var i = 0; i < fromList.length; i++) {
 						var element = fromList[i]
 						var rect = element.getBoundingClientRect();
+						if(element.firstChild && element.firstChild.getBoundingClientRect) rect = element.firstChild.getBoundingClientRect();
 						var left = rect.left;
 						var top = rect.top;
-
 						if (element.parentElement.parentElement == editorScope.glasspane) {
 							top = top - element.parentElement.parentElement.getBoundingClientRect().top;
 							left = left - element.parentElement.parentElement.getBoundingClientRect().left;
 						}
-
-						var clientWidth = element.clientWidth;
-						if (clientWidth == 0)
-						{
-							if ( element.firstChild &&  element.firstChild.clientWidth > 0)
-							{
-								clientWidth = element.firstChild.clientWidth
-							}
-							else
-							{
-								clientWidth = element.offsetWidth;
-							}
-						}
-						var clientHeight = element.clientHeight;
-						if (clientHeight == 0)
-						{
-							if ( element.firstChild &&  element.firstChild.clientHeight > 0)
-							{
-								clientHeight = element.firstChild.clientHeight
-							}
-							else
-							{
-								clientHeight = element.offsetHeight;
-							}
-						}
-
+						var clientWidth = rect.width != 0 ? rect.width : element.offsetWidth;
+						var clientHeight = rect.height != 0 ? rect.height : element.clientHeight;
+						
 						if (percentage == undefined || percentage == 100) { //Element must be fully enclosed
 							if (p1.top <= top && p1.left <= left && p2.top >= top + clientHeight && p2.left >= left + clientWidth) {
 								matchedElements.push(element)
