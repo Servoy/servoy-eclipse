@@ -283,6 +283,11 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				}
 
 			});
+			getTreeViewer().expandToLevel(FormOutlineContentProvider.ELEMENTS, 4);
+		}
+		else
+		{
+			getTreeViewer().expandToLevel(FormOutlineContentProvider.ELEMENTS, 3);
 		}
 
 		// when the outline view is reparented to another shell, you cannot use the form editor context menu here
