@@ -83,9 +83,9 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 		boolean mobile = form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) != null;
 
 		getTreeViewer().setContentProvider(mobile ? new MobileFormOutlineContentProvider(form) : new FormOutlineContentProvider(form));
-		getTreeViewer().setLabelProvider(
-			new FormContextDelegateLabelProvider(mobile ? MobileFormOutlineLabelprovider.MOBILE_FORM_OUTLINE_LABEL_PROVIDER_INSTANCE
-				: FormOutlineLabelprovider.FORM_OUTLINE_LABEL_PROVIDER_INSTANCE, form));
+		getTreeViewer().setLabelProvider(new FormContextDelegateLabelProvider(
+			mobile ? MobileFormOutlineLabelprovider.MOBILE_FORM_OUTLINE_LABEL_PROVIDER_INSTANCE : FormOutlineLabelprovider.FORM_OUTLINE_LABEL_PROVIDER_INSTANCE,
+			form));
 		getTreeViewer().setInput(form);
 
 		// when the outline view is reparented to another shell, you cannot use the form editor context menu here
@@ -98,6 +98,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				getTreeViewer().getTree().setMenu(menuManager.createContextMenu(getTreeViewer().getTree()));
 			}
 		}
+		getTreeViewer().expandToLevel(FormOutlineContentProvider.ELEMENTS, 3);
 	}
 
 	@Override
@@ -169,7 +170,8 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 					else
 					{
 						MobileListModel mobileListModel = (MobileListModel)Platform.getAdapterManager().getAdapter(selectionObject, MobileListModel.class);
-						if (mobileListModel == null && selectionObject instanceof MobileListGraphicalEditPart) mobileListModel = ((MobileListGraphicalEditPart)selectionObject).getModel();
+						if (mobileListModel == null && selectionObject instanceof MobileListGraphicalEditPart)
+							mobileListModel = ((MobileListGraphicalEditPart)selectionObject).getModel();
 						if (mobileListModel != null) selectionPath.add(mobileListModel);
 					}
 				}
