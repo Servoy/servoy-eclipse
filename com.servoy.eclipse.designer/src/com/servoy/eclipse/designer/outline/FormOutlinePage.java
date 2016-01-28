@@ -64,6 +64,7 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
@@ -72,6 +73,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -196,19 +198,20 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 					Object input = (target == null && getViewer() instanceof ContentViewer) ? ((ContentViewer)getViewer()).getInput() : target;
 					if (input instanceof PersistContext)
 					{
+						IPersist inputPersist = ((PersistContext)input).getPersist();
 						ISupportChilds targetLayoutContainer = null;
-						if (((PersistContext)input).getPersist() instanceof WebComponent)
+						if (inputPersist instanceof WebComponent)
 						{
-							WebComponent wc = (WebComponent)((PersistContext)input).getPersist();
+							WebComponent wc = (WebComponent)inputPersist;
 							if (wc.getParent() instanceof LayoutContainer)
 							{
 								targetLayoutContainer = wc.getParent();
 								dropTargetComponent = wc;
 							}
 						}
-						else if (((PersistContext)input).getPersist() instanceof LayoutContainer)
+						else if (inputPersist instanceof LayoutContainer)
 						{
-							targetLayoutContainer = (LayoutContainer)((PersistContext)input).getPersist();
+							targetLayoutContainer = (LayoutContainer)inputPersist;
 							if (getCurrentLocation() == LOCATION_BEFORE || getCurrentLocation() == LOCATION_AFTER)
 							{
 								dropTargetComponent = targetLayoutContainer;
@@ -234,6 +237,20 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 									if (!doAllow) return false;
 								}
 							}
+						}
+						else if (inputPersist instanceof WebCustomType)
+						{
+							IBasicWebComponent customTypeParent = ((WebCustomType)inputPersist).getParentComponent();
+							for (IPersist p : dragObjects)
+							{
+								if (!(p instanceof WebCustomType) || ((WebCustomType)p).getParentComponent() != customTypeParent)
+								{
+									return false;
+								}
+							}
+							dropTargetComponent = inputPersist;
+							dropTarget = customTypeParent;
+							return true;
 						}
 
 						if (targetLayoutContainer instanceof LayoutContainer)
