@@ -203,7 +203,12 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 								var allowedChildren = dt[0].getAttribute("svy-allowed-children");
 								if (!allowedChildren || !(allowedChildren.indexOf(realName) > 0))
 								{
-									return getParent( $(dt).parent("[svy-id]")); // the drop target doesn't allow this layout container type
+									// maybe this is a component that has svy-types instead of svy-allowed-childrent
+									allowedChildren = dt[0].getAttribute("svy-types");
+									if (!allowedChildren || !(allowedChildren.indexOf(realName) > 0))
+									{
+										return getParent( $(dt).parent("[svy-id]")); // the drop target doesn't allow this layout container type
+									}
 								}
 								return dt;
 							}
