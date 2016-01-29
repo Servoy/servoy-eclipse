@@ -50,16 +50,10 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 {
 
 	private final PropertyDescription propertyDescription;
-	private boolean canHandleJSONNull = false;
 
 	public WebComponentPropertyHandler(PropertyDescription propertyDescription)
 	{
 		this.propertyDescription = propertyDescription;
-	}
-
-	public void setCanHandleJSON(boolean canHandleJSONNull)
-	{
-		this.canHandleJSONNull = canHandleJSONNull;
 	}
 
 	@Override

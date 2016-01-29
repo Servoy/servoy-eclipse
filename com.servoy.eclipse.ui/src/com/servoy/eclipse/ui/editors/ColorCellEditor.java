@@ -23,8 +23,8 @@ import org.eclipse.swt.widgets.ColorDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.property.ColorPropertyController;
-import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.resource.ColorResource;
 
 /**
@@ -69,9 +69,9 @@ public class ColorCellEditor extends TextDialogCellEditor
 	protected Object doGetValue()
 	{
 		Object val = super.doGetValue();
-		if (val instanceof String)
+		if (Messages.LabelDefault.equals(val))
 		{
-			val = PersistPropertySource.DEFAULT_STRING_CONVERTER.convertValue(null, (String)val);
+			val = null;
 		}
 		if (val instanceof String)
 		{
