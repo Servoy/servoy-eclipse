@@ -38,7 +38,6 @@ import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -96,8 +95,8 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 	@Override
 	public Object getValue(Object obj, PersistContext persistContext)
 	{
-		IBasicWebObject bean = (IBasicWebObject)obj;
-		Object value = bean.getProperty(getName());
+		IBasicWebObject webObject = (IBasicWebObject)obj;
+		Object value = webObject.getProperty(getName());
 		try
 		{
 
@@ -108,7 +107,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 				if (value == null) return Integer.valueOf(0);
 				if (value instanceof Integer) return value;
 
-				IPersist persist = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).searchPersist(UUID.fromString((String)value));
+				IPersist persist = ModelUtils.getEditingFlattenedSolution(webObject, persistContext.getContext()).searchPersist(UUID.fromString((String)value));
 				if (persist instanceof AbstractBase)
 				{
 					return new Integer(persist.getID());
@@ -121,7 +120,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		{
 			Debug.log("illegal value in bean, ignoring it: " + value);
 		}
-		return canHandleJSONNull ? value : ServoyJSONObject.jsonNullToNull(value);
+		return value;
 	}
 
 	@Override
