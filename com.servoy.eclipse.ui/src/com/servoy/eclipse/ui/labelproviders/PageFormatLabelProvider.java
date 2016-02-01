@@ -18,30 +18,28 @@ package com.servoy.eclipse.ui.labelproviders;
 
 import java.awt.print.PageFormat;
 
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-
-import com.servoy.eclipse.ui.Messages;
 
 /**
  * Label provider for page format.
- * 
+ *
  * @author rgansevles
  */
 
 public class PageFormatLabelProvider extends LabelProvider
 {
-	public static final PageFormatLabelProvider INSTANCE = new PageFormatLabelProvider();
+	public static final ILabelProvider INSTANCE = new DefaultValueDelegateLabelProvider(new PageFormatLabelProvider());
+
+	private PageFormatLabelProvider()
+	{
+	}
 
 	@Override
 	public String getText(Object element)
 	{
-		if (element == null)
-		{
-			return Messages.LabelDefault;
-		}
-
 		PageFormat format = (PageFormat)element;
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		switch (format.getOrientation())
 		{
 			case PageFormat.LANDSCAPE :

@@ -84,7 +84,6 @@ import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -238,11 +237,13 @@ public class CreateComponentHandler implements IServerService
 			{
 				// see if target has a 'component' or 'component[]' typed property
 				WebComponent parentWC = (WebComponent)dropTarget;
+				PropertyDescription propertyDescription = ((WebObjectImpl)parentWC.getImplementation()).getPropertyDescription();
+
 				// TODO add a visual way for the user to drop to a specific property (if there is more then one property that supports components)
 				// TODO also add a way of adding to a specific index in a component array and also just moving component ghosts in a component array property
-				for (String propertyName : new TreeSet<String>(parentWC.getSpecification().getAllPropertiesNames()))
+				for (String propertyName : new TreeSet<String>(propertyDescription.getAllPropertiesNames()))
 				{
-					PropertyDescription property = parentWC.getSpecification().getProperty(propertyName);
+					PropertyDescription property = propertyDescription.getProperty(propertyName);
 					if (property.getType() instanceof ComponentPropertyType)
 					{
 						// simple component type
@@ -602,9 +603,7 @@ public class CreateComponentHandler implements IServerService
 				compName = componentName + "_" + id.incrementAndGet();
 			}
 
-			Pair<Integer, UUID> newIDAndUUID = WebObjectImpl.getNewIdAndUUID(parentWC);
-			ChildWebComponent webComponent = new ChildWebComponent(parentWC, newIDAndUUID.getLeft().intValue(), newIDAndUUID.getRight(), propertyName,
-				indexIfInArray, true, pd);
+			ChildWebComponent webComponent = ChildWebComponent.createNewInstance(parentWC, pd, propertyName, indexIfInArray, true);
 			webComponent.setTypeName(componentSpecName);
 
 			// not sure if location and size are still needed to be set in children here... maybe it is (if parent wants to use them at runtime)

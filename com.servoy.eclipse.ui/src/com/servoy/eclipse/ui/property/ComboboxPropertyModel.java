@@ -17,13 +17,14 @@
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.osgi.util.NLS;
 
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.j2db.util.Utils;
 
 /**
  * Simple combobox model with static real and display values.
- * 
+ *
  * @author rgansevles
  */
 
@@ -31,10 +32,11 @@ public class ComboboxPropertyModel<T> implements IComboboxPropertyModel<T>
 {
 	private T[] real;
 	private String[] display;
+	private int defaultValueIndex = -1;
 
 	/**
 	 * Display and real values are the same.
-	 * 
+	 *
 	 * @param display
 	 */
 	public ComboboxPropertyModel(T[] real)
@@ -44,24 +46,57 @@ public class ComboboxPropertyModel<T> implements IComboboxPropertyModel<T>
 
 	public ComboboxPropertyModel<T> addDefaultValue()
 	{
-		return addDefaultValue(null, Messages.LabelDefault);
+		return addDefaultValue(null, null);
 	}
 
 	public ComboboxPropertyModel<T> addDefaultValue(T defaultReal)
 	{
-		return addDefaultValue(defaultReal, Messages.LabelDefault);
+		return addDefaultValue(defaultReal, null);
 	}
 
 	public ComboboxPropertyModel<T> addDefaultValue(T defaultReal, String defaultDisplay)
 	{
+		// get the display value to show for the default real value
+		String displayForDefault = Messages.LabelDefault;
+		if (defaultDisplay != null)
+		{
+			Object disp = getDisplayValue(defaultReal, real, display);
+			if (disp instanceof String && ((String)disp).length() > 0)
+			{
+				displayForDefault = NLS.bind(Messages.LabelDefault_arg, disp);
+			}
+		}
+
 		real = Utils.arrayAdd(real, defaultReal, false);
-		display = Utils.arrayAdd(display, defaultDisplay, false);
+		display = Utils.arrayAdd(display, displayForDefault, false);
+		defaultValueIndex = 0;
 		return this;
+	}
+
+
+	private static <T> Object getDisplayValue(T realValue, T[] real, String[] display)
+	{
+		for (int i = 0; real != null && i < real.length; i++)
+		{
+			if (realValue == real[i] || realValue != null && realValue.equals(real[i]))
+			{
+				return display[i];
+			}
+		}
+
+		// not found
+		return null;
+	}
+
+	@Override
+	public int getDefaultValueIndex()
+	{
+		return defaultValueIndex;
 	}
 
 	/**
 	 * Display and real values are the same.
-	 * 
+	 *
 	 * @param display
 	 */
 	public ComboboxPropertyModel(T[] real, ILabelProvider labelProvider)
@@ -84,7 +119,7 @@ public class ComboboxPropertyModel<T> implements IComboboxPropertyModel<T>
 
 	/**
 	 * Display and real values are different.
-	 * 
+	 *
 	 * @param display
 	 */
 	public ComboboxPropertyModel(T[] real, String[] display)

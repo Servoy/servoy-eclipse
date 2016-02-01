@@ -203,7 +203,12 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 								var allowedChildren = dt[0].getAttribute("svy-allowed-children");
 								if (!allowedChildren || !(allowedChildren.indexOf(realName) > 0))
 								{
-									return getParent( $(dt).parent("[svy-id]")); // the drop target doesn't allow this layout container type
+									// maybe this is a component that has svy-types instead of svy-allowed-childrent
+									allowedChildren = dt[0].getAttribute("svy-types");
+									if (!allowedChildren || !(allowedChildren.indexOf(realName) > 0))
+									{
+										return getParent( $(dt).parent("[svy-id]")); // the drop target doesn't allow this layout container type
+									}
 								}
 								return dt;
 							}
@@ -317,44 +322,29 @@ angular.module('mouseselection',['editor']).run(function($rootScope, $pluginRegi
 
 					return null;
 				},
-
+				
+				isUnknownElement: function(element)
+				{
+					return Object.prototype.toString.call(element) === '[object HTMLUnknownElement]';
+				},
+				
 				collectMatchedElements: function (matchedElements, fromList, p1, p2, percentage) {
 					for (var i = 0; i < fromList.length; i++) {
 						var element = fromList[i]
 						var rect = element.getBoundingClientRect();
+						if(this.isUnknownElement(element) && element.firstElementChild && !this.isUnknownElement(element.firstElementChild))
+						{
+							rect = element.firstElementChild.getBoundingClientRect();
+						}
 						var left = rect.left;
 						var top = rect.top;
-
 						if (element.parentElement.parentElement == editorScope.glasspane) {
 							top = top - element.parentElement.parentElement.getBoundingClientRect().top;
 							left = left - element.parentElement.parentElement.getBoundingClientRect().left;
 						}
-
-						var clientWidth = element.clientWidth;
-						if (clientWidth == 0)
-						{
-							if ( element.firstChild &&  element.firstChild.clientWidth > 0)
-							{
-								clientWidth = element.firstChild.clientWidth
-							}
-							else
-							{
-								clientWidth = element.offsetWidth;
-							}
-						}
-						var clientHeight = element.clientHeight;
-						if (clientHeight == 0)
-						{
-							if ( element.firstChild &&  element.firstChild.clientHeight > 0)
-							{
-								clientHeight = element.firstChild.clientHeight
-							}
-							else
-							{
-								clientHeight = element.offsetHeight;
-							}
-						}
-
+						var clientWidth = rect.width != 0 ? rect.width : element.offsetWidth;
+						var clientHeight = rect.height != 0 ? rect.height : element.clientHeight;
+						
 						if (percentage == undefined || percentage == 100) { //Element must be fully enclosed
 							if (p1.top <= top && p1.left <= left && p2.top >= top + clientHeight && p2.left >= left + clientWidth) {
 								matchedElements.push(element)

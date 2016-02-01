@@ -20,11 +20,13 @@ package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 
 import org.eclipse.gef.commands.Command;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
@@ -90,6 +92,46 @@ public class ChangeParentCommand extends Command
 			for (IPersist p : children)
 			{
 				((ISupportBounds)p).setLocation(new Point(counter, counter));
+				counter++;
+			}
+		}
+		else if (child instanceof IChildWebObject)
+		{
+			ArrayList<IChildWebObject> children = new ArrayList<IChildWebObject>();
+			Iterator<IPersist> it = newParent.getAllObjects();
+			while (it.hasNext())
+			{
+				IPersist persist = it.next();
+				if (persist instanceof IChildWebObject)
+				{
+					children.add((IChildWebObject)persist);
+				}
+			}
+			IChildWebObject[] sortedChildArray = children.toArray(new IChildWebObject[0]);
+			Arrays.sort(sortedChildArray, new Comparator<IChildWebObject>()
+			{
+				@Override
+				public int compare(IChildWebObject o1, IChildWebObject o2)
+				{
+					return o1.getIndex() - o2.getIndex();
+				}
+
+			});
+			children = new ArrayList<IChildWebObject>(Arrays.asList(sortedChildArray));
+
+			int insertIdx = targetChild instanceof IChildWebObject ? children.indexOf(targetChild) : -1;
+			if (insertIdx == -1) children.add((IChildWebObject)child);
+			else
+			{
+				if (insertAfterTarget) insertIdx++;
+				if (insertIdx < children.size()) children.add(insertIdx, (IChildWebObject)child);
+				else children.add((IChildWebObject)child);
+			}
+
+			int counter = 0;
+			for (IChildWebObject p : children)
+			{
+				p.setIndex(counter);
 				counter++;
 			}
 		}

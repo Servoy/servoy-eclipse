@@ -28,14 +28,14 @@ import com.servoy.j2db.FlattenedSolution;
  *
  * @author acostescu
  */
-public class CustomJSONObjectTypePropertyDescriptorFactory implements ITypePropertyDescriptorFactory
+public class CustomObjectTypePropertyDescriptorFactory implements ITypePropertyDescriptorFactory
 {
 
 	@Override
 	public IPropertyDescriptor createPropertyDescriptor(String id, String displayName, FlattenedSolution flattenedEditingSolution,
 		PersistContext persistContext, PropertyDescription propertyDescription)
 	{
-		return new CustomJSONObjectTypePropertyController(id, displayName, persistContext, propertyDescription);
+		return new CustomObjectTypePropertyController(id, displayName, persistContext, propertyDescription);
 	}
 
 }

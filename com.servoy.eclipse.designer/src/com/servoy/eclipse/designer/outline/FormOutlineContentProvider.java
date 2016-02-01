@@ -17,6 +17,7 @@
 package com.servoy.eclipse.designer.outline;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -58,13 +59,11 @@ import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
-import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.SortedList;
-import com.servoy.j2db.util.UUID;
 
 /**
  * Content provider for Servoy form in outline view.
@@ -139,7 +138,9 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 		else if (parentElement instanceof PersistContext && ((PersistContext)parentElement).getPersist() instanceof AbstractBase)
 		{
 			List<PersistContext> list = new ArrayList<PersistContext>();
-			for (IPersist persist : ((AbstractBase)((PersistContext)parentElement).getPersist()).getAllObjectsAsList())
+			List<IPersist> allObjectsAsList = new ArrayList<>(((AbstractBase)((PersistContext)parentElement).getPersist()).getAllObjectsAsList());
+			Collections.sort(allObjectsAsList, PositionComparator.XY_PERSIST_COMPARATOR);
+			for (IPersist persist : allObjectsAsList)
 			{
 				list.add(PersistContext.create(persist, ((PersistContext)parentElement).getContext()));
 			}
@@ -395,9 +396,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 									boolean arrayReturnType = PropertyUtils.isCustomJSONArrayPropertyType(type);
 									if (!arrayReturnType)
 									{
-										Pair<Integer, UUID> idAndUUID = WebObjectImpl.getNewIdAndUUID(parentBean);
-										WebCustomType ghostBean = new WebCustomType(parentBean, pd, beanJSONKey, -1, false, idAndUUID.getLeft().intValue(),
-											idAndUUID.getRight());
+										WebCustomType ghostBean = WebCustomType.createNewInstance(parentBean, pd, beanJSONKey, -1, false);
 										ghostBean.setTypeName(simpleTypeName);
 										result.add(ghostBean);
 									}
@@ -408,9 +407,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 										{
 											for (int i = 0; i < ((JSONArray)object).length(); i++)
 											{
-												Pair<Integer, UUID> idAndUUID = WebObjectImpl.getNewIdAndUUID(parentBean);
-												WebCustomType ghostBean = new WebCustomType(parentBean, elementTypePD, beanJSONKey, i, false,
-													idAndUUID.getLeft().intValue(), idAndUUID.getRight());
+												WebCustomType ghostBean = WebCustomType.createNewInstance(parentBean, elementTypePD, beanJSONKey, i, false);
 												ghostBean.setTypeName(simpleTypeName);
 												result.add(ghostBean);
 											}
