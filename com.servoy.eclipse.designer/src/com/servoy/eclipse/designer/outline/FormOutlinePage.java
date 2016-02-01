@@ -65,6 +65,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
@@ -73,7 +74,6 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -200,7 +200,22 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 					{
 						IPersist inputPersist = ((PersistContext)input).getPersist();
 						ISupportChilds targetLayoutContainer = null;
-						if (inputPersist instanceof WebComponent)
+
+						if (inputPersist instanceof IChildWebObject)
+						{
+							IBasicWebComponent customTypeParent = ((IChildWebObject)inputPersist).getParentComponent();
+							for (IPersist p : dragObjects)
+							{
+								if (!(p instanceof IChildWebObject) || ((IChildWebObject)p).getParentComponent() != customTypeParent)
+								{
+									return false;
+								}
+							}
+							dropTargetComponent = inputPersist;
+							dropTarget = customTypeParent;
+							return true;
+						}
+						else if (inputPersist instanceof WebComponent)
 						{
 							WebComponent wc = (WebComponent)inputPersist;
 							if (wc.getParent() instanceof LayoutContainer)
@@ -238,20 +253,6 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 								}
 							}
 						}
-						else if (inputPersist instanceof WebCustomType)
-						{
-							IBasicWebComponent customTypeParent = ((WebCustomType)inputPersist).getParentComponent();
-							for (IPersist p : dragObjects)
-							{
-								if (!(p instanceof WebCustomType) || ((WebCustomType)p).getParentComponent() != customTypeParent)
-								{
-									return false;
-								}
-							}
-							dropTargetComponent = inputPersist;
-							dropTarget = customTypeParent;
-							return true;
-						}
 
 						if (targetLayoutContainer instanceof LayoutContainer)
 						{
@@ -267,7 +268,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 									for (IPersist p : dragObjects)
 									{
 										String sourceType = null;
-										if (p instanceof IFormElement)
+										if (p instanceof IFormElement && !(p instanceof IChildWebObject))
 										{
 											sourceType = "component";
 										}

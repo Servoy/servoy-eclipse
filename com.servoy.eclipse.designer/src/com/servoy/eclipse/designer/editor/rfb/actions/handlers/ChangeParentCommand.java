@@ -113,7 +113,7 @@ public class ChangeParentCommand extends Command
 				@Override
 				public int compare(IChildWebObject o1, IChildWebObject o2)
 				{
-					return o2.getIndex() - o1.getIndex();
+					return o1.getIndex() - o2.getIndex();
 				}
 
 			});
