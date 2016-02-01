@@ -34,9 +34,9 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentPackageSpecification;
+import org.sablo.specification.NGPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebLayoutSpecification;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -139,7 +139,7 @@ public class ModelUtils
 					List<Object> cssClasses = new ArrayList<Object>();
 					if (persist != null)
 					{
-						WebComponentSpecification spec = null;
+						WebObjectSpecification spec = null;
 						if (persist instanceof IFormElement)
 						{
 							spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
@@ -147,7 +147,7 @@ public class ModelUtils
 						}
 						else if (persist instanceof LayoutContainer)
 						{
-							WebComponentPackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+							NGPackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
 								((LayoutContainer)persist).getPackageName());
 							if (pkg != null)
 							{

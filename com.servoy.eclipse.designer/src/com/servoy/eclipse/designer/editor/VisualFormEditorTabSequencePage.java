@@ -62,7 +62,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
@@ -405,7 +405,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 			if (FormTemplateGenerator.isWebcomponentBean(persist))
 			{
 				String componentType = FormTemplateGenerator.getComponentTypeName((IBasicWebComponent)persist);
-				WebComponentSpecification specification = WebComponentSpecProvider.getInstance().getWebComponentSpecification(componentType);
+				WebObjectSpecification specification = WebComponentSpecProvider.getInstance().getWebComponentSpecification(componentType);
 				if (specification != null)
 				{
 					Collection<PropertyDescription> properties = specification.getProperties(NGTabSeqPropertyType.NG_INSTANCE);

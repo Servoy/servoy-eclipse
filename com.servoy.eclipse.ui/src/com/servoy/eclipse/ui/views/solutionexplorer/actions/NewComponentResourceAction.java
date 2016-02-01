@@ -31,7 +31,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -50,7 +50,7 @@ public class NewComponentResourceAction extends Action implements ISelectionChan
 {
 
 	private final Shell shell;
-	private WebComponentSpecification spec;
+	private WebObjectSpecification spec;
 
 	public NewComponentResourceAction(Shell shell)
 	{
@@ -76,7 +76,7 @@ public class NewComponentResourceAction extends Action implements ISelectionChan
 			state = (type == UserNodeType.COMPONENT) || (type == UserNodeType.SERVICE);
 			if (state)
 			{
-				spec = ((WebComponentSpecification)((SimpleUserNode)sel.getFirstElement()).getRealObject());
+				spec = ((WebObjectSpecification)((SimpleUserNode)sel.getFirstElement()).getRealObject());
 				state = "file".equals(spec.getSpecURL().getProtocol());
 			}
 		}

@@ -21,9 +21,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentPackageSpecification;
+import org.sablo.specification.NGPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.websocket.utils.PropertyUtils;
@@ -102,8 +102,8 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 								else
 								{
 									List<String> specs = new ArrayList<String>();
-									WebComponentSpecification[] webComponentSpecifications = WebComponentSpecProvider.getInstance().getAllWebComponentSpecifications();
-									for (WebComponentSpecification webComponentSpec : webComponentSpecifications)
+									WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getInstance().getAllWebComponentSpecifications();
+									for (WebObjectSpecification webComponentSpec : webComponentSpecifications)
 									{
 										if (!webComponentSpec.getPackageName().equals("servoydefault"))
 										{
@@ -190,7 +190,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			if (parentPersist != null && parentPersist.getPersist() instanceof AbstractBase && parentPersist.getPersist() instanceof ISupportChilds)
 			{
 				AbstractBase parent = (AbstractBase)ElementUtil.getOverridePersist(parentPersist);
-				WebComponentPackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+				NGPackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
 					packageName);
 				container = (LayoutContainer)parent.getRootObject().getChangeHandler().createNewObject(((ISupportChilds)parent), IRepository.LAYOUTCONTAINERS);
 				container.setSpecName(specName);
@@ -267,7 +267,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 	public static WebCustomType addCustomType(IBasicWebComponent parentBean, String propertyName, String compName, int arrayIndex)
 	{
 		int index = arrayIndex;
-		WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getTypeName());
+		WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getTypeName());
 		boolean isArray = spec.isArrayReturnType(propertyName);
 		PropertyDescription targetPD = spec.getProperty(propertyName);
 		String typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(targetPD.getType());

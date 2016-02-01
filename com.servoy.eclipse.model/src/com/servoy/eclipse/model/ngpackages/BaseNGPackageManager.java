@@ -41,10 +41,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
-import org.sablo.specification.WebComponentPackage;
-import org.sablo.specification.WebComponentPackage.DirPackageReader;
-import org.sablo.specification.WebComponentPackage.DuplicatePackageException;
-import org.sablo.specification.WebComponentPackage.IPackageReader;
+import org.sablo.specification.NGPackage;
+import org.sablo.specification.NGPackage.DirPackageReader;
+import org.sablo.specification.NGPackage.DuplicatePackageException;
+import org.sablo.specification.NGPackage.IPackageReader;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
@@ -630,7 +630,7 @@ public abstract class BaseNGPackageManager
 		}
 	}
 
-	private class FilePackageReader extends WebComponentPackage.JarPackageReader
+	private class FilePackageReader extends NGPackage.JarPackageReader
 	{
 		private final IResource resource;
 

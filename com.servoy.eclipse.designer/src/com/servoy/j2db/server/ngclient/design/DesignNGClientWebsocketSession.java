@@ -20,7 +20,7 @@ package com.servoy.j2db.server.ngclient.design;
 import java.util.List;
 import java.util.Map;
 
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.websocket.IClientService;
 import org.sablo.websocket.impl.ClientService;
 
@@ -36,7 +36,7 @@ public class DesignNGClientWebsocketSession extends NGClientWebsocketSession
 {
 	public static final String EDITOR_CONTENT_SERVICE = "$editorContentService";
 
-	private static final WebComponentSpecification EDITOR_CONTENT_SERVICE_SPECIFICATION = new WebComponentSpecification(EDITOR_CONTENT_SERVICE, "",
+	private static final WebObjectSpecification EDITOR_CONTENT_SERVICE_SPECIFICATION = new WebObjectSpecification(EDITOR_CONTENT_SERVICE, "",
 		EDITOR_CONTENT_SERVICE, null, null, null, "", null);
 
 	/**

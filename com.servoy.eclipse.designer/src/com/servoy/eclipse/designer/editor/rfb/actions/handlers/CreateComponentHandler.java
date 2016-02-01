@@ -34,9 +34,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentPackageSpecification;
+import org.sablo.specification.NGPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.websocket.IServerService;
@@ -479,7 +479,7 @@ public class CreateComponentHandler implements IServerService
 			}
 			else
 			{
-				WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(name);
+				WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(name);
 				if (spec != null)
 				{
 					String compName = null;
@@ -522,7 +522,7 @@ public class CreateComponentHandler implements IServerService
 				}
 				else
 				{
-					WebComponentPackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+					NGPackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
 						args.optString("packageName"));
 					if (specifications != null)
 					{
@@ -585,7 +585,7 @@ public class CreateComponentHandler implements IServerService
 	protected ChildWebComponent createNestedWebComponent(WebComponent parentWC, PropertyDescription pd, String componentSpecName, String propertyName,
 		int indexIfInArray, int x, int y, int width, int height)
 	{
-		WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(componentSpecName);
+		WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(componentSpecName);
 		if (spec != null)
 		{
 			String compName = null;
@@ -624,7 +624,7 @@ public class CreateComponentHandler implements IServerService
 	}
 
 	protected IPersist createLayoutContainer(ISupportFormElements parent, WebLayoutSpecification layoutSpec, JSONObject config, int index,
-		WebComponentPackageSpecification<WebLayoutSpecification> specifications, String packageName) throws RepositoryException, JSONException
+		NGPackageSpecification<WebLayoutSpecification> specifications, String packageName) throws RepositoryException, JSONException
 	{
 		Iterator<IPersist> childContainersIte = parent.getObjects(IRepositoryConstants.LAYOUTCONTAINERS);
 		LayoutContainer sameTypeChildContainer = null;

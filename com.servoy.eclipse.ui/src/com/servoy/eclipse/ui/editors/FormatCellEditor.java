@@ -23,7 +23,7 @@ import org.eclipse.swt.widgets.Control;
 import org.sablo.specification.IYieldingType;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.IPropertyType;
 
@@ -93,7 +93,7 @@ public class FormatCellEditor extends TextDialogCellEditor
 			{
 				webComponentClassName = FormTemplateGenerator.getComponentTypeName((IFormElement)persist.getAncestor(IRepository.WEBCOMPONENTS));
 			}
-			WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(webComponentClassName);
+			WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(webComponentClassName);
 			if (spec != null)
 			{
 				FlattenedSolution flattenedSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();

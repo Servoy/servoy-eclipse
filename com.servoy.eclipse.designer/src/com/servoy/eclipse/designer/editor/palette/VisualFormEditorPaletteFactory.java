@@ -39,9 +39,9 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.ValuesConfig;
-import org.sablo.specification.WebComponentPackageSpecification;
+import org.sablo.specification.NGPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
@@ -273,14 +273,14 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		Map<String, List<String>> allComponents = new HashMap<String, List<String>>();
 		Map<String, String> drawerNames = new HashMap<String, String>();
 
-		for (WebComponentPackageSpecification<WebComponentSpecification> pkg : WebComponentSpecProvider.getInstance().getWebComponentSpecifications().values())
+		for (NGPackageSpecification<WebObjectSpecification> pkg : WebComponentSpecProvider.getInstance().getWebComponentSpecifications().values())
 		{
 			String packageName = pkg.getPackageDisplayname();
 			String id = COMPONENTS_ID + "." + packageName;
 
 			drawerNames.put(id, packageName);
 
-			for (WebComponentSpecification spec : pkg.getSpecifications().values())
+			for (WebObjectSpecification spec : pkg.getSpecifications().values())
 			{
 				List<String> componentIds;
 				if (allComponents.get(id) != null) componentIds = allComponents.get(id);
@@ -719,7 +719,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 	private static PaletteEntry createComponentsEntry(String beanClassName)
 	{
 		String webComponentClassName = FormTemplateGenerator.getComponentTypeName(beanClassName);
-		WebComponentSpecification webComponentDescription = WebComponentSpecProvider.getInstance().getWebComponentSpecification(webComponentClassName);
+		WebObjectSpecification webComponentDescription = WebComponentSpecProvider.getInstance().getWebComponentSpecification(webComponentClassName);
 		Dimension dimension = getDimensionFromSpec(webComponentDescription);
 		ImageDescriptor beanIcon = Activator.loadImageDescriptorFromBundle("bean.gif");
 		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_COMPONENT, dimension);
@@ -733,7 +733,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 	 * @param dimension
 	 * @return
 	 */
-	private static Dimension getDimensionFromSpec(WebComponentSpecification webComponentDescription)
+	private static Dimension getDimensionFromSpec(WebObjectSpecification webComponentDescription)
 	{
 		Dimension dimension = new Dimension(100, 100);
 		if (webComponentDescription.getProperty("size") != null)

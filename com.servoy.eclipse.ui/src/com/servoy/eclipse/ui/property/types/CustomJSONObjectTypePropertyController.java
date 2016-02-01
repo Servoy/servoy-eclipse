@@ -22,7 +22,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.ComplexProperty;
@@ -78,7 +78,7 @@ public class CustomJSONObjectTypePropertyController extends JSONObjectTypeProper
 			PersistContext pContext = persistContext;
 
 			String pdName = propertyDescription.getName();
-			if (persist != null && !WebComponentSpecification.ARRAY_ELEMENT_PD_NAME.equals(pdName))
+			if (persist != null && !WebObjectSpecification.ARRAY_ELEMENT_PD_NAME.equals(pdName))
 			{
 				persist = (IPersist)((IBasicWebObject)persist).getProperty(pdName);
 				// property of a custom object or property of a web component; persistContext points to parent in this case

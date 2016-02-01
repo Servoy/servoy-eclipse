@@ -62,10 +62,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.mozilla.javascript.JavaMembers;
-import org.sablo.specification.WebComponentPackageSpecification;
+import org.sablo.specification.NGPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.core.Activator;
@@ -767,7 +767,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							Image componentIcon = uiActivator.loadImageFromBundle("bean.gif");
 							for (String component : components)
 							{
-								WebComponentSpecification spec = provider.getWebComponentSpecification(component);
+								WebObjectSpecification spec = provider.getWebComponentSpecification(component);
 								Image img = loadImageFromFolder(folder, spec.getIcon());
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec,
 									img != null ? img : componentIcon);
@@ -817,7 +817,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					{
 						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
 						String packageName = provider.getPackageName(un.getName());
-						WebComponentPackageSpecification<WebComponentSpecification> servicesPackage = provider.getServicesInPackage(packageName);
+						NGPackageSpecification<WebObjectSpecification> servicesPackage = provider.getServicesInPackage(packageName);
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (servicesPackage != null)
 						{
@@ -828,7 +828,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							Image serviceDefaultIcon = uiActivator.loadImageFromBundle("service.png");
 							for (String component : services)
 							{
-								WebComponentSpecification spec = provider.getWebServiceSpecification(component);
+								WebObjectSpecification spec = provider.getWebServiceSpecification(component);
 								Image img = loadImageFromFolder(folder, spec.getIcon());
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec,
 									img != null ? img : serviceDefaultIcon);
@@ -966,7 +966,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 				else if (un.getType() == UserNodeType.SERVICES_PACKAGE)
 				{
-					WebComponentPackageSpecification<WebComponentSpecification> services = WebServiceSpecProvider.getInstance().getServicesInPackage(
+					NGPackageSpecification<WebObjectSpecification> services = WebServiceSpecProvider.getInstance().getServicesInPackage(
 						WebServiceSpecProvider.getInstance().getPackageName(un.getName()));
 					return services != null && !services.getSpecifications().isEmpty();
 				}
@@ -1125,17 +1125,17 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					node.parent = pluginNode;
 				}
 			}
-			WebComponentSpecification[] serviceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList();
-			Arrays.sort(serviceSpecifications, new Comparator<WebComponentSpecification>()
+			WebObjectSpecification[] serviceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList();
+			Arrays.sort(serviceSpecifications, new Comparator<WebObjectSpecification>()
 			{
 				@Override
-				public int compare(WebComponentSpecification o1, WebComponentSpecification o2)
+				public int compare(WebObjectSpecification o1, WebObjectSpecification o2)
 				{
 					return o1.getName().compareTo(o2.getName());
 				}
 
 			});
-			for (WebComponentSpecification spec : serviceSpecifications)
+			for (WebObjectSpecification spec : serviceSpecifications)
 			{
 				if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)
 				{

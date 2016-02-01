@@ -39,7 +39,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -147,7 +147,7 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 
 	private IResource getComponentFolderToDelete(IProject resources, SimpleUserNode next)
 	{
-		WebComponentSpecification spec = (WebComponentSpecification)next.getRealObject();
+		WebObjectSpecification spec = (WebObjectSpecification)next.getRealObject();
 		IContainer[] dirResource;
 		IResource resource = null;
 		OutputStream out = null;
