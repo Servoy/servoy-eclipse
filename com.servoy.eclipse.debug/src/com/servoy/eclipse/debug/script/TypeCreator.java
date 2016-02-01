@@ -81,9 +81,9 @@ import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentApiDefinition;
+import org.sablo.specification.WebObjectApiDefinition;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.IPropertyType;
@@ -361,7 +361,7 @@ public class TypeCreator extends TypeCache
 	private final ConcurrentMap<String, Class< ? >> classTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, Class< ? >> anonymousClassTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, String> wcTypeNames = new ConcurrentHashMap<String, String>();
-	private final ConcurrentMap<String, WebComponentSpecification> wcServices = new ConcurrentHashMap<String, WebComponentSpecification>();
+	private final ConcurrentMap<String, WebObjectSpecification> wcServices = new ConcurrentHashMap<String, WebObjectSpecification>();
 
 
 	private final ConcurrentMap<String, IScopeTypeCreator> scopeTypes = new ConcurrentHashMap<String, IScopeTypeCreator>();
@@ -457,12 +457,12 @@ public class TypeCreator extends TypeCache
 
 	private void createSpecTypeDefinitions()
 	{
-		WebComponentSpecification[] webComponentSpecifications = WebComponentSpecProvider.getInstance().getAllWebComponentSpecifications();
-		WebComponentSpecification[] webServiceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList();
-		Collection<WebComponentSpecification> specs = new ArrayList<WebComponentSpecification>();
+		WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getInstance().getAllWebComponentSpecifications();
+		WebObjectSpecification[] webServiceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList();
+		Collection<WebObjectSpecification> specs = new ArrayList<WebObjectSpecification>();
 		Collections.addAll(specs, webComponentSpecifications);
 		Collections.addAll(specs, webServiceSpecifications);
-		for (WebComponentSpecification webComponentSpecification : specs)
+		for (WebObjectSpecification webComponentSpecification : specs)
 		{
 			Map<String, IPropertyType< ? >> foundTypes = webComponentSpecification.getDeclaredCustomObjectTypes();
 			for (String typeName : foundTypes.keySet())
@@ -1040,13 +1040,13 @@ public class TypeCreator extends TypeCache
 		}
 		if (wcTypeNames.get(typeNameClassName) != null)
 		{
-			WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(typeNameClassName);
+			WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(typeNameClassName);
 			if (spec != null)
 			{
 				return createWebComponentType(context, fullTypeName, spec);
 			}
 		}
-		WebComponentSpecification webComponentSpecification = wcServices.get(typeNameClassName);
+		WebObjectSpecification webComponentSpecification = wcServices.get(typeNameClassName);
 		if (webComponentSpecification != null)
 		{
 			return createWebComponentType(context, fullTypeName, webComponentSpecification);
@@ -1060,7 +1060,7 @@ public class TypeCreator extends TypeCache
 	 * @param spec
 	 * @return
 	 */
-	private Type createWebComponentType(String context, String fullTypeName, WebComponentSpecification spec)
+	private Type createWebComponentType(String context, String fullTypeName, WebObjectSpecification spec)
 	{
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
 		type.setName(fullTypeName);
@@ -1089,8 +1089,8 @@ public class TypeCreator extends TypeCache
 			}
 		}
 		SolutionExplorerListContentProvider.extractApiDocs(spec);
-		Map<String, WebComponentApiDefinition> apis = spec.getApiFunctions();
-		for (WebComponentApiDefinition api : apis.values())
+		Map<String, WebObjectApiDefinition> apis = spec.getApiFunctions();
+		for (WebObjectApiDefinition api : apis.values())
 		{
 			Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
 			method.setName(api.getName());
@@ -2761,8 +2761,8 @@ public class TypeCreator extends TypeCache
 			ClientSupport clientSupport = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
 			if (clientSupport != null && clientSupport.supports(ClientSupport.ng))
 			{
-				WebComponentSpecification[] serviceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList();
-				for (WebComponentSpecification spec : serviceSpecifications)
+				WebObjectSpecification[] serviceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList();
+				for (WebObjectSpecification spec : serviceSpecifications)
 				{
 					if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)
 					{

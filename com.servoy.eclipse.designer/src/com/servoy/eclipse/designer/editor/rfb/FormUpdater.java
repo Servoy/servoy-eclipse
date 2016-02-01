@@ -28,7 +28,7 @@ import java.util.Set;
 import org.sablo.Container;
 import org.sablo.WebComponent;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.GhostHandler;
@@ -103,7 +103,7 @@ public class FormUpdater implements Runnable
 						}
 
 
-						WebComponentSpecification spec = webComponent.getSpecification();
+						WebObjectSpecification spec = webComponent.getSpecification();
 						Set<String> allKeys = new HashSet<String>();
 						allKeys.addAll(newFe.getRawPropertyValues().keySet());
 						allKeys.addAll(existingFe.getRawPropertyValues().keySet());

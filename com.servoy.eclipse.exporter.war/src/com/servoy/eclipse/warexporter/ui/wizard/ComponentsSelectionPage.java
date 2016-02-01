@@ -23,7 +23,7 @@ import java.util.TreeSet;
 
 import org.eclipse.jface.wizard.IWizardPage;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 
@@ -53,7 +53,7 @@ public class ComponentsSelectionPage extends AbstractComponentsSelectionPage
 	protected Set<String> getAvailableItems()
 	{
 		Set<String> availableComponents = new TreeSet<String>();
-		for (WebComponentSpecification spec : WebComponentSpecProvider.getInstance().getAllWebComponentSpecifications())
+		for (WebObjectSpecification spec : WebComponentSpecProvider.getInstance().getAllWebComponentSpecifications())
 		{
 			if (!selectedComponents.contains(spec.getName())) availableComponents.add(spec.getName());
 		}

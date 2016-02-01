@@ -30,7 +30,7 @@ import org.json.JSONObject;
 import org.json.JSONWriter;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.VisiblePropertyType;
@@ -100,7 +100,7 @@ public class GhostHandler implements IServerService
 			{
 				if (FormTemplateGenerator.isWebcomponentBean(bean))
 				{
-					WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(bean.getTypeName());
+					WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(bean.getTypeName());
 					if (spec == null)
 					{
 						//error bean
@@ -607,7 +607,7 @@ public class GhostHandler implements IServerService
 			if (fe instanceof WebComponent && fe.getFlattenedPropertiesMap().containsKey("json"))
 			{
 				JSONObject obj = (JSONObject)fe.getFlattenedPropertiesMap().get("json");
-				WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)fe).getTypeName());
+				WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)fe).getTypeName());
 				if (spec != null && !spec.getProperties(VisiblePropertyType.INSTANCE).isEmpty())
 				{
 					PropertyDescription pd = spec.getProperties(VisiblePropertyType.INSTANCE).iterator().next();
@@ -678,7 +678,7 @@ public class GhostHandler implements IServerService
 	public static boolean isDroppable(PropertyDescription propertyDescription, Object configObject)
 	{
 		IPropertyType< ? > type = propertyDescription.getType();
-		return propertyDescription instanceof WebComponentSpecification || type instanceof ComponentPropertyType ||
+		return propertyDescription instanceof WebObjectSpecification || type instanceof ComponentPropertyType ||
 			(PropertyUtils.isCustomJSONArrayPropertyType(type) &&
 				((CustomJSONArrayType< ? , ? >)type).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType) ||
 			(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE)));

@@ -58,9 +58,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.json.JSONException;
-import org.sablo.specification.WebComponentPackageSpecification;
+import org.sablo.specification.NGPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -215,7 +215,7 @@ public class WarExporter
 
 		TreeSet<String> allServices = new TreeSet<String>();
 		// append internal servoy services
-		WebComponentPackageSpecification<WebComponentSpecification> servoyservices = WebServiceSpecProvider.getInstance().getServicesInPackage(
+		NGPackageSpecification<WebObjectSpecification> servoyservices = WebServiceSpecProvider.getInstance().getServicesInPackage(
 			"servoyservices");
 		if (servoyservices != null) allServices.addAll(servoyservices.getSpecifications().keySet());
 		// append user services

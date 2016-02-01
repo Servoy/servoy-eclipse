@@ -103,10 +103,10 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
-import org.sablo.specification.WebComponentPackage;
-import org.sablo.specification.WebComponentPackage.DirPackageReader;
-import org.sablo.specification.WebComponentPackage.DuplicatePackageException;
-import org.sablo.specification.WebComponentPackage.IPackageReader;
+import org.sablo.specification.NGPackage;
+import org.sablo.specification.NGPackage.DirPackageReader;
+import org.sablo.specification.NGPackage.DuplicatePackageException;
+import org.sablo.specification.NGPackage.IPackageReader;
 
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.core.doc.IDocumentationManagerProvider;
@@ -1706,7 +1706,7 @@ public class Activator extends Plugin
 		}
 	}
 
-	private class FilePackageReader extends WebComponentPackage.JarPackageReader
+	private class FilePackageReader extends NGPackage.JarPackageReader
 	{
 		private final IResource resource;
 

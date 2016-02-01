@@ -34,7 +34,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.websocket.utils.PropertyUtils;
@@ -375,7 +375,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			String beanXML = ((Bean)parentBean).getBeanXML();
 			if (beanXML != null)
 			{
-				WebComponentSpecification webComponentSpecification = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+				WebObjectSpecification webComponentSpecification = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
 					((Bean)parentBean).getBeanClassName());
 				if (webComponentSpecification != null)
 				{

@@ -36,9 +36,9 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
-import org.sablo.specification.WebComponentPackageSpecification;
+import org.sablo.specification.NGPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.util.TextFieldDialog;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -108,7 +108,7 @@ public class EditDisplayNameAction extends Action implements ISelectionChangedLi
 
 			return false;
 		}
-		for (WebComponentPackageSpecification<WebComponentSpecification> p : WebComponentSpecProvider.getInstance().getWebComponentSpecifications().values())
+		for (NGPackageSpecification<WebObjectSpecification> p : WebComponentSpecProvider.getInstance().getWebComponentSpecifications().values())
 		{
 			if (p.getPackageDisplayname().equals(packageDisplayName))
 			{

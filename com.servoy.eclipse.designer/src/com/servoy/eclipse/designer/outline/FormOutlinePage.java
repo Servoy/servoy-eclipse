@@ -47,7 +47,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
-import org.sablo.specification.WebComponentPackageSpecification;
+import org.sablo.specification.NGPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 
@@ -256,7 +256,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 
 						if (targetLayoutContainer instanceof LayoutContainer)
 						{
-							WebComponentPackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+							NGPackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
 								((LayoutContainer)targetLayoutContainer).getPackageName());
 							WebLayoutSpecification spec = null;
 							if (pkg != null && (spec = pkg.getSpecification(((LayoutContainer)targetLayoutContainer).getSpecName())) != null)

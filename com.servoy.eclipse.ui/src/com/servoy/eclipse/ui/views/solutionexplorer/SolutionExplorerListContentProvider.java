@@ -66,9 +66,9 @@ import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentApiDefinition;
+import org.sablo.specification.WebObjectApiDefinition;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.base.util.ITagResolver;
@@ -708,7 +708,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	 */
 	private SimpleUserNode[] createComponentFileList(SimpleUserNode un)
 	{
-		WebComponentSpecification spec = (WebComponentSpecification)un.getRealObject();
+		WebObjectSpecification spec = (WebObjectSpecification)un.getRealObject();
 		IProject resources = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject();
 		if ("file".equals(spec.getSpecURL().getProtocol()))
 		{
@@ -1417,11 +1417,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	 * Extract the docs for angular client side apis.
 	 * @param readTextFile
 	 */
-	public static void extractApiDocs(WebComponentSpecification spec)
+	public static void extractApiDocs(WebObjectSpecification spec)
 	{
 		if (spec.getApiFunctions().size() > 0 && spec.getDefinitionURL() != null)
 		{
-			final Map<String, WebComponentApiDefinition> apis = spec.getApiFunctions();
+			final Map<String, WebObjectApiDefinition> apis = spec.getApiFunctions();
 			try
 			{
 				InputStream is = spec.getDefinitionURL().openStream();
@@ -1441,7 +1441,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								String expr = ((PropertyExpression)node.getLeftExpression()).toString();
 								if (expr.startsWith("$scope.api") || expr.startsWith("scope.api"))
 								{
-									WebComponentApiDefinition api = apis.get(((PropertyExpression)node.getLeftExpression()).getProperty().toString());
+									WebObjectApiDefinition api = apis.get(((PropertyExpression)node.getLeftExpression()).getProperty().toString());
 									Comment doc = node.getDocumentation();
 									if (api != null && doc != null && doc.isDocumentation())
 									{
@@ -1469,7 +1469,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								PropertyInitializer[] initializers = node.getPropertyInitializers();
 								for (PropertyInitializer initializer : initializers)
 								{
-									WebComponentApiDefinition api = apis.get(initializer.getNameAsString());
+									WebObjectApiDefinition api = apis.get(initializer.getNameAsString());
 									Comment doc = initializer.getName().getDocumentation();
 									if (api != null && initializer.getValue() instanceof FunctionStatement && doc != null && doc.isDocumentation())
 									{
@@ -1511,9 +1511,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	private SimpleUserNode[] getJSMethods(Object o, String elementName, String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames)
 	{
 		if (o == null) return EMPTY_LIST;
-		if (o instanceof WebComponentSpecification)
+		if (o instanceof WebObjectSpecification)
 		{
-			WebComponentSpecification spec = ((WebComponentSpecification)o);
+			WebObjectSpecification spec = ((WebObjectSpecification)o);
 			extractApiDocs(spec);
 			Map<String, PropertyDescription> properties = spec.getProperties();
 			List<String> ids = new ArrayList<String>();
@@ -1533,11 +1533,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				for (Object element : ids)
 				{
 					Image icon = propertiesIcon;
-					String pluginsPrefix = PLUGIN_PREFIX + "." + ((WebComponentSpecification)o).getName() + ".";
+					String pluginsPrefix = PLUGIN_PREFIX + "." + ((WebObjectSpecification)o).getName() + ".";
 					IDeveloperFeedback feedback = new FieldFeedback((String)element, pluginsPrefix, null, null, null);
 					if (spec.getApiFunction((String)element) != null)
 					{
-						final WebComponentApiDefinition api = spec.getApiFunction((String)element);
+						final WebObjectApiDefinition api = spec.getApiFunction((String)element);
 						icon = functionIcon;
 						final List<String> parNames = new ArrayList<String>();
 						List<String> parTypes = new ArrayList<String>();
@@ -1871,7 +1871,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		String webComponentClassName = FormTemplateGenerator.getComponentTypeName(webcomponent);
 
-		WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(webComponentClassName);
+		WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(webComponentClassName);
 		if (spec != null)
 		{
 			Map<String, PropertyDescription> properties = spec.getProperties();
@@ -1887,8 +1887,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS, prefixForWebComponentMembers + name, name, webcomponent, propertiesIcon));
 				}
 			}
-			Map<String, WebComponentApiDefinition> apis = spec.getApiFunctions();
-			for (WebComponentApiDefinition api : apis.values())
+			Map<String, WebObjectApiDefinition> apis = spec.getApiFunctions();
+			for (WebObjectApiDefinition api : apis.values())
 			{
 				String name = api.getName();
 				String displayParams = "(";
