@@ -95,6 +95,19 @@
                menubarPath="additions">
          </action>
       </objectContribution>
+      <objectContribution
+            adaptable="true"
+            id="com.servoy.eclipse.core.contribution3"
+            nameFilter="*"
+            objectClass="org.eclipse.core.resources.IProject">
+         <action
+               class="com.servoy.eclipse.core.nature.ToggleServoyNGPackageNatureAction"
+               enablesFor="+"
+               id="com.servoy.eclipse.core.addRemoveNGPackageNatureAction"
+               label="Add/Remove Servoy NG Package Nature"
+               menubarPath="additions">
+         </action>
+      </objectContribution>
    </extension>
    <extension
          point="org.eclipse.core.runtime.adapters">

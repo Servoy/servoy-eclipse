@@ -81,8 +81,8 @@ import org.mozilla.javascript.MemberBox;
 import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentApiDefinition;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebComponentApiDefinition;
 import org.sablo.specification.WebComponentSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.ICustomType;
@@ -98,7 +98,6 @@ import org.sablo.specification.property.types.StringPropertyType;
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ISolutionMetaDataChangeListener;
-import com.servoy.eclipse.core.IWebResourceChangedListener;
 import com.servoy.eclipse.core.JSDeveloperSolutionModel;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -108,6 +107,7 @@ import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.ngpackages.INGPackageChangeListener;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
@@ -851,10 +851,10 @@ public class TypeCreator extends TypeCache
 						}
 					});
 				}
-				com.servoy.eclipse.core.Activator.getDefault().addWebComponentChangedListener(new IWebResourceChangedListener()
+				ServoyModelFinder.getServoyModel().getNGPackageManager().addNGPackagesChangedListener(new INGPackageChangeListener()
 				{
 					@Override
-					public void changed(Boolean component)
+					public void ngPackageChanged(boolean components, boolean services)
 					{
 						Job job = new Job("clearing cache")
 						{
@@ -869,6 +869,13 @@ public class TypeCreator extends TypeCache
 						job.setRule(ResourcesPlugin.getWorkspace().getRoot());
 						job.schedule();
 					}
+
+					@Override
+					public void ngPackageProjectListChanged()
+					{
+						// not used for now
+					}
+
 				});
 			}
 		}

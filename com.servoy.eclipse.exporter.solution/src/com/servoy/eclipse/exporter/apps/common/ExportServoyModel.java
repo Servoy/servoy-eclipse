@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.EclipseSequenceProvider;
@@ -34,6 +35,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
  * IServoyModel used when exporting solutions with stand-alone product.
+ *
  * @author acostescu
  */
 public class ExportServoyModel extends AbstractServoyModel implements IServoyModel
@@ -41,6 +43,8 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 
 	public void initialize(String solutionName)
 	{
+		if (getNGPackageManager() == null) super.initialize(); // if super is not already initialized by a previous call do it now
+
 		activeProject = getServoyProject(solutionName);
 		setActiveResourcesProject(activeProject != null ? activeProject.getResourcesProject() : null);
 		updateFlattenedSolution();
@@ -56,7 +60,8 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 		{
 			System.out.println("Cannot find solution project named '" + solutionName + "'. Are you sure you specified the correct workspace location?");
 		}
-
+		getNGPackageManager().clearActiveSolutionReferencesCache();
+		getNGPackageManager().reloadAllNGPackages(null, true);
 	}
 
 	private void setActiveResourcesProject(ServoyResourcesProject servoyResourcesProject)
@@ -79,14 +84,20 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 			dataModelManager = (activeResourcesProject != null ? new DataModelManager(activeResourcesProject.getProject(), sm) : null);
 			if (dataModelManager != null) sm.addGlobalColumnInfoProvider(dataModelManager);
 			sm.setGlobalSequenceProvider(dataModelManager != null ? new EclipseSequenceProvider(dataModelManager) : null);
-			((EclipseRepository)getActiveSolutionHandler().getRepository()).registerResourceMetaDatas(activeResourcesProject != null
-				? activeResourcesProject.getProject().getName() : null, IRepository.STYLES);
-			((EclipseRepository)getActiveSolutionHandler().getRepository()).registerResourceMetaDatas(activeResourcesProject != null
-				? activeResourcesProject.getProject().getName() : null, IRepository.TEMPLATES);
+			((EclipseRepository)getActiveSolutionHandler().getRepository()).registerResourceMetaDatas(
+				activeResourcesProject != null ? activeResourcesProject.getProject().getName() : null, IRepository.STYLES);
+			((EclipseRepository)getActiveSolutionHandler().getRepository()).registerResourceMetaDatas(
+				activeResourcesProject != null ? activeResourcesProject.getProject().getName() : null, IRepository.TEMPLATES);
 
 		}
-		((WorkspaceUserManager)ApplicationServerRegistry.get().getUserManager()).setResourcesProject(activeResourcesProject != null
-			? activeResourcesProject.getProject() : null); // this needs to always be done to refresh in case the main solution changed
+		((WorkspaceUserManager)ApplicationServerRegistry.get().getUserManager()).setResourcesProject(
+			activeResourcesProject != null ? activeResourcesProject.getProject() : null); // this needs to always be done to refresh in case the main solution changed
+	}
+
+	@Override
+	protected BaseNGPackageManager createNGPackageManager()
+	{
+		return new ExportNGPackageManager();
 	}
 
 }

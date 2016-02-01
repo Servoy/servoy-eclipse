@@ -195,7 +195,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 	}
 
 	/**
-	 * Meant to be called by "automatic update check at startup", called from within a job with a SerialRule using SERIAL_RULE_ID. 
+	 * Meant to be called by "automatic update check at startup", called from within a job with a SerialRule using SERIAL_RULE_ID.
 	 */
 	public boolean checkForUpdates(IProgressMonitor monitor)
 	{
@@ -241,8 +241,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 					if (VersionStringUtils.compareVersions(v, bestVersion.version) > 0)
 					{
 						DependencyMetadata[] vdmds = marketPlaceProvider.getDependencyMetadata(new ExtensionDependencyDeclaration(installedDmds[i].id, v, v));
-						if (vdmds != null &&
-							vdmds.length == 1 &&
+						if (vdmds != null && vdmds.length == 1 &&
 							(vdmds[0].getServoyDependency() == null || VersionStringUtils.belongsToInterval(VersionStringUtils.getCurrentServoyVersion(),
 								vdmds[0].getServoyDependency().minVersion, vdmds[0].getServoyDependency().maxVersion)))
 						{
@@ -386,12 +385,14 @@ public class InstalledExtensionsDialog extends TrayDialog
 
 					Message[] msgs = parser.getMessages();
 					if (msgs.length > ml) ServoyLog.logWarning(
-						"When preparing to show description in installed extensions dialog, problems were encountered: " + Arrays.asList(msgs).toString(), null);
+						"When preparing to show description in installed extensions dialog, problems were encountered: " + Arrays.asList(msgs).toString(),
+						null);
 
 					String descriptionText = "Extension ID: " + dmd.id + System.getProperty("line.separator");
 					if (whole.getInfo() != null)
 					{
-						if (whole.getInfo().description != null) descriptionText += whole.getInfo().description.replace("\r\n", "\n").replace("\n", System.getProperty("line.separator"));
+						if (whole.getInfo().description != null)
+							descriptionText += whole.getInfo().description.replace("\r\n", "\n").replace("\n", System.getProperty("line.separator"));
 					}
 
 					description.setText(descriptionText);
@@ -495,8 +496,9 @@ public class InstalledExtensionsDialog extends TrayDialog
 			});
 
 			Message[] msgs = installedProvider.getMessages();
-			if (msgs.length > ml) ServoyLog.logWarning(
-				"When getting all items for installed extensions dialog, problems were encountered: " + Arrays.asList(msgs).toString(), null);
+			if (msgs.length > ml)
+				ServoyLog.logWarning("When getting all items for installed extensions dialog, problems were encountered: " + Arrays.asList(msgs).toString(),
+					null);
 
 			Pair<DependencyMetadata, DependencyMetadata>[] oldExtensions = extensions;
 			extensions = new Pair[allInstalled.length];
@@ -544,7 +546,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 					// the table editors/buttons will not get removed by above calls (only table items); we have to remove them manually
 					for (Control c : table.getChildren())
 					{
-						if (c.getData() instanceof DependencyMetadata) c.dispose(); // for buttons 
+						if (c.getData() instanceof DependencyMetadata) c.dispose(); // for buttons
 					}
 					cleanAllocatedImages();
 

@@ -19,6 +19,7 @@ package com.servoy.eclipse.model.extensions;
 
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.AtomicIntegerWithListener;
@@ -39,7 +40,7 @@ public interface IServoyModel
 	/**
 	 * Returns the active resources project. This is the only resources project referenced by the current active project. Will return null if the active project
 	 * is null or if the number of resources projects referenced by the active project != 1.
-	 * 
+	 *
 	 * @return the active resources project.
 	 */
 	ServoyResourcesProject getActiveResourcesProject();
@@ -47,9 +48,9 @@ public interface IServoyModel
 	/**
 	 * Returns an array containing the modules of the active project (including the active project). If there is no active project, will return an array of size
 	 * 0.<br>
-	 * 
+	 *
 	 * The result does not include the active solution's import hooks (which are not part of the flattened solution).
-	 * 
+	 *
 	 * @return an array containing the modules of the active project.
 	 */
 	ServoyProject[] getModulesOfActiveProject();
@@ -67,6 +68,8 @@ public interface IServoyModel
 	FlattenedSolution getFlattenedSolution();
 
 	DataModelManager getDataModelManager();
+
+	BaseNGPackageManager getNGPackageManager();
 
 	boolean isSolutionActive(String solutionName);
 

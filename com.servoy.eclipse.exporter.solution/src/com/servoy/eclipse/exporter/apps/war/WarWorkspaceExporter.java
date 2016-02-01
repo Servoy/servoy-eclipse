@@ -33,7 +33,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.sablo.specification.WebComponentPackage;
 import org.sablo.specification.WebComponentPackage.IPackageReader;
@@ -45,13 +44,11 @@ import com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
-import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
-import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
@@ -62,26 +59,15 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentChest>
 {
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter#createArgumentChest(org.eclipse.equinox.app.IApplicationContext)
-	 */
 	@Override
 	protected WarArgumentChest createArgumentChest(IApplicationContext context)
 	{
 		return new WarArgumentChest((String[])context.getArguments().get(IApplicationContext.APPLICATION_ARGS));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter#exportActiveSolution(com.servoy.eclipse.exporter.apps.common.IArgumentChest)
-	 */
 	@Override
 	protected void exportActiveSolution(final WarArgumentChest configuration)
 	{
-		initComponentProviders();
 		WarExporter warExporter = new WarExporter(new AbstractWarExportModel()
 		{
 			@Override
@@ -236,7 +222,8 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 					{
 						if (provider.getWebComponentSpecification(componentName) == null)
 						{
-							System.out.println(componentName + " is not a valid component name.");
+							// TODO shouldn't this be an error and shouldn't the exporter fail nicely with a new exit code? I'm thinking now of Jenkins usage and failing sooner rather then later (at export rather then when testing)
+							output("'" + componentName + "' is not a valid component name or it could not be found. Ignoring.");
 							set.remove(componentName);
 						}
 					}
@@ -267,7 +254,8 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 					{
 						if (provider.getWebServiceSpecification(serviceName) == null)
 						{
-							System.out.println(serviceName + " is not a valid service name.");
+							// TODO shouldn't this be an error and shouldn't the exporter fail nicely with a new exit code? I'm thinking now of Jenkins usage and failing sooner rather then later (at export rather then when testing)
+							output("'" + serviceName + "' is not a valid service name or it could not be found. Ignoring.");
 							set.remove(serviceName);
 						}
 					}
@@ -479,32 +467,6 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 	}
 
-	private void initComponentProviders()
-	{
-		Map<String, IPackageReader> componentReaders = new HashMap<String, IPackageReader>();
-		Map<String, IPackageReader> serviceReaders = new HashMap<String, IPackageReader>();
-
-		ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
-		if (activeResourcesProject != null)
-		{
-			if (componentReaders.size() > 0)
-			{
-				ResourceProvider.refreshComponentResources(componentReaders.values());
-				componentReaders.clear();
-			}
-			if (serviceReaders.size() > 0)
-			{
-				ResourceProvider.refreshServiceResources(serviceReaders.values());
-				serviceReaders.clear();
-			}
-			componentReaders.putAll(readDir(new NullProgressMonitor(), activeResourcesProject, SolutionSerializer.COMPONENTS_DIR_NAME));
-			serviceReaders.putAll(readDir(new NullProgressMonitor(), activeResourcesProject, SolutionSerializer.SERVICES_DIR_NAME));
-
-			ResourceProvider.addComponentResources(componentReaders.values());
-			ResourceProvider.addServiceResources(serviceReaders.values());
-		}
-	}
-
 	private Map<String, IPackageReader> readDir(IProgressMonitor monitor, ServoyResourcesProject activeResourcesProject, String folderName)
 	{
 		Map<String, IPackageReader> readers = new HashMap<String, IPackageReader>();
@@ -528,13 +490,13 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 						IFolder folderResource = (IFolder)resource;
 						if ((folderResource).getFile("META-INF/MANIFEST.MF").exists())
 						{
-							File f = new File(resource.getRawLocationURI());
+							File f = new File(resource.getLocationURI());
 							readers.put(name, new WebComponentPackage.DirPackageReader(f));
 						}
 					}
 					else if (resource instanceof IFile)
 					{
-						readers.put(name, new WebComponentPackage.JarPackageReader(new File(resource.getRawLocationURI())));
+						readers.put(name, new WebComponentPackage.JarPackageReader(new File(resource.getLocationURI())));
 					}
 				}
 			}
@@ -545,4 +507,5 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 		return readers;
 	}
+
 }

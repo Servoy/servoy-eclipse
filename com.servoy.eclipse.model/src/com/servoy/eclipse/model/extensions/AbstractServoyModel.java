@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.AtomicIntegerWithListener;
@@ -69,12 +70,19 @@ public abstract class AbstractServoyModel implements IServoyModel
 
 	private final EclipseMessages messagesManager;
 
+	private BaseNGPackageManager ngPackageManager;
+
 	private final AtomicIntegerWithListener resourceChangesHandlerCounter = new AtomicIntegerWithListener();
 
 	public AbstractServoyModel()
 	{
 		messagesManager = new EclipseMessages();
 		Messages.customMessageLoader = messagesManager;
+	}
+
+	public void initialize()
+	{
+		ngPackageManager = createNGPackageManager();
 	}
 
 	public ServoyProject getActiveProject()
@@ -87,7 +95,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 	/**
 	 * Returns the active resources project. This is the only resources project referenced by the current active project. Will return null if the active project
 	 * is null or if the number of resources projects referenced by the active project != 1.
-	 * 
+	 *
 	 * @return the active resources project.
 	 */
 	public ServoyResourcesProject getActiveResourcesProject()
@@ -109,9 +117,9 @@ public abstract class AbstractServoyModel implements IServoyModel
 	/**
 	 * Returns an array containing the modules of the active project (including the active project).
 	 * If there is no active project, will return an array of size 0.
-	 * 
+	 *
 	 * The result does not include the active solution's import hooks (which are not part of the flattened solution).
-	 * 
+	 *
 	 * @return an array containing the modules of the active project.
 	 * @see #getModulesOfActiveProjectWithImportHooks()
 	 */
@@ -210,7 +218,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 	/**
 	 * Gives the list of resource projects in the workspace. If you are looking for a resource project related to a solution project, please use
 	 * {@link #getActiveResourcesProject()} or {@link ServoyProject#getResourcesProject()} instead.
-	 * 
+	 *
 	 * @return the list of resource projects in the workspace.
 	 */
 	public ServoyResourcesProject[] getResourceProjects()
@@ -325,6 +333,13 @@ public abstract class AbstractServoyModel implements IServoyModel
 		}
 	}
 
+	public BaseNGPackageManager getNGPackageManager()
+	{
+		return ngPackageManager;
+	}
+
+	protected abstract BaseNGPackageManager createNGPackageManager();
+
 	public IActiveSolutionHandler getActiveSolutionHandler()
 	{
 		if (activeSolutionHandler == null)
@@ -357,8 +372,8 @@ public abstract class AbstractServoyModel implements IServoyModel
 			}
 
 			@Override
-			protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef) throws RemoteException,
-				RepositoryException
+			protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef)
+				throws RemoteException, RepositoryException
 			{
 				return loadSolution(loginSolutionDef);
 			}
@@ -375,8 +390,8 @@ public abstract class AbstractServoyModel implements IServoyModel
 		try
 		{
 			ServoyProject[] modules = getModulesOfActiveProject();
-			SubMonitor monitor = SubMonitor.convert(m, "Building active solution...", 3 + ((activeResourcesProject != null) ? 7 : 0) +
-				((modules != null) ? modules.length * 10 : 0));
+			SubMonitor monitor = SubMonitor.convert(m, "Building active solution...",
+				3 + ((activeResourcesProject != null) ? 7 : 0) + ((modules != null) ? modules.length * 10 : 0));
 			ServoyBuilder.deleteAllBuilderMarkers();
 			monitor.internalWorked(3);
 			if (modules != null)
@@ -484,4 +499,14 @@ public abstract class AbstractServoyModel implements IServoyModel
 	{
 		ServoyLog.logError(e);
 	}
+
+	public void dispose()
+	{
+		if (ngPackageManager != null)
+		{
+			ngPackageManager.dispose();
+			ngPackageManager = null;
+		}
+	}
+
 }

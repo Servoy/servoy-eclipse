@@ -303,7 +303,8 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 
 				public Object visit(IPersist src)
 				{
-					boolean goDeeperInItems = (recursive && src instanceof ISupportChilds && SolutionSerializer.isCompositeWithIndependentSerializationOfSubItems(src));
+					boolean goDeeperInItems = (recursive && src instanceof ISupportChilds &&
+						SolutionSerializer.isCompositeWithIndependentSerializationOfSubItems(src));
 
 					ISupportChilds currentParent = parent;
 					while (!(currentParent instanceof Solution) && !currentParent.getUUID().equals(src.getParent().getUUID()))
@@ -407,7 +408,7 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 		for (IPersist node : nodes)
 		{
 			IPersist searchNode = AbstractRepository.searchPersist(getEditingSolution(), node);
-			if (searchNode != null /* object was not deleted */&& searchNode != node)
+			if (searchNode != null /* object was not deleted */ && searchNode != node)
 			{
 				throw new RepositoryException("Object to save is out of sync");
 			}
@@ -458,6 +459,35 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns the ServoyNGPackageProjects that this project references. Returns an empty array if there is no such reference.
+	 *
+	 * @return the ServoyNGPackageProjects that this project references.
+	 */
+	public ServoyNGPackageProject[] getNGPackageProjects()
+	{
+		final ArrayList<ServoyNGPackageProject> ngPackageProjects = new ArrayList<ServoyNGPackageProject>();
+		if (project.exists() && project.isOpen())
+		{
+			try
+			{
+				final IProject[] referencedProjects = project.getDescription().getReferencedProjects();
+				for (IProject p : referencedProjects)
+				{
+					if (p.exists() && p.isOpen() && p.hasNature(ServoyNGPackageProject.NATURE_ID))
+					{
+						ngPackageProjects.add((ServoyNGPackageProject)p.getNature(ServoyNGPackageProject.NATURE_ID));
+					}
+				}
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError("Exception while reading referenced projects (ngp) for " + project.getName(), e);
+			}
+		}
+		return ngPackageProjects.toArray(new ServoyNGPackageProject[ngPackageProjects.size()]);
 	}
 
 	/**
@@ -528,8 +558,8 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 				}
 
 				@Override
-				protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef) throws RemoteException,
-					RepositoryException
+				protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef)
+					throws RemoteException, RepositoryException
 				{
 					return loadSolution(loginSolutionDef);
 				}
@@ -576,8 +606,8 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 						}
 
 						@Override
-						protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef) throws RemoteException,
-							RepositoryException
+						protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef)
+							throws RemoteException, RepositoryException
 						{
 							return loadSolution(loginSolutionDef);
 						}

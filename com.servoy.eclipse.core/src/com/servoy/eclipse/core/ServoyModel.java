@@ -110,8 +110,7 @@ import org.webbitserver.HttpHandler;
 import org.webbitserver.HttpRequest;
 import org.webbitserver.HttpResponse;
 
-import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
-
+import com.servoy.eclipse.core.ngpackages.NGPackageManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
@@ -119,8 +118,11 @@ import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
+import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
+import com.servoy.eclipse.model.ngpackages.INGPackageChangeListener;
 import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
@@ -192,6 +194,8 @@ import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
+import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
+
 /**
  * models servoy as JavaModel in eclipse
  *
@@ -199,9 +203,7 @@ import com.servoy.j2db.util.Utils;
  */
 public class ServoyModel extends AbstractServoyModel
 {
-	/**
-	 *
-	 */
+
 	public static final String SERVOY_WORKING_SET_ID = "com.servoy.eclipse.core.ServoyWorkingSet";
 
 	private static final String SERVOY_ACTIVE_PROJECT = "SERVOY_ACTIVE_PROJECT";
@@ -260,8 +262,8 @@ public class ServoyModel extends AbstractServoyModel
 		Settings settings = getSettings();
 		Preferences pluginPreferences = Activator.getDefault().getPluginPreferences();
 		pluginPreferences.setDefault(TeamShareMonitor.WARN_ON_NON_IN_PROCESS_TEAM_SHARE, true);
-		initRepAsTeamProvider = Boolean.valueOf(Utils.getAsBoolean(settings.getProperty(Settings.START_AS_TEAMPROVIDER_SETTING,
-			String.valueOf(Settings.START_AS_TEAMPROVIDER_DEFAULT))));
+		initRepAsTeamProvider = Boolean.valueOf(
+			Utils.getAsBoolean(settings.getProperty(Settings.START_AS_TEAMPROVIDER_SETTING, String.valueOf(Settings.START_AS_TEAMPROVIDER_DEFAULT))));
 
 		// load in background all servers and all tables needed by current solution
 		backgroundTableLoader = new BackgroundTableLoader(getServerManager());
@@ -281,8 +283,8 @@ public class ServoyModel extends AbstractServoyModel
 					Solution solution = aProject.getSolution();
 					ServoyResourcesProject resourceProject = aProject.getResourcesProject();
 					if (solution != null && (solution.getI18nDataSource() != null || aProject.getModules().length > 1) && resourceProject != null &&
-						resourceProject.getProject().findMember(EclipseMessages.MESSAGES_DIR) == null) EclipseMessages.writeProjectI18NFiles(aProject, false,
-						false);
+						resourceProject.getProject().findMember(EclipseMessages.MESSAGES_DIR) == null)
+						EclipseMessages.writeProjectI18NFiles(aProject, false, false);
 
 					boolean isMobile = solution.getSolutionType() == SolutionMetaData.MOBILE;
 					if (!isMobile)
@@ -559,19 +561,16 @@ public class ServoyModel extends AbstractServoyModel
 			public boolean activeProjectWillChange(ServoyProject activeProject, final ServoyProject toProject)
 			{
 				// if it has no resource project, let the user choose one
-				if (toProject != null && toProject.getResourcesProject() == null && !UIUtils.showChangeResourceProjectDlg(UIUtils.getActiveShell(), toProject)) return false;
+				if (toProject != null && toProject.getResourcesProject() == null && !UIUtils.showChangeResourceProjectDlg(UIUtils.getActiveShell(), toProject))
+					return false;
 				try
 				{
 					if (toProject != null && ServoyUpdatingProject.needUpdate(toProject.getProject()))
 					{
 
-						if (!toProject.getProject().hasNature(ServoyUpdatingProject.NATURE_ID) &&
-							MessageDialog.openQuestion(
-								UIUtils.getActiveShell(),
-								"Project update",
-								"Before activating solution '" +
-									toProject.getSolution().getName() +
-									"', its project structure needs to be updated.\n\nNOTE: If the solution or one of its modules is shared using a team provider, it is recommended that this update is performed by one developer of the team, and the others cancel this update, and do a team update from 'Solution Explorer/All Solutions' for this solution and its modules.\n\nDo you want to update this solution and its modules projects ?"))
+						if (!toProject.getProject().hasNature(ServoyUpdatingProject.NATURE_ID) && MessageDialog.openQuestion(UIUtils.getActiveShell(),
+							"Project update", "Before activating solution '" + toProject.getSolution().getName() +
+								"', its project structure needs to be updated.\n\nNOTE: If the solution or one of its modules is shared using a team provider, it is recommended that this update is performed by one developer of the team, and the others cancel this update, and do a team update from 'Solution Explorer/All Solutions' for this solution and its modules.\n\nDo you want to update this solution and its modules projects ?"))
 						{
 							// do update in thread and set as active in the end
 							WorkspaceJob updateJob = new WorkspaceJob("Updating project structure ...")
@@ -593,8 +592,8 @@ public class ServoyModel extends AbstractServoyModel
 											{
 												public void run()
 												{
-													MessageDialog.openError(UIUtils.getActiveShell(), "Project update", "Error updating solution '" +
-														toProject.getSolution().getName() + "'\nTry to activate it again.");
+													MessageDialog.openError(UIUtils.getActiveShell(), "Project update",
+														"Error updating solution '" + toProject.getSolution().getName() + "'\nTry to activate it again.");
 												}
 											});
 										}
@@ -662,8 +661,8 @@ public class ServoyModel extends AbstractServoyModel
 					{
 						public void run()
 						{
-							MessageDialog.openError(UIUtils.getActiveShell(), "Project update", "Error updating solution '" + project.getSolution().getName() +
-								"'\nTry to activate it again.");
+							MessageDialog.openError(UIUtils.getActiveShell(), "Project update",
+								"Error updating solution '" + project.getSolution().getName() + "'\nTry to activate it again.");
 						}
 					});
 					return false;
@@ -672,10 +671,6 @@ public class ServoyModel extends AbstractServoyModel
 				return true;
 			}
 
-			/**
-			 * @param request
-			 * @return
-			 */
 			private MobileExporter getMobileExporter(HttpRequest request)
 			{
 				MobileExporter exporter = new MobileExporter();
@@ -958,8 +953,8 @@ public class ServoyModel extends AbstractServoyModel
 
 	public static boolean isClientRepositoryAccessAllowed()
 	{
-		return Utils.getAsBoolean(getSettings().getProperty(Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_SETTING,
-			String.valueOf(Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_DEFAULT)));
+		return Utils.getAsBoolean(
+			getSettings().getProperty(Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_SETTING, String.valueOf(Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_DEFAULT)));
 	}
 
 	/**
@@ -1117,18 +1112,15 @@ public class ServoyModel extends AbstractServoyModel
 					if (project != null && project.getSolution() == null)
 					{
 						ServoyLog.logError(
-							"Error activating solution. It is not properly initialized. Please check for problems in the underlying file representation.", null);
+							"Error activating solution. It is not properly initialized. Please check for problems in the underlying file representation.",
+							null);
 
 						Display.getDefault().syncExec(new Runnable()
 						{
 							public void run()
 							{
-								MessageDialog.openError(
-									UIUtils.getActiveShell(),
-									"Error activating solution",
-									"Solution " +
-										project +
-										" cannot be activated. The Solution or some of its modules was created or updated by a newer version of Servoy. Either switch to a newer version of Servoy or rollback the changes made.");
+								MessageDialog.openError(UIUtils.getActiveShell(), "Error activating solution", "Solution " + project +
+									" cannot be activated. The Solution or some of its modules was created or updated by a newer version of Servoy. Either switch to a newer version of Servoy or rollback the changes made.");
 							}
 						});
 						return;
@@ -1139,12 +1131,8 @@ public class ServoyModel extends AbstractServoyModel
 						{
 							public void run()
 							{
-								MessageDialog.openWarning(
-									UIUtils.getActiveShell(),
-									"Warning activating solution",
-									"Solution " +
-										project +
-										" was activated, but with errors! The Solution or one of its modules was created or updated by a newer version of Servoy. You should either switch to a newer version of Servoy or rollback the changes made.");
+								MessageDialog.openWarning(UIUtils.getActiveShell(), "Warning activating solution", "Solution " + project +
+									" was activated, but with errors! The Solution or one of its modules was created or updated by a newer version of Servoy. You should either switch to a newer version of Servoy or rollback the changes made.");
 							}
 						});
 					}
@@ -1624,8 +1612,8 @@ public class ServoyModel extends AbstractServoyModel
 				}
 				if (!added)
 				{
-					buildPaths.add(DLTKCore.newSourceEntry(sp.getProject().getFullPath(), new IPath[] { new Path(ResourcesUtils.STP_DIR + "/"), new Path(
-						SolutionSerializer.MEDIAS_DIR + "/") }));
+					buildPaths.add(DLTKCore.newSourceEntry(sp.getProject().getFullPath(),
+						new IPath[] { new Path(ResourcesUtils.STP_DIR + "/"), new Path(SolutionSerializer.MEDIAS_DIR + "/") }));
 				}
 				String[] moduleNames = Utils.getTokenElements(sp.getSolution().getModulesNames(), ",", true);
 				Arrays.sort(moduleNames);
@@ -1831,7 +1819,7 @@ public class ServoyModel extends AbstractServoyModel
 		{
 			/*
 			 * (non-Javadoc)
-			 * 
+			 *
 			 * @see org.eclipse.ui.progress.UIJob#runInUIThread(org.eclipse.core.runtime.IProgressMonitor)
 			 */
 			@Override
@@ -2192,7 +2180,8 @@ public class ServoyModel extends AbstractServoyModel
 						boolean isLoaded = eclipseRepository.isSolutionMetaDataLoaded(resource.getName());
 						if (isLoaded)
 						{
-							eclipseRepository.removeRootObject(eclipseRepository.getRootObjectMetaData(resource.getName(), IRepository.SOLUTIONS).getRootObjectId());
+							eclipseRepository.removeRootObject(
+								eclipseRepository.getRootObjectMetaData(resource.getName(), IRepository.SOLUTIONS).getRootObjectId());
 							// it is unloaded; avoid loading it afterwards when checking for active solutions
 							if (activeProject != null && activeProject.getProject().getName().equals(resource.getName()))
 							{
@@ -2464,8 +2453,9 @@ public class ServoyModel extends AbstractServoyModel
 						{
 							WorkspaceJob job;
 							// create new resource project if necessary and reference it from selected solution
-							job = new ResourcesProjectSetupJob("Updating resources project for solution '" + sp.getProject().getName() +
-								"' due to resources project rename.", project, p, sp.getProject(), true);
+							job = new ResourcesProjectSetupJob(
+								"Updating resources project for solution '" + sp.getProject().getName() + "' due to resources project rename.", project, p,
+								sp.getProject(), true);
 							job.setRule(sp.getProject().getWorkspace().getRoot());
 							job.setSystem(true);
 							job.schedule();
@@ -2803,7 +2793,8 @@ public class ServoyModel extends AbstractServoyModel
 					if (moduleMedia != null)
 					{
 						Pair<String, String> filePath = SolutionSerializer.getFilePath(moduleMedia, false);
-						if (!servoyProject.getProject().getWorkspace().getRoot().getFile(new Path(filePath.getLeft() + filePath.getRight())).exists()) skip_media_id = moduleMedia.getID();
+						if (!servoyProject.getProject().getWorkspace().getRoot().getFile(new Path(filePath.getLeft() + filePath.getRight())).exists())
+							skip_media_id = moduleMedia.getID();
 					}
 
 					media = editingSolution.createNewMedia(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), name, skip_media_id);
@@ -3275,8 +3266,28 @@ public class ServoyModel extends AbstractServoyModel
 	/**
 	 * Initializes the ServoyModel's initial state.
 	 */
+	@Override
 	public void initialize()
 	{
+		super.initialize();
+
+		getNGPackageManager().addNGPackagesChangedListener(new INGPackageChangeListener()
+		{
+
+			@Override
+			public void ngPackageChanged(boolean componentsChanged, boolean servicesChanged)
+			{
+				// nothing to do here yet
+			}
+
+			@Override
+			public void ngPackageProjectListChanged()
+			{
+				updateWorkingSet();
+			}
+
+		});
+
 		getUserManager().setFormAndTableChangeAware();
 		// first auto select active project
 		autoSelectActiveProjectIfNull(false);
@@ -3344,6 +3355,7 @@ public class ServoyModel extends AbstractServoyModel
 		}
 	}
 
+	@Override
 	public void dispose()
 	{
 		// TODO add more cleanup to this method
@@ -3357,6 +3369,8 @@ public class ServoyModel extends AbstractServoyModel
 			((IServerInternal)getServerManager().getServer(server_name, false, false)).removeTableListener(tableListener);
 		}
 		getServerManager().removeServerListener(serverTableListener);
+
+		super.dispose();
 	}
 
 	public void testBuildPathsAndBuild(final ServoyProject project, final boolean buildProject)
@@ -3411,6 +3425,16 @@ public class ServoyModel extends AbstractServoyModel
 		{
 			allModuleProjects.add(activeProject.getProject());
 			if (activeProject.getResourcesProject() != null) allModuleProjects.add(activeProject.getResourcesProject().getProject());
+		}
+
+		BaseNGPackageManager ngPackageManager = getNGPackageManager();
+		if (ngPackageManager != null)
+		{
+			ServoyNGPackageProject[] ngPackageProjects = ngPackageManager.getReferencedNGPackageProjects();
+			for (ServoyNGPackageProject p : ngPackageProjects)
+			{
+				allModuleProjects.add(p.getProject());
+			}
 		}
 
 		return allModuleProjects.toArray(new IProject[allModuleProjects.size()]);
@@ -3533,8 +3557,8 @@ public class ServoyModel extends AbstractServoyModel
 						}
 						else
 						{
-							textEdit.addChild(new ReplaceEdit(documentation.sourceStart(), documentation.sourceEnd() - documentation.sourceStart(),
-								comment.trim()));
+							textEdit.addChild(
+								new ReplaceEdit(documentation.sourceStart(), documentation.sourceEnd() - documentation.sourceStart(), comment.trim()));
 						}
 					}
 				}
@@ -3746,6 +3770,12 @@ public class ServoyModel extends AbstractServoyModel
 		{
 			activeResourcesProject.removeListener(workingSetChangedListener);
 		}
+	}
+
+	@Override
+	protected BaseNGPackageManager createNGPackageManager()
+	{
+		return new NGPackageManager();
 	}
 
 

@@ -73,7 +73,6 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.WebCustomType;
-import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.INGClientWebsocketSession;
 import com.servoy.j2db.server.ngclient.WebsocketSessionFactory;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
@@ -155,8 +154,10 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	@Override
 	public void createPartControl(Composite parent)
 	{
-		// always reload the current spec so that always the latest stuff is shown.
-		FormElementHelper.INSTANCE.reload(); // we can't reload just specs cause lately FormElement can add size/location/anchors to spec and we don't want to use old/cached/already initialized form elements while new specs were reloaded
+		// why would we reload the specs if nothing changed? I this is no longer needed now
+//		// always reload the current spec so that always the latest stuff is shown.
+//		FormElementHelper.INSTANCE.reload(); // we can't reload just specs cause lately FormElement can add size/location/anchors to spec and we don't want to use old/cached/already initialized form elements while new specs were reloaded
+
 		// Serve requests for rfb editor
 		editorId = UUID.randomUUID().toString();
 		WebsocketSessionManager.addSession(editorWebsocketSession = new EditorWebsocketSession(editorId));
