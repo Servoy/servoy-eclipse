@@ -41,6 +41,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
@@ -196,7 +197,8 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 				}
 				if (isTemplateChange)
 				{
-					com.servoy.eclipse.core.Activator.getDefault().webResourcesChanged(Boolean.TRUE);
+					// TODO how nice is this to force-call this just to refresh templates?
+					ServoyModelFinder.getServoyModel().getNGPackageManager().ngPackagesChanged(true, false);
 				}
 
 				if (!formsToDelete.isEmpty())
