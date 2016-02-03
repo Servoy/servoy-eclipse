@@ -138,6 +138,9 @@ public class MobileExporter
 	private static final String MIME_JS = "text/javascript";
 	private static final String MIME_CSS = "text/css";
 
+	private static final String JQUERY_MOBILE_THEME_FILE = "jquery.mobile.theme.css";
+	private static final String JQUERY_MOBILE_ICONS_FILE = "jquery.mobile.icons.css";
+
 	// this constant is also defined in testing.js inside servoy_mobile_testing and TestSuiteController.java; please update those as well if you change the value
 	private static final String SCOPE_NAME_SEPARATOR = "_sNS_";
 
@@ -163,11 +166,12 @@ public class MobileExporter
 		return "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort();
 	}
 
-	private String doMediaExport(ZipOutputStream zos, File outputFolder) throws IOException
+	private Pair<String, Boolean> doMediaExport(ZipOutputStream zos, File outputFolder) throws IOException
 	{
-		StringBuilder headerJS = new StringBuilder("var mediaJS = [");
-		StringBuilder headerCSS = new StringBuilder("var mediaCSS = [");
+		StringBuilder headerJS = new StringBuilder("var mediaJS = ["); //$NON-NLS-1$
+		StringBuilder headerCSS = new StringBuilder("var mediaCSS = ["); //$NON-NLS-1$
 
+		boolean isJqueryThemeOverwriten = false;
 		FlattenedSolution flattenedSolution = getFlattenedSolution();
 		if (flattenedSolution != null)
 		{
@@ -176,31 +180,40 @@ public class MobileExporter
 			{
 				Media media = flattenedSolution.getMedia(mediaName);
 				byte[] content = media.getMediaData();
+				boolean isThemeCSS = mediaName.equals(JQUERY_MOBILE_THEME_FILE) || mediaName.equals(JQUERY_MOBILE_ICONS_FILE);
 
-				if (MIME_JS.equals(media.getMimeType()))
+				if (!isThemeCSS)
 				{
-					if (headerJSEmpty) headerJSEmpty = false;
-					else headerJS.append(',');
-					headerJS.append('"').append(media.getName()).append('"');
+					if (MIME_JS.equals(media.getMimeType()))
+					{
+						if (headerJSEmpty) headerJSEmpty = false;
+						else headerJS.append(',');
+						headerJS.append('"').append(media.getName()).append('"');
+					}
+					else if (MIME_CSS.equals(media.getMimeType()))
+					{
+						if (headerCSSEmpty) headerCSSEmpty = false;
+						else headerCSS.append(',');
+						headerCSS.append('"').append(media.getName()).append('"');
+					}
 				}
-				else if (MIME_CSS.equals(media.getMimeType()))
+				else if (!isJqueryThemeOverwriten)
 				{
-					if (headerCSSEmpty) headerCSSEmpty = false;
-					else headerCSS.append(',');
-					headerCSS.append('"').append(media.getName()).append('"');
+					isJqueryThemeOverwriten = true;
 				}
 
-				addZipEntry("media/" + media.getName(), zos, new ByteArrayInputStream(content));
+				String mediaOutputFolder = isThemeCSS ? (useTestWar ? MOBILE_TEST_MODULE_NAME : MOBILE_MODULE_NAME) : "media";
+				addZipEntry(mediaOutputFolder + "/" + media.getName(), zos, new ByteArrayInputStream(content)); //$NON-NLS-1$
 				if (outputFolder != null)
 				{
-					File outputFolderJS = new File(outputFolder, "media");
+					File outputFolderJS = new File(outputFolder, mediaOutputFolder);
 					outputFolderJS.mkdirs();
 					Utils.writeFile(new File(outputFolderJS, media.getName()), content);
 				}
 			}
 		}
 
-		return headerJS.append("];\n").append(headerCSS).append("];").toString();
+		return new Pair<String, Boolean>(headerJS.append("];\n").append(headerCSS).append("];").toString(), Boolean.valueOf(isJqueryThemeOverwriten)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public String doPersistExport()
@@ -416,8 +429,8 @@ public class MobileExporter
 			if (solutionName != null && !fs.getSolution().getName().equals(solutionName))
 			{
 				ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
-				if (servoyProject == null) throw new RuntimeException("Mobile Exporter tries to export: " + solutionName +
-					" but that is not a project in the current workspace");
+				if (servoyProject == null)
+					throw new RuntimeException("Mobile Exporter tries to export: " + solutionName + " but that is not a project in the current workspace");
 				fs = servoyProject.getFlattenedSolution();
 			}
 		}
@@ -535,7 +548,9 @@ public class MobileExporter
 				exportedFile = new File(outputFolder, fileNameWithoutExtension + (exportAsZip ? ".zip" : ".war"));
 				warStream = new ZipOutputStream(new FileOutputStream(exportedFile));
 
-				String mediaExport = doMediaExport(warStream, developmentWorkspaceExport ? outputFolder : null);
+				Pair<String, Boolean> doMediaExportReturn = doMediaExport(warStream, developmentWorkspaceExport ? outputFolder : null);
+				String mediaExport = doMediaExportReturn.getLeft();
+				boolean isJqueryThemeOverwriten = doMediaExportReturn.getRight().booleanValue();
 
 				ZipInputStream zipStream = new ZipInputStream(is);
 				ZipEntry entry = zipStream.getNextEntry();
@@ -570,8 +585,8 @@ public class MobileExporter
 						if (entryName.equals(htmlFile))
 						{
 							fileContent = fileContent.replaceAll(Pattern.quote("<!--SOLUTION_MEDIA_JS_PLACEHOLDER-->"), mediaExport);
-							fileContent = fileContent.replaceAll(Pattern.quote("<!--PHONEGAP_JS_PLACEHOLDER-->"), exportAsZip
-								? "<script src=\"phonegap.js\"></script>" : "");
+							fileContent = fileContent.replaceAll(Pattern.quote("<!--PHONEGAP_JS_PLACEHOLDER-->"),
+								exportAsZip ? "<script src=\"phonegap.js\"></script>" : "");
 							if (developmentWorkspaceExport)
 							{
 								String indexContent = Utils.getTXTFileContent(new FileInputStream(new File(outputFolder, htmlFile)), Charset.forName("UTF8"),
@@ -596,7 +611,9 @@ public class MobileExporter
 						entryName = renameMap.get(entryName);
 					}
 
-					if (!exportAsZip || !entryName.startsWith("WEB-INF"))
+					if (!(isJqueryThemeOverwriten &&
+						(entryName.equals(moduleName + "/" + JQUERY_MOBILE_THEME_FILE) || entryName.equals(moduleName + "/" + JQUERY_MOBILE_ICONS_FILE))) &&
+						(!exportAsZip || !entryName.startsWith("WEB-INF")))
 					{
 						addZipEntry(entryName, warStream, contentStream != null ? contentStream : zipStream);
 					}
@@ -822,9 +839,9 @@ public class MobileExporter
 		{
 			// see also testing.js -> this function name helps show failed functions in test failures/errors
 			// "function " + scopes/forms + _ServoyTesting_.SCOPE_NAME_SEPARATOR + s2Name + _ServoyTesting_.SCOPE_NAME_SEPARATOR + fName;
-			functionAndName += " " +
-				(method.getParent().getTypeID() == IRepository.FORMS ? "forms" + SCOPE_NAME_SEPARATOR + ((Form)method.getParent()).getName() : "scopes" +
-					SCOPE_NAME_SEPARATOR + method.getScopeName()) + SCOPE_NAME_SEPARATOR + method.getName();
+			functionAndName += " " + (method.getParent().getTypeID() == IRepository.FORMS
+				? "forms" + SCOPE_NAME_SEPARATOR + ((Form)method.getParent()).getName() : "scopes" + SCOPE_NAME_SEPARATOR + method.getScopeName()) +
+				SCOPE_NAME_SEPARATOR + method.getName();
 		}
 		String code = ScriptEngine.extractFunction(method.getDeclaration(), functionAndName);
 
