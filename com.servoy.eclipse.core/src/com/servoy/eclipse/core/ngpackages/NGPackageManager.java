@@ -43,7 +43,7 @@ import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 
 /**
  * A class for managing the loaded NG custom web components and services when developer is run as UI (so not jos as a command line app that works on the workspace).
- * These can be found in the resources project as folders or archives or each in a separate project with {@link ServoyNGPackageProject} nature (again either zipped or as a expanded folder).
+ * These can be found in the resources project as folders or archives or each in a separate project with {@link ServoyNGPackageProject} nature (here only as expanded folder contents).
  *
  * @author acostescu
  */
