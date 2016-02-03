@@ -65,15 +65,16 @@ public class ShortcutsHandler implements IServerService
 		StringWriter stringWriter = new StringWriter();
 		final JSONWriter writer = new JSONWriter(stringWriter);
 		writer.object();
-		IBindingService bindingService = (IBindingService)editorPart.getSite().getService(IBindingService.class);
+		IBindingService bindingService = editorPart.getSite().getService(IBindingService.class);
+		Set<String> unique = new HashSet<String>();
 		for (Binding binding : bindingService.getBindings())
 		{
-			if (binding.getParameterizedCommand() != null && shortcutNames.contains(binding.getParameterizedCommand().getId())) //binding.getParameterizedCommand().getCommand().getCategory().getName().equals("Servoy"))
+			if (binding.getParameterizedCommand() != null && shortcutNames.contains(binding.getParameterizedCommand().getId()) &&
+				!unique.contains(binding.getParameterizedCommand().getId())) //binding.getParameterizedCommand().getCommand().getCategory().getName().equals("Servoy"))
 			{
 				ParameterizedCommand cmd = binding.getParameterizedCommand();
-				{
-					writer.key(cmd.getId()).value(binding.getTriggerSequence().toString());
-				}
+				writer.key(cmd.getId()).value(binding.getTriggerSequence().toString());
+				unique.add(cmd.getId());
 			}
 		}
 		writer.endObject();

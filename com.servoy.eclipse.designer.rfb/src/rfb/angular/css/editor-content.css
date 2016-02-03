@@ -1,0 +1,7 @@
+.highlight_element {
+	outline:1px solid lightblue;
+}
+
+.inheritedElement {
+	cursor:not-allowed;
+}
