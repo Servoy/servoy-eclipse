@@ -137,6 +137,8 @@ public class MobileExporter
 
 	private static final String MIME_JS = "text/javascript";
 	private static final String MIME_CSS = "text/css";
+	
+	private static final String JQUERY_MOBILE_THEME_FILE = "jquery.mobile.theme.css";
 
 	// this constant is also defined in testing.js inside servoy_mobile_testing and TestSuiteController.java; please update those as well if you change the value
 	private static final String SCOPE_NAME_SEPARATOR = "_sNS_"; //$NON-NLS-1$
@@ -163,11 +165,12 @@ public class MobileExporter
 		return "http://localhost:" + ApplicationServerSingleton.get().getWebServerPort();
 	}
 
-	private String doMediaExport(ZipOutputStream zos, File outputFolder) throws IOException
+	private Pair<String, Boolean> doMediaExport(ZipOutputStream zos, File outputFolder) throws IOException
 	{
 		StringBuilder headerJS = new StringBuilder("var mediaJS = ["); //$NON-NLS-1$
 		StringBuilder headerCSS = new StringBuilder("var mediaCSS = ["); //$NON-NLS-1$
 
+		boolean isJqueryThemeOverwriten = false;
 		FlattenedSolution flattenedSolution = getFlattenedSolution();
 		if (flattenedSolution != null)
 		{
@@ -176,31 +179,40 @@ public class MobileExporter
 			{
 				Media media = flattenedSolution.getMedia(mediaName);
 				byte[] content = media.getMediaData();
-		
-				if (MIME_JS.equals(media.getMimeType()))
+				boolean isThemeCSS = mediaName.equals(JQUERY_MOBILE_THEME_FILE);
+				
+				if(!isThemeCSS)
 				{
-					if (headerJSEmpty) headerJSEmpty = false;
-					else headerJS.append(',');
-					headerJS.append('"').append(media.getName()).append('"');
+					if (MIME_JS.equals(media.getMimeType()))
+					{
+						if (headerJSEmpty) headerJSEmpty = false;
+						else headerJS.append(',');
+						headerJS.append('"').append(media.getName()).append('"');
+					}
+					else if (MIME_CSS.equals(media.getMimeType()))
+					{
+						if (headerCSSEmpty) headerCSSEmpty = false;
+						else headerCSS.append(',');
+						headerCSS.append('"').append(media.getName()).append('"');
+					}
 				}
-				else if (MIME_CSS.equals(media.getMimeType()))
+				else if(!isJqueryThemeOverwriten)
 				{
-					if (headerCSSEmpty) headerCSSEmpty = false;
-					else headerCSS.append(',');
-					headerCSS.append('"').append(media.getName()).append('"');
+					isJqueryThemeOverwriten = true;
 				}
-
-				addZipEntry("media/" + media.getName(), zos,  new ByteArrayInputStream(content)); //$NON-NLS-1$
+				
+				String mediaOutputFolder = isThemeCSS ? (useTestWar ? MOBILE_TEST_MODULE_NAME : MOBILE_MODULE_NAME) : "media";
+				addZipEntry(mediaOutputFolder + "/" + media.getName(), zos,  new ByteArrayInputStream(content)); //$NON-NLS-1$
 				if (outputFolder != null)
 				{
-					File outputFolderJS = new File(outputFolder, "media"); //$NON-NLS-1$
+					File outputFolderJS = new File(outputFolder, mediaOutputFolder); //$NON-NLS-1$
 					outputFolderJS.mkdirs();
 					Utils.writeFile(new File(outputFolderJS, media.getName()), content);
 				}
 			}
 		}
 
-		return headerJS.append("];\n").append(headerCSS).append("];").toString(); //$NON-NLS-1$ //$NON-NLS-2$
+		return new Pair<String, Boolean>(headerJS.append("];\n").append(headerCSS).append("];").toString(), Boolean.valueOf(isJqueryThemeOverwriten)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public String doPersistExport()
@@ -527,7 +539,9 @@ public class MobileExporter
 				exportedFile = new File(outputFolder, fileNameWithoutExtension + (exportAsZip ? ".zip" : ".war"));
 				warStream = new ZipOutputStream(new FileOutputStream(exportedFile));
 
-				String mediaExport = doMediaExport(warStream, developmentWorkspaceExport ? outputFolder : null);
+				Pair<String,Boolean> doMediaExportReturn = doMediaExport(warStream, developmentWorkspaceExport ? outputFolder : null); 
+				String mediaExport = doMediaExportReturn.getLeft();
+				boolean isJqueryThemeOverwriten = doMediaExportReturn.getRight();
 
 				ZipInputStream zipStream = new ZipInputStream(is);
 				ZipEntry entry = zipStream.getNextEntry();
@@ -535,6 +549,7 @@ public class MobileExporter
 				{
 					InputStream contentStream = null;
 					String entryName = entry.getName();
+					
 					if (entryName.equals(htmlFile) || entryName.equals(moduleName + "/" + moduleName + ".nocache.js"))
 					{
 						String fileContent = Utils.getTXTFileContent(zipStream, Charset.forName("UTF8"), false);
@@ -588,7 +603,7 @@ public class MobileExporter
 						entryName = renameMap.get(entryName);
 					}
 
-					if (!exportAsZip || !entryName.startsWith("WEB-INF"))
+					if (!(isJqueryThemeOverwriten && entryName.equals(moduleName + "/" + JQUERY_MOBILE_THEME_FILE)) && (!exportAsZip || !entryName.startsWith("WEB-INF")))
 					{
 						addZipEntry(entryName, warStream, contentStream != null ? contentStream : zipStream);
 					}
