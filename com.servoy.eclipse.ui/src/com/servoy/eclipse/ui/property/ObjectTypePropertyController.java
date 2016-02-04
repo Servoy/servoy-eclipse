@@ -30,14 +30,13 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
-import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
  * Property controller to be used in properties view for custom json objects.
  *
  * @author acostescu
  */
-public abstract class ObjectTypePropertyController extends PropertyController<Object, Object> implements IPropertySetter<Object, ISetterAwarePropertySource>
+public abstract class ObjectTypePropertyController extends PropertyController<Object, Object>implements IPropertySetter<Object, ISetterAwarePropertySource>
 {
 
 	private static ILabelProvider labelProvider = null;
@@ -99,32 +98,39 @@ public abstract class ObjectTypePropertyController extends PropertyController<Ob
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		ComposedCellEditor cellEditor = new ComposedCellEditor(new ConvertorObjectCellEditor(getMainObjectTextConverter()), new ButtonCellEditor()
+		CellEditor cellEditor = new ButtonCellEditor()
 		{
 
 			@Override
 			protected void updateButtonState(Button buttonWidget, Object value)
 			{
-				buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(
-					!ServoyJSONObject.isJavascriptNullOrUndefined(value) ? ISharedImages.IMG_ETOOL_CLEAR : ISharedImages.IMG_OBJ_ADD));
+				buttonWidget.setImage(
+					PlatformUI.getWorkbench().getSharedImages().getImage(!isJSONNull(value) ? ISharedImages.IMG_ETOOL_CLEAR : ISharedImages.IMG_OBJ_ADD));
 				buttonWidget.setEnabled(true);
-				buttonWidget.setToolTipText(!ServoyJSONObject.isJavascriptNullOrUndefined(value) ? "Clears the property value."
-					: "Creates an empty property value '{}' to be able to expand node.");
+				buttonWidget.setToolTipText(
+					!isJSONNull(value) ? "Clears the property value." : "Creates an empty property value '{}' to be able to expand node.");
 			}
 
 			@Override
 			protected Object getValueToSetOnClick(Object oldPropertyValue)
 			{
-				return !ServoyJSONObject.isJavascriptNullOrUndefined(oldPropertyValue) ? null : new ServoyJSONObject();
+				return toggleValue(oldPropertyValue);
 			}
 
-		}, false, false, 0);
+		};
+		if (getMainObjectTextConverter() != null)
+		{
+			cellEditor = new ComposedCellEditor(new ConvertorObjectCellEditor(getMainObjectTextConverter()), cellEditor, false, false, 0);
+		}
 		cellEditor.create(parent);
-
 		return cellEditor;
 	}
 
-	protected abstract class ObjectPropertySource extends ComplexPropertySource<Object> implements ISetterAwarePropertySource
+	protected abstract Object toggleValue(Object oldPropertyValue);
+
+	protected abstract boolean isJSONNull(Object val);
+
+	protected abstract class ObjectPropertySource extends ComplexPropertySource<Object>implements ISetterAwarePropertySource
 	{
 
 		public ObjectPropertySource(ComplexProperty<Object> complexProperty)

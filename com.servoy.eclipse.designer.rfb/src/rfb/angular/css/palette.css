@@ -83,3 +83,6 @@
 	-webkit-flex-shrink: 0;
 	color: #000;
 }
+.paletteItem:hover {
+	background-color: lightblue;
+}

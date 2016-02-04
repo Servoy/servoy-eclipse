@@ -17,39 +17,34 @@
 
 package com.servoy.eclipse.ui.property.types;
 
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentSpecification;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 import com.servoy.eclipse.ui.property.ISetterAwarePropertySource;
-import com.servoy.eclipse.ui.property.JSONObjectTypePropertyController;
+import com.servoy.eclipse.ui.property.ObjectTypePropertyController;
 import com.servoy.eclipse.ui.property.PDPropertySource;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
- * Property controller to be used in properties view for custom json objects.
+ * Property controller to be used in properties view for custom objects.
  *
  * @author acostescu
  */
-public class CustomJSONObjectTypePropertyController extends JSONObjectTypePropertyController
+public class CustomObjectTypePropertyController extends ObjectTypePropertyController
 {
-
-	private static IObjectTextConverter JSONOBJECT_TEXT_CONVERTER = new JSONObjectTextConverter();
-	private static ILabelProvider labelProvider = null;
-
 	private final PersistContext persistContext;
 	private final PropertyDescription propertyDescription;
 
-	public CustomJSONObjectTypePropertyController(Object id, String displayName, PersistContext persistContext, PropertyDescription propertyDescription)
+	public CustomObjectTypePropertyController(Object id, String displayName, PersistContext persistContext, PropertyDescription propertyDescription)
 	{
 		super(id, displayName);
 		this.persistContext = persistContext;
@@ -57,40 +52,31 @@ public class CustomJSONObjectTypePropertyController extends JSONObjectTypeProper
 	}
 
 	@Override
-	protected ObjectPropertySource getObjectChildPropertySource(ComplexProperty<Object> complexProperty)
+	protected CustomObjectPropertySource getObjectChildPropertySource(ComplexProperty<Object> complexProperty)
 	{
-		return new CustomJSONObjectPropertySource(complexProperty);
+		return new CustomObjectPropertySource(complexProperty);
 	}
 
-	protected class CustomJSONObjectPropertySource extends JSONObjectPropertySource
+	protected class CustomObjectPropertySource extends ObjectPropertySource
 	{
 
 		protected PDPropertySource underlyingPropertySource;
 
-		public CustomJSONObjectPropertySource(ComplexProperty<Object> complexProperty)
+		public CustomObjectPropertySource(ComplexProperty<Object> complexProperty)
 		{
 			super(complexProperty);
 		}
 
 		protected PDPropertySource getUnderlyingPropertySource()
 		{
-			IPersist persist = persistContext.getPersist(); // parent persist holding property with propertyDescription
-			PersistContext pContext = persistContext;
+			IPersist persist = (IPersist)getEditableValue(); // parent persist holding property with propertyDescription
+			PersistContext pContext = PersistContext.create(persist, persistContext.getContext());
 
-			String pdName = propertyDescription.getName();
-			if (persist != null && !WebComponentSpecification.ARRAY_ELEMENT_PD_NAME.equals(pdName))
-			{
-				persist = (IPersist)((IBasicWebObject)persist).getProperty(pdName);
-				// property of a custom object or property of a web component; persistContext points to parent in this case
-				pContext = PersistContext.create(persist, persistContext.getContext());
-			} // else persistContext already has correct persist (array element persist)
-
-
-			if (underlyingPropertySource == null || ((persist instanceof IBasicWebObject) && (((IBasicWebObject)persist).getJson() == null))) // so if we have no propertySource or if we have one but we shouldn't (json became null meanwhile)
+			if (underlyingPropertySource == null || ((persist instanceof IBasicWebObject) && (((IBasicWebObject)persist).getFlattenedJson() == null))) // so if we have no propertySource or if we have one but we shouldn't (json became null meanwhile)
 			{
 				if (persist instanceof IBasicWebObject)
 				{
-					if (((IBasicWebObject)persist).getJson() != null)
+					if (((IBasicWebObject)persist).getFlattenedJson() != null)
 					{
 						underlyingPropertySource = new PDPropertySource(pContext, readOnly, propertyDescription);
 					}
@@ -125,7 +111,7 @@ public class CustomJSONObjectTypePropertyController extends JSONObjectTypeProper
 		public Object getPropertyValue(Object id)
 		{
 			PDPropertySource underlying = getUnderlyingPropertySource();
-			return underlying != null ? ServoyJSONObject.adjustJavascriptNULLForJava(underlying.getPropertyValue(id)) : null;
+			return underlying != null ? underlying.getPropertyValue(id) : null;
 		}
 
 		@Override
@@ -161,15 +147,7 @@ public class CustomJSONObjectTypePropertyController extends JSONObjectTypeProper
 		@Override
 		public void defaultResetProperty(Object id)
 		{
-			PropertyDescription childPD = propertyDescription.getProperty((String)id);
-			if (childPD.hasDefault()) super.defaultResetProperty(id);
-			else underlyingPropertySource.defaultResetProperty(id);
-		}
-
-		@Override
-		protected Object getDefaultElementProperty(Object id)
-		{
-			return propertyDescription.getProperty((String)id).getDefaultValue();
+			underlyingPropertySource.defaultResetProperty(id);
 		}
 
 	}
@@ -195,6 +173,51 @@ public class CustomJSONObjectTypePropertyController extends JSONObjectTypeProper
 			propertySource.setPropertyValue(getId(), toSet);
 		}
 		else propertySource.defaultResetProperty(getId());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.ui.property.ObjectTypePropertyController#getLabelText(java.lang.Object)
+	 */
+	@Override
+	protected String getLabelText(Object element)
+	{
+		return (isJSONNull(element) ? "null" : "{...}");
+	}
+
+	@Override
+	protected boolean isJSONNull(Object element)
+	{
+		return element == null || ((WebCustomType)element).getFlattenedJson() == null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.ui.property.ObjectTypePropertyController#getMainObjectTextConverter()
+	 */
+	@Override
+	protected IObjectTextConverter getMainObjectTextConverter()
+	{
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.ui.property.ObjectTypePropertyController#toggleValue(java.lang.Object)
+	 */
+	@Override
+	protected Object toggleValue(Object oldPropertyValue)
+	{
+		WebCustomType ct = (WebCustomType)(oldPropertyValue);
+		WebCustomType newPropertyValue = WebCustomType.createNewInstance(ct.getParent(), ct.getPropertyDescription(), ct.getJsonKey(), ct.getIndex(), true);
+		if (!isJSONNull(ct))
+		{
+			newPropertyValue.setJson(null);
+		}
+		return newPropertyValue;
 	}
 
 }

@@ -2760,8 +2760,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		duplicatePersistAction = new DuplicatePersistAction(this.getSite().getShell());
 		IAction importComponent = new ImportComponentAction(this, "component", "components");
 		IAction importService = new ImportComponentAction(this, "service", "services");
-		IAction importComponentFolder = new ImportComponentFolderAction(this, "component", "components");
-		IAction importServicesFolder = new ImportComponentFolderAction(this, "services", "services");
+		IAction importComponentFolder = new ImportComponentFolderAction(this, "component", "components", "Web-Component");
+		IAction importServicesFolder = new ImportComponentFolderAction(this, "services", "services", "Web-Service");
 		IAction newComponentAction = new NewComponentAction(this, getSite().getShell(), "Component", "Create new component");
 		IAction newLayoutAction = new NewComponentAction(this, getSite().getShell(), "Layout", "Create new layout");
 		IAction newServiceAction = new NewComponentAction(this, getSite().getShell(), "Service", "Create new service");

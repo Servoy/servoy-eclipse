@@ -51,7 +51,6 @@ import org.eclipse.ui.progress.WorkbenchJob;
  */
 public abstract class TextDialogCellEditor extends TextCellEditor
 {
-
 	/**
 	 * The editor control.
 	 */
@@ -386,27 +385,23 @@ public abstract class TextDialogCellEditor extends TextCellEditor
 			contents = createContents(editor, singleLine);
 		}
 
-		String stringValue;
-		if (labelProvider != null)
-		{
-			stringValue = labelProvider.getText(val);
-		}
-		else if (val != null)
-		{
-			stringValue = val.toString();
-		}
-		else
-		{
-			stringValue = "";
-		}
 		if (contents instanceof Text)
 		{
 			// the editor shouldn't be marked as dirty
-			super.doSetValue(stringValue);
+			super.doSetValue(val == null ? "" : val.toString());
 			((Text)contents).setFocus();
 		}
 		if (contents instanceof Label)
 		{
+			String stringValue;
+			if (labelProvider != null)
+			{
+				stringValue = labelProvider.getText(val);
+			}
+			else
+			{
+				stringValue = val == null ? "" : val.toString();
+			}
 			((Label)contents).setText(stringValue);
 		}
 	}

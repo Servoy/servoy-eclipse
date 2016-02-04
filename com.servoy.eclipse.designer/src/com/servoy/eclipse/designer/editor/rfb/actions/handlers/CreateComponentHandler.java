@@ -34,9 +34,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentPackageSpecification;
+import org.sablo.specification.NGPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.websocket.IServerService;
@@ -84,7 +84,6 @@ import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -238,11 +237,13 @@ public class CreateComponentHandler implements IServerService
 			{
 				// see if target has a 'component' or 'component[]' typed property
 				WebComponent parentWC = (WebComponent)dropTarget;
+				PropertyDescription propertyDescription = ((WebObjectImpl)parentWC.getImplementation()).getPropertyDescription();
+
 				// TODO add a visual way for the user to drop to a specific property (if there is more then one property that supports components)
 				// TODO also add a way of adding to a specific index in a component array and also just moving component ghosts in a component array property
-				for (String propertyName : new TreeSet<String>(parentWC.getSpecification().getAllPropertiesNames()))
+				for (String propertyName : new TreeSet<String>(propertyDescription.getAllPropertiesNames()))
 				{
-					PropertyDescription property = parentWC.getSpecification().getProperty(propertyName);
+					PropertyDescription property = propertyDescription.getProperty(propertyName);
 					if (property.getType() instanceof ComponentPropertyType)
 					{
 						// simple component type
@@ -479,7 +480,7 @@ public class CreateComponentHandler implements IServerService
 			}
 			else
 			{
-				WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(name);
+				WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(name);
 				if (spec != null)
 				{
 					String compName = null;
@@ -522,7 +523,7 @@ public class CreateComponentHandler implements IServerService
 				}
 				else
 				{
-					WebComponentPackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+					NGPackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
 						args.optString("packageName"));
 					if (specifications != null)
 					{
@@ -585,7 +586,7 @@ public class CreateComponentHandler implements IServerService
 	protected ChildWebComponent createNestedWebComponent(WebComponent parentWC, PropertyDescription pd, String componentSpecName, String propertyName,
 		int indexIfInArray, int x, int y, int width, int height)
 	{
-		WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(componentSpecName);
+		WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(componentSpecName);
 		if (spec != null)
 		{
 			String compName = null;
@@ -602,9 +603,7 @@ public class CreateComponentHandler implements IServerService
 				compName = componentName + "_" + id.incrementAndGet();
 			}
 
-			Pair<Integer, UUID> newIDAndUUID = WebObjectImpl.getNewIdAndUUID(parentWC);
-			ChildWebComponent webComponent = new ChildWebComponent(parentWC, newIDAndUUID.getLeft().intValue(), newIDAndUUID.getRight(), propertyName,
-				indexIfInArray, true, pd);
+			ChildWebComponent webComponent = ChildWebComponent.createNewInstance(parentWC, pd, propertyName, indexIfInArray, true);
 			webComponent.setTypeName(componentSpecName);
 
 			// not sure if location and size are still needed to be set in children here... maybe it is (if parent wants to use them at runtime)
@@ -624,7 +623,7 @@ public class CreateComponentHandler implements IServerService
 	}
 
 	protected IPersist createLayoutContainer(ISupportFormElements parent, WebLayoutSpecification layoutSpec, JSONObject config, int index,
-		WebComponentPackageSpecification<WebLayoutSpecification> specifications, String packageName) throws RepositoryException, JSONException
+		NGPackageSpecification<WebLayoutSpecification> specifications, String packageName) throws RepositoryException, JSONException
 	{
 		Iterator<IPersist> childContainersIte = parent.getObjects(IRepositoryConstants.LAYOUTCONTAINERS);
 		LayoutContainer sameTypeChildContainer = null;

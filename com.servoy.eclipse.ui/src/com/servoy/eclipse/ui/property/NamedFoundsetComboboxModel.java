@@ -71,6 +71,12 @@ public class NamedFoundsetComboboxModel implements IComboboxPropertyModel<String
 		return realValues;
 	}
 
+	@Override
+	public int getDefaultValueIndex()
+	{
+		return 0;
+	}
+
 	/**
 	 * Get the compatible global relations that can be used with this form and merge them with other constant values.
 	 */

@@ -13,6 +13,7 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 				return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
 			}
 			function renderDecorators(selection,renderResizeKnobs) {
+				if (renderResizeKnobs) {
 				$timeout(function(){
 					if (selection.length == 1){
 						//when resizing the form, the server sends a refreshGhosts message that updates the form ghost div => the selection references a stale form ghost,
@@ -103,6 +104,12 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 						$scope.nodes[i].style.display = 'none';
 					}
 				});
+				}
+				else {
+					for(var i=0;i<$scope.nodes.length;i++) {
+						$scope.nodes[i].style.display = 'none';
+					}
+				}
 			}
 	    	  
 			$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {

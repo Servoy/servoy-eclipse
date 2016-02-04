@@ -27,7 +27,6 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
-import com.servoy.j2db.server.ngclient.WebsocketSessionFactory;
 import com.servoy.j2db.server.ngclient.endpoint.BaseNGClientEndpoint;
 
 /**
@@ -42,7 +41,7 @@ public class EditorContentEndpoint extends BaseNGClientEndpoint
 {
 	public EditorContentEndpoint()
 	{
-		super(WebsocketSessionFactory.DESIGN_ENDPOINT);
+		super("designer");
 	}
 
 	@Override

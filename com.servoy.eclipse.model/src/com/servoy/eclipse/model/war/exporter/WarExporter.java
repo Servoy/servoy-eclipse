@@ -21,6 +21,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -55,10 +56,11 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.json.JSONException;
-import org.sablo.specification.WebComponentPackageSpecification;
+import org.sablo.specification.NGPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -132,59 +134,59 @@ public class WarExporter
 	 */
 	public void doExport(IProgressMonitor monitor) throws ExportException
 	{
-		monitor.beginTask("Creating War File", 19);
+		SubMonitor subMonitor = SubMonitor.convert(monitor, "Creating War File", 20);
 		File warFile = createNewWarFile();
-		monitor.worked(1);
+		subMonitor.worked(1);
 		File tmpWarDir = createTempDir();
-		monitor.worked(1);
+		subMonitor.worked(1);
 		String appServerDir = exportModel.getServoyApplicationServerDir();
-		monitor.subTask("Copy root webapp files");
+		subMonitor.subTask("Copy root webapp files");
 		copyRootWebappFiles(tmpWarDir, appServerDir);
-		monitor.worked(1);
-		monitor.subTask("Copy beans");
+		subMonitor.worked(1);
+		subMonitor.subTask("Copy beans");
 		copyBeans(tmpWarDir, appServerDir);
-		monitor.worked(1);
-		monitor.subTask("Copy plugins");
+		subMonitor.worked(1);
+		subMonitor.subTask("Copy plugins");
 		copyPlugins(tmpWarDir, appServerDir);
-		monitor.worked(1);
-		monitor.subTask("Copy lafs");
+		subMonitor.worked(1);
+		subMonitor.subTask("Copy lafs");
 		copyLafs(tmpWarDir, appServerDir);
-		monitor.worked(1);
-		monitor.subTask("Copy all standard libraries");
+		subMonitor.worked(1);
+		subMonitor.subTask("Copy all standard libraries");
 		final File targetLibDir = copyStandardLibs(tmpWarDir, appServerDir);
-		monitor.worked(1);
-		monitor.subTask("Copy Drivers");
+		subMonitor.worked(1);
+		subMonitor.subTask("Copy Drivers");
 		copyDrivers(appServerDir, targetLibDir);
-		monitor.worked(1);
-		monitor.subTask("Copy images");
+		subMonitor.worked(1);
+		subMonitor.subTask("Copy images");
 		copyLibImages(tmpWarDir, appServerDir);
-		monitor.worked(1);
+		subMonitor.worked(1);
 		moveSlf4j(tmpWarDir, targetLibDir);
-		monitor.worked(1);
-		monitor.subTask("Creating web.xml");
+		subMonitor.worked(1);
+		subMonitor.subTask("Creating web.xml");
 		copyWebXml(tmpWarDir);
-		monitor.worked(1);
-		createTomcatContextXML(monitor, tmpWarDir);
-		monitor.worked(1);
+		subMonitor.worked(1);
+		createTomcatContextXML(subMonitor, tmpWarDir);
+		subMonitor.worked(1);
 		addServoyProperties(tmpWarDir);
-		monitor.worked(1);
+		subMonitor.worked(1);
 		if (exportModel.isExportActiveSolution())
 		{
-			monitor.subTask("Copy the active solution");
-			copyActiveSolution(monitor, tmpWarDir);
+			subMonitor.subTask("Copy the active solution");
+			copyActiveSolution(subMonitor.newChild(2), tmpWarDir);
 		}
-		monitor.worked(1);
-		monitor.subTask("Copy NGClient components");
-		copyComponents(monitor, tmpWarDir, targetLibDir);
-		monitor.worked(1);
-		monitor.subTask("Copy exported components");
+		subMonitor.worked(1);
+		subMonitor.subTask("Copy NGClient components");
+		copyComponents(subMonitor, tmpWarDir, targetLibDir);
+		subMonitor.worked(1);
+		subMonitor.subTask("Copy exported components");
 		copyExportedComponentsPropertyFile(tmpWarDir);
-		monitor.worked(1);
-		monitor.subTask("Creating/zipping the WAR file");
+		subMonitor.worked(1);
+		subMonitor.subTask("Creating/zipping the WAR file");
 		zipDirectory(tmpWarDir, warFile);
-		monitor.worked(1);
+		subMonitor.worked(2);
 		deleteDirectory(tmpWarDir);
-		monitor.worked(1);
+		subMonitor.worked(1);
 		monitor.done();
 		return;
 	}
@@ -213,7 +215,7 @@ public class WarExporter
 
 		TreeSet<String> allServices = new TreeSet<String>();
 		// append internal servoy services
-		WebComponentPackageSpecification<WebComponentSpecification> servoyservices = WebServiceSpecProvider.getInstance().getServicesInPackage(
+		NGPackageSpecification<WebObjectSpecification> servoyservices = WebServiceSpecProvider.getInstance().getServicesInPackage(
 			"servoyservices");
 		if (servoyservices != null) allServices.addAll(servoyservices.getSpecifications().keySet());
 		// append user services
@@ -328,7 +330,7 @@ public class WarExporter
 				}
 				catch (IOException e)
 				{
-					e.printStackTrace();
+					Debug.error(e);
 				}
 			}
 			if (!found) throw new ExportException(libName + " was not found. Please specify location");
@@ -413,13 +415,13 @@ public class WarExporter
 		}
 	}
 
-	private String copyUserDefinedComponentsOrServices(File tmpWarDir, IProgressMonitor monitor, String copyFrom) throws ExportException
+	private String copyUserDefinedComponentsOrServices(File tmpWarDir, String copyFrom) throws ExportException
 	{
 		StringBuilder locations = new StringBuilder();
 		ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 		try
 		{
-			activeResourcesProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, monitor);
+			activeResourcesProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
 		}
 		catch (CoreException e1)
 		{
@@ -476,7 +478,7 @@ public class WarExporter
 	private String copyUserDefinedComponents(File tmpWarDir, IProgressMonitor monitor) throws ExportException
 	{
 		monitor.subTask("Copy user-defined components");
-		return copyUserDefinedComponentsOrServices(tmpWarDir, monitor, COMPONENTS_DIR_NAME);
+		return copyUserDefinedComponentsOrServices(tmpWarDir, COMPONENTS_DIR_NAME);
 	}
 
 	/**
@@ -489,7 +491,7 @@ public class WarExporter
 	private String copyUserDefinedServices(File tmpWarDir, IProgressMonitor monitor) throws ExportException
 	{
 		monitor.subTask("Copy user-defined services");
-		return copyUserDefinedComponentsOrServices(tmpWarDir, monitor, SERVICES_DIR_NAME);
+		return copyUserDefinedComponentsOrServices(tmpWarDir, SERVICES_DIR_NAME);
 	}
 
 	/**
@@ -526,11 +528,11 @@ public class WarExporter
 				fo.close();
 				is.close();
 			}
+			jarfile.close();
 		}
 		catch (IOException e)
 		{
-			Debug.error(e);
-			throw new ExportException(e.getMessage());
+			Debug.error("IO exception when extracting from file " + file.getAbsolutePath(), e);
 		}
 	}
 
@@ -794,7 +796,7 @@ public class WarExporter
 		}
 		catch (Exception e)
 		{
-			throw new ExportException("Can't create the web.xml file: " + webXMLFile, e);
+			throw new ExportException("Can't create the web.xml file: " + webXMLFile.getAbsolutePath(), e);
 		}
 		finally
 		{
@@ -933,7 +935,7 @@ public class WarExporter
 		}
 		catch (IOException e2)
 		{
-			throw new ExportException("Error creating laf dir", e2);
+			throw new ExportException("Error creating lafs properties file " + lafProperties.getAbsolutePath(), e2);
 		}
 		finally
 		{
@@ -1281,7 +1283,11 @@ public class WarExporter
 			fos = new FileOutputStream(new File(tmpWarDir, "WEB-INF/servoy.properties"));
 			properties.store(fos, "");
 		}
-		catch (Exception e)
+		catch (FileNotFoundException fileNotFoundException)
+		{
+			throw new ExportException("Couldn't find file " + tmpWarDir.getAbsolutePath() + "/WEB-INF/servoy.properties", fileNotFoundException);
+		}
+		catch (IOException e)
 		{
 			throw new ExportException("Couldn't generate the properties file", e);
 		}

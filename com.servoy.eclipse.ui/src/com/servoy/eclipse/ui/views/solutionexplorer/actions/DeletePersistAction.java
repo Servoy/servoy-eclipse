@@ -52,6 +52,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
@@ -60,7 +61,7 @@ import com.servoy.j2db.persistence.StringResource;
 /**
  * Action to delete IPersist objects from a solution or string resources. The selected IPersist objects must be either all resources, or all descendants of the
  * same solution object.
- * 
+ *
  * @author rgansevles
  */
 public class DeletePersistAction extends Action implements ISelectionChangedListener
@@ -71,7 +72,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 
 	/**
 	 * Creates a new "delete persist" action for the given solution view.
-	 * 
+	 *
 	 */
 	public DeletePersistAction(UserNodeType type, String text)
 	{
@@ -119,7 +120,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 	}
 
 	/**
-	 * 
+	 *
 	 * @param selectedPersistItems
 	 */
 	protected void performDeletion(List<IPersist> selectedPersistItems)
@@ -132,6 +133,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 			if (toDelete.size() > 0)
 			{
 				List<IPersist> formsToDelete = new ArrayList<IPersist>();
+				boolean isTemplateChange = false;
 				for (IPersist persist : refItems)
 				{
 					boolean closeEditor = true;
@@ -187,6 +189,14 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 						}
 					}
 					if (closeEditor) EditorUtil.closeEditor(persist);
+					if (!isTemplateChange && persist.getTypeID() == IRepository.TEMPLATES)
+					{
+						isTemplateChange = true;
+					}
+				}
+				if (isTemplateChange)
+				{
+					com.servoy.eclipse.core.Activator.getDefault().webResourcesChanged(Boolean.TRUE);
 				}
 
 				if (!formsToDelete.isEmpty())
@@ -228,7 +238,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 
 	/**
 	 * Retrieves the dependency table, that specifies which form extends another form;
-	 * 
+	 *
 	 * @param formsToDelete
 	 * @return
 	 */
@@ -282,7 +292,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 
 	/**
 	 * Builds the message to be displayed in the case of having forms that extend other forms;
-	 * 
+	 *
 	 * @param map
 	 * @return
 	 */
@@ -323,7 +333,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 
 	/**
 	 * Search for a given id in the list of forms to be deleted;
-	 * 
+	 *
 	 * @param id
 	 * @param formsToDelete
 	 * @return true/false whether is found or not;
@@ -341,7 +351,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 	/**
 	 * Checks is all the selected forms for deletion are in the same set; That means, there is no other form that is NOT selected for delete and has a parent in
 	 * the delete list;
-	 * 
+	 *
 	 * @param formsToDelete
 	 * @return
 	 */
@@ -385,7 +395,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 			{
 				if (allFormsAreInTheSameSet(deleteItems))
 				{
-					if (selectedPersists.get(0) instanceof Form) //we'll later use the delete resources wizard for forms, and that already contains question on deletion 
+					if (selectedPersists.get(0) instanceof Form) //we'll later use the delete resources wizard for forms, and that already contains question on deletion
 					{
 						performDeletion(selectedPersists);
 					}
@@ -398,8 +408,8 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 				else
 				{
 					message = buildMessageFromRelationsTable(map);
-					MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(), message +
-						"You are not allowed to delete!");
+					MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(),
+						message + "You are not allowed to delete!");
 				}
 			}
 			else

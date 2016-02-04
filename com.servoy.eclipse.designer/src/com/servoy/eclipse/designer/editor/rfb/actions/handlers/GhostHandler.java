@@ -30,7 +30,7 @@ import org.json.JSONObject;
 import org.json.JSONWriter;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.VisiblePropertyType;
@@ -59,6 +59,7 @@ import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
@@ -95,23 +96,24 @@ public class GhostHandler implements IServerService
 		ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm()).acceptVisitor(new IPersistVisitor()
 		{
 
-//			private String computeLegacyBeanGhostUUID(Bean bean, PropertyDescription pd, String simpleTypeName, int index)
-//			{
-//				if (index < 0) return bean.getUUID() + "_" + pd.getName() + "_" + simpleTypeName;
-//				return bean.getUUID() + "_" + pd.getName() + "." + +index + "_" + simpleTypeName;
-//			}
-
-			private void writeGhostsForWebcomponentBeans(JSONWriter writer, IBasicWebComponent bean)
+			private void writeGhostsForWebcomponentBeans(IBasicWebComponent bean)
 			{
 				if (FormTemplateGenerator.isWebcomponentBean(bean))
 				{
-					WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(bean.getTypeName());
+					WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(bean.getTypeName());
 					if (spec == null)
 					{
 						//error bean
 						spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(FormElement.ERROR_BEAN);
 					}
 					Map<String, PropertyDescription> properties = spec.getProperties();
+					for (String key : properties.keySet())
+					{
+						if (((WebObjectImpl)((WebComponent)bean).getImplementation()).getPropertyDescription().isArrayReturnType(key))
+						{
+							LocationCache.getINSTANCE().clearParent(bean.getUUID() + key);
+						}
+					}
 					try
 					{
 						writer.object();
@@ -140,12 +142,15 @@ public class GhostHandler implements IServerService
 									}
 
 									Object configObject;
-									if (p.getIndex() >= 0) configObject = ((WebComponent)bean).getSpecification().getProperty(p.getJsonKey()).getConfig();
+									if (p.getIndex() >= 0)
+										configObject = ((WebObjectImpl)((WebComponent)bean).getImplementation()).getPropertyDescription().getProperty(
+											p.getJsonKey()).getConfig();
 									else configObject = p.getPropertyDescription().getConfig();
 
 									if (isDroppable(p.getPropertyDescription(), configObject))
 									{
-										writeGhostToJSON(writer, text, p.getUUID().toString(), p.getIndex(), p.getTypeName());
+										String parentKey = bean.getUUID() + p.getJsonKey();
+										writeGhostToJSON(parentKey, writer, text, p.getUUID().toString(), p.getIndex(), p.getTypeName());
 									}
 								}
 							}
@@ -167,7 +172,7 @@ public class GhostHandler implements IServerService
 													if (pd.getType() instanceof ComponentPropertyType || (configObject instanceof JSONObject &&
 														Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
 													{
-														writeGhostToJSON(writer, (Bean)bean, pd, simpleTypeName, -1);// -1 does not add a [0] at the end of the name
+														writeGhostToJSON(bean.getUUID() + pd.getName(), pd, simpleTypeName, -1);// -1 does not add a [0] at the end of the name
 													}
 												}
 												else if (PropertyUtils.isCustomJSONArrayPropertyType(pd.getType()))
@@ -179,7 +184,8 @@ public class GhostHandler implements IServerService
 															(configObject instanceof JSONObject &&
 																Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
 														{
-															writeGhostToJSON(writer, (Bean)bean, pd, simpleTypeName, i);
+															writeGhostToJSON(bean.getUUID() + pd.getName(), writer,
+																pd.getName() + (i >= 0 ? "[" + i + "]" : ""), UUID.randomUUID().toString(), i, simpleTypeName);
 														}
 													}
 												}
@@ -204,15 +210,14 @@ public class GhostHandler implements IServerService
 			}
 
 
-			private void writeGhostToJSON(JSONWriter jsonWriter, Bean bean, PropertyDescription pd, String simpleTypeName, int indexForPositioning)
-				throws JSONException
+			private void writeGhostToJSON(String parentKey, PropertyDescription pd, String simpleTypeName, int indexForPositioning) throws JSONException
 			{
-				writeGhostToJSON(writer, pd.getName() + (indexForPositioning >= 0 ? "[" + indexForPositioning + "]" : ""), UUID.randomUUID().toString(),
-					indexForPositioning, simpleTypeName);
-//				writeGhostToJSON(jsonWriter, pd.getName(), computeLegacyBeanGhostUUID(bean, pd, simpleTypeName, indexForPositioning), indexForPositioning);
+				writeGhostToJSON(parentKey, writer, pd.getName() + (indexForPositioning >= 0 ? "[" + indexForPositioning + "]" : ""),
+					UUID.randomUUID().toString(), indexForPositioning, simpleTypeName);
 			}
 
-			private void writeGhostToJSON(JSONWriter jsonWriter, String text, String uuid, int indexForPositioning, String simpleTypeName) throws JSONException
+			private void writeGhostToJSON(String parentKey, JSONWriter jsonWriter, String text, String uuid, int indexForPositioning, String simpleTypeName)
+				throws JSONException
 			{
 				jsonWriter.object();
 				jsonWriter.key("uuid").value(uuid);
@@ -224,8 +229,11 @@ public class GhostHandler implements IServerService
 					jsonWriter.object();
 					int position = indexForPositioning;
 					if (position < 0) position = 0;
-					jsonWriter.key("x").value(computeX(position));
-					jsonWriter.key("y").value(computeY(position));
+					int computeX = computeX(position);
+					int computeY = computeY(position);
+					LocationCache.getINSTANCE().putLocation(parentKey, uuid, new Point(computeX, computeY));
+					jsonWriter.key("x").value(computeX);
+					jsonWriter.key("y").value(computeY);
 					jsonWriter.endObject();
 				}
 				jsonWriter.key("size");
@@ -381,7 +389,7 @@ public class GhostHandler implements IServerService
 				}
 				else if (o instanceof IBasicWebComponent)
 				{
-					writeGhostsForWebcomponentBeans(writer, (IBasicWebComponent)o);
+					writeGhostsForWebcomponentBeans((IBasicWebComponent)o);
 				}
 
 				return IPersistVisitor.CONTINUE_TRAVERSAL;
@@ -599,7 +607,7 @@ public class GhostHandler implements IServerService
 			if (fe instanceof WebComponent && fe.getFlattenedPropertiesMap().containsKey("json"))
 			{
 				JSONObject obj = (JSONObject)fe.getFlattenedPropertiesMap().get("json");
-				WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)fe).getTypeName());
+				WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)fe).getTypeName());
 				if (spec != null && !spec.getProperties(VisiblePropertyType.INSTANCE).isEmpty())
 				{
 					PropertyDescription pd = spec.getProperties(VisiblePropertyType.INSTANCE).iterator().next();
@@ -670,7 +678,7 @@ public class GhostHandler implements IServerService
 	public static boolean isDroppable(PropertyDescription propertyDescription, Object configObject)
 	{
 		IPropertyType< ? > type = propertyDescription.getType();
-		return propertyDescription instanceof WebComponentSpecification || type instanceof ComponentPropertyType ||
+		return propertyDescription instanceof WebObjectSpecification || type instanceof ComponentPropertyType ||
 			(PropertyUtils.isCustomJSONArrayPropertyType(type) &&
 				((CustomJSONArrayType< ? , ? >)type).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType) ||
 			(configObject instanceof JSONObject && Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE)));

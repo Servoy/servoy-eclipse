@@ -203,6 +203,12 @@ public abstract class JSONObjectTypePropertyController extends ObjectTypePropert
 	}
 
 	@Override
+	protected Object toggleValue(Object oldPropertyValue)
+	{
+		return !isJSONNull(oldPropertyValue) ? null : new ServoyJSONObject();
+	}
+
+	@Override
 	public void setProperty(ISetterAwarePropertySource propertySource, Object value)
 	{
 		propertySource.defaultSetProperty(getId(), value);
@@ -219,5 +225,17 @@ public abstract class JSONObjectTypePropertyController extends ObjectTypePropert
 	{
 		return propertySource.defaultIsPropertySet(getId());
 	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.ui.property.ObjectTypePropertyController#isJSONNull(java.lang.Object)
+	 */
+	@Override
+	protected boolean isJSONNull(Object value)
+	{
+		return ServoyJSONObject.isJavascriptNullOrUndefined(value);
+	}
+
 
 }

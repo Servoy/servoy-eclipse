@@ -57,7 +57,7 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	    			$scope.elements = $toolbar.getButtons(TOOLBAR_CATEGORIES.ELEMENTS);
 	    			$scope.form = $toolbar.getButtons(TOOLBAR_CATEGORIES.FORM);
 			    	$scope.display = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISPLAY);
-			    	$scope.show_data = $toolbar.getButtons(TOOLBAR_CATEGORIES.SHOW_DATA);
+//			    	$scope.show_data = $toolbar.getButtons(TOOLBAR_CATEGORIES.SHOW_DATA);
 	    			if(editor.isAbsoluteFormLayout()) {
 			    	  $scope.ordering = $toolbar.getButtons(TOOLBAR_CATEGORIES.ORDERING);
 			    	  $scope.alignment = $toolbar.getButtons(TOOLBAR_CATEGORIES.ALIGNMENT);
@@ -108,7 +108,7 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	DISPLAY: "display",
 	EDITOR: "editor",
 	STICKY: "sticky",
-	SHOW_DATA: "show_data",
+//	SHOW_DATA: "show_data",
 	DESIGN_MODE: "design_mode",
 	STANDARD_ACTIONS: "standard_actions"
 })

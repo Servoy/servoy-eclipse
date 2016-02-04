@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -74,16 +74,16 @@ public class WebComponentPropertySource extends PDPropertySource
 		{
 			throw new IllegalArgumentException("Expected persist to be IWebComponent but it is not: " + persistContext.getPersist());
 		}
-		if (!(propertyDescription instanceof WebComponentSpecification))
+		if (!(propertyDescription instanceof WebObjectSpecification))
 		{
 			throw new IllegalArgumentException("Expected pd to be WebComponentSpecification but it is not: " + propertyDescription);
 		}
 	}
 
 	@Override
-	protected WebComponentSpecification getPropertyDescription()
+	protected WebObjectSpecification getPropertyDescription()
 	{
-		return (WebComponentSpecification)super.getPropertyDescription();
+		return (WebObjectSpecification)super.getPropertyDescription();
 	}
 
 	@Override
@@ -115,9 +115,9 @@ public class WebComponentPropertySource extends PDPropertySource
 			}
 		}
 
-		if (propertyDescription instanceof WebComponentSpecification)
+		if (propertyDescription instanceof WebObjectSpecification)
 		{
-			for (PropertyDescription desc : ((WebComponentSpecification)propertyDescription).getHandlers().values())
+			for (PropertyDescription desc : ((WebObjectSpecification)propertyDescription).getHandlers().values())
 			{
 				props.add(new WebComponentPropertyHandler(desc));
 			}

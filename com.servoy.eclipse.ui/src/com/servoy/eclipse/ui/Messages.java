@@ -53,6 +53,7 @@ public class Messages extends NLS
 	public static String SolutionExplorerView_synchronizeTables;
 
 	public static String LabelDefault;
+	public static String LabelDefault_arg;
 	public static String LabelIgnore;
 	public static String LabelSeparate;
 	public static String LabelEmpty;

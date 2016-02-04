@@ -24,12 +24,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.rfb.property.types.DesignerFormPropertyType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Bean;
@@ -88,12 +87,12 @@ public class OpenContainedFormHandler implements IServerService
 							else if (persist instanceof WebCustomType)
 							{
 								WebCustomType ghost = (WebCustomType)persist;
-								JSONObject beanXML = ghost.getJson();
+								JSONObject beanXML = ghost.getFlattenedJson();
 
 
 								Collection<PropertyDescription> forms = null;
 								forms = ((ICustomType< ? >)ghost.getPropertyDescription().getType()).getCustomJSONTypeDefinition().getProperties(
-									DesignerFormPropertyType.DESIGNER_INSTANCE); // TODO what if form typed property is nested some more in the ghost? do we want to open that as well?
+									FormPropertyType.INSTANCE); // TODO what if form typed property is nested some more in the ghost? do we want to open that as well?
 
 								for (PropertyDescription pd : Utils.iterate(forms))
 								{
@@ -108,7 +107,7 @@ public class OpenContainedFormHandler implements IServerService
 							else if (persist instanceof Bean)
 							{
 								Bean bean = (Bean)persist;
-								WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+								WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
 									((Bean)persist).getBeanClassName());
 								if (spec != null)
 								{

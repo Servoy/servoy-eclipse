@@ -65,10 +65,10 @@ public class SwtWebsocket
 {
 	private WebsocketEndpoint websocketEndpoint;
 
-	public SwtWebsocket(Browser browser, String uriString, int id) throws Exception
+	public SwtWebsocket(Browser browser, String uriString, int id, String editorId, String contentId) throws Exception
 	{
 		Session newSession = new SwtWebSocketSession(browser, uriString, id);
-		if (!createAndStartEditorEndpoint(uriString, newSession) && !createAndStartEditorContentEndpoint(uriString, newSession))
+		if (!createAndStartEditorEndpoint(uriString, newSession, editorId) && !createAndStartEditorContentEndpoint(uriString, newSession, contentId))
 		{
 			throw new IllegalArgumentException("Could not create websocket endpoint for uri '" + uriString + "'");
 		}
@@ -84,7 +84,7 @@ public class SwtWebsocket
 		});
 	}
 
-	private boolean createAndStartEditorEndpoint(String uriString, Session newSession) throws Exception
+	private boolean createAndStartEditorEndpoint(String uriString, Session newSession, String editorId) throws Exception
 	{
 		// expecting ws://localhost:8080/rfb/angular/websocket/nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn
 		String[] args = getEndpointArgs(EditorEndpoint.class, uriString);
@@ -95,11 +95,11 @@ public class SwtWebsocket
 		}
 
 		websocketEndpoint = new EditorEndpoint();
-		((EditorEndpoint)websocketEndpoint).start(newSession, args[0].split("\\?")[0]);
+		((EditorEndpoint)websocketEndpoint).start(newSession, editorId);
 		return true;
 	}
 
-	private boolean createAndStartEditorContentEndpoint(String uriString, Session newSession) throws Exception
+	private boolean createAndStartEditorContentEndpoint(String uriString, Session newSession, String contentId) throws Exception
 	{
 		// expecting ws://localhost:8080/rfb/angular/content/websocket/{sessionid}/{windowName}/{windowid}?solution=tst&id=%23editor&f=orders&s=tst&replacewebsocket=true
 		String[] args = getEndpointArgs(EditorContentEndpoint.class, uriString);
@@ -110,7 +110,7 @@ public class SwtWebsocket
 		}
 
 		websocketEndpoint = new EditorContentEndpoint();
-		((EditorContentEndpoint)websocketEndpoint).start(newSession, args[0], args[1], args[2].split("\\?")[0]);
+		((EditorContentEndpoint)websocketEndpoint).start(newSession, contentId, args[1], args[2].split("\\?")[0]);
 		return true;
 	}
 
@@ -138,7 +138,7 @@ public class SwtWebsocket
 		websocketEndpoint.onClose(new CloseReason(CloseCodes.NORMAL_CLOSURE, "swt websocket close"));
 	}
 
-	public static void installFakeWebSocket(final Browser browser)
+	public static void installFakeWebSocket(final Browser browser, final String editorId, final String contentId)
 	{
 		// install fake WebSocket in case browser does not support it
 		new BrowserFunction(browser, "SwtWebsocketBrowserFunction", true, new String[0])
@@ -165,7 +165,7 @@ public class SwtWebsocket
 								swtWebsocket.close();
 							}
 
-							swtWebsocket = new SwtWebsocket(browser, ((String)arguments[1]), ((Number)arguments[2]).intValue());
+							swtWebsocket = new SwtWebsocket(browser, ((String)arguments[1]), ((Number)arguments[2]).intValue(), editorId, contentId);
 							swtWebsockets.put(arguments[2].toString(), swtWebsocket);
 						}
 

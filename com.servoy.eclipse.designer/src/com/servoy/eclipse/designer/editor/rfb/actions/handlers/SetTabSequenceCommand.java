@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.Display;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.types.TypesRegistry;
 import org.sablo.websocket.IServerService;
 
@@ -92,7 +92,7 @@ public class SetTabSequenceCommand extends AbstractEditorActionDelegateHandler i
 			{
 				if (persist.getPersist() instanceof Bean)
 				{
-					WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+					WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
 						((Bean)persist.getPersist()).getBeanClassName());
 					Collection<PropertyDescription> tabSeqProps = spec.getProperties(TypesRegistry.getType("tabseq"));
 					for (PropertyDescription pd : tabSeqProps)

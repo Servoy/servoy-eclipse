@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.WeakHashMap;
 
 import org.eclipse.core.runtime.CoreException;
@@ -34,9 +36,9 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentPackageSpecification;
+import org.sablo.specification.NGPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebLayoutSpecification;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -65,6 +67,7 @@ import com.servoy.j2db.persistence.ServerProxy;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.ui.ISupportRowStyling;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -120,100 +123,106 @@ public class ModelUtils
 	 */
 	private final static WeakHashMap<IStyleSheet, Map<Pair<String, String>, String[]>> styleClassesCache = new WeakHashMap<IStyleSheet, Map<Pair<String, String>, String[]>>();
 
-	public static String[] getStyleClasses(FlattenedSolution flattenedSolution, Form form, IPersist persist, String styleClassProperty, String lookupName)
+	/**
+	 * Het styleclasses with default value.
+	 *
+	 * @param flattenedSolution
+	 * @param form
+	 * @param persist
+	 * @param styleClassProperty
+	 * @param lookupName
+	 */
+	public static Pair<String[], String> getStyleClasses(FlattenedSolution flattenedSolution, Form form, IPersist persist, String styleClassProperty,
+		String lookupName)
 	{
 		if (flattenedSolution == null || form == null)
 		{
-			return new String[0];
+			return new Pair<>(new String[0], null);
 		}
+
 		form = flattenedSolution.getFlattenedForm(form);
 		Solution solution = (Solution)form.getRootObject();
-		// if we have solution level css, return spec file and classes from css, ignore form style
+
+		Media media = null;
 		if (solution.getStyleSheetID() > 0)
 		{
-			Media media = flattenedSolution.getMedia(solution.getStyleSheetID());
-			if (media != null)
-			{
-				try
-				{
-					List<Object> cssClasses = new ArrayList<Object>();
-					if (persist != null)
-					{
-						WebComponentSpecification spec = null;
-						if (persist instanceof IFormElement)
-						{
-							spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-								FormTemplateGenerator.getComponentTypeName((IFormElement)persist));
-						}
-						else if (persist instanceof LayoutContainer)
-						{
-							WebComponentPackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
-								((LayoutContainer)persist).getPackageName());
-							if (pkg != null)
-							{
-								spec = pkg.getSpecification(((LayoutContainer)persist).getSpecName());
-							}
-						}
-						if (spec != null)
-						{
-							PropertyDescription pd = spec.getProperty(styleClassProperty);
-							if (pd != null)
-							{
-								List<Object> values = pd.getValues();
-								if (values != null)
-								{
-									cssClasses.addAll(values);
-									Collections.sort(cssClasses, StringComparator.INSTANCE);
-								}
-							}
-						}
-
-					}
-
-					String cssContent = new String(media.getMediaData(), "UTF-8");
-					IStyleSheet ss = new ServoyStyleSheet(cssContent, media.getName());
-					List<Object> cssSelectors = new ArrayList<Object>();
-					Iterator<String> it = ss.getStyleNames().iterator();
-					while (it.hasNext())
-					{
-						String cssSelector = it.next();
-						if (cssSelector.contains("."))
-						{
-							String[] selectors = cssSelector.split("\\.");
-							for (int i = 0; i < selectors.length; i++)
-							{
-								if (i == 0 && selectors.length > 1) continue;
-								String selector = selectors[i];
-								int cutIndex = selector.indexOf(" ");
-								int pseudoClassIndex = selector.indexOf(":");
-								cutIndex = Math.min(Math.max(cutIndex, 0), Math.max(pseudoClassIndex, 0));
-								if (cutIndex > 0)
-								{
-									selector = selector.substring(0, cutIndex);
-								}
-								if (!cssSelectors.contains(selector))
-								{
-									cssSelectors.add(selector);
-								}
-							}
-						}
-					}
-					Collections.sort(cssSelectors, StringComparator.INSTANCE);
-					cssClasses.addAll(cssSelectors);
-					return cssClasses.toArray(new String[0]);
-
-				}
-				catch (UnsupportedEncodingException ex)
-				{
-					ServoyLog.logError(ex);
-				}
-			}
-			return new String[0];
+			media = flattenedSolution.getMedia(solution.getStyleSheetID());
+		}
+		if (media == null && persist instanceof IFormElement && !(persist instanceof WebComponent))
+		{
+			// legacy component, no css at solution level
+			return new Pair<>(getStyleClasses(flattenedSolution.getStyleForForm(form, null), lookupName, form.getStyleClass()), null);
 		}
 
-		Style style = flattenedSolution.getStyleForForm(form, null);
+		// if we have solution level css, return spec file and classes from css, ignore form style
+		Set<String> cssClasses = new TreeSet<>(StringComparator.INSTANCE);
+		String defaultValue = null;
 
-		return getStyleClasses(style, lookupName, form.getStyleClass());
+		WebObjectSpecification spec = null;
+		if (persist instanceof IFormElement)
+		{
+			spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(FormTemplateGenerator.getComponentTypeName((IFormElement)persist));
+		}
+		else if (persist instanceof LayoutContainer)
+		{
+			NGPackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+				((LayoutContainer)persist).getPackageName());
+			if (pkg != null)
+			{
+				spec = pkg.getSpecification(((LayoutContainer)persist).getSpecName());
+			}
+		}
+		if (spec != null)
+		{
+			PropertyDescription pd = spec.getProperty(styleClassProperty);
+			if (pd != null)
+			{
+				List<Object> values = pd.getValues();
+				for (Object val : Utils.iterate(values))
+				{
+					cssClasses.add(val.toString());
+				}
+			}
+			if (pd.hasDefault() && pd.getDefaultValue() != null)
+			{
+				defaultValue = pd.getDefaultValue().toString();
+			}
+		}
+
+		if (media != null)
+		{
+			try
+			{
+				String cssContent = new String(media.getMediaData(), "UTF-8");
+				IStyleSheet ss = new ServoyStyleSheet(cssContent, media.getName());
+				for (String cssSelector : ss.getStyleNames())
+				{
+					if (cssSelector.contains("."))
+					{
+						String[] selectors = cssSelector.split("\\.");
+						for (int i = 0; i < selectors.length; i++)
+						{
+							if (i == 0 && selectors.length > 1) continue;
+							String selector = selectors[i];
+							int cutIndex = selector.indexOf(" ");
+							int pseudoClassIndex = selector.indexOf(":");
+							cutIndex = Math.min(Math.max(cutIndex, 0), Math.max(pseudoClassIndex, 0));
+							if (cutIndex > 0)
+							{
+								selector = selector.substring(0, cutIndex);
+							}
+							cssClasses.add(selector);
+						}
+					}
+				}
+			}
+			catch (UnsupportedEncodingException ex)
+			{
+				ServoyLog.logError(ex);
+			}
+		}
+
+		return new Pair<>(cssClasses.toArray(new String[0]), defaultValue);
 	}
 
 	public static String[] getStyleClasses(Style style, String lookupName, String formStyleClass)
@@ -297,15 +306,16 @@ public class ModelUtils
 			else
 			{
 				styleName = styleParts[styleParts.length - 1];
-				if (styleParts.length > 1 && (styleName.equals(ISupportRowStyling.CLASS_ODD) || styleName.equals(ISupportRowStyling.CLASS_EVEN) ||
-					styleName.equals(ISupportRowStyling.CLASS_SELECTED)))
+				if (styleParts.length > 1 &&
+					(styleName.equals(ISupportRowStyling.CLASS_ODD) || styleName.equals(ISupportRowStyling.CLASS_EVEN) || styleName.equals(ISupportRowStyling.CLASS_SELECTED)))
 				{
 					styleName = styleParts[styleParts.length - 2];
 					stylePartsCount--;
 				}
 
 				if ((matchedFormPrefix && stylePartsCount == 1) // found a match with form prefix, skip root matches
-				|| stylePartsCount > 2 || !styleName.startsWith(lookupName) || (stylePartsCount == 2 && !styleParts[0].equals(formPrefix)))
+					||
+					stylePartsCount > 2 || !styleName.startsWith(lookupName) || (stylePartsCount == 2 && !styleParts[0].equals(formPrefix)))
 				{
 					continue;
 				}
@@ -428,9 +438,8 @@ public class ModelUtils
 	{
 		// probably Servoy developer was started via a workspace exporter app. - it must not initialize core/ui and other related projects
 		// but some extension points these use (for example DLTK extension points) will cause them to get loaded; do not allow this!
-		if (ModelUtils.isUIDisabled()) throw new RuntimeException(
-			bundleName != null ? "'" + bundleName + "' bundle will not be started as Servoy is started without UI. Please ignore this log message."
-				: "Assertion failed. UI is marked as not running.");
+		if (ModelUtils.isUIDisabled()) throw new RuntimeException(bundleName != null ? "'" + bundleName +
+			"' bundle will not be started as Servoy is started without UI. Please ignore this log message." : "Assertion failed. UI is marked as not running.");
 	}
 
 	public static boolean isUIDisabled()

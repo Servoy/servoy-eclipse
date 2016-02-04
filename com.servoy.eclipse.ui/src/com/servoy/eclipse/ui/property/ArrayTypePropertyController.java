@@ -39,14 +39,13 @@ import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.eclipse.ui.property.ConvertingCellEditor.ICellEditorConverter;
 import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConverter;
 import com.servoy.j2db.util.IDelegate;
-import com.servoy.j2db.util.ServoyJSONArray;
 
 /**
  * Property controller to be used in properties view for custom json arrays.
  *
  * @author acostescu
  */
-public abstract class ArrayTypePropertyController extends PropertyController<Object, Object> implements IPropertySetter<Object, ISetterAwarePropertySource>
+public abstract class ArrayTypePropertyController extends PropertyController<Object, Object>implements IPropertySetter<Object, ISetterAwarePropertySource>
 {
 
 	protected ILabelProvider labelProvider = null;
@@ -118,109 +117,113 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		ComposedCellEditor cellEditor = new ComposedCellEditor(new ConvertorObjectCellEditor(getMainObjectTextConverter()), new ComposedCellEditor(
-			new ButtonCellEditor()
+		ButtonCellEditor clearButton = new ButtonCellEditor()
+		{
+
+			@Override
+			protected void updateButtonState(Button buttonWidget, Object value)
 			{
+				buttonWidget.setImage(
+					PlatformUI.getWorkbench().getSharedImages().getImage(isNotSet(value) ? ISharedImages.IMG_OBJ_ADD : ISharedImages.IMG_ETOOL_CLEAR));
+				buttonWidget.setEnabled(true);
+				buttonWidget.setToolTipText(isNotSet(value) ? "Creates an empty property value '[]' to be able to expand node." : "Clears the property value.");
+			}
 
-				@Override
-				protected void updateButtonState(Button buttonWidget, Object value)
-				{
-					buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(
-						isNotSet(value) ? ISharedImages.IMG_OBJ_ADD : ISharedImages.IMG_ETOOL_CLEAR));
-					buttonWidget.setEnabled(true);
-					buttonWidget.setToolTipText(isNotSet(value) ? "Creates an empty property value '[]' to be able to expand node."
-						: "Clears the property value.");
-				}
-
-				@Override
-				protected Object getValueToSetOnClick(Object oldPropertyValue)
-				{
-					if (!isNotSet(oldPropertyValue)) return null;
-					else return createEmptyPropertyValue();
-				}
-
-			}, new ButtonCellEditor()
+			@Override
+			protected Object getValueToSetOnClick(Object oldPropertyValue)
 			{
+				if (!isNotSet(oldPropertyValue)) return null;
+				else return createEmptyPropertyValue();
+			}
 
-				private Control buttonEditorControl; // actually this is the button control
-				private boolean visible = true;
+		};
+		ButtonCellEditor addButton = new ButtonCellEditor()
+		{
 
-				@Override
-				protected Control createControl(Composite parentC)
+			private Control buttonEditorControl; // actually this is the button control
+			private boolean visible = true;
+
+			@Override
+			protected Control createControl(Composite parentC)
+			{
+				Composite buttonVisibilityWrapper = new Composite(parentC, SWT.NONE); // cell editor activate/deactivate force control visibility; but we want to control the button visibility even if the editor is active so we add a wrapper here so that the button's visibility is not directly controlled by the cell editor
+				GridLayout gridLayout = new GridLayout();
+				gridLayout.marginHeight = 0;
+				gridLayout.marginWidth = 0;
+				gridLayout.horizontalSpacing = 0;
+				gridLayout.verticalSpacing = 0;
+				gridLayout.numColumns = 1;
+				buttonVisibilityWrapper.setLayout(gridLayout);
+
+				buttonEditorControl = super.createControl(buttonVisibilityWrapper);
+
+				GridData gd = new GridData();
+				gd.horizontalAlignment = SWT.FILL;
+				gd.grabExcessHorizontalSpace = true;
+				gd.grabExcessVerticalSpace = true;
+				gd.verticalAlignment = SWT.FILL;
+				buttonEditorControl.setLayoutData(gd);
+
+				updateButtonVisibility();
+
+				return buttonVisibilityWrapper;
+			}
+
+			@Override
+			protected void updateButtonState(Button buttonWidget, Object value)
+			{
+				buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ADD));
+				buttonWidget.setToolTipText("Adds a new array item below.");
+				buttonWidget.setEnabled(true);
+
+				if (visible == isNotSet(value))
 				{
-					Composite buttonVisibilityWrapper = new Composite(parentC, SWT.NONE); // cell editor activate/deactivate force control visibility; but we want to control the button visibility even if the editor is active so we add a wrapper here so that the button's visibility is not directly controlled by the cell editor
-					GridLayout gridLayout = new GridLayout();
-					gridLayout.marginHeight = 0;
-					gridLayout.marginWidth = 0;
-					gridLayout.horizontalSpacing = 0;
-					gridLayout.verticalSpacing = 0;
-					gridLayout.numColumns = 1;
-					buttonVisibilityWrapper.setLayout(gridLayout);
-
-					buttonEditorControl = super.createControl(buttonVisibilityWrapper);
-
-					GridData gd = new GridData();
-					gd.horizontalAlignment = SWT.FILL;
-					gd.grabExcessHorizontalSpace = true;
-					gd.grabExcessVerticalSpace = true;
-					gd.verticalAlignment = SWT.FILL;
-					buttonEditorControl.setLayoutData(gd);
-
+					visible = !isNotSet(value); // visibility is not enough - we don't want the space ocuppied at all so we change layout data as well
 					updateButtonVisibility();
-
-					return buttonVisibilityWrapper;
 				}
+			}
 
-				@Override
-				protected void updateButtonState(Button buttonWidget, Object value)
+			private void updateButtonVisibility()
+			{
+				if (buttonEditorControl != null && buttonEditorControl.getLayoutData() != null)
 				{
-					buttonWidget.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ADD));
-					buttonWidget.setToolTipText("Adds a new array item below.");
-					buttonWidget.setEnabled(true);
-
-					if (visible == isNotSet(value))
+					if (visible)
 					{
-						visible = !isNotSet(value); // visibility is not enough - we don't want the space ocuppied at all so we change layout data as well
-						updateButtonVisibility();
+						((GridData)buttonEditorControl.getLayoutData()).exclude = false;
 					}
-				}
-
-				private void updateButtonVisibility()
-				{
-					if (buttonEditorControl != null && buttonEditorControl.getLayoutData() != null)
+					else
 					{
-						if (visible)
-						{
-							((GridData)buttonEditorControl.getLayoutData()).exclude = false;
-						}
-						else
-						{
-							((GridData)buttonEditorControl.getLayoutData()).exclude = true; // layout no longer changes bounds of this control
-							buttonEditorControl.setSize(new Point(0, 0));
-						}
-
-						// relayout as needed to not show blank area instead of button for no reason
-						Composite c = buttonEditorControl.getParent();
-						while (c != null && !ComposedCellEditor.isRootComposedCellEditor(c))
-							c = c.getParent();
-						if (ComposedCellEditor.isRootComposedCellEditor(c)) c.layout(true);
+						((GridData)buttonEditorControl.getLayoutData()).exclude = true; // layout no longer changes bounds of this control
+						buttonEditorControl.setSize(new Point(0, 0));
 					}
-				}
 
-				@Override
-				protected Object getValueToSetOnClick(Object oldPropertyValue)
-				{
-					// insert at position 0 an empty/null value
-					return insertElementAtIndex(0, getNewElementInitialValue(), oldPropertyValue);
+					// relayout as needed to not show blank area instead of button for no reason
+					Composite c = buttonEditorControl.getParent();
+					while (c != null && !ComposedCellEditor.isRootComposedCellEditor(c))
+						c = c.getParent();
+					if (ComposedCellEditor.isRootComposedCellEditor(c)) c.layout(true);
 				}
+			}
 
-			}, false, true, 0), false, false, 0);
+			@Override
+			protected Object getValueToSetOnClick(Object oldPropertyValue)
+			{
+				// insert at position 0 an empty/null value
+				return insertElementAtIndex(0, getNewElementInitialValue(), oldPropertyValue);
+			}
+		};
+
+		ComposedCellEditor cellEditor = new ComposedCellEditor(addButton, clearButton, false, true, 0);
+		if (getMainObjectTextConverter() != null)
+		{
+			cellEditor = new ComposedCellEditor(new ConvertorObjectCellEditor(getMainObjectTextConverter()), cellEditor, false, false, 0);
+		}
 		cellEditor.create(parent);
 
 		return cellEditor;
 	}
 
-	protected abstract class ArrayPropertySource extends ComplexPropertySource<Object> implements ISetterAwarePropertySource
+	protected abstract class ArrayPropertySource extends ComplexPropertySource<Object>implements ISetterAwarePropertySource
 	{
 
 		protected IPropertyDescriptor[] elementPropertyDescriptors;
@@ -236,7 +239,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 
 		protected abstract Object insertNewElementAfterIndex(int idx);
 
-		protected abstract ServoyJSONArray deleteElementAtIndex(final int idx);
+		protected abstract Object deleteElementAtIndex(final int idx);
 
 		protected abstract Object setComplexElementValueImpl(int idx, Object v);
 
