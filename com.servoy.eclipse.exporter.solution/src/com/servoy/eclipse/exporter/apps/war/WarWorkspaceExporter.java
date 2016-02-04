@@ -35,10 +35,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.equinox.app.IApplicationContext;
-import org.sablo.specification.WebComponentPackage;
-import org.sablo.specification.WebComponentPackage.IPackageReader;
+import org.sablo.specification.NGPackage;
+import org.sablo.specification.NGPackage.IPackageReader;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter;
@@ -224,7 +224,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 				Set<String> set = new HashSet<String>();
 				if (configuration.getSelectedComponents().trim().equalsIgnoreCase("all"))
 				{
-					for (WebComponentSpecification spec : provider.getAllWebComponentSpecifications())
+					for (WebObjectSpecification spec : provider.getAllWebComponentSpecifications())
 					{
 						set.add(spec.getName());
 					}
@@ -255,7 +255,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 				WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
 				if (configuration.getSelectedServices().trim().equalsIgnoreCase("all"))
 				{
-					for (WebComponentSpecification spec : NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport())
+					for (WebObjectSpecification spec : NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport())
 					{
 						set.add(spec.getName());
 					}
@@ -529,12 +529,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 						if ((folderResource).getFile("META-INF/MANIFEST.MF").exists())
 						{
 							File f = new File(resource.getRawLocationURI());
-							readers.put(name, new WebComponentPackage.DirPackageReader(f));
+							readers.put(name, new NGPackage.DirPackageReader(f));
 						}
 					}
 					else if (resource instanceof IFile)
 					{
-						readers.put(name, new WebComponentPackage.JarPackageReader(new File(resource.getRawLocationURI())));
+						readers.put(name, new NGPackage.JarPackageReader(new File(resource.getRawLocationURI())));
 					}
 				}
 			}

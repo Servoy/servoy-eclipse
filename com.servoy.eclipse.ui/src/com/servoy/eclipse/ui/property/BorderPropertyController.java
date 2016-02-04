@@ -49,6 +49,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.editors.FontCellEditor;
 import com.servoy.eclipse.ui.editors.TagsAndI18NTextCellEditor;
+import com.servoy.eclipse.ui.labelproviders.DefaultValueDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FontLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.TextCutoffLabelProvider;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
@@ -128,7 +129,9 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 								defaultBorderValues.put(BorderType.Etched, new EtchedBorder(EtchedBorder.RAISED));
 								defaultBorderValues.put(BorderType.Bevel, new BevelBorder(BevelBorder.RAISED));
 								defaultBorderValues.put(BorderType.Line, new LineBorder(Color.BLACK));
-								defaultBorderValues.put(BorderType.Title, new TitledBorder("Title"));
+								TitledBorder titledBorder = new TitledBorder("Title");
+								titledBorder.setTitleJustification(TitledBorder.DEFAULT_JUSTIFICATION);
+								defaultBorderValues.put(BorderType.Title, titledBorder);
 								defaultBorderValues.put(BorderType.Matte, new MatteBorder(0, 0, 0, 0, Color.BLACK));
 								defaultBorderValues.put(BorderType.SpecialMatte, new SpecialMatteBorder(0, 0, 0, 0, Color.BLACK, Color.BLACK, Color.BLACK,
 									Color.BLACK));
@@ -1432,7 +1435,7 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			}
 			if (THICKNESS.equals(id))
 			{
-				return new Integer(border.getThickness());
+				return Integer.valueOf(border.getThickness());
 			}
 			return null;
 		}
@@ -1486,18 +1489,16 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			JUSTIFICATION,
 			"justification",
 			new ComboboxPropertyModel<Integer>(
-				new Integer[] { new Integer(TitledBorder.DEFAULT_JUSTIFICATION), new Integer(TitledBorder.LEFT), new Integer(TitledBorder.CENTER), new Integer(
-					TitledBorder.RIGHT), new Integer(TitledBorder.LEADING), new Integer(TitledBorder.TRAILING) },
-				new String[] { Messages.LabelDefault, Messages.AlignLeft, Messages.AlignCenter, Messages.AlignRight, Messages.JustifyLeading, Messages.JustifyTrailing }),
+				new Integer[] { Integer.valueOf(TitledBorder.LEFT), Integer.valueOf(TitledBorder.CENTER), Integer.valueOf(TitledBorder.RIGHT), Integer.valueOf(TitledBorder.LEADING), Integer.valueOf(TitledBorder.TRAILING) },
+				new String[] { Messages.AlignLeft, Messages.AlignCenter, Messages.AlignRight, Messages.JustifyLeading, Messages.JustifyTrailing }).addDefaultValue(Integer.valueOf(TitledBorder.DEFAULT_JUSTIFICATION)),
 			Messages.LabelUnresolved);
 
 		private static final IPropertyController<Integer, Integer> POSITION_CONTROLLER = new ComboboxPropertyController<Integer>(
 			POSITION,
 			"position",
 			new ComboboxPropertyModel<Integer>(
-				new Integer[] { new Integer(TitledBorder.DEFAULT_POSITION), new Integer(TitledBorder.ABOVE_TOP), new Integer(TitledBorder.TOP), new Integer(
-					TitledBorder.BELOW_TOP), new Integer(TitledBorder.ABOVE_BOTTOM), new Integer(TitledBorder.BOTTOM), new Integer(TitledBorder.BELOW_BOTTOM) },
-				new String[] { Messages.LabelDefault, Messages.PostionABOVETOP, Messages.PostionTOP, Messages.PostionBELOWTOP, Messages.PostionABOVEBOTTOM, Messages.PostionBOTTOM, Messages.PostionBELOWBOTTOM }),
+				new Integer[] { Integer.valueOf(TitledBorder.ABOVE_TOP), Integer.valueOf(TitledBorder.TOP), Integer.valueOf(TitledBorder.BELOW_TOP), Integer.valueOf(TitledBorder.ABOVE_BOTTOM), Integer.valueOf(TitledBorder.BOTTOM), Integer.valueOf(TitledBorder.BELOW_BOTTOM) },
+				new String[] { Messages.PostionABOVETOP, Messages.PostionTOP, Messages.PostionBELOWTOP, Messages.PostionABOVEBOTTOM, Messages.PostionBOTTOM, Messages.PostionBELOWBOTTOM }).addDefaultValue(Integer.valueOf(TitledBorder.DEFAULT_POSITION)),
 			Messages.LabelUnresolved);
 
 		private final PersistContext persistContext;
@@ -1521,24 +1522,25 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 					final Form form = Utils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext())
 						? (Form)persistContext.getContext().getAncestor(IRepository.FORMS) : (Form)persistContext.getPersist().getAncestor(IRepository.FORMS);
 					final Table table = form == null ? null : form.getTable();
+					final ILabelProvider titleLabelProvider = new DefaultValueDelegateLabelProvider(TextCutoffLabelProvider.DEFAULT);
 					propertyDescriptors = new IPropertyDescriptor[] { new PropertyDescriptor(TITLE, "title text")
 					{
 						@Override
 						public CellEditor createPropertyEditor(Composite parent)
 						{
-							return new TagsAndI18NTextCellEditor(parent, persistContext, flattenedEditingSolution, TextCutoffLabelProvider.DEFAULT, table,
+							return new TagsAndI18NTextCellEditor(parent, persistContext, flattenedEditingSolution, titleLabelProvider, table,
 								"Edit text property", Activator.getDefault().getDesignClient(), false);
 						}
 
 						@Override
 						public ILabelProvider getLabelProvider()
 						{
-							return TextCutoffLabelProvider.DEFAULT;
+							return titleLabelProvider;
 						}
 					},
 
 					JUSTIFICATION_CONTROLLER, POSITION_CONTROLLER, new PropertyController<java.awt.Font, String>(FONT, "font", PropertyFontConverter.INSTANCE,
-						FontLabelProvider.INSTANCE, new ICellEditorFactory()
+						new DefaultValueDelegateLabelProvider(FontLabelProvider.INSTANCE), new ICellEditorFactory()
 						{
 							public CellEditor createPropertyEditor(Composite parent)
 							{
@@ -1567,11 +1569,11 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			}
 			if (JUSTIFICATION.equals(id))
 			{
-				return JUSTIFICATION_CONTROLLER.getConverter().convertProperty(id, new Integer(border.getTitleJustification()));
+				return JUSTIFICATION_CONTROLLER.getConverter().convertProperty(id, Integer.valueOf(border.getTitleJustification()));
 			}
 			if (POSITION.equals(id))
 			{
-				return POSITION_CONTROLLER.getConverter().convertProperty(id, new Integer(border.getTitlePosition()));
+				return POSITION_CONTROLLER.getConverter().convertProperty(id, Integer.valueOf(border.getTitlePosition()));
 			}
 			if (FONT.equals(id))
 			{
@@ -1600,13 +1602,15 @@ public class BorderPropertyController extends PropertyController<Border, Object>
 			}
 			if (JUSTIFICATION.equals(id))
 			{
-				return new TitledBorder(null, border.getTitle(), JUSTIFICATION_CONTROLLER.getConverter().convertValue(id, (Integer)v).intValue(),
-					border.getTitlePosition(), border.getTitleFont(), border.getTitleColor());
+				Integer titleJustification = JUSTIFICATION_CONTROLLER.getConverter().convertValue(id, (Integer)v);
+				return new TitledBorder(null, border.getTitle(), titleJustification == null ? TitledBorder.DEFAULT_JUSTIFICATION
+					: titleJustification.intValue(), border.getTitlePosition(), border.getTitleFont(), border.getTitleColor());
 			}
 			if (POSITION.equals(id))
 			{
-				return new TitledBorder(null, border.getTitle(), border.getTitleJustification(),
-					POSITION_CONTROLLER.getConverter().convertValue(id, (Integer)v).intValue(), border.getTitleFont(), border.getTitleColor());
+				Integer titlePosition = POSITION_CONTROLLER.getConverter().convertValue(id, (Integer)v);
+				return new TitledBorder(null, border.getTitle(), border.getTitleJustification(), titlePosition == null ? TitledBorder.DEFAULT_POSITION
+					: titlePosition.intValue(), border.getTitleFont(), border.getTitleColor());
 			}
 			if (FONT.equals(id))
 			{

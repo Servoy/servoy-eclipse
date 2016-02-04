@@ -19,7 +19,7 @@ package com.servoy.eclipse.designer.editor.rfb;
 
 import java.util.Locale;
 
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.websocket.BaseWebsocketSession;
 import org.sablo.websocket.IClientService;
 import org.sablo.websocket.impl.ClientService;
@@ -35,7 +35,7 @@ public class EditorWebsocketSession extends BaseWebsocketSession
 	public static final String EDITOR_ENDPOINT = "editor";
 	public static final String EDITOR_SERVICE = "$editorService";
 
-	private static final WebComponentSpecification EDITOR_SERVICE_SPECIFICATION = new WebComponentSpecification(EDITOR_SERVICE, "", EDITOR_SERVICE, null, null,
+	private static final WebObjectSpecification EDITOR_SERVICE_SPECIFICATION = new WebObjectSpecification(EDITOR_SERVICE, "", EDITOR_SERVICE, null, null,
 		null, "", null);
 
 	public EditorWebsocketSession(String uuid)

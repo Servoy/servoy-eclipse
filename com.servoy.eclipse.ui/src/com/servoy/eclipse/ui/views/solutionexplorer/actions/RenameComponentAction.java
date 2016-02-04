@@ -37,7 +37,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.json.JSONObject;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -79,7 +79,7 @@ public class RenameComponentAction extends Action
 		}
 		componentName = componentName.trim();
 
-		WebComponentSpecification spec = (WebComponentSpecification)node.getRealObject();
+		WebObjectSpecification spec = (WebObjectSpecification)node.getRealObject();
 		IContainer[] dirResource;
 		IResource resource = null;
 		try

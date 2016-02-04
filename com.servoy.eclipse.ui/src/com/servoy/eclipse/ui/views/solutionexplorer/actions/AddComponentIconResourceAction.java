@@ -47,7 +47,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -124,7 +124,7 @@ public class AddComponentIconResourceAction extends Action implements ISelection
 				return;
 			}
 
-			WebComponentSpecification spec = (WebComponentSpecification)selection.getRealObject();
+			WebObjectSpecification spec = (WebObjectSpecification)selection.getRealObject();
 			InputStream contents = null;
 			BufferedInputStream bufferedInputStream = null;
 			ByteArrayInputStream source = null;

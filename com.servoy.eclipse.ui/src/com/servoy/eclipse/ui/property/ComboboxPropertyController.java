@@ -47,7 +47,6 @@ import com.servoy.j2db.util.IDelegate;
  * @author rgansevles
  */
 
-
 public class ComboboxPropertyController<T> extends PropertyController<T, Integer> implements IMergeablePropertyDescriptor
 {
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
@@ -191,13 +190,14 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 			Object[] real = model.getRealValues();
 			for (int i = 0; i < real.length; i++)
 			{
-				if (real[i] == value || real[i] != null && real[i].equals(value))
+				if (real[i] == value || real[i] != null && i != model.getDefaultValueIndex() && real[i].equals(value))
 				{
 					return Integer.valueOf(i);
 				}
 			}
 
-			return Integer.valueOf(-1);
+			return Integer.valueOf(value == null || (model.getDefaultValueIndex() != -1 && value.equals(real[model.getDefaultValueIndex()]))
+				? model.getDefaultValueIndex() : -1);
 		}
 
 		public T convertValue(Object id, Integer value)

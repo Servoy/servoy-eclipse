@@ -23,7 +23,7 @@ import java.util.Arrays;
 import org.eclipse.gef.commands.Command;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.ICustomType;
 
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -64,7 +64,7 @@ public class ReorderCustomTypesCommand extends Command
 	{
 		int index = inPlaceOf.getIndex();
 		String propertyName = inPlaceOf.getJsonKey();
-		WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getTypeName());
+		WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getTypeName());
 		boolean isArray = spec.isArrayReturnType(propertyName);
 		PropertyDescription targetPD = spec.getProperty(propertyName);
 		IChildWebObject[] arrayValue = null;

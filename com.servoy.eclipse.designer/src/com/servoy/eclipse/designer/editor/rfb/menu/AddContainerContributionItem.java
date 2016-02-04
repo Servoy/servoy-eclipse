@@ -14,9 +14,9 @@ import org.eclipse.ui.menus.CommandContributionItemParameter;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentPackageSpecification;
+import org.sablo.specification.NGPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.websocket.utils.PropertyUtils;
 
@@ -54,7 +54,7 @@ public class AddContainerContributionItem extends CompoundContributionItem
 		if (persistContext != null) persist = persistContext.getPersist();
 		if (persist instanceof LayoutContainer)
 		{
-			WebComponentPackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+			NGPackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
 				((LayoutContainer)persist).getPackageName());
 			if (specifications != null)
 			{
@@ -99,8 +99,8 @@ public class AddContainerContributionItem extends CompoundContributionItem
 		}
 		else if (persist instanceof Form)
 		{
-			Collection<WebComponentPackageSpecification<WebLayoutSpecification>> values = WebComponentSpecProvider.getInstance().getLayoutSpecifications().values();
-			for (WebComponentPackageSpecification<WebLayoutSpecification> specifications : values)
+			Collection<NGPackageSpecification<WebLayoutSpecification>> values = WebComponentSpecProvider.getInstance().getLayoutSpecifications().values();
+			for (NGPackageSpecification<WebLayoutSpecification> specifications : values)
 			{
 				for (WebLayoutSpecification specification : specifications.getSpecifications().values())
 				{
@@ -114,7 +114,7 @@ public class AddContainerContributionItem extends CompoundContributionItem
 		}
 		else if (persist instanceof WebComponent)
 		{
-			WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)persist).getTypeName());
+			WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)persist).getTypeName());
 			Map<String, PropertyDescription> properties = spec.getProperties();
 			for (PropertyDescription propertyDescription : properties.values())
 			{

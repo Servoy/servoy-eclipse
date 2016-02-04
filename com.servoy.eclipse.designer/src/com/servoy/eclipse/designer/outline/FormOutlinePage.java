@@ -47,7 +47,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
-import org.sablo.specification.WebComponentPackageSpecification;
+import org.sablo.specification.NGPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 
@@ -64,6 +64,8 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IBasicWebComponent;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
@@ -196,19 +198,35 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 					Object input = (target == null && getViewer() instanceof ContentViewer) ? ((ContentViewer)getViewer()).getInput() : target;
 					if (input instanceof PersistContext)
 					{
+						IPersist inputPersist = ((PersistContext)input).getPersist();
 						ISupportChilds targetLayoutContainer = null;
-						if (((PersistContext)input).getPersist() instanceof WebComponent)
+
+						if (inputPersist instanceof IChildWebObject)
 						{
-							WebComponent wc = (WebComponent)((PersistContext)input).getPersist();
+							IBasicWebComponent customTypeParent = ((IChildWebObject)inputPersist).getParentComponent();
+							for (IPersist p : dragObjects)
+							{
+								if (!(p instanceof IChildWebObject) || ((IChildWebObject)p).getParentComponent() != customTypeParent)
+								{
+									return false;
+								}
+							}
+							dropTargetComponent = inputPersist;
+							dropTarget = customTypeParent;
+							return true;
+						}
+						else if (inputPersist instanceof WebComponent)
+						{
+							WebComponent wc = (WebComponent)inputPersist;
 							if (wc.getParent() instanceof LayoutContainer)
 							{
 								targetLayoutContainer = wc.getParent();
 								dropTargetComponent = wc;
 							}
 						}
-						else if (((PersistContext)input).getPersist() instanceof LayoutContainer)
+						else if (inputPersist instanceof LayoutContainer)
 						{
-							targetLayoutContainer = (LayoutContainer)((PersistContext)input).getPersist();
+							targetLayoutContainer = (LayoutContainer)inputPersist;
 							if (getCurrentLocation() == LOCATION_BEFORE || getCurrentLocation() == LOCATION_AFTER)
 							{
 								dropTargetComponent = targetLayoutContainer;
@@ -238,7 +256,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 
 						if (targetLayoutContainer instanceof LayoutContainer)
 						{
-							WebComponentPackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+							NGPackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
 								((LayoutContainer)targetLayoutContainer).getPackageName());
 							WebLayoutSpecification spec = null;
 							if (pkg != null && (spec = pkg.getSpecification(((LayoutContainer)targetLayoutContainer).getSpecName())) != null)
@@ -250,7 +268,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 									for (IPersist p : dragObjects)
 									{
 										String sourceType = null;
-										if (p instanceof IFormElement)
+										if (p instanceof IFormElement && !(p instanceof IChildWebObject))
 										{
 											sourceType = "component";
 										}
@@ -283,6 +301,11 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				}
 
 			});
+			getTreeViewer().expandToLevel(FormOutlineContentProvider.ELEMENTS, 4);
+		}
+		else
+		{
+			getTreeViewer().expandToLevel(FormOutlineContentProvider.ELEMENTS, 3);
 		}
 
 		// when the outline view is reparented to another shell, you cannot use the form editor context menu here

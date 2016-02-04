@@ -5,7 +5,7 @@ import java.util.Map;
 import org.eclipse.core.expressions.PropertyTester;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.GhostHandler;
@@ -35,7 +35,7 @@ public class IsContainerPropertyTester extends PropertyTester
 			PersistContext persistContext = (PersistContext)receiver;
 			if (persistContext.getPersist() instanceof WebComponent)
 			{
-				WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+				WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
 					((WebComponent)persistContext.getPersist()).getTypeName());
 				Map<String, PropertyDescription> properties = spec.getProperties();
 				for (PropertyDescription propertyDescription : properties.values())

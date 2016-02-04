@@ -1,13 +1,13 @@
 angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorService, $selectionUtils,$timeout) {
-	
+
 	$pluginRegistry.registerPlugin(function(editorScope) {
 		var utils = $selectionUtils.getUtilsForScope(editorScope);
-		
+
 		var highlightDiv = angular.element(document.querySelector('#highlight'))[0];
 		var event = null;
 		var enabled = true;
 		var execute = null;
-		
+
 		function shouldDrawIfDragging(dropTarget) {
 			if (utils.getDraggingFromPallete() != null) {
 				if (!editorScope.isAbsoluteFormLayout())
@@ -16,16 +16,16 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 					return true;
 				}
 				var draggedItem = utils.getDraggingFromPallete();
-				return ((dropTarget.getAttribute("svy-types") != null) && (dropTarget.getAttribute("svy-types").indexOf(draggedItem) > 0)) 
+				return ((dropTarget.getAttribute("svy-types") != null) && (dropTarget.getAttribute("svy-types").indexOf(draggedItem) > 0))
 			}
 			return true;
 		}
-		
+
 		function drawHighlightDiv() {
 			var node = utils.getNode(event);
 			if (node && enabled && shouldDrawIfDragging(node) && !editorScope.highlight) {
 				if (node.parentElement.parentElement !== editorScope.glasspane) {
-					if (node.clientWidth == 0 && node.clientHeight == 0 && node.firstChild) node = node.firstChild; 
+					if (node.clientWidth == 0 && node.clientHeight == 0 && node.firstChild) node = node.firstChild;
 					highlightDiv.style.display = 'block';
 					var rect = node.getBoundingClientRect();
 					var left = rect.left;
@@ -36,12 +36,28 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 					highlightDiv.style.top = top + 'px';
 					highlightDiv.style.height = rect.height + 'px';
 					highlightDiv.style.width = rect.width + 'px';
+					//get to the first dom element that is a servoy component or layoutContainer
+					while (node.parentElement && !node.getAttribute("svy-id")) node = node.parentElement;
+					if (!angular.element(node).hasClass("inheritedElement")) {
+							highlightDiv.style.cursor = "pointer";
+							highlightDiv.style.outline = "";
+					}
+					else {
+							highlightDiv.style.cursor="";
+							highlightDiv.style.outline = "1px solid #FFBBBB";
+					}
 				}
-				else
+				else {
 					highlightDiv.style.display = 'none';
+					highlightDiv.style.cursor="";
+					highlightDiv.style.outline = "";
+				}
 			}
-			else
+			else {
 				highlightDiv.style.display = 'none';
+				highlightDiv.style.cursor="";
+				highlightDiv.style.outline = "";
+			}
 		}
 		
 		function disableHighlightDiv(){

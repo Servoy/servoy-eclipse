@@ -40,7 +40,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IRepositoryConstants;
@@ -334,7 +334,7 @@ public class ElementFactory
 	public static IPersist createWebComponent(Form parent, String name, Point location) throws RepositoryException
 	{
 		WebComponent webComponent = null;
-		WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(name);
+		WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(name);
 		if (spec != null)
 		{
 			String compName = null;

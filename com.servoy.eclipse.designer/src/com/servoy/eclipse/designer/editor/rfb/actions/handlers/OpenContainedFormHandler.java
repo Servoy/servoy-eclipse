@@ -24,7 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.websocket.IServerService;
 
@@ -107,7 +107,7 @@ public class OpenContainedFormHandler implements IServerService
 							else if (persist instanceof Bean)
 							{
 								Bean bean = (Bean)persist;
-								WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+								WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
 									((Bean)persist).getBeanClassName());
 								if (spec != null)
 								{

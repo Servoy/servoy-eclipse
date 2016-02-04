@@ -46,20 +46,46 @@ public class ComboboxPropertyModel<T> implements IComboboxPropertyModel<T>
 
 	public ComboboxPropertyModel<T> addDefaultValue()
 	{
-		return addDefaultValue(null, Messages.LabelDefault);
+		return addDefaultValue(null, null);
 	}
 
 	public ComboboxPropertyModel<T> addDefaultValue(T defaultReal)
 	{
-		return addDefaultValue(defaultReal, defaultReal == null ? Messages.LabelDefault : NLS.bind(Messages.LabelDefault_arg, defaultReal));
+		return addDefaultValue(defaultReal, null);
 	}
 
 	public ComboboxPropertyModel<T> addDefaultValue(T defaultReal, String defaultDisplay)
 	{
+		// get the display value to show for the default real value
+		String displayForDefault = Messages.LabelDefault;
+		if (defaultDisplay != null)
+		{
+			Object disp = getDisplayValue(defaultReal, real, display);
+			if (disp instanceof String && ((String)disp).length() > 0)
+			{
+				displayForDefault = NLS.bind(Messages.LabelDefault_arg, disp);
+			}
+		}
+
 		real = Utils.arrayAdd(real, defaultReal, false);
-		display = Utils.arrayAdd(display, defaultDisplay, false);
+		display = Utils.arrayAdd(display, displayForDefault, false);
 		defaultValueIndex = 0;
 		return this;
+	}
+
+
+	private static <T> Object getDisplayValue(T realValue, T[] real, String[] display)
+	{
+		for (int i = 0; real != null && i < real.length; i++)
+		{
+			if (realValue == real[i] || realValue != null && realValue.equals(real[i]))
+			{
+				return display[i];
+			}
+		}
+
+		// not found
+		return null;
 	}
 
 	@Override

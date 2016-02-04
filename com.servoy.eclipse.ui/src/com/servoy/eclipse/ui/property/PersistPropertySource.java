@@ -105,6 +105,7 @@ import com.servoy.eclipse.ui.editors.TagsAndI18NTextCellEditor;
 import com.servoy.eclipse.ui.labelproviders.ArrayLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
+import com.servoy.eclipse.ui.labelproviders.DefaultValueDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FontLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormLabelProvider;
@@ -145,7 +146,6 @@ import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IBasicWebComponent;
-import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -183,6 +183,7 @@ import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.scripting.FunctionDefinition;
 import com.servoy.j2db.server.ngclient.property.ComponentTypeConfig;
 import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
@@ -314,18 +315,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		public String convertValue(Object id, String value)
 		{
 			return "".equals(value) ? null : value;
-		}
-	};
-	public static final IPropertyConverter<String, String> DEFAULT_STRING_CONVERTER = new IPropertyConverter<String, String>()
-	{
-		public String convertProperty(Object id, String value)
-		{
-			return value == null ? Messages.LabelDefault : value;
-		}
-
-		public String convertValue(Object id, String value)
-		{
-			return Messages.LabelDefault.equals(value) ? null : value;
 		}
 	};
 
@@ -1228,9 +1217,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 		if (propertyDescription != null && IContentSpecConstants.PROPERTY_NG_READONLY_MODE.equals(propertyDescription.getName()))
 		{
-			ComboboxPropertyModel<Boolean> model = new ComboboxPropertyModel<Boolean>(new Boolean[] { null, Boolean.TRUE, Boolean.FALSE },
-				new String[] { Messages.LabelDefault, "true", "false" });
-			return new ComboboxPropertyController<Boolean>(id, displayName, model, Messages.LabelUnresolved);
+			return new ComboboxPropertyController<Boolean>(id, displayName,
+				new ComboboxPropertyModel<Boolean>(new Boolean[] { Boolean.TRUE, Boolean.FALSE }, new String[] { "true", "false" }).addDefaultValue(),
+				Messages.LabelUnresolved);
 		}
 
 		IPropertyDescriptor otherPropertyDescriptor = createOtherPropertyDescriptorIfAppropriate(id, displayName, propertyDescription, form, persistContext,
@@ -1634,7 +1623,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			// ng client, style at solutionlevel
 			String tooltip = "Double click '{}' to add it to styleClass. StyleClass editor is working in NGClient mode (because solution css is set).";
-			return new StringListWithContentProposalsPropertyController(id, displayName, styleClasses, tooltip,
+			return new StringListWithContentProposalsPropertyController(id, displayName, styleClasses, defaultValue, tooltip,
 				new SolutionStyleClassValueEditor((Solution)persist.getRootObject()));
 		}
 
@@ -2076,7 +2065,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 				boolean hasInheritedValue = (value == null && persistContext.getPersist() instanceof ISupportExtendsID &&
 					beanPropertyDescriptor.valueObject == persistContext.getPersist() &&
-					PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist()) != null && ((AbstractBase)PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist())).getProperty((String)id) != null);
+					PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist()) != null &&
+					((AbstractBase)PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist())).getProperty((String)id) != null);
 				if (beanPropertyDescriptor.valueObject instanceof AbstractBase && !(beanPropertyDescriptor.valueObject instanceof LayoutContainer) &&
 					value == null && !hasInheritedValue)
 				{
@@ -2604,7 +2594,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			ComboboxPropertyModel<Object> model = new ComboboxPropertyModel<Object>(config.getReal(), config.getDisplay());
 			if (config.hasDefault())
 			{
-				model.addDefaultValue(config.getRealDefault(), config.getDisplayDefault() == null ? Messages.LabelDefault : config.getDisplayDefault());
+				model.addDefaultValue(config.getRealDefault(), config.getDisplayDefault());
 			}
 			return new ComboboxPropertyController<Object>(id, displayName, model, Messages.LabelUnresolved);
 		}
@@ -2634,7 +2624,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				return new PropertyController<String, String>(id, displayName,
 					new ChainedPropertyConverter<String, java.awt.Font, String>(
 						new InversedPropertyConverter<String, java.awt.Font>(PropertyFontConverter.INSTANCE), PropertyFontConverter.INSTANCE),
-					FontLabelProvider.INSTANCE, new ICellEditorFactory()
+					new DefaultValueDelegateLabelProvider(FontLabelProvider.INSTANCE), new ICellEditorFactory()
 					{
 						public CellEditor createPropertyEditor(Composite parent)
 						{
@@ -2657,9 +2647,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 		// see if the property (dataprovider/tagstring) needs to point to a different foundset (not the form's foundset)
 		IPersist persistContainingFoundsetProperty = persistContext.getPersist();
-		if (persistContainingFoundsetProperty instanceof IBasicWebObject)
+		if (persistContainingFoundsetProperty instanceof WebCustomType)
 		{
-			persistContainingFoundsetProperty = ((IBasicWebObject)persistContainingFoundsetProperty).getParentComponent();
+			persistContainingFoundsetProperty = ((WebCustomType)persistContainingFoundsetProperty).getParentComponent();
 		}
 		String forFoundsetName = differentFoundsetDueToProperty(propertyDescription);
 		if (forFoundsetName == null)
@@ -2854,7 +2844,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			return new MediaIDPropertyController(id, displayName, persistContext, flattenedEditingSolution, true, config);
 		}
 
-
 		if (propertyType == TagStringPropertyType.INSTANCE)
 		{
 			Table table = null;
@@ -2869,9 +2858,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					ServoyLog.logInfo("Table form not accessible: " + ex.getMessage());
 				}
 			}
-			final Table finalTable = table;
 
-			return tagStringController(persistContext, id, displayName, propertyDescription, flattenedEditingSolution, finalTable);
+			return tagStringController(persistContext, id, displayName, propertyDescription, flattenedEditingSolution, table);
 		}
 
 		ITypePropertyDescriptorFactory sabloOrNgTypeFactory = UITypesRegistry.getTypePropertyDescriptorFactory(propertyDescription.getType());
@@ -2943,7 +2931,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			};
 		}
 
-
 		return null;
 	}
 
@@ -2968,37 +2955,37 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		String forFoundsetName = null;
 		if (propertyDescription.getType() instanceof FoundsetLinkedPropertyType< ? , ? >)
 		{
-			FoundsetLinkedPropertyType< ? , ? > foundsetLinkedPropertyType = (FoundsetLinkedPropertyType< ? , ? >)propertyDescription.getType();
 			forFoundsetName = ((FoundsetLinkedConfig)propertyDescription.getConfig()).getForFoundsetName();
 		}
 		return forFoundsetName;
 	}
 
-	private static IPropertyDescriptor tagStringController(final PersistContext persistContext, final String id, final String displayName,
-		final PropertyDescription propertyDescription, final FlattenedSolution flattenedEditingSolution, final Table finalTable)
+	private static IPropertyDescriptor tagStringController(final PersistContext persistContext, String id, String displayName,
+		final PropertyDescription propertyDescription, final FlattenedSolution flattenedEditingSolution, final Table table)
 	{
+		final ILabelProvider titleLabelProvider = new DefaultValueDelegateLabelProvider(TextCutoffLabelProvider.DEFAULT, propertyDescription.getDefaultValue());
 		return new PropertyController<String, String>(id, displayName, new IPropertyConverter<String, String>()
 		{
-			public String convertProperty(Object id, String value)
+			public String convertProperty(Object propid, String value)
 			{
 				return value;
 			}
 
-			public String convertValue(Object id, String value)
+			public String convertValue(Object propid, String value)
 			{
-				if ("titleText".equals(id) && value != null && value.length() > 0 && value.trim().length() == 0)
+				if ("titleText".equals(propid) && value != null && value.length() > 0 && value.trim().length() == 0)
 				{
 					return IBasicFormManager.NO_TITLE_TEXT;
 				}
 				return value;
 			}
 
-		}, TextCutoffLabelProvider.DEFAULT, new ICellEditorFactory()
+		}, titleLabelProvider, new ICellEditorFactory()
 		{
 			public CellEditor createPropertyEditor(Composite parent)
 			{
-				return new TagsAndI18NTextCellEditor(parent, persistContext, flattenedEditingSolution, TextCutoffLabelProvider.DEFAULT, finalTable,
-					"Edit text property", Activator.getDefault().getDesignClient(), Boolean.TRUE.equals(propertyDescription.getConfig()));
+				return new TagsAndI18NTextCellEditor(parent, persistContext, flattenedEditingSolution, titleLabelProvider, table, "Edit text property",
+					Activator.getDefault().getDesignClient(), Boolean.TRUE.equals(propertyDescription.getConfig()));
 			}
 		});
 	}

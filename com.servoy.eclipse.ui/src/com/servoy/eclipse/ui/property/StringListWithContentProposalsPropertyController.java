@@ -49,10 +49,10 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
 
-import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.editors.DialogCellEditor;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.editors.TextDialogCellEditor;
+import com.servoy.eclipse.ui.labelproviders.DefaultValueDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 
 /**
@@ -65,23 +65,19 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 {
 	private static final StringTokenizerListConverter STRING_TO_LIST_CONVERTER = new StringTokenizerListConverter(" ", true);
 
-	private static final LabelProvider STRING_TO_LIST_LABEL_PPROVIDER = new LabelProvider()
-	{
-		@Override
-		public String getText(Object list)
-		{
-			return list == null ? Messages.LabelDefault : STRING_TO_LIST_CONVERTER.convertValue(null, (List<String>)list);
-		}
-	};
-
 	private final String[] proposals;
 	private final String tooltip;
+	private final String defaultValue;
 	private final IValueEditor<String> valueEditor;
 
-	public StringListWithContentProposalsPropertyController(String id, String displayName, String[] proposals, String tooltip, IValueEditor<String> valueEditor)
+	private ILabelProvider labelProvider;
+
+	public StringListWithContentProposalsPropertyController(String id, String displayName, String[] proposals, String defaultValue, String tooltip,
+		IValueEditor<String> valueEditor)
 	{
 		super(id, displayName);
 		this.proposals = proposals;
+		this.defaultValue = defaultValue;
 		this.tooltip = tooltip;
 		this.valueEditor = valueEditor;
 	}
@@ -112,7 +108,19 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 	@Override
 	public ILabelProvider getLabelProvider()
 	{
-		return STRING_TO_LIST_LABEL_PPROVIDER;
+		if (labelProvider == null)
+		{
+			labelProvider = new DefaultValueDelegateLabelProvider(new LabelProvider()
+			{
+				@Override
+				public String getText(Object list)
+				{
+					return STRING_TO_LIST_CONVERTER.convertValue(null, (List<String>)list);
+				}
+			}, defaultValue);
+		}
+
+		return labelProvider;
 	}
 
 	@Override

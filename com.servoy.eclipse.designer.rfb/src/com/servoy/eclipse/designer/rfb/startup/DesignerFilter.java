@@ -48,9 +48,9 @@ import org.json.JSONObject;
 import org.json.JSONWriter;
 import org.osgi.service.prefs.BackingStoreException;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentPackageSpecification;
+import org.sablo.specification.NGPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.websocket.utils.PropertyUtils;
 
@@ -182,7 +182,7 @@ public class DesignerFilter implements Filter
 						if ((provider.getLayoutSpecifications().containsKey(key) &&
 							isAccesibleInLayoutType(provider.getLayoutSpecifications().get(key), layoutType)))
 						{
-							WebComponentPackageSpecification<WebLayoutSpecification> pkg = provider.getLayoutSpecifications().get(key);
+							NGPackageSpecification<WebLayoutSpecification> pkg = provider.getLayoutSpecifications().get(key);
 							jsonWriter.object();
 							jsonWriter.key("packageName").value(pkg.getPackageName());
 							jsonWriter.key("packageDisplayname").value(pkg.getPackageDisplayname());
@@ -193,7 +193,7 @@ public class DesignerFilter implements Filter
 						else if (provider.getWebComponentSpecifications().containsKey(key) &&
 							isAccesibleInLayoutType(provider.getWebComponentSpecifications().get(key), layoutType))
 						{
-							WebComponentPackageSpecification<WebComponentSpecification> pkg = provider.getWebComponentSpecifications().get(key);
+							NGPackageSpecification<WebObjectSpecification> pkg = provider.getWebComponentSpecifications().get(key);
 							jsonWriter.object();
 							jsonWriter.key("packageName").value(pkg.getPackageName());
 							jsonWriter.key("packageDisplayname").value(pkg.getPackageDisplayname());
@@ -244,7 +244,7 @@ public class DesignerFilter implements Filter
 						}
 						if (startedArray && provider.getLayoutSpecifications().containsKey(key))
 						{
-							WebComponentPackageSpecification<WebLayoutSpecification> entry = provider.getLayoutSpecifications().get(key);
+							NGPackageSpecification<WebLayoutSpecification> entry = provider.getLayoutSpecifications().get(key);
 
 							for (WebLayoutSpecification spec : entry.getSpecifications().values())
 							{
@@ -301,16 +301,16 @@ public class DesignerFilter implements Filter
 						}
 						if (startedArray && provider.getWebComponentSpecifications().containsKey(key))
 						{
-							WebComponentPackageSpecification<WebComponentSpecification> pkg = provider.getWebComponentSpecifications().get(key);
-							Collection<WebComponentSpecification> webComponentSpecsCollection = pkg.getSpecifications().values();
+							NGPackageSpecification<WebObjectSpecification> pkg = provider.getWebComponentSpecifications().get(key);
+							Collection<WebObjectSpecification> webComponentSpecsCollection = pkg.getSpecifications().values();
 							if ("servoydefault".equals(key))
 							{
-								ArrayList<WebComponentSpecification> webComponentSpecsCollectionEx = new ArrayList<WebComponentSpecification>(
+								ArrayList<WebObjectSpecification> webComponentSpecsCollectionEx = new ArrayList<WebObjectSpecification>(
 									webComponentSpecsCollection);
 								webComponentSpecsCollectionEx.addAll(provider.getWebComponentSpecifications().get("servoycore").getSpecifications().values());
 								webComponentSpecsCollection = webComponentSpecsCollectionEx;
 							}
-							for (WebComponentSpecification spec : webComponentSpecsCollection)
+							for (WebObjectSpecification spec : webComponentSpecsCollection)
 							{
 								if (!IGNORE_COMPONENT_LIST.contains(spec.getName()))
 								{
@@ -378,7 +378,7 @@ public class DesignerFilter implements Filter
 	}
 
 
-	private boolean isAccesibleInLayoutType(WebComponentPackageSpecification< ? > pkg, String layoutType)
+	private boolean isAccesibleInLayoutType(NGPackageSpecification< ? > pkg, String layoutType)
 	{
 		if (pkg.getManifest() != null && pkg.getManifest().getMainAttributes() != null &&
 			Boolean.valueOf(pkg.getManifest().getMainAttributes().getValue(layoutType)).booleanValue()) return true;
@@ -433,7 +433,7 @@ public class DesignerFilter implements Filter
 		return sb.append("</div>");
 	}
 
-	private List<JSONObject> getPalleteTypeNames(WebComponentSpecification spec)
+	private List<JSONObject> getPalleteTypeNames(WebObjectSpecification spec)
 	{
 		List<JSONObject> result = new ArrayList<JSONObject>();
 		Map<String, PropertyDescription> properties = spec.getProperties();

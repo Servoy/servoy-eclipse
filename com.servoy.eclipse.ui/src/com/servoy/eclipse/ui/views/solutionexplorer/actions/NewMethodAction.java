@@ -66,7 +66,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebComponentSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.TypesRegistry;
 
@@ -311,7 +311,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 					{
 						if (persist instanceof WebComponent)
 						{
-							WebComponentSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+							WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
 								((WebComponent)persist).getTypeName());
 							PropertyDescription def = spec.getHandler(methodKey);
 							if (def != null && def.getConfig() instanceof JSONObject)

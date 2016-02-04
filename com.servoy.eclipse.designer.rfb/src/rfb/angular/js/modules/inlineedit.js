@@ -9,7 +9,7 @@ angular.module('inlineedit', ['editor']).run(['$pluginRegistry', '$editorService
 				angular.element("#directEdit").hide();
 				var newValue = angular.element("#directEdit").text();
 				var oldValue = propertyValue;
-				if (oldValue != newValue) {
+				if (oldValue != newValue && !(oldValue === null && newValue === "")) {
 					var value = {};
 					value[property] = newValue;
 					obj[nodeId] = value;
