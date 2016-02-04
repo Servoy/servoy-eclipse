@@ -110,6 +110,8 @@ import org.webbitserver.HttpHandler;
 import org.webbitserver.HttpRequest;
 import org.webbitserver.HttpResponse;
 
+
+import com.servoy.eclipse.core.ngpackages.NGPackageManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
@@ -117,8 +119,11 @@ import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
+import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
+import com.servoy.eclipse.model.ngpackages.INGPackageChangeListener;
 import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
@@ -199,9 +204,7 @@ import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
  */
 public class ServoyModel extends AbstractServoyModel
 {
-	/**
-	 *
-	 */
+
 	public static final String SERVOY_WORKING_SET_ID = "com.servoy.eclipse.core.ServoyWorkingSet";
 
 	private static final String SERVOY_ACTIVE_PROJECT = "SERVOY_ACTIVE_PROJECT";
@@ -670,10 +673,6 @@ public class ServoyModel extends AbstractServoyModel
 				return true;
 			}
 
-			/**
-			 * @param request
-			 * @return
-			 */
 			private MobileExporter getMobileExporter(HttpRequest request)
 			{
 				MobileExporter exporter = new MobileExporter();
@@ -3246,8 +3245,28 @@ public class ServoyModel extends AbstractServoyModel
 	/**
 	 * Initializes the ServoyModel's initial state.
 	 */
+	@Override
 	public void initialize()
 	{
+		super.initialize();
+
+		getNGPackageManager().addNGPackagesChangedListener(new INGPackageChangeListener()
+		{
+
+			@Override
+			public void ngPackageChanged(boolean componentsChanged, boolean servicesChanged)
+			{
+				// nothing to do here yet
+			}
+
+			@Override
+			public void ngPackageProjectListChanged()
+			{
+				updateWorkingSet();
+			}
+
+		});
+
 		getUserManager().setFormAndTableChangeAware();
 		// first auto select active project
 		autoSelectActiveProjectIfNull(false);
@@ -3315,6 +3334,7 @@ public class ServoyModel extends AbstractServoyModel
 		}
 	}
 
+	@Override
 	public void dispose()
 	{
 		// TODO add more cleanup to this method
@@ -3328,6 +3348,8 @@ public class ServoyModel extends AbstractServoyModel
 			((IServerInternal)getServerManager().getServer(server_name, false, false)).removeTableListener(tableListener);
 		}
 		getServerManager().removeServerListener(serverTableListener);
+
+		super.dispose();
 	}
 
 	public void testBuildPathsAndBuild(final ServoyProject project, final boolean buildProject)
@@ -3382,6 +3404,16 @@ public class ServoyModel extends AbstractServoyModel
 		{
 			allModuleProjects.add(activeProject.getProject());
 			if (activeProject.getResourcesProject() != null) allModuleProjects.add(activeProject.getResourcesProject().getProject());
+		}
+
+		BaseNGPackageManager ngPackageManager = getNGPackageManager();
+		if (ngPackageManager != null)
+		{
+			ServoyNGPackageProject[] ngPackageProjects = ngPackageManager.getReferencedNGPackageProjects();
+			for (ServoyNGPackageProject p : ngPackageProjects)
+			{
+				allModuleProjects.add(p.getProject());
+			}
 		}
 
 		return allModuleProjects.toArray(new IProject[allModuleProjects.size()]);
@@ -3717,6 +3749,12 @@ public class ServoyModel extends AbstractServoyModel
 		{
 			activeResourcesProject.removeListener(workingSetChangedListener);
 		}
+	}
+
+	@Override
+	protected BaseNGPackageManager createNGPackageManager()
+	{
+		return new NGPackageManager();
 	}
 
 }

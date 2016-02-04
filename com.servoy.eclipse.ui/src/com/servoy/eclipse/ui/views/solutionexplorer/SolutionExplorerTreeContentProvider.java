@@ -64,18 +64,18 @@ import org.eclipse.ui.PlatformUI;
 import org.mozilla.javascript.JavaMembers;
 import org.sablo.specification.NGPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.core.Activator;
-import com.servoy.eclipse.core.IWebResourceChangedListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.ngpackages.INGPackageChangeListener;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
@@ -147,7 +147,7 @@ import com.servoy.j2db.util.Utils;
  *
  * @author jblok
  */
-public class SolutionExplorerTreeContentProvider implements IStructuredContentProvider, ITreeContentProvider, IWebResourceChangedListener
+public class SolutionExplorerTreeContentProvider implements IStructuredContentProvider, ITreeContentProvider, INGPackageChangeListener
 {
 	private static final String IMG_SOLUTION = "solution.gif";
 	private static final String IMG_SOLUTION_M = "module.gif";
@@ -347,7 +347,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 //		job.setPriority(Job.LONG);
 //		job.schedule();
 
-		com.servoy.eclipse.core.Activator.getDefault().addWebComponentChangedListener(this);
+		ServoyModelFinder.getServoyModel().getNGPackageManager().addNGPackagesChangedListener(this);
 	}
 
 	public void inputChanged(Viewer v, Object oldInput, Object newInput)
@@ -2517,26 +2517,21 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return relations.toArray();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.core.IWebResourceChangedListener#changed()
-	 */
 	@Override
-	public void changed(final Boolean component)
+	public void ngPackageChanged(final boolean componentsChanged, final boolean servicesChanged)
 	{
-		Job job = new Job("Refreshing tree")
+		Job job = new Job("Refreshing tree due to ng component/service package changes...")
 		{
 
 			@Override
 			public IStatus run(IProgressMonitor monitor)
 			{
-				if (!Boolean.FALSE.equals(component))
+				if (componentsChanged)
 				{
 					componentsNode.children = null;
 					view.refreshTreeNodeFromModel(componentsNode);
 				}
-				if (component == null || Boolean.FALSE.equals(component))
+				if (servicesChanged)
 				{
 					servicesNode.children = null;
 					view.refreshTreeNodeFromModel(servicesNode);
@@ -2546,6 +2541,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		};
 		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
 		job.schedule();
+	}
+
+	@Override
+	public void ngPackageProjectListChanged()
+	{
+		// not used for now
 	}
 
 }

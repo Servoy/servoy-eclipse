@@ -17,6 +17,16 @@
       </runtime>
    </extension>
    <extension
+         id="com.servoy.eclipse.core.ServoyNGPackage"
+         name="Servoy NG Package (components/services) Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="com.servoy.eclipse.model.nature.ServoyNGPackageProject">
+         </run>
+      </runtime>
+   </extension>
+   <extension
          id="com.servoy.eclipse.core.ServoyProject"
          name="Servoy Solution Nature"
          point="org.eclipse.core.resources.natures">
@@ -713,5 +723,27 @@
       <attribute
             name="SolutionName">
       </attribute>
-   </extension>   
+   </extension>
+   <extension
+           id="com.servoy.eclipse.debug.SPEC_READ_MARKER"
+           name="Spec or Manifest parse errors"
+           point="org.eclipse.core.resources.markers">
+        <persistent
+              value="false">
+        </persistent>
+        <super
+              type="org.eclipse.core.resources.problemmarker">
+        </super>
+   </extension>
+   <extension
+           id="com.servoy.eclipse.debug.DUPLICATE_COMPONENT_MARKER"
+           name="Duplicate component/service package"
+           point="org.eclipse.core.resources.markers">
+        <persistent
+              value="false">
+        </persistent>
+        <super
+              type="org.eclipse.core.resources.problemmarker">
+        </super>
+   </extension>
 </plugin>

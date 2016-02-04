@@ -39,6 +39,7 @@ import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.AtomicIntegerWithListener;
@@ -76,12 +77,19 @@ public abstract class AbstractServoyModel implements IServoyModel
 
 	private final EclipseMessages messagesManager;
 
+	private BaseNGPackageManager ngPackageManager;
+
 	private final AtomicIntegerWithListener resourceChangesHandlerCounter = new AtomicIntegerWithListener();
 
 	public AbstractServoyModel()
 	{
 		messagesManager = new EclipseMessages();
 		Messages.customMessageLoader = messagesManager;
+	}
+	
+	public void initialize()
+	{
+		ngPackageManager = createNGPackageManager();
 	}
 
 	/*
@@ -411,6 +419,13 @@ public abstract class AbstractServoyModel implements IServoyModel
 		}
 	}
 
+	public BaseNGPackageManager getNGPackageManager()
+	{
+		return ngPackageManager;
+	}
+
+	protected abstract BaseNGPackageManager createNGPackageManager();
+
 	public IActiveSolutionHandler getActiveSolutionHandler()
 	{
 		if (activeSolutionHandler == null)
@@ -600,4 +615,14 @@ public abstract class AbstractServoyModel implements IServoyModel
 		}
 		return null;
 	}
+
+	public void dispose()
+	{
+		if (ngPackageManager != null)
+		{
+			ngPackageManager.dispose();
+			ngPackageManager = null;
+		}
+	}
+
 }

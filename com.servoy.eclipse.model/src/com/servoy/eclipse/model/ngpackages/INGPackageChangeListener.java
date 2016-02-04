@@ -15,13 +15,18 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.core;
+package com.servoy.eclipse.model.ngpackages;
 
 /**
  * @author jcompagner
- *
  */
-public interface IWebResourceChangedListener
+public interface INGPackageChangeListener
 {
-	public void changed(Boolean component);
+	void ngPackageChanged(boolean componentsChanged, boolean servicesChanged);
+
+	/**
+	 * Gets called when the list of referenced ng package projects changes (one is added or removed for example).
+	 */
+	void ngPackageProjectListChanged(); // TODO should this be part of IActiveProjectListener instead?
+
 }

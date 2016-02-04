@@ -19,6 +19,7 @@ package com.servoy.eclipse.model.extensions;
 
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.AtomicIntegerWithListener;
@@ -68,6 +69,8 @@ public interface IServoyModel
 	FlattenedSolution getFlattenedSolution();
 
 	DataModelManager getDataModelManager();
+
+	BaseNGPackageManager getNGPackageManager();
 
 	boolean isSolutionActive(String solutionName);
 

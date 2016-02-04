@@ -25,12 +25,12 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 
-public class ToggleServoyResourcesNatureAction extends ToggleNatureAction
+public class ToggleServoyNGPackageNatureAction extends ToggleNatureAction
 {
 
-	public ToggleServoyResourcesNatureAction()
+	public ToggleServoyNGPackageNatureAction()
 	{
-		super(ServoyResourcesProject.NATURE_ID, null);
+		super(ServoyNGPackageProject.NATURE_ID, null);
 	}
 
 	@Override
@@ -38,11 +38,11 @@ public class ToggleServoyResourcesNatureAction extends ToggleNatureAction
 	{
 		try
 		{
-			if ((project.hasNature(ServoyProject.NATURE_ID) || project.hasNature(ServoyNGPackageProject.NATURE_ID)) &&
-				!project.hasNature(ServoyResourcesProject.NATURE_ID))
+			if ((project.hasNature(ServoyProject.NATURE_ID) || project.hasNature(ServoyResourcesProject.NATURE_ID)) &&
+				!project.hasNature(ServoyNGPackageProject.NATURE_ID))
 			{
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot add resources nature",
-					"Project already has solution or ng package nature; that has to be removed before adding resources nature (it cannot have both natures).");
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot add ng package nature",
+					"Project already has solution or resources project nature; that has to be removed before adding ng package nature (it cannot have both natures).");
 				return;
 			}
 			super.toggleNature(project);

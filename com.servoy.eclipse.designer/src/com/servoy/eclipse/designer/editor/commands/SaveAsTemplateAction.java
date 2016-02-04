@@ -35,6 +35,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -252,7 +253,9 @@ public class SaveAsTemplateAction extends SelectionAction
 			ServoyLog.logError("Cannot save template", e);
 			MessageDialog.openError(getWorkbenchPart().getSite().getShell(), "Cannot save template", "Reason: " + e.getMessage());
 		}
-		com.servoy.eclipse.core.Activator.getDefault().webResourcesChanged(true);
+
+		// TODO - is this ok? manually triggering the ng component package change broadcast just to refresh the palette?
+		ServoyModelFinder.getServoyModel().getNGPackageManager().ngPackagesChanged(true, false);
 	}
 
 	/**

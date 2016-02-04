@@ -22,6 +22,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.model.builder.ServoyBuilder;
+import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -39,10 +40,11 @@ public class ToggleServoySolutionNatureAction extends ToggleNatureAction
 	{
 		try
 		{
-			if (!project.hasNature(ServoyProject.NATURE_ID) && project.hasNature(ServoyResourcesProject.NATURE_ID))
+			if (!project.hasNature(ServoyProject.NATURE_ID) &&
+				(project.hasNature(ServoyResourcesProject.NATURE_ID) || project.hasNature(ServoyNGPackageProject.NATURE_ID)))
 			{
 				MessageDialog.openError(Display.getDefault().getActiveShell(), "Cannot add solution nature",
-					"Project already has resources nature, it has to be removed before adding solution nature (cannot have both natures).");
+					"Project already has resources or ng package nature; that has to be removed before adding solution nature (it cannot have both natures).");
 				return;
 			}
 			super.toggleNature(project);

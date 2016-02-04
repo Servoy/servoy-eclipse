@@ -17,13 +17,13 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
-import com.servoy.eclipse.core.IWebResourceChangedListener;
+import com.servoy.eclipse.model.ngpackages.INGPackageChangeListener;
 
 /**
  * Notify the editor about component changes to reload the palette.
  * @author emera
  */
-public class RfbWebResourceListener implements IWebResourceChangedListener
+public class RfbWebResourceListener implements INGPackageChangeListener
 {
 
 	private EditorWebsocketSession editorWebsocketSession;
@@ -38,9 +38,9 @@ public class RfbWebResourceListener implements IWebResourceChangedListener
 	 * @see com.servoy.eclipse.core.IWebResourceChangedListener#changed()
 	 */
 	@Override
-	public void changed(Boolean component)
+	public void ngPackageChanged(boolean components, boolean services)
 	{
-		if (!Boolean.FALSE.equals(component))
+		if (components)
 		{
 			editorWebsocketSession.getEventDispatcher().addEvent(new Runnable()
 			{
@@ -58,7 +58,14 @@ public class RfbWebResourceListener implements IWebResourceChangedListener
 	 */
 	public void setEditorWebsocketSession(EditorWebsocketSession editorWebsocketSession)
 	{
-		if (this.editorWebsocketSession == null) com.servoy.eclipse.core.Activator.getDefault().addWebComponentChangedListener(this);
+//		if (this.editorWebsocketSession == null) com.servoy.eclipse.core.Activator.getDefault().addWebComponentChangedListener(this);
 		this.editorWebsocketSession = editorWebsocketSession;
 	}
+
+	@Override
+	public void ngPackageProjectListChanged()
+	{
+		// not used right now
+	}
+
 }
