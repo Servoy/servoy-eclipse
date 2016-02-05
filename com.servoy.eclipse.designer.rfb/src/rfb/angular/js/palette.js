@@ -61,7 +61,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 			});
 
 			/**
-			 * enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.topContainer,layoutName)  for new components from the pallete
+			 * enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.topContainer,layoutName)  for new components from the palette
 			 * enterDragMode($event,ghost,null,null,null,ghost,null) for a ghost
 			 */
 			$scope.enterDragMode = function(event,componentName,packageName,tagName,model,type, topContainer,layoutName,propertyName)
@@ -77,7 +77,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 					{
 						var css = { top: ev.pageY, left: ev.pageX};
 						dragClone.css(css);
-						if (angularElement && $scope.isAbsoluteFormLayout()) {
+						if (angularElement) {
 							var x = (window.pageXOffset !== undefined) ? window.pageXOffset : document.documentElement.scrollLeft;
 							var y = (window.pageYOffset !== undefined) ? window.pageYOffset : document.documentElement.scrollTop;
 							var angularCss = { top: ev.pageY - y, left: ev.pageX - x };
@@ -90,27 +90,27 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 						}
 						else $scope.glasspane.style.cursor="";
 
-						if ( canDrop.dropTarget  && !$scope.isAbsoluteFormLayout()  && angularElement) {
-							if ($scope.glasspane.style.cursor=="") {
-
-								if (t) clearTimeout(t);
-								t = setTimeout(function(){
-									if (canDrop.beforeChild) {
-										angularElement.insertBefore(canDrop.beforeChild);
-										angularElement.css('opacity', '1');
-									}
-									else if (angularElement.parent()[0] != canDrop.dropTarget || canDrop.append){
-										$(canDrop.dropTarget).append(angularElement);
-										angularElement.css('opacity', '1');
-									}
-								}, 200);
-
-							}
-							else {
-								angularElement.css('opacity', '0');
-								angularElement.remove();
-							}
-						}
+//						if ( canDrop.dropTarget  && !$scope.isAbsoluteFormLayout() && angularElement) {
+//							if ($scope.glasspane.style.cursor=="") {
+//
+//								if (t) clearTimeout(t);
+//								t = setTimeout(function(){
+//									if (canDrop.beforeChild) {
+//										angularElement.insertBefore(canDrop.beforeChild);
+//										angularElement.css('opacity', '1');
+//									}
+//									else if (angularElement.parent()[0] != canDrop.dropTarget || canDrop.append){
+//										$(canDrop.dropTarget).append(angularElement);
+//										angularElement.css('opacity', '1');
+//									}
+//								}, 200);
+//
+//							}
+//							else {
+//								angularElement.css('opacity', '0');
+//								angularElement.remove();
+//							}
+//						}
 					}
 					else
 					{
@@ -129,16 +129,16 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 						$('body').append(dragClone);
 						if (type=='component' || type == "layout" || type == "template") {
 							if (type=='component') {
-								angularElement = $scope.getEditorContentRootScope().createComponent('<div style="border-style: dotted;"><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-autoapply-disabled=\'true\'/></div>',model);
+								angularElement = $scope.getEditorContentRootScope().createComponent('<div style="border-style: dotted; "><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-autoapply-disabled=\'true\'/></div>',model);
 							}
 							else {
 								// tagname is the full element
 								angularElement = $scope.getEditorContentRootScope().createComponent(tagName);
 							}
-							if ($scope.isAbsoluteFormLayout()) {
+//							if ($scope.isAbsoluteFormLayout()) {
 								var elWidth = model.size ? model.size.width : 100;
 								var elHeight = model.size ? model.size.height : 100;
-								var css = $scope.convertToContentPoint({
+								css = $scope.convertToContentPoint({
 									position: 'absolute',
 									top: event.pageY,
 									left: event.pageX,
@@ -149,29 +149,29 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 									transition: 'opacity .5s ease-in-out 0'
 								});
 								angularElement.css(css)
-							}
-							else {
-								angularElement.css('opacity', '0');
-							}
+//							}
+//							else {
+//								angularElement.css('opacity', '0');
+//							}
 						}
 					}
 				});
-				mouseentercallback = $scope.registerDOMEvent("mouseenter","CONTENTFRAME_OVERLAY", function(ev){
+				mouseentercallback = $scope.registerDOMEvent("mouseenter","CONTENTFRAME_OVERLAY", function(){
 					if (angularElement)
 					{
 						dragClone.css('opacity', '0');
-						if ($scope.isAbsoluteFormLayout()) {
+						// if ($scope.isAbsoluteFormLayout()) {
 							angularElement.css('opacity', '1');
-						}
+						// }
 					}
 				});
-				mouseleavecallback = $scope.registerDOMEvent("mouseenter","PALETTE", function(ev){
+				mouseleavecallback = $scope.registerDOMEvent("mouseenter","PALETTE", function(){
 					if (angularElement)
 					{
 						dragClone.css('opacity', '1');
-						if ($scope.isAbsoluteFormLayout()) {
+						// if ($scope.isAbsoluteFormLayout()) {
 							angularElement.css('opacity', '0');
-						}
+						//}
 					}
 				});
 				mouseupcallback = $scope.registerDOMEvent("mouseup","EDITOR", function(ev){
@@ -238,10 +238,10 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 						}
 					}
 					else {
-						 if (angularElement)
-						 {
-						 	angularElement.remove();
-						 }
+						if (angularElement)
+						{
+							angularElement.remove();
+						}
 					}
 				});
 			}
