@@ -161,7 +161,7 @@ public class JSDeveloperSolutionModel
 
 							ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(state.getSolutionName());
 							solutionCopy = servoyProject.getEditingSolution();
-							MemServer memServer = new MemServer(servoyProject, solutionCopy);
+							MemServer memServer = servoyProject.getMemServer();
 							ITable memTable = memServer.createNewTable(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), table,
 								DataSourceUtils.getDataSourceTableName(objName));
 							memServer.syncTableObjWithDB(memTable, false, true, null);
