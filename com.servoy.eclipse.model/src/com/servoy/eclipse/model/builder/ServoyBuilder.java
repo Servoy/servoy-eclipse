@@ -5405,6 +5405,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					if (o instanceof TableNode)
 					{
 						TableNode node = (TableNode)o;
+						if (node.getDataSource().startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON)) return CONTINUE_TRAVERSAL;
 						IFile f = dm.getDBIFile(node.getDataSource());
 						if (f == null || !f.exists())
 						{
