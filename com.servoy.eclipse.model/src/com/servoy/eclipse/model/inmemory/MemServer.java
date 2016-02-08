@@ -66,6 +66,7 @@ import com.servoy.j2db.util.DatabaseUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ITransactionConnection;
 import com.servoy.j2db.util.ServoyJSONObject;
+import com.servoy.j2db.util.keyword.SQLKeywords;
 
 /**
  * @author gganea
@@ -649,10 +650,28 @@ public class MemServer implements IServerInternal, IServer
 	 * java.lang.String)
 	 */
 	@Override
-	public Table createNewTable(IValidateName nameValidator, ITable selectedTable, String tableName) throws RepositoryException
+	public ITable createNewTable(IValidateName validator, ITable selectedTable, String tableName) throws RepositoryException
 	{
-		// TODO Auto-generated method stub
-		return null;
+		if (tables.containsKey(tableName))
+		{
+			throw new RepositoryException("A table with name " + tableName + " already exists");
+		}
+		if (SQLKeywords.checkIfKeyword(tableName))
+		{
+			throw new RepositoryException("The name " + tableName + " is an reserved sql word");
+		}
+		MemTable table = new MemTable(this, tableName);
+		tables.put(tableName, table);
+
+		Iterator<Column> it = selectedTable.getColumns().iterator();
+		while (it.hasNext())
+		{
+			Column c = it.next();
+			table.createNewColumn(validator, c.getSQLName(), c.getType(), c.getLength(), c.getScale(), c.getAllowNull(),
+				(c.getFlags() & Column.PK_COLUMN) != 0);
+		}
+		updateAllColumnInfo(table);
+		return table;
 	}
 
 	/*

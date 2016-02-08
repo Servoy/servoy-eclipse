@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.core;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +38,8 @@ import org.eclipse.ui.PlatformUI;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.inmemory.MemServer;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IFileAccess;
@@ -44,14 +47,17 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.IDebugClient;
 import com.servoy.j2db.IForm;
+import com.servoy.j2db.dataprocessing.datasource.JSDataSource;
 import com.servoy.j2db.documentation.ServoyDocumented;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
+import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.scripting.solutionmodel.JSForm;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
 
@@ -118,44 +124,66 @@ public class JSDeveloperSolutionModel
 	 * Saves just the give form into the developers workspace.
 	 * This must be a solution created or altered form.
 	 *
-	 * @param form The formname or JSForm object to save.
+	 * @param obj The formname or JSForm object to save.
 	 */
-	public void js_save(Object form)
+	public void js_save(Object obj)
 	{
 		String name = null;
-		if (form instanceof String)
+		if (obj instanceof String)
 		{
-			name = (String)form;
+			name = (String)obj;
 		}
-		else if (form instanceof JSForm)
+		else if (obj instanceof JSForm)
 		{
-			name = ((JSForm)form).getName();
+			name = ((JSForm)obj).getName();
+		}
+		else if (obj instanceof JSDataSource)
+		{
+			name = ((JSDataSource)obj).getDatasource();
 		}
 		if (name != null)
 		{
-			final String formName = name;
+			final String objName = name;
 			WorkspaceJob saveJob = new WorkspaceJob("Save solution data")
 			{
 				@Override
 				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 				{
 					final IFileAccess wfa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
-					Solution solutionCopy = state.getFlattenedSolution().getSolutionCopy();
+					Solution solutionCopy = null;
 					try
 					{
-						Form frm = solutionCopy.getForm(formName);
-						if (frm == null) throw new IllegalArgumentException("JSForm is not a solution model created/altered form");
+						AbstractBase saveObj = null;
+						if (objName.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON))
+						{
+							ITable table = state.getFoundSetManager().getTable(objName);
+							if (table == null) throw new IllegalArgumentException("Datasource is not a solution model created/altered datasource");
 
-						checkParent(frm);
+							ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(state.getSolutionName());
+							solutionCopy = servoyProject.getEditingSolution();
+							MemServer memServer = new MemServer(servoyProject, solutionCopy);
+							ITable memTable = memServer.createNewTable(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), table,
+								DataSourceUtils.getDataSourceTableName(objName));
+							memServer.syncTableObjWithDB(memTable, false, true, null);
+							saveObj = solutionCopy.getOrCreateTableNode(objName);
+						}
+						else
+						{
+							solutionCopy = state.getFlattenedSolution().getSolutionCopy();
+							saveObj = solutionCopy.getForm(objName);
+							if (saveObj == null) throw new IllegalArgumentException("JSForm is not a solution model created/altered form");
+						}
+
+						checkParent(saveObj);
 
 						EclipseRepository eclipseRepository = (EclipseRepository)ServoyModel.getDeveloperRepository();
-						eclipseRepository.loadForeignElementsIDs(loadForeignElementsIDs(frm));
-						SolutionSerializer.writePersist(frm, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
+						eclipseRepository.loadForeignElementsIDs(loadForeignElementsIDs(saveObj));
+						SolutionSerializer.writePersist(saveObj, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
 						eclipseRepository.clearForeignElementsIds();
 
-						frm.setParent(solutionCopy);
+						saveObj.setParent(solutionCopy);
 					}
-					catch (RepositoryException e)
+					catch (RepositoryException | SQLException e)
 					{
 						Debug.error(e);
 					}
