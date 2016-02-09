@@ -114,7 +114,6 @@ public class JSDeveloperSolutionModel
 					if (!state.getFoundSetManager().getInMemDataSourceNames().isEmpty())
 					{
 						ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(state.getSolutionName());
-						solutionCopy = servoyProject.getEditingSolution();
 						MemServer memServer = servoyProject.getMemServer();
 						DataModelManager dataModelManager = ServoyModelFinder.getServoyModel().getDataModelManager();
 						for (String tableName : state.getFoundSetManager().getInMemDataSourceNames())
