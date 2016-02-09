@@ -39,7 +39,9 @@ import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.inmemory.MemServer;
+import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IFileAccess;
@@ -121,12 +123,24 @@ public class JSDeveloperSolutionModel
 	}
 
 	/**
-	 * Saves just the give form into the developers workspace.
-	 * This must be a solution created or altered form.
+	 * Saves just the given form or in memory datasource into the developers workspace.
+	 * This must be a solution created or altered form/in memory datasource.
 	 *
-	 * @param obj The formname or JSForm object to save.
+	 * @param obj The formname, JSForm, datasource name or JSDataSource object to save.
 	 */
 	public void js_save(Object obj)
+	{
+		js_save(obj, false);
+	}
+
+	/**
+	 * Saves just the given form or in memory datasource into the developers workspace.
+	 * This must be a solution created or altered form/in memory datasource.
+	 *
+	 * @param obj The formname, JSForm, datasource name or JSDataSource object to save.
+	 * @param override Override an existing in memory table.
+	 */
+	public void js_save(Object obj, final boolean override)
 	{
 		String name = null;
 		if (obj instanceof String)
@@ -162,9 +176,33 @@ public class JSDeveloperSolutionModel
 							ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(state.getSolutionName());
 							solutionCopy = servoyProject.getEditingSolution();
 							MemServer memServer = servoyProject.getMemServer();
-							ITable memTable = memServer.createNewTable(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), table,
-								DataSourceUtils.getDataSourceTableName(objName));
-							memServer.syncTableObjWithDB(memTable, false, true, null);
+							String tableName = DataSourceUtils.getDataSourceTableName(objName);
+							ITable memTable = memServer.getTable(tableName);
+							if (memTable == null)
+							{
+								memTable = memServer.createNewTable(ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator(), table,
+									tableName);
+								memServer.syncTableObjWithDB(memTable, false, true, null);
+							}
+							else if (override)
+							{
+								DataModelManager dataModelManager = ServoyModelFinder.getServoyModel().getDataModelManager();
+								if (dataModelManager != null)
+								{
+									((MemTable)memTable).setColumns(dataModelManager.serializeTable(table));
+								}
+								else
+								{
+									state.reportError("Internal error.", "Cannot save table " + tableName);
+									return Status.CANCEL_STATUS;
+								}
+							}
+							else
+							{
+								state.reportError("Cannot save", "The in memory table '" + tableName +
+									"' already exists. Please delete it, or use the 'save' method with the 'override' flag set to true.");
+								return Status.CANCEL_STATUS;
+							}
 							saveObj = solutionCopy.getOrCreateTableNode(objName);
 						}
 						else
