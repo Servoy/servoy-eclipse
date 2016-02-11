@@ -5425,7 +5425,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				@Override
 				public Object visit(IPersist o)
 				{
-					if (o instanceof TableNode && DataSourceUtils.getInmemDataSourceName(((TableNode)o).getDataSource()) == null)
+					if (o instanceof TableNode && DataSourceUtils.getDBServernameTablename(((TableNode)o).getDataSource()) != null)
 					{
 						TableNode node = (TableNode)o;
 						IFile f = dm.getDBIFile(node.getDataSource());
