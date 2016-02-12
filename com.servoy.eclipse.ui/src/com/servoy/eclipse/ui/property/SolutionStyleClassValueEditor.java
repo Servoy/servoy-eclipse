@@ -17,6 +17,9 @@
 
 package com.servoy.eclipse.ui.property;
 
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.IEditorPart;
@@ -24,10 +27,12 @@ import org.eclipse.wst.sse.ui.StructuredTextEditor;
 
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -49,15 +54,32 @@ public class SolutionStyleClassValueEditor implements IValueEditor<String>
 	{
 		if (solution.getStyleSheetID() > 0)
 		{
-			Media media = ModelUtils.getEditingFlattenedSolution(solution).getMedia(solution.getStyleSheetID());
-			if (media != null)
+			List<String> styleSheets = NGUtils.getOrderedStyleSheets(ModelUtils.getEditingFlattenedSolution(solution));
+			for (String styleSheet : styleSheets)
 			{
-				Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, true);
-				IEditorPart editor = EditorUtil.openFileEditor(ResourcesPlugin.getWorkspace().getRoot().getFile(
-					new Path(pathPair.getLeft() + pathPair.getRight())));
-				if (editor instanceof StructuredTextEditor)
+				Media media = ModelUtils.getEditingFlattenedSolution(solution).getMedia(styleSheet);
+				if (media != null)
 				{
-					EditorUtil.selectAndReveal((StructuredTextEditor)editor, value);
+					String cssContent = null;
+					try
+					{
+						cssContent = new String(media.getMediaData(), "UTF-8");
+					}
+					catch (UnsupportedEncodingException e)
+					{
+						ServoyLog.logError(e);
+					}
+					if (cssContent.contains(value))
+					{
+						Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, true);
+						IEditorPart editor = EditorUtil.openFileEditor(
+							ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(pathPair.getLeft() + pathPair.getRight())));
+						if (editor instanceof StructuredTextEditor)
+						{
+							EditorUtil.selectAndReveal((StructuredTextEditor)editor, value);
+						}
+						break;
+					}
 				}
 			}
 		}
