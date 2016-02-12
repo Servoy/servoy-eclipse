@@ -111,7 +111,7 @@
 			}
 		</style>
 		<!-- component_contributions -->
-		<link rel="stylesheet" ng-href='{{solutionSettings.styleSheetPath}}'>
+		<link ng-repeat="path in solutionSettings.styleSheetPaths" rel="stylesheet" ng-href='{{path}}'>
 	</head>
 	<body class="user-selection-off content">
 		<div class="drag-scroll-preventer max" style="overflow: none; z-index: 0">
