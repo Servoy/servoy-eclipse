@@ -19,8 +19,10 @@ package com.servoy.eclipse.ui.property;
 
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.FunctionPropertyType;
+import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -34,6 +36,7 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
@@ -156,6 +159,15 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 
 	public boolean shouldShow(Object obj)
 	{
+		if (propertyDescription.getType() instanceof ComponentPropertyType)
+		{
+			return false;
+		}
+		if (PropertyUtils.isCustomJSONArrayPropertyType(propertyDescription.getType()) &&
+			((CustomJSONArrayType< ? , ? >)propertyDescription.getType()).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType)
+		{
+			return false;
+		}
 		return true;
 	}
 }
