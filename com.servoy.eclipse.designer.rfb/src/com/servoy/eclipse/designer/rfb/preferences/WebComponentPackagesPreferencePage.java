@@ -6,6 +6,7 @@ import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PlatformUI;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
@@ -17,13 +18,15 @@ public class WebComponentPackagesPreferencePage extends FieldEditorPreferencePag
 	public WebComponentPackagesPreferencePage()
 	{
 		super(GRID);
+		setMessage("Mark packages as unused.");
+		setDescription("Unchecked component/service packages are not loaded in the client or shown in the palette:");
 	}
 
 
 	@Override
 	public void init(IWorkbench workbench)
 	{
-		setPreferenceStore(com.servoy.eclipse.debug.Activator.getDefault().getPreferenceStore());
+		setPreferenceStore(PlatformUI.getPreferenceStore());
 	}
 
 	@Override
@@ -45,7 +48,7 @@ public class WebComponentPackagesPreferencePage extends FieldEditorPreferencePag
 			if (packageName.equals("servoycore")) continue;//we do not allow disabling the core package
 			// TODO add some tooltips or a label to this page explaining what all this means to the user...
 			addField(new BooleanFieldEditor("com.servoy.eclipse.designer.rfb.packages.enable." + packageName, "Enable " + displayName + " package",
-				getFieldEditorParent()));
+					getFieldEditorParent()));
 		}
 	}
 
