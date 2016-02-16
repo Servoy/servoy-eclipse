@@ -38,6 +38,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private String pluginLocations;
 	private String selectedComponents;
 	private String selectedServices;
+	private String excludedComponentPackages;
+	private String excludedServicePackages;
 
 	private boolean exportMetaData = false;
 	private boolean exportSampleData = false;
@@ -101,11 +103,15 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -crefs <additional_component_names> or \"all\" exports the components used by the solution and the\n" +
 			"				 components in the additional components list .\n"
 			+			    "Default: all components are exported.\n"
+			+ "        -cexcludedpacks ... the list of excluded component packages \n"
+			+			    "Default: none is excluded.\n"
 			+ "        -srefs exports only the services used by the solution.\n"
 			+			    "Default: all services are exported.\n"
 			+ "        -srefs <additional_service_names>  or \"all\" exports the services used by the solution and the\n" +
 			"				 services in the additional services list .\n"
 			+			    "Default: all services are exported.\n"
+			+ "        -sexcludedpacks ... the list of excluded service packages \n"
+			+			    "Default: none is excluded.\n"
 			+ "        -md ws|db|none|both ... take table  metadata from workspace / database / both+check.\n"
 			+ "             Usually you will want to use 'ws'.\n"
 			+ "        -checkmd ... check metadata tables, default false\n"
@@ -152,6 +158,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 		if (pluginLocations == null) pluginLocations = "developer/../plugins";
 		selectedComponents = parseComponentsArg("crefs", argsMap);
 		selectedServices = parseComponentsArg("srefs", argsMap);
+		excludedComponentPackages = parseComponentsArg("cexcludedpacks", argsMap);
+		excludedServicePackages = parseComponentsArg("sexcludedpacks", argsMap);
 
 		if (argsMap.containsKey("md")) exportMetaData = true;
 		if (argsMap.containsKey("checkmd")) checkMetadataTables = true;
@@ -228,6 +236,16 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public String getSelectedServices()
 	{
 		return selectedServices;
+	}
+
+	public String getExcludedComponentPackages()
+	{
+		return excludedComponentPackages;
+	}
+
+	public String getExcludedServicePackages()
+	{
+		return excludedServicePackages;
 	}
 
 	public boolean isExportSampleData()

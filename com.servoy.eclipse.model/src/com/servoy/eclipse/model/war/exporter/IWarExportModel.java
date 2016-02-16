@@ -51,6 +51,9 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	public Set<String> getUsedServices();
 
+	public List<String> getExcludedComponentPackages();
+
+	public List<String> getExcludedServicePackages();
 
 	public boolean isOverwriteGroups();
 

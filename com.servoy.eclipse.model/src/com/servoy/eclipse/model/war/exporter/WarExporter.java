@@ -255,16 +255,18 @@ public class WarExporter
 			StringBuilder componentLocations = new StringBuilder();
 			StringBuilder servicesLocations = new StringBuilder();
 
-			ComponentResourcesExporter.copyDefaultComponentsAndServices(tmpWarDir);
+			ComponentResourcesExporter.copyDefaultComponentsAndServices(tmpWarDir, exportModel.getExcludedComponentPackages(),
+				exportModel.getExcludedServicePackages());
 
-			componentLocations.append(ComponentResourcesExporter.getComponentDirectoryNames());
-			componentLocations.append(copyUserDefinedComponents(tmpWarDir, monitor.newChild(1)));
+			componentLocations.append(ComponentResourcesExporter.getComponentDirectoryNames(exportModel.getExcludedComponentPackages()));
+			componentLocations.append(copyUserDefinedComponents(tmpWarDir, exportModel.getExcludedComponentPackages(), monitor.newChild(1)));
 
 
-			servicesLocations.append(ComponentResourcesExporter.getServicesDirectoryNames());
-			servicesLocations.append(copyUserDefinedServices(tmpWarDir, monitor.newChild(1)));
+			servicesLocations.append(ComponentResourcesExporter.getServicesDirectoryNames(exportModel.getExcludedServicePackages()));
+			servicesLocations.append(copyUserDefinedServices(tmpWarDir, exportModel.getExcludedServicePackages(), monitor.newChild(1)));
 
-			copyAndAddLocationsOfNGPackageProjects(componentLocations, servicesLocations, tmpWarDir, monitor.newChild(1));
+			copyAndAddLocationsOfNGPackageProjects(componentLocations, servicesLocations, tmpWarDir, exportModel.getExcludedComponentPackages(),
+				exportModel.getExcludedServicePackages(), monitor.newChild(1));
 
 			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/components.properties"), componentLocations.toString());
 			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/services.properties"), servicesLocations.toString());
@@ -279,7 +281,7 @@ public class WarExporter
 	}
 
 	private void copyAndAddLocationsOfNGPackageProjects(StringBuilder componentLocations, StringBuilder servicesLocations, File tmpWarDir,
-		IProgressMonitor monitor) throws ExportException
+		List<String> excludedComponentPackages, List<String> excludedServicePackages, IProgressMonitor monitor) throws ExportException
 	{
 		monitor.subTask("Copying user-defined ng package projects services and components");
 
@@ -292,39 +294,46 @@ public class WarExporter
 			{
 				for (ServoyNGPackageProject ngp : ngPackageProjects)
 				{
-					if (ngPackageManager.isComponentPackageProject(ngp.getProject().getName()))
+					String packageName = ngp.getProject().getName();
+					if (ngPackageManager.isComponentPackageProject(packageName))
 					{
-						// if we are here then normally this package is already loaded and valid => we can just copy it directly
-						componentLocations.append(";/" + ngp.getProject().getName());
-						File destDir = new File(tmpWarDir, ngp.getProject().getName());
-						copyDir(new File(ngp.getProject().getLocationURI()), destDir, true);
-
-						// delete the eclipse .project file as it's not needed in war
-						if (destDir.exists() && destDir.isDirectory())
+						if (excludedComponentPackages == null || excludedComponentPackages.indexOf(packageName) == -1)
 						{
-							File dotProjectFile = new File(destDir, ".project");
-							if (dotProjectFile.exists() && dotProjectFile.isFile()) dotProjectFile.delete();
+							// if we are here then normally this package is already loaded and valid => we can just copy it directly
+							componentLocations.append(";/" + packageName);
+							File destDir = new File(tmpWarDir, packageName);
+							copyDir(new File(ngp.getProject().getLocationURI()), destDir, true);
+
+							// delete the eclipse .project file as it's not needed in war
+							if (destDir.exists() && destDir.isDirectory())
+							{
+								File dotProjectFile = new File(destDir, ".project");
+								if (dotProjectFile.exists() && dotProjectFile.isFile()) dotProjectFile.delete();
+							}
 						}
 					}
-					else if (ngPackageManager.isServicePackageProject(ngp.getProject().getName()))
+					else if (ngPackageManager.isServicePackageProject(packageName))
 					{
-						// if we are here then normally this package is already loaded and valid => we can just copy it directly
-						servicesLocations.append(";/" + ngp.getProject().getName());
-						File destDir = new File(tmpWarDir, ngp.getProject().getName());
-						copyDir(new File(ngp.getProject().getLocationURI()), destDir, true);
-
-						// delete the eclipse .project file as it's not needed in war
-						if (destDir.exists() && destDir.isDirectory())
+						if (excludedServicePackages == null || excludedServicePackages.indexOf(packageName) == -1)
 						{
-							File dotProjectFile = new File(destDir, ".project");
-							if (dotProjectFile.exists() && dotProjectFile.isFile()) dotProjectFile.delete();
+							// if we are here then normally this package is already loaded and valid => we can just copy it directly
+							servicesLocations.append(";/" + packageName);
+							File destDir = new File(tmpWarDir, ngp.getProject().getName());
+							copyDir(new File(ngp.getProject().getLocationURI()), destDir, true);
+
+							// delete the eclipse .project file as it's not needed in war
+							if (destDir.exists() && destDir.isDirectory())
+							{
+								File dotProjectFile = new File(destDir, ".project");
+								if (dotProjectFile.exists() && dotProjectFile.isFile()) dotProjectFile.delete();
+							}
 						}
 					}
 					else
 					{
 						ServoyLog.logError(new RuntimeException(
 							"War export: Invalid referenced ngPackage project found; it is there but it is not loaded for some reason and it will not be exported: " +
-								ngp.getProject().getName()));
+								packageName));
 					}
 				}
 			}
@@ -474,7 +483,8 @@ public class WarExporter
 		}
 	}
 
-	private String copyUserDefinedComponentsOrServices(File tmpWarDir, IProgressMonitor monitor, String copyFrom) throws ExportException
+	private String copyUserDefinedComponentsOrServices(File tmpWarDir, IProgressMonitor monitor, String copyFrom, List<String> excludedPackages)
+		throws ExportException
 	{
 		StringBuilder locations = new StringBuilder();
 		ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
@@ -507,8 +517,12 @@ public class WarExporter
 							IFolder resourceFolder = (IFolder)resource;
 							if ((resourceFolder).getFile("META-INF/MANIFEST.MF").exists())
 							{
-								locations.append(";/" + resourceFolder.getName());
-								copyDir(new File(resource.getLocationURI()), new File(tmpWarDir, resourceFolder.getName()), true);
+								String packageName = resourceFolder.getName();
+								if (excludedPackages == null || excludedPackages.indexOf(packageName) == -1)
+								{
+									locations.append(";/" + packageName);
+									copyDir(new File(resource.getLocationURI()), new File(tmpWarDir, resourceFolder.getName()), true);
+								}
 							}
 						}
 						else if (resource instanceof IFile)
@@ -530,19 +544,19 @@ public class WarExporter
 	/**
 	 * Copy all user-defined components from resources project to the war.
 	 */
-	private String copyUserDefinedComponents(File tmpWarDir, IProgressMonitor monitor) throws ExportException
+	private String copyUserDefinedComponents(File tmpWarDir, List<String> excludedComponentPackages, IProgressMonitor monitor) throws ExportException
 	{
 		monitor.subTask("Copy user-defined components from resources project");
-		return copyUserDefinedComponentsOrServices(tmpWarDir, monitor, COMPONENTS_DIR_NAME);
+		return copyUserDefinedComponentsOrServices(tmpWarDir, monitor, COMPONENTS_DIR_NAME, excludedComponentPackages);
 	}
 
 	/**
 	 * Copy all user-defined services from resources/services to the war.
 	 */
-	private String copyUserDefinedServices(File tmpWarDir, IProgressMonitor monitor) throws ExportException
+	private String copyUserDefinedServices(File tmpWarDir, List<String> excludedServicePackages, IProgressMonitor monitor) throws ExportException
 	{
 		monitor.subTask("Copy user-defined services from resources project");
-		return copyUserDefinedComponentsOrServices(tmpWarDir, monitor, SERVICES_DIR_NAME);
+		return copyUserDefinedComponentsOrServices(tmpWarDir, monitor, SERVICES_DIR_NAME, excludedServicePackages);
 	}
 
 	private void extractJar(File file, File tmpWarDir) throws ExportException
