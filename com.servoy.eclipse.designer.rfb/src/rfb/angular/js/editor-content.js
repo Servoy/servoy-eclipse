@@ -225,7 +225,7 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
           }
         }
         if (formData.solutionProperties) {
-          $applicationService.setStyleSheet(formData.solutionProperties.styleSheet);
+          $applicationService.setStyleSheets(formData.solutionProperties.styleSheets);
         }
       } else return formData;
     },
@@ -313,8 +313,8 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
           renderDecorators();
         });
       }
-      if (data && data.solutionProperties && formData.solutionProperties.styleSheet) {
-        $applicationService.setStyleSheet(formData.solutionProperties.styleSheet);
+      if (data && data.solutionProperties && formData.solutionProperties.styleSheets) {
+        $applicationService.setStyleSheets(formData.solutionProperties.styleSheets);
       }
     }
 

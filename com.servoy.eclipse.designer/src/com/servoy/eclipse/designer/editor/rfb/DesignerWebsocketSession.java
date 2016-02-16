@@ -46,7 +46,6 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.LayoutContainer;
-import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.server.ngclient.FormElement;
@@ -59,6 +58,7 @@ import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
 import com.servoy.j2db.server.ngclient.template.FormWrapper;
 import com.servoy.j2db.server.ngclient.template.IFormElementValidator;
 import com.servoy.j2db.server.ngclient.template.PartWrapper;
+import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -84,18 +84,19 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		registerServerService("$editor", this);
 	}
 
-	private String getSolutionCSSURL(FlattenedSolution fs)
+	private String[] getSolutionStyleSheets(FlattenedSolution fs)
 	{
-		int styleSheetID = fs.getSolution().getStyleSheetID();
-		if (styleSheetID > 0)
+		List<String> styleSheets = NGUtils.getOrderedStyleSheets(fs);
+		if (styleSheets != null && styleSheets.size() > 0)
 		{
-			Media styleSheetMedia = fs.getMedia(styleSheetID);
-			if (styleSheetMedia != null)
+			Collections.reverse(styleSheets);
+			for (int i = 0; i < styleSheets.size(); i++)
 			{
-				return "resources/" + MediaResourcesServlet.FLATTENED_SOLUTION_ACCESS + "/" + fs.getSolution().getName() + "/" + styleSheetMedia.getName();
+				styleSheets.set(i,
+					"resources/" + MediaResourcesServlet.FLATTENED_SOLUTION_ACCESS + "/" + fs.getSolution().getName() + "/" + styleSheets.get(i));
 			}
 		}
-		return null;
+		return styleSheets.toArray(new String[0]);
 	}
 
 
@@ -159,8 +160,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				sendComponents(fs, writer, baseComponents, deleted);
 				writer.key("solutionProperties");
 				writer.object();
-				writer.key("styleSheet");
-				writer.value(getSolutionCSSURL(fs));
+				writer.key("styleSheets");
+				writer.value(getSolutionStyleSheets(fs));
 				writer.endObject();
 				generateParts(flattenedForm, context, writer, wrapper.getParts());
 				writer.endObject();
