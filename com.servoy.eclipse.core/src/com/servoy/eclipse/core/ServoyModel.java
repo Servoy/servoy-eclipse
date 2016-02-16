@@ -1681,7 +1681,7 @@ public class ServoyModel extends AbstractServoyModel
 		fireActiveProjectUpdated(IActiveProjectListener.MODULES_UPDATED); // this will also eventually refresh JS build paths and working set
 	}
 
-	private void fireActiveProjectUpdated(int updateInfo)
+	public void fireActiveProjectUpdated(int updateInfo)
 	{
 		if (updateInfo == IActiveProjectListener.MODULES_UPDATED)
 		{
@@ -3569,7 +3569,7 @@ public class ServoyModel extends AbstractServoyModel
 			return null;
 		}
 
-		Solution solution = aProject.getSolution();
+		Solution solution = aProject.getEditingSolution();
 		if (solution == null)
 		{
 			return null;

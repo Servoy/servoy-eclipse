@@ -30,8 +30,7 @@ public class ActiveSolutionProvider extends AbstractSourceProvider
 				return true;
 			}
 
-			@Override
-			public void activeProjectChanged(ServoyProject activeProject)
+			private void setStartMenuButtonsState()
 			{
 				fireSourceChanged(ISources.WORKBENCH, NG_STATE, getNGVariableState());
 				fireSourceChanged(ISources.WORKBENCH, MOBILE_STATE, getMobileVariableState());
@@ -40,8 +39,15 @@ public class ActiveSolutionProvider extends AbstractSourceProvider
 			}
 
 			@Override
+			public void activeProjectChanged(ServoyProject activeProject)
+			{
+				setStartMenuButtonsState();
+			}
+
+			@Override
 			public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
 			{
+				if (updateInfo == IActiveProjectListener.SOLUTION_TYPE_CHANGED) setStartMenuButtonsState();
 			}
 
 		});

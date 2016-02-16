@@ -68,6 +68,11 @@ public interface IActiveProjectListener
 	public static final int SCOPE_NAMES_CHANGED = 7;
 
 	/**
+	 * Used by activeProjectUpdated(...) to notify that the solution type of the active solution changed.
+	 */
+	public static final int SOLUTION_TYPE_CHANGED = 8;
+
+	/**
 	 * Notifies the change of the active project - another project (or null) becomes active.
 	 *
 	 * @param activeProject The current active project
