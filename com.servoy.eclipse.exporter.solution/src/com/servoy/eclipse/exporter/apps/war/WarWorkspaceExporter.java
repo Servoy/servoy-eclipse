@@ -421,6 +421,18 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			{
 				return configuration.isAntiResourceLocking();
 			}
+
+			@Override
+			public List<String> getExcludedComponentPackages()
+			{
+				return configuration.getExcludedComponentPackages() == null ? null : Arrays.asList(configuration.getExcludedComponentPackages().split(" "));
+			}
+
+			@Override
+			public List<String> getExcludedServicePackages()
+			{
+				return configuration.getExcludedServicePackages() == null ? null : Arrays.asList(configuration.getExcludedServicePackages().split(" "));
+			}
 		});
 		try
 		{
