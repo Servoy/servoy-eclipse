@@ -110,7 +110,6 @@ import org.webbitserver.HttpHandler;
 import org.webbitserver.HttpRequest;
 import org.webbitserver.HttpResponse;
 
-
 import com.servoy.eclipse.core.ngpackages.NGPackageManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
@@ -190,6 +189,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.server.shared.IUserManagerFactory;
 import com.servoy.j2db.server.shared.IWebClientSessionFactory;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
@@ -2662,6 +2662,10 @@ public class ServoyModel extends AbstractServoyModel
 					if (persist instanceof IScriptElement)
 					{
 						changedScriptElements.add(persist);
+					}
+					else if (persist instanceof TableNode && DataSourceUtils.INMEM_DATASOURCE.equals(((TableNode)persist).getServerName()))
+					{
+						servoyProject.refreshMemServer();
 					}
 				}
 				return SolutionSerializer.isCompositeWithIndependentSerializationOfSubItems(persist) ? IPersistVisitor.CONTINUE_TRAVERSAL

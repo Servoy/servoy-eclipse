@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.INGPackageChangeListener;
 
 /**
@@ -58,7 +59,7 @@ public class RfbWebResourceListener implements INGPackageChangeListener
 	 */
 	public void setEditorWebsocketSession(EditorWebsocketSession editorWebsocketSession)
 	{
-//		if (this.editorWebsocketSession == null) com.servoy.eclipse.core.Activator.getDefault().addWebComponentChangedListener(this);
+		if (this.editorWebsocketSession == null) ServoyModelFinder.getServoyModel().getNGPackageManager().addNGPackagesChangedListener(this);
 		this.editorWebsocketSession = editorWebsocketSession;
 	}
 
