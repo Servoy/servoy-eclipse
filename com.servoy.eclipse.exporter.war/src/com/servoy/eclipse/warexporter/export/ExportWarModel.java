@@ -919,4 +919,26 @@ public class ExportWarModel extends AbstractWarExportModel
 	{
 		this.antiResourceLocking = antiResourceLocking;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getExcludedComponentPackages()
+	 */
+	@Override
+	public List<String> getExcludedComponentPackages()
+	{
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getExcludedServicePackages()
+	 */
+	@Override
+	public List<String> getExcludedServicePackages()
+	{
+		return null;
+	}
 }

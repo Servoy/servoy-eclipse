@@ -46,9 +46,7 @@ public class WebComponentPackagesPreferencePage extends FieldEditorPreferencePag
 			}
 			if (packageName.equals("servoyservices")) continue;//we do not allow disabling the services package
 			if (packageName.equals("servoycore")) continue;//we do not allow disabling the core package
-			// TODO add some tooltips or a label to this page explaining what all this means to the user...
-			addField(new BooleanFieldEditor("com.servoy.eclipse.designer.rfb.packages.enable." + packageName, "Enable " + displayName + " package",
-					getFieldEditorParent()));
+			addField(new BooleanFieldEditor("com.servoy.eclipse.designer.rfb.packages.enable." + packageName, displayName, getFieldEditorParent()));
 		}
 	}
 

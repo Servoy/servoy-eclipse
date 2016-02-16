@@ -87,6 +87,18 @@ public abstract class BaseNGPackageManager
 
 		resourceChangeListener = new BaseNGPackageResourcesChangedListener(this);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
+		setRemovedPackages();
+	}
+
+	private void setRemovedPackages()
+	{
+		Set<String> defaultPackageNames = ResourceProvider.getDefaultPackageNames();
+		List<String> toRemove = new ArrayList<String>();
+		for (String packageName : defaultPackageNames)
+		{
+			if (!isDefaultPackageEnabled(packageName)) toRemove.add(packageName);
+		}
+		ResourceProvider.setRemovedPackages(toRemove);
 	}
 
 	public void clearActiveSolutionReferencesCache()
@@ -149,14 +161,8 @@ public abstract class BaseNGPackageManager
 	 */
 	public void reloadAllNGPackages(IProgressMonitor m, boolean canChangeResources)
 	{
-		Set<String> defaultPackageNames = ResourceProvider.getDefaultPackageNames();
-		List<String> toRemove = new ArrayList<String>();
-		for (String packageName : defaultPackageNames)
-		{
-			if (!isDefaultPackageEnabled(packageName)) toRemove.add(packageName);
-		}
-		ResourceProvider.setRemovedPackages(toRemove);
-
+		setRemovedPackages();
+		
 		SubMonitor monitor = SubMonitor.convert(m, "Reloading all ng packages", 100);
 
 		ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
@@ -348,7 +354,7 @@ public abstract class BaseNGPackageManager
 
 	/**
 	 * Unloads some previously loaded ngPackage projects and loads others as needed (as they change in workspace).
-
+	
 	 * IMPORTANT: only call this if these packages are the only ones that changed (so there were no changes in the ng packages from the resouces project; cause if
 	 * for example a package is moved between the resources project and a separate ng pacakge project it would error out because it might not be unloaded
 	 * properly before being loaded again if you sequentially call reload on resources project packages and on ng package projects)
