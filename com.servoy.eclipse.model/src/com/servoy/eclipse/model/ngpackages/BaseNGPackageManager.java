@@ -83,17 +83,11 @@ public abstract class BaseNGPackageManager
 
 	public BaseNGPackageManager()
 	{
-		if (ServoyModelFinder.getServoyModel().getActiveProject() != null)
-		{
-			reloadAllNGPackages(null, true); // initial load
-		}
-		else
-		{
-			setRemovedPackages();
-		}
+		if (ServoyModelFinder.getServoyModel().getActiveProject() != null) reloadAllNGPackages(null, true); // initial load
 
 		resourceChangeListener = new BaseNGPackageResourcesChangedListener(this);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
+		setRemovedPackages();
 	}
 
 	private void setRemovedPackages()
@@ -168,7 +162,7 @@ public abstract class BaseNGPackageManager
 	public void reloadAllNGPackages(IProgressMonitor m, boolean canChangeResources)
 	{
 		setRemovedPackages();
-
+		
 		SubMonitor monitor = SubMonitor.convert(m, "Reloading all ng packages", 100);
 
 		ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
