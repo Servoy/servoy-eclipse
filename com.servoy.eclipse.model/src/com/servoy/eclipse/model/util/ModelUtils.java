@@ -144,12 +144,8 @@ public class ModelUtils
 		form = flattenedSolution.getFlattenedForm(form);
 		Solution solution = (Solution)form.getRootObject();
 
-		List<String> mediaStyleSheets = null;
-		if (solution.getStyleSheetID() > 0)
-		{
-			mediaStyleSheets = NGUtils.getOrderedStyleSheets(flattenedSolution);
-		}
-		if (mediaStyleSheets == null && persist instanceof IFormElement && !(persist instanceof WebComponent))
+		List<String> mediaStyleSheets = NGUtils.getOrderedStyleSheets(flattenedSolution);
+		if (mediaStyleSheets != null && mediaStyleSheets.size() == 0 && persist instanceof IFormElement && !(persist instanceof WebComponent))
 		{
 			// legacy component, no css at solution level
 			return new Pair<>(getStyleClasses(flattenedSolution.getStyleForForm(form, null), lookupName, form.getStyleClass()), null);

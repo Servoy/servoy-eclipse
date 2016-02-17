@@ -201,6 +201,7 @@ import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
+import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.smart.dataui.InvisibleBean;
 import com.servoy.j2db.util.ComponentFactoryHelper;
 import com.servoy.j2db.util.DataSourceUtils;
@@ -1619,7 +1620,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 		boolean multiSelect = persist.getRootObject() instanceof Solution &&
 			((Solution)persist.getRootObject()).getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE &&
-			((Solution)persist.getRootObject()).getStyleSheetID() > 0;
+			NGUtils.getOrderedStyleSheets(ModelUtils.getEditingFlattenedSolution(persist)).size() > 0;
 		if (multiSelect)
 		{
 			// ng client, style at solutionlevel
