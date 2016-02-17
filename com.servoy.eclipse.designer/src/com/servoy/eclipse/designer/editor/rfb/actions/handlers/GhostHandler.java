@@ -107,11 +107,14 @@ public class GhostHandler implements IServerService
 						spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(FormElement.ERROR_BEAN);
 					}
 					Map<String, PropertyDescription> properties = spec.getProperties();
-					for (String key : properties.keySet())
+					if (!FormElement.ERROR_BEAN.equals(spec.getName()))
 					{
-						if (((WebObjectImpl)((WebComponent)bean).getImplementation()).getPropertyDescription().isArrayReturnType(key))
+						for (String key : properties.keySet())
 						{
-							LocationCache.getINSTANCE().clearParent(bean.getUUID() + key);
+							if (((WebObjectImpl)((WebComponent)bean).getImplementation()).getPropertyDescription().isArrayReturnType(key))
+							{
+								LocationCache.getINSTANCE().clearParent(bean.getUUID() + key);
+							}
 						}
 					}
 					try
