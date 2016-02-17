@@ -29,15 +29,6 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebObjectSpecification;
-import org.sablo.specification.property.ICustomType;
-import org.sablo.specification.property.IPropertyType;
-import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -45,11 +36,8 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
-import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
-import com.servoy.j2db.persistence.IBasicWebComponent;
-import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptElement;
@@ -57,12 +45,7 @@ import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RepositoryException;
-import com.servoy.j2db.persistence.WebComponent;
-import com.servoy.j2db.persistence.WebCustomType;
-import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
-import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.SortedList;
 
 /**
@@ -144,14 +127,6 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 			{
 				list.add(PersistContext.create(persist, ((PersistContext)parentElement).getContext()));
 			}
-			if (((PersistContext)parentElement).getPersist() instanceof Bean)
-			{
-				List<IChildWebObject> allGhostElements = getAllGhostElements((Bean)((PersistContext)parentElement).getPersist());
-				for (IChildWebObject ghost : allGhostElements)
-				{
-					list.add(PersistContext.create(ghost, ((PersistContext)parentElement).getContext()));
-				}
-			}
 			if (form.isResponsiveLayout()) return list.toArray();
 			return new SortedList(comparator, list).toArray();
 		}
@@ -164,10 +139,6 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 				list.add(PersistContext.create(elements.next(), form));
 			}
 			return new SortedList(comparator, list).toArray();
-		}
-		else if (parentElement instanceof Bean)
-		{
-			return getAllGhostElements((Bean)parentElement).toArray();
 		}
 		return null;
 	}
@@ -243,10 +214,6 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 				list.add(PersistContext.create(persist, ((PersistContext)parentElement).getContext()));
 			}
 			return list.toArray();
-		}
-		else if (parentElement instanceof Bean)
-		{
-			return getAllGhostElements((Bean)parentElement).toArray();
 		}
 
 		return null;
@@ -345,9 +312,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 	{
 		return element == ELEMENTS || element == PARTS || element instanceof Pair || element instanceof FormElementGroup ||
 			(element instanceof PersistContext && ((PersistContext)element).getPersist() instanceof AbstractBase &&
-				(((AbstractBase)((PersistContext)element).getPersist())).getAllObjects().hasNext() ||
-				(((PersistContext)element).getPersist() instanceof Bean && !(((PersistContext)element).getPersist() instanceof WebCustomType) &&
-					((Bean)((PersistContext)element).getPersist()).getBeanXML() != null));
+				(((AbstractBase)((PersistContext)element).getPersist())).getAllObjects().hasNext());
 	}
 
 	public Object[] getElements(Object inputElement)
@@ -361,74 +326,6 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
 	{
-	}
-
-	private List<IChildWebObject> getAllGhostElements(IBasicWebComponent parentBean)
-	{
-		if (parentBean instanceof WebComponent) return ((WebComponent)parentBean).getAllPersistMappedProperties();
-
-		List<IChildWebObject> result = new ArrayList<IChildWebObject>();
-
-		if (parentBean instanceof Bean && FormTemplateGenerator.isWebcomponentBean(parentBean))
-		{
-			// TODO the following code is legacy only; now WebComponent persists are used instead of Bean for custom web components
-			String beanXML = ((Bean)parentBean).getBeanXML();
-			if (beanXML != null)
-			{
-				WebObjectSpecification webComponentSpecification = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-					((Bean)parentBean).getBeanClassName());
-				if (webComponentSpecification != null)
-				{
-					try
-					{
-						JSONObject beanJSON = new JSONObject(beanXML);
-						for (String beanJSONKey : ServoyJSONObject.getNames(beanJSON))
-						{
-							Object object = beanJSON.get(beanJSONKey);
-							if (object != null)
-							{
-								PropertyDescription pd = webComponentSpecification.getProperty(beanJSONKey);
-								IPropertyType< ? > type = pd.getType();
-								String simpleTypeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(type);
-
-								if (PropertyUtils.isCustomJSONProperty(type))
-								{
-									boolean arrayReturnType = PropertyUtils.isCustomJSONArrayPropertyType(type);
-									if (!arrayReturnType)
-									{
-										WebCustomType ghostBean = WebCustomType.createNewInstance(parentBean, pd, beanJSONKey, -1, false);
-										ghostBean.setTypeName(simpleTypeName);
-										result.add(ghostBean);
-									}
-									else if (object instanceof JSONArray)
-									{
-										PropertyDescription elementTypePD = ((ICustomType< ? >)type).getCustomJSONTypeDefinition();
-										if (PropertyUtils.isCustomJSONObjectProperty(elementTypePD.getType()))
-										{
-											for (int i = 0; i < ((JSONArray)object).length(); i++)
-											{
-												WebCustomType ghostBean = WebCustomType.createNewInstance(parentBean, elementTypePD, beanJSONKey, i, false);
-												ghostBean.setTypeName(simpleTypeName);
-												result.add(ghostBean);
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-					catch (JSONException e)
-					{
-						Debug.error(e);
-					}
-				}
-				else
-				{
-					Debug.error("no webcomponent specification found for: " + ((Bean)parentBean).getBeanClassName());
-				}
-			}
-		}
-		return result;
 	}
 
 	public static class PersistContextNameComparator implements Comparator<Object>
