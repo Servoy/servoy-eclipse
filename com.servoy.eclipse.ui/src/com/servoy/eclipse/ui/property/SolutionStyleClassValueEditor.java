@@ -52,34 +52,31 @@ public class SolutionStyleClassValueEditor implements IValueEditor<String>
 
 	public void openEditor(String value)
 	{
-		if (solution.getStyleSheetID() > 0)
+		List<String> styleSheets = NGUtils.getOrderedStyleSheets(ModelUtils.getEditingFlattenedSolution(solution));
+		for (String styleSheet : styleSheets)
 		{
-			List<String> styleSheets = NGUtils.getOrderedStyleSheets(ModelUtils.getEditingFlattenedSolution(solution));
-			for (String styleSheet : styleSheets)
+			Media media = ModelUtils.getEditingFlattenedSolution(solution).getMedia(styleSheet);
+			if (media != null)
 			{
-				Media media = ModelUtils.getEditingFlattenedSolution(solution).getMedia(styleSheet);
-				if (media != null)
+				String cssContent = null;
+				try
 				{
-					String cssContent = null;
-					try
+					cssContent = new String(media.getMediaData(), "UTF-8");
+				}
+				catch (UnsupportedEncodingException e)
+				{
+					ServoyLog.logError(e);
+				}
+				if (cssContent.contains(value))
+				{
+					Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, true);
+					IEditorPart editor = EditorUtil.openFileEditor(
+						ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(pathPair.getLeft() + pathPair.getRight())));
+					if (editor instanceof StructuredTextEditor)
 					{
-						cssContent = new String(media.getMediaData(), "UTF-8");
+						EditorUtil.selectAndReveal((StructuredTextEditor)editor, value);
 					}
-					catch (UnsupportedEncodingException e)
-					{
-						ServoyLog.logError(e);
-					}
-					if (cssContent.contains(value))
-					{
-						Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, true);
-						IEditorPart editor = EditorUtil.openFileEditor(
-							ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(pathPair.getLeft() + pathPair.getRight())));
-						if (editor instanceof StructuredTextEditor)
-						{
-							EditorUtil.selectAndReveal((StructuredTextEditor)editor, value);
-						}
-						break;
-					}
+					break;
 				}
 			}
 		}
@@ -87,6 +84,14 @@ public class SolutionStyleClassValueEditor implements IValueEditor<String>
 
 	public boolean canEdit(String value)
 	{
-		return solution.getStyleSheetID() > 0 && ModelUtils.getEditingFlattenedSolution(solution).getMedia(solution.getStyleSheetID()) != null;
+		List<String> medias = NGUtils.getOrderedStyleSheets(ModelUtils.getEditingFlattenedSolution(solution));
+		for (String mediaName : medias)
+		{
+			if (ModelUtils.getEditingFlattenedSolution(solution).getMedia(mediaName) != null)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }
