@@ -6772,7 +6772,7 @@ for( var i = 1 ; i <= dataset.getMaxRowIndex() ; i++ )
             <description clientSupport="wc,sc"><![CDATA[Performs a sql query with a query builder object.
 Will throw an exception if anything did go wrong when executing the query.
 
-Using this variation of getDataSetByQuery any Tablefilter on the involved tables will be taken into account.]]></description>
+Using this variation of getDataSetByQuery any Tablefilter on the involved tables will not be taken into account.]]></description>
           </descriptions>
           <summaries>
             <summary clientSupport="wc,sc"><![CDATA[Performs a sql query with a query builder object.]]></summary>
