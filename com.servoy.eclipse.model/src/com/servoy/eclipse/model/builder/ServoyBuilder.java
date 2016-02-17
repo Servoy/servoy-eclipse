@@ -465,7 +465,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> FORM_RELATED_TAB_UNSOLVED_UUID = new Pair<String, ProblemSeverity>(
 		"formRelatedTabUnsolvedUuid", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> FORM_PROPERTY_TARGET_NOT_FOUND = new Pair<String, ProblemSeverity>(
-		"formPropertyTargetNotFound", ProblemSeverity.WARNING); //$NON-NLS-1$
+		"formPropertyTargetNotFound", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> FORM_INVALID_TABLE = new Pair<String, ProblemSeverity>("formInvalidTable", ProblemSeverity.ERROR); //$NON-NLS-1$
 	public final static Pair<String, ProblemSeverity> FORM_TYPEAHEAD_UNSTORED_CALCULATION = new Pair<String, ProblemSeverity>(
 		"formTypeAheadUnstoredCalculation", ProblemSeverity.ERROR); //$NON-NLS-1$
