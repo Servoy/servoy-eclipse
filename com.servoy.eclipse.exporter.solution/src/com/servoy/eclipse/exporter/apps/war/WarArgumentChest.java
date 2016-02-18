@@ -75,75 +75,79 @@ public class WarArgumentChest extends AbstractArgumentChest
 		initialize(args);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest#getHelpMessage()
-	 */
 	@Override
 	public String getHelpMessage()
 	{
 		// @formatter:off
 		return  "WAR exporter. Exports workspace solutions into .war files.\n"
 			+ super.getHelpMessageCore()
-			+ "        -b <bean_names> ... the list of beans to export \n"
-			+			   "Default: all beans from application_server/beans are exported.\n"
+			+ "        -b <bean_names> ... the list of beans to export\n"
+			+ "             Default: all beans from application_server/beans are exported.\n"
 			+ "        -l <lafs_names> ... the list of lafs to export \n"
-			+			    "Default: all lafs from application_server/lafs are exported.\n"
+			+ "             Default: all lafs from application_server/lafs are exported.\n"
 			+ "        -d <jdbc_drivers> ... the list of drivers to export\n"
-			+			    "Default: all drivers from application_server/drivers are exported.\n"
-			+ "        -pi <plugin_names> ... the list of plugins to export e.g. -pi plugin1.jar plugin2.zip\n"
-			+			    "Default: all plugins from application_server/plugins are exported.\n"
-			+ "        -active <true/false> export active solution (and its modules) only\n"
+			+ "             Default: all drivers from application_server/drivers are exported.\n"
+			+ "        -pi <plugin_names> ... the list of plugins to export e.g -pi plugin1.jar plugin2.zip\n"
+			+ "             Default: all plugins from application_server/plugins are exported.\n"
+			+ "        -active <true/false> ... export active solution (and its modules) only\n"
 			+ "				Default: true\n"
-			+ "        -pluginLocations absolute paths to plugin folders.\n"
-			+			    "Default: '../plugins'.\n"
-			+ "        -crefs exports only the components used by the solution.\n"
-			+			    "Default: all components are exported.\n"
-			+ "        -crefs <additional_component_names> or \"all\" exports the components used by the solution and the\n" +
-			"				 components in the additional components list .\n"
-			+			    "Default: all components are exported.\n"
-			+ "        -excludeComponentPkgs ... space separated list of excluded component packages \n"
-			+			    "Default: none is excluded.\n"
+			+ "        -pluginLocations <absolute paths to plugins folder>\n"
+			+ "             Default: '../plugins'.\n"
+			+ "        -crefs ... exports only the components used by the solution.\n"
+			+ "             Default: all components are exported.\n"
+			+ "        -crefs <additional_component_names> ... can be 'all' (no ') or a list of components;\n"
+			+ "             exports  the  components  used  by  the solution  and  the  components  in  the\n"
+			+ "             additional components list.\n"
+			+ "             Default: all components are exported.\n"
+			+ "        -excludeComponentPkgs ... space separated list of excluded component packages\n"
+			+ "             Default: none is excluded.\n"
 			+ "        -srefs exports only the services used by the solution.\n"
-			+			    "Default: all services are exported.\n"
-			+ "        -srefs <additional_service_names>  or \"all\" exports the services used by the solution and the\n" +
-			"				 services in the additional services list .\n"
-			+			    "Default: all services are exported.\n"
-			+ "        -excludeServicePkgs ... space separated list of excluded service packages \n"
-			+			    "Default: none is excluded.\n"
+			+ "             Default: all services are exported.\n"
+			+ "        -srefs <additional_service_names> ... can  be  'all' (no ')  or  a list of services;\n"
+			+ "             exports  the services  used by the solution  and the services in the additional\n"
+			+ "             services list.\n"
+			+ "             Default: all services are exported.\n"
+			+ "        -excludeServicePkgs ... space separated list of excluded service packages\n"
+			+ "             Default: none is excluded.\n"
 			+ "        -md ws|db|none|both ... take table  metadata from workspace / database / both+check.\n"
 			+ "             Usually you will want to use 'ws'.\n"
 			+ "        -checkmd ... check metadata tables, default false\n"
-			+ "        -sd ... exports sample data. IMPORTANT: all needed DB\n"
-			+ "             servers must already be started\n"
+			+ "        -sd ... exports sample data. IMPORTANT all needed DB servers must already be started\n"
 			+ "        -sdcount <count> ... number of rows to  export per table. Only  makes sense when -sd\n"
 			+ "             is also present. Can be 'all' (without the '). Default: 10000\n"
 			+ "        -i18n ... exports i18n data\n"
 			+ "        -users ... exports users\n"
 			+ "        -tables ... export  all table  information  about  tables from  referenced  servers.\n"
 			+ "             IMPORTANT: all needed DB servers must already be started\n"
-			+ "        -warFileName ... the name of the war file \n"
-			+			"Default: the solution name\n"
-			+ "        -"+overwriteGroups+" ...  overwrites Groups\n"
-			+ "        -"+allowSQLKeywords+" ... allows SQLKeywords \n"
-			+ "        -"+overrideSequenceTypes+" ... overrides Sequence Types \n"
-			+ "        -"+overrideDefaultValues+" ... overrides Default Values \n"
-			+ "        -"+insertNewI18NKeysOnly+" ... inserts NewI18NKeysOnly \n"
-			+ "        -"+importUserPolicy+" ... 0/1/2 \n"
-			+ "        				 don't = 0 \n"
-			+ "        		Default: create users update groups = 1 \n"
-			+ "        				 overwrite completely = 2 \n"
-			+ "        -"+addUsersToAdminGroup+" ... adds Users To Admin Group \n"
-			+ "        -"+updateSequences+" ... updates Sequences \n"
-			+ "        -"+upgradeRepository+" ... automatically upgrade repository if needed \n"
-
-			+ "        -"+createTomcatContextXML+" create a META-INF/context.xml file, please see https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Standard_Implementation for more information \n"
-			+ "        -"+antiResourceLocking+" add antiResourceLocking=\"true\" to Context element, may only be used with createTomcatContextXML \n"
-			+ "        -"+clearReferencesStatic+" add clearReferencesStatic=\"true\" to Context element, may only be used with createTomcatContextXML \n"
-			+ "        -"+clearReferencesStopThreads+" add clearReferencesStopThreads=\"true\" to Context element, may only be used with createTomcatContextXML \n"
-			+ "        -"+clearReferencesStopTimerThreads+" add clearReferencesStopTimerThreads=\"true\" to Context element, may only be used with createTomcatContextXML \n";
+			+ "        -warFileName ... the name of the war file\n"
+			+ "             Default: the solution name\n"
+			+ "        -" + overwriteGroups + " ...  overwrites Groups\n"
+			+ "        -" + allowSQLKeywords + " ... allows SQLKeywords\n"
+			+ "        -" + overrideSequenceTypes + " ... overrides Sequence Types\n"
+			+ "        -" + overrideDefaultValues + " ... overrides Default Values\n"
+			+ "        -" + insertNewI18NKeysOnly + " ... inserts NewI18NKeysOnly\n"
+			+ "        -" + importUserPolicy + " ... 0/1/2 where:\n"
+			+ "             don't = 0\n"
+			+ "             create users & update groups = 1 (default)\n"
+			+ "             overwrite completely = 2\n"
+			+ "        -" + addUsersToAdminGroup + " ... adds Users To Admin Group\n"
+			+ "        -" + updateSequences + " ... updates Sequences\n"
+			+ "        -" + upgradeRepository + " ... automatically upgrade repository if needed\n"
+			+ "        -" + createTomcatContextXML + " ... create   a   META-INF/context.xml  file;   please  see\n"
+			+ "             https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Standard_Impleme\n"
+			+ "             ntation\n"
+			+ "             for more information\n"
+			+ "        -" + antiResourceLocking + " ... add  antiResourceLocking=\"true\"  to  Context element; may\n"
+			+ "             only be used with createTomcatContextXML\n"
+			+ "        -" + clearReferencesStatic + " ... add  clearReferencesStatic=\"true\"  to  Context element;\n"
+			+ "             may only be used with createTomcatContextXML\n"
+			+ "        -" + clearReferencesStopThreads + " ... add  clearReferencesStopThreads=\"true\"  to Context\n"
+			+ "             element; may only be used with createTomcatContextXML\n"
+			+ "        -" + clearReferencesStopTimerThreads + " ... add clearReferencesStopTimerThreads=\"true\" to\n"
+			+ "             Context element; may only be used with createTomcatContextXML.\n";
+		// @formatter:on
 	}
+
 	@Override
 	protected void parseArguments(HashMap<String, String> argsMap)
 	{
@@ -214,25 +218,16 @@ public class WarArgumentChest extends AbstractArgumentChest
 		return isExportActiveSolutionOnly;
 	}
 
-	/**
-	 * @return the paths to plugin directories
-	 */
 	public String getPluginLocations()
 	{
 		return pluginLocations;
 	}
 
-	/**
-	 * @return the selectedComponents
-	 */
 	public String getSelectedComponents()
 	{
 		return selectedComponents;
 	}
 
-	/**
-	 * @return the selectedServices
-	 */
 	public String getSelectedServices()
 	{
 		return selectedServices;
@@ -289,107 +284,67 @@ public class WarArgumentChest extends AbstractArgumentChest
 		return warFileName;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isOverwriteGroups()
 	{
 		return argumentsMap.containsKey(overwriteGroups);
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isAllowSQLKeywords()
 	{
 		return argumentsMap.containsKey(allowSQLKeywords);
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isInsertNewI18NKeysOnly()
 	{
 		return argumentsMap.containsKey(insertNewI18NKeysOnly);
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isOverrideDefaultValues()
 	{
 		return argumentsMap.containsKey(overrideDefaultValues);
 	}
 
-	/**
-	 * @return
-	 */
 	public int getImportUserPolicy()
 	{
-		if (argumentsMap.containsKey(importUserPolicy))
-			return Utils.getAsInteger(argumentsMap.get(importUserPolicy));
+		if (argumentsMap.containsKey(importUserPolicy)) return Utils.getAsInteger(argumentsMap.get(importUserPolicy));
 		return IXMLImportUserChannel.IMPORT_USER_POLICY_CREATE_U_UPDATE_G;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isAddUsersToAdminGroup()
 	{
 		return argumentsMap.containsKey(addUsersToAdminGroup);
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isUpdateSequences()
 	{
 		return argumentsMap.containsKey(updateSequences);
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean automaticallyUpdateRepository()
 	{
 		return argumentsMap.containsKey(upgradeRepository);
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isCreateTomcatContextXML()
 	{
 		return argumentsMap.containsKey(createTomcatContextXML);
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isClearReferencesStatic()
 	{
 		return argumentsMap.containsKey(clearReferencesStatic);
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isClearReferencesStopThreads()
 	{
 		return argumentsMap.containsKey(clearReferencesStopThreads);
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isClearReferencesStopTimerThreads()
 	{
 		return argumentsMap.containsKey(clearReferencesStopTimerThreads);
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isAntiResourceLocking()
 	{
 		return argumentsMap.containsKey(antiResourceLocking);
