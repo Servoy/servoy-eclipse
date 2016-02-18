@@ -58,7 +58,7 @@ import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
 import com.servoy.j2db.server.ngclient.template.FormWrapper;
 import com.servoy.j2db.server.ngclient.template.IFormElementValidator;
 import com.servoy.j2db.server.ngclient.template.PartWrapper;
-import com.servoy.j2db.server.ngclient.utils.NGUtils;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -86,7 +86,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 
 	private String[] getSolutionStyleSheets(FlattenedSolution fs)
 	{
-		List<String> styleSheets = NGUtils.getOrderedStyleSheets(fs);
+		List<String> styleSheets = PersistHelper.getOrderedStyleSheets(fs);
 		if (styleSheets != null && styleSheets.size() > 0)
 		{
 			Collections.reverse(styleSheets);

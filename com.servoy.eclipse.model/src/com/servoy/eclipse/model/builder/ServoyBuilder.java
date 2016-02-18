@@ -154,7 +154,6 @@ import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -4852,7 +4851,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 							continue;
 						}
-						if (NGUtils.getOrderedStyleSheets(servoyProject.getFlattenedSolution()).size() == 0)
+						if (PersistHelper.getOrderedStyleSheets(servoyProject.getFlattenedSolution()).size() == 0)
 						{
 							form.acceptVisitor(new IPersistVisitor()
 							{
@@ -4914,7 +4913,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 				else
 				{
-					if (NGUtils.getOrderedStyleSheets(servoyProject.getFlattenedSolution()).size() == 0)
+					if (PersistHelper.getOrderedStyleSheets(servoyProject.getFlattenedSolution()).size() == 0)
 					{
 						form.acceptVisitor(new IPersistVisitor()
 						{

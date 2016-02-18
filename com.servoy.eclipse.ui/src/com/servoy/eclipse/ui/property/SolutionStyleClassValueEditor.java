@@ -32,8 +32,8 @@ import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistHelper;
 
 /**
  * Value editor for style classes defined at solution level (ngclient), opens the style and selects the style class.
@@ -52,7 +52,7 @@ public class SolutionStyleClassValueEditor implements IValueEditor<String>
 
 	public void openEditor(String value)
 	{
-		List<String> styleSheets = NGUtils.getOrderedStyleSheets(ModelUtils.getEditingFlattenedSolution(solution));
+		List<String> styleSheets = PersistHelper.getOrderedStyleSheets(ModelUtils.getEditingFlattenedSolution(solution));
 		for (String styleSheet : styleSheets)
 		{
 			Media media = ModelUtils.getEditingFlattenedSolution(solution).getMedia(styleSheet);
@@ -84,7 +84,7 @@ public class SolutionStyleClassValueEditor implements IValueEditor<String>
 
 	public boolean canEdit(String value)
 	{
-		List<String> medias = NGUtils.getOrderedStyleSheets(ModelUtils.getEditingFlattenedSolution(solution));
+		List<String> medias = PersistHelper.getOrderedStyleSheets(ModelUtils.getEditingFlattenedSolution(solution));
 		for (String mediaName : medias)
 		{
 			if (ModelUtils.getEditingFlattenedSolution(solution).getMedia(mediaName) != null)
