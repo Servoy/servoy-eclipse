@@ -18,19 +18,38 @@ package com.servoy.eclipse.designer.editor.commands;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.eclipse.gef.commands.Command;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.wizards.ICheckBoxView;
+import com.servoy.eclipse.ui.wizards.SelectAllButtonsBar;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
@@ -88,6 +107,119 @@ public class FormElementDeleteCommand extends Command
 		this.children = children;
 	}
 
+	private class ConfirmDeleteDialog extends Dialog implements ICheckStateListener, ICheckBoxView
+	{
+		private final Set<IPersist> overridingPersists;
+		private CheckboxTableViewer checkboxTableViewer;
+		private HashMap<String, IPersist> options;
+		Set<IPersist> selected;
+		private final String description;
+
+		protected ConfirmDeleteDialog(Shell parentShell, String description, Set<IPersist> overridingPersists)
+		{
+			super(parentShell);
+			this.description = description;
+			this.overridingPersists = overridingPersists;
+		}
+
+		@Override
+		protected Control createContents(Composite parent)
+		{
+			GridLayout gridLayout = new GridLayout();
+			parent.setLayout(gridLayout);
+
+			Label l = new Label(parent, SWT.NONE);
+			l.setText(description);
+
+			options = new HashMap<String, IPersist>();
+			checkboxTableViewer = CheckboxTableViewer.newCheckList(parent, SWT.BORDER | SWT.FULL_SELECTION);
+			checkboxTableViewer.setContentProvider(new IStructuredContentProvider()
+			{
+
+				@Override
+				public void dispose()
+				{
+				}
+
+				@Override
+				public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
+				{
+				}
+
+				public Object[] getElements(Object inputElement)
+				{
+					if (inputElement instanceof Set< ? >)
+					{
+						Set<IPersist> persists = (Set<IPersist>)inputElement;
+						String[] items = new String[persists.size()];
+						int i = 0;
+						for (IPersist p : persists)
+						{
+							String item = ((Form)p.getAncestor(IRepository.FORMS)).getName();
+							items[i++] = item;
+							options.put(item, p);
+						}
+						return items;
+					}
+					return null;
+				}
+			});
+			checkboxTableViewer.setInput(overridingPersists);
+			selected = new HashSet<>(overridingPersists);
+			gridLayout.numColumns = 2;
+			GridData gridData = new GridData();
+			gridData.horizontalAlignment = GridData.FILL;
+			gridData.verticalAlignment = GridData.FILL;
+			gridData.grabExcessVerticalSpace = true;
+			gridData.grabExcessHorizontalSpace = true;
+			gridData.horizontalSpan = 2;
+			checkboxTableViewer.getTable().setLayoutData(gridData);
+			checkboxTableViewer.addCheckStateListener(this);
+			Composite container = new Composite(parent, SWT.NONE);
+			GridLayout layout = new GridLayout(2, true);
+			container.setLayout(layout);
+			SelectAllButtonsBar selectAllButtons = new SelectAllButtonsBar(this, container);
+			checkboxTableViewer.setAllChecked(true);
+			selectAllButtons.disableSelectAll();
+			return super.createContents(parent);
+		}
+
+		@Override
+		public void checkStateChanged(CheckStateChangedEvent event)
+		{
+			if (event.getChecked())
+			{
+				selected.add(options.get(event.getElement()));
+			}
+			else
+			{
+				selected.remove(options.get(event.getElement()));
+			}
+		}
+
+		@Override
+		public void selectAll()
+		{
+			checkboxTableViewer.setAllChecked(true);
+			selected.addAll(overridingPersists);
+		}
+
+		@Override
+		public void deselectAll()
+		{
+			checkboxTableViewer.setAllChecked(false);
+			selected.removeAll(overridingPersists);
+		}
+
+		@Override
+		protected void configureShell(Shell newShell)
+		{
+			super.configureShell(newShell);
+			newShell.setText("Element overriden in subforms");
+		}
+
+	}
+
 	@Override
 	public void execute()
 	{
@@ -96,12 +228,20 @@ public class FormElementDeleteCommand extends Command
 		ArrayList<IPersist> confirmedChildren = new ArrayList<IPersist>();
 		for (IPersist child : children)
 		{
-			if (isPeristOverriden(child))
+			Set<IPersist> overriding = getOverridingPersists(child);
+			if (!overriding.isEmpty())
 			{
 				String name = child instanceof ISupportName ? ((ISupportName)child).getName() : "";
-				if (name == null) name = "";
-				if (!MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Confirm delete",
-					"The element '" + name + "' is overriden in a subform, do you want to delete it ?")) //$NON-NLS-1$
+				if (name == null) name = child.toString();
+
+				ConfirmDeleteDialog dialog = new ConfirmDeleteDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+					"Delete the overidden element '" + name + "' from the following subforms:", overriding);
+				dialog.setBlockOnOpen(true);
+				if (dialog.open() == Window.OK)
+				{
+					confirmedChildren.addAll(dialog.selected);
+				}
+				else
 				{
 					continue;
 				}
@@ -119,8 +259,7 @@ public class FormElementDeleteCommand extends Command
 			}
 		}
 		setLabel(label);
-		redo();
-
+		if (children.length > 0) redo();
 	}
 
 	@Override
@@ -166,8 +305,9 @@ public class FormElementDeleteCommand extends Command
 		return children;
 	}
 
-	private static boolean isPeristOverriden(IPersist persist)
+	private static Set<IPersist> getOverridingPersists(IPersist persist)
 	{
+		Set<IPersist> overriding = new HashSet<IPersist>();
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		//retrieve all the forms;
@@ -185,12 +325,12 @@ public class FormElementDeleteCommand extends Command
 					IPersist p = elementsIte.next();
 					if (p instanceof ISupportExtendsID && (((ISupportExtendsID)p).getExtendsID() == persist.getID()))
 					{
-						return true;
+						overriding.add(p);
 					}
 				}
 			}
 		}
 
-		return false;
+		return overriding;
 	}
 }
