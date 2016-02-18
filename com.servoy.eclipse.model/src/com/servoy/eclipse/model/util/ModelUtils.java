@@ -69,11 +69,11 @@ import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
-import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.ui.ISupportRowStyling;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyStyleSheet;
 import com.servoy.j2db.util.StringComparator;
 import com.servoy.j2db.util.Utils;
@@ -144,7 +144,7 @@ public class ModelUtils
 		form = flattenedSolution.getFlattenedForm(form);
 		Solution solution = (Solution)form.getRootObject();
 
-		List<String> mediaStyleSheets = NGUtils.getOrderedStyleSheets(flattenedSolution);
+		List<String> mediaStyleSheets = PersistHelper.getOrderedStyleSheets(flattenedSolution);
 		if (mediaStyleSheets != null && mediaStyleSheets.size() == 0 && persist instanceof IFormElement && !(persist instanceof WebComponent))
 		{
 			// legacy component, no css at solution level
