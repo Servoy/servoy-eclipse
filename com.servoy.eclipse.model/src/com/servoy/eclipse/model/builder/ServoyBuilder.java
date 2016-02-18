@@ -3128,7 +3128,12 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									if (!relation.isGlobal() && relation.getPrimaryDataSource() != null)
 									{
 										Form form = tabFlattenedSolution.getForm(tab.getContainsFormID());
+<<<<<<< HEAD
 										if (form != null && !relation.getForeignDataSource().equals(form.getDataSource()))
+=======
+										if (form != null && (!relation.getForeignServerName().equals(form.getServerName()) ||
+											!relation.getForeignTableName().equals(form.getTableName())))
+>>>>>>> refs/heads/master
 										{
 											ServoyMarker mk = MarkerMessages.FormRelatedTabDifferentTable.fill(form.getName(), relation.getName());
 											addMarker(project, mk.getType(), mk.getText(), -1, FORM_RELATED_TAB_DIFFERENT_TABLE, IMarker.PRIORITY_NORMAL, null,
@@ -3861,6 +3866,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							{
 								if (!server.getName().equals(stn[0]))
 								{
+<<<<<<< HEAD
 									String customSeverity = getSeverity(VALUELIST_DB_SERVER_DUPLICATE.getLeft(),
 										VALUELIST_DB_SERVER_DUPLICATE.getRight().name(), vl);
 									if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
@@ -3869,6 +3875,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										problems.add(new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_DB_SERVER_DUPLICATE.getRight()),
 											mk.getText()));
 									}
+=======
+									ServoyMarker mk = MarkerMessages.ValuelistDBTableNotAccessible.fill(vl.getName(), stn[1]);
+									problems.add(
+										new Problem(mk.getType(), getTranslatedSeverity(customSeverity, VALUELIST_ENTITY_NOT_FOUND.getRight()), mk.getText()));
+>>>>>>> refs/heads/master
 								}
 								table = server.getTable(stn[1]);
 								if (table == null)
