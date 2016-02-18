@@ -28,16 +28,17 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 			var utils = $selectionUtils.getUtilsForScope($scope);
 
 			var layoutType = null;
+			var formName = null;
 			var packageOrder = null;
-			var loadPalette = function()
+			var loadPalette = function(formName)
 			{
-				$http({method: 'GET', url: '/designer/palette?layout='+layoutType}).success(function(data) {
-					$scope.packages = data;
+				$http({method: 'GET', url: '/designer/palette?layout='+layoutType+'&formName='+formName}).then(function(got) {
+					$scope.packages = got.data;
 					packageOrder = {};
 					packageOrder[layoutType] = [];
-					for(var i = 0; i < data.length; i++) {
-						data[i].isOpen = "true";
-						packageOrder[layoutType].push(data[i].packageName);
+					for(var i = 0; i < got.data.length; i++) {
+						got.data[i].isOpen = "true";
+						packageOrder[layoutType].push(got.data[i].packageName);
 					}
 				});
 			}
@@ -47,17 +48,18 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 					layoutType = "Absolute-Layout"; // TODO extract as constant, this is a key in the main attributes of the manifest
 				else
 					layoutType = "Responsive-Layout";
-				loadPalette();
+				formName = scope.getFormName();
+				loadPalette(formName);
 			});
 
 			$scope.showPreviewImage = function (preview)  {
-				  var host = $(location).attr('host');
-				  var protocol = $(location).attr('protocol');
-				  $editorService.showImageInOverlayDiv(protocol+"//"+host+"/"+preview);
+					var host = angular.element(location).attr('host');
+					var protocol = angular.element(location).attr('protocol');
+					$editorService.showImageInOverlayDiv(protocol+"//"+host+"/"+preview);
 			};
 
 			$rootScope.$on(EDITOR_EVENTS.RELOAD_PALETTE, function(e){
-				loadPalette();
+				loadPalette(formName);
 			});
 
 			/**
@@ -71,7 +73,6 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 				var mouseentercallback;
 				var mouseleavecallback;
 				var mouseupcallback;
-				var t;
 				var mousemovecallback = $scope.registerDOMEvent("mousemove","EDITOR", function(ev){
 					if (dragClone)
 					{
@@ -114,7 +115,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 					}
 					else
 					{
-						dragClone = $(event.target).clone();
+						dragClone = angular.element(event.target).clone();
 						utils.setDraggingFromPallete(type);
 						$scope.setSelection(null);
 						dragClone.attr('id', 'dragNode')
@@ -126,10 +127,13 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 							'pointer-events': 'none',
 							'list-style-type': 'none'
 						})
-						$('body').append(dragClone);
+						angular.element('body').append(dragClone);
 						if (type=='component' || type == "layout" || type == "template") {
 							if (type=='component') {
-								angularElement = $scope.getEditorContentRootScope().createComponent('<div style="border-style: dotted; "><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-autoapply-disabled=\'true\'/></div>',model);
+								if ($scope.isAbsoluteFormLayout())
+									angularElement = $scope.getEditorContentRootScope().createComponent('<div style="border-style: dotted; "><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-autoapply-disabled=\'true\'/></div>',model);
+								else
+									angularElement = $scope.getEditorContentRootScope().createComponent(tagName,model);
 							}
 							else {
 								// tagname is the full element

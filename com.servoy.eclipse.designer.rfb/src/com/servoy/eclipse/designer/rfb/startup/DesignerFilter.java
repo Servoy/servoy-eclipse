@@ -18,6 +18,8 @@
 package com.servoy.eclipse.designer.rfb.startup;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -47,19 +49,26 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 import org.osgi.service.prefs.BackingStoreException;
-import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.NGPackageSpecification;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Template;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.FormElement;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HTTPUtils;
@@ -89,6 +98,7 @@ public class DesignerFilter implements Filter
 			HttpServletRequest request = (HttpServletRequest)servletRequest;
 			String uri = request.getRequestURI();
 			String layoutType = request.getParameter("layout");
+			String formName = request.getParameter("formName");
 			if (uri != null && uri.endsWith("palette"))
 			{
 				WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
@@ -319,6 +329,18 @@ public class DesignerFilter implements Filter
 									jsonWriter.key("componentType").value("component");
 									jsonWriter.key("displayName").value(spec.getDisplayName());
 									jsonWriter.key("tagName").value(FormTemplateGenerator.getTagName(spec.getName()));
+
+									FlattenedSolution fl = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
+									WebComponent obj = (WebComponent)fl.getSolution().getChangeHandler().createNewObject(null, IRepository.WEBCOMPONENTS);
+
+									Form form = fl.getForm(formName);
+
+									FormElement formElement = FormElementHelper.INSTANCE.getFormElement(obj, fl, null, false);
+									StringWriter stringWriter = new StringWriter();
+									PrintWriter printWriter = new PrintWriter(stringWriter);
+									FormLayoutGenerator.generateFormElement(printWriter, formElement, form, true, false);
+									//jsonWriter.key("tagName").value(stringWriter.toString());
+
 									Map<String, Object> model = new HashMap<String, Object>();
 									PropertyDescription pd = spec.getProperty("size");
 									if (pd != null && pd.getDefaultValue() != null)
@@ -361,6 +383,10 @@ public class DesignerFilter implements Filter
 					Debug.error("Exception during designe palette generation", ex);
 				}
 				catch (BackingStoreException e)
+				{
+					Debug.error(e);
+				}
+				catch (RepositoryException e)
 				{
 					Debug.error(e);
 				}
