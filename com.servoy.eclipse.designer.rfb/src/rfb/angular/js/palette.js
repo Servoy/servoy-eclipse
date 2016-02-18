@@ -132,8 +132,9 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 							if (type=='component') {
 								if ($scope.isAbsoluteFormLayout())
 									angularElement = $scope.getEditorContentRootScope().createComponent('<div style="border-style: dotted; "><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-autoapply-disabled=\'true\'/></div>',model);
-								else
+								else{
 									angularElement = $scope.getEditorContentRootScope().createComponent(tagName,model);
+								}
 							}
 							else {
 								// tagname is the full element

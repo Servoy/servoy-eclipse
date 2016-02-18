@@ -89,7 +89,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				return eventCallback;
 			}
 
-
+			$scope.getFormName = function () {
+			    return formName;
+			}
+			
 			$scope.getContentAreaStyle = function() {
 				var contentAreaStyle = {};
 				if ($scope.isAbsoluteFormLayout()) {
