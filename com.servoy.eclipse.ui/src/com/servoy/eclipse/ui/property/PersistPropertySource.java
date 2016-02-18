@@ -78,6 +78,7 @@ import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.DesignComponentFactory;
+import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.repository.I18NMessagesUtil;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -1618,7 +1619,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 		boolean multiSelect = persist.getRootObject() instanceof Solution &&
 			((Solution)persist.getRootObject()).getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE &&
-			((Solution)persist.getRootObject()).getStyleSheetID() > 0;
+			PersistHelper.getOrderedStyleSheets(ModelUtils.getEditingFlattenedSolution(persist)).size() > 0;
 		if (multiSelect)
 		{
 			// ng client, style at solutionlevel
@@ -2122,6 +2123,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				if ("groupID".equals(id))
 				{
 					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, persistContext.getPersist().getParent(), true);
+				}
+				else if ("solutionType".equals(id))
+				{
+					ServoyModelManager.getServoyModelManager().getServoyModel().fireActiveProjectUpdated(IActiveProjectListener.SOLUTION_TYPE_CHANGED);
 				}
 				else
 				{

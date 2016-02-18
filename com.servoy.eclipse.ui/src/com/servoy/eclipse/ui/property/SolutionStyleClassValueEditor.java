@@ -17,6 +17,9 @@
 
 package com.servoy.eclipse.ui.property;
 
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.IEditorPart;
@@ -24,11 +27,13 @@ import org.eclipse.wst.sse.ui.StructuredTextEditor;
 
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistHelper;
 
 /**
  * Value editor for style classes defined at solution level (ngclient), opens the style and selects the style class.
@@ -47,17 +52,31 @@ public class SolutionStyleClassValueEditor implements IValueEditor<String>
 
 	public void openEditor(String value)
 	{
-		if (solution.getStyleSheetID() > 0)
+		List<String> styleSheets = PersistHelper.getOrderedStyleSheets(ModelUtils.getEditingFlattenedSolution(solution));
+		for (String styleSheet : styleSheets)
 		{
-			Media media = ModelUtils.getEditingFlattenedSolution(solution).getMedia(solution.getStyleSheetID());
+			Media media = ModelUtils.getEditingFlattenedSolution(solution).getMedia(styleSheet);
 			if (media != null)
 			{
-				Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, true);
-				IEditorPart editor = EditorUtil.openFileEditor(ResourcesPlugin.getWorkspace().getRoot().getFile(
-					new Path(pathPair.getLeft() + pathPair.getRight())));
-				if (editor instanceof StructuredTextEditor)
+				String cssContent = null;
+				try
 				{
-					EditorUtil.selectAndReveal((StructuredTextEditor)editor, value);
+					cssContent = new String(media.getMediaData(), "UTF-8");
+				}
+				catch (UnsupportedEncodingException e)
+				{
+					ServoyLog.logError(e);
+				}
+				if (cssContent.contains(value))
+				{
+					Pair<String, String> pathPair = SolutionSerializer.getFilePath(media, true);
+					IEditorPart editor = EditorUtil.openFileEditor(
+						ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(pathPair.getLeft() + pathPair.getRight())));
+					if (editor instanceof StructuredTextEditor)
+					{
+						EditorUtil.selectAndReveal((StructuredTextEditor)editor, value);
+					}
+					break;
 				}
 			}
 		}
@@ -65,6 +84,14 @@ public class SolutionStyleClassValueEditor implements IValueEditor<String>
 
 	public boolean canEdit(String value)
 	{
-		return solution.getStyleSheetID() > 0 && ModelUtils.getEditingFlattenedSolution(solution).getMedia(solution.getStyleSheetID()) != null;
+		List<String> medias = PersistHelper.getOrderedStyleSheets(ModelUtils.getEditingFlattenedSolution(solution));
+		for (String mediaName : medias)
+		{
+			if (ModelUtils.getEditingFlattenedSolution(solution).getMedia(mediaName) != null)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }

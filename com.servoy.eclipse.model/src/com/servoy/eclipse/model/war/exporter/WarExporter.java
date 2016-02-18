@@ -215,8 +215,7 @@ public class WarExporter
 
 		TreeSet<String> allServices = new TreeSet<String>();
 		// append internal servoy services
-		NGPackageSpecification<WebObjectSpecification> servoyservices = WebServiceSpecProvider.getInstance().getServicesInPackage(
-			"servoyservices");
+		NGPackageSpecification<WebObjectSpecification> servoyservices = WebServiceSpecProvider.getInstance().getServicesInPackage("servoyservices");
 		if (servoyservices != null) allServices.addAll(servoyservices.getSpecifications().keySet());
 		// append user services
 		if (exportModel.getExportedServices() != null) allServices.addAll(exportModel.getExportedServices());
@@ -258,15 +257,17 @@ public class WarExporter
 	{
 		try
 		{
+			ComponentResourcesExporter.copyDefaultComponentsAndServices(tmpWarDir, exportModel.getExcludedComponentPackages(),
+				exportModel.getExcludedServicePackages());
+
 			StringBuilder componentLocations = new StringBuilder();
-			ComponentResourcesExporter.copyDefaultComponentsAndServices(tmpWarDir);
-			componentLocations.append(ComponentResourcesExporter.getComponentDirectoryNames());
-			componentLocations.append(copyUserDefinedComponents(tmpWarDir, monitor));
+			componentLocations.append(ComponentResourcesExporter.getComponentDirectoryNames(exportModel.getExcludedComponentPackages()));
+			componentLocations.append(copyUserDefinedComponents(tmpWarDir, exportModel.getExcludedComponentPackages(), monitor));
 			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/components.properties"), componentLocations.toString());
 
 			StringBuilder servicesLocations = new StringBuilder();
-			servicesLocations.append(ComponentResourcesExporter.getServicesDirectoryNames());
-			servicesLocations.append(copyUserDefinedServices(tmpWarDir, monitor));
+			servicesLocations.append(ComponentResourcesExporter.getServicesDirectoryNames(exportModel.getExcludedServicePackages()));
+			servicesLocations.append(copyUserDefinedServices(tmpWarDir, exportModel.getExcludedServicePackages(), monitor));
 			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/services.properties"), servicesLocations.toString());
 			copyNGLibs(targetLibDir);
 		}
@@ -415,7 +416,7 @@ public class WarExporter
 		}
 	}
 
-	private String copyUserDefinedComponentsOrServices(File tmpWarDir, String copyFrom) throws ExportException
+	private String copyUserDefinedComponentsOrServices(File tmpWarDir, String copyFrom, List<String> excludedPackages) throws ExportException
 	{
 		StringBuilder locations = new StringBuilder();
 		ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
@@ -448,8 +449,12 @@ public class WarExporter
 							IFolder resourceFolder = (IFolder)resource;
 							if ((resourceFolder).getFile("META-INF/MANIFEST.MF").exists())
 							{
-								locations.append(";/" + resourceFolder.getName().split("\\.")[0]);
-								copyDir(new File(resource.getRawLocationURI()), new File(tmpWarDir, resourceFolder.getName()), true);
+								String packageName = resourceFolder.getName().split("\\.")[0];
+								if (excludedPackages == null || excludedPackages.indexOf(packageName) == -1)
+								{
+									locations.append(";/" + packageName);
+									copyDir(new File(resource.getRawLocationURI()), new File(tmpWarDir, resourceFolder.getName()), true);
+								}
 							}
 						}
 						else if (resource instanceof IFile)
@@ -475,10 +480,10 @@ public class WarExporter
 	 * @param locations
 	 * @throws ExportException
 	 */
-	private String copyUserDefinedComponents(File tmpWarDir, IProgressMonitor monitor) throws ExportException
+	private String copyUserDefinedComponents(File tmpWarDir, List<String> excludedComponentPackages, IProgressMonitor monitor) throws ExportException
 	{
 		monitor.subTask("Copy user-defined components");
-		return copyUserDefinedComponentsOrServices(tmpWarDir, COMPONENTS_DIR_NAME);
+		return copyUserDefinedComponentsOrServices(tmpWarDir, COMPONENTS_DIR_NAME, excludedComponentPackages);
 	}
 
 	/**
@@ -488,10 +493,10 @@ public class WarExporter
 	 * @param locations
 	 * @throws ExportException
 	 */
-	private String copyUserDefinedServices(File tmpWarDir, IProgressMonitor monitor) throws ExportException
+	private String copyUserDefinedServices(File tmpWarDir, List<String> excludedServicePackages, IProgressMonitor monitor) throws ExportException
 	{
 		monitor.subTask("Copy user-defined services");
-		return copyUserDefinedComponentsOrServices(tmpWarDir, SERVICES_DIR_NAME);
+		return copyUserDefinedComponentsOrServices(tmpWarDir, SERVICES_DIR_NAME, excludedServicePackages);
 	}
 
 	/**

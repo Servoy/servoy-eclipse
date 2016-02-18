@@ -41,14 +41,13 @@ import com.servoy.j2db.util.Utils;
  */
 public class DesignNGClientWindow extends NGClientWindow
 {
-
 	/**
 	 * @param websocketSession
 	 * @param windowName
 	 */
-	public DesignNGClientWindow(INGClientWebsocketSession websocketSession, String windowName)
+	public DesignNGClientWindow(INGClientWebsocketSession websocketSession, String windowUuid, String windowName)
 	{
-		super(websocketSession, windowName);
+		super(websocketSession, windowUuid, windowName);
 	}
 
 	@Override
@@ -108,8 +107,9 @@ public class DesignNGClientWindow extends NGClientWindow
 	@Override
 	protected Pair<String, Boolean> getRealFormURLAndSeeIfItIsACopy(Form form, String realFormName, boolean addSessionID)
 	{
-		return new Pair<String, Boolean>(getDefaultFormURLStart(form, realFormName) + "?lm:" + System.currentTimeMillis() +
-			(addSessionID ? "&sessionId=" + getSession().getUuid() : ""), Boolean.FALSE);
+		return new Pair<String, Boolean>(
+			getDefaultFormURLStart(form, realFormName) + "?lm:" + System.currentTimeMillis() + (addSessionID ? "&sessionId=" + getSession().getUuid() : ""),
+			Boolean.FALSE);
 	}
 
 }

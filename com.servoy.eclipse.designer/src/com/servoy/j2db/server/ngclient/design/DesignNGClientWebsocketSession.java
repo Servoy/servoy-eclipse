@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.websocket.IClientService;
+import org.sablo.websocket.IWebsocketSession;
 import org.sablo.websocket.impl.ClientService;
 
 import com.servoy.j2db.IFormController;
@@ -57,10 +58,11 @@ public class DesignNGClientWebsocketSession extends NGClientWebsocketSession
 		return super.createClientService(name);
 	}
 
+
 	@Override
-	public INGClientWindow createWindow(String windowName)
+	public INGClientWindow createWindow(IWebsocketSession session, String windowUuid, String windowName)
 	{
-		return new DesignNGClientWindow(this, windowName);
+		return new DesignNGClientWindow(this, windowUuid, windowName);
 	}
 
 

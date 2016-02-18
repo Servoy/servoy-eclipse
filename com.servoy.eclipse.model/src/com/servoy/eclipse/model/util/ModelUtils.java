@@ -35,11 +35,11 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
-import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.NGPackageSpecification;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
@@ -73,6 +73,7 @@ import com.servoy.j2db.ui.ISupportRowStyling;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.IStyleSheet;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.ServoyStyleSheet;
 import com.servoy.j2db.util.StringComparator;
 import com.servoy.j2db.util.Utils;
@@ -143,12 +144,8 @@ public class ModelUtils
 		form = flattenedSolution.getFlattenedForm(form);
 		Solution solution = (Solution)form.getRootObject();
 
-		Media media = null;
-		if (solution.getStyleSheetID() > 0)
-		{
-			media = flattenedSolution.getMedia(solution.getStyleSheetID());
-		}
-		if (media == null && persist instanceof IFormElement && !(persist instanceof WebComponent))
+		List<String> mediaStyleSheets = PersistHelper.getOrderedStyleSheets(flattenedSolution);
+		if (mediaStyleSheets != null && mediaStyleSheets.size() == 0 && persist instanceof IFormElement && !(persist instanceof WebComponent))
 		{
 			// legacy component, no css at solution level
 			return new Pair<>(getStyleClasses(flattenedSolution.getStyleForForm(form, null), lookupName, form.getStyleClass()), null);
@@ -189,36 +186,43 @@ public class ModelUtils
 			}
 		}
 
-		if (media != null)
+		if (mediaStyleSheets != null)
 		{
-			try
+			for (String styleSheet : mediaStyleSheets)
 			{
-				String cssContent = new String(media.getMediaData(), "UTF-8");
-				IStyleSheet ss = new ServoyStyleSheet(cssContent, media.getName());
-				for (String cssSelector : ss.getStyleNames())
+				Media media = flattenedSolution.getMedia(styleSheet);
+				if (media != null)
 				{
-					if (cssSelector.contains("."))
+					try
 					{
-						String[] selectors = cssSelector.split("\\.");
-						for (int i = 0; i < selectors.length; i++)
+						String cssContent = new String(media.getMediaData(), "UTF-8");
+						IStyleSheet ss = new ServoyStyleSheet(cssContent, media.getName());
+						for (String cssSelector : ss.getStyleNames())
 						{
-							if (i == 0 && selectors.length > 1) continue;
-							String selector = selectors[i];
-							int cutIndex = selector.indexOf(" ");
-							int pseudoClassIndex = selector.indexOf(":");
-							cutIndex = Math.min(Math.max(cutIndex, 0), Math.max(pseudoClassIndex, 0));
-							if (cutIndex > 0)
+							if (cssSelector.contains("."))
 							{
-								selector = selector.substring(0, cutIndex);
+								String[] selectors = cssSelector.split("\\.");
+								for (int i = 0; i < selectors.length; i++)
+								{
+									if (i == 0 && selectors.length > 1) continue;
+									String selector = selectors[i];
+									int cutIndex = selector.indexOf(" ");
+									int pseudoClassIndex = selector.indexOf(":");
+									cutIndex = Math.min(Math.max(cutIndex, 0), Math.max(pseudoClassIndex, 0));
+									if (cutIndex > 0)
+									{
+										selector = selector.substring(0, cutIndex);
+									}
+									cssClasses.add(selector);
+								}
 							}
-							cssClasses.add(selector);
 						}
 					}
+					catch (UnsupportedEncodingException ex)
+					{
+						ServoyLog.logError(ex);
+					}
 				}
-			}
-			catch (UnsupportedEncodingException ex)
-			{
-				ServoyLog.logError(ex);
 			}
 		}
 
@@ -306,16 +310,15 @@ public class ModelUtils
 			else
 			{
 				styleName = styleParts[styleParts.length - 1];
-				if (styleParts.length > 1 &&
-					(styleName.equals(ISupportRowStyling.CLASS_ODD) || styleName.equals(ISupportRowStyling.CLASS_EVEN) || styleName.equals(ISupportRowStyling.CLASS_SELECTED)))
+				if (styleParts.length > 1 && (styleName.equals(ISupportRowStyling.CLASS_ODD) || styleName.equals(ISupportRowStyling.CLASS_EVEN) ||
+					styleName.equals(ISupportRowStyling.CLASS_SELECTED)))
 				{
 					styleName = styleParts[styleParts.length - 2];
 					stylePartsCount--;
 				}
 
 				if ((matchedFormPrefix && stylePartsCount == 1) // found a match with form prefix, skip root matches
-					||
-					stylePartsCount > 2 || !styleName.startsWith(lookupName) || (stylePartsCount == 2 && !styleParts[0].equals(formPrefix)))
+				|| stylePartsCount > 2 || !styleName.startsWith(lookupName) || (stylePartsCount == 2 && !styleParts[0].equals(formPrefix)))
 				{
 					continue;
 				}
@@ -438,8 +441,9 @@ public class ModelUtils
 	{
 		// probably Servoy developer was started via a workspace exporter app. - it must not initialize core/ui and other related projects
 		// but some extension points these use (for example DLTK extension points) will cause them to get loaded; do not allow this!
-		if (ModelUtils.isUIDisabled()) throw new RuntimeException(bundleName != null ? "'" + bundleName +
-			"' bundle will not be started as Servoy is started without UI. Please ignore this log message." : "Assertion failed. UI is marked as not running.");
+		if (ModelUtils.isUIDisabled()) throw new RuntimeException(
+			bundleName != null ? "'" + bundleName + "' bundle will not be started as Servoy is started without UI. Please ignore this log message."
+				: "Assertion failed. UI is marked as not running.");
 	}
 
 	public static boolean isUIDisabled()
