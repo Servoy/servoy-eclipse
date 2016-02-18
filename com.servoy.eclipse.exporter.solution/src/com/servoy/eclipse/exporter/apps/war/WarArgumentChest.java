@@ -103,14 +103,14 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -crefs <additional_component_names> or \"all\" exports the components used by the solution and the\n" +
 			"				 components in the additional components list .\n"
 			+			    "Default: all components are exported.\n"
-			+ "        -cexcludedpacks ... the list of excluded component packages \n"
+			+ "        -excludeComponentPkgs ... space separated list of excluded component packages \n"
 			+			    "Default: none is excluded.\n"
 			+ "        -srefs exports only the services used by the solution.\n"
 			+			    "Default: all services are exported.\n"
 			+ "        -srefs <additional_service_names>  or \"all\" exports the services used by the solution and the\n" +
 			"				 services in the additional services list .\n"
 			+			    "Default: all services are exported.\n"
-			+ "        -sexcludedpacks ... the list of excluded service packages \n"
+			+ "        -excludeServicePkgs ... space separated list of excluded service packages \n"
 			+			    "Default: none is excluded.\n"
 			+ "        -md ws|db|none|both ... take table  metadata from workspace / database / both+check.\n"
 			+ "             Usually you will want to use 'ws'.\n"
@@ -158,8 +158,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 		if (pluginLocations == null) pluginLocations = "developer/../plugins";
 		selectedComponents = parseComponentsArg("crefs", argsMap);
 		selectedServices = parseComponentsArg("srefs", argsMap);
-		excludedComponentPackages = parseComponentsArg("cexcludedpacks", argsMap);
-		excludedServicePackages = parseComponentsArg("sexcludedpacks", argsMap);
+		excludedComponentPackages = parseComponentsArg("excludeComponentPkgs", argsMap);
+		excludedServicePackages = parseComponentsArg("excludeServicePkgs", argsMap);
 
 		if (argsMap.containsKey("md")) exportMetaData = true;
 		if (argsMap.containsKey("checkmd")) checkMetadataTables = true;
