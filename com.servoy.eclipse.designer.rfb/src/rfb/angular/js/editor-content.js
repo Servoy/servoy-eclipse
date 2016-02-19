@@ -1,10 +1,10 @@
 angular.module('editorContent',['servoyApp'])
  .controller("MainController", function($scope, $window, $timeout, $windowService, $document, $webSocket, $servoyInternal,$rootScope,$compile,$solutionSettings){
-		$rootScope.createComponent = function(html, model, componentName) {
+		$rootScope.createComponent = function(html, model) {
 				var compScope = $scope.$new(false);
 				if (!$scope.model)
 				    $scope.model = {};
-				$scope.model[model.componentName] = model;
+				if (model) $scope.model[model.componentName] = model;
 				compScope.api = {};
 				compScope.handlers = {};
 				var el = $compile(html)(compScope);

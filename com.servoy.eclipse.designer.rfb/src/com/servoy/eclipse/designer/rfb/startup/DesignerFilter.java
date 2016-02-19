@@ -279,7 +279,7 @@ public class DesignerFilter implements Filter
 								}
 								else
 								{
-									jsonWriter.key("tagName").value(createLayoutDiv(config, new StringBuilder()).toString());
+									jsonWriter.key("tagName").value(createLayoutDiv(config, new StringBuilder(), spec).toString());
 								}
 								Map<String, Object> model = new HashMap<String, Object>();
 								PropertyDescription pd = spec.getProperty("size");
@@ -290,8 +290,7 @@ public class DesignerFilter implements Filter
 								else
 								{
 									HashMap<String, Number> size = new HashMap<String, Number>();
-									size.put("height", Integer.valueOf(20));
-									size.put("width", Integer.valueOf(100));
+									size.put("width", Integer.valueOf(300));
 									model.put("size", size);
 								}
 								jsonWriter.key("model").value(new JSONObject(model));
@@ -435,12 +434,13 @@ public class DesignerFilter implements Filter
 	/**
 	 * @param config
 	 * @param sb
+	 * @param spec
 	 * @param specifications
 	 * @throws JSONException
 	 */
-	protected StringBuilder createLayoutDiv(JSONObject config, StringBuilder sb) throws JSONException
+	protected StringBuilder createLayoutDiv(JSONObject config, StringBuilder sb, WebLayoutSpecification spec) throws JSONException
 	{
-		sb.append("<div style='border-style: dotted;' "); // TODO tagname from spec?
+		sb.append("<div "); // TODO tagname from spec?
 		Iterator keys = config.keys();
 		while (keys.hasNext())
 		{
@@ -449,7 +449,9 @@ public class DesignerFilter implements Filter
 			String value = config.getString(key);
 			sb.append(key);
 			sb.append("='");
+
 			sb.append(value);
+			if (key.equals("class")) sb.append(" " + spec.getDesignStyleClass());
 			sb.append("' ");
 		}
 		sb.append(">");
@@ -462,7 +464,7 @@ public class DesignerFilter implements Filter
 				JSONObject childModel = jsonObject.optJSONObject("model");
 				if (childModel != null)
 				{
-					createLayoutDiv(childModel, sb);
+					createLayoutDiv(childModel, sb, spec);
 				}
 			}
 		}

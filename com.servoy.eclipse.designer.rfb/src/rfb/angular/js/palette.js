@@ -140,24 +140,19 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 								// tagname is the full element
 								angularElement = $scope.getEditorContentRootScope().createComponent(tagName);
 							}
-//							if ($scope.isAbsoluteFormLayout()) {
-								var elWidth = model.size ? model.size.width : 100;
-								var elHeight = model.size ? model.size.height : 100;
-								css = $scope.convertToContentPoint({
-									position: 'absolute',
-									top: event.pageY,
-									left: event.pageX,
-									width: (elWidth +'px'),
-									height: (elHeight +'px'),
-									'z-index': 4,
-									opacity: 0,
-									transition: 'opacity .5s ease-in-out 0'
-								});
-								angularElement.css(css)
-//							}
-//							else {
-//								angularElement.css('opacity', '0');
-//							}
+							var elWidth = model.size ? model.size.width : 200;
+							var elHeight = model.size ? model.size.height : 100;
+							css = $scope.convertToContentPoint({
+								position: 'absolute',
+								top: event.pageY,
+								left: event.pageX,
+								width: (elWidth +'px'),
+								'z-index': 4,
+								opacity: 0,
+								transition: 'opacity .5s ease-in-out 0'
+							});
+							angularElement.css(css)
+//							
 						}
 					}
 				});
