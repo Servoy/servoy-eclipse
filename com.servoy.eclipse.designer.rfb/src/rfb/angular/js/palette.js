@@ -81,7 +81,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 						if (angularElement) {
 							var x = (window.pageXOffset !== undefined) ? window.pageXOffset : document.documentElement.scrollLeft;
 							var y = (window.pageYOffset !== undefined) ? window.pageYOffset : document.documentElement.scrollTop;
-							var angularCss = { top: ev.pageY - y, left: ev.pageX - x };
+							var angularCss = { top: ev.pageY - y + 2, left: ev.pageX - x + 2 };
 							angularElement.css($scope.convertToContentPoint(angularCss));
 						}
 
@@ -133,7 +133,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 								if ($scope.isAbsoluteFormLayout())
 									angularElement = $scope.getEditorContentRootScope().createComponent('<div style="border-style: dotted; "><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-autoapply-disabled=\'true\'/></div>',model);
 								else{
-									angularElement = $scope.getEditorContentRootScope().createComponent(tagName,model);
+									angularElement = $scope.getEditorContentRootScope().createComponent('<div>'+tagName+'</div>', model);
 								}
 							}
 							else {

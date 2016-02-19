@@ -69,6 +69,7 @@ import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
+import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HTTPUtils;
 
@@ -327,21 +328,32 @@ public class DesignerFilter implements Filter
 									jsonWriter.key("name").value(spec.getName());
 									jsonWriter.key("componentType").value("component");
 									jsonWriter.key("displayName").value(spec.getDisplayName());
-//									jsonWriter.key("tagName").value(FormTemplateGenerator.getTagName(spec.getName()));
-
 									FlattenedSolution fl = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
-									WebComponent obj = (WebComponent)fl.getSolution().getChangeHandler().createNewObject(null, IRepository.WEBCOMPONENTS);
-
 									Form form = fl.getForm(formName);
-
-									FormElement formElement = FormElementHelper.INSTANCE.getFormElement(obj, fl, null, false);
-									StringWriter stringWriter = new StringWriter();
-									PrintWriter printWriter = new PrintWriter(stringWriter);
-									FormLayoutGenerator.generateFormElement(printWriter, formElement, form, false, false);
-									jsonWriter.key("tagName").value(stringWriter.toString());
-
 									Map<String, Object> model = new HashMap<String, Object>();
+									if (form.isResponsiveLayout())
+									{
+										WebComponent obj = (WebComponent)fl.getSolution().getChangeHandler().createNewObject(form, IRepository.WEBCOMPONENTS);
+										obj.setName(spec.getName());
+										obj.setTypeName(spec.getName());
+										FormElement formElement = FormElementHelper.INSTANCE.getFormElement(obj, fl, null, false);
+										StringWriter stringWriter = new StringWriter();
+										PrintWriter printWriter = new PrintWriter(stringWriter);
+										FormLayoutGenerator.generateFormElement(printWriter, formElement, form, true, false);
+										jsonWriter.key("tagName").value(stringWriter.toString());
+										model.put("componentName", formElement.getName());
+									}
+									else jsonWriter.key("tagName").value(FormTemplateGenerator.getTagName(spec.getName()));
 									PropertyDescription pd = spec.getProperty("size");
+									Set<String> allPropertiesNames = spec.getAllPropertiesNames();
+									for (String string : allPropertiesNames)
+									{
+										if (spec.getProperty(string) != null && spec.getProperty(string).getDefaultValue() != null)
+										{
+											Object defaultValue = spec.getProperty(string).getDefaultValue();
+											if (defaultValue != null) model.put(string, defaultValue);
+										}
+									}
 									if (pd != null && pd.getDefaultValue() != null)
 									{
 										model.put("size", pd.getDefaultValue());
@@ -354,10 +366,9 @@ public class DesignerFilter implements Filter
 									{
 										model.put("editable", Boolean.TRUE);
 									}
-									if ("servoydefault-label".equals(spec.getName()))
-									{
-										model.put("text", "label");
-									}
+
+									model.put("visible", Boolean.TRUE);
+
 									jsonWriter.key("model").value(new JSONObject(model));
 									if (spec.getIcon() != null)
 									{

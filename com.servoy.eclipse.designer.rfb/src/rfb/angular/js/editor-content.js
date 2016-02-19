@@ -1,18 +1,20 @@
 angular.module('editorContent',['servoyApp'])
- .controller("MainController", function($scope, $window, $timeout, $windowService, $webSocket, $servoyInternal,$rootScope,$compile,$solutionSettings){
-	 $rootScope.createComponent = function(html,model) {
-			 var compScope = $scope.$new(true);
-			 compScope.model = model;
-			 compScope.api = {};
-			 compScope.handlers = {};
-			 var el = $compile(html)(compScope);
-			 $('body').append(el); 
-			 return el;
-		  }
+ .controller("MainController", function($scope, $window, $timeout, $windowService, $document, $webSocket, $servoyInternal,$rootScope,$compile,$solutionSettings){
+		$rootScope.createComponent = function(html, model, componentName) {
+				var compScope = $scope.$new(false);
+				if (!$scope.model)
+				    $scope.model = {};
+				$scope.model[model.componentName] = model;
+				compScope.api = {};
+				compScope.handlers = {};
+				var el = $compile(html)(compScope);
+				angular.element($document[0].body).append(el);
+				return el;
+		}
 	$rootScope.highlight = false;
 	$rootScope.showWireframe = false;
-	$solutionSettings.enableAnchoring = false; 
-	$scope.solutionSettings = $solutionSettings; 
+	$solutionSettings.enableAnchoring = false;
+	$scope.solutionSettings = $solutionSettings;
 	var realConsole = $window.console;
 	$window.console = {
 			log: function(msg) {
@@ -23,7 +25,7 @@ angular.module('editorContent',['servoyApp'])
 					realConsole.log(msg)
 				}
 				else alert(msg);
-				
+
 			},
 			error: function(msg) {
 				if (typeof(consoleLog) != "undefined") {
@@ -31,16 +33,16 @@ angular.module('editorContent',['servoyApp'])
 				}
 				else if (realConsole) {
 					realConsole.error(msg)
-				}				
+				}
 				else alert(msg);
 			}
 	}
-	
+
 	if (typeof(WebSocket) == 'undefined' || $webSocket.getURLParameter("replacewebsocket")=='true') {
-		
+
 		WebSocket = SwtWebSocket;
-		 
-		function SwtWebSocket(url)  
+
+		function SwtWebSocket(url)
 		{
 			this.id = parent.window.addWebSocket(this);
 			var me = this;
@@ -50,7 +52,7 @@ angular.module('editorContent',['servoyApp'])
 			}
 			setTimeout(onopenCaller, 0);
 		}
-		
+
 		SwtWebSocket.prototype.send = function(str)
 		{
 			parent.window.SwtWebsocketBrowserFunction('send', str, this.id)
@@ -68,7 +70,7 @@ angular.module('editorContent',['servoyApp'])
 		 }
 	 }
  }).factory("$editorContentService", function() {
-	 
+
 	 return  {
 		 refreshDecorators: function() {
 			 renderDecorators();
