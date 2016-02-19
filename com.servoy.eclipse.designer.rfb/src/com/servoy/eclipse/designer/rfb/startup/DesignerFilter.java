@@ -47,11 +47,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 import org.osgi.service.prefs.BackingStoreException;
-import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.NGPackageSpecification;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -61,6 +61,7 @@ import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
+import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HTTPUtils;
 
@@ -248,6 +249,7 @@ public class DesignerFilter implements Filter
 
 							for (WebLayoutSpecification spec : entry.getSpecifications().values())
 							{
+								if (NGUtils.isAbsoluteLayoutDiv(spec)) continue; // not supported in designer
 								jsonWriter.object();
 								jsonWriter.key("name").value(spec.getName());
 								if (spec.getConfig() != null)

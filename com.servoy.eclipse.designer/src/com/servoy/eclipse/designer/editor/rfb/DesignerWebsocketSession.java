@@ -184,7 +184,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
 						if (fe.getName().equals(name))
 						{
-							if (!form.isResponsiveLayout()) FormLayoutGenerator.generateFormElementWrapper(w, fe, true, flattenedForm);
+							if (!form.isResponsiveLayout())
+								FormLayoutGenerator.generateFormElementWrapper(w, fe, true, flattenedForm, form.isResponsiveLayout());
 							FormLayoutGenerator.generateFormElement(w, fe, flattenedForm, true);
 							if (!form.isResponsiveLayout()) FormLayoutGenerator.generateEndDiv(w);
 							if (form.isResponsiveLayout())
