@@ -1617,22 +1617,33 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		String[] styleClasses = styleClassesInfo.getLeft();
 		String defaultValue = styleClassesInfo.getRight();
 
-		boolean multiSelect = persist.getRootObject() instanceof Solution &&
-			((Solution)persist.getRootObject()).getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE &&
-			PersistHelper.getOrderedStyleSheets(ModelUtils.getEditingFlattenedSolution(persist)).size() > 0;
-		if (multiSelect)
+		if (persist.getRootObject() instanceof Solution)
 		{
-			// ng client, style at solutionlevel
-			String tooltip = "Double click '{}' to add it to styleClass. StyleClass editor is working in NGClient mode (because solution css is set).";
-			return new StringListWithContentProposalsPropertyController(id, displayName, styleClasses, defaultValue, tooltip,
-				new SolutionStyleClassValueEditor((Solution)persist.getRootObject()));
+			Solution solution = (Solution)persist.getRootObject();
+
+			boolean multiSelect = solution.getSolutionType() != SolutionMetaData.MOBILE &&
+				PersistHelper.getOrderedStyleSheets(ModelUtils.getEditingFlattenedSolution(persist)).size() > 0;
+			if (!multiSelect && (form.isResponsiveLayout() || solution.getSolutionType() == SolutionMetaData.NG_CLIENT_ONLY))
+			{
+				// responsive forms or ng-client solution: use multi-select for style class
+				multiSelect = true;
+			}
+
+			if (multiSelect)
+			{
+				// ng client, style at solutionlevel
+				String tooltip = "Double click '{}' to add it to styleClass. StyleClass editor is working in NGClient mode (because solution css is set).";
+				return new StringListWithContentProposalsPropertyController(id, displayName, styleClasses, defaultValue, tooltip,
+					new SolutionStyleClassValueEditor((Solution)persist.getRootObject()));
+			}
 		}
 
 		// single select
 		ComboboxPropertyModel<String> model = new ComboboxPropertyModel<String>(styleClasses).addDefaultValue(defaultValue);
 		return new ComboboxPropertyController<String>(id, displayName, model, Messages.LabelUnresolved,
-			((Solution)persist.getRootObject()).getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE
-				? new ComboboxDelegateValueEditor<String>(new StyleClassValueEditor(form, persist), model) : null)
+			persist.getRootObject() instanceof Solution &&
+				((Solution)persist.getRootObject()).getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE
+					? new ComboboxDelegateValueEditor<String>(new StyleClassValueEditor(form, persist), model) : null)
 		{
 			@Override
 			protected String getWarningMessage()
