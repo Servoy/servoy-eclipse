@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.gef.commands.Command;
@@ -109,13 +110,14 @@ public class FormElementDeleteCommand extends Command
 
 	private class ConfirmDeleteDialog extends Dialog implements ICheckStateListener, ICheckBoxView
 	{
-		private final Set<IPersist> overridingPersists;
+		private final List<IPersist> overridingPersists;
 		private CheckboxTableViewer checkboxTableViewer;
 		private HashMap<String, IPersist> options;
 		Set<IPersist> selected;
 		private final String description;
+		private SelectAllButtonsBar selectAllButtons;
 
-		protected ConfirmDeleteDialog(Shell parentShell, String description, Set<IPersist> overridingPersists)
+		protected ConfirmDeleteDialog(Shell parentShell, String description, List<IPersist> overridingPersists)
 		{
 			super(parentShell);
 			this.description = description;
@@ -148,9 +150,9 @@ public class FormElementDeleteCommand extends Command
 
 				public Object[] getElements(Object inputElement)
 				{
-					if (inputElement instanceof Set< ? >)
+					if (inputElement instanceof List< ? >)
 					{
-						Set<IPersist> persists = (Set<IPersist>)inputElement;
+						List<IPersist> persists = (List<IPersist>)inputElement;
 						String[] items = new String[persists.size()];
 						int i = 0;
 						for (IPersist p : persists)
@@ -178,7 +180,7 @@ public class FormElementDeleteCommand extends Command
 			Composite container = new Composite(parent, SWT.NONE);
 			GridLayout layout = new GridLayout(2, true);
 			container.setLayout(layout);
-			SelectAllButtonsBar selectAllButtons = new SelectAllButtonsBar(this, container);
+			selectAllButtons = new SelectAllButtonsBar(this, container);
 			checkboxTableViewer.setAllChecked(true);
 			selectAllButtons.disableSelectAll();
 			return super.createContents(parent);
@@ -194,6 +196,14 @@ public class FormElementDeleteCommand extends Command
 			else
 			{
 				selected.remove(options.get(event.getElement()));
+			}
+			if (checkboxTableViewer.getCheckedElements().length < checkboxTableViewer.getTable().getItemCount())
+			{
+				selectAllButtons.enableAll();
+			}
+			if (checkboxTableViewer.getCheckedElements().length == 0)
+			{
+				selectAllButtons.disableDeselectAll();
 			}
 		}
 
@@ -228,7 +238,7 @@ public class FormElementDeleteCommand extends Command
 		ArrayList<IPersist> confirmedChildren = new ArrayList<IPersist>();
 		for (IPersist child : children)
 		{
-			Set<IPersist> overriding = getOverridingPersists(child);
+			List<IPersist> overriding = getOverridingPersists(child);
 			if (!overriding.isEmpty())
 			{
 				String name = child instanceof ISupportName ? ((ISupportName)child).getName() : "";
@@ -305,13 +315,13 @@ public class FormElementDeleteCommand extends Command
 		return children;
 	}
 
-	private static Set<IPersist> getOverridingPersists(IPersist persist)
+	private static List<IPersist> getOverridingPersists(IPersist persist)
 	{
-		Set<IPersist> overriding = new HashSet<IPersist>();
+		List<IPersist> overriding = new ArrayList<IPersist>();
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 		//retrieve all the forms;
-		Iterator<Form> it = servoyModel.getFlattenedSolution().getForms(false);
+		Iterator<Form> it = servoyModel.getFlattenedSolution().getForms(true);
 
 		//start iterating through all the forms;
 		while (it.hasNext())
