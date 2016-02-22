@@ -205,6 +205,10 @@ public class FormElementDeleteCommand extends Command
 			{
 				selectAllButtons.disableDeselectAll();
 			}
+			if (checkboxTableViewer.getCheckedElements().length == checkboxTableViewer.getTable().getItemCount())
+			{
+				selectAllButtons.disableSelectAll();
+			}
 		}
 
 		@Override
