@@ -30,6 +30,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 			var layoutType = null;
 			var formName = null;
 			var packageOrder = null;
+			var editorScope = null;
 			var loadPalette = function(formName)
 			{
 				$http({method: 'GET', url: '/designer/palette?layout='+layoutType+'&formName='+formName}).then(function(got) {
@@ -44,6 +45,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 			}
 
 			$pluginRegistry.registerPlugin(function(scope) {
+			    	editorScope = scope;
 				if (scope.isAbsoluteFormLayout())
 					layoutType = "Absolute-Layout"; // TODO extract as constant, this is a key in the main attributes of the manifest
 				else
@@ -73,9 +75,15 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 				var mouseentercallback;
 				var mouseleavecallback;
 				var mouseupcallback;
+				var t;
+				var node;
 				var mousemovecallback = $scope.registerDOMEvent("mousemove","EDITOR", function(ev){
 					if (dragClone)
 					{
+					    	if (node){
+					    	   node.remove();
+					    	   node = null;
+					    	}
 						var css = { top: ev.pageY, left: ev.pageX};
 						dragClone.css(css);
 						if (angularElement) {
@@ -91,27 +99,27 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 						}
 						else $scope.glasspane.style.cursor="";
 
-//						if ( canDrop.dropTarget  && !$scope.isAbsoluteFormLayout() && angularElement) {
-//							if ($scope.glasspane.style.cursor=="") {
-//
-//								if (t) clearTimeout(t);
-//								t = setTimeout(function(){
-//									if (canDrop.beforeChild) {
-//										angularElement.insertBefore(canDrop.beforeChild);
-//										angularElement.css('opacity', '1');
-//									}
-//									else if (angularElement.parent()[0] != canDrop.dropTarget || canDrop.append){
-//										$(canDrop.dropTarget).append(angularElement);
-//										angularElement.css('opacity', '1');
-//									}
-//								}, 200);
-//
-//							}
-//							else {
-//								angularElement.css('opacity', '0');
-//								angularElement.remove();
-//							}
-//						}
+						if ( canDrop.dropTarget  && !$scope.isAbsoluteFormLayout() && angularElement) {
+							if ($scope.glasspane.style.cursor=="") {
+								if (t) clearTimeout(t);
+								t = setTimeout(function() {
+								    	node = angular.element(angularElement)[0].firstElementChild.cloneNode(true);;
+									if (canDrop.beforeChild) {
+									    	canDrop.dropTarget.insertBefore(node, canDrop.beforeChild);
+										angularElement.css('opacity', '1');
+									}
+									else if (angularElement.parent()[0] != canDrop.dropTarget || canDrop.append){
+										angular.element(canDrop.dropTarget).append(node);
+										angularElement.css('opacity', '1');
+									}
+									editorScope.refreshEditorContent();
+								}, 200);
+							}
+							else {
+								angularElement.css('opacity', '0');
+								angularElement.remove();
+							}
+						}
 					}
 					else
 					{
