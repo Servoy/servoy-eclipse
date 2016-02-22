@@ -35,62 +35,78 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					var topContainer = null;
 					var layoutName = null;
 					var key;
-					if (event.ctrlKey) {
-						var components = [];
-						var size = 0;
+
+					if (!editorScope.isAbsoluteFormLayout()) {
+						obj = event.ctrlKey ? [] : {};
 						for (i = 0; i < selectionToDrag.length; i++) {
-							selectionToDrag[i].remove();
-							node = selectionToDrag[i][0];
-							var component = {};
-							component.uuid = node.getAttribute('cloneuuid');
-							component.x = node.location.x;
-							component.y = node.location.y;
-							if (component.x > 0 && component.y > 0) {
-								components[size++] = component;
+							if(event.ctrlKey) {
+								selectionToDrag[i].remove();
+							}
+							node = selectionToDrag[i];
+							if(node[0]) node = node[0];
+							ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+							if (ghostObject)
+								type = ghostObject.propertyType;
+							canDrop = utils.getDropNode(type, topContainer, layoutName, event);
+							if (!canDrop.dropAllowed) {
+								// full refresh the editor content, it can be moved to different places already.
+								// TODO this is not enough
+								editorScope.refreshEditorContent();
+								continue;
+							}
+							if (canDrop.dropAllowed && !canDrop.beforeChild) {
+								canDrop.beforeChild = node.nextElementSibling;
+							}
+
+							key = event.ctrlKey ? i : node.uuid;
+							if (key == undefined) {
+								key = node.getAttribute("svy-id");
+							}
+
+							obj[key] = {};
+							if(event.ctrlKey) {
+								obj[key].uuid = node.getAttribute('cloneuuid');
+							}
+
+							//support for reordering ghosts in responsive layout - if this is a ghost then only allow dropping on top of a sibling ghost
+							if (!ghostObject || (angular.element(canDrop.dropTarget).parent() !== angular.element(node).parent)) {
+								if (canDrop.dropTarget) {
+									obj[key].dropTargetUUID = canDrop.dropTarget.getAttribute("svy-id");
+								}
+
+								if (canDrop.beforeChild) {
+									obj[key].rightSibling = canDrop.beforeChild.getAttribute("svy-id");
+								}
 							}
 						}
-						if (size > 0) $editorService.createComponents({
-							"components": components
-						});
+						if(event.ctrlKey) {
+							$editorService.createComponents({
+								"components": obj
+							});
+						}
+						else {
+							$editorService.moveResponsiveComponent(obj);	
+						}
 					} else {
-						if (!editorScope.isAbsoluteFormLayout()) {
-							obj = {};
+						if (event.ctrlKey) {
+							var components = [];
+							var size = 0;
 							for (i = 0; i < selectionToDrag.length; i++) {
-								node = selectionToDrag[i];
-								ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-								if (ghostObject)
-									type = ghostObject.propertyType;
-								canDrop = utils.getDropNode(type, topContainer, layoutName, event);
-								if (!canDrop.dropAllowed) {
-									// full refresh the editor content, it can be moved to different places already.
-									// TODO this is not enough
-									editorScope.refreshEditorContent();
-									continue;
-								}
-								if (canDrop.dropAllowed && !canDrop.beforeChild) {
-									canDrop.beforeChild = node.nextElementSibling;
-								}
-
-								key = node.uuid;
-								if (!key) {
-									key = node.getAttribute("svy-id");
-								}
-
-								obj[key] = {};
-
-								//support for reordering ghosts in responsive layout - if this is a ghost then only allow dropping on top of a sibling ghost
-								if (!ghostObject || (angular.element(canDrop.dropTarget).parent() !== angular.element(node).parent)) {
-									if (canDrop.dropTarget) {
-										obj[key].dropTargetUUID = canDrop.dropTarget.getAttribute("svy-id");
-									}
-
-									if (canDrop.beforeChild) {
-										obj[key].rightSibling = canDrop.beforeChild.getAttribute("svy-id");
-									}
+								selectionToDrag[i].remove();
+								node = selectionToDrag[i][0];
+								var component = {};
+								component.uuid = node.getAttribute('cloneuuid');
+								component.x = node.location.x;
+								component.y = node.location.y;
+								if (component.x > 0 && component.y > 0) {
+									components[size++] = component;
 								}
 							}
-							$editorService.moveResponsiveComponent(obj);
-						} else {
+							if (size > 0) $editorService.createComponents({
+								"components": components
+							});
+						}
+						else {
 							obj = {};
 							for (i = 0; i < selectionToDrag.length; i++) {
 								node = selectionToDrag[i];
@@ -148,28 +164,32 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					var selection = editorScope.getSelection();
 					for (i = 0; i < selection.length; i++) {
 						node = selection[i];
-						selectionToDrag[i] = angular.element(selection[i]).clone();
-						var posX, posY;
-						beanModel = editorScope.getBeanModel(node);
-						if (beanModel) {
-							posX = beanModel.location.x;
-							posY = beanModel.location.y;
-						} else {
-							ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-							posX = ghostObject.location.x;
-							posY = ghostObject.location.y;
-						}
 						selectionToDrag[i] = angular.element(node).clone();
 						selectionToDrag[i].attr('id', 'dragNode' + i);
-						selectionToDrag[i].attr('cloneuuid', node.getAttribute("svy-id"));
-						selectionToDrag[i][0]['location'] = {
-							x: posX,
-							y: posY
-						};
-						selectionToDrag[i].css({
-							'z-index': 4
-						});
-						angular.element(selection[i]).parent().append(selectionToDrag[i]);
+						selectionToDrag[i].attr('cloneuuid', node.getAttribute("svy-id"));						
+						
+						if(editorScope.isAbsoluteFormLayout()) {
+							var posX, posY;
+							beanModel = editorScope.getBeanModel(node);
+							if (beanModel) {
+								posX = beanModel.location.x;
+								posY = beanModel.location.y;
+							} else {
+								ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+								posX = ghostObject.location.x;
+								posY = ghostObject.location.y;
+							}
+							
+							selectionToDrag[i][0]['location'] = {
+									x: posX,
+									y: posY
+								};
+							
+							selectionToDrag[i].css({
+								'z-index': 4
+							});
+							angular.element(selection[i]).parent().append(selectionToDrag[i]);
+						}
 					}
 				}
 
@@ -180,16 +200,19 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 
 				if (selectionToDrag.length > 0) {
 					if (!editorScope.isAbsoluteFormLayout()) {
-
+						var firstSelectedNode = selectionToDrag[0];
+						if(firstSelectedNode[0]) firstSelectedNode = firstSelectedNode[0];
+						
 						var type = "component";
-						var layoutName = selectionToDrag[0].getAttribute("svy-layoutname");
+						var layoutName = firstSelectedNode.getAttribute("svy-layoutname");
 						if (layoutName) type = "layout"
 
 						var topContainer = null;
 
-						ghostObject = editorScope.getGhost(selectionToDrag[0].getAttribute("svy-id"));
+						ghostObject = editorScope.getGhost(firstSelectedNode.getAttribute("svy-id"));
 						if (ghostObject) return;
 
+						
 						var canDrop = utils.getDropNode(type, topContainer, layoutName, event);
 						if (!canDrop.dropAllowed) {
 							editorScope.glasspane.style.cursor = "no-drop";

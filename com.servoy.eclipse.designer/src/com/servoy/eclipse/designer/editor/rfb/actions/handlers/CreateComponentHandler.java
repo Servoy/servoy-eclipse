@@ -33,11 +33,11 @@ import org.eclipse.swt.widgets.Display;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.NGPackageSpecification;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.websocket.IServerService;
 import org.sablo.websocket.utils.PropertyUtils;
@@ -84,7 +84,6 @@ import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.util.Debug;
-import com.servoy.j2db.util.UUID;
 
 /**
  * @author user
@@ -161,8 +160,8 @@ public class CreateComponentHandler implements IServerService
 
 	protected IPersist[] createComponent(final JSONObject args) throws JSONException, RepositoryException
 	{
-		int x = args.getInt("x");
-		int y = args.getInt("y");
+		int x = args.optInt("x");
+		int y = args.optInt("y");
 		int w = args.optInt("w");
 		int h = args.optInt("h");
 		if (args.has("type"))
@@ -208,7 +207,7 @@ public class CreateComponentHandler implements IServerService
 				}
 			}
 		}
-		else if (args.has("name"))
+		else if (args.has("name") || args.has("uuid"))
 		{
 			ISupportFormElements parentSupportingElements = editorPart.getForm();
 			IPersist dropTarget = null;
@@ -231,39 +230,6 @@ public class CreateComponentHandler implements IServerService
 						parentSupportingElements = (ISupportFormElements)p;
 					}
 				}
-			}
-			String name = args.getString("name");
-			if (dropTarget instanceof WebComponent)
-			{
-				// see if target has a 'component' or 'component[]' typed property
-				WebComponent parentWC = (WebComponent)dropTarget;
-				PropertyDescription propertyDescription = ((WebObjectImpl)parentWC.getImplementation()).getPropertyDescription();
-
-				// TODO add a visual way for the user to drop to a specific property (if there is more then one property that supports components)
-				// TODO also add a way of adding to a specific index in a component array and also just moving component ghosts in a component array property
-				for (String propertyName : new TreeSet<String>(propertyDescription.getAllPropertiesNames()))
-				{
-					PropertyDescription property = propertyDescription.getProperty(propertyName);
-					if (property.getType() instanceof ComponentPropertyType)
-					{
-						// simple component type
-						ChildWebComponent createdWebComponent = createNestedWebComponent(parentWC, property, name, propertyName, -1, x, y, w, h);
-						parentWC.internalAddChild(createdWebComponent);
-						return new IPersist[] { createdWebComponent };
-					}
-					else if (PropertyUtils.isCustomJSONArrayPropertyType(property.getType()) &&
-						((CustomJSONArrayType< ? , ? >)property.getType()).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType)
-					{
-						// array of component types
-						int index = 0;
-						IChildWebObject[] arrayOfChildComponents = (IChildWebObject[])parentWC.getProperty(propertyName);
-						if (arrayOfChildComponents != null) index = arrayOfChildComponents.length;
-						ChildWebComponent createdWebComponent = createNestedWebComponent(parentWC,
-							((CustomJSONArrayType< ? , ? >)property.getType()).getCustomJSONTypeDefinition(), name, propertyName, index, x, y, w, h);
-						parentWC.internalAddChild(createdWebComponent);
-						return new IPersist[] { createdWebComponent };
-					}
-				} // if we found no property to drop to, just continue with code below - it will be dropped on form
 			}
 			if (editorPart.getForm().isResponsiveLayout())
 			{
@@ -311,255 +277,293 @@ public class CreateComponentHandler implements IServerService
 					}
 				}
 			}
-			if ("servoydefault-button".equals(name))
+			if (args.has("name"))
 			{
-				GraphicalComponent gc = parentSupportingElements.createNewGraphicalComponent(new Point(x, y));
-				gc.setText("button");
-				gc.setOnActionMethodID(-1);
-				gc.setSize(new Dimension(w, h));
-				return new IPersist[] { gc };
-			}
-			else if ("servoydefault-label".equals(name))
-			{
-				GraphicalComponent gc = parentSupportingElements.createNewGraphicalComponent(new Point(x, y));
-				gc.setText("label");
-				gc.setSize(new Dimension(w, h));
-				return new IPersist[] { gc };
-			}
-			else if ("servoydefault-combobox".equals(name))
-			{
-				Field field = parentSupportingElements.createNewField(new Point(x, y));
-				field.setDisplayType(Field.COMBOBOX);
-				field.setSize(new Dimension(w, h));
-				return new IPersist[] { field };
-			}
-			else if ("servoydefault-textfield".equals(name))
-			{
-				Field field = parentSupportingElements.createNewField(new Point(x, y));
-				field.setDisplayType(Field.TEXT_FIELD);
-				field.setSize(new Dimension(w, h));
-				return new IPersist[] { field };
-			}
-			else if ("servoydefault-textarea".equals(name))
-			{
-				Field field = parentSupportingElements.createNewField(new Point(x, y));
-				field.setDisplayType(Field.TEXT_AREA);
-				field.setSize(new Dimension(w, h));
-				return new IPersist[] { field };
-			}
-			else if ("servoydefault-password".equals(name))
-			{
-				Field field = parentSupportingElements.createNewField(new Point(x, y));
-				field.setDisplayType(Field.PASSWORD);
-				field.setSize(new Dimension(w, h));
-				return new IPersist[] { field };
-			}
-			else if ("servoydefault-calendar".equals(name))
-			{
-				Field field = parentSupportingElements.createNewField(new Point(x, y));
-				field.setDisplayType(Field.CALENDAR);
-				field.setSize(new Dimension(w, h));
-				return new IPersist[] { field };
-			}
-			else if ("servoydefault-typeahead".equals(name))
-			{
-				Field field = parentSupportingElements.createNewField(new Point(x, y));
-				field.setDisplayType(Field.TYPE_AHEAD);
-				field.setSize(new Dimension(w, h));
-				return new IPersist[] { field };
-			}
-			else if ("servoydefault-spinner".equals(name))
-			{
-				Field field = parentSupportingElements.createNewField(new Point(x, y));
-				field.setDisplayType(Field.SPINNER);
-				field.setSize(new Dimension(w, h));
-				return new IPersist[] { field };
-			}
-			else if ("servoydefault-check".equals(name) || "servoydefault-checkgroup".equals(name))
-			{
-				Field field = parentSupportingElements.createNewField(new Point(x, y));
-				field.setDisplayType(Field.CHECKS);
-				field.setSize(new Dimension(w, h));
-				return new IPersist[] { field };
-			}
-			else if ("servoydefault-radio".equals(name) || "servoydefault-radiogroup".equals(name))
-			{
-				Field field = parentSupportingElements.createNewField(new Point(x, y));
-				field.setDisplayType(Field.RADIOS);
-				field.setSize(new Dimension(w, h));
-				return new IPersist[] { field };
-			}
-			else if ("servoydefault-imagemedia".equals(name))
-			{
-				Field field = parentSupportingElements.createNewField(new Point(x, y));
-				field.setDisplayType(Field.IMAGE_MEDIA);
-				field.setSize(new Dimension(w, h));
-				return new IPersist[] { field };
-			}
-			else if ("servoydefault-listbox".equals(name))
-			{
-				Field field = parentSupportingElements.createNewField(new Point(x, y));
-				field.setDisplayType(Field.LIST_BOX);
-				field.setSize(new Dimension(w, h));
-				return new IPersist[] { field };
-			}
-			else if ("servoydefault-htmlarea".equals(name))
-			{
-				Field field = parentSupportingElements.createNewField(new Point(x, y));
-				field.setDisplayType(Field.HTML_AREA);
-				field.setEditable(true);
-				field.setSize(new Dimension(w, h));
-				return new IPersist[] { field };
-			}
-			else if ("servoydefault-tabpanel".equals(name))
-			{
-				String compName = "tabpanel_" + id.incrementAndGet();
-				while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
+				String name = args.getString("name");
+				if (dropTarget instanceof WebComponent)
 				{
-					compName = "tabpanel_" + id.incrementAndGet();
-				}
-				TabPanel tabPanel = null;
-				if (parentSupportingElements instanceof AbstractContainer)
-				{
-					tabPanel = ((AbstractContainer)parentSupportingElements).createNewTabPanel(compName);
-				}
-				else
-				{
-					tabPanel = editorPart.getForm().createNewTabPanel(compName);
-				}
-				tabPanel.setLocation(new Point(x, y));
-				tabPanel.setSize(new Dimension(w, h));
-				return new IPersist[] { tabPanel };
-			}
-			else if ("servoydefault-splitpane".equals(name))
-			{
-				String compName = "tabpanel_" + id.incrementAndGet();
-				while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
-				{
-					compName = "tabpanel_" + id.incrementAndGet();
-				}
-				TabPanel tabPanel = null;
-				if (parentSupportingElements instanceof AbstractContainer)
-				{
-					tabPanel = ((AbstractContainer)parentSupportingElements).createNewTabPanel(compName);
-				}
-				else
-				{
-					tabPanel = editorPart.getForm().createNewTabPanel(compName);
-				}
-				tabPanel.setLocation(new Point(x, y));
-				tabPanel.setTabOrientation(TabPanel.SPLIT_HORIZONTAL);
-				tabPanel.setSize(new Dimension(w, h));
-				return new IPersist[] { tabPanel };
-			}
-			else if ("servoycore-portal".equals(name))
-			{
-				String compName = "portal_" + id.incrementAndGet();
-				while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
-				{
-					compName = "portal_" + id.incrementAndGet();
-				}
-				Portal portal = null;
-				if (parentSupportingElements instanceof AbstractContainer)
-				{
-					portal = ((AbstractContainer)parentSupportingElements).createNewPortal(compName, new Point(x, y));
-				}
-				else
-				{
-					portal = editorPart.getForm().createNewPortal(compName, new Point(x, y));
-				}
-				portal.setSize(new Dimension(w, h));
-				return new IPersist[] { portal };
-			}
-			else if ("servoydefault-rectangle".equals(name))
-			{
-				RectShape shape = editorPart.getForm().createNewRectangle(new Point(x, y));
-				shape.setLineSize(1);
-				shape.setSize(new Dimension(w, h));
-				return new IPersist[] { shape };
-			}
-			else
-			{
-				WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(name);
-				if (spec != null)
-				{
-					String compName = null;
-					String componentName = name;
-					int index = componentName.indexOf("-");
-					if (index != -1)
+					// see if target has a 'component' or 'component[]' typed property
+					WebComponent parentWC = (WebComponent)dropTarget;
+					PropertyDescription propertyDescription = ((WebObjectImpl)parentWC.getImplementation()).getPropertyDescription();
+
+					// TODO add a visual way for the user to drop to a specific property (if there is more then one property that supports components)
+					// TODO also add a way of adding to a specific index in a component array and also just moving component ghosts in a component array property
+					for (String propertyName : new TreeSet<String>(propertyDescription.getAllPropertiesNames()))
 					{
-						componentName = componentName.substring(index + 1);
-					}
-					componentName = componentName.replaceAll("-", "_");
-					compName = componentName + "_" + id.incrementAndGet();
+						PropertyDescription property = propertyDescription.getProperty(propertyName);
+						if (property.getType() instanceof ComponentPropertyType)
+						{
+							// simple component type
+							ChildWebComponent createdWebComponent = createNestedWebComponent(parentWC, property, name, propertyName, -1, x, y, w, h);
+							parentWC.internalAddChild(createdWebComponent);
+							return new IPersist[] { createdWebComponent };
+						}
+						else if (PropertyUtils.isCustomJSONArrayPropertyType(property.getType()) &&
+							((CustomJSONArrayType< ? , ? >)property.getType()).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType)
+						{
+							// array of component types
+							int index = 0;
+							IChildWebObject[] arrayOfChildComponents = (IChildWebObject[])parentWC.getProperty(propertyName);
+							if (arrayOfChildComponents != null) index = arrayOfChildComponents.length;
+							ChildWebComponent createdWebComponent = createNestedWebComponent(parentWC,
+								((CustomJSONArrayType< ? , ? >)property.getType()).getCustomJSONTypeDefinition(), name, propertyName, index, x, y, w, h);
+							parentWC.internalAddChild(createdWebComponent);
+							return new IPersist[] { createdWebComponent };
+						}
+					} // if we found no property to drop to, just continue with code below - it will be dropped on form
+				}
+
+				if ("servoydefault-button".equals(name))
+				{
+					GraphicalComponent gc = parentSupportingElements.createNewGraphicalComponent(new Point(x, y));
+					gc.setText("button");
+					gc.setOnActionMethodID(-1);
+					gc.setSize(new Dimension(w, h));
+					return new IPersist[] { gc };
+				}
+				else if ("servoydefault-label".equals(name))
+				{
+					GraphicalComponent gc = parentSupportingElements.createNewGraphicalComponent(new Point(x, y));
+					gc.setText("label");
+					gc.setSize(new Dimension(w, h));
+					return new IPersist[] { gc };
+				}
+				else if ("servoydefault-combobox".equals(name))
+				{
+					Field field = parentSupportingElements.createNewField(new Point(x, y));
+					field.setDisplayType(Field.COMBOBOX);
+					field.setSize(new Dimension(w, h));
+					return new IPersist[] { field };
+				}
+				else if ("servoydefault-textfield".equals(name))
+				{
+					Field field = parentSupportingElements.createNewField(new Point(x, y));
+					field.setDisplayType(Field.TEXT_FIELD);
+					field.setSize(new Dimension(w, h));
+					return new IPersist[] { field };
+				}
+				else if ("servoydefault-textarea".equals(name))
+				{
+					Field field = parentSupportingElements.createNewField(new Point(x, y));
+					field.setDisplayType(Field.TEXT_AREA);
+					field.setSize(new Dimension(w, h));
+					return new IPersist[] { field };
+				}
+				else if ("servoydefault-password".equals(name))
+				{
+					Field field = parentSupportingElements.createNewField(new Point(x, y));
+					field.setDisplayType(Field.PASSWORD);
+					field.setSize(new Dimension(w, h));
+					return new IPersist[] { field };
+				}
+				else if ("servoydefault-calendar".equals(name))
+				{
+					Field field = parentSupportingElements.createNewField(new Point(x, y));
+					field.setDisplayType(Field.CALENDAR);
+					field.setSize(new Dimension(w, h));
+					return new IPersist[] { field };
+				}
+				else if ("servoydefault-typeahead".equals(name))
+				{
+					Field field = parentSupportingElements.createNewField(new Point(x, y));
+					field.setDisplayType(Field.TYPE_AHEAD);
+					field.setSize(new Dimension(w, h));
+					return new IPersist[] { field };
+				}
+				else if ("servoydefault-spinner".equals(name))
+				{
+					Field field = parentSupportingElements.createNewField(new Point(x, y));
+					field.setDisplayType(Field.SPINNER);
+					field.setSize(new Dimension(w, h));
+					return new IPersist[] { field };
+				}
+				else if ("servoydefault-check".equals(name) || "servoydefault-checkgroup".equals(name))
+				{
+					Field field = parentSupportingElements.createNewField(new Point(x, y));
+					field.setDisplayType(Field.CHECKS);
+					field.setSize(new Dimension(w, h));
+					return new IPersist[] { field };
+				}
+				else if ("servoydefault-radio".equals(name) || "servoydefault-radiogroup".equals(name))
+				{
+					Field field = parentSupportingElements.createNewField(new Point(x, y));
+					field.setDisplayType(Field.RADIOS);
+					field.setSize(new Dimension(w, h));
+					return new IPersist[] { field };
+				}
+				else if ("servoydefault-imagemedia".equals(name))
+				{
+					Field field = parentSupportingElements.createNewField(new Point(x, y));
+					field.setDisplayType(Field.IMAGE_MEDIA);
+					field.setSize(new Dimension(w, h));
+					return new IPersist[] { field };
+				}
+				else if ("servoydefault-listbox".equals(name))
+				{
+					Field field = parentSupportingElements.createNewField(new Point(x, y));
+					field.setDisplayType(Field.LIST_BOX);
+					field.setSize(new Dimension(w, h));
+					return new IPersist[] { field };
+				}
+				else if ("servoydefault-htmlarea".equals(name))
+				{
+					Field field = parentSupportingElements.createNewField(new Point(x, y));
+					field.setDisplayType(Field.HTML_AREA);
+					field.setEditable(true);
+					field.setSize(new Dimension(w, h));
+					return new IPersist[] { field };
+				}
+				else if ("servoydefault-tabpanel".equals(name))
+				{
+					String compName = "tabpanel_" + id.incrementAndGet();
 					while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
 					{
-						compName = componentName + "_" + id.incrementAndGet();
+						compName = "tabpanel_" + id.incrementAndGet();
 					}
-
-					WebComponent webComponent = null;
-					if (parentSupportingElements instanceof Portal)
+					TabPanel tabPanel = null;
+					if (parentSupportingElements instanceof AbstractContainer)
 					{
-						Portal portal = (Portal)parentSupportingElements;
-						webComponent = (WebComponent)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(portal, IRepository.WEBCOMPONENTS);
-						webComponent.setProperty("text", compName);
-						webComponent.setTypeName(name);
-						portal.addChild(webComponent);
-					}
-					else if (parentSupportingElements instanceof AbstractContainer)
-					{
-						webComponent = ((AbstractContainer)parentSupportingElements).createNewWebComponent(compName, name);
-
-					}
-					webComponent.setLocation(new Point(x, y));
-					webComponent.setSize(new Dimension(w, h));
-					PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
-					if (description != null && description.getDefaultValue() instanceof JSONObject)
-					{
-						webComponent.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
-							((JSONObject)description.getDefaultValue()).optInt("height", 80)));
-					}
-					return new IPersist[] { webComponent };
-				}
-				else
-				{
-					NGPackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
-						args.optString("packageName"));
-					if (specifications != null)
-					{
-						WebLayoutSpecification layoutSpec = specifications.getSpecification(name);
-						if (layoutSpec != null)
-						{
-							JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
-							return new IPersist[] { createLayoutContainer(parentSupportingElements, layoutSpec, config, x, specifications,
-								args.optString("packageName")) };
-						}
+						tabPanel = ((AbstractContainer)parentSupportingElements).createNewTabPanel(compName);
 					}
 					else
 					{
-						for (IRootObject template : ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES))
+						tabPanel = editorPart.getForm().createNewTabPanel(compName);
+					}
+					tabPanel.setLocation(new Point(x, y));
+					tabPanel.setSize(new Dimension(w, h));
+					return new IPersist[] { tabPanel };
+				}
+				else if ("servoydefault-splitpane".equals(name))
+				{
+					String compName = "tabpanel_" + id.incrementAndGet();
+					while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
+					{
+						compName = "tabpanel_" + id.incrementAndGet();
+					}
+					TabPanel tabPanel = null;
+					if (parentSupportingElements instanceof AbstractContainer)
+					{
+						tabPanel = ((AbstractContainer)parentSupportingElements).createNewTabPanel(compName);
+					}
+					else
+					{
+						tabPanel = editorPart.getForm().createNewTabPanel(compName);
+					}
+					tabPanel.setLocation(new Point(x, y));
+					tabPanel.setTabOrientation(TabPanel.SPLIT_HORIZONTAL);
+					tabPanel.setSize(new Dimension(w, h));
+					return new IPersist[] { tabPanel };
+				}
+				else if ("servoycore-portal".equals(name))
+				{
+					String compName = "portal_" + id.incrementAndGet();
+					while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
+					{
+						compName = "portal_" + id.incrementAndGet();
+					}
+					Portal portal = null;
+					if (parentSupportingElements instanceof AbstractContainer)
+					{
+						portal = ((AbstractContainer)parentSupportingElements).createNewPortal(compName, new Point(x, y));
+					}
+					else
+					{
+						portal = editorPart.getForm().createNewPortal(compName, new Point(x, y));
+					}
+					portal.setSize(new Dimension(w, h));
+					return new IPersist[] { portal };
+				}
+				else if ("servoydefault-rectangle".equals(name))
+				{
+					RectShape shape = editorPart.getForm().createNewRectangle(new Point(x, y));
+					shape.setLineSize(1);
+					shape.setSize(new Dimension(w, h));
+					return new IPersist[] { shape };
+				}
+				else
+				{
+					WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(name);
+					if (spec != null)
+					{
+						String compName = null;
+						String componentName = name;
+						int index = componentName.indexOf("-");
+						if (index != -1)
 						{
-							if (template.getName().equals(name))
+							componentName = componentName.substring(index + 1);
+						}
+						componentName = componentName.replaceAll("-", "_");
+						compName = componentName + "_" + id.incrementAndGet();
+						while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
+						{
+							compName = componentName + "_" + id.incrementAndGet();
+						}
+
+						WebComponent webComponent = null;
+						if (parentSupportingElements instanceof Portal)
+						{
+							Portal portal = (Portal)parentSupportingElements;
+							webComponent = (WebComponent)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(portal,
+								IRepository.WEBCOMPONENTS);
+							webComponent.setProperty("text", compName);
+							webComponent.setTypeName(name);
+							portal.addChild(webComponent);
+						}
+						else if (parentSupportingElements instanceof AbstractContainer)
+						{
+							webComponent = ((AbstractContainer)parentSupportingElements).createNewWebComponent(compName, name);
+
+						}
+						webComponent.setLocation(new Point(x, y));
+						webComponent.setSize(new Dimension(w, h));
+						PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
+						if (description != null && description.getDefaultValue() instanceof JSONObject)
+						{
+							webComponent.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
+								((JSONObject)description.getDefaultValue()).optInt("height", 80)));
+						}
+						return new IPersist[] { webComponent };
+					}
+					else
+					{
+						NGPackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+							args.optString("packageName"));
+						if (specifications != null)
+						{
+							WebLayoutSpecification layoutSpec = specifications.getSpecification(name);
+							if (layoutSpec != null)
 							{
-								Object[] applyTemplate = ElementFactory.applyTemplate(parentSupportingElements, new TemplateElementHolder((Template)template),
-									new org.eclipse.swt.graphics.Point(x, y), false);
-								if (applyTemplate.length > 0)
+								JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
+								return new IPersist[] { createLayoutContainer(parentSupportingElements, layoutSpec, config, x, specifications,
+									args.optString("packageName")) };
+							}
+						}
+						else
+						{
+							for (IRootObject template : ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES))
+							{
+								if (template.getName().equals(name))
 								{
-									if (applyTemplate[0] instanceof FormElementGroup)
+									Object[] applyTemplate = ElementFactory.applyTemplate(parentSupportingElements,
+										new TemplateElementHolder((Template)template), new org.eclipse.swt.graphics.Point(x, y), false);
+									if (applyTemplate.length > 0)
 									{
-										Iterator<IFormElement> elements = ((FormElementGroup)applyTemplate[0]).getElements();
-										//convert iterator to []
-										ArrayList<IFormElement> list = new ArrayList<>();
-										while (elements.hasNext())
+										if (applyTemplate[0] instanceof FormElementGroup)
 										{
-											IFormElement next = elements.next();
-											list.add(next);
+											Iterator<IFormElement> elements = ((FormElementGroup)applyTemplate[0]).getElements();
+											//convert iterator to []
+											ArrayList<IFormElement> list = new ArrayList<>();
+											while (elements.hasNext())
+											{
+												IFormElement next = elements.next();
+												list.add(next);
+											}
+											return list.toArray(new IPersist[list.size()]);
 										}
-										return list.toArray(new IPersist[list.size()]);
-									}
-									else
-									{ //Object[] to IPersist[]
-										return Arrays.asList(applyTemplate).toArray(new IPersist[applyTemplate.length]);
+										else
+										{ //Object[] to IPersist[]
+											return Arrays.asList(applyTemplate).toArray(new IPersist[applyTemplate.length]);
+										}
 									}
 								}
 							}
@@ -567,19 +571,21 @@ public class CreateComponentHandler implements IServerService
 					}
 				}
 			}
-		}
-		else if (args.has("uuid"))
-		{
-			IPersist persist = editorPart.getForm().getChild(UUID.fromString(args.getString("uuid")));
-			if (persist instanceof AbstractBase)
+			else if (args.has("uuid"))
 			{
-				IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
-				IPersist newPersist = ((AbstractBase)persist).cloneObj(persist.getParent(), true, validator, true, true, true);
-				((ISupportBounds)newPersist).setLocation(new Point(x, y));
-				if (w > 0 && h > 0) ((ISupportBounds)newPersist).setSize(new Dimension(w, h));
-				return new IPersist[] { newPersist };
+				IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart, args.getString("uuid"));
+				if (persist instanceof AbstractBase)
+				{
+					IValidateName validator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
+					ISupportChilds parent = dropTarget instanceof ISupportChilds ? (ISupportChilds)dropTarget : persist.getParent();
+					IPersist newPersist = ((AbstractBase)persist).cloneObj(parent, true, validator, true, true, true);
+					((ISupportBounds)newPersist).setLocation(new Point(x, y));
+					if (w > 0 && h > 0) ((ISupportBounds)newPersist).setSize(new Dimension(w, h));
+					return new IPersist[] { newPersist };
+				}
 			}
 		}
+
 		return null;
 	}
 
