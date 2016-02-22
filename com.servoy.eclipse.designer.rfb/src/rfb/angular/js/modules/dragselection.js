@@ -39,11 +39,11 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					if (!editorScope.isAbsoluteFormLayout()) {
 						obj = event.ctrlKey ? [] : {};
 						for (i = 0; i < selectionToDrag.length; i++) {
-							if(event.ctrlKey) {
-								selectionToDrag[i].remove();
-							}
 							node = selectionToDrag[i];
 							if(node[0]) node = node[0];
+							type = "component";
+							layoutName = node.getAttribute("svy-layoutname");
+							if (layoutName) type = "layout"
 							ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
 							if (ghostObject)
 								type = ghostObject.propertyType;
@@ -66,6 +66,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 							obj[key] = {};
 							if(event.ctrlKey) {
 								obj[key].uuid = node.getAttribute('cloneuuid');
+								selectionToDrag[i].remove();
 							}
 
 							//support for reordering ghosts in responsive layout - if this is a ghost then only allow dropping on top of a sibling ghost

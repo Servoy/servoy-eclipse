@@ -64,6 +64,8 @@ import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistCloneable;
+import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.ISupportBounds;
@@ -581,7 +583,22 @@ public class CreateComponentHandler implements IServerService
 					IPersist newPersist = ((AbstractBase)persist).cloneObj(parent, true, validator, true, true, true);
 					((ISupportBounds)newPersist).setLocation(new Point(x, y));
 					if (w > 0 && h > 0) ((ISupportBounds)newPersist).setSize(new Dimension(w, h));
-					return new IPersist[] { newPersist };
+
+					final ArrayList<IPersist> newPersists = new ArrayList<IPersist>();
+					newPersist.acceptVisitor(new IPersistVisitor()
+					{
+						@Override
+						public Object visit(IPersist o)
+						{
+							if (o instanceof IPersistCloneable)
+							{
+								newPersists.add(o);
+							}
+							return IPersistVisitor.CONTINUE_TRAVERSAL;
+						}
+					});
+
+					return newPersists.toArray(new IPersist[newPersists.size()]);
 				}
 			}
 		}
