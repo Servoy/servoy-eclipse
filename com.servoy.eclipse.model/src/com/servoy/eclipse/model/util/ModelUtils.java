@@ -143,9 +143,11 @@ public class ModelUtils
 
 		form = flattenedSolution.getFlattenedForm(form);
 		Solution solution = (Solution)form.getRootObject();
+		ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solution.getName());
 
-		List<String> mediaStyleSheets = PersistHelper.getOrderedStyleSheets(flattenedSolution);
-		if (mediaStyleSheets != null && mediaStyleSheets.size() == 0 && persist instanceof IFormElement && !(persist instanceof WebComponent))
+		List<String> mediaStyleSheets = PersistHelper.getOrderedStyleSheets(servoyProject.getEditingFlattenedSolution());
+		if (mediaStyleSheets != null && mediaStyleSheets.size() == 0 &&
+			(persist instanceof IFormElement || persist instanceof Form || persist instanceof Part) && !(persist instanceof WebComponent))
 		{
 			// legacy component, no css at solution level
 			return new Pair<>(getStyleClasses(flattenedSolution.getStyleForForm(form, null), lookupName, form.getStyleClass()), null);

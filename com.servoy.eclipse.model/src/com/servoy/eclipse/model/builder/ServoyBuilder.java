@@ -4853,7 +4853,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 							continue;
 						}
-						if (PersistHelper.getOrderedStyleSheets(servoyProject.getFlattenedSolution()).size() == 0)
+						if (PersistHelper.getOrderedStyleSheets(servoyProject.getEditingFlattenedSolution()).size() == 0)
 						{
 							form.acceptVisitor(new IPersistVisitor()
 							{
@@ -4867,9 +4867,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										else if (o instanceof Part) styleClass = ((Part)o).getStyleClass();
 										if (styleClass != null)
 										{
-											List<String> styleClasses = Arrays.asList(
-												ModelUtils.getStyleClasses(flattenedSolution, form, (o instanceof IFormElement) ? (IFormElement)o : null,
-													StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), ModelUtils.getStyleLookupname(o)).getLeft());
+											List<String> styleClasses = Arrays.asList(ModelUtils.getStyleClasses(flattenedSolution, form, o,
+												StaticContentSpecLoader.PROPERTY_STYLECLASS.getPropertyName(), ModelUtils.getStyleLookupname(o)).getLeft());
 											if (!styleClasses.contains(styleClass))
 											{
 												ServoyMarker mk = MarkerMessages.StyleFormClassNotFound.fill(styleClass, form.getName());
@@ -4915,7 +4914,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				}
 				else
 				{
-					if (PersistHelper.getOrderedStyleSheets(servoyProject.getFlattenedSolution()).size() == 0)
+					if (PersistHelper.getOrderedStyleSheets(servoyProject.getEditingFlattenedSolution()).size() == 0)
 					{
 						form.acceptVisitor(new IPersistVisitor()
 						{
