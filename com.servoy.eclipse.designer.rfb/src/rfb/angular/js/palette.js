@@ -202,6 +202,11 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 								canDrop.beforeChild = angularElement[0].nextElementSibling;
 							}
 							angularElement.remove();
+							//the next element can be the dummy one that was inserted just to see how it would look
+							//so get the next one because that one should be a real element with a real svy-id
+							if (canDrop.beforeChild && canDrop.beforeChild.getAttribute("svy-id") === "null")
+							    canDrop.beforeChild = canDrop.beforeChild.nextElementSibling;
+							
 						}
 						if (!canDrop.dropAllowed) return;
 

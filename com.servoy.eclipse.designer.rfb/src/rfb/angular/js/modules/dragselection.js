@@ -76,6 +76,9 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 								if (canDrop.dropAllowed && !canDrop.beforeChild) {
 									canDrop.beforeChild = node.nextElementSibling;
 								}
+								
+								if (canDrop.beforeChild && canDrop.beforeChild.getAttribute("svy-id") === node.getAttribute("svy-id"))
+								    canDrop.beforeChild = canDrop.beforeChild.nextElementSibling;
 
 								key = node.uuid;
 								if (!key) {

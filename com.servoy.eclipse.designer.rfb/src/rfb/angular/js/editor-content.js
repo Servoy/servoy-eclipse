@@ -14,7 +14,7 @@ angular.module('editorContent',['servoyApp'])
 	//create an absolute position div on the body that holds the element that is being dragged
      	$rootScope.createTransportDiv = function(element, event) {
      	    var dragClone = element.cloneNode(true);
-     	    angular.element(dragClone).attr({'svy-id':""});
+     	    dragClone.removeAttribute('svy-id');
      	    var dragCloneDiv = angular.element($document[0].createElement('div'));
      	    dragCloneDiv.css({
         		position: 'absolute',
