@@ -115,8 +115,8 @@ public class ImportComponentFolderAction extends ImportComponentAction
 			{
 				public void run()
 				{
-					ScrollableDialog dialog = new ScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.INFORMATION, "Import component folder",
-						"The following components will be imported: ", allComponents.toString());
+					ScrollableDialog dialog = new ScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.INFORMATION, "Import " + entity + " folder",
+						"The following " + folder + " will be imported: ", allComponents.toString());
 					dialog.open();
 				}
 			}, true);
@@ -128,7 +128,7 @@ public class ImportComponentFolderAction extends ImportComponentAction
 			{
 				public void run()
 				{
-					ScrollableDialog dialog = new ScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.ERROR, "Import component folder",
+					ScrollableDialog dialog = new ScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.ERROR, "Import " + entity + " folder",
 						"The following error occured during import: ", ex.toString());
 					dialog.open();
 				}

@@ -60,8 +60,8 @@ public class ImportComponentAction extends Action
 
 	protected final SolutionExplorerView viewer;
 	private int overrideReturnCode;
-	private final String entity;
-	private final String folder;
+	protected final String entity;
+	protected final String folder;
 
 	public ImportComponentAction(SolutionExplorerView viewer, String entity, String folder)
 	{
