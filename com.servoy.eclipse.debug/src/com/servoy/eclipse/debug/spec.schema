@@ -60,6 +60,11 @@
 			"description": "The javascript definition",
 			"type": "string"
 		},
+		"attributes": 
+		{
+			"description": "Layout attributes definition",
+			"type": "string"
+		},
 		"name": 
 		{
 			"description": "The angular directive name of the component",
