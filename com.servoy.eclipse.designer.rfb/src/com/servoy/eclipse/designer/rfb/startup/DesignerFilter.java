@@ -18,6 +18,8 @@
 package com.servoy.eclipse.designer.rfb.startup;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -55,11 +57,18 @@ import org.sablo.specification.WebObjectSpecification;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Template;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.FormElement;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.util.Debug;
@@ -90,6 +99,7 @@ public class DesignerFilter implements Filter
 			HttpServletRequest request = (HttpServletRequest)servletRequest;
 			String uri = request.getRequestURI();
 			String layoutType = request.getParameter("layout");
+			String formName = request.getParameter("formName");
 			if (uri != null && uri.endsWith("palette"))
 			{
 				WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
@@ -271,7 +281,7 @@ public class DesignerFilter implements Filter
 								}
 								else
 								{
-									jsonWriter.key("tagName").value(createLayoutDiv(config, new StringBuilder()).toString());
+									jsonWriter.key("tagName").value(createLayoutDiv(config, new StringBuilder(), spec).toString());
 								}
 								Map<String, Object> model = new HashMap<String, Object>();
 								PropertyDescription pd = spec.getProperty("size");
@@ -282,8 +292,7 @@ public class DesignerFilter implements Filter
 								else
 								{
 									HashMap<String, Number> size = new HashMap<String, Number>();
-									size.put("height", Integer.valueOf(20));
-									size.put("width", Integer.valueOf(100));
+									size.put("width", Integer.valueOf(300));
 									model.put("size", size);
 								}
 								jsonWriter.key("model").value(new JSONObject(model));
@@ -320,9 +329,32 @@ public class DesignerFilter implements Filter
 									jsonWriter.key("name").value(spec.getName());
 									jsonWriter.key("componentType").value("component");
 									jsonWriter.key("displayName").value(spec.getDisplayName());
-									jsonWriter.key("tagName").value(FormTemplateGenerator.getTagName(spec.getName()));
+									FlattenedSolution fl = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
+									Form form = fl.getForm(formName);
 									Map<String, Object> model = new HashMap<String, Object>();
+									if (form.isResponsiveLayout())
+									{
+										WebComponent obj = (WebComponent)fl.getSolution().getChangeHandler().createNewObject(form, IRepository.WEBCOMPONENTS);
+										obj.setName(spec.getName());
+										obj.setTypeName(spec.getName());
+										FormElement formElement = FormElementHelper.INSTANCE.getFormElement(obj, fl, null, false);
+										StringWriter stringWriter = new StringWriter();
+										PrintWriter printWriter = new PrintWriter(stringWriter);
+										FormLayoutGenerator.generateFormElement(printWriter, formElement, form, true);
+										jsonWriter.key("tagName").value(stringWriter.toString());
+										model.put("componentName", formElement.getName());
+									}
+									else jsonWriter.key("tagName").value(FormTemplateGenerator.getTagName(spec.getName()));
 									PropertyDescription pd = spec.getProperty("size");
+									Set<String> allPropertiesNames = spec.getAllPropertiesNames();
+									for (String string : allPropertiesNames)
+									{
+										if (spec.getProperty(string) != null && spec.getProperty(string).getDefaultValue() != null)
+										{
+											Object defaultValue = spec.getProperty(string).getDefaultValue();
+											if (defaultValue != null) model.put(string, defaultValue);
+										}
+									}
 									if (pd != null && pd.getDefaultValue() != null)
 									{
 										model.put("size", pd.getDefaultValue());
@@ -335,10 +367,9 @@ public class DesignerFilter implements Filter
 									{
 										model.put("editable", Boolean.TRUE);
 									}
-									if ("servoydefault-label".equals(spec.getName()))
-									{
-										model.put("text", "label");
-									}
+
+									model.put("visible", Boolean.TRUE);
+
 									jsonWriter.key("model").value(new JSONObject(model));
 									if (spec.getIcon() != null)
 									{
@@ -363,6 +394,10 @@ public class DesignerFilter implements Filter
 					Debug.error("Exception during designe palette generation", ex);
 				}
 				catch (BackingStoreException e)
+				{
+					Debug.error(e);
+				}
+				catch (RepositoryException e)
 				{
 					Debug.error(e);
 				}
@@ -401,12 +436,13 @@ public class DesignerFilter implements Filter
 	/**
 	 * @param config
 	 * @param sb
+	 * @param spec
 	 * @param specifications
 	 * @throws JSONException
 	 */
-	protected StringBuilder createLayoutDiv(JSONObject config, StringBuilder sb) throws JSONException
+	protected StringBuilder createLayoutDiv(JSONObject config, StringBuilder sb, WebLayoutSpecification spec) throws JSONException
 	{
-		sb.append("<div style='border-style: dotted;' "); // TODO tagname from spec?
+		sb.append("<div "); // TODO tagname from spec?
 		Iterator keys = config.keys();
 		while (keys.hasNext())
 		{
@@ -415,7 +451,9 @@ public class DesignerFilter implements Filter
 			String value = config.getString(key);
 			sb.append(key);
 			sb.append("='");
+
 			sb.append(value);
+			if (key.equals("class")) sb.append(" " + spec.getDesignStyleClass());
 			sb.append("' ");
 		}
 		sb.append(">");
@@ -428,7 +466,7 @@ public class DesignerFilter implements Filter
 				JSONObject childModel = jsonObject.optJSONObject("model");
 				if (childModel != null)
 				{
-					createLayoutDiv(childModel, sb);
+					createLayoutDiv(childModel, sb, spec);
 				}
 			}
 		}

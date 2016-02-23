@@ -1,14 +1,30 @@
-angular.module('editorContent', ['servoyApp']).controller('MainController', function($scope, $window, $timeout,
-  $windowService, $webSocket, $sabloApplication,
-  $servoyInternal, $rootScope, $compile, $solutionSettings, $editorContentService) {
+angular.module('editorContent',['servoyApp'])
+ .controller("MainController", function($scope, $window, $timeout, $windowService, $document, $webSocket, $servoyInternal, $sabloApplication, $rootScope, $compile, $solutionSettings, $editorContentService){
   $rootScope.createComponent = function(html, model) {
-    var compScope = $scope.$new(true);
-    compScope.model = model;
-    compScope.api = {};
-    compScope.handlers = {};
-    var el = $compile(html)(compScope);
-    angular.element('body').append(el);
+    if (model) $rootScope.getDesignFormControllerScope().setModel(model.componentName, model);
+    var el = $compile(html)($rootScope.getDesignFormControllerScope());
+    $rootScope.getDesignFormElement().append(el);
     return el;
+  }
+	//create an absolute position div on the body that holds the element that is being dragged
+  $rootScope.createTransportDiv = function(element, event) {
+    var dragClone = element.cloneNode(true);
+    dragClone.removeAttribute('svy-id');
+    var dragCloneDiv = angular.element($document[0].createElement('div'));
+    dragCloneDiv.css({
+      position: 'absolute',
+      width: 200,
+      heigth: 100,
+      top: event.pageY,
+      left: event.pageX,
+      'z-index': 4,
+      'pointer-events': 'none',
+      'list-style-type': 'none',
+      display: 'none'
+    });
+    dragCloneDiv.append(dragClone);
+    angular.element($document[0].body).append(dragCloneDiv);
+    return dragCloneDiv;
   }
   $rootScope.showWireframe = false;
   $solutionSettings.enableAnchoring = false;
@@ -78,7 +94,7 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
       }
     }
   };
-}).controller("DesignFormController", function($scope, $editorContentService, $rootScope) {
+}).controller("DesignFormController", function($scope, $editorContentService, $rootScope, $element) {
   $scope.formStyle = {
     left: "0px",
     right: "0px",
@@ -95,6 +111,9 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
     delete layout[name];
   }
 
+  $rootScope.getDesignFormElement = function() {
+      return $element;
+  };
   $rootScope.getDesignFormControllerScope = function() {
     return $scope;
   };
@@ -122,6 +141,12 @@ angular.module('editorContent', ['servoyApp']).controller('MainController', func
       model[name] = ret;
     }
     return ret;
+  }
+  $scope.setModel = function(name, modelObject){
+    if (!model[name]){
+      model[name] = modelObject;
+    }
+    return model[name];
   }
   $scope.api = function(name) {
     var ret = api[name];
