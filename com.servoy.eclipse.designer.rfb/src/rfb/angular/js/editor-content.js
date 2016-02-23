@@ -1,16 +1,36 @@
 angular.module('editorContent',['servoyApp'])
  .controller("MainController", function($scope, $window, $timeout, $windowService, $document, $webSocket, $servoyInternal,$rootScope,$compile,$solutionSettings){
-		$rootScope.createComponent = function(html, model) {
-				var compScope = $scope.$new(false);
-				if (!$scope.model)
-				    $scope.model = {};
-				if (model) $scope.model[model.componentName] = model;
-				compScope.api = {};
-				compScope.handlers = {};
-				var el = $compile(html)(compScope);
-				angular.element($document[0].body).append(el);
-				return el;
-		}
+     	$rootScope.createComponent = function(html, model) {
+			var compScope = $scope.$new(false);
+			if (!$scope.model)
+			    $scope.model = {};
+			if (model) $scope.model[model.componentName] = model;
+			compScope.api = {};
+			compScope.handlers = {};
+			var el = $compile(html)(compScope);
+			angular.element($document[0].body).append(el);
+			return el;
+	}
+	//create an absolute position div on the body that holds the element that is being dragged
+     	$rootScope.createTransportDiv = function(element, event) {
+     	    var dragClone = element.cloneNode(true);
+     	    angular.element(dragClone).attr({'svy-id':""});
+     	    var dragCloneDiv = angular.element($document[0].createElement('div'));
+     	    dragCloneDiv.css({
+        		position: 'absolute',
+        		width: 200,
+        		heigth: 100,
+        		top: event.pageY,
+        		left: event.pageX,
+        		'z-index': 4,
+        		'pointer-events': 'none',
+        		'list-style-type': 'none',
+        		display: 'none'
+     	    });
+     	    dragCloneDiv.append(dragClone);
+     	    angular.element($document[0].body).append(dragCloneDiv);
+     	    return dragCloneDiv;
+     	}
 	$rootScope.highlight = false;
 	$rootScope.showWireframe = false;
 	$solutionSettings.enableAnchoring = false;

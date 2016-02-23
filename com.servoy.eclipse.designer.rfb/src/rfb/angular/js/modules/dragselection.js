@@ -5,6 +5,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 		var dragging = false;
 		var dragStartEvent = null;
 		var selectionToDrag = null;
+		var dragCloneDiv = null;
 		var COMPONENT_TYPE = 7;
 
 		function onmousedown(event) {
@@ -15,6 +16,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					if (angular.element(dragNode).hasClass("inheritedElement")) {//do not grab if this is an inherited element
 						dragStartEvent = null;
 					}
+					dragCloneDiv = editorScope.getEditorContentRootScope().createTransportDiv(dragNode, event);
 				}
 			}
 		}
@@ -22,6 +24,10 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 		function onmouseup(event) {
 			if (event.button == 0) {
 				dragStartEvent = null;
+				if (dragCloneDiv) {
+			    	    dragCloneDiv.remove();
+			    	    dragCloneDiv = null;
+			    	}
 				if (dragging) {
 					utils.setDraggingFromPallete(null);
 					dragging = false;
@@ -141,6 +147,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					if (Math.abs(dragStartEvent.screenX - event.screenX) > 5 || Math.abs(dragStartEvent.screenY - event.screenY) > 5) {
 						dragging = true;
 						utils.setDraggingFromPallete(true);
+						if (dragCloneDiv) dragCloneDiv.css({display:'block'});
 					} else return;
 				}
 				if (event.ctrlKey && selectionToDrag == null) {
@@ -180,10 +187,21 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 
 				if (selectionToDrag.length > 0) {
 					if (!editorScope.isAbsoluteFormLayout()) {
+					    	if (dragCloneDiv){
+					    		var css = editorScope.convertToContentPoint({
+								position: 'absolute',
+								top: event.pageY+1,
+								left: event.pageX+1,
+								display: 'block',
+								'z-index': 4,
+								transition: 'opacity .5s ease-in-out 0'
+							});
+					    		dragCloneDiv.css(css);
+					    	}
 
 						var type = "component";
 						var layoutName = selectionToDrag[0].getAttribute("svy-layoutname");
-						if (layoutName) type = "layout"
+						if (layoutName) type = "layout";
 
 						var topContainer = null;
 
@@ -199,7 +217,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 
 						if (t) clearTimeout(t);
 						t = setTimeout(function() {
-							if (canDrop.dropTarget) {
+							if (canDrop.dropTarget && selectionToDrag) {
 								for (var i = 0; i < selectionToDrag.length; i++) {
 									var node = angular.element(selectionToDrag[i]);
 									if (editorScope.glasspane.style.cursor == "") {
