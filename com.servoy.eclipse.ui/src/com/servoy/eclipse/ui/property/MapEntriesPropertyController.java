@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui.property;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jface.viewers.CellEditor;
@@ -33,12 +34,16 @@ import org.eclipse.swt.layout.grouplayout.GroupLayout.ParallelGroup;
 import org.eclipse.swt.layout.grouplayout.GroupLayout.SequentialGroup;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.TextPropertyDescriptor;
+import org.sablo.specification.PropertyDescription;
 
 import com.servoy.eclipse.ui.editors.TextDialogCellEditor;
 import com.servoy.j2db.util.Pair;
@@ -46,13 +51,14 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Property controller for key(string)/values in a map, entries are shown as subproperties.
- * 
+ *
  * @author rgansevles
- * 
+ *
  * @since 6.1
  */
 public class MapEntriesPropertyController extends PropertyController<Map<String, Object>, Object>
 {
+	private final Map<String, PropertyDescription> attributesMap;
 	public static LabelProvider CLICK_TO_ADD = new LabelProvider()
 	{
 		@Override
@@ -62,15 +68,20 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 		}
 	};
 
-	public MapEntriesPropertyController(String id, String displayName)
+	public MapEntriesPropertyController(String id, String displayName, Map<String, PropertyDescription> map)
 	{
 		super(id, displayName);
 		setLabelProvider(CLICK_TO_ADD);
+		this.attributesMap = map;
 	}
 
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
+		if (attributesMap != null && attributesMap.size() > 0)
+		{
+			return new AddEntryComboCellEditor(parent);
+		}
 		return new AddEntryCellEditor(parent);
 	}
 
@@ -94,7 +105,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 		};
 	}
 
-	protected static class MapPropertySource extends ComplexPropertySource<Map<String, Object>>
+	protected class MapPropertySource extends ComplexPropertySource<Map<String, Object>>
 	{
 		private static final String REMOVE_VALUE = "<removed>&*^&^%&$#@^%$&%%^#$*$($";
 
@@ -106,7 +117,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 		@Override
 		public IPropertyDescriptor[] createPropertyDescriptors()
 		{
-			Map<String, Object> map = getEditableValue();
+			final Map<String, Object> map = getEditableValue();
 			if (map == null)
 			{
 				return IPropertyController.NO_DESCRIPTORS;
@@ -114,30 +125,78 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 
 			IPropertyDescriptor[] descs = new IPropertyDescriptor[map.size()];
 			int i = 0;
-			for (String key : map.keySet())
+			for (final String key : map.keySet())
 			{
 				descs[i++] = new TextPropertyDescriptor(key, key)
 				{
 					@Override
 					public CellEditor createPropertyEditor(Composite parent)
 					{
-						return new TextDialogCellEditor(parent, SWT.NONE, new LabelProvider())
-						{
-							@Override
-							protected Button createButton(Composite parent)
-							{
-								Button button = super.createButton(parent);
-								button.setText("x");
-								return button;
-							}
 
-							@Override
-							public Object openDialogBox(Control cellEditorWindow)
+						if (attributesMap != null && attributesMap.size() > 0 && attributesMap.containsKey(key) &&
+							!attributesMap.get(key).getValues().isEmpty())
+						{
+							List<Object> values = attributesMap.get(key).getValues();
+							return new StringListWithContentProposalsPropertyController.AbstractWordsWithContentProposalCellEditor(parent,
+								values.toArray(new String[values.size()]), null)
 							{
-								// button is hit
-								return REMOVE_VALUE;
-							}
-						};
+
+								@Override
+								protected Object doGetValue()
+								{
+									return text.getText();
+								}
+
+								@Override
+								protected void doSetValue(Object val)
+								{
+									text.setText(val instanceof String ? (String)val : "");
+								}
+
+								@Override
+								protected void addButton(Composite composite)
+								{
+									button = new Button(composite, SWT.FLAT);
+									button.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_DELETE));
+									button.addSelectionListener(new SelectionAdapter()
+									{
+										@Override
+										public void widgetSelected(SelectionEvent e)
+										{
+											markDirty();
+											doSetValue(REMOVE_VALUE);
+											fireApplyEditorValue();
+										}
+									});
+									button.setEnabled(true);
+								}
+
+								@Override
+								protected void addListeners()
+								{
+								}
+							};
+						}
+						else
+						{
+							return new TextDialogCellEditor(parent, SWT.NONE, new LabelProvider())
+							{
+								@Override
+								protected Button createButton(Composite composite)
+								{
+									Button button = new Button(composite, SWT.FLAT);
+									button.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_DELETE));
+									return button;
+								}
+
+								@Override
+								public Object openDialogBox(Control cellEditorWindow)
+								{
+									// button is hit
+									return REMOVE_VALUE;
+								}
+							};
+						}
 					}
 				};
 			}
@@ -208,13 +267,12 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 		}
 	}
 
-	protected class AddEntryCellEditor extends CellEditor
+	protected abstract class AbstractAddEntryCellEditor extends CellEditor
 	{
 		private Map<String, Object> value;
-		private Button button;
-		private Text text;
+		protected Button button;
 
-		public AddEntryCellEditor(Composite parent)
+		public AbstractAddEntryCellEditor(Composite parent)
 		{
 			super(parent);
 		}
@@ -270,7 +328,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 			// create a copy-map so that value is seen as modified
 			value = value == null ? new HashMap<String, Object>() : new HashMap<String, Object>(value);
 			value.put(keyval.getLeft(), keyval.getRight() == null ? "" : keyval.getRight());
-			text.setText("");
+			setInputText("");
 			markDirty();
 			fireApplyEditorValue();
 		}
@@ -279,7 +337,101 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 		protected Control createControl(Composite parent)
 		{
 			Composite composite = new Composite(parent, SWT.NONE);
+			addInput(composite);
 
+			button = new Button(composite, SWT.PUSH);
+			button.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ADD));
+			addSelectionListener();
+			button.setEnabled(false);
+
+			// layout
+			GroupLayout groupLayout = new GroupLayout(composite);
+			SequentialGroup sequentialGroup = groupLayout.createSequentialGroup();
+			sequentialGroup.add(getInput(), GroupLayout.PREFERRED_SIZE, 135, Integer.MAX_VALUE);
+			sequentialGroup.addPreferredGap(LayoutStyle.RELATED).add(button);
+			groupLayout.setHorizontalGroup(sequentialGroup);
+
+			ParallelGroup parallelGroup = groupLayout.createParallelGroup(GroupLayout.CENTER, false);
+			parallelGroup.add(button, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE);
+			parallelGroup.add(getInput(), GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE);
+			groupLayout.setVerticalGroup(parallelGroup);
+
+			composite.setLayout(groupLayout);
+
+			return composite;
+		}
+
+		protected void addSelectionListener()
+		{
+			button.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					addEntry(getInputText());
+				}
+			});
+		}
+
+		@Override
+		protected Map<String, Object> doGetValue()
+		{
+			return value;
+		}
+
+		@Override
+		protected void doSetValue(Object val)
+		{
+			this.value = value instanceof Map< ? , ? > ? (Map<String, Object>)val : null;
+		}
+
+		@Override
+		protected void doSetFocus()
+		{
+			getInput().forceFocus();
+		}
+
+		protected abstract Control getInput();
+
+		protected abstract void addInput(Composite composite);
+
+		protected abstract void setInputText(String string);
+
+		protected abstract String getInputText();
+
+	}
+
+	protected class AddEntryCellEditor extends AbstractAddEntryCellEditor
+	{
+
+		private Text text;
+
+		public AddEntryCellEditor(Composite parent)
+		{
+			super(parent);
+		}
+
+		@Override
+		protected void setInputText(String string)
+		{
+			text.setText(string);
+		}
+
+		@Override
+		protected Control getInput()
+		{
+			return text;
+		}
+
+		@Override
+		protected String getInputText()
+		{
+			return text.getText();
+		}
+
+		@Override
+		protected void addInput(Composite composite)
+		{
 			text = new Text(composite, SWT.BORDER);
 			text.addModifyListener(new ModifyListener()
 			{
@@ -299,52 +451,61 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 					}
 				}
 			});
+		}
 
-			button = new Button(composite, SWT.PUSH);
-			button.setText("add");
-			button.addSelectionListener(new SelectionAdapter()
+	}
+
+	protected class AddEntryComboCellEditor extends AbstractAddEntryCellEditor
+	{
+		private Combo combo;
+
+		public AddEntryComboCellEditor(Composite parent)
+		{
+			super(parent);
+		}
+
+		@Override
+		protected Control getInput()
+		{
+			return combo;
+		}
+
+		@Override
+		protected String getInputText()
+		{
+			return combo.getText();
+		}
+
+		@Override
+		protected void setInputText(String string)
+		{
+			combo.setText(string);
+		}
+
+		@Override
+		protected void addInput(Composite composite)
+		{
+			combo = new Combo(composite, SWT.BORDER);
+			combo.setItems(attributesMap.keySet().toArray(new String[attributesMap.size()]));
+			combo.addModifyListener(new ModifyListener()
 			{
-				@Override
-				public void widgetSelected(SelectionEvent e)
+				public void modifyText(ModifyEvent e)
 				{
-					addEntry(text.getText());
+					button.setEnabled(allowNewKey(combo.getText()));
 				}
 			});
-			button.setEnabled(false);
-
-			// layout
-			GroupLayout groupLayout = new GroupLayout(composite);
-			SequentialGroup sequentialGroup = groupLayout.createSequentialGroup();
-			sequentialGroup.add(text, GroupLayout.PREFERRED_SIZE, 135, Integer.MAX_VALUE);
-			sequentialGroup.addPreferredGap(LayoutStyle.RELATED).add(button);
-			groupLayout.setHorizontalGroup(sequentialGroup);
-
-			ParallelGroup parallelGroup = groupLayout.createParallelGroup(GroupLayout.CENTER, false);
-			parallelGroup.add(button, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE);
-			parallelGroup.add(text, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE);
-			groupLayout.setVerticalGroup(parallelGroup);
-
-			composite.setLayout(groupLayout);
-
-			return composite;
-		}
-
-		@Override
-		protected Map<String, Object> doGetValue()
-		{
-			return value;
-		}
-
-		@Override
-		protected void doSetValue(Object value)
-		{
-			this.value = (Map<String, Object>)value;
-		}
-
-		@Override
-		protected void doSetFocus()
-		{
-			text.forceFocus();
+			combo.addTraverseListener(new TraverseListener()
+			{
+				public void keyTraversed(TraverseEvent e)
+				{
+					if (e.detail == SWT.TRAVERSE_RETURN && allowNewKey(combo.getText()))
+					{
+						e.doit = false;
+						addEntry(combo.getText());
+					}
+				}
+			});
 		}
 	}
+
 }

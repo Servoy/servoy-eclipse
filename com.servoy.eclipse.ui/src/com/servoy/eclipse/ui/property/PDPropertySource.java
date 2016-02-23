@@ -26,6 +26,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
+import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
@@ -89,72 +90,73 @@ public class PDPropertySource extends PersistPropertySource
 		if (persistContext.getPersist() instanceof LayoutContainer)
 		{
 			IPropertyHandler attributesPropertyHandler = new WebComponentPropertyHandler(new PropertyDescription("attributes", null,
-				new PropertySetterDelegatePropertyController<Map<String, Object>, PersistPropertySource>(new MapEntriesPropertyController("attributes",
-					RepositoryHelper.getDisplayName("attributes", Form.class))
-				{ /*
-				 * (non-Javadoc)
-				 * 
-				 * @see com.servoy.eclipse.ui.property.PropertyController#createConverter()
-				 */
-					@Override
-					protected ComplexPropertyConverter<Map<String, Object>> createConverter()
-					{
-						return new ComplexProperty.ComplexPropertyConverter<Map<String, Object>>()
+				new PropertySetterDelegatePropertyController<Map<String, Object>, PersistPropertySource>(
+					new MapEntriesPropertyController("attributes", RepositoryHelper.getDisplayName("attributes", Form.class),
+						propertyDescription instanceof WebLayoutSpecification ? ((WebLayoutSpecification)propertyDescription).getAttributes() : null)
+					{ /*
+						 * (non-Javadoc)
+						 *
+						 * @see com.servoy.eclipse.ui.property.PropertyController#createConverter()
+						 */
+						@Override
+						protected ComplexPropertyConverter<Map<String, Object>> createConverter()
 						{
-							@Override
-							public Object convertProperty(final Object id, Map<String, Object> value)
+							return new ComplexProperty.ComplexPropertyConverter<Map<String, Object>>()
 							{
-								return new ComplexProperty<Map<String, Object>>(value)
+								@Override
+								public Object convertProperty(final Object id, Map<String, Object> value)
 								{
-									@Override
-									public IPropertySource getPropertySource()
+									return new ComplexProperty<Map<String, Object>>(value)
 									{
-										return new MapPropertySource(this)
+										@Override
+										public IPropertySource getPropertySource()
 										{
-											@Override
-											public IPropertyDescriptor[] createPropertyDescriptors()
+											return new MapPropertySource(this)
 											{
-												// remove "class" property from super-property-descriptors
-												IPropertyDescriptor[] propertyDescriptors = super.createPropertyDescriptors();
-												List<IPropertyDescriptor> result = new ArrayList<>();
-												for (IPropertyDescriptor desc : propertyDescriptors)
+												@Override
+												public IPropertyDescriptor[] createPropertyDescriptors()
 												{
-													if (!"class".equals(desc.getId()))
+													// remove "class" property from super-property-descriptors
+													IPropertyDescriptor[] propertyDescriptors = super.createPropertyDescriptors();
+													List<IPropertyDescriptor> result = new ArrayList<>();
+													for (IPropertyDescriptor desc : propertyDescriptors)
 													{
-														result.add(desc);
+														if (!"class".equals(desc.getId()))
+														{
+															result.add(desc);
+														}
 													}
+													return result.toArray(new IPropertyDescriptor[result.size()]);
 												}
-												return result.toArray(new IPropertyDescriptor[result.size()]);
-											}
 
-											/*
-											 * (non-Javadoc)
-											 * 
-											 * @see com.servoy.eclipse.ui.property.MapEntriesPropertyController.MapPropertySource#toJSExpression(java.lang.
-											 * Object)
-											 */
-											@Override
-											protected String toJSExpression(Object v)
-											{
-												String result;
-												if (v instanceof String && ((String)v).length() > 0)
+												/*
+												 * (non-Javadoc)
+												 *
+												 * @see com.servoy.eclipse.ui.property.MapEntriesPropertyController.MapPropertySource#toJSExpression(java.lang.
+												 * Object)
+												 */
+												@Override
+												protected String toJSExpression(Object v)
 												{
-													result = v.toString();
+													String result;
+													if (v instanceof String && ((String)v).length() > 0)
+													{
+														result = v.toString();
+													}
+													else
+													{
+														result = null;
+													}
+													return result;
 												}
-												else
-												{
-													result = null;
-												}
-												return result;
-											}
-										};
-									}
-								};
-							}
-						};
-					}
+											};
+										}
+									};
+								}
+							};
+						}
 
-				}, "attributes")
+					}, "attributes")
 				{
 					@SuppressWarnings("unchecked")
 					@Override
@@ -222,8 +224,8 @@ public class PDPropertySource extends PersistPropertySource
 				config.addDefault(desc.getDefaultValue(), null);
 			}
 			createdPropertyHandler = createWebComponentPropertyHandler(
-				new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config, desc.getDefaultValue(), desc.hasDefault(), null, null, null, false),
-				persistContext);
+					new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config, desc.getDefaultValue(), desc.hasDefault(), null, null, null, false),
+					persistContext);
 		}
 		else
 		{

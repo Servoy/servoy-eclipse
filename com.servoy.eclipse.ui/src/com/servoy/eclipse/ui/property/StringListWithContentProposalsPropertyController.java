@@ -315,8 +315,8 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 				IContentProposal[] modifiedProposels = new IContentProposal[contentProposals.length];
 				for (int i = 0; i < contentProposals.length; i++)
 				{
-					modifiedProposels[i] = new ContentProposal(contentProposals[i].getContent(), contentProposals[i].getLabel(), tooltip.replaceFirst("\\{\\}",
-						contentProposals[i].getContent()));
+					modifiedProposels[i] = new ContentProposal(contentProposals[i].getContent(), contentProposals[i].getLabel(),
+						tooltip.replaceFirst("\\{\\}", contentProposals[i].getContent()));
 				}
 				return modifiedProposels;
 			}
@@ -408,22 +408,21 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 		}
 	}
 
-	private static class WordsWithContentProposalCellEditor extends CellEditor
+	static abstract class AbstractWordsWithContentProposalCellEditor extends CellEditor
 	{
+
 		private final String[] proposals;
 		private final String tooltip;
 
-		private Button button;
-		private Text text;
+		protected Button button;
+		protected Text text;
 		private ModifiedContentProposalAdapter contentProposalAdapter;
-		private final IValueEditor<String> valueEditor;
 
-		public WordsWithContentProposalCellEditor(Composite parent, String[] proposals, String tooltip, IValueEditor<String> valueEditor)
+		public AbstractWordsWithContentProposalCellEditor(Composite parent, String[] proposals, String tooltip)
 		{
 			super(parent);
 			this.proposals = proposals;
 			this.tooltip = tooltip;
-			this.valueEditor = valueEditor;
 		}
 
 		/**
@@ -460,17 +459,7 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 			Composite composite = new Composite(parent, SWT.NONE);
 
 			text = new Text(composite, SWT.BORDER);
-			Listener listener = new Listener()
-			{
-				@Override
-				public void handleEvent(Event arg0)
-				{
-					button.setEnabled(valueEditor != null && valueEditor.canEdit(getCurrentWord()));
-				}
-			};
-			text.addListener(SWT.Modify, listener);
-			text.addListener(SWT.KeyUp, listener);
-			text.addListener(SWT.MouseUp, listener);
+			addListeners();
 			text.addSelectionListener(new SelectionAdapter()
 			{
 				@Override
@@ -481,20 +470,7 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 				}
 			});
 
-			button = new Button(composite, SWT.FLAT);
-			button.setImage(DialogCellEditor.OPEN_IMAGE);
-			button.addSelectionListener(new SelectionAdapter()
-			{
-				@Override
-				public void widgetSelected(SelectionEvent e)
-				{
-					if (valueEditor != null)
-					{
-						valueEditor.openEditor(getCurrentWord());
-					}
-				}
-			});
-			button.setEnabled(false);
+			addButton(composite);
 
 			// layout
 			GroupLayout groupLayout = new GroupLayout(composite);
@@ -519,6 +495,63 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 		}
 
 		@Override
+		protected void doSetFocus()
+		{
+			text.forceFocus();
+		}
+
+		protected abstract void addButton(Composite composite);
+
+		protected abstract void addListeners();
+	}
+
+	class WordsWithContentProposalCellEditor extends AbstractWordsWithContentProposalCellEditor
+	{
+		private final IValueEditor<String> valueEditor;
+
+		public WordsWithContentProposalCellEditor(Composite parent, String[] proposals, String tooltip, IValueEditor<String> valueEditor)
+		{
+			super(parent, proposals, tooltip);
+			this.valueEditor = valueEditor;
+		}
+
+
+		@Override
+		protected void addListeners()
+		{
+			Listener listener = new Listener()
+			{
+				@Override
+				public void handleEvent(Event arg0)
+				{
+					button.setEnabled(valueEditor != null && valueEditor.canEdit(getCurrentWord()));
+				}
+			};
+			text.addListener(SWT.Modify, listener);
+			text.addListener(SWT.KeyUp, listener);
+			text.addListener(SWT.MouseUp, listener);
+		}
+
+		@Override
+		protected void addButton(Composite composite)
+		{
+			button = new Button(composite, SWT.FLAT);
+			button.setImage(DialogCellEditor.OPEN_IMAGE);
+			button.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					if (valueEditor != null)
+					{
+						valueEditor.openEditor(getCurrentWord());
+					}
+				}
+			});
+			button.setEnabled(false);
+		}
+
+		@Override
 		protected List<String> doGetValue()
 		{
 			return STRING_TO_LIST_CONVERTER.convertProperty(null, text.getText());
@@ -528,12 +561,6 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 		protected void doSetValue(Object val)
 		{
 			text.setText(PersistPropertySource.NULL_STRING_CONVERTER.convertProperty(null, STRING_TO_LIST_CONVERTER.convertValue(null, (List<String>)val)));
-		}
-
-		@Override
-		protected void doSetFocus()
-		{
-			text.forceFocus();
 		}
 	}
 }
