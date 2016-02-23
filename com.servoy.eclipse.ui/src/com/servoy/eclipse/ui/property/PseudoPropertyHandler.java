@@ -31,7 +31,7 @@ import com.servoy.j2db.persistence.Solution;
 
 /**
  * Handler for some known pseudo proeties/
- * 
+ *
  * @author rgansevles
  *
  */
@@ -43,8 +43,9 @@ public class PseudoPropertyHandler implements IPropertyHandler
 
 	// null type: use property controller internally
 	public static final PropertyDescription DESIGN_PROPERTIES_DESCRIPTION = new PropertyDescription("designTimeProperties", null,
-		new PropertySetterDelegatePropertyController<Map<String, Object>, PersistPropertySource>(new MapEntriesPropertyController("designTimeProperties",
-			RepositoryHelper.getDisplayName("designTimeProperties", Form.class)), "designTimeProperties")
+		new PropertySetterDelegatePropertyController<Map<String, Object>, PersistPropertySource>(
+			new MapEntriesPropertyController("designTimeProperties", RepositoryHelper.getDisplayName("designTimeProperties", Form.class), null),
+			"designTimeProperties")
 		{
 			@Override
 			public Map<String, Object> getProperty(PersistPropertySource propSource)
