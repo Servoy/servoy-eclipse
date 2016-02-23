@@ -60,7 +60,8 @@ public class DesignerValueListPropertyType extends ValueListPropertyType
 
 			valueList = getIValueList(formElementValue, pd, formElement, comp, dataAdapterList, val, valueList, config, dataproviderID);
 
-			return valueList != null ? new ValueListTypeSabloValue(valueList, dataAdapterList, config, dataproviderID, pd)
+			return valueList != null ? new ValueListTypeSabloValue(valueList, dataAdapterList, config, dataproviderID, pd,
+				getComponentFormat(pd, dataAdapterList, formElement, config, dataproviderID))
 			{
 				@Override
 				protected java.util.List<java.util.Map<String, Object>> getJavaValueForJSON()
