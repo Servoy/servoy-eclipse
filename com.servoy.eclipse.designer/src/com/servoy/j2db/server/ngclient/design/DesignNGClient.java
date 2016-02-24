@@ -239,4 +239,10 @@ public class DesignNGClient extends DebugNGClient
 	{
 		this.showData = showData;
 	}
+
+	@Override
+	public void reportJSError(String message, Object detail)
+	{
+		// do not report client errors
+	}
 }
