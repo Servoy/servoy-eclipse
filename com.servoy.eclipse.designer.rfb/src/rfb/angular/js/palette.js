@@ -139,7 +139,7 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 						if (type=='component' || type == "layout" || type == "template") {
 							if (type=='component') {
 								if ($scope.isAbsoluteFormLayout())
-									angularElement = $scope.getEditorContentRootScope().createComponent('<div style="border-style: dotted; "><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-autoapply-disabled=\'true\'/></div>',model);
+									angularElement = $scope.getEditorContentRootScope().createAbsoluteComponent('<div><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-autoapply-disabled=\'true\'/></div>', model);
 								else{
 									angularElement = $scope.getEditorContentRootScope().createComponent('<div>'+tagName+'</div>', model);
 								}
@@ -159,7 +159,10 @@ angular.module("palette",['ui.bootstrap', 'ui.sortable'])
 								opacity: 0,
 								transition: 'opacity .5s ease-in-out 0'
 							});
-							angularElement.css(css)
+							if ($scope.isAbsoluteFormLayout()){
+							    css.height = elHeight + 'px';
+							}
+							angularElement.css(css);
 //							
 						}
 					}
