@@ -232,7 +232,6 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						var layoutName = firstSelectedNode.getAttribute("svy-layoutname");
 						if (layoutName) {
 						    editorScope.getEditorContentRootScope().drop_highlight = layoutName;
-						    console.log(layoutName)
 						    type = "layout";
 						}
 						
