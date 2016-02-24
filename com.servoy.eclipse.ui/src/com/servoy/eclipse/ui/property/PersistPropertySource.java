@@ -1623,7 +1623,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 			boolean multiSelect = solution.getSolutionType() != SolutionMetaData.MOBILE &&
 				PersistHelper.getOrderedStyleSheets(ModelUtils.getEditingFlattenedSolution(persist)).size() > 0;
-			if (!multiSelect && (form.isResponsiveLayout() || solution.getSolutionType() == SolutionMetaData.NG_CLIENT_ONLY))
+			if (!multiSelect && ((form != null && form.isResponsiveLayout()) || solution.getSolutionType() == SolutionMetaData.NG_CLIENT_ONLY))
 			{
 				// responsive forms or ng-client solution: use multi-select for style class
 				multiSelect = true;
