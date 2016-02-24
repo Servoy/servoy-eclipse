@@ -1,11 +1,22 @@
 angular.module('editorContent',['servoyApp'])
- .controller("MainController", function($scope, $window, $timeout, $windowService, $document, $webSocket, $servoyInternal, $sabloApplication, $rootScope, $compile, $solutionSettings, $editorContentService){
+ .controller("MainController", function($scope, $window, $timeout, $windowService, $document, $webSocket, $servoyInternal, $sabloApplication, $rootScope, $compile, $solutionSettings, $editorContentService, $element){
   $rootScope.createComponent = function(html, model) {
     if (model) $rootScope.getDesignFormControllerScope().setModel(model.componentName, model);
     var el = $compile(html)($rootScope.getDesignFormControllerScope());
     $rootScope.getDesignFormElement().append(el);
     return el;
   }
+     	
+  $rootScope.createAbsoluteComponent = function(html, model) {
+      var compScope = $scope.$new(true);
+      compScope.model = model;
+      compScope.api = {};
+      compScope.handlers = {};
+      var el = $compile(html)(compScope);
+      angular.element($element).append(el);
+      return el;
+  }
+     	
 	//create an absolute position div on the body that holds the element that is being dragged
   $rootScope.createTransportDiv = function(element, event) {
     var dragClone = element.cloneNode(true);
