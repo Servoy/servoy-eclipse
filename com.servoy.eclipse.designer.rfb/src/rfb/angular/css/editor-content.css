@@ -5,3 +5,6 @@
 .inheritedElement {
 	cursor:not-allowed;
 }
+.drop_highlight {
+	outline:2px solid #c2ecc2;
+}

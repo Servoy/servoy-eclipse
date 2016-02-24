@@ -28,6 +28,8 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 			    	    dragCloneDiv.remove();
 			    	    dragCloneDiv = null;
 			    	}
+				editorScope.getEditorContentRootScope().drop_highlight = null;
+			    	editorScope.getEditorContentRootScope().$apply();
 				if (dragging) {
 					utils.setDraggingFromPallete(null);
 					dragging = false;
@@ -226,8 +228,16 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						if(firstSelectedNode[0]) firstSelectedNode = firstSelectedNode[0];
 						
 						var type = "component";
+						editorScope.getEditorContentRootScope().drop_highlight = type;
 						var layoutName = firstSelectedNode.getAttribute("svy-layoutname");
-						if (layoutName) type = "layout";
+						if (layoutName) {
+						    editorScope.getEditorContentRootScope().drop_highlight = layoutName;
+						    console.log(layoutName)
+						    type = "layout";
+						}
+						
+						
+					    	editorScope.getEditorContentRootScope().$apply();
 
 						var topContainer = null;
 

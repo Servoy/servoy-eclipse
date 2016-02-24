@@ -133,6 +133,13 @@ angular.module('editorContent',['servoyApp'])
 
   $editorContentService.setLayoutData(layout);
 
+  $scope.canContainDraggedElement = function() {
+      for (arg in arguments){
+	  if (arguments[arg] == $scope.drop_highlight) return true;
+      }
+      return false;
+  }
+  
   $scope.model = function(name, noCreate) {
     var ret = model[name];
     if (!ret && !noCreate) {
@@ -142,6 +149,7 @@ angular.module('editorContent',['servoyApp'])
     }
     return ret;
   }
+  
   $scope.setModel = function(name, modelObject){
     if (!model[name]){
       model[name] = modelObject;

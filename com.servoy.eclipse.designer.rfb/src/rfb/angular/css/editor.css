@@ -193,6 +193,9 @@ body {
 	border-width: 1px;
 	display: none
 }
+.drop_highlight {
+	outline:2px solid green;
+}
 
 #highlight {
 	position:relative;

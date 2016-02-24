@@ -81,6 +81,11 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 					var node;
 					var mousemovecallback = $scope.registerDOMEvent("mousemove", "EDITOR", function(ev) {
 						if (dragClone) {
+						    	if (layoutName)
+						    	    editorScope.getEditorContentRootScope().drop_highlight = layoutName;
+						    	else
+						    	    editorScope.getEditorContentRootScope().drop_highlight = type;
+						    	editorScope.getEditorContentRootScope().$apply();
 							if (node){
 								node.remove();
 								node = null;
@@ -191,6 +196,8 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 						mouseentercallback);
 						if (mouseleavecallback) $scope.unregisterDOMEvent("mouseenter", "PALETTE", mouseleavecallback);
 						$scope.glasspane.style.cursor = "";
+						editorScope.getEditorContentRootScope().drop_highlight = null;
+						editorScope.getEditorContentRootScope().$apply();
 						if (dragClone) {
 							if (node){
 								node.remove();
