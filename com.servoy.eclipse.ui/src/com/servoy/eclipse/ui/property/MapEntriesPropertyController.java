@@ -352,7 +352,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 			groupLayout.setHorizontalGroup(sequentialGroup);
 
 			ParallelGroup parallelGroup = groupLayout.createParallelGroup(GroupLayout.CENTER, false);
-			parallelGroup.add(button, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Integer.MAX_VALUE);
+			parallelGroup.add(button, 0, 0, Integer.MAX_VALUE);
 			parallelGroup.add(getInput(), GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE);
 			groupLayout.setVerticalGroup(parallelGroup);
 
