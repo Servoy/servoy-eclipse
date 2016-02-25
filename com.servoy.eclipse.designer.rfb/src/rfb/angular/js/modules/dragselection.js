@@ -41,7 +41,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					var topContainer = null;
 					var layoutName = null;
 					var key;
-					if (event.ctrlKey) {
+					if (event.ctrlKey||event.metaKey) {
 						var components = [];
 						var size = 0;
 						for (i = 0; i < selectionToDrag.length; i++) {
@@ -153,7 +153,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						if (dragCloneDiv) dragCloneDiv.css({display:'block'});
 					} else return;
 				}
-				if (event.ctrlKey && selectionToDrag == null) {
+				if ((event.ctrlKey || event.metaKey) && selectionToDrag == null) {
 					selectionToDrag = [];
 					var selection = editorScope.getSelection();
 					for (i = 0; i < selection.length; i++) {
