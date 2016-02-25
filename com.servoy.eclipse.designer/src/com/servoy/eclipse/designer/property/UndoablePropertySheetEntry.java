@@ -144,7 +144,7 @@ public final class UndoablePropertySheetEntry extends ModifiedPropertySheetEntry
 	public void applyEditorValue()
 	{
 		Object[] values = getValues();
-		if (values != null && values.length > 1 && !editor.isDirty())
+		if (values != null && values.length > 1 && editor != null && !editor.isDirty())
 		{
 			return;
 		}
