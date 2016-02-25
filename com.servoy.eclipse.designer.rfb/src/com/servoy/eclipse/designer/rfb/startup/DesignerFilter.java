@@ -367,7 +367,10 @@ public class DesignerFilter implements Filter
 									}
 
 									model.put("visible", Boolean.TRUE);
-
+									if ("servoydefault-label".equals(spec.getName()))
+									{
+										model.put("text", "label");
+									}
 									jsonWriter.key("model").value(new JSONObject(model));
 									if (spec.getIcon() != null)
 									{
