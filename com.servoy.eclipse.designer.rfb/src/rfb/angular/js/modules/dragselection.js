@@ -45,7 +45,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					var key;
 
 					if (!editorScope.isAbsoluteFormLayout()) {
-						obj = event.ctrlKey ? [] : {};
+						obj = (event.ctrlKey||event.metaKey) ? [] : {};
 						for (i = 0; i < selectionToDrag.length; i++) {
 							node = selectionToDrag[i];
 							if(node[0]) node = node[0];
@@ -69,13 +69,13 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 								if (canDrop.beforeChild && canDrop.beforeChild.getAttribute("svy-id") === node.getAttribute("svy-id"))
 								    canDrop.beforeChild = canDrop.beforeChild.nextElementSibling;
 
-							key = event.ctrlKey ? i : node.uuid;
+							key = (event.ctrlKey||event.metaKey) ? i : node.uuid;
 							if (key == undefined) {
 								key = node.getAttribute("svy-id");
 							}
 
 							obj[key] = {};
-							if(event.ctrlKey) {
+							if((event.ctrlKey||event.metaKey)) {
 								obj[key].uuid = node.getAttribute('cloneuuid');
 								selectionToDrag[i].remove();
 							}
@@ -91,7 +91,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 								}
 							}
 						}
-						if(event.ctrlKey) {
+						if((event.ctrlKey||event.metaKey)) {
 							$editorService.createComponents({
 								"components": obj
 							});
@@ -100,7 +100,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 							$editorService.moveResponsiveComponent(obj);	
 						}
 					} else {
-						if (event.ctrlKey) {
+						if ((event.ctrlKey||event.metaKey)) {
 							var components = [];
 							var size = 0;
 							for (i = 0; i < selectionToDrag.length; i++) {
@@ -172,7 +172,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						if (dragCloneDiv) dragCloneDiv.css({display:'block'});
 					} else return;
 				}
-				if (event.ctrlKey && selectionToDrag == null) {
+				if ((event.ctrlKey || event.metaKey) && selectionToDrag == null) {
 					selectionToDrag = [];
 					var selection = editorScope.getSelection();
 					for (i = 0; i < selection.length; i++) {
