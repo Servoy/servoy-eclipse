@@ -2831,7 +2831,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			return new MediaIDPropertyController(id, displayName, persistContext, flattenedEditingSolution, true, config);
 		}
 
-		if (propertyType == TagStringPropertyType.INSTANCE)
+		if (propertyType instanceof TagStringPropertyType)
 		{
 			ITable table = null;
 			if (form != null)
