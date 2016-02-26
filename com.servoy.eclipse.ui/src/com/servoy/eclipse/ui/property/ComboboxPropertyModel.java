@@ -94,6 +94,11 @@ public class ComboboxPropertyModel<T> implements IComboboxPropertyModel<T>
 		return defaultValueIndex;
 	}
 
+	public void setDefaultValueIndex(int defaultValueIndex)
+	{
+		this.defaultValueIndex = defaultValueIndex;
+	}
+
 	/**
 	 * Display and real values are the same.
 	 *
