@@ -687,8 +687,7 @@ public class CreateComponentHandler implements IServerService
 						if (jsonObject.has("layoutName"))
 						{
 							WebLayoutSpecification spec = specifications.getSpecification(jsonObject.getString("layoutName"));
-							createLayoutContainer(container, spec, sameTypeChildContainer, jsonObject.optJSONObject("model"), i + 1, specifications,
-								packageName);
+							createLayoutContainer(container, spec, null, jsonObject.optJSONObject("model"), i + 1, specifications, packageName);
 						}
 						else if (jsonObject.has("componentName"))
 						{
