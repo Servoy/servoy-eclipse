@@ -31,6 +31,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.team.internal.ui.Utils;
 
 import com.servoy.eclipse.ui.editors.DialogCellEditor;
 import com.servoy.eclipse.ui.editors.DialogCellEditor.ValueEditorCellLayout;
@@ -196,8 +197,8 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 				}
 			}
 
-			return Integer.valueOf(value == null || (model.getDefaultValueIndex() != -1 && value.equals(real[model.getDefaultValueIndex()]))
-				? model.getDefaultValueIndex() : -1);
+			return Integer.valueOf(
+				value == null || (model.getDefaultValueIndex() != -1 && value.equals(real[model.getDefaultValueIndex()])) ? model.getDefaultValueIndex() : -1);
 		}
 
 		public T convertValue(Object id, Integer value)
@@ -313,8 +314,16 @@ public class ComboboxPropertyController<T> extends PropertyController<T, Integer
 				}
 			}
 
-			return new ComboboxPropertyModel<T>(real.toArray((T[])java.lang.reflect.Array.newInstance(real1.getClass().getComponentType(), real.size())),
+			ComboboxPropertyModel model = new ComboboxPropertyModel<T>(
+				real.toArray((T[])java.lang.reflect.Array.newInstance(real1.getClass().getComponentType(), real.size())),
 				display.toArray(new String[display.size()]));
+			if (model1.getDefaultValueIndex() >= 0 && model2.getDefaultValueIndex() >= 0 &&
+				Utils.equalObject(real1[model1.getDefaultValueIndex()], real2[model2.getDefaultValueIndex()]) &&
+				Utils.equalObject(display1[model1.getDefaultValueIndex()], display2[model2.getDefaultValueIndex()]))
+			{
+				model.setDefaultValueIndex(real.indexOf(real1[model1.getDefaultValueIndex()]));
+			}
+			return model;
 		}
 
 		/**
