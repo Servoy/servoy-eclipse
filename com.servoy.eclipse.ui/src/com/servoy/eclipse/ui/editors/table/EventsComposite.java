@@ -58,12 +58,14 @@ import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.StringTokenizerConverter;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
 
@@ -224,17 +226,47 @@ public class EventsComposite extends Composite
 			Solution solution = (Solution)servoyProject.getEditingPersist(servoyProject.getSolution().getUUID());
 			Set<UUID> solutions = new HashSet<UUID>();
 			rows.add(new EventNode(solution, t));
-			solutions.add(solution.getUUID());
-			for (int i = 0; i < rows.size(); i++)
+
+			if (t.getServerName().equals(DataSourceUtils.INMEM_DATASOURCE))
 			{
-				Solution sol = rows.get(i).getSolution();
-				String[] modulesNames = new StringTokenizerConverter(",", true).convertProperty("modulesNames", sol.getModulesNames());
-				for (String modulename : modulesNames)
+				try
 				{
-					ServoyProject moduleProject = servoyModel.getServoyProject(modulename);
-					if (moduleProject != null && moduleProject.getSolution() != null && solutions.add(moduleProject.getSolution().getUUID()))
+					Iterator<TableNode> nodes = servoyModel.getFlattenedSolution().getTableNodes(t);
+					if (nodes.hasNext())
 					{
-						rows.add(new EventNode((Solution)moduleProject.getEditingPersist(moduleProject.getSolution().getUUID()), t));
+						TableNode tn = nodes.next();
+						Solution s = (Solution)tn.getAncestor(IRepository.SOLUTIONS);
+						if (!solution.getName().equals(s.getName())) rows.add(new EventNode(s, t));
+						ServoyProject[] projects = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProjects();
+						for (ServoyProject project : projects)
+						{
+							if (project.getFlattenedSolution().hasModule(s.getName()) &&
+								servoyModel.getFlattenedSolution().hasModule(project.getSolution().getName()) && !solutions.contains(project.getSolution()))
+							{
+								rows.add(new EventNode(project.getSolution(), t));
+							}
+						}
+					}
+				}
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+			else
+			{
+				solutions.add(solution.getUUID());
+				for (int i = 0; i < rows.size(); i++)
+				{
+					Solution sol = rows.get(i).getSolution();
+					String[] modulesNames = new StringTokenizerConverter(",", true).convertProperty("modulesNames", sol.getModulesNames());
+					for (String modulename : modulesNames)
+					{
+						ServoyProject moduleProject = servoyModel.getServoyProject(modulename);
+						if (moduleProject != null && moduleProject.getSolution() != null && solutions.add(moduleProject.getSolution().getUUID()))
+						{
+							rows.add(new EventNode((Solution)moduleProject.getEditingPersist(moduleProject.getSolution().getUUID()), t));
+						}
 					}
 				}
 			}

@@ -16,12 +16,6 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
-/**
- * Composite for the methods-tab in table editor.
- *
- * @author rgansevles
- */
-import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.core.databinding.observable.ChangeEvent;
@@ -29,14 +23,11 @@ import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TreeColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
@@ -70,34 +61,17 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
 
-public class FoundsetMethodsComposite extends Composite
+public class FoundsetMethodsComposite extends AbstractTableEditorComposite
 {
-	private final TreeViewer treeViewer;
-	private ArrayList<Solution> rows;
-	private final Composite treeContainer;
-
 	public static final int CI_NAME = 0;
 	public static final int CI_CODE = 1;
 	private final IPersistChangeListener persistListener;
-	private final FlattenedSolution flattenedSolution;
 
 	public FoundsetMethodsComposite(final TableEditor te, Composite parent, FlattenedSolution flattenedSolution, int style)
 	{
-		super(parent, style);
-		this.flattenedSolution = flattenedSolution;
-		this.setLayout(new FillLayout());
-		ScrolledComposite myScrolledComposite = new ScrolledComposite(this, SWT.H_SCROLL | SWT.V_SCROLL);
-		myScrolledComposite.setExpandHorizontal(true);
-		myScrolledComposite.setExpandVertical(true);
-
-		Composite container = new Composite(myScrolledComposite, SWT.NONE);
-
-		myScrolledComposite.setContent(container);
+		super(parent, style, flattenedSolution);
 
 		final ITable t = te.getTable();
-		treeContainer = new Composite(container, SWT.NONE);
-
-		treeViewer = new TreeViewer(treeContainer, SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 
 		Tree tree = treeViewer.getTree();
 		tree.setLinesVisible(true);
@@ -317,39 +291,6 @@ public class FoundsetMethodsComposite extends Composite
 	{
 		TableScriptsContentProvider columnViewContentProvider = new TableScriptsContentProvider(t, IRepository.METHODS);
 		treeViewer.setContentProvider(columnViewContentProvider);
-		rows = new ArrayList<Solution>();
-		try
-		{
-			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
-				flattenedSolution.getSolution().getName());
-			if (servoyProject != null)
-			{
-				Solution solution = servoyProject.getEditingSolution();
-				rows.add(solution);
-				Solution[] modules = flattenedSolution.getModules();
-				if (modules != null && modules.length > 0)
-				{
-					for (Solution module : modules)
-					{
-						ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(module.getName());
-						if (project != null)
-						{
-							solution = (Solution)project.getEditingPersist(module.getUUID());
-							if (solution != null)
-							{
-								rows.add(solution);
-							}
-						}
-					}
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			ServoyLog.logError(e);
-		}
-
-		treeViewer.setInput(rows);
-		treeViewer.expandAll();
+		super.setRows(t);
 	}
 }

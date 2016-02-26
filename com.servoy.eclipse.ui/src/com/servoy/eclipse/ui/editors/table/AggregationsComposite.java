@@ -16,9 +16,7 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
@@ -26,13 +24,10 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TreeColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
@@ -64,7 +59,7 @@ import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.query.QueryAggregate;
 import com.servoy.j2db.util.Debug;
 
-public class AggregationsComposite extends Composite
+public class AggregationsComposite extends AbstractTableEditorComposite
 {
 	private final Button removeButton;
 	private final MenuItem moveItem;
@@ -72,11 +67,6 @@ public class AggregationsComposite extends Composite
 	private final MenuItem searchForReferencesItem;
 
 //	private final DataBindingContext m_bindingContext;
-	private final TreeViewer treeViewer;
-	private List<Solution> rows;
-	private final Composite treeContainer;
-	private final FlattenedSolution flattenedSolution;
-
 	/**
 	 * Create the composite
 	 *
@@ -85,21 +75,9 @@ public class AggregationsComposite extends Composite
 	 */
 	public AggregationsComposite(final TableEditor te, Composite parent, FlattenedSolution flattenedSolution, int style)
 	{
-		super(parent, style);
-		this.flattenedSolution = flattenedSolution;
-		this.setLayout(new FillLayout());
-		ScrolledComposite myScrolledComposite = new ScrolledComposite(this, SWT.H_SCROLL | SWT.V_SCROLL);
-		myScrolledComposite.setExpandHorizontal(true);
-		myScrolledComposite.setExpandVertical(true);
-
-		Composite container = new Composite(myScrolledComposite, SWT.NONE);
-
-		myScrolledComposite.setContent(container);
+		super(parent, style, flattenedSolution);
 
 		final ITable t = te.getTable();
-		treeContainer = new Composite(container, SWT.NONE);
-
-		treeViewer = new TreeViewer(treeContainer, SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 
 		Tree tree = treeViewer.getTree();
 		tree.setLinesVisible(true);
@@ -394,41 +372,7 @@ public class AggregationsComposite extends Composite
 	{
 		AggregationContentProvider columnViewContentProvider = new AggregationContentProvider(t);
 		treeViewer.setContentProvider(columnViewContentProvider);
-		rows = new ArrayList<Solution>();
-		try
-		{
-			ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
-				flattenedSolution.getSolution().getName());
-			if (servoyProject != null)
-			{
-				Solution solution = servoyProject.getEditingSolution();
-				rows.add(solution);
-				Solution[] modules = flattenedSolution.getModules();
-				if (modules != null && modules.length > 0)
-				{
-					for (Solution module : modules)
-					{
-						ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(module.getName());
-						if (project != null)
-						{
-							solution = (Solution)project.getEditingPersist(module.getUUID());
-							if (solution != null)
-							{
-								rows.add(solution);
-							}
-						}
-					}
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			ServoyLog.logError(e);
-		}
-
-		treeViewer.setInput(rows);
-		treeViewer.expandAll();
-
+		super.setRows(t);
 	}
 
 	public void selectColumn(AggregateVariable column)
