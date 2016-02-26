@@ -155,7 +155,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 								}
 								else {
 									// tagname is the full element
-									angularElement = $scope.getEditorContentRootScope().createComponent(tagName);
+									angularElement = $scope.getEditorContentRootScope().createComponent('<div>'+tagName+'</div>');
 								}
 								var elWidth = model.size ? model.size.width : 200;
 								var elHeight = model.size ? model.size.height : 100;

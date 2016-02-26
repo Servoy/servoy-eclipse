@@ -535,9 +535,20 @@ public class CreateComponentHandler implements IServerService
 							WebLayoutSpecification layoutSpec = specifications.getSpecification(name);
 							if (layoutSpec != null)
 							{
+
+								Iterator<IPersist> childContainersIte = parentSupportingElements.getObjects(IRepositoryConstants.LAYOUTCONTAINERS);
+								LayoutContainer sameTypeChildContainer = null;
+								while (childContainersIte.hasNext())
+								{
+									LayoutContainer childContainer = (LayoutContainer)childContainersIte.next();
+									if (layoutSpec.getName().equals(childContainer.getSpecName()))
+									{
+										sameTypeChildContainer = childContainer;
+									}
+								}
 								JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
-								return new IPersist[] { createLayoutContainer(parentSupportingElements, layoutSpec, config, x, specifications,
-									args.optString("packageName")) };
+								return new IPersist[] { createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, x,
+									specifications, args.optString("packageName")) };
 							}
 						}
 						else
@@ -645,19 +656,11 @@ public class CreateComponentHandler implements IServerService
 		return null;
 	}
 
-	protected IPersist createLayoutContainer(ISupportFormElements parent, WebLayoutSpecification layoutSpec, JSONObject config, int index,
-		NGPackageSpecification<WebLayoutSpecification> specifications, String packageName) throws RepositoryException, JSONException
+	protected IPersist createLayoutContainer(ISupportFormElements parent, WebLayoutSpecification layoutSpec, LayoutContainer sameTypeChildContainer,
+		JSONObject config, int index, NGPackageSpecification<WebLayoutSpecification> specifications, String packageName)
+		throws RepositoryException, JSONException
 	{
-		Iterator<IPersist> childContainersIte = parent.getObjects(IRepositoryConstants.LAYOUTCONTAINERS);
-		LayoutContainer sameTypeChildContainer = null;
-		while (childContainersIte.hasNext())
-		{
-			LayoutContainer childContainer = (LayoutContainer)childContainersIte.next();
-			if (layoutSpec.getName().equals(childContainer.getSpecName()))
-			{
-				sameTypeChildContainer = childContainer;
-			}
-		}
+
 		LayoutContainer container = (LayoutContainer)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(parent,
 			IRepository.LAYOUTCONTAINERS);
 		container.setSpecName(layoutSpec.getName());
@@ -684,7 +687,8 @@ public class CreateComponentHandler implements IServerService
 						if (jsonObject.has("layoutName"))
 						{
 							WebLayoutSpecification spec = specifications.getSpecification(jsonObject.getString("layoutName"));
-							createLayoutContainer(container, spec, jsonObject.optJSONObject("model"), i + 1, specifications, packageName);
+							createLayoutContainer(container, spec, sameTypeChildContainer, jsonObject.optJSONObject("model"), i + 1, specifications,
+								packageName);
 						}
 						else if (jsonObject.has("componentName"))
 						{

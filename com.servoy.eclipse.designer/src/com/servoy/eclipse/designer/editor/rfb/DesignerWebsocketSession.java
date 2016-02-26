@@ -208,6 +208,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						{
 							componentFound = true;
 							parentuuid = child.getParent().getUUID();
+							if (child.getParent().equals(form)) parentuuid = null;
 							insertBeforeUUID = findNextSibling(child);
 							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context, w, true);
 						}
