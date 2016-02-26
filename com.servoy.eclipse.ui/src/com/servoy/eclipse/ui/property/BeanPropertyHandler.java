@@ -20,9 +20,13 @@ package com.servoy.eclipse.ui.property;
 import java.awt.Component;
 import java.awt.Dimension;
 
+import org.eclipse.ui.views.properties.IPropertySource;
+import org.sablo.specification.PropertyDescription;
+
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.persistence.Bean;
+import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 
 
 /**
@@ -73,6 +77,17 @@ public class BeanPropertyHandler extends BasePropertyHandler
 				ComponentFactory.updateBeanWithItsXML((Bean)persistContext.getPersist(), obj);
 			}
 		}
+	}
+
+	@Override
+	public PropertyDescription getPropertyDescription(Object obj, IPropertySource propertySource, PersistContext persistContext)
+	{
+		String name = propertyDescriptor.getName();
+		if (name.equals("innerHTML"))
+		{
+			return new PropertyDescription(name, TagStringPropertyType.INSTANCE, true);
+		}
+		return super.getPropertyDescription(obj, propertySource, persistContext);
 	}
 
 }
