@@ -126,13 +126,15 @@ public class FormatCellEditor extends TextDialogCellEditor
 							String dataProviderID = (String)((AbstractBase)persist).getProperty(propertyName);
 							if (dataProviderID == null && persist instanceof IBasicWebObject)
 							{
-								dataProviderID = ((IBasicWebObject)persist).getProperty(propertyName) != null ? (String)((IBasicWebObject)persist).getProperty(propertyName) : null;
+								dataProviderID = ((IBasicWebObject)persist).getProperty(propertyName) != null
+									? (String)((IBasicWebObject)persist).getProperty(propertyName) : null;
 							}
 							if (dataProviderID != null)
 							{
 								Form form = (Form)persist.getAncestor(IRepository.FORMS);
 								if (form != null)
 								{
+									form = flattenedSolution.getFlattenedForm(form);
 									IDataProviderLookup dataproviderLookup = flattenedSolution.getDataproviderLookup(null, form);
 									ComponentFormat componentFormat = ComponentFormat.getComponentFormat(formatString, dataProviderID, dataproviderLookup,
 										Activator.getDefault().getDesignClient());
