@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.quickfix.jsexternalize;
 
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.javascript.ast.CallExpression;
+import org.eclipse.dltk.javascript.ast.PropertyExpression;
 import org.eclipse.dltk.javascript.ast.StringLiteral;
 
 /**
@@ -77,7 +78,7 @@ public abstract class StringLiteralVisitor extends org.eclipse.dltk.ast.ASTVisit
 		else if (node instanceof CallExpression)
 		{
 			CallExpression mc = (CallExpression)node;
-			if (I18N_EXTERNALIZE_CALLBACK.equals(mc.getExpression().toString()))
+			if ((mc.getExpression() instanceof PropertyExpression) && I18N_EXTERNALIZE_CALLBACK.equals(mc.getExpression().toString()))
 			{
 				isEvaluatingI18N = true;
 			}
@@ -104,7 +105,7 @@ public abstract class StringLiteralVisitor extends org.eclipse.dltk.ast.ASTVisit
 			else if (node instanceof CallExpression)
 			{
 				CallExpression mc = (CallExpression)node;
-				if (I18N_EXTERNALIZE_CALLBACK.equals(mc.getExpression().toString()))
+				if ((mc.getExpression() instanceof PropertyExpression) && I18N_EXTERNALIZE_CALLBACK.equals(mc.getExpression().toString()))
 				{
 					isEvaluatingI18N = false;
 				}
