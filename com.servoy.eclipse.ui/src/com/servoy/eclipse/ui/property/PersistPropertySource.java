@@ -2688,25 +2688,28 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Object object = null;
 				if (persistContainingFoundsetProperty instanceof IBasicWebComponent)
 					object = ((IBasicWebComponent)persistContainingFoundsetProperty).getProperty(forFoundsetName);
-				String foundsetValue = "";
+				String foundsetValue = null; // default no table
 				if (object instanceof JSONObject)
 				{
 					foundsetValue = (String)((JSONObject)object).get(FoundsetPropertyType.FOUNDSET_SELECTOR);
 				}
-				if (foundsetValue.equals(""))
+				if (foundsetValue != null)
 				{
-					table = flattenedEditingSolution.getFlattenedForm(form).getTable();
-				}
-				else
-				{
-					if (DataSourceUtils.isDatasourceUri(foundsetValue))
+					if (foundsetValue.equals(""))
 					{
-						ITable iTable = DataSourceUtils.getTable(foundsetValue, flattenedEditingSolution.getSolution(), null);
-						if (iTable instanceof Table) table = (Table)iTable;
+						table = flattenedEditingSolution.getFlattenedForm(form).getTable();
 					}
-					else if (flattenedEditingSolution.getRelation(foundsetValue) != null)
+					else
 					{
-						table = flattenedEditingSolution.getRelation(foundsetValue).getForeignTable();
+						if (DataSourceUtils.isDatasourceUri(foundsetValue))
+						{
+							ITable iTable = DataSourceUtils.getTable(foundsetValue, flattenedEditingSolution.getSolution(), null);
+							if (iTable instanceof Table) table = (Table)iTable;
+						}
+						else if (flattenedEditingSolution.getRelation(foundsetValue) != null)
+						{
+							table = flattenedEditingSolution.getRelation(foundsetValue).getForeignTable();
+						}
 					}
 				}
 			}
