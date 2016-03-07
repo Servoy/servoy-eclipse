@@ -336,15 +336,28 @@ public class FormElementDeleteCommand extends Command
 				Iterator<IPersist> elementsIte = itForm.getAllObjects();
 				while (elementsIte.hasNext())
 				{
-					IPersist p = elementsIte.next();
-					if (p instanceof ISupportExtendsID && (((ISupportExtendsID)p).getExtendsID() == persist.getID()))
-					{
-						overriding.add(p);
-					}
+					addOverriding(overriding, persist, elementsIte.next());
 				}
 			}
 		}
 
 		return overriding;
+	}
+
+	private static void addOverriding(List<IPersist> overriding, IPersist persist, IPersist p)
+	{
+		if (p instanceof ISupportExtendsID && (((ISupportExtendsID)p).getExtendsID() == persist.getID()))
+		{
+			overriding.add(p);
+		}
+		else if (p instanceof ISupportChilds)
+		{
+			ISupportChilds parent = (ISupportChilds)p;
+			Iterator<IPersist> childrenIt = parent.getAllObjects();
+			while (childrenIt.hasNext())
+			{
+				addOverriding(overriding, persist, childrenIt.next());
+			}
+		}
 	}
 }
