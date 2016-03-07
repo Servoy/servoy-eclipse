@@ -2680,25 +2680,28 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Object object = null;
 				if (persistContainingFoundsetProperty instanceof IBasicWebComponent)
 					object = ((IBasicWebComponent)persistContainingFoundsetProperty).getProperty(forFoundsetName);
-				String foundsetValue = "";
+				String foundsetValue = null; // default no table
 				if (object instanceof JSONObject)
 				{
 					foundsetValue = (String)((JSONObject)object).get(FoundsetPropertyType.FOUNDSET_SELECTOR);
 				}
 				IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
-				if (foundsetValue.equals(""))
+				if (foundsetValue != null)
 				{
-					table = dsm.getDataSource(flattenedEditingSolution.getFlattenedForm(form).getDataSource());
-				}
-				else
-				{
-					if (DataSourceUtils.isDatasourceUri(foundsetValue))
+					if (foundsetValue.equals(""))
 					{
-						table = dsm.getDataSource(foundsetValue);
+						table = dsm.getDataSource(flattenedEditingSolution.getFlattenedForm(form).getDataSource());
 					}
-					else if (flattenedEditingSolution.getRelation(foundsetValue) != null)
+					else
 					{
-						table = dsm.getDataSource(flattenedEditingSolution.getRelation(foundsetValue).getForeignDataSource());
+						if (DataSourceUtils.isDatasourceUri(foundsetValue))
+						{
+							table = dsm.getDataSource(foundsetValue);
+						}
+						else if (flattenedEditingSolution.getRelation(foundsetValue) != null)
+						{
+							table = dsm.getDataSource(flattenedEditingSolution.getRelation(foundsetValue).getForeignDataSource());
+						}
 					}
 				}
 			}
