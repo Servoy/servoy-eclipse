@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -90,7 +91,8 @@ public class FixedSelectAllAction extends SelectAllAction
 		}
 
 		// select them all.
-		selectionProvider.setSelection(new StructuredSelection(Utils.asList(part.getForm().getFormElementsSortedByFormIndex())));
+		selectionProvider.setSelection(new StructuredSelection(
+			Utils.asList(ModelUtils.getEditingFlattenedSolution(part.getForm()).getFlattenedForm(part.getForm()).getFormElementsSortedByFormIndex())));
 	}
 
 	@Override
