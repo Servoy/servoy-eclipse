@@ -64,8 +64,8 @@ import org.eclipse.ui.PlatformUI;
 import org.mozilla.javascript.JavaMembers;
 import org.sablo.specification.NGPackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.core.Activator;
@@ -235,10 +235,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib), //
 			createTypeNode(Messages.TreeStrings_SpecialOperators, UserNodeType.SPECIAL_OPERATORS,
 				com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, jslib), //
-				createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
-				createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
-				createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
-					jslib) };
+			createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
+			createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
+			createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
+				jslib) };
 
 		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, invisibleRootNode);
 
@@ -961,8 +961,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 				else if (un.getType() == UserNodeType.COMPONENTS_PACKAGE)
 				{
-					return !WebComponentSpecProvider.getInstance().getComponentsInPackage(
-						WebComponentSpecProvider.getInstance().getPackageName(un.getName())).isEmpty();
+					return (!WebComponentSpecProvider.getInstance().getComponentsInPackage(
+						WebComponentSpecProvider.getInstance().getPackageName(un.getName())).isEmpty() ||
+						!WebComponentSpecProvider.getInstance().getLayoutsInPackage(
+							WebComponentSpecProvider.getInstance().getPackageName(un.getName())).isEmpty());
 				}
 				else if (un.getType() == UserNodeType.SERVICES_PACKAGE)
 				{
