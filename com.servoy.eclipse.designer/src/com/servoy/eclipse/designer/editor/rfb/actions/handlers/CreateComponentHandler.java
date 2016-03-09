@@ -546,6 +546,7 @@ public class CreateComponentHandler implements IServerService
 										sameTypeChildContainer = childContainer;
 									}
 								}
+							
 								JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
 								return new IPersist[] { createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, x,
 									specifications, args.optString("packageName")) };
