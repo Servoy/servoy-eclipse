@@ -27,6 +27,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.Writer;
 import java.net.URI;
@@ -89,6 +90,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ComponentResourcesExporter;
+import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
@@ -1521,19 +1523,31 @@ public class WarExporter
 			}
 			FileChannel source = null;
 			FileChannel destination = null;
-			source = new FileInputStream(sourceFile).getChannel();
-			destination = new FileOutputStream(destFile).getChannel();
-			if (destination != null && source != null)
+			String compileLessWithNashorn = null;
+			if (sourceFile.getName().endsWith(".less") &&
+				(compileLessWithNashorn = ResourceProvider.compileLessWithNashorn(sourceFile.toURI().toURL())) != null)
 			{
-				destination.transferFrom(source, 0, source.size());
+				File compiledLessFile = destFile;
+				PrintWriter printWriter = new PrintWriter(compiledLessFile);
+				printWriter.println(compileLessWithNashorn);
+				printWriter.close();
 			}
-			if (source != null)
+			else
 			{
-				source.close();
-			}
-			if (destination != null)
-			{
-				destination.close();
+				source = new FileInputStream(sourceFile).getChannel();
+				destination = new FileOutputStream(destFile).getChannel();
+				if (destination != null && source != null)
+				{
+					destination.transferFrom(source, 0, source.size());
+				}
+				if (source != null)
+				{
+					source.close();
+				}
+				if (destination != null)
+				{
+					destination.close();
+				}
 			}
 		}
 		catch (Exception e)
