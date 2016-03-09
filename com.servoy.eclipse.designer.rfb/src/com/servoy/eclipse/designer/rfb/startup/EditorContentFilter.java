@@ -93,6 +93,14 @@ public class EditorContentFilter implements Filter
 					{
 						formScripts.addAll(entry.getJsDesignLibrary());
 					}
+					if (entry.getCssClientLibrary() != null)
+					{
+						css.addAll(entry.getCssClientLibrary());
+					}
+					if (entry.getJsClientLibrary() != null)
+					{
+						formScripts.addAll(entry.getJsClientLibrary());
+					}
 				}
 				IndexPageEnhancer.enhance(getClass().getResource("editor-content.html"), httpServletRequest.getContextPath(), css, formScripts,
 					variableSubstitution, w, null);
