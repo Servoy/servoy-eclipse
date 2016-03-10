@@ -5,7 +5,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 		directive.replace = true;
 		return $delegate;
 	});
-}]).directive("palette", function($editorService, $compile, $selectionUtils, $rootScope, EDITOR_EVENTS) {
+}]).directive("palette", function($editorService, $compile, $selectionUtils, $rootScope, EDITOR_EVENTS, $document) {
 	return {
 		restrict: 'E',
 		transclude: true,
@@ -78,17 +78,18 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 					var mouseleavecallback;
 					var mouseupcallback;
 					var t;
-					var node;
+					var insertedClone;
+					var insertedCloneParent;
 					var mousemovecallback = $scope.registerDOMEvent("mousemove", "EDITOR", function(ev) {
 						if (dragClone) {
-						    	if (layoutName)
-						    	    editorScope.getEditorContentRootScope().drop_highlight = layoutName;
-						    	else
-						    	    editorScope.getEditorContentRootScope().drop_highlight = type;
-						    	editorScope.getEditorContentRootScope().$apply();
-							if (node){
-								node.remove();
-								node = null;
+						    if (layoutName)
+						   	    editorScope.getEditorContentRootScope().drop_highlight = layoutName;
+						   	else
+						   	    editorScope.getEditorContentRootScope().drop_highlight = type;
+						   	editorScope.getEditorContentRootScope().$apply();
+						    if (insertedClone){
+								insertedCloneParent.removeChild(insertedClone);
+								insertedClone = null;
 							}
 							var css = {
 								top: ev.pageY,
@@ -115,20 +116,24 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 
 									if (t) clearTimeout(t);
 									t = setTimeout(function() {
-										node = angular.element(angularElement)[0].firstElementChild.cloneNode(true);
+										
 										if (canDrop.beforeChild) {
-											canDrop.dropTarget.insertBefore(node, canDrop.beforeChild);
+											insertedClone = angular.element(angularElement)[0].firstElementChild.cloneNode(true);
+											canDrop.dropTarget.insertBefore(insertedClone, canDrop.beforeChild);
 											angularElement.css('opacity', '1');
+											insertedCloneParent = canDrop.dropTarget;
 										} else if (angularElement.parent()[0] != canDrop.dropTarget || canDrop.append) {
-											angular.element(canDrop.dropTarget).append(node);
+											insertedClone = angular.element(angularElement)[0].firstElementChild.cloneNode(true);
+											angular.element(canDrop.dropTarget).append(insertedClone);
 											angularElement.css('opacity', '1');
+											insertedCloneParent = canDrop.dropTarget;
 										}
 										editorScope.refreshEditorContent();
 									}, 200);
 
 								} else {
 									angularElement.css('opacity', '0');
-									angularElement.remove();
+									$scope.getEditorContentRootScope().getDesignFormElement()[0].removeChild(angularElement);
 								}
 							}
 						} else {
@@ -144,14 +149,13 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 								'pointer-events': 'none',
 								'list-style-type': 'none'
 							})
-							angular.element('body').append(dragClone);
+							$document[0].body.appendChild(dragClone[0]);
 							if (type == 'component' || type == "layout" || type == "template") {
 								if (type == 'component') {
 									if ($scope.isAbsoluteFormLayout())
-									angularElement = $scope.getEditorContentRootScope().createAbsoluteComponent('<div><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-autoapply-disabled=\'true\'/></div>', model);
-									else{
-										angularElement = $scope.getEditorContentRootScope().createComponent('<div>'+tagName+'</div>', model);
-									}
+									    angularElement = $scope.getEditorContentRootScope().createAbsoluteComponent('<div><'+tagName+' svy-model=\'model\' svy-api=\'api\' svy-handlers=\'handlers\' svy-autoapply-disabled=\'true\'/></div>', model);
+									else 
+									    angularElement = $scope.getEditorContentRootScope().createComponent('<div>'+tagName+'</div>', model);
 								}
 								else {
 									// tagname is the full element
@@ -202,13 +206,15 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 						editorScope.getEditorContentRootScope().drop_highlight = null;
 						editorScope.getEditorContentRootScope().$apply();
 						if (dragClone) {
-							if (node){
-								node.remove();
-								node = null;
+							if (insertedClone){
+								insertedCloneParent.removeChild(insertedClone);
+								insertedClone = null;
 							}
+							$document[0].body.removeChild(dragClone[0]);
+							
 							var canDrop = utils.getDropNode(type, topContainer, layoutName, ev, componentName);
 							utils.setDraggingFromPallete(null);
-							dragClone.remove();
+							
 							if (angularElement) {
 								// if the drop was still allowed an the beforeChild is not set
 								// then ask the current angularelement for the next sibling because it
@@ -217,7 +223,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 									canDrop.beforeChild = angularElement[0].nextElementSibling;
 								}
 								if (t) clearTimeout(t);
-								angularElement.remove();
+								$scope.getEditorContentRootScope().getDesignFormElement()[0].removeChild(angularElement[0]);
 								//the next element can be the dummy one that was inserted just to see how it would look
 								//so get the next one because that one should be a real element with a real svy-id
 								if (canDrop.beforeChild && canDrop.beforeChild.getAttribute("svy-id") === "null")
@@ -264,7 +270,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 							}
 						} else {
 							if (angularElement) {
-								angularElement.remove();
+								$scope.getEditorContentRootScope().getDesignFormElement().removeChild(angularElement);
 							}
 						}
 					});
