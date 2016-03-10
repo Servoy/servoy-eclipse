@@ -13,7 +13,7 @@ angular.module('editorContent',['servoyApp'])
       compScope.api = {};
       compScope.handlers = {};
       var el = $compile(html)(compScope);
-      angular.element($element).append(el);
+      $rootScope.getDesignFormElement().append(el);
       return el;
   }
      	

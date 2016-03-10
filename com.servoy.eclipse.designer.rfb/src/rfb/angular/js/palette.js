@@ -99,9 +99,11 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 							if (angularElement) {
 								var x = (window.pageXOffset !== undefined) ? window.pageXOffset : document.documentElement.scrollLeft;
 								var y = (window.pageYOffset !== undefined) ? window.pageYOffset : document.documentElement.scrollTop;
+								var offset = 0;
+								if (!$scope.isAbsoluteFormLayout()) offset = 1;
 								var angularCss = {
-									top: ev.pageY - y + 2,
-									left: ev.pageX - x +2
+									top: ev.pageY - y + offset,
+									left: ev.pageX - x + offset
 								};
 								angularElement.css($scope.convertToContentPoint(angularCss));
 							}
@@ -133,7 +135,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 
 								} else {
 									angularElement.css('opacity', '0');
-									$scope.getEditorContentRootScope().getDesignFormElement()[0].removeChild(angularElement);
+									$scope.getEditorContentRootScope().getDesignFormElement()[0].removeChild(angularElement[0]);
 								}
 							}
 						} else {
