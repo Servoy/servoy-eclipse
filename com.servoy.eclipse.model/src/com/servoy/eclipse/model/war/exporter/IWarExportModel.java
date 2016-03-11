@@ -85,4 +85,11 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	boolean isClearReferencesStopTimerThreads();
 
+	/**
+	 * admin properties
+	 */
+	public String getDefaultAdminUser();
+
+	public String getDefaultAdminPassword();
+
 }
