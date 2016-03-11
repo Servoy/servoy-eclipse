@@ -98,14 +98,14 @@ public class ImportComponentFolderAction extends ImportComponentAction
 				if ("true".equalsIgnoreCase((String)entry.getValue().get(new Attributes.Name(entityType))))
 				{
 					File wcSpecFile = new File(importFolder, entry.getKey());
-					if (wcSpecFile.exists()) importFolderEntries.add(wcSpecFile.getParentFile());
+					if (wcSpecFile.exists()) importFolderEntries.add(importFolderEntries.size() - 1, wcSpecFile.getParentFile());
 				}
 			}
 
 			final StringBuilder allComponents = new StringBuilder();
 			if (importFolderEntries.size() > 1)
 			{
-				for (int i = 1; i < importFolderEntries.size(); i++)
+				for (int i = 0; i < importFolderEntries.size() - 1; i++)
 				{
 					if (allComponents.length() > 0) allComponents.append("\n");
 					allComponents.append(importFolderEntries.get(i).getName());
