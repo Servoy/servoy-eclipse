@@ -1,3 +1,59 @@
+
+var catchedErrors = {
+		array: [],
+		catchedErrorsDiv: null,
+		createErrorTextNodes: function(message, source, lineno, colno, error) {
+			 var t = document.createTextNode(message +'\n');
+			 catchedErrors.catchedErrorsDiv.appendChild(t);
+			 t = document.createTextNode(source+':');
+			 catchedErrors.catchedErrorsDiv.appendChild(t);
+			 t = document.createTextNode(lineno+':');
+			 catchedErrors.catchedErrorsDiv.appendChild(t);
+			 t = document.createTextNode(colno+'\n');
+			 catchedErrors.catchedErrorsDiv.appendChild(t);
+			 t = document.createTextNode(error+'\n');
+			 catchedErrors.catchedErrorsDiv.appendChild(t);
+		}
+}
+window.onerror = function(message, source, lineno, colno, error) {
+	if (!window.parent.document.body) {
+		catchedErrors.array.push({message:message,source:source,lineno:lineno,colno:colno,error:error});
+		return;
+	}
+	if (!catchedErrors.catchedErrorsDiv) {
+		var div = document.createElement('div');
+		div.style.position = "absolute";
+		div.style.overflow = "auto";
+		div.style.left = "0px";
+		div.style.right = "0px";
+		div.style.bottom = "0px";
+		div.style.top = "0px";
+		window.parent.document.body.appendChild(div);
+		catchedErrors.catchedErrorsDiv = document.createElement('pre');
+		catchedErrors.catchedErrorsDiv.style.color = "red";
+		div.appendChild(catchedErrors.catchedErrorsDiv);
+	}
+	if (!catchedErrors.textNodesCreated) {
+		catchedErrors.textNodesCreated = true;
+		for(var i=0;i<catchedErrors.array.length;i++) {
+			catchedErrors.createErrorTextNodes(catchedErrors.array[i].message, catchedErrors.array[i].source, catchedErrors.array[i].lineno, catchedErrors.array[i].colno, catchedErrors.array[i].error)
+		}
+	}
+	catchedErrors.createErrorTextNodes(message, source, lineno, colno, error);
+	 
+	if (typeof(consoleLog) != "undefined") {
+		for(var i=0;i<catchedErrors.array.length;i++) {
+			consoleLog("onerror",catchedErrors.array[i].message, catchedErrors.array[i].source, catchedErrors.array[i].lineno, catchedErrors.array[i].colno, catchedErrors.array[i].error)
+		}
+		catchedErrors.array = [];
+		consoleLog("onerror",message, source, lineno, colno, error)
+	}
+	else {
+		catchedErrors.array.push({message:message,source:source,lineno:lineno,colno:colno,error:error});
+	}
+	
+}
+
 angular.module('editorContent',['servoyApp'])
  .controller("MainController", function($scope, $window, $timeout, $windowService, $document, $webSocket, $servoyInternal, $sabloApplication, $rootScope, $compile, $solutionSettings, $editorContentService, $element){
   $rootScope.createComponent = function(html, model) {

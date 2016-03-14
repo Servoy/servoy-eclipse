@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.editor.rfb;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -180,6 +181,10 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 						else if ("error".equals(arguments[0]))
 						{
 							ServoyLog.logError(arguments[1] != null ? arguments[1].toString() : null, null);
+						}
+						else if ("onerror".equals(arguments[0]))
+						{
+							ServoyLog.logError(Arrays.toString(arguments), null);
 						}
 					}
 					return null;
