@@ -83,6 +83,8 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean clearReferencesStatic;
 	private boolean clearReferencesStopThreads;
 	private boolean clearReferencesStopTimerThreads;
+	private String defaultAdminUser;
+	private String defaultAdminPassword;
 
 	/**
 	 * @param dialogSettings
@@ -922,7 +924,7 @@ public class ExportWarModel extends AbstractWarExportModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getExcludedComponentPackages()
 	 */
 	@Override
@@ -933,12 +935,44 @@ public class ExportWarModel extends AbstractWarExportModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getExcludedServicePackages()
 	 */
 	@Override
 	public List<String> getExcludedServicePackages()
 	{
 		return null;
+	}
+
+	/**
+	 * @return the defaultAdminUser
+	 */
+	public String getDefaultAdminUser()
+	{
+		return defaultAdminUser;
+	}
+
+	/**
+	 * @param defaultAdminPassword the defaultAdminPassword to set
+	 */
+	public void setDefaultAdminPassword(String defaultAdminPassword)
+	{
+		this.defaultAdminPassword = defaultAdminPassword;
+	}
+
+	/**
+	 * @return the defaultAdminPassword
+	 */
+	public String getDefaultAdminPassword()
+	{
+		return defaultAdminPassword;
+	}
+
+	/**
+	 * @param defaultAdminUser the defaultAdminUser to set
+	 */
+	public void setDefaultAdminUser(String defaultAdminUser)
+	{
+		this.defaultAdminUser = defaultAdminUser;
 	}
 }

@@ -421,6 +421,18 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			{
 				return configuration.getExcludedServicePackages() == null ? null : Arrays.asList(configuration.getExcludedServicePackages().split(" "));
 			}
+
+			@Override
+			public String getDefaultAdminUser()
+			{
+				return configuration.getDefaultAdminUser();
+			}
+
+			@Override
+			public String getDefaultAdminPassword()
+			{
+				return configuration.getDefaultAdminPassword();
+			}
 		});
 		try
 		{

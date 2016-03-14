@@ -67,6 +67,9 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private static final String clearReferencesStopThreads = "clearReferencesStopThreads";
 	private static final String clearReferencesStopTimerThreads = "clearReferencesStopTimerThreads";
 
+	private static final String defaultAdminUser = "defaultAdminUser";
+	private static final String defaultAdminPassword = "defaultAdminPassword";
+
 	private HashMap<String, String> argumentsMap;
 
 	public WarArgumentChest(String[] args)
@@ -144,7 +147,9 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -" + clearReferencesStopThreads + " ... add  clearReferencesStopThreads=\"true\"  to Context\n"
 			+ "             element; may only be used with createTomcatContextXML\n"
 			+ "        -" + clearReferencesStopTimerThreads + " ... add clearReferencesStopTimerThreads=\"true\" to\n"
-			+ "             Context element; may only be used with createTomcatContextXML.\n";
+			+ "             Context element; may only be used with createTomcatContextXML.\n"
+			+ "        -" + defaultAdminUser + " user name for admin page when no admin user exists [ required ]\n"
+			+ "        -" + defaultAdminPassword + " password for defaultAdminUser  required ]\n";
 		// @formatter:on
 	}
 
@@ -348,5 +353,15 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public boolean isAntiResourceLocking()
 	{
 		return argumentsMap.containsKey(antiResourceLocking);
+	}
+
+	public String getDefaultAdminUser()
+	{
+		return argumentsMap.get(defaultAdminUser);
+	}
+
+	public String getDefaultAdminPassword()
+	{
+		return argumentsMap.get(defaultAdminPassword);
 	}
 }

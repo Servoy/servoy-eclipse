@@ -46,6 +46,8 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 	private final IWizardPage nextPage;
 	private Button useRMI;
 	private Text startRMIPortText;
+	private Text defaultAdminUserText;
+	private Text defaultAdminPasswordText;
 
 	public ServoyPropertiesConfigurationPage(String title, ExportWarModel exportModel, IWizardPage nextPage)
 	{
@@ -104,8 +106,32 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 4;
 		label.setLayoutData(gd);
-		label.setText("\nNOTE: If running of smart clients is enabled, please take in consideration\nthat on each restart of the application context in the web container,\nRMI related classes cannot be GC and that may lead to out-of-memory errors.");
+		label.setText(
+			"\nNOTE: If running of smart clients is enabled, please take in consideration\nthat on each restart of the application context in the web container,\nRMI related classes cannot be GC and that may lead to out-of-memory errors.");
 
+		label = new Label(composite, SWT.NONE);
+		label.setText("Default Admin user ");
+
+		defaultAdminUserText = new Text(composite, SWT.BORDER);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 3;
+		defaultAdminUserText.setLayoutData(gd);
+		defaultAdminUserText.addListener(SWT.KeyUp, this);
+
+		label = new Label(composite, SWT.NONE);
+		label.setText("Default Admin password ");
+
+		defaultAdminPasswordText = new Text(composite, SWT.BORDER | SWT.PASSWORD);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 3;
+		defaultAdminPasswordText.setLayoutData(gd);
+		defaultAdminPasswordText.addListener(SWT.KeyUp, this);
+
+		label = new Label(composite, SWT.NONE);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 4;
+		label.setLayoutData(gd);
+		label.setText("\nThe default administrator user will give access to the servoy-admin page, as long as no admin user is created in the server.");
 
 		setControl(composite);
 	}
@@ -114,8 +140,15 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 	{
 		if (event.widget == startRMIPortText)
 		{
-			String rmiPort = startRMIPortText.getText();
-			exportModel.setStartRMIPort(rmiPort);
+			exportModel.setStartRMIPort(startRMIPortText.getText());
+		}
+		else if (event.widget == defaultAdminUserText)
+		{
+			exportModel.setDefaultAdminUser(defaultAdminUserText.getText());
+		}
+		else if (event.widget == defaultAdminPasswordText)
+		{
+			exportModel.setDefaultAdminPassword(defaultAdminPasswordText.getText());
 		}
 
 		getWizard().getContainer().updateButtons();

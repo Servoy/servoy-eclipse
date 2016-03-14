@@ -99,6 +99,7 @@ import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.JarManager;
 import com.servoy.j2db.util.JarManager.ExtensionResource;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.SecuritySupport;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.SortedProperties;
 import com.servoy.j2db.util.Utils;
@@ -708,14 +709,27 @@ public class WarExporter
 			prop.setProperty("allowDataModelChange", Boolean.toString(exportModel.isAllowDataModelChanges()));
 			prop.setProperty("updateSequences", Boolean.toString(exportModel.isUpdateSequences()));
 			prop.setProperty("automaticallyUpgradeRepository", Boolean.toString(exportModel.isAutomaticallyUpgradeRepository()));
-			FileWriter writer = new FileWriter(importProperties);
-			try
+
+			try (FileWriter writer = new FileWriter(importProperties))
 			{
 				prop.store(writer, "import properties");
 			}
-			finally
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
+
+		try
+		{
+			File adminProperties = new File(tmpWarDir, "WEB-INF/admin.properties");
+			Properties prop = new Properties();
+			prop.setProperty("defaultAdminUser", exportModel.getDefaultAdminUser());
+			prop.setProperty("defaultAdminPassword", SecuritySupport.encrypt(Settings.getInstance(), exportModel.getDefaultAdminPassword()));
+
+			try (FileWriter writer = new FileWriter(adminProperties))
 			{
-				writer.close();
+				prop.store(writer, "admin properties");
 			}
 		}
 		catch (Exception e)
