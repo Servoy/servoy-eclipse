@@ -140,9 +140,10 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 				}
 				else if (baseNGPackageManager.getActiveSolutionReferencedProjectNamesInternal().contains(resource.getName()))
 				{
-					// a referenced project has changed; we need to know if it's a project that has been referenced before but was missing and now it is
-					// available and of type ngPackage - or if it was previously available and loaded as an ngPackage project we must check to see if manifest or .spec files changed
-					// or if the project is no longer available
+					// a referenced project has changed;
+					// - we need to know if it's a project that has been referenced before but was missing and now it is available and of type ngPackage
+					// or
+					// - if it was previously available and loaded as an ngPackage project, we must check to see if manifest or .spec files changed or if the project is no longer available
 					boolean wasPreviouslyLoaded = false;
 					for (ServoyNGPackageProject p : baseNGPackageManager.getReferencedNGPackageProjectsInternal())
 					{

@@ -157,6 +157,11 @@ public abstract class BaseNGPackageManager
 			{
 				ngPackageProjects = module.getNGPackageProjects();
 				Collections.addAll(referencedNGPackageProjectsSet, ngPackageProjects);
+				for (ServoyNGPackageProject packageProject : ngPackageProjects)
+				{
+					activeSolutionReferencedProjectNames.add(packageProject.getProject().getName());
+				}
+
 			}
 			referencedNGPackageProjects = referencedNGPackageProjectsSet.toArray(new ServoyNGPackageProject[referencedNGPackageProjectsSet.size()]);
 		}
