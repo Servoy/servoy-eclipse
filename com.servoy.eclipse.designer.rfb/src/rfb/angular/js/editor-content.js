@@ -125,13 +125,16 @@ angular.module('editorContent',['servoyApp'])
 
       function onopenCaller() {
         parent.window.SwtWebsocketBrowserFunction('open', url, me.id)
-        me.onopen()
+        me.onopen({isReconnect:false});
       }
       setTimeout(onopenCaller, 0);
     }
 
     SwtWebSocket.prototype.send = function(str) {
       parent.window.SwtWebsocketBrowserFunction('send', str, this.id)
+    }
+    SwtWebSocket.prototype.close = function(str) {
+     // ignore
     }
   }
   $servoyInternal.connect();
