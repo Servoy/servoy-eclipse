@@ -33,7 +33,7 @@ import org.eclipse.swt.widgets.Display;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.sablo.specification.NGPackageSpecification;
+import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
@@ -528,7 +528,7 @@ public class CreateComponentHandler implements IServerService
 					}
 					else
 					{
-						NGPackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+						PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
 							args.optString("packageName"));
 						if (specifications != null)
 						{
@@ -658,7 +658,7 @@ public class CreateComponentHandler implements IServerService
 	}
 
 	protected IPersist createLayoutContainer(ISupportFormElements parent, WebLayoutSpecification layoutSpec, LayoutContainer sameTypeChildContainer,
-		JSONObject config, int index, NGPackageSpecification<WebLayoutSpecification> specifications, String packageName)
+		JSONObject config, int index, PackageSpecification<WebLayoutSpecification> specifications, String packageName)
 		throws RepositoryException, JSONException
 	{
 

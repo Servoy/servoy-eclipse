@@ -49,7 +49,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 import org.osgi.service.prefs.BackingStoreException;
-import org.sablo.specification.NGPackageSpecification;
+import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
@@ -193,7 +193,7 @@ public class DesignerFilter implements Filter
 						if ((provider.getLayoutSpecifications().containsKey(key) &&
 							isAccesibleInLayoutType(provider.getLayoutSpecifications().get(key), layoutType)))
 						{
-							NGPackageSpecification<WebLayoutSpecification> pkg = provider.getLayoutSpecifications().get(key);
+							PackageSpecification<WebLayoutSpecification> pkg = provider.getLayoutSpecifications().get(key);
 							jsonWriter.object();
 							jsonWriter.key("packageName").value(pkg.getPackageName());
 							jsonWriter.key("packageDisplayname").value(pkg.getPackageDisplayname());
@@ -204,7 +204,7 @@ public class DesignerFilter implements Filter
 						else if (provider.getWebComponentSpecifications().containsKey(key) &&
 							isAccesibleInLayoutType(provider.getWebComponentSpecifications().get(key), layoutType))
 						{
-							NGPackageSpecification<WebObjectSpecification> pkg = provider.getWebComponentSpecifications().get(key);
+							PackageSpecification<WebObjectSpecification> pkg = provider.getWebComponentSpecifications().get(key);
 							jsonWriter.object();
 							jsonWriter.key("packageName").value(pkg.getPackageName());
 							jsonWriter.key("packageDisplayname").value(pkg.getPackageDisplayname());
@@ -255,7 +255,7 @@ public class DesignerFilter implements Filter
 						}
 						if (startedArray && provider.getLayoutSpecifications().containsKey(key))
 						{
-							NGPackageSpecification<WebLayoutSpecification> entry = provider.getLayoutSpecifications().get(key);
+							PackageSpecification<WebLayoutSpecification> entry = provider.getLayoutSpecifications().get(key);
 
 							for (WebLayoutSpecification spec : entry.getSpecifications().values())
 							{
@@ -312,7 +312,7 @@ public class DesignerFilter implements Filter
 						}
 						if (startedArray && provider.getWebComponentSpecifications().containsKey(key))
 						{
-							NGPackageSpecification<WebObjectSpecification> pkg = provider.getWebComponentSpecifications().get(key);
+							PackageSpecification<WebObjectSpecification> pkg = provider.getWebComponentSpecifications().get(key);
 							Collection<WebObjectSpecification> webComponentSpecsCollection = pkg.getSpecifications().values();
 							if ("servoydefault".equals(key))
 							{
@@ -418,7 +418,7 @@ public class DesignerFilter implements Filter
 	}
 
 
-	private boolean isAccesibleInLayoutType(NGPackageSpecification< ? > pkg, String layoutType)
+	private boolean isAccesibleInLayoutType(PackageSpecification< ? > pkg, String layoutType)
 	{
 		if (pkg.getManifest() != null && pkg.getManifest().getMainAttributes() != null &&
 			Boolean.valueOf(pkg.getManifest().getMainAttributes().getValue(layoutType)).booleanValue()) return true;

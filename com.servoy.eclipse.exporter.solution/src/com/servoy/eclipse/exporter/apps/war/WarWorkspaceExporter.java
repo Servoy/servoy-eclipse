@@ -34,8 +34,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.equinox.app.IApplicationContext;
-import org.sablo.specification.NGPackage;
-import org.sablo.specification.NGPackage.IPackageReader;
+import org.sablo.specification.Package;
+import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
@@ -503,12 +503,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 						if ((folderResource).getFile("META-INF/MANIFEST.MF").exists())
 						{
 							File f = new File(resource.getLocationURI());
-							readers.put(name, new NGPackage.DirPackageReader(f));
+							readers.put(name, new Package.DirPackageReader(f));
 						}
 					}
 					else if (resource instanceof IFile)
 					{
-						readers.put(name, new NGPackage.JarPackageReader(new File(resource.getLocationURI())));
+						readers.put(name, new Package.JarPackageReader(new File(resource.getLocationURI())));
 					}
 				}
 			}

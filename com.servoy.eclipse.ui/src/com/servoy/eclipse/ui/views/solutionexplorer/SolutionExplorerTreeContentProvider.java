@@ -62,7 +62,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.mozilla.javascript.JavaMembers;
-import org.sablo.specification.NGPackageSpecification;
+import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
@@ -825,7 +825,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					{
 						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
 						String packageName = provider.getPackageName(un.getName());
-						NGPackageSpecification<WebObjectSpecification> servicesPackage = provider.getServicesInPackage(packageName);
+						PackageSpecification<WebObjectSpecification> servicesPackage = provider.getServicesInPackage(packageName);
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (servicesPackage != null)
 						{
@@ -973,7 +973,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 				else if (un.getType() == UserNodeType.COMPONENTS)
 				{
-					return resourceFolderHasChildren(SolutionSerializer.COMPONENTS_DIR_NAME);
+					WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
+					Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
+					return packages.size() > 0;
+//					return resourceFolderHasChildren(SolutionSerializer.COMPONENTS_DIR_NAME);
 				}
 				else if (un.getType() == UserNodeType.SERVICES)
 				{
@@ -988,7 +991,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 				else if (un.getType() == UserNodeType.SERVICES_PACKAGE)
 				{
-					NGPackageSpecification<WebObjectSpecification> services = WebServiceSpecProvider.getInstance().getServicesInPackage(
+					PackageSpecification<WebObjectSpecification> services = WebServiceSpecProvider.getInstance().getServicesInPackage(
 						WebServiceSpecProvider.getInstance().getPackageName(un.getName()));
 					return services != null && !services.getSpecifications().isEmpty();
 				}

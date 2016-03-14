@@ -29,7 +29,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.sablo.specification.NGPackage;
+import org.sablo.specification.Package;
 
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.core.util.UIUtils.ScrollableDialog;
@@ -88,7 +88,7 @@ public class ImportComponentFolderAction extends ImportComponentAction
 	protected File[] getImportFolderEntries(File importFolder)
 	{
 		ArrayList<File> importFolderEntries = new ArrayList<File>();
-		NGPackage.DirPackageReader dirReader = new NGPackage.DirPackageReader(importFolder);
+		Package.DirPackageReader dirReader = new Package.DirPackageReader(importFolder);
 		try
 		{
 			Manifest mf = dirReader.getManifest();

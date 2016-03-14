@@ -44,7 +44,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.sablo.specification.NGPackageSpecification;
+import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
@@ -217,7 +217,7 @@ public class NewComponentPackageAction extends Action
 
 	private boolean isNameValid(PlatformSimpleUserNode node)
 	{
-		Collection<NGPackageSpecification<WebObjectSpecification>> packages = null;
+		Collection<PackageSpecification<WebObjectSpecification>> packages = null;
 		if (node.getType() == UserNodeType.SERVICES)
 		{
 			if (!packageName.toLowerCase().endsWith("services"))
@@ -231,7 +231,7 @@ public class NewComponentPackageAction extends Action
 		{
 			packages = WebComponentSpecProvider.getInstance().getWebComponentSpecifications().values();
 		}
-		for (NGPackageSpecification<WebObjectSpecification> p : packages)
+		for (PackageSpecification<WebObjectSpecification> p : packages)
 		{
 			if (p.getPackageName().equals(packageName))
 			{

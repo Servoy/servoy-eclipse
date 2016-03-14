@@ -14,7 +14,7 @@ import org.eclipse.ui.menus.CommandContributionItemParameter;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.NGPackageSpecification;
+import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebLayoutSpecification;
@@ -54,7 +54,7 @@ public class AddContainerContributionItem extends CompoundContributionItem
 		if (persistContext != null) persist = persistContext.getPersist();
 		if (persist instanceof LayoutContainer)
 		{
-			NGPackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+			PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
 				((LayoutContainer)persist).getPackageName());
 			if (specifications != null)
 			{
@@ -99,8 +99,8 @@ public class AddContainerContributionItem extends CompoundContributionItem
 		}
 		else if (persist instanceof Form)
 		{
-			Collection<NGPackageSpecification<WebLayoutSpecification>> values = WebComponentSpecProvider.getInstance().getLayoutSpecifications().values();
-			for (NGPackageSpecification<WebLayoutSpecification> specifications : values)
+			Collection<PackageSpecification<WebLayoutSpecification>> values = WebComponentSpecProvider.getInstance().getLayoutSpecifications().values();
+			for (PackageSpecification<WebLayoutSpecification> specifications : values)
 			{
 				for (WebLayoutSpecification specification : specifications.getSpecifications().values())
 				{

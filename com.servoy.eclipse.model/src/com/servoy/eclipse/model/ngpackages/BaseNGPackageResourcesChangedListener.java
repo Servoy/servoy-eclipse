@@ -76,7 +76,7 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 		ValueReference<Boolean> clearReferencedProjectsCache = new ValueReference<>(Boolean.FALSE);
 		final List<IProject> newNGPackageProjectsToLoad = new ArrayList<>();
 		final List<IProject> oldNGPackageProjectsToUnload = new ArrayList<>();
-		checkForChangesInNGPackageProjecs(activeProject, affectedChildren, refreshAllNGPackageProjects, clearReferencedProjectsCache,
+		checkForChangesInNGPackageProjects(activeProject, affectedChildren, refreshAllNGPackageProjects, clearReferencedProjectsCache,
 			newNGPackageProjectsToLoad, oldNGPackageProjectsToUnload);
 
 		boolean somethingChangedInResourcesProject = (refreshResourcesServices || refreshResourcesComponents);
@@ -112,7 +112,7 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 		}
 	}
 
-	protected void checkForChangesInNGPackageProjecs(ServoyProject activeProject, IResourceDelta[] affectedChildren,
+	protected void checkForChangesInNGPackageProjects(ServoyProject activeProject, IResourceDelta[] affectedChildren,
 		ValueReference<Boolean> refreshAllNGPackageProjects, ValueReference<Boolean> clearReferencedProjectsCache,
 		final List<IProject> newNGPackageProjectsToLoad, final List<IProject> oldNGPackageProjectsToUnload)
 	{

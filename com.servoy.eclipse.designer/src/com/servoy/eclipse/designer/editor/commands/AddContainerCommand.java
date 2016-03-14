@@ -21,7 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.NGPackageSpecification;
+import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebLayoutSpecification;
@@ -187,7 +187,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			if (parentPersist != null && parentPersist.getPersist() instanceof AbstractBase && parentPersist.getPersist() instanceof ISupportChilds)
 			{
 				AbstractBase parent = (AbstractBase)ElementUtil.getOverridePersist(parentPersist);
-				NGPackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+				PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
 					packageName);
 				container = (LayoutContainer)parent.getRootObject().getChangeHandler().createNewObject(((ISupportChilds)parent), IRepository.LAYOUTCONTAINERS);
 				container.setSpecName(specName);

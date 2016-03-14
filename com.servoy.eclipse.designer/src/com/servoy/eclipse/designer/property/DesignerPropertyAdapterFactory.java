@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.gef.EditPart;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.NGPackageSpecification;
+import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 
@@ -310,7 +310,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 					PropertyDescription propertyDescription = null;
 					if (persist.getParent() != null)
 					{
-						NGPackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+						PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
 							layoutContainer.getPackageName());
 
 						if (pkg != null)

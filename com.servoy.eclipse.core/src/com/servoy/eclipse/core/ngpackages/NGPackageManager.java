@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
@@ -85,8 +86,8 @@ public class NGPackageManager extends BaseNGPackageManager
 					else if (updateInfo == MODULES_UPDATED)
 					{
 						// TODO if we will take referenced ng package projects even from modules, we should enable this code...
-//						clearActiveSolutionReferencesCache();
-//						reloadAllNGPackageProjects(m);
+						clearActiveSolutionReferencesCache();
+						reloadAllNGPackageProjects(new NullProgressMonitor(), false);
 					}
 				}
 

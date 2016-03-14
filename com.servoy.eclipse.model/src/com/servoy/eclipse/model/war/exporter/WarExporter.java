@@ -59,7 +59,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.json.JSONException;
-import org.sablo.specification.NGPackageSpecification;
+import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
@@ -215,7 +215,7 @@ public class WarExporter
 
 		TreeSet<String> allServices = new TreeSet<String>();
 		// append internal servoy services
-		NGPackageSpecification<WebObjectSpecification> servoyservices = WebServiceSpecProvider.getInstance().getServicesInPackage("servoyservices");
+		PackageSpecification<WebObjectSpecification> servoyservices = WebServiceSpecProvider.getInstance().getServicesInPackage("servoyservices");
 		if (servoyservices != null) allServices.addAll(servoyservices.getSpecifications().keySet());
 		// append user services
 		if (exportModel.getExportedServices() != null) allServices.addAll(exportModel.getExportedServices());

@@ -39,7 +39,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.ValuesConfig;
-import org.sablo.specification.NGPackageSpecification;
+import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 
@@ -273,7 +273,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		Map<String, List<String>> allComponents = new HashMap<String, List<String>>();
 		Map<String, String> drawerNames = new HashMap<String, String>();
 
-		for (NGPackageSpecification<WebObjectSpecification> pkg : WebComponentSpecProvider.getInstance().getWebComponentSpecifications().values())
+		for (PackageSpecification<WebObjectSpecification> pkg : WebComponentSpecProvider.getInstance().getWebComponentSpecifications().values())
 		{
 			String packageName = pkg.getPackageDisplayname();
 			String id = COMPONENTS_ID + "." + packageName;

@@ -41,10 +41,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
-import org.sablo.specification.NGPackage;
-import org.sablo.specification.NGPackage.DirPackageReader;
-import org.sablo.specification.NGPackage.DuplicatePackageException;
-import org.sablo.specification.NGPackage.IPackageReader;
+import org.sablo.specification.Package;
+import org.sablo.specification.Package.DirPackageReader;
+import org.sablo.specification.Package.DuplicatePackageException;
+import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
@@ -138,7 +138,9 @@ public abstract class BaseNGPackageManager
 		if (referencedNGPackageProjects == null)
 		{
 			ServoyProject activeSolutionProject = ServoyModelFinder.getServoyModel().getActiveProject();
-			referencedNGPackageProjects = activeSolutionProject.getNGPackageProjects();
+			HashSet<ServoyNGPackageProject> referencedNGPackageProjectsSet = new HashSet<ServoyNGPackageProject>();
+			ServoyNGPackageProject[] ngPackageProjects = activeSolutionProject.getNGPackageProjects();
+			Collections.addAll(referencedNGPackageProjectsSet, ngPackageProjects);
 			try
 			{
 				IProject[] activeSolutionReferencedProjects = activeSolutionProject.getProject().getDescription().getReferencedProjects();
@@ -150,7 +152,13 @@ public abstract class BaseNGPackageManager
 			{
 				ServoyLog.logError(e);
 			}
-			// TODO should we get all referenced projects from modules as well here? and watch for changes of those in resource change listeners too? if yes then some code in NGPackageManager should be enabled as well - in activeProjectUpdated
+			ServoyProject[] modulesOfActiveProject = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
+			for (ServoyProject module : modulesOfActiveProject)
+			{
+				ngPackageProjects = module.getNGPackageProjects();
+				Collections.addAll(referencedNGPackageProjectsSet, ngPackageProjects);
+			}
+			referencedNGPackageProjects = referencedNGPackageProjectsSet.toArray(new ServoyNGPackageProject[referencedNGPackageProjectsSet.size()]);
 		}
 		return referencedNGPackageProjects;
 	}
@@ -162,7 +170,7 @@ public abstract class BaseNGPackageManager
 	public void reloadAllNGPackages(IProgressMonitor m, boolean canChangeResources)
 	{
 		setRemovedPackages();
-		
+
 		SubMonitor monitor = SubMonitor.convert(m, "Reloading all ng packages", 100);
 
 		ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
@@ -636,7 +644,7 @@ public abstract class BaseNGPackageManager
 		}
 	}
 
-	private class FilePackageReader extends NGPackage.JarPackageReader
+	private class FilePackageReader extends Package.JarPackageReader
 	{
 		private final IResource resource;
 
