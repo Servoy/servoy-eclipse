@@ -374,6 +374,7 @@ public class ElementUtil
 			}
 		}
 		IPersist newPersist = ((AbstractBase)nextParentSrc).cloneObj(currentParrent, false, null, false, false, false);
+		((AbstractBase)newPersist).copyPropertiesMap(null, true);
 		((ISupportExtendsID)newPersist).setExtendsID(nextParentSrc.getID());
 		return newPersist;
 	}
