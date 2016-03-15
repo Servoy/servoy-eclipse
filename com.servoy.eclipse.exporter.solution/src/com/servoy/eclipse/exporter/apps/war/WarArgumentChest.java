@@ -52,6 +52,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 
 	private static final String overwriteGroups = "overwriteGroups";//  overwrites Groups\n"
 	private static final String allowSQLKeywords = "allowSQLKeywords";// allows SQLKeywords \n"
+	private static final String stopOnDataModelChanges = "stopOnDataModelChanges";// allow data model changes \n"
 	private static final String overrideSequenceTypes = "overrideSequenceTypes";// overrides Sequence Types \n"
 	private static final String overrideDefaultValues = "overrideDefaultValues";// overrides Default Values \n"
 	private static final String insertNewI18NKeysOnly = "insertNewI18NKeysOnly";// inserts NewI18NKeysOnly \n"
@@ -126,6 +127,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             Default: the solution name\n"
 			+ "        -" + overwriteGroups + " ...  overwrites Groups\n"
 			+ "        -" + allowSQLKeywords + " ... allows SQLKeywords\n"
+			+ "        -" + stopOnDataModelChanges + " ... stops import if data model changes\n"
 			+ "        -" + overrideSequenceTypes + " ... overrides Sequence Types\n"
 			+ "        -" + overrideDefaultValues + " ... overrides Default Values\n"
 			+ "        -" + insertNewI18NKeysOnly + " ... inserts NewI18NKeysOnly\n"
@@ -297,6 +299,11 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public boolean isAllowSQLKeywords()
 	{
 		return argumentsMap.containsKey(allowSQLKeywords);
+	}
+
+	public boolean isStopOnAllowDataModelChanges()
+	{
+		return argumentsMap.containsKey(stopOnDataModelChanges);
 	}
 
 	public boolean isInsertNewI18NKeysOnly()
