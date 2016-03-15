@@ -34,6 +34,7 @@ import com.servoy.eclipse.designer.actions.ZOrderAction;
 
 public abstract class DesignerActionFactory extends ActionFactory
 {
+	public static final String GROUP_ID = "com.servoy.eclipse.designer.rfb.group";
 	public static final String GROUP_ELEMENTS = "group.elements";
 	public static final String GROUP_ACTIONS = "group.actions";
 	public static final String GROUP_REFACTOR = "group.refactor";
@@ -46,7 +47,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 	public static final String BRING_TO_FRONT_TEXT = "Bring to front";
 	public static final String BRING_TO_FRONT_TOOLTIP = BRING_TO_FRONT_TEXT;
 	public static final ImageDescriptor BRING_TO_FRONT_IMAGE = Activator.loadImageDescriptorFromBundle("bring_to_front.png");
-	public static final String BRING_TO_FRONT_ID = "com.servoy.eclipse.designer.bringtofront";
+	public static final String BRING_TO_FRONT_ID = "com.servoy.eclipse.designer.rfb.bringtofront";
 	public static final ActionFactory BRING_TO_FRONT = new ActionFactory(ZOrderAction.ID_Z_ORDER_BRING_TO_FRONT)
 	{
 
@@ -69,7 +70,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 	public static final String SEND_TO_BACK_TEXT = "Send to back";
 	public static final String SEND_TO_BACK_TOOLTIP = SEND_TO_BACK_TEXT;
 	public static final ImageDescriptor SEND_TO_BACK_IMAGE = Activator.loadImageDescriptorFromBundle("send_to_back.png");
-	public static final String SEND_TO_BACK_ID = "com.servoy.eclipse.designer.sendtoback";
+	public static final String SEND_TO_BACK_ID = "com.servoy.eclipse.designer.rfb.sendtoback";
 	public static final ActionFactory SEND_TO_BACK = new ActionFactory(ZOrderAction.ID_Z_ORDER_SEND_TO_BACK)
 	{
 
@@ -92,7 +93,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 	public static final String BRING_TO_FRONT_ONE_STEP_TEXT = "Bring forward";
 	public static final String BRING_TO_FRONT_ONE_STEP_TOOLTIP = BRING_TO_FRONT_ONE_STEP_TEXT;
 	public static final ImageDescriptor BRING_TO_FRONT_ONE_STEP_IMAGE = Activator.loadImageDescriptorFromBundle("bring_forward.png");
-	public static final String BRING_TO_FRONT_ONE_STEP_ID = "com.servoy.eclipse.designer.bringtofrontonestep";
+	public static final String BRING_TO_FRONT_ONE_STEP_ID = "com.servoy.eclipse.designer.rfb.bringtofrontonestep";
 	public static final ActionFactory BRING_TO_FRONT_ONE_STEP = new ActionFactory(ZOrderAction.ID_Z_ORDER_BRING_TO_FRONT_ONE_STEP)
 	{
 
@@ -115,7 +116,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 	public static final String SEND_TO_BACK_ONE_STEP_TEXT = "Send backward";
 	public static final String SEND_TO_BACK_ONE_STEP_TOOLTIP = SEND_TO_BACK_ONE_STEP_TEXT;
 	public static final ImageDescriptor SEND_TO_BACK_ONE_STEP_IMAGE = Activator.loadImageDescriptorFromBundle("send_backward.png");
-	public static final String SEND_TO_BACK_ONE_STEP_ID = "com.servoy.eclipse.designer.sendtobackonestep";
+	public static final String SEND_TO_BACK_ONE_STEP_ID = "com.servoy.eclipse.designer.rfb.sendtobackonestep";
 	public static final ActionFactory SEND_TO_BACK_ONE_STEP = new ActionFactory(ZOrderAction.ID_Z_ORDER_SEND_TO_BACK_ONE_STEP)
 	{
 
@@ -336,7 +337,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 	public static final String SET_TAB_SEQUENCE_TEXT = "Set tab sequence";
 	public static final String SET_TAB_SEQUENCE_TOOLTIP = SET_TAB_SEQUENCE_TEXT;
 	public static final ImageDescriptor SET_TAB_SEQUENCE_IMAGE = Activator.loadImageDescriptorFromBundle("th_horizontal.gif"); // TODO create proper icon
-	public static final String SET_TAB_SEQUENCE_ID = "com.servoy.eclipse.designer.settabseq";
+	public static final String SET_TAB_SEQUENCE_ID = "com.servoy.eclipse.designer.rfb.settabseq";
 	public static final ActionFactory SET_TAB_SEQUENCE = new ActionFactory("set-tab-sequence")
 	{
 
@@ -378,6 +379,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
+	public static final String UNGROUP_ID = "com.servoy.eclipse.designer.rfb.ungroup";
 	public static final String UNGROUP_TEXT = "Ungroup";
 	public static final String UNGROUP_TOOLTIP = UNGROUP_TEXT;
 	public static final ImageDescriptor UNGROUP_IMAGE = Activator.loadImageDescriptorFromBundle("ungroup.gif");
@@ -425,7 +427,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 	public static final String SAME_WIDTH_TEXT = "Same width";
 	public static final String SAME_WIDTH_TOOLTIP = SAME_WIDTH_TEXT;
 	public static final ImageDescriptor SAME_WIDTH_IMAGE = Activator.loadImageDescriptorFromBundle("same_width.gif");
-	public static final String SAME_WIDTH_ID = "com.servoy.eclipse.designer.samewidth";
+	public static final String SAME_WIDTH_ID = "com.servoy.eclipse.designer.rfb.samewidth";
 	public static final ActionFactory SAME_WIDTH = new ActionFactory("same-width")
 	{
 
@@ -447,7 +449,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 	public static final String SAME_HEIGHT_TEXT = "Same height";
 	public static final String SAME_HEIGHT_TOOLTIP = SAME_HEIGHT_TEXT;
 	public static final ImageDescriptor SAME_HEIGHT_IMAGE = Activator.loadImageDescriptorFromBundle("same_height.gif");
-	public static final String SAME_HEIGHT_ID = "com.servoy.eclipse.designer.sameheight";
+	public static final String SAME_HEIGHT_ID = "com.servoy.eclipse.designer.rfb.sameheight";
 	public static final ActionFactory SAME_HEIGHT = new ActionFactory("same-height")
 	{
 

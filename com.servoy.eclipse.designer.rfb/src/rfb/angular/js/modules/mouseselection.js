@@ -354,6 +354,49 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						if (ghostObject && ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM && !(angular.element(elements[elements.length - 2]).is("[svy-non-selectable]"))) {
 							return elements[elements.length - 2];
 						}
+						if (ghostObject && ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
+						{
+							function getMinFormIndexGroup(ghostObject)
+							{
+								var groupElements = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[group-id='"+ghostObject.uuid+"']"));
+								var minGroupIndex =  Number.MAX_SAFE_INTEGER;
+								for (var i = 0; i < groupElements.length; i++)
+								{
+									minGroupIndex = Math.min(minGroupIndex, parseInt(groupElements[i].getAttribute('form-index')));
+								}
+								return minGroupIndex;
+							}
+							//find min formindex in group
+							
+							var minGroupIndex = getMinFormIndexGroup(ghostObject);
+							var idx = -1;
+							var maxElemIndex = -1;
+							//find max form index selected elem overlapping the group
+							for (var i = 0; i < elements.length -2 ; i ++)
+							{
+								if (elements[i].firstElementChild.getAttribute('group-id') == ghostObject.uuid) continue;
+								var formIndex;
+								if (editorScope.getGhost(elements[i].getAttribute("svy-id"))) 
+								{
+									formIndex = getMinFormIndexGroup(editorScope.getGhost(elements[i].getAttribute("svy-id")));
+								}
+								else
+								{
+									formIndex = parseInt(elements[i].firstElementChild.getAttribute('form-index'));
+								}
+								
+								if (maxElemIndex < formIndex)
+								{
+									maxElemIndex = formIndex;
+									idx = i;
+								}
+							}
+							if (maxElemIndex > minGroupIndex)
+							{
+								return elements[idx];
+							}
+						}
+							
 						// always return the one on top (visible); this is due to formIndex implementation
 						return elements[elements.length - 1]
 					}

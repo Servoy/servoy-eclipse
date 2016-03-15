@@ -548,6 +548,18 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="[">
       </key>
+      <key
+            commandId="com.servoy.eclipse.designer.rfb.group"
+            contextId="com.servoy.eclipse.designer.rfb.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+G">
+      </key>
+      <key
+            commandId="com.servoy.eclipse.designer.rfb.ungroup"
+            contextId="com.servoy.eclipse.designer.rfb.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+U">
+      </key>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -833,6 +845,18 @@
             defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand$ToFront"
             id="com.servoy.eclipse.designer.rfb.bringtofront"
             name="Bring to front">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.rfb.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupCommand$GroupCommand"
+            id="com.servoy.eclipse.designer.rfb.group"
+            name="Group">
+      </command>
+      <command
+            categoryId="com.servoy.eclipse.designer.rfb.category"
+            defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupCommand$UngroupCommand"
+            id="com.servoy.eclipse.designer.rfb.ungroup"
+            name="Ungroup">
       </command>
       <command
             categoryId="com.servoy.eclipse.designer.rfb.category"

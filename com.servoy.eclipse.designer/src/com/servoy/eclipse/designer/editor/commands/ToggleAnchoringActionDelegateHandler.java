@@ -32,7 +32,7 @@ public abstract class ToggleAnchoringActionDelegateHandler extends ToggleCheckbo
 
 	public static class ToggleAnchoringTop extends ToggleAnchoringActionDelegateHandler
 	{
-		public static final String TOGGLE_ANCHORING_TOP_ID = "com.servoy.eclipse.designer.anchorTop";
+		public static final String TOGGLE_ANCHORING_TOP_ID = "com.servoy.eclipse.designer.rfb.anchorTop";
 
 		public ToggleAnchoringTop()
 		{
@@ -41,7 +41,7 @@ public abstract class ToggleAnchoringActionDelegateHandler extends ToggleCheckbo
 	}
 	public static class ToggleAnchoringRight extends ToggleAnchoringActionDelegateHandler
 	{
-		public static final String TOGGLE_ANCHORING_RIGHT_ID = "com.servoy.eclipse.designer.anchorRight";
+		public static final String TOGGLE_ANCHORING_RIGHT_ID = "com.servoy.eclipse.designer.rfb.anchorRight";
 
 		public ToggleAnchoringRight()
 		{
@@ -50,7 +50,7 @@ public abstract class ToggleAnchoringActionDelegateHandler extends ToggleCheckbo
 	}
 	public static class ToggleAnchoringBottom extends ToggleAnchoringActionDelegateHandler
 	{
-		public static final String TOGGLE_ANCHORING_BOTTOM_ID = "com.servoy.eclipse.designer.anchorBottom";
+		public static final String TOGGLE_ANCHORING_BOTTOM_ID = "com.servoy.eclipse.designer.rfb.anchorBottom";
 
 		public ToggleAnchoringBottom()
 		{
@@ -59,7 +59,7 @@ public abstract class ToggleAnchoringActionDelegateHandler extends ToggleCheckbo
 	}
 	public static class ToggleAnchoringLeft extends ToggleAnchoringActionDelegateHandler
 	{
-		public static final String TOGGLE_ANCHORING_LEFT_ID = "com.servoy.eclipse.designer.anchorLeft";
+		public static final String TOGGLE_ANCHORING_LEFT_ID = "com.servoy.eclipse.designer.rfb.anchorLeft";
 
 		public ToggleAnchoringLeft()
 		{

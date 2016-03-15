@@ -29,6 +29,8 @@ import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupCommand.GroupCommand;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupCommand.UngroupCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentsHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.GetPartStylesHandler;
@@ -214,6 +216,9 @@ public class EditorServiceHandler implements IServerService
 				return null;
 			}
 		});
+
+		configuredHandlers.put("createGroup", new GroupCommand(editorPart, selectionProvider));
+		configuredHandlers.put("clearGroup", new UngroupCommand(editorPart, selectionProvider));
 	}
 
 	@Override

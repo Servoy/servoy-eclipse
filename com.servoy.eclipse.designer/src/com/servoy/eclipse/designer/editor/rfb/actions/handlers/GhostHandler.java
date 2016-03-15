@@ -18,8 +18,10 @@
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +47,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IFormElement;
@@ -78,6 +81,7 @@ public class GhostHandler implements IServerService
 	public static final String GHOST_TYPE_PART = "part";
 	public static final String GHOST_TYPE_FORM = "form";
 	private static final String GHOST_TYPE_INVISIBLE = "invisible";
+	public static final String GHOST_TYPE_GROUP = "group";
 
 	private final BaseVisualFormEditor editorPart;
 
@@ -107,7 +111,7 @@ public class GhostHandler implements IServerService
 						spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(FormElement.ERROR_BEAN);
 					}
 					Map<String, PropertyDescription> properties = spec.getProperties();
-					if (bean instanceof WebComponent && !FormElement.ERROR_BEAN.equals(spec.getName()))  // could be legacy Bean (was used in alphas/betas) - that is unlikely though
+					if (bean instanceof WebComponent && !FormElement.ERROR_BEAN.equals(spec.getName())) // could be legacy Bean (was used in alphas/betas) - that is unlikely though
 					{
 						for (String key : properties.keySet())
 						{
@@ -551,6 +555,7 @@ public class GhostHandler implements IServerService
 		});
 		List<IFormElement> outsideElements = new ArrayList<IFormElement>();
 		List<IFormElement> invisibleElements = new ArrayList<IFormElement>();
+		Map<String, FormElementGroup> groups = new HashMap<>();
 		Iterator<IPersist> it = editorPart.getForm().getAllObjects();
 		int formHeight = 0;
 		if (editorPart.getForm().getParts().hasNext())
@@ -577,9 +582,15 @@ public class GhostHandler implements IServerService
 					outsideElements.add(fe);
 				}
 				if (!isVisible(fe)) invisibleElements.add(fe);
+				if (fe.getGroupID() != null)
+				{
+					String groupID = fe.getGroupID();
+					if (!groups.containsKey(groupID))
+						groups.put(groupID, new FormElementGroup(groupID, ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm()));
+				}
 			}
 		}
-		if (outsideElements.size() > 0 || invisibleElements.size() > 0)
+		if (outsideElements.size() > 0 || invisibleElements.size() > 0 || groups.size() > 0)
 		{
 			writer.object();
 			writer.key("style");
@@ -593,6 +604,26 @@ public class GhostHandler implements IServerService
 			writer.array();
 			printGhostFormElements(writer, outsideElements.iterator(), GHOST_TYPE_COMPONENT);
 			printGhostFormElements(writer, invisibleElements.iterator(), GHOST_TYPE_INVISIBLE);
+
+			for (FormElementGroup group : groups.values())
+			{
+				writer.object();
+				writer.key("uuid").value(group.getGroupID());
+				writer.key("type").value(GHOST_TYPE_GROUP);
+				Rectangle rectangle = group.getBounds();
+				writer.key("location");
+				writer.object();
+				writer.key("x").value(rectangle.getX());
+				writer.key("y").value(rectangle.getY());
+				writer.endObject();
+				writer.key("size");
+				writer.object();
+				writer.key("width").value(rectangle.getWidth());
+				writer.key("height").value(rectangle.getHeight());
+				writer.endObject();
+				writer.endObject();
+			}
+
 			writer.endArray();
 			writer.endObject();
 		}

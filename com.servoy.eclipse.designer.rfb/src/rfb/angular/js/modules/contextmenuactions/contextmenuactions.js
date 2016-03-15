@@ -1,18 +1,20 @@
 angular.module('contextmenuactions',['contextmenu','editor'])
 .value("SHORTCUT_IDS",
 {	
-	SET_TAB_SEQUENCE_ID: "com.servoy.eclipse.designer.settabseq",
-	SAME_WIDTH_ID: "com.servoy.eclipse.designer.samewidth",
-	SAME_HEIGHT_ID: "com.servoy.eclipse.designer.sameheight",
-	TOGGLE_ANCHORING_TOP_ID: "com.servoy.eclipse.designer.anchorTop",
-	TOGGLE_ANCHORING_RIGHT_ID: "com.servoy.eclipse.designer.anchorRight",
-	TOGGLE_ANCHORING_BOTTOM_ID: "com.servoy.eclipse.designer.anchorBottom",
-	TOGGLE_ANCHORING_LEFT_ID: "com.servoy.eclipse.designer.anchorLeft",
-	BRING_TO_FRONT_ONE_STEP_ID: "com.servoy.eclipse.designer.bringtofrontonestep",
-	SEND_TO_BACK_ONE_STEP_ID: "com.servoy.eclipse.designer.sendtobackonestep",
-	BRING_TO_FRONT_ID: "com.servoy.eclipse.designer.bringtofront", 
-	SEND_TO_BACK_ID: "com.servoy.eclipse.designer.sendtoback",
-	OPEN_SCRIPT_ID: "com.servoy.eclipse.ui.OpenFormJsAction"
+	SET_TAB_SEQUENCE_ID: "com.servoy.eclipse.designer.rfb.settabseq",
+	SAME_WIDTH_ID: "com.servoy.eclipse.designer.rfb.samewidth",
+	SAME_HEIGHT_ID: "com.servoy.eclipse.designer.rfb.sameheight",
+	TOGGLE_ANCHORING_TOP_ID: "com.servoy.eclipse.designer.rfb.anchorTop",
+	TOGGLE_ANCHORING_RIGHT_ID: "com.servoy.eclipse.designer.rfb.anchorRight",
+	TOGGLE_ANCHORING_BOTTOM_ID: "com.servoy.eclipse.designer.rfb.anchorBottom",
+	TOGGLE_ANCHORING_LEFT_ID: "com.servoy.eclipse.designer.rfb.anchorLeft",
+	BRING_TO_FRONT_ONE_STEP_ID: "com.servoy.eclipse.designer.rfb.bringtofrontonestep",
+	SEND_TO_BACK_ONE_STEP_ID: "com.servoy.eclipse.designer.rfb.sendtobackonestep",
+	BRING_TO_FRONT_ID: "com.servoy.eclipse.designer.rfb.bringtofront", 
+	SEND_TO_BACK_ID: "com.servoy.eclipse.designer.rfb.sendtoback",
+	OPEN_SCRIPT_ID: "com.servoy.eclipse.ui.OpenFormJsAction",
+	GROUP_ID: "com.servoy.eclipse.designer.rfb.group",
+	UNGROUP_ID: "com.servoy.eclipse.designer.rfb.ungroup"
 })
 .run(function($rootScope, $pluginRegistry,$contextmenu, $editorService,EDITOR_EVENTS,SHORTCUT_IDS){
 	$pluginRegistry.registerPlugin(function(editorScope) {
@@ -86,9 +88,8 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 				getIconStyle: function(){ return {'background-image':"url(images/th_horizontal.gif)"};},
 				shortcut: shortcuts[SHORTCUT_IDS.SET_TAB_SEQUENCE_ID],
 				getItemClass: function() { if (!editorScope.getSelection() || editorScope.getSelection().length < 2) return "disabled";},
-				execute:function()
-				{
-					$editorService.executeAction('setTabSequence');
+				execute:function(){
+					$editorService.executeAction('setTabSequence');	
 				}
 			});
 			
@@ -119,8 +120,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 							$editorService.sameSize(false);
 						}
 					}
-				);
-			
+				);			
 			$contextmenu.add(
 					{
 						text: "Sizing",
@@ -131,7 +131,6 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 			
 			// anchoring
 			var anchoringActions = [];
-			
 			anchoringActions.push(
 					{
 						text: "Top",
@@ -175,7 +174,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 							setAnchoring(4);
 						}
 					}
-				);
+				);			
 			
 			anchoringActions.push(
 					{
@@ -200,15 +199,14 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 			
 			//arrange
 			var arrangeActions = [];
-			
 			arrangeActions.push(
 					{
 						text: "Bring forward",
 						getIconStyle: function(){ return {'background-image':"url(images/bring_forward.png)"}},
 						shortcut: shortcuts[SHORTCUT_IDS.BRING_TO_FRONT_ONE_STEP_ID],
 						getItemClass: function() { if (!hasSelection()) return "disabled";},
-						execute:function()
-						{
+						execute: function() 
+						{ 
 							$("#contextMenu").hide();
 							$editorService.executeAction('z_order_bring_to_front_one_step');
 						}
@@ -221,7 +219,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 						getIconStyle: function(){ return {'background-image':"url(images/send_backward.png)"}},
 						shortcut: shortcuts[SHORTCUT_IDS.SEND_TO_BACK_ONE_STEP_ID],
 						getItemClass: function() { if (!hasSelection()) return "disabled";},
-						execute:function()
+						execute: function()
 						{
 							$("#contextMenu").hide();
 							$editorService.executeAction('z_order_send_to_back_one_step');
@@ -235,8 +233,8 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 						getIconStyle: function(){ return {'background-image':"url(images/bring_to_front.png)"}},
 						shortcut: shortcuts[SHORTCUT_IDS.BRING_TO_FRONT_ID],
 						getItemClass: function() { if (!hasSelection()) return "disabled";},
-						execute:function()
-						{
+						execute: function() 
+						{ 
 							$("#contextMenu").hide();
 							$editorService.executeAction('z_order_bring_to_front');
 						}
@@ -249,7 +247,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 						getIconStyle: function(){ return {'background-image':"url(images/send_to_back.png)"}},
 						shortcut: shortcuts[SHORTCUT_IDS.SEND_TO_BACK_ID],
 						getItemClass: function() { if (!hasSelection()) return "disabled";},
-						execute:function()
+						execute: function()
 						{
 							$("#contextMenu").hide();
 							$editorService.executeAction('z_order_send_to_back');
@@ -264,6 +262,43 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 						getItemClass: function() { return "dropdown-submenu"}
 					}
 				);
+			
+			var groupingActions = [];
+			groupingActions.push(
+					{
+						text: "Group",
+						getIconStyle: function(){ return {'background-image':"url(images/group.gif)"}},
+						getItemClass: function() { if (!hasSelection()) return "disabled";},
+						shortcut: shortcuts[SHORTCUT_IDS.GROUP_ID],
+						execute: function()
+						{
+							$("#contextMenu").hide();
+							$editorService.executeAction('createGroup');
+						}
+					}
+				);
+			
+			groupingActions.push(
+					{
+						text: "Ungroup",
+						getIconStyle: function(){ return {'background-image':"url(images/ungroup.gif)"}},
+						getItemClass: function() { if (!hasSelection()) return "disabled";},
+						shortcut: shortcuts[SHORTCUT_IDS.UNGROUP_ID],
+						execute: function()
+						{
+							$("#contextMenu").hide();
+							$editorService.executeAction('clearGroup');
+						}
+					}
+				);
+			
+			$contextmenu.add(
+					{
+						text: "Grouping",
+						subMenu: groupingActions,
+						getItemClass: function() { return "dropdown-submenu"}
+					}
+			);
 			
 			$contextmenu.add(
 					{
@@ -294,7 +329,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 						$editorService.executeAction('openScript');
 					}
 				}
-			);
+			);			
 		});
 	});
 	

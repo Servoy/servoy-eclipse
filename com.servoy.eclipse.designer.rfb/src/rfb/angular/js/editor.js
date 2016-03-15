@@ -31,7 +31,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	GHOST_TYPE_COMPONENT: "comp",
 	GHOST_TYPE_PART: "part",
 	GHOST_TYPE_FORM: "form",
-	GHOST_TYPE_INVISIBLE: "invisible"
+	GHOST_TYPE_INVISIBLE: "invisible",
+	GHOST_TYPE_GROUP: "group"
 }).directive("editor", function($window, $pluginRegistry, $rootScope, EDITOR_EVENTS, EDITOR_CONSTANTS, $timeout,
 	$editorService, $webSocket, $q) {
 	return {
@@ -214,7 +215,6 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					yOffset += 20;
 				}
 				var style = {
-					background: "#e4844a",
 					opacity: 0.7,
 					padding: "3px",
 					left: ghost.location.x + xOffset,
@@ -224,6 +224,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				};
 				if (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_INVISIBLE) {
 					style.background = "#d0d0d0";
+				}
+				else if (ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
+				{
+					style.background = "#e4844a";
 				}
 				return style;
 			}
@@ -537,7 +541,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			$scope.isAbsoluteFormLayout = function() {
 				return formLayout == "absolute";
 			}
-
+			
 			$scope.refreshEditorContent = function() {
 				if (editorContentRootScope) {
 					// TODO this digest makes it slow when moving, do we really need this?
@@ -1111,7 +1115,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 
 		getShortcuts: function() {
 			return wsSession.callService('formeditor', 'getShortcuts');
-		},
+		},		
 
 		toggleHighlight: function() {
 			if (!editorScope.getEditorContentRootScope().design_highlight)
