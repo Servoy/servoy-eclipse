@@ -23,10 +23,10 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
 
 import com.servoy.eclipse.designer.actions.AbstractEditorActionDelegateHandler;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.IAnchorConstants;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
@@ -46,25 +46,29 @@ public class ToggleAnchoringCommand extends AbstractEditorActionDelegateHandler
 	protected Command createCommand()
 	{
 		List< ? > selection = getSelectedObjects();
-		if (selection != null && selection.size() > 0 && selection.get(0) instanceof BaseComponent)
+		if (selection != null && selection.size() > 0 && (selection.get(0) instanceof BaseComponent || selection.get(0) instanceof PersistContext))
 		{
 			CompoundCommand cc = new CompoundCommand();
 			for (Object component : selection)
 			{
-				if (component instanceof BaseComponent)
+				BaseComponent comp = component instanceof BaseComponent ? (BaseComponent)component : null;
+				if (component instanceof PersistContext && ((PersistContext)component).getPersist() instanceof BaseComponent)
 				{
-					int anchoring = ((BaseComponent)component).getAnchors();
-					if ((anchoring & anchorConstant) == anchorConstant)
-					{
-						anchoring = anchoring - anchorConstant;
-					}
-					else
-					{
-						anchoring = anchoring + anchorConstant;
-					}
-					cc.add(new SetPropertyCommand("anchor", PersistPropertySource.createPersistPropertySource((IPersist)component, false),
-						StaticContentSpecLoader.PROPERTY_ANCHORS.getPropertyName(), Integer.valueOf(anchoring)));
+					comp = (BaseComponent)((PersistContext)component).getPersist();
 				}
+				if (comp == null) continue;
+
+				int anchoring = comp.getAnchors();
+				if ((anchoring & anchorConstant) == anchorConstant)
+				{
+					anchoring = anchoring - anchorConstant;
+				}
+				else
+				{
+					anchoring = anchoring + anchorConstant;
+				}
+				cc.add(new SetPropertyCommand("anchor", PersistPropertySource.createPersistPropertySource(comp, false),
+					StaticContentSpecLoader.PROPERTY_ANCHORS.getPropertyName(), Integer.valueOf(anchoring)));
 			}
 			return cc;
 		}

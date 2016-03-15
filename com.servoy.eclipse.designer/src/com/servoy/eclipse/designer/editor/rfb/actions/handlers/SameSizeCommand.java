@@ -24,9 +24,9 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
 
 import com.servoy.eclipse.designer.actions.AbstractEditorActionDelegateHandler;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.BaseComponent;
-import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
@@ -47,25 +47,29 @@ public class SameSizeCommand extends AbstractEditorActionDelegateHandler
 	protected Command createCommand()
 	{
 		List< ? > selection = getSelectedObjects();
-		if (selection != null && selection.size() > 1 && selection.get(0) instanceof BaseComponent)
+		if (selection != null && selection.size() > 1 && (selection.get(0) instanceof BaseComponent || selection.get(0) instanceof PersistContext))
 		{
 			CompoundCommand cc = new CompoundCommand();
 			Dimension size = null;
 			for (Object component : selection)
 			{
-				if (component instanceof BaseComponent)
+				BaseComponent comp = component instanceof BaseComponent ? (BaseComponent)component : null;
+				if (component instanceof PersistContext && ((PersistContext)component).getPersist() instanceof BaseComponent)
 				{
-					if (size == null)
-					{
-						size = ((BaseComponent)component).getSize();
-					}
-					else
-					{
-						Dimension oldSize = ((BaseComponent)component).getSize();
-						cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource((IPersist)component, false),
-							StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(), new Dimension(sameWidth ? size.width : oldSize.width, sameWidth
-								? oldSize.height : size.height)));
-					}
+					comp = (BaseComponent)((PersistContext)component).getPersist();
+				}
+				if (comp == null) continue;
+
+				if (size == null)
+				{
+					size = comp.getSize();
+				}
+				else
+				{
+					Dimension oldSize = comp.getSize();
+					cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(comp, false),
+						StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(),
+						new Dimension(sameWidth ? size.width : oldSize.width, sameWidth ? oldSize.height : size.height)));
 				}
 			}
 			return cc;
