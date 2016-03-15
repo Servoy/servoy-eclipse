@@ -45,10 +45,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 
+import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
+import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
@@ -58,14 +60,12 @@ import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.StringTokenizerConverter;
-import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 import com.servoy.j2db.persistence.TableNode;
-import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
 
@@ -226,31 +226,20 @@ public class EventsComposite extends Composite
 			Solution solution = (Solution)servoyProject.getEditingPersist(servoyProject.getSolution().getUUID());
 			Set<UUID> solutions = new HashSet<UUID>();
 			rows.add(new EventNode(solution, t));
+			solutions.add(solution.getUUID());
 
-			if (t.getServerName().equals(DataSourceUtils.INMEM_DATASOURCE))
+			if (DataSourceUtilsBase.getDBServernameTablename(t.getDataSource()) == null)
 			{
-				try
+				Solution owner = ((MemTable)t).getParent().getServoyProject().getSolution();
+				ServoyProject[] projects = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
+				for (ServoyProject project : projects)
 				{
-					Iterator<TableNode> nodes = servoyModel.getFlattenedSolution().getTableNodes(t);
-					if (nodes.hasNext())
+					if ((owner.equals(project.getSolution()) || project.getFlattenedSolution().hasModule(owner.getName())) &&
+						!solutions.contains(project.getSolution().getUUID()))
 					{
-						TableNode tn = nodes.next();
-						Solution s = (Solution)tn.getAncestor(IRepository.SOLUTIONS);
-						if (!solution.getName().equals(s.getName())) rows.add(new EventNode(s, t));
-						ServoyProject[] projects = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProjects();
-						for (ServoyProject project : projects)
-						{
-							if (project.getFlattenedSolution().hasModule(s.getName()) &&
-								servoyModel.getFlattenedSolution().hasModule(project.getSolution().getName()) && !solutions.contains(project.getSolution()))
-							{
-								rows.add(new EventNode(project.getSolution(), t));
-							}
-						}
+						rows.add(new EventNode(project.getSolution(), t));
+						solutions.add(project.getSolution().getUUID());
 					}
-				}
-				catch (RepositoryException e)
-				{
-					ServoyLog.logError(e);
 				}
 			}
 			else
