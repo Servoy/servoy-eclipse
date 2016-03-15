@@ -16,7 +16,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 	GROUP_ID: "com.servoy.eclipse.designer.rfb.group",
 	UNGROUP_ID: "com.servoy.eclipse.designer.rfb.ungroup"
 })
-.run(function($rootScope, $pluginRegistry,$contextmenu, $editorService,EDITOR_EVENTS,SHORTCUT_IDS){
+.run(function($rootScope, $pluginRegistry,$contextmenu, $editorService,EDITOR_EVENTS,SHORTCUT_IDS,EDITOR_CONSTANTS){
 	$pluginRegistry.registerPlugin(function(editorScope) {
 		var selection = null;
 		var beanAnchor = 0;
@@ -268,7 +268,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 					{
 						text: "Group",
 						getIconStyle: function(){ return {'background-image':"url(images/group.gif)"}},
-						getItemClass: function() { if (!hasSelection()) return "disabled";},
+						getItemClass: function() {if (!editorScope.getSelection() || editorScope.getSelection().length < 2) return "disabled";},
 						shortcut: shortcuts[SHORTCUT_IDS.GROUP_ID],
 						execute: function()
 						{
@@ -282,7 +282,20 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 					{
 						text: "Ungroup",
 						getIconStyle: function(){ return {'background-image':"url(images/ungroup.gif)"}},
-						getItemClass: function() { if (!hasSelection()) return "disabled";},
+						getItemClass: function() {
+							if (!hasSelection()) return "disabled";
+							//at least one selected element should be a group
+							var selection = editorScope.getSelection();
+							for (var i = 0; i < selection.length; i++)
+							{
+								var ghost = editorScope.getGhost(selection[i].getAttribute("svy-id"));
+								if (ghost && ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
+								{
+									return;
+								}
+							}
+							return "disabled";
+						},
 						shortcut: shortcuts[SHORTCUT_IDS.UNGROUP_ID],
 						execute: function()
 						{

@@ -358,6 +358,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						{
 							function getMinFormIndexGroup(ghostObject)
 							{
+								if (ghostObject.type != EDITOR_CONSTANTS.GHOST_TYPE_GROUP) return Number.MAX_SAFE_INTEGER;
 								var groupElements = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[group-id='"+ghostObject.uuid+"']"));
 								var minGroupIndex =  Number.MAX_SAFE_INTEGER;
 								for (var i = 0; i < groupElements.length; i++)
@@ -366,7 +367,6 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 								}
 								return minGroupIndex;
 							}
-							//find min formindex in group
 							
 							var minGroupIndex = getMinFormIndexGroup(ghostObject);
 							var idx = -1;
