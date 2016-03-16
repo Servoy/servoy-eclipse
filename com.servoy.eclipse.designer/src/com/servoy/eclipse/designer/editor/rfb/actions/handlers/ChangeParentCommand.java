@@ -137,6 +137,7 @@ public class ChangeParentCommand extends Command
 		}
 
 		newParent.addChild(child);
+		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, Arrays.asList(new IPersist[] { child }));
 	}
 
 	@Override
