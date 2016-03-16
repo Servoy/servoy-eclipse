@@ -57,8 +57,8 @@ public class ColumnLengthEditingSupport extends EditingSupport
 			}
 
 			ColumnType columnType = ((Column)element).getConfiguredColumnType();
-			if (!((Column)element).getExistInDB()) ((Column)element).updateColumnType(columnType.getSqlType(), length, columnType.getScale());
 			((Column)element).getColumnInfo().setConfiguredColumnType(ColumnType.getInstance(columnType.getSqlType(), length, columnType.getScale()));
+			if (!((Column)element).getExistInDB()) ((Column)element).updateColumnType(columnType.getSqlType(), length, columnType.getScale());
 			getViewer().update(element, null);
 		}
 	}

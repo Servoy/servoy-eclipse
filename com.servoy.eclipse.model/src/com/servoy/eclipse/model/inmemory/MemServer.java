@@ -78,6 +78,7 @@ public class MemServer implements IServerInternal, IServer
 	private volatile ISequenceProvider sequenceManager;
 	private final ServerConfig serverConfig;
 	private final ServoyProject servoyProject;
+	private final Solution solution;
 
 	/**
 	 * @param servoyProject
@@ -87,7 +88,15 @@ public class MemServer implements IServerInternal, IServer
 	public MemServer(ServoyProject servoyProject, Solution solution)
 	{
 		this.servoyProject = servoyProject;
+		this.solution = solution;
 		this.serverConfig = new ServerConfig(DataSourceUtils.INMEM_DATASOURCE, "", "", "", null, "", "", null, true, true, "");
+		init();
+	}
+
+	public void init()
+	{
+		tables.clear();
+		sequenceManager = null;
 		List<IPersist> allObjectsAsList = solution.getAllObjectsAsList();
 		for (IPersist iPersist : allObjectsAsList)
 		{
@@ -103,6 +112,7 @@ public class MemServer implements IServerInternal, IServer
 						DatabaseUtils.deserializeInMemoryTable(ApplicationServerRegistry.get().getDeveloperRepository(), this, table,
 							(ServoyJSONObject)property);
 						table.setExistInDB(true);
+						table.setInitialized(true);
 					}
 					catch (RepositoryException e)
 					{
@@ -114,7 +124,6 @@ public class MemServer implements IServerInternal, IServer
 			}
 		}
 	}
-
 
 	public ServoyProject getServoyProject()
 	{
@@ -206,7 +215,6 @@ public class MemServer implements IServerInternal, IServer
 		while (it.hasNext())
 		{
 			Column c = it.next();
-			c.setExistInDB(true);
 			if (c.getColumnInfo() == null && dataModelManager != null) dataModelManager.createNewColumnInfo(c, createMissingServoySequences); // Use supplied sequence info, don't assume anything!!
 		}
 

@@ -729,8 +729,8 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 	 */
 	public void refreshMemServer()
 	{
-		memServer = new MemServer(this, this.getSolution());
-
+		if (memServer == null) memServer = new MemServer(this, this.getSolution());
+		else memServer.init();
 	}
 
 }

@@ -465,7 +465,7 @@ public class DataModelManager implements IColumnInfoManager
 			{
 				// create file contents as string
 				t.acquireReadLock();
-				out = serializeTable(t);
+				out = serializeTable(t, !(t instanceof MemTable));
 			}
 			finally
 			{
