@@ -216,7 +216,8 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 				}
 			}
 		});
-		tableViewer.setInput(new String[][] { { "0", "Digit" }, { "#", "Digit, zero shows as basent" }, { ".", "Decimal separator or monetary decimal separator" }, { "-", "Minus sign" }, { ",", "Grouping separator" }, { "E", "Separates mantissa and exponent in scientific notation." }, { "%", "Multiply by 100 and show as percentage (prefix or suffix)" }, { "\u2030", "Multiply by 1000 and show as per mille value (prefix or suffix)" }, { "\u00A4", "Currency sign, replaced by currency symbol. (prefix or suffix)" } });
+		tableViewer.setInput(
+			new String[][] { { "0", "Digit" }, { "#", "Digit, zero shows as absent" }, { ".", "Decimal separator or monetary decimal separator" }, { "-", "Minus sign" }, { ",", "Grouping separator" }, { "E", "Separates mantissa and exponent in scientific notation." }, { "%", "Multiply by 100 and show as percentage (prefix or suffix)" }, { "\u2030", "Multiply by 1000 and show as per mille value (prefix or suffix)" }, { "\u00A4", "Currency sign, replaced by currency symbol. (prefix or suffix)" } });
 		new Label(this, SWT.NONE);
 	}
 

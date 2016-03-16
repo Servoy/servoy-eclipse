@@ -31,7 +31,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 				editorScope.getEditorContentRootScope().drop_highlight = null;
 			    	editorScope.getEditorContentRootScope().$apply();
 				if (dragging) {
-					utils.setDraggingFromPallete(null);
+					
 					dragging = false;
 					// store the position changes
 					var i = 0;
@@ -152,6 +152,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 							$editorService.sendChanges(obj);
 						}
 					}
+					utils.setDraggingFromPallete(null);
 				}
 				selectionToDrag = null;
 			}
