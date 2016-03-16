@@ -1,4 +1,4 @@
-angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pluginRegistry, $editorService, $selectionUtils) {
+angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pluginRegistry, $editorService, $selectionUtils, EDITOR_CONSTANTS) {
 	$pluginRegistry.registerPlugin(function(editorScope) {
 
 		var utils = $selectionUtils.getUtilsForScope(editorScope);
@@ -31,7 +31,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 				editorScope.getEditorContentRootScope().drop_highlight = null;
 			    	editorScope.getEditorContentRootScope().$apply();
 				if (dragging) {
-					
+
 					dragging = false;
 					// store the position changes
 					var i = 0;
@@ -140,9 +140,27 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 									} else {
 										ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
 										if (ghostObject) {
-											obj[node.getAttribute("svy-id")] = {
-												x: ghostObject.location.x,
-												y: ghostObject.location.y
+											if (ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
+											{
+												var groupElements = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[group-id='"+ghostObject.uuid+"']"));
+												for (var i = 0; i < groupElements.length; i++)
+												{
+													var elem = groupElements[i];
+													var beanModel = editorScope.getBeanModel(elem);
+													if (beanModel) {
+														obj[elem.parentElement.getAttribute("svy-id")] = {
+																x: beanModel.location.x,
+																y: beanModel.location.y
+														}
+													}
+												}
+											}
+											else
+											{
+												obj[node.getAttribute("svy-id")] = {
+														x: ghostObject.location.x,
+														y: ghostObject.location.y
+												}
 											}
 										}
 									}
@@ -293,6 +311,21 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 								else {
 									var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
 									if (ghostObject) {
+										if (ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
+										{
+											var groupElements = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[group-id='"+ghostObject.uuid+"']"));
+											for (var i = 0; i < groupElements.length; i++)
+											{
+												var elem = groupElements[i];
+												var beanModel = editorScope.getBeanModel(elem.parentElement);
+												if (beanModel) {
+													beanModel.location.y = beanModel.location.y + changeY;
+													beanModel.location.x = beanModel.location.x + changeX;
+													var css = { top: beanModel.location.y, left: beanModel.location.x }
+													$(elem.parentElement).css(css);
+												}
+											}
+										}
 										editorScope.updateGhostLocation(ghostObject, ghostObject.location.x + changeX, ghostObject.location.y + changeY)
 									}	
 								}
