@@ -41,6 +41,7 @@ import org.eclipse.dltk.javascript.typeinfo.model.TypeInfoModelFactory;
 import org.eclipse.dltk.javascript.typeinfo.model.Visibility;
 import org.eclipse.jface.resource.ImageDescriptor;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -58,8 +59,8 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptVariable;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.scripting.IExecutingEnviroment;
+import com.servoy.j2db.util.DataSourceUtils;
 
 /**
  * Class that resolves names in javascript like application or controller to a {@link Property} with a reference to the {@link Type} of that name.
@@ -198,7 +199,7 @@ public class ElementResolver implements IElementResolver
 			else if (path.segmentCount() == 3 && path.segment(0).equals(SolutionSerializer.DATASOURCES_DIR_NAME))
 			{
 				// datasources/server/table_foundset.js or datasources/server/table_calculations.js
-				Table table = getDatasourceTable(context, fs);
+				ITable table = getDatasourceTable(context, fs);
 				if (table != null)
 				{
 					typeNames.add(ScriptVariable.GLOBAL_SCOPE);
@@ -283,9 +284,9 @@ public class ElementResolver implements IElementResolver
 	 * @param fs
 	 * @return
 	 */
-	private Table getDatasourceTable(ITypeInfoContext context, FlattenedSolution fs)
+	private ITable getDatasourceTable(ITypeInfoContext context, FlattenedSolution fs)
 	{
-		Table table = null;
+		ITable table = null;
 		IResource resource = context.getModelElement().getResource();
 		String[] serverTablename = SolutionSerializer.getDataSourceForCalculationJSFile(resource);
 		if (serverTablename == null)
@@ -296,8 +297,10 @@ public class ElementResolver implements IElementResolver
 		{
 			try
 			{
-				IServer server = fs.getSolution().getServer(serverTablename[0]);
-				if (server != null) table = (Table)server.getTable(serverTablename[1]);
+				IServer server = DataSourceUtils.INMEM_DATASOURCE.equals(serverTablename[0])
+					? ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getMemServer()
+					: fs.getSolution().getServer(serverTablename[0]);
+				if (server != null) table = server.getTable(serverTablename[1]);
 			}
 			catch (Exception e)
 			{
@@ -413,7 +416,7 @@ public class ElementResolver implements IElementResolver
 			else if (path.segmentCount() == 3 && path.segment(0).equals(SolutionSerializer.DATASOURCES_DIR_NAME))
 			{
 				// datasources/server/table_foundset.js or datasources/server/table_calculations.js
-				Table table = getDatasourceTable(context, fs);
+				ITable table = getDatasourceTable(context, fs);
 				if (table != null)
 				{
 					if (path.segment(2).endsWith(SolutionSerializer.FOUNDSET_POSTFIX))

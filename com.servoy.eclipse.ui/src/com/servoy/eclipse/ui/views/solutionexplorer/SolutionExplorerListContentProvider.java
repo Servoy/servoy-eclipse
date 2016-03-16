@@ -66,8 +66,8 @@ import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.sablo.specification.PropertyDescription;
-import org.sablo.specification.WebObjectApiDefinition;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectApiDefinition;
 import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.base.util.DataSourceUtilsBase;
@@ -138,7 +138,6 @@ import com.servoy.j2db.persistence.ScriptCalculation;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.scripting.DeclaringClassJavaMembers;
@@ -417,7 +416,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.TABLE_COLUMNS)
 			{
-				lm = createTableColumns((Table)un.getRealObject(), un);
+				lm = createTableColumns((ITable)un.getRealObject(), un);
 			}
 			else if (type == UserNodeType.SERVER && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
@@ -1036,7 +1035,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return dlm.toArray(new SimpleUserNode[dlm.size()]);
 	}
 
-	private Object[] createTableColumns(Table table, SimpleUserNode un) throws RepositoryException
+	private Object[] createTableColumns(ITable table, SimpleUserNode un) throws RepositoryException
 	{
 		List<SimpleUserNode> dlm = new ArrayList<SimpleUserNode>();
 

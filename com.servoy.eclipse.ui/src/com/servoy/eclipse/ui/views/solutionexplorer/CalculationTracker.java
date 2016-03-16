@@ -32,6 +32,7 @@ import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.DataSourceUtils;
 
 public class CalculationTracker implements ActiveEditorListener
 {
@@ -52,7 +53,7 @@ public class CalculationTracker implements ActiveEditorListener
 			{
 				// see if it is a calculation JS file
 				ScriptEditor scriptEditor = (ScriptEditor)newActiveEditor;
-				IResource resource = (IResource)scriptEditor.getEditorInput().getAdapter(IResource.class);
+				IResource resource = scriptEditor.getEditorInput().getAdapter(IResource.class);
 				if (resource == null && scriptEditor.getInputModelElement() != null && scriptEditor.getInputModelElement().getResource() != null &&
 					scriptEditor.getInputModelElement().getResource().exists())
 				{
@@ -67,7 +68,9 @@ public class CalculationTracker implements ActiveEditorListener
 					Solution solution = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(project.getName()).getSolution();
 					if (solution != null)
 					{
-						IServer server = solution.getServer(serverTablename[0]);
+						IServer server = DataSourceUtils.INMEM_DATASOURCE.equals(serverTablename[0])
+							? ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(project.getName()).getMemServer()
+							: solution.getServer(serverTablename[0]);
 						if (server != null)
 						{
 							ITable tableOfCalculation = server.getTable(serverTablename[1]);
