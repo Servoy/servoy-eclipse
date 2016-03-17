@@ -118,8 +118,11 @@ public class DesignerUtil
 		{
 			for (int i = 0; i < selectedEditParts.size(); i++)
 			{
-				PersistContext persistContext = (PersistContext)selectedEditParts.get(i);
-				if (Utils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext())) return true;
+				if (selectedEditParts.get(i) instanceof PersistContext)
+				{
+					PersistContext persistContext = (PersistContext)selectedEditParts.get(i);
+					if (Utils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext())) return true;
+				}
 			}
 		}
 		return false;
