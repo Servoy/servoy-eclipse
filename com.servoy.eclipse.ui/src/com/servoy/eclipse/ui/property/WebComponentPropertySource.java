@@ -21,6 +21,7 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,6 @@ import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
-import com.servoy.j2db.util.Utils;
 
 /**
  * Properties for ngclient components.
@@ -45,6 +45,7 @@ import com.servoy.j2db.util.Utils;
 public class WebComponentPropertySource extends PDPropertySource
 {
 	private static final Map<String, PropertyDescriptor> BEAN_PROPERTIES = new HashMap<String, PropertyDescriptor>();
+
 	static
 	{
 		BeanInfo info;
@@ -55,7 +56,8 @@ public class WebComponentPropertySource extends PDPropertySource
 			{
 				if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(desc.getName()) ||
 					StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(desc.getName()) ||
-					StaticContentSpecLoader.PROPERTY_ANCHORS.getPropertyName().equals(desc.getName()))
+					StaticContentSpecLoader.PROPERTY_ANCHORS.getPropertyName().equals(desc.getName()) ||
+					StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName().equals(desc.getName()))
 				{
 					BEAN_PROPERTIES.put(desc.getName(), desc);
 				}
@@ -91,8 +93,13 @@ public class WebComponentPropertySource extends PDPropertySource
 	{
 		IPropertyHandler[] tmp1 = super.createPropertyHandlers(valueObject);
 		IPropertyHandler[] tmp2 = createComponentSpecificPropertyHandlersFromSpec(getPropertyDescription());
-		return Utils.arrayJoin(tmp1, tmp2);
+		ArrayList<IPropertyHandler> handlers = new ArrayList<>(Arrays.asList(tmp1));
+		handlers.addAll(Arrays.asList(tmp2));
+		IPropertyHandler groupIDHandler = new BeanPropertyHandler(BEAN_PROPERTIES.get(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName()));
+		if (groupIDHandler != null) handlers.add(groupIDHandler);
+		return handlers.toArray(new IPropertyHandler[handlers.size()]);
 	}
+
 
 	public static IPropertyHandler[] createComponentSpecificPropertyHandlersFromSpec(PropertyDescription propertyDescription)
 	{
