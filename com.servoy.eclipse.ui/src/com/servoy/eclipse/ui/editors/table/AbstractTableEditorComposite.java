@@ -25,7 +25,6 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
-import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -76,7 +75,7 @@ public class AbstractTableEditorComposite extends Composite
 				Solution solution = servoyProject.getEditingSolution();
 				rows.add(solution);
 
-				if (DataSourceUtilsBase.getDBServernameTablename(t.getDataSource()) == null)
+				if (t instanceof MemTable)
 				{
 					Solution owner = ((MemTable)t).getParent().getServoyProject().getSolution();
 					ServoyProject[] projects = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();

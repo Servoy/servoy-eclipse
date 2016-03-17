@@ -45,7 +45,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 
-import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -228,7 +227,7 @@ public class EventsComposite extends Composite
 			rows.add(new EventNode(solution, t));
 			solutions.add(solution.getUUID());
 
-			if (DataSourceUtilsBase.getDBServernameTablename(t.getDataSource()) == null)
+			if (t instanceof MemTable)
 			{
 				Solution owner = ((MemTable)t).getParent().getServoyProject().getSolution();
 				ServoyProject[] projects = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
