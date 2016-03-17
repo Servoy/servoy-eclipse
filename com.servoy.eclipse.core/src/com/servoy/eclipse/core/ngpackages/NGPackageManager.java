@@ -32,6 +32,8 @@ import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.PlatformUI;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
@@ -64,6 +66,9 @@ public class NGPackageManager extends BaseNGPackageManager
 			@Override
 			public void propertyChange(PropertyChangeEvent event)
 			{
+				//default packages preferences changed - flush everything
+				WebComponentSpecProvider.disposeInstance();
+				WebServiceSpecProvider.disposeInstance();
 				reloadAllNGPackages(null, true);
 			}
 		});
