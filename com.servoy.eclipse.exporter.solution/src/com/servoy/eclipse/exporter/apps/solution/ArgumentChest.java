@@ -43,7 +43,7 @@ import com.servoy.j2db.util.xmlxport.IXMLExportUserChannel;
 public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUserChannel
 {
 	private static final String FILE_EXTENSION = ".servoy";
-	
+
 	private static final int META_DATA_NONE = 0;
 	private static final int META_DATA_WS = 1;
 	private static final int META_DATA_DB = 2;
@@ -78,12 +78,12 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 		if (argsMap.containsKey("i18n")) exportI18N = true;
 		if (argsMap.containsKey("users")) exportUsers = true;
 		if (argsMap.containsKey("tables")) exportAllTablesFromReferencedServers = true;
-		protectionPassword = parseArg("pwd", "Protection password was not specified after '-pwd' argument.", argsMap);
+		protectionPassword = parseArg("pwd", "Protection password was not specified after '-pwd' argument.", argsMap, false);
 
 		if (argsMap.containsKey("modules"))
 		{
 			exportModules = true;
-			String modules = parseArg("modules", null, argsMap);
+			String modules = parseArg("modules", null, argsMap, false);
 			if (modules != null) moduleList = Arrays.asList(modules.split(" "));
 		}
 	}
@@ -189,8 +189,8 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 			allModules.retainAll(moduleList);
 			if (allModules.size() != moduleList.size())
 			{
-				info(
-					"Some of the modules specified for export where not actually modules of exported solution. All solution modules: '" + allModulesString + "', to exported modules: '" + Arrays.toString(moduleList.toArray()) + "'", ILogLevel.ERROR); //$NON-NLS-1$
+				info("Some of the modules specified for export where not actually modules of exported solution. All solution modules: '" + allModulesString + //$NON-NLS-1$
+					"', to exported modules: '" + Arrays.toString(moduleList.toArray()) + "'", ILogLevel.ERROR);
 				return null;
 			}
 		}
@@ -213,7 +213,8 @@ public class ArgumentChest extends AbstractArgumentChest implements IXMLExportUs
 		String wscontents = null;
 		if ((metadataSource | META_DATA_WS) != 0)
 		{
-			wscontents = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getUTF8Contents(dmm.getMetaDataFile(table.getDataSource()).getFullPath().toString());
+			wscontents = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()).getUTF8Contents(
+				dmm.getMetaDataFile(table.getDataSource()).getFullPath().toString());
 		}
 		if (metadataSource == META_DATA_WS)
 		{

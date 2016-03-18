@@ -160,13 +160,13 @@ public class WarArgumentChest extends AbstractArgumentChest
 	protected void parseArguments(HashMap<String, String> argsMap)
 	{
 		printArgsMap(System.out, argsMap);
-		plugins = parseArg("pi", "Plugin name(s) was(were) not specified after '-pi' argument.", argsMap);
-		beans = parseArg("b", "Bean name(s) was(were) not specified after '-b' argument.", argsMap);
-		lafs = parseArg("l", "Laf name(s) was(were) not specified after '-l' argument.", argsMap);
-		drivers = parseArg("d", "Driver name(s) was(were) not specified after '-d' argument.", argsMap);
+		plugins = parseArg("pi", "Plugin name(s) was(were) not specified after '-pi' argument.", argsMap, false);
+		beans = parseArg("b", "Bean name(s) was(were) not specified after '-b' argument.", argsMap, false);
+		lafs = parseArg("l", "Laf name(s) was(were) not specified after '-l' argument.", argsMap, false);
+		drivers = parseArg("d", "Driver name(s) was(were) not specified after '-d' argument.", argsMap, false);
 		isExportActiveSolutionOnly = true;
 		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolutionOnly = false;
-		pluginLocations = parseArg("pluginLocations", null, argsMap);
+		pluginLocations = parseArg("pluginLocations", null, argsMap, false);
 		if (pluginLocations == null) pluginLocations = "developer/../plugins";
 		selectedComponents = parseComponentsArg("crefs", argsMap);
 		selectedServices = parseComponentsArg("srefs", argsMap);
@@ -183,7 +183,11 @@ public class WarArgumentChest extends AbstractArgumentChest
 		if (argsMap.containsKey("i18n")) exportI18N = true;
 		if (argsMap.containsKey("users")) exportUsers = true;
 		if (argsMap.containsKey("tables")) exportAllTablesFromReferencedServers = true;
-		if (argsMap.containsKey("warFileName")) warFileName = parseArg("warFileName", null, argsMap);
+		if (argsMap.containsKey("warFileName")) warFileName = parseArg("warFileName", null, argsMap, false);
+
+		parseArg("defaultAdminUser", "Parameters'-defaultAdminUser' and '-defaultAdminPassword' are required.", argsMap, true);
+		parseArg("defaultAdminPassword", "Parameters'-defaultAdminUser' and '-defaultAdminPassword' are required.", argsMap, true);
+
 		argumentsMap = argsMap;
 	}
 

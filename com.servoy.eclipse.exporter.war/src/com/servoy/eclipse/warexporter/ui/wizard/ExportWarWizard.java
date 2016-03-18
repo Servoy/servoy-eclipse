@@ -73,6 +73,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 
 	private DirectorySelectionPage driverSelectionPage;
 
+	private DefaultAdminConfigurationPage defaultAdminConfigurationPage;
+
 	private ServoyPropertiesSelectionPage servoyPropertiesSelectionPage;
 
 	private DirectorySelectionPage lafSelectionPage;
@@ -154,8 +156,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 							while (missingJarName != null)
 							{
 								DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.OPEN);
-								dialog.setMessage("Please select the directory where " + missingJarName +
-									" is located (usually your servoy developer/plugins directory)");
+								dialog.setMessage(
+									"Please select the directory where " + missingJarName + " is located (usually your servoy developer/plugins directory)");
 								String chosenDirName = dialog.open();
 								if (chosenDirName != null)
 								{
@@ -216,8 +218,9 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel, servoyPropertiesConfigurationPage);
 			componentsSelectionPage = new ComponentsSelectionPage(exportModel, "componentspage", "Select components to export",
 				"View the components used and select others which you want to export.", servicesSelectionPage);
+			defaultAdminConfigurationPage = new DefaultAdminConfigurationPage("defaultAdminPage", exportModel, servoyPropertiesSelectionPage);
 			servicesSelectionPage = new ServicesSelectionPage(exportModel, "servicespage", "Select services to export",
-				"View the services used and select others which you want to export.", servoyPropertiesSelectionPage);
+				"View the services used and select others which you want to export.", defaultAdminConfigurationPage);
 			driverSelectionPage = new DirectorySelectionPage("driverpage", "Choose the jdbc drivers to export",
 				"Select the jdbc drivers that you want to use in the war (if the app server doesn't provide them)",
 				ApplicationServerRegistry.get().getServerManager().getDriversDir(), exportModel.getDrivers(), new String[] { "hsqldb.jar" },
@@ -228,15 +231,16 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 			beanSelectionPage = new DirectorySelectionPage("beanpage", "Choose the beans to export", "Select the beans that you want to use in the war",
 				ApplicationServerRegistry.get().getBeanManager().getBeansDir(), exportModel.getBeans(), null, getDialogSettings().get("export.beans") == null,
 				lafSelectionPage);
-			pluginSelectionPage = new DirectorySelectionPage("pluginpage", "Choose the plugins to export",
-				"Select the plugins that you want to use in the war", ApplicationServerRegistry.get().getPluginManager().getPluginsDir(),
-				exportModel.getPlugins(), null, getDialogSettings().get("export.plugins") == null, beanSelectionPage);
+			pluginSelectionPage = new DirectorySelectionPage("pluginpage", "Choose the plugins to export", "Select the plugins that you want to use in the war",
+				ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), exportModel.getPlugins(), null,
+				getDialogSettings().get("export.plugins") == null, beanSelectionPage);
 			fileSelectionPage = new FileSelectionPage(exportModel, pluginSelectionPage);
 			addPage(fileSelectionPage);
 			addPage(pluginSelectionPage);
 			addPage(beanSelectionPage);
 			addPage(lafSelectionPage);
 			addPage(driverSelectionPage);
+			addPage(defaultAdminConfigurationPage);
 			addPage(servoyPropertiesSelectionPage);
 			addPage(servoyPropertiesConfigurationPage);
 			addPage(serversSelectionPage);

@@ -47,8 +47,8 @@ public class MobileArgumentChest extends AbstractArgumentChest
 		// set defaults; these can't be set when declaring the member because this method is called from the super class constructor
 		testing = true; // test war by default
 		syncTimeout = MobileExporter.DEFAULT_SYNC_TIMEOUT;
-		serverURL = parseArg("server_url", "Server url was not specified after '-server_url' argument.", argsMap);
-		serviceSolutionName = parseArg("service_solution", "Service solution was not specified after '-service_solution' argument.", argsMap);
+		serverURL = parseArg("server_url", "Server url was not specified after '-server_url' argument.", argsMap, false);
+		serviceSolutionName = parseArg("service_solution", "Service solution was not specified after '-service_solution' argument.", argsMap, false);
 		if (argsMap.containsKey("production")) testing = false;
 		if (argsMap.containsKey("sync_timeout")) parseSyncTimeout(argsMap.get("sync_timeout"));
 	}
