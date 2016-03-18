@@ -17,7 +17,10 @@
 
 package com.servoy.eclipse.exporter.apps.war;
 
+import java.io.PrintStream;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest;
 import com.servoy.j2db.util.Utils;
@@ -156,7 +159,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 	@Override
 	protected void parseArguments(HashMap<String, String> argsMap)
 	{
-		System.out.println("parsing arguments map " + argsMap);
+		printArgsMap(System.out, argsMap);
 		plugins = parseArg("pi", "Plugin name(s) was(were) not specified after '-pi' argument.", argsMap);
 		beans = parseArg("b", "Bean name(s) was(were) not specified after '-b' argument.", argsMap);
 		lafs = parseArg("l", "Laf name(s) was(were) not specified after '-l' argument.", argsMap);
@@ -182,6 +185,36 @@ public class WarArgumentChest extends AbstractArgumentChest
 		if (argsMap.containsKey("tables")) exportAllTablesFromReferencedServers = true;
 		if (argsMap.containsKey("warFileName")) warFileName = parseArg("warFileName", null, argsMap);
 		argumentsMap = argsMap;
+	}
+
+	/**
+	 * @param out
+	 * @param argsMap
+	 */
+	private static void printArgsMap(PrintStream out, Map<String, String> argsMap)
+	{
+		out.print("parsing arguments map {");
+
+		StringBuilder sb = new StringBuilder();
+
+		for (Entry<String, String> entry : argsMap.entrySet())
+		{
+			if (sb.length() > 0)
+			{
+				sb.append(", ");
+			}
+			sb.append(entry.getKey()).append('=');
+			if (entry.getKey().toLowerCase().indexOf("passw") >= 0)
+			{
+				sb.append("*********");
+			}
+			else
+			{
+				sb.append(entry.getValue());
+			}
+		}
+
+		out.println(sb.append('}').toString());
 	}
 
 	private String parseComponentsArg(String argName, HashMap<String, String> argsMap)
