@@ -295,6 +295,8 @@ public abstract class BaseNGPackageManager
 
 		prepareToReloadNGPackageProjects(activeSolutionProject, componentReaders, serviceReaders, monitor.newChild(10), canChangeResources);
 		monitor.setWorkRemaining((serviceReaders.size() + componentReaders.size()) * 10 + 3);
+		ngPackageProjectComponentReaders.clear();
+		ngPackageProjectServiceReaders.clear();
 		reloadActualSpecs(ngPackageProjectComponentReaders, componentReaders, ngPackageProjectServiceReaders, serviceReaders,
 			monitor.newChild((serviceReaders.size() + componentReaders.size()) * 10 + 3), canChangeResources);
 		monitor.done();
@@ -468,7 +470,7 @@ public abstract class BaseNGPackageManager
 				{
 					IMarker marker = project.createMarker(SPEC_READ_MARKER);
 					marker.setAttribute(IMarker.MESSAGE,
-						"NG Package Project '" + project.getName() + " cannot be loaded; no web component or service found in it's manifest file.");
+						"NG Package Project '" + project.getName() + "' cannot be loaded; no web component or service found in it's manifest file.");
 					marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
 					marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
 					marker.setAttribute(IMarker.LOCATION, project.getLocation().toString());

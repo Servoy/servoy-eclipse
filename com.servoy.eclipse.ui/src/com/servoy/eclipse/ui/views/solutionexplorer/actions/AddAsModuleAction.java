@@ -18,18 +18,11 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
 
-import com.servoy.eclipse.core.ServoyModel;
-import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -43,23 +36,20 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Action for adding the selected solution(s) as (a) module(s) of one of the already active modules.
- * 
+ *
  * @author acostescu
  */
-public class AddAsModuleAction extends Action implements ISelectionChangedListener
+public class AddAsModuleAction extends AddAsSolutionReference
 {
-
-	private final List<String> selectedProjects = new ArrayList<String>();
-	private final Shell shell;
 
 	/**
 	 * Creates a new add as module action.
-	 * 
+	 *
 	 * @param shell shell that might be used to display a dialog to the user (too choose a parent solution).
 	 */
 	public AddAsModuleAction(Shell shell)
 	{
-		this.shell = shell;
+		super(shell, UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE);
 		setText("Add as module");
 		setToolTipText("Add as a module to an already active module");
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("add_as_module.gif"));
@@ -70,7 +60,7 @@ public class AddAsModuleAction extends Action implements ISelectionChangedListen
 	{
 		if (selectedProjects.size() > 0)
 		{
-			// let the user choose the active module to add the selected projects to (as modules)			
+			// let the user choose the active module to add the selected projects to (as modules)
 			ServoyProject activeModule = askUserForActiveModuleToUse();
 			if (activeModule == null) return;
 			Solution editingSolution = activeModule.getEditingSolution();
@@ -100,68 +90,10 @@ public class AddAsModuleAction extends Action implements ISelectionChangedListen
 		}
 	}
 
-	private ServoyProject askUserForActiveModuleToUse()
-	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		ServoyProject[] activeModules = servoyModel.getModulesOfActiveProjectWithImportHooks();
-		if (activeModules.length == 1)
-		{
-			return activeModules[0];
-		}
-		else if (activeModules.length > 1)
-		{
-			ServoyProject activeProject = servoyModel.getActiveProject();
-			int defaultIndex = 0;
-			String options[] = new String[activeModules.length];
-			for (int i = activeModules.length - 1; i >= 0; i--)
-			{
-				if (activeModules[i] == activeProject)
-				{
-					defaultIndex = i;
-				}
-				options[i] = activeModules[i].getProject().getName();
-			}
-			int selectedProject = UIUtils.showOptionDialog(shell, "Choose parent solution",
-				"You may add modules to the active solution or to any of it's modules.\nPlease choose one of these solutions.", options, defaultIndex);
-
-			if (selectedProject >= 0)
-			{
-				// the user selected a project
-				return activeModules[selectedProject];
-			}
-			else
-			{
-				// the user canceled the dialog
-				return null;
-			}
-		}
-		else
-		{
-			ServoyLog.logError("Trying to add modules while there is no active solution!", null);
-			return null;
-		}
-	}
-
+	@Override
 	public void selectionChanged(SelectionChangedEvent event)
 	{
-		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-		selectedProjects.clear();
-		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
-		boolean state = (sel.size() > 0) && (servoyModel.getActiveProject() != null);
-		if (state)
-		{
-			Iterator<SimpleUserNode> selit = sel.iterator();
-			while (state && selit.hasNext())
-			{
-				SimpleUserNode node = selit.next();
-				state = (node.getType() == UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE);
-				if (state) selectedProjects.add(((ServoyProject)node.getRealObject()).getProject().getName());
-			}
-			if (!state)
-			{
-				selectedProjects.clear();
-			}
-		}
+		super.selectionChanged(event);
 		if (selectedProjects.size() > 1)
 		{
 			setText("Add as modules");
@@ -172,7 +104,24 @@ public class AddAsModuleAction extends Action implements ISelectionChangedListen
 			setText("Add as module");
 			setToolTipText("Add as a module to an already active module");
 		}
-		setEnabled(state);
+	}
+
+
+	@Override
+	protected String solutionChooseDialogMessage()
+	{
+		return "You may add modules to the active solution or to any of it's modules.\nPlease choose one of these solutions.";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.ui.views.solutionexplorer.actions.AddAsSolutionReference#getSelectedNodeName(com.servoy.eclipse.ui.node.SimpleUserNode)
+	 */
+	@Override
+	protected String getSelectedNodeName(SimpleUserNode node)
+	{
+		return ((ServoyProject)node.getRealObject()).getProject().getName();
 	}
 
 }

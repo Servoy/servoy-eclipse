@@ -159,8 +159,9 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 
 			if (resource != null)
 			{
-				IFolder parent = (IFolder)resource.getParent();
-				IFile m = parent.getFile("META-INF/MANIFEST.MF");
+				IResource parent = resource.getParent();
+
+				IFile m = getFile(parent);
 				m.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
 				Manifest manifest = new Manifest(m.getContents());
 				manifest.getEntries().remove(resource.getName() + "/" + resource.getName() + ".spec");
@@ -197,6 +198,15 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 		return resource;
 	}
 
+	private IFile getFile(IResource resource)
+	{
+		String manifest = "META-INF/MANIFEST.MF";
+		if (resource instanceof IFolder) return ((IFolder)resource).getFile(manifest);
+		if (resource instanceof IProject) return ((IProject)resource).getFile(manifest);
+		return null;
+
+	}
+
 	/*
 	 * (non-Javadoc)
 	 *
@@ -216,7 +226,7 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 			state = (node.getType() == nodeType);
 			if (node.getType() == UserNodeType.COMPONENT || node.getType() == UserNodeType.SERVICE)
 			{
-				state = node.parent.getRealObject() instanceof IFolder;
+				state = node.parent.getRealObject() instanceof IFolder || node.parent.getRealObject() instanceof IProject;
 			}
 		}
 		if (state)

@@ -52,7 +52,7 @@ import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider
 import com.servoy.j2db.util.Pair;
 
 /**
- * @author user
+ * @author gganea@servoy.com
  *
  */
 public class ImportComponentAction extends Action

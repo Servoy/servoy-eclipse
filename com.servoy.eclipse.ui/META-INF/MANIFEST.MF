@@ -68,7 +68,8 @@ Require-Bundle: org.eclipse.ui,
  servoy_ngclient,
  org.apache.commons.io;bundle-version="2.4.0",
  org.maven.ide.eclipse.grouplayout;bundle-version="1.1.0",
- org.apache.commons.dbcp;bundle-version="1.4.0"
+ org.apache.commons.dbcp;bundle-version="1.4.0",
+ org.eclipse.jface
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.ui,
  com.servoy.eclipse.ui.actions,

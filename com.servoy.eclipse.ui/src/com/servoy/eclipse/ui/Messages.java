@@ -114,6 +114,7 @@ public class Messages extends NLS
 
 	public static String CursorHand;
 	public static String TreeStrings_AllSolutions;
+	public static String TreeStrings_AllWebPackages;
 	public static String TreeStrings_Application;
 	public static String TreeStrings_Array;
 	public static String TreeStrings_controller;

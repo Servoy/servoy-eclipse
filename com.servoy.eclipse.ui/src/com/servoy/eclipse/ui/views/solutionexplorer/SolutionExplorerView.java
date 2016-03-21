@@ -208,102 +208,7 @@ import com.servoy.eclipse.ui.util.IDeprecationProvider;
 import com.servoy.eclipse.ui.util.MediaNode;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetEntry;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.ActivateSolutionAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddAsModuleAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddComponentIconResourceAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddModuleAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddWorkingSetAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.ChangeResourcesProjectAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.CollapseTreeAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.ContextAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.CopyAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.CopyTableAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.CreateMediaFileAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.CreateMediaFolderAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.CutAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.DebugMethodAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteComponentResourceAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteI18NAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteInMemTableAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteMediaAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeletePersistAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteScopeAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteScriptAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteServerAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteSolutionAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteTableAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.DeleteWorkingSetAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.DuplicatePersistAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.DuplicateServerAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.EditDisplayNameAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.EditI18nAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.EditSecurityAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.EditVariableAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.EnableServerAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.ExpandNodeAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.ExportPackageResourceAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.HideUnhideTablesAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NExternalizeAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NReadFromDBAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.I18NWriteToDBAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.ISelectedNodeProvider;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportComponentAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportComponentFolderAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportMediaAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.ImportMediaFolderAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.LinkWithEditorAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.LoadRelationsAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.MovePersistAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.MoveTextAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NavigationToggleAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewComponentAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewComponentPackageAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewComponentResourceAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewInMemoryDataSourceAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewMethodAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewPostgresDbAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewRelationAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewScopeAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewServerAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewSybaseDbAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewTableAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewValueListAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewVariableAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenComponentResourceAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenI18NAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenMediaAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenNewFormWizardAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenRelationAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenScriptAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenServerAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenSqlEditorAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenStyleAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenTableAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenValueListAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenWizardAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.OrientationAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.OverrideMethodAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.PasteAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.RefreshAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.ReloadTablesAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.RemoveModuleAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.RemoveSolutionProtectionAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameComponentAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameMediaAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameMediaFolderAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenamePersistAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameScopeAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameSolutionAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.RenameWorkingSetAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.ReplaceServerAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.ReplaceTableAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.SelectAllAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.SuggestForeignTypesAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.SynchronizeTableDataAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.SynchronizeTablesAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.ToggleFormCommandsAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.TreeHandlingToggleAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.UpdateServoySequencesAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.*;
 import com.servoy.eclipse.ui.wizards.ExportSolutionWizard;
 import com.servoy.eclipse.ui.wizards.IExportSolutionWizardProvider;
 import com.servoy.eclipse.ui.wizards.ImportSolutionWizard;
@@ -428,11 +333,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private AddAsModuleAction addAsModuleAction;
 
+	private AddAsWebPackageAction addAsWebPackageAction;
+
 	private ContextAction renameActionInTree;
 
 	private RemoveModuleAction removeModuleAction;
 
 	private AddModuleAction addModuleAction;
+	private AddProjectPackageAction addPackageProjectAction;
 
 	private MoveTextAction moveCode;
 
@@ -1523,6 +1431,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private ClientSupportViewerFilter clientSupportViewerFilter;
 	private ContextAction createActionInTree;
+	private ContextAction createPackageProjectActionInTree;
 	private ExportPackageResourceAction exportComponentPackage;
 	private EditDisplayNameAction editDisplayNameAction;
 
@@ -2356,6 +2265,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			if (newActionInTreePrimary.isEnabled()) manager.add(newActionInTreePrimary);
 			if (newActionInTreeSecondary.isEnabled()) manager.add(newActionInTreeSecondary);
 			if (createActionInTree.isEnabled()) manager.add(createActionInTree);
+			if (createPackageProjectActionInTree.isEnabled()) manager.add(createPackageProjectActionInTree);
 		}
 
 		if (createMediaFolderAction.isEnabled()) manager.add(createMediaFolderAction);
@@ -2442,8 +2352,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		manager.add(new Separator());
 		if (addAsModuleAction.isEnabled()) manager.add(addAsModuleAction);
+		if (addAsWebPackageAction.isEnabled()) manager.add(addAsWebPackageAction);
 		if (removeModuleAction.isEnabled()) manager.add(removeModuleAction);
 		if (addModuleAction.isEnabled()) manager.add(addModuleAction);
+		if (addPackageProjectAction.isEnabled()) manager.add(addPackageProjectAction);
 		if (moveFormAction.isEnabled()) manager.add(moveFormAction);
 		if (duplicateFormAction.isEnabled()) manager.add(duplicateFormAction);
 		if (exportComponentPackage.isEnabled()) manager.add(exportComponentPackage);
@@ -2710,6 +2622,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			"New");
 		createActionInTree = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
 			"Create");
+		createPackageProjectActionInTree = new ContextAction(this,
+			PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD), "Create");
 		newActionInListSecondary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
 			"New");
 
@@ -2766,6 +2680,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction newLayoutAction = new NewComponentAction(this, getSite().getShell(), "Layout", "Create new layout");
 		IAction newServiceAction = new NewComponentAction(this, getSite().getShell(), "Service", "Create new service");
 		IAction newComponentPackageAction = new NewComponentPackageAction(this, getSite().getShell(), "Create component package");
+		NewPackageProjectAction newComponentsPackageProjectAction = new NewPackageProjectAction("Create component package project");
+		NewPackageProjectAction newServicesPackageProjectAction = new NewPackageProjectAction("Create services package project");
 		IAction newServicePackageAction = new NewComponentPackageAction(this, getSite().getShell(), "Create service package");
 
 		newActionInTreePrimary.registerAction(UserNodeType.FORM, newMethod);
@@ -2791,6 +2707,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES, importService);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS_PACKAGE, newComponentAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_PACKAGE, newServiceAction);
+		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newComponentAction);
+		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, newServiceAction);
 
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA_FOLDER, importMediaFolder);
@@ -2798,7 +2716,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreeSecondary.registerAction(UserNodeType.SERVICES, importServicesFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS_PACKAGE, newLayoutAction);
 		createActionInTree.registerAction(UserNodeType.COMPONENTS, newComponentPackageAction);
+		createPackageProjectActionInTree.registerAction(UserNodeType.COMPONENTS_PROJECTS, newComponentsPackageProjectAction);
 		createActionInTree.registerAction(UserNodeType.SERVICES, newServicePackageAction);
+		createPackageProjectActionInTree.registerAction(UserNodeType.SERVICES_PROJECTS, newServicesPackageProjectAction);
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
@@ -2976,8 +2896,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		renameActionInTree.registerAction(UserNodeType.SERVICE, new RenameComponentAction(this, getSite().getShell(), UserNodeType.SERVICE));
 
 		addAsModuleAction = new AddAsModuleAction(getSite().getShell());
+		addAsWebPackageAction = new AddAsWebPackageAction(getSite().getShell());
 		removeModuleAction = new RemoveModuleAction(getSite().getShell());
 		addModuleAction = new AddModuleAction(getSite().getShell());
+		addPackageProjectAction = new AddProjectPackageAction(getSite().getShell());
 
 		expandNodeAction = new ExpandNodeAction(tree);
 
@@ -3009,6 +2931,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		addTreeSelectionChangedListener(newActionInTreePrimary);
 		addTreeSelectionChangedListener(newActionInTreeSecondary);
 		addTreeSelectionChangedListener(createActionInTree);
+		addTreeSelectionChangedListener(createPackageProjectActionInTree);
+		addTreeSelectionChangedListener(newComponentsPackageProjectAction);
+		addTreeSelectionChangedListener(newServicesPackageProjectAction);
 
 		addTreeSelectionChangedListener(newActionInListPrimary);
 
@@ -3016,9 +2941,11 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		addTreeSelectionChangedListener(searchTreeAction);
 		addTreeSelectionChangedListener(deleteActionInTree);
 		addTreeSelectionChangedListener(addAsModuleAction);
+		addTreeSelectionChangedListener(addAsWebPackageAction);
 		addTreeSelectionChangedListener(renameActionInTree);
 		addTreeSelectionChangedListener(removeModuleAction);
 		addTreeSelectionChangedListener(addModuleAction);
+		addTreeSelectionChangedListener(addPackageProjectAction);
 		addTreeSelectionChangedListener(setActive);
 		addTreeSelectionChangedListener(replaceActionInTree);
 		addTreeSelectionChangedListener(replaceServerAction);

@@ -150,6 +150,15 @@
             name="Database Server"
             project="false">
       </wizard>
+      <wizard
+            canFinishEarly="false"
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.ui.wizards.NewPackageProjectWizard"
+            icon="icons/new_solution_wizard.gif"
+            id="com.servoy.eclipse.ui.NewPackageProjectWizard"
+            name="New Package Project"
+            project="true">
+      </wizard>
    </extension>
    <extension 
    		point="org.eclipse.ui.exportWizards">
