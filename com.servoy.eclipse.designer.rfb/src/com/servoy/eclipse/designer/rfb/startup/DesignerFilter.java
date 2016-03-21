@@ -63,6 +63,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.WebComponent;
@@ -445,7 +446,9 @@ public class DesignerFilter implements Filter
 	 */
 	protected StringBuilder createLayoutDiv(JSONObject config, StringBuilder sb, WebLayoutSpecification spec) throws JSONException
 	{
-		sb.append("<div "); // TODO tagname from spec?
+		String tagName = (String)(spec.getProperty(StaticContentSpecLoader.PROPERTY_TAGTYPE.getPropertyName()) != null
+			? spec.getProperty(StaticContentSpecLoader.PROPERTY_TAGTYPE.getPropertyName()).getDefaultValue() : "div");
+		sb.append("<" + tagName + " ");
 		Iterator keys = config.keys();
 		while (keys.hasNext())
 		{
@@ -473,7 +476,7 @@ public class DesignerFilter implements Filter
 				}
 			}
 		}
-		return sb.append("</div>");
+		return sb.append("</" + tagName + ">");
 	}
 
 	private List<JSONObject> getPalleteTypeNames(WebObjectSpecification spec)

@@ -62,6 +62,15 @@ public class WebComponentPropertySource extends PDPropertySource
 					BEAN_PROPERTIES.put(desc.getName(), desc);
 				}
 			}
+
+			info = java.beans.Introspector.getBeanInfo(LayoutContainer.class);
+			for (PropertyDescriptor desc : info.getPropertyDescriptors())
+			{
+				if (StaticContentSpecLoader.PROPERTY_TAGTYPE.getPropertyName().equals(desc.getName()))
+				{
+					BEAN_PROPERTIES.put(desc.getName(), desc);
+				}
+			}
 		}
 		catch (IntrospectionException e)
 		{

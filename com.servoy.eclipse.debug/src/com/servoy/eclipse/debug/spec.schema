@@ -65,6 +65,11 @@
 			"description": "Layout attributes definition",
 			"type": "string"
 		},
+		"tagType": 
+		{
+			"description": "Layout tagType definition",
+			"type": "string"
+		},
 		"name": 
 		{
 			"description": "The angular directive name of the component",
