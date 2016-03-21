@@ -68,7 +68,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		return ((ICustomType< ? >)propertyDescription.getType()).getCustomJSONTypeDefinition();
 	}
 
-	private Object getNewElementValue(int index)
+	private WebCustomType getNewElementValue(int index)
 	{
 		// when user adds/inserts a new item in the array normally a null is inserted
 		// but for custom object properties most of the time the uses will want to have an object so that it can be directly expanded (without clicking one more time to make it {} from null)
@@ -86,7 +86,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	}
 
 	@Override
-	protected Object getNewElementInitialValue()
+	protected WebCustomType getNewElementInitialValue()
 	{
 		return getNewElementValue(0);
 	}
@@ -328,7 +328,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	@Override
 	protected Object createEmptyPropertyValue()
 	{
-		return null;
+		return new WebCustomType[] { getNewElementInitialValue() };
 	}
 
 	/*
