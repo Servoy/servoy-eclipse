@@ -1,5 +1,5 @@
 /*
- This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2012 Servoy BV
+ This file belongs to the Servoy development and deployment environment, Copyright (C) 1997-2016 Servoy BV
 
  This program is free software; you can redistribute it and/or modify it under
  the terms of the GNU Affero General Public License as published by the Free
@@ -20,11 +20,8 @@ package com.servoy.eclipse.warexporter.ui.wizard;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -32,28 +29,29 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
+import com.servoy.j2db.util.Utils;
 
 /**
- * Wizard page which handles the configuration of the servoy properties file.
- * Properties set here will be reflected in the generated properties file.
+ * Wizard page which handles the configuration of the default admin user.
  *
- * @author acostache
+ * @author rgansevles
  *
  */
-public class ServoyPropertiesConfigurationPage extends WizardPage implements Listener
+public class DefaultAdminConfigurationPage extends WizardPage implements Listener
 {
 	private final ExportWarModel exportModel;
 	private final IWizardPage nextPage;
-	private Button useRMI;
-	private Text startRMIPortText;
+	private Text defaultAdminUserText;
+	private Text defaultAdminPasswordText;
+	private Text defaultAdminPasswordText2;
 
-	public ServoyPropertiesConfigurationPage(String title, ExportWarModel exportModel, IWizardPage nextPage)
+	public DefaultAdminConfigurationPage(String title, ExportWarModel exportModel, IWizardPage nextPage)
 	{
 		super(title);
 		this.exportModel = exportModel;
 		this.nextPage = nextPage;
-		setTitle("Configuration settings for the generated servoy properties file");
-		setDescription("Specify following settings");
+		setTitle("Configuration settings for the default admin user");
+		setDescription("Specify default admin username and password");
 	}
 
 	public void createControl(Composite parent)
@@ -63,60 +61,51 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 		composite.setLayout(gridLayout);
 
 		Label label = new Label(composite, SWT.NONE);
-		label.setText("Allow running smart clients");
 
-		useRMI = new Button(composite, SWT.CHECK);
-		GridData gd = new GridData();
+		label.setText("Default Admin user ");
+
+		defaultAdminUserText = new Text(composite, SWT.BORDER);
+		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 3;
-		useRMI.setLayoutData(gd);
-		useRMI.setSelection(exportModel.getStartRMI());
-		useRMI.addSelectionListener(new SelectionListener()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				boolean bUseRMI = useRMI.getSelection();
-				startRMIPortText.setEnabled(bUseRMI);
-				exportModel.setStartRMI(bUseRMI);
-				getWizard().getContainer().updateButtons();
-				getWizard().getContainer().updateMessage();
-
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e)
-			{
-			}
-		});
+		defaultAdminUserText.setLayoutData(gd);
+		defaultAdminUserText.addListener(SWT.KeyUp, this);
 
 		label = new Label(composite, SWT.NONE);
-		label.setText("Port used by RMI Registry ");
+		label.setText("Default Admin password ");
 
-		startRMIPortText = new Text(composite, SWT.BORDER);
+		defaultAdminPasswordText = new Text(composite, SWT.BORDER | SWT.PASSWORD);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 3;
-		startRMIPortText.setLayoutData(gd);
-		startRMIPortText.setText(exportModel.getStartRMIPort());
-		startRMIPortText.addListener(SWT.KeyUp, this);
-		startRMIPortText.setEnabled(exportModel.getStartRMI());
+		defaultAdminPasswordText.setLayoutData(gd);
+		defaultAdminPasswordText.addListener(SWT.KeyUp, this);
+
+		label = new Label(composite, SWT.NONE);
+		label.setText("Repeat Admin password ");
+
+		defaultAdminPasswordText2 = new Text(composite, SWT.BORDER | SWT.PASSWORD);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 3;
+		defaultAdminPasswordText2.setLayoutData(gd);
+		defaultAdminPasswordText2.addListener(SWT.KeyUp, this);
 
 		label = new Label(composite, SWT.NONE);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 4;
 		label.setLayoutData(gd);
-		label.setText(
-			"\nNOTE: If running of smart clients is enabled, please take in consideration\nthat on each restart of the application context in the web container,\nRMI related classes cannot be GC and that may lead to out-of-memory errors.");
-
+		label.setText("\nThe default administrator user will give access to the servoy-admin page, as long as no admin user is created in the server.");
 
 		setControl(composite);
 	}
 
 	public void handleEvent(Event event)
 	{
-		if (event.widget == startRMIPortText)
+		if (event.widget == defaultAdminUserText)
 		{
-			String rmiPort = startRMIPortText.getText();
-			exportModel.setStartRMIPort(rmiPort);
+			exportModel.setDefaultAdminUser(defaultAdminUserText.getText());
+		}
+		else if (event.widget == defaultAdminPasswordText)
+		{
+			exportModel.setDefaultAdminPassword(defaultAdminPasswordText.getText());
 		}
 
 		getWizard().getContainer().updateButtons();
@@ -126,7 +115,20 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 	@Override
 	public boolean canFlipToNextPage()
 	{
-		return !useRMI.getSelection() || (startRMIPortText.getText() != null && startRMIPortText.getText().length() > 0);
+		setErrorMessage(null);
+		if (Utils.stringIsEmpty(defaultAdminUserText.getText()) || Utils.stringIsEmpty(defaultAdminPasswordText.getText()) ||
+			Utils.stringIsEmpty(defaultAdminPasswordText2.getText()))
+		{
+			return false;
+		}
+
+		if (!defaultAdminPasswordText.getText().equals(defaultAdminPasswordText2.getText()))
+		{
+			setErrorMessage("Passwords are not the same");
+			return false;
+		}
+
+		return true;
 	}
 
 	@Override

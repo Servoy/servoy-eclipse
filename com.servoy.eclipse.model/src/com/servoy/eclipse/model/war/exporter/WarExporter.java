@@ -720,21 +720,24 @@ public class WarExporter
 			ServoyLog.logError(e);
 		}
 
-		try
+		if (exportModel.getDefaultAdminUser() != null && exportModel.getDefaultAdminPassword() != null)
 		{
-			File adminProperties = new File(tmpWarDir, "WEB-INF/admin.properties");
-			Properties prop = new Properties();
-			prop.setProperty("defaultAdminUser", exportModel.getDefaultAdminUser());
-			prop.setProperty("defaultAdminPassword", SecuritySupport.encrypt(Settings.getInstance(), exportModel.getDefaultAdminPassword()));
-
-			try (FileWriter writer = new FileWriter(adminProperties))
+			try
 			{
-				prop.store(writer, "admin properties");
+				File adminProperties = new File(tmpWarDir, "WEB-INF/admin.properties");
+				Properties prop = new Properties();
+				prop.setProperty("defaultAdminUser", exportModel.getDefaultAdminUser());
+				prop.setProperty("defaultAdminPassword", SecuritySupport.encrypt(Settings.getInstance(), exportModel.getDefaultAdminPassword()));
+
+				try (FileWriter writer = new FileWriter(adminProperties))
+				{
+					prop.store(writer, "admin properties");
+				}
 			}
-		}
-		catch (Exception e)
-		{
-			ServoyLog.logError(e);
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
 		}
 	}
 

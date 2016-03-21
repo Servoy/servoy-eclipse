@@ -18,6 +18,7 @@
 package com.servoy.eclipse.exporter.apps.common;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.util.ILogLevel;
@@ -49,13 +50,13 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 		{
 			HashMap<String, String> argsMap = getArgsAsMap(args);
 			if (argsMap.containsKey("help") || argsMap.containsKey("?")) mustShowHelp = true;
-			solutionNames = parseArg("s", "Solution name(s) was(were) not specified after '-s' argument.", argsMap);
-			exportFilePath = parseArg("o", "Export file path was not specified after '-o' argument.", argsMap);
+			solutionNames = parseArg("s", "Solution name(s) was(were) not specified after '-s' argument.", argsMap, true);
+			exportFilePath = parseArg("o", "Export file path was not specified after '-o' argument.", argsMap, true);
 			if (argsMap.containsKey("verbose")) verbose = true;
-			settingsFile = parseArg("p", "Properties file was not specified after '-p' argument.", argsMap);
+			settingsFile = parseArg("p", "Properties file was not specified after '-p' argument.", argsMap, false);
 			if (argsMap.containsKey("as"))
 			{
-				appServerDir = parseArg("as", "Application server directory was not specified after '-as' argument.", argsMap);
+				appServerDir = parseArg("as", "Application server directory was not specified after '-as' argument.", argsMap, false);
 			}
 			if (argsMap.containsKey("pl")) aggregateWorkspace = true;
 			if (argsMap.containsKey("dbi") || argsMap.containsKey("dbd")) exportUsingDbiFileInfoOnly = true;
@@ -66,12 +67,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 			// check that the required arguments are provided
 			if (!mustShowHelp && !invalidArguments)
 			{
-				if (solutionNames == null || exportFilePath == null)
-				{
-					info("Required arguments are missing. Please provide both '-s'and '-o' arguments.", ILogLevel.ERROR);
-					markInvalid();
-				}
-				else if (solutionNames.split(",").length == 0)
+				if (solutionNames.split(",").length == 0)
 				{
 					info("No solutions to export -> '" + solutionNames +
 						"'; unable to get solution names from that string. It must be a list of solution names separated by comma.", ILogLevel.ERROR);
@@ -116,9 +112,9 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 		return argsMap;
 	}
 
-	protected String parseArg(String argName, String errMsg, HashMap<String, String> argsMap)
+	protected String parseArg(String argName, String errMsg, Map<String, String> argsMap, boolean required)
 	{
-		if (argsMap.containsKey(argName))
+		if (required || argsMap.containsKey(argName))
 		{
 			String val = argsMap.get(argName);
 			if (val != null && !val.trim().equals("")) return val;
