@@ -182,7 +182,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					for (BaseComponent baseComponent : baseComponents)
 					{
 						FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
-						if (fe.getName().equals(name))
+						if (fe.getDesignId().equals(name) || fe.getName().equals(name))
 						{
 							if (!form.isResponsiveLayout())
 								FormLayoutGenerator.generateFormElementWrapper(w, fe, true, flattenedForm, form.isResponsiveLayout());
@@ -416,7 +416,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			for (BaseComponent baseComponent : baseComponents)
 			{
 				FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
-				writer.key(fe.getName());
+				if (fe.getDesignId() != null)
+				{
+					writer.key(fe.getDesignId());
+				}
+				else
+				{
+					writer.key(fe.getName());
+				}	
 				fe.propertiesAsTemplateJSON(writer, new FormElementContext(fe));
 			}
 			writer.endObject();

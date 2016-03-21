@@ -278,7 +278,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 
 			$scope.getBeanModel = function(node) {
 				if (node) {
-					var name = node.getAttribute("name");
+					var name = node.getAttribute("svy-id");
 					if (name) return editorContentRootScope.getDesignFormControllerScope().model(name, true);
 				}
 				return null;
@@ -288,7 +288,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				if (node) {
 					var name = node.getAttribute("name");
 					if (name)
-						return editorContentRootScope.getDesignFormControllerScope().model(name, true);
+						return editorContentRootScope.getDesignFormControllerScope().model(node.getAttribute("svy-id"), true);
 					else {
 						var ghostObject = $scope.getGhost(node.getAttribute("svy-id"));
 						if (ghostObject && (ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_COMPONENT || ghostObject.type ==
