@@ -161,6 +161,11 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 														x: ghostObject.location.x,
 														y: ghostObject.location.y
 												}
+												
+												if (ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_PART && ghostObject === editorScope.getLastPartGhost()) 
+												{
+													editorScope.setContentSize(editorScope.contentStyle.width, ghostObject.location.y+"px")
+												}
 											}
 										}
 									}
