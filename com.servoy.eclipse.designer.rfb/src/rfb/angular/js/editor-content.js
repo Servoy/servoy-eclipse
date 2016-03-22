@@ -179,6 +179,7 @@ angular.module('editorContent',['servoyApp'])
     delete handlers[name];
     delete servoyApi[name];
     delete layout[name];
+    delete formData.components[name]
   }
 
   $rootScope.getDesignFormElement = function() {
@@ -383,10 +384,9 @@ angular.module('editorContent',['servoyApp'])
           }
           for (var index in data.deleted) {
             var toDelete = angular.element('[svy-id="' + data.deleted[index] + '"]');
-            var name = toDelete.attr("name");
-            if (name) $rootScope.getDesignFormControllerScope().removeComponent(name);
+            toDelete.scope().$destroy();
             toDelete.remove();
-
+            $rootScope.getDesignFormControllerScope().removeComponent(data.deleted[index]);
           }
           if (data.renderGhosts) renderGhosts();
           if (data.parts) {
