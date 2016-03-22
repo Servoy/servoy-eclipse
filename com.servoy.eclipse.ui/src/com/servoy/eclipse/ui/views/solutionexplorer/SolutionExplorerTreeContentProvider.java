@@ -1176,13 +1176,16 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				else if (un.getType() == UserNodeType.COMPONENTS)
 				{
 					WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
-					Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
-					for (Map.Entry<String, URL> entry : packages.entrySet())
+					if (provider != null)
 					{
-						IResource resource = getResource(entry.getValue());
-						if (resource != null && !(resource instanceof IProject))
+						Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
+						for (Map.Entry<String, URL> entry : packages.entrySet())
 						{
-							return true;
+							IResource resource = getResource(entry.getValue());
+							if (resource != null && !(resource instanceof IProject))
+							{
+								return true;
+							}
 						}
 					}
 				}
@@ -1194,13 +1197,16 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				else if (un.getType() == UserNodeType.SERVICES)
 				{
 					WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
-					Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
-					for (Map.Entry<String, URL> entry : packages.entrySet())
+					if (provider != null)
 					{
-						IResource resource = getResource(entry.getValue());
-						if (resource != null && !(resource instanceof IProject))
+						Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
+						for (Map.Entry<String, URL> entry : packages.entrySet())
 						{
-							return true;
+							IResource resource = getResource(entry.getValue());
+							if (resource != null && !(resource instanceof IProject))
+							{
+								return true;
+							}
 						}
 					}
 				}
