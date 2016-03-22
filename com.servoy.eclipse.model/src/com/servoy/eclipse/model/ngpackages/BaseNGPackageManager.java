@@ -295,9 +295,12 @@ public abstract class BaseNGPackageManager
 
 		prepareToReloadNGPackageProjects(activeSolutionProject, componentReaders, serviceReaders, monitor.newChild(10), canChangeResources);
 		monitor.setWorkRemaining((serviceReaders.size() + componentReaders.size()) * 10 + 3);
-		ngPackageProjectComponentReaders.clear();
-		ngPackageProjectServiceReaders.clear();
-		reloadActualSpecs(ngPackageProjectComponentReaders, componentReaders, ngPackageProjectServiceReaders, serviceReaders,
+
+		HashMap<String, IPackageReader> thisComponentReaders = new HashMap<String, IPackageReader>();
+		thisComponentReaders.putAll(ngPackageProjectComponentReaders);
+		HashMap<String, IPackageReader> thisServiceReaders = new HashMap<String, IPackageReader>();
+		thisServiceReaders.putAll(ngPackageProjectServiceReaders);
+		reloadActualSpecs(thisComponentReaders, componentReaders, thisServiceReaders, serviceReaders,
 			monitor.newChild((serviceReaders.size() + componentReaders.size()) * 10 + 3), canChangeResources);
 		monitor.done();
 	}

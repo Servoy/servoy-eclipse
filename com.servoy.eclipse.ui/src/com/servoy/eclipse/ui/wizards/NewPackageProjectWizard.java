@@ -70,8 +70,8 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 	{
 		setWindowTitle("New Package Project");
 		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("solution_wizard_description.gif"));
-		typeToTypeName.put(UserNodeType.COMPONENTS, IPackageReader.WEB_COMPONENT);
-		typeToTypeName.put(UserNodeType.SERVICES, IPackageReader.WEB_SERVICE);
+		typeToTypeName.put(UserNodeType.COMPONENTS_PROJECTS, IPackageReader.WEB_COMPONENT);
+		typeToTypeName.put(UserNodeType.SERVICES_PROJECTS, IPackageReader.WEB_SERVICE);
 	}
 
 	@Override

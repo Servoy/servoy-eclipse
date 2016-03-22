@@ -102,6 +102,10 @@ public class AddAsWebPackageAction extends AddAsSolutionReference
 	public static void addReferencedProjectToDescription(IProject newProject, IProjectDescription solutionProjectDescription)
 	{
 		IProject[] oldReferencedProjectsArray = solutionProjectDescription.getReferencedProjects();
+		for (IProject iProject : oldReferencedProjectsArray)
+		{
+			if (iProject.equals(newProject)) return;
+		}
 		IProject[] newReferencesArray = new IProject[oldReferencedProjectsArray.length + 1];
 		System.arraycopy(oldReferencedProjectsArray, 0, newReferencesArray, 0, oldReferencedProjectsArray.length);
 		newReferencesArray[oldReferencedProjectsArray.length] = newProject;
@@ -110,7 +114,7 @@ public class AddAsWebPackageAction extends AddAsSolutionReference
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.views.solutionexplorer.actions.AddAsSolutionReference#getSelectedNodeName(com.servoy.eclipse.ui.node.SimpleUserNode)
 	 */
 	@Override

@@ -146,7 +146,7 @@ public class NGPackageManager extends BaseNGPackageManager
 	}
 
 	@Override
-	protected void reloadAllNGPackageProjects(IProgressMonitor m, boolean canChangeResources)
+	protected void reloadAllNGPackageProjects(IProgressMonitor m, final boolean canChangeResources)
 	{
 		Job registerNgPackagesJob = new Job("Reading all ng package projects...")
 		{
@@ -154,7 +154,7 @@ public class NGPackageManager extends BaseNGPackageManager
 			public IStatus run(IProgressMonitor monitor)
 			{
 				// do the actual work
-				NGPackageManager.super.reloadAllNGPackageProjects(monitor, true);
+				NGPackageManager.super.reloadAllNGPackageProjects(monitor, canChangeResources);
 				return Status.OK_STATUS;
 			}
 

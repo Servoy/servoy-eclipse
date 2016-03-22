@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
@@ -49,6 +51,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -64,6 +67,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.mozilla.javascript.JavaMembers;
 import org.sablo.specification.BaseSpecProvider;
+import org.sablo.specification.Package;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
@@ -78,6 +82,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager.ContainerPackageReader;
 import com.servoy.eclipse.model.ngpackages.INGPackageChangeListener;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -107,6 +112,7 @@ import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IMediaProvider;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -773,20 +779,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					else if (type == UserNodeType.COMPONENTS_PROJECTS)
 					{
 						BaseSpecProvider provider = WebComponentSpecProvider.getInstance();
-						Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
-						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
-						Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
-						for (Map.Entry<String, URL> entry : packages.entrySet())
-						{
-							IResource resource = getResource(entry.getValue());
-							if (resource != null && resource instanceof IProject)
-							{
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(provider.getPackageDisplayName(entry.getKey()),
-									UserNodeType.COMPONENTS_PROJECT_PACKAGE, resource, packageIcon);
-								node.parent = un;
-								children.add(node);
-							}
-						}
+						List<PlatformSimpleUserNode> children = getWebProjects(un, provider, "components_package.png", UserNodeType.COMPONENTS_PROJECT_PACKAGE);
 						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 					}
 					else if (type == UserNodeType.COMPONENTS_PACKAGE)
@@ -891,20 +884,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					else if (type == UserNodeType.SERVICES_PROJECTS)
 					{
 						BaseSpecProvider provider = WebServiceSpecProvider.getInstance();
-						Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
-						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
-						Image packageIcon = uiActivator.loadImageFromBundle("service.png");
-						for (Map.Entry<String, URL> entry : packages.entrySet())
-						{
-							IResource resource = getResource(entry.getValue());
-							if (resource != null && resource instanceof IProject)
-							{
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(provider.getPackageDisplayName(entry.getKey()),
-									UserNodeType.SERVICES_PROJECT_PACKAGE, resource, packageIcon);
-								node.parent = un;
-								children.add(node);
-							}
-						}
+						List<PlatformSimpleUserNode> children = getWebProjects(un, provider, "services_package.png", UserNodeType.SERVICES_PROJECT_PACKAGE);
 						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 					}
 					else if (type == UserNodeType.SERVICES_PACKAGE)
@@ -960,51 +940,22 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					}
 					else if (type == UserNodeType.ALL_WEB_PACKAGES)
 					{
-						Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
+
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 						for (IProject iProject : projects)
 						{
 							if (iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
 							{
+
+								Image packageIcon = resolveWebPackageImage(iProject);
+
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(iProject.getName(), UserNodeType.WEB_PACKAGE, iProject, packageIcon);
 								node.parent = un;
 								children.add(node);
 							}
 
 						}
-//
-//
-//						Map<String, URL> packages = new TreeMap<String, URL>(WebComponentSpecProvider.getInstance().getPackagesToURLs());
-//
-//
-//						for (Map.Entry<String, URL> entry : packages.entrySet())
-//						{
-//							IResource resource = getResource(entry.getValue());
-//							if (resource != null && resource instanceof IProject)
-//							{
-//								PlatformSimpleUserNode node = new PlatformSimpleUserNode(
-//									WebComponentSpecProvider.getInstance().getPackageDisplayName(entry.getKey()), UserNodeType.COMPONENTS_PACKAGE, resource,
-//									packageIcon);
-//								node.parent = un;
-//								children.add(node);
-//							}
-//						}
-//
-//						packages = new TreeMap<String, URL>(WebServiceSpecProvider.getInstance().getPackagesToURLs());
-//						packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
-//						for (Map.Entry<String, URL> entry : packages.entrySet())
-//						{
-//							IResource resource = getResource(entry.getValue());
-//							if (resource != null && resource instanceof IProject)
-//							{
-//								PlatformSimpleUserNode node = new PlatformSimpleUserNode(
-//									WebServiceSpecProvider.getInstance().getPackageDisplayName(entry.getKey()), UserNodeType.SERVICES_PACKAGE, resource,
-//									packageIcon);
-//								node.parent = un;
-//								children.add(node);
-//							}
-//						}
 						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 					}
 					if (un.children == null)
@@ -1020,6 +971,76 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			return un.children;
 		}
 		return new Object[0];
+	}
+
+	/**
+	 * @param iProject
+	 * @return
+	 */
+	private Image resolveWebPackageImage(IProject iProject)
+	{
+		String imageFile = null;
+		boolean disabled = false;
+
+		if (WebComponentSpecProvider.getInstance().getWebComponentSpecifications().containsKey(iProject.getName())) imageFile = "components_package.png";
+		else if ((WebServiceSpecProvider.getInstance().getWebServiceSpecifications().containsKey(iProject.getName()))) imageFile = "services_package.png";
+		else
+		{
+			disabled = true;
+			//now we have to read the package type from the manifest
+			imageFile = "components_package.png";
+			if (iProject.getFile(new Path("META-INF/MANIFEST.MF")).exists())
+			{
+				try
+				{
+					if (new ContainerPackageReader(new File(iProject.getLocationURI()), iProject).getPackageType().equals(Package.IPackageReader.WEB_SERVICE))
+						imageFile = "services_package.png";
+				}
+				catch (IOException e)
+				{
+					Debug.log(e);
+				}
+			}
+
+		}
+		return uiActivator.loadImageFromBundle(imageFile, disabled);
+	}
+
+
+	/**
+	 * @param un
+	 * @param provider
+	 * @return
+	 */
+	private List<PlatformSimpleUserNode> getWebProjects(PlatformSimpleUserNode un, BaseSpecProvider provider, String imageFileName, UserNodeType nodeType)
+	{
+		List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
+		Image packageIcon = uiActivator.loadImageFromBundle(imageFileName);
+		Object realObject = un.getRealObject();
+		if (realObject instanceof Solution)
+		{
+			Solution servoySolution = (Solution)realObject;
+			ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(servoySolution.getName());
+			IProject eclipseProject = servoyProject.getProject();
+			try
+			{
+				IProject[] referencedProjects = eclipseProject.getReferencedProjects();
+				for (IProject iProject : referencedProjects)
+				{
+					if (provider.getPackagesToURLs().containsKey(iProject.getName()))
+					{
+						PlatformSimpleUserNode node = new PlatformSimpleUserNode(iProject.getName(), nodeType, iProject, packageIcon);
+						node.parent = un;
+						children.add(node);
+					}
+				}
+			}
+			catch (CoreException e)
+			{
+				Debug.log(e);
+			}
+		}
+		return children;
 	}
 
 	private Image loadImageFromFolder(IFolder folder, String iconPath) throws CoreException
@@ -1078,7 +1099,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 		try
 		{
-			IWorkspaceRoot root = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getWorkspace().getRoot();
+			IWorkspaceRoot root = ServoyModel.getWorkspace().getRoot();
 			IContainer[] dirResource = root.findContainersForLocationURI(packageURL.toURI());
 			if (dirResource.length == 1 && dirResource[0].exists()) return dirResource[0];
 
@@ -1167,16 +1188,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 				else if (un.getType() == UserNodeType.COMPONENTS_PROJECTS)
 				{
-					WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
-					Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
-					for (Map.Entry<String, URL> entry : packages.entrySet())
-					{
-						IResource resource = getResource(entry.getValue());
-						if (resource != null && resource instanceof IProject)
-						{
-							return true;
-						}
-					}
+					BaseSpecProvider provider = WebComponentSpecProvider.getInstance();
+					return hasWebProjectReferences(un, provider);
 				}
 				else if (un.getType() == UserNodeType.SERVICES)
 				{
@@ -1194,15 +1207,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				else if (un.getType() == UserNodeType.SERVICES_PROJECTS)
 				{
 					WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
-					Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
-					for (Map.Entry<String, URL> entry : packages.entrySet())
-					{
-						IResource resource = getResource(entry.getValue());
-						if (resource != null && resource instanceof IProject)
-						{
-							return true;
-						}
-					}
+					return hasWebProjectReferences(un, provider);
 				}
 				else if (un.getType() == UserNodeType.ALL_WEB_PACKAGES)
 				{
@@ -1246,6 +1251,35 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		else if (parent instanceof UserNode &&
 			(((UserNode)parent).getType() == UserNodeType.TABLE || ((UserNode)parent).getType() == UserNodeType.INMEMORY_DATASOURCE)) return false;
 		return true;
+	}
+
+	/**
+	 * @param un
+	 * @param provider
+	 * @return
+	 */
+	private boolean hasWebProjectReferences(PlatformSimpleUserNode un, BaseSpecProvider provider)
+	{
+		Object realObject = un.getRealObject();
+		if (realObject instanceof Solution)
+		{
+			Solution servoySolution = (Solution)realObject;
+			ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(servoySolution.getName());
+			IProject eclipseProject = servoyProject.getProject();
+			try
+			{
+				IProject[] referencedProjects = eclipseProject.getReferencedProjects();
+				for (IProject iProject : referencedProjects)
+				{
+					if (provider.getPackageNames().contains(iProject.getName())) return true;
+				}
+			}
+			catch (CoreException e)
+			{
+				Debug.log(e);
+			}
+		}
+		return false;
 	}
 
 	private void addServersNodeChildren(PlatformSimpleUserNode serversNode)
@@ -2766,8 +2800,28 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			@Override
 			public IStatus run(IProgressMonitor monitor)
 			{
+				allWebPackagesNode.children = null;
 				activeSolutionNode.children = null;
+				try
+				{
+					List activeRootObjects = ServoyModel.getDeveloperRepository().getActiveRootObjects(IRepository.SOLUTIONS);
+					for (Object sol : activeRootObjects)
+					{
+						SimpleUserNode findChildNode = findChildNode(modulesOfActiveSolution, ((Solution)sol).getName());
+						if (findChildNode != null)
+						{
+							findChildNode.children = null;
+							view.refreshTreeNodeFromModel(findChildNode);
+						}
+					}
+				}
+				catch (RepositoryException e)
+				{
+					Debug.log(e);
+				}
+
 				view.refreshTreeNodeFromModel(activeSolutionNode);
+				view.refreshTreeNodeFromModel(allWebPackagesNode);
 
 				if (componentsChanged)
 				{

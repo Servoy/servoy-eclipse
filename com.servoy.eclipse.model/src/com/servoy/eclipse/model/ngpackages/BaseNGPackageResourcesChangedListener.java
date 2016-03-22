@@ -123,22 +123,19 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 				if (rd.getFlags() == IResourceDelta.MARKERS) continue;
 				IResource resource = rd.getResource();
 
-				if (activeProject.getProject().equals(resource))
+				// check for changes in the list of projects that the active solution references
+				IResourceDelta[] affectedProjectChildren = rd.getAffectedChildren(IResourceDelta.CHANGED, IResource.HIDDEN);
+				for (IResourceDelta firstLevelChanges : affectedProjectChildren)
 				{
-					// check for changes in the list of projects that the active solution references
-					IResourceDelta[] affectedProjectChildren = rd.getAffectedChildren(IResourceDelta.CHANGED, IResource.HIDDEN);
-					for (IResourceDelta firstLevelChanges : affectedProjectChildren)
+					if (".project".equals(firstLevelChanges.getResource().getName()))
 					{
-						if (".project".equals(firstLevelChanges.getResource().getName()))
-						{
-							refreshAllNGPackageProjects.value = Boolean.TRUE; // this could be refined further to check new vs. old (that we have cached) and only refresh what is needed, not all ng package projects
-							clearReferencedProjectsCache.value = Boolean.TRUE;
-							break;
-						}
+						refreshAllNGPackageProjects.value = Boolean.TRUE; // this could be refined further to check new vs. old (that we have cached) and only refresh what is needed, not all ng package projects
+						clearReferencedProjectsCache.value = Boolean.TRUE;
+						break;
 					}
-					if (refreshAllNGPackageProjects.value.booleanValue()) break;
 				}
-				else if (baseNGPackageManager.getActiveSolutionReferencedProjectNamesInternal().contains(resource.getName()))
+				if (refreshAllNGPackageProjects.value.booleanValue()) break;
+				if (baseNGPackageManager.getActiveSolutionReferencedProjectNamesInternal().contains(resource.getName()))
 				{
 					// a referenced project has changed;
 					// - we need to know if it's a project that has been referenced before but was missing and now it is available and of type ngPackage

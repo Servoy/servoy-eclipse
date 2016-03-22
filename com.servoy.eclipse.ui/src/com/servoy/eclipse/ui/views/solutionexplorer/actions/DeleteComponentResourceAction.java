@@ -107,6 +107,15 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 						}
 						else
 						{
+							if (resource instanceof IProject)
+							{
+								IProject[] referencingProjects = ((IProject)resource).getReferencingProjects();
+								for (IProject iProject : referencingProjects)
+								{
+									RemovePackageProjectAction.removeProjecReference(iProject, (IProject)resource);
+								}
+
+							}
 							resource.delete(true, new NullProgressMonitor());
 							resources.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 						}
