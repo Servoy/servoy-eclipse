@@ -339,28 +339,28 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 		// we want to load the plugins node in a background low prio job so that it will expand fast
 		// when used...
-		Display.getDefault().asyncExec(new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				addPluginsNodeChildren(plugins);
-
-			}
-		});
-//		Job job = new Job("Background loading of plugins node")
+//		Display.getDefault().asyncExec(new Runnable()
 //		{
+//
 //			@Override
-//			protected IStatus run(IProgressMonitor monitor)
+//			public void run()
 //			{
 //				addPluginsNodeChildren(plugins);
-//				return Status.OK_STATUS;
+//
 //			}
-//		};
-//		job.setSystem(true);
-//		job.setPriority(Job.LONG);
-//		job.schedule();
+//		});
+		Job job = new Job("Background loading of plugins node")
+		{
+			@Override
+			protected IStatus run(IProgressMonitor monitor)
+			{
+				addPluginsNodeChildren(plugins);
+				return Status.OK_STATUS;
+			}
+		};
+		job.setSystem(true);
+		job.setPriority(Job.LONG);
+		job.schedule();
 
 		ServoyModelFinder.getServoyModel().getNGPackageManager().addNGPackagesChangedListener(this);
 	}
@@ -993,7 +993,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			{
 				try
 				{
-					if (new ContainerPackageReader(new File(iProject.getLocationURI()), iProject).getPackageType().equals(Package.IPackageReader.WEB_SERVICE))
+					if (Package.IPackageReader.WEB_SERVICE.equals(new ContainerPackageReader(new File(iProject.getLocationURI()), iProject).getPackageType()))
 						imageFile = "services_package.png";
 				}
 				catch (IOException e)
