@@ -189,7 +189,7 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 	@Override
 	protected boolean isJSONNull(Object element)
 	{
-		return element == null || ((WebCustomType)element).getFlattenedJson() == null;
+		return element == null || (element instanceof WebCustomType && ((WebCustomType)element).getFlattenedJson() == null);
 	}
 
 	/*
