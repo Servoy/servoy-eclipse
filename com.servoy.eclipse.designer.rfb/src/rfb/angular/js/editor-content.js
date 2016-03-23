@@ -215,7 +215,10 @@ angular.module('editorContent',['servoyApp'])
     var ret = model[name];
     if (!ret && !noCreate) {
       if (formData.components[name]) ret = formData.components[name];
-      else ret = {}
+      else {
+    	  ret = {}
+    	  formData.components[name] = ret;
+      }
       model[name] = ret;
     }
     return ret;
