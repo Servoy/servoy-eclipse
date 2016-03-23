@@ -368,7 +368,20 @@ angular.module('editorContent',['servoyApp'])
             }
            
             var elementTemplate = angular.element('[svy-id="' + name + '"]');
-            if (!elementTemplate.length) {
+            var shouldGetTemplate = true;
+            if(elementTemplate.length) {
+            	var domParentUUID = elementTemplate.parent('[svy-id]').attr('svy-id');
+            	var currentParentUUID = data.childParentMap[name].uuid;
+            	if(domParentUUID != currentParentUUID ||
+            		((data.childParentMap[name].index > -1) && (data.childParentMap[name].index != elementTemplate.index()))) {
+            		elementTemplate.remove();
+            	}
+            	else {
+            		shouldGetTemplate = false;
+            	}
+            }
+            
+            if (shouldGetTemplate) {
               var promise = $sabloApplication.callService("$editor", "getTemplate", {
                 name: name
               }, false);
@@ -398,9 +411,20 @@ angular.module('editorContent',['servoyApp'])
           if (data.containers) {
             for (var key in data.containers) {
               var element = angular.element(document.querySelectorAll("[svy-id='" + key + "']"));
-              if (element && element.length > 0) {
-                // TODO just update the attributes?
-              } else {
+              var shouldGetTemplate = true;
+              if(element.length) {
+            	  var domParentUUID = element.parent('[svy-id]').attr('svy-id');
+            	  var currentParentUUID = data.childParentMap[key].uuid;
+            	  if(domParentUUID != currentParentUUID ||
+            	  	((data.childParentMap[key].index > -1) && (data.childParentMap[key].index != element.index()))) {
+            		  element.remove();
+            	  }
+            	  else {
+            		  shouldGetTemplate = false;
+            	  }
+              }              
+
+              if (shouldGetTemplate) {
                 var promise = $sabloApplication.callService("$editor", "getTemplate", {
                   layoutId: key
                 }, false);

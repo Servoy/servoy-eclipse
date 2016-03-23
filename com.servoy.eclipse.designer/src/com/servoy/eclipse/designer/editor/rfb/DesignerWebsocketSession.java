@@ -19,9 +19,12 @@ package com.servoy.eclipse.designer.editor.rfb;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -44,6 +47,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
@@ -397,6 +401,48 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			}
 			writer.endArray();
 		}
+
+		ArrayList<IPersist> componentsWithParents = new ArrayList<IPersist>();
+		componentsWithParents.addAll(baseComponents);
+		componentsWithParents.addAll(containers);
+		if (componentsWithParents.size() > 0)
+		{
+			writer.key("childParentMap");
+			writer.object();
+			for (IPersist p : componentsWithParents)
+			{
+				ISupportChilds parent = p.getParent();
+				writer.key(p.getUUID().toString());
+				writer.object();
+				writer.key("uuid");
+				writer.value(parent.getUUID().toString());
+				writer.key("index");
+				if (parent instanceof LayoutContainer)
+				{
+					ArrayList<IPersist> children = new ArrayList<IPersist>();
+					Iterator<IPersist> it = parent.getAllObjects();
+					while (it.hasNext())
+					{
+						IPersist persist = it.next();
+						if (persist instanceof ISupportBounds)
+						{
+							children.add(persist);
+						}
+					}
+					IPersist[] sortedChildArray = children.toArray(new IPersist[0]);
+					Arrays.sort(sortedChildArray, PositionComparator.XY_PERSIST_COMPARATOR);
+					children = new ArrayList<IPersist>(Arrays.asList(sortedChildArray));
+					writer.value(children.indexOf(p));
+				}
+				else
+				{
+					writer.value(-1);
+				}
+				writer.endObject();
+			}
+			writer.endObject();
+		}
+
 		writer.endObject();
 		return writer.toString();
 	}
@@ -423,7 +469,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				else
 				{
 					writer.key(fe.getName());
-				}	
+				}
 				fe.propertiesAsTemplateJSON(writer, new FormElementContext(fe));
 			}
 			writer.endObject();
