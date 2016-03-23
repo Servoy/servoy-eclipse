@@ -365,9 +365,9 @@ angular.module('editorContent',['servoyApp'])
             } else {
               formData.components[name] = newCompData;
             }
-            // always test if the model is really already initialized.
-            // if not then there is no template yet.
-            if (!$rootScope.getDesignFormControllerScope().model(name, true)) {
+           
+            var elementTemplate = angular.element('[svy-id="' + name + '"]');
+            if (!elementTemplate.length) {
               var promise = $sabloApplication.callService("$editor", "getTemplate", {
                 name: name
               }, false);
@@ -384,7 +384,6 @@ angular.module('editorContent',['servoyApp'])
           }
           for (var index in data.deleted) {
             var toDelete = angular.element('[svy-id="' + data.deleted[index] + '"]');
-            toDelete.scope().$destroy();
             toDelete.remove();
             $rootScope.getDesignFormControllerScope().removeComponent(data.deleted[index]);
           }
