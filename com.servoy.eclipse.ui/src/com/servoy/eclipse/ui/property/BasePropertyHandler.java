@@ -52,6 +52,7 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
@@ -65,8 +66,8 @@ import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 public class BasePropertyHandler implements IPropertyHandler
 {
 	// null type: use property controller internally
-	public static final PropertyDescription ANCHORS_DESCRIPTION = new PropertyDescription("anchors", null, new AnchorPropertyController("anchors",
-			RepositoryHelper.getDisplayName("anchors", GraphicalComponent.class)));
+	public static final PropertyDescription ANCHORS_DESCRIPTION = new PropertyDescription("anchors", null,
+		new AnchorPropertyController("anchors", RepositoryHelper.getDisplayName("anchors", GraphicalComponent.class)));
 
 	protected final PropertyDescriptor propertyDescriptor;
 
@@ -191,7 +192,8 @@ public class BasePropertyHandler implements IPropertyHandler
 	@Override
 	public boolean hasSupportForClientType(Object obj, ClientSupport csp)
 	{
-		return AnnotationManagerReflection.getInstance().hasSupportForClientType(propertyDescriptor.getReadMethod(), obj.getClass(), csp, ClientSupport.Default);
+		return AnnotationManagerReflection.getInstance().hasSupportForClientType(propertyDescriptor.getReadMethod(), obj.getClass(), csp,
+			ClientSupport.Default);
 	}
 
 	@Override
@@ -242,8 +244,8 @@ public class BasePropertyHandler implements IPropertyHandler
 			{
 				Form form = (Form)obj;
 				int type = form.getSolution().getSolutionType();
-				return (type == SolutionMetaData.SOLUTION || type == SolutionMetaData.NG_CLIENT_ONLY ||  type == SolutionMetaData.MODULE) && form.getView() != IFormConstants.VIEW_TYPE_RECORD &&
-					form.getView() != IFormConstants.VIEW_TYPE_RECORD_LOCKED;
+				return (type == SolutionMetaData.SOLUTION || type == SolutionMetaData.NG_CLIENT_ONLY || type == SolutionMetaData.MODULE) &&
+					form.getView() != IFormConstants.VIEW_TYPE_RECORD && form.getView() != IFormConstants.VIEW_TYPE_RECORD_LOCKED;
 			}
 
 			if (!RepositoryHelper.shouldShow(name, element, persist.getClass(), dispType))
@@ -278,6 +280,13 @@ public class BasePropertyHandler implements IPropertyHandler
 					// there is a login solution, do not show the deprecated login form setting
 					return false;
 				}
+			}
+
+			if (persist instanceof Form && ((Form)persist).isResponsiveLayout() &&
+				(name.equals(StaticContentSpecLoader.PROPERTY_TRANSPARENT.getPropertyName()) ||
+					name.equals(StaticContentSpecLoader.PROPERTY_BORDERTYPE.getPropertyName())))
+			{
+				return false;
 			}
 		}
 		catch (RepositoryException e)
