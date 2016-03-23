@@ -291,8 +291,6 @@ angular.module('editorContent',['servoyApp'])
       renderGhosts();
       return;
     }
-    // was there already a template generated before this, then just skip it
-    if ($rootScope.getDesignFormControllerScope().model(name, true)) return;
     var parentId = json.parentId;
     if (!parentId) parentId = 'svyDesignForm';
 
@@ -430,4 +428,14 @@ angular.module('editorContent',['servoyApp'])
     showLoading: function() {},
     hideLoading: function() {}
   }
+}).directive("createscope", function() {
+	return {
+		restrict: 'A',
+		scope: true,
+		link: function($scope, $element) {
+			  $element.on('$destroy', function(){
+				  $scope.$destroy();
+		      })
+		}
+	}
 });
