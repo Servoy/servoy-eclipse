@@ -270,8 +270,8 @@ angular.module('editorContent',['servoyApp'])
         ret.top = formData.components[name].location.y + "px";
         ret.width = formData.components[name].size.width + "px";
         ret.height = formData.components[name].size.height + "px";
-        ret.position = 'absolute'
       }
+      ret.position = 'absolute'
       layout[name] = ret;
     }
     return ret;
