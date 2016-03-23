@@ -398,6 +398,8 @@ angular.module('editorContent',['servoyApp'])
           }
           for (var index in data.deleted) {
             var toDelete = angular.element('[svy-id="' + data.deleted[index] + '"]');
+            // if it has a createscope parent then use that one to delete the whole component
+        	if (toDelete.parent()[0].tagName == "CREATESCOPE") toDelete = toDelete.parent();
             toDelete.remove();
             $rootScope.getDesignFormControllerScope().removeComponent(data.deleted[index]);
           }
@@ -454,7 +456,6 @@ angular.module('editorContent',['servoyApp'])
   }
 }).directive("createscope", function() {
 	return {
-		restrict: 'A',
 		scope: true,
 		link: function($scope, $element) {
 			  $element.on('$destroy', function(){
