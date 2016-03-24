@@ -182,7 +182,6 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
-import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebCustomType;
@@ -715,8 +714,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		IPropertyDescriptor desc = createPropertyDescriptor(propertySource, persistContext, readOnly, propertyDescriptor, id, displayName,
 			flattenedEditingSolution, form);
 		if (desc != null //
-		&& persistContext != null && persistContext.getPersist() != null && (persistContext.getPersist().getParent() == persistContext.getContext() ||
-			(persistContext.getPersist().getParent() instanceof TabPanel && persistContext.getPersist().getParent().getParent() == persistContext.getContext())) // only show overrides when element is shown in its 'own' form or in a tabPanel of the same form
+		&& persistContext != null && persistContext.getPersist() != null &&
+			persistContext.getPersist().getAncestor(IRepository.FORMS) == persistContext.getContext() // only show overrides when element is shown in its 'own' form
 			&&
 			// skip some specific properties
 			!(persistContext.getPersist() instanceof Form && StaticContentSpecLoader.PROPERTY_NAME.getPropertyName().equals(id)) &&
