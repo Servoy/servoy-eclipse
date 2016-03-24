@@ -105,35 +105,38 @@ public class DesignerUtil
 
 	public static boolean containsInheritedElement(List selectedEditParts)
 	{
-		if (selectedEditParts != null && !selectedEditParts.isEmpty() && selectedEditParts.get(0) instanceof EditPart)
+		if (selectedEditParts != null && !selectedEditParts.isEmpty())
 		{
-			for (int i = 0; i < selectedEditParts.size(); i++)
+			if (selectedEditParts.get(0) instanceof EditPart)
 			{
-				EditPart object = (EditPart)selectedEditParts.get(i);
-				EditPart parent = object.getParent();
-				if (parent != null && parent.getModel() instanceof IPersist && Utils.isInheritedFormElement(object.getModel(), (IPersist)parent.getModel()))
-					return true;
+				for (int i = 0; i < selectedEditParts.size(); i++)
+				{
+					EditPart object = (EditPart)selectedEditParts.get(i);
+					EditPart parent = object.getParent();
+					if (parent != null && parent.getModel() instanceof IPersist && Utils.isInheritedFormElement(object.getModel(), (IPersist)parent.getModel()))
+						return true;
+				}
 			}
-		}
-		if (selectedEditParts != null && !selectedEditParts.isEmpty() && selectedEditParts.get(0) instanceof PersistContext)
-		{
-			for (int i = 0; i < selectedEditParts.size(); i++)
+			else
 			{
-				Object formElement = null;
-				IPersist context = null;
-				if (selectedEditParts.get(i) instanceof PersistContext)
+				for (int i = 0; i < selectedEditParts.size(); i++)
 				{
-					PersistContext persistContext = (PersistContext)selectedEditParts.get(i);
-					context = persistContext.getContext();
-					formElement = persistContext.getPersist();
+					Object formElement = null;
+					IPersist context = null;
+					if (selectedEditParts.get(i) instanceof PersistContext)
+					{
+						PersistContext persistContext = (PersistContext)selectedEditParts.get(i);
+						context = persistContext.getContext();
+						formElement = persistContext.getPersist();
 
+					}
+					else if (selectedEditParts.get(i) instanceof FormElementGroup)
+					{
+						context = ((FormElementGroup)selectedEditParts.get(i)).getParent();
+						formElement = selectedEditParts.get(i);
+					}
+					if (Utils.isInheritedFormElement(formElement, context)) return true;
 				}
-				else if (selectedEditParts.get(i) instanceof FormElementGroup)
-				{
-					context = ((FormElementGroup)selectedEditParts.get(i)).getParent();
-					formElement = selectedEditParts.get(i);
-				}
-				if (Utils.isInheritedFormElement(formElement, context)) return true;
 			}
 		}
 		return false;
