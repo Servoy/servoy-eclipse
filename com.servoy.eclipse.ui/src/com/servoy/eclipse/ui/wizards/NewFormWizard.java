@@ -918,6 +918,15 @@ public class NewFormWizard extends Wizard implements INewWizard
 				dataSourceViewer.setEditable(false);
 				styleNameCombo.setSelection(new StructuredSelection(superForm.getStyleName() == null ? "" : superForm.getStyleName()));
 			}
+			if (superForm != null && superForm.isResponsiveLayout())
+			{
+				listFormCheck.setSelection(true);
+				listFormCheck.setEnabled(false);
+			}
+			else
+			{
+				listFormCheck.setEnabled(true);
+			}
 			dataSourceViewer.setButtonText((superForm == null || superForm.getDataSource() == null) ? TreeSelectViewer.DEFAULT_BUTTON_TEXT : "");
 		}
 
