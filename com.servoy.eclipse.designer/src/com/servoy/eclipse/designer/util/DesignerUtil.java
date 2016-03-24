@@ -45,6 +45,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportEncapsulation;
@@ -118,11 +119,21 @@ public class DesignerUtil
 		{
 			for (int i = 0; i < selectedEditParts.size(); i++)
 			{
+				Object formElement = null;
+				IPersist context = null;
 				if (selectedEditParts.get(i) instanceof PersistContext)
 				{
 					PersistContext persistContext = (PersistContext)selectedEditParts.get(i);
-					if (Utils.isInheritedFormElement(persistContext.getPersist(), persistContext.getContext())) return true;
+					context = persistContext.getContext();
+					formElement = persistContext.getPersist();
+
 				}
+				else if (selectedEditParts.get(i) instanceof FormElementGroup)
+				{
+					context = ((FormElementGroup)selectedEditParts.get(i)).getParent();
+					formElement = selectedEditParts.get(i);
+				}
+				if (Utils.isInheritedFormElement(formElement, context)) return true;
 			}
 		}
 		return false;
