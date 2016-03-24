@@ -75,23 +75,15 @@ public class TableContentProvider extends ArrayContentProvider implements ITreeC
 			}
 			for (String serverName : serverNames)
 			{
-				Object[] tables = null;
-				if (options.type != TableListType.ALL || options.serverName != null)
-				{
-					tables = getTables(serverName, options);
-				}
 				if (options.serverName == null)
 				{
 					// top nodes servers
-					if (options.type == TableListType.ALL || tables.length > 0)
-					{
-						lst.add(new TableWrapper(serverName, null)); // table == null -> server
-					}
+					lst.add(new TableWrapper(serverName, null)); // table == null -> server
 				}
 				else
 				{
 					// list tables directly
-					lst.addAll(Arrays.asList(tables));
+					lst.addAll(Arrays.asList(getTables(serverName, options)));
 				}
 			}
 			if (options.serverName == null)
