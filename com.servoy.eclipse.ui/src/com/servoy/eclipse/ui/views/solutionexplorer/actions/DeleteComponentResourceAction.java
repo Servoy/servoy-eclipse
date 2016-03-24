@@ -23,7 +23,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.jar.Manifest;
 
 import org.eclipse.core.resources.IContainer;
@@ -31,8 +33,12 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -77,10 +83,44 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 	@Override
 	public void run()
 	{
-		IProject resources = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject();
 		if (selection != null && MessageDialog.openConfirm(shell, getText(), "Are you sure you want to delete?"))
 		{
+			//first save the current selection so that he user can't change it while the job is running
+			List<SimpleUserNode> saveTheSelection = new ArrayList<SimpleUserNode>();
 			Iterator<SimpleUserNode> it = selection.iterator();
+			while (it.hasNext())
+				saveTheSelection.add(it.next());
+			//start the delete job
+			WorkspaceJob deleteJob = new DeleteComponentResourcesWorkspaceJob(saveTheSelection);
+			deleteJob.schedule();
+		}
+	}
+
+
+	private class DeleteComponentResourcesWorkspaceJob extends WorkspaceJob
+	{
+
+		private final List<SimpleUserNode> savedSelection;
+
+		/**
+		 * @param name
+		 */
+		public DeleteComponentResourcesWorkspaceJob(List<SimpleUserNode> selection)
+		{
+			super("Deleting component resources");
+			savedSelection = selection;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see org.eclipse.core.resources.WorkspaceJob#runInWorkspace(org.eclipse.core.runtime.IProgressMonitor)
+		 */
+		@Override
+		public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+		{
+			IProject resources = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject();
+			Iterator<SimpleUserNode> it = savedSelection.iterator();
 			while (it.hasNext())
 			{
 				SimpleUserNode next = it.next();
@@ -126,93 +166,95 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 					}
 				}
 			}
+			return Status.OK_STATUS;
 		}
-	}
 
-	private void deleteFolder(IFolder folder) throws CoreException
-	{
-		for (IResource resource : folder.members())
+		private void deleteFolder(IFolder folder) throws CoreException
 		{
-			if (resource instanceof IFolder)
+			for (IResource resource : folder.members())
 			{
-				deleteFolder((IFolder)resource);
-			}
-			else
-			{
-				try
+				if (resource instanceof IFolder)
 				{
-					resource.delete(true, new NullProgressMonitor());
+					deleteFolder((IFolder)resource);
 				}
-				catch (CoreException e)
+				else
 				{
-					// can go wrong once, try again with a refresh
-					resource.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
-					resource.delete(true, new NullProgressMonitor());
+					try
+					{
+						resource.delete(true, new NullProgressMonitor());
+					}
+					catch (CoreException e)
+					{
+						// can go wrong once, try again with a refresh
+						resource.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+						resource.delete(true, new NullProgressMonitor());
+					}
 				}
 			}
+			folder.delete(true, new NullProgressMonitor());
 		}
-		folder.delete(true, new NullProgressMonitor());
-	}
 
-	private IResource getComponentFolderToDelete(IProject resources, SimpleUserNode next)
-	{
-		WebObjectSpecification spec = (WebObjectSpecification)next.getRealObject();
-		IContainer[] dirResource;
-		IResource resource = null;
-		OutputStream out = null;
-		InputStream in = null;
-		try
+		private IResource getComponentFolderToDelete(IProject resources, SimpleUserNode next)
 		{
-			dirResource = resources.getWorkspace().getRoot().findContainersForLocationURI(spec.getSpecURL().toURI());
-			if (dirResource.length == 1 && dirResource[0].getParent().exists()) resource = dirResource[0].getParent();
-
-			if (resource != null)
-			{
-				IResource parent = resource.getParent();
-
-				IFile m = getFile(parent);
-				m.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
-				Manifest manifest = new Manifest(m.getContents());
-				manifest.getEntries().remove(resource.getName() + "/" + resource.getName() + ".spec");
-				out = new ByteArrayOutputStream();
-				manifest.write(out);
-				in = new ByteArrayInputStream(out.toString().getBytes());
-				m.setContents(in, IResource.FORCE, new NullProgressMonitor());
-			}
-		}
-		catch (URISyntaxException e)
-		{
-			ServoyLog.logError(e);
-		}
-		catch (IOException e)
-		{
-			ServoyLog.logError(e);
-		}
-		catch (CoreException e)
-		{
-			ServoyLog.logError(e);
-		}
-		finally
-		{
+			WebObjectSpecification spec = (WebObjectSpecification)next.getRealObject();
+			IContainer[] dirResource;
+			IResource resource = null;
+			OutputStream out = null;
+			InputStream in = null;
 			try
 			{
-				if (out != null) out.close();
-				if (in != null) in.close();
+				dirResource = resources.getWorkspace().getRoot().findContainersForLocationURI(spec.getSpecURL().toURI());
+				if (dirResource.length == 1 && dirResource[0].getParent().exists()) resource = dirResource[0].getParent();
+
+				if (resource != null)
+				{
+					IResource parent = resource.getParent();
+
+					IFile m = getFile(parent);
+					m.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
+					Manifest manifest = new Manifest(m.getContents());
+					manifest.getEntries().remove(resource.getName() + "/" + resource.getName() + ".spec");
+					out = new ByteArrayOutputStream();
+					manifest.write(out);
+					in = new ByteArrayInputStream(out.toString().getBytes());
+					m.setContents(in, IResource.FORCE, new NullProgressMonitor());
+				}
+			}
+			catch (URISyntaxException e)
+			{
+				ServoyLog.logError(e);
 			}
 			catch (IOException e)
 			{
 				ServoyLog.logError(e);
 			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError(e);
+			}
+			finally
+			{
+				try
+				{
+					if (out != null) out.close();
+					if (in != null) in.close();
+				}
+				catch (IOException e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+			return resource;
 		}
-		return resource;
-	}
 
-	private IFile getFile(IResource resource)
-	{
-		String manifest = "META-INF/MANIFEST.MF";
-		if (resource instanceof IFolder) return ((IFolder)resource).getFile(manifest);
-		if (resource instanceof IProject) return ((IProject)resource).getFile(manifest);
-		return null;
+		private IFile getFile(IResource resource)
+		{
+			String manifest = "META-INF/MANIFEST.MF";
+			if (resource instanceof IFolder) return ((IFolder)resource).getFile(manifest);
+			if (resource instanceof IProject) return ((IProject)resource).getFile(manifest);
+			return null;
+
+		}
 
 	}
 

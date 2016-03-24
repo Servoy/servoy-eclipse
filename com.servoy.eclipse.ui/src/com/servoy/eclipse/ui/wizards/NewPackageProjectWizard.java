@@ -17,9 +17,13 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -90,32 +94,65 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 	@Override
 	public boolean performFinish()
 	{
-		IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(page1.getPackageName());
-		try
-		{
-			newProject.create(new NullProgressMonitor());
-			newProject.open(new NullProgressMonitor());
-			IProjectDescription description = newProject.getDescription();
-			description.setNatureIds(new String[] { ServoyNGPackageProject.NATURE_ID });
-			newProject.setDescription(description, new NullProgressMonitor());
-			IProject[] referencedProjects = page1.getReferencedProjects();
-			for (IProject iProject : referencedProjects)
-			{
-				IProjectDescription solutionProjectDescription = iProject.getDescription();
-				AddAsWebPackageAction.addReferencedProjectToDescription(newProject, solutionProjectDescription);
-				iProject.setDescription(solutionProjectDescription, new NullProgressMonitor());
-			}
-			createManifest(newProject, page1.getPackageName(), page1.getPackageType());
-		}
-		catch (CoreException e)
-		{
-			Debug.log(e);
-		}
-		catch (IOException e)
-		{
-			Debug.log(e);
-		}
+		CreatePackageProjectJob createPackageProjectJob = new CreatePackageProjectJob(page1.getPackageName(), page1.getPackageType(),
+			page1.getReferencedProjects());
+		createPackageProjectJob.schedule();
 		return true;
+	}
+
+	private class CreatePackageProjectJob extends WorkspaceJob
+	{
+
+		private final String projectName;
+		private final String packageType;
+		private final IProject[] referencedProjects;
+
+		/**
+		 * @param name
+		 */
+		public CreatePackageProjectJob(String projectName, String packageType, IProject[] referencedProjects)
+		{
+			super("Creating Package Project");
+			this.projectName = projectName;
+			this.packageType = packageType;
+			this.referencedProjects = referencedProjects;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see org.eclipse.core.resources.WorkspaceJob#runInWorkspace(org.eclipse.core.runtime.IProgressMonitor)
+		 */
+		@Override
+		public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+		{
+			IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(projectName);
+			try
+			{
+				newProject.create(new NullProgressMonitor());
+				newProject.open(new NullProgressMonitor());
+				IProjectDescription description = newProject.getDescription();
+				description.setNatureIds(new String[] { ServoyNGPackageProject.NATURE_ID });
+				newProject.setDescription(description, new NullProgressMonitor());
+				for (IProject iProject : referencedProjects)
+				{
+					IProjectDescription solutionProjectDescription = iProject.getDescription();
+					AddAsWebPackageAction.addReferencedProjectToDescription(newProject, solutionProjectDescription);
+					iProject.setDescription(solutionProjectDescription, new NullProgressMonitor());
+				}
+				createManifest(newProject, projectName, packageType);
+			}
+			catch (CoreException e)
+			{
+				Debug.log(e);
+			}
+			catch (IOException e)
+			{
+				Debug.log(e);
+			}
+			return Status.OK_STATUS;
+		}
+
 	}
 
 

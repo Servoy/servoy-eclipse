@@ -77,7 +77,7 @@ public abstract class BaseNGPackageManager
 	private final Map<String, IPackageReader> ngPackageProjectServiceReaders = new HashMap<String, IPackageReader>(); // resource name (project name) -> package reader
 
 	private ServoyNGPackageProject[] referencedNGPackageProjects;
-	private Set<String> activeSolutionReferencedProjectNames;
+	private Set<String> activeSolutionReferencedProjectNames = new HashSet<>();
 
 	private final List<INGPackageChangeListener> webResourceChangedListeners = Collections.synchronizedList(new ArrayList<INGPackageChangeListener>());
 
@@ -104,7 +104,7 @@ public abstract class BaseNGPackageManager
 	public void clearActiveSolutionReferencesCache()
 	{
 		referencedNGPackageProjects = null;
-		activeSolutionReferencedProjectNames = null;
+		activeSolutionReferencedProjectNames = new HashSet<>();
 	}
 
 	public void addNGPackagesChangedListener(INGPackageChangeListener listener)
