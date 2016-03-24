@@ -7,6 +7,7 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 			var sendChanges = function(){
 				var selection = $scope.getSelection();
 				var obj = {};
+				var refreshGhosts = false;
 				for(var i=0;i<selection.length;i++) {
 					var node = selection[i];
 					var beanModel = $scope.getBeanModel(node);
@@ -16,9 +17,9 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 					if(beanModel) {
 						if(beanModel.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM) {
 							obj[node.getAttribute("svy-id")] = {x:beanModel.location.x,y:beanModel.location.y,width:beanModel.size.width,height:beanModel.size.height}
-							
 							var part = $scope.getLastPartGhost();
 							if (part != null) obj[part.uuid] = {x:part.location.x, y:part.location.y};
+							refreshGhosts = true;
 						}
 						else
 						{
@@ -33,7 +34,15 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 						}
 					}
 				}
-				$editorService.sendChanges(obj)
+				$editorService.sendChanges(obj);
+				
+				if (refreshGhosts)
+				{
+					var promise = $editorService.getGhostComponents();
+					promise.then(function(result) {
+						$scope.setGhosts(result);
+					});
+				}
 			}
 			var mousemovecallback;
 			var mouseupcallback, mouseleavecallback;
@@ -60,7 +69,7 @@ angular.module('resizeknobs',[]).directive("resizeknobs", function($window,EDITO
 							x: event.screenX,
 							y: event.screenY
 						}
-					var resizeSelection = function(ev){
+					var resizeSelection = function(ev){					
 						var selection = $scope.getSelection();
 						var deltaX = ev.screenX - lastresizeStartPosition.x;
 						var deltaY = ev.screenY - lastresizeStartPosition.y;
