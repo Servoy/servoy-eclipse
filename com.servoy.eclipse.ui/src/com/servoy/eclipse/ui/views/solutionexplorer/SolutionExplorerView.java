@@ -2753,7 +2753,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInListPrimary.registerAction(UserNodeType.VALUELISTS, newValueList);
 		newActionInListPrimary.registerAction(UserNodeType.MEDIA, importMedia);
 		newActionInListPrimary.registerAction(UserNodeType.MEDIA_FOLDER, importMedia);
-		newActionInListPrimary.registerAction(UserNodeType.SERVER, new NewTableAction(null));
+		newActionInListPrimary.registerAction(UserNodeType.SERVER, new NewTableAction(this));
 		newActionInListPrimary.registerAction(UserNodeType.COMPONENT, newComponentResource);
 		newActionInListPrimary.registerAction(UserNodeType.SERVICE, newComponentResource);
 
