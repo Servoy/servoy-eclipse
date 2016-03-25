@@ -170,7 +170,9 @@ angular.module('editorContent',['servoyApp'])
     right: "0px",
     top: "0px",
     bottom: "0px",
-    overflow: "hidden"
+    overflow: "hidden",
+    "overflow-x": "hidden",
+    "overflow-y": "hidden"
   }
 
   $scope.removeComponent = function(name) {
