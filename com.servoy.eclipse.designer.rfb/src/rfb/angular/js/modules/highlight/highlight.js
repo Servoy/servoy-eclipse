@@ -39,7 +39,10 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 					//get to the first dom element that is a servoy component or layoutContainer
 					while (node.parentElement && !node.getAttribute("svy-id")) node = node.parentElement;
 					if (!angular.element(node).hasClass("inheritedElement")) {
-							highlightDiv.style.cursor = "pointer";
+							if (!utils.getDraggingFromPallete())
+							{
+								highlightDiv.style.cursor = "pointer";
+							}	
 							highlightDiv.style.outline = "";
 					}
 					else {

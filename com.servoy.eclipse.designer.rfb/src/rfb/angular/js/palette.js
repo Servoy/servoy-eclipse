@@ -110,11 +110,11 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 
 							var canDrop = utils.getDropNode(type, topContainer, layoutName, ev, componentName);
 							if (!canDrop.dropAllowed) {
-								$scope.glasspane.style.cursor = "no-drop";
-							} else $scope.glasspane.style.cursor = "";
+								$scope.glasspane.style.cursor = "not-allowed";
+							} else $scope.glasspane.style.cursor = "pointer";
 
 							if (canDrop.dropTarget && !$scope.isAbsoluteFormLayout() && angularElement) {
-								if ($scope.glasspane.style.cursor == "") {
+								if ($scope.glasspane.style.cursor == "pointer") {
 
 									if (t) clearTimeout(t);
 									t = setTimeout(function() {

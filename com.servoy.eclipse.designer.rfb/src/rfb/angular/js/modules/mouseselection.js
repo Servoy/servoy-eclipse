@@ -412,7 +412,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 					for (var i = 0; i < fromList.length; i++) {
 						var element = fromList[i]
 						var rect = element.getBoundingClientRect();
-						if(this.isUnknownElement(element) && element.firstElementChild && !this.isUnknownElement(element.firstElementChild)) {
+						if(this.isUnknownElement(element) && !element.clientWidth && !element.clientHeight && element.firstElementChild && !this.isUnknownElement(element.firstElementChild)) {
 							rect = element.firstElementChild.getBoundingClientRect();
 						}
 						var left = rect.left;
