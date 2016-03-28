@@ -558,8 +558,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				position: "absolute",
 				top: "20px",
 				left: "20px",
-				minWidth: "992px",
-				bottom: "0px"
+				right: "20px",
+				bottom: "20px"
 			};
 			$scope.glasspaneStyle = {};
 
@@ -571,6 +571,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				delete $scope.contentStyle.position;
 				delete $scope.contentStyle.minWidth;
 				delete $scope.contentStyle.bottom;
+				delete $scope.contentStyle.right;
 				delete $scope.contentStyle.h
 				delete $scope.contentStyle.w
 				adjustGlassPaneSize(width, height);
@@ -580,8 +581,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					position: "absolute",
 					top: "20px",
 					left: "20px",
-					minWidth: "992px",
-					bottom: "0px"
+					right: "20px",
+					bottom: "20px"
 				};
 				delete $scope.contentStyle.width;
 				delete $scope.contentStyle.height;
@@ -694,8 +695,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				} else {
 					var contentDiv = $($scope.contentDocument).find('.svy-form')[0];
 					if (contentDiv) {
-						$scope.glasspaneStyle.width = contentDiv.clientWidth + 20 + 'px';
-						$scope.glasspaneStyle.height = contentDiv.clientHeight + 20 + 'px';
+						$scope.glasspaneStyle.width = (contentDiv.offsetWidth +20) + 'px';
+						$scope.glasspaneStyle.height = (contentDiv.offsetHeight + 20) + 'px';
 					}
 				}
 			}
