@@ -195,8 +195,7 @@ public class MemServer implements IServerInternal, IServer
 	@Override
 	public boolean hasTable(String tableName) throws RepositoryException
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return tables.containsKey(tableName);
 	}
 
 

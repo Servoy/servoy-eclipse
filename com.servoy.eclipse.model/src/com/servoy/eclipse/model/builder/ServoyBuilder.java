@@ -76,6 +76,8 @@ import com.servoy.eclipse.model.builder.MarkerMessages.ServoyMarker;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.extensions.IMarkerAttributeContributor;
 import com.servoy.eclipse.model.extensions.IServoyModel;
+import com.servoy.eclipse.model.inmemory.MemServer;
+import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
@@ -311,6 +313,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String DEPRECATED_ELEMENT_USAGE = _PREFIX + ".deprecatedElementUsage";
 	public static final String ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE = _PREFIX + ".elementExtendsDeletedElement";
 	public static final String LINGERING_TABLE_FILES_TYPE = _PREFIX + ".lingeringTableFiles";
+	public static final String DUPLICATE_MEM_TABLE_TYPE = _PREFIX + ".duplicateMemTable";
 
 
 	// warning/error level settings keys/defaults
@@ -384,6 +387,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> DBI_COLUMN_INFO_SEQ_TYPE_OVERRIDE = new Pair<String, ProblemSeverity>("DBIColumnSequenceTypeOverride",
 		ProblemSeverity.WARNING);
 	public static final Pair<String, ProblemSeverity> LINGERING_TABLE_FILES = new Pair<String, ProblemSeverity>("LingeringTableFiles", ProblemSeverity.ERROR);
+	public static final Pair<String, ProblemSeverity> DUPLICATE_MEM_TABLE = new Pair<String, ProblemSeverity>("DuplicateMemTable", ProblemSeverity.ERROR);
 
 	// column problems
 	public final static Pair<String, ProblemSeverity> COLUMN_UUID_FLAG_NOT_SET = new Pair<String, ProblemSeverity>("ColumnUUIDFlagNotSet",
@@ -1804,6 +1808,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, DEPRECATED_ELEMENT_USAGE);
 		deleteMarkers(project, ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE);
 		deleteMarkers(project, LINGERING_TABLE_FILES_TYPE);
+		deleteMarkers(project, DUPLICATE_MEM_TABLE_TYPE);
 
 		try
 		{
@@ -5418,33 +5423,65 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		{
 			final DataModelManager dm = getServoyModel().getDataModelManager();
 			ServoyProject[] modules = ServoyModelFinder.getServoyModel().getModulesOfActiveProjectWithImportHooks();
+			final Map<String, MemTable> memTables = new HashMap<>();
+
 			IPersistVisitor visitor = new IPersistVisitor()
 			{
 
 				@Override
 				public Object visit(IPersist o)
 				{
-					if (o instanceof TableNode && DataSourceUtils.getDBServernameTablename(((TableNode)o).getDataSource()) != null)
+					if (o instanceof TableNode)
 					{
 						TableNode node = (TableNode)o;
-						if (node.getDataSource().startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON)) return CONTINUE_TRAVERSAL;
-						IFile f = dm.getDBIFile(node.getDataSource());
-						if (f == null || !f.exists())
+						if (DataSourceUtils.getDBServernameTablename(((TableNode)o).getDataSource()) == null)
 						{
-							String parentName = ((Solution)node.getParent()).getSolutionMetaData().getName();
-							ServoyMarker mk = MarkerMessages.LingeringTableFiles.fill(node.getTableName());
-							IMarker marker = addMarker(getServoyModel().getServoyProject(parentName).getProject(), mk.getType(), mk.getText(), -1,
-								LINGERING_TABLE_FILES, IMarker.PRIORITY_NORMAL, null, node);
-							try
+							if (node.getDataSource().startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON))
 							{
-								marker.setAttribute("Uuid", node.getUUID().toString());
-								marker.setAttribute("SolutionName", parentName);
+								try
+								{
+									String solutionName = ((Solution)node.getParent()).getName();
+									ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
+									MemServer memServer = servoyProject.getMemServer();
+									MemTable table = memServer.getTable(node.getTableName());
+									if (memTables.containsKey(node.getTableName()))
+									{
+										if (memServer.hasTable(node.getTableName()))
+										{
+											ServoyMarker mk = MarkerMessages.DuplicateMemTable.fill(node.getTableName(),
+												memTables.get(node.getTableName()).getParent().getServoyProject().getSolution().getName(), solutionName);
+											addMarker(servoyProject.getProject(), mk.getType(), mk.getText(), -1, DUPLICATE_MEM_TABLE, IMarker.PRIORITY_NORMAL,
+												null, node);
+											return CONTINUE_TRAVERSAL;
+										}
+									}
+									memTables.put(node.getTableName(), table);
+								}
+								catch (Exception e)
+								{
+									Debug.error(e);
+								}
 							}
-							catch (CoreException e)
+						}
+						else
+						{
+							IFile f = dm.getDBIFile(node.getDataSource());
+							if (f == null || !f.exists())
 							{
-								Debug.error(e);
+								String parentName = ((Solution)node.getParent()).getSolutionMetaData().getName();
+								ServoyMarker mk = MarkerMessages.LingeringTableFiles.fill(node.getTableName());
+								IMarker marker = addMarker(getServoyModel().getServoyProject(parentName).getProject(), mk.getType(), mk.getText(), -1,
+									LINGERING_TABLE_FILES, IMarker.PRIORITY_NORMAL, null, node);
+								try
+								{
+									marker.setAttribute("Uuid", node.getUUID().toString());
+									marker.setAttribute("SolutionName", parentName);
+								}
+								catch (CoreException e)
+								{
+									Debug.error(e);
+								}
 							}
-
 						}
 					}
 					if (o instanceof Form)
