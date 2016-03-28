@@ -40,15 +40,19 @@ angular.module('designsize',['toolbar','editor']).run(function($rootScope, $tool
 		};
 
 	var btnCustomSize = {
-			text: "240x480",
+			text: "Stretch",
+			tooltip: "Switch landscape/portrait mode",
 			enabled: true,
 			onclick: function(selection) {
 				if(lastClicked == selection) isPortrait = !isPortrait;
 				var s = selection.split("x");
-				if(isPortrait) 
-					editor.setContentSize(s[0] + "px", s[1] + "px");
-				else
-					editor.setContentSize(s[1] + "px", s[0] + "px");
+				if (s.length == 2)
+				{
+					if(isPortrait) 
+						editor.setContentSize(s[0] + "px", s[1] + "px");
+					else
+						editor.setContentSize(s[1] + "px", s[0] + "px");
+				}
 				lastClicked = selection;
 			},
 			list: ["240x480", "480x640"],
