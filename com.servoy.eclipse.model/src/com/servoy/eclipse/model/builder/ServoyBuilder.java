@@ -3232,8 +3232,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											{
 												ServoyLog.logError(e);
 											}
-											vlWithUnstoredCalcError =
-											/**/isUnstoredCalc(vl.getDataProviderID1(), table, fieldFlattenedSolution) || //
+											vlWithUnstoredCalcError = /**/isUnstoredCalc(vl.getDataProviderID1(), table, fieldFlattenedSolution) || //
 												isUnstoredCalc(vl.getDataProviderID2(), table, fieldFlattenedSolution) || //
 												isUnstoredCalc(vl.getDataProviderID3(), table, fieldFlattenedSolution);
 										}
@@ -3265,8 +3264,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 												{
 													ServoyLog.logError(e);
 												}
-												vlWithUnstoredCalcError =
-												/**/isUnstoredCalc(fallback.getDataProviderID1(), table, fieldFlattenedSolution) || //
+												vlWithUnstoredCalcError = /**/isUnstoredCalc(fallback.getDataProviderID1(), table, fieldFlattenedSolution) || //
 													isUnstoredCalc(fallback.getDataProviderID2(), table, fieldFlattenedSolution) || //
 													isUnstoredCalc(fallback.getDataProviderID3(), table, fieldFlattenedSolution);
 											}
@@ -5434,37 +5432,9 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					if (o instanceof TableNode)
 					{
 						TableNode node = (TableNode)o;
-						if (DataSourceUtils.getDBServernameTablename(((TableNode)o).getDataSource()) == null)
+						if (DataSourceUtils.getDBServernameTablename(node.getDataSource()) != null)
 						{
-							if (node.getDataSource().startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON))
-							{
-								try
-								{
-									String solutionName = ((Solution)node.getParent()).getName();
-									ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
-									MemServer memServer = servoyProject.getMemServer();
-									MemTable table = memServer.getTable(node.getTableName());
-									if (memTables.containsKey(node.getTableName()))
-									{
-										if (memServer.hasTable(node.getTableName()))
-										{
-											ServoyMarker mk = MarkerMessages.DuplicateMemTable.fill(node.getTableName(),
-												memTables.get(node.getTableName()).getParent().getServoyProject().getSolution().getName(), solutionName);
-											addMarker(servoyProject.getProject(), mk.getType(), mk.getText(), -1, DUPLICATE_MEM_TABLE, IMarker.PRIORITY_NORMAL,
-												null, node);
-											return CONTINUE_TRAVERSAL;
-										}
-									}
-									memTables.put(node.getTableName(), table);
-								}
-								catch (Exception e)
-								{
-									Debug.error(e);
-								}
-							}
-						}
-						else
-						{
+
 							IFile f = dm.getDBIFile(node.getDataSource());
 							if (f == null || !f.exists())
 							{
@@ -5482,6 +5452,33 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									Debug.error(e);
 								}
 							}
+						}
+						else if (node.getDataSource().startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON))
+						{
+							try
+							{
+								String solutionName = ((Solution)node.getParent()).getName();
+								ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
+								MemServer memServer = servoyProject.getMemServer();
+								MemTable table = memServer.getTable(node.getTableName());
+								if (memTables.containsKey(node.getTableName()))
+								{
+									if (memServer.hasTable(node.getTableName()))
+									{
+										ServoyMarker mk = MarkerMessages.DuplicateMemTable.fill(node.getTableName(),
+											memTables.get(node.getTableName()).getParent().getServoyProject().getSolution().getName(), solutionName);
+										addMarker(servoyProject.getProject(), mk.getType(), mk.getText(), -1, DUPLICATE_MEM_TABLE, IMarker.PRIORITY_NORMAL,
+											null, node);
+										return CONTINUE_TRAVERSAL;
+									}
+								}
+								memTables.put(node.getTableName(), table);
+							}
+							catch (Exception e)
+							{
+								Debug.error(e);
+							}
+
 						}
 					}
 					if (o instanceof Form)
