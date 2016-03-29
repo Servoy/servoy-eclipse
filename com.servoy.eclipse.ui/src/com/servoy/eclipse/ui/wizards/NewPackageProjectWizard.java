@@ -50,7 +50,7 @@ import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
+import com.servoy.eclipse.core.ngpackages.NGPackageManager;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.dialogs.FilteredTreeViewer;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
@@ -62,8 +62,6 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddAsWebPackageActio
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.util.Debug;
-
-import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
 
 public class NewPackageProjectWizard extends Wizard implements INewWizard
 {
@@ -128,14 +126,9 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 		@Override
 		public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 		{
-			IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(projectName);
 			try
 			{
-				newProject.create(new NullProgressMonitor());
-				newProject.open(new NullProgressMonitor());
-				IProjectDescription description = newProject.getDescription();
-				description.setNatureIds(new String[] { ServoyNGPackageProject.NATURE_ID, JsonSchemaValidationNature.NATURE_ID });
-				newProject.setDescription(description, new NullProgressMonitor());
+				IProject newProject = NGPackageManager.createProject(projectName);
 				for (IProject iProject : referencedProjects)
 				{
 					IProjectDescription solutionProjectDescription = iProject.getDescription();

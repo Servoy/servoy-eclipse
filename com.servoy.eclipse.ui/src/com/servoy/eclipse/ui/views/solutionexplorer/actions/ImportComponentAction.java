@@ -17,57 +17,31 @@
 
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 
-import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
-import com.servoy.eclipse.core.util.UIUtils.ScrollableDialog;
-import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.nature.ServoyResourcesProject;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
-import com.servoy.j2db.util.Pair;
 
 /**
- * @author gganea@servoy.com
+ * @author gboros
  *
  */
-public class ImportComponentAction extends Action
+public abstract class ImportComponentAction extends Action
 {
-
 	protected final SolutionExplorerView viewer;
-	private int overrideReturnCode;
 	protected final String entity;
-	protected final String folder;
 
-	public ImportComponentAction(SolutionExplorerView viewer, String entity, String folder)
+	public ImportComponentAction(SolutionExplorerView viewer, String entity)
 	{
 		this.viewer = viewer;
 		this.entity = entity;
-		this.folder = folder;
 		setImageDescriptor(Activator.loadImageDescriptorFromOldLocations("import.gif"));
 		setText("Import " + entity + " jar package");
 		setToolTipText(getText());
@@ -86,14 +60,11 @@ public class ImportComponentAction extends Action
 		String[] fileNames = fd.getFileNames();
 		String filterPath = fd.getFilterPath();
 
-		checkIfOverwriteAndDoImport(fileNames, filterPath);
+		checkForDefaultPackageNameConflict(fileNames);
+		doImport(fileNames, filterPath);
 	}
 
-	/**
-	 * @param fileNames
-	 * @param filterPath
-	 */
-	protected void checkIfOverwriteAndDoImport(String[] fileNames, String filterPath)
+	protected void checkForDefaultPackageNameConflict(String[] fileNames)
 	{
 		if (fileNames == null || fileNames.length == 0)
 		{
@@ -108,211 +79,7 @@ public class ImportComponentAction extends Action
 				return;
 			}
 		}
-		overrideReturnCode = IDialogConstants.YES_TO_ALL_ID;
-
-		final List<String> existingComponents = existingComponents(fileNames);
-
-		if (!existingComponents.isEmpty())
-		{
-			UIUtils.runInUI(new Runnable()
-			{
-				public void run()
-				{
-					ScrollableDialog dialog = new ScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.ERROR, "Error",
-						"The folowing " + entity + " files already exist: ", existingComponents.toString());
-					List<Pair<Integer, String>> buttonsAndLabels = new ArrayList<Pair<Integer, String>>();
-					buttonsAndLabels.add(new Pair<Integer, String>(IDialogConstants.YES_TO_ALL_ID, "Overwrite all"));
-					buttonsAndLabels.add(new Pair<Integer, String>(IDialogConstants.CANCEL_ID, "Cancel"));
-					dialog.setCustomBottomBarButtons(buttonsAndLabels);
-					//shell.setSize(400, 500);
-					overrideReturnCode = dialog.open();
-				}
-			}, true);
-		}
-		if (overrideReturnCode == IDialogConstants.YES_TO_ALL_ID) addComponents(filterPath, fileNames);
 	}
 
-	/**
-	 * @param fileNames
-	 */
-	private void addComponents(String filterPath, String[] fileNames)
-	{
-		IFolder componentsFolder = checkComponentsFolderCreated();
-		for (String fileName : fileNames)
-		{
-			File javaFile = new File(filterPath + File.separator + fileName);
-			if (javaFile.exists())
-			{
-				if (javaFile.isDirectory())
-				{
-					File[] importFolderEntries = getImportFolderEntries(javaFile);
-					if (importFolderEntries.length > 0)
-					{
-						deleteFolderIfWeAlreadyHaveIt(componentsFolder, javaFile);
-						importFolderComponent(componentsFolder, javaFile, false);
-						IFolder packageFolder = componentsFolder.getFolder(new Path(javaFile.getName()));
-						for (File f : importFolderEntries)
-						{
-							importFolderComponent(packageFolder, f, true);
-						}
-					}
-				}
-				else if (javaFile.isFile())
-				{
-					importZipFileComponent(componentsFolder, javaFile);
-				}
-			}
-		}
-
-	}
-
-	protected File[] getImportFolderEntries(File importFolder)
-	{
-		return importFolder.listFiles();
-	}
-
-	/**
-	 * @param componentsFolder
-	 */
-	private void deleteFolderIfWeAlreadyHaveIt(IFolder componentsFolder, File javaFile)
-	{
-		IFolder newFolder = componentsFolder.getFolder(new Path(javaFile.getName()));
-		try
-		{
-			newFolder.delete(true, new NullProgressMonitor());
-		}
-		catch (CoreException e)
-		{
-			ServoyLog.logError(e);
-		}
-	}
-
-	/**
-	 * @param javaFile
-	 */
-	private void importZipFileComponent(IFolder componentsFolder, File javaFile)
-	{
-		IFile eclipseFile = componentsFolder.getFile(javaFile.getName());
-
-		if (eclipseFile.exists())
-		{
-			try
-			{
-				eclipseFile.delete(true, new NullProgressMonitor());
-			}
-			catch (CoreException e)
-			{
-				e.printStackTrace();
-			}
-		}
-		eclipseFile = componentsFolder.getFile(javaFile.getName());
-		InputStream source;
-		try
-		{
-			source = new FileInputStream(javaFile);
-			eclipseFile.create(source, IResource.NONE, null);
-		}
-		catch (FileNotFoundException e)
-		{
-			ServoyLog.logError(e);
-		}
-		catch (CoreException e)
-		{
-			ServoyLog.logError(e);
-		}
-
-	}
-
-	private List<String> existingComponents(String[] fileNames)
-	{
-		List<String> existing = new ArrayList<String>();
-		List<String> incoming = Arrays.asList(fileNames);
-
-		IProject project = getResourcesProject();
-		if (project.getFolder(folder).exists())
-		{
-			try
-			{
-				IResource[] members = project.getFolder(folder).members();
-				for (IResource iResource : members)
-				{
-					if (incoming.contains(iResource.getName())) existing.add(iResource.getName());
-				}
-			}
-			catch (CoreException e)
-			{
-				ServoyLog.logError(e);
-			}
-		}
-		return existing;
-	}
-
-	/**
-	 * @param javaFile
-	 */
-	private void importFolderComponent(IFolder componentsFolder, File javaFile, boolean isImportChildFolders)
-	{
-		if (javaFile.isDirectory())
-		{
-			IFolder newFolder = componentsFolder.getFolder(new Path(javaFile.getName()));
-			try
-			{
-				newFolder.create(true, true, new NullProgressMonitor());
-			}
-			catch (CoreException e)
-			{
-				ServoyLog.logError(e);
-			}
-
-			if (isImportChildFolders)
-			{
-				for (File file : javaFile.listFiles())
-				{
-					importFolderComponent(newFolder, file, isImportChildFolders);
-				}
-			}
-		}
-		else if (javaFile.isFile()) importZipFileComponent(componentsFolder, javaFile);
-	}
-
-	/**
-	 *
-	 */
-	private IFolder checkComponentsFolderCreated()
-	{
-		IProject project = getResourcesProject();
-
-		try
-		{
-			project.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
-		}
-		catch (CoreException e1)
-		{
-			e1.printStackTrace();
-		}
-		IFolder folder = project.getFolder(this.folder);
-		if (!folder.exists())
-		{
-			try
-			{
-				folder.create(true, true, new NullProgressMonitor());
-			}
-			catch (CoreException e)
-			{
-				ServoyLog.logError(e);
-			}
-		}
-		return folder;
-	}
-
-	/**
-	 * @return
-	 */
-	private IProject getResourcesProject()
-	{
-		ServoyProject initialActiveProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		ServoyResourcesProject resourcesProject = initialActiveProject.getResourcesProject();
-		IProject project = resourcesProject.getProject();
-		return project;
-	}
+	protected abstract void doImport(String[] fileNames, String filterPath);
 }

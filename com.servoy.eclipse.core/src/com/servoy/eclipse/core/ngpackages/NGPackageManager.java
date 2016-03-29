@@ -21,7 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -43,6 +45,8 @@ import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
+
+import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
 
 /**
  * A class for managing the loaded NG custom web components and services when developer is run as UI (so not jos as a command line app that works on the workspace).
@@ -200,4 +204,15 @@ public class NGPackageManager extends BaseNGPackageManager
 		return PlatformUI.getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.packages.enable." + packageName);
 	}
 
+	public static IProject createProject(String name) throws CoreException
+	{
+		IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(name);
+		newProject.create(new NullProgressMonitor());
+		newProject.open(new NullProgressMonitor());
+		IProjectDescription description = newProject.getDescription();
+		description.setNatureIds(new String[] { ServoyNGPackageProject.NATURE_ID, JsonSchemaValidationNature.NATURE_ID });
+		newProject.setDescription(description, new NullProgressMonitor());
+
+		return newProject;
+	}
 }

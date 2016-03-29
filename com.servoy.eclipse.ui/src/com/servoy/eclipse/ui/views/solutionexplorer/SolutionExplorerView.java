@@ -2674,10 +2674,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		renameMediaFolderAction = new RenameMediaFolderAction(this);
 		movePersistAction = new MovePersistAction(this.getSite().getShell());
 		duplicatePersistAction = new DuplicatePersistAction(this.getSite().getShell());
-		IAction importComponent = new ImportComponentAction(this, "component", "components");
-		IAction importService = new ImportComponentAction(this, "service", "services");
-		IAction importComponentFolder = new ImportComponentFolderAction(this, "component", "components", "Web-Component");
-		IAction importServicesFolder = new ImportComponentFolderAction(this, "services", "services", "Web-Service");
+		IAction importComponent = new ImportComponentAsZipAction(this, "component", "components");
+		IAction importService = new ImportComponentAsZipAction(this, "service", "services");
+		IAction importComponentAsProject = new ImportComponentAsProjectAction(this, "component");
 		IAction newComponentAction = new NewComponentAction(this, getSite().getShell(), "Component", "Create new component");
 		IAction newLayoutAction = new NewComponentAction(this, getSite().getShell(), "Layout", "Create new layout");
 		IAction newServiceAction = new NewComponentAction(this, getSite().getShell(), "Service", "Create new service");
@@ -2712,11 +2711,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_PACKAGE, newServiceAction);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newComponentAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, newServiceAction);
+		newActionInTreePrimary.registerAction(UserNodeType.ALL_WEB_PACKAGES, importComponentAsProject);
 
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA_FOLDER, importMediaFolder);
-		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS, importComponentFolder);
-		newActionInTreeSecondary.registerAction(UserNodeType.SERVICES, importServicesFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS_PACKAGE, newLayoutAction);
 		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newLayoutAction);
 		createActionInTree.registerAction(UserNodeType.COMPONENTS, newComponentPackageAction);
