@@ -63,6 +63,8 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.util.Debug;
 
+import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
+
 public class NewPackageProjectWizard extends Wizard implements INewWizard
 {
 
@@ -132,7 +134,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 				newProject.create(new NullProgressMonitor());
 				newProject.open(new NullProgressMonitor());
 				IProjectDescription description = newProject.getDescription();
-				description.setNatureIds(new String[] { ServoyNGPackageProject.NATURE_ID });
+				description.setNatureIds(new String[] { ServoyNGPackageProject.NATURE_ID, JsonSchemaValidationNature.NATURE_ID });
 				newProject.setDescription(description, new NullProgressMonitor());
 				for (IProject iProject : referencedProjects)
 				{
