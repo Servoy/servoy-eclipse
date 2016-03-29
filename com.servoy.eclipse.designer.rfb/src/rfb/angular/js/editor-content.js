@@ -432,6 +432,9 @@ angular.module('editorContent',['servoyApp'])
             	  }
             	  else {
             		  shouldGetTemplate = false;
+            		  for (attribute in data.containers[key]) {
+                          element.attr(attribute,data.containers[key][attribute]);
+                      }
             	  }
               }              
 
