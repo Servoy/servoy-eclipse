@@ -408,6 +408,37 @@ public class DesignerFilter implements Filter
 
 				return;
 			}
+			else if (uri != null && uri.endsWith("formplaceholder.html"))
+			{
+				if (servletResponse instanceof HttpServletResponse)
+				{
+					HTTPUtils.setNoCacheHeaders((HttpServletResponse)servletResponse);
+					((HttpServletResponse)servletResponse).setContentType("text/html");
+				}
+				String width = "350px";
+				String height = "200px";
+				if (formName != null)
+				{
+					FlattenedSolution fl = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
+					Form form = fl.getForm(formName);
+					if (form != null)
+					{
+						if (!form.isResponsiveLayout())
+						{
+							width = form.getSize().width + "px";
+							height = form.getSize().height + "px";
+						}
+						else
+						{
+							width = "100%";
+						}
+					}
+				}
+				if (formName == null) formName = "";
+				PrintWriter w = servletResponse.getWriter();
+				w.write("<div style=\"height:" + height + ";width:" + width + ";background-color:#e6e6e6;\">" + formName + "</div>");
+				return;
+			}
 
 			filterChain.doFilter(request, servletResponse);
 		}

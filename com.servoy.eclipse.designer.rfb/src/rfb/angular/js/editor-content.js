@@ -262,7 +262,7 @@ angular.module('editorContent',['servoyApp'])
       return null;
     },
     getFormUrl: function(formUrl) {
-      return null;
+      return "/designer/formplaceholder.html?formName="+formUrl;
     },
     startEdit: function(propertyName) {},
     apply: function(propertyName) {},
