@@ -33,6 +33,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ngpackages.NGPackageManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.util.Utils;
 
@@ -76,7 +77,7 @@ public class ImportComponentAsProjectAction extends ImportComponentAction
 					String fileName = ze.getName();
 					if (ze.isDirectory())
 					{
-						newProject.getFolder(fileName).create(true, true, new NullProgressMonitor());
+						WorkspaceFileAccess.mkdirs(newProject.getFolder(fileName));
 					}
 					else
 					{
@@ -84,6 +85,7 @@ public class ImportComponentAsProjectAction extends ImportComponentAction
 						BufferedInputStream bis = new BufferedInputStream(zis);
 						Utils.streamCopy(bis, bos);
 						IFile newFile = newProject.getFile(fileName);
+						WorkspaceFileAccess.mkdirs(newFile.getParent());
 						newFile.create(new ByteArrayInputStream(bos.toByteArray()), true, new NullProgressMonitor());
 						bos.close();
 					}
