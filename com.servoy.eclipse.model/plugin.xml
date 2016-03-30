@@ -567,7 +567,7 @@
             type="com.servoy.eclipse.core.servoyProblem">
       </super>
       <persistent
-            value="false">
+            value="true">
       </persistent>
    </extension>
    <extension
@@ -578,7 +578,7 @@
             type="com.servoy.eclipse.core.servoyProblem">
       </super>
       <persistent
-            value="false">
+            value="true">
       </persistent>
    </extension>
    <extension
