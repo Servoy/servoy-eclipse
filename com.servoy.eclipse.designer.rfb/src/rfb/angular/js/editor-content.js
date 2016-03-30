@@ -314,6 +314,32 @@ angular.module('editorContent',['servoyApp'])
     } else
       parent.append(tpl)
   }
+  
+  function updateElementIfParentChange(elementId, updateData, getTemplateParam) {
+    var elementTemplate = angular.element('[svy-id="' + elementId + '"]');
+    var shouldGetTemplate = true;
+    if(elementTemplate.length) {
+    	var domParentUUID = elementTemplate.parent('[svy-id]').attr('svy-id');
+    	var currentParentUUID = updateData.childParentMap[elementId].uuid;
+    	if(domParentUUID != currentParentUUID ||
+    		((updateData.childParentMap[elementId].index > -1) && (updateData.childParentMap[elementId].index != elementTemplate.index()))) {
+    		elementTemplate.remove();
+    	}
+    	else {
+    		shouldGetTemplate = false;
+    	}
+    }
+    
+    if (shouldGetTemplate) {
+      var promise = $sabloApplication.callService("$editor", "getTemplate", getTemplateParam, false);
+      promise.then(handleTemplate)
+      return null;
+    }
+    else {
+      return elementTemplate;
+    }
+  }
+  
   return {
     refreshDecorators: function() {
       renderDecorators();
@@ -375,28 +401,9 @@ angular.module('editorContent',['servoyApp'])
             } else {
               formData.components[name] = newCompData;
             }
-           
-            var elementTemplate = angular.element('[svy-id="' + name + '"]');
-            var shouldGetTemplate = true;
-            if(elementTemplate.length) {
-            	var domParentUUID = elementTemplate.parent('[svy-id]').attr('svy-id');
-            	var currentParentUUID = data.childParentMap[name].uuid;
-            	if(domParentUUID != currentParentUUID ||
-            		((data.childParentMap[name].index > -1) && (data.childParentMap[name].index != elementTemplate.index()))) {
-            		elementTemplate.remove();
-            	}
-            	else {
-            		shouldGetTemplate = false;
-            	}
-            }
-            
-            if (shouldGetTemplate) {
-              var promise = $sabloApplication.callService("$editor", "getTemplate", {
-                name: name
-              }, false);
-              promise.then(handleTemplate)
 
-            }
+            updateElementIfParentChange(name, data, { name: name });
+
             var compLayout = layoutData[name];
             if (compLayout) {
               compLayout.left = newCompData.location.x + "px";
@@ -421,28 +428,11 @@ angular.module('editorContent',['servoyApp'])
           }
           if (data.containers) {
             for (var key in data.containers) {
-              var element = angular.element(document.querySelectorAll("[svy-id='" + key + "']"));
-              var shouldGetTemplate = true;
-              if(element.length) {
-            	  var domParentUUID = element.parent('[svy-id]').attr('svy-id');
-            	  var currentParentUUID = data.childParentMap[key].uuid;
-            	  if(domParentUUID != currentParentUUID ||
-            	  	((data.childParentMap[key].index > -1) && (data.childParentMap[key].index != element.index()))) {
-            		  element.remove();
-            	  }
-            	  else {
-            		  shouldGetTemplate = false;
-            		  for (attribute in data.containers[key]) {
-                          element.attr(attribute,data.containers[key][attribute]);
-                      }
-            	  }
-              }              
-
-              if (shouldGetTemplate) {
-                var promise = $sabloApplication.callService("$editor", "getTemplate", {
-                  layoutId: key
-                }, false);
-                promise.then(handleTemplate)
+              var element = updateElementIfParentChange(key, data, { layoutId: key });
+              if(element) {
+        		  for (attribute in data.containers[key]) {
+                      element.attr(attribute,data.containers[key][attribute]);
+                  }
               }
             }
           }
