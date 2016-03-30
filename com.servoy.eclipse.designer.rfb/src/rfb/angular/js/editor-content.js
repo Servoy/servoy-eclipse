@@ -319,7 +319,7 @@ angular.module('editorContent',['servoyApp'])
     var elementTemplate = angular.element('[svy-id="' + elementId + '"]');
     var shouldGetTemplate = true;
     if(elementTemplate.length) {
-    	var domParentUUID = elementTemplate.parent('[svy-id]').attr('svy-id');
+    	var domParentUUID = elementTemplate.parent().closest('[svy-id]').attr('svy-id');
     	var currentParentUUID = updateData.childParentMap[elementId].uuid;
     	if(domParentUUID != currentParentUUID ||
     		((updateData.childParentMap[elementId].index > -1) && (updateData.childParentMap[elementId].index != elementTemplate.index()))) {

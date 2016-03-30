@@ -415,7 +415,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				writer.key(p.getUUID().toString());
 				writer.object();
 				writer.key("uuid");
-				writer.value(parent.getUUID().toString());
+				if (parent instanceof Form)
+				{
+					writer.value(null);
+				}
+				else
+				{
+					writer.value(parent.getUUID().toString());
+				}
 				writer.key("index");
 				if (parent instanceof LayoutContainer)
 				{
