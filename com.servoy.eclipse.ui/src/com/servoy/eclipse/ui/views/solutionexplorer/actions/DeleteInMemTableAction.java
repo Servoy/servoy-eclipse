@@ -18,6 +18,8 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.rmi.RemoteException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -33,15 +35,22 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ListDialog;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils.YesYesToAllNoNoToAllAsker;
+import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
@@ -113,20 +122,43 @@ public class DeleteInMemTableAction extends Action implements ISelectionChangedL
 									if (flatSolution != null)
 									{
 										Iterator<TableNode> tableNodes = flatSolution.getTableNodes(table);
-										// skip one, there is always 1 of the original table
-										if (tableNodes.hasNext()) tableNodes.next();
 
-										if (tableNodes.hasNext())
+										// first check if there are duplicate definitions
+										boolean duplicateDefinitionFound = false;
+										boolean definitionFound = false;
+										boolean askUser = false;
+										while (tableNodes.hasNext())
 										{
-											YesYesToAllNoNoToAllAsker deleteEACAsker = new YesYesToAllNoNoToAllAsker(shell, getText());
-											deleteEACAsker.setMessage(
-												"Table events, aggregattions and/or calculations exist for table '" + selectedTable.getTableName() +
-													"' in the active solution and/or modules.\nDo you still want to delete the table?");
-											// we have tableNode(s)... ask user if these should be deleted as well
-											if (!deleteEACAsker.userSaidYes())
+											if (tableNodes.next().getColumns() != null)
 											{
+												if (definitionFound) duplicateDefinitionFound = true;
+												else definitionFound = true;
+											}
+											else
+											{
+												askUser = true;
+											}
+										}
+										if (askUser)
+										{
+											if (duplicateDefinitionFound)
+											{
+												deleteUserSelection(server, table, flatSolution);
 												deleteTable = false;
 											}
+											else
+											{
+												YesYesToAllNoNoToAllAsker deleteEACAsker = new YesYesToAllNoNoToAllAsker(shell, getText());
+												deleteEACAsker.setMessage(
+													"Table events, aggregattions and/or calculations exist for table '" + selectedTable.getTableName() +
+														"' in the active solution and/or modules.\nDo you still want to delete the table?");
+												// we have tableNode(s)... ask user if these should be deleted as well
+												if (!deleteEACAsker.userSaidYes())
+												{
+													deleteTable = false;
+												}
+											}
+
 										}
 									}
 
@@ -236,6 +268,102 @@ public class DeleteInMemTableAction extends Action implements ISelectionChangedL
 			selection = sel;
 		}
 		setEnabled(state);
+	}
+
+	/**
+	 * @param server
+	 * @param table
+	 * @param flatSolution
+	 */
+	private void deleteUserSelection(IServer server, final ITable table, final FlattenedSolution flatSolution)
+	{
+		final ArrayList<String> userSelection = new ArrayList<>();
+		final boolean[] deleteServer = new boolean[1];
+		Runnable run = new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				// duplicate definitions found.
+				ListDialog dialog = new ListDialog(shell)
+				{
+					@Override
+					protected int getTableStyle()
+					{
+						return SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER;
+					}
+				};
+				dialog.setContentProvider(new IStructuredContentProvider()
+				{
+					@Override
+					public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
+					{
+					}
+
+					@Override
+					public void dispose()
+					{
+					}
+
+					@Override
+					public Object[] getElements(Object inputElement)
+					{
+						if (inputElement instanceof Iterator< ? >)
+						{
+							ArrayList<String> names = new ArrayList<>();
+							Iterator<TableNode> it = (Iterator<TableNode>)inputElement;
+							while (it.hasNext())
+							{
+								TableNode tn = it.next();
+								if (tn.getColumns() == null) names.add(tn.getRootObject().getName());
+							}
+							Collections.sort(names);
+							return names.toArray();
+						}
+						return null;
+					}
+				});
+				dialog.setLabelProvider(new LabelProvider());
+				dialog.setTitle("In memory datasource has events or caclulations in other solution(s)");
+				dialog.setMessage("Select the solution that will also be cleaned up for this in mem datasource (tablesnodes are deleted)");
+				try
+				{
+					dialog.setInput(flatSolution.getTableNodes(table));
+					if (dialog.open() == Window.OK)
+					{
+						deleteServer[0] = true;
+						Object[] result = dialog.getResult();
+						for (Object element : result)
+						{
+							userSelection.add((String)element);
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
+			}
+		};
+		if (Display.getCurrent() != null)
+		{
+			run.run();
+		}
+		else
+		{
+			Display.getDefault().syncExec(run);
+		}
+		if (deleteServer[0])
+		{
+			try
+			{
+				((MemServer)server).removeTable(table, userSelection);
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
 	}
 
 }

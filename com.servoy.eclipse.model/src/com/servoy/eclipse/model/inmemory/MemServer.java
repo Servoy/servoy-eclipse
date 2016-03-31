@@ -257,24 +257,18 @@ public class MemServer implements IServerInternal, IServer
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.persistence.IServerInternal#getConfig()
-	 */
 	@Override
 	public ServerConfig getConfig()
 	{
 		return serverConfig;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.persistence.IServerInternal#removeTable(com.servoy.j2db.persistence.ITable)
-	 */
-	@Override
 	public String[] removeTable(ITable t) throws SQLException, RepositoryException
+	{
+		return removeTable(t, null);
+	}
+
+	public String[] removeTable(ITable t, List<String> nodesToDelete) throws RepositoryException
 	{
 		if (t != null)
 		{
@@ -284,7 +278,21 @@ public class MemServer implements IServerInternal, IServer
 			Iterator<TableNode> tableNodes = fs.getTableNodes(t);
 			while (tableNodes.hasNext())
 			{
-				deletePersist(tableNodes.next());
+				TableNode tn = tableNodes.next();
+				if (nodesToDelete != null)
+				{
+					// only delete the nodes that are given or the tablenode of the table itself.
+					if (nodesToDelete.contains(tn.getRootObject().getName()) ||
+						(tn.getColumns() != null && tn.getRootObject().equals(servoyProject.getSolution())))
+					{
+						deletePersist(tn);
+					}
+				}
+				else if (tn.getColumns() == null || tn.getRootObject().equals(servoyProject.getSolution()))
+				{
+					// skip the one that has columns definition but is not of this project/solution
+					deletePersist(tn);
+				}
 			}
 
 			tables.remove(t.getName());
@@ -293,7 +301,7 @@ public class MemServer implements IServerInternal, IServer
 		return null;
 	}
 
-	private void deletePersist(IPersist persist)
+	private void deletePersist(TableNode persist)
 	{
 		IRootObject rootObject = persist.getRootObject();
 
@@ -303,9 +311,11 @@ public class MemServer implements IServerInternal, IServer
 
 			try
 			{
-				IPersist editingNode = servoyProject.getEditingPersist(persist.getUUID());
+				IServoyModel sm = ServoyModelFinder.getServoyModel();
+				ServoyProject project = sm.getServoyProject(rootObject.getName());
+				TableNode editingNode = (TableNode)project.getEditingPersist(persist.getUUID());
 				repository.deleteObject(editingNode);
-				servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true, false);
+				project.saveEditingSolutionNodes(new IPersist[] { editingNode }, true, false);
 			}
 			catch (RepositoryException e)
 			{
