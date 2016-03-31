@@ -2830,6 +2830,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			MediaPropertyControllerConfig config = null;
 			if (propertyDescription != null && propertyDescription.getConfig() instanceof MediaPropertyControllerConfig)
 				config = (MediaPropertyControllerConfig)propertyDescription.getConfig();
+			if (IContentSpecConstants.PROPERTY_STYLESHEET.equals(id))
+			{
+				return new SolutionStylePropertyController(id, displayName, persistContext, flattenedEditingSolution, true, config);
+			}
 			return new MediaIDPropertyController(id, displayName, persistContext, flattenedEditingSolution, true, config);
 		}
 

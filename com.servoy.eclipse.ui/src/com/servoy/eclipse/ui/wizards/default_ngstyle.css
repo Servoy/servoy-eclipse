@@ -1,0 +1,328 @@
+.svy-field
+{
+	background-color:#f0f0f0; 
+	border-style: solid;
+	border-width: 1px 1px 1px 1px;
+	border-color: #cccccc;
+	font-family: Verdana, sans-serif;
+	font-size: 8pt;
+	color: #333;
+	text-align: left; 
+	margin: 2px; 
+	font-weight: normal;
+}
+.field_bold
+{
+	font-weight: bold;
+}
+.field_white
+{
+	background-color:#ffffff;
+}
+.svy-field.oheader
+{
+	font-weight: bold;
+	font-size: 13pt;
+	color: #eb7c12;
+}
+.svy-combobox
+{}
+
+.even
+{
+ 	background-color: #FFFFFF;
+}
+
+.odd
+{
+	background-color: #FFFFFF
+}
+
+.ui-grid-row-selected div.ui-grid-cell {
+	background-color: #F0F0F0;
+	color:#000000; 
+}
+
+.svy-field.navlist
+{
+	font-size: 8pt;
+	color: #000000;
+	border-width: 0px 0px 0px 0px;
+	background-color: #ffffff;
+	font-weight: bold;
+}
+.svy-field.noborder
+{
+	border-width: 0px 0px 0px 0px;
+}
+.svy-field.noborder10px
+{
+	border-width: 0px 0px 0px 0px;
+	font-size: 7px;
+}
+
+.svy-field.nobordersmall
+{
+	font-size: 7pt;
+	color: #000000;
+	border-width: 0px 0px 0px 0px;
+}
+.svy-field.noborder12pt
+{
+	border-width: 0px 0px 0px 0px;
+	font-size: 9pt;
+}
+.svy-field.reportsm
+{
+	font-size: 7pt;
+	color: #000000;
+}
+.svy-field.reportsmbold
+{
+	font-weight: bold;
+	font-size: 7pt;
+	color: #000000;
+}
+.svy-field.reportnobordersm
+{
+	font-size: 7pt;
+	color: #000000;
+	border-width: 0px 0px 0px 0px;
+}
+.svy-field.noborderbold
+{
+	font-weight: bold;
+	border-width: 0px 0px 0px 0px;
+}
+portal
+{
+	background-color: #ffffff; 
+	border-style: solid; 
+}
+.svy-tabpanel.leftcolumn
+{
+	background-color: #ffffcc;
+	border-style: solid;
+	border-width: 7pt;
+	border-color: #000;
+}
+.svy-form
+{
+	background-color: #ffffff; 
+	border-style: none; 
+}
+.svy-label
+{
+	font-family: Verdana, sans-serif;
+	font-weight: bold;
+	font-size: 7pt;
+	color: #666666;
+    text-align: left;
+}
+.svy-label.med
+{
+	font-size: 9pt;
+}
+.svy-label.lg
+{
+	font-size: 10pt;
+}
+.svy-label.topnav
+{
+	font-weight: bold;
+	font-size: 8pt;
+	color: #666666;
+}
+.svy-label.navlstmed
+{
+	font-weight: normal;
+	font-size: 11pt;
+	color: #666666;
+}
+.svy-label.navlstsm
+{
+	font-weight: normal;
+	font-size: 10pt;
+	color: #666666;
+}
+.svy-label.whte
+{
+	color: #ffffff;
+}
+.svy-label.whtctr
+{
+	color: #ffffff;
+    text-align: center;
+}
+.svy-label.whtmed
+{
+	color: #ffffff;
+   	font-size: 9pt;
+}
+.svy-label.whtlg
+{
+	color: #ffffff;
+   	font-size: 13pt;
+}
+.svy-label.btn
+{
+	color: #ffffff;
+    text-align: center;
+	font-size: 8pt;
+	background-color: #666666;
+}
+.svy-label.darkgrc
+{
+	color: #ffffff;
+	background-color: #666666;
+}
+.svy-label.darkgrcmed
+{
+	font-size: 8pt;
+	color: #ffffff;
+	background-color: #666666;
+}
+.svy-label.medgrc
+{
+	color: #ffffff;
+	background-color: #999999;
+}
+.svy-label.ltgrc
+{
+	color: #ffffff;
+	background-color: #ebebeb;
+}
+.svy-label.solidgrc
+{
+	color: #666666;
+	background-color: #666666;
+}
+.svy-label.fieldlbl
+{
+    text-align: right;
+	border-width: 1px 1px 1px 1px;
+	border-style: solid;
+	border-color: #CCCCCC;
+	background: #e6e4df;
+	margin: 1px 8px 1px 1px;
+}
+.svy-label.list
+{
+	font-weight: normal;
+	font-size: 8pt;
+	color: #333;
+    text-align: left;
+	background: none;
+}
+.svy-label.listbold
+{
+	font-size: 8pt;
+	color: #333;
+    text-align: left;
+	background: none;
+}
+.svy-label.oheader
+{
+	font-weight: bold;
+	font-size: 18pt;
+	color: #eb7c12;
+    text-align: left;
+}
+.svy-label.revoheader
+{
+	font-weight: bold;
+	font-size: 13pt;
+	background-color: #eb7c12;
+	color: #ffffff;
+    text-align: left;
+}
+.svy-label.headernobold
+{
+	font-weight: normal;
+	font-size: 13pt;
+	color: #eb7c12;
+    text-align: left;
+}
+.svy-label.xboxtitle
+{
+	color: #003372;
+	font-weight: bold;
+	text-align: left;
+}
+.svy-label.tabmenu
+{
+	color: #ffffff;
+	font-size: 8pt;
+	text-align: center;
+}
+.svy-label.grey
+{
+	font-weight: normal;
+	font-size: 8pt;
+	color: #666666;
+    text-align: left;
+}
+.svy-label.smgrey
+{
+	font-weight: normal;
+	font-size: 7pt;
+	color: #666666;
+    text-align: left;
+}
+.svy-label.image
+{
+	font-weight: normal;
+	font-size: 8pt;
+	color: #000000;
+    text-align: left;
+	background-color: #FFFFFF;
+}
+.svy-label.report
+{
+	font-weight: normal;
+	font-size: 7pt;
+	color: #000000;
+    text-align: left;
+}
+.svy-label.reportbold
+{
+	font-weight: bold;
+	font-size: 7pt;
+	color: #000000;
+    text-align: left;
+}
+.svy-label.reportsm
+{
+	font-weight: normal;
+	font-size: 7pt;
+	color: #000000;
+    text-align: left;
+}
+.svy-label.reportxsm
+{
+	font-weight: normal;
+	font-size: 6pt;
+	color: #000000;
+    text-align: left;
+}
+.svy-label.reportboldsm
+{
+	font-weight: bold;
+	font-size: 7pt;
+	color: #000000;
+    text-align: left;
+}
+.svy-label.headerreport
+{
+	font-weight: bold;
+	font-size: 13pt;
+	color: #000000;
+    text-align: left;
+}
+.svy-label.subheadreport
+{
+	font-weight: bold;
+	font-size: 9pt;
+	color: #000000;
+    text-align: left;
+}
