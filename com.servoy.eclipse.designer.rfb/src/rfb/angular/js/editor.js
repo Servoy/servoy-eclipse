@@ -695,8 +695,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				} else {
 					var contentDiv = $($scope.contentDocument).find('.svy-form')[0];
 					if (contentDiv) {
-						$scope.glasspaneStyle.width = (contentDiv.offsetWidth +20) + 'px';
-						$scope.glasspaneStyle.height = (contentDiv.offsetHeight + 20) + 'px';
+					        if (contentDiv.offsetHeight > 0 ){
+        						$scope.glasspaneStyle.width = (contentDiv.offsetWidth +20) + 'px';
+        						$scope.glasspaneStyle.height = (contentDiv.offsetHeight + 20) + 'px';
+					        }
 					}
 				}
 			}

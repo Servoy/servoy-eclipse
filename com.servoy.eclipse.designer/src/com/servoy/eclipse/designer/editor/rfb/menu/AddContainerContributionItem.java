@@ -13,11 +13,11 @@ import org.eclipse.ui.menus.CommandContributionItem;
 import org.eclipse.ui.menus.CommandContributionItemParameter;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.PackageSpecification;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
@@ -78,11 +78,12 @@ public class AddContainerContributionItem extends CompoundContributionItem
 								}
 
 								//if the layoutName matches the current allowedChildName then we add this container as a menu entry
-								if (allowedChildName.equals(layoutName))
+								if (allowedChildName.equals(((LayoutContainer)persist).getPackageName() + "." + layoutName))
 								{
 									String config = specification.getConfig() instanceof String ? specification.getConfig().toString() : "{}";
 									addMenuItem(list, specification, config, null);
 								}
+
 							}
 							catch (JSONException e)
 							{
@@ -90,10 +91,15 @@ public class AddContainerContributionItem extends CompoundContributionItem
 							}
 						}
 					}
-					if (allowedChildren.contains("component"))
+					for (String allowedChildName : allowedChildren)
 					{
-						addMenuItem(list, null, null, null);
+						if (allowedChildName.endsWith(".*"))
+						{
+							addMenuItem(list, null, null, null);
+							break;
+						}
 					}
+
 				}
 			}
 		}

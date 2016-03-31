@@ -338,12 +338,12 @@ public class DesignerFilter implements Filter
 										WebComponent obj = (WebComponent)fl.getSolution().getChangeHandler().createNewObject(form, IRepository.WEBCOMPONENTS);
 										obj.setName(spec.getName());
 										obj.setTypeName(spec.getName());
-										FormElement formElement = FormElementHelper.INSTANCE.getFormElement(obj, fl, null, false);
+										FormElement formElement = FormElementHelper.INSTANCE.getFormElement(obj, fl, null, true);
 										StringWriter stringWriter = new StringWriter();
 										PrintWriter printWriter = new PrintWriter(stringWriter);
 										FormLayoutGenerator.generateFormElement(printWriter, formElement, form, true);
 										jsonWriter.key("tagName").value(stringWriter.toString());
-										model.put("componentName", formElement.getName());
+										model.put("componentName", formElement.getDesignId());
 									}
 									else jsonWriter.key("tagName").value(FormTemplateGenerator.getTagName(spec.getName()));
 									PropertyDescription pd = spec.getProperty("size");

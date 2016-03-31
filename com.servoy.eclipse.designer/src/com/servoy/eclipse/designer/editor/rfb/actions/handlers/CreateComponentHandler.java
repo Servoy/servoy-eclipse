@@ -26,10 +26,20 @@ import java.util.List;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.core.commands.Command;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.NotEnabledException;
+import org.eclipse.core.commands.NotHandledException;
+import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -484,99 +494,117 @@ public class CreateComponentHandler implements IServerService
 				}
 				else
 				{
-					WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(name);
-					if (spec != null)
+					if ("*".equals(name))
 					{
-						String compName = null;
-						String componentName = name;
-						int index = componentName.indexOf("-");
-						if (index != -1)
+						Command command = (PlatformUI.getWorkbench().getService(ICommandService.class)).getCommand(AddContainerCommand.COMMAND_ID);
+						final Event trigger = new Event();
+						ExecutionEvent executionEvent = (PlatformUI.getWorkbench().getService(IHandlerService.class)).createExecutionEvent(command, trigger);
+						try
 						{
-							componentName = componentName.substring(index + 1);
+							command.executeWithChecks(executionEvent);
 						}
-						componentName = componentName.replaceAll("-", "_");
-						compName = componentName + "_" + id.incrementAndGet();
-						while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
+						catch (ExecutionException | NotDefinedException | NotEnabledException | NotHandledException e)
 						{
-							compName = componentName + "_" + id.incrementAndGet();
+							Debug.log(e);
 						}
-
-						WebComponent webComponent = null;
-						if (parentSupportingElements instanceof Portal)
-						{
-							Portal portal = (Portal)parentSupportingElements;
-							webComponent = (WebComponent)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(portal,
-								IRepository.WEBCOMPONENTS);
-							webComponent.setProperty("text", compName);
-							webComponent.setTypeName(name);
-							portal.addChild(webComponent);
-						}
-						else if (parentSupportingElements instanceof AbstractContainer)
-						{
-							webComponent = ((AbstractContainer)parentSupportingElements).createNewWebComponent(compName, name);
-
-						}
-						webComponent.setLocation(new Point(x, y));
-						webComponent.setSize(new Dimension(w, h));
-						PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
-						if (description != null && description.getDefaultValue() instanceof JSONObject)
-						{
-							webComponent.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
-								((JSONObject)description.getDefaultValue()).optInt("height", 80)));
-						}
-						return new IPersist[] { webComponent };
 					}
 					else
 					{
-						PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
-							args.optString("packageName"));
-						if (specifications != null)
+						WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(name);
+						if (spec != null)
 						{
-							WebLayoutSpecification layoutSpec = specifications.getSpecification(name);
-							if (layoutSpec != null)
+							String compName = null;
+							String componentName = name;
+							int index = componentName.indexOf("-");
+							if (index != -1)
 							{
-
-								Iterator<IPersist> childContainersIte = parentSupportingElements.getObjects(IRepositoryConstants.LAYOUTCONTAINERS);
-								LayoutContainer sameTypeChildContainer = null;
-								while (childContainersIte.hasNext())
-								{
-									LayoutContainer childContainer = (LayoutContainer)childContainersIte.next();
-									if (layoutSpec.getName().equals(childContainer.getSpecName()))
-									{
-										sameTypeChildContainer = childContainer;
-									}
-								}
-							
-								JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
-								return new IPersist[] { createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, x,
-									specifications, args.optString("packageName")) };
+								componentName = componentName.substring(index + 1);
 							}
+							componentName = componentName.replaceAll("-", "_");
+							compName = componentName + "_" + id.incrementAndGet();
+							while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
+							{
+								compName = componentName + "_" + id.incrementAndGet();
+							}
+
+							WebComponent webComponent = null;
+							if (parentSupportingElements instanceof Portal)
+							{
+								Portal portal = (Portal)parentSupportingElements;
+								webComponent = (WebComponent)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(portal,
+									IRepository.WEBCOMPONENTS);
+								webComponent.setProperty("text", compName);
+								webComponent.setTypeName(name);
+								portal.addChild(webComponent);
+							}
+							else if (parentSupportingElements instanceof AbstractContainer)
+							{
+								webComponent = ((AbstractContainer)parentSupportingElements).createNewWebComponent(compName, name);
+
+							}
+							webComponent.setLocation(new Point(x, y));
+							webComponent.setSize(new Dimension(w, h));
+							PropertyDescription description = spec.getProperty(StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName());
+							if (description != null && description.getDefaultValue() instanceof JSONObject)
+							{
+								webComponent.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
+									((JSONObject)description.getDefaultValue()).optInt("height", 80)));
+							}
+							return new IPersist[] { webComponent };
 						}
 						else
 						{
-							for (IRootObject template : ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES))
+							PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+								args.optString("packageName"));
+							if (specifications != null)
 							{
-								if (template.getName().equals(name))
+								WebLayoutSpecification layoutSpec = specifications.getSpecification(name);
+								if (layoutSpec != null)
 								{
-									Object[] applyTemplate = ElementFactory.applyTemplate(parentSupportingElements,
-										new TemplateElementHolder((Template)template), new org.eclipse.swt.graphics.Point(x, y), false);
-									if (applyTemplate.length > 0)
+
+									Iterator<IPersist> childContainersIte = parentSupportingElements.getObjects(IRepositoryConstants.LAYOUTCONTAINERS);
+									LayoutContainer sameTypeChildContainer = null;
+									while (childContainersIte.hasNext())
 									{
-										if (applyTemplate[0] instanceof FormElementGroup)
+										LayoutContainer childContainer = (LayoutContainer)childContainersIte.next();
+										if (layoutSpec.getName().equals(childContainer.getSpecName()))
 										{
-											Iterator<IFormElement> elements = ((FormElementGroup)applyTemplate[0]).getElements();
-											//convert iterator to []
-											ArrayList<IFormElement> list = new ArrayList<>();
-											while (elements.hasNext())
-											{
-												IFormElement next = elements.next();
-												list.add(next);
-											}
-											return list.toArray(new IPersist[list.size()]);
+											sameTypeChildContainer = childContainer;
 										}
-										else
-										{ //Object[] to IPersist[]
-											return Arrays.asList(applyTemplate).toArray(new IPersist[applyTemplate.length]);
+									}
+
+									JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
+									return new IPersist[] { createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, x,
+										specifications, args.optString("packageName")) };
+								}
+							}
+							else
+							{
+								for (IRootObject template : ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(
+									IRepository.TEMPLATES))
+								{
+									if (template.getName().equals(name))
+									{
+										Object[] applyTemplate = ElementFactory.applyTemplate(parentSupportingElements,
+											new TemplateElementHolder((Template)template), new org.eclipse.swt.graphics.Point(x, y), false);
+										if (applyTemplate.length > 0)
+										{
+											if (applyTemplate[0] instanceof FormElementGroup)
+											{
+												Iterator<IFormElement> elements = ((FormElementGroup)applyTemplate[0]).getElements();
+												//convert iterator to []
+												ArrayList<IFormElement> list = new ArrayList<>();
+												while (elements.hasNext())
+												{
+													IFormElement next = elements.next();
+													list.add(next);
+												}
+												return list.toArray(new IPersist[list.size()]);
+											}
+											else
+											{ //Object[] to IPersist[]
+												return Arrays.asList(applyTemplate).toArray(new IPersist[applyTemplate.length]);
+											}
 										}
 									}
 								}
@@ -658,8 +686,7 @@ public class CreateComponentHandler implements IServerService
 	}
 
 	protected IPersist createLayoutContainer(ISupportFormElements parent, WebLayoutSpecification layoutSpec, LayoutContainer sameTypeChildContainer,
-		JSONObject config, int index, PackageSpecification<WebLayoutSpecification> specifications, String packageName)
-		throws RepositoryException, JSONException
+		JSONObject config, int index, PackageSpecification<WebLayoutSpecification> specifications, String packageName) throws RepositoryException, JSONException
 	{
 
 		LayoutContainer container = (LayoutContainer)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(parent,

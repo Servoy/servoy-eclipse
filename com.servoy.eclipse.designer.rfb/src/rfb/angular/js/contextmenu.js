@@ -19,6 +19,36 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 							$("#contextMenu").hide();
 							return false;
 						}
+            					var i;
+            					for (i = 0; i < $scope.actions.length; i++){
+            					    if ($scope.actions[i].text === "Add") {
+            						var types = selection.getAttribute("svy-allowed-children");
+            						if (types){
+            						    $scope.actions[i].subMenu = [];
+            						    var typesArray = types.split(",");
+            						    var k;
+            						    for (k = 0; k < typesArray.length; k++){
+            							var addAction = function (k) {//save the k in a closure
+                							$scope.actions[i].subMenu.push({
+                            						text: typesArray[k],
+                            						execute: function()
+                            						{
+                            						    $("#contextMenu").hide();
+                            						    var component = {};
+                            						    component.dropTargetUUID = selection.getAttribute("svy-id");
+                            						    var nameAndPackage = typesArray[k].split(".");
+                            						    component.name = nameAndPackage[1];
+                            						    component.packageName = nameAndPackage[0];
+                            						    component = $scope.convertToContentPoint(component);
+                            						    $editorService.createComponent(component);
+                            						}	
+                							});
+            							};
+            							addAction(k);
+            						    }
+            						}
+            					    }
+            					}
 					}
 					$scope.$digest();
 					$("#contextMenu")
@@ -44,6 +74,11 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 		
 		getActions: function() {
 			return actions;
+		},
+		
+		getAddActions: function() {
+		    console.log("add actions!")
+		    return [];
 		}
 	}
 })

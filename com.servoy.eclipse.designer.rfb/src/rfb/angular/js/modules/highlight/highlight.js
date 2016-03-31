@@ -39,26 +39,19 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 					//get to the first dom element that is a servoy component or layoutContainer
 					while (node.parentElement && !node.getAttribute("svy-id")) node = node.parentElement;
 					if (!angular.element(node).hasClass("inheritedElement")) {
-							if (!utils.getDraggingFromPallete())
-							{
-								highlightDiv.style.cursor = "pointer";
-							}	
 							highlightDiv.style.outline = "";
 					}
 					else {
-							highlightDiv.style.cursor="";
 							highlightDiv.style.outline = "1px solid #FFBBBB";
 					}
 				}
 				else {
 					highlightDiv.style.display = 'none';
-					highlightDiv.style.cursor="";
 					highlightDiv.style.outline = "";
 				}
 			}
 			else {
 				highlightDiv.style.display = 'none';
-				highlightDiv.style.cursor="";
 				highlightDiv.style.outline = "";
 			}
 		}

@@ -93,225 +93,238 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 				}
 			});
 			
-			// sizing
-			var sizingActions = [];
 			
-			sizingActions.push(
-					{
-						text: "Same Width",
-						getIconStyle: function(){ return {'background-image':"url(images/same_width.gif)"};},
-						shortcut: shortcuts[SHORTCUT_IDS.SAME_WIDTH_ID],
-						getItemClass: function() { if (!editorScope.getSelection() || editorScope.getSelection().length < 2) return "disabled";},
-						execute:function()
-						{
-							$editorService.sameSize(true);
-						}
-					}
-				);
+			if (editorScope.isAbsoluteFormLayout()){
+        			// sizing
+        			var sizingActions = [];
+        			
+        			sizingActions.push(
+        					{
+        						text: "Same Width",
+        						getIconStyle: function(){ return {'background-image':"url(images/same_width.gif)"};},
+        						shortcut: shortcuts[SHORTCUT_IDS.SAME_WIDTH_ID],
+        						getItemClass: function() { if (!editorScope.getSelection() || editorScope.getSelection().length < 2) return "disabled";},
+        						execute:function()
+        						{
+        							$editorService.sameSize(true);
+        						}
+        					}
+        				);
+        			
+        			sizingActions.push(
+        					{
+        						text: "Same Height",
+        						getIconStyle: function(){ return {'background-image':"url(images/same_height.gif)"};},
+        						shortcut: shortcuts[SHORTCUT_IDS.SAME_HEIGHT_ID],
+        						getItemClass: function() { if (!editorScope.getSelection() || editorScope.getSelection().length < 2) return "disabled";},
+        						execute:function()
+        						{
+        							$editorService.sameSize(false);
+        						}
+        					}
+        				);			
+        			$contextmenu.add(
+        					{
+        						text: "Sizing",
+        						subMenu: sizingActions,
+        						getItemClass: function() { return "dropdown-submenu";}
+        					}
+        				);
+        			
+        			// anchoring
+        			var anchoringActions = [];
+        			anchoringActions.push(
+        					{
+        						text: "Top",
+        						getIconStyle: function(){
+        							if(isAnchored(1))
+        							{
+        								return {'background-image':"url(images/check.png)"};
+        							}
+        							return null;
+        						},
+        						shortcut: shortcuts[SHORTCUT_IDS.TOGGLE_ANCHORING_TOP_ID],
+        						getItemClass: function() { if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
+        						execute:function()
+        						{
+        							setAnchoring(1);
+        						}
+        					}
+        				);
+        			
+        			anchoringActions.push(
+        					{
+        						text: "Right",
+        						getIconStyle: function(){ if(isAnchored(2)) return {'background-image':"url(images/check.png)"};},
+        						shortcut: shortcuts[SHORTCUT_IDS.TOGGLE_ANCHORING_RIGHT_ID],
+        						getItemClass: function() { if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
+        						execute:function()
+        						{
+        							setAnchoring(2);
+        						}
+        					}
+        				);
+        			
+        			anchoringActions.push(
+        					{
+        						text: "Bottom",
+        						getIconStyle: function(){ if(isAnchored(4)) return {'background-image':"url(images/check.png)"};},
+        						shortcut: shortcuts[SHORTCUT_IDS.TOGGLE_ANCHORING_BOTTOM_ID],
+        						getItemClass: function() {  if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
+        						execute:function()
+        						{
+        							setAnchoring(4);
+        						}
+        					}
+        				);			
+        			
+        			anchoringActions.push(
+        					{
+        						text: "Left",
+        						getIconStyle: function(){ if(isAnchored(8)) return {'background-image':"url(images/check.png)"};},
+        						shortcut: shortcuts[SHORTCUT_IDS.TOGGLE_ANCHORING_LEFT_ID],
+        						getItemClass: function() { if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
+        						execute:function()
+        						{
+        							setAnchoring(8);
+        						}
+        					}
+        				);
+        			
+        			$contextmenu.add(
+        					{
+        						text: "Anchoring",
+        						subMenu: anchoringActions,
+        						getItemClass: function() { return "dropdown-submenu";}
+        					}
+        				);
+        			
+        			//arrange
+        			var arrangeActions = [];
+        			arrangeActions.push(
+        					{
+        						text: "Bring forward",
+        						getIconStyle: function(){ return {'background-image':"url(images/bring_forward.png)"}},
+        						shortcut: shortcuts[SHORTCUT_IDS.BRING_TO_FRONT_ONE_STEP_ID],
+        						getItemClass: function() { if (!hasSelection()) return "disabled";},
+        						execute: function() 
+        						{ 
+        							$("#contextMenu").hide();
+        							$editorService.executeAction('z_order_bring_to_front_one_step');
+        						}
+        					}
+        				);
+        			
+        			arrangeActions.push(
+        					{
+        						text: "Send backward",
+        						getIconStyle: function(){ return {'background-image':"url(images/send_backward.png)"}},
+        						shortcut: shortcuts[SHORTCUT_IDS.SEND_TO_BACK_ONE_STEP_ID],
+        						getItemClass: function() { if (!hasSelection()) return "disabled";},
+        						execute: function()
+        						{
+        							$("#contextMenu").hide();
+        							$editorService.executeAction('z_order_send_to_back_one_step');
+        						}
+        					}
+        				);
+        			
+        			arrangeActions.push(
+        					{
+        						text: "Bring to front",
+        						getIconStyle: function(){ return {'background-image':"url(images/bring_to_front.png)"}},
+        						shortcut: shortcuts[SHORTCUT_IDS.BRING_TO_FRONT_ID],
+        						getItemClass: function() { if (!hasSelection()) return "disabled";},
+        						execute: function() 
+        						{ 
+        							$("#contextMenu").hide();
+        							$editorService.executeAction('z_order_bring_to_front');
+        						}
+        					}
+        				);
+        			
+        			arrangeActions.push(
+        					{
+        						text: "Send to back",
+        						getIconStyle: function(){ return {'background-image':"url(images/send_to_back.png)"}},
+        						shortcut: shortcuts[SHORTCUT_IDS.SEND_TO_BACK_ID],
+        						getItemClass: function() { if (!hasSelection()) return "disabled";},
+        						execute: function()
+        						{
+        							$("#contextMenu").hide();
+        							$editorService.executeAction('z_order_send_to_back');
+        						}
+        					}
+        				);
+        			
+        			$contextmenu.add(
+        					{
+        						text: "Arrange",
+        						subMenu: arrangeActions,
+        						getItemClass: function() { return "dropdown-submenu"}
+        					}
+        				);
+        			
+        			var groupingActions = [];
+        			groupingActions.push(
+        					{
+        						text: "Group",
+        						getIconStyle: function(){ return {'background-image':"url(images/group.gif)"}},
+        						getItemClass: function() {if (!editorScope.getSelection() || editorScope.getSelection().length < 2) return "disabled";},
+        						shortcut: shortcuts[SHORTCUT_IDS.GROUP_ID],
+        						execute: function()
+        						{
+        							$("#contextMenu").hide();
+        							$editorService.executeAction('createGroup');
+        						}
+        					}
+        				);
+        			
+        			groupingActions.push(
+        					{
+        						text: "Ungroup",
+        						getIconStyle: function(){ return {'background-image':"url(images/ungroup.gif)"}},
+        						getItemClass: function() {
+        							if (!hasSelection()) return "disabled";
+        							//at least one selected element should be a group
+        							var selection = editorScope.getSelection();
+        							for (var i = 0; i < selection.length; i++)
+        							{
+        								var ghost = editorScope.getGhost(selection[i].getAttribute("svy-id"));
+        								if (ghost && ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
+        								{
+        									return;
+        								}
+        							}
+        							return "disabled";
+        						},
+        						shortcut: shortcuts[SHORTCUT_IDS.UNGROUP_ID],
+        						execute: function()
+        						{
+        							$("#contextMenu").hide();
+        							$editorService.executeAction('clearGroup');
+        						}
+        					}
+        				);
+        			
+        			$contextmenu.add(
+        					{
+        						text: "Grouping",
+        						subMenu: groupingActions,
+        						getItemClass: function() { return "dropdown-submenu"}
+        					}
+        			);
+			}
+			else {//this is an Responsive Layout 
+    			$contextmenu.add(
+				{
+					text: "Add",
+//					subMenu: $contextmenu.getAddActions(),
+					getItemClass: function() { return "dropdown-submenu"}
+				}
+		);
+			}
 			
-			sizingActions.push(
-					{
-						text: "Same Height",
-						getIconStyle: function(){ return {'background-image':"url(images/same_height.gif)"};},
-						shortcut: shortcuts[SHORTCUT_IDS.SAME_HEIGHT_ID],
-						getItemClass: function() { if (!editorScope.getSelection() || editorScope.getSelection().length < 2) return "disabled";},
-						execute:function()
-						{
-							$editorService.sameSize(false);
-						}
-					}
-				);			
-			$contextmenu.add(
-					{
-						text: "Sizing",
-						subMenu: sizingActions,
-						getItemClass: function() { return "dropdown-submenu";}
-					}
-				);
-			
-			// anchoring
-			var anchoringActions = [];
-			anchoringActions.push(
-					{
-						text: "Top",
-						getIconStyle: function(){
-							if(isAnchored(1))
-							{
-								return {'background-image':"url(images/check.png)"};
-							}
-							return null;
-						},
-						shortcut: shortcuts[SHORTCUT_IDS.TOGGLE_ANCHORING_TOP_ID],
-						getItemClass: function() { if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
-						execute:function()
-						{
-							setAnchoring(1);
-						}
-					}
-				);
-			
-			anchoringActions.push(
-					{
-						text: "Right",
-						getIconStyle: function(){ if(isAnchored(2)) return {'background-image':"url(images/check.png)"};},
-						shortcut: shortcuts[SHORTCUT_IDS.TOGGLE_ANCHORING_RIGHT_ID],
-						getItemClass: function() { if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
-						execute:function()
-						{
-							setAnchoring(2);
-						}
-					}
-				);
-			
-			anchoringActions.push(
-					{
-						text: "Bottom",
-						getIconStyle: function(){ if(isAnchored(4)) return {'background-image':"url(images/check.png)"};},
-						shortcut: shortcuts[SHORTCUT_IDS.TOGGLE_ANCHORING_BOTTOM_ID],
-						getItemClass: function() {  if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
-						execute:function()
-						{
-							setAnchoring(4);
-						}
-					}
-				);			
-			
-			anchoringActions.push(
-					{
-						text: "Left",
-						getIconStyle: function(){ if(isAnchored(8)) return {'background-image':"url(images/check.png)"};},
-						shortcut: shortcuts[SHORTCUT_IDS.TOGGLE_ANCHORING_LEFT_ID],
-						getItemClass: function() { if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
-						execute:function()
-						{
-							setAnchoring(8);
-						}
-					}
-				);
-			
-			$contextmenu.add(
-					{
-						text: "Anchoring",
-						subMenu: anchoringActions,
-						getItemClass: function() { return "dropdown-submenu";}
-					}
-				);
-			
-			//arrange
-			var arrangeActions = [];
-			arrangeActions.push(
-					{
-						text: "Bring forward",
-						getIconStyle: function(){ return {'background-image':"url(images/bring_forward.png)"}},
-						shortcut: shortcuts[SHORTCUT_IDS.BRING_TO_FRONT_ONE_STEP_ID],
-						getItemClass: function() { if (!hasSelection()) return "disabled";},
-						execute: function() 
-						{ 
-							$("#contextMenu").hide();
-							$editorService.executeAction('z_order_bring_to_front_one_step');
-						}
-					}
-				);
-			
-			arrangeActions.push(
-					{
-						text: "Send backward",
-						getIconStyle: function(){ return {'background-image':"url(images/send_backward.png)"}},
-						shortcut: shortcuts[SHORTCUT_IDS.SEND_TO_BACK_ONE_STEP_ID],
-						getItemClass: function() { if (!hasSelection()) return "disabled";},
-						execute: function()
-						{
-							$("#contextMenu").hide();
-							$editorService.executeAction('z_order_send_to_back_one_step');
-						}
-					}
-				);
-			
-			arrangeActions.push(
-					{
-						text: "Bring to front",
-						getIconStyle: function(){ return {'background-image':"url(images/bring_to_front.png)"}},
-						shortcut: shortcuts[SHORTCUT_IDS.BRING_TO_FRONT_ID],
-						getItemClass: function() { if (!hasSelection()) return "disabled";},
-						execute: function() 
-						{ 
-							$("#contextMenu").hide();
-							$editorService.executeAction('z_order_bring_to_front');
-						}
-					}
-				);
-			
-			arrangeActions.push(
-					{
-						text: "Send to back",
-						getIconStyle: function(){ return {'background-image':"url(images/send_to_back.png)"}},
-						shortcut: shortcuts[SHORTCUT_IDS.SEND_TO_BACK_ID],
-						getItemClass: function() { if (!hasSelection()) return "disabled";},
-						execute: function()
-						{
-							$("#contextMenu").hide();
-							$editorService.executeAction('z_order_send_to_back');
-						}
-					}
-				);
-			
-			$contextmenu.add(
-					{
-						text: "Arrange",
-						subMenu: arrangeActions,
-						getItemClass: function() { return "dropdown-submenu"}
-					}
-				);
-			
-			var groupingActions = [];
-			groupingActions.push(
-					{
-						text: "Group",
-						getIconStyle: function(){ return {'background-image':"url(images/group.gif)"}},
-						getItemClass: function() {if (!editorScope.getSelection() || editorScope.getSelection().length < 2) return "disabled";},
-						shortcut: shortcuts[SHORTCUT_IDS.GROUP_ID],
-						execute: function()
-						{
-							$("#contextMenu").hide();
-							$editorService.executeAction('createGroup');
-						}
-					}
-				);
-			
-			groupingActions.push(
-					{
-						text: "Ungroup",
-						getIconStyle: function(){ return {'background-image':"url(images/ungroup.gif)"}},
-						getItemClass: function() {
-							if (!hasSelection()) return "disabled";
-							//at least one selected element should be a group
-							var selection = editorScope.getSelection();
-							for (var i = 0; i < selection.length; i++)
-							{
-								var ghost = editorScope.getGhost(selection[i].getAttribute("svy-id"));
-								if (ghost && ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
-								{
-									return;
-								}
-							}
-							return "disabled";
-						},
-						shortcut: shortcuts[SHORTCUT_IDS.UNGROUP_ID],
-						execute: function()
-						{
-							$("#contextMenu").hide();
-							$editorService.executeAction('clearGroup');
-						}
-					}
-				);
-			
-			$contextmenu.add(
-					{
-						text: "Grouping",
-						subMenu: groupingActions,
-						getItemClass: function() { return "dropdown-submenu"}
-					}
-			);
 			
 			$contextmenu.add(
 					{
@@ -342,7 +355,20 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 						$editorService.executeAction('openScript');
 					}
 				}
-			);			
+			);
+			
+			$contextmenu.add(
+				{
+					text: "Delete",
+					getIconStyle: function(){ return {'background-image':"url(images/delete.gif)"}},
+					execute:function()
+					{
+						$("#contextMenu").hide();
+						//46 == delete key
+						$editorService.keyPressed({"keyCode":46});
+					}
+				}
+			);	
 		});
 	});
 	
