@@ -499,6 +499,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 						// skip the one already there.
 						if (filtered.contains(persist)) continue;
 						IPersist ancestor = persist.getAncestor(IRepository.FORMS);
+						if (ancestor == null) continue;
 						for (Form superForm : allForms)
 						{
 							if (superForm.getUUID().equals(ancestor.getUUID()))
