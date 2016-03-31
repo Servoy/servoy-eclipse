@@ -354,6 +354,16 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
 			{
+				while (WebServiceSpecProvider.getInstance() == null)
+				{
+					try
+					{
+						Thread.sleep(500);
+					}
+					catch (InterruptedException e)
+					{
+					}
+				}
 				addPluginsNodeChildren(plugins);
 				return Status.OK_STATUS;
 			}
