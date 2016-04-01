@@ -73,7 +73,7 @@ import com.servoy.j2db.util.Pair;
 
 /**
  * Handles callbacks from scriptUnit view  (ex dobleclick on stac trace to go to that file in createOpenEditorAction(line) )
- * 
+ *
  * @author obuligan
  */
 public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestElementResolver, ITestRunnerUIExtension
@@ -107,7 +107,7 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestEle
 			return element.getSuiteTypeName().matches(SOLUTION_TEST_ELEMENT_PATTERN);
 		}
 
-		/** 
+		/**
 		 * returns the solutoin name from a form suite
 		 */
 		static String getSolutionOfForm(ITestSuiteElement element)
@@ -275,7 +275,7 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestEle
 	{
 
 		String testMethod = element.getTestName();
-		if (testMethod.equals("testReason")) return null;
+		if (testMethod.equals("testSystemInitFailed")) return null;
 		String formOrScope = ((ITestSuiteElement)element.getParentContainer()).getSuiteTypeName();
 		String solution = null;
 		IFile scriptFile = null;
@@ -362,7 +362,7 @@ public class JSUnitTestRunnerUI extends AbstractTestRunnerUI implements ITestEle
 
 	/**
 	 * Tests if the specified line should pass thru the filter.
-	 * 
+	 *
 	 * @param line
 	 * @return
 	 */

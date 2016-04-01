@@ -99,21 +99,21 @@ public class SolutionJSUnitSuiteCodeBuilder
 		//   ...
 		//   forms.formNName test case suite
 		//   Modules suite
-		//     Module1Name solution suite 
+		//     Module1Name solution suite
 		//       ... same as Solution suite structure
-		//     ModuleNName solution suite 
+		//     ModuleNName solution suite
 		//       ... same as Solution suite structure
 		StringBuffer testCode = new StringBuffer(1024);
 		HashSet<Solution> inspectedModules = new HashSet<Solution>();
 		TestIdentifier testIdentifier = appendSolutionTestCode(solution, target, testCode, inspectedModules, flattenedSolution,
-		//* If Test target is null that means the whole active solution.
-		//* If Test target's module to test is the same as active solution that means the whole active solution again.
+			//* If Test target is null that means the whole active solution.
+			//* If Test target's module to test is the same as active solution that means the whole active solution again.
 			target == null || target.getActiveSolution().getName().equals(target.getModuleToTest() == null ? "" : target.getModuleToTest().getName()));
 
 		if (testIdentifier == null)
 		{
-			initializeWithError("Th" + (target == null ? "is solution" : "e selection") + " does not have jsunit tests" +
-				(target == null ? ": " + solution.getName() : "."));
+			initializeWithError(
+				"Th" + (target == null ? "is solution" : "e selection") + " does not have jsunit tests" + (target == null ? ": " + solution.getName() : "."));
 		}
 		else
 		{
@@ -273,10 +273,9 @@ public class SolutionJSUnitSuiteCodeBuilder
 		while (it.hasNext())
 		{
 			ScriptMethod method = it.next();
-			if (method.getName().equals(SET_UP_METHOD) ||
-				method.getName().equals(TEAR_DOWN_METHOD) ||
-				((target == null || target.getTestMethodToTest() == null || target.getTestMethodToTest().getID() == method.getID()) && method.getName().startsWith(
-					TEST_METHOD_PREFIX)))
+			if (method.getName().equals(SET_UP_METHOD) || method.getName().equals(TEAR_DOWN_METHOD) ||
+				((target == null || target.getTestMethodToTest() == null || target.getTestMethodToTest().getID() == method.getID()) &&
+					method.getName().startsWith(TEST_METHOD_PREFIX)))
 			{
 				if (!testMethodsFound && method.getName().startsWith(TEST_METHOD_PREFIX))
 				{
@@ -333,7 +332,7 @@ public class SolutionJSUnitSuiteCodeBuilder
 				// if someone wants this test to fail after it finished running do so here (for example if during current test, an unhandled (so not handled by solution onError) global error was detected)
 				tmp.append(" = null; if (this.").append(SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY).append(") { var te = this.").append(
 					SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY).append("; this.").append(
-					SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY).append(" = null; throw te; } }\n");
+						SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY).append(" = null; throw te; } }\n");
 			}
 		}
 		if (testMethodsFound && testIdentifier != null)
@@ -422,7 +421,7 @@ public class SolutionJSUnitSuiteCodeBuilder
 		error.append(INVALID_APP_SUITE);
 		error.append("(name) { TestCase.call(this, name); }\nfunction ");
 		error.append(INVALID_APP_SUITE);
-		error.append("_testReason() { this.fail(\"");
+		error.append("_testSystemInitFailed() { this.fail(\"");
 
 		error.append(msg);
 
@@ -473,8 +472,9 @@ public class SolutionJSUnitSuiteCodeBuilder
 					String adjustedMessage = ((message != null) ? message + ". " : "") +
 						(error != null && !Utils.equalObjects(message, String.valueOf(error)) ? "Details: " + String.valueOf(error) : "");
 
-					context.evaluateString(solutionScope, IExecutingEnviroment.TOPLEVEL_JSUNIT + "." +
-						SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY + " = new JsUnitError();", "unhandled error detected", 1, null);
+					context.evaluateString(solutionScope,
+						IExecutingEnviroment.TOPLEVEL_JSUNIT + "." + SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY + " = new JsUnitError();",
+						"unhandled error detected", 1, null);
 					failAfterTest = jsunitAssertObject.get(SolutionJSUnitSuiteCodeBuilder.FAIL_AFTER_CURRENT_TEST_KEY, jsunitAssertObject); // should now be the JSUnitError
 					ScriptableObject.putProperty((Scriptable)failAfterTest, "message", Context.javaToJS(adjustedMessage, solutionScope));
 				}
