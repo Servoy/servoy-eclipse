@@ -318,6 +318,14 @@
 							"required": ["name","type"],
 							"additionalProperties":false
 						}
+					},
+					"delayUntilFormLoad": {
+						"description": "Delay this api call until the form is reall loaded on the client (requestFocus)",
+						"type": "boolean"
+					},
+					"globalExclusive": {
+						"description": "Should only 1 of this api call be invoke after a request (like 1 request focus)",
+						"type": "boolean"
 					}
 				},
 				"additionalProperties":false
