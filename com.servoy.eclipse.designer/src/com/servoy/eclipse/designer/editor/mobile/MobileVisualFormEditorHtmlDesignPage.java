@@ -66,6 +66,7 @@ import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.designer.editor.AddPartsCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
@@ -122,7 +123,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Design page for web based mobile form editor
- * 
+ *
  * @author rgansevles
  *
  */
@@ -144,6 +145,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 	private static final String HEADER_PREFIX = "header_";
 
 	private static final Map<String, Integer> DISPLAY_TYPE_MAPPING = new HashMap<String, Integer>();
+
 	static
 	{
 		DISPLAY_TYPE_MAPPING.put("TextInput", Integer.valueOf(Field.TEXT_FIELD));
@@ -157,6 +159,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 
 	private static final String PALETTE_ITEMS_RECORDVIEW;
 	private static final String PALETTE_ITEMS_LISTFORM;
+
 	static
 	{
 		JSONArray items = new JSONArray(); // no newlines
@@ -190,6 +193,12 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 	public MobileVisualFormEditorHtmlDesignPage(BaseVisualFormEditor editorPart)
 	{
 		super(editorPart);
+	}
+
+	@Override
+	public DesignPagetype getDesignPagetype()
+	{
+		return DesignPagetype.Mobile;
 	}
 
 	@Override
@@ -505,8 +514,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 						snapType = MobileSnapType.FooterItem;
 					}
 				}
-				commands.add(new MobileAddButtonCommand(Activator.getDefault().getDesignClient(), form, VisualFormEditor.REQ_PLACE_BUTTON, new Point(0, 0),
-					snapType));
+				commands.add(
+					new MobileAddButtonCommand(Activator.getDefault().getDesignClient(), form, VisualFormEditor.REQ_PLACE_BUTTON, new Point(0, 0), snapType));
 			}
 			else if ("Label".equals(nodeType))
 			{
@@ -527,8 +536,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				if ("Header".equals(nodeType))
 				{
 					// add header title so we can set header text property
-					commands.add(new MobileAddHeaderTitleCommand(Activator.getDefault().getDesignClient(), form, VisualFormEditor.REQ_PLACE_HEADER_TITLE, null,
-						null));
+					commands.add(
+						new MobileAddHeaderTitleCommand(Activator.getDefault().getDesignClient(), form, VisualFormEditor.REQ_PLACE_HEADER_TITLE, null, null));
 				}
 			}
 			else if ("InsetList".equals(nodeType))
@@ -556,12 +565,11 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				if (fieldType != null)
 				{
 					Map<Object, Object> props = new HashMap<Object, Object>();
-					props.put(
-						SetValueCommand.REQUEST_PROPERTY_PREFIX + StaticContentSpecLoader.PROPERTY_DISPLAYTYPE.getPropertyName(),
+					props.put(SetValueCommand.REQUEST_PROPERTY_PREFIX + StaticContentSpecLoader.PROPERTY_DISPLAYTYPE.getPropertyName(),
 						MobilePersistPropertySource.MOBILE_DISPLAY_TYPE_CONTROLLER.getConverter().convertProperty(
 							StaticContentSpecLoader.PROPERTY_DISPLAYTYPE.getPropertyName(), fieldType));
-					commands.add(new AddFieldCommand(Activator.getDefault().getDesignClient(), form, VisualFormEditor.REQ_PLACE_FIELD, props, null,
-						customProperties));
+					commands.add(
+						new AddFieldCommand(Activator.getDefault().getDesignClient(), form, VisualFormEditor.REQ_PLACE_FIELD, props, null, customProperties));
 				}
 			}
 		}
@@ -727,7 +735,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 
 	public static Command createSetValueCommand(Object element, String id, Object value)
 	{
-		IPropertySource propertySource = (IPropertySource)Platform.getAdapterManager().getAdapter(element, IPropertySource.class);
+		IPropertySource propertySource = Platform.getAdapterManager().getAdapter(element, IPropertySource.class);
 		if (propertySource == null)
 		{
 			return null;
@@ -1050,7 +1058,7 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 //				},
 //				{type:'Footer',zone:'bottom'}
 //			]
-//			
+//
 //		}]
 //	}
 
@@ -1120,7 +1128,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 					List<IFormElement> partModelChildren = null;
 					if (PersistUtils.isHeaderPart(((Part)child).getPartType()))
 					{
-						partModelChildren = MobileHeaderGraphicalEditPart.getHeaderModelChildren(Activator.getDefault().getDesignClient(), editorPart.getForm());
+						partModelChildren = MobileHeaderGraphicalEditPart.getHeaderModelChildren(Activator.getDefault().getDesignClient(),
+							editorPart.getForm());
 
 						GraphicalComponent headerText = getHeaderText((Part)child);
 						// take out header title, this is not a separate element in this form editor
@@ -1132,7 +1141,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 					else if (PersistUtils.isFooterPart(((Part)child).getPartType()))
 					{
 						content = createContentIfNull(elements, content); // make sure there is always a content part to drop elements on
-						partModelChildren = MobileFooterGraphicalEditPart.getFooterModelChildren(Activator.getDefault().getDesignClient(), editorPart.getForm());
+						partModelChildren = MobileFooterGraphicalEditPart.getFooterModelChildren(Activator.getDefault().getDesignClient(),
+							editorPart.getForm());
 					}
 
 					if (partModelChildren != null && partModelChildren.size() > 0)
@@ -1255,10 +1265,10 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 			return MobileListModel.create(form, persist.getParent());
 		}
 
-		if (persist instanceof AbstractBase &&
-			(((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.LIST_ITEM_IMAGE.propertyName) != null ||
-				((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.LIST_ITEM_BUTTON.propertyName) != null ||
-				((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.LIST_ITEM_SUBTEXT.propertyName) != null || ((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.LIST_ITEM_COUNT.propertyName) != null))
+		if (persist instanceof AbstractBase && (((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.LIST_ITEM_IMAGE.propertyName) != null ||
+			((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.LIST_ITEM_BUTTON.propertyName) != null ||
+			((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.LIST_ITEM_SUBTEXT.propertyName) != null ||
+			((AbstractBase)persist).getCustomMobileProperty(IMobileProperties.LIST_ITEM_COUNT.propertyName) != null))
 		{
 			// list form
 			return MobileListModel.create(form, form);
@@ -1311,8 +1321,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 	{
 		try
 		{
-			ServoyJSONObject json = getChildJson(getPersistModel(editorPart.getForm(),
-				ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(getUUID(uuid))));
+			ServoyJSONObject json = getChildJson(
+				getPersistModel(editorPart.getForm(), ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(getUUID(uuid))));
 			if (json != null)
 			{
 				return json.toString();
@@ -1526,8 +1536,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 									if (i == 1)
 									{
 										checkProperties.put("checked", "checked");
-										checkProperties.put("servoydataprovider", field.getDataProviderID() == null ? EMPTY_VALUE
-											: ((ISupportDataProviderID)persist).getDataProviderID());
+										checkProperties.put("servoydataprovider",
+											field.getDataProviderID() == null ? EMPTY_VALUE : ((ISupportDataProviderID)persist).getDataProviderID());
 									}
 
 									checkProperties.put(THEME_KEY, field.getStyleClass());
@@ -1593,8 +1603,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 		}
 		if (persist instanceof ISupportDataProviderID)
 		{
-			properties.put("servoydataprovider", ((ISupportDataProviderID)persist).getDataProviderID() == null ? EMPTY_VALUE
-				: ((ISupportDataProviderID)persist).getDataProviderID());
+			properties.put("servoydataprovider",
+				((ISupportDataProviderID)persist).getDataProviderID() == null ? EMPTY_VALUE : ((ISupportDataProviderID)persist).getDataProviderID());
 		}
 
 		return element;

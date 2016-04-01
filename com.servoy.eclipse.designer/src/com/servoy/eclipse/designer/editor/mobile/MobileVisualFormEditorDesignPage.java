@@ -27,6 +27,7 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditorGEFDesignPage;
 import com.servoy.eclipse.designer.editor.IPaletteFactory;
@@ -45,7 +46,7 @@ import com.servoy.j2db.persistence.Portal;
 
 /**
  * Design page for mobile form editor.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -57,6 +58,12 @@ public class MobileVisualFormEditorDesignPage extends BaseVisualFormEditorGEFDes
 	public MobileVisualFormEditorDesignPage(BaseVisualFormEditor editorPart)
 	{
 		super(editorPart);
+	}
+
+	@Override
+	public DesignPagetype getDesignPagetype()
+	{
+		return DesignPagetype.MobileClassic;
 	}
 
 	@Override

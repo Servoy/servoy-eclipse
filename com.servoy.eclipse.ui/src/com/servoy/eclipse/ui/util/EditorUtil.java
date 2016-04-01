@@ -221,7 +221,7 @@ public class EditorUtil
 				IWorkbenchPage activePage = getActivePage();
 				if (activePage != null)
 				{
-					return activePage.openEditor(new PersistEditorInput(form.getName(), form.getSolution().getName(), form.getUUID()).setNew(newForm),
+					return activePage.openEditor(PersistEditorInput.createFormEditorInput(form).setNew(newForm),
 						PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
 							Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId(),
 						activate);
@@ -234,7 +234,6 @@ public class EditorUtil
 		}
 		return null;
 	}
-
 
 	public static IEditorPart openTableEditor(ITable table)
 	{
@@ -535,8 +534,7 @@ public class EditorUtil
 	{
 		if (lookup != null)
 		{
-			FindReplaceDocumentAdapter finder = new FindReplaceDocumentAdapter(
-				((StructuredTextEditor)editor).getDocumentProvider().getDocument(((StructuredTextEditor)editor).getEditorInput()));
+			FindReplaceDocumentAdapter finder = new FindReplaceDocumentAdapter(editor.getDocumentProvider().getDocument(editor.getEditorInput()));
 			try
 			{
 				IRegion region = finder.find(0, lookup, true, true, true, false);
@@ -929,6 +927,7 @@ public class EditorUtil
 			webBrowser.openURL(new URL(url));
 		}
 	}
+
 
 	public static class Encapsulation2StringConverter extends Converter
 	{

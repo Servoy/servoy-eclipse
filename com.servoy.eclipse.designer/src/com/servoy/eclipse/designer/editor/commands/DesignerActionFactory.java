@@ -424,6 +424,28 @@ public abstract class DesignerActionFactory extends ActionFactory
 		}
 	};
 
+	public static final String SWITCH_TO_RFB_EDITOR_TEXT = "Switch to HTML5 form editor";
+	public static final String SWITCH_TO_RFB_EDITOR_TOOLTIP = SWITCH_TO_RFB_EDITOR_TEXT;
+	public static final ImageDescriptor SWITCH_TO_RFB_EDITOR_IMAGE = Activator.loadImageDescriptorFromBundle("html5.png");
+	public static final ActionFactory SWITCH_TO_RFB_EDITOR = new ActionFactory("switch-to-rfb-editor-id")
+	{
+
+		@Override
+		public IWorkbenchAction create(IWorkbenchWindow window)
+		{
+			if (window == null)
+			{
+				throw new IllegalArgumentException();
+			}
+			RetargetAction action = new RetargetAction(getId(), SWITCH_TO_RFB_EDITOR_TEXT);
+			action.setToolTipText(SWITCH_TO_RFB_EDITOR_TOOLTIP);
+			window.getPartService().addPartListener(action);
+//			action.setActionDefinitionId("org.eclipse.ui.edit." + getId());
+			action.setImageDescriptor(SWITCH_TO_RFB_EDITOR_IMAGE);
+			return action;
+		}
+	};
+
 	public static final String SAME_WIDTH_TEXT = "Same width";
 	public static final String SAME_WIDTH_TOOLTIP = SAME_WIDTH_TEXT;
 	public static final ImageDescriptor SAME_WIDTH_IMAGE = Activator.loadImageDescriptorFromBundle("same_width.gif");

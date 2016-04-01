@@ -71,6 +71,7 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.designer.actions.SelectFeedbackmodeAction;
 import com.servoy.eclipse.designer.actions.SelectSnapmodeAction;
 import com.servoy.eclipse.designer.actions.ViewerTogglePropertyAction;
@@ -95,7 +96,7 @@ import com.servoy.j2db.persistence.Part;
 
 /**
  * Tab in form editor for designing the form visually.
- * 
+ *
  * @author rgansevles
  */
 public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPage
@@ -186,6 +187,13 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 	}
 
 	@Override
+	public DesignPagetype getDesignPagetype()
+	{
+		return DesignPagetype.Classic;
+	}
+
+
+	@Override
 	protected DeleteAction createDeleteAction()
 	{
 		return new DeleteAction((IWorkbenchPart)editorPart)
@@ -273,10 +281,10 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 					{
 						getGraphicalViewer().setSelection(editpartSelection);
 					}
-					// reveal the last element, otherwise you have jumpy behavior when in form designer via ctl-click element 2 is 
+					// reveal the last element, otherwise you have jumpy behavior when in form designer via ctl-click element 2 is
 					// selected whilst selected element 1 is not visible.
-					if (getGraphicalViewer().getControl() != null && !getGraphicalViewer().getControl().isDisposed()) getGraphicalViewer().reveal(
-						editParts.get(editParts.size() - 1));
+					if (getGraphicalViewer().getControl() != null && !getGraphicalViewer().getControl().isDisposed())
+						getGraphicalViewer().reveal(editParts.get(editParts.size() - 1));
 				}
 			}
 		};
@@ -641,6 +649,7 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 
 		addToolbarAction(COOLBAR_ACTIONS, getActionRegistry().getAction(DesignerActionFactory.SET_TAB_SEQUENCE.getId()));
 		addToolbarAction(COOLBAR_ACTIONS, getActionRegistry().getAction(DesignerActionFactory.SAVE_AS_TEMPLATE.getId()));
+		addToolbarAction(COOLBAR_ACTIONS, getActionRegistry().getAction(DesignerActionFactory.SWITCH_TO_RFB_EDITOR.getId()));
 	}
 
 	@Override
@@ -723,7 +732,7 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 
 	/**
 	 * Creates the GraphicalViewer on the specified <code>Composite</code>.
-	 * 
+	 *
 	 * @param parent the parent composite
 	 */
 	@Override

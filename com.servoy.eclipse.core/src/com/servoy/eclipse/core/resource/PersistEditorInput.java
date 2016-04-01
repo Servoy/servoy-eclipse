@@ -16,12 +16,23 @@
  */
 package com.servoy.eclipse.core.resource;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.model.repository.SolutionDeserializer;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -35,6 +46,7 @@ public class PersistEditorInput implements IEditorInput
 	public static final String RELATION_RESOURCE_ID = "com.servoy.eclipse.core.resource.relation";
 	public static final String MEDIA_RESOURCE_ID = "com.servoy.eclipse.core.resource.media";
 
+	private IFile file;
 	private final String name;
 	private final UUID uuid;
 	private final String solutionName;
@@ -42,7 +54,7 @@ public class PersistEditorInput implements IEditorInput
 
 	/**
 	 * Creates a persist input.
-	 * 
+	 *
 	 * @param solution
 	 */
 	public PersistEditorInput(String name, String solutionName, UUID uuid)
@@ -52,6 +64,48 @@ public class PersistEditorInput implements IEditorInput
 		this.solutionName = solutionName;
 	}
 
+	public static PersistEditorInput createFormEditorInput(IFile file)
+	{
+		IPersist filePersist = SolutionDeserializer.findPersistFromFile(file);
+		if (filePersist != null)
+		{
+			Form form = (Form)filePersist.getAncestor(IRepository.FORMS);
+			if (form != null)
+			{
+				return createFormEditorInput(form, file);
+			}
+		}
+
+		return null;
+	}
+
+	public static PersistEditorInput createFormEditorInput(Form form)
+	{
+		return createFormEditorInput(form, ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getRelativeFilePath(form, true))));
+	}
+
+	private static PersistEditorInput createFormEditorInput(Form form, IFile file)
+	{
+		PersistEditorInput input = new PersistEditorInput(form.getName(), form.getSolution().getName(), form.getUUID());
+		input.setFile(file);
+		return input;
+	}
+
+	/**
+	 * @return the file
+	 */
+	public IFile getFile()
+	{
+		return file;
+	}
+
+	/**
+	 * @param file the file to set
+	 */
+	public void setFile(IFile file)
+	{
+		this.file = file;
+	}
 
 	/**
 	 * @param isNew the isNew to set
@@ -81,7 +135,8 @@ public class PersistEditorInput implements IEditorInput
 	/*
 	 * (non-Javadoc) Method declared on IAdaptable.
 	 */
-	public Object getAdapter(Class adapter)
+	@Override
+	public <T> T getAdapter(Class<T> adapter)
 	{
 		return Platform.getAdapterManager().getAdapter(this, adapter);
 	}
@@ -113,6 +168,43 @@ public class PersistEditorInput implements IEditorInput
 		return solutionName;
 	}
 
+	/**
+	 * @return the designPagetype
+	 */
+	public DesignPagetype getDesignPagetype()
+	{
+		if (file != null)
+		{
+			try
+			{
+				return DesignPagetype.safeValueOf(file.getPersistentProperty(Activator.DESIGN_PAGE_TYPE_KEY));
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+		return null;
+	}
+
+	/**
+	* @param designPagetype the designPagetype to set
+	*/
+	public void setDesignPagetype(DesignPagetype designPagetype)
+	{
+		if (file != null)
+		{
+			try
+			{
+				file.setPersistentProperty(Activator.DESIGN_PAGE_TYPE_KEY, designPagetype == null ? null : designPagetype.name());
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+	}
+
 	/*
 	 * (non-Javadoc) Method declared on IEditorInput.
 	 */
@@ -126,12 +218,12 @@ public class PersistEditorInput implements IEditorInput
 	 */
 	public IPersistableElement getPersistable()
 	{
-		return (IPersistableElement)getAdapter(IPersistableElement.class);
+		return getAdapter(IPersistableElement.class);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -163,5 +255,6 @@ public class PersistEditorInput implements IEditorInput
 		else if (!uuid.equals(other.uuid)) return false;
 		return true;
 	}
+
 
 }

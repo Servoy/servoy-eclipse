@@ -28,6 +28,8 @@ import org.eclipse.swt.custom.CTabItem;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.core.resource.DesignPagetype;
+import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorHtmlDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
@@ -125,22 +127,53 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	}
 
 	@Override
-	protected BaseVisualFormEditorDesignPage createGraphicaleditor()
+	protected BaseVisualFormEditorDesignPage createGraphicaleditor(DesignPagetype designPagetype)
 	{
 		Activator.getDefault().getDesignClient().getFlattenedSolution(); // enforce loading of internal style
-		if (isMobile())
+
+		DesignPagetype editorType = designPagetype;
+		if (editorType == null && getEditorInput() instanceof PersistEditorInput)
 		{
-			if (new DesignerPreferences().getClassicFormEditorInMobile())
+			// saved last design page type that was selected by the user
+			editorType = ((PersistEditorInput)getEditorInput()).getDesignPagetype();
+		}
+
+		if (editorType == null)
+		{
+			if (isMobile())
 			{
-				return new MobileVisualFormEditorDesignPage(this);
+				if (new DesignerPreferences().getClassicFormEditorInMobile())
+				{
+					editorType = DesignPagetype.MobileClassic;
+				}
+				else
+				{
+					editorType = DesignPagetype.Mobile;
+				}
 			}
-			return new MobileVisualFormEditorHtmlDesignPage(this);
+			else if ((getForm() != null && getForm().isResponsiveLayout()) || !new DesignerPreferences().getClassicFormEditor())
+			{
+				editorType = DesignPagetype.Rfb;
+			}
+			else
+			{
+				editorType = DesignPagetype.Classic;
+			}
 		}
-		if (!new DesignerPreferences().getClassicFormEditor())
+
+		switch (editorType)
 		{
-			return new RfbVisualFormEditorDesignPage(this);
+			case MobileClassic :
+				return new MobileVisualFormEditorDesignPage(this);
+			case Mobile :
+				return new MobileVisualFormEditorHtmlDesignPage(this);
+			case Rfb :
+				return new RfbVisualFormEditorDesignPage(this);
+			case Classic :
+				return new VisualFormEditorDesignPage(this);
 		}
-		return new VisualFormEditorDesignPage(this);
+
+		throw new IllegalStateException("No design page for " + editorType);
 	}
 
 	@Override

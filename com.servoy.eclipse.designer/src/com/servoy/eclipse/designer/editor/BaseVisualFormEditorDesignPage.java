@@ -48,6 +48,7 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 
+import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.designer.actions.AlignmentSortPartsAction;
 import com.servoy.eclipse.designer.actions.DistributeAction;
 import com.servoy.eclipse.designer.actions.DistributeRequest;
@@ -64,6 +65,7 @@ import com.servoy.eclipse.designer.editor.commands.SameHeightAction;
 import com.servoy.eclipse.designer.editor.commands.SameWidthAction;
 import com.servoy.eclipse.designer.editor.commands.SaveAsTemplateAction;
 import com.servoy.eclipse.designer.editor.commands.SetTabSequenceAction;
+import com.servoy.eclipse.designer.editor.commands.SwitchToRfbEditorAction;
 import com.servoy.eclipse.designer.editor.commands.UngroupAction;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.property.UndoablePropertySheetEntry;
@@ -84,6 +86,7 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 	private ISelectionListener selectionChangedHandler;
 	private ISelection currentSelection;
 
+
 	public BaseVisualFormEditorDesignPage(BaseVisualFormEditor editorPart)
 	{
 		this.editorPart = editorPart;
@@ -92,10 +95,7 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 		setEditDomain(editDomain);
 	}
 
-	public Map getEditPartRegistry()
-	{
-		return getGraphicalViewer().getEditPartRegistry();
-	}
+	public abstract DesignPagetype getDesignPagetype();
 
 	@Override
 	public CommandStack getCommandStack()
@@ -211,6 +211,8 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 		getPropertyActions().add(action.getId());
 
 		registry.registerAction(new PrintAction(editorPart));
+
+		registry.registerAction(new SwitchToRfbEditorAction(editorPart));
 
 		action = createCopyAction();
 		if (action != null)

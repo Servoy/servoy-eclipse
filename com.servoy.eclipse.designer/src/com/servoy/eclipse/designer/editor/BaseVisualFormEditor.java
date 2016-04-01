@@ -33,6 +33,9 @@ import org.eclipse.gef.commands.CommandStackEventListener;
 import org.eclipse.gef.commands.CommandStackListener;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.parts.GraphicalEditor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -51,6 +54,7 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.designer.property.UndoablePersistPropertySourceProvider;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -116,15 +120,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		IEditorInput input = editorInput;
 		if (input instanceof FileEditorInput)
 		{
-			IPersist filePersist = SolutionDeserializer.findPersistFromFile(((FileEditorInput)input).getFile());
-			if (filePersist != null)
-			{
-				Form f = (Form)filePersist.getAncestor(IRepository.FORMS);
-				if (f != null)
-				{
-					input = new PersistEditorInput(f.getName(), f.getSolution().getName(), f.getUUID());
-				}
-			}
+			input = PersistEditorInput.createFormEditorInput(((FileEditorInput)input).getFile());
 		}
 
 		// Check input.
@@ -165,7 +161,6 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	@Override
 	protected void setInput(IEditorInput input)
 	{
-		super.setInput(input);
 		PersistEditorInput formInput = (PersistEditorInput)input;
 
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -185,6 +180,14 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		}
 		setPartName(form.getName());
 		servoyModel.addPersistChangeListener(false, this);
+
+		// make sure we have a file resource
+		if (formInput.getFile() == null)
+		{
+			formInput = PersistEditorInput.createFormEditorInput(form);
+		}
+
+		super.setInput(formInput);
 	}
 
 	@Override
@@ -689,25 +692,72 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		{
 			try
 			{
-				createDesignPage();
+				createDesignPage(null);
 			}
 			catch (PartInitException e)
 			{
 				ServoyLog.logError("Could not create design page", e);
 			}
 		}
-
 	}
 
-	protected void createDesignPage() throws PartInitException
+	public void setDesignPageType(DesignPagetype designPagetype) throws PartInitException
 	{
-		graphicaleditor = createGraphicaleditor();
-		setPageText(addPage(graphicaleditor, getEditorInput()), "Design");
+		if (designPagetype != null && !designPagetype.equals(graphicaleditor.getDesignPagetype()))
+		{
+			if (isDirty())
+			{
+				if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Save form", getTitle() + " has been modified. Save changes?"))
+				{
+					return;
+				}
+				doSave(null);
+			}
 
-		getCommandStack().addCommandStackEventListener(commandStackEventListener);
+			recreateDesignPage(designPagetype);
+		}
 	}
 
-	protected abstract BaseVisualFormEditorDesignPage createGraphicaleditor();
+	protected void recreateDesignPage(DesignPagetype designPagetype) throws PartInitException
+	{
+		int activePage = getActivePage();
+
+		CTabItem[] items = ((CTabFolder)getContainer()).getItems();
+		for (int i = 0; i < items.length; i++)
+		{
+			if (graphicaleditor == items[i].getData())
+			{
+				removePage(i);
+				graphicaleditor.dispose();
+				graphicaleditor = null;
+				break;
+			}
+		}
+
+		createDesignPage(designPagetype);
+
+		if (activePage >= 0)
+		{
+			setActivePage(activePage);
+		}
+
+		if (designPagetype != null && getEditorInput() instanceof PersistEditorInput)
+		{
+			// save last selected as default for next time
+			((PersistEditorInput)getEditorInput()).setDesignPagetype(designPagetype);
+		}
+	}
+
+	protected void createDesignPage(DesignPagetype designPagetype) throws PartInitException
+	{
+		graphicaleditor = createGraphicaleditor(designPagetype);
+		addPage(0, graphicaleditor, getEditorInput());
+		setPageText(0, "Design");
+
+		graphicaleditor.getCommandStack().addCommandStackEventListener(commandStackEventListener);
+	}
+
+	protected abstract BaseVisualFormEditorDesignPage createGraphicaleditor(DesignPagetype designPagetype);
 
 	private boolean isModified;
 

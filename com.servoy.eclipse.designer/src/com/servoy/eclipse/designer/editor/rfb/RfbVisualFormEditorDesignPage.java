@@ -44,6 +44,7 @@ import org.sablo.websocket.WebsocketSessionManager;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
+import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.actions.CopyAction;
@@ -131,6 +132,12 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	public RfbVisualFormEditorDesignPage(BaseVisualFormEditor editorPart)
 	{
 		super(editorPart);
+	}
+
+	@Override
+	public DesignPagetype getDesignPagetype()
+	{
+		return DesignPagetype.Rfb;
 	}
 
 	@Override

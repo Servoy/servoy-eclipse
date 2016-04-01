@@ -341,8 +341,7 @@ public class JSDeveloperSolutionModel
 					{
 						try
 						{
-							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-								new PersistEditorInput(frm.getName(), frm.getSolution().getName(), frm.getUUID()).setNew(false),
+							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(PersistEditorInput.createFormEditorInput(frm).setNew(false),
 								PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
 									Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId());
 						}

@@ -47,6 +47,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
@@ -160,6 +161,8 @@ public class Activator extends Plugin
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "com.servoy.eclipse.core";
+
+	public static final QualifiedName DESIGN_PAGE_TYPE_KEY = new QualifiedName(PLUGIN_ID, "designPagetype");
 
 	// The shared instance
 	private static Activator plugin;
@@ -637,8 +640,7 @@ public class Activator extends Plugin
 						{
 							try
 							{
-								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-									new PersistEditorInput(testForm.getName(), testForm.getSolution().getName(), testForm.getUUID()),
+								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(PersistEditorInput.createFormEditorInput(testForm),
 									PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
 										Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId());
 								PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().forceActive();

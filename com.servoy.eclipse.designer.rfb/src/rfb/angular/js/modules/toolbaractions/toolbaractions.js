@@ -539,6 +539,17 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	}
 
 	$toolbar.add(btnReload, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
+	
+	var btnClassicEditor = {
+			text: "Swtch to classic editor",
+			icon: "../../images/html5-gray.png",
+			enabled: true,
+			onclick: function() {
+				$editorService.executeAction('switchEditorClassic');
+			},
+	}
+	
+	$toolbar.add(btnClassicEditor, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 
 	$rootScope.$on(EDITOR_EVENTS.INITIALIZED, function() {
 		// disable or enable buttons.
