@@ -178,6 +178,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					utils.setDraggingFromPallete(null);
 				}
 				selectionToDrag = null;
+				editorScope.glasspane.style.cursor = "";
 			}
 		}
 
@@ -270,8 +271,8 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						
 						var canDrop = utils.getDropNode(type, topContainer, layoutName, event);
 						if (!canDrop.dropAllowed) {
-							editorScope.glasspane.style.cursor = "no-drop";
-						} else editorScope.glasspane.style.cursor = "";
+							editorScope.glasspane.style.cursor = "not-allowed";
+						} else editorScope.glasspane.style.cursor = "pointer";
 
 						dragStartEvent = event;
 
@@ -280,7 +281,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 							if (canDrop.dropTarget && selectionToDrag) {
 								for (var i = 0; i < selectionToDrag.length; i++) {
 									var node = angular.element(selectionToDrag[i]);
-									if (editorScope.glasspane.style.cursor == "") {
+									if (editorScope.glasspane.style.cursor == "pointer") {
 										if (canDrop.beforeChild) {
 											node.insertBefore(canDrop.beforeChild);
 										} else if (node.parent()[0] != canDrop.dropTarget || canDrop.append) {
