@@ -1,3 +1,16 @@
+
+.bottomAutoscrollArea {
+	z-index: 3;
+	position: fixed;
+	bottom: 0px;
+	height: 20px;
+	width: 100%;
+	margin-left : -20px;
+	background-color: blue;
+	opacity: 0.3;
+	pointer-events: none;
+}
+
 /* Helper classes */
 .user-selection-off {
 	-webkit-user-select: none; /* Chrome all / Safari all */
@@ -36,6 +49,8 @@ html, body
 	position: absolute;
 	top: 0px;
 	left: 0px;
+	background-color: green!important;
+	opacity: 0.3;
 	width: 100%;
 	height: 100%;
 }
@@ -118,7 +133,8 @@ body {
 	border-width: 0px;
 	width: 100%;
 	height: 100%;
-	display: block
+	pointer-events:none;
+	display: block;
 }
 
 /* Decorator Overlays */

@@ -34,7 +34,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	GHOST_TYPE_INVISIBLE: "invisible",
 	GHOST_TYPE_GROUP: "group"
 }).directive("editor", function($window, $pluginRegistry, $rootScope, EDITOR_EVENTS, EDITOR_CONSTANTS, $timeout,
-	$editorService, $webSocket, $q) {
+	$editorService, $webSocket, $q, $interval) {
 	return {
 		restrict: 'E',
 		transclude: true,
@@ -75,6 +75,23 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			$scope.glasspane = $element.find('.contentframe-overlay')[0];
 			$scope.editorID = $element.attr('id');
 			$scope.contentDocument = null;
+			
+			$scope.startBottomAutoScroll = function (callback){
+			    	if (angular.isDefined(stop)) {
+			    	    $interval.cancel(stop);
+			    	    stop = undefined;
+			    	}
+				stop = $interval(function (){
+				    var contentArea = ($element.find('.content-area')[0]);
+				    if ((contentArea.scrollTop + contentArea.offsetHeight) === contentArea.scrollHeight)
+					angular.element($scope.glasspane).height(angular.element($scope.glasspane).height()+5);
+				    contentArea.scrollTop += 5;
+				    callback($scope, $scope.selectionToDrag,0,5);
+				    $scope.refreshEditorContent();
+				},100);
+				return stop;
+			};
+			
 			$scope.registerDOMEvent = function(eventType, target, callback) {
 				var eventCallback = callback.bind(this);
 				if (target == "FORM") {
@@ -87,8 +104,27 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					$($element.find('.palette')[0]).on(eventType, null, eventCallback)
 				} else if (target == "CONTENTFRAME_OVERLAY") {
 					$($scope.glasspane).on(eventType, null, eventCallback)
+				} else if (target == "BOTTOM_AUTOSCROLL") {
+					$($element.find('.bottomAutoscrollArea')[0]).on(eventType, null, eventCallback)
 				}
+				
 				return eventCallback;
+			}
+			
+			$scope.unregisterDOMEvent = function(eventType, target, callback) {
+				if (target == "FORM") {
+					$($scope.contentDocument).off(eventType, null, callback)
+				} else if (target == "EDITOR") {
+					$($element).off(eventType, null, callback);
+				} else if (target == "CONTENT_AREA") {
+					$($element.find('.content-area')[0]).off(eventType, null, callback);
+				} else if (target == "CONTENTFRAME_OVERLAY") {
+					$($scope.glasspane).off(eventType, null, callback)
+				} else if (target == "PALETTE") {
+					$($element.find('.palette')[0]).off(eventType, null, callback);
+				} else if (target == "BOTTOM_AUTOSCROLL") {
+					$($element.find('.bottomAutoscrollArea')[0]).off(eventType, null, callback)
+				}
 			}
 
 			$scope.getFormName = function () {
@@ -433,21 +469,6 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				}
 			});
 
-
-			$scope.unregisterDOMEvent = function(eventType, target, callback) {
-				if (target == "FORM") {
-					$($scope.contentDocument).off(eventType, null, callback)
-				} else if (target == "EDITOR") {
-					$($element).off(eventType, null, callback);
-				} else if (target == "CONTENT_AREA") {
-					$($element.find('.content-area')[0]).off(eventType, null, callback);
-				} else if (target == "CONTENTFRAME_OVERLAY") {
-					$($scope.glasspane).off(eventType, null, callback)
-				} else if (target == "PALETTE") {
-					$($element.find('.palette')[0]).off(eventType, null, callback);
-				}
-			}
-
 			$scope.convertToContentPoint = function(point) {
 				var frameRect = $element.find('.contentframe')[0].getBoundingClientRect()
 				if (point.x && point.y) {
@@ -562,6 +583,15 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				bottom: "20px"
 			};
 			$scope.glasspaneStyle = {};
+			
+			$scope.togglePointerEvents = {
+				"pointer-events" : "none"
+			};
+			
+			$scope.setPointerEvents = function (value){
+			    $scope.togglePointerEvents["pointer-events"] = value;
+			    $scope.$apply();
+			}
 
 			$scope.setContentSize = function(width, height) {
 				$scope.contentStyle.width = width;

@@ -5,7 +5,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 		directive.replace = true;
 		return $delegate;
 	});
-}]).directive("palette", function($editorService, $compile, $selectionUtils, $rootScope, EDITOR_EVENTS, $document) {
+}]).directive("palette", function($editorService, $compile, $selectionUtils, $rootScope, EDITOR_EVENTS, $document, $interval) {
 	return {
 		restrict: 'E',
 		transclude: true,
@@ -80,6 +80,8 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 					var t;
 					var insertedClone;
 					var insertedCloneParent;
+					var bottomAutoscrollEnter;
+					
 					var mousemovecallback = $scope.registerDOMEvent("mousemove", "EDITOR", function(ev) {
 						if (dragClone) {
 						    if (layoutName)
@@ -178,32 +180,52 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 								    css.height = elHeight + 'px';
 								}
 								angularElement.css(css);
-								//
 							}
 						}
 					});
+					
 					mouseentercallback = $scope.registerDOMEvent("mouseenter","CONTENTFRAME_OVERLAY", function(){
 						if (angularElement) {
+						    	$scope.setPointerEvents("all");	
 							dragClone.css('opacity', '0');
-							// if ($scope.isAbsoluteFormLayout()) {
 							angularElement.css('opacity', '1');
-							// }
 						}
 					});
+					
 					mouseleavecallback = $scope.registerDOMEvent("mouseenter","PALETTE", function(){
 						if (angularElement) {
+						    	$scope.setPointerEvents("none");	
 							dragClone.css('opacity', '1');
-							// if ($scope.isAbsoluteFormLayout()) {
 							angularElement.css('opacity', '0');
-							//}
 						}
 					});
+					
+					var stop;
+					bottomAutoscrollEnter = $scope.registerDOMEvent("mouseenter","BOTTOM_AUTOSCROLL", function(event){
+					   stop = $scope.startBottomAutoScroll();
+					});
+					
+					bottomAutoscrollLeave = $scope.registerDOMEvent("mouseleave","BOTTOM_AUTOSCROLL", function(){
+					    if (angular.isDefined(stop)) {
+					            $interval.cancel(stop);
+					            stop = undefined;
+					    }
+					});
+					
 					mouseupcallback = $scope.registerDOMEvent("mouseup", "EDITOR", function(ev) {
+					    
+					    	if (angular.isDefined(stop)) {
+					    	    $interval.cancel(stop);
+					    	    stop = undefined;
+					    	}
+					    	$scope.setPointerEvents("none");
 						if (mousemovecallback) $scope.unregisterDOMEvent("mousemove", "EDITOR", mousemovecallback);
 						if (mouseupcallback) $scope.unregisterDOMEvent("mouseup", "EDITOR", mouseupcallback);
 						if (mouseentercallback) $scope.unregisterDOMEvent("mouseenter", "CONTENTFRAME_OVERLAY",
 						mouseentercallback);
 						if (mouseleavecallback) $scope.unregisterDOMEvent("mouseenter", "PALETTE", mouseleavecallback);
+						if (bottomAutoscrollEnter) $scope.unregisterDOMEvent("mouseenter", "BOTTOM_AUTOSCROLL", bottomAutoscrollEnter);
+						if (bottomAutoscrollLeave) $scope.unregisterDOMEvent("mouseleave", "BOTTOM_AUTOSCROLL", bottomAutoscrollLeave);
 						$scope.glasspane.style.cursor = "";
 						editorScope.getEditorContentRootScope().drop_highlight = null;
 						editorScope.getEditorContentRootScope().$apply();

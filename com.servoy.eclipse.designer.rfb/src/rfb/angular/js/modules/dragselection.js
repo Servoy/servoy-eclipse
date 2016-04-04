@@ -1,10 +1,10 @@
-angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pluginRegistry, $editorService, $selectionUtils, EDITOR_CONSTANTS) {
+angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pluginRegistry, $editorService, $selectionUtils, EDITOR_CONSTANTS, $interval) {
 	$pluginRegistry.registerPlugin(function(editorScope) {
 
 		var utils = $selectionUtils.getUtilsForScope(editorScope);
 		var dragging = false;
 		var dragStartEvent = null;
-		var selectionToDrag = null;
+		editorScope.selectionToDrag = null;
 		var dragCloneDiv = null;
 		var COMPONENT_TYPE = 7;
 
@@ -22,6 +22,19 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 		}
 
 		function onmouseup(event) {
+		    
+		    	if (event.type == "mouseup"){
+                		if (angular.isDefined(stop)) {
+                		    $interval.cancel(stop);
+                		    stop = undefined;
+                		}
+                		//disable mouse events on the bottom_autoscroll
+        			editorScope.setPointerEvents("none");
+                		if (bottomAutoscrollEnter) editorScope.unregisterDOMEvent("mouseenter", "BOTTOM_AUTOSCROLL", bottomAutoscrollEnter);
+                		if (bottomAutoscrollLeave) editorScope.unregisterDOMEvent("mouseleave", "BOTTOM_AUTOSCROLL", bottomAutoscrollLeave);
+                		if (bottomAutoscrollMouseup) editorScope.unregisterDOMEvent("mouseup", "BOTTOM_AUTOSCROLL", bottomAutoscrollMouseup);
+		    	}
+        		
 			if (event.button == 0) {
 				dragStartEvent = null;
 				if (dragCloneDiv) {
@@ -46,8 +59,8 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 
 					if (!editorScope.isAbsoluteFormLayout()) {
 						obj = (event.ctrlKey||event.metaKey) ? [] : {};
-						for (i = 0; i < selectionToDrag.length; i++) {
-							node = selectionToDrag[i];
+						for (i = 0; i < editorScope.selectionToDrag.length; i++) {
+							node = editorScope.selectionToDrag[i];
 							if(node[0]) node = node[0];
 							type = "component";
 							layoutName = node.getAttribute("svy-layoutname");
@@ -77,7 +90,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 							obj[key] = {};
 							if((event.ctrlKey||event.metaKey)) {
 								obj[key].uuid = node.getAttribute('cloneuuid');
-								selectionToDrag[i].remove();
+								editorScope.selectionToDrag[i].remove();
 							}
 
 							//support for reordering ghosts in responsive layout - if this is a ghost then only allow dropping on top of a sibling ghost
@@ -103,9 +116,9 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						if ((event.ctrlKey||event.metaKey)) {
 							var components = [];
 							var size = 0;
-							for (i = 0; i < selectionToDrag.length; i++) {
-								selectionToDrag[i].remove();
-								node = selectionToDrag[i][0];
+							for (i = 0; i < editorScope.selectionToDrag.length; i++) {
+								editorScope.selectionToDrag[i].remove();
+								node = editorScope.selectionToDrag[i][0];
 								var component = {};
 								component.uuid = node.getAttribute('cloneuuid');
 								component.x = node.location.x;
@@ -120,8 +133,8 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						}
 						else {
 							obj = {};
-							for (i = 0; i < selectionToDrag.length; i++) {
-								node = selectionToDrag[i];
+							for (i = 0; i < editorScope.selectionToDrag.length; i++) {
+								node = editorScope.selectionToDrag[i];
 								if (node.uuid) {
 									if (node.type === COMPONENT_TYPE) // this is a component, so we have to move it
 										obj[node.uuid] = {
@@ -175,14 +188,69 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 							$editorService.sendChanges(obj);
 						}
 					}
+					
 					utils.setDraggingFromPallete(null);
 				}
-				selectionToDrag = null;
+				if (event.type == "mouseup"){
+				    editorScope.selectionToDrag = null;
+				}
+			}
+		}
+		
+		var updateAbsoluteLayoutComponentsLocations = function (editorScope, draggedSelection, changeX, changeY) {
+			for(var i=0;i< draggedSelection.length;i++) {
+				var node = draggedSelection[i];
+				if (node[0] && node[0].getAttribute('cloneuuid')){
+						node[0].location.x += changeX;
+						node[0].location.y += changeY;
+						css = {
+							top: node[0].location.y,
+							left: node[0].location.x
+						}
+						node.css(css);
+				}
+				else {
+				    	var css;
+					
+					var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+					if (ghostObject) {
+						if (ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
+						{
+							var groupElements = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[group-id='"+ghostObject.uuid+"']"));
+							for (var i = 0; i < groupElements.length; i++)
+							{
+								var elem = groupElements[i];
+								beanModel = editorScope.getBeanModel(elem.parentElement);
+								if (beanModel) {
+									beanModel.location.y = beanModel.location.y + changeY;
+									beanModel.location.x = beanModel.location.x + changeX;
+									css = { top: beanModel.location.y, left: beanModel.location.x }
+									angular.element(elem.parentElement).css(css);
+								}
+							}
+						}
+						editorScope.updateGhostLocation(ghostObject, ghostObject.location.x + changeX, ghostObject.location.y + changeY)
+					}
+					else {
+        					var beanModel = editorScope.getBeanModel(node);
+        					    if (beanModel){
+        						beanModel.location.y = beanModel.location.y + changeY;
+        						beanModel.location.x = beanModel.location.x + changeX;
+        						css = { top: beanModel.location.y, left: beanModel.location.x }
+        						angular.element(node).css(css);
+        						
+        					}	
+					}
+					
+				}
 			}
 		}
 
 		var t;
-
+		var stop;
+		var bottomAutoscrollEnter;
+		var bottomAutoscrollLeave;
+		var bottomAutoscrollMouseup;
 		function onmousemove(event) {
 			if (dragStartEvent) {
 				var i;
@@ -193,17 +261,44 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					if (Math.abs(dragStartEvent.screenX - event.screenX) > 5 || Math.abs(dragStartEvent.screenY - event.screenY) > 5) {
 						dragging = true;
 						utils.setDraggingFromPallete(true);
+						
+						//if the click starts in the bottom 20px and going up, 
+						//then do not enable the bottom div & start dragging downwards
+						if ((event.clientY <= editorScope.glasspane.clientHeight - 20)||(dragStartEvent.screenY - event.screenY > 0)){
+						    	//enable mouse events on the bottom_autoscroll
+						    	editorScope.setPointerEvents("all");
+        						bottomAutoscrollEnter = editorScope.registerDOMEvent("mouseenter","BOTTOM_AUTOSCROLL", function(event){
+        						   stop = editorScope.startBottomAutoScroll(updateAbsoluteLayoutComponentsLocations);
+        						});
+        						
+        						bottomAutoscrollLeave = editorScope.registerDOMEvent("mouseleave","BOTTOM_AUTOSCROLL", function(){
+        						    if (angular.isDefined(stop)) {
+        						            $interval.cancel(stop);
+        						            stop = undefined;
+        						    }
+        						});
+        						
+        						bottomAutoscrollMouseup = editorScope.registerDOMEvent("mouseup","BOTTOM_AUTOSCROLL", function(){
+        						    if (angular.isDefined(stop)) {
+        						            $interval.cancel(stop);
+        						            stop = undefined;
+        						    }
+        						});
+						}
+						
+						
 						if (dragCloneDiv) dragCloneDiv.css({display:'block'});
 					} else return;
 				}
-				if ((event.ctrlKey || event.metaKey) && selectionToDrag == null) {
-					selectionToDrag = [];
+				
+				if ((event.ctrlKey || event.metaKey) && editorScope.selectionToDrag == null) {
+					editorScope.selectionToDrag = [];
 					var selection = editorScope.getSelection();
 					for (i = 0; i < selection.length; i++) {
 						node = selection[i];
-						selectionToDrag[i] = angular.element(node).clone();
-						selectionToDrag[i].attr('id', 'dragNode' + i);
-						selectionToDrag[i].attr('cloneuuid', node.getAttribute("svy-id"));						
+						editorScope.selectionToDrag[i] = angular.element(node).clone();
+						editorScope.selectionToDrag[i].attr('id', 'dragNode' + i);
+						editorScope.selectionToDrag[i].attr('cloneuuid', node.getAttribute("svy-id"));						
 						
 						if(editorScope.isAbsoluteFormLayout()) {
 							var posX, posY;
@@ -217,25 +312,25 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 								posY = ghostObject.location.y;
 							}
 							
-							selectionToDrag[i][0]['location'] = {
+							editorScope.selectionToDrag[i][0]['location'] = {
 									x: posX,
 									y: posY
 								};
 							
-							selectionToDrag[i].css({
+							editorScope.selectionToDrag[i].css({
 								'z-index': 4
 							});
-							angular.element(selection[i]).parent().append(selectionToDrag[i]);
+							angular.element(selection[i]).parent().append(editorScope.selectionToDrag[i]);
 						}
 					}
 				}
 
-				if (!selectionToDrag) {
-					selectionToDrag = editorScope.getSelection();
-					selectionToDrag = utils.addGhostsToSelection(selectionToDrag);
+				if (!editorScope.selectionToDrag) {
+					editorScope.selectionToDrag = editorScope.getSelection();
+					editorScope.selectionToDrag = utils.addGhostsToSelection(editorScope.selectionToDrag);
 				}
 
-				if (selectionToDrag.length > 0) {
+				if (editorScope.selectionToDrag.length > 0) {
 					if (!editorScope.isAbsoluteFormLayout()) {
 					    	if (dragCloneDiv){
 					    		var css = editorScope.convertToContentPoint({
@@ -248,7 +343,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 							});
 					    		dragCloneDiv.css(css);
 					    	}
-						var firstSelectedNode = selectionToDrag[0];
+						var firstSelectedNode = editorScope.selectionToDrag[0];
 						if(firstSelectedNode[0]) firstSelectedNode = firstSelectedNode[0];
 						
 						var type = "component";
@@ -277,9 +372,9 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 
 						if (t) clearTimeout(t);
 						t = setTimeout(function() {
-							if (canDrop.dropTarget && selectionToDrag) {
-								for (var i = 0; i < selectionToDrag.length; i++) {
-									var node = angular.element(selectionToDrag[i]);
+							if (canDrop.dropTarget && editorScope.selectionToDrag) {
+								for (var i = 0; i < editorScope.selectionToDrag.length; i++) {
+									var node = angular.element(editorScope.selectionToDrag[i]);
 									if (editorScope.glasspane.style.cursor == "") {
 										if (canDrop.beforeChild) {
 											node.insertBefore(canDrop.beforeChild);
@@ -294,70 +389,29 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					} else {
 						var changeX = event.screenX- dragStartEvent.screenX;
 						var changeY = event.screenY- dragStartEvent.screenY;
-						for(var i=0;i<selectionToDrag.length;i++) {
-							var node = selectionToDrag[i];
-							if (node[0] && node[0].getAttribute('cloneuuid')){
-									node[0].location.x += changeX;
-									node[0].location.y += changeY;
-									css = {
-										top: node[0].location.y,
-										left: node[0].location.x
-									}
-									node.css(css);
-							}
-							else {
-								var beanModel = editorScope.getBeanModel(node);
-								if (beanModel){
-									beanModel.location.y = beanModel.location.y + changeY;
-									beanModel.location.x = beanModel.location.x + changeX;
-									var css = { top: beanModel.location.y, left: beanModel.location.x }
-									$(node).css(css);
-								}
-								else {
-									var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-									if (ghostObject) {
-										if (ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
-										{
-											var groupElements = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[group-id='"+ghostObject.uuid+"']"));
-											for (var i = 0; i < groupElements.length; i++)
-											{
-												var elem = groupElements[i];
-												var beanModel = editorScope.getBeanModel(elem.parentElement);
-												if (beanModel) {
-													beanModel.location.y = beanModel.location.y + changeY;
-													beanModel.location.x = beanModel.location.x + changeX;
-													var css = { top: beanModel.location.y, left: beanModel.location.x }
-													$(elem.parentElement).css(css);
-												}
-											}
-										}
-										editorScope.updateGhostLocation(ghostObject, ghostObject.location.x + changeX, ghostObject.location.y + changeY)
-									}	
-								}
-							}
-						}
+						updateAbsoluteLayoutComponentsLocations(editorScope, editorScope.selectionToDrag, changeX, changeY);
 						editorScope.refreshEditorContent();
 						dragStartEvent = event;
 					}
 				}
 			}
 		}
-
+		
 		angular.element('body').keyup(function(event) {
 			//if control is released during drag, the copy is deleted and selected element must be moved
 			if (dragStartEvent && dragStartEvent.ctrlKey && event.which == 17) {
-				for (var i = 0; i < selectionToDrag.length; i++) {
-					selectionToDrag[i].remove();
+				for (var i = 0; i < editorScope.selectionToDrag.length; i++) {
+					editorScope.selectionToDrag[i].remove();
 				}
-				selectionToDrag = editorScope.getSelection();
+				editorScope.selectionToDrag = editorScope.getSelection();
 			}
 		});
-
+		
 		// register event on editor form iframe (see register event in the editor.js)
 		editorScope.registerDOMEvent("mousedown", "CONTENTFRAME_OVERLAY", onmousedown); // real selection in editor content iframe
 		editorScope.registerDOMEvent("mouseup", "CONTENTFRAME_OVERLAY", onmouseup); // real selection in editor content iframe
 		editorScope.registerDOMEvent("mousemove", "CONTENTFRAME_OVERLAY", onmousemove); // real selection in editor content iframe
 		editorScope.registerDOMEvent("mouseleave", "CONTENTFRAME_OVERLAY", onmouseup); // real selection in editor content iframe
 
-	})
+	});
 });
