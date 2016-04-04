@@ -278,11 +278,12 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
         						    }
         						});
         						
-        						bottomAutoscrollMouseup = editorScope.registerDOMEvent("mouseup","BOTTOM_AUTOSCROLL", function(){
+        						bottomAutoscrollMouseup = editorScope.registerDOMEvent("mouseup","BOTTOM_AUTOSCROLL", function(event){
         						    if (angular.isDefined(stop)) {
         						            $interval.cancel(stop);
         						            stop = undefined;
         						    }
+        						    onmouseup(event);
         						});
 						}
 						
@@ -411,7 +412,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 		editorScope.registerDOMEvent("mousedown", "CONTENTFRAME_OVERLAY", onmousedown); // real selection in editor content iframe
 		editorScope.registerDOMEvent("mouseup", "CONTENTFRAME_OVERLAY", onmouseup); // real selection in editor content iframe
 		editorScope.registerDOMEvent("mousemove", "CONTENTFRAME_OVERLAY", onmousemove); // real selection in editor content iframe
-		editorScope.registerDOMEvent("mouseleave", "CONTENTFRAME_OVERLAY", onmouseup); // real selection in editor content iframe
+//		editorScope.registerDOMEvent("mouseleave", "CONTENTFRAME_OVERLAY", onmouseup); // real selection in editor content iframe
 
 	});
 });
