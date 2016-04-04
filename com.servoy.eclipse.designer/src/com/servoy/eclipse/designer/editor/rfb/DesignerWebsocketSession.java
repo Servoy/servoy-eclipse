@@ -64,6 +64,7 @@ import com.servoy.j2db.server.ngclient.template.IFormElementValidator;
 import com.servoy.j2db.server.ngclient.template.PartWrapper;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner
@@ -186,7 +187,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					for (BaseComponent baseComponent : baseComponents)
 					{
 						FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
-						if (fe.getDesignId().equals(name) || fe.getName().equals(name))
+						if (Utils.equalObjects(fe.getDesignId(), name) || Utils.equalObjects(fe.getName(), name))
 						{
 							if (!form.isResponsiveLayout())
 								FormLayoutGenerator.generateFormElementWrapper(w, fe, true, flattenedForm, form.isResponsiveLayout());

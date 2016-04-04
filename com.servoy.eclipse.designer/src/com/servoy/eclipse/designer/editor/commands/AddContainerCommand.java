@@ -16,15 +16,16 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.PackageSpecification;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.ICustomType;
 import org.sablo.websocket.utils.PropertyUtils;
 
@@ -140,9 +141,25 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 								{
 									ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false,
 										Arrays.asList(new IPersist[] { persist }));
-									Object[] selection = new Object[] { persist };
-									IStructuredSelection structuredSelection = new StructuredSelection(selection);
-									DesignerUtil.getContentOutline().setSelection(structuredSelection);
+									Object[] selection = new Object[] { PersistContext.create(persist, persistContext.getContext()) };
+									final IStructuredSelection structuredSelection = new StructuredSelection(selection);
+									// wait for tree to be refreshed with new element
+									Display.getDefault().asyncExec(new Runnable()
+									{
+										@Override
+										public void run()
+										{
+											Display.getDefault().asyncExec(new Runnable()
+											{
+												@Override
+												public void run()
+												{
+													DesignerUtil.getContentOutline().setSelection(structuredSelection);
+												}
+											});
+
+										}
+									});
 								}
 							}
 						}
@@ -187,8 +204,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			if (parentPersist != null && parentPersist.getPersist() instanceof AbstractBase && parentPersist.getPersist() instanceof ISupportChilds)
 			{
 				AbstractBase parent = (AbstractBase)ElementUtil.getOverridePersist(parentPersist);
-				PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
-					packageName);
+				PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(packageName);
 				container = (LayoutContainer)parent.getRootObject().getChangeHandler().createNewObject(((ISupportChilds)parent), IRepository.LAYOUTCONTAINERS);
 				container.setSpecName(specName);
 				container.setPackageName(packageName);
