@@ -315,13 +315,13 @@ angular.module('editorContent',['servoyApp'])
       parent.append(tpl)
   }
   
-  function updateElementIfParentChange(elementId, updateData, getTemplateParam) {
+  function updateElementIfParentChange(elementId, updateData, getTemplateParam,forceUpdate) {
     var elementTemplate = angular.element('[svy-id="' + elementId + '"]');
     var shouldGetTemplate = true;
     if(elementTemplate.length) {
     	var domParentUUID = elementTemplate.parent().closest('[svy-id]').attr('svy-id');
     	var currentParentUUID = updateData.childParentMap[elementId].uuid;
-    	if(domParentUUID != currentParentUUID ||
+    	if(forceUpdate || domParentUUID != currentParentUUID ||
     		((updateData.childParentMap[elementId].index > -1) && (updateData.childParentMap[elementId].index != elementTemplate.index()))) {
     		elementTemplate.remove();
     	}
@@ -402,7 +402,19 @@ angular.module('editorContent',['servoyApp'])
               formData.components[name] = newCompData;
             }
 
-            updateElementIfParentChange(name, data, { name: name });
+            var forceUpdate = false;
+            if (data.refreshTemplate)
+            {
+            	for (var index in data.refreshTemplate) 
+            	{
+            		if (name == data.refreshTemplate[index])
+            		{
+            			forceUpdate = true;
+            			break;
+            		}	
+            	}
+            }	
+            updateElementIfParentChange(name, data, { name: name },forceUpdate);
 
             var compLayout = layoutData[name];
             if (compLayout) {
@@ -428,7 +440,7 @@ angular.module('editorContent',['servoyApp'])
           }
           if (data.containers) {
             for (var key in data.containers) {
-              var element = updateElementIfParentChange(key, data, { layoutId: key });
+              var element = updateElementIfParentChange(key, data, { layoutId: key },false);
               if(element) {
         		  for (attribute in data.containers[key]) {
                       element.attr(attribute,data.containers[key][attribute]);
