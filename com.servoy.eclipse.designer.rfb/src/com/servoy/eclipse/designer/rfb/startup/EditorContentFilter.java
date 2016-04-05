@@ -86,6 +86,7 @@ public class EditorContentFilter implements Filter
 			if (solution != null && form != null)
 			{
 				((HttpServletResponse)response).setContentType("text/html");
+				((HttpServletResponse)response).setCharacterEncoding("UTF-8");
 				PrintWriter w = response.getWriter();
 				Set<String> formScripts = new HashSet<String>();
 				formScripts.add("js/servoy-components.js?x=" + System.currentTimeMillis());
