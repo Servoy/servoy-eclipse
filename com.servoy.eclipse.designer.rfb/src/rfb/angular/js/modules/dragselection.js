@@ -23,17 +23,15 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 
 		function onmouseup(event) {
 		    
-		    	if (event.type == "mouseup"){
-                		if (angular.isDefined(stop)) {
-                		    $interval.cancel(stop);
-                		    stop = undefined;
-                		}
+                	if (angular.isDefined(stop)) {
+                	    $interval.cancel(stop);
+                	    stop = undefined;
+                	}
                 		//disable mouse events on the bottom_autoscroll
-        			editorScope.setPointerEvents("none");
-                		if (bottomAutoscrollEnter) editorScope.unregisterDOMEvent("mouseenter", "BOTTOM_AUTOSCROLL", bottomAutoscrollEnter);
-                		if (bottomAutoscrollLeave) editorScope.unregisterDOMEvent("mouseleave", "BOTTOM_AUTOSCROLL", bottomAutoscrollLeave);
-                		if (bottomAutoscrollMouseup) editorScope.unregisterDOMEvent("mouseup", "BOTTOM_AUTOSCROLL", bottomAutoscrollMouseup);
-		    	}
+        		editorScope.setPointerEvents("none");
+                	if (bottomAutoscrollEnter) editorScope.unregisterDOMEvent("mouseenter", "BOTTOM_AUTOSCROLL", bottomAutoscrollEnter);
+                	if (bottomAutoscrollLeave) editorScope.unregisterDOMEvent("mouseleave", "BOTTOM_AUTOSCROLL", bottomAutoscrollLeave);
+                	if (bottomAutoscrollMouseup) editorScope.unregisterDOMEvent("mouseup", "BOTTOM_AUTOSCROLL", bottomAutoscrollMouseup);
         		
 			if (event.button == 0) {
 				dragStartEvent = null;
@@ -191,9 +189,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					
 					utils.setDraggingFromPallete(null);
 				}
-				if (event.type == "mouseup"){
-				    editorScope.selectionToDrag = null;
-				}
+				editorScope.selectionToDrag = null;
 			}
 		}
 		

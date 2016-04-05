@@ -77,11 +77,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			$scope.contentDocument = null;
 			
 			$scope.startBottomAutoScroll = function (callback){
-			    	if (angular.isDefined(stop)) {
-			    	    $interval.cancel(stop);
-			    	    stop = undefined;
-			    	}
-				stop = $interval(function (){
+				return $interval(function (){
 				    var contentArea = ($element.find('.content-area')[0]);
 				    if ((contentArea.scrollTop + contentArea.offsetHeight) === contentArea.scrollHeight)
 					angular.element($scope.glasspane).height(angular.element($scope.glasspane).height()+5);
@@ -89,7 +85,6 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				    callback($scope, $scope.selectionToDrag,0,5);
 				    $scope.refreshEditorContent();
 				},100);
-				return stop;
 			};
 			
 			$scope.registerDOMEvent = function(eventType, target, callback) {
@@ -710,15 +705,26 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				if ($scope.isAbsoluteFormLayout()) {
 					var sizes = getScrollSizes($scope.contentDocument.querySelectorAll(".sfcontent"));
 					if (sizes.height > 0 && sizes.width > 0) {
-						var contentDiv = $element.find('.content-area')[0];
-						if (contentDiv.clientHeight < (sizes.height + 40)) {
-							$scope.glasspaneStyle.height = (sizes.height + 40) + "px"; // 20 for the body ghost height
+					    	var contentDiv = $element.find('.content-area')[0];
+					    	var height = contentDiv.scrollHeight;
+					    	var ghosts = $element.find('.ghostcontainer > .ghost');
+					    	var width = contentDiv.scrollWidth;
+					    	
+					    	ghosts.each(function (index, ghost){
+					    	    if (ghost.getBoundingClientRect().bottom > height)
+					    		height = ghost.getBoundingClientRect().bottom;
+					    	    if (ghost.getBoundingClientRect().right > width)
+					    		width = ghost.getBoundingClientRect().right;
+					    	});
+					    	
+						if (contentDiv.clientHeight < height) {
+							$scope.glasspaneStyle.height = height + "px"; // 20 for the body ghost height
 						} else {
 							$scope.glasspaneStyle.height = '100%';
 						}
 
-						if (contentDiv.clientWidth < (sizes.width + 120)) {
-							$scope.glasspaneStyle.width = (sizes.width + 120) + "px"; // 80 for the body ghost width
+						if (contentDiv.clientWidth < width) {
+							$scope.glasspaneStyle.width = width + "px"; // 80 for the body ghost width
 						} else
 							$scope.glasspaneStyle.width = '100%';
 					}
