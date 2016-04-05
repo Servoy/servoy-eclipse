@@ -139,6 +139,7 @@ import com.servoy.j2db.dataui.PropertyEditorOption;
 import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
@@ -2883,11 +2884,11 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 												false);
 
 										}
-										else if (persistContext.getPersist() instanceof Form)
+										else if (persistContext.getPersist() instanceof AbstractContainer)
 										{
 											ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName((String)value,
-												persistContext.getPersist().getID(), new ValidatorSearchContext(persistContext.getPersist(), IRepository.FORMS),
-												false);
+												persistContext.getPersist().getID(),
+												new ValidatorSearchContext(persistContext.getPersist(), persistContext.getPersist().getTypeID()), false);
 										}
 									}
 									catch (RepositoryException e)
