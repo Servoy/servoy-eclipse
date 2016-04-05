@@ -181,8 +181,36 @@ angular.module('editorContent',['servoyApp'])
     "overflow-x": "hidden",
     "overflow-y": "hidden"
   }
+  
+  var watches = [];
+  
+  $scope.originalWatch = $scope.$watch;
+  $scope.$watch = function(watchExp, listener, objectEquality, prettyPrintExpression) {
+	  var unreg = $scope.originalWatch(watchExp, listener, objectEquality, prettyPrintExpression);
+	  watches.push({exp: watchExp, unreg:unreg})
+	  return unreg;
+  }
+  function unRegisterWatch(exp) {
+	  for(var i=watches.length;i-->0;) {
+		  if (watches[i].exp == exp) {
+			  watches[i].unreg();
+			  watches.splice(i,1);
+			  return;
+		  }
+	  }
+  }
 
   $scope.removeComponent = function(name) {
+	for(var i =$scope.$$watchers.length;i-- >0;) {
+		var data = $scope.$$watchers[i].last;
+		if (data) {
+			if (model[name] == data) unRegisterWatch($scope.$$watchers[i].exp);
+			else if (api[name] == data) unRegisterWatch($scope.$$watchers[i].exp);
+			else if (handlers[name] == data) unRegisterWatch($scope.$$watchers[i].exp);
+			else if (servoyApi[name] == data) unRegisterWatch($scope.$$watchers[i].exp);
+			else if (angular.equals(layout[name],data)) unRegisterWatch($scope.$$watchers[i].exp);
+		}
+	}
     delete model[name];
     delete api[name];
     delete handlers[name];
@@ -225,6 +253,7 @@ angular.module('editorContent',['servoyApp'])
     if (!ret && !noCreate) {
       if (formData.components[name]) ret = formData.components[name];
       else {
+    	  console.log("creating for " + name);
     	  ret = {}
     	  formData.components[name] = ret;
       }
@@ -426,8 +455,6 @@ angular.module('editorContent',['servoyApp'])
           }
           for (var index in data.deleted) {
             var toDelete = angular.element('[svy-id="' + data.deleted[index] + '"]');
-            // if it has a createscope parent then use that one to delete the whole component
-        	if (toDelete.parent()[0].tagName == "CREATESCOPE") toDelete = toDelete.parent();
             toDelete.remove();
             $rootScope.getDesignFormControllerScope().removeComponent(data.deleted[index]);
           }
@@ -468,13 +495,4 @@ angular.module('editorContent',['servoyApp'])
     showLoading: function() {},
     hideLoading: function() {}
   }
-}).directive("createscope", function() {
-	return {
-		scope: true,
-		link: function($scope, $element) {
-			  $element.on('$destroy', function(){
-				  $scope.$destroy();
-		      })
-		}
-	}
 });
