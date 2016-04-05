@@ -541,7 +541,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	$toolbar.add(btnReload, TOOLBAR_CATEGORIES.STANDARD_ACTIONS);
 	
 	var btnClassicEditor = {
-			text: "Swtch to classic editor",
+			text: "Switch to classic editor",
 			icon: "../../images/html5-gray.png",
 			enabled: true,
 			onclick: function() {
