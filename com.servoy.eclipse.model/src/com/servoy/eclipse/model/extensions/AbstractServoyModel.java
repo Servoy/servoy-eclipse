@@ -49,6 +49,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.Messages;
 import com.servoy.j2db.persistence.IActiveSolutionHandler;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -86,7 +87,7 @@ public abstract class AbstractServoyModel implements IServoyModel
 		messagesManager = new EclipseMessages();
 		Messages.customMessageLoader = messagesManager;
 	}
-	
+
 	public void initialize()
 	{
 		ngPackageManager = createNGPackageManager();
@@ -125,7 +126,11 @@ public abstract class AbstractServoyModel implements IServoyModel
 					{
 						try
 						{
-							return ApplicationServerRegistry.get().getServerManager().getServer(dbServernameTablename[0]).getTable(dbServernameTablename[1]);
+							IServer server = ApplicationServerRegistry.get().getServerManager().getServer(dbServernameTablename[0]);
+							if (server != null)
+							{
+								return server.getTable(dbServernameTablename[1]);
+							}
 						}
 						catch (Exception e)
 						{
