@@ -1,4 +1,16 @@
 
+.rightAutoscrollArea {
+	z-index: 3;
+	position: fixed;
+	right: 0px;
+	width: 20px;
+	height: 100%;
+	margin-top : -20px;
+	background-color: blue;
+	opacity: 0.3;
+	pointer-events: none;
+}
+
 .bottomAutoscrollArea {
 	z-index: 3;
 	position: fixed;
@@ -111,6 +123,7 @@ body {
 	-webkit-box-shadow: 1px 3px 6px 1px rgba(50, 50, 50, 0.75);
 	   -moz-box-shadow: 1px 3px 6px 1px rgba(50, 50, 50, 0.75);
 	        box-shadow: 1px 3px 6px 1px rgba(50, 50, 50, 0.75);
+	position: absolute;
 }
 
 .content-area {

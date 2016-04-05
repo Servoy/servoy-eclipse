@@ -87,6 +87,17 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				},100);
 			};
 			
+			$scope.startRightAutoScroll = function (callback){
+				return $interval(function (){
+				    var contentArea = ($element.find('.content-area')[0]);
+				    if ((contentArea.scrollLeft + contentArea.offsetWidth) === contentArea.scrollWidth)
+					angular.element($scope.glasspane).width(angular.element($scope.glasspane).width()+5);
+				    contentArea.scrollLeft += 5;
+				    callback($scope, $scope.selectionToDrag,5,0);
+				    $scope.refreshEditorContent();
+				},100);
+			};
+			
 			$scope.registerDOMEvent = function(eventType, target, callback) {
 				var eventCallback = callback.bind(this);
 				if (target == "FORM") {
@@ -101,6 +112,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					$($scope.glasspane).on(eventType, null, eventCallback)
 				} else if (target == "BOTTOM_AUTOSCROLL") {
 					$($element.find('.bottomAutoscrollArea')[0]).on(eventType, null, eventCallback)
+				} else if (target == "RIGHT_AUTOSCROLL") {
+					$($element.find('.rightAutoscrollArea')[0]).on(eventType, null, eventCallback)
 				}
 				
 				return eventCallback;
@@ -119,6 +132,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					$($element.find('.palette')[0]).off(eventType, null, callback);
 				} else if (target == "BOTTOM_AUTOSCROLL") {
 					$($element.find('.bottomAutoscrollArea')[0]).off(eventType, null, callback)
+				} else if (target == "RIGHT_AUTOSCROLL") {
+					$($element.find('.rightAutoscrollArea')[0]).off(eventType, null, callback)
 				}
 			}
 

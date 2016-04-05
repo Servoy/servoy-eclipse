@@ -23,17 +23,32 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 
 		function onmouseup(event) {
 		    
-                	if (angular.isDefined(stop)) {
-                	    $interval.cancel(stop);
-                	    stop = undefined;
+                	if (angular.isDefined(bottomStop)) {
+                	    $interval.cancel(bottomStop);
+                	    bottomStop = undefined;
+                	}
+                	
+                	if (angular.isDefined(rightStop)) {
+                	    $interval.cancel(rightStop);
+                	    rightStop = undefined;
                 	}
                 		//disable mouse events on the bottom_autoscroll
         		editorScope.setPointerEvents("none");
                 	if (bottomAutoscrollEnter) editorScope.unregisterDOMEvent("mouseenter", "BOTTOM_AUTOSCROLL", bottomAutoscrollEnter);
-                	if (bottomAutoscrollLeave) editorScope.unregisterDOMEvent("mouseleave", "BOTTOM_AUTOSCROLL", bottomAutoscrollLeave);
-                	if (bottomAutoscrollMouseup) editorScope.unregisterDOMEvent("mouseup", "BOTTOM_AUTOSCROLL", bottomAutoscrollMouseup);
-        		
-			if (event.button == 0) {
+                	if (bottomAutoscrollLeave) {
+                	    editorScope.unregisterDOMEvent("mouseleave", "BOTTOM_AUTOSCROLL", bottomAutoscrollLeave);
+                	    editorScope.unregisterDOMEvent("mouseup", "BOTTOM_AUTOSCROLL", bottomAutoscrollLeave);
+                	}
+                	
+                	if (rightAutoscrollEnter) 
+                	    editorScope.unregisterDOMEvent("mouseenter", "RIGHT_AUTOSCROLL", rightAutoscrollEnter);
+                	if (rightAutoscrollLeave) {
+                	    editorScope.unregisterDOMEvent("mouseleave", "RIGHT_AUTOSCROLL", rightAutoscrollLeave);
+                	    editorScope.unregisterDOMEvent("mouseup", "RIGHT_AUTOSCROLL", rightAutoscrollLeave);
+                	}
+
+
+                	if (event.button == 0) {
 				dragStartEvent = null;
 				if (dragCloneDiv) {
 			    	    dragCloneDiv.remove();
@@ -241,12 +256,61 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 				}
 			}
 		}
+		
+		
+		
 
 		var t;
-		var stop;
+		
+		var bottomStop;
 		var bottomAutoscrollEnter;
 		var bottomAutoscrollLeave;
-		var bottomAutoscrollMouseup;
+		
+		var rightStop;
+		var rightAutoscrollEnter;
+		var rightAutoscrollLeave;
+		
+		function addBottomAutoscrollListeners() {
+		    	//enable mouse events on the bottom_autoscroll
+		    	editorScope.setPointerEvents("all");
+			bottomAutoscrollEnter = editorScope.registerDOMEvent("mouseenter","BOTTOM_AUTOSCROLL", function(event){
+			    bottomStop = editorScope.startBottomAutoScroll(updateAbsoluteLayoutComponentsLocations);
+			});
+			
+			bottomAutoscrollLeave = function (event){
+			    if (angular.isDefined(bottomStop)) {
+			            $interval.cancel(bottomStop);
+			            bottomStop = undefined;
+			    }
+			    if (event.type == "mouseup")
+				onmouseup(event);
+			}
+			
+			editorScope.registerDOMEvent("mouseleave","BOTTOM_AUTOSCROLL", bottomAutoscrollLeave);
+			editorScope.registerDOMEvent("mouseup","BOTTOM_AUTOSCROLL", bottomAutoscrollLeave );
+		}
+		
+		function addRightAutoscrollListeners() {
+		    	//enable mouse events on the right_autoscroll
+		    	editorScope.setPointerEvents("all");
+			rightAutoscrollEnter = editorScope.registerDOMEvent("mouseenter","RIGHT_AUTOSCROLL", function(event){
+			    rightStop = editorScope.startRightAutoScroll(updateAbsoluteLayoutComponentsLocations);
+			});
+			
+			rightAutoscrollLeave = function (event){
+			    if (angular.isDefined(rightStop)) {
+			            $interval.cancel(rightStop);
+			            rightStop = undefined;
+			    }
+			    if (event.type == "mouseup")
+				onmouseup(event);
+			}
+			
+			editorScope.registerDOMEvent("mouseleave","RIGHT_AUTOSCROLL", rightAutoscrollLeave);
+			editorScope.registerDOMEvent("mouseup","RIGHT_AUTOSCROLL", rightAutoscrollLeave );
+		}
+		
+		
 		function onmousemove(event) {
 			if (dragStartEvent) {
 				var i;
@@ -260,29 +324,15 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						
 						//if the click starts in the bottom 20px and going up, 
 						//then do not enable the bottom div & start dragging downwards
-						if ((event.clientY <= editorScope.glasspane.clientHeight - 20)||(dragStartEvent.screenY - event.screenY > 0)){
-						    	//enable mouse events on the bottom_autoscroll
-						    	editorScope.setPointerEvents("all");
-        						bottomAutoscrollEnter = editorScope.registerDOMEvent("mouseenter","BOTTOM_AUTOSCROLL", function(event){
-        						   stop = editorScope.startBottomAutoScroll(updateAbsoluteLayoutComponentsLocations);
-        						});
-        						
-        						bottomAutoscrollLeave = editorScope.registerDOMEvent("mouseleave","BOTTOM_AUTOSCROLL", function(){
-        						    if (angular.isDefined(stop)) {
-        						            $interval.cancel(stop);
-        						            stop = undefined;
-        						    }
-        						});
-        						
-        						bottomAutoscrollMouseup = editorScope.registerDOMEvent("mouseup","BOTTOM_AUTOSCROLL", function(event){
-        						    if (angular.isDefined(stop)) {
-        						            $interval.cancel(stop);
-        						            stop = undefined;
-        						    }
-        						    onmouseup(event);
-        						});
+						if ((event.clientY <= editorScope.glasspane.clientHeight - 20) || (dragStartEvent.screenY - event.screenY > 0)){
+						    addBottomAutoscrollListeners()
 						}
 						
+						//if the click starts in the right 20px and going right, 
+						//then do not enable the bottom div & start dragging downwards
+						if ((event.clientX <= editorScope.glasspane.clientWidth - 20) || (dragStartEvent.screenX - event.screenX > 0)){
+						    addRightAutoscrollListeners()
+						}
 						
 						if (dragCloneDiv) dragCloneDiv.css({display:'block'});
 					} else return;
