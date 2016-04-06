@@ -340,6 +340,10 @@ public class MarkerMessages
 	public static ServoyMarker FormNamedFieldFallbackRelatedValuelist = new ServoyMarker(
 		"Field \"{0}\" has attached a valuelist \"{1}\" whose fallback valuelist \"{2}\" is related but doesn''t have the same datasource as {3}.",
 		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
+
+	public static ServoyMarker ComponentInvalidFoundset = new ServoyMarker("Unresolved foundset \"{0}\" for component \"{1}\"",
+		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
+
 	/**
 	 * The labelfor element used by a label cannot be found.
 	 */

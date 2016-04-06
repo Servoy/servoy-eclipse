@@ -26,6 +26,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -62,6 +63,11 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.problem.ProblemSeverity;
+import org.json.JSONObject;
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.property.ICustomType;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -113,6 +119,8 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.FlattenedPortal;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IBasicWebComponent;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IFormElement;
@@ -156,6 +164,16 @@ import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.server.ngclient.FormElement;
+import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
+import com.servoy.j2db.server.ngclient.property.FoundsetLinkedPropertyType;
+import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.IDataLinkedType.TargetDataLinks;
+import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
+import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
@@ -461,6 +479,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> FORM_FIELD_RELATED_VALUELIST = new Pair<String, ProblemSeverity>("formFieldRelatedValuelist",
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> FORM_FOUNDSET_INCORRECT_VALUE = new Pair<String, ProblemSeverity>("formFoundsetIncorrectValue",
+		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> COMPONENT_FOUNDSET_INVALID = new Pair<String, ProblemSeverity>("componentFoundsetInvalid",
 		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> FORM_PORTAL_INVALID_RELATION_NAME = new Pair<String, ProblemSeverity>("formPortalInvalidRelationName",
 		ProblemSeverity.WARNING);
@@ -2353,271 +2373,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							}
 						}
 						checkCancel();
-						if (o instanceof ISupportDataProviderID)
-						{
-							try
-							{
-								String id = ((ISupportDataProviderID)o).getDataProviderID();
-								if (id != null && !"".equals(id))
-								{
-									if (!(context instanceof Form))
-									{
-										ServoyLog.logError("Could not find parent form for element " + o, null);
-									}
-									else
-									{
-										Form parentForm = (Form)context;
-										if (!missingServers.containsKey(parentForm.getServerName()))
-										{
-											FlattenedSolution persistFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution);
-											IDataProvider dataProvider = persistFlattenedSolution.getDataProviderForTable(
-												servoyModel.getDataSourceManager().getDataSource(parentForm.getDataSource()), id);
-											if (dataProvider == null)
-											{
-												Form flattenedForm = persistFlattenedSolution.getFlattenedForm(o);
-												if (flattenedForm != null)
-												{
-													dataProvider = flattenedForm.getScriptVariable(id);
-												}
-											}
-											if (dataProvider == null)
-											{
-												try
-												{
-													dataProvider = persistFlattenedSolution.getGlobalDataProvider(id, false);
-												}
-												catch (Exception e)
-												{
-													exceptionCount++;
-													if (exceptionCount < MAX_EXCEPTIONS) ServoyLog.logError(e);
-												}
-											}
-
-											String elementName = null;
-											String inForm = null;
-											if (o instanceof ISupportName && ((ISupportName)o).getName() != null)
-											{
-												elementName = ((ISupportName)o).getName();
-											}
-											inForm = parentForm.getName();
-
-											if ((o instanceof Field || o instanceof GraphicalComponent) && dataProvider != null)
-											{
-												String format = (o instanceof Field) ? ((Field)o).getFormat() : ((GraphicalComponent)o).getFormat();
-												if (o instanceof Field && ((Field)o).getDisplayType() != Field.TEXT_FIELD &&
-													((Field)o).getDisplayType() != Field.TYPE_AHEAD && ((Field)o).getDisplayType() != Field.CALENDAR)
-												{
-													format = null;
-												}
-												if (format != null && format.length() > 0)
-												{
-													ParsedFormat parsedFormat = FormatParser.parseFormatProperty(format);
-													int dataType = getDataType(project, dataProvider, parsedFormat, o);
-													if (parsedFormat.getDisplayFormat() != null && !parsedFormat.getDisplayFormat().startsWith("i18n:"))
-													{
-														try
-														{
-															if (dataType == IColumnTypes.DATETIME)
-															{
-																new SimpleDateFormat(parsedFormat.getDisplayFormat());
-																if (parsedFormat.getEditFormat() != null) new SimpleDateFormat(parsedFormat.getEditFormat());
-															}
-															else if (dataType == IColumnTypes.INTEGER || dataType == IColumnTypes.NUMBER)
-															{
-																new DecimalFormat(parsedFormat.getDisplayFormat(),
-																	RoundHalfUpDecimalFormat.getDecimalFormatSymbols(Locale.getDefault()));
-																if (parsedFormat.getEditFormat() != null) new DecimalFormat(parsedFormat.getEditFormat(),
-																	RoundHalfUpDecimalFormat.getDecimalFormatSymbols(Locale.getDefault()));
-															}
-														}
-														catch (Exception ex)
-														{
-															Debug.trace(ex);
-
-															ServoyMarker mk;
-															if (elementName == null)
-															{
-																mk = MarkerMessages.FormFormatInvalid.fill(inForm, parsedFormat.getFormatString());
-															}
-															else
-															{
-																mk = MarkerMessages.FormFormatOnElementInvalid.fill(elementName, inForm,
-																	parsedFormat.getFormatString());
-															}
-															addMarker(project, mk.getType(), mk.getText(), -1, FORM_FORMAT_INVALID, IMarker.PRIORITY_NORMAL,
-																null, o);
-														}
-													}
-												}
-											}
-											if (o instanceof Field &&
-												(((Field)o).getDisplayType() == Field.TYPE_AHEAD || ((Field)o).getDisplayType() == Field.TEXT_FIELD) &&
-												((Field)o).getValuelistID() > 0 && ((Field)o).getFormat() != null)
-											{
-												boolean showWarning = false;
-												ValueList vl = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution).getValueList(
-													((Field)o).getValuelistID());
-												if (vl != null && vl.getValueListType() == IValueListConstants.CUSTOM_VALUES && vl.getCustomValues() != null &&
-													(vl.getCustomValues() == null || vl.getCustomValues().contains("|")))
-												{
-													showWarning = true;
-												}
-												if (vl != null && vl.getValueListType() == IValueListConstants.DATABASE_VALUES &&
-													vl.getReturnDataProviders() != vl.getShowDataProviders())
-												{
-													showWarning = true;
-												}
-												if (showWarning)
-												{
-													ServoyMarker mk;
-													if (elementName == null)
-													{
-														mk = MarkerMessages.FormFormatIncompatible.fill(inForm);
-													}
-													else
-													{
-														mk = MarkerMessages.FormFormatOnElementIncompatible.fill(elementName, inForm);
-													}
-													addMarker(project, mk.getType(), mk.getText(), -1, FORM_FORMAT_INVALID, IMarker.PRIORITY_NORMAL, null, o);
-												}
-
-											}
-											if (o instanceof Field && dataProvider != null)
-											{
-												Field field = (Field)o;
-												if (field.getEditable() &&
-													(field.getDisplayType() == Field.HTML_AREA || field.getDisplayType() == Field.RTF_AREA) &&
-													dataProvider.getColumnWrapper() != null && dataProvider.getColumnWrapper().getColumn() instanceof Column)
-												{
-													Column column = (Column)dataProvider.getColumnWrapper().getColumn();
-													if (column.getLength() < MIN_FIELD_LENGTH && column.getLength() > 0)
-													{
-														ServoyMarker mk = MarkerMessages.FormColumnLengthTooSmall.fill(elementName != null ? elementName : "",
-															inForm);
-														addMarker(project, mk.getType(), mk.getText(), -1, FORM_COLUMN_LENGTH_TOO_SMALL,
-															IMarker.PRIORITY_NORMAL, null, o);
-													}
-												}
-												if (((dataProvider instanceof ScriptVariable &&
-													((ScriptVariable)dataProvider).getVariableType() == IColumnTypes.MEDIA &&
-													((ScriptVariable)dataProvider).getSerializableRuntimeProperty(IScriptProvider.TYPE) == null) ||
-													(dataProvider instanceof AggregateVariable &&
-														((AggregateVariable)dataProvider).getType() == IColumnTypes.MEDIA &&
-														((AggregateVariable)dataProvider).getSerializableRuntimeProperty(IScriptProvider.TYPE) == null) ||
-													(dataProvider instanceof ScriptCalculation &&
-														((ScriptCalculation)dataProvider).getType() == IColumnTypes.MEDIA &&
-														((ScriptCalculation)dataProvider).getSerializableRuntimeProperty(IScriptProvider.TYPE) == null) ||
-													(dataProvider instanceof Column &&
-														Column.mapToDefaultType(((Column)dataProvider).getType()) == IColumnTypes.MEDIA) &&
-														((Column)dataProvider).getColumnInfo() != null &&
-														((Column)dataProvider).getColumnInfo().getConverterName() == null) &&
-													field.getDisplayType() != Field.IMAGE_MEDIA)
-												{
-													ServoyMarker mk = MarkerMessages.FormIncompatibleElementType.fill(
-														elementName != null ? elementName : field.getUUID(), inForm);
-													addMarker(project, mk.getType(), mk.getText(), -1, FORM_INCOMPATIBLE_ELEMENT_TYPE, IMarker.PRIORITY_NORMAL,
-														null, o);
-												}
-												if (dataProvider instanceof ScriptVariable && ((ScriptVariable)dataProvider).isDeprecated())
-												{
-													ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedVariable.fill(
-														((ScriptVariable)dataProvider).getName(), "form " + inForm, "dataProvider");
-													addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
-														IMarker.PRIORITY_NORMAL, null, o);
-												}
-												else if (dataProvider instanceof ScriptCalculation && ((ScriptCalculation)dataProvider).isDeprecated())
-												{
-													ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(
-														((ScriptCalculation)dataProvider).getName(), "form " + inForm, "dataProvider");
-													addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
-														IMarker.PRIORITY_NORMAL, null, o);
-												}
-											}
-
-											if (dataProvider == null && (parentForm.getDataSource() != null || ScopesUtils.isVariableScope(id)))
-											{
-												ServoyMarker mk;
-												if (elementName == null)
-												{
-													mk = MarkerMessages.FormDataproviderNotFound.fill(inForm, id);
-												}
-												else
-												{
-													mk = MarkerMessages.FormDataproviderOnElementNotFound.fill(elementName, inForm, id);
-												}
-												addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_DATAPROVIDER, IMarker.PRIORITY_LOW, null, o);
-											}
-											if (parentForm.getDataSource() != null && dataProvider instanceof ColumnWrapper)
-											{
-												Relation[] relations = ((ColumnWrapper)dataProvider).getRelations();
-												if (relations != null && !relations[0].isGlobal() &&
-													!parentForm.getDataSource().equals(relations[0].getPrimaryDataSource()))
-												{
-													ServoyMarker mk;
-													if (elementName == null)
-													{
-														mk = MarkerMessages.FormDataproviderNotBasedOnFormTable.fill(inForm, id);
-													}
-													else
-													{
-														mk = MarkerMessages.FormDataproviderOnElementNotBasedOnFormTable.fill(elementName, inForm, id);
-													}
-													addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_DATAPROVIDER, IMarker.PRIORITY_LOW, null,
-														o);
-												}
-											}
-											if (dataProvider instanceof AggregateVariable && o instanceof Field && ((Field)o).getEditable())
-											{
-												ServoyMarker mk;
-												if (elementName == null)
-												{
-													mk = MarkerMessages.FormDataproviderAggregateNotEditable.fill(inForm, id);
-												}
-												else
-												{
-													mk = MarkerMessages.FormDataproviderOnElementAggregateNotEditable.fill(elementName, inForm, id);
-												}
-												addMarker(project, mk.getType(), mk.getText(), -1, FORM_DATAPROVIDER_AGGREGATE_NOT_EDITABLE,
-													IMarker.PRIORITY_LOW, null, o);
-											}
-											if (dataProvider != null && dataProvider instanceof Column && ((Column)dataProvider).getColumnInfo() != null)
-											{
-												if (((Column)dataProvider).getColumnInfo().isExcluded())
-												{
-													ServoyMarker mk;
-													if (elementName == null)
-													{
-														mk = MarkerMessages.FormDataproviderNotFound.fill(inForm, id);
-													}
-													else
-													{
-														mk = MarkerMessages.FormDataproviderOnElementNotFound.fill(elementName, inForm, id);
-													}
-													addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_DATAPROVIDER, IMarker.PRIORITY_LOW, null,
-														o);
-												}
-											}
-											if (dataProvider instanceof ColumnWrapper)
-											{
-												Relation[] relations = ((ColumnWrapper)dataProvider).getRelations();
-												if (relations != null)
-												{
-													for (Relation r : relations)
-													{
-														addEncapsulationMarker(project, o, r, (Form)context);
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-							catch (Exception e)
-							{
-								exceptionCount++;
-								if (exceptionCount < MAX_EXCEPTIONS) ServoyLog.logError(e);
-							}
-						}
+						checkDataProviders(o, context);
 						checkCancel();
 						if (o instanceof IFormElement)
 						{
@@ -3656,7 +3412,441 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						checkCancel();
 						return IPersistVisitor.CONTINUE_TRAVERSAL;
 					}
+
+					private void checkDataProviders(final IPersist o, IPersist context)
+					{
+						String id = null;
+						if (o instanceof ISupportDataProviderID)
+						{
+							id = ((ISupportDataProviderID)o).getDataProviderID();
+						}
+						else if (o instanceof WebComponent || o instanceof WebCustomType)
+						{
+							Collection<PropertyDescription> dpProperties = null;
+
+							if (o instanceof WebComponent)
+							{
+								WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+									((WebComponent)o).getTypeName());
+								dpProperties = spec.getProperties().values();
+							}
+							else
+							{
+								WebCustomType customType = (WebCustomType)o;
+								IBasicWebComponent parent = (IBasicWebComponent)customType.getParent();
+								WebObjectSpecification parentSpec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parent.getTypeName());
+								PropertyDescription spec = parentSpec.getProperties().get(customType.getJsonKey());
+								PropertyDescription cpd = ((ICustomType< ? >)spec.getType()).getCustomJSONTypeDefinition();
+								dpProperties = cpd.getProperties().values();
+							}
+
+							for (PropertyDescription pd : dpProperties)
+							{
+								if (pd.getType() instanceof DataproviderPropertyType || pd.getType() instanceof FoundsetLinkedPropertyType< ? , ? > ||
+									pd.getType() instanceof FoundsetPropertyType)
+								{
+
+									Object propertyValue = ((IBasicWebObject)o).getProperty(pd.getName());
+									if (propertyValue != null)
+									{
+										if ((pd.getType() instanceof FoundsetLinkedPropertyType< ? , ? > &&
+											((FoundsetLinkedConfig)pd.getConfig()).getWrappedPropertyDescription().getType() instanceof TagStringPropertyType))
+										{
+											TagStringPropertyType wrappedPd = (TagStringPropertyType)((FoundsetLinkedConfig)pd.getConfig()).getWrappedPropertyDescription().getType();
+											TargetDataLinks links = wrappedPd.getDataLinks((String)propertyValue, pd, flattenedSolution,
+												new FormElement((IFormElement)o.getParent(), flattenedSolution, new PropertyPath(), true));
+											if (!TargetDataLinks.NOT_LINKED_TO_DATA.equals(links))
+											{
+												for (String dp : links.dataProviderIDs)
+												{
+													checkDataProvider(o, context, dp);
+												}
+											}
+											continue;
+										}
+										else if (pd.getType() instanceof FoundsetPropertyType)
+										{
+											if (propertyValue instanceof JSONObject)
+											{
+												JSONObject val = (JSONObject)propertyValue;
+												FlattenedSolution persistFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution);
+
+												//first check if the foundset is valid
+												boolean invalid = false;
+												String fs = val.optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
+												if (!"".equals(fs)) //Form foundset, no need to check
+												{
+													if ((fs.contains(".") || fs.contains(":")))
+													{
+														invalid = persistFlattenedSolution.getTable(fs) == null;
+													}
+													else
+													{
+														invalid = persistFlattenedSolution.getRelation(fs) == null;
+													}
+													if (invalid)
+													{
+														String comp_name = ((ISupportName)o).getName() != null ? ((ISupportName)o).getName() : "";
+														ServoyMarker mk = MarkerMessages.ComponentInvalidFoundset.fill(fs, comp_name);
+														addMarker(project, mk.getType(), mk.getText(), -1, COMPONENT_FOUNDSET_INVALID, IMarker.PRIORITY_NORMAL,
+															null, o);
+														continue;
+													}
+												}
+												if (val.has("dataproviders"))
+												{
+													JSONObject dataproviders = val.getJSONObject("dataproviders");
+													for (String dp : dataproviders.keySet())
+													{
+														checkDataProvider(o, context, dataproviders.optString(dp));
+													}
+												}
+											}
+										}
+										else checkDataProvider(o, context, (String)propertyValue);
+									}
+								}
+							}
+
+						}
+						checkDataProvider(o, context, id);
+
+					}
+
+					private void checkDataProvider(final IPersist o, IPersist context, String id)
+					{
+						try
+						{
+							if (id != null && !"".equals(id))
+							{
+								if (!(context instanceof Form))
+								{
+									ServoyLog.logError("Could not find parent form for element " + o, null);
+								}
+								else
+								{
+									Form parentForm = (Form)context;
+									if (!missingServers.containsKey(parentForm.getServerName()))
+									{
+										FlattenedSolution persistFlattenedSolution = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution);
+										IDataProvider dataProvider = persistFlattenedSolution.getDataProviderForTable(
+											servoyModel.getDataSourceManager().getDataSource(parentForm.getDataSource()), id);
+										if (dataProvider == null)
+										{
+											Form flattenedForm = persistFlattenedSolution.getFlattenedForm(o);
+											if (flattenedForm != null)
+											{
+												dataProvider = flattenedForm.getScriptVariable(id);
+											}
+										}
+										if (dataProvider == null)
+										{
+											try
+											{
+												dataProvider = persistFlattenedSolution.getGlobalDataProvider(id, false);
+											}
+											catch (Exception e)
+											{
+												exceptionCount++;
+												if (exceptionCount < MAX_EXCEPTIONS) ServoyLog.logError(e);
+											}
+										}
+										if (dataProvider == null && o.getParent() instanceof WebComponent)
+										{
+											WebComponent parent = (WebComponent)o.getParent();
+											dataProvider = checkComponentDataproviders(id, persistFlattenedSolution, parent);
+										}
+										if (dataProvider == null && o instanceof WebComponent)
+										{
+											dataProvider = checkComponentDataproviders(id, persistFlattenedSolution, (WebComponent)o);
+										}
+
+										String elementName = null;
+										String inForm = null;
+										if (o instanceof ISupportName && ((ISupportName)o).getName() != null)
+										{
+											elementName = ((ISupportName)o).getName();
+										}
+										inForm = parentForm.getName();
+
+										if ((o instanceof Field || o instanceof GraphicalComponent) && dataProvider != null)
+										{
+											String format = (o instanceof Field) ? ((Field)o).getFormat() : ((GraphicalComponent)o).getFormat();
+											if (o instanceof Field && ((Field)o).getDisplayType() != Field.TEXT_FIELD &&
+												((Field)o).getDisplayType() != Field.TYPE_AHEAD && ((Field)o).getDisplayType() != Field.CALENDAR)
+											{
+												format = null;
+											}
+											if (format != null && format.length() > 0)
+											{
+												ParsedFormat parsedFormat = FormatParser.parseFormatProperty(format);
+												int dataType = getDataType(project, dataProvider, parsedFormat, o);
+												if (parsedFormat.getDisplayFormat() != null && !parsedFormat.getDisplayFormat().startsWith("i18n:"))
+												{
+													try
+													{
+														if (dataType == IColumnTypes.DATETIME)
+														{
+															new SimpleDateFormat(parsedFormat.getDisplayFormat());
+															if (parsedFormat.getEditFormat() != null) new SimpleDateFormat(parsedFormat.getEditFormat());
+														}
+														else if (dataType == IColumnTypes.INTEGER || dataType == IColumnTypes.NUMBER)
+														{
+															new DecimalFormat(parsedFormat.getDisplayFormat(),
+																RoundHalfUpDecimalFormat.getDecimalFormatSymbols(Locale.getDefault()));
+															if (parsedFormat.getEditFormat() != null) new DecimalFormat(parsedFormat.getEditFormat(),
+																RoundHalfUpDecimalFormat.getDecimalFormatSymbols(Locale.getDefault()));
+														}
+													}
+													catch (Exception ex)
+													{
+														Debug.trace(ex);
+
+														ServoyMarker mk;
+														if (elementName == null)
+														{
+															mk = MarkerMessages.FormFormatInvalid.fill(inForm, parsedFormat.getFormatString());
+														}
+														else
+														{
+															mk = MarkerMessages.FormFormatOnElementInvalid.fill(elementName, inForm,
+																parsedFormat.getFormatString());
+														}
+														addMarker(project, mk.getType(), mk.getText(), -1, FORM_FORMAT_INVALID, IMarker.PRIORITY_NORMAL, null,
+															o);
+													}
+												}
+											}
+										}
+										if (o instanceof Field &&
+											(((Field)o).getDisplayType() == Field.TYPE_AHEAD || ((Field)o).getDisplayType() == Field.TEXT_FIELD) &&
+											((Field)o).getValuelistID() > 0 && ((Field)o).getFormat() != null)
+										{
+											boolean showWarning = false;
+											ValueList vl = ServoyBuilder.getPersistFlattenedSolution(o, flattenedSolution).getValueList(
+												((Field)o).getValuelistID());
+											if (vl != null && vl.getValueListType() == IValueListConstants.CUSTOM_VALUES && vl.getCustomValues() != null &&
+												(vl.getCustomValues() == null || vl.getCustomValues().contains("|")))
+											{
+												showWarning = true;
+											}
+											if (vl != null && vl.getValueListType() == IValueListConstants.DATABASE_VALUES &&
+												vl.getReturnDataProviders() != vl.getShowDataProviders())
+											{
+												showWarning = true;
+											}
+											if (showWarning)
+											{
+												ServoyMarker mk;
+												if (elementName == null)
+												{
+													mk = MarkerMessages.FormFormatIncompatible.fill(inForm);
+												}
+												else
+												{
+													mk = MarkerMessages.FormFormatOnElementIncompatible.fill(elementName, inForm);
+												}
+												addMarker(project, mk.getType(), mk.getText(), -1, FORM_FORMAT_INVALID, IMarker.PRIORITY_NORMAL, null, o);
+											}
+
+										}
+										if (o instanceof Field && dataProvider != null)
+										{
+											Field field = (Field)o;
+											if (field.getEditable() &&
+												(field.getDisplayType() == Field.HTML_AREA || field.getDisplayType() == Field.RTF_AREA) &&
+												dataProvider.getColumnWrapper() != null && dataProvider.getColumnWrapper().getColumn() instanceof Column)
+											{
+												Column column = (Column)dataProvider.getColumnWrapper().getColumn();
+												if (column.getLength() < MIN_FIELD_LENGTH && column.getLength() > 0)
+												{
+													ServoyMarker mk = MarkerMessages.FormColumnLengthTooSmall.fill(elementName != null ? elementName : "",
+														inForm);
+													addMarker(project, mk.getType(), mk.getText(), -1, FORM_COLUMN_LENGTH_TOO_SMALL, IMarker.PRIORITY_NORMAL,
+														null, o);
+												}
+											}
+											if (((dataProvider instanceof ScriptVariable &&
+												((ScriptVariable)dataProvider).getVariableType() == IColumnTypes.MEDIA &&
+												((ScriptVariable)dataProvider).getSerializableRuntimeProperty(IScriptProvider.TYPE) == null) ||
+												(dataProvider instanceof AggregateVariable &&
+													((AggregateVariable)dataProvider).getType() == IColumnTypes.MEDIA &&
+													((AggregateVariable)dataProvider).getSerializableRuntimeProperty(IScriptProvider.TYPE) == null) ||
+												(dataProvider instanceof ScriptCalculation &&
+													((ScriptCalculation)dataProvider).getType() == IColumnTypes.MEDIA &&
+													((ScriptCalculation)dataProvider).getSerializableRuntimeProperty(IScriptProvider.TYPE) == null) ||
+												(dataProvider instanceof Column &&
+													Column.mapToDefaultType(((Column)dataProvider).getType()) == IColumnTypes.MEDIA) &&
+													((Column)dataProvider).getColumnInfo() != null &&
+													((Column)dataProvider).getColumnInfo().getConverterName() == null) &&
+												field.getDisplayType() != Field.IMAGE_MEDIA)
+											{
+												ServoyMarker mk = MarkerMessages.FormIncompatibleElementType.fill(
+													elementName != null ? elementName : field.getUUID(), inForm);
+												addMarker(project, mk.getType(), mk.getText(), -1, FORM_INCOMPATIBLE_ELEMENT_TYPE, IMarker.PRIORITY_NORMAL,
+													null, o);
+											}
+											if (dataProvider instanceof ScriptVariable && ((ScriptVariable)dataProvider).isDeprecated())
+											{
+												ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedVariable.fill(((ScriptVariable)dataProvider).getName(),
+													"form " + inForm, "dataProvider");
+												addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
+													IMarker.PRIORITY_NORMAL, null, o);
+											}
+											else if (dataProvider instanceof ScriptCalculation && ((ScriptCalculation)dataProvider).isDeprecated())
+											{
+												ServoyMarker mk = MarkerMessages.ElementUsingDeprecatedCalculation.fill(
+													((ScriptCalculation)dataProvider).getName(), "form " + inForm, "dataProvider");
+												addMarker(project, mk.getType(), mk.getText(), -1, DEPRECATED_SCRIPT_ELEMENT_USAGE_PROBLEM,
+													IMarker.PRIORITY_NORMAL, null, o);
+											}
+										}
+
+										if (dataProvider == null && (parentForm.getDataSource() != null || ScopesUtils.isVariableScope(id)))
+										{
+											ServoyMarker mk;
+											if (elementName == null)
+											{
+												mk = MarkerMessages.FormDataproviderNotFound.fill(inForm, id);
+											}
+											else
+											{
+												mk = MarkerMessages.FormDataproviderOnElementNotFound.fill(elementName, inForm, id);
+											}
+											addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_DATAPROVIDER, IMarker.PRIORITY_LOW, null, o);
+										}
+										if (parentForm.getDataSource() != null && dataProvider instanceof ColumnWrapper)
+										{
+											Relation[] relations = ((ColumnWrapper)dataProvider).getRelations();
+											if (relations != null && !relations[0].isGlobal() &&
+												!parentForm.getDataSource().equals(relations[0].getPrimaryDataSource()))
+											{
+												ServoyMarker mk;
+												if (elementName == null)
+												{
+													mk = MarkerMessages.FormDataproviderNotBasedOnFormTable.fill(inForm, id);
+												}
+												else
+												{
+													mk = MarkerMessages.FormDataproviderOnElementNotBasedOnFormTable.fill(elementName, inForm, id);
+												}
+												addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_DATAPROVIDER, IMarker.PRIORITY_LOW, null, o);
+											}
+										}
+										if (dataProvider instanceof AggregateVariable && o instanceof Field && ((Field)o).getEditable())
+										{
+											ServoyMarker mk;
+											if (elementName == null)
+											{
+												mk = MarkerMessages.FormDataproviderAggregateNotEditable.fill(inForm, id);
+											}
+											else
+											{
+												mk = MarkerMessages.FormDataproviderOnElementAggregateNotEditable.fill(elementName, inForm, id);
+											}
+											addMarker(project, mk.getType(), mk.getText(), -1, FORM_DATAPROVIDER_AGGREGATE_NOT_EDITABLE, IMarker.PRIORITY_LOW,
+												null, o);
+										}
+										if (dataProvider != null && dataProvider instanceof Column && ((Column)dataProvider).getColumnInfo() != null)
+										{
+											if (((Column)dataProvider).getColumnInfo().isExcluded())
+											{
+												ServoyMarker mk;
+												if (elementName == null)
+												{
+													mk = MarkerMessages.FormDataproviderNotFound.fill(inForm, id);
+												}
+												else
+												{
+													mk = MarkerMessages.FormDataproviderOnElementNotFound.fill(elementName, inForm, id);
+												}
+												addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_DATAPROVIDER, IMarker.PRIORITY_LOW, null, o);
+											}
+										}
+										if (dataProvider instanceof ColumnWrapper)
+										{
+											Relation[] relations = ((ColumnWrapper)dataProvider).getRelations();
+											if (relations != null)
+											{
+												for (Relation r : relations)
+												{
+													addEncapsulationMarker(project, o, r, (Form)context);
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+						catch (
+
+						Exception e)
+
+						{
+							exceptionCount++;
+							if (exceptionCount < MAX_EXCEPTIONS) ServoyLog.logError(e);
+						}
+					}
+
+					private IDataProvider checkComponentDataproviders(String id, FlattenedSolution persistFlattenedSolution, WebComponent component)
+						throws RepositoryException
+					{
+						IDataProvider dataProvider = null;
+						WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(component.getTypeName());
+
+						Collection<PropertyDescription> fsPD = spec.getProperties(FoundsetPropertyType.INSTANCE);
+						for (PropertyDescription pd : fsPD)
+						{
+							Object relatedFS = component.getProperty(pd.getName());
+							if (relatedFS instanceof JSONObject)
+							{
+								String fs = ((JSONObject)relatedFS).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
+								if ("".equals(fs)) //Form foundset
+								{
+									Form f = (Form)component.getAncestor(IRepository.FORMS);
+									fs = f.getDataSource();
+								}
+								if (fs.contains(".") || fs.contains(":"))
+								{
+									ITable table = persistFlattenedSolution.getTable(fs);
+									if (table != null)
+									{
+										dataProvider = table.getColumn(id);
+									}
+								}
+								else
+								{
+									Relation r = persistFlattenedSolution.getRelation(fs);
+									if (r != null)
+									{
+										dataProvider = getDataProvider(id, r.getPrimaryServerName(), r.getPrimaryTableName());
+										if (dataProvider == null) dataProvider = getDataProvider(id, r.getForeignServerName(), r.getForeignTableName());
+									}
+								}
+								if (dataProvider != null) break;
+							}
+						}
+						return dataProvider;
+					}
+
+					private IDataProvider getDataProvider(String id, String serverName, String tableName) throws RepositoryException
+					{
+						IServerInternal server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName, true, true);
+						if (server != null)
+						{
+							ITable table = server.getTable(tableName);
+							for (Column c : table.getColumns())
+							{
+								if (c.getDataProviderID().equals(id))
+								{
+									return c;
+								}
+							}
+						}
+						return null;
+					}
 				});
+
 				checkRelations(project, missingServers);
 				checkCancel();
 				checkStyles(project);
@@ -3683,6 +3873,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, SERVER_NOT_ACCESSIBLE_FIRST_OCCURENCE, IMarker.PRIORITY_HIGH, null,
 					persist);
 				if (marker != null)
+
 				{
 					try
 					{
@@ -3695,6 +3886,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						ServoyLog.logError(e);
 					}
 				}
+
 			}
 		}
 		else
@@ -4919,6 +5111,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					{
 						form.acceptVisitor(new IPersistVisitor()
 						{
+
 							public Object visit(IPersist o)
 							{
 								if (o instanceof BaseComponent || o instanceof Form)
@@ -4939,6 +5132,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								}
 								return IPersistVisitor.CONTINUE_TRAVERSAL;
 							}
+
 						});
 					}
 				}
@@ -5550,6 +5744,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				if (file.exists())
 				{
 					marker = file.createMarker(type);
+				}
+				else if (persist.getParent() instanceof WebComponent)
+				{
+					pathPair = SolutionSerializer.getFilePath(persist.getParent(), true);
+					path = new Path(pathPair.getLeft() + pathPair.getRight());
+					file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+					marker = file.exists() ? file.createMarker(type) : resource.createMarker(type);
 				}
 				else
 				{
