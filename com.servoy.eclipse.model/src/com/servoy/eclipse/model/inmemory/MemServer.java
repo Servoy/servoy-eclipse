@@ -78,17 +78,15 @@ public class MemServer implements IServerInternal, IServer
 	private volatile ISequenceProvider sequenceManager;
 	private final ServerConfig serverConfig;
 	private final ServoyProject servoyProject;
-	private final Solution solution;
 
 	/**
 	 * @param servoyProject
 	 * @param solution
 	 *
 	 */
-	public MemServer(ServoyProject servoyProject, Solution solution)
+	public MemServer(ServoyProject servoyProject)
 	{
 		this.servoyProject = servoyProject;
-		this.solution = solution;
 		this.serverConfig = new ServerConfig(DataSourceUtils.INMEM_DATASOURCE, "", "", "", null, "", "", null, true, true, "");
 		init();
 	}
@@ -97,7 +95,7 @@ public class MemServer implements IServerInternal, IServer
 	{
 		tables.clear();
 		sequenceManager = null;
-		List<IPersist> allObjectsAsList = solution.getAllObjectsAsList();
+		List<IPersist> allObjectsAsList = servoyProject.getSolution().getAllObjectsAsList();
 		for (IPersist iPersist : allObjectsAsList)
 		{
 			if (iPersist instanceof TableNode)
@@ -113,6 +111,12 @@ public class MemServer implements IServerInternal, IServer
 							(ServoyJSONObject)property);
 						table.setExistInDB(true);
 						table.setInitialized(true);
+						tableNode.setTable(table);
+						TableNode editingTableNode = (TableNode)servoyProject.getEditingPersist(tableNode.getUUID());
+						if (editingTableNode != null)
+						{
+							editingTableNode.setTable(table);
+						}
 					}
 					catch (RepositoryException e)
 					{
