@@ -26,6 +26,7 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 			if (node && enabled && shouldDrawIfDragging(node) && !editorScope.highlight) {
 				if (node.parentElement != undefined && node.parentElement.parentElement !== editorScope.glasspane) {
 					if (node.clientWidth == 0 && node.clientHeight == 0 && node.firstChild) node = node.firstChild;
+					if (!node.getBoundingClientRect) node = node.parentNode;
 					highlightDiv.style.display = 'block';
 					var rect = node.getBoundingClientRect();
 					var left = rect.left;

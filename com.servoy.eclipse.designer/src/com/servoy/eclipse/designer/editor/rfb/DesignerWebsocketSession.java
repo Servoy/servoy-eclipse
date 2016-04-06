@@ -44,6 +44,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
@@ -290,6 +291,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	public String getComponentsJSON(FlattenedSolution fs, List<IPersist> persists)
 	{
 		Set<BaseComponent> baseComponents = new HashSet<>();
+		Set<BaseComponent> refreshTemplate = new HashSet<>();
 		Set<BaseComponent> deletedComponents = new HashSet<>();
 		Set<LayoutContainer> deletedLayoutContainers = new HashSet<>();
 		Set<Part> parts = new HashSet<>();
@@ -322,6 +324,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							parent = parent.getParent();
 						}
 
+					}
+					if (persist instanceof Field)
+					{
+						Field oldField = (Field)ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(persist.getUUID());
+						if (oldField != null && ((Field)persist).getDisplayType() != oldField.getDisplayType())
+						{
+							refreshTemplate.add((BaseComponent)persist);
+						}
 					}
 				}
 				else
@@ -399,6 +409,17 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			for (LayoutContainer container : deletedLayoutContainers)
 			{
 				writer.value(container.getUUID().toString());
+			}
+			writer.endArray();
+		}
+
+		if (refreshTemplate.size() > 0)
+		{
+			writer.key("refreshTemplate");
+			writer.array();
+			for (BaseComponent persist : refreshTemplate)
+			{
+				writer.value(persist.getUUID().toString());
 			}
 			writer.endArray();
 		}
