@@ -2860,7 +2860,20 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	@Override
 	public void ngPackageProjectListChanged()
 	{
-		// not used for now
+		Job job = new Job("Refreshing allWebPackagesNode due to ngPackageProject list changed...")
+		{
+			@SuppressWarnings("unchecked")
+			@Override
+			public IStatus run(IProgressMonitor monitor)
+			{
+				allWebPackagesNode.children = null;
+				view.refreshTreeNodeFromModel(allWebPackagesNode);
+
+				return Status.OK_STATUS;
+			}
+		};
+		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		job.schedule();
 	}
 
 }
