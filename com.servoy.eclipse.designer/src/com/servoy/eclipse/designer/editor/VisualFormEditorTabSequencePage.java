@@ -398,10 +398,9 @@ public class VisualFormEditorTabSequencePage extends Composite
 				return TabSeqComparator.compareTabSeq(o1.getSeqValue(), o1.element, o2.getSeqValue(), o2.element);
 			}
 		});
-		Iterator<IPersist> iterator = ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm()).getAllObjects();
-		for (int i = 0; iterator.hasNext(); i++)
+		List<IFormElement> elements = ModelUtils.getEditingFlattenedSolution(editor.getForm()).getFlattenedForm(editor.getForm()).getFlattenedObjects(null);
+		for (IFormElement persist : elements)
 		{
-			IPersist persist = iterator.next();
 			if (FormTemplateGenerator.isWebcomponentBean(persist))
 			{
 				IBasicWebComponent webComponent = (IBasicWebComponent)persist;
@@ -417,11 +416,11 @@ public class VisualFormEditorTabSequencePage extends Composite
 							int tabseq = Utils.getAsInteger(webComponent.getProperty(pd.getName()));
 							if (tabseq >= 0)
 							{
-								selected.add(new TabSeqProperty((IFormElement)persist, pd.getName()));
+								selected.add(new TabSeqProperty(persist, pd.getName()));
 							}
 							else
 							{
-								available.add(new TabSeqProperty((IFormElement)persist, pd.getName()));
+								available.add(new TabSeqProperty(persist, pd.getName()));
 							}
 						}
 					}
@@ -431,11 +430,11 @@ public class VisualFormEditorTabSequencePage extends Composite
 			{
 				if (((ISupportTabSeq)persist).getTabSeq() >= 0)
 				{
-					selected.add(new TabSeqProperty((IFormElement)persist, null));
+					selected.add(new TabSeqProperty(persist, null));
 				}
 				else
 				{
-					available.add(new TabSeqProperty((IFormElement)persist, null));
+					available.add(new TabSeqProperty(persist, null));
 				}
 			}
 
