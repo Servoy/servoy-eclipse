@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.servoy.mobile.%%ID%%" version="%%VERSION%%" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
+	<name>%%NAME%%</name>
+	<description>%%DESCRIPTION%%</description>
+
+	<preference name="phonegap-version" value="cli-6.0.0" />
+	<gap:plugin name="cordova-plugin-whitelist" source="npm" />
+	<access origin="*"/>
+</widget>

@@ -20,6 +20,7 @@ package com.servoy.eclipse.exporter.mobile.ui.wizard;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +51,7 @@ import org.json.JSONObject;
 import com.servoy.eclipse.model.mobile.exporter.MobileExporter;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.ServoyJSONObject;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author lvostinar
@@ -299,6 +301,7 @@ public class PhoneGapConnector
 		}
 
 		File exportedFile = null;
+		File tempConfigFile = null;
 		try
 		{
 			String url = URL_PHONEGAP_CLOUD;
@@ -335,6 +338,17 @@ public class PhoneGapConnector
 			entity.addPart("data", new StringBody(application.getJSON()));
 
 			mobileExporter.setOutputFolder(new File(System.getProperty("java.io.tmpdir")));
+			if (!configFile.exists())
+			{
+				String configTemplate = Utils.getTXTFileContent(getClass().getResourceAsStream("config.xml"), Charset.forName("UTF-8"));
+				tempConfigFile = new File(System.getProperty("java.io.tmpdir"), "servoy_mobile_config.xml");
+				String appTitle = application.getTitle();
+				String sAppId = appTitle != null ? appTitle.replace(" ", "") : "app";
+				configTemplate = configTemplate.replace("%%ID%%", sAppId).replace("%%VERSION%%", application.getVersion()).replace("%%NAME%%",
+					appTitle).replace("%%DESCRIPTION%%", application.getDescription());
+				Utils.writeTXTFile(tempConfigFile, configTemplate, Charset.forName("UTF-8"));
+				configFile = tempConfigFile;
+			}
 			mobileExporter.setConfigFile(configFile);
 			exportedFile = mobileExporter.doExport(true);
 			entity.addPart("file", new FileBody(exportedFile));
@@ -372,6 +386,10 @@ public class PhoneGapConnector
 			if (exportedFile != null)
 			{
 				exportedFile.delete();
+			}
+			if (tempConfigFile != null)
+			{
+				tempConfigFile.delete();
 			}
 		}
 		return null;
