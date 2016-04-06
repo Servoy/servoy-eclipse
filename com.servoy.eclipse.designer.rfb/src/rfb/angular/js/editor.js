@@ -82,7 +82,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				    if ((contentArea.scrollTop + contentArea.offsetHeight) === contentArea.scrollHeight)
 					angular.element($scope.glasspane).height(angular.element($scope.glasspane).height()+5);
 				    contentArea.scrollTop += 5;
-				    callback($scope, $scope.selectionToDrag,0,5);
+				    if (callback) callback($scope, $scope.selectionToDrag,0,5);
 				    $scope.refreshEditorContent();
 				},100);
 			};
@@ -93,7 +93,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				    if ((contentArea.scrollLeft + contentArea.offsetWidth) === contentArea.scrollWidth)
 					angular.element($scope.glasspane).width(angular.element($scope.glasspane).width()+5);
 				    contentArea.scrollLeft += 5;
-				    callback($scope, $scope.selectionToDrag,5,0);
+				    if (callback) callback($scope, $scope.selectionToDrag,5,0);
 				    $scope.refreshEditorContent();
 				},100);
 			};

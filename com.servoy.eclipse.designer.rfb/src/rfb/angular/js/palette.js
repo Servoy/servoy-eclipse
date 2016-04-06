@@ -80,7 +80,12 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 					var t;
 					var insertedClone;
 					var insertedCloneParent;
+					
 					var bottomAutoscrollEnter;
+					var bottomAutoscrollLeave;
+					
+					var rightAutoscrollEnter;
+					var rightAutoscrollLeave;
 					
 					var mousemovecallback = $scope.registerDOMEvent("mousemove", "EDITOR", function(ev) {
 						if (dragClone) {
@@ -200,23 +205,40 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 						}
 					});
 					
-					var stop;
+					var bottomStop;
 					bottomAutoscrollEnter = $scope.registerDOMEvent("mouseenter","BOTTOM_AUTOSCROLL", function(event){
-					   stop = $scope.startBottomAutoScroll();
+					    bottomStop = $scope.startBottomAutoScroll();
 					});
 					
 					bottomAutoscrollLeave = $scope.registerDOMEvent("mouseleave","BOTTOM_AUTOSCROLL", function(){
-					    if (angular.isDefined(stop)) {
-					            $interval.cancel(stop);
-					            stop = undefined;
+					    if (angular.isDefined(bottomStop)) {
+					            $interval.cancel(bottomStop);
+					            bottomStop = undefined;
+					    }
+					});
+					
+
+					var rightStop;
+					bottomAutoscrollEnter = $scope.registerDOMEvent("mouseenter","RIGHT_AUTOSCROLL", function(event){
+					    rightStop = $scope.startRightAutoScroll();
+					});
+					
+					bottomAutoscrollLeave = $scope.registerDOMEvent("mouseleave","RIGHT_AUTOSCROLL", function(){
+					    if (angular.isDefined(rightStop)) {
+					            $interval.cancel(rightStop);
+					            rightStop = undefined;
 					    }
 					});
 					
 					mouseupcallback = $scope.registerDOMEvent("mouseup", "EDITOR", function(ev) {
 					    
-					    	if (angular.isDefined(stop)) {
-					    	    $interval.cancel(stop);
-					    	    stop = undefined;
+					    	if (angular.isDefined(bottomStop)) {
+					    	    $interval.cancel(bottomStop);
+					    	    bottomStop = undefined;
+					    	}
+					    	if (angular.isDefined(rightStop)) {
+					    	    $interval.cancel(rightStop);
+					    	    rightStop = undefined;
 					    	}
 					    	$scope.setPointerEvents("none");
 						if (mousemovecallback) $scope.unregisterDOMEvent("mousemove", "EDITOR", mousemovecallback);
@@ -226,6 +248,8 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 						if (mouseleavecallback) $scope.unregisterDOMEvent("mouseenter", "PALETTE", mouseleavecallback);
 						if (bottomAutoscrollEnter) $scope.unregisterDOMEvent("mouseenter", "BOTTOM_AUTOSCROLL", bottomAutoscrollEnter);
 						if (bottomAutoscrollLeave) $scope.unregisterDOMEvent("mouseleave", "BOTTOM_AUTOSCROLL", bottomAutoscrollLeave);
+						if (rightAutoscrollEnter) $scope.unregisterDOMEvent("mouseenter", "RIGHT_AUTOSCROLL", rightAutoscrollEnter);
+						if (rightAutoscrollLeave) $scope.unregisterDOMEvent("mouseleave", "RIGHT_AUTOSCROLL", rightAutoscrollLeave);
 						$scope.glasspane.style.cursor = "";
 						editorScope.getEditorContentRootScope().drop_highlight = null;
 						editorScope.getEditorContentRootScope().$apply();
