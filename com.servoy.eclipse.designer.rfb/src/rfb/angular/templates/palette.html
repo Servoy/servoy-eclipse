@@ -1,20 +1,19 @@
 <div id="paletteContent" class="paletteContent">
 		<input type="text" class="form-control input-xs" placeholder="Search" ng-model="searchText"/>
 		<accordion close-others='oneAtATime' ui-sortable="sortableOptions" ng-model="packages">
-			<accordion-group ng-repeat="package in packages" is-open="package.isOpen" ng-if="(package.components | filter:{displayName:searchText}).length > 0">
+			<accordion-group ng-repeat="(packageIndex, package) in packages" is-open="package.isOpen" ng-if="((package.components | filter:{displayName:searchText}).length > 0) || ((package.categories | filter:{displayName:searchText}).length > 0)" >
 				<accordion-heading>
 					<h1 class="palette-heading handle"><i class="glyphicon glyphicon-move"></i>{{package.packageDisplayname}}<span ng-class="package.isOpen ? 'glyphicon glyphicon-chevron-down' : 'glyphicon glyphicon-chevron-right'" style="float: right"></span></h1>
 				</accordion-heading>
 			    <div>
 				    <ul>
-						<li ng-repeat="item in package.components | filter:{displayName:searchText} | orderBy:'displayName'" style="position:relative;">
-							<div ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.componentType,item.topContainer, item.layoutName) " class="paletteItem" title="Drag component {{item.displayName}} to form to add it"> 
-								<img draggable="false" ng-src="/{{item.icon}}" alt=""/>{{item.displayName}}
-							</div>
-							<img ng-click="showPreviewImage(item.preview)" draggable="false" ng-if="item.preview" src="images/images.jpeg" title="Open preview" alt="" style="position:absolute; right:0; bottom:0.14em; cursor:pointer;"/>
-							<ul>
-								<li ng-repeat="ghost in item.types" ng-mousedown="enterDragMode($event,ghost.type,null,null,null,ghost.type,null,null,ghost.propertyName) " class="paletteItem" title="Drag {{ghost.type}} to a {{item.displayName}} on the form to add it">
-									<img draggable="false" ng-src="/{{item.icon}}" alt=""/>{{ghost.type}}
+				    <palette-components enter-drag-mode="enterDragMode" package="package" search-text="searchText" show-preview-image="showPreviewImage"></palette-components>
+				    </ul>
+				    <ul>
+				    	<li ng-repeat="(catName, category) in package.categories" style="position:relative;">
+				    		<div>{{catName}}</div>
+				    		<ul>
+								<palette-components enter-drag-mode="enterDragMode" svy-components="{{catName}}" package="package"  search-text="searchText" show-preview-image="showPreviewImage"></palette-components>
 							</ul>
 						</li>
 				    </ul>

@@ -191,6 +191,7 @@ public class DesignerFilter implements Filter
 					for (String key : orderedKeys)
 					{
 						boolean startedArray = false;
+						JSONObject categories = new JSONObject(); // categorised items (components/layouts can have "category" : "categoryName" in their spec)
 						if ((provider.getLayoutSpecifications().containsKey(key) &&
 							isAccesibleInLayoutType(provider.getLayoutSpecifications().get(key), layoutType)))
 						{
@@ -257,33 +258,37 @@ public class DesignerFilter implements Filter
 						if (startedArray && provider.getLayoutSpecifications().containsKey(key))
 						{
 							PackageSpecification<WebLayoutSpecification> entry = provider.getLayoutSpecifications().get(key);
-
 							for (WebLayoutSpecification spec : entry.getSpecifications().values())
 							{
+
 								if (NGUtils.isAbsoluteLayoutDiv(spec)) continue; // not supported in designer
-								jsonWriter.object();
-								jsonWriter.key("name").value(spec.getName());
+								JSONObject layoutJson = new JSONObject();
+								layoutJson.put("name", spec.getName());
 								if (spec.getConfig() != null)
 								{
 									String layoutName = new JSONObject((String)spec.getConfig()).optString("layoutName", null);
 									if (layoutName != null)
 									{
-										jsonWriter.key("layoutName").value(layoutName);
+										layoutJson.put("layoutName", layoutName);
 									}
-									else jsonWriter.key("layoutName").value(spec.getName());
+									else layoutJson.put("layoutName", spec.getName());
 								}
-								else jsonWriter.key("layoutName").value(spec.getName());
-								jsonWriter.key("componentType").value("layout");
-								jsonWriter.key("displayName").value(spec.getDisplayName());
+								else layoutJson.put("layoutName", spec.getName());
+								layoutJson.put("componentType", "layout");
+								layoutJson.put("displayName", spec.getDisplayName());
+
+								if (spec.getCategoryName() != null) layoutJson.put("category", spec.getCategoryName());
+
 								JSONObject config = spec.getConfig() instanceof String ? new JSONObject((String)spec.getConfig()) : null;
 								if (config == null)
 								{
-									jsonWriter.key("tagName").value("<div style='border-style: dotted;'></div>"); //TODO is tagname configurable by the spec
+									layoutJson.put("tagName", "<div style='border-style: dotted;'></div>"); //TODO is tagname configurable by the spec
 								}
 								else
 								{
-									jsonWriter.key("tagName").value(createLayoutDiv(config, new StringBuilder(), spec).toString());
+									layoutJson.put("tagName", createLayoutDiv(config, new StringBuilder(), spec).toString());
 								}
+
 								Map<String, Object> model = new HashMap<String, Object>();
 								PropertyDescription pd = spec.getProperty("size");
 								if (pd != null && pd.getDefaultValue() != null)
@@ -296,19 +301,22 @@ public class DesignerFilter implements Filter
 									size.put("width", Integer.valueOf(300));
 									model.put("size", size);
 								}
-								jsonWriter.key("model").value(new JSONObject(model));
+								layoutJson.put("model", new JSONObject(model));
 								if (spec.getIcon() != null)
 								{
-									jsonWriter.key("icon").value(spec.getIcon());
+									layoutJson.put("icon", spec.getIcon());
 								}
 								if (spec.getPreview() != null)
 								{
-									jsonWriter.key("preview").value(spec.getPreview());
+									layoutJson.put("preview", spec.getPreview());
 								}
-								jsonWriter.key("topContainer").value(spec.isTopContainer());
+								layoutJson.put("topContainer", spec.isTopContainer());
 
-
-								jsonWriter.endObject();
+								if (layoutJson.has("category"))
+								{
+									categories.append(layoutJson.getString("category"), layoutJson);
+								}
+								else jsonWriter.value(layoutJson);
 							}
 						}
 						if (startedArray && provider.getWebComponentSpecifications().containsKey(key))
@@ -326,10 +334,11 @@ public class DesignerFilter implements Filter
 							{
 								if (!IGNORE_COMPONENT_LIST.contains(spec.getName()))
 								{
-									jsonWriter.object();
-									jsonWriter.key("name").value(spec.getName());
-									jsonWriter.key("componentType").value("component");
-									jsonWriter.key("displayName").value(spec.getDisplayName());
+
+									JSONObject componentJson = new JSONObject();
+									componentJson.put("name", spec.getName());
+									componentJson.put("componentType", "component");
+									componentJson.put("displayName", spec.getDisplayName());
 									FlattenedSolution fl = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
 									Form form = fl.getForm(formName);
 									Map<String, Object> model = new HashMap<String, Object>();
@@ -342,10 +351,11 @@ public class DesignerFilter implements Filter
 										StringWriter stringWriter = new StringWriter();
 										PrintWriter printWriter = new PrintWriter(stringWriter);
 										FormLayoutGenerator.generateFormElement(printWriter, formElement, form, true);
-										jsonWriter.key("tagName").value(stringWriter.toString());
+										componentJson.put("tagName", stringWriter.toString());
 										model.put("componentName", formElement.getDesignId());
 									}
-									else jsonWriter.key("tagName").value(FormTemplateGenerator.getTagName(spec.getName()));
+									else componentJson.put("tagName", FormTemplateGenerator.getTagName(spec.getName()));
+
 									PropertyDescription pd = spec.getProperty("size");
 									Set<String> allPropertiesNames = spec.getAllPropertiesNames();
 									for (String string : allPropertiesNames)
@@ -374,23 +384,27 @@ public class DesignerFilter implements Filter
 									{
 										model.put("text", "label");
 									}
-									jsonWriter.key("model").value(new JSONObject(model));
+									componentJson.put("model", new JSONObject(model));
 									if (spec.getIcon() != null)
 									{
-										jsonWriter.key("icon").value(spec.getIcon());
+										componentJson.put("icon", spec.getIcon());
 									}
-									jsonWriter.key("types").value(new JSONArray(getPalleteTypeNames(spec)));
-									jsonWriter.endObject();
+									componentJson.put("types", new JSONArray(getPalleteTypeNames(spec)));
+									if (componentJson.has("category"))
+									{
+										categories.append(componentJson.getString("category"), componentJson);
+									}
+									else jsonWriter.value(componentJson);
 								}
 							}
 						}
 						if (startedArray)
 						{
 							jsonWriter.endArray();
+							if (categories.length() > 0) jsonWriter.key("categories").value(categories);
 							jsonWriter.endObject();
 						}
 					}
-
 					jsonWriter.endArray();
 				}
 				catch (JSONException ex)

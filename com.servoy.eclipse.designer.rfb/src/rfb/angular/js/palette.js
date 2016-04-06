@@ -328,4 +328,21 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 			replace: true
 		};
 
-	})
+}).directive("paletteComponents", function($parse) {
+    return {
+	restrict: "E",
+	scope: {
+	    "package":"=",
+	    "searchText":"=",
+	    "enterDragMode":"=",
+	    "showPreviewImage":"="
+	},
+	link: function($scope, $element, $attrs) {
+	    $scope.items = $scope.package.components;
+	    if ($attrs['svyComponents']){
+		 $scope.items = $scope.package.categories[$attrs['svyComponents']];
+	    }
+	},
+	templateUrl: 'templates/palettecomponents.html'
+    };
+})
