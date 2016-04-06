@@ -135,86 +135,82 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 					}
 				}
 				if (refreshAllNGPackageProjects.value.booleanValue()) break;
-				if (baseNGPackageManager.getActiveSolutionReferencedProjectNamesInternal().contains(resource.getName()))
+				// - we need to know if it's a project that has been referenced before but was missing and now it is available and of type ngPackage
+				// or
+				// - if it was previously available and loaded as an ngPackage project, we must check to see if manifest or .spec files changed or if the project is no longer available
+				boolean wasPreviouslyLoaded = false;
+				for (ServoyNGPackageProject p : baseNGPackageManager.getReferencedNGPackageProjectsInternal())
 				{
-					// a referenced project has changed;
-					// - we need to know if it's a project that has been referenced before but was missing and now it is available and of type ngPackage
-					// or
-					// - if it was previously available and loaded as an ngPackage project, we must check to see if manifest or .spec files changed or if the project is no longer available
-					boolean wasPreviouslyLoaded = false;
-					for (ServoyNGPackageProject p : baseNGPackageManager.getReferencedNGPackageProjectsInternal())
+					if (resource.equals(p.getProject()))
 					{
-						if (resource.equals(p.getProject()))
-						{
-							wasPreviouslyLoaded = true;
-							break;
-						}
+						wasPreviouslyLoaded = true;
+						break;
 					}
+				}
 
-					final IProject p = resource.getProject(); // kind of a cast cause it's already a project on this branch
-					boolean isValidNGPackageProject;
-					try
+				final IProject p = resource.getProject(); // kind of a cast cause it's already a project on this branch
+				boolean isValidNGPackageProject;
+				try
+				{
+					isValidNGPackageProject = (p.exists() && p.isOpen() && p.hasNature(ServoyNGPackageProject.NATURE_ID));
+				}
+				catch (CoreException e1)
+				{
+					ServoyLog.logError(e1);
+					isValidNGPackageProject = false;
+				}
+				if (wasPreviouslyLoaded)
+				{
+					if (isValidNGPackageProject)
 					{
-						isValidNGPackageProject = (p.exists() && p.isOpen() && p.hasNature(ServoyNGPackageProject.NATURE_ID));
-					}
-					catch (CoreException e1)
-					{
-						ServoyLog.logError(e1);
-						isValidNGPackageProject = false;
-					}
-					if (wasPreviouslyLoaded)
-					{
-						if (isValidNGPackageProject)
+						// check for changes in spec or manifest files
+						try
 						{
-							// check for changes in spec or manifest files
-							try
+							rd.accept(new IResourceDeltaVisitor()
 							{
-								rd.accept(new IResourceDeltaVisitor()
+								boolean continueSearching = true;
+
+								@Override
+								public boolean visit(IResourceDelta delta) throws CoreException
 								{
-									boolean continueSearching = true;
-
-									@Override
-									public boolean visit(IResourceDelta delta) throws CoreException
+									if (continueSearching)
 									{
-										if (continueSearching)
-										{
-											if (delta.getFlags() == IResourceDelta.MARKERS) return false;
+										if (delta.getFlags() == IResourceDelta.MARKERS) return false;
 
-											if (delta.getResource().getName().toLowerCase().endsWith(".spec") ||
-												delta.getResource().getName().equalsIgnoreCase("MANIFEST.MF"))
-											{
-												oldNGPackageProjectsToUnload.add(p);
-												newNGPackageProjectsToLoad.add(p);
-												continueSearching = false;
-											}
+										if (delta.getResource().getName().toLowerCase().endsWith(".spec") ||
+											delta.getResource().getName().equalsIgnoreCase("MANIFEST.MF"))
+										{
+											oldNGPackageProjectsToUnload.add(p);
+											newNGPackageProjectsToLoad.add(p);
+											continueSearching = false;
 										}
-										return continueSearching;
 									}
-								});
-							}
-							catch (CoreException e)
-							{
-								ServoyLog.logError(e);
-								oldNGPackageProjectsToUnload.add(p);
-								newNGPackageProjectsToLoad.add(p);
-							}
+									return continueSearching;
+								}
+							});
 						}
-						else
+						catch (CoreException e)
 						{
-							// that means it's no longer available although it was loaded before; it needs to be unloaded
-							clearReferencedProjectsCache.value = Boolean.TRUE;
+							ServoyLog.logError(e);
 							oldNGPackageProjectsToUnload.add(p);
+							newNGPackageProjectsToLoad.add(p);
 						}
 					}
 					else
 					{
-						if (isValidNGPackageProject)
-						{
-							// a new referenced ngPackage project is available; load it
-							clearReferencedProjectsCache.value = Boolean.TRUE;
-							newNGPackageProjectsToLoad.add(p);
-						} // else just some other type of referenced project changed; ignore
+						// that means it's no longer available although it was loaded before; it needs to be unloaded
+						clearReferencedProjectsCache.value = Boolean.TRUE;
+						oldNGPackageProjectsToUnload.add(p);
 					}
+				}
+				else
+				{
+					if (isValidNGPackageProject)
+					{
+						// a new referenced ngPackage project is available; load it
+						clearReferencedProjectsCache.value = Boolean.TRUE;
+						if (p.getReferencingProjects().length > 0) newNGPackageProjectsToLoad.add(p);
+					} // else just some other type of referenced project changed; ignore
 				}
 			}
 		}
