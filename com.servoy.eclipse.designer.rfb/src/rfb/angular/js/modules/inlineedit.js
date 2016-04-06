@@ -48,7 +48,7 @@ angular.module('inlineedit', ['editor']).run(['$pluginRegistry', '$editorService
 						event.stopPropagation();
 					}
 					if (event.keyCode == 65 && event.ctrlKey) {
-						$document.execCommand('selectAll', false, null);
+						document.execCommand('selectAll', false, null);
 					}
 				})
 				.bind('blur', function() {
