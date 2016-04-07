@@ -69,7 +69,7 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 			if (execute)
 				$timeout.cancel(execute);
 			event = e;
-			execute = $timeout(drawHighlightDiv,10);
+			execute = $timeout(drawHighlightDiv,300);
 		}
 		
 		editorScope.registerDOMEvent("mousemove","CONTENTFRAME_OVERLAY", onmousemove); // real selection in editor content iframe
