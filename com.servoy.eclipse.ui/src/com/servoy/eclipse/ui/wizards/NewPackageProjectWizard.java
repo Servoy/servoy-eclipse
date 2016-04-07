@@ -318,7 +318,9 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 			data.horizontalAlignment = SWT.FILL;
 			data.verticalAlignment = SWT.FILL;
 			data.grabExcessHorizontalSpace = true;
+			data.grabExcessVerticalSpace = true;
 			data.horizontalSpan = 2;
+			data.minimumHeight = 40;
 			treeContainer.setLayout(new GridLayout(1, false));
 			treeContainer.setLayoutData(data);
 
@@ -341,10 +343,11 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 			data.verticalAlignment = SWT.FILL;
 			data.grabExcessHorizontalSpace = true;
 			data.grabExcessVerticalSpace = true;
+			data.minimumHeight = 30;
 			ftv.setLayoutData(data);
 
-			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
+			ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 
 			List<String> availableSolutions = new ArrayList<String>();
 			try
@@ -364,7 +367,6 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 			ftv.setInput(availableSolutions.toArray());
 
 			if (servoyModel.getActiveProject() != null) ftv.setSelection(new StructuredSelection(servoyModel.getActiveProject().getSolution().getName()));
-
 			setControl(container);
 			setPageComplete(validatePage());
 		}
