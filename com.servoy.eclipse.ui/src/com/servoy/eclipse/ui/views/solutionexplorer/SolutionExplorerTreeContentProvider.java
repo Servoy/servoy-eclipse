@@ -80,6 +80,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
+import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager.ContainerPackageReader;
@@ -247,10 +248,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib), //
 			createTypeNode(Messages.TreeStrings_SpecialOperators, UserNodeType.SPECIAL_OPERATORS,
 				com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, jslib), //
-			createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
-			createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
-			createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
-				jslib) };
+				createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
+				createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
+				createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
+					jslib) };
 
 		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, invisibleRootNode);
 
@@ -836,7 +837,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					else if (type == UserNodeType.COMPONENTS_PROJECT_PACKAGE)
 					{
 						WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
-						String packageName = provider.getPackageName(un.getName());
+						String packageName = provider.getPackageName(removeModuleName(un.getName()));
 						List<String> components = new ArrayList<>(provider.getComponentsInPackage(packageName));
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (components.size() > 0)
@@ -926,7 +927,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					else if (type == UserNodeType.SERVICES_PROJECT_PACKAGE)
 					{
 						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
-						String packageName = provider.getPackageName(un.getName());
+						String packageName = provider.getPackageName(removeModuleName(un.getName()));
 						PackageSpecification<WebObjectSpecification> servicesPackage = provider.getServicesInPackage(packageName);
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (servicesPackage != null)
@@ -1034,12 +1035,20 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			IProject eclipseProject = servoyProject.getProject();
 			try
 			{
-				IProject[] referencedProjects = eclipseProject.getReferencedProjects();
-				for (IProject iProject : referencedProjects)
+				ArrayList<IProject> allReferencedProjects = new ArrayList<IProject>();
+				fillAllReferencedProjects(eclipseProject, allReferencedProjects);
+
+				for (IProject iProject : allReferencedProjects)
 				{
 					if (provider.getPackagesToURLs().containsKey(iProject.getName()))
 					{
-						PlatformSimpleUserNode node = new PlatformSimpleUserNode(iProject.getName(), nodeType, iProject, packageIcon);
+						String name = iProject.getName();
+						List<IProject> referencingProjects = Arrays.asList(iProject.getReferencingProjects());
+						if (referencingProjects.indexOf(eclipseProject) == -1 && referencingProjects.size() > 0)
+						{
+							name = appendModuleName(name, referencingProjects.get(0).getName());
+						}
+						PlatformSimpleUserNode node = new PlatformSimpleUserNode(name, nodeType, iProject, packageIcon);
 						node.parent = un;
 						children.add(node);
 					}
@@ -1051,6 +1060,28 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			}
 		}
 		return children;
+	}
+
+	private static void fillAllReferencedProjects(IProject project, List<IProject> allReferencedProjects) throws CoreException
+	{
+		if (allReferencedProjects.indexOf(project) != -1) return;
+		allReferencedProjects.add(project);
+		for (IProject iProject : project.getReferencedProjects())
+		{
+			fillAllReferencedProjects(iProject, allReferencedProjects);
+		}
+	}
+
+	private static String appendModuleName(String name, String moduleName)
+	{
+		return name + " [" + moduleName + "]";
+	}
+
+	private static String removeModuleName(String name)
+	{
+		int moduleDescriptionIdx = name.indexOf(" [");
+		if (moduleDescriptionIdx != -1) return name.substring(0, moduleDescriptionIdx);
+		return name;
 	}
 
 	private Image loadImageFromFolder(IFolder folder, String iconPath) throws CoreException
@@ -1163,7 +1194,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				{
 					return ServoyModel.getServerManager().getServerNames(false, false, true, true).length > 0;
 				}
-				else if (un.getType() == UserNodeType.SERVER || un.getType() == UserNodeType.INMEMORY_DATASOURCES)
+				else if (un.getType() == UserNodeType.SERVER)
 				{
 					try
 					{
@@ -1174,6 +1205,30 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						ServoyLog.logError(e);
 						return false;
 					}
+				}
+				else if (un.getType() == UserNodeType.INMEMORY_DATASOURCES)
+				{
+					ArrayList<IProject> allReferencedProjects = new ArrayList<IProject>();
+					IProject project = ((MemServer)un.getRealObject()).getServoyProject().getProject();
+					try
+					{
+						fillAllReferencedProjects(project, allReferencedProjects);
+						for (IProject module : allReferencedProjects)
+						{
+							if (module.isOpen() && module.hasNature(ServoyProject.NATURE_ID))
+							{
+								if (((ServoyProject)module.getNature(ServoyProject.NATURE_ID)).getMemServer().getTableNames(true).size() > 0)
+								{
+									return true;
+								}
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						ServoyLog.logError(ex);
+					}
+					return false;
 				}
 				else if (un.getType() == UserNodeType.PLUGINS)
 				{
@@ -1247,14 +1302,14 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				else if (un.getType() == UserNodeType.COMPONENTS_PACKAGE || un.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE)
 				{
 					return (!WebComponentSpecProvider.getInstance().getComponentsInPackage(
-						WebComponentSpecProvider.getInstance().getPackageName(un.getName())).isEmpty() ||
+						WebComponentSpecProvider.getInstance().getPackageName(removeModuleName(un.getName()))).isEmpty() ||
 						!WebComponentSpecProvider.getInstance().getLayoutsInPackage(
-							WebComponentSpecProvider.getInstance().getPackageName(un.getName())).isEmpty());
+							WebComponentSpecProvider.getInstance().getPackageName(removeModuleName(un.getName()))).isEmpty());
 				}
 				else if (un.getType() == UserNodeType.SERVICES_PACKAGE || un.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE)
 				{
 					PackageSpecification<WebObjectSpecification> services = WebServiceSpecProvider.getInstance().getServicesInPackage(
-						WebServiceSpecProvider.getInstance().getPackageName(un.getName()));
+						WebServiceSpecProvider.getInstance().getPackageName(removeModuleName(un.getName())));
 					return services != null && !services.getSpecifications().isEmpty();
 				}
 			}
@@ -1284,8 +1339,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			IProject eclipseProject = servoyProject.getProject();
 			try
 			{
-				IProject[] referencedProjects = eclipseProject.getReferencedProjects();
-				for (IProject iProject : referencedProjects)
+				ArrayList<IProject> allReferencedProjects = new ArrayList<IProject>();
+				fillAllReferencedProjects(eclipseProject, allReferencedProjects);
+
+				for (IProject iProject : allReferencedProjects)
 				{
 					if (provider.getPackageNames().contains(iProject.getName())) return true;
 				}
@@ -1324,8 +1381,43 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private void addServerNodeChildren(PlatformSimpleUserNode serverNode, UserNodeType type)
 	{
-		IServerInternal server = (IServerInternal)serverNode.getRealObject();
-		serverNode.children = SolutionExplorerListContentProvider.createTables(server, type);
+		// append inmemory ds from modules
+		if (serverNode.getType() == UserNodeType.INMEMORY_DATASOURCES)
+		{
+			ArrayList<SimpleUserNode> serverNodeChildren = new ArrayList<SimpleUserNode>();
+			IProject project = ((MemServer)serverNode.getRealObject()).getServoyProject().getProject();
+			ArrayList<IProject> allReferencedProjects = new ArrayList<IProject>();
+			try
+			{
+				fillAllReferencedProjects(project, allReferencedProjects);
+				for (IProject module : allReferencedProjects)
+				{
+					if (module.isOpen() && module.hasNature(ServoyProject.NATURE_ID))
+					{
+						SimpleUserNode[] moduleTables = SolutionExplorerListContentProvider.createTables(
+							((ServoyProject)module.getNature(ServoyProject.NATURE_ID)).getMemServer(), type);
+
+						for (SimpleUserNode moduleTable : moduleTables)
+						{
+							if (module != project) moduleTable.setDisplayName(appendModuleName(moduleTable.getName(), module.getName()));
+							serverNodeChildren.add(moduleTable);
+						}
+					}
+				}
+			}
+			catch (CoreException ex)
+			{
+				ServoyLog.logError(ex);
+			}
+			serverNode.children = serverNodeChildren.toArray(new SimpleUserNode[serverNodeChildren.size()]);
+		}
+		else
+		{
+			IServerInternal server = (IServerInternal)serverNode.getRealObject();
+			serverNode.children = SolutionExplorerListContentProvider.createTables(server, type);
+		}
+
+
 		for (Object node : serverNode.children)
 		{
 			if (node instanceof SimpleUserNode)
