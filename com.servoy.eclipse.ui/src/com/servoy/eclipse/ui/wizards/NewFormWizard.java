@@ -928,6 +928,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 				listFormCheck.setEnabled(true);
 			}
 			dataSourceViewer.setButtonText((superForm == null || superForm.getDataSource() == null) ? TreeSelectViewer.DEFAULT_BUTTON_TEXT : "");
+			setPageComplete(validatePage());
 		}
 
 		private void handleTemplateSelected(FlattenedSolution flattenedSolution) throws Exception
