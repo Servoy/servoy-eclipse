@@ -91,12 +91,17 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			@Override
 			public String getServoyPropertiesFileName()
 			{
-				String servoyPropertiesFileName = configuration.getSettingsFileName();
-				if (servoyPropertiesFileName == null)
+				String warSettingsFileName = configuration.getWarSettingsFileName();
+				if (warSettingsFileName == null)
 				{
-					servoyPropertiesFileName = getServoyApplicationServerDir() + File.separator + "servoy.properties";
+					String servoyPropertiesFileName = configuration.getSettingsFileName();
+					if (servoyPropertiesFileName == null)
+					{
+						servoyPropertiesFileName = getServoyApplicationServerDir() + File.separator + "servoy.properties";
+					}
+					return servoyPropertiesFileName;
 				}
-				return servoyPropertiesFileName;
+				return warSettingsFileName;
 			}
 
 			@Override

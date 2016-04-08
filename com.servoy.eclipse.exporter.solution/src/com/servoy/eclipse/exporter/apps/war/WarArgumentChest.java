@@ -52,6 +52,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private boolean checkMetadataTables = false;
 	private boolean exportUsers = false;
 	private String warFileName = null;
+	private String warSettingsFile = null;
 
 	private static final String overwriteGroups = "overwriteGroups";//  overwrites Groups\n"
 	private static final String allowSQLKeywords = "allowSQLKeywords";// allows SQLKeywords \n"
@@ -88,6 +89,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 		// @formatter:off
 		return  "WAR exporter. Exports workspace solutions into .war files.\n"
 			+ super.getHelpMessageCore()
+			+ "        -pfw <properties_file> ... path and name of properties file to be included in the war.\n"
+			+ "             Default: the 'servoy.properties' file  from 'application_server'  will be used.\n"
 			+ "        -b <bean_names> ... the list of beans to export\n"
 			+ "             Default: all beans from application_server/beans are exported.\n"
 			+ "        -l <lafs_names> ... the list of lafs to export \n"
@@ -162,6 +165,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 	protected void parseArguments(HashMap<String, String> argsMap)
 	{
 		printArgsMap(System.out, argsMap);
+		warSettingsFile = parseArg("pfw", "Properties file was not specified after '-pfw' argument.", argsMap, false);
 		plugins = parseArg("pi", "Plugin name(s) was(were) not specified after '-pi' argument.", argsMap, false);
 		beans = parseArg("b", "Bean name(s) was(were) not specified after '-b' argument.", argsMap, false);
 		lafs = parseArg("l", "Laf name(s) was(were) not specified after '-l' argument.", argsMap, false);
@@ -326,6 +330,11 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public String getWarFileName()
 	{
 		return warFileName;
+	}
+
+	public String getWarSettingsFileName()
+	{
+		return warSettingsFile;
 	}
 
 	public boolean isOverwriteGroups()
