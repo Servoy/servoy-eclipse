@@ -1,4 +1,4 @@
-angular.module('inlineedit', ['editor']).run(['$pluginRegistry', '$editorService', '$selectionUtils', '$document', function($pluginRegistry, $editorService, $selectionUtils, $document) {
+angular.module('inlineedit', ['editor']).run(['$pluginRegistry', '$editorService', '$selectionUtils', function($pluginRegistry, $editorService, $selectionUtils) {
 	$pluginRegistry.registerPlugin(function(editorScope) {
 
 		var utils = $selectionUtils.getUtilsForScope(editorScope);
