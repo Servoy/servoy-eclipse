@@ -203,17 +203,16 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 			$scope.getGhostContainerStyle = function(ghostContainer) {
 				if (!$scope.isAbsoluteFormLayout()) {
-					ghostContainer.style.display = "none";
-					//					var p = getRealContainerElement(ghostContainer.uuid);
-					//					if (p.then) {
-					//						p.then(function(parent) {
-					//							getBounds(ghostContainer, parent);
-					//						}, function() {
-					//							ghostContainer.style.display = "none";
-					//						});
-					//					} else {
-					//						getBounds(ghostContainer, p);
-					//					}
+					var p = getRealContainerElement(ghostContainer.uuid);
+					if (p.then) {
+						p.then(function(parent) {
+							getBounds(ghostContainer, parent);
+						}, function() {
+							ghostContainer.style.display = "none";
+						});
+					} else {
+						getBounds(ghostContainer, p);
+					}
 				} else {
 					if (ghostContainer.style == undefined) {
 						//TODO refactor out this 20px addition
