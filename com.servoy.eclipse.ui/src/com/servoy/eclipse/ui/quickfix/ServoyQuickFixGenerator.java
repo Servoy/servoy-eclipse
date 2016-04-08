@@ -32,6 +32,7 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
+import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -179,6 +180,16 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				{
 					ServoyLog.logError(e);
 				}
+			}
+			else if (type.equals(ServoyBuilder.DUPLICATE_MEM_TABLE_TYPE))
+			{
+				String solName = (String)marker.getAttribute("SolutionName");
+				String uuid = (String)marker.getAttribute("Uuid");
+				final UUID id = UUID.fromString(uuid);
+				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
+				IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
+				resolutions.add(new RenameMemTableQuickFix(persist, servoyProject));
+				resolutions.add(new DeleteMemTableQuickFix(persist, servoyProject));
 			}
 
 			return resolutions.toArray(new IMarkerResolution[resolutions.size()]);

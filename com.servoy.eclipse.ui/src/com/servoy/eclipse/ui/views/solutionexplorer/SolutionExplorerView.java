@@ -2897,6 +2897,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		renameActionInTree = new ContextAction(this, null, "Rename");
 
 		RenameSolutionAction renameSolutionAction = new RenameSolutionAction(this);
+		RenameInMemTableAction renameInMemTableAction = new RenameInMemTableAction(getSite().getShell());
 		renameActionInTree.registerAction(UserNodeType.SOLUTION, renameSolutionAction);
 		renameActionInTree.registerAction(UserNodeType.SOLUTION_ITEM, renameSolutionAction);
 		renameActionInTree.registerAction(UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE, renameSolutionAction);
@@ -2905,6 +2906,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		renameActionInTree.registerAction(UserNodeType.WORKING_SET, new RenameWorkingSetAction());
 		renameActionInTree.registerAction(UserNodeType.COMPONENT, new RenameComponentAction(this, getSite().getShell(), UserNodeType.COMPONENT));
 		renameActionInTree.registerAction(UserNodeType.SERVICE, new RenameComponentAction(this, getSite().getShell(), UserNodeType.SERVICE));
+		renameActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, renameInMemTableAction);
 
 		addAsModuleAction = new AddAsModuleAction(getSite().getShell());
 		addAsWebPackageAction = new AddAsWebPackageAction(getSite().getShell());

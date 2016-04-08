@@ -5655,14 +5655,23 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
 								MemServer memServer = servoyProject.getMemServer();
 								MemTable table = memServer.getTable(node.getTableName());
-								if (memTables.containsKey(node.getTableName()))
+								if (memTables.containsKey(node.getTableName()) && memTables.get(node.getTableName()).getParent() != memServer)
 								{
 									if (memServer.hasTable(node.getTableName()))
 									{
 										ServoyMarker mk = MarkerMessages.DuplicateMemTable.fill(node.getTableName(),
 											memTables.get(node.getTableName()).getParent().getServoyProject().getSolution().getName(), solutionName);
-										addMarker(servoyProject.getProject(), mk.getType(), mk.getText(), -1, DUPLICATE_MEM_TABLE, IMarker.PRIORITY_NORMAL,
-											null, node);
+										IMarker marker = addMarker(servoyProject.getProject(), mk.getType(), mk.getText(), -1, DUPLICATE_MEM_TABLE,
+											IMarker.PRIORITY_NORMAL, null, node);
+										try
+										{
+											marker.setAttribute("Uuid", node.getUUID().toString());
+											marker.setAttribute("SolutionName", solutionName);
+										}
+										catch (CoreException e)
+										{
+											Debug.error(e);
+										}
 										return CONTINUE_TRAVERSAL;
 									}
 								}

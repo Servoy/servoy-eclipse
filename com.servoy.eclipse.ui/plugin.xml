@@ -621,6 +621,10 @@
               class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
               markerType="com.servoy.eclipse.core.lingeringTableFiles">
         </markerResolutionGenerator>
+        <markerResolutionGenerator
+              class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
+              markerType="com.servoy.eclipse.core.duplicateMemTable">
+        </markerResolutionGenerator>
      </extension>
      <extension
            point="org.eclipse.ui.commands">

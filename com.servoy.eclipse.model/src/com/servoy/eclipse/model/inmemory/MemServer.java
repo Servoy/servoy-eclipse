@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.model.inmemory;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -29,6 +31,13 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.io.IOUtils;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -304,6 +313,89 @@ public class MemServer implements IServerInternal, IServer
 		}
 		return null;
 	}
+
+	public String[] renameTable(ITable t, String newName) throws SQLException, RepositoryException
+	{
+		return renameTable(t, newName, null);
+	}
+
+	public String[] renameTable(ITable t, String newName, List<String> nodesToRename) throws RepositoryException, SQLException
+	{
+		if (t != null)
+		{
+			ITable newTable = createNewTable(null, t, newName);
+			syncTableObjWithDB(newTable, false, true, null);
+
+			// rename all tablenodes representing this table.
+			IServoyModel sm = ServoyModelFinder.getServoyModel();
+			FlattenedSolution fs = sm.getFlattenedSolution();
+			Iterator<TableNode> tableNodes = fs.getTableNodes(t);
+			while (tableNodes.hasNext())
+			{
+				TableNode tn = tableNodes.next();
+				if (nodesToRename != null)
+				{
+					if (nodesToRename.contains(tn.getRootObject().getName()) ||
+						(tn.getColumns() != null && tn.getRootObject().equals(servoyProject.getSolution())))
+					{
+						renameTableNode(t, newTable, newName, tn);
+					}
+				}
+				else if (tn.getColumns() == null || tn.getRootObject().equals(servoyProject.getSolution()))
+				{
+					// skip the one that has columns definition but is not of this project/solution
+					renameTableNode(t, newTable, newName, tn);
+				}
+			}
+			tables.remove(t.getName());
+			initTableIfNecessary(newTable);
+		}
+		return null;
+	}
+
+	protected void renameTableNode(ITable t, ITable newTable, String newName, TableNode tn)
+	{
+		try
+		{
+			tn.setTableName(newName);
+			IFolder folder = ResourcesPlugin.getWorkspace().getRoot().getFolder(
+				new Path(servoyProject.getSolution() + "/datasources/" + DataSourceUtils.INMEM_DATASOURCE + "/"));
+			IResource[] resources = folder.members();
+			for (IResource res : resources)
+			{
+				if (res instanceof IFile && (res.getName().equals(t.getName() + ".tbl") || res.getName().startsWith(t.getName() + "_")))
+				{
+					IFile file = (IFile)res;
+					InputStream is = file.getContents();
+					String content = IOUtils.toString(is, "UTF-8");
+					is.close();
+					if (tn.getColumns() != null && file.getName().equals(t.getName() + ".tbl"))
+					{
+						ServoyJSONObject json = new ServoyJSONObject(content, true);
+						json.getJSONObject("columns").put("name", newName);
+						json.put("dataSource", newTable.getDataSource());
+						content = json.toString(true);
+					}
+
+					IFile newFile = folder.getFile(file.getName().replace(t.getName(), newName));
+					if (!newFile.exists())
+					{
+						newFile.create(new ByteArrayInputStream(content.getBytes()), IResource.NONE, new NullProgressMonitor());
+					}
+					else
+					{
+						ServoyLog.logInfo("Could not rename table node " + tn.getTableName() + ". File " + newFile.getName() + " already exists.");
+					}
+				}
+			}
+			deletePersist(tn);
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("Could not rename tablenode " + tn.getDataSource(), e);
+		}
+	}
+
 
 	private void deletePersist(TableNode persist)
 	{
