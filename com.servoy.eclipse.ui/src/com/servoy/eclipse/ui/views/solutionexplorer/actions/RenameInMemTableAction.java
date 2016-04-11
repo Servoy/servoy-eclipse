@@ -20,22 +20,33 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.inmemory.MemServer;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
@@ -118,7 +129,67 @@ public class RenameInMemTableAction extends AbstractInMemTableAction
 				names.put(selectedTable.getTableName(), nameDialog.getValue());
 			}
 		}
-		if (names.size() > 0) super.run();
+		if (names.size() > 0)
+		{
+			super.run();
+		}
+	}
+
+	@Override
+	protected void updateReferencesIfNeeded()
+	{
+		try
+		{
+			ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+			project.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
+			final Set<IPersist> persists = new HashSet<>();
+			project.getEditingSolution().acceptVisitor(new IPersistVisitor()
+			{
+				public Object visit(IPersist o)
+				{
+					if (o instanceof Form)
+					{
+						Form f = (Form)o;
+						String tableName = DataSourceUtils.getDataSourceTableName(f.getDataSource());
+						if (f.getDataSource().startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON) && names.containsKey(tableName))
+						{
+							f.setDataSource(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON + names.get(tableName));
+							persists.add(f);
+						}
+					}
+					else if (o instanceof Relation)
+					{
+						Relation r = (Relation)o;
+						if (r.getPrimaryDataSource().startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON) && names.containsKey(r.getPrimaryTableName()))
+						{
+							r.setPrimaryDataSource(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON + names.get(r.getPrimaryTableName()));
+							persists.add(r);
+						}
+						if (r.getForeignDataSource().startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON) && names.containsKey(r.getForeignTableName()))
+						{
+							r.setForeignDataSource(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON + names.get(r.getForeignTableName()));
+							persists.add(r);
+						}
+					}
+					else if (o instanceof ValueList)
+					{
+						ValueList vl = (ValueList)o;
+						if (vl.getDataSource() != null && vl.getDataSource().startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON) &&
+							names.containsKey(vl.getTableName()))
+						{
+							vl.setDataSource(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON + names.get(vl.getTableName()));
+							persists.add(vl);
+						}
+					}
+					return IPersistVisitor.CONTINUE_TRAVERSAL;
+				}
+			});
+			project.saveEditingSolutionNodes(persists.toArray(new IPersist[persists.size()]), false, false);
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("Could not update mem table references", e);
+		}
 	}
 
 	/*

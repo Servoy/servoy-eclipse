@@ -138,6 +138,7 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 							{
 								final IServer server = selection.get(selectedTable);
 								final ITable table = server == null ? null : server.getTable(selectedTable.getTableName());
+								boolean duplicateDefinitionFound = false;
 								if (server instanceof IServerInternal)
 								{
 									ServoyModel sm = ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -149,7 +150,6 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 										Iterator<TableNode> tableNodes = flatSolution.getTableNodes(table);
 
 										// first check if there are duplicate definitions
-										boolean duplicateDefinitionFound = false;
 										boolean definitionFound = false;
 										boolean askUser = false;
 										while (tableNodes.hasNext())
@@ -235,6 +235,9 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 									warnings.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID,
 										"Cannot " + actionString1 + " table " + table + " from server " + server));
 								}
+
+								if (!duplicateDefinitionFound) updateReferencesIfNeeded();
+								//TODO SVY-9708 in case of duplicate definition we need to ask the user which ones to replace
 							}
 							catch (RemoteException e)
 							{
@@ -273,6 +276,7 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 					}
 					return Status.OK_STATUS;
 				}
+
 			};
 			job.setUser(true);
 			job.schedule();
@@ -280,6 +284,8 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 	}
 
 	protected abstract boolean confirm();
+
+	protected abstract void updateReferencesIfNeeded();
 
 	protected void duplicateMemTableHandler(IServer server, final ITable table, final FlattenedSolution flatSolution)
 	{

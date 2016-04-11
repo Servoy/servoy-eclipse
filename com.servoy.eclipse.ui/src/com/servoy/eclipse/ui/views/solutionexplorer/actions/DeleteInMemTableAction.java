@@ -65,4 +65,9 @@ public class DeleteInMemTableAction extends AbstractInMemTableAction implements 
 	{
 		return MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(), "Are you sure you want to delete?");
 	}
+
+	@Override
+	protected void updateReferencesIfNeeded()
+	{
+	}
 }

@@ -45,6 +45,7 @@ import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseRepository;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.TableFilter;
@@ -359,7 +360,7 @@ public class MemServer implements IServerInternal, IServer
 		{
 			tn.setTableName(newName);
 			IFolder folder = ResourcesPlugin.getWorkspace().getRoot().getFolder(
-				new Path(servoyProject.getSolution() + "/datasources/" + DataSourceUtils.INMEM_DATASOURCE + "/"));
+				new Path(servoyProject.getSolution() + "/" + SolutionSerializer.DATASOURCES_DIR_NAME + "/" + DataSourceUtils.INMEM_DATASOURCE + "/"));
 			IResource[] resources = folder.members();
 			for (IResource res : resources)
 			{
