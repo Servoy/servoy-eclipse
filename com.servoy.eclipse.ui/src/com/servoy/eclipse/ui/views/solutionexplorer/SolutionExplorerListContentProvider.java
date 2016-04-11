@@ -76,6 +76,7 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
@@ -424,7 +425,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.INMEMORY_DATASOURCES)
 			{
-				lm = createTables((IServerInternal)un.getRealObject(), UserNodeType.INMEMORY_DATASOURCE);
+				IProject project = ((MemServer)un.getRealObject()).getServoyProject().getProject();
+				lm = createInMemTables(project, includeModules);
 			}
 			else if (type == UserNodeType.VIEWS && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
@@ -1033,6 +1035,44 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 		}
 		return dlm.toArray(new SimpleUserNode[dlm.size()]);
+	}
+
+	public static SimpleUserNode[] createInMemTables(IProject project, boolean bIncludeModules)
+	{
+		ArrayList<SimpleUserNode> serverNodeChildren = new ArrayList<SimpleUserNode>();
+		ArrayList<IProject> allReferencedProjects = new ArrayList<IProject>();
+		try
+		{
+			if (bIncludeModules)
+			{
+				SolutionExplorerTreeContentProvider.fillAllReferencedProjects(project, allReferencedProjects);
+			}
+			else
+			{
+				allReferencedProjects.add(project);
+			}
+			for (IProject module : allReferencedProjects)
+			{
+				if (module.isOpen() && module.hasNature(ServoyProject.NATURE_ID))
+				{
+					SimpleUserNode[] moduleTables = SolutionExplorerListContentProvider.createTables(
+						((ServoyProject)module.getNature(ServoyProject.NATURE_ID)).getMemServer(), UserNodeType.INMEMORY_DATASOURCES);
+
+					for (SimpleUserNode moduleTable : moduleTables)
+					{
+						if (module != project)
+							moduleTable.setDisplayName(SolutionExplorerTreeContentProvider.appendModuleName(moduleTable.getName(), module.getName()));
+						serverNodeChildren.add(moduleTable);
+					}
+				}
+			}
+		}
+		catch (CoreException ex)
+		{
+			ServoyLog.logError(ex);
+		}
+
+		return serverNodeChildren.toArray(new SimpleUserNode[serverNodeChildren.size()]);
 	}
 
 	private Object[] createTableColumns(ITable table, SimpleUserNode un) throws RepositoryException

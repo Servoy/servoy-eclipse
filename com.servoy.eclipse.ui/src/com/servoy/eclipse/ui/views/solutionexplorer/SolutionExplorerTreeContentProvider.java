@@ -224,6 +224,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private final List<Image> imagesConvertedFromSwing = new ArrayList<Image>();
 
+	private boolean includeModules;
+
 	private static PlatformSimpleUserNode createTypeNode(String displayName, UserNodeType type, Class< ? > realType, PlatformSimpleUserNode parent)
 	{
 		PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayName, type, null, IconProvider.instance().image(realType), realType);
@@ -1036,7 +1038,14 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			try
 			{
 				ArrayList<IProject> allReferencedProjects = new ArrayList<IProject>();
-				fillAllReferencedProjects(eclipseProject, allReferencedProjects);
+				if (includeModules)
+				{
+					fillAllReferencedProjects(eclipseProject, allReferencedProjects);
+				}
+				else
+				{
+					allReferencedProjects.add(eclipseProject);
+				}
 
 				for (IProject iProject : allReferencedProjects)
 				{
@@ -1062,7 +1071,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return children;
 	}
 
-	private static void fillAllReferencedProjects(IProject project, List<IProject> allReferencedProjects) throws CoreException
+	static void fillAllReferencedProjects(IProject project, List<IProject> allReferencedProjects) throws CoreException
 	{
 		if (allReferencedProjects.indexOf(project) != -1) return;
 		allReferencedProjects.add(project);
@@ -1072,12 +1081,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		}
 	}
 
-	private static String appendModuleName(String name, String moduleName)
+	static String appendModuleName(String name, String moduleName)
 	{
 		return name + " [" + moduleName + "]";
 	}
 
-	private static String removeModuleName(String name)
+	static String removeModuleName(String name)
 	{
 		int moduleDescriptionIdx = name.indexOf(" [");
 		if (moduleDescriptionIdx != -1) return name.substring(0, moduleDescriptionIdx);
@@ -1212,7 +1221,14 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					IProject project = ((MemServer)un.getRealObject()).getServoyProject().getProject();
 					try
 					{
-						fillAllReferencedProjects(project, allReferencedProjects);
+						if (includeModules)
+						{
+							fillAllReferencedProjects(project, allReferencedProjects);
+						}
+						else
+						{
+							allReferencedProjects.add(project);
+						}
 						for (IProject module : allReferencedProjects)
 						{
 							if (module.isOpen() && module.hasNature(ServoyProject.NATURE_ID))
@@ -1340,7 +1356,14 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			try
 			{
 				ArrayList<IProject> allReferencedProjects = new ArrayList<IProject>();
-				fillAllReferencedProjects(eclipseProject, allReferencedProjects);
+				if (includeModules)
+				{
+					fillAllReferencedProjects(eclipseProject, allReferencedProjects);
+				}
+				else
+				{
+					allReferencedProjects.add(eclipseProject);
+				}
 
 				for (IProject iProject : allReferencedProjects)
 				{
@@ -1384,32 +1407,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		// append inmemory ds from modules
 		if (serverNode.getType() == UserNodeType.INMEMORY_DATASOURCES)
 		{
-			ArrayList<SimpleUserNode> serverNodeChildren = new ArrayList<SimpleUserNode>();
 			IProject project = ((MemServer)serverNode.getRealObject()).getServoyProject().getProject();
-			ArrayList<IProject> allReferencedProjects = new ArrayList<IProject>();
-			try
-			{
-				fillAllReferencedProjects(project, allReferencedProjects);
-				for (IProject module : allReferencedProjects)
-				{
-					if (module.isOpen() && module.hasNature(ServoyProject.NATURE_ID))
-					{
-						SimpleUserNode[] moduleTables = SolutionExplorerListContentProvider.createTables(
-							((ServoyProject)module.getNature(ServoyProject.NATURE_ID)).getMemServer(), type);
-
-						for (SimpleUserNode moduleTable : moduleTables)
-						{
-							if (module != project) moduleTable.setDisplayName(appendModuleName(moduleTable.getName(), module.getName()));
-							serverNodeChildren.add(moduleTable);
-						}
-					}
-				}
-			}
-			catch (CoreException ex)
-			{
-				ServoyLog.logError(ex);
-			}
-			serverNode.children = serverNodeChildren.toArray(new SimpleUserNode[serverNodeChildren.size()]);
+			serverNode.children = SolutionExplorerListContentProvider.createInMemTables(project, includeModules);
 		}
 		else
 		{
@@ -2968,4 +2967,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		job.schedule();
 	}
 
+	public void setIncludeModules(boolean includeModules)
+	{
+		this.includeModules = includeModules;
+	}
 }

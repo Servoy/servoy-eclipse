@@ -438,6 +438,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private MenuItem includeModulesToggleButton;
 
+	private Action includeModulesAction;
+
 	private Menu listDropDownMenu;
 
 	private StatusBarUpdater statusBarUpdater;
@@ -2183,9 +2185,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 			public void widgetSelected(SelectionEvent e)
 			{
-				((SolutionExplorerListContentProvider)list.getContentProvider()).setIncludeModules(includeModulesToggleButton.getSelection());
-				refreshList();
-				fDialogSettings.put(INCLUDE_ENTRIES_FROM_MODULES, includeModulesToggleButton.getSelection());
+				setIncludeModulesOption(includeModulesToggleButton.getSelection());
 			}
 		});
 	}
@@ -2203,6 +2203,29 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		viewMenu.add(navigationToggleAction);
 		treeHandlingToggleAction = new TreeHandlingToggleAction(this, treeContextMenuTreeHandlingEnabled);
 		viewMenu.add(treeHandlingToggleAction);
+		viewMenu.add(new Separator());
+		includeModulesAction = new Action("Include entries from modules", IAction.AS_CHECK_BOX)
+		{
+			@Override
+			public void run()
+			{
+				setIncludeModulesOption(includeModulesAction.isChecked());
+			}
+		};
+		includeModulesAction.setChecked(fDialogSettings.getBoolean(INCLUDE_ENTRIES_FROM_MODULES));
+		((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setIncludeModules(fDialogSettings.getBoolean(INCLUDE_ENTRIES_FROM_MODULES));
+		viewMenu.add(includeModulesAction);
+	}
+
+	public void setIncludeModulesOption(boolean doInclude)
+	{
+		fDialogSettings.put(INCLUDE_ENTRIES_FROM_MODULES, doInclude);
+		((SolutionExplorerTreeContentProvider)tree.getContentProvider()).setIncludeModules(doInclude);
+		((SolutionExplorerListContentProvider)list.getContentProvider()).setIncludeModules(doInclude);
+
+		if (includeModulesAction.isChecked() != doInclude) includeModulesAction.setChecked(doInclude);
+		if (includeModulesToggleButton.getSelection() != doInclude) includeModulesToggleButton.setSelection(doInclude);
+		refreshView();
 	}
 
 	private IAction getExportSolutionAction()
@@ -3578,13 +3601,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		}
 
 		return null;
-	}
-
-	public void setIncludeModulesOption(boolean includeModulesOptionStatus)
-	{
-		((SolutionExplorerListContentProvider)list.getContentProvider()).setIncludeModules(includeModulesOptionStatus);
-		refreshList();
-		includeModulesToggleButton.setSelection(includeModulesOptionStatus);
 	}
 
 	public void setOpenAsDefaultOption(boolean openAsdefaultOptionStatus)
