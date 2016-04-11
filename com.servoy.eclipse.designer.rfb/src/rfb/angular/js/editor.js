@@ -850,9 +850,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 								var ghosts = Array.prototype.slice.call($scope.glasspane.querySelectorAll("[svy-id]"));
 								nodes = nodes.concat(ghosts);
 								var matchedElements = []
-								for (var i = 0; i < nodes.length; i++) {
-									var element = nodes[i]
-									for (var s = 0; s < selection.length; s++) {
+								for (var s = 0; s < selection.length; s++) 
+								{
+									for (var i = 0; i < nodes.length; i++) {
+										var element = nodes[i]
 										if (selection[s].getAttribute("svy-id") == element.getAttribute("svy-id")) {
 											matchedElements.push(element);
 											break;
