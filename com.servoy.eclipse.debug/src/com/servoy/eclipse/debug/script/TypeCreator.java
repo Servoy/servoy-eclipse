@@ -82,7 +82,7 @@ import org.mozilla.javascript.NativeJavaMethod;
 import org.mozilla.javascript.Scriptable;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebObjectApiDefinition;
+import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.ICustomType;
@@ -1098,8 +1098,8 @@ public class TypeCreator extends TypeCache
 			}
 		}
 		SolutionExplorerListContentProvider.extractApiDocs(spec);
-		Map<String, WebObjectApiDefinition> apis = spec.getApiFunctions();
-		for (WebObjectApiDefinition api : apis.values())
+		Map<String, WebObjectFunctionDefinition> apis = spec.getApiFunctions();
+		for (WebObjectFunctionDefinition api : apis.values())
 		{
 			Method method = TypeInfoModelFactory.eINSTANCE.createMethod();
 			method.setName(api.getName());

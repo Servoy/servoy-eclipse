@@ -67,7 +67,7 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebObjectApiDefinition;
+import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.base.util.DataSourceUtilsBase;
@@ -1492,7 +1492,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	{
 		if (spec.getApiFunctions().size() > 0 && spec.getDefinitionURL() != null)
 		{
-			final Map<String, WebObjectApiDefinition> apis = spec.getApiFunctions();
+			final Map<String, WebObjectFunctionDefinition> apis = spec.getApiFunctions();
 			try
 			{
 				InputStream is = spec.getDefinitionURL().openStream();
@@ -1512,7 +1512,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								String expr = ((PropertyExpression)node.getLeftExpression()).toString();
 								if (expr.startsWith("$scope.api") || expr.startsWith("scope.api"))
 								{
-									WebObjectApiDefinition api = apis.get(((PropertyExpression)node.getLeftExpression()).getProperty().toString());
+									WebObjectFunctionDefinition api = apis.get(((PropertyExpression)node.getLeftExpression()).getProperty().toString());
 									Comment doc = node.getDocumentation();
 									if (api != null && doc != null && doc.isDocumentation())
 									{
@@ -1540,7 +1540,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 								PropertyInitializer[] initializers = node.getPropertyInitializers();
 								for (PropertyInitializer initializer : initializers)
 								{
-									WebObjectApiDefinition api = apis.get(initializer.getNameAsString());
+									WebObjectFunctionDefinition api = apis.get(initializer.getNameAsString());
 									Comment doc = initializer.getName().getDocumentation();
 									if (api != null && initializer.getValue() instanceof FunctionStatement && doc != null && doc.isDocumentation())
 									{
@@ -1608,7 +1608,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					IDeveloperFeedback feedback = new FieldFeedback((String)element, pluginsPrefix, null, null, null);
 					if (spec.getApiFunction((String)element) != null)
 					{
-						final WebObjectApiDefinition api = spec.getApiFunction((String)element);
+						final WebObjectFunctionDefinition api = spec.getApiFunction((String)element);
 						icon = functionIcon;
 						final List<String> parNames = new ArrayList<String>();
 						List<String> parTypes = new ArrayList<String>();
@@ -1958,8 +1958,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					nodes.add(new UserNode(name, UserNodeType.FORM_ELEMENTS, prefixForWebComponentMembers + name, name, webcomponent, propertiesIcon));
 				}
 			}
-			Map<String, WebObjectApiDefinition> apis = spec.getApiFunctions();
-			for (WebObjectApiDefinition api : apis.values())
+			Map<String, WebObjectFunctionDefinition> apis = spec.getApiFunctions();
+			for (WebObjectFunctionDefinition api : apis.values())
 			{
 				String name = api.getName();
 				String displayParams = "(";

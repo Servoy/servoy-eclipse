@@ -25,7 +25,6 @@ import org.sablo.specification.property.types.FunctionPropertyType;
 import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractBase;

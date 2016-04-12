@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebObjectFunctionDefinition;
 import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -133,9 +134,9 @@ public class WebComponentPropertySource extends PDPropertySource
 
 		if (propertyDescription instanceof WebObjectSpecification)
 		{
-			for (PropertyDescription desc : ((WebObjectSpecification)propertyDescription).getHandlers().values())
+			for (WebObjectFunctionDefinition desc : ((WebObjectSpecification)propertyDescription).getHandlers().values())
 			{
-				props.add(new WebComponentPropertyHandler(desc));
+				props.add(new WebComponentPropertyHandler(desc.getAsPropertyDescription()));
 			}
 		}
 

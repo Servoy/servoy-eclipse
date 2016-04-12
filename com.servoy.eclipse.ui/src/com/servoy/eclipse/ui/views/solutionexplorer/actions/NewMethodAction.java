@@ -313,50 +313,53 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 						{
 							WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
 								((WebComponent)persist).getTypeName());
-							PropertyDescription def = spec.getHandler(methodKey);
-							if (def != null && def.getConfig() instanceof JSONObject)
+							if (spec.getHandler(methodKey) != null)
 							{
-								JSONObject config = (JSONObject)def.getConfig();
-								ArgumentType returnType = null;
-								String defaultMethodCode = config.optString("code", "");
-								String returnTypeDescription = "";
-								if (config.has("returns"))
+								PropertyDescription def = spec.getHandler(methodKey).getAsPropertyDescription();
+								if (def != null && def.getConfig() instanceof JSONObject)
 								{
-									if (config.get("returns") instanceof JSONObject)
+									JSONObject config = (JSONObject)def.getConfig();
+									ArgumentType returnType = null;
+									String defaultMethodCode = config.optString("code", "");
+									String returnTypeDescription = "";
+									if (config.has("returns"))
 									{
-										JSONObject returns = config.getJSONObject("returns");
-										returnType = ArgumentType.valueOf(returns.optString("type", ""));
-										returnTypeDescription = returns.optString("description", "");
-									}
-									else
-									{
-										returnType = ArgumentType.valueOf(config.getString("returns"));
-									}
-									IPropertyType< ? > pt = null;
-									if (!returnType.getName().equals("") && defaultMethodCode.equals("") &&
-										(pt = TypesRegistry.getType(returnType.getName())) != null)
-									{
-										Object defaultValue = pt.defaultValue(def);
-										if (defaultValue != null)
+										if (config.get("returns") instanceof JSONObject)
 										{
-											defaultMethodCode = "return " + defaultValue + ";";
+											JSONObject returns = config.getJSONObject("returns");
+											returnType = ArgumentType.valueOf(returns.optString("type", ""));
+											returnTypeDescription = returns.optString("description", "");
+										}
+										else
+										{
+											returnType = ArgumentType.valueOf(config.getString("returns"));
+										}
+										IPropertyType< ? > pt = null;
+										if (!returnType.getName().equals("") && defaultMethodCode.equals("") &&
+											(pt = TypesRegistry.getType(returnType.getName())) != null)
+										{
+											Object defaultValue = pt.defaultValue(def);
+											if (defaultValue != null)
+											{
+												defaultMethodCode = "return " + defaultValue + ";";
+											}
 										}
 									}
-								}
-								List<MethodArgument> arguments = new ArrayList<MethodArgument>();
-								if (config.has("parameters") && config.get("parameters") instanceof JSONArray)
-								{
-									JSONArray parameters = config.getJSONArray("parameters");
-									for (int i = 0; i < parameters.length(); i++)
+									List<MethodArgument> arguments = new ArrayList<MethodArgument>();
+									if (config.has("parameters") && config.get("parameters") instanceof JSONArray)
 									{
-										JSONObject parameter = parameters.getJSONObject(i);
-										arguments.add(new MethodArgument(parameter.optString("name"), ArgumentType.valueOf(parameter.optString("type")),
-											parameter.optString("description", "")));
+										JSONArray parameters = config.getJSONArray("parameters");
+										for (int i = 0; i < parameters.length(); i++)
+										{
+											JSONObject parameter = parameters.getJSONObject(i);
+											arguments.add(new MethodArgument(parameter.optString("name"), ArgumentType.valueOf(parameter.optString("type")),
+												parameter.optString("description", "")));
+										}
 									}
+									template = (MethodTemplate)MethodTemplatesFactory.getInstance().createMethodTemplate(methodKey,
+										config.optString("description", ""), returnType, returnTypeDescription,
+										arguments.toArray(new MethodArgument[arguments.size()]), defaultMethodCode, true);
 								}
-								template = (MethodTemplate)MethodTemplatesFactory.getInstance().createMethodTemplate(methodKey,
-									config.optString("description", ""), returnType, returnTypeDescription,
-									arguments.toArray(new MethodArgument[arguments.size()]), defaultMethodCode, true);
 							}
 						}
 						if (template == null) template = MethodTemplate.getTemplate(met.getClass(), methodKey);
