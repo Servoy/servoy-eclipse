@@ -698,9 +698,6 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					if (contentDiv.clientHeight < sizes.height && (!$scope.contentStyle.h || $scope.contentStyle.h + 20 < sizes.height ||
 							$scope.contentStyle.h - 20 > sizes.height)) {
 						$scope.contentStyle.h = sizes.height
-						if (!$scope.isAbsoluteFormLayout()) {
-							$scope.contentStyle.height = (sizes.height + 20) + "px"
-						}
 					}
 					if ($scope.isContentSizeFull()) {
 						if (contentDiv.clientWidth < sizes.width && (!$scope.contentStyle.w || $scope.contentStyle.w + 20 < sizes.width ||
