@@ -3422,13 +3422,16 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						else if (o instanceof WebComponent || o instanceof WebCustomType)
 						{
-							Collection<PropertyDescription> dpProperties = null;
+							Collection<PropertyDescription> dpProperties = new ArrayList<PropertyDescription>();
 
 							if (o instanceof WebComponent)
 							{
 								WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
 									((WebComponent)o).getTypeName());
-								dpProperties = spec.getProperties().values();
+								if (spec != null)
+								{
+									dpProperties.addAll(spec.getProperties().values());
+								}
 							}
 							else
 							{
@@ -3436,8 +3439,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								IBasicWebComponent parent = (IBasicWebComponent)customType.getParent();
 								WebObjectSpecification parentSpec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parent.getTypeName());
 								PropertyDescription spec = parentSpec.getProperties().get(customType.getJsonKey());
-								PropertyDescription cpd = ((ICustomType< ? >)spec.getType()).getCustomJSONTypeDefinition();
-								dpProperties = cpd.getProperties().values();
+								if (spec != null)
+								{
+									PropertyDescription cpd = ((ICustomType< ? >)spec.getType()).getCustomJSONTypeDefinition();
+									if (cpd != null)
+									{
+										dpProperties.addAll(cpd.getProperties().values());
+									}
+								}
 							}
 
 							for (PropertyDescription pd : dpProperties)
