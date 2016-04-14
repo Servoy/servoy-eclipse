@@ -469,7 +469,44 @@ angular.module('editorContent',['servoyApp'])
               var element = updateElementIfParentChange(key, data, { layoutId: key },false);
               if(element) {
         		  for (attribute in data.containers[key]) {
-                      element.attr(attribute,data.containers[key][attribute]);
+        			  if ('class' === attribute)
+        			  {
+        				  var oldValue = element.attr(attribute);
+        				  var newValue = data.containers[key][attribute];
+        				  if (oldValue)
+        				  {
+        					  var oldValuesArray = oldValue.split(" ");
+        					  var newValuesArray = newValue.split(" ");
+        					  var ngClassValues = [];
+        					  var ngClassValue= element.attr('ng-class');
+        					  if (ngClassValue)
+        					  {
+        						  // this is not valid json, how to parse it ?
+        						  ngClassValue = ngClassValue.replace("{","").replace("}","").replace(/"/g,"");
+        						  ngClassValues = ngClassValue.split(":");
+        						  for (var i=0;i< ngClassValues.length-1;i++ )
+        						  {
+        							  if (ngClassValues[i].indexOf(',') >= 0)
+        							  {
+        								  ngClassValues[i] = ngClassValues[i].slice(ngClassValues[i].lastIndexOf(',')+1,ngClassValues[i].length);
+        							  }	  
+        						  }	  
+        					  }	  
+        					  for (var i=0;i< oldValuesArray.length;i++)
+        					  {
+        						  if (newValuesArray.indexOf(oldValuesArray[i]) < 0 && ngClassValues.indexOf(oldValuesArray[i]) >= 0)
+        						  {
+        							  //this value is missing, check if servoy added class
+        							  newValue += " " + oldValuesArray[i];
+        						  }	  
+        					  }	  
+        				  }	
+        				  element.attr(attribute,newValue); 
+        			  }
+        			  else
+        			  {
+        				  element.attr(attribute,data.containers[key][attribute]); 
+        			  }	  
                   }
               }
             }
