@@ -2127,10 +2127,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				{
 					ServoyModelManager.getServoyModelManager().getServoyModel().fireActiveProjectUpdated(IActiveProjectListener.SOLUTION_TYPE_CHANGED);
 				}
-				else if ("solutionType".equals(id))
-				{
-					ServoyModelManager.getServoyModelManager().getServoyModel().fireActiveProjectUpdated(IActiveProjectListener.SOLUTION_TYPE_CHANGED);
-				}
 				else
 				{
 					// fire persist change recursively if the style (or other ui related property) is changed
