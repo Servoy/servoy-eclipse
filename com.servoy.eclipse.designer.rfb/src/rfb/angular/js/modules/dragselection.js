@@ -81,7 +81,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 								ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
 							if (ghostObject)
 								type = ghostObject.propertyType;
-							canDrop = utils.getDropNode(type, topContainer, layoutName, event);
+							canDrop = utils.getDropNode(type, topContainer, layoutName, event, undefined, node.getAttribute("svy-id"));
 							if (!canDrop.dropAllowed) {
 								// full refresh the editor content, it can be moved to different places already.
 								// TODO this is not enough

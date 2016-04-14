@@ -195,12 +195,12 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 					return selection;
 				},
 
-				getDropNode: function(type, topContainer, layoutName, event, componentName) {
+				getDropNode: function(type, topContainer, layoutName, event, componentName, skipNodeId) {
 					var dropTarget = null;
 					if (type == "layout" || (type == "component" && !editorScope.isAbsoluteFormLayout())) {
 						var realName = layoutName ? layoutName : "component";
 
-						dropTarget = this.getNode(event, true);
+						dropTarget = this.getNode(event, true, skipNodeId);
 						if (!dropTarget) {
 							// this is on the form, can this layout container be dropped on the form?
 							if (!topContainer) {
@@ -333,7 +333,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						"top": yMouseDown
 					};
 				},
-				getNode: function(event, skipGlass) {
+				getNode: function(event, skipGlass, skipNodeId) {
 					var glassPaneMousePosition = this.getMousePosition(event);
 					var glassPaneMousePosition1 = {
 						top: glassPaneMousePosition.top + 1,
@@ -343,7 +343,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						top: glassPaneMousePosition.top - 1,
 						left: glassPaneMousePosition.left - 1
 					};
-					var elements = this.getElementsByRectangle(glassPaneMousePosition1, glassPaneMousePosition2, 0.000001, true, !skipGlass);
+					var elements = this.getElementsByRectangle(glassPaneMousePosition1, glassPaneMousePosition2, 0.000001, true, !skipGlass, skipNodeId);
 
 					if (elements.length == 1)
 						return elements[0];
@@ -439,7 +439,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 					}
 				},
 
-				getElementsByRectangle: function(p1, p2, percentage, fromDoc, fromGlass) {
+				getElementsByRectangle: function(p1, p2, percentage, fromDoc, fromGlass, skipId) {
 					var temp = 0;
 					if (p1.left > p2.left) {
 						var temp = p1.left;
@@ -454,11 +454,11 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 					var nodes = [];
 					var ghosts = [];
 					if (fromDoc)
-						nodes = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[svy-id]"));
+						nodes = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[svy-id]:not([svy-id = '" + (skipId == undefined ? '' : skipId) + "'])"));
 
 					if (fromGlass)
-						ghosts = Array.prototype.slice.call(editorScope.glasspane.querySelectorAll("[svy-id]"));
-
+						ghosts = Array.prototype.slice.call(editorScope.glasspane.querySelectorAll("[svy-id]:not([svy-id = '" + (skipId == undefined ? '' : skipId) + "'])"));
+					
 					var matchedFromDoc = [];
 					var matchedFromGlass = [];
 					this.collectMatchedElements(matchedFromGlass, ghosts, p1, p2, percentage);
