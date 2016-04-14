@@ -274,7 +274,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 										}
 										else if (p instanceof LayoutContainer)
 										{
-											sourceType = ((LayoutContainer)p).getSpecName();
+											sourceType = ((LayoutContainer)p).getPackageName() + "." + ((LayoutContainer)p).getSpecName();
 										}
 										if (sourceType != null)
 										{
