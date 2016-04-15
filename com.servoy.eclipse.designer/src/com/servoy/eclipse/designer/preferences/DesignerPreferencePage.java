@@ -45,6 +45,7 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences.FormEditorDesignerPreference;
 import com.servoy.eclipse.ui.resource.ColorResource;
 import com.servoy.eclipse.ui.views.ColorSelectViewer;
 import com.servoy.j2db.util.ObjectWrapper;
@@ -52,9 +53,9 @@ import com.servoy.j2db.util.PersistHelper;
 
 /**
  * Preferences page for designer settings.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class DesignerPreferencePage extends PreferencePage implements IWorkbenchPreferencePage
 {
@@ -89,8 +90,9 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 	private Button paintPagebreaksCheck;
 	private Button showRulersCheck;
 	private Button marqueeSelectOuterCheck;
-	private Button classicMobileFormeditorCheck;
-	private Button classicFormeditorCheck;
+	private Button formEditorDesignerPreferenceClassic;
+	private Button formEditorDesignerPreferenceNew;
+	private Button formEditorDesignerPreferenceAutomatic;
 	private ColorSelectViewer sameHeightWidthIndicatorColor;
 
 	public void init(IWorkbench workbench)
@@ -108,8 +110,19 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		Composite optionsPanel = new Composite(rootPanel, SWT.NONE);
 		optionsPanel.setLayout(new GridLayout(1, false));
 
-		classicMobileFormeditorCheck = new Button(optionsPanel, SWT.CHECK);
-		classicMobileFormeditorCheck.setText("Use classic form editor for mobile forms.");
+		Group formEditorDesignerPreferenceGroup = new Group(optionsPanel, SWT.NONE);
+		formEditorDesignerPreferenceGroup.setText("Form Editor Designer type");
+		formEditorDesignerPreferenceGroup.setLayout(new GridLayout(1, false));
+		formEditorDesignerPreferenceGroup.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+
+		formEditorDesignerPreferenceClassic = new Button(formEditorDesignerPreferenceGroup, SWT.RADIO);
+		formEditorDesignerPreferenceClassic.setText("Classic");
+
+		formEditorDesignerPreferenceNew = new Button(formEditorDesignerPreferenceGroup, SWT.RADIO);
+		formEditorDesignerPreferenceNew.setText("Modern");
+
+		formEditorDesignerPreferenceAutomatic = new Button(formEditorDesignerPreferenceGroup, SWT.RADIO);
+		formEditorDesignerPreferenceAutomatic.setText("Automatic");
 
 		Link xulRunnerInfo = new Link(optionsPanel, SWT.NONE);
 		xulRunnerInfo.setText("Consider installing <A>XulRunner</A> when this option is disabled, for increased compatibility.");
@@ -131,9 +144,6 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 				}
 			}
 		});
-
-		classicFormeditorCheck = new Button(optionsPanel, SWT.CHECK);
-		classicFormeditorCheck.setText("Use classic form editor for regular forms.");
 
 		Composite copyPastePanel = new Composite(optionsPanel, SWT.NONE);
 		copyPastePanel.setLayout(new GridLayout(2, false));
@@ -408,8 +418,10 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		paintPagebreaksCheck.setSelection(prefs.getPaintPageBreaks());
 		showRulersCheck.setSelection(prefs.getShowRulers());
 		marqueeSelectOuterCheck.setSelection(prefs.getMarqueeSelectOuter());
-		classicMobileFormeditorCheck.setSelection(prefs.getClassicFormEditorInMobile());
-		classicFormeditorCheck.setSelection(prefs.getClassicFormEditor());
+		formEditorDesignerPreferenceClassic.setSelection(prefs.getFormEditorDesignerPreference() == FormEditorDesignerPreference.Classic);
+		formEditorDesignerPreferenceNew.setSelection(prefs.getFormEditorDesignerPreference() == FormEditorDesignerPreference.New);
+		formEditorDesignerPreferenceAutomatic.setSelection(prefs.getFormEditorDesignerPreference() != FormEditorDesignerPreference.Classic &&
+			prefs.getFormEditorDesignerPreference() != FormEditorDesignerPreference.New);
 	}
 
 	@Override
@@ -439,8 +451,8 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		prefs.setPaintPageBreaks(paintPagebreaksCheck.getSelection());
 		prefs.setShowRulers(showRulersCheck.getSelection());
 		prefs.setMarqueeSelectOuter(marqueeSelectOuterCheck.getSelection());
-		prefs.setClassicFormEditorInMobile(classicMobileFormeditorCheck.getSelection());
-		prefs.setClassicFormEditor(classicFormeditorCheck.getSelection());
+		prefs.setFormEditorDesignerPreference(formEditorDesignerPreferenceClassic.getSelection() ? FormEditorDesignerPreference.Classic
+			: formEditorDesignerPreferenceNew.getSelection() ? FormEditorDesignerPreference.New : null);
 
 		prefs.save();
 
@@ -453,10 +465,10 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		gridPointSizeSpinner.setSelection(DesignerPreferences.GRID_POINTSIZE_DEFAULT);
 		gridSizeSpinner.setSelection(DesignerPreferences.GRID_SIZE_DEFAULT);
 		gridColorViewer.setSelection(new StructuredSelection(ColorResource.ColorAwt2Rgb(PersistHelper.createColor(DesignerPreferences.GRID_COLOR_DEFAULT))));
-		sameHeightWidthIndicatorColor.setSelection(new StructuredSelection(
-			ColorResource.ColorAwt2Rgb(PersistHelper.createColor(DesignerPreferences.SAME_HEIGHT_WIDTH_INDICATOR_COLOR_DEFAULT))));
-		alignmentGuidecolorSelectViewer.setSelection(new StructuredSelection(
-			ColorResource.ColorAwt2Rgb(PersistHelper.createColor(DesignerPreferences.ALIGNMENT_GUIDE_COLOR_DEFAULT))));
+		sameHeightWidthIndicatorColor.setSelection(
+			new StructuredSelection(ColorResource.ColorAwt2Rgb(PersistHelper.createColor(DesignerPreferences.SAME_HEIGHT_WIDTH_INDICATOR_COLOR_DEFAULT))));
+		alignmentGuidecolorSelectViewer.setSelection(
+			new StructuredSelection(ColorResource.ColorAwt2Rgb(PersistHelper.createColor(DesignerPreferences.ALIGNMENT_GUIDE_COLOR_DEFAULT))));
 		guideSizeSpinner.setSelection(DesignerPreferences.GUIDE_SIZE_DEFAULT);
 		alignmentFeedbackCheck.setSelection(DesignerPreferences.FEEDBACK_ALIGNMENT_DEFAULT);
 		gridFeedbackCheck.setSelection(DesignerPreferences.FEEDBACK_GRID_DEFAULT);
@@ -479,8 +491,9 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		paintPagebreaksCheck.setSelection(DesignerPreferences.PAINT_PAGEBREAKS_DEFAULT);
 		showRulersCheck.setSelection(DesignerPreferences.SHOW_RULERS_DEFAULT);
 		marqueeSelectOuterCheck.setSelection(DesignerPreferences.MARQUEE_SELECT_OUTER_DEFAULT);
-		classicMobileFormeditorCheck.setSelection(DesignerPreferences.CLASSIC_FORM_EDITOR_MOBILE_DEFAULT);
-		classicFormeditorCheck.setSelection(DesignerPreferences.CLASSIC_FORM_EDITOR_SETTING_DEFAULT);
+		formEditorDesignerPreferenceClassic.setSelection(DesignerPreferences.FORM_EDITOR_DESIGNER_DEFAULT == FormEditorDesignerPreference.Classic);
+		formEditorDesignerPreferenceNew.setSelection(DesignerPreferences.FORM_EDITOR_DESIGNER_DEFAULT == FormEditorDesignerPreference.New);
+		formEditorDesignerPreferenceAutomatic.setSelection(DesignerPreferences.FORM_EDITOR_DESIGNER_DEFAULT == FormEditorDesignerPreference.Automatic);
 
 		setEnabledState();
 		super.performDefaults();

@@ -50,6 +50,27 @@ public class DesignerPreferences
 	public static final int CM = 1;
 	public static final int IN = 2;
 
+	public static enum FormEditorDesignerPreference
+	{
+		Classic, New, Automatic;
+
+		public static FormEditorDesignerPreference safeValueOf(String value, FormEditorDesignerPreference def)
+		{
+			if (value != null)
+			{
+				try
+				{
+					return valueOf(value);
+				}
+				catch (IllegalArgumentException e)
+				{
+					// ignore
+				}
+			}
+			return def;
+		}
+	}
+
 	private static final String DESIGNER_SETTINGS_PREFIX = "designer.";
 
 	public static final String METRICS_SETTING = "preferdMetrics";
@@ -79,8 +100,7 @@ public class DesignerPreferences
 	public static final String PAINT_PAGEBREAKS_SETTING = "paintPageBreaks";
 	public static final String SHOW_RULERS_SETTING = "showRulers";
 	public static final String MARQUEE_SELECT_OUTER_SETTING = "marqueeSelectOuter";
-	public static final String CLASSIC_FORM_EDITOR_MOBILE_SETTING = "classicFormEditorMobile";
-	public static final String CLASSIC_FORM_EDITOR_SETTING = "classicFormEditor";
+	public static final String FORM_EDITOR_DESIGNER_SETTING = "FormEditorDesigner";
 	public static final String FORM_EVENT_HANDLER_NAMING_SETTING = "formEventHandlerNaming";
 	public static final String TABLE_EVENT_HANDLER_NAMING_SETTING = "tableEventHandlerNaming";
 	public static final String LOADED_RELATIONS_NAMING_PATTERN_SETTING = "loadedRelationsNamingPattern";
@@ -121,8 +141,7 @@ public class DesignerPreferences
 	public static final boolean PAINT_PAGEBREAKS_DEFAULT = false;
 	public static final boolean SHOW_RULERS_DEFAULT = true;
 	public static final boolean MARQUEE_SELECT_OUTER_DEFAULT = true;
-	public static final boolean CLASSIC_FORM_EDITOR_MOBILE_DEFAULT = true;
-	public static final boolean CLASSIC_FORM_EDITOR_SETTING_DEFAULT = false;
+	public static final FormEditorDesignerPreference FORM_EDITOR_DESIGNER_DEFAULT = FormEditorDesignerPreference.Automatic;
 
 	public static final int FORM_EVENT_HANDLER_NAMING_DEFAULT = 0;
 	public static final int FORM_EVENT_HANDLER_NAMING_INCLUDE_FORM_ELEMENT_NAME = 1;
@@ -339,24 +358,14 @@ public class DesignerPreferences
 		setProperty(MARQUEE_SELECT_OUTER_SETTING, outer);
 	}
 
-	public boolean getClassicFormEditorInMobile()
+	public FormEditorDesignerPreference getFormEditorDesignerPreference()
 	{
-		return getProperty(CLASSIC_FORM_EDITOR_MOBILE_SETTING, CLASSIC_FORM_EDITOR_MOBILE_DEFAULT);
+		return FormEditorDesignerPreference.safeValueOf(getProperty(FORM_EDITOR_DESIGNER_SETTING, null), FORM_EDITOR_DESIGNER_DEFAULT);
 	}
 
-	public void setClassicFormEditorInMobile(boolean classic)
+	public void setFormEditorDesignerPreference(FormEditorDesignerPreference pref)
 	{
-		setProperty(CLASSIC_FORM_EDITOR_MOBILE_SETTING, classic);
-	}
-
-	public boolean getClassicFormEditor()
-	{
-		return getProperty(CLASSIC_FORM_EDITOR_SETTING, CLASSIC_FORM_EDITOR_SETTING_DEFAULT);
-	}
-
-	public void setClassicFormEditor(boolean useClassic)
-	{
-		setProperty(CLASSIC_FORM_EDITOR_SETTING, useClassic);
+		setProperty(FORM_EDITOR_DESIGNER_SETTING, pref == null ? null : pref.name());
 	}
 
 	public static boolean isGuideSetting(String key)
@@ -381,8 +390,8 @@ public class DesignerPreferences
 
 	public RGB getSameHeightWidthIndicatorColor()
 	{
-		return ColorResource.ColorAwt2Rgb(PersistHelper.createColor(getProperty(SAME_HEIGHT_WIDTH_INDICATOR_COLOR_SETTING,
-			SAME_HEIGHT_WIDTH_INDICATOR_COLOR_DEFAULT)));
+		return ColorResource.ColorAwt2Rgb(
+			PersistHelper.createColor(getProperty(SAME_HEIGHT_WIDTH_INDICATOR_COLOR_SETTING, SAME_HEIGHT_WIDTH_INDICATOR_COLOR_DEFAULT)));
 	}
 
 	public void setGridColor(RGB rgb)
@@ -818,7 +827,8 @@ public class DesignerPreferences
 
 	public void setTestClientLoadTimeout(int timeout)
 	{
-		if (timeout == WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT) removeProperty(WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_TIMEOUT_PROPERTY_NAME);
+		if (timeout == WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT)
+			removeProperty(WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_TIMEOUT_PROPERTY_NAME);
 		else setProperty(WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_TIMEOUT_PROPERTY_NAME, timeout);
 	}
 

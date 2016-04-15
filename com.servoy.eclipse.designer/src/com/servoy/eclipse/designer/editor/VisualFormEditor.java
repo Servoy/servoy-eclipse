@@ -35,6 +35,7 @@ import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorHtmlDesig
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.ui.editors.ITabbedEditor;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
+import com.servoy.eclipse.ui.preferences.DesignerPreferences.FormEditorDesignerPreference;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 
@@ -140,9 +141,10 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 
 		if (editorType == null)
 		{
+			FormEditorDesignerPreference formEditorDesignerPreference = new DesignerPreferences().getFormEditorDesignerPreference();
 			if (isMobile())
 			{
-				if (new DesignerPreferences().getClassicFormEditorInMobile())
+				if (formEditorDesignerPreference == FormEditorDesignerPreference.Classic)
 				{
 					editorType = DesignPagetype.MobileClassic;
 				}
@@ -151,7 +153,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 					editorType = DesignPagetype.Mobile;
 				}
 			}
-			else if ((getForm() != null && getForm().isResponsiveLayout()) || !new DesignerPreferences().getClassicFormEditor())
+			else if (formEditorDesignerPreference == FormEditorDesignerPreference.New || (getForm() != null && getForm().isResponsiveLayout()))
 			{
 				editorType = DesignPagetype.Rfb;
 			}
