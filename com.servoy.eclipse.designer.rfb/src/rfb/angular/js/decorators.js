@@ -12,7 +12,7 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 			function hasClass(element, cls) {
 				return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
 			}
-			function renderDecorators(selection,renderResizeKnobs) {
+			function renderDecorators(selection,renderResizeKnobs) {	
 				if (renderResizeKnobs) {
 				$timeout(function(){
 					if (selection.length == 1){
@@ -117,7 +117,8 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 			})
 			$rootScope.$on(EDITOR_EVENTS.SELECTION_MOVED, function(event, selection) {
 				// do not render resize knobs while selection is moving; performance optimization
-				renderDecorators(selection,false);
+				//if it's just one element selected, then we don't need to optimize so much (especially if it's the form - otherwise the knobs are gone after 1 resize of the form)
+				renderDecorators(selection, selection.length == 1);
 			})
 			$rootScope.$on(EDITOR_EVENTS.RENDER_DECORATORS, function(event, selection) {
 				renderDecorators(selection,true);
