@@ -838,6 +838,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					var ghost = $scope.getGhost(selection[0].getAttribute("svy-id"));
 					if (ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM)) {
 						$scope.setContentSizes();
+						var promise = $editorService.getGhostComponents();
+						promise.then(function(result) {
+							$scope.setGhosts(result);
+						});
 					} else {
 						var promise = $editorService.getGhostComponents(); //no parameter, then the ghosts are not repositioned
 						promise.then(function(result) {
@@ -868,6 +872,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					}
 				} else {
 					$scope.setContentSizes();
+					var promise = $editorService.getGhostComponents();
+					promise.then(function(result) {
+						$scope.setGhosts(result);
+					});
 				}
 			});
 
