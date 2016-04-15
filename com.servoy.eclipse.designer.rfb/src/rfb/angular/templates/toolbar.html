@@ -29,23 +29,23 @@
 	</div>
 	
 	<div class="toolbar editor">
-		<!-- toolbar-item ng-repeat="item in editor" model="item" class="toolbar-action"/ -->
+		<!-- toolbar-item ng-repeat="item in editor" ng-if="!item.hide" model="item" class="toolbar-action"/ -->
 	</div>
 	
 	<!-- This right aligned toolbar will expand its left margin so that it will be moved as far right as possible, 
 		 divs after this one will also be on the right side of the toolbar -->
 
 	<div class="toolbar show_data right-aligned" ng-if="show_data.length > 0">	
-    	<toolbar-switch ng-repeat="item in show_data" model="item" class="toolbar-action"/>
+    	<toolbar-switch ng-repeat="item in show_data" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>
 	<div class="toolbar design_mode" ng-if="design_mode.length > 0">	
-    	<toolbar-switch ng-repeat="item in design_mode" model="item" class="toolbar-action"/>
+    	<toolbar-switch ng-repeat="item in design_mode" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>
 	<div class="toolbar sticky" ng-if="sticky.length > 0">	
-    	<toolbar-item ng-repeat="item in sticky" model="item" class="toolbar-action"/>
+    	<toolbar-item ng-repeat="item in sticky" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>
 	<div class="toolbar standard_actions" ng-if="standard_actions.length > 0">	
-    	<toolbar-item ng-repeat="item in standard_actions" model="item" class="toolbar-action"/>
+    	<toolbar-item ng-repeat="item in standard_actions" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>
 
 </div>
