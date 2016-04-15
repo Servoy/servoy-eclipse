@@ -51,6 +51,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.core.util.UIUtils.YesYesToAllNoNoToAllAsker;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.dnd.IDragData;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -71,9 +72,9 @@ import com.servoy.j2db.util.Pair;
 /**
  * Listener for dropping files and nodes on a viewer with SimpleUserNode nodes.
  * Files will be added as media.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class UserNodeDropTargetListener extends ViewerDropAdapter
 {
@@ -218,8 +219,8 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 					if (persist instanceof Form)
 					{
 						Form form = (Form)persist;
-						if (getCurrentTarget() instanceof SimpleUserNode &&
-							(((SimpleUserNode)getCurrentTarget()).getRealType() == UserNodeType.WORKING_SET || ((SimpleUserNode)getCurrentTarget()).getRealType() == UserNodeType.FORMS))
+						if (getCurrentTarget() instanceof SimpleUserNode && (((SimpleUserNode)getCurrentTarget()).getRealType() == UserNodeType.WORKING_SET ||
+							((SimpleUserNode)getCurrentTarget()).getRealType() == UserNodeType.FORMS))
 						{
 							Pair<String, String> formFilePath = SolutionSerializer.getFilePath(form, false);
 							IFile file = ServoyModel.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()));
@@ -229,7 +230,7 @@ public class UserNodeDropTargetListener extends ViewerDropAdapter
 							if (resourcesProject != null)
 							{
 								String workingSetName = resourcesProject.getContainingWorkingSet(form.getName(),
-									ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getFlattenedSolution().getSolutionNames());
+									ServoyModelFinder.getServoyModel().getFlattenedSolution().getSolutionNames());
 								if (workingSetName != null)
 								{
 									IWorkingSet ws = PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);

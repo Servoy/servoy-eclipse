@@ -107,7 +107,7 @@ public class RfbSelectionListener implements ISelectionListener
 				}
 				else
 				{
-					List<Form> formHierarchy = ServoyModelFinder.getServoyModel().getActiveProject().getFlattenedSolution().getFormHierarchy(form);
+					List<Form> formHierarchy = ServoyModelFinder.getServoyModel().getFlattenedSolution().getFormHierarchy(form);
 					if (formHierarchy.contains(ancestor))
 					{
 						uuids.add(persist.getUUID().toString());

@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.rmi.RemoteException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,6 +62,7 @@ import com.servoy.eclipse.model.test.TestTarget;
 import com.servoy.eclipse.model.util.IValueFilter;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.AbstractActiveSolutionHandler;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.dataprocessing.IValueList;
@@ -81,6 +83,7 @@ import com.servoy.j2db.persistence.ISupportScriptProviders;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -88,6 +91,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.server.shared.IApplicationServer;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ScopesUtils;
 import com.servoy.j2db.util.ServoyJSONArray;
@@ -431,7 +435,41 @@ public class MobileExporter
 				ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
 				if (servoyProject == null)
 					throw new RuntimeException("Mobile Exporter tries to export: " + solutionName + " but that is not a project in the current workspace");
-				fs = servoyProject.getFlattenedSolution();
+				fs = new FlattenedSolution();
+				try
+				{
+					IApplicationServer as = ApplicationServerRegistry.getService(IApplicationServer.class);
+					fs.setSolution(servoyProject.getSolutionMetaData(), true, true, new AbstractActiveSolutionHandler(as)
+					{
+						@Override
+						public IRepository getRepository()
+						{
+							return ApplicationServerRegistry.get().getDeveloperRepository();
+						}
+
+						@Override
+						protected Solution loadSolution(RootObjectMetaData solutionDef) throws RemoteException, RepositoryException
+						{
+							ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solutionDef.getName());
+							if (servoyProject != null)
+							{
+								return servoyProject.getSolution();
+							}
+							return null;
+						}
+
+						@Override
+						protected Solution loadLoginSolution(SolutionMetaData mainSolutionDef, SolutionMetaData loginSolutionDef)
+							throws RemoteException, RepositoryException
+						{
+							return loadSolution(loginSolutionDef);
+						}
+					});
+				}
+				catch (Exception e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
 		}
 		return fs;

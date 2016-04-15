@@ -18,6 +18,7 @@
 package com.servoy.eclipse.ui.editors.table;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
@@ -26,12 +27,14 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Base class for calculations, aggregations and method table editors.
@@ -72,25 +75,23 @@ public class AbstractTableEditorComposite extends Composite
 				flattenedSolution.getSolution().getName());
 			if (servoyProject != null)
 			{
-				Solution solution = servoyProject.getEditingSolution();
-				rows.add(solution);
-
 				if (t instanceof MemTable)
 				{
-					Solution owner = ((MemTable)t).getParent().getServoyProject().getSolution();
+					ServoyProject owner = ((MemTable)t).getParent().getServoyProject();
 					ServoyProject[] projects = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 					for (ServoyProject project : projects)
 					{
-						if ((owner.equals(project.getSolution()) || project.getFlattenedSolution().hasModule(owner.getName())) &&
-							!rows.contains(project.getSolution()))
+						if ((Utils.equalObjects(owner.getProject().getName(), project.getProject().getName()) ||
+							Arrays.asList(ServoyBuilder.getSolutionModules(project)).contains(owner)) && !rows.contains(project.getEditingSolution()))
 						{
-							rows.add(project.getSolution());
+							rows.add(project.getEditingSolution());
 						}
 					}
 				}
 				else
 				{
-
+					Solution solution = servoyProject.getEditingSolution();
+					rows.add(solution);
 					Solution[] modules = flattenedSolution.getModules();
 					if (modules != null && modules.length > 0)
 					{

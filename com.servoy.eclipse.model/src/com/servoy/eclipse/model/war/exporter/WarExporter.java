@@ -662,7 +662,7 @@ public class WarExporter
 	{
 		try
 		{
-			FlattenedSolution solution = ServoyModelFinder.getServoyModel().getActiveProject().getFlattenedSolution();
+			FlattenedSolution solution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
 			SolutionSerializer.writeRuntimeSolution(null, new File(tmpWarDir, "WEB-INF/solution.runtime"), solution.getSolution(),
 				ApplicationServerRegistry.get().getDeveloperRepository(), solution.getModules());
 			exportSolution(monitor, tmpWarDir.getCanonicalPath(), solution.getSolution(), false);

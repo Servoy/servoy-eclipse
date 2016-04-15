@@ -61,7 +61,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 	public AbstractWarExportModel()
 	{
-		FlattenedSolution solution = ServoyModelFinder.getServoyModel().getActiveProject().getFlattenedSolution();
+		FlattenedSolution solution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
 		Iterator<Form> forms = solution.getForms(false);
 		usedComponents = new TreeSet<String>();
 		usedServices = new TreeSet<String>();
@@ -79,8 +79,8 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 		for (Pair<String, IRootObject> scope : solution.getAllScopes())
 		{
-			extractUsedComponentsAndServices(SolutionSerializer.getRelativePath(scope.getRight(), false) + scope.getLeft() +
-					SolutionSerializer.JS_FILE_EXTENSION);
+			extractUsedComponentsAndServices(
+				SolutionSerializer.getRelativePath(scope.getRight(), false) + scope.getLeft() + SolutionSerializer.JS_FILE_EXTENSION);
 		}
 
 		//these are always required

@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui.editors.table;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -48,6 +49,7 @@ import org.eclipse.swt.widgets.TreeColumn;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -67,6 +69,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader.TypedProperty;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
 
 public class EventsComposite extends Composite
 {
@@ -222,39 +225,35 @@ public class EventsComposite extends Composite
 		ServoyProject servoyProject = servoyModel.getActiveProject();
 		if (servoyProject != null)
 		{
-			Solution solution = (Solution)servoyProject.getEditingPersist(servoyProject.getSolution().getUUID());
 			Set<UUID> solutions = new HashSet<UUID>();
-			rows.add(new EventNode(solution, t));
-			solutions.add(solution.getUUID());
-
 			if (t instanceof MemTable)
 			{
-				Solution owner = ((MemTable)t).getParent().getServoyProject().getSolution();
+				ServoyProject owner = ((MemTable)t).getParent().getServoyProject();
 				ServoyProject[] projects = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
 				for (ServoyProject project : projects)
 				{
-					if ((owner.equals(project.getSolution()) || project.getFlattenedSolution().hasModule(owner.getName())) &&
-						!solutions.contains(project.getSolution().getUUID()))
+					if ((Utils.equalObjects(owner.getProject().getName(), project.getProject().getName()) ||
+						Arrays.asList(ServoyBuilder.getSolutionModules(project)).contains(owner)) &&
+						!solutions.contains(project.getEditingSolution().getUUID()))
 					{
-						rows.add(new EventNode(project.getSolution(), t));
-						solutions.add(project.getSolution().getUUID());
+						rows.add(new EventNode(project.getEditingSolution(), t));
+						solutions.add(project.getEditingSolution().getUUID());
 					}
 				}
 			}
 			else
 			{
+				Solution solution = (Solution)servoyProject.getEditingPersist(servoyProject.getSolution().getUUID());
+				rows.add(new EventNode(solution, t));
 				solutions.add(solution.getUUID());
-				for (int i = 0; i < rows.size(); i++)
+
+				String[] modulesNames = new StringTokenizerConverter(",", true).convertProperty("modulesNames", solution.getModulesNames());
+				for (String modulename : modulesNames)
 				{
-					Solution sol = rows.get(i).getSolution();
-					String[] modulesNames = new StringTokenizerConverter(",", true).convertProperty("modulesNames", sol.getModulesNames());
-					for (String modulename : modulesNames)
+					ServoyProject moduleProject = servoyModel.getServoyProject(modulename);
+					if (moduleProject != null && moduleProject.getSolution() != null && solutions.add(moduleProject.getSolution().getUUID()))
 					{
-						ServoyProject moduleProject = servoyModel.getServoyProject(modulename);
-						if (moduleProject != null && moduleProject.getSolution() != null && solutions.add(moduleProject.getSolution().getUUID()))
-						{
-							rows.add(new EventNode((Solution)moduleProject.getEditingPersist(moduleProject.getSolution().getUUID()), t));
-						}
+						rows.add(new EventNode((Solution)moduleProject.getEditingPersist(moduleProject.getSolution().getUUID()), t));
 					}
 				}
 			}
