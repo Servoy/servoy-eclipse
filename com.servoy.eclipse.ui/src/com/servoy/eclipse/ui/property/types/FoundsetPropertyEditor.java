@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.json.JSONObject;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.dialogs.CombinedTreeContentProvider;
@@ -89,9 +90,9 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 						foreignTableForRelation.equals(ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
 							((RelationsWrapper)toTest).relations[((RelationsWrapper)toTest).relations.length - 1].getForeignDataSource()));
 				}
-				else if (toTest instanceof TableWrapper)
+				else if (toTest instanceof IDataSourceWrapper)
 				{
-					return ((TableWrapper)toTest).getTableName() != null && ((TableWrapper)toTest).getTableName().length() > 0;
+					return ((IDataSourceWrapper)toTest).getTableName() != null && ((IDataSourceWrapper)toTest).getTableName().length() > 0;
 				}
 				return false;
 			}
