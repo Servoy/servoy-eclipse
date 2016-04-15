@@ -50,6 +50,7 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -267,18 +268,33 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 									boolean doAllow = true;
 									for (IPersist p : dragObjects)
 									{
+										String sourcePackage = null;
 										String sourceType = null;
-										if (p instanceof IFormElement && !(p instanceof IChildWebObject))
+
+										if (p instanceof LayoutContainer)
+										{
+											sourcePackage = ((LayoutContainer)p).getPackageName() + ".*";
+											sourceType = ((LayoutContainer)p).getPackageName() + "." + ((LayoutContainer)p).getSpecName();
+										}
+										else if (p instanceof WebComponent)
+										{
+											WebObjectSpecification pSpec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+												((WebComponent)p).getTypeName());
+											sourcePackage = pSpec.getPackageName() + ".*";
+											sourceType = pSpec.getPackageName() + "." + ((WebComponent)p).getTypeName();
+										}
+										else if (p instanceof IFormElement && !(p instanceof IChildWebObject))
 										{
 											sourceType = "component";
 										}
-										else if (p instanceof LayoutContainer)
-										{
-											sourceType = ((LayoutContainer)p).getPackageName() + "." + ((LayoutContainer)p).getSpecName();
-										}
+
 										if (sourceType != null)
 										{
 											doAllow = allowedChildren.indexOf(sourceType) != -1;
+											if (!doAllow && sourcePackage != null)
+											{
+												doAllow = allowedChildren.indexOf(sourcePackage) != -1;
+											}
 										}
 										else doAllow = false;
 										if (!doAllow) break;
