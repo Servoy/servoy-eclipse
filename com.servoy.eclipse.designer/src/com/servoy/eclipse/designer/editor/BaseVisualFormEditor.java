@@ -722,19 +722,22 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	{
 		int activePage = getActivePage();
 
+		BaseVisualFormEditorDesignPage oldGraphicaleditor = graphicaleditor;
+		graphicaleditor = null;
+
+		createDesignPage(designPagetype);
+
+		// remove old graphicaleditor
 		CTabItem[] items = ((CTabFolder)getContainer()).getItems();
 		for (int i = 0; i < items.length; i++)
 		{
-			if (graphicaleditor == items[i].getData())
+			if (oldGraphicaleditor == items[i].getData())
 			{
 				removePage(i);
-				graphicaleditor.dispose();
-				graphicaleditor = null;
+				oldGraphicaleditor.dispose();
 				break;
 			}
 		}
-
-		createDesignPage(designPagetype);
 
 		if (activePage >= 0)
 		{
