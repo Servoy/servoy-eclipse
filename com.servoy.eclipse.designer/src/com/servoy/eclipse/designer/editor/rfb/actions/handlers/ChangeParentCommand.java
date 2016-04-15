@@ -41,7 +41,11 @@ public class ChangeParentCommand extends Command
 	private final IPersist child, targetChild;
 	private final ISupportChilds newParent;
 	private ISupportChilds oldParent;
+	private int oldIndex;
 	private final boolean insertAfterTarget;
+
+	private final boolean hasChildPositionSupport;
+	private final Class< ? > childPositionClass;
 
 	public ChangeParentCommand(IPersist child, ISupportChilds newParent)
 	{
@@ -55,31 +59,29 @@ public class ChangeParentCommand extends Command
 		this.targetChild = targetChild;
 		this.newParent = newParent;
 		this.insertAfterTarget = insertAfterTarget;
+
+		this.hasChildPositionSupport = child instanceof ISupportBounds || child instanceof IChildWebObject;
+		this.childPositionClass = child instanceof ISupportBounds ? ISupportBounds.class : IChildWebObject.class;
 	}
 
 	@Override
 	public void execute()
 	{
 		oldParent = child.getParent();
+
+		if (hasChildPositionSupport)
+		{
+			ArrayList<IPersist> children = getChildrenSortedOnType(oldParent);
+			oldIndex = children.indexOf(child);
+		}
+
 		oldParent.removeChild(child);
 
-		if (child instanceof ISupportBounds)
+		if (hasChildPositionSupport)
 		{
-			ArrayList<IPersist> children = new ArrayList<IPersist>();
-			Iterator<IPersist> it = newParent.getAllObjects();
-			while (it.hasNext())
-			{
-				IPersist persist = it.next();
-				if (persist instanceof ISupportBounds)
-				{
-					children.add(persist);
-				}
-			}
-			IPersist[] sortedChildArray = children.toArray(new IPersist[0]);
-			Arrays.sort(sortedChildArray, PositionComparator.XY_PERSIST_COMPARATOR);
-			children = new ArrayList<IPersist>(Arrays.asList(sortedChildArray));
+			ArrayList<IPersist> children = getChildrenSortedOnType(newParent);
 
-			int insertIdx = targetChild instanceof ISupportBounds ? children.indexOf(targetChild) : -1;
+			int insertIdx = childPositionClass.isInstance(targetChild) ? children.indexOf(targetChild) : -1;
 			if (insertIdx == -1) children.add(child);
 			else
 			{
@@ -88,56 +90,60 @@ public class ChangeParentCommand extends Command
 				else children.add(child);
 			}
 
-			int counter = 1;
-			for (IPersist p : children)
-			{
-				((ISupportBounds)p).setLocation(new Point(counter, counter));
-				counter++;
-			}
-		}
-		else if (child instanceof IChildWebObject)
-		{
-			ArrayList<IChildWebObject> children = new ArrayList<IChildWebObject>();
-			Iterator<IPersist> it = newParent.getAllObjects();
-			while (it.hasNext())
-			{
-				IPersist persist = it.next();
-				if (persist instanceof IChildWebObject)
-				{
-					children.add((IChildWebObject)persist);
-				}
-			}
-			IChildWebObject[] sortedChildArray = children.toArray(new IChildWebObject[0]);
-			Arrays.sort(sortedChildArray, new Comparator<IChildWebObject>()
-			{
-				@Override
-				public int compare(IChildWebObject o1, IChildWebObject o2)
-				{
-					return o1.getIndex() - o2.getIndex();
-				}
-
-			});
-			children = new ArrayList<IChildWebObject>(Arrays.asList(sortedChildArray));
-
-			int insertIdx = targetChild instanceof IChildWebObject ? children.indexOf(targetChild) : -1;
-			if (insertIdx == -1) children.add((IChildWebObject)child);
-			else
-			{
-				if (insertAfterTarget) insertIdx++;
-				if (insertIdx < children.size()) children.add(insertIdx, (IChildWebObject)child);
-				else children.add((IChildWebObject)child);
-			}
-
-			int counter = 0;
-			for (IChildWebObject p : children)
-			{
-				p.setIndex(counter);
-				counter++;
-			}
+			updateWithOrderedPosition(children);
 		}
 
 		newParent.addChild(child);
 		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, Arrays.asList(new IPersist[] { child }));
+	}
+
+	private void updateWithOrderedPosition(ArrayList<IPersist> children)
+	{
+		int counter = child instanceof ISupportBounds ? 1 : 0;
+		for (IPersist p : children)
+		{
+			if (child instanceof ISupportBounds)
+			{
+				((ISupportBounds)p).setLocation(new Point(counter, counter));
+			}
+			else if (child instanceof IChildWebObject)
+			{
+				((IChildWebObject)p).setIndex(counter);
+			}
+			counter++;
+		}
+	}
+
+	private ArrayList<IPersist> getChildrenSortedOnType(ISupportChilds parent)
+	{
+		ArrayList<IPersist> children = new ArrayList<IPersist>();
+		Iterator<IPersist> it = parent.getAllObjects();
+		while (it.hasNext())
+		{
+			IPersist persist = it.next();
+
+			if (childPositionClass.isInstance(persist))
+			{
+				children.add(persist);
+			}
+		}
+		IPersist[] sortedChildArray = children.toArray(new IPersist[0]);
+		if (childPositionClass == ISupportBounds.class)
+		{
+			Arrays.sort(sortedChildArray, PositionComparator.XY_PERSIST_COMPARATOR);
+		}
+		else if (childPositionClass == IChildWebObject.class)
+		{
+			Arrays.sort(sortedChildArray, new Comparator<IPersist>()
+			{
+				@Override
+				public int compare(IPersist o1, IPersist o2)
+				{
+					return ((IChildWebObject)o1).getIndex() - ((IChildWebObject)o2).getIndex();
+				}
+			});
+		}
+		return new ArrayList<IPersist>(Arrays.asList(sortedChildArray));
 	}
 
 	@Override
@@ -146,7 +152,23 @@ public class ChangeParentCommand extends Command
 		ArrayList<IPersist> changes = new ArrayList<IPersist>();
 		changes.add(child.getParent());
 		changes.add(oldParent);
+		changes.add(child);
 		child.getParent().removeChild(child);
+
+		if (hasChildPositionSupport)
+		{
+			ArrayList<IPersist> children = getChildrenSortedOnType(oldParent);
+			if (oldIndex < children.size())
+			{
+				children.add(oldIndex, child);
+			}
+			else
+			{
+				children.add(child);
+			}
+			updateWithOrderedPosition(children);
+		}
+
 		oldParent.addChild(child);
 		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changes);
 	}
