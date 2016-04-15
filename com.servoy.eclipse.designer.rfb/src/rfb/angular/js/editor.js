@@ -895,6 +895,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 						"c_sessionid") + "&windowname=" + formName + "&f=" + formName + "&s=" + $webSocket.getURLParameter("s") +
 					replacews;
 			})
+			//init ghosts
+			var promise = $editorService.getGhostComponents();
+			promise.then(function(result) {
+				$scope.setGhosts(result);
+			});
 		},
 		templateUrl: 'templates/editor.html',
 		replace: true
