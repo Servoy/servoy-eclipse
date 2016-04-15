@@ -32,7 +32,6 @@ import org.eclipse.gef.commands.CommandStackEvent;
 import org.eclipse.gef.commands.CommandStackEventListener;
 import org.eclipse.gef.commands.CommandStackListener;
 import org.eclipse.gef.ui.actions.ActionRegistry;
-import org.eclipse.gef.ui.parts.GraphicalEditor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -61,7 +60,6 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -141,16 +139,6 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 			close(false);
 			return;
 		}
-
-		Display.getCurrent().asyncExec(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				// part needs to be activated first
-				if (!PlatformUI.getWorkbench().isClosing()) activateEditorContext();
-			}
-		});
 	}
 
 	/*
@@ -237,7 +225,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	/**
 	 * @return the graphicaleditor
 	 */
-	public GraphicalEditor getGraphicaleditor()
+	public BaseVisualFormEditorDesignPage getGraphicaleditor()
 	{
 		return graphicaleditor;
 	}
@@ -758,6 +746,16 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		setPageText(0, "Design");
 
 		graphicaleditor.getCommandStack().addCommandStackEventListener(commandStackEventListener);
+
+		Display.getCurrent().asyncExec(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				// part needs to be activated first
+				if (!PlatformUI.getWorkbench().isClosing()) activateEditorContext();
+			}
+		});
 	}
 
 	protected abstract BaseVisualFormEditorDesignPage createGraphicaleditor(DesignPagetype designPagetype);
@@ -778,19 +776,22 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 
 	public void activateEditorContext()
 	{
-		if (activateContext == null)
+		IContextService service = getSite().getService(IContextService.class);
+		if (service != null)
 		{
-			IContextService service = getSite().getService(IContextService.class);
-			if (service != null)
+			if (activateContext != null)
 			{
-				if (!new DesignerPreferences().getClassicFormEditor())
-				{
-					activateContext = service.activateContext(COM_SERVOY_ECLIPSE_RFB_DESIGNER_CONTEXT);
-				}
-				else
-				{
-					activateContext = service.activateContext(COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT);
-				}
+				service.deactivateContext(activateContext);
+				activateContext = null;
+			}
+
+			if (getGraphicaleditor().getDesignPagetype() == DesignPagetype.Rfb)
+			{
+				activateContext = service.activateContext(COM_SERVOY_ECLIPSE_RFB_DESIGNER_CONTEXT);
+			}
+			else
+			{
+				activateContext = service.activateContext(COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT);
 			}
 		}
 	}
