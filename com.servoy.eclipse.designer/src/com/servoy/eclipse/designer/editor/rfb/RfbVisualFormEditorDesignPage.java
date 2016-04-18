@@ -320,9 +320,9 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	}
 
 	@Override
-	public void refreshPersists(List<IPersist> persists)
+	public void refreshPersists(final List<IPersist> persists)
 	{
-		Form form = editorPart.getForm();
+		final Form form = editorPart.getForm();
 		FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(form);
 		final String componentsJSON = designerWebsocketSession.getComponentsJSON(fs, filterByParent(persists, form));
 		CurrentWindow.runForWindow(new WebsocketSessionWindows(designerWebsocketSession), new Runnable()
@@ -331,6 +331,8 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			public void run()
 			{
 				designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateFormData", new Object[] { componentsJSON });
+				if (persists.contains(form)) designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateForm",
+					new Object[] { form.getUUID(), form.getSize().width, form.getSize().height });
 				designerWebsocketSession.valueChanged();
 			}
 		});

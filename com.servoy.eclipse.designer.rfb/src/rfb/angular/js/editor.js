@@ -881,17 +881,17 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 
 			$element.on('updateForm.content', function(event, formInfo) {
 				if ($scope.isAbsoluteFormLayout()) {
-					if (formName == formInfo.name) {
-						$scope.setContentSize(formInfo.w + "px", formInfo.h + "px");
-						var ghost = $scope.getGhost(formInfo.uuid);
-						if (ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM)) {
+					var ghost = $scope.getGhost(formInfo.uuid);
+					if (ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM) && (ghost.size.width != formInfo.w || ghost.size.height != formInfo.h)) {
+						$rootScope.$apply(function() {
+							$scope.setContentSize(formInfo.w + "px", formInfo.h + "px");
 							ghost.size.width = formInfo.w;
 							ghost.size.height = formInfo.h;
 
 							if (selection.length > 0 && selection[0].getAttribute("svy-id") == formInfo.uuid) {
 								$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, selection)
 							}
-						}
+						});
 					}
 				}
 			});

@@ -375,10 +375,9 @@ angular.module('editorContent',['servoyApp'])
     refreshGhosts: function() {
       renderGhosts();
     },
-    updateForm: function(name, uuid, w, h) {
+    updateForm: function(uuid,w, h) {
       updateForm({
-        name: name,
-        uuid: uuid,
+    	uuid : uuid,  
         w: w,
         h: h
       });
