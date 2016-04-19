@@ -1014,7 +1014,7 @@ public class ElementFactory
 		try
 		{
 			JSONObject json = new ServoyJSONObject(templateHolder.template.getContent(), false);
-
+			final Form parentForm = parent instanceof Form ? (Form)parent : (Form)parent.getAncestor(IRepository.FORMS);
 			// location
 			final java.awt.Point awtLocation;
 			if (location == null)
@@ -1080,8 +1080,7 @@ public class ElementFactory
 						try
 						{
 							ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator().checkName(n == 0 ? name : (name + n), -1,
-								new ValidatorSearchContext(parent instanceof Form ? parent : parent.getAncestor(IRepository.FORMS), IRepository.ELEMENTS),
-								false);
+								new ValidatorSearchContext(parentForm, IRepository.ELEMENTS), false);
 						}
 						catch (RepositoryException e)
 						{
@@ -1110,7 +1109,7 @@ public class ElementFactory
 					{
 						public Object visit(IPersist o)
 						{
-							if (o instanceof ISupportBounds)
+							if (o instanceof ISupportBounds && (o == persist || !parentForm.isResponsiveLayout()))
 							{
 								int x, y;
 								if (setFormProperties || persists.size() > 1)
