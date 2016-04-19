@@ -3,7 +3,6 @@
 	-webkit-background-size: 10px 10px;
 	-moz-background-size: 10px 10px;
 	background-size: 10px 10px;
-	background-color: pink;
 	background-image: -webkit-gradient(linear, 0 0, 100% 100%, color-stop(.25, rgba(255, 255,
 		255, .2)), color-stop(.25, transparent), color-stop(.5, transparent),
 		color-stop(.5, rgba(255, 255, 255, .2)),
