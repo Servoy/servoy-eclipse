@@ -65,7 +65,7 @@ public class FoundsetMethodsComposite extends AbstractTableEditorComposite
 {
 	public static final int CI_NAME = 0;
 	public static final int CI_CODE = 1;
-	private final IPersistChangeListener persistListener;
+	private IPersistChangeListener persistListener;
 
 	public FoundsetMethodsComposite(final TableEditor te, Composite parent, FlattenedSolution flattenedSolution, int style)
 	{
@@ -195,29 +195,43 @@ public class FoundsetMethodsComposite extends AbstractTableEditorComposite
 		initDataBindings(t);
 
 		myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+	}
 
-		persistListener = new IPersistChangeListener()
+	@Override
+	public void setVisible(boolean visible)
+	{
+		if (visible && persistListener == null)
 		{
-			public void persistChanges(Collection<IPersist> changes)
+			persistListener = new IPersistChangeListener()
 			{
-				// For now just refresh if it is a TableNode or ScriptMethod that changed.
-				for (IPersist persist : changes)
+				public void persistChanges(Collection<IPersist> changes)
 				{
-					if (persist.getParent() instanceof TableNode || persist instanceof TableNode)
+					// For now just refresh if it is a TableNode or ScriptMethod that changed.
+					for (IPersist persist : changes)
 					{
-						Display.getDefault().asyncExec(new Runnable()
+						if (persist.getParent() instanceof TableNode || persist instanceof TableNode)
 						{
-							public void run()
+							Display.getDefault().asyncExec(new Runnable()
 							{
-								treeViewer.refresh();
-							}
-						});
-						break;
+								public void run()
+								{
+									if (!treeViewer.getTree().isDisposed()) treeViewer.refresh();
+								}
+							});
+							break;
+						}
 					}
 				}
-			}
-		};
-		ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(false, persistListener);
+			};
+			ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(false, persistListener);
+			refresh();
+		}
+		else if (!visible && persistListener != null)
+		{
+			ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(false, persistListener);
+			persistListener = null;
+		}
+		super.setVisible(visible);
 	}
 
 	/**
@@ -226,7 +240,8 @@ public class FoundsetMethodsComposite extends AbstractTableEditorComposite
 	@Override
 	public void dispose()
 	{
-		ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(false, persistListener);
+		if (persistListener != null) ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(false, persistListener);
+		persistListener = null;
 		super.dispose();
 	}
 
