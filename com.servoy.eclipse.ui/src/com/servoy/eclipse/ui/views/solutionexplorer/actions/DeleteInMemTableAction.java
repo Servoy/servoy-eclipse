@@ -21,10 +21,12 @@ import java.util.ArrayList;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.inmemory.MemServer;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
@@ -69,5 +71,36 @@ public class DeleteInMemTableAction extends AbstractInMemTableAction implements 
 	@Override
 	protected void updateReferencesIfNeeded()
 	{
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.ui.views.solutionexplorer.actions.AbstractInMemTableAction#shouldCompleteActionIfUnsaved(java.lang.String)
+	 */
+	@Override
+	protected boolean shouldCompleteActionIfUnsaved(String tableName)
+	{
+		return true;
+	}
+
+	@Override
+	protected void refreshEditor(final ITable table)
+	{
+		// EditorUtil.closeEditor(table) needs to be run in an UI thread
+		if (Display.getCurrent() != null)
+		{
+			EditorUtil.closeEditor(table);
+		}
+		else
+		{
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				public void run()
+				{
+					EditorUtil.closeEditor(table);
+				}
+			});
+		}
 	}
 }

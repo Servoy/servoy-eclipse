@@ -2920,7 +2920,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		renameActionInTree = new ContextAction(this, null, "Rename");
 
 		RenameSolutionAction renameSolutionAction = new RenameSolutionAction(this);
-		RenameInMemTableAction renameInMemTableAction = new RenameInMemTableAction(getSite().getShell());
+		RenameInMemTableAction renameInMemTableAction = new RenameInMemTableAction(getSite().getShell(), getSite().getPage());
 		renameActionInTree.registerAction(UserNodeType.SOLUTION, renameSolutionAction);
 		renameActionInTree.registerAction(UserNodeType.SOLUTION_ITEM, renameSolutionAction);
 		renameActionInTree.registerAction(UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE, renameSolutionAction);

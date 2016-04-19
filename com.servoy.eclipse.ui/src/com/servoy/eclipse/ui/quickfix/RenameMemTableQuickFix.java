@@ -20,6 +20,7 @@ package com.servoy.eclipse.ui.quickfix;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IMarkerResolution;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -64,7 +65,8 @@ public class RenameMemTableQuickFix implements IMarkerResolution
 	@Override
 	public void run(IMarker marker)
 	{
-		RenameInMemTableAction action = new RenameInMemTableAction(UIUtils.getActiveShell());
+		RenameInMemTableAction action = new RenameInMemTableAction(UIUtils.getActiveShell(),
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage());
 		action.setSelection(new StructuredSelection(
 			new Pair<IDataSourceWrapper, IServer>(DataSourceWrapperFactory.getWrapper(tableNode.getDataSource()), project.getMemServer())));
 		action.run();

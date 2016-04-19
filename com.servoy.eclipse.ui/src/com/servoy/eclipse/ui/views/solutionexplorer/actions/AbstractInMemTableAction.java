@@ -56,7 +56,6 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
-import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -133,7 +132,8 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 						while (it.hasNext())
 						{
 							selectedTable = it.next();
-							boolean completeAction = true;
+							boolean completeAction = shouldCompleteActionIfUnsaved(selectedTable.getTableName());
+							if (!completeAction) continue;
 							try
 							{
 								final IServer server = selection.get(selectedTable);
@@ -187,6 +187,7 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 										}
 									}
 
+
 									if (completeAction)
 									{
 										ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable()
@@ -197,6 +198,7 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 												try
 												{
 													doAction(server, table);
+
 												}
 												catch (SQLException e)
 												{
@@ -213,21 +215,7 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 											}
 										}, null);
 
-										// EditorUtil.closeEditor(table) needs to be run in an UI thread
-										if (Display.getCurrent() != null)
-										{
-											EditorUtil.closeEditor(table);
-										}
-										else
-										{
-											Display.getDefault().asyncExec(new Runnable()
-											{
-												public void run()
-												{
-													EditorUtil.closeEditor(table);
-												}
-											});
-										}
+										refreshEditor(table);
 									}
 								}
 								else
@@ -281,6 +269,7 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 			job.setUser(true);
 			job.schedule();
 		}
+
 	}
 
 	protected abstract boolean confirm();
@@ -381,5 +370,9 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 	protected abstract void doAction(final IServer server, final ITable table) throws SQLException, RepositoryException;
 
 	protected abstract void doAction(IServer server, ITable table, ArrayList<String> userSelection) throws RepositoryException;
+
+	protected abstract boolean shouldCompleteActionIfUnsaved(String tableName);
+
+	protected abstract void refreshEditor(final ITable table);
 
 }

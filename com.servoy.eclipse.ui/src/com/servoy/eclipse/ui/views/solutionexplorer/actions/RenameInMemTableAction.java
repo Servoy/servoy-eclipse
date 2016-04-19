@@ -27,17 +27,24 @@ import java.util.Set;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.inmemory.MemServer;
+import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.editors.TableEditor;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -55,12 +62,14 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 public class RenameInMemTableAction extends AbstractInMemTableAction
 {
 	private HashMap<String, String> names;
+	private final IWorkbenchPage page;
 
-	public RenameInMemTableAction(Shell shell)
+	public RenameInMemTableAction(Shell shell, IWorkbenchPage page)
 	{
 		super(shell, "rename", "Renaming");
 		setText("Rename in memory datasource");
 		setToolTipText("Rename in memory datasource");
+		this.page = page;
 	}
 
 	/*
@@ -73,7 +82,6 @@ public class RenameInMemTableAction extends AbstractInMemTableAction
 	protected void doAction(IServer server, ITable table) throws SQLException, RepositoryException
 	{
 		((MemServer)server).renameTable(table, names.get(table.getName()));
-
 	}
 
 	/*
@@ -108,6 +116,9 @@ public class RenameInMemTableAction extends AbstractInMemTableAction
 		while (it.hasNext())
 		{
 			final IDataSourceWrapper selectedTable = it.next();
+
+			if (!checkAndAskUnsaved(selectedTable)) continue;
+
 			InputDialog nameDialog = new InputDialog(Display.getDefault().getActiveShell(), "Rename in memory datasource", "Supply a new datasource name",
 				selectedTable.getTableName(), new IInputValidator()
 				{
@@ -135,6 +146,34 @@ public class RenameInMemTableAction extends AbstractInMemTableAction
 		}
 	}
 
+	private boolean checkAndAskUnsaved(IDataSourceWrapper dsWrapper)
+	{
+		IEditorPart[] dirtyEditors = page.getDirtyEditors();
+		for (IEditorPart dirtyEditor : dirtyEditors)
+		{
+			if (dirtyEditor instanceof TableEditor)
+			{
+				final TableEditor editor = (TableEditor)dirtyEditor;
+				String ds = editor.getTable().getDataSource();
+				if (ds.equals(dsWrapper.getDataSource()))
+				{
+					boolean rename = MessageDialog.openConfirm(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), getText(),
+						"Table '" + editor.getTable().getName() + "' has unsaved changes. Do you want to rename?");
+					if (rename)
+					{
+						editor.doSave(null);
+						break;
+					}
+					else
+					{
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+
 	@Override
 	protected void updateReferencesIfNeeded()
 	{
@@ -151,7 +190,8 @@ public class RenameInMemTableAction extends AbstractInMemTableAction
 					{
 						Form f = (Form)o;
 						String tableName = DataSourceUtils.getDataSourceTableName(f.getDataSource());
-						if (f.getDataSource().startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON) && names.containsKey(tableName))
+						if (f.getDataSource() != null && f.getDataSource().startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON) &&
+							names.containsKey(tableName))
 						{
 							f.setDataSource(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON + names.get(tableName));
 							persists.add(f);
@@ -201,5 +241,49 @@ public class RenameInMemTableAction extends AbstractInMemTableAction
 	protected boolean confirm()
 	{
 		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.ui.views.solutionexplorer.actions.AbstractInMemTableAction#shouldCompleteActionIfUnsaved(java.lang.String)
+	 */
+	@Override
+	protected boolean shouldCompleteActionIfUnsaved(String tableName)
+	{
+		return names.containsKey(tableName);
+	}
+
+	@Override
+	protected void refreshEditor(final ITable table)
+	{
+		try
+		{
+			final ITable newTable = ((MemTable)table).getParent().getTable(names.get(table.getName()));
+			if (newTable == null)
+			{
+				ServoyLog.logInfo("Table '" + names.get(table.getName()) + "' not found, cannot open it in editor.");
+			}
+			if (Display.getCurrent() != null)
+			{
+				EditorUtil.closeEditor(table);
+				EditorUtil.openTableEditor(newTable);
+			}
+			else
+			{
+				Display.getDefault().syncExec(new Runnable()
+				{
+					public void run()
+					{
+						EditorUtil.closeEditor(table);
+						EditorUtil.openTableEditor(newTable);
+					}
+				});
+			}
+		}
+		catch (RepositoryException e)
+		{
+			ServoyLog.logError("Could not open mem table '" + names.get(table.getName()) + "' in editor", e);
+		}
 	}
 }
