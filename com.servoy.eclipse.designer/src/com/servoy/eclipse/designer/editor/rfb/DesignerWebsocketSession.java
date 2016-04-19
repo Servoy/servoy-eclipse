@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.ui.PlatformUI;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.json.JSONWriter;
@@ -40,6 +41,7 @@ import org.sablo.websocket.IClientService;
 import org.sablo.websocket.IServerService;
 import org.sablo.websocket.impl.ClientService;
 
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.FlattenedSolution;
@@ -297,6 +299,12 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		Set<Part> parts = new HashSet<>();
 		Set<LayoutContainer> containers = new HashSet<>();
 		boolean renderGhosts = false;
+		if (PlatformUI.getWorkbench().getActiveWorkbenchWindow() != null && PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage() != null && PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor() instanceof BaseVisualFormEditor)
+		{
+			BaseVisualFormEditor editor = (BaseVisualFormEditor)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+			renderGhosts = editor.isRenderGhosts();
+			editor.setRenderGhosts(false);
+		}
 		for (IPersist persist : persists)
 		{
 			if (persist instanceof BaseComponent)
@@ -354,7 +362,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					deletedLayoutContainers.add((LayoutContainer)persist);
 				}
 			}
-			else if (!(persist instanceof Form))
+			else
 			{
 				// if it is not a base component then it is a child thing, very likely the ghost must be refreshed.
 				renderGhosts = true;

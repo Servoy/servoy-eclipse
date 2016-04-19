@@ -761,6 +761,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	protected abstract BaseVisualFormEditorDesignPage createGraphicaleditor(DesignPagetype designPagetype);
 
 	private boolean isModified;
+	private boolean renderGhosts = false;
 
 	public void flagModified()
 	{
@@ -905,5 +906,14 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		}
 	}
 
+	public void setRenderGhosts(boolean b)
+	{
+		renderGhosts = b;
+	}
+
+	public boolean isRenderGhosts()
+	{
+		return renderGhosts;
+	}
 
 }

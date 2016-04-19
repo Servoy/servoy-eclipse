@@ -20,9 +20,11 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Field;
@@ -35,7 +37,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
  * Command to place a field in the form designer.
- * 
+ *
  * @author rgansevles
  */
 
@@ -51,7 +53,7 @@ public class FormPlaceFieldCommand extends BaseFormPlaceElementCommand
 
 	/**
 	 * Command to add a field.
-	 * 
+	 *
 	 * @param parent
 	 * @param location
 	 * @param object
@@ -73,6 +75,12 @@ public class FormPlaceFieldCommand extends BaseFormPlaceElementCommand
 	@Override
 	protected IPersist[] placeElements(Point location) throws RepositoryException
 	{
+		if (PlatformUI.getWorkbench().getActiveWorkbenchWindow() != null && PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage() != null &&
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor() instanceof BaseVisualFormEditor)
+		{
+			BaseVisualFormEditor editor = (BaseVisualFormEditor)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+			editor.setRenderGhosts(true);
+		}
 		if (parent instanceof ISupportFormElements)
 		{
 			setLabel("place field(s)");
