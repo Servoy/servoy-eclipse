@@ -358,7 +358,6 @@ public class MemServer implements IServerInternal, IServer
 	{
 		try
 		{
-			tn.setTableName(newName);
 			IFolder folder = ResourcesPlugin.getWorkspace().getRoot().getFolder(
 				new Path(servoyProject.getSolution() + "/" + SolutionSerializer.DATASOURCES_DIR_NAME + "/" + DataSourceUtils.INMEM_DATASOURCE + "/"));
 			IResource[] resources = folder.members();
