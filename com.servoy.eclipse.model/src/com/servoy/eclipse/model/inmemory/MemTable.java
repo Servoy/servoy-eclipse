@@ -372,4 +372,21 @@ public class MemTable extends AbstractTable
 	{
 		return memServer.isChanged(this);
 	}
+
+	@Override
+	public int hashCode()
+	{
+		return name.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj instanceof MemTable)
+		{
+			MemTable table = (MemTable)obj;
+			return memServer == table.memServer && name.equals(table.name);
+		}
+		return false;
+	}
 }
