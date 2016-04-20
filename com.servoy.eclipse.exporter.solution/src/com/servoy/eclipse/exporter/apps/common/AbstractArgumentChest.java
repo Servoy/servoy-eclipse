@@ -187,7 +187,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 
 			+ "        Optional arguments:\n\n"
 			+ "        -verbose ... prints more info to console\n"
-			+ "        -p <properties_file> ... path and name of properties file.\n"
+			+ "        -p <properties_file> ... path and name of properties file used to start exporter.\n"
 			+ "             Default: the 'servoy.properties' file  from 'application_server'  will be used.\n"
 			+ "        -as <app_server_dir> ... specifies where to find the 'application_server' directory.\n"
 			+ "             Default: '../../application_server'.\n"
