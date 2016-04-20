@@ -24,7 +24,6 @@ import org.sablo.specification.property.IPropertyType;
 import org.sablo.specification.property.types.FunctionPropertyType;
 import org.sablo.websocket.utils.PropertyUtils;
 
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.documentation.ClientSupport;
@@ -155,12 +154,6 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		}
 
 		bean.setProperty(getName(), convertedValue);
-		//also update the real persist
-		IPersist realPersist = ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(bean.getUUID());
-		if (realPersist != null)
-		{
-			((IBasicWebObject)realPersist).setProperty(getName(), convertedValue);
-		}
 	}
 
 	public boolean shouldShow(Object obj)
