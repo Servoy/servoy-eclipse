@@ -1020,11 +1020,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	}
 
 
-	/**
-	 * @param un
-	 * @param provider
-	 * @return
-	 */
 	private List<PlatformSimpleUserNode> getWebProjects(PlatformSimpleUserNode un, BaseSpecProvider provider, String imageFileName, UserNodeType nodeType)
 	{
 		List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
@@ -1037,19 +1032,19 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			IProject eclipseProject = servoyProject.getProject();
 			try
 			{
-				ArrayList<IProject> allReferencedProjects = new ArrayList<IProject>();
+				List<IProject> allReferencedProjects = new ArrayList<IProject>();
 				if (includeModules)
 				{
 					fillAllReferencedProjects(eclipseProject, allReferencedProjects);
 				}
 				else
 				{
-					allReferencedProjects.add(eclipseProject);
+					allReferencedProjects = Arrays.asList(eclipseProject.getReferencedProjects());
 				}
 
 				for (IProject iProject : allReferencedProjects)
 				{
-					if (provider.getPackagesToURLs().containsKey(iProject.getName()))
+					if (iProject.hasNature(ServoyNGPackageProject.NATURE_ID) && provider.getPackageNames().contains(iProject.getName()))
 					{
 						String name = iProject.getName();
 						List<IProject> referencingProjects = Arrays.asList(iProject.getReferencingProjects());
@@ -1340,11 +1335,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return true;
 	}
 
-	/**
-	 * @param un
-	 * @param provider
-	 * @return
-	 */
 	private boolean hasWebProjectReferences(PlatformSimpleUserNode un, BaseSpecProvider provider)
 	{
 		Object realObject = un.getRealObject();
@@ -1355,19 +1345,19 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			IProject eclipseProject = servoyProject.getProject();
 			try
 			{
-				ArrayList<IProject> allReferencedProjects = new ArrayList<IProject>();
+				List<IProject> allReferencedProjects = new ArrayList<IProject>();
 				if (includeModules)
 				{
 					fillAllReferencedProjects(eclipseProject, allReferencedProjects);
 				}
 				else
 				{
-					allReferencedProjects.add(eclipseProject);
+					allReferencedProjects = Arrays.asList(eclipseProject.getReferencedProjects());
 				}
 
 				for (IProject iProject : allReferencedProjects)
 				{
-					if (provider.getPackageNames().contains(iProject.getName())) return true;
+					if (iProject.hasNature(ServoyNGPackageProject.NATURE_ID) && provider.getPackageNames().contains(iProject.getName())) return true;
 				}
 			}
 			catch (CoreException e)
