@@ -21,6 +21,12 @@
             <contentTypeBinding
                contentTypeId="com.servoy.eclipse.core.resource.form"/>
       </editor>
+      <editor
+            class="com.servoy.eclipse.designer.webpackages.WebPackageManager"
+            default="false"
+            id="com.servoy.eclipse.ui.webpackagemanager"
+            name="Web Package Manager">
+      </editor>
    </extension>
    <extension
          point="org.eclipse.core.runtime.adapters">

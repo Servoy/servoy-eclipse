@@ -1,0 +1,5 @@
+<h1>Web Package Manager</h1>  
+	<li *ngFor="#item of items; #i = index"> {{item.name}} - {{item.version}} - {{item.latestVersion}} 
+		<button *ngIf="item.version==='n/a'" (click)="install(item)">install</button>
+		<button *ngIf="item.version!==item.latestVersion && item.version!=='n/a'" (click)="install(item)">update</button>  
+	</li>

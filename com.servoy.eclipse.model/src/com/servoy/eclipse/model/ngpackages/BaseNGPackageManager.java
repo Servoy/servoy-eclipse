@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.jar.Manifest;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -53,6 +55,7 @@ import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -545,7 +548,18 @@ public abstract class BaseNGPackageManager
 			{
 				name = name.substring(0, index);
 			}
-			return new Pair<String, IPackageReader>(name, new FilePackageReader(resource));
+			if (resource.getName().endsWith(".zip"))
+			{
+				try
+				{
+					return new Pair<String, IPackageReader>(name, new ZipFilePackageReader(resource));
+				}
+				catch (IOException e)
+				{
+					Debug.log(e);
+				}
+			}
+			else if (resource.getName().endsWith(".jar")) return new Pair<String, IPackageReader>(name, new JarFilePackageReader(resource));
 		}
 		return null;
 	}
@@ -655,13 +669,31 @@ public abstract class BaseNGPackageManager
 		}
 	}
 
-	private class FilePackageReader extends Package.JarPackageReader
+	private class JarFilePackageReader extends Package.JarPackageReader
 	{
 		private final IResource resource;
 
-		public FilePackageReader(IResource resource)
+		public JarFilePackageReader(IResource resource)
 		{
 			super(new File(resource.getLocationURI()));
+			this.resource = resource;
+		}
+
+		@Override
+		public void reportError(String specpath, Exception e)
+		{
+			super.reportError(specpath, e);
+			addErrorMarker(resource, e);
+		}
+	}
+
+	private class ZipFilePackageReader extends Package.ZipPackageReader
+	{
+		private final IResource resource;
+
+		public ZipFilePackageReader(IResource resource) throws ZipException, IOException
+		{
+			super(new ZipFile(new File(resource.getLocationURI())), resource.getName().substring(0, resource.getName().length() - 4));
 			this.resource = resource;
 		}
 

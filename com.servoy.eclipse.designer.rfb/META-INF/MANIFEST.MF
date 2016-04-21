@@ -13,14 +13,19 @@ Require-Bundle: org.apache.tomcat,
  com.servoy.eclipse.core,
  com.servoy.eclipse.model,
  com.servoy.eclipse.debug,
- org.eclipse.ui
+ org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.apache.httpcomponents.httpcore,
+ org.apache.httpcomponents.httpclient,
+ org.apache.commons.io
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: javax.servlet,
- javax.servlet.http,
  javax.servlet.annotation,
+ javax.servlet.http,
  javax.websocket,
  javax.websocket.server,
+ org.eclipse.core.resources,
  org.osgi.framework
 Export-Package: com.servoy.eclipse.designer.rfb.endpoint,
  com.servoy.eclipse.designer.rfb.startup

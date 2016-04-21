@@ -21,21 +21,13 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.equinox.app.IApplicationContext;
-import org.sablo.specification.Package;
-import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
@@ -43,7 +35,6 @@ import org.sablo.specification.WebServiceSpecProvider;
 import com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ExportException;
@@ -495,46 +486,4 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			exitCode = EXIT_EXPORT_FAILED;
 		}
 	}
-
-	private Map<String, IPackageReader> readDir(IProgressMonitor monitor, ServoyResourcesProject activeResourcesProject, String folderName)
-	{
-		Map<String, IPackageReader> readers = new HashMap<String, IPackageReader>();
-		IFolder folder = activeResourcesProject.getProject().getFolder(folderName);
-		if (folder.exists())
-		{
-			try
-			{
-				folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-				IResource[] members = folder.members();
-				for (IResource resource : members)
-				{
-					String name = resource.getName();
-					int index = name.lastIndexOf('.');
-					if (index != -1)
-					{
-						name = name.substring(0, index);
-					}
-					if (resource instanceof IFolder)
-					{
-						IFolder folderResource = (IFolder)resource;
-						if ((folderResource).getFile("META-INF/MANIFEST.MF").exists())
-						{
-							File f = new File(resource.getLocationURI());
-							readers.put(name, new Package.DirPackageReader(f));
-						}
-					}
-					else if (resource instanceof IFile)
-					{
-						readers.put(name, new Package.JarPackageReader(new File(resource.getLocationURI())));
-					}
-				}
-			}
-			catch (CoreException e)
-			{
-				ServoyLog.logError(e);
-			}
-		}
-		return readers;
-	}
-
 }

@@ -3,14 +3,14 @@ package com.servoy.eclipse.designer.rfb.startup;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.servlet.annotation.WebServlet;
-
 import org.apache.tomcat.starter.IServicesProvider;
 
 import com.servoy.eclipse.designer.rfb.endpoint.EditorContentEndpoint;
 import com.servoy.eclipse.designer.rfb.endpoint.EditorEndpoint;
+import com.servoy.eclipse.designer.webpackage.WebPackageManagerResourcesServlet;
+import com.servoy.eclipse.designer.webpackage.endpoint.WebPackageManagerEndpoint;
 
-@WebServlet("/rfb/*")
+
 public class ServicesProvider implements IServicesProvider
 {
 	public void registerServices()
@@ -28,6 +28,8 @@ public class ServicesProvider implements IServicesProvider
 			set.add(EditorEndpoint.class);
 			set.add(EditorContentEndpoint.class);
 			set.add(DesignerFilter.class);
+			set.add(WebPackageManagerResourcesServlet.class);
+			set.add(WebPackageManagerEndpoint.class);
 			return set;
 		}
 		return null;

@@ -2698,6 +2698,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		movePersistAction = new MovePersistAction(this.getSite().getShell());
 		duplicatePersistAction = new DuplicatePersistAction(this.getSite().getShell());
 		IAction importComponent = new ImportComponentAsZipAction(this, "component", "components");
+		IAction manageWebPackagesAction = new StartWebPackageManager();
 		IAction importService = new ImportComponentAsZipAction(this, "service", "services");
 		IAction importComponentAsProject = new ImportComponentAsProjectAction(this, "component");
 		IAction newComponentAction = new NewComponentAction(this, getSite().getShell(), "Component", "Create new component");
@@ -2740,6 +2741,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA_FOLDER, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS_PACKAGE, newLayoutAction);
 		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newLayoutAction);
+		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS, manageWebPackagesAction);
+
 		createActionInTree.registerAction(UserNodeType.COMPONENTS, newComponentPackageAction);
 		createPackageProjectActionInTree.registerAction(UserNodeType.COMPONENTS_PROJECTS, newComponentsPackageProjectAction);
 		createPackageProjectActionInTree.registerAction(UserNodeType.ALL_WEB_PACKAGES, newPackageProjectAction);
