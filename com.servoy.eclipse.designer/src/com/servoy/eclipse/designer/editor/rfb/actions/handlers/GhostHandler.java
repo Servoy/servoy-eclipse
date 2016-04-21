@@ -39,8 +39,6 @@ import org.sablo.specification.property.types.VisiblePropertyType;
 import org.sablo.websocket.IServerService;
 import org.sablo.websocket.utils.PropertyUtils;
 
-import com.servoy.base.persistence.constants.IContentSpecConstantsBase;
-import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -53,8 +51,6 @@ import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
-import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.Part;
@@ -323,7 +319,6 @@ public class GhostHandler implements IServerService
 					if (!((Form)o).isResponsiveLayout()) // absolute layout
 					{
 						writePartGhosts(writer, f);
-						writeTableViewGhosts(writer, f);
 					}
 				}
 				else if (o instanceof Portal)
@@ -401,87 +396,6 @@ public class GhostHandler implements IServerService
 
 				return IPersistVisitor.CONTINUE_TRAVERSAL;
 			}
-
-			private void writeTableViewGhosts(final JSONWriter writer, Form f)
-			{
-				if (f.getProperty(IContentSpecConstantsBase.PROPERTY_VIEW) != null)
-				{
-					Object property = f.getProperty(IContentSpecConstantsBase.PROPERTY_VIEW);
-					if ((Integer)property == IFormConstants.VIEW_TYPE_TABLE || (Integer)property == IFormConstants.VIEW_TYPE_TABLE_LOCKED)
-					{
-						List<Integer> typesSubset = new ArrayList<Integer>();
-						typesSubset.add(IRepository.FIELDS);
-						typesSubset.add(IRepository.GRAPHICALCOMPONENTS);
-						typesSubset.add(IRepository.BEANS);
-						typesSubset.add(IRepository.WEBCOMPONENTS);
-						typesSubset.add(IRepository.SHAPES);
-						typesSubset.add(IRepository.RECTSHAPES);
-						try
-						{
-							writer.object();
-							{
-								writer.key("style");
-								{
-									writer.object();
-									writer.key("left").value(0);
-									writer.key("top").value(0);
-									writer.endObject();
-								}
-								//writer.key("uuid").value(f.getUUID());
-								writer.key("ghosts");
-								writer.array();
-								{
-									for (Integer elementType : typesSubset)
-									{
-										Iterator<IPersist> fields = f.getObjects(elementType.intValue());
-										while (fields.hasNext())
-										{
-											IPersist next = fields.next();
-											if (!isVisible(next)) continue;
-											// TODO check responsive/relative layout and ghosts...
-											Part p = null;
-											if (!f.getParts().hasNext() || (next instanceof ISupportBounds &&
-												(p = f.getPartAt(((ISupportBounds)next).getLocation().y)) != null && p.getPartType() == Part.BODY))
-											{
-												ISupportBounds iSupportBounds = (ISupportBounds)next;
-												int x = iSupportBounds.getLocation().x;
-												int y = iSupportBounds.getLocation().y;
-												writer.object();
-												writer.key("uuid").value(next.getUUID());
-												writer.key("type").value(GHOST_TYPE_COMPONENT);
-												writer.key("location");
-												writer.object();
-												writer.key("x").value(x);
-												writer.key("y").value(y);
-												writer.endObject();
-												writer.key("size");
-												writer.object();
-												writer.key("width").value(iSupportBounds.getSize().width);
-												writer.key("height").value(iSupportBounds.getSize().height);
-												writer.endObject();
-												String nameText = getGhostLabel(next);
-												writer.key("text").value(nameText);
-												writer.endObject();
-											}
-										}
-									}
-								}
-								writer.endArray();
-							}
-							writer.endObject();
-						}
-						catch (IllegalArgumentException e)
-						{
-							Debug.error(e);
-						}
-						catch (JSONException e)
-						{
-							e.printStackTrace();
-						}
-					}
-				}
-			}
-
 
 			private void writePartGhosts(final JSONWriter writer, Form f)
 			{
