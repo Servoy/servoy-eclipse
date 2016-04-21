@@ -211,9 +211,17 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 	@Override
 	protected Object toggleValue(Object oldPropertyValue)
 	{
-		WebCustomType ct = (WebCustomType)(oldPropertyValue);
-		WebCustomType newPropertyValue = WebCustomType.createNewInstance(ct.getParent(), ct.getPropertyDescription(), ct.getJsonKey(), ct.getIndex(), true);
-		if (!isJSONNull(ct))
+		WebCustomType newPropertyValue;
+		if (oldPropertyValue != null)
+		{
+			WebCustomType ct = (WebCustomType)(oldPropertyValue);
+			newPropertyValue = WebCustomType.createNewInstance(ct.getParent(), ct.getPropertyDescription(), ct.getJsonKey(), ct.getIndex(), true);
+		}
+		else
+		{
+			newPropertyValue = WebCustomType.createNewInstance((IBasicWebObject)persistContext.getPersist(), propertyDescription, getId().toString(), 0, true);
+		}
+		if (!isJSONNull(oldPropertyValue))
 		{
 			newPropertyValue.setJson(null);
 		}
