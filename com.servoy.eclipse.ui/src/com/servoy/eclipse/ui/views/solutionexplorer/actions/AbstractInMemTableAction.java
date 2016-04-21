@@ -193,12 +193,11 @@ public abstract class AbstractInMemTableAction extends Action implements ISelect
 										ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable()
 										{
 
-											public void run(IProgressMonitor monitor) throws CoreException
+											public void run(IProgressMonitor m) throws CoreException
 											{
 												try
 												{
 													doAction(server, table);
-
 												}
 												catch (SQLException e)
 												{

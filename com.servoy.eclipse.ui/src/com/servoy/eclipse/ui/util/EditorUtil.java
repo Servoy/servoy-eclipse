@@ -659,7 +659,8 @@ public class EditorUtil
 						((object instanceof IServerInternal) && editor.getAdapter(ServerConfig.class) != null &&
 							((IServerInternal)object).getConfig().getServerName().equals(editor.getAdapter(ServerConfig.class).getServerName())))
 					{
-						page.closeEditor(editor, false);
+						boolean closed = page.closeEditor(editor, false);
+						if (!closed) ServoyLog.logInfo("Could not close editor for" + object.toString());
 					}
 				}
 			}
@@ -755,18 +756,18 @@ public class EditorUtil
 						{
 							TreeSelectDialog dialog = new TreeSelectDialog(shell, false, false, TreePatternFilter.FILTER_LEAFS,
 								FlatTreeContentProvider.INSTANCE, new LabelProvider()
-							{
-								@Override
-								public String getText(Object element)
 								{
-									if (element instanceof IEditorPart)
+									@Override
+									public String getText(Object element)
 									{
-										IEditorPart part = (IEditorPart)element;
-										return part.getTitle();
+										if (element instanceof IEditorPart)
+										{
+											IEditorPart part = (IEditorPart)element;
+											return part.getTitle();
+										}
+										return super.getText(element);
 									}
-									return super.getText(element);
-								}
-							}, null, null, SWT.MULTI | SWT.CHECK, "Select editors to save", dirtyparts, new StructuredSelection(dirtyparts), true,
+								}, null, null, SWT.MULTI | SWT.CHECK, "Select editors to save", dirtyparts, new StructuredSelection(dirtyparts), true,
 								"saveEditors", null);
 							dialog.open();
 							if (dialog.getReturnCode() == Window.OK)
