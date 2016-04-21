@@ -105,36 +105,30 @@ public class MemServer implements IServerInternal, IServer
 	{
 		tables.clear();
 		sequenceManager = null;
-		List<IPersist> allObjectsAsList = servoyProject.getSolution().getAllObjectsAsList();
-		for (IPersist iPersist : allObjectsAsList)
+		Iterator<IPersist> tableNodes = servoyProject.getSolution().getObjects(IRepository.TABLENODES);
+		while (tableNodes.hasNext())
 		{
-			if (iPersist instanceof TableNode)
+			TableNode tableNode = (TableNode)tableNodes.next();
+			Object property = tableNode.getProperty(IContentSpecConstants.PROPERTY_COLUMNS);
+			if (property != null)
 			{
-				TableNode tableNode = (TableNode)iPersist;
-				Object property = tableNode.getProperty(IContentSpecConstants.PROPERTY_COLUMNS);
-				if (property != null)
+				try
 				{
-					try
+					ITable table = createNewTable(null, tableNode.getDataSource().substring(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON.length()));
+					DatabaseUtils.deserializeInMemoryTable(ApplicationServerRegistry.get().getDeveloperRepository(), this, table, (ServoyJSONObject)property);
+					table.setExistInDB(true);
+					table.setInitialized(true);
+					tableNode.setTable(table);
+					IPersist editingTableNode = servoyProject.getEditingPersist(tableNode.getUUID());
+					if (editingTableNode != null)
 					{
-						ITable table = createNewTable(null, tableNode.getDataSource().substring(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON.length()));
-						DatabaseUtils.deserializeInMemoryTable(ApplicationServerRegistry.get().getDeveloperRepository(), this, table,
-							(ServoyJSONObject)property);
-						table.setExistInDB(true);
-						table.setInitialized(true);
-						tableNode.setTable(table);
-						TableNode editingTableNode = (TableNode)servoyProject.getEditingPersist(tableNode.getUUID());
-						if (editingTableNode != null)
-						{
-							editingTableNode.setTable(table);
-						}
+						((TableNode)editingTableNode).setTable(table);
 					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-					}
-
 				}
-
+				catch (RepositoryException e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
 		}
 	}
@@ -348,8 +342,9 @@ public class MemServer implements IServerInternal, IServer
 					renameTableNode(t, newTable, newName, tn);
 				}
 			}
-			tables.remove(t.getName());
 			initTableIfNecessary(newTable);
+			tables.remove(t.getName());
+			fireTablesRemoved(new ITable[] { t }, true);
 		}
 		return null;
 	}
@@ -404,14 +399,12 @@ public class MemServer implements IServerInternal, IServer
 		if (rootObject instanceof Solution)
 		{
 			EclipseRepository repository = (EclipseRepository)rootObject.getRepository();
-
 			try
 			{
-				IServoyModel sm = ServoyModelFinder.getServoyModel();
-				ServoyProject project = sm.getServoyProject(rootObject.getName());
-				TableNode editingNode = (TableNode)project.getEditingPersist(persist.getUUID());
+				TableNode editingNode = (TableNode)servoyProject.getEditingPersist(persist.getUUID());
 				repository.deleteObject(editingNode);
-				project.saveEditingSolutionNodes(new IPersist[] { editingNode }, true, false);
+				servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true, false);
+				persist.getParent().removeChild(persist);//TODO is this really needed?
 			}
 			catch (RepositoryException e)
 			{

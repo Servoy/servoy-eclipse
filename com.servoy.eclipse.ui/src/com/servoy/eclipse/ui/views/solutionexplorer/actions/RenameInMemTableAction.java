@@ -161,7 +161,13 @@ public class RenameInMemTableAction extends AbstractInMemTableAction
 						"Table '" + editor.getTable().getName() + "' has unsaved changes. Do you want to rename?");
 					if (rename)
 					{
-						editor.doSave(null);
+						Display.getDefault().syncExec(new Runnable()
+						{
+							public void run()
+							{
+								editor.doSave(null);
+							}
+						});
 						break;
 					}
 					else
@@ -271,7 +277,7 @@ public class RenameInMemTableAction extends AbstractInMemTableAction
 			}
 			else
 			{
-				Display.getDefault().syncExec(new Runnable()
+				Display.getDefault().asyncExec(new Runnable()
 				{
 					public void run()
 					{
