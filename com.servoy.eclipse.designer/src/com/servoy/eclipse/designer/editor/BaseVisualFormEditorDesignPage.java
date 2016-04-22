@@ -23,7 +23,6 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.PositionConstants;
 import org.eclipse.gef.DefaultEditDomain;
-import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.actions.DeleteAction;
@@ -91,17 +90,11 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 	{
 		this.editorPart = editorPart;
 		DefaultEditDomain editDomain = new DefaultEditDomain(editorPart);
-		editDomain.getCommandStack().addCommandStackListener(editorPart);
+		editDomain.setCommandStack(editorPart.getCommandStack()); // used shared command stack from editorPart, design page may be recreated
 		setEditDomain(editDomain);
 	}
 
 	public abstract DesignPagetype getDesignPagetype();
-
-	@Override
-	public CommandStack getCommandStack()
-	{
-		return super.getCommandStack();
-	}
 
 	@Override
 	public void doSave(IProgressMonitor monitor)

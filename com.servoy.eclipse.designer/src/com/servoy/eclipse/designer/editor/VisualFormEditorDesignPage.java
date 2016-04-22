@@ -36,7 +36,6 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.SnapToGrid;
-import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.gef.rulers.RulerProvider;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.actions.DeleteAction;
@@ -115,8 +114,6 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 	public static final String COOLBAR_LAYERING = "Layering";
 	public static final String COOLBAR_GROUPING = "Grouping";
 
-	private IPaletteFactory paletteFactory;
-	private PaletteRoot paletteModel;
 	private CoolBarManager coolBarManager;
 	private List<String> hiddenBars;
 	private MenuManager toolbarMenuManager;
@@ -783,7 +780,6 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 	@Override
 	public void dispose()
 	{
-		getEditDomain().getCommandStack().removeCommandStackListener(editorPart);
 		com.servoy.eclipse.ui.Activator.getDefault().getEclipsePreferences().removePreferenceChangeListener(preferenceChangeListener);
 		super.dispose();
 	}

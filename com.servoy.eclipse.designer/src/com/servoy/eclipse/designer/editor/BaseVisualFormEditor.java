@@ -89,8 +89,7 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  */
 
-public abstract class BaseVisualFormEditor extends MultiPageEditorPart
-	implements CommandStackListener, IActiveProjectListener, IPersistChangeListener, IShowEditorInput
+public abstract class BaseVisualFormEditor extends MultiPageEditorPart implements IActiveProjectListener, IPersistChangeListener, IShowEditorInput
 {
 	private static final String COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.context";
 	private static final String COM_SERVOY_ECLIPSE_RFB_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.rfb.context";
@@ -110,7 +109,11 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	protected BaseVisualFormEditorDesignPage graphicaleditor = null;
 	private boolean closing = false;
 
-	private final CommandStackListener commandStackEventListener = new CommandStackListener();
+	private final CommandStack commandStack = new CommandStack();
+
+	private final VfeCommandStackEventListener commandStackEventListener = new VfeCommandStackEventListener();
+	private final VfeCommandStackListener commandStackListener = new VfeCommandStackListener();
+
 
 	@Override
 	public void init(IEditorSite site, IEditorInput editorInput) throws PartInitException
@@ -139,6 +142,9 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 			close(false);
 			return;
 		}
+
+		commandStack.addCommandStackEventListener(commandStackEventListener);
+		commandStack.addCommandStackListener(commandStackListener);
 	}
 
 	/*
@@ -182,8 +188,8 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	public void dispose()
 	{
 		// stop listening
-		CommandStack commandStack = getCommandStack();
-		if (commandStack != null) commandStack.removeCommandStackEventListener(commandStackEventListener);
+		commandStack.removeCommandStackEventListener(commandStackEventListener);
+		commandStack.removeCommandStackListener(commandStackListener);
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.removeActiveProjectListener(this);
 		servoyModel.removePersistChangeListener(false, this);
@@ -309,12 +315,7 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 
 	public CommandStack getCommandStack()
 	{
-		return graphicaleditor != null ? graphicaleditor.getCommandStack() : null;
-	}
-
-	public void commandStackChanged(EventObject event)
-	{
-		firePropertyChange(IEditorPart.PROP_DIRTY);
+		return commandStack;
 	}
 
 	@Override
@@ -745,8 +746,6 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 		addPage(0, graphicaleditor, getEditorInput());
 		setPageText(0, "Design");
 
-		graphicaleditor.getCommandStack().addCommandStackEventListener(commandStackEventListener);
-
 		Display.getCurrent().asyncExec(new Runnable()
 		{
 			@Override
@@ -877,12 +876,19 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 	/**
 	 * @return the commandStackEventListener
 	 */
-	public CommandStackListener getCommandStackEventListener()
+	public VfeCommandStackEventListener getCommandStackEventListener()
 	{
 		return commandStackEventListener;
 	}
 
-	public static class CommandStackListener implements CommandStackEventListener
+	public class VfeCommandStackListener implements CommandStackListener
+	{
+		public void commandStackChanged(EventObject event)
+		{
+			firePropertyChange(IEditorPart.PROP_DIRTY);
+		}
+	}
+	public static class VfeCommandStackEventListener implements CommandStackEventListener
 	{
 		private int lastState = CommandStack.POST_EXECUTE;
 
