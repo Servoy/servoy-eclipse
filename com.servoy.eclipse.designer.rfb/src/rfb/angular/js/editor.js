@@ -692,24 +692,26 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 
 			$scope.setContentSizes = function() {
-				var sizes = getScrollSizes($scope.contentDocument.querySelectorAll(".sfcontent"));
-				if (sizes.height > 0 && sizes.width > 0) {
-					var contentDiv = $element.find('.content-area')[0];
-					if (contentDiv.clientHeight < sizes.height && (!$scope.contentStyle.h || $scope.contentStyle.h + 20 < sizes.height ||
-							$scope.contentStyle.h - 20 > sizes.height)) {
-						$scope.contentStyle.h = sizes.height
-					}
-					if ($scope.isContentSizeFull()) {
-						if (contentDiv.clientWidth < sizes.width && (!$scope.contentStyle.w || $scope.contentStyle.w + 20 < sizes.width ||
-								$scope.contentStyle.w - 20 > sizes.width)) {
-							$scope.contentStyle.w = sizes.width
-							if (!$scope.isAbsoluteFormLayout()) {
-								$scope.contentStyle.width = (sizes.width + 20) + "px"
+				if ($scope.contentDocument) {
+					var sizes = getScrollSizes($scope.contentDocument.querySelectorAll(".sfcontent"));
+					if (sizes.height > 0 && sizes.width > 0) {
+						var contentDiv = $element.find('.content-area')[0];
+						if (contentDiv.clientHeight < sizes.height && (!$scope.contentStyle.h || $scope.contentStyle.h + 20 < sizes.height ||
+								$scope.contentStyle.h - 20 > sizes.height)) {
+							$scope.contentStyle.h = sizes.height
+						}
+						if ($scope.isContentSizeFull()) {
+							if (contentDiv.clientWidth < sizes.width && (!$scope.contentStyle.w || $scope.contentStyle.w + 20 < sizes.width ||
+									$scope.contentStyle.w - 20 > sizes.width)) {
+								$scope.contentStyle.w = sizes.width
+								if (!$scope.isAbsoluteFormLayout()) {
+									$scope.contentStyle.width = (sizes.width + 20) + "px"
+								}
 							}
 						}
 					}
+					adjustGlassPaneSize();
 				}
-				adjustGlassPaneSize();
 			}
 
 			function adjustGlassPaneSize() {
