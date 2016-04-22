@@ -785,7 +785,12 @@ public class UIUtils
 
 	public static String showTextFieldDialog(Shell shell, String title, String message)
 	{
-		TextFieldDialog dialog = new TextFieldDialog(shell, title, null, message, MessageDialog.NONE, new String[] { "OK", "Cancel" }, "");
+		return showTextFieldDialog(shell, title, message, "");
+	}
+
+	public static String showTextFieldDialog(Shell shell, String title, String message, String initialValue)
+	{
+		TextFieldDialog dialog = new TextFieldDialog(shell, title, null, message, MessageDialog.NONE, new String[] { "OK", "Cancel" }, initialValue);
 		dialog.setBlockOnOpen(true);
 		if (dialog.open() != Window.OK)
 		{

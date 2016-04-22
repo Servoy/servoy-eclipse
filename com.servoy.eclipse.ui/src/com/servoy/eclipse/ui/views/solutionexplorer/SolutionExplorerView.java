@@ -2750,14 +2750,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction manageWebPackagesAction = new StartWebPackageManager();
 		IAction importService = new ImportComponentAsZipAction(this, "service", "services");
 		IAction importComponentAsProject = new ImportComponentAsProjectAction(this, "component");
-		IAction newComponentAction = new NewComponentAction(this, shell, "Component", "Create new component");
-		IAction newLayoutAction = new NewComponentAction(this, shell, "Layout", "Create new layout");
-		IAction newServiceAction = new NewComponentAction(this, shell, "Service", "Create new service");
-		IAction newComponentPackageAction = new NewComponentPackageAction(this, shell, "Create component package");
+		IAction newComponentAction = new NewComponentOrServiceAction(this, shell, "Component", "Create new component");
+		IAction newLayoutAction = new NewComponentOrServiceAction(this, shell, "Layout", "Create new layout");
+		IAction newServiceAction = new NewComponentOrServiceAction(this, shell, "Service", "Create new service");
+		IAction newComponentPackageAction = new NewResourcesComponentsOrServicesPackageAction(this, shell, "Create component package");
 		NewPackageProjectAction newPackageProjectAction = new NewPackageProjectAction(this, shell, "Create package project");
 		NewPackageProjectAction newComponentsPackageProjectAction = new NewPackageProjectAction(this, shell, "Create component package project");
 		NewPackageProjectAction newServicesPackageProjectAction = new NewPackageProjectAction(this, shell, "Create services package project");
-		IAction newServicePackageAction = new NewComponentPackageAction(this, shell, "Create service package");
+		IAction newServicePackageAction = new NewResourcesComponentsOrServicesPackageAction(this, shell, "Create service package");
 
 		newActionInTreePrimary.registerAction(UserNodeType.FORM, newMethod);
 		newActionInTreePrimary.registerAction(UserNodeType.SCOPES_ITEM, newScope);
@@ -2887,20 +2887,21 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction deleteGlobalScript = new DeleteScriptAction(UserNodeType.GLOBAL_METHOD_ITEM, "Delete method", this);
 		IAction deleteFormVariable = new DeleteScriptAction(UserNodeType.FORM_VARIABLE_ITEM, "Delete variable", this);
 		IAction deleteGlobalVariable = new DeleteScriptAction(UserNodeType.GLOBAL_VARIABLE_ITEM, "Delete variable", this);
-		IAction deleteComponentPackage = new DeleteComponentResourceAction(this, shell, "Delete component package",
+		IAction deleteComponentPackage = new DeleteComponentOrServiceResourceAction(this, shell, "Delete component package",
 			UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES);
-		IAction deleteServicePackage = new DeleteComponentResourceAction(this, shell, "Delete service package", UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES);
-		IAction deleteComponentProjectPackage = new DeleteComponentResourceAction(this, shell, "Delete component package project",
+		IAction deleteServicePackage = new DeleteComponentOrServiceResourceAction(this, shell, "Delete service package",
+			UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES);
+		IAction deleteComponentProjectPackage = new DeleteComponentOrServiceResourceAction(this, shell, "Delete component package project",
 			UserNodeType.COMPONENTS_PROJECT_PACKAGE);
-		IAction deleteServiceProjectPackage = new DeleteComponentResourceAction(this, shell, "Delete service package project",
+		IAction deleteServiceProjectPackage = new DeleteComponentOrServiceResourceAction(this, shell, "Delete service package project",
 			UserNodeType.SERVICES_PROJECT_PACKAGE);
-		IAction deleteProjectPackage = new DeleteComponentResourceAction(this, shell, "Delete Package Project", UserNodeType.WEB_PACKAGE);
+		IAction deleteProjectPackage = new DeleteComponentOrServiceResourceAction(this, shell, "Delete Package Project", UserNodeType.WEB_PACKAGE);
 		exportComponentPackage = new ExportPackageResourceAction(this, shell);
 		editDisplayNameAction = new EditDisplayNameAction(this, shell, "Edit package display name");
 
-		IAction deleteComponent = new DeleteComponentResourceAction(this, shell, "Delete component", UserNodeType.COMPONENT);
-		IAction deleteService = new DeleteComponentResourceAction(this, shell, "Delete service", UserNodeType.SERVICE);
-		IAction deleteComponentResource = new DeleteComponentResourceAction(this, shell, "Delete file", UserNodeType.COMPONENT_RESOURCE);
+		IAction deleteComponent = new DeleteComponentOrServiceResourceAction(this, shell, "Delete component", UserNodeType.COMPONENT);
+		IAction deleteService = new DeleteComponentOrServiceResourceAction(this, shell, "Delete service", UserNodeType.SERVICE);
+		IAction deleteComponentResource = new DeleteComponentOrServiceResourceAction(this, shell, "Delete file", UserNodeType.COMPONENT_RESOURCE);
 		IAction deleteI18N = new DeleteI18NAction(shell);
 		IAction deleteScope = new DeleteScopeAction("Delete scope", this);
 
@@ -2979,8 +2980,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		renameActionInTree.registerAction(UserNodeType.FORM, new RenamePersistAction());
 		renameActionInTree.registerAction(UserNodeType.GLOBALS_ITEM, new RenameScopeAction(this));
 		renameActionInTree.registerAction(UserNodeType.WORKING_SET, new RenameWorkingSetAction());
-		renameActionInTree.registerAction(UserNodeType.COMPONENT, new RenameComponentAction(this, shell, UserNodeType.COMPONENT));
-		renameActionInTree.registerAction(UserNodeType.SERVICE, new RenameComponentAction(this, shell, UserNodeType.SERVICE));
+		renameActionInTree.registerAction(UserNodeType.COMPONENT, new RenameComponentOrServiceAction(this, shell, UserNodeType.COMPONENT));
+		renameActionInTree.registerAction(UserNodeType.SERVICE, new RenameComponentOrServiceAction(this, shell, UserNodeType.SERVICE));
 		renameActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, renameInMemTableAction);
 
 		addAsModuleAction = new AddAsModuleAction(shell);

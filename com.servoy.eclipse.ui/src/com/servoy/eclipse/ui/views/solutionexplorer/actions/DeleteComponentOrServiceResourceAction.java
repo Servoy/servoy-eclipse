@@ -57,7 +57,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
  * Deletes the selected components or services.
  * @author gganea
  */
-public class DeleteComponentResourceAction extends Action implements ISelectionChangedListener
+public class DeleteComponentOrServiceResourceAction extends Action implements ISelectionChangedListener
 {
 
 	private IStructuredSelection selection;
@@ -66,7 +66,7 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 	private final SolutionExplorerView viewer;
 
 
-	public DeleteComponentResourceAction(SolutionExplorerView viewer, Shell shell, String text, UserNodeType nodeType)
+	public DeleteComponentOrServiceResourceAction(SolutionExplorerView viewer, Shell shell, String text, UserNodeType nodeType)
 	{
 		this.viewer = viewer;
 		this.shell = shell;

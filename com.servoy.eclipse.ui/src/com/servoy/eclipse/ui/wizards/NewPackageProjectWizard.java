@@ -51,7 +51,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddAsWebPackageAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewComponentPackageAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewResourcesComponentsOrServicesPackageAction;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.util.Debug;
@@ -128,11 +128,11 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 					AddAsWebPackageAction.addReferencedProjectToDescription(newProject, solutionProjectDescription);
 					iProject.setDescription(solutionProjectDescription, new NullProgressMonitor());
 				}
-				NewComponentPackageAction.createManifest(newProject, projectName, projectName, packageType); // TODO symbolic name here instead of double projectName?
+				NewResourcesComponentsOrServicesPackageAction.createManifest(newProject, projectName, projectName, packageType); // TODO symbolic name here instead of double projectName?
 
 				if (viewer != null)
 				{
-					viewer.getSolExNavigator().revealWhenAvailable(treeNode, new String[] { projectName }, true);
+					viewer.getSolExNavigator().revealWhenAvailable(treeNode, new String[] { projectName }, true); // if in the future this action allows specifying display name, that one should be used here in the array instead
 				}
 			}
 			catch (CoreException e)

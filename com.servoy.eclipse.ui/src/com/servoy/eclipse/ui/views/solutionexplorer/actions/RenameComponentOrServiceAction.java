@@ -33,6 +33,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -50,12 +51,12 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
  * Action to rename a component.
  * @author emera
  */
-public class RenameComponentAction extends Action
+public class RenameComponentOrServiceAction extends Action
 {
 	private final SolutionExplorerView viewer;
 	private final Shell shell;
 
-	public RenameComponentAction(SolutionExplorerView viewer, Shell shell, UserNodeType nodeType)
+	public RenameComponentOrServiceAction(SolutionExplorerView viewer, Shell shell, UserNodeType nodeType)
 	{
 		this.viewer = viewer;
 		this.shell = shell;
@@ -69,16 +70,6 @@ public class RenameComponentAction extends Action
 		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
 		String type = node.getType().toString().toLowerCase();
 
-		String componentName = UIUtils.showTextFieldDialog(shell, getText(), "Provide the new name for the " + node.getName() + " " + type +
-			".\n Please note that this action does not update references.");
-		if (componentName == null) return;
-		while (!isNameValid(componentName, type + " name must start with a letter and must contain only alphanumeric characters"))
-		{
-			componentName = UIUtils.showTextFieldDialog(shell, getText(), "Please provide the " + type.toLowerCase() + " name.");
-			if (componentName == null) return;
-		}
-		componentName = componentName.trim();
-
 		WebObjectSpecification spec = (WebObjectSpecification)node.getRealObject();
 		IContainer[] dirResource;
 		IResource resource = null;
@@ -91,15 +82,36 @@ public class RenameComponentAction extends Action
 			if (resource != null)
 			{
 				IFolder pack = (IFolder)resource;
-				IFolder parent = (IFolder)pack.getParent();
+				IContainer parent = pack.getParent();
 
 				String currentName = resource.getName();
+
+				String componentName;
+
+				do
+				{
+					componentName = UIUtils.showTextFieldDialog(shell, getText(),
+						"Please provide a new unique name for the '" + node.getName() + "' " + type +
+							".\n\nPlease note that this action does not update references.\nIf the display name was different, it will not be changed (only the name will change).\nDisplay name can be changed directly from the .spec file.\n",
+						currentName);
+					if (componentName == null) return;
+				}
+				while (!isNameValid(componentName, type + " name must start with a letter and must contain only alphanumeric characters"));
+
+				componentName = componentName.trim();
+
 				IFile specFile = pack.getFile(currentName + ".spec");
 				InputStream is = specFile.getContents();
 				JSONObject specJSON = new JSONObject(IOUtils.toString(is, "UTF-8"));
 				specJSON.put("name", specJSON.getString("name").replace("-" + currentName, "-" + componentName));
 				specJSON.put("definition", specJSON.getString("definition").replace("/" + currentName, "/" + componentName));
-				specJSON.put("displayName", componentName);
+
+				String displayName = specJSON.getString("displayName");
+				if (currentName.equals(displayName))
+				{
+					specJSON.put("displayName", componentName);
+					displayName = componentName;
+				}
 				IFile newSpecFile = pack.getFile(componentName + ".spec");
 				newSpecFile.create(new ByteArrayInputStream(specJSON.toString(3).getBytes()), IResource.NONE, new NullProgressMonitor());
 				is.close();
@@ -126,10 +138,15 @@ public class RenameComponentAction extends Action
 				}
 				defFile.delete(true, new NullProgressMonitor());
 				specFile.delete(true, new NullProgressMonitor());
-				resource.move(parent.getFolder(componentName).getFullPath(), IResource.FORCE, new NullProgressMonitor());
+				resource.move(parent.getFolder(new Path(componentName)).getFullPath(), IResource.FORCE, new NullProgressMonitor());
 				parent.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 
 				renameInManifest(componentName, resource, parent);
+
+				if (viewer != null)
+				{
+					viewer.getSolExNavigator().revealWhenAvailable(node.parent, new String[] { displayName }, true);
+				}
 			}
 		}
 		catch (Exception e)
@@ -138,13 +155,13 @@ public class RenameComponentAction extends Action
 		}
 	}
 
-	public void renameInManifest(String newName, IResource resource, IFolder parent) throws CoreException
+	public void renameInManifest(String newName, IResource resource, IContainer parent) throws CoreException
 	{
 		OutputStream out = null;
 		InputStream in = null;
 		try
 		{
-			IFile m = parent.getFile("META-INF/MANIFEST.MF");
+			IFile m = parent.getFile(new Path("META-INF/MANIFEST.MF"));
 			m.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
 			Manifest manifest = new Manifest(m.getContents());
 			Attributes attributes = manifest.getEntries().remove(resource.getName() + "/" + resource.getName() + ".spec");
@@ -191,6 +208,6 @@ public class RenameComponentAction extends Action
 	{
 		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
 		IResource packageRoot = (IResource)node.parent.getRealObject();
-		return (packageRoot instanceof IFolder);
+		return (packageRoot instanceof IContainer);
 	}
 }

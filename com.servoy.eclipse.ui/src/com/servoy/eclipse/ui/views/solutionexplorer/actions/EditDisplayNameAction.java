@@ -48,6 +48,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
 /**
@@ -89,8 +90,9 @@ public class EditDisplayNameAction extends Action implements ISelectionChangedLi
 		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
 		boolean componentsNotServices = (node.getType() == UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES ||
 			node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE);
-		String name = (componentsNotServices ? WebComponentSpecProvider.getInstance().getPackageDisplayName(node.getName())
-			: WebServiceSpecProvider.getInstance().getPackageDisplayName(node.getName()));
+		String packageName = SolutionExplorerTreeContentProvider.getPackageName(node); // we cannot rely on node name to be the display name directly cause if 'includeFromModules' option is enabled in SolEx the node name will be prefixed with the module name in some cases
+		String name = (componentsNotServices ? WebComponentSpecProvider.getInstance().getPackageDisplayName(packageName)
+			: WebServiceSpecProvider.getInstance().getPackageDisplayName(packageName));
 		String newName = null;
 		TextFieldDialog dialog = new TextFieldDialog(shell, getText(), null, "Please provide the new package display name.", MessageDialog.NONE,
 			new String[] { "OK", "Cancel" }, name);

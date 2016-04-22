@@ -52,7 +52,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
  * Create a new component/service in the selected component package.
  * @author emera
  */
-public class NewComponentAction extends Action
+public class NewComponentOrServiceAction extends Action
 {
 
 	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
@@ -60,7 +60,7 @@ public class NewComponentAction extends Action
 	private final SolutionExplorerView viewer;
 	private final String type;
 
-	public NewComponentAction(SolutionExplorerView viewer, Shell shell, String type, String text)
+	public NewComponentOrServiceAction(SolutionExplorerView viewer, Shell shell, String type, String text)
 	{
 		super();
 		this.viewer = viewer;
@@ -186,7 +186,7 @@ public class NewComponentAction extends Action
 
 			if (viewer != null && parentNode != null)
 			{
-				viewer.getSolExNavigator().revealWhenAvailable(parentNode, new String[] { componentOrServiceName }, true);
+				viewer.getSolExNavigator().revealWhenAvailable(parentNode, new String[] { componentOrServiceName }, true); // if in the future this action allows specifying display name, that one should be used here in the array instead
 			}
 		}
 		catch (IOException e)
@@ -270,11 +270,6 @@ public class NewComponentAction extends Action
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.action.Action#isEnabled()
-	 */
 	@Override
 	public boolean isEnabled()
 	{

@@ -37,7 +37,8 @@ public class TextFieldDialog extends MessageDialog
 	private final String defaultText;
 	private String selectedText;
 
-	public TextFieldDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage, int dialogImageType, String[] dialogButtonLabels)
+	public TextFieldDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage, int dialogImageType,
+		String[] dialogButtonLabels)
 	{
 		this(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, dialogButtonLabels, "");
 	}
@@ -56,6 +57,7 @@ public class TextFieldDialog extends MessageDialog
 	{
 		text = new Text(parent, SWT.BORDER);
 		text.setText(defaultText);
+		if (defaultText != null && defaultText.length() > 0) text.selectAll();
 		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
 		text.setLayoutData(gridData);
 		return text;

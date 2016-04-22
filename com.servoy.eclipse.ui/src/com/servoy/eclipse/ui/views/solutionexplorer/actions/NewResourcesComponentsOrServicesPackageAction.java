@@ -65,7 +65,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
  * Create a new component/service package.
  * @author emera
  */
-public class NewComponentPackageAction extends Action
+public class NewResourcesComponentsOrServicesPackageAction extends Action
 {
 
 	private final SolutionExplorerView viewer;
@@ -76,7 +76,7 @@ public class NewComponentPackageAction extends Action
 	private String componentOrServiceName;
 	private String packageType;
 
-	public NewComponentPackageAction(SolutionExplorerView viewer, Shell shell, String text)
+	public NewResourcesComponentsOrServicesPackageAction(SolutionExplorerView viewer, Shell shell, String text)
 	{
 		super();
 		this.viewer = viewer;
@@ -197,14 +197,14 @@ public class NewComponentPackageAction extends Action
 
 					if (componentOrServiceName != null)
 					{
-						NewComponentAction newComponent = new NewComponentAction(viewer, shell, "Component", "");
+						NewComponentOrServiceAction newComponent = new NewComponentOrServiceAction(viewer, shell, "Component", "");
 						newComponent.createComponentOrService(pack, type, componentOrServiceName, null);
 					}
 
 					if (viewer != null)
 					{
 						if (componentOrServiceName == null) viewer.getSolExNavigator().revealWhenAvailable(node, new String[] { packageDisplayName }, true);
-						else viewer.getSolExNavigator().revealWhenAvailable(node, new String[] { packageDisplayName, componentOrServiceName }, true);
+						else viewer.getSolExNavigator().revealWhenAvailable(node, new String[] { packageDisplayName, componentOrServiceName }, true); // if in the future this action allows specifying component or service display name, that one should be used here in the array instead
 					}
 				}
 				catch (Exception e)

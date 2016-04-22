@@ -850,7 +850,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					else if (type == UserNodeType.COMPONENTS_PROJECT_PACKAGE)
 					{
 						WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
-						String packageName = provider.getPackageName(removeModuleName(un.getName()));
+						String packageName = getPackageName(un);
 						List<String> components = new ArrayList<>(provider.getComponentsInPackage(packageName));
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (components.size() > 0)
@@ -940,7 +940,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					else if (type == UserNodeType.SERVICES_PROJECT_PACKAGE)
 					{
 						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
-						String packageName = provider.getPackageName(removeModuleName(un.getName()));
+						String packageName = getPackageName(un);
 						PackageSpecification<WebObjectSpecification> servicesPackage = provider.getServicesInPackage(packageName);
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (servicesPackage != null)
@@ -1057,13 +1057,13 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				{
 					if (iProject.hasNature(ServoyNGPackageProject.NATURE_ID) && provider.getPackageNames().contains(iProject.getName()))
 					{
-						String name = iProject.getName();
+						String displayName = provider.getPackageDisplayName(iProject.getName());
 						List<IProject> referencingProjects = Arrays.asList(iProject.getReferencingProjects());
 						if (referencingProjects.indexOf(eclipseProject) == -1 && referencingProjects.size() > 0)
 						{
-							name = appendModuleName(name, referencingProjects.get(0).getName());
+							displayName = appendModuleName(displayName, referencingProjects.get(0).getName());
 						}
-						PlatformSimpleUserNode node = new PlatformSimpleUserNode(name, nodeType, iProject, packageIcon);
+						PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayName, nodeType, iProject, packageIcon);
 						node.parent = un;
 						children.add(node);
 					}
@@ -1092,12 +1092,14 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return name + " [" + moduleName + "]";
 	}
 
-	static String removeModuleName(String name)
-	{
-		int moduleDescriptionIdx = name.indexOf(" [");
-		if (moduleDescriptionIdx != -1) return name.substring(0, moduleDescriptionIdx);
-		return name;
-	}
+//  this removeModuleName is commented out because code should really identify stuff based on the realObject/type instead of the display name of the node;
+//  so for example for a components package node that is suffixed with module (includeFromModules enabled in SolEx) you can use the real object which is an IProject to get the name
+//	static String removeModuleName(String name)
+//	{
+//		int moduleDescriptionIdx = name.indexOf(" [");
+//		if (moduleDescriptionIdx != -1) return name.substring(0, moduleDescriptionIdx);
+//		return name;
+//	}
 
 	private Image loadImageFromFolder(IFolder folder, String iconPath) throws CoreException
 	{
@@ -1324,14 +1326,14 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				else if (un.getType() == UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES || un.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE)
 				{
 					return (!WebComponentSpecProvider.getInstance().getComponentsInPackage(
-						WebComponentSpecProvider.getInstance().getPackageName(removeModuleName(un.getName()))).isEmpty() ||
+						WebComponentSpecProvider.getInstance().getPackageName(getPackageName(un))).isEmpty() ||
 						!WebComponentSpecProvider.getInstance().getLayoutsInPackage(
-							WebComponentSpecProvider.getInstance().getPackageName(removeModuleName(un.getName()))).isEmpty());
+							WebComponentSpecProvider.getInstance().getPackageName(getPackageName(un))).isEmpty());
 				}
 				else if (un.getType() == UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES || un.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE)
 				{
 					PackageSpecification<WebObjectSpecification> services = WebServiceSpecProvider.getInstance().getServicesInPackage(
-						WebServiceSpecProvider.getInstance().getPackageName(removeModuleName(un.getName())));
+						WebServiceSpecProvider.getInstance().getPackageName(getPackageName(un)));
 					return services != null && !services.getSpecifications().isEmpty();
 				}
 			}
@@ -1344,6 +1346,25 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		else if (parent instanceof UserNode &&
 			(((UserNode)parent).getType() == UserNodeType.TABLE || ((UserNode)parent).getType() == UserNodeType.INMEMORY_DATASOURCE)) return false;
 		return true;
+	}
+
+	/**
+	 * Gets the name of a service/component package based on a node in the tree. It uses the realObject instead of node name
+	 * cause node display name cannot be counted on (sometimes it's subfixed with the name of the module it is referenced from).
+	 *
+	 * @param un the user node representing a package in SolEx.
+	 * @return the name of that package.
+	 */
+	public static String getPackageName(PlatformSimpleUserNode un)
+	{
+		IResource realObject = (IResource)un.getRealObject();
+		if (realObject instanceof IFile)
+		{
+			String extension = ((IFile)realObject).getFileExtension();
+			return (extension != null ? realObject.getName().substring(0, realObject.getName().length() - extension.length() - 1) : realObject.getName());
+		}
+
+		return realObject.getName(); // realObject should be an IContainer in this case (project or folder)
 	}
 
 	private boolean hasWebProjectReferences(PlatformSimpleUserNode un, BaseSpecProvider provider)
