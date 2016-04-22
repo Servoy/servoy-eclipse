@@ -404,7 +404,6 @@ public class MemServer implements IServerInternal, IServer
 				TableNode editingNode = (TableNode)servoyProject.getEditingPersist(persist.getUUID());
 				repository.deleteObject(editingNode);
 				servoyProject.saveEditingSolutionNodes(new IPersist[] { editingNode }, true, false);
-				persist.getParent().removeChild(persist);//TODO is this really needed?
 			}
 			catch (RepositoryException e)
 			{
