@@ -2790,7 +2790,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA_FOLDER, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES, newLayoutAction);
 		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newLayoutAction);
-		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS, manageWebPackagesAction);
+		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS_FROM_RESOURCES, manageWebPackagesAction);
 
 		createActionInTree.registerAction(UserNodeType.COMPONENTS_FROM_RESOURCES, newComponentPackageAction);
 		createPackageProjectActionInTree.registerAction(UserNodeType.COMPONENTS_PROJECTS, newComponentsPackageProjectAction);
@@ -2887,7 +2887,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction deleteGlobalScript = new DeleteScriptAction(UserNodeType.GLOBAL_METHOD_ITEM, "Delete method", this);
 		IAction deleteFormVariable = new DeleteScriptAction(UserNodeType.FORM_VARIABLE_ITEM, "Delete variable", this);
 		IAction deleteGlobalVariable = new DeleteScriptAction(UserNodeType.GLOBAL_VARIABLE_ITEM, "Delete variable", this);
-		IAction deleteComponentPackage = new DeleteComponentResourceAction(this, shell, "Delete component package", UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES);
+		IAction deleteComponentPackage = new DeleteComponentResourceAction(this, shell, "Delete component package",
+			UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES);
 		IAction deleteServicePackage = new DeleteComponentResourceAction(this, shell, "Delete service package", UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES);
 		IAction deleteComponentProjectPackage = new DeleteComponentResourceAction(this, shell, "Delete component package project",
 			UserNodeType.COMPONENTS_PROJECT_PACKAGE);
