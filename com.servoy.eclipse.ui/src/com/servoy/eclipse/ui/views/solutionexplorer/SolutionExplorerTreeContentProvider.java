@@ -190,9 +190,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private final PlatformSimpleUserNode stylesNode;
 
-	private final PlatformSimpleUserNode componentsNode;
+	private final PlatformSimpleUserNode componentsFromResourcesNode;
 
-	private final PlatformSimpleUserNode servicesNode;
+	private final PlatformSimpleUserNode servicesFromResourcesNode;
 
 	private final PlatformSimpleUserNode templatesNode;
 
@@ -267,15 +267,15 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		stylesNode.setClientSupport(ClientSupport.ng_wc_sc);
 		stylesNode.parent = resources;
 
-		componentsNode = new PlatformSimpleUserNode(Messages.TreeStrings_Components, UserNodeType.COMPONENTS, SolutionSerializer.COMPONENTS_DIR_NAME,
-			uiActivator.loadImageFromBundle("coffee_grains.png"));
-		componentsNode.setClientSupport(ClientSupport.ng_wc_sc);
-		componentsNode.parent = resources;
+		componentsFromResourcesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Components, UserNodeType.COMPONENTS_FROM_RESOURCES,
+			SolutionSerializer.COMPONENTS_DIR_NAME, uiActivator.loadImageFromBundle("coffee_grains.png"));
+		componentsFromResourcesNode.setClientSupport(ClientSupport.ng_wc_sc);
+		componentsFromResourcesNode.parent = resources;
 
-		servicesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Services, UserNodeType.SERVICES, SolutionSerializer.SERVICES_DIR_NAME,
-			uiActivator.loadImageFromBundle("services.gif"));
-		servicesNode.setClientSupport(ClientSupport.ng_wc_sc);
-		servicesNode.parent = resources;
+		servicesFromResourcesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Services, UserNodeType.SERVICES_FROM_RESOURCES,
+			SolutionSerializer.SERVICES_DIR_NAME, uiActivator.loadImageFromBundle("services.gif"));
+		servicesFromResourcesNode.setClientSupport(ClientSupport.ng_wc_sc);
+		servicesFromResourcesNode.parent = resources;
 
 		userGroupSecurityNode = new PlatformSimpleUserNode(Messages.TreeStrings_UserGroupSecurity, UserNodeType.USER_GROUP_SECURITY, null,
 			uiActivator.loadImageFromBundle("lock.gif"));
@@ -301,7 +301,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
 		allSolutionsNode.parent = invisibleRootNode;
 
-		allWebPackagesNode = new PlatformSimpleUserNode(Messages.TreeStrings_AllWebPackages, UserNodeType.ALL_WEB_PACKAGES, null,
+		allWebPackagesNode = new PlatformSimpleUserNode(Messages.TreeStrings_AllWebPackageProjects, UserNodeType.ALL_WEB_PACKAGES, null,
 			PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
 		allWebPackagesNode.parent = invisibleRootNode;
 
@@ -331,14 +331,14 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			uiActivator.loadImageFromBundle("plugin.gif"));
 		plugins.parent = invisibleRootNode;
 
-		resources.children = new PlatformSimpleUserNode[] { servers, stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsNode, servicesNode };
+		resources.children = new PlatformSimpleUserNode[] { servers, stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsFromResourcesNode, servicesFromResourcesNode };
 
 		invisibleRootNode.children = new PlatformSimpleUserNode[] { resources, allWebPackagesNode, allSolutionsNode, activeSolutionNode, jslib, application, solutionModel, databaseManager, utils, history, security, i18n, jsunit, plugins };
 
 		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, utils, history, security, i18n, /*
 																																			 * exceptions ,
 																																			 */jsunit, plugins };
-		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsNode, servicesNode };
+		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsFromResourcesNode, servicesFromResourcesNode };
 
 		// we want to load the plugins node in a background low prio job so that it will expand fast
 		// when used...
@@ -376,6 +376,17 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		job.schedule();
 
 		ServoyModelFinder.getServoyModel().getNGPackageManager().addNGPackagesChangedListener(this);
+	}
+
+	/**
+	 * Returns a 'virtual' non shown root node - the parent of all visilbe first level nodes.
+	 * Used for caching.
+	 *
+	 * @return the invisible root node.
+	 */
+	public PlatformSimpleUserNode getInvisibleRootNode()
+	{
+		return invisibleRootNode;
 	}
 
 	public void inputChanged(Viewer v, Object oldInput, Object newInput)
@@ -770,7 +781,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					{
 						addMediaFolderChildrenNodes(un, ((MediaNode)un.getRealObject()).getMediaProvider());
 					}
-					else if (type == UserNodeType.COMPONENTS)
+					else if (type == UserNodeType.COMPONENTS_FROM_RESOURCES)
 					{
 						BaseSpecProvider provider = WebComponentSpecProvider.getInstance();
 						Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
@@ -782,7 +793,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							if (resource != null && !(resource instanceof IProject))
 							{
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(provider.getPackageDisplayName(entry.getKey()),
-									UserNodeType.COMPONENTS_PACKAGE, resource, packageIcon);
+									UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES, resource, packageIcon);
 								node.parent = un;
 								children.add(node);
 							}
@@ -795,7 +806,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						List<PlatformSimpleUserNode> children = getWebProjects(un, provider, "components_package.png", UserNodeType.COMPONENTS_PROJECT_PACKAGE);
 						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 					}
-					else if (type == UserNodeType.COMPONENTS_PACKAGE)
+					else if (type == UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES)
 					{
 						WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
 						String packageName = provider.getPackageName(un.getName());
@@ -875,7 +886,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						}
 						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 					}
-					else if (type == UserNodeType.SERVICES)
+					else if (type == UserNodeType.SERVICES_FROM_RESOURCES)
 					{
 						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
 						Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
@@ -887,7 +898,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							if (resource != null && !(resource instanceof IProject))
 							{
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(provider.getPackageDisplayName(entry.getKey()),
-									UserNodeType.SERVICES_PACKAGE, resource, packageIcon);
+									UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES, resource, packageIcon);
 								node.parent = un;
 								children.add(node);
 							}
@@ -900,7 +911,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						List<PlatformSimpleUserNode> children = getWebProjects(un, provider, "services_package.png", UserNodeType.SERVICES_PROJECT_PACKAGE);
 						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 					}
-					else if (type == UserNodeType.SERVICES_PACKAGE)
+					else if (type == UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES)
 					{
 						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
 						String packageName = provider.getPackageName(un.getName());
@@ -1249,7 +1260,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				{
 					return ((MediaNode)un.getRealObject()).hasChildren(EnumSet.of(MediaNode.TYPE.FOLDER));
 				}
-				else if (un.getType() == UserNodeType.COMPONENTS)
+				else if (un.getType() == UserNodeType.COMPONENTS_FROM_RESOURCES)
 				{
 					WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
 					if (provider != null)
@@ -1270,7 +1281,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					BaseSpecProvider provider = WebComponentSpecProvider.getInstance();
 					return hasWebProjectReferences(un, provider);
 				}
-				else if (un.getType() == UserNodeType.SERVICES)
+				else if (un.getType() == UserNodeType.SERVICES_FROM_RESOURCES)
 				{
 					WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
 					if (provider != null)
@@ -1310,14 +1321,14 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					}
 					return false;
 				}
-				else if (un.getType() == UserNodeType.COMPONENTS_PACKAGE || un.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE)
+				else if (un.getType() == UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES || un.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE)
 				{
 					return (!WebComponentSpecProvider.getInstance().getComponentsInPackage(
 						WebComponentSpecProvider.getInstance().getPackageName(removeModuleName(un.getName()))).isEmpty() ||
 						!WebComponentSpecProvider.getInstance().getLayoutsInPackage(
 							WebComponentSpecProvider.getInstance().getPackageName(removeModuleName(un.getName()))).isEmpty());
 				}
-				else if (un.getType() == UserNodeType.SERVICES_PACKAGE || un.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE)
+				else if (un.getType() == UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES || un.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE)
 				{
 					PackageSpecification<WebObjectSpecification> services = WebServiceSpecProvider.getInstance().getServicesInPackage(
 						WebServiceSpecProvider.getInstance().getPackageName(removeModuleName(un.getName())));
@@ -2190,10 +2201,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return node;
 	}
 
-
-	/**
-	 * @return
-	 */
 	private PlatformSimpleUserNode createNodeForWebComponentBean(Bean bean)
 	{
 		PlatformSimpleUserNode node = new PlatformSimpleUserNode(bean.getName(), UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { bean, null }, bean.getParent(),
@@ -2897,19 +2904,17 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			@Override
 			public IStatus run(IProgressMonitor monitor)
 			{
-				allWebPackagesNode.children = null;
-				activeSolutionNode.children = null;
+				refreshTreeNode(allWebPackagesNode);
+				if (componentsChanged) refreshTreeNode(findChildNode(activeSolutionNode, Messages.TreeStrings_Components));
+				if (servicesChanged) refreshTreeNode(findChildNode(activeSolutionNode, Messages.TreeStrings_Services));
 				try
 				{
-					List activeRootObjects = ServoyModel.getDeveloperRepository().getActiveRootObjects(IRepository.SOLUTIONS);
+					List<Solution> activeRootObjects = ServoyModel.getDeveloperRepository().getActiveRootObjects(IRepository.SOLUTIONS);
 					for (Object sol : activeRootObjects)
 					{
-						SimpleUserNode findChildNode = findChildNode(modulesOfActiveSolution, ((Solution)sol).getName());
-						if (findChildNode != null)
-						{
-							findChildNode.children = null;
-							view.refreshTreeNodeFromModel(findChildNode);
-						}
+						SimpleUserNode moduleNode = findChildNode(modulesOfActiveSolution, ((Solution)sol).getName());
+						if (componentsChanged) refreshTreeNode(findChildNode(moduleNode, Messages.TreeStrings_Components));
+						if (servicesChanged) refreshTreeNode(findChildNode(moduleNode, Messages.TreeStrings_Services));
 					}
 				}
 				catch (RepositoryException e)
@@ -2917,25 +2922,23 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					Debug.log(e);
 				}
 
-				view.refreshTreeNodeFromModel(activeSolutionNode);
-				view.refreshTreeNodeFromModel(allWebPackagesNode);
-
-				if (componentsChanged)
-				{
-					componentsNode.children = null;
-					view.refreshTreeNodeFromModel(componentsNode);
-				}
-				if (servicesChanged)
-				{
-					servicesNode.children = null;
-					view.refreshTreeNodeFromModel(servicesNode);
-
-				}
+				if (componentsChanged) refreshTreeNode(componentsFromResourcesNode);
+				if (servicesChanged) refreshTreeNode(servicesFromResourcesNode);
 				return Status.OK_STATUS;
 			}
+
 		};
 		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
 		job.schedule();
+	}
+
+	private void refreshTreeNode(SimpleUserNode nodeToRefresh)
+	{
+		if (nodeToRefresh != null)
+		{
+			nodeToRefresh.children = null;
+			view.refreshTreeNodeFromModel(nodeToRefresh);
+		}
 	}
 
 	@Override
@@ -2947,9 +2950,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			@Override
 			public IStatus run(IProgressMonitor monitor)
 			{
-				allWebPackagesNode.children = null;
-				view.refreshTreeNodeFromModel(allWebPackagesNode);
-
+				refreshTreeNode(allWebPackagesNode);
 				return Status.OK_STATUS;
 			}
 		};

@@ -47,6 +47,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
 /**
  * Exports the selected components or services packages
+ * 
  * @author jcompagner
  */
 public class ExportPackageResourceAction extends Action implements ISelectionChangedListener
@@ -65,11 +66,6 @@ public class ExportPackageResourceAction extends Action implements ISelectionCha
 		setToolTipText("Export the package to a zip file that can be imported in another installation");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.action.Action#run()
-	 */
 	@Override
 	public void run()
 	{
@@ -154,13 +150,6 @@ public class ExportPackageResourceAction extends Action implements ISelectionCha
 		}
 	}
 
-	/**
-	 * @param resource
-	 * @param zos
-	 * @throws CoreException
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 */
 	private void zipDir(IContainer folder, ZipOutputStream zos, String prefix) throws CoreException, FileNotFoundException, IOException
 	{
 		for (IResource member : folder.members())
@@ -216,7 +205,7 @@ public class ExportPackageResourceAction extends Action implements ISelectionCha
 		while (it.hasNext() && state)
 		{
 			SimpleUserNode node = it.next();
-			state = (node.getType() == UserNodeType.COMPONENTS_PACKAGE) || node.getType() == UserNodeType.SERVICES_PACKAGE;
+			state = (node.getType() == UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES) || node.getType() == UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES;
 		}
 		if (state)
 		{
@@ -224,4 +213,5 @@ public class ExportPackageResourceAction extends Action implements ISelectionCha
 		}
 		setEnabled(state);
 	}
+	
 }

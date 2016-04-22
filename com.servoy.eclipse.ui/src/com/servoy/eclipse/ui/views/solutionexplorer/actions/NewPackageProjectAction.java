@@ -23,10 +23,11 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.wizards.IWizardDescriptor;
 
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.wizards.NewPackageProjectWizard;
 import com.servoy.j2db.util.Debug;
 
@@ -37,13 +38,17 @@ import com.servoy.j2db.util.Debug;
 public class NewPackageProjectAction extends Action implements ISelectionChangedListener
 {
 
+	private final SolutionExplorerView viewer;
+	private final Shell shell;
 	private IStructuredSelection selection;
 
 	/**
 	 * @param text - the label of the menu entry
 	 */
-	public NewPackageProjectAction(String text)
+	public NewPackageProjectAction(SolutionExplorerView solutionExplorerView, Shell shell, String text)
 	{
+		this.viewer = solutionExplorerView;
+		this.shell = shell;
 		setText(text);
 	}
 
@@ -57,7 +62,8 @@ public class NewPackageProjectAction extends Action implements ISelectionChanged
 			{
 				NewPackageProjectWizard wizard = (NewPackageProjectWizard)descriptor.createWizard();
 				wizard.init(PlatformUI.getWorkbench(), selection);
-				WizardDialog wd = new WizardDialog(Display.getDefault().getActiveShell(), wizard);
+				wizard.setSolutionExplorerView(viewer);
+				WizardDialog wd = new WizardDialog(shell, wizard);
 				wd.setTitle(wizard.getWindowTitle());
 				wd.open();
 			}
@@ -68,11 +74,6 @@ public class NewPackageProjectAction extends Action implements ISelectionChanged
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
-	 */
 	@Override
 	public void selectionChanged(SelectionChangedEvent event)
 	{

@@ -1,19 +1,11 @@
 package com.servoy.eclipse.ui.wizards;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -45,7 +37,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
-import org.sablo.specification.Package;
 import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -58,7 +49,9 @@ import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddAsWebPackageAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.NewComponentPackageAction;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RootObjectMetaData;
 import com.servoy.j2db.util.Debug;
@@ -69,6 +62,10 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 	private final NewPackageProjectPage page1 = new NewPackageProjectPage();
 
 	private final Map<UserNodeType, String> typeToTypeName = new HashMap<UserNodeType, String>();
+
+	private SolutionExplorerView viewer; // if running from solEx, when finished the wizard will try to expand and select the newly created package
+
+	private PlatformSimpleUserNode treeNode;
 
 	public NewPackageProjectWizard()
 	{
@@ -84,11 +81,15 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 		addPage(page1);
 		if (selection.getFirstElement() instanceof PlatformSimpleUserNode)
 		{
-			PlatformSimpleUserNode platformSimpleUserNode = (PlatformSimpleUserNode)selection.getFirstElement();
-			String typeName = typeToTypeName.get(platformSimpleUserNode.getType());
+			treeNode = (PlatformSimpleUserNode)selection.getFirstElement();
+			String typeName = typeToTypeName.get(treeNode.getType());
 			if (typeName != null) page1.setDefaultPackageType(typeName);
 		}
+	}
 
+	public void setSolutionExplorerView(SolutionExplorerView solEx)
+	{
+		this.viewer = solEx;
 	}
 
 	@Override
@@ -107,9 +108,6 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 		private final String packageType;
 		private final IProject[] referencedProjects;
 
-		/**
-		 * @param name
-		 */
 		public CreatePackageProjectJob(String projectName, String packageType, IProject[] referencedProjects)
 		{
 			super("Creating Package Project");
@@ -118,11 +116,6 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 			this.referencedProjects = referencedProjects;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.core.resources.WorkspaceJob#runInWorkspace(org.eclipse.core.runtime.IProgressMonitor)
-		 */
 		@Override
 		public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 		{
@@ -135,7 +128,12 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 					AddAsWebPackageAction.addReferencedProjectToDescription(newProject, solutionProjectDescription);
 					iProject.setDescription(solutionProjectDescription, new NullProgressMonitor());
 				}
-				createManifest(newProject, projectName, packageType);
+				NewComponentPackageAction.createManifest(newProject, projectName, projectName, packageType); // TODO symbolic name here instead of double projectName?
+
+				if (viewer != null)
+				{
+					viewer.getSolExNavigator().revealWhenAvailable(treeNode, new String[] { projectName }, true);
+				}
 			}
 			catch (CoreException e)
 			{
@@ -145,31 +143,11 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 			{
 				Debug.log(e);
 			}
+
 			return Status.OK_STATUS;
 		}
 
 	}
-
-
-	private void createManifest(IProject pack, String projectName, String packageType) throws CoreException, IOException
-	{
-		Manifest manifest = new Manifest();
-		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-		manifest.getMainAttributes().put(new Attributes.Name(Package.BUNDLE_NAME), projectName);
-		manifest.getMainAttributes().put(new Attributes.Name(Package.BUNDLE_SYMBOLIC_NAME), projectName);
-		manifest.getMainAttributes().put(new Attributes.Name(Package.PACKAGE_TYPE), packageType);
-
-		IFolder metainf = pack.getFolder("META-INF");
-		metainf.create(true, true, new NullProgressMonitor());
-		IFile m = metainf.getFile("MANIFEST.MF");
-		m.create(new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
-
-		try (OutputStream out = new FileOutputStream(new File(m.getLocationURI()), false))
-		{
-			manifest.write(out);
-		}
-	}
-
 
 	private class NewPackageProjectPage extends WizardPage
 	{
@@ -178,27 +156,16 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 		private Group packageTypeGroup;
 		private String defaultPackageTypeName;
 
-		/**
-		 * @param pageName
-		 * @param title
-		 * @param titleImage
-		 */
 		protected NewPackageProjectPage()
 		{
 			super("Create new Components Package Project");
 		}
 
-		/**
-		 * @param typeName
-		 */
 		public void setDefaultPackageType(String typeName)
 		{
 			this.defaultPackageTypeName = typeName;
 		}
 
-		/**
-		 * @return
-		 */
 		public IProject[] getReferencedProjects()
 		{
 			ISelection selection = ftv.getSelection();
@@ -244,11 +211,6 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 			return result;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-		 */
 		@Override
 		public void createControl(Composite parent)
 		{

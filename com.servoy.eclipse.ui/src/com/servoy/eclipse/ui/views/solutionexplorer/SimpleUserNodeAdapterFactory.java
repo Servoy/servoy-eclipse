@@ -101,7 +101,8 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 
 									IProject moduleIProject = moduleProject.getProject();
 									RepositoryProvider rp = RepositoryProvider.getProvider(moduleIProject);
-									if (rp != null && rp.getID().equals(solutionRP.getID())) mappings.add(new SimpleResourceMapping(moduleProject.getProject()));
+									if (rp != null && rp.getID().equals(solutionRP.getID()))
+										mappings.add(new SimpleResourceMapping(moduleProject.getProject()));
 								}
 							}
 						}
@@ -122,12 +123,12 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 				SimpleResourceMapping styles = getResourceProjectResourceMapping(StringResourceDeserializer.STYLES_DIR_NAME);
 				if (styles != null) mappings.add(styles);
 			}
-			else if (nodeType == UserNodeType.COMPONENTS)
+			else if (nodeType == UserNodeType.COMPONENTS_FROM_RESOURCES)
 			{
 				SimpleResourceMapping components = getResourceProjectResourceMapping(SolutionSerializer.COMPONENTS_DIR_NAME);
 				if (components != null) mappings.add(components);
 			}
-			else if (nodeType == UserNodeType.SERVICES)
+			else if (nodeType == UserNodeType.SERVICES_FROM_RESOURCES)
 			{
 				SimpleResourceMapping services = getResourceProjectResourceMapping(SolutionSerializer.SERVICES_DIR_NAME);
 				if (services != null) mappings.add(services);
@@ -160,8 +161,8 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 				String formScriptFile = SolutionSerializer.getScriptPath(form, true);
 
 				// add the form file
-				mappings.add(new SimpleResourceMapping(ResourcesPlugin.getWorkspace().getRoot().getFile(
-					new Path(formFilePath.getLeft() + formFilePath.getRight()))));
+				mappings.add(
+					new SimpleResourceMapping(ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(formFilePath.getLeft() + formFilePath.getRight()))));
 				if (formScriptFile != null)
 				{
 					IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(formScriptFile));
@@ -341,8 +342,8 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 				{
 					// Pair<Solution, scopeName>
 					Pair<Solution, String> pair = (Pair<Solution, String>)userNode.getRealObject();
-					return (((IProjectNature)project.getRealObject()).getProject()).findMember(pair.getRight().toString() +
-						SolutionSerializer.JS_FILE_EXTENSION);
+					return (((IProjectNature)project.getRealObject()).getProject()).findMember(
+						pair.getRight().toString() + SolutionSerializer.JS_FILE_EXTENSION);
 				}
 			}
 		}
@@ -386,7 +387,7 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 		{
 			if (adaptableObject instanceof SimpleUserNode)
 			{
-				IResource resource = (IResource)Platform.getAdapterManager().getAdapter(adaptableObject, IResource.class);
+				IResource resource = Platform.getAdapterManager().getAdapter(adaptableObject, IResource.class);
 				if (resource != null) return Platform.getAdapterManager().getAdapter(resource, IWorkbenchAdapter.class);
 			}
 		}

@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
@@ -33,6 +34,7 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
@@ -44,6 +46,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.sablo.specification.Package;
+import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
@@ -69,13 +73,9 @@ public class NewComponentPackageAction extends Action
 
 	private String packageName;
 	private String packageDisplayName;
-	private String componentName;
+	private String componentOrServiceName;
+	private String packageType;
 
-	/**
-	 * @param solutionExplorerView
-	 * @param shell
-	 * @param text
-	 */
 	public NewComponentPackageAction(SolutionExplorerView viewer, Shell shell, String text)
 	{
 		super();
@@ -85,16 +85,12 @@ public class NewComponentPackageAction extends Action
 		setToolTipText(text);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.action.Action#run()
-	 */
 	@Override
 	public void run()
 	{
 		final PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
-		final String type = UserNodeType.COMPONENTS == node.getType() ? "Component" : "Service";
+		final String type = UserNodeType.COMPONENTS_FROM_RESOURCES == node.getType() ? "Component" : "Service";
+		packageType = (UserNodeType.COMPONENTS_FROM_RESOURCES == node.getType() ? IPackageReader.WEB_COMPONENT : IPackageReader.WEB_SERVICE);
 		final IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
 			(String)node.getRealObject());
 
@@ -128,7 +124,7 @@ public class NewComponentPackageAction extends Action
 				Label packageLabel = new Label(container, SWT.NONE);
 				packageLabel.setText("Package name");
 				packName = new Text(container, SWT.BORDER);
-				if (packageName == null && node.getType() == UserNodeType.SERVICES) packName.setText("services");
+				if (packageName == null && node.getType() == UserNodeType.SERVICES_FROM_RESOURCES) packName.setText("services");
 				if (packageName != null) packName.setText(packageName);
 				packName.setLayoutData(data);
 
@@ -141,7 +137,7 @@ public class NewComponentPackageAction extends Action
 				Label componentLabel = new Label(container, SWT.NONE);
 				componentLabel.setText(type + " name");
 				compName = new Text(container, SWT.BORDER);
-				if (componentName != null) compName.setText(componentName);
+				if (componentOrServiceName != null) compName.setText(componentOrServiceName);
 				compName.setLayoutData(data);
 
 				return container;
@@ -152,16 +148,17 @@ public class NewComponentPackageAction extends Action
 			{
 				packageName = (packName != null ? packName.getText() : null);
 				packageDisplayName = (packDisplay != null ? packDisplay.getText() : null);
-				componentName = (compName != null ? compName.getText() : null);
+				componentOrServiceName = ((compName.getText() != null && compName.getText().length() > 0) ? compName.getText() : null);
 				return super.close();
 			}
 		};
 		int code = dialog.open();
 		if (code != 0) return;
 		while (checkIfEmpty(packageName, "Package name was not provided.") ||
-			checkIfEmpty(componentName, "The name of the first component was not provided.") || !isNameValid(node) ||
+			/* checkIfEmpty(componentName, "The name of the first component was not provided.") || */ !isNameValid(node) ||
 			!isNameValid(packageName, "^[a-z][0-9a-z]*$", "Package name must start with a letter and must contain only lowercase letters or numbers") ||
-			!isNameValid(componentName, "^[a-zA-Z][0-9a-zA-Z]*$", type + " name must start with a letter and must contain only alphanumeric characters"))
+			(componentOrServiceName != null && !isNameValid(componentOrServiceName, "^[a-zA-Z][0-9a-zA-Z]*$",
+				type + " name must start with a letter and must contain only alphanumeric characters")))
 		{
 			code = dialog.open();
 			if (code != 0) return;
@@ -196,10 +193,19 @@ public class NewComponentPackageAction extends Action
 					}
 
 					pack.create(IResource.FORCE, true, monitor);
-					createManifest(pack);
+					createManifest(pack, packageDisplayName, packageName, packageType);
 
-					NewComponentAction newComponent = new NewComponentAction(viewer, shell, "Component", "");
-					newComponent.createComponent(pack, type, componentName);
+					if (componentOrServiceName != null)
+					{
+						NewComponentAction newComponent = new NewComponentAction(viewer, shell, "Component", "");
+						newComponent.createComponentOrService(pack, type, componentOrServiceName, null);
+					}
+
+					if (viewer != null)
+					{
+						if (componentOrServiceName == null) viewer.getSolExNavigator().revealWhenAvailable(node, new String[] { packageDisplayName }, true);
+						else viewer.getSolExNavigator().revealWhenAvailable(node, new String[] { packageDisplayName, componentOrServiceName }, true);
+					}
 				}
 				catch (Exception e)
 				{
@@ -218,13 +224,8 @@ public class NewComponentPackageAction extends Action
 	private boolean isNameValid(PlatformSimpleUserNode node)
 	{
 		Collection<PackageSpecification<WebObjectSpecification>> packages = null;
-		if (node.getType() == UserNodeType.SERVICES)
+		if (node.getType() == UserNodeType.SERVICES_FROM_RESOURCES)
 		{
-			if (!packageName.toLowerCase().endsWith("services"))
-			{
-				MessageDialog.openError(shell, getText(), "Service package names must end with \"services\"");
-				return false;
-			}
 			packages = WebServiceSpecProvider.getInstance().getWebServiceSpecifications().values();
 		}
 		else
@@ -274,19 +275,15 @@ public class NewComponentPackageAction extends Action
 		return true;
 	}
 
-	/**
-	 * @param pack
-	 * @throws IOException
-	 * @throws CoreException
-	 */
-	private void createManifest(IFolder pack) throws CoreException, IOException
+	public static void createManifest(IContainer pack, String packageDisplayName, String packageName, String packageType) throws CoreException, IOException
 	{
 		Manifest manifest = new Manifest();
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
 		manifest.getMainAttributes().put(new Attributes.Name("Bundle-Name"), packageDisplayName);
 		manifest.getMainAttributes().put(new Attributes.Name("Bundle-SymbolicName"), packageName);
+		manifest.getMainAttributes().put(new Attributes.Name(Package.PACKAGE_TYPE), packageType);
 
-		IFolder metainf = pack.getFolder("META-INF");
+		IFolder metainf = pack.getFolder(new Path("META-INF"));
 		metainf.create(true, true, new NullProgressMonitor());
 		IFile m = metainf.getFile("MANIFEST.MF");
 		m.create(new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
@@ -296,4 +293,5 @@ public class NewComponentPackageAction extends Action
 			manifest.write(out);
 		}
 	}
+
 }

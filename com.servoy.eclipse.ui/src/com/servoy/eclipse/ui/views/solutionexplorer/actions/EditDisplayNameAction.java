@@ -23,13 +23,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -39,6 +41,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.core.util.TextFieldDialog;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -73,7 +76,9 @@ public class EditDisplayNameAction extends Action implements ISelectionChangedLi
 		if (it.hasNext() && state)
 		{
 			SimpleUserNode node = it.next();
-			state = node.getRealObject() instanceof IFolder && node.getType() == UserNodeType.COMPONENTS_PACKAGE;
+			state = node.getRealObject() instanceof IContainer &&
+				(node.getType() == UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES || node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE ||
+					node.getType() == UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES || node.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE);
 		}
 		setEnabled(state);
 	}
@@ -82,7 +87,10 @@ public class EditDisplayNameAction extends Action implements ISelectionChangedLi
 	public void run()
 	{
 		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
-		String name = WebComponentSpecProvider.getInstance().getPackageDisplayName(node.getName());
+		boolean componentsNotServices = (node.getType() == UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES ||
+			node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE);
+		String name = (componentsNotServices ? WebComponentSpecProvider.getInstance().getPackageDisplayName(node.getName())
+			: WebServiceSpecProvider.getInstance().getPackageDisplayName(node.getName()));
 		String newName = null;
 		TextFieldDialog dialog = new TextFieldDialog(shell, getText(), null, "Please provide the new package display name.", MessageDialog.NONE,
 			new String[] { "OK", "Cancel" }, name);
@@ -91,7 +99,7 @@ public class EditDisplayNameAction extends Action implements ISelectionChangedLi
 		int code = dialog.open();
 		newName = dialog.getSelectedText();
 		if (code != 0 || name.equals(newName)) return;
-		while (!isNameValid(node, newName))
+		while (!isNameValid(node, newName, componentsNotServices))
 		{
 			code = dialog.open();
 			newName = dialog.getSelectedText();
@@ -100,7 +108,7 @@ public class EditDisplayNameAction extends Action implements ISelectionChangedLi
 		updatePackageName(node, newName);
 	}
 
-	private boolean isNameValid(PlatformSimpleUserNode node, String packageDisplayName)
+	private boolean isNameValid(PlatformSimpleUserNode node, String packageDisplayName, boolean componentsNotServices)
 	{
 		if ("".equals(packageDisplayName))
 		{
@@ -108,7 +116,9 @@ public class EditDisplayNameAction extends Action implements ISelectionChangedLi
 
 			return false;
 		}
-		for (PackageSpecification<WebObjectSpecification> p : WebComponentSpecProvider.getInstance().getWebComponentSpecifications().values())
+		Map<String, PackageSpecification<WebObjectSpecification>> specifications = (componentsNotServices
+			? WebComponentSpecProvider.getInstance().getWebComponentSpecifications() : WebServiceSpecProvider.getInstance().getWebServiceSpecifications());
+		for (PackageSpecification<WebObjectSpecification> p : specifications.values())
 		{
 			if (p.getPackageDisplayname().equals(packageDisplayName))
 			{
@@ -126,7 +136,7 @@ public class EditDisplayNameAction extends Action implements ISelectionChangedLi
 		InputStream in = null;
 		try
 		{
-			IFile m = ((IFolder)node.getRealObject()).getFile("META-INF/MANIFEST.MF");
+			IFile m = ((IContainer)node.getRealObject()).getFile(new Path("META-INF/MANIFEST.MF"));
 			m.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
 			Manifest manifest = new Manifest(m.getContents());
 			Attributes attr = manifest.getMainAttributes();

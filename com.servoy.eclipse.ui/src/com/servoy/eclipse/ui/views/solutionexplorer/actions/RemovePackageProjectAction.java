@@ -77,10 +77,6 @@ public class RemovePackageProjectAction extends Action implements ISelectionChan
 		}
 	}
 
-	/**
-	 * @param fromProject
-	 * @param projectToBeRemoved
-	 */
 	public static void removeProjecReference(IProject fromProject, IProject projectToBeRemoved)
 	{
 		try
@@ -97,11 +93,6 @@ public class RemovePackageProjectAction extends Action implements ISelectionChan
 		}
 	}
 
-	/**
-	 * @param referencedProjects
-	 * @param selectedProject
-	 * @return
-	 */
 	private static IProject[] removeFromArray(IProject[] referencedProjects, IProject project)
 	{
 		List<IProject> asList = new ArrayList<IProject>(Arrays.asList(referencedProjects));
@@ -171,11 +162,6 @@ public class RemovePackageProjectAction extends Action implements ISelectionChan
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
-	 */
 	@Override
 	public void selectionChanged(SelectionChangedEvent event)
 	{

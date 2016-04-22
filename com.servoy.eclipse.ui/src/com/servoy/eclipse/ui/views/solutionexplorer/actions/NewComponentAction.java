@@ -70,26 +70,21 @@ public class NewComponentAction extends Action
 		setToolTipText(text);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.action.Action#run()
-	 */
 	@Override
 	public void run()
 	{
-		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
+		final PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
 
-		String componentName = UIUtils.showTextFieldDialog(shell, getText(), "Please provide the " + type.toLowerCase() + " name.");
-		if (componentName == null) return;
-		while (!isNameValid(componentName, type + " name must start with a letter and must contain only alphanumeric characters"))
+		String componentOrServiceName = UIUtils.showTextFieldDialog(shell, getText(), "Please provide the " + type.toLowerCase() + " name.");
+		if (componentOrServiceName == null) return;
+		while (!isNameValid(componentOrServiceName, type + " name must start with a letter and must contain only alphanumeric characters"))
 		{
-			componentName = UIUtils.showTextFieldDialog(shell, getText(), "Please provide the " + type.toLowerCase() + " name.");
-			if (componentName == null) return;
+			componentOrServiceName = UIUtils.showTextFieldDialog(shell, getText(), "Please provide the " + type.toLowerCase() + " name.");
+			if (componentOrServiceName == null) return;
 		}
-		componentName = componentName.trim();
+		componentOrServiceName = componentOrServiceName.trim();
 
-		final String compName = componentName;
+		final String compOrSrvName = componentOrServiceName;
 		final IResource packageRoot = (IResource)node.getRealObject();
 		IWorkspaceRunnable createJob = new IWorkspaceRunnable()
 		{
@@ -97,12 +92,12 @@ public class NewComponentAction extends Action
 			@Override
 			public void run(IProgressMonitor monitor) throws CoreException
 			{
-				createComponent(packageRoot, type, compName);
+				createComponentOrService(packageRoot, type, compOrSrvName, node);
 			}
 		};
 
 		RunInWorkspaceJob job = new RunInWorkspaceJob(createJob);
-		job.setName("Create component");
+		job.setName("Create component or service");
 		job.setRule(ServoyModel.getWorkspace().getRoot());
 		job.setUser(false);
 		job.schedule();
@@ -121,18 +116,12 @@ public class NewComponentAction extends Action
 		return true;
 	}
 
-	/**
-	 * @param folder
-	 * @param elementType
-	 * @param componentName
-	 * @param displayName
-	 */
-	void createComponent(IResource packageRoot, final String elementType, final String componentName)
+	void createComponentOrService(IResource packageRoot, final String elementType, final String componentOrServiceName, PlatformSimpleUserNode parentNode)
 	{
 		if (!(packageRoot instanceof IFolder) && !(packageRoot instanceof IProject)) return;
 		IFolder folder = null;
-		if (packageRoot instanceof IFolder) folder = ((IFolder)packageRoot).getFolder(componentName);
-		if (packageRoot instanceof IProject) folder = ((IProject)packageRoot).getFolder(componentName);
+		if (packageRoot instanceof IFolder) folder = ((IFolder)packageRoot).getFolder(componentOrServiceName);
+		if (packageRoot instanceof IProject) folder = ((IProject)packageRoot).getFolder(componentOrServiceName);
 		InputStream in = null;
 		try
 		{
@@ -143,19 +132,19 @@ public class NewComponentAction extends Action
 				{
 					public void run()
 					{
-						MessageDialog.openError(shell, getText(), elementType + " " + componentName + " already exists in package " + folderName);
+						MessageDialog.openError(shell, getText(), elementType + " " + componentOrServiceName + " already exists in package " + folderName);
 					}
 				});
 				return;
 			}
 
-			String moduleName = packageRoot.getName() + componentName.substring(0, 1).toUpperCase() + componentName.substring(1);
+			String moduleName = packageRoot.getName() + componentOrServiceName.substring(0, 1).toUpperCase() + componentOrServiceName.substring(1);
 
 			folder.create(IResource.FORCE, true, new NullProgressMonitor());
 			if (elementType.equals("Component"))
 			{
 				in = uiActivator.getBundle().getEntry("/component-templates/component.html").openStream();
-				createFile(componentName + ".html", folder, in);
+				createFile(componentOrServiceName + ".html", folder, in);
 				in.close();
 			}
 			if (!elementType.equals("Layout"))
@@ -163,45 +152,50 @@ public class NewComponentAction extends Action
 				in = uiActivator.getBundle().getEntry("/component-templates/" + elementType.toLowerCase() + ".js").openStream();
 				String text = IOUtils.toString(in, "UTF-8");
 				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
-				text = text.replaceAll("\\$\\{NAME\\}", componentName);
+				text = text.replaceAll("\\$\\{NAME\\}", componentOrServiceName);
 				text = text.replaceAll("\\$\\{PACKAGENAME\\}", packageRoot.getName());
-				createFile(componentName + ".js", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
+				createFile(componentOrServiceName + ".js", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
 				in.close();
 				in = uiActivator.getBundle().getEntry("/component-templates/" + elementType.toLowerCase() + ".spec").openStream();
 				text = IOUtils.toString(in, "UTF-8");
 				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
-				text = text.replaceAll("\\$\\{NAME\\}", componentName);
-				text = text.replaceAll("\\$\\{DASHEDNAME\\}", getDashedName(componentName));
+				text = text.replaceAll("\\$\\{NAME\\}", componentOrServiceName);
+				text = text.replaceAll("\\$\\{DASHEDNAME\\}", getDashedName(componentOrServiceName));
 				text = text.replaceAll("\\$\\{PACKAGENAME\\}", packageRoot.getName());
-				createFile(componentName + ".spec", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
+				createFile(componentOrServiceName + ".spec", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
 				in.close();
 			}
 			else
 			{
 				in = uiActivator.getBundle().getEntry("/component-templates/" + elementType.toLowerCase() + ".json").openStream();
 				String text = IOUtils.toString(in, "UTF-8");
-				createFile(componentName + ".json", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
+				createFile(componentOrServiceName + ".json", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
 				in.close();
 				in = uiActivator.getBundle().getEntry("/component-templates/" + elementType.toLowerCase() + ".spec").openStream();
 				text = IOUtils.toString(in, "UTF-8");
 				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
-				text = text.replaceAll("\\$\\{NAME\\}", componentName);
-				text = text.replaceAll("\\$\\{DASHEDNAME\\}", getDashedName(componentName));
+				text = text.replaceAll("\\$\\{NAME\\}", componentOrServiceName);
+				text = text.replaceAll("\\$\\{DASHEDNAME\\}", getDashedName(componentOrServiceName));
 				text = text.replaceAll("\\$\\{PACKAGENAME\\}", packageRoot.getName());
-				createFile(componentName + ".spec", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
+				createFile(componentOrServiceName + ".spec", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
 				in.close();
 			}
 
 
-			addToManifest(componentName, elementType, packageRoot);
+			addToManifest(componentOrServiceName, elementType, packageRoot);
+
+			if (viewer != null && parentNode != null)
+			{
+				viewer.getSolExNavigator().revealWhenAvailable(parentNode, new String[] { componentOrServiceName }, true);
+			}
 		}
 		catch (IOException e)
 		{
-			ServoyLog.logError("Cannot create component.", e);
+			ServoyLog.logError("Cannot create component or service.", e);
 		}
 		catch (CoreException e)
 		{
-			ServoyLog.logError("Cannot create component.", e);
+			ServoyLog.logError("Cannot create component or service.", e);
 		}
 		finally
 		{
@@ -236,28 +230,15 @@ public class NewComponentAction extends Action
 		return name;
 	}
 
-	/**
-	 * @param componentName
-	 * @param folder
-	 * @param in
-	 * @throws CoreException
-	 */
-	private void createFile(String componentName, IFolder folder, InputStream in) throws CoreException
+	private void createFile(String componentOrServiceName, IFolder folder, InputStream in) throws CoreException
 	{
-		IFile file = folder.getFile(componentName);
+		IFile file = folder.getFile(componentOrServiceName);
 		file.create(in != null ? in : new ByteArrayInputStream(new byte[0]), true, new NullProgressMonitor());
 		EditorUtil.openFileEditor(file);
 	}
 
-	/**
-	 * @param componentName
-	 * @param node
-	 * @param pack
-	 * @throws IOException
-	 * @throws CoreException
-	 * @throws FileNotFoundException
-	 */
-	private void addToManifest(String componentName, String elementType, IResource packageRoot) throws IOException, CoreException, FileNotFoundException
+	private void addToManifest(String componentOrServiceName, String elementType, IResource packageRoot)
+		throws IOException, CoreException, FileNotFoundException
 	{
 		if (!(packageRoot instanceof IFolder) && !(packageRoot instanceof IProject)) return;
 		IFile m = null;
@@ -267,7 +248,7 @@ public class NewComponentAction extends Action
 		Manifest manifest = new Manifest(m.getContents());
 		Attributes attr = new Attributes();
 		attr.put(new Attributes.Name("Web-" + elementType), "True");
-		manifest.getEntries().put(componentName + "/" + componentName + ".spec", attr);
+		manifest.getEntries().put(componentOrServiceName + "/" + componentOrServiceName + ".spec", attr);
 
 		OutputStream out = null;
 		InputStream in = null;

@@ -75,11 +75,6 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 		setToolTipText(text);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.action.Action#run()
-	 */
 	@Override
 	public void run()
 	{
@@ -102,20 +97,12 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 
 		private final List<SimpleUserNode> savedSelection;
 
-		/**
-		 * @param name
-		 */
 		public DeleteComponentResourcesWorkspaceJob(List<SimpleUserNode> selection)
 		{
-			super("Deleting component resources");
+			super("Deleting component or service resources");
 			savedSelection = selection;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.core.resources.WorkspaceJob#runInWorkspace(org.eclipse.core.runtime.IProgressMonitor)
-		 */
 		@Override
 		public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 		{
@@ -258,11 +245,6 @@ public class DeleteComponentResourceAction extends Action implements ISelectionC
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
-	 */
 	@Override
 	public void selectionChanged(SelectionChangedEvent event)
 	{
