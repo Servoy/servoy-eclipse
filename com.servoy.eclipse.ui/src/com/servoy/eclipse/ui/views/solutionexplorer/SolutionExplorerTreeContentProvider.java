@@ -784,27 +784,34 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					else if (type == UserNodeType.COMPONENTS_FROM_RESOURCES)
 					{
 						BaseSpecProvider provider = WebComponentSpecProvider.getInstance();
-						Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
-						Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
-						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
-						for (Map.Entry<String, URL> entry : packages.entrySet())
+						if (provider != null) // the package management system might not yet be initialized at developer startup
 						{
-							IResource resource = getResource(entry.getValue());
-							if (resource != null && !(resource instanceof IProject))
+							Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
+							Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
+							List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
+							for (Map.Entry<String, URL> entry : packages.entrySet())
 							{
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(provider.getPackageDisplayName(entry.getKey()),
-									UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES, resource, packageIcon);
-								node.parent = un;
-								children.add(node);
+								IResource resource = getResource(entry.getValue());
+								if (resource != null && !(resource instanceof IProject))
+								{
+									PlatformSimpleUserNode node = new PlatformSimpleUserNode(provider.getPackageDisplayName(entry.getKey()),
+										UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES, resource, packageIcon);
+									node.parent = un;
+									children.add(node);
+								}
 							}
+							un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 						}
-						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 					}
 					else if (type == UserNodeType.COMPONENTS_PROJECTS)
 					{
 						BaseSpecProvider provider = WebComponentSpecProvider.getInstance();
-						List<PlatformSimpleUserNode> children = getWebProjects(un, provider, "components_package.png", UserNodeType.COMPONENTS_PROJECT_PACKAGE);
-						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
+						if (provider != null) // the package management system might not yet be initialized at developer startup
+						{
+							List<PlatformSimpleUserNode> children = getWebProjects(un, provider, "components_package.png",
+								UserNodeType.COMPONENTS_PROJECT_PACKAGE);
+							un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
+						}
 					}
 					else if (type == UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES)
 					{
@@ -889,78 +896,88 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					else if (type == UserNodeType.SERVICES_FROM_RESOURCES)
 					{
 						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
-						Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
-						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
-						Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
-						for (Map.Entry<String, URL> entry : packages.entrySet())
+						if (provider != null) // the package management system might not yet be initialized at developer startup
 						{
-							IResource resource = getResource(entry.getValue());
-							if (resource != null && !(resource instanceof IProject))
+							Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
+							List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
+							Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
+							for (Map.Entry<String, URL> entry : packages.entrySet())
 							{
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(provider.getPackageDisplayName(entry.getKey()),
-									UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES, resource, packageIcon);
-								node.parent = un;
-								children.add(node);
+								IResource resource = getResource(entry.getValue());
+								if (resource != null && !(resource instanceof IProject))
+								{
+									PlatformSimpleUserNode node = new PlatformSimpleUserNode(provider.getPackageDisplayName(entry.getKey()),
+										UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES, resource, packageIcon);
+									node.parent = un;
+									children.add(node);
+								}
 							}
+							un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 						}
-						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 					}
 					else if (type == UserNodeType.SERVICES_PROJECTS)
 					{
 						BaseSpecProvider provider = WebServiceSpecProvider.getInstance();
-						List<PlatformSimpleUserNode> children = getWebProjects(un, provider, "services_package.png", UserNodeType.SERVICES_PROJECT_PACKAGE);
-						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
+						if (provider != null) // the package management system might not yet be initialized at developer startup
+						{
+							List<PlatformSimpleUserNode> children = getWebProjects(un, provider, "services_package.png", UserNodeType.SERVICES_PROJECT_PACKAGE);
+							un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
+						}
 					}
 					else if (type == UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES)
 					{
 						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
-						String packageName = provider.getPackageName(un.getName());
-						PackageSpecification<WebObjectSpecification> servicesPackage = provider.getServicesInPackage(packageName);
-						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
-						if (servicesPackage != null)
+						if (provider != null) // the package management system might not yet be initialized at developer startup
 						{
-							List<String> services = new ArrayList<>(servicesPackage.getSpecifications().keySet());
-							Collections.sort(services);
-							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
-								SolutionSerializer.SERVICES_DIR_NAME);
-							Image serviceDefaultIcon = uiActivator.loadImageFromBundle("service.png");
-							for (String component : services)
+							String packageName = provider.getPackageName(un.getName());
+							PackageSpecification<WebObjectSpecification> servicesPackage = provider.getServicesInPackage(packageName);
+							List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
+							if (servicesPackage != null)
 							{
-								WebObjectSpecification spec = provider.getWebServiceSpecification(component);
-								Image img = loadImageFromFolder(folder, spec.getIcon());
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec,
-									img != null ? img : serviceDefaultIcon);
-								node.parent = un;
-								children.add(node);
+								List<String> services = new ArrayList<>(servicesPackage.getSpecifications().keySet());
+								Collections.sort(services);
+								IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
+									SolutionSerializer.SERVICES_DIR_NAME);
+								Image serviceDefaultIcon = uiActivator.loadImageFromBundle("service.png");
+								for (String component : services)
+								{
+									WebObjectSpecification spec = provider.getWebServiceSpecification(component);
+									Image img = loadImageFromFolder(folder, spec.getIcon());
+									PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec,
+										img != null ? img : serviceDefaultIcon);
+									node.parent = un;
+									children.add(node);
+								}
 							}
+							un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 						}
-						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
-
 					}
 					else if (type == UserNodeType.SERVICES_PROJECT_PACKAGE)
 					{
 						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
-						String packageName = getPackageName(un);
-						PackageSpecification<WebObjectSpecification> servicesPackage = provider.getServicesInPackage(packageName);
-						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
-						if (servicesPackage != null)
+						if (provider != null) // the package management system might not yet be initialized at developer startup
 						{
-							List<String> services = new ArrayList<>(servicesPackage.getSpecifications().keySet());
-							Collections.sort(services);
-							IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(packageName);
-							Image serviceDefaultIcon = uiActivator.loadImageFromBundle("service.png");
-							for (String component : services)
+							String packageName = getPackageName(un);
+							PackageSpecification<WebObjectSpecification> servicesPackage = provider.getServicesInPackage(packageName);
+							List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
+							if (servicesPackage != null)
 							{
-								WebObjectSpecification spec = provider.getWebServiceSpecification(component);
-								Image img = loadImageFromProject(project, spec.getIcon());
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec,
-									img != null ? img : serviceDefaultIcon);
-								node.parent = un;
-								children.add(node);
+								List<String> services = new ArrayList<>(servicesPackage.getSpecifications().keySet());
+								Collections.sort(services);
+								IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(packageName);
+								Image serviceDefaultIcon = uiActivator.loadImageFromBundle("service.png");
+								for (String component : services)
+								{
+									WebObjectSpecification spec = provider.getWebServiceSpecification(component);
+									Image img = loadImageFromProject(project, spec.getIcon());
+									PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec,
+										img != null ? img : serviceDefaultIcon);
+									node.parent = un;
+									children.add(node);
+								}
 							}
+							un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 						}
-						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
-
 					}
 					else if (type == UserNodeType.ALL_WEB_PACKAGES)
 					{
@@ -997,10 +1014,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return new Object[0];
 	}
 
-	/**
-	 * @param iProject
-	 * @return
-	 */
 	private Image resolveWebPackageImage(IProject iProject)
 	{
 		String imageFile = null;
@@ -1147,10 +1160,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return img;
 	}
 
-	/**
-	 * @param url
-	 * @return
-	 */
 	private IResource getResource(URL packageURL)
 	{
 		if (packageURL == null) return null;
@@ -1325,14 +1334,18 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 				else if (un.getType() == UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES || un.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE)
 				{
-					return (!WebComponentSpecProvider.getInstance().getComponentsInPackage(
-						WebComponentSpecProvider.getInstance().getPackageName(getPackageName(un))).isEmpty() ||
+					return (WebComponentSpecProvider.getInstance() != null &&
+						!WebComponentSpecProvider.getInstance().getComponentsInPackage(
+							WebComponentSpecProvider.getInstance().getPackageName(getPackageName(un))).isEmpty() ||
 						!WebComponentSpecProvider.getInstance().getLayoutsInPackage(
 							WebComponentSpecProvider.getInstance().getPackageName(getPackageName(un))).isEmpty());
 				}
 				else if (un.getType() == UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES || un.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE)
 				{
-					PackageSpecification<WebObjectSpecification> services = WebServiceSpecProvider.getInstance().getServicesInPackage(
+					WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
+					if (provider == null) return false;// the package management system might not yet be initialized at developer startup
+
+					PackageSpecification<WebObjectSpecification> services = provider.getServicesInPackage(
 						WebServiceSpecProvider.getInstance().getPackageName(getPackageName(un)));
 					return services != null && !services.getSpecifications().isEmpty();
 				}
@@ -1369,6 +1382,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private boolean hasWebProjectReferences(PlatformSimpleUserNode un, BaseSpecProvider provider)
 	{
+		if (provider == null) return false; // the package management system is not yet initialized; this is probably at developer startup
+
 		Object realObject = un.getRealObject();
 		if (realObject instanceof Solution)
 		{
