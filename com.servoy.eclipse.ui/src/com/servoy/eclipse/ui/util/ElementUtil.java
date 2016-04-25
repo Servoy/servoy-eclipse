@@ -49,6 +49,7 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -67,7 +68,6 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.TabPanel;
 import com.servoy.j2db.persistence.ValueList;
-import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.plugins.IClientPluginAccess;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
@@ -244,11 +244,11 @@ public class ElementUtil
 			// no override
 			return persist;
 		}
-		WebCustomType customType = null;
-		if (persist instanceof WebCustomType)
+		IChildWebObject webObject = null;
+		if (persist instanceof IChildWebObject)
 		{
-			customType = (WebCustomType)persist;
-			persist = customType.getParent();
+			webObject = (IChildWebObject)persist;
+			persist = webObject.getParent();
 		}
 		while (PersistHelper.getSuperPersist((ISupportExtendsID)persist) != null)
 		{
@@ -302,20 +302,21 @@ public class ElementUtil
 			((AbstractBase)newPersist).copyPropertiesMap(null, true);
 			((ISupportExtendsID)newPersist).setExtendsID(parentPersist.getID());
 		}
-		if (customType != null)
+		if (webObject != null)
 		{
-			Object newCustomType = ((AbstractBase)newPersist).getProperty(customType.getJsonKey());
-			if (newCustomType instanceof WebCustomType)
+			Object newWebObject = ((AbstractBase)newPersist).getProperty(webObject.getJsonKey());
+			if (newWebObject instanceof IChildWebObject)
 			{
-				return (WebCustomType)newCustomType;
+				return (IChildWebObject)newWebObject;
 			}
-			else if (newCustomType instanceof Object[])
+			else if (newWebObject instanceof Object[])
 			{
-				return (IPersist)((Object[])newCustomType)[customType.getIndex()];
+				return (IPersist)((Object[])newWebObject)[webObject.getIndex()];
 			}
 			else
 			{
-				ServoyLog.logError("Cannot find the override custom type in: " + newCustomType, null);
+				ServoyLog.logError("Cannot find the override custom type in: " + newWebObject, null);
+				return webObject;
 			}
 		}
 		return newPersist;
