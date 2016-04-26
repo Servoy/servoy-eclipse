@@ -76,7 +76,6 @@ public class GhostHandler implements IServerService
 	public static final String GHOST_TYPE_COMPONENT = "comp";
 	public static final String GHOST_TYPE_PART = "part";
 	public static final String GHOST_TYPE_FORM = "form";
-	private static final String GHOST_TYPE_INVISIBLE = "invisible";
 	public static final String GHOST_TYPE_GROUP = "group";
 
 	private final BaseVisualFormEditor editorPart;
@@ -468,7 +467,6 @@ public class GhostHandler implements IServerService
 			}
 		});
 		List<IFormElement> outsideElements = new ArrayList<IFormElement>();
-		List<IFormElement> invisibleElements = new ArrayList<IFormElement>();
 		Map<String, FormElementGroup> groups = new HashMap<>();
 		Iterator<IPersist> it = editorPart.getForm().getAllObjects();
 		int formHeight = 0;
@@ -495,7 +493,6 @@ public class GhostHandler implements IServerService
 				{
 					outsideElements.add(fe);
 				}
-				if (!isVisible(fe)) invisibleElements.add(fe);
 				if (fe.getGroupID() != null)
 				{
 					String groupID = fe.getGroupID();
@@ -504,7 +501,7 @@ public class GhostHandler implements IServerService
 				}
 			}
 		}
-		if (outsideElements.size() > 0 || invisibleElements.size() > 0 || groups.size() > 0)
+		if (outsideElements.size() > 0 || groups.size() > 0)
 		{
 			writer.object();
 			writer.key("style");
@@ -517,7 +514,6 @@ public class GhostHandler implements IServerService
 			writer.key("ghosts");
 			writer.array();
 			printGhostFormElements(writer, outsideElements.iterator(), GHOST_TYPE_COMPONENT);
-			printGhostFormElements(writer, invisibleElements.iterator(), GHOST_TYPE_INVISIBLE);
 
 			for (FormElementGroup group : groups.values())
 			{
