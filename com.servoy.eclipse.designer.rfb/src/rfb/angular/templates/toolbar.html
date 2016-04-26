@@ -20,6 +20,10 @@
 		<toolbar-item ng-repeat="item in sizing" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>
 	
+	<div class="toolbar groping" ng-if="grouping.length > 0">
+		<toolbar-item ng-repeat="item in grouping" ng-if="!item.hide" model="item" class="toolbar-action"/>
+	</div>
+	
 	<div class="toolbar form" ng-if="form.length > 0">
 		<toolbar-item ng-repeat="item in form" ng-if="!item.hide" model="item" class="toolbar-action"/>
 	</div>

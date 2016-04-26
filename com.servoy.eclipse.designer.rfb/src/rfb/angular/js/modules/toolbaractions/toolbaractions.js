@@ -1,4 +1,4 @@
-angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope, $toolbar, TOOLBAR_CATEGORIES, $editorService, $pluginRegistry, $selectionUtils, $window, EDITOR_EVENTS) {
+angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope, $toolbar, TOOLBAR_CATEGORIES, $editorService, $pluginRegistry, $selectionUtils, $window, EDITOR_EVENTS, EDITOR_CONSTANTS) {
 
 	var editorScope = null;
 	var utils = null;
@@ -529,6 +529,30 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	$toolbar.add(btnDistributeVerticalSpacing, TOOLBAR_CATEGORIES.DISTRIBUTION);
 	$toolbar.add(btnDistributeVerticalCenters, TOOLBAR_CATEGORIES.DISTRIBUTION);
 	$toolbar.add(btnDistributeUpward, TOOLBAR_CATEGORIES.DISTRIBUTION);
+	
+	var btnGroup =
+	{
+			text: "Group",
+			icon: "../../images/group.gif",
+			enabled: false,
+			onclick: function()
+			{
+				$editorService.executeAction('createGroup');
+			}
+	};
+
+	var btnUngroup =
+	{
+		text: "Ungroup",
+		icon: "../../images/ungroup.gif",
+		enabled: false,
+		onclick: function()
+		{
+			$editorService.executeAction('clearGroup');
+		}
+	};
+	$toolbar.add(btnGroup, TOOLBAR_CATEGORIES.GROUPING);
+	$toolbar.add(btnUngroup, TOOLBAR_CATEGORIES.GROUPING);
 
 	var btnReload = {
 		text: "Reload designer (use when component changes must be reflected)",
@@ -585,6 +609,20 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 				btnBottomAlign.enabled = selection.length > 1;
 				btnCenterAlign.enabled = selection.length > 1;
 				btnMiddleAlign.enabled = selection.length > 1;
+				//TODO move this outside the if when SVY-9108 Should be possible to group elements in responsive form. is done
+				btnGroup.enabled = selection.length >= 2;
+				btnUngroup.enabled = function() {
+					//at least one selected element should be a group
+					for (var i = 0; i < selection.length; i++)
+					{
+						var ghost = editorScope.getGhost(selection[i].getAttribute("svy-id"));
+						if (ghost && ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
+						{
+							return true;
+						}
+					}
+					return false;
+				}();
 			}
 			btnBringForward.enabled = selection.length > 0;
 			btnSendBackward.enabled = selection.length > 0;

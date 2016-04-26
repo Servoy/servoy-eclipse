@@ -63,6 +63,8 @@ angular.module("toolbar",['toolbaractions','designsize'])
 			    	  $scope.alignment = $toolbar.getButtons(TOOLBAR_CATEGORIES.ALIGNMENT);
 			    	  $scope.distribution = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISTRIBUTION);
 			    	  $scope.sizing = $toolbar.getButtons(TOOLBAR_CATEGORIES.SIZING);
+			    	  $scope.grouping = $toolbar.getButtons(TOOLBAR_CATEGORIES.GROUPING);//TODO move this outside the if when SVY-9108 Should be possible to group elements in responsive form. is done
+
 	    			}
 	    			else {
 	    				$scope.design_mode = $toolbar.getButtons(TOOLBAR_CATEGORIES.DESIGN_MODE);
@@ -104,6 +106,7 @@ angular.module("toolbar",['toolbaractions','designsize'])
 	ALIGNMENT: "alignment",
 	DISTRIBUTION: "distribution",
 	SIZING: "sizing",
+	GROUPING: "grouping",
 	FORM: "forms",
 	DISPLAY: "display",
 	EDITOR: "editor",
