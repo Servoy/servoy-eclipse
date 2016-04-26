@@ -172,7 +172,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 												for (var i = 0; i < groupElements.length; i++)
 												{
 													var elem = groupElements[i];
-													var beanModel = editorScope.getBeanModel(elem);
+													var beanModel = editorScope.getBeanModel(elem.parentElement);
 													if (beanModel) {
 														obj[elem.parentElement.getAttribute("svy-id")] = {
 																x: beanModel.location.x,
