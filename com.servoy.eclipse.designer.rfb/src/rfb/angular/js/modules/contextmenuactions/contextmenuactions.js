@@ -320,7 +320,6 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 				{
 					text: "Add",
 //					subMenu: $contextmenu.getAddActions(),
-					getItemClass: function() { return "dropdown-submenu"}
 				}
 		);
 			}
