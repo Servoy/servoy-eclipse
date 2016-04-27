@@ -300,22 +300,29 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		Set<LayoutContainer> deletedLayoutContainers = new HashSet<>();
 		Set<Part> parts = new HashSet<>();
 		Set<LayoutContainer> containers = new HashSet<>();
+		Set<BaseComponent> compAttributes = new HashSet<>();
 		boolean renderGhosts = editor.isRenderGhosts();
 		editor.setRenderGhosts(false);
 		for (IPersist persist : persists)
 		{
 			if (persist instanceof BaseComponent)
 			{
+				BaseComponent baseComponent = (BaseComponent)persist;
+				if (baseComponent.getGroupID() != null)
+				{
+					compAttributes.add(baseComponent);
+				}
+
 				if (persist.getParent().getChild(persist.getUUID()) != null)
 				{
 					ISupportChilds parent = persist.getParent();
 					if (parent instanceof LayoutContainer)
 					{
-						baseComponents.add((BaseComponent)persist);
+						baseComponents.add(baseComponent);
 					}
 					else if (parent instanceof Form)
 					{
-						baseComponents.add((BaseComponent)persist);
+						baseComponents.add(baseComponent);
 					}
 					else while (parent instanceof BaseComponent)
 					{
@@ -335,13 +342,13 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						Field oldField = (Field)ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(persist.getUUID());
 						if (oldField != null && ((Field)persist).getDisplayType() != oldField.getDisplayType())
 						{
-							refreshTemplate.add((BaseComponent)persist);
+							refreshTemplate.add(baseComponent);
 						}
 					}
 				}
 				else
 				{
-					deletedComponents.add((BaseComponent)persist);
+					deletedComponents.add(baseComponent);
 				}
 			}
 			else if (persist instanceof Part)
@@ -427,6 +434,21 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				writer.value(persist.getUUID().toString());
 			}
 			writer.endArray();
+		}
+
+		if (compAttributes.size() > 0)
+		{
+			writer.key("compAttributes");
+			writer.object();
+			for (BaseComponent persist : compAttributes)
+			{
+				writer.key(persist.getUUID().toString());
+				writer.object();
+				writer.key("group-id");
+				writer.value(persist.getGroupID());
+				writer.endObject();
+			}
+			writer.endObject();
 		}
 
 		ArrayList<IPersist> componentsWithParents = new ArrayList<IPersist>();

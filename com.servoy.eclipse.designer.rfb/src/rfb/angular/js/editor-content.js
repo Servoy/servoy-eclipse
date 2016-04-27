@@ -401,7 +401,7 @@ angular.module('editorContent',['servoyApp'])
     },
     updateFormData: function(updates) {
       var data = JSON.parse(updates);
-      if (data && (data.components || data.deleted || data.renderGhosts || data.parts || data.containers || data.deletedContainers)) {
+      if (data && (data.components || data.deleted || data.renderGhosts || data.parts || data.containers || data.deletedContainers || data.compAttributes)) {
         // TODO should it be converted??
         $rootScope.$apply(function() {
 
@@ -463,6 +463,20 @@ angular.module('editorContent',['servoyApp'])
               scope[name] = JSON.parse(data.parts[name]);
             }
           }
+          if (data.compAttributes)
+          {
+        	  for (var key in data.compAttributes) {
+        		  var element = $(document).find("[svy-id='"+key+"']");
+        		  if (element[0] && element[0].firstElementChild)
+        		  {
+        			  var elem = $(element[0].firstElementChild);
+        			  for (attribute in data.compAttributes[key]) {
+        				  elem.attr(attribute,data.compAttributes[key][attribute]);
+        			  }
+        		  }
+        	  }
+          }
+          
           if (data.containers) {
             for (var key in data.containers) {
               var element = updateElementIfParentChange(key, data, { layoutId: key },false);
