@@ -305,11 +305,11 @@ public class ExportWarModel extends AbstractWarExportModel
 				sb.append(name);
 				sb.append(';');
 				ServerConfiguration sc = getServerConfiguration(name);
-				settings.put("export.servers." + name + ".catalog", sc.getCatalog());
+				if (sc.getCatalog() != null) settings.put("export.servers." + name + ".catalog", sc.getCatalog());
 				settings.put("export.servers." + name + ".clone", sc.getDataModelCloneFrom());
 				settings.put("export.servers." + name + ".driver", sc.getDriver());
 				settings.put("export.servers." + name + ".password", sc.getPassword());
-				settings.put("export.servers." + name + ".schema", sc.getSchema());
+				if (sc.getSchema() != null) settings.put("export.servers." + name + ".schema", sc.getSchema());
 				settings.put("export.servers." + name + ".serverurl", sc.getServerUrl());
 				settings.put("export.servers." + name + ".username", sc.getUserName());
 				settings.put("export.servers." + name + ".validationquery", sc.getValidationQuery());
