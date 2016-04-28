@@ -8,6 +8,11 @@
 .drop_highlight {
 	outline:2px solid #c2ecc2;
 }
+
+#svyDesignForm.drop_highlight {
+	border:2px solid #c2ecc2;
+}
+
 .invisible_element {
 	opacity: 0.3;
 	border: 2px dashed;

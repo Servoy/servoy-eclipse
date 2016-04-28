@@ -90,9 +90,9 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 					var mousemovecallback = $scope.registerDOMEvent("mousemove", "EDITOR", function(ev) {
 						if (dragClone) {
 						    if (layoutName)
-						   	    editorScope.getEditorContentRootScope().drop_highlight = layoutName;
+						   	    editorScope.getEditorContentRootScope().drop_highlight = packageName + "." + layoutName;
 						   	else
-						   	    editorScope.getEditorContentRootScope().drop_highlight = type;
+						   	    editorScope.getEditorContentRootScope().drop_highlight = packageName + "." + type;
 						   	editorScope.getEditorContentRootScope().$apply();
 						    if (insertedClone){
 								insertedCloneParent.removeChild(insertedClone);

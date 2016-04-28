@@ -242,9 +242,13 @@ angular.module('editorContent',['servoyApp'])
   $editorContentService.setLayoutData(layout);
 
   $scope.canContainDraggedElement = function() {
-      for (arg in arguments){
-	  if (arguments[arg] == $scope.drop_highlight) return true;
-      }
+	  if($scope.drop_highlight) {
+	  	  var drop = $scope.drop_highlight.split(".");
+	      for (arg in arguments){
+			var a = arguments[arg].split(".");
+			if((a[0] == drop[0] || ($scope.drop_highlight == "component")) && ((a[1] == "*") || (a[1] == drop[1]))) return true;
+	      }
+	  }
       return false;
   }
   
