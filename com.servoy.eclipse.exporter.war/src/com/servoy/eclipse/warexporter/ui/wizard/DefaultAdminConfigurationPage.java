@@ -68,6 +68,7 @@ public class DefaultAdminConfigurationPage extends WizardPage implements Listene
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 3;
 		defaultAdminUserText.setLayoutData(gd);
+		if (exportModel.getDefaultAdminUser() != null) defaultAdminUserText.setText(exportModel.getDefaultAdminUser());
 		defaultAdminUserText.addListener(SWT.KeyUp, this);
 
 		label = new Label(composite, SWT.NONE);
@@ -77,6 +78,7 @@ public class DefaultAdminConfigurationPage extends WizardPage implements Listene
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 3;
 		defaultAdminPasswordText.setLayoutData(gd);
+		if (exportModel.getDefaultAdminPassword() != null) defaultAdminPasswordText.setText(exportModel.getDefaultAdminPassword());
 		defaultAdminPasswordText.addListener(SWT.KeyUp, this);
 
 		label = new Label(composite, SWT.NONE);
@@ -86,6 +88,7 @@ public class DefaultAdminConfigurationPage extends WizardPage implements Listene
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 3;
 		defaultAdminPasswordText2.setLayoutData(gd);
+		if (exportModel.getDefaultAdminPassword() != null) defaultAdminPasswordText2.setText(exportModel.getDefaultAdminPassword());
 		defaultAdminPasswordText2.addListener(SWT.KeyUp, this);
 
 		label = new Label(composite, SWT.NONE);

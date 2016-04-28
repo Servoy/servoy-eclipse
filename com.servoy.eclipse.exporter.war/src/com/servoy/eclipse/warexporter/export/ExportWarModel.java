@@ -206,6 +206,9 @@ public class ExportWarModel extends AbstractWarExportModel
 			}
 		}
 		overwriteSocketFactoryProperties = false;
+		defaultAdminUser = settings.get("export.defaultAdminUser");
+		if (settings.get("export.defaultAdminPassword") != null)
+			defaultAdminPassword = new String(Utils.decodeBASE64(settings.get("export.defaultAdminPassword")));
 	}
 
 	public void saveSettings(IDialogSettings settings)
@@ -239,7 +242,8 @@ public class ExportWarModel extends AbstractWarExportModel
 		settings.put("export.tomcat.clearReferencesStatic", clearReferencesStatic);
 		settings.put("export.tomcat.clearReferencesStopThreads", clearReferencesStopThreads);
 		settings.put("export.tomcat.clearReferencesStopTimerThreads", clearReferencesStopTimerThreads);
-
+		settings.put("export.defaultAdminUser", defaultAdminUser);
+		if (defaultAdminPassword != null) settings.put("export.defaultAdminPassword", Utils.encodeBASE64(defaultAdminPassword.getBytes()));
 
 		if (exportedComponents != null) settings.put("export.components", exportedComponents.toArray(new String[exportedComponents.size()]));
 		if (exportedServices != null) settings.put("export.services", exportedServices.toArray(new String[exportedServices.size()]));

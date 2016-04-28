@@ -39,6 +39,8 @@ public class ServerConfiguration
 	public ServerConfiguration(String name)
 	{
 		this.name = name;
+		schema = ServerConfig.NONE;
+		catalog = ServerConfig.NONE;
 	}
 
 	public ServerConfiguration(String name, ServerConfig config)
@@ -48,8 +50,8 @@ public class ServerConfiguration
 		userName = config.getUserName();
 		password = config.getPassword();
 		driver = config.getDriver();
-		schema = config.getSchema();
-		catalog = config.getCatalog();
+		schema = getDisplayValue(config.getSchema());
+		catalog = getDisplayValue(config.getCatalog());
 		connectionValidationType = config.getConnectionValidationType();
 		validationQuery = config.getValidationQuery();
 		dataModelCloneFrom = config.getDataModelCloneFrom();
@@ -57,6 +59,19 @@ public class ServerConfiguration
 		maxIdle = config.getMaxIdle();
 		maxPreparedStatementsIdle = config.getMaxPreparedStatementsIdle();
 		skipSysTables = config.getSkipSysTables();
+	}
+
+	private String getDisplayValue(String value)
+	{
+		if (value == null)
+		{
+			return ServerConfig.NONE;
+		}
+		else if (value.trim().length() == 0)
+		{
+			return ServerConfig.EMPTY;
+		}
+		return value;
 	}
 
 	/**
@@ -200,7 +215,7 @@ public class ServerConfiguration
 	 */
 	public void setCatalog(String catalog)
 	{
-		this.catalog = catalog;
+		this.catalog = getDisplayValue(catalog);
 	}
 
 	/**
@@ -264,7 +279,7 @@ public class ServerConfiguration
 	 */
 	public void setSchema(String schema)
 	{
-		this.schema = schema;
+		this.schema = getDisplayValue(schema);
 	}
 
 	/**
