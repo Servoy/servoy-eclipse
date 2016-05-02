@@ -6,32 +6,34 @@
       templateUrl: 'app/app.component.html',
     })
     .Class({
-      constructor: [ng.http.Http, function(http) {
-	  var loc = window.location;
-	  var self = this; 
-	  
-	  var uri = "ws://"+loc.host+"/webpackage/angular2/websocket";
-	  this.websocket = new WebSocket(uri);
-	  
-	  var ws = this.websocket;
-	  
-	  ws.onopen = function (event) {
-	      var command = {"method":"requestAllInstalledPackages"};
-	      ws.send(JSON.stringify(command)); 
-	  };
-	  
-	  //http.get("http://servoy.github.io/webpackageindex").map(function (res) { return res.json();}).subscribe(function(data){console.log(data);});
-	  
-	  ws.onmessage = function (msg){
-	      var receivedJson = JSON.parse(msg.data);
-	      if (receivedJson["requestAllInstalledPackages"]) receivedAllInstalledPackage(self,receivedJson["requestAllInstalledPackages"]);
-	      if (receivedJson["message"]) self[receivedJson["message"]](receivedJson["args"]);
-	  }
-	  
-	  function receivedAllInstalledPackage(self, packagesArray){
-	      self.items = packagesArray;
-	  };
-      }],
+	      constructor: [ng.http.Http,ng.core.NgZone, function(http,zone) {
+		  var loc = window.location;
+		  var self = this; 
+		  
+		  var uri = "ws://"+loc.host+"/webpackage/angular2/websocket";
+		  this.websocket = new WebSocket(uri);
+		  
+		  var ws = this.websocket;
+		  
+		  ws.onopen = function (event) {
+		      var command = {"method":"requestAllInstalledPackages"};
+		      ws.send(JSON.stringify(command)); 
+		  };
+		  
+		  //http.get("http://servoy.github.io/webpackageindex").map(function (res) { return res.json();}).subscribe(function(data){console.log(data);});
+		  
+		  ws.onmessage = function (msg){
+			  zone.run(function() {
+				  var receivedJson = JSON.parse(msg.data);
+			      if (receivedJson["requestAllInstalledPackages"]) receivedAllInstalledPackage(self,receivedJson["requestAllInstalledPackages"]);
+			      if (receivedJson["message"]) self[receivedJson["message"]](receivedJson["args"]);
+			  })
+		  }
+		  
+		  function receivedAllInstalledPackage(self, packagesArray){
+				 self.items = packagesArray;
+		  };
+	  }],
       
       install : function (item) {
         	  var ws = this.websocket;
