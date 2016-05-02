@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.jar.Manifest;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -55,7 +53,6 @@ import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -375,7 +372,7 @@ public abstract class BaseNGPackageManager
 
 	/**
 	 * Unloads some previously loaded ngPackage projects and loads others as needed (as they change in workspace).
-
+	
 	 * IMPORTANT: only call this if these packages are the only ones that changed (so there were no changes in the ng packages from the resouces project; cause if
 	 * for example a package is moved between the resources project and a separate ng pacakge project it would error out because it might not be unloaded
 	 * properly before being loaded again if you sequentially call reload on resources project packages and on ng package projects)
@@ -550,14 +547,7 @@ public abstract class BaseNGPackageManager
 			}
 			if (resource.getName().endsWith(".zip"))
 			{
-				try
-				{
-					return new Pair<String, IPackageReader>(name, new ZipFilePackageReader(resource));
-				}
-				catch (IOException e)
-				{
-					Debug.log(e);
-				}
+				return new Pair<String, IPackageReader>(name, new ZipFilePackageReader(resource));
 			}
 			else if (resource.getName().endsWith(".jar")) return new Pair<String, IPackageReader>(name, new JarFilePackageReader(resource));
 		}
@@ -691,9 +681,9 @@ public abstract class BaseNGPackageManager
 	{
 		private final IResource resource;
 
-		public ZipFilePackageReader(IResource resource) throws ZipException, IOException
+		public ZipFilePackageReader(IResource resource)
 		{
-			super(new ZipFile(new File(resource.getLocationURI())), resource.getName().substring(0, resource.getName().length() - 4));
+			super(new File(resource.getLocationURI()), resource.getName().substring(0, resource.getName().length() - 4));
 			this.resource = resource;
 		}
 
