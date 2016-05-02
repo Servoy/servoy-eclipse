@@ -2791,6 +2791,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES, newLayoutAction);
 		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newLayoutAction);
 		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS_FROM_RESOURCES, manageWebPackagesAction);
+		newActionInTreeSecondary.registerAction(UserNodeType.SERVICES_FROM_RESOURCES, manageWebPackagesAction);
 
 		createActionInTree.registerAction(UserNodeType.COMPONENTS_FROM_RESOURCES, newComponentPackageAction);
 		createPackageProjectActionInTree.registerAction(UserNodeType.COMPONENTS_PROJECTS, newComponentsPackageProjectAction);
