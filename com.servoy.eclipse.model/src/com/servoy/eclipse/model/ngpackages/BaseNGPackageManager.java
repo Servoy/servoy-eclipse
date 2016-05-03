@@ -545,11 +545,10 @@ public abstract class BaseNGPackageManager
 			{
 				name = name.substring(0, index);
 			}
-			if (resource.getName().endsWith(".zip"))
+			if (resource.getName().endsWith(".zip") || resource.getName().endsWith(".jar"))
 			{
 				return new Pair<String, IPackageReader>(name, new ZipFilePackageReader(resource));
 			}
-			else if (resource.getName().endsWith(".jar")) return new Pair<String, IPackageReader>(name, new JarFilePackageReader(resource));
 		}
 		return null;
 	}
@@ -656,24 +655,6 @@ public abstract class BaseNGPackageManager
 		{
 			super.reportError(specpath, e);
 			addErrorMarker(e instanceof DuplicatePackageException ? container : container.getFile(new Path(specpath)), e);
-		}
-	}
-
-	private class JarFilePackageReader extends Package.JarPackageReader
-	{
-		private final IResource resource;
-
-		public JarFilePackageReader(IResource resource)
-		{
-			super(new File(resource.getLocationURI()));
-			this.resource = resource;
-		}
-
-		@Override
-		public void reportError(String specpath, Exception e)
-		{
-			super.reportError(specpath, e);
-			addErrorMarker(resource, e);
 		}
 	}
 
