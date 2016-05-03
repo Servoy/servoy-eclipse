@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Web Package Manager
 Bundle-SymbolicName: com.servoy.eclipse.designer.wpm;singleton:=true
-Bundle-Version: 1.0.0
-Bundle-Vendor: SERVOY
+Bundle-Version: 8.0.3.3025
+Bundle-Vendor: Servoy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: javax.servlet,
  jabsorb,
