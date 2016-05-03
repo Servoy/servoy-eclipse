@@ -4120,7 +4120,8 @@ public class TypeCreator extends TypeCache
 
 		String serverName = null;
 		String tableName = null;
-		String[] serverAndTableName = DataSourceUtilsBase.getDBServernameTablename(config);
+		String[] serverAndTableName = config.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON) ? DataSourceUtils.getMemServernameTablename(config)
+			: DataSourceUtilsBase.getDBServernameTablename(config);
 		if (serverAndTableName != null)
 		{
 			serverName = serverAndTableName[0];
@@ -4149,7 +4150,9 @@ public class TypeCreator extends TypeCache
 			{
 				try
 				{
-					IServer server = fs.getSolution().getRepository().getServer(serverName);
+					IServer server = config.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON)
+						? ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(fs.getName()).getMemServer()
+						: fs.getSolution().getRepository().getServer(serverName);
 					if (server != null)
 					{
 						table = server.getTable(tableName);
