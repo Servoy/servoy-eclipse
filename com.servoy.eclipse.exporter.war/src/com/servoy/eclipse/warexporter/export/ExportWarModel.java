@@ -25,6 +25,8 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.crypto.Cipher;
+
 import org.eclipse.jface.dialogs.IDialogSettings;
 
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
@@ -32,6 +34,8 @@ import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.SecuritySupport;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
 
@@ -86,11 +90,25 @@ public class ExportWarModel extends AbstractWarExportModel
 	private String defaultAdminUser;
 	private String defaultAdminPassword;
 
+	private static final String enc_prefix = "encrypted:";
+
 	/**
 	 * @param dialogSettings
 	 */
 	public ExportWarModel(IDialogSettings settings)
 	{
+		Cipher desCipher = null;
+		try
+		{
+			Cipher cipher = Cipher.getInstance("DESede"); //$NON-NLS-1$
+			cipher.init(Cipher.DECRYPT_MODE, SecuritySupport.getCryptKey(null));
+			desCipher = cipher;
+		}
+		catch (Exception e)
+		{
+			Debug.error("Cannot load encrypted previous export passwords", e);
+		}
+
 		warFileName = settings.get("export.warfilename");
 		servoyPropertiesFileName = settings.get("export.servoyPropertiesFileName");
 		exportActiveSolution = Utils.getAsBoolean(settings.get("export.exportActiveSolution"));
@@ -192,7 +210,7 @@ public class ExportWarModel extends AbstractWarExportModel
 					sc.setCatalog(settings.get("export.servers." + name + ".catalog"));
 					sc.setDataModelCloneFrom(settings.get("export.servers." + name + ".clone"));
 					sc.setDriver(settings.get("export.servers." + name + ".driver"));
-					sc.setPassword(settings.get("export.servers." + name + ".password"));
+					sc.setPassword(decryptPassword(settings, desCipher, "export.servers." + name + ".password"));
 					sc.setSchema(settings.get("export.servers." + name + ".schema"));
 					sc.setServerUrl(settings.get("export.servers." + name + ".serverurl"));
 					sc.setUserName(settings.get("export.servers." + name + ".username"));
@@ -208,11 +226,50 @@ public class ExportWarModel extends AbstractWarExportModel
 		overwriteSocketFactoryProperties = false;
 		defaultAdminUser = settings.get("export.defaultAdminUser");
 		if (settings.get("export.defaultAdminPassword") != null)
-			defaultAdminPassword = new String(Utils.decodeBASE64(settings.get("export.defaultAdminPassword")));
+		{
+			defaultAdminPassword = decryptPassword(settings, desCipher, "export.defaultAdminPassword");
+		}
+	}
+
+	private String decryptPassword(IDialogSettings settings, Cipher desCipher, String propertyName)
+	{
+		String value = "";
+		String password = settings.get(propertyName);
+		if (password.startsWith(enc_prefix))
+		{
+			try
+			{
+				String val_val = password.substring(enc_prefix.length());
+				byte[] array_val = Utils.decodeBASE64(val_val);
+				value = new String(desCipher.doFinal(array_val));
+			}
+			catch (Exception e)
+			{
+				Debug.error("Could not decrypt property");
+			}
+		}
+		else if (!"".equals(password))
+		{
+			value = new String(Utils.decodeBASE64(password));
+		}
+		return value;
 	}
 
 	public void saveSettings(IDialogSettings settings)
 	{
+
+		Cipher desCipher = null;
+		try
+		{
+			Cipher cipher = Cipher.getInstance("DESede"); //$NON-NLS-1$
+			cipher.init(Cipher.ENCRYPT_MODE, SecuritySupport.getCryptKey(null));
+			desCipher = cipher;
+		}
+		catch (Exception e)
+		{
+			Debug.error("Cannot save encrypted export passwords", e);
+		}
+
 		settings.put("export.warfilename", warFileName);
 		settings.put("export.exportActiveSolution", exportActiveSolution);
 		settings.put("export.servoyPropertiesFileName", servoyPropertiesFileName);
@@ -243,7 +300,8 @@ public class ExportWarModel extends AbstractWarExportModel
 		settings.put("export.tomcat.clearReferencesStopThreads", clearReferencesStopThreads);
 		settings.put("export.tomcat.clearReferencesStopTimerThreads", clearReferencesStopTimerThreads);
 		settings.put("export.defaultAdminUser", defaultAdminUser);
-		if (defaultAdminPassword != null) settings.put("export.defaultAdminPassword", Utils.encodeBASE64(defaultAdminPassword.getBytes()));
+		if (defaultAdminPassword != null)
+			settings.put("export.defaultAdminPassword", encryptPassword(desCipher, "export.defaultAdminPassword", defaultAdminPassword));
 
 		if (exportedComponents != null) settings.put("export.components", exportedComponents.toArray(new String[exportedComponents.size()]));
 		if (exportedServices != null) settings.put("export.services", exportedServices.toArray(new String[exportedServices.size()]));
@@ -312,7 +370,7 @@ public class ExportWarModel extends AbstractWarExportModel
 				if (sc.getCatalog() != null) settings.put("export.servers." + name + ".catalog", sc.getCatalog());
 				settings.put("export.servers." + name + ".clone", sc.getDataModelCloneFrom());
 				settings.put("export.servers." + name + ".driver", sc.getDriver());
-				settings.put("export.servers." + name + ".password", sc.getPassword());
+				settings.put("export.servers." + name + ".password", encryptPassword(desCipher, "export.servers." + name + ".password", sc.getPassword()));
 				if (sc.getSchema() != null) settings.put("export.servers." + name + ".schema", sc.getSchema());
 				settings.put("export.servers." + name + ".serverurl", sc.getServerUrl());
 				settings.put("export.servers." + name + ".username", sc.getUserName());
@@ -325,6 +383,25 @@ public class ExportWarModel extends AbstractWarExportModel
 			}
 			settings.put("export.servers", sb.toString());
 		}
+	}
+
+	private String encryptPassword(Cipher desCipher, String propertyName, String password)
+	{
+		String val = password;
+		if (!val.startsWith(enc_prefix) && propertyName.toLowerCase().indexOf("password") != -1) //$NON-NLS-1$
+		{
+			try
+			{
+				byte[] array_val = password.getBytes();
+				String new_val = Utils.encodeBASE64(desCipher.doFinal(array_val));
+				val = enc_prefix + new_val;
+			}
+			catch (Exception e)
+			{
+				Debug.error("Could not encrypt password " + propertyName, e);
+			}
+		}
+		return val;
 	}
 
 	public String getFileName()
