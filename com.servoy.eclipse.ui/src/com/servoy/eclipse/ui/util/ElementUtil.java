@@ -30,7 +30,6 @@ import org.eclipse.swt.graphics.Image;
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
@@ -48,6 +47,7 @@ import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.FormReference;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IFormElement;
@@ -238,7 +238,6 @@ public class ElementUtil
 		|| !(context instanceof Form) //
 		|| ancestorForm == null // persist is something else, like a relation or a solution
 		|| ancestorForm == context // already in same form
-		|| !ModelUtils.getEditingFlattenedSolution(context).getFormHierarchy((Form)context).contains(ancestorForm)// check that the persist is in a parent form of the context
 		)
 		{
 			// no override
@@ -296,6 +295,19 @@ public class ElementUtil
 					parent = (ISupportChilds)((AbstractBase)persist.getParent()).cloneObj((Form)context, false, null, false, false, false);
 					((AbstractBase)parent).copyPropertiesMap(null, true);
 					((ISupportExtendsID)parent).setExtendsID(parentPersist.getParent().getID());
+				}
+			}
+			else
+			{
+				Iterator<FormReference> it = ((Form)context).getFormReferences();
+				while (it.hasNext())
+				{
+					FormReference formReference = it.next();
+					if (formReference.getContainsFormID() == ancestorForm.getID())
+					{
+						parent = formReference;
+						break;
+					}
 				}
 			}
 			newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false, false);

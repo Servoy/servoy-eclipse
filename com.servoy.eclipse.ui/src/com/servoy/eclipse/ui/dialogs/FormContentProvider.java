@@ -32,12 +32,13 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.PersistEncapsulation;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Content provider class for forms.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 
 public class FormContentProvider implements ITreeContentProvider
@@ -82,7 +83,9 @@ public class FormContentProvider implements ITreeContentProvider
 					while (forms.hasNext())
 					{
 						Form obj = forms.next();
-						if ((options.showInMenu == null || options.showInMenu.booleanValue() == obj.getShowInMenu()) && form != obj &&
+						if (((options.showInMenu == null || options.showInMenu.booleanValue() == obj.getShowInMenu()) &&
+							(options.showTemplates == Utils.getAsBoolean(obj.getReferenceForm())) &&
+							((options.datasource == null || Utils.equalObjects(options.datasource, obj.getDataSource())))) && form != obj &&
 							!PersistEncapsulation.isModuleScope(obj, flattenedSolution.getSolution()))
 						{
 							addFormInList(activeProject, obj, solutionNames, formIdsAndWorkingSets);
@@ -96,8 +99,8 @@ public class FormContentProvider implements ITreeContentProvider
 					while (forms.hasNext())
 					{
 						Form possibleParentForm = forms.next();
-						if ((form.getDataSource() == null || possibleParentForm.getDataSource() == null || form.getDataSource().equals(
-							possibleParentForm.getDataSource())) &&
+						if ((form.getDataSource() == null || possibleParentForm.getDataSource() == null ||
+							form.getDataSource().equals(possibleParentForm.getDataSource())) &&
 							!PersistEncapsulation.isModuleScope(possibleParentForm, flattenedSolution.getSolution()))
 						{
 							// do not add the form if it is already a sub-form, to prevent cycles
@@ -149,15 +152,20 @@ public class FormContentProvider implements ITreeContentProvider
 		public final boolean includeNone;
 		public final boolean includeDefault;
 		public final boolean includeIgnore;
+		public final boolean showTemplates;
+		public final String datasource;
 		public final FormListType type;
 
-		public FormListOptions(FormListType type, Boolean showInMenu, boolean includeNone, boolean includeDefault, boolean includeIgnore)
+		public FormListOptions(FormListType type, Boolean showInMenu, boolean includeNone, boolean includeDefault, boolean includeIgnore, boolean showTemplates,
+			String datasource)
 		{
 			this.type = type;
 			this.showInMenu = showInMenu;
 			this.includeNone = includeNone;
 			this.includeDefault = includeDefault;
 			this.includeIgnore = includeIgnore;
+			this.showTemplates = showTemplates;
+			this.datasource = datasource;
 		}
 	}
 

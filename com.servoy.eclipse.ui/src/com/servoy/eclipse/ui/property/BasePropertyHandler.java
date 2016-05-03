@@ -42,6 +42,7 @@ import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.component.ComponentFactory;
 import com.servoy.j2db.documentation.ClientSupport;
+import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
@@ -246,6 +247,11 @@ public class BasePropertyHandler implements IPropertyHandler
 				int type = form.getSolution().getSolutionType();
 				return (type == SolutionMetaData.SOLUTION || type == SolutionMetaData.NG_CLIENT_ONLY || type == SolutionMetaData.MODULE) &&
 					form.getView() != IFormConstants.VIEW_TYPE_RECORD && form.getView() != IFormConstants.VIEW_TYPE_RECORD_LOCKED;
+			}
+
+			if (obj instanceof Form && ((Form)obj).getReferenceForm() && BaseComponent.isEventOrCommandProperty(name))
+			{
+				return false;
 			}
 
 			if (!RepositoryHelper.shouldShow(name, element, persist.getClass(), dispType))

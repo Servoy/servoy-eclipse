@@ -181,10 +181,10 @@ public class ModelUtils
 				{
 					cssClasses.add(val.toString());
 				}
-			}
-			if (pd.hasDefault() && pd.getDefaultValue() != null)
-			{
-				defaultValue = pd.getDefaultValue().toString();
+				if (pd.hasDefault() && pd.getDefaultValue() != null)
+				{
+					defaultValue = pd.getDefaultValue().toString();
+				}
 			}
 		}
 

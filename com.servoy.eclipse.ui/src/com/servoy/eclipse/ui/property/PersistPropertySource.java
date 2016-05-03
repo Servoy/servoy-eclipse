@@ -148,6 +148,7 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormReference;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IColumnTypes;
@@ -1123,7 +1124,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 								new FormContentProvider(flattenedEditingSolution, null /* persist is solution */), formLabelProvider,
 								new FormValueEditor(flattenedEditingSolution), readOnly,
 								new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null,
-									Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)), false, false),
+									Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)), false, false,
+									persistContext.getPersist() instanceof FormReference,
+									(persistContext.getPersist() instanceof FormReference) ? ((Form)persistContext.getContext()).getDataSource() : null),
 								SWT.NONE, null, "Select form dialog");
 						}
 
@@ -1661,7 +1664,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			String name = propertyDescriptor.propertyDescriptor.getName();
 
-			if (name.equals("containsFormID"))
+			if (name.equals("containsFormID") && !(persistContext.getPersist() instanceof FormReference))
 			{
 				return createDelegatePropertyControllerForInheritance(persistContext.getPersist(), new RelatedTabController("containsForm", "containsForm",
 					"Select tab form", readOnly, form, ModelUtils.getEditingFlattenedSolution(persistContext.getPersist())), "containsFormID");
@@ -2810,8 +2813,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				{
 					return new ListSelectCellEditor(parent, "Select form", new FormContentProvider(flattenedEditingSolution, null /* persist is solution */),
 						formLabelProvider, new FormValueEditor(flattenedEditingSolution), readOnly,
-						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false), SWT.NONE, null,
-						"Select form dialog");
+						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false,
+							persistContext.getPersist() instanceof FormReference,
+							(persistContext.getPersist() instanceof FormReference) ? ((Form)persistContext.getContext()).getDataSource() : null),
+						SWT.NONE, null, "Select form dialog");
 				}
 			};
 			pd.setLabelProvider(formLabelProvider);

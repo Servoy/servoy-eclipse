@@ -55,6 +55,7 @@ import com.servoy.j2db.persistence.ArgumentType;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormReference;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
@@ -534,14 +535,14 @@ public class SolutionSerializer
 		catch (IOException e)
 		{
 			Solution s = (Solution)node.getAncestor(IRepository.SOLUTIONS);
-			throw new RepositoryException("Could not write object " + node + " to workspace directory " +
-				fileAccess.getWorkspaceOSPath(s != null ? s.getName() : null), e);
+			throw new RepositoryException(
+				"Could not write object " + node + " to workspace directory " + fileAccess.getWorkspaceOSPath(s != null ? s.getName() : null), e);
 		}
 		catch (JSONException e)
 		{
 			Solution s = (Solution)node.getAncestor(IRepository.SOLUTIONS);
-			throw new RepositoryException("Could not write object " + node + " to workspace directory " +
-				fileAccess.getWorkspaceOSPath(s != null ? s.getName() : null), e);
+			throw new RepositoryException(
+				"Could not write object " + node + " to workspace directory " + fileAccess.getWorkspaceOSPath(s != null ? s.getName() : null), e);
 		}
 	}
 
@@ -643,7 +644,7 @@ public class SolutionSerializer
 		}
 
 		return p instanceof Relation || p instanceof TableNode || p instanceof Form || p instanceof TabPanel || p instanceof Portal ||
-			p instanceof LayoutContainer; // can only return true for objects containing SolutionSerializer.PROP_ITEMS
+			p instanceof LayoutContainer || p instanceof FormReference; // can only return true for objects containing SolutionSerializer.PROP_ITEMS
 	}
 
 	/**
@@ -663,7 +664,7 @@ public class SolutionSerializer
 		}
 
 		return p instanceof Solution || p instanceof Relation || p instanceof TableNode || p instanceof Form || p instanceof TabPanel || p instanceof Portal ||
-			p instanceof LayoutContainer;
+			p instanceof LayoutContainer || p instanceof FormReference;
 	}
 
 	public static boolean isCompositeItem(IPersist p)
@@ -1105,7 +1106,8 @@ public class SolutionSerializer
 			if (persist instanceof AbstractBase && element.getTypeID() == IRepository.ELEMENTS &&
 				((Integer)propertyObjectValue).intValue() == IRepository.UNRESOLVED_ELEMENT)
 			{
-				HashMap<String, String> unresolvedMap = ((AbstractBase)persist).getSerializableRuntimeProperty(AbstractBase.UnresolvedPropertyToValueMapProperty);
+				HashMap<String, String> unresolvedMap = ((AbstractBase)persist).getSerializableRuntimeProperty(
+					AbstractBase.UnresolvedPropertyToValueMapProperty);
 				if (unresolvedMap != null && unresolvedMap.containsKey(propertyName))
 				{
 					propertyValue = unresolvedMap.get(propertyName);
@@ -1132,11 +1134,11 @@ public class SolutionSerializer
 				if (!isBoolean && !isNumber && !isJSON)
 				{
 					if (propertyValue == null)
-					{	
+					{
 						property_values.put(propertyName, JSONObject.NULL);
 					}
 					else
-					{	
+					{
 						property_values.put(propertyName, propertyValue);//replace with textual version
 					}
 				}
@@ -1155,8 +1157,8 @@ public class SolutionSerializer
 			while (it.hasNext())
 			{
 				child = it.next();
-				if (!(child instanceof IScriptElement)) itemsArrayList.add(generateJSONObject(child, forceRecursive, makeFlattened, repository,
-					useQuotesForKey, valueFilter));
+				if (!(child instanceof IScriptElement))
+					itemsArrayList.add(generateJSONObject(child, forceRecursive, makeFlattened, repository, useQuotesForKey, valueFilter));
 			}
 			if (itemsArrayList.size() > 0)
 			{

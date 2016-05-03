@@ -132,7 +132,7 @@ public class EditorContentFilter implements Filter
 			if (flattenedForm.isResponsiveLayout())
 			{
 				((HttpServletResponse)response).setContentType("text/html");
-				FormLayoutStructureGenerator.generateLayout(flattenedForm, solutionAndFormName.getRight(), new ServoyDataConverterContext(fs), w, true);
+				FormLayoutStructureGenerator.generateLayout(flattenedForm, solutionAndFormName.getRight(), fs, w, true);
 			}
 			else
 			{

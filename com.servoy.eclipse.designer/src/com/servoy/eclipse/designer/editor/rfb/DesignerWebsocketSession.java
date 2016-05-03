@@ -44,9 +44,11 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormReference;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
@@ -165,8 +167,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				writer.object();
 				writer.key("formProperties");
 				writer.value(wrapper.getPropertiesString());
-				Collection<BaseComponent> baseComponents = wrapper.getBaseComponents();
-				Collection<BaseComponent> deleted = Collections.emptyList();
+				Collection<IFormElement> baseComponents = new ArrayList<IFormElement>(wrapper.getBaseComponents());
+				Collection<IFormElement> deleted = Collections.emptyList();
 				sendComponents(fs, writer, baseComponents, deleted);
 				writer.key("solutionProperties");
 				writer.object();
@@ -188,20 +190,27 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				boolean componentFound = false;
 				if (name != null)
 				{
-					Collection<BaseComponent> baseComponents = wrapper.getBaseComponents();
-					for (BaseComponent baseComponent : baseComponents)
+					Collection<IFormElement> baseComponents = wrapper.getBaseComponents();
+					for (IFormElement baseComponent : baseComponents)
 					{
 						FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
 						if (Utils.equalObjects(fe.getDesignId(), name) || Utils.equalObjects(fe.getName(), name))
 						{
 							if (!form.isResponsiveLayout())
 								FormLayoutGenerator.generateFormElementWrapper(w, fe, true, flattenedForm, form.isResponsiveLayout());
-							FormLayoutGenerator.generateFormElement(w, fe, flattenedForm, true);
+							if (!(baseComponent instanceof FormReference))
+							{
+								FormLayoutGenerator.generateFormElement(w, fe, flattenedForm, true);
+							}
 							if (!form.isResponsiveLayout()) FormLayoutGenerator.generateEndDiv(w);
 							if (form.isResponsiveLayout())
 							{
 								parentuuid = fe.getPersistIfAvailable().getParent().getUUID();
 								insertBeforeUUID = findNextSibling(fe.getPersistIfAvailable());
+							}
+							if (baseComponent.getParent() instanceof FormReference)
+							{
+								parentuuid = baseComponent.getParent().getUUID();
 							}
 							componentFound = true;
 							break;
@@ -220,7 +229,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							parentuuid = child.getParent().getUUID();
 							if (child.getParent().equals(form)) parentuuid = null;
 							insertBeforeUUID = findNextSibling(child);
-							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context, w, true);
+							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context.getSolution(), w, true);
 						}
 					}
 				}
@@ -294,20 +303,20 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 
 	public String getComponentsJSON(FlattenedSolution fs, List<IPersist> persists)
 	{
-		Set<BaseComponent> baseComponents = new HashSet<>();
-		Set<BaseComponent> refreshTemplate = new HashSet<>();
-		Set<BaseComponent> deletedComponents = new HashSet<>();
+		Set<IFormElement> baseComponents = new HashSet<>();
+		Set<IFormElement> refreshTemplate = new HashSet<>();
+		Set<IFormElement> deletedComponents = new HashSet<>();
 		Set<LayoutContainer> deletedLayoutContainers = new HashSet<>();
 		Set<Part> parts = new HashSet<>();
 		Set<LayoutContainer> containers = new HashSet<>();
-		Set<BaseComponent> compAttributes = new HashSet<>();
+		Set<IFormElement> compAttributes = new HashSet<>();
 		boolean renderGhosts = editor.isRenderGhosts();
 		editor.setRenderGhosts(false);
 		for (IPersist persist : persists)
 		{
-			if (persist instanceof BaseComponent)
+			if (persist instanceof IFormElement)
 			{
-				BaseComponent baseComponent = (BaseComponent)persist;
+				IFormElement baseComponent = (IFormElement)persist;
 				if (baseComponent.getGroupID() != null)
 				{
 					compAttributes.add(baseComponent);
@@ -316,7 +325,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				if (persist.getParent().getChild(persist.getUUID()) != null)
 				{
 					ISupportChilds parent = persist.getParent();
-					if (parent instanceof LayoutContainer)
+					if (parent instanceof AbstractContainer)
 					{
 						baseComponents.add(baseComponent);
 					}
@@ -328,7 +337,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					{
 						if (parent.getParent() instanceof Form)
 						{
-							baseComponents.add((BaseComponent)parent);
+							baseComponents.add((IFormElement)parent);
 							break;
 						}
 						else
@@ -429,7 +438,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		{
 			writer.key("refreshTemplate");
 			writer.array();
-			for (BaseComponent persist : refreshTemplate)
+			for (IFormElement persist : refreshTemplate)
 			{
 				writer.value(persist.getUUID().toString());
 			}
@@ -440,7 +449,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		{
 			writer.key("compAttributes");
 			writer.object();
-			for (BaseComponent persist : compAttributes)
+			for (IFormElement persist : compAttributes)
 			{
 				writer.key(persist.getUUID().toString());
 				writer.object();
@@ -508,14 +517,14 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	 * @param writer
 	 * @param baseComponents
 	 */
-	private void sendComponents(FlattenedSolution fs, JSONWriter writer, Collection<BaseComponent> baseComponents, Collection<BaseComponent> deletedComponents)
+	private void sendComponents(FlattenedSolution fs, JSONWriter writer, Collection<IFormElement> baseComponents, Collection<IFormElement> deletedComponents)
 	{
 		if (baseComponents.size() > 0)
 		{
 			writer.key("components");
 			writer.object();
 			// TODO is this really all the data? or are there properties that would normally go through the webcomponents..
-			for (BaseComponent baseComponent : baseComponents)
+			for (IFormElement baseComponent : baseComponents)
 			{
 				FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
 				if (fe.getDesignId() != null)
@@ -534,7 +543,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		{
 			writer.key("deleted");
 			writer.array();
-			for (BaseComponent baseComponent : deletedComponents)
+			for (IFormElement baseComponent : deletedComponents)
 			{
 				FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
 				writer.value(FormLayoutGenerator.getDesignId(fe));

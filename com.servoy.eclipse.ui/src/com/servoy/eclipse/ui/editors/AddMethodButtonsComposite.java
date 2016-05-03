@@ -154,7 +154,8 @@ public class AddMethodButtonsComposite extends Composite
 					}
 					else if (scopes.size() == 1)
 					{
-						selectedScope = new ScopeWithContext(scopes.iterator().next(), (Solution)persistContext.getContext().getAncestor(IRepository.SOLUTIONS));
+						selectedScope = new ScopeWithContext(scopes.iterator().next(),
+							(Solution)persistContext.getContext().getAncestor(IRepository.SOLUTIONS));
 					}
 				}
 				ScriptMethod method = createMethod(persistContext.getContext().getAncestor(IRepository.SOLUTIONS));
@@ -213,9 +214,10 @@ public class AddMethodButtonsComposite extends Composite
 		this.persistContext = persistContext;
 		this.methodKey = methodKey;
 		Form form = (Form)persistContext.getContext().getAncestor(IRepository.FORMS);
-		createFormMethodButton.setEnabled(form != null);
-		createFoundsetMethodButton.setEnabled((form != null && form.getDataSource() != null && form.getSolution().getSolutionType() != SolutionMetaData.MOBILE) ||
-			persistContext.getContext().getAncestor(IRepository.TABLENODES) != null);
+		createFormMethodButton.setEnabled(form != null && !form.getReferenceForm());
+		createFoundsetMethodButton.setEnabled(
+			(form != null && form.getDataSource() != null && form.getSolution().getSolutionType() != SolutionMetaData.MOBILE) ||
+				persistContext.getContext().getAncestor(IRepository.TABLENODES) != null);
 	}
 
 	public void setSelectedScope(ScopeWithContext scope)

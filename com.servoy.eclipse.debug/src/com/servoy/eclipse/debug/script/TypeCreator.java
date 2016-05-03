@@ -108,8 +108,8 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.ngpackages.INGPackageChangeListener;
+import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
@@ -2437,14 +2437,17 @@ public class TypeCreator extends TypeCache
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
-					Property formProperty = createProperty(form.getName(), true, getTypeRef(context, "RuntimeForm<" + form.getName() + '>'),
-						getDescription(form.getDataSource()), getImageDescriptorForFormEncapsulation(form.getEncapsulation()), null, form.getDeprecated());
-					formProperty.setAttribute(LAZY_VALUECOLLECTION, form);
-					if (PersistEncapsulation.isHideInScriptingModuleScope(form, fs))
+					if (!form.getReferenceForm())
 					{
-						formProperty.setVisible(false);
+						Property formProperty = createProperty(form.getName(), true, getTypeRef(context, "RuntimeForm<" + form.getName() + '>'),
+							getDescription(form.getDataSource()), getImageDescriptorForFormEncapsulation(form.getEncapsulation()), null, form.getDeprecated());
+						formProperty.setAttribute(LAZY_VALUECOLLECTION, form);
+						if (PersistEncapsulation.isHideInScriptingModuleScope(form, fs))
+						{
+							formProperty.setVisible(false);
+						}
+						members.add(formProperty);
 					}
-					members.add(formProperty);
 				}
 			}
 			return type;

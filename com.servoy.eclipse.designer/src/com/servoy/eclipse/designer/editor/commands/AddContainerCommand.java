@@ -42,6 +42,7 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
+import com.servoy.j2db.persistence.FormReference;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IDeveloperRepository;
@@ -92,10 +93,28 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 								}
 								else if (event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.spec") != null)
 								{
-									persist = addLayoutComponent(persistContext, event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.spec"),
-										event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.package"),
-										new JSONObject(event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.config")),
-										computeNextLayoutContainerIndex(persistContext.getPersist()));
+									String specName = event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.spec");
+									String packageName = event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.package");
+									if ("12grid".equals(packageName) && "formreference".equals(specName))
+									{
+										if (persistContext != null && persistContext.getPersist() instanceof AbstractBase &&
+											persistContext.getPersist() instanceof ISupportChilds)
+										{
+											AbstractBase parent = (AbstractBase)ElementUtil.getOverridePersist(persistContext);
+											FormReference formReference = (FormReference)parent.getRootObject().getChangeHandler().createNewObject(
+												((ISupportChilds)parent), IRepository.FORMREFERENCE);
+											parent.addChild(formReference);
+											int index = computeNextLayoutContainerIndex(persistContext.getPersist());
+											formReference.setLocation(new Point(index, index));
+											persist = formReference;
+										}
+									}
+									else
+									{
+										persist = addLayoutComponent(persistContext, specName, packageName,
+											new JSONObject(event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.add.config")),
+											computeNextLayoutContainerIndex(persistContext.getPersist()));
+									}
 								}
 								else
 								{
@@ -267,7 +286,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			while (allObjects.hasNext())
 			{
 				IPersist child = allObjects.next();
-				if (child instanceof LayoutContainer)
+				if (child instanceof AbstractContainer)
 				{
 					i++;
 				}

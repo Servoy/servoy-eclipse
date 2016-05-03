@@ -493,8 +493,9 @@ public class PersistPropertyHandler extends BasePropertyHandler
 					boolean isMobile = form.getSolution().getSolutionMetaData().getSolutionType() == SolutionMetaData.MOBILE;
 					return new ListSelectCellEditor(parent, "Select navigator form", new FormContentProvider(flattenedEditingSolution, form), formLabelProvider,
 						new FormValueEditor(flattenedEditingSolution), false,
-						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, Boolean.valueOf(isMobile), true, !isMobile, true), SWT.NONE,
-						null, "navigatorFormDialog", "Only forms that have navigator set to -none- and showInMenu deselected appear in this list.");
+						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, Boolean.valueOf(isMobile), true, !isMobile, true, false,
+							null),
+						SWT.NONE, null, "navigatorFormDialog", "Only forms that have navigator set to -none- and showInMenu deselected appear in this list.");
 				}
 			};
 			pd.setLabelProvider(formLabelProvider);
@@ -514,9 +515,9 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				public CellEditor createPropertyEditor(Composite parent)
 				{
 					return new ListSelectCellEditor(parent, "Select parent form", new FormContentProvider(flattenedEditingSolution, form), formLabelProvider,
-						new FormValueEditor(flattenedEditingSolution), false,
-						new FormContentProvider.FormListOptions(FormListOptions.FormListType.HIERARCHY, null, true, false, false), SWT.NONE, null,
-						"parentFormDialog")
+						new FormValueEditor(flattenedEditingSolution), false, new FormContentProvider.FormListOptions(FormListOptions.FormListType.HIERARCHY,
+							null, true, false, false, form.getReferenceForm(), null),
+						SWT.NONE, null, "parentFormDialog")
 					{
 						@Override
 						protected Object openDialogBox(Control cellEditorWindow)
@@ -613,7 +614,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		}
 
 
-		if (name.equals("firstFormID") || name.equals("loginFormID"))
+		if (name.equals("firstFormID") || name.equals("loginFormID") || name.equals("containsFormID"))
 		{
 			return new PropertyDescription(name, FormPropertyType.INSTANCE);
 		}
@@ -889,6 +890,11 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		}
 
 		if (name.equals(IContentSpecConstants.PROPERTY_NG_READONLY_MODE))
+		{
+			return new PropertyDescription(name, BooleanPropertyType.INSTANCE, null, null, true, null, null, null, false);
+		}
+
+		if (name.equals(IContentSpecConstants.PROPERTY_REFERENCE_FORM))
 		{
 			return new PropertyDescription(name, BooleanPropertyType.INSTANCE, null, null, true, null, null, null, false);
 		}
