@@ -36,9 +36,11 @@ import com.servoy.j2db.util.Utils;
  * @author gganea
  *
  */
-@WebServlet("/webpackage/angular2/*")
+@WebServlet("/wpm/angular2/*")
 public class WebPackageManagerResourcesServlet extends HttpServlet
 {
+	private static final long serialVersionUID = 2361198278530167217L;
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
 	{

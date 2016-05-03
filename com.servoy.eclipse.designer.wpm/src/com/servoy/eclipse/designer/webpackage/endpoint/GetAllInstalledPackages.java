@@ -89,7 +89,7 @@ public class GetAllInstalledPackages implements IDeveloperService
 	{
 
 		HashMap<String, String> result = new HashMap<>();
-		String repositoriesIndex = getHTML("http://servoy.github.io/webpackageindex");
+		String repositoriesIndex = getListOfProjectsAsJson("http://servoy.github.io/webpackageindex");
 
 		JSONArray repoArray = new JSONArray(repositoriesIndex);
 		for (int i = repoArray.length(); i-- > 0;)
@@ -112,42 +112,21 @@ public class GetAllInstalledPackages implements IDeveloperService
 		StringBuffer result = new StringBuffer();
 		try
 		{
-
-			try (CloseableHttpClient httpClient = HttpClientBuilder.create().build())
-			{
-
-				// use httpClient (no need to close it explicitly)
-
-			}
-			catch (IOException e)
-			{
-
-				// handle
-
-			}
 			// Create an instance of HttpClient.
 			HttpClient client = HttpClientBuilder.create().build();
 			HttpGet request = new HttpGet(url);
 
 			// add request header
 			HttpResponse response;
-
 			response = client.execute(request);
 
-
 			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
 
 			String line = "";
 			while ((line = rd.readLine()) != null)
 			{
 				result.append(line);
 			}
-
-		}
-		catch (ClientProtocolException e)
-		{
-			Debug.log(e);
 		}
 		catch (Throwable e)
 		{
@@ -156,7 +135,7 @@ public class GetAllInstalledPackages implements IDeveloperService
 		return result.toString();
 	}
 
-	private String getHTML(String urlToRead)
+	private String getListOfProjectsAsJson(String urlToRead)
 	{
 		try
 		{
@@ -170,7 +149,6 @@ public class GetAllInstalledPackages implements IDeveloperService
 			{
 				result.append(line);
 			}
-
 			rd.close();
 			return result.toString();
 		}

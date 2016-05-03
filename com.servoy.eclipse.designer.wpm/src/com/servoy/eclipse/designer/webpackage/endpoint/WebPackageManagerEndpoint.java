@@ -40,7 +40,7 @@ import com.servoy.j2db.util.Debug;
  *
  */
 
-@ServerEndpoint("/webpackage/angular2/websocket")
+@ServerEndpoint("/wpm/angular2/websocket")
 public class WebPackageManagerEndpoint
 {
 

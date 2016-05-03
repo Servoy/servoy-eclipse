@@ -10,7 +10,7 @@
 		  var loc = window.location;
 		  var self = this; 
 		  
-		  var uri = "ws://"+loc.host+"/webpackage/angular2/websocket";
+		  var uri = "ws://"+loc.host+"/wpm/angular2/websocket";
 		  this.websocket = new WebSocket(uri);
 		  
 		  var ws = this.websocket;

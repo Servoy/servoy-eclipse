@@ -8,18 +8,14 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
-import org.sablo.websocket.WebsocketSessionManager;
 
-import com.servoy.eclipse.designer.editor.rfb.EditorWebsocketSession;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 public class WebPackageManager extends EditorPart
 {
 	public static final String EDITOR_ID = "com.servoy.eclipse.ui.webpackagemanager";
-	public static final String STARTPAGE_URL = "http://developer.servoy.com/developer/8xx_intro/startpage.html";
 	private Browser browser;
-	private EditorWebsocketSession pmWebsocketSession;
 
 	@Override
 	public void doSave(IProgressMonitor monitor)
@@ -57,11 +53,9 @@ public class WebPackageManager extends EditorPart
 	{
 
 
-		WebsocketSessionManager.addSession(pmWebsocketSession = new EditorWebsocketSession(this.getClass().getName()));
-		pmWebsocketSession.registerServerService("packagemanager", new WebPackageManagerServiceHandler());
 		browser = new Browser(parent, SWT.NONE);
 
-		String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/webpackage/angular2/index.html";
+		String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/wpm/angular2/index.html";
 		try
 		{
 			browser.setUrl(url, null, new String[] { "Cache-Control: no-cache" });
