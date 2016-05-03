@@ -1071,4 +1071,11 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          fragment="true"
          unpack="false"/>
 
+   <plugin
+         id="com.servoy.eclipse.designer.wpm"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>
