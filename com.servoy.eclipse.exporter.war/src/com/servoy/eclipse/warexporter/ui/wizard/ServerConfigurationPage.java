@@ -183,7 +183,7 @@ public class ServerConfigurationPage extends WizardPage
 		Label lblNewLabel_12 = new Label(container, SWT.NONE);
 		lblNewLabel_12.setText("Password");
 
-		password = new Text(container, SWT.BORDER);
+		password = new Text(container, SWT.BORDER | SWT.PASSWORD);
 		GroupLayout gl_container = new GroupLayout(container);
 		gl_container.setHorizontalGroup(gl_container.createParallelGroup(GroupLayout.LEADING).add(
 			gl_container.createSequentialGroup().addContainerGap().add(
