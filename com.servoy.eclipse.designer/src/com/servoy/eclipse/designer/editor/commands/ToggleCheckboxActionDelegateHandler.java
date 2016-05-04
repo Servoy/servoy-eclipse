@@ -19,23 +19,26 @@ package com.servoy.eclipse.designer.editor.commands;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
-import org.eclipse.ui.views.properties.IPropertySource;
 
-import com.servoy.eclipse.ui.property.PersistPropertySource;
+import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.IAnchorConstants;
 
 /**
  * Base action class to toggle change a boolean property of selected objects.
- * 
+ *
  * @author rgansevles
  */
 public abstract class ToggleCheckboxActionDelegateHandler extends SetPropertyActionDelegateHandler
 {
-	public ToggleCheckboxActionDelegateHandler(String propertyId, String name)
+	private final int flag;
+
+	public ToggleCheckboxActionDelegateHandler(String propertyId, String name, int flag)
 	{
 		super(propertyId, name, null);
+		this.flag = flag;
 	}
 
 	@Override
@@ -43,13 +46,20 @@ public abstract class ToggleCheckboxActionDelegateHandler extends SetPropertyAct
 	{
 		for (Object sel : getSelection().toArray())
 		{
-			IPropertySource propertySource = (IPropertySource)Platform.getAdapterManager().getAdapter(sel, IPropertySource.class);
-			if (propertySource instanceof PersistPropertySource)
+			Object persist = null;
+			if (sel instanceof EditPart)
 			{
-				if (((PersistPropertySource)propertySource).getPropertyDescriptor(getPropertyId()) != null)
-				{
-					return (Boolean)propertySource.getPropertyValue(getPropertyId());
-				}
+				persist = ((EditPart)sel).getModel();
+			}
+			if (sel instanceof PersistContext)
+			{
+				persist = ((PersistContext)sel).getPersist();
+			}
+			if (persist instanceof BaseComponent)
+			{
+				int anchors = ((BaseComponent)persist).getAnchors();
+				if (anchors == 0) anchors = IAnchorConstants.DEFAULT;
+				return (anchors & flag) == 0 ? Boolean.FALSE : Boolean.TRUE;
 			}
 		}
 

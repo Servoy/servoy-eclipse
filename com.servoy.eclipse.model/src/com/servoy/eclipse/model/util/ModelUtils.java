@@ -198,7 +198,7 @@ public class ModelUtils
 					try
 					{
 						String cssContent = new String(media.getMediaData(), "UTF-8");
-						IStyleSheet ss = new ServoyStyleSheet(cssContent, media.getName());
+						IStyleSheet ss = new ServoyStyleSheet(cssContent, media.getName(), true);
 						for (String cssSelector : ss.getStyleNames())
 						{
 							if (cssSelector.contains("."))

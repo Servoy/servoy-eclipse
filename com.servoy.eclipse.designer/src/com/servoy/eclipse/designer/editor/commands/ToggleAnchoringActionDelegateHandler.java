@@ -17,6 +17,7 @@
 package com.servoy.eclipse.designer.editor.commands;
 
 import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySource;
+import com.servoy.j2db.persistence.IAnchorConstants;
 
 /**
  * An action to change the anchoring of selected objects.
@@ -25,9 +26,9 @@ import com.servoy.eclipse.ui.property.AnchorPropertyController.AnchorPropertySou
  */
 public abstract class ToggleAnchoringActionDelegateHandler extends ToggleCheckboxActionDelegateHandler
 {
-	public ToggleAnchoringActionDelegateHandler(String anchoringProperty)
+	public ToggleAnchoringActionDelegateHandler(String anchoringProperty, int flag)
 	{
-		super("anchors." + anchoringProperty, "toggle anchoring");
+		super("anchors." + anchoringProperty, "toggle anchoring", flag);
 	}
 
 	public static class ToggleAnchoringTop extends ToggleAnchoringActionDelegateHandler
@@ -36,7 +37,7 @@ public abstract class ToggleAnchoringActionDelegateHandler extends ToggleCheckbo
 
 		public ToggleAnchoringTop()
 		{
-			super(AnchorPropertySource.TOP);
+			super(AnchorPropertySource.TOP, IAnchorConstants.NORTH);
 		}
 	}
 	public static class ToggleAnchoringRight extends ToggleAnchoringActionDelegateHandler
@@ -45,7 +46,7 @@ public abstract class ToggleAnchoringActionDelegateHandler extends ToggleCheckbo
 
 		public ToggleAnchoringRight()
 		{
-			super(AnchorPropertySource.RIGHT);
+			super(AnchorPropertySource.RIGHT, IAnchorConstants.EAST);
 		}
 	}
 	public static class ToggleAnchoringBottom extends ToggleAnchoringActionDelegateHandler
@@ -54,7 +55,7 @@ public abstract class ToggleAnchoringActionDelegateHandler extends ToggleCheckbo
 
 		public ToggleAnchoringBottom()
 		{
-			super(AnchorPropertySource.BOTTOM);
+			super(AnchorPropertySource.BOTTOM, IAnchorConstants.SOUTH);
 		}
 	}
 	public static class ToggleAnchoringLeft extends ToggleAnchoringActionDelegateHandler
@@ -63,7 +64,7 @@ public abstract class ToggleAnchoringActionDelegateHandler extends ToggleCheckbo
 
 		public ToggleAnchoringLeft()
 		{
-			super(AnchorPropertySource.LEFT);
+			super(AnchorPropertySource.LEFT, IAnchorConstants.WEST);
 		}
 	}
 }
