@@ -33,6 +33,7 @@ import javax.imageio.ImageIO;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -78,9 +79,9 @@ public class AddComponentIconResourceAction extends Action implements ISelection
 	}
 
 	/*
-	 * 
+	 *
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	@Override
@@ -158,8 +159,8 @@ public class AddComponentIconResourceAction extends Action implements ISelection
 					bufferedInputStream = new BufferedInputStream(contents);
 					String specFileString = IOUtils.toString(bufferedInputStream);
 					JSONObject json = new JSONObject(specFileString);
-					if (imageIFile.getParent() != null && imageIFile.getParent().getParent() != null) json.put("icon",
-						imageIFile.getParent().getParent().getName() + "/" + imageIFile.getParent().getName() + "/" + imageFileName);
+					if (imageIFile.getParent() != null && imageIFile.getParent().getParent() != null)
+						json.put("icon", imageIFile.getParent().getParent().getName() + "/" + imageIFile.getParent().getName() + "/" + imageFileName);
 					source = new ByteArrayInputStream(json.toString(4).getBytes(StandardCharsets.UTF_8));
 					specfile.setContents(source, true, false, null);
 				}
@@ -251,10 +252,12 @@ public class AddComponentIconResourceAction extends Action implements ISelection
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
 		if (sel.size() == 1)
 		{
-			SimpleUserNode firstElement = (SimpleUserNode)sel.getFirstElement();
-			if (firstElement.getType() == UserNodeType.COMPONENT)
+			SimpleUserNode node = (SimpleUserNode)sel.getFirstElement();
+			if ((node.getType() == UserNodeType.COMPONENT) &&
+				(node.parent.getRealObject() instanceof IFolder || node.parent.getRealObject() instanceof IProject))
 			{
-				selection = firstElement;
+
+				selection = node;
 				setEnabled(true);
 				return;
 			}

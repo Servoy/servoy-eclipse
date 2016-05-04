@@ -2436,7 +2436,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (deleteActionInTree.isEnabled()) manager.add(deleteActionInTree);
 		if (renameActionInTree.isEnabled()) manager.add(renameActionInTree);
 
-		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.COMPONENT)
+		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.COMPONENT && addComponentIcon.isEnabled())
 		{
 			manager.add(new Separator());
 			manager.add(addComponentIcon);
