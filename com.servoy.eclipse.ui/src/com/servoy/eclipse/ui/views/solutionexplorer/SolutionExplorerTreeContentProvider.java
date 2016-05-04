@@ -250,10 +250,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib), //
 			createTypeNode(Messages.TreeStrings_SpecialOperators, UserNodeType.SPECIAL_OPERATORS,
 				com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, jslib), //
-				createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
-				createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
-				createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
-					jslib) };
+			createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
+			createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
+			createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
+				jslib) };
 
 		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, invisibleRootNode);
 
@@ -787,6 +787,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						if (provider != null) // the package management system might not yet be initialized at developer startup
 						{
 							Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
+							Image zipPackageIcon = PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor("test.zip").createImage();
 							Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
 							List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 							for (Map.Entry<String, URL> entry : packages.entrySet())
@@ -794,8 +795,13 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 								IResource resource = getResource(entry.getValue());
 								if (resource != null && !(resource instanceof IProject))
 								{
+									Image nodeIcon = packageIcon;
+									if (resource.getName().endsWith(".zip"))
+									{
+										nodeIcon = zipPackageIcon;
+									}
 									PlatformSimpleUserNode node = new PlatformSimpleUserNode(provider.getPackageDisplayName(entry.getKey()),
-										UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES, resource, packageIcon);
+										UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES, resource, nodeIcon);
 									node.parent = un;
 									children.add(node);
 								}
@@ -901,13 +907,19 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
 							List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 							Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
+							Image zipPackageIcon = PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor("test.zip").createImage();
 							for (Map.Entry<String, URL> entry : packages.entrySet())
 							{
 								IResource resource = getResource(entry.getValue());
 								if (resource != null && !(resource instanceof IProject))
 								{
+									Image nodeIcon = packageIcon;
+									if (resource.getName().endsWith(".zip"))
+									{
+										nodeIcon = zipPackageIcon;
+									}
 									PlatformSimpleUserNode node = new PlatformSimpleUserNode(provider.getPackageDisplayName(entry.getKey()),
-										UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES, resource, packageIcon);
+										UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES, resource, nodeIcon);
 									node.parent = un;
 									children.add(node);
 								}
