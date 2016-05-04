@@ -53,6 +53,7 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PositionComparator;
@@ -321,6 +322,13 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				{
 					compAttributes.add(baseComponent);
 				}
+
+				if (persist instanceof ISupportExtendsID)
+				{
+					IPersist superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)persist);
+					if (superPersist instanceof IFormElement) deletedComponents.add((IFormElement)superPersist);
+				}
+
 
 				if (persist.getParent().getChild(persist.getUUID()) != null)
 				{
