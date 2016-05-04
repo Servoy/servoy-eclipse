@@ -32,11 +32,12 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 
 /**
  * Factory for adapters for saving state of elements in the form editor.
- * 
+ *
  * @author rgansevles
  */
 public class RestorerAdapterFactory implements IAdapterFactory
@@ -76,7 +77,7 @@ public class RestorerAdapterFactory implements IAdapterFactory
 
 	/**
 	 * Restorer of AbstractBase objects.
-	 * 
+	 *
 	 * @author rgansevles
 	 *
 	 */
@@ -91,7 +92,18 @@ public class RestorerAdapterFactory implements IAdapterFactory
 
 		public Object getState(Object object)
 		{
-			return ((AbstractBase)object).getPropertiesMap();
+			Map<String, Object> map = ((AbstractBase)object).getPropertiesMap();
+			Map<String, Object> cloned = new HashMap<>();
+			for (String key : map.keySet())
+			{
+				Object v = map.get(key);
+				if (v instanceof ServoyJSONObject)
+				{
+					v = ((ServoyJSONObject)v).clone();
+				}
+				cloned.put(key, v);
+			}
+			return cloned;
 		}
 
 		public Object getRemoveState(Object object)

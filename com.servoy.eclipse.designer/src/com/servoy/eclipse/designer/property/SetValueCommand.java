@@ -34,7 +34,7 @@ import com.servoy.j2db.util.Pair;
 /**
  * Command to set a value on a IPropertySource target.
  * Save state for undo.
- * 
+ *
  * @author rgansevles
  */
 
@@ -102,7 +102,7 @@ public class SetValueCommand extends Command
 	 * Create a command for setting a value.
 	 * Use BaseRestorableCommand if possible (saves state completely before setting).
 	 * If not possible (for instance PointPropertySource), use old style save which gets the undo-value first.
-	 * 
+	 *
 	 * @param propLabel
 	 * @param target
 	 * @param propertyName
@@ -111,6 +111,8 @@ public class SetValueCommand extends Command
 	 */
 	public static Command createSetvalueCommand(String propLabel, final IPropertySource target, final Object propertyId, final Object propertyValue)
 	{
+		if (target.getPropertyValue(propertyId) == propertyValue) return null;//we don't want to set the same object
+
 		String label = (propLabel != null && propLabel.length() > 0) ? "Set " + propLabel + " Property" : "";
 		if (target instanceof IModelSavePropertySource && BaseRestorableCommand.getRestorer(((IModelSavePropertySource)target).getSaveModel()) != null)
 		{
