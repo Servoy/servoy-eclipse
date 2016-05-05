@@ -111,7 +111,8 @@ public class SetValueCommand extends Command
 	 */
 	public static Command createSetvalueCommand(String propLabel, final IPropertySource target, final Object propertyId, final Object propertyValue)
 	{
-		if (target.getPropertyValue(propertyId) == propertyValue) return null;//we don't want to set the same object
+		if (target.getPropertyValue(propertyId) == propertyValue || propertyValue != null && propertyValue.equals(target.getPropertyValue(propertyId)))
+			return null;//we don't want to set the same object
 
 		String label = (propLabel != null && propLabel.length() > 0) ? "Set " + propLabel + " Property" : "";
 		if (target instanceof IModelSavePropertySource && BaseRestorableCommand.getRestorer(((IModelSavePropertySource)target).getSaveModel()) != null)
