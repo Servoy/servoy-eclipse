@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui.views;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +41,9 @@ import com.servoy.j2db.util.ComponentFactoryHelper;
  */
 public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IAdaptable
 {
+
+	private Object[] previousValues;
+
 
 	public ModifiedPropertySheetEntry()
 	{
@@ -139,8 +143,8 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 			{
 				Object object = propertyDescriptorMaps[i].get(ids[j]);
 				if (object == null ||
-				// see if the descriptors (which have the same id) are
-				// compatible
+					// see if the descriptors (which have the same id) are
+					// compatible
 					!((IPropertyDescriptor)intersection.get(ids[j])).isCompatibleWith((IPropertyDescriptor)object))
 				{
 					intersection.remove(ids[j]);
@@ -241,12 +245,13 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 
 		// See if the value changed and if so update
 		Object newValue = editor.getValue();
-		boolean changed = values.length > 1 || !valueEquals(editValue, newValue);
+		boolean changed = !valueEquals(editValue, newValue) || values.length > 1 && !valueEquals(previousValues, values);
 
 		// Set the editor value
 		if (changed)
 		{
 			setValue(newValue);
+			previousValues = values;
 		}
 	}
 
@@ -260,7 +265,11 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 		// special cases, borders (like LineBorder) do not implement equals based on fields.
 		if (val1 instanceof Border && val2 instanceof Border)
 		{
-			return ComponentFactoryHelper.createBorderString((Border)val1).equals(ComponentFactoryHelper.createBorderString((Border)val2));
+			return ComponentFactoryHelper.createBorderString(val1).equals(ComponentFactoryHelper.createBorderString(val2));
+		}
+		if (val1 instanceof Object[] && val2 instanceof Object[])
+		{
+			return Arrays.deepEquals((Object[])val1, (Object[])val2);
 		}
 
 		return val1.equals(val2);
