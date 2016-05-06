@@ -519,16 +519,6 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 		@Override
 		protected void addListeners()
 		{
-			text.addListener(SWT.Modify, new Listener()
-			{
-				@Override
-				public void handleEvent(Event event)
-				{
-					markDirty();
-					button.setEnabled(valueEditor != null && valueEditor.canEdit(getCurrentWord()));
-				}
-
-			});
 			Listener listener = new Listener()
 			{
 				@Override
@@ -537,6 +527,7 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 					button.setEnabled(valueEditor != null && valueEditor.canEdit(getCurrentWord()));
 				}
 			};
+			text.addListener(SWT.Modify, listener);
 			text.addListener(SWT.KeyUp, listener);
 			text.addListener(SWT.MouseUp, listener);
 		}
