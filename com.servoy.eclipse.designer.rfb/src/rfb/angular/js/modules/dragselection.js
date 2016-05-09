@@ -224,13 +224,18 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 				else {
 					var css;
 					var beanModel = editorScope.getBeanModel(node);
+					var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
 					if (beanModel){
 						beanModel.location.y = beanModel.location.y + changeY;
 						beanModel.location.x = beanModel.location.x + changeX;
-						css = { top: beanModel.location.y, left: beanModel.location.x }
-						angular.element(node).css(css);
+						
+					    	//it can happen that we have the node in the bean model but it is outside the form
+					    	//in this case do not update the css as that will be done in the 'if (ghostObject) {...}'
+						if (!ghostObject) { 
+        						css = { top: beanModel.location.y, left: beanModel.location.x }
+        						angular.element(node).css(css);
+						}
 					}
-					var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
 					if (ghostObject) {
 						if (ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_GROUP)
 						{
