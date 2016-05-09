@@ -54,12 +54,12 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 /**
  * @author emera
  */
-public class EditDisplayNameAction extends Action implements ISelectionChangedListener
+public class EditWebPackageDisplayNameAction extends Action implements ISelectionChangedListener
 {
 	private final Shell shell;
 	private final SolutionExplorerView viewer;
 
-	public EditDisplayNameAction(SolutionExplorerView viewer, Shell shell, String text)
+	public EditWebPackageDisplayNameAction(SolutionExplorerView viewer, Shell shell, String text)
 	{
 		super();
 		this.viewer = viewer;
@@ -94,7 +94,8 @@ public class EditDisplayNameAction extends Action implements ISelectionChangedLi
 		String name = (componentsNotServices ? WebComponentSpecProvider.getInstance().getPackageDisplayName(packageName)
 			: WebServiceSpecProvider.getInstance().getPackageDisplayName(packageName));
 		String newName = null;
-		TextFieldDialog dialog = new TextFieldDialog(shell, getText(), null, "Please provide the new package display name.", MessageDialog.NONE,
+		TextFieldDialog dialog = new TextFieldDialog(shell, getText(), null,
+			"Please provide the new package display name for package with symbolic name '" + packageName + "'.", MessageDialog.NONE,
 			new String[] { "OK", "Cancel" }, name);
 		dialog.setBlockOnOpen(true);
 

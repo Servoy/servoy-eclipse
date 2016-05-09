@@ -1483,7 +1483,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private ContextAction createActionInTree;
 	private ContextAction createPackageProjectActionInTree;
 	private ExportPackageResourceAction exportComponentPackage;
-	private EditDisplayNameAction editDisplayNameAction;
+	private EditWebPackageDisplayNameAction editDisplayNameAction;
 
 	private void createTreeViewer(Composite parent)
 	{
@@ -2897,7 +2897,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			UserNodeType.SERVICES_PROJECT_PACKAGE);
 		IAction deleteProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete Package Project", UserNodeType.WEB_PACKAGE);
 		exportComponentPackage = new ExportPackageResourceAction(this, shell);
-		editDisplayNameAction = new EditDisplayNameAction(this, shell, "Edit package display name");
+		editDisplayNameAction = new EditWebPackageDisplayNameAction(this, shell, "Edit package display name");
 
 		IAction deleteComponent = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component", UserNodeType.COMPONENT);
 		IAction deleteService = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service", UserNodeType.SERVICE);

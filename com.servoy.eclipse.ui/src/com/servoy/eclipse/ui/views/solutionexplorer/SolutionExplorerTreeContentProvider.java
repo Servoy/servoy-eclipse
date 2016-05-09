@@ -250,10 +250,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib), //
 			createTypeNode(Messages.TreeStrings_SpecialOperators, UserNodeType.SPECIAL_OPERATORS,
 				com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, jslib), //
-			createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
-			createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
-			createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
-				jslib) };
+				createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
+				createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
+				createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
+					jslib) };
 
 		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, invisibleRootNode);
 
@@ -1001,9 +1001,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							if (iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
 							{
 
-								Image packageIcon = resolveWebPackageImage(iProject);
-
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(iProject.getName(), UserNodeType.WEB_PACKAGE, iProject, packageIcon);
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(resolveWebPackageDisplayName(iProject), UserNodeType.WEB_PACKAGE,
+									iProject, resolveWebPackageImage(iProject));
 								node.parent = un;
 								children.add(node);
 							}
@@ -1055,6 +1054,28 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return uiActivator.loadImageFromBundle(imageFile, disabled);
 	}
 
+	private String resolveWebPackageDisplayName(IProject iProject)
+	{
+		String displayName;
+
+		// the package project could be referenced by active solution/modules or not (we still have to know it's display name)
+		if (WebComponentSpecProvider.getInstance().getWebComponentSpecifications().containsKey(iProject.getName()))
+			displayName = WebComponentSpecProvider.getInstance().getPackageDisplayName(iProject.getName());
+		else if ((WebServiceSpecProvider.getInstance().getWebServiceSpecifications().containsKey(iProject.getName())))
+			displayName = WebServiceSpecProvider.getInstance().getPackageDisplayName(iProject.getName());
+		else
+		{
+			// now we have to read the package type from the manifest
+			displayName = iProject.getName(); // fall-back to project name in case we can't read manifest
+			if (iProject.getFile(new Path("META-INF/MANIFEST.MF")).exists())
+			{
+				displayName = new ContainerPackageReader(new File(iProject.getLocationURI()), iProject).getPackageDisplayname();
+			}
+
+		}
+
+		return displayName;
+	}
 
 	private List<PlatformSimpleUserNode> getWebProjects(PlatformSimpleUserNode un, BaseSpecProvider provider, String imageFileName, UserNodeType nodeType)
 	{
