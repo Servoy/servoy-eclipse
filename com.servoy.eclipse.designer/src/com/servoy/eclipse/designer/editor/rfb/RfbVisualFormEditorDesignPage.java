@@ -53,6 +53,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.DeleteAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.FixedSelectAllAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
@@ -60,6 +61,8 @@ import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormReference;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportExtendsID;
@@ -490,9 +493,31 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			for (IPersist persist : persists)
 			{
 				IPersist ancestor = persist.getAncestor(IRepository.FORMS);
-				if (ancestor != null && ancestor.getUUID().equals(form.getUUID()))
+				if (ancestor != null)
 				{
-					filtered.add(persist);
+					boolean isPartOfForm = ancestor.getUUID().equals(form.getUUID());
+					if (!isPartOfForm)
+					{
+						for (FormReference formRef : PersistHelper.getAllFormReferences(
+							ServoyModelFinder.getServoyModel().getFlattenedSolution().getFlattenedForm(form)))
+						{
+							if (formRef.getContainsFormID() == ancestor.getID())
+							{
+								for (IFormElement formElement : formRef.getFlattenedObjects(FlattenedForm.FORM_INDEX_WITH_HIERARCHY_COMPARATOR))
+								{
+									if (PersistHelper.getOverrideHierarchy(formElement).indexOf(persist) != -1)
+									{
+										filtered.add(formElement);
+									}
+								}
+							}
+						}
+					}
+					else
+					{
+						filtered.add(persist);
+					}
+
 				}
 			}
 			// if there are other persist left, check if they are in the hierarchy

@@ -480,16 +480,19 @@ angular.module('editorContent',['servoyApp'])
         		  }
         	  }
           }
-          
+
+
           if (data.containers) {
-            for (var key in data.containers) {
+            for(var j = 0; j < data.containers.length; j++) {
+              var key = data.containers[j].uuid;
               var element = updateElementIfParentChange(key, data, { layoutId: key },false);
               if(element) {
-        		  for (attribute in data.containers[key]) {
+        		  for (attribute in data.containers[j]) {
+        		      if('uuid' === attribute) continue;
         			  if ('class' === attribute)
         			  {
         				  var oldValue = element.attr(attribute);
-        				  var newValue = data.containers[key][attribute];
+        				  var newValue = data.containers[j][attribute];
         				  if (oldValue)
         				  {
         					  var oldValuesArray = oldValue.split(" ");
@@ -522,17 +525,19 @@ angular.module('editorContent',['servoyApp'])
         			  }
         			  else
         			  {
-        				  element.attr(attribute,data.containers[key][attribute]); 
+        				  element.attr(attribute,data.containers[j][attribute]); 
         			  }	  
                   }
               }
             }
-          }
+          }          
+          
           for (var index in data.deletedContainers) {
             var toDelete = angular.element('[svy-id="' + data.deletedContainers[index] + '"]');
             toDelete.remove();
 
-          }
+          }          
+
           renderDecorators();
         });
       }

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -209,9 +210,21 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 								parentuuid = fe.getPersistIfAvailable().getParent().getUUID();
 								insertBeforeUUID = findNextSibling(fe.getPersistIfAvailable());
 							}
-							if (baseComponent.getParent() instanceof FormReference)
+
+							IPersist superBaseComponent = PersistHelper.getSuperPersist(baseComponent);
+							ISupportChilds baseComponentParent = superBaseComponent != null ? superBaseComponent.getParent() : baseComponent.getParent();
+
+							if (baseComponentParent instanceof Form && ((Form)baseComponentParent).getReferenceForm().booleanValue())
 							{
-								parentuuid = baseComponent.getParent().getUUID();
+								Iterator<FormReference> formReferencesIte = form.getFormReferences();
+								while (formReferencesIte.hasNext())
+								{
+									FormReference formRef = formReferencesIte.next();
+									if (formRef.getContainsFormID() == baseComponentParent.getID())
+									{
+										parentuuid = formRef.getUUID();
+									}
+								}
 							}
 							componentFound = true;
 							break;
@@ -223,12 +236,24 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					String layoutId = args.optString("layoutId");
 					if (layoutId != null)
 					{
-						IPersist child = flattenedForm.findChild(UUID.fromString(layoutId));
+						IPersist child = flattenedForm.findChild(UUID.fromString(layoutId), true);
 						if (child instanceof LayoutContainer)
 						{
 							componentFound = true;
 							parentuuid = child.getParent().getUUID();
 							if (child.getParent().equals(form)) parentuuid = null;
+
+							if (child.getParent() instanceof Form && ((Form)child.getParent()).getReferenceForm().booleanValue())
+							{
+								for (FormReference formRef : PersistHelper.getAllFormReferences(form))
+								{
+									if (formRef.getContainsFormID() == child.getParent().getID())
+									{
+										parentuuid = formRef.getUUID();
+									}
+								}
+							}
+
 							insertBeforeUUID = findNextSibling(child);
 							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context.getSolution(), w, true);
 						}
@@ -309,7 +334,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		Set<IFormElement> deletedComponents = new HashSet<>();
 		Set<LayoutContainer> deletedLayoutContainers = new HashSet<>();
 		Set<Part> parts = new HashSet<>();
-		Set<LayoutContainer> containers = new HashSet<>();
+		List<LayoutContainer> containers = new ArrayList<>();
 		Set<IFormElement> compAttributes = new HashSet<>();
 		boolean renderGhosts = editor.isRenderGhosts();
 		editor.setRenderGhosts(false);
@@ -360,6 +385,43 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						if (oldField != null && ((Field)persist).getDisplayType() != oldField.getDisplayType())
 						{
 							refreshTemplate.add(baseComponent);
+						}
+					}
+					else if (persist instanceof FormReference)
+					{
+						FormReference oldFormReference = null;
+						for (FormReference formRef : PersistHelper.getAllFormReferences(
+							ServoyModelFinder.getServoyModel().getFlattenedSolution().getFlattenedForm(form)))
+						{
+							if (formRef.getUUID().equals(persist.getUUID()))
+							{
+								oldFormReference = formRef;
+								break;
+							}
+						}
+
+						int oldFormReferenceId = oldFormReference != null ? oldFormReference.getContainsFormID() : 0;
+
+						if (oldFormReferenceId != ((FormReference)persist).getContainsFormID())
+						{
+							if (oldFormReference != null)
+							{
+								for (IPersist element : oldFormReference.getFlattenedFormElementsAndLayoutContainers())
+								{
+									if (element instanceof IFormElement) deletedComponents.add((IFormElement)element);
+									else if (element instanceof LayoutContainer) deletedLayoutContainers.add((LayoutContainer)element);
+								}
+							}
+
+							Form referencedForm = fs.getFlattenedForm(fs.getForm(((FormReference)persist).getContainsFormID()));
+							if (referencedForm != null)
+							{
+								for (IPersist element : referencedForm.getFlattenedFormElementsAndLayoutContainers())
+								{
+									if (element instanceof IFormElement) baseComponents.add((IFormElement)element);
+									else if (element instanceof LayoutContainer) containers.add((LayoutContainer)element);
+								}
+							}
 						}
 					}
 				}
@@ -414,14 +476,30 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		}
 		if (containers.size() > 0)
 		{
+			LayoutContainer[] containersA = containers.toArray(new LayoutContainer[containers.size()]);
+			Arrays.sort(containersA, new Comparator<LayoutContainer>()
+			{
+				@Override
+				public int compare(LayoutContainer o1, LayoutContainer o2)
+				{
+					if (o1 != o2)
+					{
+						if (o1.findChild(o2.getUUID()) != null) return 1;
+						else if (o2.findChild(o1.getUUID()) != null) return -1;
+					}
+					return 0;
+				}
+			});
+
 			writer.key("containers");
-			writer.object();
-			for (LayoutContainer container : containers)
+			writer.array();
+			for (LayoutContainer container : containersA)
 			{
 				// TODO what the send over, if new then just the id? but what about the properties?
 				Map<String, String> attributes = container.getAttributes();
-				writer.key(container.getUUID().toString());
 				writer.object();
+				writer.key("uuid");
+				writer.value(container.getUUID().toString());
 				for (Entry<String, String> attribute : attributes.entrySet())
 				{
 					writer.key(attribute.getKey());
@@ -429,7 +507,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				}
 				writer.endObject();
 			}
-			writer.endObject();
+			writer.endArray();
 		}
 		if (deletedLayoutContainers.size() > 0)
 		{
