@@ -356,6 +356,9 @@
 					        		  },
 					        		  "default": {
 					        		  },
+					        		  "pushToServer": {
+				        			  		"enum" : ["reject", "allow", "shallow", "deep"]
+				        		 	  },
 					        		  "forFoundset":{
 					        			  "type":"string"
 					        		  },
