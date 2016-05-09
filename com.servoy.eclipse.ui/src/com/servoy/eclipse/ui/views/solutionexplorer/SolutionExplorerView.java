@@ -349,7 +349,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private RemovePackageProjectAction removePackageProjectAction;
 
 	private AddModuleAction addModuleAction;
-	private AddProjectPackageAction addPackageProjectAction;
+	private AddPackageProjectAction addPackageProjectAction;
 
 	private MoveTextAction moveCode;
 
@@ -2995,7 +2995,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		removeModuleAction = new RemoveModuleAction(shell);
 		removePackageProjectAction = new RemovePackageProjectAction(shell);
 		addModuleAction = new AddModuleAction(shell);
-		addPackageProjectAction = new AddProjectPackageAction(shell);
+		addPackageProjectAction = new AddPackageProjectAction(shell);
 
 		expandNodeAction = new ExpandNodeAction(tree);
 

@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.util.Debug;
@@ -37,12 +38,12 @@ import com.servoy.j2db.util.Debug;
 public class AddAsWebPackageAction extends AddAsSolutionReference
 {
 
-	/**
-	 * @param shell
-	 */
 	public AddAsWebPackageAction(Shell shell)
 	{
 		super(shell, UserNodeType.WEB_PACKAGE);
+		setText("Add reference to this Package Project");
+		setToolTipText("Adds a Package Project reference to the active solution or it's modules.");
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("add_as_module.gif"));
 	}
 
 	@Override
@@ -79,13 +80,13 @@ public class AddAsWebPackageAction extends AddAsSolutionReference
 		super.selectionChanged(event);
 		if (selectedProjects.size() > 1)
 		{
-			setText("Add as Web Package Projects");
-			setToolTipText("Add as Web Package Projects to an already active module");
+			setText("Add references to these Package Projects");
+			setToolTipText("Adds Package Project references to the active solution or it's modules.");
 		}
 		else if (selectedProjects.size() == 1)
 		{
-			setText("Add as Web Package Project");
-			setToolTipText("Add as a Web Package Project to an already active module");
+			setText("Add reference to this Package Project");
+			setToolTipText("Adds a Package Project reference to the active solution or it's modules.");
 		}
 	}
 
@@ -95,10 +96,6 @@ public class AddAsWebPackageAction extends AddAsSolutionReference
 		return "You may add Web Package Projects to the active solution or to any of it's modules.\nPlease choose one of these solutions.";
 	}
 
-	/**
-	 * @param newProject
-	 * @param solutionProjectDescription
-	 */
 	public static void addReferencedProjectToDescription(IProject newProject, IProjectDescription solutionProjectDescription)
 	{
 		IProject[] oldReferencedProjectsArray = solutionProjectDescription.getReferencedProjects();
@@ -112,11 +109,6 @@ public class AddAsWebPackageAction extends AddAsSolutionReference
 		solutionProjectDescription.setReferencedProjects(newReferencesArray);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.ui.views.solutionexplorer.actions.AddAsSolutionReference#getSelectedNodeName(com.servoy.eclipse.ui.node.SimpleUserNode)
-	 */
 	@Override
 	protected String getSelectedNodeName(SimpleUserNode node)
 	{

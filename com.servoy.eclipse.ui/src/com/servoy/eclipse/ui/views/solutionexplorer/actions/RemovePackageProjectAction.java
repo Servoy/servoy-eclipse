@@ -37,6 +37,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.util.Debug;
@@ -60,8 +61,10 @@ public class RemovePackageProjectAction extends Action implements ISelectionChan
 	public RemovePackageProjectAction(Shell shell)
 	{
 		this.shell = shell;
-		setText("Remove package");
-		setToolTipText("Remove Package Project from one of the active modules that contains it (the project itself will not be deleted)");
+		setText("Remove reference to this Package Project");
+		setToolTipText(
+			"Removes a Package Project reference from one of the active modules that references it (the package project itself will not be deleted)");
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("remove_module.gif"));
 	}
 
 	@Override
@@ -172,7 +175,7 @@ public class RemovePackageProjectAction extends Action implements ISelectionChan
 		if (state)
 		{
 			SimpleUserNode node = (SimpleUserNode)sel.getFirstElement();
-			state = (node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE);
+			state = (node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE || node.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE);
 			if (state) try
 			{
 				selectedProject = (ServoyNGPackageProject)((IProject)node.getRealObject()).getNature(ServoyNGPackageProject.NATURE_ID);

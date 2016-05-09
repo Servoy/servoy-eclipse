@@ -32,7 +32,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 
@@ -47,16 +46,10 @@ public abstract class AddAsSolutionReference extends Action implements ISelectio
 	protected Shell shell;
 	protected final UserNodeType targetNodeType;
 
-	/**
-	 * @param shell
-	 */
 	public AddAsSolutionReference(Shell shell, UserNodeType nodeType)
 	{
 		this.shell = shell;
 		targetNodeType = nodeType;
-		setText("Add as web package");
-		setToolTipText("Add as a web package to an already active module");
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("add_as_module.gif"));
 	}
 
 	@Override

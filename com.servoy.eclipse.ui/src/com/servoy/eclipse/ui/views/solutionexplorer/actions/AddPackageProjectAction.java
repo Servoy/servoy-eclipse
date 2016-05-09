@@ -53,27 +53,19 @@ import com.servoy.j2db.util.Debug;
  * @author gganea@servoy.com
  *
  */
-public class AddProjectPackageAction extends Action implements ISelectionChangedListener
+public class AddPackageProjectAction extends Action implements ISelectionChangedListener
 {
 
 	private PlatformSimpleUserNode selection;
 	private final Shell shell;
 
-	/**
-	 * @param shell
-	 */
-	public AddProjectPackageAction(Shell shell)
+	public AddPackageProjectAction(Shell shell)
 	{
 		this.shell = shell;
 		setText("Add Package Project");
 		setToolTipText("Add a Package Project to the solution");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.action.Action#run()
-	 */
 	@Override
 	public void run()
 	{
@@ -81,11 +73,6 @@ public class AddProjectPackageAction extends Action implements ISelectionChanged
 
 		ILabelProvider labelProvider = new LabelProvider()
 		{
-			/*
-			 * (non-Javadoc)
-			 *
-			 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
-			 */
 			@Override
 			public String getText(Object element)
 			{
@@ -152,11 +139,6 @@ public class AddProjectPackageAction extends Action implements ISelectionChanged
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
-	 */
 	@Override
 	public void selectionChanged(SelectionChangedEvent event)
 	{
@@ -178,11 +160,6 @@ public class AddProjectPackageAction extends Action implements ISelectionChanged
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.action.Action#isEnabled()
-	 */
 	@Override
 	public boolean isEnabled()
 	{
