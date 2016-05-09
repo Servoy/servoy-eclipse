@@ -223,6 +223,7 @@ import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerListener;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -241,6 +242,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.ImageLoader;
@@ -1625,6 +1627,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 							{
 								// for an in mem tablenode send just that tablenode so only that one is refreshed
 								parents.add(persist);
+							}
+							else if (persist instanceof WebComponent)
+							{
+								parents.add(persist.getAncestor(IRepository.FORMS));
 							}
 							else
 							{
