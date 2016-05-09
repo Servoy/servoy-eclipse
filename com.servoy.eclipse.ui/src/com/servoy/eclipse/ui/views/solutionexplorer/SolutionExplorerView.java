@@ -309,7 +309,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private DrillDownAdapter drillDownAdapter;
 
-	private final SolutionExplorerNavigator navigator;
+	private SolutionExplorerNavigator navigator;
 
 	private final List<IRefreshListener<SimpleUserNode>> treeRefreshListeners = new ArrayList<>();
 	private final List<IRefreshListener<SimpleUserNode>> listRefreshListeners = new ArrayList<>();
@@ -724,7 +724,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	public SolutionExplorerView()
 	{
 		fDialogSettings = Activator.getDefault().getDialogSettings();
-		navigator = createNavigator();
 	}
 
 	public void selectionChanged(SelectionChangedEvent e)
@@ -3874,8 +3873,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		return new SolutionExplorerNavigator(this);
 	}
 
+	/**
+	 * Returns an object responsible for 'navigating' this view's tree and list.
+	 *
+	 * @return the navigator object.
+	 */
 	public SolutionExplorerNavigator getSolExNavigator()
 	{
+		if (navigator == null) navigator = createNavigator();
 		return navigator;
 	}
 
