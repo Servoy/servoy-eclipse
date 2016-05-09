@@ -282,6 +282,7 @@ public class NewResourcesComponentsOrServicesPackageAction extends Action
 		manifest.getMainAttributes().put(new Attributes.Name("Bundle-Name"), packageDisplayName);
 		manifest.getMainAttributes().put(new Attributes.Name("Bundle-SymbolicName"), packageName);
 		manifest.getMainAttributes().put(new Attributes.Name(Package.PACKAGE_TYPE), packageType);
+		manifest.getMainAttributes().put(Attributes.Name.IMPLEMENTATION_VERSION, "1.0.0");
 
 		IFolder metainf = pack.getFolder(new Path("META-INF"));
 		metainf.create(true, true, new NullProgressMonitor());
