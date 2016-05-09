@@ -1147,11 +1147,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return null;
 	}
 
-	/**
-	 * @param iconFile
-	 * @return
-	 * @throws CoreException
-	 */
 	private Image loadImageFromIFile(IFile iconFile) throws CoreException
 	{
 		Image img = imageCache.get(iconFile.getFullPath());

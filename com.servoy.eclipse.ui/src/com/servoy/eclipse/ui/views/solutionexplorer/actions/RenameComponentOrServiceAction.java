@@ -103,7 +103,7 @@ public class RenameComponentOrServiceAction extends Action
 				IFile specFile = pack.getFile(currentName + ".spec");
 				InputStream is = specFile.getContents();
 				JSONObject specJSON = new JSONObject(IOUtils.toString(is, "UTF-8"));
-				specJSON.put("name", specJSON.getString("name").replace("-" + currentName, "-" + componentName));
+				specJSON.put("name", specJSON.getString("name").replace("-" + NewComponentOrServiceAction.getDashedName(currentName), "-" + componentName));
 				specJSON.put("definition", specJSON.getString("definition").replace("/" + currentName, "/" + componentName));
 
 				String displayName = specJSON.getString("displayName");

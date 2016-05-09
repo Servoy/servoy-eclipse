@@ -51,24 +51,22 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
-import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
 /**
- * Deletes the selected components or services.
+ * Deletes the selected components or services or packages of components or services.
+ *
  * @author gganea
  */
-public class DeleteComponentOrServiceResourceAction extends Action implements ISelectionChangedListener
+public class DeleteComponentOrServiceOrPackageResourceAction extends Action implements ISelectionChangedListener
 {
 
 	private IStructuredSelection selection;
 	private final Shell shell;
 	private final UserNodeType nodeType;
-	private final SolutionExplorerView viewer;
 
 
-	public DeleteComponentOrServiceResourceAction(SolutionExplorerView viewer, Shell shell, String text, UserNodeType nodeType)
+	public DeleteComponentOrServiceOrPackageResourceAction(Shell shell, String text, UserNodeType nodeType)
 	{
-		this.viewer = viewer;
 		this.shell = shell;
 		this.nodeType = nodeType;
 		setText(text);
@@ -86,18 +84,17 @@ public class DeleteComponentOrServiceResourceAction extends Action implements IS
 			while (it.hasNext())
 				saveTheSelection.add(it.next());
 			//start the delete job
-			WorkspaceJob deleteJob = new DeleteComponentResourcesWorkspaceJob(saveTheSelection);
+			WorkspaceJob deleteJob = new DeleteComponentOrServiceResourcesWorkspaceJob(saveTheSelection);
 			deleteJob.schedule();
 		}
 	}
 
-
-	private class DeleteComponentResourcesWorkspaceJob extends WorkspaceJob
+	private class DeleteComponentOrServiceResourcesWorkspaceJob extends WorkspaceJob
 	{
 
 		private final List<SimpleUserNode> savedSelection;
 
-		public DeleteComponentResourcesWorkspaceJob(List<SimpleUserNode> selection)
+		public DeleteComponentOrServiceResourcesWorkspaceJob(List<SimpleUserNode> selection)
 		{
 			super("Deleting component or service resources");
 			savedSelection = selection;
@@ -141,7 +138,6 @@ public class DeleteComponentOrServiceResourceAction extends Action implements IS
 								{
 									RemovePackageProjectAction.removeProjecReference(iProject, (IProject)resource);
 								}
-
 							}
 							resource.delete(true, new NullProgressMonitor());
 							resources.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
@@ -268,4 +264,5 @@ public class DeleteComponentOrServiceResourceAction extends Action implements IS
 		}
 		setEnabled(state);
 	}
+
 }

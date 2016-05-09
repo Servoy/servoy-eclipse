@@ -2888,21 +2888,21 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction deleteGlobalScript = new DeleteScriptAction(UserNodeType.GLOBAL_METHOD_ITEM, "Delete method", this);
 		IAction deleteFormVariable = new DeleteScriptAction(UserNodeType.FORM_VARIABLE_ITEM, "Delete variable", this);
 		IAction deleteGlobalVariable = new DeleteScriptAction(UserNodeType.GLOBAL_VARIABLE_ITEM, "Delete variable", this);
-		IAction deleteComponentPackage = new DeleteComponentOrServiceResourceAction(this, shell, "Delete component package",
+		IAction deleteComponentPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component package",
 			UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES);
-		IAction deleteServicePackage = new DeleteComponentOrServiceResourceAction(this, shell, "Delete service package",
+		IAction deleteServicePackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service package",
 			UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES);
-		IAction deleteComponentProjectPackage = new DeleteComponentOrServiceResourceAction(this, shell, "Delete component package project",
+		IAction deleteComponentProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component package project",
 			UserNodeType.COMPONENTS_PROJECT_PACKAGE);
-		IAction deleteServiceProjectPackage = new DeleteComponentOrServiceResourceAction(this, shell, "Delete service package project",
+		IAction deleteServiceProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service package project",
 			UserNodeType.SERVICES_PROJECT_PACKAGE);
-		IAction deleteProjectPackage = new DeleteComponentOrServiceResourceAction(this, shell, "Delete Package Project", UserNodeType.WEB_PACKAGE);
+		IAction deleteProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete Package Project", UserNodeType.WEB_PACKAGE);
 		exportComponentPackage = new ExportPackageResourceAction(this, shell);
 		editDisplayNameAction = new EditDisplayNameAction(this, shell, "Edit package display name");
 
-		IAction deleteComponent = new DeleteComponentOrServiceResourceAction(this, shell, "Delete component", UserNodeType.COMPONENT);
-		IAction deleteService = new DeleteComponentOrServiceResourceAction(this, shell, "Delete service", UserNodeType.SERVICE);
-		IAction deleteComponentResource = new DeleteComponentOrServiceResourceAction(this, shell, "Delete file", UserNodeType.COMPONENT_RESOURCE);
+		IAction deleteComponent = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component", UserNodeType.COMPONENT);
+		IAction deleteService = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service", UserNodeType.SERVICE);
+		IAction deleteComponentResource = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete file", UserNodeType.COMPONENT_RESOURCE);
 		IAction deleteI18N = new DeleteI18NAction(shell);
 		IAction deleteScope = new DeleteScopeAction("Delete scope", this);
 

@@ -210,7 +210,7 @@ public class NewComponentOrServiceAction extends Action
 		}
 	}
 
-	private String getDashedName(String name)
+	public static String getDashedName(String name)
 	{
 		if (name != null && name.length() > 0)
 		{

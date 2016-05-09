@@ -1,5 +1,5 @@
 {
-	"name": "${MODULENAME}",
+	"name": "${PACKAGENAME}-${DASHEDNAME}",
 	"displayName": "${NAME}",
 	"version": 1,
  	"definition": "${PACKAGENAME}/${NAME}/${NAME}.js",
