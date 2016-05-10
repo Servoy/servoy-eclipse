@@ -44,83 +44,82 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 				$("#contextMenu").hide();
 			})
 			$("body").on("contextmenu", function(e) {
-				var contentPoint =  $scope.convertToContentPoint( { top: e.pageY, left: e.pageX });
-				if (contentPoint.left >= 0 && contentPoint.top >= 0)
-				{
-					var utils = $selectionUtils.getUtilsForScope($scope);
-					var selection = utils.getNode(e);
-					if(!selection) {
-						selection = $(".contentframe").contents().find("#svyDesignForm").get(0);
-					}
-
-					var ghost = $scope.getGhost(selection.getAttribute("svy-id"));
-					if(ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART)) {
-						$("#contextMenu").hide();
-						return false;
-					}
-					var i;
-					for (i = 0; i < $scope.actions.length; i++){
-					    if ($scope.actions[i].text === "Add") {
-    						var allowedChildren = selection.getAttribute("svy-allowed-children");
-    						var types = selection.getAttribute("svy-types");
-    						if (allowedChildren || types){
-    							$scope.actions[i].getItemClass = function() { return "dropdown-submenu"};
-    						    $scope.actions[i].subMenu = [];
-    						    var typesArray = allowedChildren ? allowedChildren.split(",") : [];
-
-    						    var typesStartIdx = typesArray.length; 
-    						    if(types) {
-    						    	var typesA = types.slice(1, -1).split(",");
-    						    	var propertiesA = selection.getAttribute("svy-types-properties").slice(1, -1).split(",");
-    						    	
-    						    	for(var x = 0; x < typesA.length; x++) {
-    						    		typesArray.push({"type" : typesA[x], "property" : propertiesA[x]});
-    						    	}
-    						    }
-    						    
-    						    var k;
-    						    for (k = 0; k < typesArray.length; k++){
-    							var addAction = function (k, typesStartIdx) {//save the k in a closure
-        							$scope.actions[i].subMenu.push({
-                    						text: k < typesStartIdx ? getDisplayName(typesArray[k]) : typesArray[k].type + ' for ' + typesArray[k].property,
-                    						execute: function()
-                    						{
-                    						    $("#contextMenu").hide();
-                    						    var component = {};
-                    						    if(selection.getAttribute("svy-id")) component.dropTargetUUID = selection.getAttribute("svy-id");
-                    						    
-                    						    if(k < typesStartIdx) {
-                        						    var nameAndPackage = typesArray[k].split(".");
-                        						    component.name = nameAndPackage[1];
-                        						    component.packageName = nameAndPackage[0];
-                    						    }
-                    						    else {
-                    						    	component.type = typesArray[k].type; 
-                    						    	component.propertyName = typesArray[k].property;
-                    						    }
-                    						    
-                    						    component = $scope.convertToContentPoint(component);
-                    						    $editorService.createComponent(component);
-                    						}	
-        							});
-    							};
-    							addAction(k, typesStartIdx);
-    						    }
-    						}
-    						else {
-    							$scope.actions[i].getItemClass = function() { return "invisible"};
-    						}
-					    }
-					}
-
-					$scope.$digest();
-					$("#contextMenu")
-						.css({
-							display: "block",
-							left: e.pageX,
-							top: e.pageY
-						})
+				return false;
+			})
+			$scope.registerDOMEvent("contextmenu", "CONTENTFRAME_OVERLAY", function(e) {
+				var utils = $selectionUtils.getUtilsForScope($scope);
+				var selection = utils.getNode(e);
+				if(!selection) {
+					selection = $(".contentframe").contents().find("#svyDesignForm").get(0);
 				}
+
+				var ghost = $scope.getGhost(selection.getAttribute("svy-id"));
+				if(ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_PART)) {
+					$("#contextMenu").hide();
+					return false;
+				}
+				var i;
+				for (i = 0; i < $scope.actions.length; i++){
+					if ($scope.actions[i].text === "Add") {
+						var allowedChildren = selection.getAttribute("svy-allowed-children");
+						var types = selection.getAttribute("svy-types");
+						if (allowedChildren || types){
+							$scope.actions[i].getItemClass = function() { return "dropdown-submenu"};
+							$scope.actions[i].subMenu = [];
+							var typesArray = allowedChildren ? allowedChildren.split(",") : [];
+
+							var typesStartIdx = typesArray.length; 
+							if(types) {
+								var typesA = types.slice(1, -1).split(",");
+								var propertiesA = selection.getAttribute("svy-types-properties").slice(1, -1).split(",");
+
+								for(var x = 0; x < typesA.length; x++) {
+									typesArray.push({"type" : typesA[x], "property" : propertiesA[x]});
+								}
+							}
+
+							var k;
+							for (k = 0; k < typesArray.length; k++){
+								var addAction = function (k, typesStartIdx) {//save the k in a closure
+									$scope.actions[i].subMenu.push({
+										text: k < typesStartIdx ? getDisplayName(typesArray[k]) : typesArray[k].type + ' for ' + typesArray[k].property,
+												execute: function()
+												{
+													$("#contextMenu").hide();
+													var component = {};
+													if(selection.getAttribute("svy-id")) component.dropTargetUUID = selection.getAttribute("svy-id");
+
+													if(k < typesStartIdx) {
+														var nameAndPackage = typesArray[k].split(".");
+														component.name = nameAndPackage[1];
+														component.packageName = nameAndPackage[0];
+													}
+													else {
+														component.type = typesArray[k].type; 
+														component.propertyName = typesArray[k].property;
+													}
+
+													component = $scope.convertToContentPoint(component);
+													$editorService.createComponent(component);
+												}	
+									});
+								};
+								addAction(k, typesStartIdx);
+							}
+						}
+						else {
+							$scope.actions[i].getItemClass = function() { return "invisible"};
+						}
+					}
+				}
+
+				$scope.$digest();
+				$("#contextMenu")
+				.css({
+					display: "block",
+					left: e.pageX,
+					top: e.pageY
+				})
 				return false;
 			});
 			$scope.actions = $contextmenu.getActions();
