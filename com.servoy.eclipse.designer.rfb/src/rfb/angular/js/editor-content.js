@@ -162,7 +162,7 @@ angular.module('editorContent',['servoyApp'])
 
         promise.then(function(data) {
           formModelData = JSON.parse(data);
-          $editorContentService.formData(formModelData);
+          $editorContentService.formData(false, formModelData);
           formUrl = "designertemplate/" + solutionName + "/" + formName + ".html?";
         });
       } else {
@@ -172,6 +172,10 @@ angular.module('editorContent',['servoyApp'])
     }
   };
 }).controller("DesignFormController", function($scope, $editorContentService, $rootScope, $element) {
+  $rootScope.getDesignFormControllerScope = function() {
+    return $scope;
+  };
+
   $scope.formStyle = {
     left: "0px",
     right: "0px",
@@ -222,11 +226,8 @@ angular.module('editorContent',['servoyApp'])
   $rootScope.getDesignFormElement = function() {
       return $element;
   };
-  $rootScope.getDesignFormControllerScope = function() {
-    return $scope;
-  };
 
-  var formData = $editorContentService.formData();
+  var formData = $editorContentService.formData(true);
 
   if (formData.parts) {
     for (var name in formData.parts) {
@@ -386,19 +387,28 @@ angular.module('editorContent',['servoyApp'])
         h: h
       });
     },
-    formData: function(data) {
+    formData: function(designControllerReady, data) {
       if (data) {
         formData = data;
-        for (var name in data.components) {
-          var compData = data.components[name];
+      }
+      
+      if (designControllerReady && formData) {
+    	// we need the scope from DesignFormController so we will only be able to do the property conversions ($sabloConverters.convertFromServerToClient) when that controller is available
+        function compModelGetter(compName) {
+        	return function() { return formData.components[compName]; }
+        }
+        for (var name in formData.components) {
+          var compData = formData.components[name];
           if (compData.conversions) {
-            data.components[name] = $sabloConverters.convertFromServerToClient(compData, compData.conversions, undefined, undefined, undefined)
+        	  formData.components[name] = $sabloConverters.convertFromServerToClient(compData, compData.conversions, undefined, $rootScope.getDesignFormControllerScope(), compModelGetter(name));
           }
         }
         if (formData.solutionProperties) {
           $applicationService.setStyleSheets(formData.solutionProperties.styleSheets);
         }
-      } else return formData;
+      }
+      
+      return formData;
     },
     setLayoutData: function(data) {
       layoutData = data;
@@ -408,12 +418,15 @@ angular.module('editorContent',['servoyApp'])
       if (data && (data.components || data.deleted || data.renderGhosts || data.parts || data.containers || data.deletedContainers || data.compAttributes)) {
         // TODO should it be converted??
         $rootScope.$apply(function() {
+          function compModelGetter(compName) {
+            return function() { return formData.components[compName]; }
+          }
 
           for (var name in data.components) {
             var compData = formData.components[name];
             var newCompData = data.components[name];
             if (newCompData.conversions) {
-              newCompData = $sabloConverters.convertFromServerToClient(newCompData, newCompData.conversions, compData, undefined, undefined)
+              newCompData = $sabloConverters.convertFromServerToClient(newCompData, newCompData.conversions, compData, $rootScope.getDesignFormControllerScope(), compModelGetter(name))
             }
             if (compData) {
               var modifyFunction = compData[$sabloConstants.modelChangeNotifier];
@@ -480,7 +493,6 @@ angular.module('editorContent',['servoyApp'])
         		  }
         	  }
           }
-
 
           if (data.containers) {
             for(var j = 0; j < data.containers.length; j++) {
