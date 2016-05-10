@@ -503,6 +503,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> FORM_PROPERTY_MULTIPLE_METHODS_ON_SAME_ELEMENT = new Pair<String, ProblemSeverity>(
 		"formPropertyMultipleMethodsOnSameElement", ProblemSeverity.INFO);
+	public final static Pair<String, ProblemSeverity> FORM_REFERENCE_INVALID_PROPERTY = new Pair<String, ProblemSeverity>("formReferenceInvalidProperty",
+		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> FORM_REFERENCE_INVALID_SCRIPT = new Pair<String, ProblemSeverity>("formReferenceInvalidScript",
+		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> NON_ACCESSIBLE_PERSIST_IN_MODULE_USED_IN_PARENT_SOLUTION = new Pair<String, ProblemSeverity>(
 		"nonAccessibleFormInModuleUsedInParentSolution", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> METHOD_NUMBER_OF_ARGUMENTS_MISMATCH = new Pair<String, ProblemSeverity>("methodNumberOfArgsMismatch",
@@ -2244,6 +2248,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										{
 											addEncapsulationMarker(project, o, foundPersist, (Form)context);
 										}
+										if (context instanceof Form && ((Form)context).getReferenceForm().booleanValue() &&
+											BaseComponent.isEventOrCommandProperty(element.getName()))
+										{
+											ServoyMarker mk = MarkerMessages.FormReferenceInvalidProperty.fill(((Form)context).getName(), element.getName());
+											addMarker(project, mk.getType(), mk.getText(), -1, FORM_REFERENCE_INVALID_PROPERTY, IMarker.PRIORITY_NORMAL, null,
+												context);
+										}
 										if (BaseComponent.isEventProperty(element.getName()) && !skipEventMethod(element.getName()) &&
 											(foundPersist instanceof ScriptMethod) && !methodsParsed.contains(foundPersist.getUUID()))
 										{
@@ -3368,6 +3379,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						else if (parent.getTypeID() == IRepository.TABPANELS && o.getTypeID() != IRepository.TABS)
 						{
 							addBadStructureMarker(o, servoyProject, project);
+						}
+
+						if (context instanceof Form && ((Form)context).getReferenceForm().booleanValue() && o instanceof IScriptElement)
+						{
+							ServoyMarker mk = MarkerMessages.FormReferenceInvalidScript.fill(((Form)context).getName(), ((IScriptElement)o).getName());
+							addMarker(project, mk.getType(), mk.getText(), ((IScriptElement)o).getLineNumberOffset(), FORM_REFERENCE_INVALID_SCRIPT,
+								IMarker.PRIORITY_NORMAL, null, o);
 						}
 
 						if (!(o instanceof IScriptElement) &&

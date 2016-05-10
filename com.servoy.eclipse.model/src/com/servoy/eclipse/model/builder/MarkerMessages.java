@@ -314,6 +314,12 @@ public class MarkerMessages
 	public static ServoyMarker FormFileNameInconsistent = new ServoyMarker("Form \"{0}\" is saved on disk in a file with a different name( \"{1}\" ).",
 		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 
+	public static ServoyMarker FormReferenceInvalidProperty = new ServoyMarker(
+		"Form \"{0}\" is a reference form and it is not allowed to have the property \"{1}\" set.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
+
+	public static ServoyMarker FormReferenceInvalidScript = new ServoyMarker(
+		"Form \"{0}\" is a reference form and it is not allowed to have script variables or methods defined (\"{1}\").",
+		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 	/**
 	 * This means that when using form inheritance a cycle was introduced in the dependency relation of some forms. This is not allowed.
 	 */
