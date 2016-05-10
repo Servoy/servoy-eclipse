@@ -33,6 +33,7 @@ import org.sablo.specification.BaseSpecProvider;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.j2db.util.Debug;
 
 /**
@@ -44,6 +45,7 @@ public class GetAllInstalledPackages implements IDeveloperService
 
 	public JSONArray executeMethod(String message, JSONObject args)
 	{
+		String activeSolutionName = ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
 		BaseSpecProvider provider = WebComponentSpecProvider.getInstance();
 		JSONArray result = new JSONArray();
 		try
@@ -58,6 +60,12 @@ public class GetAllInstalledPackages implements IDeveloperService
 				if (packagesToVersions.containsKey(name))
 				{
 					pack.put("installed", packagesToVersions.get(name));
+					// TODO get the solution of the package.
+					pack.put("activeSolution", activeSolutionName);
+				}
+				else
+				{
+					pack.put("activeSolution", activeSolutionName);
 				}
 				// TODO add the solution where this package is installed in.
 				result.put(pack);

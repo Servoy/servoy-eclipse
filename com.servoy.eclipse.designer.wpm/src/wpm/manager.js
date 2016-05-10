@@ -83,7 +83,7 @@ angular.module('app', ['ngMaterial'])
 		    if ($scope.packages[index].installed) { 
 		      return "Upgrade"
 		    } else {
-		      return "Install";
+		      return "Add to solution";
 		    }
 		  }
 
