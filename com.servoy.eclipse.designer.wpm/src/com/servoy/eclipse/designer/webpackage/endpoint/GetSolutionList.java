@@ -30,7 +30,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 public class GetSolutionList implements IDeveloperService
 {
 	@Override
-	public JSONArray executeMethod(String methodName, JSONObject args)
+	public JSONArray executeMethod(JSONObject msg)
 	{
 		ServoyProject[] modulesOfActiveProject = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
 		JSONArray array = new JSONArray();

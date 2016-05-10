@@ -33,6 +33,7 @@ public class WebPackagesServiceHandler
 	{
 		configuredHandlers.put("requestAllInstalledPackages", new GetAllInstalledPackages());
 		configuredHandlers.put("install", new InstallWebPackageHandler());
+		configuredHandlers.put("remove", new RemoveWebPackageHandler());
 		configuredHandlers.put("getSolutionList", new GetSolutionList());
 	}
 
@@ -42,8 +43,8 @@ public class WebPackagesServiceHandler
 		String method = msg.getString("method");
 		IDeveloperService iServerService = configuredHandlers.get(method);
 		JSONObject args = null;
-		if (msg.has("args")) args = msg.getJSONObject("args");
-		Object result = iServerService.executeMethod(message, args);
+		Object result = iServerService.executeMethod(msg);
+		if (result == null) return null;
 		JSONObject jsonResult = new JSONObject();
 		jsonResult.put("method", method);
 		jsonResult.put("result", result);

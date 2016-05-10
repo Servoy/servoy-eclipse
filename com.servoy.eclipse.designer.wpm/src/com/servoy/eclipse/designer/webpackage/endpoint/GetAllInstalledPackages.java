@@ -43,7 +43,7 @@ import com.servoy.j2db.util.Debug;
 public class GetAllInstalledPackages implements IDeveloperService
 {
 
-	public JSONArray executeMethod(String message, JSONObject args)
+	public JSONArray executeMethod(JSONObject msg)
 	{
 		String activeSolutionName = ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
 		BaseSpecProvider provider = WebComponentSpecProvider.getInstance();

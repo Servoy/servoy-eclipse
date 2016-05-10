@@ -25,5 +25,5 @@ import org.json.JSONObject;
  */
 public interface IDeveloperService
 {
-	Object executeMethod(String methodName, JSONObject args);
+	Object executeMethod(JSONObject message);
 }

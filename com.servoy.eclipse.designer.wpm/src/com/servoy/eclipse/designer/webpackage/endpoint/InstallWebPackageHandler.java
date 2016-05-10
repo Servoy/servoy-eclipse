@@ -24,16 +24,12 @@ import java.net.URLConnection;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.nature.ServoyResourcesProject;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.Debug;
 
 /**
@@ -44,34 +40,41 @@ public class InstallWebPackageHandler implements IDeveloperService
 {
 
 	@Override
-	public JSONObject executeMethod(String methodName, JSONObject args)
+	public JSONObject executeMethod(JSONObject msg)
 	{
-//		https://github.com/Servoy/angularmaterial/releases/tag/1.0.0
-		String urlString = "https://github.com/Servoy/" + args.get("name") + "/releases/download/" + args.getString("latestVersion") + "/" + args.get("name") +
-			".zip";
+		JSONObject pck = msg.getJSONObject("package");
+		String selected = pck.optString("selected");
+		if (selected == null) return null;
+		String urlString = null;
+		JSONArray jsonArray = pck.getJSONArray("releases");
+		for (int i = 0; i < jsonArray.length(); i++)
+		{
+			JSONObject release = jsonArray.optJSONObject(i);
+			if (release.optString("version", "").equals(selected))
+			{
+				urlString = release.optString("url");
+				break;
+			}
+		}
 		try
 		{
 			URL url = new URL(urlString);
 			URLConnection conn = url.openConnection();
 			InputStream in = conn.getInputStream();
-			String packageName = args.get("name").toString();
+			String packageName = pck.getString("name");
 			String componentsOrServices = "components";
-			if (packageName.endsWith("services")) componentsOrServices = "services";
-			IFolder componentsFolder = checkComponentsFolderCreated(componentsOrServices);
+			if (pck.getString("packageType").endsWith("Web-Service")) componentsOrServices = "services";
+			else if (pck.getString("packageType").endsWith("Web-Layout")) componentsOrServices = "layout"; // TODO
+			IFolder componentsFolder = RemoveWebPackageHandler.checkComponentsFolderCreated(componentsOrServices);
 
-			importZipFileComponent(componentsFolder, in, args.get("name").toString());
+			importZipFileComponent(componentsFolder, in, packageName);
 			in.close();
 		}
 		catch (IOException e)
 		{
 			Debug.log(e);
-			return args;
 		}
-		args.put("version", args.get("latestVersion"));
-		JSONObject result = new JSONObject();
-		result.put("message", "updatePackage");
-		result.put("args", args);
-		return result;
+		return null;
 	}
 
 
@@ -100,40 +103,4 @@ public class InstallWebPackageHandler implements IDeveloperService
 			Debug.log(e);
 		}
 	}
-
-	private IFolder checkComponentsFolderCreated(String componentsOrServices)
-	{
-		IProject project = getResourcesProject();
-
-		try
-		{
-			project.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
-		}
-		catch (CoreException e1)
-		{
-			e1.printStackTrace();
-		}
-		IFolder folder = project.getFolder(componentsOrServices);
-		if (!folder.exists())
-		{
-			try
-			{
-				folder.create(true, true, new NullProgressMonitor());
-			}
-			catch (CoreException e)
-			{
-				ServoyLog.logError(e);
-			}
-		}
-		return folder;
-	}
-
-	private IProject getResourcesProject()
-	{
-		ServoyProject initialActiveProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		ServoyResourcesProject resourcesProject = initialActiveProject.getResourcesProject();
-		IProject project = resourcesProject.getProject();
-		return project;
-	}
-
 }

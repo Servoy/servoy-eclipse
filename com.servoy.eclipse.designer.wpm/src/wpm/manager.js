@@ -14,6 +14,7 @@ angular.module('app', ['ngMaterial'])
 //		var uri = "ws://localhost:8080/wpm/angular2/websocket";
 	  
 	var ws = new WebSocket(uri);
+	$scope.websocket = ws;
 	  
 	ws.onopen = function (event) {
 	      var command = {"method":"requestAllInstalledPackages"};
@@ -62,13 +63,6 @@ angular.module('app', ['ngMaterial'])
 	  	}
     }
 
-	$scope.install = function (item) {
-    	  var command = {"method":"install",
-    		  	 "args": item};
-    	  ws.send(JSON.stringify(command));
-  	}
-
-
     $scope.tabSelected = 1;
 }).directive('packages',  function () {
 	return {
@@ -76,7 +70,8 @@ angular.module('app', ['ngMaterial'])
 		templateUrl: 'packages.html',
 		scope: {
 			packages: "=packages",
-			solutionList: "=solutionList"
+			solutionList: "=solutionList",
+			websocket: "=websocket"
 		},
 		link:function($scope, $element, $attrs) {
 		  $scope.getActionText = function(index) {
@@ -89,7 +84,7 @@ angular.module('app', ['ngMaterial'])
 
 		   $scope.getSelectedRelease = function(index) {
 			if (angular.isUndefined($scope.packages[index].selected)) {
-				$scope.packages[index].selected = $scope.packages[index].installed; 
+				$scope.packages[index].selected = $scope.packages[index].releases[0].version; 
 			}
 		    if ($scope.packages[index].selected == $scope.packages[index].releases[0].version) {
 		      return $scope.packages[index].selected + " Latest";
@@ -97,10 +92,17 @@ angular.module('app', ['ngMaterial'])
 		      return $scope.packages[index].selected;
 		    }
 		  }
+		   
+		   $scope.install = function (pck) {
+			   var command = {"method":"install","package": pck};
+			   $scope.websocket.send(JSON.stringify(command));
+		  	}
 
-		  $scope.uninstall = function(index) {
-		    $scope.packages[index].installed = null;
-		  }
+
+		  $scope.uninstall = function(pck) {
+			   var command = {"method":"remove","package": pck};
+			   $scope.websocket.send(JSON.stringify(command));
+		  	}
 
 		  $scope.isLatestRelease = function (index) {
 		    return $scope.packages[index].installed == $scope.packages[index].releases[0];

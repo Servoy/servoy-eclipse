@@ -1,13 +1,13 @@
-.list-packages {
-  /* Add some right padding so that the text doesn't overlap the buttons */ }
-  .list-packages md-divider {
+
+.list-packages md-divider {
     margin-top: 10px;
     margin-bottom: 10px; 
-  }
-  .list-packages md-list-item > p,
-  .list-packages md-list-item > .md-list-item-inner > p,
-  .list-packages md-list-item .md-list-item-inner > p,
-  .list-packages md-list-item .md-list-item-inner > .md-list-item-inner > p {
+}
+
+.list-packages md-list-item > p,
+.list-packages md-list-item > .md-list-item-inner > p,
+.list-packages md-list-item .md-list-item-inner > p,
+.list-packages md-list-item .md-list-item-inner > .md-list-item-inner > p {
     -webkit-user-select: none;
     /* Chrome all / Safari all */
     -moz-user-select: none;

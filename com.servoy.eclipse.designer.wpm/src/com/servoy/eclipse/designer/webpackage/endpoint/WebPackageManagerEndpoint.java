@@ -59,7 +59,7 @@ public class WebPackageManagerEndpoint
 	public void incoming(String msg, boolean lastPart)
 	{
 		String handleMessage = this.webPackagesServiceHandler.handleMessage(msg);
-		if (session != null && session.isOpen())
+		if (handleMessage != null && session != null && session.isOpen())
 		{
 			Future<Void> sendObject = session.getAsyncRemote().sendText(handleMessage);
 			try
