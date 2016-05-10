@@ -1,0 +1,141 @@
+.list-packages {
+  /* Add some right padding so that the text doesn't overlap the buttons */ }
+  .list-packages md-divider {
+    margin-top: 10px;
+    margin-bottom: 10px; 
+  }
+  .list-packages md-list-item > p,
+  .list-packages md-list-item > .md-list-item-inner > p,
+  .list-packages md-list-item .md-list-item-inner > p,
+  .list-packages md-list-item .md-list-item-inner > .md-list-item-inner > p {
+    -webkit-user-select: none;
+    /* Chrome all / Safari all */
+    -moz-user-select: none;
+    /* Firefox all */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Likely future */ 
+ }
+.list-packages > md-list-item {
+  height: 50px;
+ }
+.list-packages .secondary-button-padding p {
+    padding-right: 100px; 
+}
+
+.title {
+  margin-top: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.title,
+md-tabs-canvas,
+md-tabs .md-tab {
+  background-color: #000;
+  color: #fff;
+}
+
+md-tabs.md-default-theme md-ink-bar, md-tabs md-ink-bar {
+    color: #e4844a;
+    background: #e4844a;
+    height: 5px;
+}
+
+md-tabs.md-default-theme .md-tab.md-active,
+md-tabs .md-tab.md-active, 
+md-tabs.md-default-theme .md-tab.md-active md-icon, 
+md-tabs .md-tab.md-active md-icon, 
+md-tabs.md-default-theme .md-tab.md-focused, 
+md-tabs .md-tab.md-focused, 
+md-tabs.md-default-theme .md-tab.md-focused md-icon, 
+md-tabs .md-tab.md-focused md-icon {
+  color: #e4844a;
+}
+
+.svy-primary.md-button.md-raised {
+    color: #fff;
+    background-color: #e4844a;
+}
+
+.svy-primary.md-button.md-raised:not([disabled]):hover {
+    background-color: #e4844a;
+}
+
+.table-package {
+  width: 100%;
+}
+
+.table-package .md-avatar {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    margin-right: 16px;
+    border-radius: 50%;
+    box-sizing: content-box;
+    width: 40px;
+    height: 40px;
+}
+
+.table-package md-select {
+  display: inline-block;
+}
+
+.table-package td > div {
+
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-justify-content: flex-start;
+    -ms-flex-pack: start;
+    justify-content: flex-start;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    min-height: 48px;
+    height: auto;
+}
+
+.table-package span:first-child:last-child {
+	width : 100%;
+	text-align: center;
+}
+
+.table-package .align-center > * {
+  margin: auto;
+}
+
+.table-package td:last-child > div {
+  margin: auto;
+  width: 215px;
+}
+
+.table-package .fa {
+  font-size: 28px;
+}
+
+.table-package .column-release .release-action {
+  font-size: 24px;
+  float: right;
+}
+
+.success {
+  color: green;
+}
+
+.warning {
+  color: red;
+}
+
+.visible {
+  width: 100%;
+}
+
+.hidden {
+  width : 0px;
+  display: none;
+}
+
+.visible, .hidden {
+  transition: width 2s;
+}

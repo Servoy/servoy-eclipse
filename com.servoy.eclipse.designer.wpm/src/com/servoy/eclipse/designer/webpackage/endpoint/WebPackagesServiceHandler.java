@@ -33,15 +33,21 @@ public class WebPackagesServiceHandler
 	{
 		configuredHandlers.put("requestAllInstalledPackages", new GetAllInstalledPackages());
 		configuredHandlers.put("install", new InstallWebPackageHandler());
+		configuredHandlers.put("getSolutionList", new GetSolutionList());
 	}
 
-	public JSONObject handleMessage(String message)
+	public String handleMessage(String message)
 	{
 		JSONObject msg = new JSONObject(message);
-		IDeveloperService iServerService = configuredHandlers.get(msg.get("method"));
+		String method = msg.getString("method");
+		IDeveloperService iServerService = configuredHandlers.get(method);
 		JSONObject args = null;
 		if (msg.has("args")) args = msg.getJSONObject("args");
-		return iServerService.executeMethod(message, args);
+		Object result = iServerService.executeMethod(message, args);
+		JSONObject jsonResult = new JSONObject();
+		jsonResult.put("method", method);
+		jsonResult.put("result", result);
+		return jsonResult.toString();
 	}
 
 }

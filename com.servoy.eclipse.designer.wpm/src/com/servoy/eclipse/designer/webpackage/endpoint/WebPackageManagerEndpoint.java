@@ -29,8 +29,6 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
-import org.json.JSONObject;
-
 import com.servoy.j2db.util.Debug;
 
 /**
@@ -60,10 +58,10 @@ public class WebPackageManagerEndpoint
 	@OnMessage
 	public void incoming(String msg, boolean lastPart)
 	{
-		JSONObject handleMessage = this.webPackagesServiceHandler.handleMessage(msg);
+		String handleMessage = this.webPackagesServiceHandler.handleMessage(msg);
 		if (session != null && session.isOpen())
 		{
-			Future<Void> sendObject = session.getAsyncRemote().sendText(handleMessage.toString());
+			Future<Void> sendObject = session.getAsyncRemote().sendText(handleMessage);
 			try
 			{
 				sendObject.get();

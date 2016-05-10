@@ -18,19 +18,15 @@
 package com.servoy.eclipse.designer.webpackage.endpoint;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.specification.BaseSpecProvider;
@@ -46,12 +42,7 @@ import com.servoy.j2db.util.Debug;
 public class GetAllInstalledPackages implements IDeveloperService
 {
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.sablo.websocket.IServerService#executeMethod(java.lang.String, org.json.JSONObject)
-	 */
-	public JSONObject executeMethod(String methodName, JSONObject args)
+	public JSONArray executeMethod(String message, JSONObject args)
 	{
 		BaseSpecProvider provider = WebComponentSpecProvider.getInstance();
 		JSONArray result = new JSONArray();
@@ -59,18 +50,16 @@ public class GetAllInstalledPackages implements IDeveloperService
 		{
 			Map<String, String> packagesToVersions = provider.getPackagesToVersions();
 			packagesToVersions.putAll(WebServiceSpecProvider.getInstance().getPackagesToVersions());
-			Map<String, String> latestVersions = getLatestVersions();
+			List<JSONObject> remotePackages = getRemotePackages();
 
-			for (Map.Entry<String, String> entry : latestVersions.entrySet())
+			for (JSONObject pack : remotePackages)
 			{
-				JSONObject pack = new JSONObject();
-				pack.put("name", entry.getKey());
-				if (packagesToVersions.containsKey(entry.getKey()))
+				String name = pack.getString("name");
+				if (packagesToVersions.containsKey(name))
 				{
-					pack.put("version", packagesToVersions.get(entry.getKey()));
+					pack.put("installed", packagesToVersions.get(name));
 				}
-				else pack.put("version", "n/a");
-				pack.put("latestVersion", entry.getValue());
+				// TODO add the solution where this package is installed in.
 				result.put(pack);
 			}
 		}
@@ -78,18 +67,17 @@ public class GetAllInstalledPackages implements IDeveloperService
 		{
 			Debug.log(e);
 		}
-		return new JSONObject().put("requestAllInstalledPackages", result);
+		return result;
 	}
 
 	/**
 	 * @return
 	 * @throws Exception
 	 */
-	private Map<String, String> getLatestVersions() throws Exception
+	private List<JSONObject> getRemotePackages() throws Exception
 	{
-
-		HashMap<String, String> result = new HashMap<>();
-		String repositoriesIndex = getListOfProjectsAsJson("http://servoy.github.io/webpackageindex");
+		List<JSONObject> result = new ArrayList<>();
+		String repositoriesIndex = getUrlContents("http://servoy.github.io/webpackageindex");
 
 		JSONArray repoArray = new JSONArray(repositoriesIndex);
 		for (int i = repoArray.length(); i-- > 0;)
@@ -98,44 +86,43 @@ public class GetAllInstalledPackages implements IDeveloperService
 			if (repo instanceof JSONObject)
 			{
 				JSONObject repoObject = (JSONObject)repo;
-				String geturl = repoObject.getString("url").replace("github.com", "api.github.com/repos") + "/releases/latest";
-				String githubResponse = callGithubAPIForLatestVersion(geturl);
-				JSONObject response = new JSONObject(githubResponse);
-				result.put(repoObject.getString("name"), response.getString("tag_name"));
+				String packageResponse = getUrlContents(repoObject.getString("url"));
+				if (packageResponse == null)
+				{
+					Debug.log("Couldn't get the package contents of: " + repoObject);
+					continue;
+				}
+				try
+				{
+					JSONObject packageObject = new JSONObject(packageResponse);
+					JSONArray jsonArray = packageObject.getJSONArray("releases");
+					List<JSONObject> toSort = new ArrayList<>();
+					for (int k = jsonArray.length(); k-- > 0;)
+					{
+						toSort.add(jsonArray.getJSONObject(k));
+					}
+					Collections.sort(toSort, new Comparator<JSONObject>()
+					{
+						@Override
+						public int compare(JSONObject o1, JSONObject o2)
+						{
+							return o2.optString("version", "").compareTo(o1.optString("version", ""));
+						}
+					});
+					packageObject.put("releases", toSort);
+					result.add(packageObject);
+				}
+				catch (Exception e)
+				{
+					Debug.log("Couldn't get the package contents of: " + repoObject + " error parsing: " + packageResponse, e);
+					continue;
+				}
 			}
 		}
 		return result;
 	}
 
-	private String callGithubAPIForLatestVersion(String url)
-	{
-		StringBuffer result = new StringBuffer();
-		try
-		{
-			// Create an instance of HttpClient.
-			HttpClient client = HttpClientBuilder.create().build();
-			HttpGet request = new HttpGet(url);
-
-			// add request header
-			HttpResponse response;
-			response = client.execute(request);
-
-			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-			String line = "";
-			while ((line = rd.readLine()) != null)
-			{
-				result.append(line);
-			}
-		}
-		catch (Throwable e)
-		{
-			Debug.log(e);
-		}
-		return result.toString();
-	}
-
-	private String getListOfProjectsAsJson(String urlToRead)
+	private String getUrlContents(String urlToRead)
 	{
 		try
 		{
@@ -150,6 +137,7 @@ public class GetAllInstalledPackages implements IDeveloperService
 				result.append(line);
 			}
 			rd.close();
+			conn.disconnect();
 			return result.toString();
 		}
 		catch (Exception e)

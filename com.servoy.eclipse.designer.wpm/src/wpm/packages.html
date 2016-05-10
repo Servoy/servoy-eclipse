@@ -1,0 +1,47 @@
+<table style="width:100%" class="table-package">
+  <tr>
+    <th><md-subheader class="md-no-sticky">Package</md-subheader></th>
+    <th><md-subheader class="md-no-sticky">Release</md-subheader></th>
+    <th><md-subheader class="md-no-sticky">Installed</md-subheader></th>  
+    <th><md-subheader class="md-no-sticky">Solution</md-subheader></th>  
+    <th><md-subheader class="md-no-sticky">Demo</md-subheader></th>
+  </tr>
+  <tr ng-repeat="package in packages">
+    <td>
+      <div>
+        <img  ng-src="{{package.icon}}" class="md-avatar" />
+        <span>{{package.displayName}}</span>
+      </div>
+    </td>
+    <td>
+      <div class="column-release">
+        <md-select ng-model="package.selected" style="width: 200px;" md-selected-text="getSelectedRelease($index)">
+          <md-option ng-value="release.version" ng-repeat="release in package.releases">{{release.version}}</md-option>
+        </md-select>
+        <md-button class="md-raised" ng-click="install($index)" ng-bind="getActionText($index)" ng-disabled="!upgradeEnabled($index)"></md-button>
+        <md-button class="md-raised" ng-click="uninstall($index)" ng-if="package.installed">Uninstall</md-button>
+      </div>
+    </td>
+    <td>
+      <div> 
+        <span> {{package.installed}} </span>
+        <!--<i class="fa fa-check-circle-o release-action success" ng-if="package.installed"></i>-->
+      </div>
+    </td>
+    <td>
+      <div class="align-center">  
+        <md-select ng-model="package.activeSolution" style="width: 200px;">
+          <md-option ng-value="solution" ng-repeat="solution in $parent.solutionList">{{solution}}</md-option>
+        </md-select>
+        <!--<i class="fa fa-check-circle-o release-action success" ng-if="package.installed"></i>-->
+      </div>
+    </td>
+    <td>    
+      <div class="align-center">  
+        <md-button class="md-raised svy-primary" ng-click="showDemo(true)">View Demo</md-button>
+        <md-button class="md-icon-button fa fa-book"  ng-click="showDemo(true)"></md-button>
+        <md-button class="md-icon-button fa fa-github"  ng-click="showDemo(true)"></md-button>
+      </div>
+    </td> 
+  </tr>
+</table>

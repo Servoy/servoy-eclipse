@@ -55,7 +55,7 @@ public class WebPackageManager extends EditorPart
 
 		browser = new Browser(parent, SWT.NONE);
 
-		String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/wpm/angular2/index.html";
+		String url = "http://localhost:" + ApplicationServerRegistry.get().getWebServerPort() + "/wpm/index.html";
 		try
 		{
 			browser.setUrl(url, null, new String[] { "Cache-Control: no-cache" });
