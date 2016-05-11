@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.j2db.util.Debug;
 
 /**
@@ -62,9 +63,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 			URLConnection conn = url.openConnection();
 			InputStream in = conn.getInputStream();
 			String packageName = pck.getString("name");
-			String componentsOrServices = "components";
-			if (pck.getString("packageType").endsWith("Web-Service")) componentsOrServices = "services";
-			else if (pck.getString("packageType").endsWith("Web-Layout")) componentsOrServices = "layout"; // TODO
+			String componentsOrServices = SolutionSerializer.NG_PACKAGES_DIR_NAME;
 			IFolder componentsFolder = RemoveWebPackageHandler.checkComponentsFolderCreated(componentsOrServices);
 
 			importZipFileComponent(componentsFolder, in, packageName);

@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.model.ngpackages;
 
+import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
+
 /**
  * @author jcompagner
  */
@@ -26,7 +28,8 @@ public interface INGPackageChangeListener
 
 	/**
 	 * Gets called when the list of referenced ng package projects changes (one is added or removed for example).
+	 * @param referencedNGPackageProjects
 	 */
-	void ngPackageProjectListChanged(); // TODO should this be part of IActiveProjectListener instead?
+	void ngPackageProjectListChanged(ServoyNGPackageProject[] referencedNGPackageProjects); // TODO should this be part of IActiveProjectListener instead?
 
 }

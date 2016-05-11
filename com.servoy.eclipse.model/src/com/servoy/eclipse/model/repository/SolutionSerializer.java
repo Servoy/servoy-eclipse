@@ -111,6 +111,8 @@ public class SolutionSerializer
 	public static final String COMPONENTS_DIR_NAME = "components";
 	public static final String SERVICES_DIR_NAME = "services";
 
+	public static final String NG_PACKAGES_DIR_NAME = "ng_web_packages";
+
 	public static final String DATASOURCES_DIR_NAME = "datasources";
 	public static final int JSON_FILE_EXTENSION_SIZE = 4;
 	public static final String JSON_DEFAULT_FILE_EXTENSION = ".obj";

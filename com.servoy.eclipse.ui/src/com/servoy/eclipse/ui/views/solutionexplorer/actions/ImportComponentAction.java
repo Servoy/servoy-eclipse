@@ -43,7 +43,7 @@ public abstract class ImportComponentAction extends Action
 		this.viewer = viewer;
 		this.entity = entity;
 		setImageDescriptor(Activator.loadImageDescriptorFromOldLocations("import.gif"));
-		setText("Import " + entity + " jar package");
+		setText("Import " + entity + " zip package");
 		setToolTipText(getText());
 	}
 

@@ -18,6 +18,7 @@
 package com.servoy.eclipse.designer.editor.rfb;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.ngpackages.INGPackageChangeListener;
 
 /**
@@ -64,7 +65,7 @@ public class RfbWebResourceListener implements INGPackageChangeListener
 	}
 
 	@Override
-	public void ngPackageProjectListChanged()
+	public void ngPackageProjectListChanged(ServoyNGPackageProject[] referencedNGPackageProjects)
 	{
 		// not used right now
 	}

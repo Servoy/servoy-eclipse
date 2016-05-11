@@ -2752,6 +2752,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		movePersistAction = new MovePersistAction(shell);
 		duplicatePersistAction = new DuplicatePersistAction(shell);
 		IAction importComponent = new ImportComponentAsZipAction(this, "component", "components");
+		IAction importComponentInSolution = new ImportComponentAsZipAction(this, "component", SolutionSerializer.NG_PACKAGES_DIR_NAME);
 		IAction manageWebPackagesAction = new StartWebPackageManager();
 		IAction importService = new ImportComponentAsZipAction(this, "service", "services");
 		IAction importComponentAsProject = new ImportComponentAsProjectAction(this, "component");
@@ -2784,6 +2785,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_SOLUTIONS, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.STYLES, newStyle);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS_FROM_RESOURCES, importComponent);
+		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, importComponentInSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_FROM_RESOURCES, importService);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES, newComponentAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES, newServiceAction);
@@ -2799,10 +2801,10 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreeSecondary.registerAction(UserNodeType.SERVICES_FROM_RESOURCES, manageWebPackagesAction);
 
 		createActionInTree.registerAction(UserNodeType.COMPONENTS_FROM_RESOURCES, newComponentPackageAction);
-		createPackageProjectActionInTree.registerAction(UserNodeType.COMPONENTS_PROJECTS, newComponentsPackageProjectAction);
+		createPackageProjectActionInTree.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newComponentsPackageProjectAction);
 		createPackageProjectActionInTree.registerAction(UserNodeType.ALL_WEB_PACKAGES, newPackageProjectAction);
 		createActionInTree.registerAction(UserNodeType.SERVICES_FROM_RESOURCES, newServicePackageAction);
-		createPackageProjectActionInTree.registerAction(UserNodeType.SERVICES_PROJECTS, newServicesPackageProjectAction);
+		createPackageProjectActionInTree.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newServicesPackageProjectAction);
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 

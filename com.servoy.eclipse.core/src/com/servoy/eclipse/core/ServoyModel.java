@@ -3259,7 +3259,7 @@ public class ServoyModel extends AbstractServoyModel
 			}
 
 			@Override
-			public void ngPackageProjectListChanged()
+			public void ngPackageProjectListChanged(ServoyNGPackageProject[] referencedNGPackageProjects)
 			{
 				updateWorkingSet();
 			}

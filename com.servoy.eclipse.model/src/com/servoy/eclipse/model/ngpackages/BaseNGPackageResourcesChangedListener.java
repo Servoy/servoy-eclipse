@@ -18,7 +18,9 @@
 package com.servoy.eclipse.model.ngpackages;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -29,6 +31,7 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.sablo.specification.Package.IPackageReader;
 import org.sablo.util.ValueReference;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -37,6 +40,9 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
+import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 
 /**
  * This class is responsible for refreshing loaded ng packages as needed depending on workspace resource changes.
@@ -76,6 +82,9 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 		ValueReference<Boolean> clearReferencedProjectsCache = new ValueReference<>(Boolean.FALSE);
 		final List<IProject> newNGPackageProjectsToLoad = new ArrayList<>();
 		final List<IProject> oldNGPackageProjectsToUnload = new ArrayList<>();
+
+		checkForChangesInSolutionBinaryPackages(delta);
+
 		checkForChangesInNGPackageProjects(activeProject, affectedChildren, refreshAllNGPackageProjects, clearReferencedProjectsCache,
 			newNGPackageProjectsToLoad, oldNGPackageProjectsToUnload);
 
@@ -110,6 +119,94 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 			}
 			if (clearReferencedProjectsCache.value.booleanValue()) baseNGPackageManager.ngPackageProjectListChanged();
 		}
+	}
+
+
+	/** Checks for resources changes of binary packages and updates the  @ResourceProvider if needed
+	 * @param delta
+	 * @return
+	 */
+	private void checkForChangesInSolutionBinaryPackages(IResourceDelta delta)
+	{
+		final Map<String, IPackageReader> addedComponentProjectReaders = new HashMap<String, IPackageReader>();
+		final Map<String, IPackageReader> addedServiceProjectReaders = new HashMap<String, IPackageReader>();
+		final Map<String, IPackageReader> removedComponentProjectReaders = new HashMap<String, IPackageReader>();
+		final Map<String, IPackageReader> removedServiceProjectReaders = new HashMap<String, IPackageReader>();
+		try
+		{
+			delta.accept(new IResourceDeltaVisitor()
+			{
+
+				@Override
+				public boolean visit(IResourceDelta resourceDelta) throws CoreException
+				{
+					IResource resource = resourceDelta.getResource();
+					if (resource instanceof IFile)
+					{
+						IFile binaryFile = (IFile)resource;
+						if (binaryFile.getName().endsWith(".zip"))
+						{
+							Pair<String, IPackageReader> readPackageResource = baseNGPackageManager.readPackageResource(resource);
+
+							if (binaryFile.getParent().getName().equals(SolutionSerializer.NG_PACKAGES_DIR_NAME))
+							{//component package
+								if ((resourceDelta.getKind() & IResourceDelta.CHANGED) != 0)
+								{
+									removedComponentProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
+									addedComponentProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
+								}
+								else if ((resourceDelta.getKind() & IResourceDelta.REMOVED) != 0)
+								{
+									removedComponentProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
+								}
+								else if ((resourceDelta.getKind() & IResourceDelta.ADDED) != 0)
+								{
+									addedComponentProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
+								}
+							}
+							else
+							{//service package
+								if ((resourceDelta.getKind() & IResourceDelta.CHANGED) != 0)
+								{
+									removedServiceProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
+									addedServiceProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
+								}
+								else if ((resourceDelta.getKind() & IResourceDelta.REMOVED) != 0)
+								{
+									removedServiceProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
+								}
+								else if ((resourceDelta.getKind() & IResourceDelta.ADDED) != 0)
+								{
+									addedServiceProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
+								}
+							}
+						}
+						return false;
+					}
+					return true;
+				}
+			});
+		}
+		catch (CoreException e)
+		{
+			Debug.log(e);
+		}
+
+		boolean componentsReloaded = false;
+		boolean servicesReloaded = false;
+
+		if (removedComponentProjectReaders.size() > 0 || addedComponentProjectReaders.size() > 0)
+		{
+			ResourceProvider.updateComponentResources(removedComponentProjectReaders.keySet(), addedComponentProjectReaders.values());
+			componentsReloaded = true;
+		}
+		if (removedServiceProjectReaders.size() > 0 || addedServiceProjectReaders.size() > 0)
+		{
+			ResourceProvider.updateServiceResources(removedServiceProjectReaders.keySet(), addedServiceProjectReaders.values());
+			servicesReloaded = true;
+		}
+
+		if (componentsReloaded || servicesReloaded) baseNGPackageManager.ngPackagesChanged(componentsReloaded, servicesReloaded);
 	}
 
 	protected void checkForChangesInNGPackageProjects(ServoyProject activeProject, IResourceDelta[] affectedChildren,

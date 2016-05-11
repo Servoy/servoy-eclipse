@@ -120,10 +120,10 @@ public enum UserNodeType
 	MEDIA_IMAGE,
 	MEDIA_FOLDER,
 	RESOURCES,
+	SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, //unique node in solex under each solution/module - holds web packages - binaries and project references
 	COMPONENTS_FROM_RESOURCES, //unique node in solex under Resources - holds folder and zip component packages
-	COMPONENTS_PACKAGE_FROM_RESOURCES, //node in solex under Resources/NG Components it is a folder or zip component package
-	COMPONENTS_PROJECTS, //unique node in solex under each solution/module - holds project component packages
-	COMPONENTS_PROJECT_PACKAGE, //node in solex under each Solution/NG Components it is a project component package
+	COMPONENTS_PACKAGE_FROM_RESOURCES, //node in solex under Resources->NG Components or under Solution->Web Packages it is a folder or zip component package
+	COMPONENTS_PROJECT_PACKAGE, //node in solex under Solution->Web Packages it is a project component package
 	COMPONENT, // one component - it can either belong to a folder/zip or to a project package
 	XML_METHODS,
 	XML_LIST_METHODS,
@@ -133,9 +133,8 @@ public enum UserNodeType
 	WORKING_SET,
 	DATASOURCES,
 	SERVICES_FROM_RESOURCES, //unique node in solex under Resources - holds folder and zip service packages
-	SERVICES_PACKAGE_FROM_RESOURCES, //node in solex under Resources/NG Services it is a folder or zip service package
-	SERVICES_PROJECTS, //node in solex under each solution/module - holds project component packages
-	SERVICES_PROJECT_PACKAGE, //node in solex under each Solution/NG Services it is a project service package
+	SERVICES_PACKAGE_FROM_RESOURCES, //node in solex under Resources->NG Services or under Solution->Web Packages  it is a folder or zip service package
+	SERVICES_PROJECT_PACKAGE, //node in solex under Solution->Web Packages it is a project service package
 	SERVICE, // one service - it can either belong to a folder/zip or to a project package
 	COMPONENT_RESOURCE,
 	SOLUTION_DATASOURCES,

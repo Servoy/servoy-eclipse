@@ -37,10 +37,12 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.core.util.UIUtils.ScrollableDialog;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -50,12 +52,12 @@ import com.servoy.j2db.util.Pair;
 public class ImportComponentAsZipAction extends ImportComponentAction
 {
 	private int overrideReturnCode;
-	protected final String folder;
+	protected final String folderName;
 
 	public ImportComponentAsZipAction(SolutionExplorerView viewer, String entity, String folder)
 	{
 		super(viewer, entity);
-		this.folder = folder;
+		this.folderName = folder;
 	}
 
 	/**
@@ -151,12 +153,12 @@ public class ImportComponentAsZipAction extends ImportComponentAction
 		List<String> existing = new ArrayList<String>();
 		List<String> incoming = Arrays.asList(fileNames);
 
-		IProject project = getResourcesProject();
-		if (project.getFolder(folder).exists())
+		IProject project = getTargetProject();
+		if (project.getFolder(folderName).exists())
 		{
 			try
 			{
-				IResource[] members = project.getFolder(folder).members();
+				IResource[] members = project.getFolder(folderName).members();
 				for (IResource iResource : members)
 				{
 					if (incoming.contains(iResource.getName())) existing.add(iResource.getName());
@@ -175,7 +177,7 @@ public class ImportComponentAsZipAction extends ImportComponentAction
 	 */
 	private IFolder checkComponentsFolderCreated()
 	{
-		IProject project = getResourcesProject();
+		IProject project = getTargetProject();
 
 		try
 		{
@@ -185,7 +187,7 @@ public class ImportComponentAsZipAction extends ImportComponentAction
 		{
 			e1.printStackTrace();
 		}
-		IFolder folder = project.getFolder(this.folder);
+		IFolder folder = project.getFolder(this.folderName);
 		if (!folder.exists())
 		{
 			try
@@ -203,8 +205,16 @@ public class ImportComponentAsZipAction extends ImportComponentAction
 	/**
 	 * @return
 	 */
-	private IProject getResourcesProject()
+	private IProject getTargetProject()
 	{
+
+		Object realObject = this.viewer.getSelectedTreeNode().getRealObject();
+		if (realObject instanceof Solution)
+		{
+			Solution solution = (Solution)realObject;
+			ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(solution.getName());
+			return servoyProject.getProject();
+		}
 		ServoyProject initialActiveProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
 		ServoyResourcesProject resourcesProject = initialActiveProject.getResourcesProject();
 		IProject project = resourcesProject.getProject();
