@@ -547,7 +547,17 @@ public abstract class BaseNGPackageManager
 			}
 			if (resource.getName().endsWith(".zip") || resource.getName().endsWith(".jar"))
 			{
-				return new Pair<String, IPackageReader>(name, new ZipFilePackageReader(resource));
+				ZipFilePackageReader reader = new ZipFilePackageReader(resource);
+				try
+				{
+					if (reader.getManifest().getMainAttributes().getValue("Package-Type") == null) return null;
+				}
+				catch (IOException e)
+				{
+					// ignore
+					return null;
+				}
+				return new Pair<String, IPackageReader>(name, reader);
 			}
 		}
 		return null;
