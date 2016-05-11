@@ -30,6 +30,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.specification.BaseSpecProvider;
+import org.sablo.specification.BaseSpecProvider.ISpecReloadListener;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
@@ -40,8 +41,20 @@ import com.servoy.j2db.util.Debug;
  * @author gganea
  *
  */
-public class GetAllInstalledPackages implements IDeveloperService
+public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadListener
 {
+	public static final String CLIENT_SERVER_METHOD = "requestAllInstalledPackages";
+	private final WebPackageManagerEndpoint endpoint;
+
+	/**
+	 * @param endpoint
+	 */
+	public GetAllInstalledPackages(WebPackageManagerEndpoint endpoint)
+	{
+		this.endpoint = endpoint;
+		WebComponentSpecProvider.getInstance().addSpecReloadListener(null, this);
+		WebServiceSpecProvider.getInstance().addSpecReloadListener(null, this);
+	}
 
 	public JSONArray executeMethod(JSONObject msg)
 	{
@@ -153,5 +166,22 @@ public class GetAllInstalledPackages implements IDeveloperService
 			Debug.log(e);
 		}
 		return null;
+	}
+
+	@Override
+	public void dispose()
+	{
+		WebComponentSpecProvider.getInstance().removeSpecReloadListener(null, this);
+		WebServiceSpecProvider.getInstance().removeSpecReloadListener(null, this);
+	}
+
+	@Override
+	public void webObjectSpecificationReloaded()
+	{
+		JSONArray packages = executeMethod(null);
+		JSONObject jsonResult = new JSONObject();
+		jsonResult.put("method", CLIENT_SERVER_METHOD);
+		jsonResult.put("result", packages);
+		endpoint.send(jsonResult.toString());
 	}
 }

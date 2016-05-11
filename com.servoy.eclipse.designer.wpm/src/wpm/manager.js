@@ -37,6 +37,9 @@ angular.module('app', ['ngMaterial'])
 	$scope.layoutPackages = []
 	  
 	this.requestAllInstalledPackages = function(packagesArray){
+		$scope.componentPackages.length = 0;
+		$scope.servicePackages.length = 0;
+		$scope.layoutPackages.length = 0;
 		for(i=0;i<packagesArray.length;i++) {
 			if (packagesArray[i].packageType == "Web-Component") {
 				$scope.componentPackages.push(packagesArray[i]);

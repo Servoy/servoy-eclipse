@@ -103,4 +103,10 @@ public class InstallWebPackageHandler implements IDeveloperService
 			Debug.log(e);
 		}
 	}
+
+	@Override
+	public void dispose()
+	{
+	}
+
 }

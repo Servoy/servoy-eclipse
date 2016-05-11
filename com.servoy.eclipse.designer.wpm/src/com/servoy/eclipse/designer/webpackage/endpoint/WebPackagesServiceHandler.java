@@ -29,9 +29,9 @@ public class WebPackagesServiceHandler
 {
 	private final HashMap<String, IDeveloperService> configuredHandlers = new HashMap<>();
 
-	public WebPackagesServiceHandler()
+	public WebPackagesServiceHandler(WebPackageManagerEndpoint endpoint)
 	{
-		configuredHandlers.put("requestAllInstalledPackages", new GetAllInstalledPackages());
+		configuredHandlers.put(GetAllInstalledPackages.CLIENT_SERVER_METHOD, new GetAllInstalledPackages(endpoint));
 		configuredHandlers.put("install", new InstallWebPackageHandler());
 		configuredHandlers.put("remove", new RemoveWebPackageHandler());
 		configuredHandlers.put("getSolutionList", new GetSolutionList());
@@ -49,6 +49,14 @@ public class WebPackagesServiceHandler
 		jsonResult.put("method", method);
 		jsonResult.put("result", result);
 		return jsonResult.toString();
+	}
+
+	/**
+	 *
+	 */
+	public void dispose()
+	{
+
 	}
 
 }

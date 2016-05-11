@@ -42,7 +42,7 @@ import com.servoy.j2db.util.Debug;
 public class WebPackageManagerEndpoint
 {
 
-	private final WebPackagesServiceHandler webPackagesServiceHandler = new WebPackagesServiceHandler();
+	private final WebPackagesServiceHandler webPackagesServiceHandler = new WebPackagesServiceHandler(this);
 	private Session session;
 
 	public WebPackageManagerEndpoint()
@@ -59,9 +59,17 @@ public class WebPackageManagerEndpoint
 	public void incoming(String msg, boolean lastPart)
 	{
 		String handleMessage = this.webPackagesServiceHandler.handleMessage(msg);
-		if (handleMessage != null && session != null && session.isOpen())
+		send(handleMessage);
+	}
+
+	/**
+	 * @param message
+	 */
+	public void send(String message)
+	{
+		if (message != null && session != null && session.isOpen())
 		{
-			Future<Void> sendObject = session.getAsyncRemote().sendText(handleMessage);
+			Future<Void> sendObject = session.getAsyncRemote().sendText(message);
 			try
 			{
 				sendObject.get();
@@ -76,7 +84,7 @@ public class WebPackageManagerEndpoint
 	@OnClose
 	public void onClose(CloseReason closeReason)
 	{
-		//TODO
+		webPackagesServiceHandler.dispose();
 	}
 
 	@OnError

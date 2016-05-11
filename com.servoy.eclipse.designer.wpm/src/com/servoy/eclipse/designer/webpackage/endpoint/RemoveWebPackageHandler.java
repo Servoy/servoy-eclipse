@@ -95,4 +95,9 @@ public class RemoveWebPackageHandler implements IDeveloperService
 		return project;
 	}
 
+	@Override
+	public void dispose()
+	{
+	}
+
 }

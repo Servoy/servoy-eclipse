@@ -41,4 +41,10 @@ public class GetSolutionList implements IDeveloperService
 		return array;
 	}
 
+	@Override
+	public void dispose()
+	{
+	}
+
+
 }

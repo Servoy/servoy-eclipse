@@ -26,4 +26,6 @@ import org.json.JSONObject;
 public interface IDeveloperService
 {
 	Object executeMethod(JSONObject message);
+
+	void dispose();
 }
