@@ -199,7 +199,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 				IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 				for (IProject iProject : projects)
 				{
-					if (iProject.getName().equals(text))
+					if (iProject.getName().toLowerCase().equals(text.toLowerCase()))
 					{
 						setErrorMessage("Project " + text + " already exists in workspace.");
 						result = false;
@@ -208,6 +208,13 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 
 			}
 			return result;
+		}
+
+		@Override
+		public void setVisible(boolean visible)
+		{
+			super.setVisible(visible);
+			packName.setFocus();
 		}
 
 		@Override
