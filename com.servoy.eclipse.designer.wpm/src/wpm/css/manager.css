@@ -54,6 +54,10 @@ md-tabs .md-tab.md-focused md-icon {
   color: #e4844a;
 }
 
+md-content {
+  background-color: rgb(255,255,255);
+}
+
 .svy-primary.md-button.md-raised {
     color: #fff;
     background-color: #e4844a;
@@ -96,18 +100,10 @@ md-tabs .md-tab.md-focused md-icon {
     height: auto;
 }
 
-.table-package span:first-child:last-child {
-	width : 100%;
-	text-align: center;
-}
-
-.table-package .align-center > * {
-  margin: auto;
-}
-
-.table-package td:last-child > div {
-  margin: auto;
-  width: 215px;
+.table-package td > div.align-center {
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
 }
 
 .table-package .fa {
