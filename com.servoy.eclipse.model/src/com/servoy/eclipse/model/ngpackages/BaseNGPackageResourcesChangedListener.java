@@ -189,7 +189,7 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 			else
 			{
 				packageName = ResourceProvider.getServicePackageNameForFile(file);
-				if (packageName != null) removedComponentNames.add(packageName);
+				if (packageName != null) removedServiceNames.add(packageName);
 			}
 		}
 		List<IPackageReader> addedComponentProjectReaders = new ArrayList<>();
