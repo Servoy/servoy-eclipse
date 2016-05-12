@@ -27,7 +27,7 @@ import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.util.Debug;
 
@@ -44,10 +44,7 @@ public class RemoveWebPackageHandler implements IDeveloperService
 		JSONObject pck = msg.getJSONObject("package");
 
 		String packageName = pck.getString("name");
-		String componentsOrServices = "components";
-		if (pck.getString("packageType").endsWith("Web-Service")) componentsOrServices = "services";
-		else if (pck.getString("packageType").endsWith("Web-Layout")) componentsOrServices = "layout"; // TODO
-		IFolder componentsFolder = checkComponentsFolderCreated(componentsOrServices);
+		IFolder componentsFolder = checkComponentsFolderCreated(SolutionSerializer.NG_PACKAGES_DIR_NAME);
 		IFile file = componentsFolder.getFile(packageName + ".zip");
 		try
 		{
@@ -60,9 +57,9 @@ public class RemoveWebPackageHandler implements IDeveloperService
 		return null;
 	}
 
-	static IFolder checkComponentsFolderCreated(String componentsOrServices)
+	static IFolder checkComponentsFolderCreated(String webPackagesFolder)
 	{
-		IProject project = getResourcesProject();
+		IProject project = getInstallTargetProject();
 
 		try
 		{
@@ -72,7 +69,7 @@ public class RemoveWebPackageHandler implements IDeveloperService
 		{
 			e1.printStackTrace();
 		}
-		IFolder folder = project.getFolder(componentsOrServices);
+		IFolder folder = project.getFolder(webPackagesFolder);
 		if (!folder.exists())
 		{
 			try
@@ -87,11 +84,11 @@ public class RemoveWebPackageHandler implements IDeveloperService
 		return folder;
 	}
 
-	static IProject getResourcesProject()
+	//TODO get the target from the client
+	static IProject getInstallTargetProject()
 	{
 		ServoyProject initialActiveProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		ServoyResourcesProject resourcesProject = initialActiveProject.getResourcesProject();
-		IProject project = resourcesProject.getProject();
+		IProject project = initialActiveProject.getProject();
 		return project;
 	}
 

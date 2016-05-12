@@ -69,8 +69,6 @@ public class AddPackageProjectAction extends Action implements ISelectionChanged
 	@Override
 	public void run()
 	{
-
-
 		ILabelProvider labelProvider = new LabelProvider()
 		{
 			@Override
@@ -150,8 +148,7 @@ public class AddPackageProjectAction extends Action implements ISelectionChanged
 				Object firstElement = ((IStructuredSelection)event.getSelection()).getFirstElement();
 				if (firstElement instanceof PlatformSimpleUserNode)
 				{
-					if (((PlatformSimpleUserNode)firstElement).getType() == UserNodeType.COMPONENTS_PROJECTS ||
-						((PlatformSimpleUserNode)firstElement).getType() == UserNodeType.SERVICES_PROJECTS)
+					if (((PlatformSimpleUserNode)firstElement).getType() == UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES)
 					{
 						selection = (PlatformSimpleUserNode)firstElement;
 					}
