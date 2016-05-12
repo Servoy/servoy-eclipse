@@ -657,7 +657,7 @@ public abstract class BaseNGPackageManager
 
 	protected ServoyNGPackageProject[] getReferencedNGPackageProjectsInternal()
 	{
-		return referencedNGPackageProjects;
+		return referencedNGPackageProjects == null ? new ServoyNGPackageProject[0] : referencedNGPackageProjects;
 	}
 
 	protected Set<String> getActiveSolutionReferencedProjectNamesInternal()
