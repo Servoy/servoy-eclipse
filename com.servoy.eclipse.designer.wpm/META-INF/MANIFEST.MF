@@ -10,10 +10,9 @@ Require-Bundle: javax.servlet,
  jabsorb,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
- org.apache.httpcomponents.httpcore,
- org.apache.httpcomponents.httpclient,
  sablo,
  servoy_shared,
  com.servoy.eclipse.model,
  com.servoy.eclipse.core,
- org.apache.tomcat
+ org.apache.tomcat,
+ org.eclipse.ui.workbench

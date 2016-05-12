@@ -33,6 +33,7 @@ public class WebPackagesServiceHandler
 	{
 		configuredHandlers.put(GetAllInstalledPackages.CLIENT_SERVER_METHOD, new GetAllInstalledPackages(endpoint));
 		configuredHandlers.put("install", new InstallWebPackageHandler());
+		configuredHandlers.put("showurl", new ShowUrllWebPackageHandler());
 		configuredHandlers.put("remove", new RemoveWebPackageHandler());
 		configuredHandlers.put("getSolutionList", new GetSolutionList());
 	}
@@ -42,7 +43,6 @@ public class WebPackagesServiceHandler
 		JSONObject msg = new JSONObject(message);
 		String method = msg.getString("method");
 		IDeveloperService iServerService = configuredHandlers.get(method);
-		JSONObject args = null;
 		Object result = iServerService.executeMethod(msg);
 		if (result == null) return null;
 		JSONObject jsonResult = new JSONObject();
@@ -51,13 +51,8 @@ public class WebPackagesServiceHandler
 		return jsonResult.toString();
 	}
 
-	/**
-	 *
-	 */
 	public void dispose()
 	{
-
 	}
-
 }
 

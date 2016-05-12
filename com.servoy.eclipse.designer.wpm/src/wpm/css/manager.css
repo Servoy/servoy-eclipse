@@ -58,7 +58,7 @@ md-content {
   background-color: rgb(255,255,255);
 }
 
-.svy-primary.md-button.md-raised {
+.svy-primary.md-button.md-raised:not([disabled]) {
     color: #fff;
     background-color: #e4844a;
 }

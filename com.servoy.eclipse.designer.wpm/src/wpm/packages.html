@@ -38,9 +38,9 @@
     </td>
     <td>    
       <div class="align-center">  
-        <md-button class="md-raised svy-primary" ng-click="showDemo(true)">View Demo</md-button>
-        <md-button class="md-icon-button fa fa-book"  ng-click="showDemo(true)"></md-button>
-        <md-button class="md-icon-button fa fa-github"  ng-click="showDemo(true)"></md-button>
+        <md-button class="md-raised svy-primary" ng-disabled="!package.sampleUrl" ng-click="showUrl(package.sampleUrl)">View Demo</md-button>
+        <md-button class="md-icon-button fa fa-book"  ng-disabled="!package.wikiUrl" ng-click="showUrl(package.wikiUrl)"></md-button>
+        <md-button class="md-icon-button fa fa-github"  ng-disabled="!package.sourceUrl" ng-click="showUrl(package.sourceUrl)"></md-button>
       </div>
     </td> 
   </tr>

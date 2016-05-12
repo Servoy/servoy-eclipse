@@ -115,8 +115,9 @@ angular.module('app', ['ngMaterial'])
 		    return !$scope.packages[index].installed || (!$scope.isLatestRelease(index) && $scope.packages[index].selected > $scope.packages[index].installed )
 		  }
 
-		  $scope.showDemo = function(value) {
-		    $scope.demoVisible = value
+		  $scope.showUrl = function(value) {
+			  var command = {"method":"showurl","url": value};
+			   $scope.websocket.send(JSON.stringify(command));
 		  }
 		}
 	}
