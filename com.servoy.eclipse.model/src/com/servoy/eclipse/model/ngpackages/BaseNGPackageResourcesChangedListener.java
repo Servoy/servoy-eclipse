@@ -17,10 +17,13 @@
 
 package com.servoy.eclipse.model.ngpackages;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -128,10 +131,8 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 	 */
 	private void checkForChangesInSolutionBinaryPackages(IResourceDelta delta)
 	{
-		final Map<String, IPackageReader> addedComponentProjectReaders = new HashMap<String, IPackageReader>();
-		final Map<String, IPackageReader> addedServiceProjectReaders = new HashMap<String, IPackageReader>();
-		final Map<String, IPackageReader> removedComponentProjectReaders = new HashMap<String, IPackageReader>();
-		final Map<String, IPackageReader> removedServiceProjectReaders = new HashMap<String, IPackageReader>();
+		final Map<String, IPackageReader> addedProjectReaders = new HashMap<String, IPackageReader>();
+		final List<File> removedProjectFiles = new ArrayList<>();
 		try
 		{
 			delta.accept(new IResourceDeltaVisitor()
@@ -152,32 +153,16 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 							{//component package
 								if ((resourceDelta.getKind() & IResourceDelta.CHANGED) != 0)
 								{
-									removedComponentProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
-									addedComponentProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
+									removedProjectFiles.add(new File(resource.getLocationURI()));
+									addedProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
 								}
 								else if ((resourceDelta.getKind() & IResourceDelta.REMOVED) != 0)
 								{
-									removedComponentProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
+									removedProjectFiles.add(new File(resource.getLocationURI()));
 								}
 								else if ((resourceDelta.getKind() & IResourceDelta.ADDED) != 0)
 								{
-									addedComponentProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
-								}
-							}
-							else
-							{//service package
-								if ((resourceDelta.getKind() & IResourceDelta.CHANGED) != 0)
-								{
-									removedServiceProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
-									addedServiceProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
-								}
-								else if ((resourceDelta.getKind() & IResourceDelta.REMOVED) != 0)
-								{
-									removedServiceProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
-								}
-								else if ((resourceDelta.getKind() & IResourceDelta.ADDED) != 0)
-								{
-									addedServiceProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
+									addedProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
 								}
 							}
 						}
@@ -195,14 +180,49 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 		boolean componentsReloaded = false;
 		boolean servicesReloaded = false;
 
-		if (removedComponentProjectReaders.size() > 0 || addedComponentProjectReaders.size() > 0)
+		List<String> removedComponentNames = new ArrayList<>();
+		List<String> removedServiceNames = new ArrayList<>();
+		for (File file : removedProjectFiles)
 		{
-			ResourceProvider.updateComponentResources(removedComponentProjectReaders.keySet(), addedComponentProjectReaders.values());
+			String packageName = ResourceProvider.getComponnetPackageNameForFile(file);
+			if (packageName != null) removedComponentNames.add(packageName);
+			else
+			{
+				packageName = ResourceProvider.getServicePackageNameForFile(file);
+				if (packageName != null) removedComponentNames.add(packageName);
+			}
+		}
+		List<IPackageReader> addedComponentProjectReaders = new ArrayList<>();
+		List<IPackageReader> addedServiceProjectReaders = new ArrayList<>();
+		for (Entry<String, IPackageReader> entry : addedProjectReaders.entrySet())
+		{
+			try
+			{
+				if (IPackageReader.WEB_SERVICE.equals(entry.getValue().getPackageType()))
+				{
+					addedServiceProjectReaders.add(entry.getValue());
+				}
+				else
+				{
+					// for now always fall back to a component
+					addedComponentProjectReaders.add(entry.getValue());
+				}
+			}
+			catch (IOException e)
+			{
+				Debug.log(e);
+			}
+		}
+
+
+		if (removedComponentNames.size() > 0 || addedComponentProjectReaders.size() > 0)
+		{
+			ResourceProvider.updateComponentResources(removedComponentNames, addedComponentProjectReaders);
 			componentsReloaded = true;
 		}
-		if (removedServiceProjectReaders.size() > 0 || addedServiceProjectReaders.size() > 0)
+		if (removedServiceNames.size() > 0 || addedServiceProjectReaders.size() > 0)
 		{
-			ResourceProvider.updateServiceResources(removedServiceProjectReaders.keySet(), addedServiceProjectReaders.values());
+			ResourceProvider.updateServiceResources(removedServiceNames, addedServiceProjectReaders);
 			servicesReloaded = true;
 		}
 
