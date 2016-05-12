@@ -22,6 +22,8 @@ import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1495,7 +1497,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			final Map<String, WebObjectFunctionDefinition> apis = spec.getApiFunctions();
 			try
 			{
-				InputStream is = spec.getDefinitionURL().openStream();
+				URL url = spec.getDefinitionURL();
+				URLConnection openConnection = url.openConnection();
+				openConnection.setUseCaches(false);
+				InputStream is = openConnection.getInputStream();
 				String source = IOUtils.toString(is);
 				is.close();
 				if (source != null)
