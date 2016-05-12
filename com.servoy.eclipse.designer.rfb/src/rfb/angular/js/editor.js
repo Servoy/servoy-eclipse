@@ -833,44 +833,50 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			});
 
 			$element.on('renderDecorators.content', function(event) {
-				// TODO this is now in a timeout to let the editor-content be able to reload the form.
-				// could we have an event somewhere from the editor-content that the form is reloaded and ready?
-				// maybe the form controllers code could call $evalAsync as last thing in its controller when it is in design.
-				if (selection.length > 0) {
-					var ghost = $scope.getGhost(selection[0].getAttribute("svy-id"));
-					if (ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM)) {
-						$scope.setContentSizes();
-					} else {
-						var promise = $editorService.getGhostComponents(); //no parameter, then the ghosts are not repositioned
-						promise.then(function(result) {
-							$scope.setGhosts(result);
-							$timeout(function() {
-								var nodes = Array.prototype.slice.call($scope.contentDocument.querySelectorAll("[svy-id]"));
-								var ghosts = Array.prototype.slice.call($scope.glasspane.querySelectorAll("[svy-id]"));
-								nodes = nodes.concat(ghosts);
-								var matchedElements = []
-								for (var s = 0; s < selection.length; s++) 
-								{
-									for (var i = 0; i < nodes.length; i++) {
-										var element = nodes[i]
-										if (selection[s].getAttribute("svy-id") == element.getAttribute("svy-id")) {
-											matchedElements.push(element);
-											break;
+				var toRun = function() {
+					// TODO this is now in a timeout to let the editor-content be able to reload the form.
+					// could we have an event somewhere from the editor-content that the form is reloaded and ready?
+					// maybe the form controllers code could call $evalAsync as last thing in its controller when it is in design.
+					if (selection.length > 0) {
+						var ghost = $scope.getGhost(selection[0].getAttribute("svy-id"));
+						if (ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM)) {
+							$scope.setContentSizes();
+						} else {
+							var promise = $editorService.getGhostComponents(); //no parameter, then the ghosts are not repositioned
+							promise.then(function(result) {
+								$scope.setGhosts(result);
+								$timeout(function() {
+									var nodes = Array.prototype.slice.call($scope.contentDocument.querySelectorAll("[svy-id]"));
+									var ghosts = Array.prototype.slice.call($scope.glasspane.querySelectorAll("[svy-id]"));
+									nodes = nodes.concat(ghosts);
+									var matchedElements = []
+									for (var s = 0; s < selection.length; s++) 
+									{
+										for (var i = 0; i < nodes.length; i++) {
+											var element = nodes[i]
+											if (selection[s].getAttribute("svy-id") == element.getAttribute("svy-id")) {
+												matchedElements.push(element);
+												break;
+											}
 										}
 									}
-								}
-								selection = matchedElements;
-								if (selection.length != matchedElements.length) {
-									$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, selection);
-								} else {
-									$rootScope.$broadcast(EDITOR_EVENTS.RENDER_DECORATORS, selection);
-								}
-							}, 100);
-						});
+									selection = matchedElements;
+									if (selection.length != matchedElements.length) {
+										$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, selection);
+									} else {
+										$rootScope.$broadcast(EDITOR_EVENTS.RENDER_DECORATORS, selection);
+									}
+								}, 100);
+							});
+						}
+					} else {
+						$scope.setContentSizes();
 					}
-				} else {
-					$scope.setContentSizes();
 				}
+				
+				// run all this inside the angular digest loop - as it can change things that are watched
+				if ($scope.$$phase) toRun(); // are we sure if it is a digest on a smaller nested scope that the right watches will run or should we always evalAsync on the editor scope ($scope) or even root scope?
+				else $scope.$evalAsync(toRun);
 			});
 
 			$element.on('updateForm.content', function(event, formInfo) {
