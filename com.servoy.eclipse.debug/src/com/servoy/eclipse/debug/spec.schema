@@ -323,6 +323,10 @@
 						"description": "Delay this api call until the form is reall loaded on the client (requestFocus)",
 						"type": "boolean"
 					},
+					"async": {
+						"description": "Execute this api call async (don't wait for return value).",
+						"type": "boolean"
+					},
 					"globalExclusive": {
 						"description": "Should only 1 of this api call be invoke after a request (like 1 request focus)",
 						"type": "boolean"
