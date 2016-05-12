@@ -107,7 +107,6 @@ import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.extensions.IServoyModel;
-import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.INGPackageChangeListener;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
@@ -874,7 +873,7 @@ public class TypeCreator extends TypeCache
 					}
 
 					@Override
-					public void ngPackageProjectListChanged(ServoyNGPackageProject[] referencedNGPackageProjects)
+					public void ngPackageProjectListChanged()
 					{
 						// not used for now
 					}

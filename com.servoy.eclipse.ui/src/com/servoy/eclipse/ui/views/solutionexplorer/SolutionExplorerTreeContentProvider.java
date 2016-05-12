@@ -45,6 +45,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -251,10 +254,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib), //
 			createTypeNode(Messages.TreeStrings_SpecialOperators, UserNodeType.SPECIAL_OPERATORS,
 				com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, jslib), //
-				createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
-				createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
-				createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
-					jslib) };
+			createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
+			createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
+			createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
+				jslib) };
 
 		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, invisibleRootNode);
 
@@ -368,6 +371,84 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		rootChildren.add(i18n);
 		rootChildren.add(jsunit);
 		rootChildren.add(plugins);
+
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(new IResourceChangeListener()
+		{
+			@Override
+			public void resourceChanged(IResourceChangeEvent event)
+			{
+
+				IResource resource = event.getResource();
+				if (event.getType() == IResourceChangeEvent.POST_CHANGE)
+				{
+					IResourceDelta[] affectedChildren = event.getDelta().getAffectedChildren(IResourceDelta.ADDED, IResource.PROJECT);
+					if (affectedChildren.length == 1) resource = affectedChildren[0].getResource();
+				}
+				if (resource != null && resource.getType() == IResource.PROJECT)
+				{
+					try
+					{
+						if (resource.getProject().hasNature(ServoyNGPackageProject.NATURE_ID))
+						{
+							boolean havePackageProjects = false;
+							IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+							for (IProject project : projects)
+							{
+								try
+								{
+									if (project.hasNature(ServoyNGPackageProject.NATURE_ID) &&
+										((!project.equals(resource) && event.getType() == IResourceChangeEvent.PRE_DELETE) ||
+											event.getType() == IResourceChangeEvent.POST_CHANGE))
+									{
+										havePackageProjects = true;
+										break;
+									}
+								}
+								catch (CoreException e)
+								{
+									Debug.log(e);
+								}
+							}
+
+							if (havePackageProjects && !invisibleRootNode.children[1].equals(allWebPackagesNode))
+							{
+								addAllWebPackagesNode();
+							}
+							else if (!havePackageProjects && invisibleRootNode.children[1].equals(allWebPackagesNode))
+							{
+								removeAllWebPackagesNode();
+							}
+							refreshTreeNode(allWebPackagesNode);
+						}
+					}
+					catch (CoreException e)
+					{
+						Debug.log(e);
+					}
+				}
+
+			}
+
+			private void addAllWebPackagesNode()
+			{
+				List<SimpleUserNode> newRootChildren = new ArrayList<SimpleUserNode>();
+				newRootChildren.addAll(Arrays.asList(invisibleRootNode.children));
+				//add allWebPacakgesNode to second position
+				newRootChildren.add(1, allWebPackagesNode);
+				invisibleRootNode.children = newRootChildren.toArray(new PlatformSimpleUserNode[0]);
+				view.refreshTreeCompletely();
+			}
+
+			private void removeAllWebPackagesNode()
+			{
+				List<SimpleUserNode> newRootChildren = new ArrayList<SimpleUserNode>();
+				newRootChildren.addAll(Arrays.asList(invisibleRootNode.children));
+				//add allWebPacakgesNode to second position
+				newRootChildren.remove(allWebPackagesNode);
+				invisibleRootNode.children = newRootChildren.toArray(new PlatformSimpleUserNode[0]);
+				view.refreshTreeCompletely();
+			}
+		}, IResourceChangeEvent.PRE_DELETE | IResourceChangeEvent.POST_CHANGE);
 
 		invisibleRootNode.children = rootChildren.toArray(new PlatformSimpleUserNode[0]);// new PlatformSimpleUserNode[] { resources, allWebPackagesNode, allSolutionsNode, activeSolutionNode, jslib, application, solutionModel, databaseManager, utils, history, security, i18n, jsunit, plugins };
 
@@ -3158,7 +3239,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 
 	@Override
-	public void ngPackageProjectListChanged(final ServoyNGPackageProject[] referencedNGPackageProjects)
+	public void ngPackageProjectListChanged()
 	{
 		Job job = new Job("Refreshing allWebPackagesNode due to ngPackageProject list changed...")
 		{
@@ -3166,37 +3247,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			@Override
 			public IStatus run(IProgressMonitor monitor)
 			{
-				if (referencedNGPackageProjects.length > 0 && !invisibleRootNode.children[1].equals(allWebPackagesNode))
-				{
-					addAllWebPackagesNode();
-				}
-				else if (referencedNGPackageProjects.length == 0 && invisibleRootNode.children[1].equals(allWebPackagesNode))
-				{
-					removeAllWebPackagesNode();
-				}
 				refreshTreeNode(allWebPackagesNode);
 				return Status.OK_STATUS;
-			}
-
-			private void addAllWebPackagesNode()
-			{
-				List<SimpleUserNode> rootChildren = new ArrayList<SimpleUserNode>();
-				rootChildren.addAll(Arrays.asList(invisibleRootNode.children));
-				//add allWebPacakgesNode to second position
-				rootChildren.add(1, allWebPackagesNode);
-				invisibleRootNode.children = rootChildren.toArray(new PlatformSimpleUserNode[0]);
-				view.refreshTreeCompletely();
-
-			}
-
-			private void removeAllWebPackagesNode()
-			{
-				List<SimpleUserNode> rootChildren = new ArrayList<SimpleUserNode>();
-				rootChildren.addAll(Arrays.asList(invisibleRootNode.children));
-				//add allWebPacakgesNode to second position
-				rootChildren.remove(allWebPackagesNode);
-				invisibleRootNode.children = rootChildren.toArray(new PlatformSimpleUserNode[0]);
-				view.refreshTreeCompletely();
 			}
 		};
 		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
