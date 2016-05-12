@@ -496,7 +496,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 				if (ancestor != null)
 				{
 					boolean isPartOfForm = ancestor.getUUID().equals(form.getUUID());
-					if (!isPartOfForm)
+					if (!isPartOfForm && persist.getParent().getChild(persist.getUUID()) != null)
 					{
 						for (FormReference formRef : PersistHelper.getAllFormReferences(
 							ServoyModelFinder.getServoyModel().getFlattenedSolution().getFlattenedForm(form)))
