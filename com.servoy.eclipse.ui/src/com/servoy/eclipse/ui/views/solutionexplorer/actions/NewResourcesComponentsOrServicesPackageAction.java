@@ -74,13 +74,14 @@ public class NewResourcesComponentsOrServicesPackageAction extends Action
 	private String packageName;
 	private String packageDisplayName;
 	private String componentOrServiceName;
-	private String packageType;
+	private final String packageType;
 
-	public NewResourcesComponentsOrServicesPackageAction(SolutionExplorerView viewer, Shell shell, String text)
+	public NewResourcesComponentsOrServicesPackageAction(SolutionExplorerView viewer, Shell shell, String text, String type)
 	{
 		super();
 		this.viewer = viewer;
 		this.shell = shell;
+		packageType = type;
 		setText(text);
 		setToolTipText(text);
 	}
@@ -89,8 +90,7 @@ public class NewResourcesComponentsOrServicesPackageAction extends Action
 	public void run()
 	{
 		final PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
-		final String type = UserNodeType.COMPONENTS_FROM_RESOURCES == node.getType() ? "Component" : "Service";
-		packageType = (UserNodeType.COMPONENTS_FROM_RESOURCES == node.getType() ? IPackageReader.WEB_COMPONENT : IPackageReader.WEB_SERVICE);
+		final String type = packageType.replace("Web-", "");
 		final IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
 			(String)node.getRealObject());
 

@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -25,11 +24,9 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.wizards.IWizardDescriptor;
 
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.wizards.NewPackageProjectWizard;
-import com.servoy.j2db.util.Debug;
 
 /**
  * @author gganea@servoy.com
@@ -41,37 +38,28 @@ public class NewPackageProjectAction extends Action implements ISelectionChanged
 	private final SolutionExplorerView viewer;
 	private final Shell shell;
 	private IStructuredSelection selection;
+	private final String packageType;
 
 	/**
 	 * @param text - the label of the menu entry
 	 */
-	public NewPackageProjectAction(SolutionExplorerView solutionExplorerView, Shell shell, String text)
+	public NewPackageProjectAction(SolutionExplorerView solutionExplorerView, Shell shell, String text, String packageType)
 	{
 		this.viewer = solutionExplorerView;
 		this.shell = shell;
+		this.packageType = packageType;
 		setText(text);
 	}
 
 	@Override
 	public void run()
 	{
-		IWizardDescriptor descriptor = PlatformUI.getWorkbench().getNewWizardRegistry().findWizard("com.servoy.eclipse.ui.NewPackageProjectWizard");
-		try
-		{
-			if (descriptor != null)
-			{
-				NewPackageProjectWizard wizard = (NewPackageProjectWizard)descriptor.createWizard();
-				wizard.init(PlatformUI.getWorkbench(), selection);
-				wizard.setSolutionExplorerView(viewer);
-				WizardDialog wd = new WizardDialog(shell, wizard);
-				wd.setTitle(wizard.getWindowTitle());
-				wd.open();
-			}
-		}
-		catch (CoreException e)
-		{
-			Debug.log(e);
-		}
+		NewPackageProjectWizard wizard = new NewPackageProjectWizard(packageType);
+		wizard.init(PlatformUI.getWorkbench(), selection);
+		wizard.setSolutionExplorerView(viewer);
+		WizardDialog wd = new WizardDialog(shell, wizard);
+		wd.setTitle(wizard.getWindowTitle());
+		wd.open();
 	}
 
 	@Override

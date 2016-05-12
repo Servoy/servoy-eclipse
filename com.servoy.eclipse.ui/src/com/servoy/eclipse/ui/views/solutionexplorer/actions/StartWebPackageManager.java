@@ -24,6 +24,9 @@ import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.util.Debug;
 
 /**
@@ -32,14 +35,15 @@ import com.servoy.j2db.util.Debug;
  */
 public class StartWebPackageManager extends Action
 {
-
+	private final SolutionExplorerView viewer;
 
 	/**
 	 *	Opens the web packages manager app in a browser
 	 */
-	public StartWebPackageManager()
+	public StartWebPackageManager(SolutionExplorerView viewer)
 	{
 		super("Manage web packages");
+		this.viewer = viewer;
 	}
 
 	/*
@@ -104,4 +108,18 @@ public class StartWebPackageManager extends Action
 			Debug.log(e);
 		}
 	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.eclipse.jface.action.Action#isEnabled()
+	 */
+	@Override
+	public boolean isEnabled()
+	{
+		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
+		return node.getType() == UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES;
+	}
+
+
 }
