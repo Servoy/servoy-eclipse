@@ -117,7 +117,6 @@ import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IMediaProvider;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -254,10 +253,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib), //
 			createTypeNode(Messages.TreeStrings_SpecialOperators, UserNodeType.SPECIAL_OPERATORS,
 				com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, jslib), //
-			createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
-			createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
-			createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
-				jslib) };
+				createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
+				createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
+				createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
+					jslib) };
 
 		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, invisibleRootNode);
 
@@ -3205,18 +3204,15 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			{
 				refreshTreeNode(allWebPackagesNode);
 				refreshTreeNode(findChildNode(activeSolutionNode, Messages.TreeStrings_Web_Packages));
-				try
+
+				ServoyProject[] activeProjects = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
+				if (activeProjects != null)
 				{
-					List<Solution> activeRootObjects = ServoyModel.getDeveloperRepository().getActiveRootObjects(IRepository.SOLUTIONS);
-					for (Object sol : activeRootObjects)
+					for (ServoyProject servoyProject : activeProjects)
 					{
-						SimpleUserNode moduleNode = findChildNode(modulesOfActiveSolution, ((Solution)sol).getName());
+						SimpleUserNode moduleNode = findChildNode(modulesOfActiveSolution, servoyProject.getSolution().getName());
 						refreshTreeNode(findChildNode(moduleNode, Messages.TreeStrings_Web_Packages));
 					}
-				}
-				catch (RepositoryException e)
-				{
-					Debug.log(e);
 				}
 
 				if (componentsChanged) refreshTreeNode(componentsFromResourcesNode);
