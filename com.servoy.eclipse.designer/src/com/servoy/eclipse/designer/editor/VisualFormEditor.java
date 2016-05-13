@@ -36,8 +36,10 @@ import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.ui.editors.ITabbedEditor;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.FormEditorDesignerPreference;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.SolutionMetaData;
 
 
 /**
@@ -130,7 +132,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	@Override
 	protected BaseVisualFormEditorDesignPage createGraphicaleditor(DesignPagetype designPagetype)
 	{
-		Activator.getDefault().getDesignClient().getFlattenedSolution(); // enforce loading of internal style
+		FlattenedSolution fs = Activator.getDefault().getDesignClient().getFlattenedSolution(); // enforce loading of internal style
 
 		DesignPagetype editorType = designPagetype;
 		if (editorType == null && getEditorInput() instanceof PersistEditorInput)
@@ -153,7 +155,16 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 					editorType = DesignPagetype.Mobile;
 				}
 			}
-			else if (formEditorDesignerPreference == FormEditorDesignerPreference.New || (getForm() != null && getForm().isResponsiveLayout()))
+			else if (formEditorDesignerPreference == FormEditorDesignerPreference.New)
+			{
+				editorType = DesignPagetype.Rfb;
+			}
+			else if (formEditorDesignerPreference == FormEditorDesignerPreference.Automatic && fs != null && fs.getSolution() != null &&
+				fs.getSolution().getSolutionType() == SolutionMetaData.NG_CLIENT_ONLY)
+			{
+				editorType = DesignPagetype.Rfb;
+			}
+			else if (getForm() != null && getForm().isResponsiveLayout())
 			{
 				editorType = DesignPagetype.Rfb;
 			}

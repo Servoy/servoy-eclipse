@@ -124,6 +124,9 @@ public class DesignerPreferencePage extends PreferencePage implements IWorkbench
 		formEditorDesignerPreferenceAutomatic = new Button(formEditorDesignerPreferenceGroup, SWT.RADIO);
 		formEditorDesignerPreferenceAutomatic.setText("Automatic");
 
+		formEditorDesignerPreferenceGroup.setToolTipText("Select the designer type that will be used in the form editor" //
+			+ "\nIn automatic mode, the Classic editor will be used for regular (non-responsive-layout) forms and on NG-client-only solutions.");
+
 		Link xulRunnerInfo = new Link(optionsPanel, SWT.NONE);
 		xulRunnerInfo.setText("Consider installing <A>XulRunner</A> when this option is disabled, for increased compatibility.");
 		xulRunnerInfo.addSelectionListener(new SelectionAdapter()
