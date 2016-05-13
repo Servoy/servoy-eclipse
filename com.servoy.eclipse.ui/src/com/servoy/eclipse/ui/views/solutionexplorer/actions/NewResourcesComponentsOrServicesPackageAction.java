@@ -197,7 +197,7 @@ public class NewResourcesComponentsOrServicesPackageAction extends Action
 
 					if (componentOrServiceName != null)
 					{
-						NewComponentOrServiceAction newComponent = new NewComponentOrServiceAction(viewer, shell, "Component", "");
+						NewWebObjectAction newComponent = new NewWebObjectAction(viewer, shell, "Component", "");
 						newComponent.createComponentOrService(pack, type, componentOrServiceName, null);
 					}
 

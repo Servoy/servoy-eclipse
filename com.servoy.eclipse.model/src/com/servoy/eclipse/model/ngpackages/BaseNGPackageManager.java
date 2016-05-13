@@ -340,13 +340,14 @@ public abstract class BaseNGPackageManager
 	 * for example a package is moved between the resources project and a separate ng pacakge project it would error out because it might not be unloaded
 	 * properly before being loaded again if you sequentially call reload on resources project packages and on ng package projects)
 	 */
-	protected void reloadAllNGPackageProjects(IProgressMonitor m, boolean canChangeResources)
+	protected void reloadAllSolutionReferencedPackages(IProgressMonitor m, boolean canChangeResources)
 	{
 		Map<String, IPackageReader> componentReaders = new HashMap<String, IPackageReader>();
 		Map<String, IPackageReader> serviceReaders = new HashMap<String, IPackageReader>();
 		SubMonitor monitor = SubMonitor.convert(m, "Reloading all referenced ng package projects", 100);
 
 		prepareToReloadNGPackageProjects(componentReaders, serviceReaders, monitor.newChild(10), canChangeResources);
+		
 		prepareToReloadSolutionContainedBinaryPackages(componentReaders, serviceReaders, monitor.newChild(8), canChangeResources);
 
 		monitor.setWorkRemaining((serviceReaders.size() + componentReaders.size()) * 10 + 3);

@@ -205,7 +205,7 @@ public class ExportPackageResourceAction extends Action implements ISelectionCha
 		while (it.hasNext() && state)
 		{
 			SimpleUserNode node = it.next();
-			state = (node.getType() == UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES) || node.getType() == UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES;
+			state = (node.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE) || node.getType() == UserNodeType.SERVICES_NONPROJECT_PACKAGE;
 		}
 		if (state)
 		{

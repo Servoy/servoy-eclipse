@@ -33,17 +33,15 @@ import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider
  * @author gboros
  *
  */
-public abstract class ImportComponentAction extends Action
+public abstract class ImportZipPackageAction extends Action
 {
 	protected final SolutionExplorerView viewer;
-	protected final String entity;
 
-	public ImportComponentAction(SolutionExplorerView viewer, String entity)
+	public ImportZipPackageAction(SolutionExplorerView viewer)
 	{
 		this.viewer = viewer;
-		this.entity = entity;
 		setImageDescriptor(Activator.loadImageDescriptorFromOldLocations("import.gif"));
-		setText("Import " + entity + " zip package");
+		setText("Import Zip Web Package");
 		setToolTipText(getText());
 	}
 
@@ -75,7 +73,7 @@ public abstract class ImportComponentAction extends Action
 		{
 			if (defaultPackageNames.contains(fName.split("\\.")[0]))
 			{
-				MessageDialog.openError(UIUtils.getActiveShell(), "Error", fName + " is a default " + entity + "s package.");
+				MessageDialog.openError(UIUtils.getActiveShell(), "Error", fName + " is a default " + " package.");
 				return;
 			}
 		}

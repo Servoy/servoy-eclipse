@@ -78,8 +78,8 @@ public class EditWebPackageDisplayNameAction extends Action implements ISelectio
 		{
 			SimpleUserNode node = it.next();
 			state = node.getRealObject() instanceof IContainer &&
-				(node.getType() == UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES || node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE ||
-					node.getType() == UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES || node.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE);
+				(node.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE ||
+					node.getType() == UserNodeType.SERVICES_NONPROJECT_PACKAGE || node.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE);
 		}
 		setEnabled(state);
 	}
@@ -88,7 +88,7 @@ public class EditWebPackageDisplayNameAction extends Action implements ISelectio
 	public void run()
 	{
 		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
-		boolean componentsNotServices = (node.getType() == UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES ||
+		boolean componentsNotServices = (node.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE ||
 			node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE);
 		String packageName = SolutionExplorerTreeContentProvider.getPackageName(node); // we cannot rely on node name to be the display name directly cause if 'includeFromModules' option is enabled in SolEx the node name will be prefixed with the module name in some cases
 		String name = (componentsNotServices ? WebComponentSpecProvider.getInstance().getPackageDisplayName(packageName)

@@ -41,11 +41,11 @@ import com.servoy.j2db.util.Utils;
  * @author gboros
  *
  */
-public class ImportComponentAsProjectAction extends ImportComponentAction
+public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 {
-	public ImportComponentAsProjectAction(SolutionExplorerView viewer, String entity)
+	public ImportZipPackageAsProjectAction(SolutionExplorerView viewer)
 	{
-		super(viewer, entity);
+		super(viewer);
 	}
 
 	/**

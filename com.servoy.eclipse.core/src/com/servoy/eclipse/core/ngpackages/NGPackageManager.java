@@ -96,7 +96,7 @@ public class NGPackageManager extends BaseNGPackageManager
 					{
 						// TODO if we will take referenced ng package projects even from modules, we should enable this code...
 						clearActiveSolutionReferencesCache();
-						reloadAllNGPackageProjects(new NullProgressMonitor(), false);
+						reloadAllSolutionReferencedPackages(new NullProgressMonitor(), false);
 					}
 				}
 
@@ -150,7 +150,7 @@ public class NGPackageManager extends BaseNGPackageManager
 	}
 
 	@Override
-	protected void reloadAllNGPackageProjects(IProgressMonitor m, final boolean canChangeResources)
+	protected void reloadAllSolutionReferencedPackages(IProgressMonitor m, final boolean canChangeResources)
 	{
 		Job registerNgPackagesJob = new Job("Reading all ng package projects...")
 		{
@@ -158,7 +158,7 @@ public class NGPackageManager extends BaseNGPackageManager
 			public IStatus run(IProgressMonitor monitor)
 			{
 				// do the actual work
-				NGPackageManager.super.reloadAllNGPackageProjects(monitor, canChangeResources);
+				NGPackageManager.super.reloadAllSolutionReferencedPackages(monitor, canChangeResources);
 				return Status.OK_STATUS;
 			}
 

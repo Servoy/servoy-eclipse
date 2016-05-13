@@ -52,7 +52,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
  * Create a new component/service in the selected component package.
  * @author emera
  */
-public class NewComponentOrServiceAction extends Action
+public class NewWebObjectAction extends Action
 {
 
 	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
@@ -60,7 +60,7 @@ public class NewComponentOrServiceAction extends Action
 	private final SolutionExplorerView viewer;
 	private final String type;
 
-	public NewComponentOrServiceAction(SolutionExplorerView viewer, Shell shell, String type, String text)
+	public NewWebObjectAction(SolutionExplorerView viewer, Shell shell, String type, String text)
 	{
 		super();
 		this.viewer = viewer;

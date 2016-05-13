@@ -114,7 +114,7 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 			if (clearReferencedProjectsCache.value.booleanValue()) baseNGPackageManager.clearActiveSolutionReferencesCache();
 			if (refreshAllNGPackageProjects.value.booleanValue())
 			{
-				baseNGPackageManager.reloadAllNGPackageProjects(null, false);
+				baseNGPackageManager.reloadAllSolutionReferencedPackages(null, false);
 			}
 			else if (newNGPackageProjectsToLoad.size() > 0 || oldNGPackageProjectsToUnload.size() > 0)
 			{
@@ -131,8 +131,8 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 	 */
 	private void checkForChangesInSolutionBinaryPackages(IResourceDelta delta)
 	{
-		final Map<String, IPackageReader> addedProjectReaders = new HashMap<String, IPackageReader>();
-		final List<File> removedProjectFiles = new ArrayList<>();
+		final Map<String, IPackageReader> addedPackageReaders = new HashMap<String, IPackageReader>();
+		final List<File> removedPackageFiles = new ArrayList<>();
 		try
 		{
 			delta.accept(new IResourceDeltaVisitor()
@@ -147,22 +147,21 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 						IFile binaryFile = (IFile)resource;
 						if (binaryFile.getName().endsWith(".zip"))
 						{
-							Pair<String, IPackageReader> readPackageResource = baseNGPackageManager.readPackageResource(resource);
-
 							if (binaryFile.getParent().getName().equals(SolutionSerializer.NG_PACKAGES_DIR_NAME))
 							{//component package
+								Pair<String, IPackageReader> readPackageResource = baseNGPackageManager.readPackageResource(resource);
 								if ((resourceDelta.getKind() & IResourceDelta.CHANGED) != 0)
 								{
-									removedProjectFiles.add(new File(resource.getLocationURI()));
-									addedProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
+									removedPackageFiles.add(new File(resource.getLocationURI()));
+									if (readPackageResource != null) addedPackageReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
 								}
 								else if ((resourceDelta.getKind() & IResourceDelta.REMOVED) != 0)
 								{
-									removedProjectFiles.add(new File(resource.getLocationURI()));
+									removedPackageFiles.add(new File(resource.getLocationURI()));
 								}
 								else if ((resourceDelta.getKind() & IResourceDelta.ADDED) != 0)
 								{
-									addedProjectReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
+									if (readPackageResource != null) addedPackageReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
 								}
 							}
 						}
@@ -180,32 +179,32 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 		boolean componentsReloaded = false;
 		boolean servicesReloaded = false;
 
-		List<String> removedComponentNames = new ArrayList<>();
-		List<String> removedServiceNames = new ArrayList<>();
-		for (File file : removedProjectFiles)
+		List<String> removedComponentPacakgeNames = new ArrayList<>();
+		List<String> removedServicePackageNames = new ArrayList<>();
+		for (File file : removedPackageFiles)
 		{
-			String packageName = ResourceProvider.getComponnetPackageNameForFile(file);
-			if (packageName != null) removedComponentNames.add(packageName);
+			String packageName = ResourceProvider.getComponentPackageNameForFile(file);
+			if (packageName != null) removedComponentPacakgeNames.add(packageName);
 			else
 			{
 				packageName = ResourceProvider.getServicePackageNameForFile(file);
-				if (packageName != null) removedServiceNames.add(packageName);
+				if (packageName != null) removedServicePackageNames.add(packageName);
 			}
 		}
-		List<IPackageReader> addedComponentProjectReaders = new ArrayList<>();
-		List<IPackageReader> addedServiceProjectReaders = new ArrayList<>();
-		for (Entry<String, IPackageReader> entry : addedProjectReaders.entrySet())
+		List<IPackageReader> addedComponentPackageReaders = new ArrayList<>();
+		List<IPackageReader> addedServicePackageReaders = new ArrayList<>();
+		for (Entry<String, IPackageReader> entry : addedPackageReaders.entrySet())
 		{
 			try
 			{
 				if (IPackageReader.WEB_SERVICE.equals(entry.getValue().getPackageType()))
 				{
-					addedServiceProjectReaders.add(entry.getValue());
+					addedServicePackageReaders.add(entry.getValue());
 				}
 				else
 				{
 					// for now always fall back to a component
-					addedComponentProjectReaders.add(entry.getValue());
+					addedComponentPackageReaders.add(entry.getValue());
 				}
 			}
 			catch (IOException e)
@@ -215,14 +214,14 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 		}
 
 
-		if (removedComponentNames.size() > 0 || addedComponentProjectReaders.size() > 0)
+		if (removedComponentPacakgeNames.size() > 0 || addedComponentPackageReaders.size() > 0)
 		{
-			ResourceProvider.updateComponentResources(removedComponentNames, addedComponentProjectReaders);
+			ResourceProvider.updateComponentResources(removedComponentPacakgeNames, addedComponentPackageReaders);
 			componentsReloaded = true;
 		}
-		if (removedServiceNames.size() > 0 || addedServiceProjectReaders.size() > 0)
+		if (removedServicePackageNames.size() > 0 || addedServicePackageReaders.size() > 0)
 		{
-			ResourceProvider.updateServiceResources(removedServiceNames, addedServiceProjectReaders);
+			ResourceProvider.updateServiceResources(removedServicePackageNames, addedServicePackageReaders);
 			servicesReloaded = true;
 		}
 

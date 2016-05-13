@@ -49,14 +49,14 @@ import com.servoy.j2db.util.Pair;
  * @author gganea, gboros
  *
  */
-public class ImportComponentAsZipAction extends ImportComponentAction
+public class ImportZipPackageAsZipAction extends ImportZipPackageAction
 {
 	private int overrideReturnCode;
 	protected final String folderName;
 
-	public ImportComponentAsZipAction(SolutionExplorerView viewer, String entity, String folder)
+	public ImportZipPackageAsZipAction(SolutionExplorerView viewer, String folder)
 	{
-		super(viewer, entity);
+		super(viewer);
 		this.folderName = folder;
 	}
 
@@ -78,7 +78,7 @@ public class ImportComponentAsZipAction extends ImportComponentAction
 				public void run()
 				{
 					ScrollableDialog dialog = new ScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.ERROR, "Error",
-						"The folowing " + entity + " files already exist: ", existingComponents.toString());
+						"The folowing files already exist: ", existingComponents.toString());
 					List<Pair<Integer, String>> buttonsAndLabels = new ArrayList<Pair<Integer, String>>();
 					buttonsAndLabels.add(new Pair<Integer, String>(IDialogConstants.YES_TO_ALL_ID, "Overwrite all"));
 					buttonsAndLabels.add(new Pair<Integer, String>(IDialogConstants.CANCEL_ID, "Cancel"));

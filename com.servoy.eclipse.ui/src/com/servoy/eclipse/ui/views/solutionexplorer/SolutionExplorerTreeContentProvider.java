@@ -304,7 +304,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
 		allSolutionsNode.parent = invisibleRootNode;
 
-		allWebPackagesNode = new PlatformSimpleUserNode(Messages.TreeStrings_AllWebPackageProjects, UserNodeType.ALL_WEB_PACKAGES, null,
+		allWebPackagesNode = new PlatformSimpleUserNode(Messages.TreeStrings_AllWebPackageProjects, UserNodeType.ALL_WEB_PACKAGE_PROJECTS, null,
 			PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
 		allWebPackagesNode.parent = invisibleRootNode;
 
@@ -425,7 +425,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						Debug.log(e);
 					}
 				}
-
 			}
 
 			private void addAllWebPackagesNode()
@@ -917,7 +916,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 										nodeIcon = zipPackageIcon;
 									}
 									PlatformSimpleUserNode node = new PlatformSimpleUserNode(provider.getPackageDisplayName(entry.getKey()),
-										UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES, resource, nodeIcon);
+										UserNodeType.COMPONENTS_NONPROJECT_PACKAGE, resource, nodeIcon);
 									node.parent = un;
 									children.add(node);
 								}
@@ -927,20 +926,20 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					}
 					else if (type == UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES)
 					{
-						BaseSpecProvider provider = WebComponentSpecProvider.getInstance();
+						BaseSpecProvider componentSpecProvider = WebComponentSpecProvider.getInstance();
 						BaseSpecProvider serviceSpecProvider = WebServiceSpecProvider.getInstance();
-						if (provider != null && serviceSpecProvider != null) // the package management system might not yet be initialized at developer startup
+						if (componentSpecProvider != null && serviceSpecProvider != null) // the package management system might not yet be initialized at developer startup
 						{
-							List<PlatformSimpleUserNode> children = getWebProjects(un, provider, "components_package.png",
+							List<PlatformSimpleUserNode> children = getWebProjects(un, componentSpecProvider, "components_package.png",
 								UserNodeType.COMPONENTS_PROJECT_PACKAGE);
 							List<PlatformSimpleUserNode> servicesProjects = getWebProjects(un, serviceSpecProvider, "services_package.png",
 								UserNodeType.SERVICES_PROJECT_PACKAGE);
 							children.addAll(servicesProjects);
-							children.addAll(getBinaryPackages(un, provider, serviceSpecProvider));
+							children.addAll(getBinaryPackages(un, componentSpecProvider, serviceSpecProvider));
 							un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 						}
 					}
-					else if (type == UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES)
+					else if (type == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE)
 					{
 						WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
 						String packageName = provider.getPackageName(un.getName());
@@ -1040,7 +1039,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 										nodeIcon = zipPackageIcon;
 									}
 									PlatformSimpleUserNode node = new PlatformSimpleUserNode(provider.getPackageDisplayName(entry.getKey()),
-										UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES, resource, nodeIcon);
+										UserNodeType.SERVICES_NONPROJECT_PACKAGE, resource, nodeIcon);
 									node.parent = un;
 									children.add(node);
 								}
@@ -1048,7 +1047,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 						}
 					}
-					else if (type == UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES)
+					else if (type == UserNodeType.SERVICES_NONPROJECT_PACKAGE)
 					{
 						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
 						if (provider != null) // the package management system might not yet be initialized at developer startup
@@ -1103,7 +1102,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 						}
 					}
-					else if (type == UserNodeType.ALL_WEB_PACKAGES)
+					else if (type == UserNodeType.ALL_WEB_PACKAGE_PROJECTS)
 					{
 
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
@@ -1177,25 +1176,16 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			allReferencedProjects.remove(activeResourcesProject.getProject());
 
 			Map<String, URL> packages = new TreeMap<String, URL>(componentsProvider.getPackagesToURLs());
-			addAllPackagesFromSpecProvider(un, componentsProvider, UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES, result, packageIcon, allReferencedProjects,
+			addBinaryReferecedPackages(un, componentsProvider, UserNodeType.COMPONENTS_NONPROJECT_PACKAGE, result, packageIcon, allReferencedProjects,
 				packages);
 			packages = new TreeMap<String, URL>(servicesProvider.getPackagesToURLs());
-			addAllPackagesFromSpecProvider(un, servicesProvider, UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES, result, packageIcon, allReferencedProjects,
+			addBinaryReferecedPackages(un, servicesProvider, UserNodeType.SERVICES_NONPROJECT_PACKAGE, result, packageIcon, allReferencedProjects,
 				packages);
 		}
 		return result;
 	}
 
-	/**
-	 * @param un
-	 * @param provider
-	 * @param nodeType
-	 * @param result
-	 * @param packageIcon
-	 * @param allReferencedProjects
-	 * @param packages
-	 */
-	private void addAllPackagesFromSpecProvider(PlatformSimpleUserNode un, BaseSpecProvider provider, UserNodeType nodeType,
+	private void addBinaryReferecedPackages(PlatformSimpleUserNode un, BaseSpecProvider provider, UserNodeType nodeType,
 		List<PlatformSimpleUserNode> result, Image packageIcon, List<IProject> allReferencedProjects, Map<String, URL> packages)
 	{
 		for (Map.Entry<String, URL> entry : packages.entrySet())
@@ -1535,7 +1525,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						}
 					}
 				}
-				else if (un.getType() == UserNodeType.ALL_WEB_PACKAGES)
+				else if (un.getType() == UserNodeType.ALL_WEB_PACKAGE_PROJECTS)
 				{
 					IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 					for (IProject iProject : projects)
@@ -1554,7 +1544,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					}
 					return false;
 				}
-				else if (un.getType() == UserNodeType.COMPONENTS_PACKAGE_FROM_RESOURCES || un.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE)
+				else if (un.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || un.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE)
 				{
 					return (WebComponentSpecProvider.getInstance() != null &&
 						!WebComponentSpecProvider.getInstance().getComponentsInPackage(
@@ -1562,7 +1552,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						!WebComponentSpecProvider.getInstance().getLayoutsInPackage(
 							WebComponentSpecProvider.getInstance().getPackageName(getPackageName(un))).isEmpty());
 				}
-				else if (un.getType() == UserNodeType.SERVICES_PACKAGE_FROM_RESOURCES || un.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE)
+				else if (un.getType() == UserNodeType.SERVICES_NONPROJECT_PACKAGE || un.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE)
 				{
 					WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
 					if (provider == null) return false;// the package management system might not yet be initialized at developer startup
@@ -1586,9 +1576,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private boolean containsBinaryPackages(PlatformSimpleUserNode un)
 	{
-		BaseSpecProvider provider = WebComponentSpecProvider.getInstance();
+		BaseSpecProvider componentProvider = WebComponentSpecProvider.getInstance();
 		BaseSpecProvider serviceProvider = WebServiceSpecProvider.getInstance();
-		if (provider == null || serviceProvider == null) return false; // the package management system is not yet initialized; this is probably at developer startup
+		if (componentProvider == null || serviceProvider == null) return false; // the package management system is not yet initialized; this is probably at developer startup
 
 		Object realObject = un.getRealObject();
 		if (realObject instanceof Solution)
@@ -1616,7 +1606,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			}
 			ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 			allReferencedProjects.remove(activeResourcesProject.getProject());
-			Map<String, URL> packages = new TreeMap<String, URL>(provider.getPackagesToURLs());
+			Map<String, URL> packages = new TreeMap<String, URL>(componentProvider.getPackagesToURLs());
 			packages.putAll(serviceProvider.getPackagesToURLs());
 
 			for (Map.Entry<String, URL> entry : packages.entrySet())

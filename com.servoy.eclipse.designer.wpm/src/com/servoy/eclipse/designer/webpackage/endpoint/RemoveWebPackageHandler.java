@@ -44,8 +44,8 @@ public class RemoveWebPackageHandler implements IDeveloperService
 		JSONObject pck = msg.getJSONObject("package");
 
 		String packageName = pck.getString("name");
-		IFolder componentsFolder = checkComponentsFolderCreated(SolutionSerializer.NG_PACKAGES_DIR_NAME);
-		IFile file = componentsFolder.getFile(packageName + ".zip");
+		IFolder packagesFolder = checkPackagesFolderCreated(SolutionSerializer.NG_PACKAGES_DIR_NAME);
+		IFile file = packagesFolder.getFile(packageName + ".zip");
 		try
 		{
 			file.delete(true, new NullProgressMonitor());
@@ -57,7 +57,7 @@ public class RemoveWebPackageHandler implements IDeveloperService
 		return null;
 	}
 
-	static IFolder checkComponentsFolderCreated(String webPackagesFolder)
+	static IFolder checkPackagesFolderCreated(String webPackagesFolder)
 	{
 		IProject project = getInstallTargetProject();
 
