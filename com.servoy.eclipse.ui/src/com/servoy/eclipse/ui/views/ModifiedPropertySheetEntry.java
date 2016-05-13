@@ -275,19 +275,6 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 		}
 	}
 
-	private boolean valueEquals(Object val, Object[] array)
-	{
-		if (array == null)
-		{
-			return val == null;
-		}
-		for (Object obj : array)
-		{
-			if (!valueEquals(val, obj)) return false;
-		}
-		return true;
-	}
-
 	protected boolean valueEquals(Object val1, Object val2)
 	{
 		if (val1 == null)
@@ -299,6 +286,15 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 		if (val1 instanceof Border && val2 instanceof Border)
 		{
 			return ComponentFactoryHelper.createBorderString(val1).equals(ComponentFactoryHelper.createBorderString(val2));
+		}
+
+		if (val2 instanceof Object[])
+		{
+			for (Object obj : (Object[])val2)
+			{
+				if (!valueEquals(val1, obj)) return false;
+			}
+			return true;
 		}
 
 		return val1.equals(val2);
