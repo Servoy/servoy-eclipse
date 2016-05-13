@@ -39,7 +39,9 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences.FormEditorDesignerP
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.SolutionMetaData;
+import com.servoy.j2db.persistence.WebComponent;
 
 
 /**
@@ -143,35 +145,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 
 		if (editorType == null)
 		{
-			FormEditorDesignerPreference formEditorDesignerPreference = new DesignerPreferences().getFormEditorDesignerPreference();
-			if (isMobile())
-			{
-				if (formEditorDesignerPreference == FormEditorDesignerPreference.Classic)
-				{
-					editorType = DesignPagetype.MobileClassic;
-				}
-				else
-				{
-					editorType = DesignPagetype.Mobile;
-				}
-			}
-			else if (formEditorDesignerPreference == FormEditorDesignerPreference.New)
-			{
-				editorType = DesignPagetype.Rfb;
-			}
-			else if (formEditorDesignerPreference == FormEditorDesignerPreference.Automatic && fs != null && fs.getSolution() != null &&
-				fs.getSolution().getSolutionType() == SolutionMetaData.NG_CLIENT_ONLY)
-			{
-				editorType = DesignPagetype.Rfb;
-			}
-			else if (getForm() != null && getForm().isResponsiveLayout())
-			{
-				editorType = DesignPagetype.Rfb;
-			}
-			else
-			{
-				editorType = DesignPagetype.Classic;
-			}
+			editorType = determineEditorType(fs, getForm());
 		}
 
 		switch (editorType)
@@ -187,6 +161,53 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		}
 
 		throw new IllegalStateException("No design page for " + editorType);
+	}
+
+	private static DesignPagetype determineEditorType(FlattenedSolution fs, Form form)
+	{
+		FormEditorDesignerPreference formEditorDesignerPreference = new DesignerPreferences().getFormEditorDesignerPreference();
+		if (isMobile(form))
+		{
+			if (formEditorDesignerPreference == FormEditorDesignerPreference.Classic)
+			{
+				return DesignPagetype.MobileClassic;
+			}
+			return DesignPagetype.Mobile;
+		}
+
+		if (formEditorDesignerPreference == FormEditorDesignerPreference.New)
+		{
+			return DesignPagetype.Rfb;
+		}
+
+		if (formEditorDesignerPreference == FormEditorDesignerPreference.Automatic && fs != null && fs.getSolution() != null &&
+			fs.getSolution().getSolutionType() == SolutionMetaData.NG_CLIENT_ONLY)
+		{
+			return DesignPagetype.Rfb;
+		}
+
+		if (form != null && (form.isResponsiveLayout() || (fs != null && hasWebComponents(fs.getFlattenedForm(form)))))
+		{
+			return DesignPagetype.Rfb;
+		}
+
+		return DesignPagetype.Classic;
+	}
+
+	private static boolean hasWebComponents(Form flattenedForm)
+	{
+		return flattenedForm.acceptVisitor(new IPersistVisitor()
+		{
+			@Override
+			public Object visit(IPersist o)
+			{
+				if (o instanceof WebComponent)
+				{
+					return Boolean.TRUE;
+				}
+				return IPersistVisitor.CONTINUE_TRAVERSAL;
+			}
+		}) == Boolean.TRUE;
 	}
 
 	@Override
@@ -297,7 +318,11 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 
 	private boolean isMobile()
 	{
-		Form form = getForm();
+		return isMobile(getForm());
+	}
+
+	private static boolean isMobile(Form form)
+	{
 		return form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) != null;
 	}
 }
