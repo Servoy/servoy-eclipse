@@ -46,7 +46,11 @@
 
   <div ng-cloak>
   <md-content ng-controller="appPackages">
-    <md-tabs md-dynamic-height md-border-bottom md-selected="selectedTab">
+  	<md-content layout="column" layout-align="space-around center center" ng-if="isLoading" style="min-height: 150px;">
+  		<md-content>Loading ...</md-content>
+  		<md-progress-circular md-mode="indeterminate"></md-progress-circular>
+  	</md-content>
+    <md-tabs md-dynamic-height md-border-bottom md-selected="selectedTab" ng-if="!isLoading">
       <md-tab label="NG Components">
         <md-content class="md-padding">
         	<packages packages="componentPackages" solution-list="solutionList" websocket="websocket">

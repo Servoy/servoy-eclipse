@@ -612,7 +612,7 @@ public abstract class BaseNGPackageManager
 				catch (IOException e)
 				{
 					// ignore
-					return null;
+					reader = null;
 				}
 				return new Pair<String, IPackageReader>(name, reader);
 			}

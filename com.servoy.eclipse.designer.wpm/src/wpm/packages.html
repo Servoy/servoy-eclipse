@@ -18,8 +18,8 @@
         <md-select ng-model="package.selected" style="width: 200px;" md-selected-text="getSelectedRelease($index)">
           <md-option ng-value="release.version" ng-repeat="release in package.releases">{{release.version}}</md-option>
         </md-select>
-        <md-button class="md-raised" ng-click="install(package)" ng-bind="getActionText($index)" ng-disabled="!upgradeEnabled($index)"></md-button>
-        <md-button class="md-raised" ng-click="uninstall(package)" ng-if="package.installed">Remove</md-button>
+        <md-button class="md-raised" ng-click="install(package, $index)" ng-bind="getInstallText($index)" ng-disabled="!installEnabled($index)"></md-button>
+        <md-button class="md-raised" ng-click="uninstall(package, $index)" ng-if="package.installed" ng-bind="getRemoveText($index)" ng-disabled="!removeEnabled($index)"></md-button>
       </div>
     </td>
     <td>
