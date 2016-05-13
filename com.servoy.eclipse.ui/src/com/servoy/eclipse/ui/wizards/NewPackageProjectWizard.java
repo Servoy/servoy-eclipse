@@ -2,6 +2,7 @@ package com.servoy.eclipse.ui.wizards;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -35,11 +36,15 @@ import org.eclipse.ui.IWorkbench;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ngpackages.NGPackageManager;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.FilteredTreeViewer;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
+import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.AddAsWebPackageAction;
@@ -117,7 +122,28 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 
 				if (viewer != null)
 				{
-					viewer.getSolExNavigator().revealWhenAvailable(treeNode, new String[] { projectName }, true); // if in the future this action allows specifying display name, that one should be used here in the array instead
+					SimpleUserNode nodeToExpand = treeNode;
+					if (treeNode.parent != null)
+					{
+						List<IProject> projects = Arrays.asList(referencedProjects);
+						if (treeNode.parent.getRealObject() instanceof ServoyProject &&
+							!projects.contains(((ServoyProject)treeNode.parent.getRealObject()).getProject()))
+						{
+							ServoyProject activeSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+							if (activeSolution != null && projects.contains(activeSolution.getProject()))
+							{
+								PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getTreeContentProvider().findChildNode(
+									viewer.getTreeContentProvider().getInvisibleRootNode(), activeSolution.getProject().getName());
+								if (node != null) nodeToExpand = viewer.getTreeContentProvider().findChildNode(node, Messages.TreeStrings_Web_Packages);
+							}
+							else
+							{
+								nodeToExpand = viewer.getTreeContentProvider().findChildNode(viewer.getTreeContentProvider().getInvisibleRootNode(),
+									Messages.TreeStrings_AllWebPackageProjects);
+							}
+						}
+					}
+					viewer.getSolExNavigator().revealWhenAvailable(nodeToExpand, new String[] { projectName }, true); // if in the future this action allows specifying display name, that one should be used here in the array instead
 				}
 			}
 			catch (CoreException e)
@@ -243,7 +269,14 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 			}
 			ftv.setInput(availableSolutions.toArray());
 
-			if (servoyModel.getActiveProject() != null) ftv.setSelection(new StructuredSelection(servoyModel.getActiveProject().getSolution().getName()));
+			if (treeNode.parent.getType() == UserNodeType.SOLUTION || treeNode.parent.getType() == UserNodeType.SOLUTION_ITEM)
+			{
+				ftv.setSelection(new StructuredSelection(((ServoyProject)treeNode.parent.getRealObject()).getProject().getName()));
+			}
+			else if (servoyModel.getActiveProject() != null)
+			{
+				ftv.setSelection(new StructuredSelection(servoyModel.getActiveProject().getSolution().getName()));
+			}
 
 			final GroupLayout groupLayout = new GroupLayout(container);
 			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
