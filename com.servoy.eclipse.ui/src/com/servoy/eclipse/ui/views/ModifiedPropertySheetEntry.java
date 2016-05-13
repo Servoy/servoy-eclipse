@@ -17,7 +17,6 @@
 package com.servoy.eclipse.ui.views;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -42,8 +41,7 @@ import com.servoy.j2db.util.ComponentFactoryHelper;
 public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IAdaptable
 {
 
-	private Object[] previousValues;
-
+	private Object[] editValues;
 
 	public ModifiedPropertySheetEntry()
 	{
@@ -245,14 +243,49 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 
 		// See if the value changed and if so update
 		Object newValue = editor.getValue();
-		boolean changed = !valueEquals(editValue, newValue) || values.length > 1 && !valueEquals(previousValues, values);
-
-		// Set the editor value
-		if (changed)
+		if (!valueEquals(newValue, editValues))
 		{
+			// Set the editor value
 			setValue(newValue);
-			previousValues = values;
 		}
+	}
+
+	@Override
+	public void setValues(Object[] objects)
+	{
+		super.setValues(objects);
+		if (objects.length == 0)
+		{
+			editValues = null;
+		}
+		else
+		{
+			editValues = new Object[objects.length];
+			for (int i = 0; i < objects.length; i++)
+			{
+				Object newValue = values[0];
+				// see if we should convert the value to an editable value
+				IPropertySource source = getPropertySource(newValue);
+				if (source != null)
+				{
+					newValue = source.getEditableValue();
+				}
+				editValues[i] = newValue;
+			}
+		}
+	}
+
+	private boolean valueEquals(Object val, Object[] array)
+	{
+		if (array == null)
+		{
+			return val == null;
+		}
+		for (Object obj : array)
+		{
+			if (!valueEquals(val, obj)) return false;
+		}
+		return true;
 	}
 
 	protected boolean valueEquals(Object val1, Object val2)
@@ -266,10 +299,6 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 		if (val1 instanceof Border && val2 instanceof Border)
 		{
 			return ComponentFactoryHelper.createBorderString(val1).equals(ComponentFactoryHelper.createBorderString(val2));
-		}
-		if (val1 instanceof Object[] && val2 instanceof Object[])
-		{
-			return Arrays.deepEquals((Object[])val1, (Object[])val2);
 		}
 
 		return val1.equals(val2);
