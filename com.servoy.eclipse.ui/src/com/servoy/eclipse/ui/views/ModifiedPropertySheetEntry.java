@@ -263,7 +263,7 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 			editValues = new Object[objects.length];
 			for (int i = 0; i < objects.length; i++)
 			{
-				Object newValue = values[0];
+				Object newValue = values[i];
 				// see if we should convert the value to an editable value
 				IPropertySource source = getPropertySource(newValue);
 				if (source != null)
@@ -277,9 +277,9 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 
 	protected boolean valueEquals(Object val1, Object val2)
 	{
-		if (val1 == null)
+		if (val2 == null)
 		{
-			return val2 == null;
+			return val1 == null;
 		}
 
 		// special cases, borders (like LineBorder) do not implement equals based on fields.
