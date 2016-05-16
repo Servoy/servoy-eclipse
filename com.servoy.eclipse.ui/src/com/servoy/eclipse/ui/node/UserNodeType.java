@@ -72,6 +72,7 @@ public enum UserNodeType
 	MODULES,
 	MODULE,
 	FORMS,
+	REFERENCE_FORMS,
 	FORMS_GRAYED_OUT,
 	FORM,
 	JSLIB,

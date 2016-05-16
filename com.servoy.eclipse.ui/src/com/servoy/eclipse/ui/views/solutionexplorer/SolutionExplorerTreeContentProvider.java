@@ -253,10 +253,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib), //
 			createTypeNode(Messages.TreeStrings_SpecialOperators, UserNodeType.SPECIAL_OPERATORS,
 				com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, jslib), //
-				createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
-				createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
-				createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
-					jslib) };
+			createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
+			createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
+			createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
+				jslib) };
 
 		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, invisibleRootNode);
 
@@ -870,7 +870,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					}
 					else if (type == UserNodeType.FORMS || (type == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.FORMS))
 					{
-						addFormsNodeChildren(un);
+						addFormsNodeChildren(un, false);
+					}
+					else if (type == UserNodeType.REFERENCE_FORMS || (type == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.REFERENCE_FORMS))
+					{
+						addFormsNodeChildren(un, true);
 					}
 					else if (type == UserNodeType.WORKING_SET || (type == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.WORKING_SET))
 					{
@@ -1179,14 +1183,13 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			addBinaryReferecedPackages(un, componentsProvider, UserNodeType.COMPONENTS_NONPROJECT_PACKAGE, result, packageIcon, allReferencedProjects,
 				packages);
 			packages = new TreeMap<String, URL>(servicesProvider.getPackagesToURLs());
-			addBinaryReferecedPackages(un, servicesProvider, UserNodeType.SERVICES_NONPROJECT_PACKAGE, result, packageIcon, allReferencedProjects,
-				packages);
+			addBinaryReferecedPackages(un, servicesProvider, UserNodeType.SERVICES_NONPROJECT_PACKAGE, result, packageIcon, allReferencedProjects, packages);
 		}
 		return result;
 	}
 
-	private void addBinaryReferecedPackages(PlatformSimpleUserNode un, BaseSpecProvider provider, UserNodeType nodeType,
-		List<PlatformSimpleUserNode> result, Image packageIcon, List<IProject> allReferencedProjects, Map<String, URL> packages)
+	private void addBinaryReferecedPackages(PlatformSimpleUserNode un, BaseSpecProvider provider, UserNodeType nodeType, List<PlatformSimpleUserNode> result,
+		Image packageIcon, List<IProject> allReferencedProjects, Map<String, URL> packages)
 	{
 		for (Map.Entry<String, URL> entry : packages.entrySet())
 		{
@@ -1401,11 +1404,17 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 				else if (un.getType() == UserNodeType.FORMS || (un.getType() == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.FORMS))
 				{
-					if (((Solution)un.getRealObject()).getForms(null, false).hasNext()) return true;
+					if (((Solution)un.getRealObject()).getAllNonReferenceForms(false).hasNext()) return true;
 					if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null &&
 						ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().hasServoyWorkingSets(
 							new String[] { ((Solution)un.getRealObject()).getName() }))
 						return true;
+					return false;
+				}
+				else if (un.getType() == UserNodeType.REFERENCE_FORMS ||
+					(un.getType() == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.REFERENCE_FORMS))
+				{
+					if (((Solution)un.getRealObject()).getAllReferenceForms(false).hasNext()) return true;
 					return false;
 				}
 				else if (un.getType() == UserNodeType.WORKING_SET || (un.getType() == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.WORKING_SET))
@@ -1957,6 +1966,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			PlatformSimpleUserNode forms = new PlatformSimpleUserNode(Messages.TreeStrings_Forms, UserNodeType.FORMS, solution,
 				uiActivator.loadImageFromBundle("forms.gif"));
 			forms.parent = projectNode;
+
+			PlatformSimpleUserNode formReferences = new PlatformSimpleUserNode(Messages.TreeStrings_ReferenceForms, UserNodeType.REFERENCE_FORMS, solution,
+				uiActivator.loadImageFromBundle("forms.gif"));
+			formReferences.parent = projectNode;
 			PlatformSimpleUserNode allRelations = null;
 			if (solutionOfCalculation == null)
 			{
@@ -1997,12 +2010,13 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 				dataProvidersNode.parent = projectNode;
 				allRelations.parent = projectNode;
-				projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, dataProvidersNode, forms, allRelations, valuelists, media, solutionDataSources, solutionWebPackages };
+				projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, dataProvidersNode, forms, formReferences, allRelations, valuelists, media, solutionDataSources, solutionWebPackages };
 				forms.hide();
+				formReferences.hide();
 			}
 			else
 			{
-				projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, forms, allRelations, valuelists, media, solutionDataSources, solutionWebPackages };
+				projectNode.children = new PlatformSimpleUserNode[] { scopesFolder, forms, formReferences, allRelations, valuelists, media, solutionDataSources, solutionWebPackages };
 				// solution's allRelations not allowed in login solutions
 				if (activeSolutionNode != null &&
 					((ServoyProject)activeSolutionNode.getRealObject()).getSolution().getSolutionType() == SolutionMetaData.LOGIN_SOLUTION &&
@@ -2089,7 +2103,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				for (String formName : forms)
 				{
 					Form form = workingSetNode.getSolution().getForm(formName);
-					if (form != null)
+					if (form != null && !form.getReferenceForm().booleanValue())
 					{
 						addFormNode(form, nodes, workingSetNode);
 					}
@@ -2108,11 +2122,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		node.parent = parentNode;
 	}
 
-	private void addFormsNodeChildren(PlatformSimpleUserNode formsNode)
+	private void addFormsNodeChildren(PlatformSimpleUserNode formsNode, boolean referenceForms)
 	{
 		Solution solution = (Solution)formsNode.getRealObject();
 		List<PlatformSimpleUserNode> nodes = new ArrayList<PlatformSimpleUserNode>();
-		if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
+		if (!referenceForms && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null)
 		{
 			List<String> workingSets = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().getServoyWorkingSets(
 				new String[] { solution.getName() });
@@ -2127,11 +2141,14 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 			}
 		}
-		Iterator<Form> it = solution.getForms(null, true);
+		Iterator<Form> it = null;
+		if (!referenceForms) it = solution.getAllNonReferenceForms(true);
+		else it = solution.getAllReferenceForms(true);
 		while (it.hasNext())
 		{
 			Form f = it.next();
-			if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() == null ||
+			//if this is the "Reference Forms" node, then all forms here, even if they belong to a working set
+			if (referenceForms || ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() == null ||
 				!ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().isContainedInWorkingSets(f.getName(),
 					new String[] { solution.getName() }))
 			{
@@ -2693,8 +2710,14 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						{
 							// don't refresh if we also refresh the solution
 							if (persists.contains(s)) continue;
-
-							node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
+							boolean referenceForms = false;
+							if (UserNodeType.FORMS.equals(node.parent.getType()))
+								node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
+							else
+							{
+								node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_ReferenceForms);
+								referenceForms = true;
+							}
 							if (node != null)
 							{
 								PlatformSimpleUserNode formNode = (PlatformSimpleUserNode)findChildNode(node, ((Form)persist).getName());
@@ -2703,7 +2726,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 									if (!refreshedFormsNode)
 									{
 										refreshedFormsNode = true;
-										addFormsNodeChildren(node);
+										addFormsNodeChildren(node, referenceForms);
 									}
 									else
 									{
@@ -2742,7 +2765,13 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							PlatformSimpleUserNode solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
 							if (solutionChildNode != null)
 							{
-								addFormsNodeChildren(solutionChildNode);
+								addFormsNodeChildren(solutionChildNode, false);
+								view.refreshTreeNodeFromModel(solutionChildNode);
+							}
+							solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_ReferenceForms);
+							if (solutionChildNode != null)
+							{
+								addFormsNodeChildren(solutionChildNode, true);
 								view.refreshTreeNodeFromModel(solutionChildNode);
 							}
 							solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Media);
@@ -3059,9 +3088,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		view.refreshTreeNodeFromModel(servers);
 	}
 
-	public void refreshFormsNode(PlatformSimpleUserNode formsNode)
+	public void refreshFormsNode(PlatformSimpleUserNode formsNode, boolean referenceForms)
 	{
-		addFormsNodeChildren(formsNode);
+		addFormsNodeChildren(formsNode, referenceForms);
 		view.refreshTreeNodeFromModel(formsNode);
 	}
 

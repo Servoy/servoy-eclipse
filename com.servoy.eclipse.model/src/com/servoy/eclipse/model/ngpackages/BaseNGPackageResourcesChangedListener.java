@@ -179,12 +179,12 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 		boolean componentsReloaded = false;
 		boolean servicesReloaded = false;
 
-		List<String> removedComponentPacakgeNames = new ArrayList<>();
+		List<String> removedComponentPackageNames = new ArrayList<>();
 		List<String> removedServicePackageNames = new ArrayList<>();
 		for (File file : removedPackageFiles)
 		{
 			String packageName = ResourceProvider.getComponentPackageNameForFile(file);
-			if (packageName != null) removedComponentPacakgeNames.add(packageName);
+			if (packageName != null) removedComponentPackageNames.add(packageName);
 			else
 			{
 				packageName = ResourceProvider.getServicePackageNameForFile(file);
@@ -214,9 +214,9 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 		}
 
 
-		if (removedComponentPacakgeNames.size() > 0 || addedComponentPackageReaders.size() > 0)
+		if (removedComponentPackageNames.size() > 0 || addedComponentPackageReaders.size() > 0)
 		{
-			ResourceProvider.updateComponentResources(removedComponentPacakgeNames, addedComponentPackageReaders);
+			ResourceProvider.updateComponentResources(removedComponentPackageNames, addedComponentPackageReaders);
 			componentsReloaded = true;
 		}
 		if (removedServicePackageNames.size() > 0 || addedServicePackageReaders.size() > 0)

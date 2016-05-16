@@ -534,7 +534,15 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						PlatformSimpleUserNode formsNode = (PlatformSimpleUserNode)cp.findChildNode(solutionNode, Messages.TreeStrings_Forms);
 						if (formsNode != null)
 						{
-							cp.refreshFormsNode(formsNode);
+							cp.refreshFormsNode(formsNode, false);
+						}
+						else
+						{
+							formsNode = (PlatformSimpleUserNode)cp.findChildNode(solutionNode, Messages.TreeStrings_ReferenceForms);
+							if (formsNode != null)
+							{
+								cp.refreshFormsNode(formsNode, true);
+							}
 						}
 					}
 				}

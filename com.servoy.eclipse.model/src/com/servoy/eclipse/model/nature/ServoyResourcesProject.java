@@ -19,6 +19,7 @@ package com.servoy.eclipse.model.nature;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,14 +30,17 @@ import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.IWorkingSetChangedListener;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.NameComparator;
+import com.servoy.j2db.persistence.Solution;
 
 /**
  * Project nature for Resources Servoy projects.
- * 
+ *
  * @author acostescu
  */
 public class ServoyResourcesProject implements IProjectNature
@@ -136,11 +140,36 @@ public class ServoyResourcesProject implements IProjectNature
 		return false;
 	}
 
+	/**
+	 * Returns true if the working set contains forms that are not reference forms
+	 * @param workingSetName
+	 * @param solutionNames
+	 * @return
+	 */
 	public boolean hasPersistsInServoyWorkingSets(String workingSetName, String[] solutionNames)
 	{
 		if (workingSetPersists != null)
 		{
 			List<String> formNames = getFormNames(workingSetPersists.get(workingSetName), solutionNames);
+			Iterator<String> iterator = formNames.iterator();
+
+			formNamesWhile : while (iterator.hasNext())
+			{
+				String formName = iterator.next();
+				for (String solutionName : solutionNames)
+				{
+					Solution solution = ServoyModelFinder.getServoyModel().getServoyProject(solutionName).getSolution();
+					if (solution != null)
+					{
+						Form form = solution.getForm(formName);
+						if (form != null && form.getReferenceForm().booleanValue())
+						{
+							iterator.remove();
+							continue formNamesWhile; // removed it already, no point in continuing the for
+						}
+					}
+				}
+			}
 			if (formNames != null && formNames.size() > 0)
 			{
 				return true;
