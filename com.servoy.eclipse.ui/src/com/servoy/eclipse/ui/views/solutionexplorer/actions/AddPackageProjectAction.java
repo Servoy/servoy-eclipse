@@ -62,7 +62,7 @@ public class AddPackageProjectAction extends Action implements ISelectionChanged
 	public AddPackageProjectAction(Shell shell)
 	{
 		this.shell = shell;
-		setText("Add Web Package Project Reference");
+		setText("Add web package project reference");
 		setToolTipText("Add a Web Package Project reference to the solution");
 	}
 
