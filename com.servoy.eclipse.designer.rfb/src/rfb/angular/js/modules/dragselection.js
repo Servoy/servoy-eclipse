@@ -10,7 +10,8 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 
 		function onmousedown(event) {
 			var dragNode = utils.getNode(event);
-			if (event.button == 0 && dragNode) {
+			// skip dragging if it is an inherited element from a form reference
+			if (event.button == 0 && dragNode && !angular.element(dragNode).hasClass("form_reference_element")) {
 				dragStartEvent = event;
 				if(!editorScope.isAbsoluteFormLayout()){
 					if (angular.element(dragNode).hasClass("inheritedElement")) {//do not grab if this is an inherited element

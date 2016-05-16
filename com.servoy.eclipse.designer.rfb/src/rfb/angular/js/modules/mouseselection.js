@@ -155,6 +155,13 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 		editorScope.registerDOMEvent("mousedown", "CONTENTFRAME_OVERLAY", onmousedownLasso);
 		editorScope.registerDOMEvent("mouseup", "CONTENTFRAME_OVERLAY", onmouseupLasso);
 		editorScope.registerDOMEvent("mousemove", "CONTENTFRAME_OVERLAY", onmousemove);
+		
+		editorScope.registerDOMEvent("dblclick", "CONTENTFRAME_OVERLAY", function(e) {
+			var selection = editorScope.getSelection()
+			if(selection && selection.length && angular.element(selection[0]).hasClass("form_reference")) {
+				editorScope.openContainedForm({"uuid" : selection[0].getAttribute("svy-id")});
+			}
+		});
 	})
 }).factory("$selectionUtils", function(EDITOR_CONSTANTS) {
 	function hasClass(element, cls) {

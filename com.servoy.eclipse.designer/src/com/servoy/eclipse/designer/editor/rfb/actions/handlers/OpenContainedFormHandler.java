@@ -33,9 +33,9 @@ import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IContainsFormID;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.persistence.Tab;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.util.Debug;
@@ -78,11 +78,11 @@ public class OpenContainedFormHandler implements IServerService
 						if (persist != null)
 						{
 
-							if (persist instanceof Tab)
+							if (persist instanceof IContainsFormID)
 							{
-								open = openFormDesignEditor(s, ((Tab)persist).getContainsFormID());
-								Debug.log("Cannot open form with id " + ((Tab)persist).getContainsFormID() + "in design editor (Tab uuid " +
-									args.getString("uuid") + ")");
+								open = openFormDesignEditor(s, ((IContainsFormID)persist).getContainsFormID());
+								Debug.log("Cannot open form with id " + ((IContainsFormID)persist).getContainsFormID() +
+									"in design editor (parent element uuid " + args.getString("uuid") + ")");
 							}
 							else if (persist instanceof WebCustomType)
 							{
@@ -123,7 +123,6 @@ public class OpenContainedFormHandler implements IServerService
 									}
 								}
 							}
-
 						}
 						else
 						{
