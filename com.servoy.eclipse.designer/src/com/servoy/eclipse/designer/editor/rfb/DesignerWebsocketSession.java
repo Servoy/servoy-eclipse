@@ -607,10 +607,12 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	{
 		if (baseComponents.size() > 0)
 		{
+			List<IFormElement> components = new ArrayList<IFormElement>(baseComponents);
+			Collections.sort(components, PositionComparator.XY_PERSIST_COMPARATOR);
 			writer.key("components");
 			writer.object();
 			// TODO is this really all the data? or are there properties that would normally go through the webcomponents..
-			for (IFormElement baseComponent : baseComponents)
+			for (IFormElement baseComponent : components)
 			{
 				FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
 				if (fe.getDesignId() != null)

@@ -327,26 +327,36 @@ angular.module('editorContent',['servoyApp'])
   var layoutData = null;
 
   function handleTemplate(data) {
-    // append the template
-    var json = JSON.parse(data);
-    if (json.renderGhosts) {
-      renderGhosts();
-      return;
-    }
-    var parentId = json.parentId;
-    if (!parentId) parentId = 'svyDesignForm';
+	    // append the template
+	    var json = JSON.parse(data);
+	    if (json.renderGhosts) {
+	      renderGhosts();
+	      return;
+	    }
+	    var parentId = json.parentId;
+	    if (!parentId) parentId = 'svyDesignForm';
 
-    var parent = angular.element(document.getElementById(parentId));
-    if (!parent.length) {
-      parent = angular.element(document.querySelectorAll("[svy-id='" + parentId + "']"));
-    }
-    var tpl = $compile(json.template)($rootScope.getDesignFormControllerScope());
-    if (json.insertBeforeUUID) {
-      var nextSibling = angular.element(document.querySelectorAll("[svy-id='" + json.insertBeforeUUID + "']"));
-      tpl.insertBefore(nextSibling);
-    } else
-      parent.append(tpl)
-  }
+	    var parent = angular.element(document.getElementById(parentId));
+	    if (!parent.length) {
+	      parent = angular.element(document.querySelectorAll("[svy-id='" + parentId + "']"));
+	    }
+	    var tpl = $compile(json.template)($rootScope.getDesignFormControllerScope());
+	    if (json.insertBeforeUUID) {
+	    	var sibling = document.querySelectorAll("[svy-id='" + json.insertBeforeUUID + "']");
+	    	if(sibling[0])
+	    	{
+	    		var nextSibling = angular.element(sibling);
+	    		tpl.insertBefore(nextSibling);
+	    	}
+	    	else
+	    	{
+	    		parent.append(tpl);//next sibling is not here yet, append to parent
+	    	}
+	    } else
+	    {
+	    	parent.append(tpl)
+	    }
+	  }
   
   function updateElementIfParentChange(elementId, updateData, getTemplateParam,forceUpdate) {
     var elementTemplate = angular.element('[svy-id="' + elementId + '"]');
