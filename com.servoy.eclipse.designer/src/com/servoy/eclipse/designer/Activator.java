@@ -39,10 +39,8 @@ import com.servoy.eclipse.core.I18NChangeListener;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.rfb.property.types.DesignerTypes;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.j2db.server.ngclient.property.types.Types;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -82,9 +80,6 @@ public class Activator extends AbstractUIPlugin
 
 		super.start(context);
 		plugin = this;
-
-		Types.setTypesInstance(DesignerTypes.INSTANCE);
-		Types.getTypesInstance().registerTypes();
 
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		servoyModel.addI18NChangeListener(i18nChangeListener = new I18NChangeListener()
