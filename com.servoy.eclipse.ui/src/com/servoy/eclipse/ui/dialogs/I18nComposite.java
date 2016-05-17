@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeMap;
 
+import org.apache.wicket.util.string.Strings;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -331,20 +332,20 @@ public class I18nComposite extends Composite
 	{
 		GroupLayout i18NLayout = new GroupLayout(this);
 		i18NLayout.setHorizontalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(
-			i18NLayout.createSequentialGroup().addContainerGap().add(
-				i18NLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING, container, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE).add(
-					i18NLayout.createSequentialGroup().add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-						LayoutStyle.RELATED).add(filterText, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(
-						languageLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
-						languageCombo, GroupLayout.PREFERRED_SIZE, LANG_COMBO_WIDTH, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
-						countryCombo, GroupLayout.PREFERRED_SIZE, LANG_COMBO_WIDTH, GroupLayout.PREFERRED_SIZE))).addContainerGap()));
-		i18NLayout.setVerticalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(
-			i18NLayout.createSequentialGroup().addContainerGap().add(
-				i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(filterText, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(languageCombo, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(languageLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(countryCombo, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-				LayoutStyle.RELATED).add(container, GroupLayout.PREFERRED_SIZE, 100, Short.MAX_VALUE).addContainerGap()));
+				i18NLayout.createSequentialGroup().addContainerGap().add(
+					i18NLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING, container, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE).add(
+						i18NLayout.createSequentialGroup().add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+							LayoutStyle.RELATED).add(filterText, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(
+							languageLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
+							languageCombo, GroupLayout.PREFERRED_SIZE, LANG_COMBO_WIDTH, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
+							countryCombo, GroupLayout.PREFERRED_SIZE, LANG_COMBO_WIDTH, GroupLayout.PREFERRED_SIZE))).addContainerGap()));
+			i18NLayout.setVerticalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(
+				i18NLayout.createSequentialGroup().addContainerGap().add(
+					i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.PREFERRED_SIZE).add(filterText, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(languageCombo, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(languageLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.PREFERRED_SIZE).add(countryCombo, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
+					LayoutStyle.RELATED).add(container, GroupLayout.PREFERRED_SIZE, 100, Short.MAX_VALUE).addContainerGap()));
 		return i18NLayout;
 	}
 
@@ -362,7 +363,7 @@ public class I18nComposite extends Composite
 
 
 		tableViewer.setInput(messagesModel.getMessages(filter, null, null, null,
-			ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile()));
+				ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile()));
 	}
 
 
@@ -375,9 +376,11 @@ public class I18nComposite extends Composite
 			availableLanguages = new TreeMap<String, String>();
 			Locale[] availableLocales = Locale.getAvailableLocales();
 			for (Locale locale : availableLocales)
+			{
+				if (Strings.isEmpty(locale.getDisplayLanguage())) continue;
 				availableLanguages.put(locale.getDisplayLanguage(), locale.getLanguage());
+			}
 		}
-
 		return availableLanguages;
 	}
 
