@@ -158,8 +158,15 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 		
 		editorScope.registerDOMEvent("dblclick", "CONTENTFRAME_OVERLAY", function(e) {
 			var selection = editorScope.getSelection()
-			if(selection && selection.length && angular.element(selection[0]).hasClass("form_reference")) {
-				editorScope.openContainedForm({"uuid" : selection[0].getAttribute("svy-id")});
+			if(selection && selection.length) {
+				var el = angular.element(selection[0]);
+				var attrDirectEdit = el.attr('directeditpropertyname');
+				if (typeof attrDirectEdit == typeof undefined || attrDirectEdit == false) {
+					var fr = el.closest('.form_reference');
+					if(fr.length) {
+						editorScope.openContainedForm({"uuid" : fr.attr("svy-id")});
+					}
+				}
 			}
 		});
 	})
