@@ -280,7 +280,7 @@ public class DesignerFilter implements Filter
 								if (spec.getCategoryName() != null) layoutJson.put("category", spec.getCategoryName());
 
 								JSONObject config = spec.getConfig() instanceof String ? new JSONObject((String)spec.getConfig()) : null;
-								if (config == null)
+								if (config == null || config.length() < 1)
 								{
 									layoutJson.put("tagName", "<div style='border-style: dotted;'></div>"); //TODO is tagname configurable by the spec
 								}

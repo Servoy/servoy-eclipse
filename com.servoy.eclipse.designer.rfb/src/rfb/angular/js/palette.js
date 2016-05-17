@@ -183,6 +183,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 								});
 								if ($scope.isAbsoluteFormLayout()){
 								    css.height = elHeight + 'px';
+								    css.outline = '1px dotted black';
 								}
 								angularElement.css(css);
 							}
