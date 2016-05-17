@@ -347,7 +347,7 @@ public abstract class BaseNGPackageManager
 		SubMonitor monitor = SubMonitor.convert(m, "Reloading all referenced ng package projects", 100);
 
 		prepareToReloadNGPackageProjects(componentReaders, serviceReaders, monitor.newChild(10), canChangeResources);
-		
+
 		prepareToReloadSolutionContainedBinaryPackages(componentReaders, serviceReaders, monitor.newChild(8), canChangeResources);
 
 		monitor.setWorkRemaining((serviceReaders.size() + componentReaders.size()) * 10 + 3);
@@ -608,7 +608,7 @@ public abstract class BaseNGPackageManager
 				ZipFilePackageReader reader = new ZipFilePackageReader(resource);
 				try
 				{
-					if (reader.getManifest().getMainAttributes().getValue("Package-Type") == null) return null;
+					if (reader.getPackageType() == null) return null;
 				}
 				catch (IOException e)
 				{
