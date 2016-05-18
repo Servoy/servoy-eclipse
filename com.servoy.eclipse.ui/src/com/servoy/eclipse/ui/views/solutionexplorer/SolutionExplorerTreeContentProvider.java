@@ -2710,14 +2710,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						{
 							// don't refresh if we also refresh the solution
 							if (persists.contains(s)) continue;
-							boolean referenceForms = false;
-							if (UserNodeType.FORMS.equals(node.parent.getType()))
-								node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
-							else
-							{
-								node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_ReferenceForms);
-								referenceForms = true;
-							}
+							boolean referenceForms = ((Form)persist).getReferenceForm().booleanValue();
+
+							if (referenceForms) node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_ReferenceForms);
+							else node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
+
 							if (node != null)
 							{
 								PlatformSimpleUserNode formNode = (PlatformSimpleUserNode)findChildNode(node, ((Form)persist).getName());
