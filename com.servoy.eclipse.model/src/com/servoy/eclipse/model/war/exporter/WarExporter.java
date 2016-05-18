@@ -1538,19 +1538,20 @@ public class WarExporter
 			{
 				destFile.createNewFile();
 			}
-			FileChannel source = null;
+			FileInputStream fis = new FileInputStream(sourceFile);
 			FileChannel destination = null;
 			String compileLessWithNashorn = null;
-			if (sourceFile.getName().endsWith(".less") &&
-				(compileLessWithNashorn = ResourceProvider.compileLessWithNashorn(sourceFile.toURI().toURL())) != null)
+			if (sourceFile.getName().endsWith(".less") && (compileLessWithNashorn = ResourceProvider.compileLessWithNashorn(fis)) != null)
 			{
 				File compiledLessFile = destFile;
 				PrintWriter printWriter = new PrintWriter(compiledLessFile);
 				printWriter.println(compileLessWithNashorn);
 				printWriter.close();
+				fis.close();
 			}
 			else
 			{
+				FileChannel source = fis.getChannel();
 				source = new FileInputStream(sourceFile).getChannel();
 				destination = new FileOutputStream(destFile).getChannel();
 				if (destination != null && source != null)
