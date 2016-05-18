@@ -1539,33 +1539,48 @@ public class WarExporter
 				destFile.createNewFile();
 			}
 			FileInputStream fis = new FileInputStream(sourceFile);
-			FileChannel destination = null;
-			String compileLessWithNashorn = null;
-			if (sourceFile.getName().endsWith(".less") && (compileLessWithNashorn = ResourceProvider.compileLessWithNashorn(fis)) != null)
+			try
 			{
-				File compiledLessFile = destFile;
-				PrintWriter printWriter = new PrintWriter(compiledLessFile);
-				printWriter.println(compileLessWithNashorn);
-				printWriter.close();
-				fis.close();
+				String compileLessWithNashorn = null;
+				if (sourceFile.getName().endsWith(".less") && (compileLessWithNashorn = ResourceProvider.compileLessWithNashorn(fis)) != null)
+				{
+					File compiledLessFile = destFile;
+					PrintWriter printWriter = new PrintWriter(compiledLessFile);
+					printWriter.println(compileLessWithNashorn);
+					printWriter.close();
+				}
+				else
+				{
+					FileChannel source = fis.getChannel();
+					FileOutputStream fos = new FileOutputStream(destFile);
+					FileChannel destination = fos.getChannel();
+					try
+					{
+						if (destination != null && source != null)
+						{
+							destination.transferFrom(source, 0, source.size());
+						}
+					}
+					finally
+					{
+						if (source != null)
+						{
+							source.close();
+						}
+						if (destination != null)
+						{
+							destination.close();
+						}
+						if (fos != null)
+						{
+							fos.close();
+						}
+					}
+				}
 			}
-			else
+			finally
 			{
-				FileChannel source = fis.getChannel();
-				source = new FileInputStream(sourceFile).getChannel();
-				destination = new FileOutputStream(destFile).getChannel();
-				if (destination != null && source != null)
-				{
-					destination.transferFrom(source, 0, source.size());
-				}
-				if (source != null)
-				{
-					source.close();
-				}
-				if (destination != null)
-				{
-					destination.close();
-				}
+				fis.close();
 			}
 		}
 		catch (Exception e)
