@@ -19,35 +19,35 @@ package com.servoy.eclipse.core.nature;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 
-public class ToggleNatureAction implements IObjectActionDelegate
+public class ToggleNatureHandler extends AbstractHandler
 {
 
-	private ISelection selection;
 	private final String natureID;
 	private final String[] secondaryNatureIDs;
-	private IWorkbenchPart targetPart;
 
 	/**
-	 * Creates a new ToggleNatureAction that toggles the project nature of the selected object with id natureID. If the project nature will be added, it makes
+	 * Creates a new ToggleNatureHandler that toggles the project nature of the selected object with id natureID. If the project nature will be added, it makes
 	 * sure that the secondary natures are also added. When deleting the project nature, the secondary natures will not be deleted.
-	 * 
+	 *
 	 * @param natureID the nature id of the nature to toggle.
 	 * @param secondaryNatureIDs any natures that are required by the nature to be toggled.
 	 */
-	public ToggleNatureAction(String natureID, String[] secondaryNatureIDs)
+	public ToggleNatureHandler(String natureID, String[] secondaryNatureIDs)
 	{
 		this.natureID = natureID;
 
@@ -58,16 +58,14 @@ public class ToggleNatureAction implements IObjectActionDelegate
 		this.secondaryNatureIDs = secondaryNatureIDs;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
-	 */
-	public void run(IAction action)
+	@Override
+	public Object execute(ExecutionEvent event) throws ExecutionException
 	{
+		ISelection selection = HandlerUtil.getActiveMenuSelection(event);
 		if (selection instanceof IStructuredSelection)
 		{
-			for (Iterator it = ((IStructuredSelection)selection).iterator(); it.hasNext();)
+			IWorkbenchPart targetPart = HandlerUtil.getActivePart(event);
+			for (Iterator< ? > it = ((IStructuredSelection)selection).iterator(); it.hasNext();)
 			{
 				Object element = it.next();
 				IProject project = null;
@@ -77,48 +75,24 @@ public class ToggleNatureAction implements IObjectActionDelegate
 				}
 				else if (element instanceof IAdaptable)
 				{
-					project = (IProject)((IAdaptable)element).getAdapter(IProject.class);
+					project = ((IAdaptable)element).getAdapter(IProject.class);
 				}
 				if (project != null)
 				{
 					if (project.isOpen())
 					{
-						if (MessageDialog.openConfirm(targetPart.getSite().getShell(), "Change nature", "Are you sure you want to change nature for project '" +
-							project.getName() + "' ?")) toggleNature(project);
-					}
-					else
-					{
-						MessageDialog.openInformation(targetPart.getSite().getShell(), "Cannot change project nature",
-							"The project must be open in order to change project nature.");
+						if (MessageDialog.openConfirm(targetPart.getSite().getShell(), "Change nature",
+							"Are you sure you want to change nature for project '" + project.getName() + "'?")) toggleNature(project);
 					}
 				}
 			}
 		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction, org.eclipse.jface.viewers.ISelection)
-	 */
-	public void selectionChanged(IAction action, ISelection selection)
-	{
-		this.selection = selection;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IObjectActionDelegate#setActivePart(org.eclipse.jface.action.IAction, org.eclipse.ui.IWorkbenchPart)
-	 */
-	public void setActivePart(IAction action, IWorkbenchPart targetPart)
-	{
-		this.targetPart = targetPart;
+		return null;
 	}
 
 	/**
 	 * Toggles sample nature on a project
-	 * 
+	 *
 	 * @param project to have sample nature added or removed
 	 */
 	protected void toggleNature(IProject project)

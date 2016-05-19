@@ -66,49 +66,257 @@
          </presentation>
       </config>
    </extension>
-   
-    <extension
-         point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            adaptable="true"
-            id="com.servoy.eclipse.core.contribution1"
-            nameFilter="*"
-            objectClass="org.eclipse.core.resources.IProject">
-         <action
-               class="com.servoy.eclipse.core.nature.ToggleServoySolutionNatureAction"
-               enablesFor="+"
-               id="com.servoy.eclipse.core.addRemoveNatureAction"
-               label="Add/Remove Servoy Solution Nature"
-               menubarPath="additions">
-         </action>
-      </objectContribution>
-      <objectContribution
-            adaptable="true"
-            id="com.servoy.eclipse.core.contribution2"
-            nameFilter="*"
-            objectClass="org.eclipse.core.resources.IProject">
-         <action
-               class="com.servoy.eclipse.core.nature.ToggleServoyResourcesNatureAction"
-               enablesFor="+"
-               id="com.servoy.eclipse.core.addRemoveResourcesNatureAction"
-               label="Add/Remove Servoy Resources Nature"
-               menubarPath="additions">
-         </action>
-      </objectContribution>
-      <objectContribution
-            adaptable="true"
-            id="com.servoy.eclipse.core.contribution3"
-            nameFilter="*"
-            objectClass="org.eclipse.core.resources.IProject">
-         <action
-               class="com.servoy.eclipse.core.nature.ToggleServoyNGPackageNatureAction"
-               enablesFor="+"
-               id="com.servoy.eclipse.core.addRemoveNGPackageNatureAction"
-               label="Add/Remove Servoy NG Package Nature"
-               menubarPath="additions">
-         </action>
-      </objectContribution>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            description="Adds or removes the Servoy Solution Nature to/from a project in the workspace."
+            id="com.servoy.eclipse.core.nature.addRemoveSolutionNatureCommand"
+            name="Add/Remove Servoy Solution Nature">
+      </command>
+      <command
+            description="Adds or removes the Servoy Resources Nature to/from a project in the workspace."
+            id="com.servoy.eclipse.core.nature.addRemoveResourcesNatureCommand"
+            name="Add/Remove Servoy Resources Nature">
+      </command>
+      <command
+            description="Adds or removes the Servoy NG Package Nature to/from a project in the workspace."
+            id="com.servoy.eclipse.core.nature.addRemoveNGPackageNatureCommand"
+            name="Add/Remove Servoy NG Package Nature">
+      </command>
    </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="com.servoy.eclipse.core.nature.ToggleServoySolutionNatureHandler"
+            commandId="com.servoy.eclipse.core.nature.addRemoveSolutionNatureCommand">
+      </handler>
+      <handler
+            class="com.servoy.eclipse.core.nature.ToggleServoyResourcesNatureHandler"
+            commandId="com.servoy.eclipse.core.nature.addRemoveResourcesNatureCommand">
+      </handler>
+      <handler
+            class="com.servoy.eclipse.core.nature.ToggleServoyNGPackageNatureHandler"
+            commandId="com.servoy.eclipse.core.nature.addRemoveNGPackageNatureCommand">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+            class="com.servoy.eclipse.core.nature.ResourcePropertyTester"
+            id="com.servoy.eclipse.core.nature.projectTester"
+            namespace="com.servoy.eclipse.core.testers.IResource"
+            properties="hasNature"
+            type="org.eclipse.core.resources.IResource">
+      </propertyTester>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.eclipse.ui.popup.any">
+         <command
+               commandId="com.servoy.eclipse.core.nature.addRemoveSolutionNatureCommand"
+               id="com.servoy.eclipse.core.nature.addSolutionNatureContribution"
+               label="Add Servoy Solution Nature"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeMenuSelection">
+                  <iterate
+                        ifEmpty="false"
+                        operator="and">
+                     <and>
+                        <not>
+                           <test
+                                 forcePluginActivation="true"
+                                 property="com.servoy.eclipse.core.testers.IResource.hasNature"
+                                 value="com.servoy.eclipse.core.ServoyProject">
+                           </test>
+                        </not>
+                        <not>
+                           <test
+                                 forcePluginActivation="true"
+                                 property="com.servoy.eclipse.core.testers.IResource.hasNature"
+                                 value="com.servoy.eclipse.core.ServoyNGPackage">
+                           </test>
+                        </not>
+                        <not>
+                           <test
+                                 forcePluginActivation="true"
+                                 property="com.servoy.eclipse.core.testers.IResource.hasNature"
+                                 value="com.servoy.eclipse.core.ServoyResources">
+                           </test>
+                        </not>
+                     </and>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.eclipse.ui.popup.any">
+         <command
+               commandId="com.servoy.eclipse.core.nature.addRemoveResourcesNatureCommand"
+               id="com.servoy.eclipse.core.nature.addResourcesNatureContribution"
+               label="Add Servoy Resources Nature"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeMenuSelection">
+                  <iterate
+                        ifEmpty="false"
+                        operator="and">
+                     <and>
+                        <not>
+                           <test
+                                 forcePluginActivation="true"
+                                 property="com.servoy.eclipse.core.testers.IResource.hasNature"
+                                 value="com.servoy.eclipse.core.ServoyProject">
+                           </test>
+                        </not>
+                        <not>
+                           <test
+                                 forcePluginActivation="true"
+                                 property="com.servoy.eclipse.core.testers.IResource.hasNature"
+                                 value="com.servoy.eclipse.core.ServoyNGPackage">
+                           </test>
+                        </not>
+                        <not>
+                           <test
+                                 forcePluginActivation="true"
+                                 property="com.servoy.eclipse.core.testers.IResource.hasNature"
+                                 value="com.servoy.eclipse.core.ServoyResources">
+                           </test>
+                        </not>
+                     </and>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.eclipse.ui.popup.any">
+         <command
+               commandId="com.servoy.eclipse.core.nature.addRemoveNGPackageNatureCommand"
+               id="com.servoy.eclipse.core.nature.addNGPackageNatureContribution"
+               label="Add Servoy NG Package Nature"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeMenuSelection">
+                  <iterate
+                        ifEmpty="false"
+                        operator="and">
+                     <and>
+                        <not>
+                           <test
+                                 forcePluginActivation="true"
+                                 property="com.servoy.eclipse.core.testers.IResource.hasNature"
+                                 value="com.servoy.eclipse.core.ServoyProject">
+                           </test>
+                        </not>
+                        <not>
+                           <test
+                                 forcePluginActivation="true"
+                                 property="com.servoy.eclipse.core.testers.IResource.hasNature"
+                                 value="com.servoy.eclipse.core.ServoyNGPackage">
+                           </test>
+                        </not>
+                        <not>
+                           <test
+                                 forcePluginActivation="true"
+                                 property="com.servoy.eclipse.core.testers.IResource.hasNature"
+                                 value="com.servoy.eclipse.core.ServoyResources">
+                           </test>
+                        </not>
+                     </and>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.eclipse.ui.popup.any">
+         <command
+               commandId="com.servoy.eclipse.core.nature.addRemoveSolutionNatureCommand"
+               id="com.servoy.eclipse.core.nature.removeSolutionNatureContribution"
+               label="Remove Servoy Solution Nature"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeMenuSelection">
+                  <iterate
+                        ifEmpty="false"
+                        operator="and">
+                     <test
+                           forcePluginActivation="true"
+                           property="com.servoy.eclipse.core.testers.IResource.hasNature"
+                           value="com.servoy.eclipse.core.ServoyProject">
+                     </test>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.eclipse.ui.popup.any">
+         <command
+               commandId="com.servoy.eclipse.core.nature.addRemoveResourcesNatureCommand"
+               id="com.servoy.eclipse.core.nature.removeResourcesNatureContribution"
+               label="Remove Servoy Resources Nature"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeMenuSelection">
+                  <iterate
+                        ifEmpty="false"
+                        operator="and">
+                     <test
+                           forcePluginActivation="true"
+                           property="com.servoy.eclipse.core.testers.IResource.hasNature"
+                           value="com.servoy.eclipse.core.ServoyResources">
+                     </test>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.eclipse.ui.popup.any">
+         <command
+               commandId="com.servoy.eclipse.core.nature.addRemoveNGPackageNatureCommand"
+               id="com.servoy.eclipse.core.nature.removeNGPackageNatureContribution"
+               label="Remove Servoy NG Package Nature"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeMenuSelection">
+                  <iterate
+                        ifEmpty="false"
+                        operator="and">
+                     <test
+                           forcePluginActivation="true"
+                           property="com.servoy.eclipse.core.testers.IResource.hasNature"
+                           value="com.servoy.eclipse.core.ServoyNGPackage">
+                     </test>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+   </extension>
+   
    <extension
          point="org.eclipse.core.runtime.adapters">
       <factory
@@ -121,6 +329,13 @@
             class="com.servoy.eclipse.dnd.DragDataAdapterFactory">
          <adapter
                type="com.servoy.eclipse.dnd.IDragData">
+         </adapter>
+      </factory>
+      <factory
+            adaptableType="org.eclipse.core.resources.IProject"
+            class="com.servoy.eclipse.core.nature.ActionFilterForProjects">
+         <adapter
+               type="org.eclipse.ui.IActionFilter">
          </adapter>
       </factory>
    </extension>
