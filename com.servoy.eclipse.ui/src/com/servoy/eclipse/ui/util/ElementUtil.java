@@ -233,7 +233,8 @@ public class ElementUtil
 	{
 		IPersist persist = persistContext.getPersist();
 		IPersist context = persistContext.getContext();
-		IPersist ancestorForm = persist.getAncestor(IRepository.FORMS);
+		Form ancestorForm = (Form)persist.getAncestor(IRepository.FORMS);
+		FormReference ancestorFormReference = persist instanceof FormReference ? null : (FormReference)persist.getAncestor(IRepository.FORMREFERENCE);
 		if (!(persist instanceof AbstractBase)//
 		|| !(context instanceof Form) //
 		|| ancestorForm == null // persist is something else, like a relation or a solution
@@ -299,15 +300,28 @@ public class ElementUtil
 			}
 			else
 			{
-				Iterator<FormReference> it = ((Form)context).getFormReferences();
-				while (it.hasNext())
+				Form currentFormContext = (Form)context;
+				boolean formReferenceFound = false;
+				while (!formReferenceFound && (currentFormContext != null))
 				{
-					FormReference formReference = it.next();
-					if (formReference.getContainsFormID() == ancestorForm.getID())
+					Iterator<FormReference> it = currentFormContext.getFormReferences();
+					while (!formReferenceFound && it.hasNext())
 					{
-						parent = formReference;
-						break;
+						FormReference formReference = it.next();
+
+						if (formReference == ancestorFormReference || formReference.getContainsFormID() == ancestorForm.getID())
+						{
+							parent = formReference;
+							formReferenceFound = true;
+						}
 					}
+
+					currentFormContext = (Form)PersistHelper.getSuperPersist(currentFormContext);
+				}
+
+				if (formReferenceFound)
+				{
+					parent = (ISupportChilds)getOverridePersist(PersistContext.create(parent, context));
 				}
 			}
 			newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false, false);
