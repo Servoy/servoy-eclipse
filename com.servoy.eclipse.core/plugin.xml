@@ -331,13 +331,6 @@
                type="com.servoy.eclipse.dnd.IDragData">
          </adapter>
       </factory>
-      <factory
-            adaptableType="org.eclipse.core.resources.IProject"
-            class="com.servoy.eclipse.core.nature.ActionFilterForProjects">
-         <adapter
-               type="org.eclipse.ui.IActionFilter">
-         </adapter>
-      </factory>
    </extension>
    <extension
          point="org.eclipse.core.contenttype.contentTypes">
