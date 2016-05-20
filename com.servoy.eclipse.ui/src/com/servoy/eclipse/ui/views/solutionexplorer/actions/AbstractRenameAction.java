@@ -31,9 +31,14 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -51,12 +56,12 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
  * Action to rename a component.
  * @author emera
  */
-public class RenameComponentOrServiceAction extends Action
+public abstract class AbstractRenameAction extends Action
 {
 	private final SolutionExplorerView viewer;
 	private final Shell shell;
 
-	public RenameComponentOrServiceAction(SolutionExplorerView viewer, Shell shell, UserNodeType nodeType)
+	public AbstractRenameAction(SolutionExplorerView viewer, Shell shell, UserNodeType nodeType)
 	{
 		this.viewer = viewer;
 		this.shell = shell;
@@ -67,85 +72,93 @@ public class RenameComponentOrServiceAction extends Action
 	@Override
 	public void run()
 	{
-		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
+		final PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
 		String type = node.getType().toString().toLowerCase();
 
 		WebObjectSpecification spec = (WebObjectSpecification)node.getRealObject();
 		IContainer[] dirResource;
-		IResource resource = null;
 		try
 		{
 			IProject resources = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject();
 			dirResource = resources.getWorkspace().getRoot().findContainersForLocationURI(spec.getSpecURL().toURI());
-			if (dirResource.length == 1 && dirResource[0].getParent().exists()) resource = dirResource[0].getParent();
-
-			if (resource != null)
+			if (dirResource.length == 1 && dirResource[0].getParent().exists())
 			{
-				IFolder pack = (IFolder)resource;
-				IContainer parent = pack.getParent();
+				final IResource resource = dirResource[0].getParent();
 
-				String currentName = resource.getName();
-
-				String componentName;
-
-				do
+				if (resource != null)
 				{
-					componentName = UIUtils.showTextFieldDialog(shell, getText(),
-						"Please provide a new unique name for the '" + node.getName() + "' " + type +
-							".\n\nPlease note that this action does not update references.\nIf the display name was different, it will not be changed (only the name will change).\nDisplay name can be changed directly from the .spec file.\n",
-						currentName);
-					if (componentName == null) return;
-				}
-				while (!isNameValid(componentName, type + " name must start with a letter and must contain only alphanumeric characters"));
+					final String currentName = resource.getName();
 
-				componentName = componentName.trim();
+					String componentName;
 
-				IFile specFile = pack.getFile(currentName + ".spec");
-				InputStream is = specFile.getContents();
-				JSONObject specJSON = new JSONObject(IOUtils.toString(is, "UTF-8"));
-				specJSON.put("name", specJSON.getString("name").replace("-" + NewWebObjectAction.getDashedName(currentName), "-" + componentName));
-				specJSON.put("definition", specJSON.getString("definition").replace("/" + currentName, "/" + componentName));
+					do
+					{
+						componentName = UIUtils.showTextFieldDialog(shell, getText(),
+							"Please provide a new unique name for the '" + node.getName() + "' " + type +
+								".\n\nPlease note that this action does not update references.\nIf the display name was different, it will not be changed (only the name will change).\nDisplay name can be changed directly from the .spec file.\n",
+							currentName);
+						if (componentName == null) return;
+					}
+					while (!isNameValid(componentName, type + " name must start with a letter and must contain only alphanumeric characters"));
 
-				String displayName = specJSON.getString("displayName");
-				if (currentName.equals(displayName))
-				{
-					specJSON.put("displayName", componentName);
-					displayName = componentName;
-				}
-				IFile newSpecFile = pack.getFile(componentName + ".spec");
-				newSpecFile.create(new ByteArrayInputStream(specJSON.toString(3).getBytes()), IResource.NONE, new NullProgressMonitor());
-				is.close();
+					final String newName = componentName.trim();
 
-				IFile defFile = pack.getFile(currentName + ".js");
-				is = defFile.getContents();
-				String text = IOUtils.toString(is, "UTF-8");
-				String moduleName = pack.getParent().getName() + componentName.substring(0, 1).toUpperCase() + componentName.substring(1);
-				String oldName = pack.getParent().getName() + currentName.substring(0, 1).toUpperCase() + currentName.substring(1);
-				text = text.replaceAll(oldName, moduleName);
-				text = text.replaceAll(currentName + "/" + currentName + ".html", componentName + "/" + componentName + ".html");
-				IFile newDefFile = pack.getFile(componentName + ".js");
-				newDefFile.create(new ByteArrayInputStream(text.getBytes()), IResource.NONE, new NullProgressMonitor());
-				is.close();
+					Job job = new WorkspaceJob("renaming")
+					{
 
-				IFile htmlFile = pack.getFile(currentName + ".html");
-				if (htmlFile.exists())
-				{
-					IFile newHTML = pack.getFile(componentName + ".html");
-					is = htmlFile.getContents();
-					newHTML.create(is, IResource.NONE, new NullProgressMonitor());
-					is.close();
-					htmlFile.delete(true, new NullProgressMonitor());
-				}
-				defFile.delete(true, new NullProgressMonitor());
-				specFile.delete(true, new NullProgressMonitor());
-				resource.move(parent.getFolder(new Path(componentName)).getFullPath(), IResource.FORCE, new NullProgressMonitor());
-				parent.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+						@Override
+						public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+						{
+							String displayName;
+							try
+							{
+								IFolder pack = (IFolder)resource;
+								IContainer parent = pack.getParent();
+								IFile specFile = pack.getFile(currentName + ".spec");
+								InputStream is = specFile.getContents();
+								JSONObject specJSON = new JSONObject(IOUtils.toString(is, "UTF-8"));
+								specJSON.put("name", specJSON.getString("name").replace("-" + NewWebObjectAction.getDashedName(currentName), "-" + newName));
+								String definition = specJSON.getString("definition").replace("/" + currentName, "/" + newName);
+								if (definition.startsWith(currentName))
+								{
+									// support for /XXX/compname/compname.xxx and compname/compname.xxx
+									definition = newName + definition.substring(currentName.length());
+								}
+								specJSON.put("definition", definition);
 
-				renameInManifest(componentName, resource, parent);
+								displayName = specJSON.getString("displayName");
+								if (currentName.equals(displayName))
+								{
+									specJSON.put("displayName", newName);
+									displayName = newName;
+								}
 
-				if (viewer != null)
-				{
-					viewer.getSolExNavigator().revealWhenAvailable(node.parent, new String[] { displayName }, true);
+								renameFiles(pack, currentName, newName);
+								IFile newSpecFile = pack.getFile(newName + ".spec");
+								newSpecFile.create(new ByteArrayInputStream(specJSON.toString(3).getBytes()), IResource.NONE, new NullProgressMonitor());
+								is.close();
+
+								specFile.delete(true, new NullProgressMonitor());
+								resource.move(parent.getFolder(new Path(newName)).getFullPath(), IResource.FORCE, new NullProgressMonitor());
+								parent.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+
+								renameInManifest(newName, resource, parent);
+							}
+							catch (Exception e)
+							{
+								ServoyLog.logError(e);
+								return Status.CANCEL_STATUS;
+							}
+
+							if (viewer != null)
+							{
+								viewer.getSolExNavigator().revealWhenAvailable(node.parent, new String[] { displayName }, true);
+							}
+							return Status.OK_STATUS;
+						}
+					};
+					job.setUser(true);
+					job.schedule();
 				}
 			}
 		}
@@ -154,6 +167,15 @@ public class RenameComponentOrServiceAction extends Action
 			ServoyLog.logError(e);
 		}
 	}
+
+	/**
+	 * @param pack
+	 * @param currentName
+	 * @param newName
+	 * @throws CoreException
+	 * @throws IOException
+	 */
+	protected abstract void renameFiles(IFolder pack, String currentName, String newName) throws CoreException, IOException;
 
 	public void renameInManifest(String newName, IResource resource, IContainer parent) throws CoreException
 	{

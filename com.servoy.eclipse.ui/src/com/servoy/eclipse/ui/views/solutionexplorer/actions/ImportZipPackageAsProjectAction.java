@@ -34,6 +34,8 @@ import com.servoy.eclipse.core.ngpackages.NGPackageManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.util.Utils;
 
@@ -46,6 +48,7 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 	public ImportZipPackageAsProjectAction(SolutionExplorerView viewer)
 	{
 		super(viewer);
+		setText("Import zip web package as project");
 	}
 
 	/**
@@ -111,5 +114,12 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 				}
 			}
 		}
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
+		return node.getType() == UserNodeType.ALL_WEB_PACKAGE_PROJECTS;
 	}
 }

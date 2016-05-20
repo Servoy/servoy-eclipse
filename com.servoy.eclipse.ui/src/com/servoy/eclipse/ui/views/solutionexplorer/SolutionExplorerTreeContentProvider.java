@@ -17,7 +17,6 @@
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
@@ -71,6 +70,7 @@ import org.eclipse.ui.PlatformUI;
 import org.mozilla.javascript.JavaMembers;
 import org.sablo.specification.BaseSpecProvider;
 import org.sablo.specification.Package;
+import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
@@ -87,6 +87,7 @@ import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager.ContainerPackageReader;
 import com.servoy.eclipse.model.ngpackages.INGPackageChangeListener;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -935,15 +936,18 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						if (componentSpecProvider != null && serviceSpecProvider != null) // the package management system might not yet be initialized at developer startup
 						{
 							List<PlatformSimpleUserNode> children = getWebProjects(un, componentSpecProvider, "components_package.png",
-								UserNodeType.COMPONENTS_PROJECT_PACKAGE);
+								UserNodeType.COMPONENTS_PROJECT_PACKAGE, IPackageReader.WEB_COMPONENT);
+							List<PlatformSimpleUserNode> layoutProjects = getWebProjects(un, componentSpecProvider, "layout_package.png",
+								UserNodeType.LAYOUT_PROJECT_PACKAGE, BaseNGPackageManager.WEB_LAYOUT);
 							List<PlatformSimpleUserNode> servicesProjects = getWebProjects(un, serviceSpecProvider, "services_package.png",
-								UserNodeType.SERVICES_PROJECT_PACKAGE);
+								UserNodeType.SERVICES_PROJECT_PACKAGE, IPackageReader.WEB_SERVICE);
 							children.addAll(servicesProjects);
+							children.addAll(layoutProjects);
 							children.addAll(getBinaryPackages(un, componentSpecProvider, serviceSpecProvider));
 							un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 						}
 					}
-					else if (type == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE)
+					else if (type == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || type == UserNodeType.LAYOUT_NONPROJECT_PACKAGE)
 					{
 						WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
 						String packageName = provider.getPackageName(un.getName());
@@ -971,12 +975,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							Collections.sort(layouts);
 							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
 								SolutionSerializer.COMPONENTS_DIR_NAME);
-							Image componentIcon = uiActivator.loadImageFromBundle("bean.gif");
+							Image componentIcon = uiActivator.loadImageFromBundle("layout.png");
 							for (String layout : layouts)
 							{
 								WebLayoutSpecification spec = provider.getLayoutSpecifications().get(packageName).getSpecification(layout);
 								Image img = loadImageFromFolder(folder, spec.getIcon());
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec,
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
 									img != null ? img : componentIcon);
 								node.parent = un;
 								children.add(node);
@@ -984,7 +988,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						}
 						un.children = children.toArray(new PlatformSimpleUserNode[children.size()]);
 					}
-					else if (type == UserNodeType.COMPONENTS_PROJECT_PACKAGE)
+					else if (type == UserNodeType.COMPONENTS_PROJECT_PACKAGE || type == UserNodeType.LAYOUT_PROJECT_PACKAGE)
 					{
 						WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
 						String packageName = getPackageName(un);
@@ -1010,12 +1014,12 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						{
 							Collections.sort(layouts);
 							IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(packageName);
-							Image componentIcon = uiActivator.loadImageFromBundle("bean.gif");
+							Image componentIcon = uiActivator.loadImageFromBundle("layout.png");
 							for (String layout : layouts)
 							{
 								WebLayoutSpecification spec = provider.getLayoutSpecifications().get(packageName).getSpecification(layout);
 								Image img = loadImageFromProject(project, spec.getIcon());
-								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec,
+								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
 									img != null ? img : componentIcon);
 								node.parent = un;
 								children.add(node);
@@ -1218,15 +1222,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			imageFile = "components_package.png";
 			if (iProject.getFile(new Path("META-INF/MANIFEST.MF")).exists())
 			{
-				try
-				{
-					if (Package.IPackageReader.WEB_SERVICE.equals(new ContainerPackageReader(new File(iProject.getLocationURI()), iProject).getPackageType()))
-						imageFile = "services_package.png";
-				}
-				catch (IOException e)
-				{
-					Debug.log(e);
-				}
+				if (Package.IPackageReader.WEB_SERVICE.equals(new ContainerPackageReader(new File(iProject.getLocationURI()), iProject).getPackageType()))
+					imageFile = "services_package.png";
 			}
 
 		}
@@ -1256,7 +1253,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return displayName;
 	}
 
-	private List<PlatformSimpleUserNode> getWebProjects(PlatformSimpleUserNode un, BaseSpecProvider provider, String imageFileName, UserNodeType nodeType)
+	private List<PlatformSimpleUserNode> getWebProjects(PlatformSimpleUserNode un, BaseSpecProvider provider, String imageFileName, UserNodeType nodeType,
+		String type)
 	{
 		List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 		Image packageIcon = uiActivator.loadImageFromBundle(imageFileName);
@@ -1282,15 +1280,19 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				{
 					if (iProject.hasNature(ServoyNGPackageProject.NATURE_ID) && provider.getPackageNames().contains(iProject.getName()))
 					{
-						String displayName = provider.getPackageDisplayName(iProject.getName());
-						List<IProject> referencingProjects = Arrays.asList(iProject.getReferencingProjects());
-						if (referencingProjects.indexOf(eclipseProject) == -1 && referencingProjects.size() > 0)
+						String packageType = provider.getPackageType(iProject.getName());
+						if (packageType.equals(type))
 						{
-							displayName = appendModuleName(displayName, referencingProjects.get(0).getName());
+							String displayName = provider.getPackageDisplayName(iProject.getName());
+							List<IProject> referencingProjects = Arrays.asList(iProject.getReferencingProjects());
+							if (referencingProjects.indexOf(eclipseProject) == -1 && referencingProjects.size() > 0)
+							{
+								displayName = appendModuleName(displayName, referencingProjects.get(0).getName());
+							}
+							PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayName, nodeType, iProject, packageIcon);
+							node.parent = un;
+							children.add(node);
 						}
-						PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayName, nodeType, iProject, packageIcon);
-						node.parent = un;
-						children.add(node);
 					}
 				}
 			}
@@ -1553,7 +1555,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					}
 					return false;
 				}
-				else if (un.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || un.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE)
+				else if (un.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || un.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE ||
+					un.getType() == UserNodeType.LAYOUT_NONPROJECT_PACKAGE || un.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE)
 				{
 					return (WebComponentSpecProvider.getInstance() != null &&
 						!WebComponentSpecProvider.getInstance().getComponentsInPackage(

@@ -182,6 +182,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -1492,10 +1493,11 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private ClientSupportViewerFilter clientSupportViewerFilter;
 	private ContextAction createActionInTree;
-	private ContextAction createPackageProjectActionInTree;
 	private ExportPackageResourceAction exportComponentPackage;
 	private EditWebPackageDetailsAction editWebPackageDetailsAction;
 	private StartWebPackageManager manageWebPackagesAction;
+	private ImportZipPackageAsProjectAction importComponentAsProject;
+	private IAction importComponentInSolution;
 
 	private void createTreeViewer(Composite parent)
 	{
@@ -2352,7 +2354,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			if (newActionInTreePrimary.isEnabled()) manager.add(newActionInTreePrimary);
 			if (newActionInTreeSecondary.isEnabled()) manager.add(newActionInTreeSecondary);
 			if (createActionInTree.isEnabled()) manager.add(createActionInTree);
-			if (createPackageProjectActionInTree.isEnabled()) manager.add(createPackageProjectActionInTree);
 		}
 
 		if (createMediaFolderAction.isEnabled()) manager.add(createMediaFolderAction);
@@ -2451,6 +2452,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (deleteActionInTree.isEnabled()) manager.add(deleteActionInTree);
 		if (renameActionInTree.isEnabled()) manager.add(renameActionInTree);
 		if (manageWebPackagesAction.isEnabled()) manager.add(manageWebPackagesAction);
+		if (importComponentAsProject.isEnabled()) manager.add(importComponentAsProject);
+		if (importComponentInSolution.isEnabled()) manager.add(importComponentInSolution);
 
 		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.COMPONENT && addComponentIcon.isEnabled())
 		{
@@ -2713,8 +2716,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			"New");
 		createActionInTree = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
 			"Create");
-		createPackageProjectActionInTree = new ContextAction(this,
-			PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD), "Create");
 		newActionInListSecondary = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD),
 			"New");
 
@@ -2762,11 +2763,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		renameMediaFolderAction = new RenameMediaFolderAction(this);
 		movePersistAction = new MovePersistAction(shell);
 		duplicatePersistAction = new DuplicatePersistAction(shell);
-		IAction importComponent = new ImportZipPackageAsZipAction(this, "components");
-		IAction importComponentInSolution = new ImportZipPackageAsZipAction(this, SolutionSerializer.NG_PACKAGES_DIR_NAME);
+		importComponentInSolution = new ImportZipPackageAsZipAction(this, SolutionSerializer.NG_PACKAGES_DIR_NAME);
 		manageWebPackagesAction = new StartWebPackageManager(this);
-		IAction importService = new ImportZipPackageAsZipAction(this, "services");
-		IAction importComponentAsProject = new ImportZipPackageAsProjectAction(this);
+		importComponentAsProject = new ImportZipPackageAsProjectAction(this);
 		IAction newComponentAction = new NewWebObjectAction(this, shell, "Component", "Create new component");
 		IAction newLayoutAction = new NewWebObjectAction(this, shell, "Layout", "Create new layout");
 		IAction newServiceAction = new NewWebObjectAction(this, shell, "Service", "Create new service");
@@ -2774,6 +2773,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			IPackageReader.WEB_COMPONENT);
 		NewPackageProjectAction newComponentsPackageProjectAction = new NewPackageProjectAction(this, shell, "Create component package project",
 			IPackageReader.WEB_COMPONENT);
+		NewPackageProjectAction newLayoutPackageProjectAction = new NewPackageProjectAction(this, shell, "Create layout package project",
+			BaseNGPackageManager.WEB_LAYOUT);
 		NewPackageProjectAction newServicesPackageProjectAction = new NewPackageProjectAction(this, shell, "Create services package project",
 			IPackageReader.WEB_SERVICE);
 		IAction newServicePackageAction = new NewResourcesComponentsOrServicesPackageAction(this, shell, "Create service package", IPackageReader.WEB_SERVICE);
@@ -2797,26 +2798,25 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreePrimary.registerAction(UserNodeType.MODULES, newModule);
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_SOLUTIONS, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.STYLES, newStyle);
-		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS_FROM_RESOURCES, importComponent);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, importComponentInSolution);
-		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_FROM_RESOURCES, importService);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS_NONPROJECT_PACKAGE, newComponentAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_NONPROJECT_PACKAGE, newServiceAction);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newComponentAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, newServiceAction);
-		newActionInTreePrimary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, importComponentAsProject);
+		newActionInTreePrimary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newComponentsPackageProjectAction);
+		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newComponentsPackageProjectAction);
 
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA_FOLDER, importMediaFolder);
-		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS_NONPROJECT_PACKAGE, newLayoutAction);
-		newActionInTreeSecondary.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newLayoutAction);
-		newActionInTreeSecondary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newComponentsPackageProjectAction);
-		newActionInTreeSecondary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newComponentsPackageProjectAction);
+		newActionInTreeSecondary.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, newLayoutAction);
+
+		newActionInTreeSecondary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newLayoutPackageProjectAction);
+		newActionInTreeSecondary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newLayoutPackageProjectAction);
 
 		createActionInTree.registerAction(UserNodeType.COMPONENTS_FROM_RESOURCES, newComponentPackageAction);
 		createActionInTree.registerAction(UserNodeType.SERVICES_FROM_RESOURCES, newServicePackageAction);
 		createActionInTree.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newServicesPackageProjectAction);
-		createPackageProjectActionInTree.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newServicesPackageProjectAction);
+		createActionInTree.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newServicesPackageProjectAction);
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
@@ -2913,6 +2913,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			UserNodeType.SERVICES_NONPROJECT_PACKAGE);
 		IAction deleteComponentProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component package project",
 			UserNodeType.COMPONENTS_PROJECT_PACKAGE);
+		IAction deleteLayoutProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete layout package project",
+			UserNodeType.LAYOUT_PROJECT_PACKAGE);
 		IAction deleteServiceProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service package project",
 			UserNodeType.SERVICES_PROJECT_PACKAGE);
 		IAction deleteProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete Package Project", UserNodeType.WEB_PACKAGE);
@@ -2920,6 +2922,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		editWebPackageDetailsAction = new EditWebPackageDetailsAction(this, shell, "Edit package details");
 
 		IAction deleteComponent = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component", UserNodeType.COMPONENT);
+		IAction deleteLayout = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete layout", UserNodeType.LAYOUT);
 		IAction deleteService = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service", UserNodeType.SERVICE);
 		IAction deleteComponentResource = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete file", UserNodeType.COMPONENT_RESOURCE);
 		IAction deleteI18N = new DeleteI18NAction(shell);
@@ -2980,11 +2983,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		deleteActionInTree.registerAction(UserNodeType.GLOBALS_ITEM, deleteScope);
 		deleteActionInTree.registerAction(UserNodeType.WORKING_SET, new DeleteWorkingSetAction());
 		deleteActionInTree.registerAction(UserNodeType.COMPONENTS_NONPROJECT_PACKAGE, deleteComponentPackage);
+		deleteActionInTree.registerAction(UserNodeType.LAYOUT_NONPROJECT_PACKAGE, deleteComponentPackage);
 		deleteActionInTree.registerAction(UserNodeType.SERVICES_NONPROJECT_PACKAGE, deleteServicePackage);
 		deleteActionInTree.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, deleteComponentProjectPackage);
+		deleteActionInTree.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, deleteLayoutProjectPackage);
 		deleteActionInTree.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, deleteServiceProjectPackage);
 		deleteActionInTree.registerAction(UserNodeType.WEB_PACKAGE, deleteProjectPackage);
 		deleteActionInTree.registerAction(UserNodeType.COMPONENT, deleteComponent);
+		deleteActionInTree.registerAction(UserNodeType.LAYOUT, deleteLayout);
 		deleteActionInTree.registerAction(UserNodeType.SERVICE, deleteService);
 		deleteActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, deleteInMemDataSource);
 		deleteActionInTree.registerAction(UserNodeType.TABLE, deleteTable);
@@ -3000,8 +3006,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		renameActionInTree.registerAction(UserNodeType.FORM, new RenamePersistAction());
 		renameActionInTree.registerAction(UserNodeType.GLOBALS_ITEM, new RenameScopeAction(this));
 		renameActionInTree.registerAction(UserNodeType.WORKING_SET, new RenameWorkingSetAction());
-		renameActionInTree.registerAction(UserNodeType.COMPONENT, new RenameComponentOrServiceAction(this, shell, UserNodeType.COMPONENT));
-		renameActionInTree.registerAction(UserNodeType.SERVICE, new RenameComponentOrServiceAction(this, shell, UserNodeType.SERVICE));
+		renameActionInTree.registerAction(UserNodeType.COMPONENT, new RenameComponentOrService(this, shell, UserNodeType.COMPONENT));
+		renameActionInTree.registerAction(UserNodeType.LAYOUT, new RenameLayoutAction(this, shell, UserNodeType.LAYOUT));
+		renameActionInTree.registerAction(UserNodeType.SERVICE, new RenameComponentOrService(this, shell, UserNodeType.SERVICE));
 		renameActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, renameInMemTableAction);
 
 		addAsModuleAction = new AddAsModuleAction(shell);
@@ -3041,7 +3048,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		addTreeSelectionChangedListener(newActionInTreePrimary);
 		addTreeSelectionChangedListener(newActionInTreeSecondary);
 		addTreeSelectionChangedListener(createActionInTree);
-		addTreeSelectionChangedListener(createPackageProjectActionInTree);
 		addTreeSelectionChangedListener(newComponentsPackageProjectAction);
 		addTreeSelectionChangedListener(newServicesPackageProjectAction);
 

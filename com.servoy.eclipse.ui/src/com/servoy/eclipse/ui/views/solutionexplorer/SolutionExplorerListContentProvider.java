@@ -407,7 +407,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				lm = createI18NFiles();
 			}
-			else if (type == UserNodeType.COMPONENT || type == UserNodeType.SERVICE)
+			else if (type == UserNodeType.COMPONENT || type == UserNodeType.SERVICE || type == UserNodeType.LAYOUT)
 			{
 				lm = createComponentFileList(un);
 				key = null;

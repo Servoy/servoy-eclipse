@@ -126,6 +126,9 @@ public enum UserNodeType
 	COMPONENTS_NONPROJECT_PACKAGE, //node in solex under Resources->NG Components or under Solution->Web Packages it is a folder or zip component package
 	COMPONENTS_PROJECT_PACKAGE, //node in solex under Solution->Web Packages it is a project component package
 	COMPONENT, // one component - it can either belong to a folder/zip or to a project package
+	LAYOUT_NONPROJECT_PACKAGE, //node in solex under  Solution->Web Packages it is a folder or zip layout package
+	LAYOUT_PROJECT_PACKAGE, //node in solex under Solution->Web Packages it is a project layout package
+	LAYOUT, // one layout - it can either belong to a folder/zip or to a project package	XML_METHODS,
 	XML_METHODS,
 	XML_LIST_METHODS,
 	JSUNIT,

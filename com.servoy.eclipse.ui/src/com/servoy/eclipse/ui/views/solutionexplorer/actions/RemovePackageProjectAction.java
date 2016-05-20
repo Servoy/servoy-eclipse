@@ -175,7 +175,8 @@ public class RemovePackageProjectAction extends Action implements ISelectionChan
 		if (state)
 		{
 			SimpleUserNode node = (SimpleUserNode)sel.getFirstElement();
-			state = (node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE || node.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE);
+			state = (node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE || node.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE ||
+				node.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE);
 			if (state) try
 			{
 				selectedProject = (ServoyNGPackageProject)((IProject)node.getRealObject()).getNature(ServoyNGPackageProject.NATURE_ID);

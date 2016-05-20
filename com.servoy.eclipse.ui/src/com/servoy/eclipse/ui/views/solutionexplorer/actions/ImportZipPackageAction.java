@@ -41,7 +41,6 @@ public abstract class ImportZipPackageAction extends Action
 	{
 		this.viewer = viewer;
 		setImageDescriptor(Activator.loadImageDescriptorFromOldLocations("import.gif"));
-		setText("Import zip web package");
 		setToolTipText(getText());
 	}
 
@@ -78,6 +77,7 @@ public abstract class ImportZipPackageAction extends Action
 			}
 		}
 	}
+
 
 	protected abstract void doImport(String[] fileNames, String filterPath);
 }

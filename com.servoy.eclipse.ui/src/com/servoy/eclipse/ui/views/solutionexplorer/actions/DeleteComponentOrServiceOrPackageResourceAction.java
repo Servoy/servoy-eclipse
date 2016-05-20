@@ -115,7 +115,7 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 					resource = (IResource)realObject;
 
 				}
-				else if (next.getType() == UserNodeType.COMPONENT || next.getType() == UserNodeType.SERVICE)
+				else if (next.getType() == UserNodeType.COMPONENT || next.getType() == UserNodeType.SERVICE || next.getType() == UserNodeType.LAYOUT)
 				{
 					resource = getComponentFolderToDelete(resources, next);
 				}
@@ -253,7 +253,7 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 		{
 			SimpleUserNode node = it.next();
 			state = (node.getType() == nodeType);
-			if (node.getType() == UserNodeType.COMPONENT || node.getType() == UserNodeType.SERVICE)
+			if (node.getType() == UserNodeType.COMPONENT || node.getType() == UserNodeType.SERVICE || node.getType() == UserNodeType.LAYOUT)
 			{
 				state = node.parent.getRealObject() instanceof IFolder || node.parent.getRealObject() instanceof IProject;
 			}

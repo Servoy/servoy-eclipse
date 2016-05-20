@@ -53,7 +53,6 @@ import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
-import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -65,6 +64,11 @@ import com.servoy.j2db.util.Pair;
 // a lot of the initial code in this class was just taken out of the huge core plugin Activator and refactored to make it easier to follow and to maintain
 public abstract class BaseNGPackageManager
 {
+	/**
+	 * Identifier used in the manifest of layout packages to list web services. Can also be returned by {@link #getPackageType()}.
+	 */
+	public static final String WEB_LAYOUT = "Web-Layout"; //$NON-NLS-1$
+
 
 	private static final String DUPLICATE_COMPONENT_MARKER = "com.servoy.eclipse.debug.DUPLICATE_COMPONENT_MARKER";
 	private static final String SPEC_READ_MARKER = "com.servoy.eclipse.debug.SPEC_READ_MARKER";
@@ -266,17 +270,10 @@ public abstract class BaseNGPackageManager
 						for (IResource resource : members)
 						{
 							Pair<String, IPackageReader> nameAndReader = readPackageResource(resource);
-							try
+							if (nameAndReader != null)
 							{
-								if (nameAndReader != null)
-								{
-									String packageType = nameAndReader.getRight().getPackageType();
-									packagesTypeToReaders.get(packageType).put(nameAndReader.getLeft(), nameAndReader.getRight());
-								}
-							}
-							catch (IOException e)
-							{
-								Debug.log(e);
+								String packageType = nameAndReader.getRight().getPackageType();
+								packagesTypeToReaders.get(packageType).put(nameAndReader.getLeft(), nameAndReader.getRight());
 							}
 						}
 					}
@@ -523,7 +520,8 @@ public abstract class BaseNGPackageManager
 				{
 					newServiceReaders.put(nameAndReader.getLeft(), nameAndReader.getRight());
 				}
-				else if (IPackageReader.WEB_COMPONENT.equals(nameAndReader.getRight().getPackageType()))
+				else if (IPackageReader.WEB_COMPONENT.equals(nameAndReader.getRight().getPackageType()) ||
+					BaseNGPackageManager.WEB_LAYOUT.equals(nameAndReader.getRight().getPackageType()))
 				{
 					newComponentReaders.put(nameAndReader.getLeft(), nameAndReader.getRight());
 				}
@@ -606,15 +604,7 @@ public abstract class BaseNGPackageManager
 			if (resource.getName().endsWith(".zip") || resource.getName().endsWith(".jar"))
 			{
 				ZipFilePackageReader reader = new ZipFilePackageReader(resource);
-				try
-				{
-					if (reader.getPackageType() == null) return null;
-				}
-				catch (IOException e)
-				{
-					// ignore
-					reader = null;
-				}
+				if (reader.getPackageType() == null) return null;
 				return new Pair<String, IPackageReader>(name, reader);
 			}
 		}

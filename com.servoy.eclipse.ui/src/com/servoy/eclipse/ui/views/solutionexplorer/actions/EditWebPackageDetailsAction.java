@@ -85,9 +85,9 @@ public class EditWebPackageDetailsAction extends Action implements ISelectionCha
 		if (it.hasNext() && state)
 		{
 			SimpleUserNode node = it.next();
-			state = node.getRealObject() instanceof IContainer &&
-				(node.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE ||
-					node.getType() == UserNodeType.SERVICES_NONPROJECT_PACKAGE || node.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE);
+			state = node.getRealObject() instanceof IContainer && (node.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE ||
+				node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE || node.getType() == UserNodeType.SERVICES_NONPROJECT_PACKAGE ||
+				node.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE || node.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE);
 		}
 		setEnabled(state);
 	}
@@ -97,7 +97,7 @@ public class EditWebPackageDetailsAction extends Action implements ISelectionCha
 	{
 		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
 		boolean componentsNotServices = (node.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE ||
-			node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE);
+			node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE || node.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE);
 		String packageName = SolutionExplorerTreeContentProvider.getPackageName(node); // we cannot rely on node name to be the display name directly cause if 'includeFromModules' option is enabled in SolEx the node name will be prefixed with the module name in some cases
 		String name = (componentsNotServices ? WebComponentSpecProvider.getInstance().getPackageDisplayName(packageName)
 			: WebServiceSpecProvider.getInstance().getPackageDisplayName(packageName));

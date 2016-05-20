@@ -18,7 +18,6 @@
 package com.servoy.eclipse.model.ngpackages;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -195,21 +194,14 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 		List<IPackageReader> addedServicePackageReaders = new ArrayList<>();
 		for (Entry<String, IPackageReader> entry : addedPackageReaders.entrySet())
 		{
-			try
+			if (IPackageReader.WEB_SERVICE.equals(entry.getValue().getPackageType()))
 			{
-				if (IPackageReader.WEB_SERVICE.equals(entry.getValue().getPackageType()))
-				{
-					addedServicePackageReaders.add(entry.getValue());
-				}
-				else
-				{
-					// for now always fall back to a component
-					addedComponentPackageReaders.add(entry.getValue());
-				}
+				addedServicePackageReaders.add(entry.getValue());
 			}
-			catch (IOException e)
+			else
 			{
-				Debug.log(e);
+				// for now always fall back to a component
+				addedComponentPackageReaders.add(entry.getValue());
 			}
 		}
 
