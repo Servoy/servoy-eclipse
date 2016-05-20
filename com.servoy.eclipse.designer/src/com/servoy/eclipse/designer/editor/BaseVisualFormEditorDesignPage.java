@@ -113,6 +113,11 @@ public abstract class BaseVisualFormEditorDesignPage extends GraphicalEditorWith
 	@Override
 	protected void initializeGraphicalViewer()
 	{
+		openViewers();
+	}
+
+	protected void openViewers()
+	{
 		if (editorPart.getForm() != null)
 		{
 			getEditorSite().getShell().getDisplay().asyncExec(new Runnable()

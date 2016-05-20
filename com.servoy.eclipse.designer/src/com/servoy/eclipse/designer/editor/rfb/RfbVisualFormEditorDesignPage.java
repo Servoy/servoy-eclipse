@@ -206,7 +206,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			ServoyLog.logError("couldn't load the editor: ", e);
 		}
 
-
+		openViewers();
 	}
 
 	@Override

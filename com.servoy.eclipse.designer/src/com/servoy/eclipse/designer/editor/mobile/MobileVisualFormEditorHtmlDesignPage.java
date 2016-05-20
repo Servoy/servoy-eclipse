@@ -377,6 +377,8 @@ public class MobileVisualFormEditorHtmlDesignPage extends BaseVisualFormEditorDe
 				}
 			}
 		});
+
+		openViewers();
 	}
 
 	private static String asString(Object s)
