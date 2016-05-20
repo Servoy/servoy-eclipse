@@ -1494,7 +1494,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private ContextAction createActionInTree;
 	private ContextAction createPackageProjectActionInTree;
 	private ExportPackageResourceAction exportComponentPackage;
-	private EditWebPackageDisplayNameAction editDisplayNameAction;
+	private EditWebPackageDetailsAction editWebPackageDetailsAction;
 	private StartWebPackageManager manageWebPackagesAction;
 
 	private void createTreeViewer(Composite parent)
@@ -2447,7 +2447,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (moveFormAction.isEnabled()) manager.add(moveFormAction);
 		if (duplicateFormAction.isEnabled()) manager.add(duplicateFormAction);
 		if (exportComponentPackage.isEnabled()) manager.add(exportComponentPackage);
-		if (editDisplayNameAction.isEnabled()) manager.add(editDisplayNameAction);
+		if (editWebPackageDetailsAction.isEnabled()) manager.add(editWebPackageDetailsAction);
 		if (deleteActionInTree.isEnabled()) manager.add(deleteActionInTree);
 		if (renameActionInTree.isEnabled()) manager.add(renameActionInTree);
 		if (manageWebPackagesAction.isEnabled()) manager.add(manageWebPackagesAction);
@@ -2917,7 +2917,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			UserNodeType.SERVICES_PROJECT_PACKAGE);
 		IAction deleteProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete Package Project", UserNodeType.WEB_PACKAGE);
 		exportComponentPackage = new ExportPackageResourceAction(this, shell);
-		editDisplayNameAction = new EditWebPackageDisplayNameAction(this, shell, "Edit package display name");
+		editWebPackageDetailsAction = new EditWebPackageDetailsAction(this, shell, "Edit package details");
 
 		IAction deleteComponent = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component", UserNodeType.COMPONENT);
 		IAction deleteService = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service", UserNodeType.SERVICE);
@@ -3063,7 +3063,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		addTreeSelectionChangedListener(openSqlEditorAction);
 		addTreeSelectionChangedListener(duplicateFormAction);
 		addTreeSelectionChangedListener(exportComponentPackage);
-		addTreeSelectionChangedListener(editDisplayNameAction);
+		addTreeSelectionChangedListener(editWebPackageDetailsAction);
 		addTreeSelectionChangedListener(moveFormAction);
 		addTreeSelectionChangedListener(changeResourcesProjectAction);
 		addTreeSelectionChangedListener(removeSolutionProtectionAction);

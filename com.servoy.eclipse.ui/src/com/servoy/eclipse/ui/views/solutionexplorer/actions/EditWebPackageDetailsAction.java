@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.jar.Attributes;
+import java.util.jar.Attributes.Name;
 import java.util.jar.Manifest;
 
 import org.eclipse.core.resources.IContainer;
@@ -37,29 +38,36 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 
-import com.servoy.eclipse.core.util.TextFieldDialog;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author emera
  */
-public class EditWebPackageDisplayNameAction extends Action implements ISelectionChangedListener
+public class EditWebPackageDetailsAction extends Action implements ISelectionChangedListener
 {
 	private final Shell shell;
 	private final SolutionExplorerView viewer;
 
-	public EditWebPackageDisplayNameAction(SolutionExplorerView viewer, Shell shell, String text)
+	public EditWebPackageDetailsAction(SolutionExplorerView viewer, Shell shell, String text)
 	{
 		super();
 		this.viewer = viewer;
@@ -93,22 +101,35 @@ public class EditWebPackageDisplayNameAction extends Action implements ISelectio
 		String packageName = SolutionExplorerTreeContentProvider.getPackageName(node); // we cannot rely on node name to be the display name directly cause if 'includeFromModules' option is enabled in SolEx the node name will be prefixed with the module name in some cases
 		String name = (componentsNotServices ? WebComponentSpecProvider.getInstance().getPackageDisplayName(packageName)
 			: WebServiceSpecProvider.getInstance().getPackageDisplayName(packageName));
-		String newName = null;
-		TextFieldDialog dialog = new TextFieldDialog(shell, getText(), null,
-			"Please provide the new package display name for package with symbolic name '" + packageName + "'.", MessageDialog.NONE,
-			new String[] { "OK", "Cancel" }, name);
-		dialog.setBlockOnOpen(true);
-
-		int code = dialog.open();
-		newName = dialog.getSelectedText();
-		if (code != 0 || name.equals(newName)) return;
-		while (!isNameValid(node, newName, componentsNotServices))
+		String version = null;
+		try
 		{
-			code = dialog.open();
-			newName = dialog.getSelectedText();
-			if (code != 0 || name.equals(newName)) return;
+			version = (componentsNotServices ? WebComponentSpecProvider.getInstance().getPackagesToVersions().get(packageName)
+				: WebServiceSpecProvider.getInstance().getPackagesToVersions().get(packageName));
 		}
-		updatePackageName(node, newName);
+		catch (IOException ex)
+		{
+			ServoyLog.logError(ex);
+		}
+		String newName = null;
+		String newVersion = null;
+
+		EditDialog dialog = new EditDialog(packageName, name, version);
+		int code = dialog.open();
+		newName = dialog.getSelectedName();
+		newVersion = dialog.getSelectedVersion();
+		if (code != 0 || (name.equals(newName) && Utils.equalObjects(version, newVersion))) return;
+		if (!name.equals(newName))
+		{
+			while (!isNameValid(node, newName, componentsNotServices))
+			{
+				code = dialog.open();
+				newName = dialog.getSelectedName();
+				if (code != 0 || (name.equals(newName) && Utils.equalObjects(version, newVersion))) return;
+			}
+		}
+
+		updatePackageDetails(node, newName, newVersion);
 	}
 
 	private boolean isNameValid(PlatformSimpleUserNode node, String packageDisplayName, boolean componentsNotServices)
@@ -133,7 +154,7 @@ public class EditWebPackageDisplayNameAction extends Action implements ISelectio
 		return true;
 	}
 
-	private void updatePackageName(PlatformSimpleUserNode node, String newName)
+	private void updatePackageDetails(PlatformSimpleUserNode node, String newName, String newVersion)
 	{
 		OutputStream out = null;
 		InputStream in = null;
@@ -144,6 +165,8 @@ public class EditWebPackageDisplayNameAction extends Action implements ISelectio
 			Manifest manifest = new Manifest(m.getContents());
 			Attributes attr = manifest.getMainAttributes();
 			attr.putValue("Bundle-Name", newName);
+			if (newVersion != null && newVersion.trim().length() > 0) attr.putValue("Implementation-Version", newVersion);
+			else attr.remove(new Name("Implementation-Version"));
 
 			out = new ByteArrayOutputStream();
 			manifest.write(out);
@@ -170,6 +193,82 @@ public class EditWebPackageDisplayNameAction extends Action implements ISelectio
 			catch (IOException e)
 			{
 			}
+		}
+	}
+
+	class EditDialog extends MessageDialog
+	{
+		private Text txtName;
+		private final String defaultName;
+		private String selectedName;
+
+		private Text txtVersion;
+		private final String defaultVersion;
+		private String selectedVersion;
+
+
+		EditDialog(String packageName, String defaultName, String defaultVersion)
+		{
+			super(shell, getText(), null, "Please provide the new package display name and version for package with symbolic name '" + packageName + "'.",
+				MessageDialog.NONE, new String[] { "OK", "Cancel" }, 0);
+			this.defaultName = defaultName;
+			this.defaultVersion = defaultVersion;
+			setBlockOnOpen(true);
+		}
+
+
+		@Override
+		protected Control createCustomArea(Composite parent)
+		{
+			GridData data = new GridData(GridData.FILL_HORIZONTAL);
+			data.horizontalAlignment = GridData.FILL_HORIZONTAL;
+			data.grabExcessHorizontalSpace = true;
+			data.horizontalSpan = 2;
+
+			Composite container = new Composite(parent, SWT.FILL);
+			GridLayout layout = new GridLayout(2, false);
+			layout.marginWidth = 0;
+			layout.horizontalSpacing = 10;
+
+			container.setLayout(layout);
+			container.setLayoutData(data);
+
+			data = new GridData();
+			data.horizontalAlignment = SWT.FILL;
+			data.grabExcessHorizontalSpace = true;
+			data.minimumWidth = 250;
+
+			Label nameLabel = new Label(container, SWT.NONE);
+			nameLabel.setText("Name");
+			txtName = new Text(container, SWT.BORDER);
+			if (defaultName != null) txtName.setText(defaultName);
+			txtName.setLayoutData(data);
+
+			Label versionLabel = new Label(container, SWT.NONE);
+			versionLabel.setText("Version");
+			txtVersion = new Text(container, SWT.BORDER);
+			if (defaultVersion != null) txtVersion.setText(defaultVersion);
+			txtVersion.setLayoutData(data);
+
+			return container;
+		}
+
+		@Override
+		public boolean close()
+		{
+			selectedName = (txtName != null ? txtName.getText() : null);
+			selectedVersion = (txtVersion != null ? txtVersion.getText() : null);
+			return super.close();
+		}
+
+		public String getSelectedName()
+		{
+			return selectedName;
+		}
+
+		public String getSelectedVersion()
+		{
+			return selectedVersion;
 		}
 	}
 }
