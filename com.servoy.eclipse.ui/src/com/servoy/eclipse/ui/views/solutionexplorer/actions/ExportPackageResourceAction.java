@@ -47,7 +47,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
 /**
  * Exports the selected components or services packages
- * 
+ *
  * @author jcompagner
  */
 public class ExportPackageResourceAction extends Action implements ISelectionChangedListener
@@ -205,7 +205,9 @@ public class ExportPackageResourceAction extends Action implements ISelectionCha
 		while (it.hasNext() && state)
 		{
 			SimpleUserNode node = it.next();
-			state = (node.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE) || node.getType() == UserNodeType.SERVICES_NONPROJECT_PACKAGE;
+			state = node.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || node.getType() == UserNodeType.SERVICES_NONPROJECT_PACKAGE ||
+				node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE || node.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE ||
+				node.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE;
 		}
 		if (state)
 		{
@@ -213,5 +215,5 @@ public class ExportPackageResourceAction extends Action implements ISelectionCha
 		}
 		setEnabled(state);
 	}
-	
+
 }
