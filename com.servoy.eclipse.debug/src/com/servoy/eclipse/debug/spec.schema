@@ -381,7 +381,15 @@
 				        		  	},
 				        		 	"tags": {
 				        			  "type": "object"
-				        		  	}
+				        		  	},
+				        		  	"elementConfig": {
+				        		  		"type":"object",
+				        		  		"properties":{
+				        		  			"forFoundset": {
+				        		  				"type":"string"
+				        		  			}
+				        		  		}
+				        		  	}				        		  	
 					        	  },
 					        	  "required":["type"],
 					        	  "additionalProperties": false
