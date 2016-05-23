@@ -154,17 +154,20 @@ public class ExportPackageResourceAction extends Action implements ISelectionCha
 	{
 		for (IResource member : folder.members())
 		{
-			if (member instanceof IContainer)
+			if (!member.getName().startsWith("."))
 			{
-				zipDir((IContainer)member, zos, prefix + member.getName() + '/');
-			}
-			else if (member instanceof IFile)
-			{
-				addToZipFile((IFile)member, prefix + member.getName(), zos);
-			}
-			else
-			{
-				ServoyLog.logInfo("unsupported file when exporting package: " + member);
+				if (member instanceof IContainer)
+				{
+					zipDir((IContainer)member, zos, prefix + member.getName() + '/');
+				}
+				else if (member instanceof IFile)
+				{
+					addToZipFile((IFile)member, prefix + member.getName(), zos);
+				}
+				else
+				{
+					ServoyLog.logInfo("unsupported file when exporting package: " + member);
+				}
 			}
 		}
 
