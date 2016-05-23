@@ -2799,11 +2799,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_SOLUTIONS, newSolution);
 		newActionInTreePrimary.registerAction(UserNodeType.STYLES, newStyle);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, importComponentInSolution);
-<<<<<<< Upstream, based on branch 'v81x_branch' of https://github.com/Servoy/servoy-eclipse.git
-=======
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, importComponentAsProject);
-		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_FROM_RESOURCES, importService);
->>>>>>> d781736 To be reviewed with SVY-9904
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS_NONPROJECT_PACKAGE, newComponentAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_NONPROJECT_PACKAGE, newServiceAction);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, newComponentAction);
