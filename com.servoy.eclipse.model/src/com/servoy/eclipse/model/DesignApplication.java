@@ -132,11 +132,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		getClient().blockGUI(reason);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.IApplication#updateUI(int)
-	 */
+	
 	public void updateUI(int time)
 	{
 		getClient().updateUI(time);
@@ -162,11 +158,6 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		return CLIENT;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.IApplication#getOSName()
-	 */
 	public String getClientOSName()
 	{
 		return System.getProperty("os.name");
@@ -762,11 +753,6 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		return ap != null ? ap.getEditingSolution() : null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.IServiceProvider#isSolutionLoaded()
-	 */
 	public boolean isSolutionLoaded()
 	{
 		return getSolution() != null;
@@ -900,6 +886,12 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	@Override
+	public void reportJSWarning(String msg, Throwable t)
+	{
+		getClient().reportJSWarning(msg, t);
+	}
+
+	@Override
 	public void reportJSInfo(String msg)
 	{
 		getClient().reportJSInfo(msg);
@@ -989,9 +981,6 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		return getClient().showURL(url, target, target_options, timeout, onRootFrame);
 	}
 
-	/**
-	 *
-	 */
 	public void refreshI18NMessages()
 	{
 		messages.clear();
@@ -1052,136 +1041,76 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 
 	}
 
-	/**
-	 *
-	 * @see com.servoy.j2db.ISmartClientApplication#registerWindow(java.lang.String, java.awt.Window)
-	 */
 	public void registerWindow(String name, Window d)
 	{
 
 	}
 
-	/**
-	 *
-	 * @see com.servoy.j2db.ISmartClientApplication#getWindow(java.lang.String)
-	 */
 	public Window getWindow(String name)
 	{
 		return null;
 	}
 
-	/**
-	 *
-	 * @see com.servoy.j2db.ISmartClientApplication#getToolbarPanel()
-	 */
 	public IToolbarPanel getToolbarPanel()
 	{
 		return null;
 	}
 
-	/**
-	 *
-	 * @see com.servoy.j2db.ISmartClientApplication#showI18NDialog(java.lang.String, java.lang.String)
-	 */
 	public String showI18NDialog(String preselect_key, String preselect_language)
 	{
 		return null;
 	}
 
-	/**
-	 *
-	 * @see com.servoy.j2db.ISmartClientApplication#showCalendar(java.lang.String, java.util.Date)
-	 */
 	public Date showCalendar(String pattern, Date date)
 	{
 		return null;
 	}
 
-	/**
-	 *
-	 * @see com.servoy.j2db.ISmartClientApplication#showColorChooser(java.lang.String)
-	 */
 	public String showColorChooser(String originalColor)
 	{
 		return null;
 	}
 
-	/**
-	 *
-	 * @see com.servoy.j2db.ISmartClientApplication#showFontChooser(java.lang.String)
-	 */
 	public String showFontChooser(String font)
 	{
 		return null;
 	}
 
-	/**
-	 *
-	 * @see com.servoy.j2db.ISmartClientApplication#beep()
-	 */
 	public void beep()
 	{
 
 	}
 
-	/**
-	 *
-	 * @see com.servoy.j2db.ISmartClientApplication#setClipboardContent(java.lang.String)
-	 */
 	public void setClipboardContent(String string)
 	{
 
 	}
 
-	/**
-	 *
-	 * @see com.servoy.j2db.ISmartClientApplication#getClipboardString()
-	 */
 	public String getClipboardString()
 	{
 		return null;
 	}
 
-	/**
-	 *
-	 * @see com.servoy.j2db.ISmartClientApplication#setNumpadEnterAsFocusNextEnabled(boolean)
-	 */
 	public void setNumpadEnterAsFocusNextEnabled(boolean enabled)
 	{
 
 	}
 
-	/**
-	 *
-	 * @see com.servoy.j2db.ISmartClientApplication#exportObject(java.rmi.Remote)
-	 */
 	public int exportObject(Remote object) throws RemoteException
 	{
 		return 0;
 	}
 
-	/**
-	 *
-	 * @see com.servoy.j2db.ISmartClientApplication#setPaintTableImmediately(boolean)
-	 */
 	public void setPaintTableImmediately(boolean b)
 	{
 
 	}
 
-	/**
-	 *
-	 * @see com.servoy.j2db.ISmartClientApplication#getPaintTableImmediately()
-	 */
 	public int getPaintTableImmediately()
 	{
 		return 0;
 	}
 
-	/**
-	 *
-	 * @see com.servoy.j2db.ISmartClientApplication#updateInsertModeIcon(com.servoy.j2db.dataprocessing.IDisplay)
-	 */
 	public void updateInsertModeIcon(IDisplay display)
 	{
 
@@ -1189,27 +1118,16 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 
 	private boolean isFormElementsEditableInFindMode = true;
 
-	/*
-	 * @see com.servoy.j2db.IApplication#setFormElementsEditableInFindMode(boolean)
-	 */
 	public void setFormElementsEditableInFindMode(boolean editable)
 	{
 		isFormElementsEditableInFindMode = editable;
 	}
 
-	/*
-	 * @see com.servoy.j2db.IApplication#isFormElementsEditableInFindMode()
-	 */
 	public boolean isFormElementsEditableInFindMode()
 	{
 		return isFormElementsEditableInFindMode;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.j2db.IApplication#setValueListItems(java.lang.String, java.lang.Object[], java.lang.Object[], boolean)
-	 */
 	public void setValueListItems(String name, Object[] displayValues, Object[] realValues, boolean autoconvert)
 	{
 		client.setValueListItems(name, displayValues, realValues, autoconvert);
