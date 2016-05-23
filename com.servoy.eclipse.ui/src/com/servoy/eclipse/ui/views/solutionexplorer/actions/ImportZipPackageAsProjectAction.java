@@ -27,13 +27,22 @@ import java.util.zip.ZipInputStream;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ngpackages.NGPackageManager;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
@@ -51,65 +60,82 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 	}
 
 	@Override
-	protected void doImport(String[] fileNames, String filterPath)
+	protected void doImport(final String[] fileNames, final String filterPath)
 	{
-		for (String zipFile : fileNames)
+		final SimpleUserNode selectedTreeNode = viewer.getSelectedTreeNode();
+		Job job = new WorkspaceJob("Importing webpackage as project")
 		{
-			int extStartIdx = zipFile.indexOf('.');
-			String projectName = extStartIdx > 0 ? zipFile.substring(0, extStartIdx) : zipFile;
+			@Override
+			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+			{
+				for (String zipFile : fileNames)
+				{
+					int extStartIdx = zipFile.indexOf('.');
+					String projectName = extStartIdx > 0 ? zipFile.substring(0, extStartIdx) : zipFile;
 
-			ZipInputStream zis = null;
-			try
-			{
-				if (ServoyModel.getWorkspace().getRoot().getProject(projectName).exists())
-				{
-					UIUtils.reportError("Import component as project",
-						"Project with name : '" + projectName + "' already exist in the current workspace. Skipping import.");
-					continue;
-				}
-				IProject newProject = NGPackageManager.createProject(projectName);
-
-				zis = new ZipInputStream(new FileInputStream(filterPath + File.separator + zipFile));
-				ZipEntry ze = zis.getNextEntry();
-				while (ze != null)
-				{
-					String fileName = ze.getName();
-					if (ze.isDirectory())
-					{
-						WorkspaceFileAccess.mkdirs(newProject.getFolder(fileName));
-					}
-					else
-					{
-						ByteArrayOutputStream bos = new ByteArrayOutputStream();
-						BufferedInputStream bis = new BufferedInputStream(zis);
-						Utils.streamCopy(bis, bos);
-						IFile newFile = newProject.getFile(fileName);
-						WorkspaceFileAccess.mkdirs(newFile.getParent());
-						newFile.create(new ByteArrayInputStream(bos.toByteArray()), true, new NullProgressMonitor());
-						bos.close();
-					}
-					ze = zis.getNextEntry();
-				}
-			}
-			catch (Exception ex)
-			{
-				ServoyLog.logError(ex);
-			}
-			finally
-			{
-				if (zis != null)
-				{
+					ZipInputStream zis = null;
 					try
 					{
-						zis.close();
+						if (ServoyModel.getWorkspace().getRoot().getProject(projectName).exists())
+						{
+							UIUtils.reportError("Import component as project",
+								"Project with name : '" + projectName + "' already exist in the current workspace. Skipping import.");
+							continue;
+						}
+						IProject newProject = NGPackageManager.createProject(projectName);
+
+						zis = new ZipInputStream(new FileInputStream(filterPath + File.separator + zipFile));
+						ZipEntry ze = zis.getNextEntry();
+						while (ze != null)
+						{
+							String fileName = ze.getName();
+							if (ze.isDirectory())
+							{
+								WorkspaceFileAccess.mkdirs(newProject.getFolder(fileName));
+							}
+							else
+							{
+								ByteArrayOutputStream bos = new ByteArrayOutputStream();
+								BufferedInputStream bis = new BufferedInputStream(zis);
+								Utils.streamCopy(bis, bos);
+								IFile newFile = newProject.getFile(fileName);
+								WorkspaceFileAccess.mkdirs(newFile.getParent());
+								newFile.create(new ByteArrayInputStream(bos.toByteArray()), true, new NullProgressMonitor());
+								bos.close();
+							}
+							ze = zis.getNextEntry();
+						}
+						if (selectedTreeNode.getType() == UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES)
+						{
+							IProject project = ((ServoyProject)selectedTreeNode.parent.getRealObject()).getProject();
+							IProjectDescription solutionProjectDescription = project.getDescription();
+							AddAsWebPackageAction.addReferencedProjectToDescription(newProject, solutionProjectDescription);
+							project.setDescription(solutionProjectDescription, new NullProgressMonitor());
+						}
 					}
 					catch (Exception ex)
 					{
 						ServoyLog.logError(ex);
 					}
+					finally
+					{
+						if (zis != null)
+						{
+							try
+							{
+								zis.close();
+							}
+							catch (Exception ex)
+							{
+								ServoyLog.logError(ex);
+							}
+						}
+					}
 				}
+				return Status.OK_STATUS;
 			}
-		}
+		};
+		job.schedule();
 	}
 
 	@Override
