@@ -37,18 +37,14 @@ public abstract class ImportZipPackageAction extends Action
 {
 	protected final SolutionExplorerView viewer;
 
-	public ImportZipPackageAction(SolutionExplorerView viewer)
+	public ImportZipPackageAction(SolutionExplorerView viewer, String actionText, String actionTooltip)
 	{
 		this.viewer = viewer;
 		setImageDescriptor(Activator.loadImageDescriptorFromOldLocations("import.gif"));
-		setToolTipText(getText());
+		setText(actionText);
+		setToolTipText(actionTooltip);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.action.Action#run()
-	 */
 	@Override
 	public void run()
 	{
@@ -78,6 +74,6 @@ public abstract class ImportZipPackageAction extends Action
 		}
 	}
 
-
 	protected abstract void doImport(String[] fileNames, String filterPath);
+
 }

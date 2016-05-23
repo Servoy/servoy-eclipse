@@ -41,20 +41,15 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * @author gboros
- *
  */
 public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 {
 	public ImportZipPackageAsProjectAction(SolutionExplorerView viewer)
 	{
-		super(viewer);
-		setText("Import zip web package as project");
+		super(viewer, "Import zip web package as project",
+			"Imports a zip web package (component/service/layout package) into the workspace as a separate (expanded) project and references it from the solution. This is useful if you want to be able to change/extend the package.");
 	}
 
-	/**
-	 * @param fileNames
-	 * @param filterPath
-	 */
 	@Override
 	protected void doImport(String[] fileNames, String filterPath)
 	{
@@ -68,7 +63,8 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 			{
 				if (ServoyModel.getWorkspace().getRoot().getProject(projectName).exists())
 				{
-					UIUtils.reportError("Import component as project", "Project with name : '" + projectName + "' already exist in the current workspace");
+					UIUtils.reportError("Import component as project",
+						"Project with name : '" + projectName + "' already exist in the current workspace. Skipping import.");
 					continue;
 				}
 				IProject newProject = NGPackageManager.createProject(projectName);
@@ -120,6 +116,6 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 	public boolean isEnabled()
 	{
 		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
-		return node.getType() == UserNodeType.ALL_WEB_PACKAGE_PROJECTS;
+		return node.getType() == UserNodeType.ALL_WEB_PACKAGE_PROJECTS || node.getType() == UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES;
 	}
 }
