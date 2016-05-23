@@ -129,11 +129,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		getClient().blockGUI(reason);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.j2db.IApplication#updateUI(int)
-	 */
+	
 	public void updateUI(int time)
 	{
 		getClient().updateUI(time);
@@ -159,11 +155,6 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		return CLIENT;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.j2db.IApplication#getOSName()
-	 */
 	public String getClientOSName()
 	{
 		return System.getProperty("os.name"); //$NON-NLS-1$
@@ -264,95 +255,95 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 				String servoyMobileStyle = //
 
 				"label, label.a, label.b, label.c, label.d, label.e {"//
-					+ "color: #101010;" //  
+				+ "color: #101010;" //
 					+ "margin-left:5px;" //
 					+ "background-color: #414141;" //
 					+ "}"//
 
-					+ "headertext, headertext.a {"//
+				+ "headertext, headertext.a {"//
 					+ "color: #ffffff;" //
 					+ "background-color: #414141;" //
 					+ "font-weight:bold;" //
 					+ "}"//
 
-					+ "field {"//
+				+ "field {"//
 					+ "color: #101010;" //
 					+ "background-color: #F9F9F9;" //
 					+ "}"//
 
-					+ "button, button.a, combobox.a, check.a, radio.a, portal.a {"//
+				+ "button, button.a, combobox.a, check.a, radio.a, portal.a {"//
 					+ "color: #FFFFFF;" //
 					+ "background-color: #414141;" + "font-weight:bold;" //
 					+ "}"//
 
-					+ "header, header.a, footer.a,  title_header, title_header.a, title_footer.a {" //
+				+ "header, header.a, footer.a,  title_header, title_header.a, title_footer.a {" //
 					+ "background-color: #262626;" //
 					+ "}" //
 
-					+ "headertext.b {"//
+				+ "headertext.b {"//
 					+ "color: #ffffff;" //
 					+ "background-color: #4C83B1;" //
 					+ "font-weight:bold;" //
 					+ "}" //
 
-					+ "button.b, combobox.b, check.b, radio.b, portal.b {"//
+				+ "button.b, combobox.b, check.b, radio.b, portal.b {"//
 					+ "color: #FFFFFF;" //
 					+ "background-color: #4C83B1;" //
 					+ "font-weight:bold;" //
 					+ "}" //
 
-					+ "header.b, footer.b, title_header.b, title_footer.b {" //
+				+ "header.b, footer.b, title_header.b, title_footer.b {" //
 					+ "background-color: #5A91BF;" //
 					+ "}" //
 
-					+ "headertext.c {"//
+				+ "headertext.c {"//
 					+ "color: #101010;" //
 					+ "background-color: #4C83B1;" //
 					+ "font-weight:bold;" //
 					+ "}" //
 
-					+ "button.c, combobox.c, check.c, radio.c, portal.c {" //
+				+ "button.c, combobox.c, check.c, radio.c, portal.c {" //
 					+ "color: #363636;" //
 					+ "background-color: #F6F6F6;"//
 					+ "font-weight:bold;" //
 					+ "}"//
 
-					+ "header.c, footer.c, title_header.c, title_footer.c {" //
+				+ "header.c, footer.c, title_header.c, title_footer.c {" //
 					+ "background-color: #E4E4E4;" //
 					+ "}" //
 
-					+ "headertext.d {"//
+				+ "headertext.d {"//
 					+ "color: #101010;" //
 					+ "background-color: #4C83B1;" //
 					+ "font-weight:bold;" //
 					+ "}" //
 
-					+ "button.d, combobox.d, check.d, radio.d, portal.d {" //
+				+ "button.d, combobox.d, check.d, radio.d, portal.d {" //
 					+ "color: #363636;" //
 					+ "background-color: #F8F8F8;" //
 					+ "font-weight:bold;" //
 					+ "}"//
 
-					+ "header.d, footer.d, title_header.d, title_footer.d {" //
+				+ "header.d, footer.d, title_header.d, title_footer.d {" //
 					+ "background-color: #C7C7C7;" //
 					+ "}" //
 
-					+ "headertext.e {"//
+				+ "headertext.e {"//
 					+ "color: #101010;" //
 					+ "background-color: #4C83B1;" //
 					+ "font-weight:bold;" //
 					+ "}" //
 
-					+ "button.e, combobox.e, check.e, radio.e, portal.e {" //
+				+ "button.e, combobox.e, check.e, radio.e, portal.e {" //
 					+ "color: #363636;" //
 					+ "background-color: #FFE87C;" //
 					+ "font-weight:bold;" //
 					+ "}" //
 
-					+ "header.e, footer.e, title_header.e, title_footer.e {" //
+				+ "header.e, footer.e, title_header.e, title_footer.e {" //
 					+ "background-color: #FBEE90;" //
 					+ "}" //
-				;
+					;
 				flattenedSolution.createStyle("_servoy_mobile", servoyMobileStyle);
 			}
 		}
@@ -662,7 +653,7 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		if (pluginManager == null)
 		{
 			pluginAccess = new ClientPluginAccessProvider(this);
-			//getClient(); // do not create the client here, it needs to be created from within a job, otherwise the main thread 
+			//getClient(); // do not create the client here, it needs to be created from within a job, otherwise the main thread
 			// may be blocked on the awt thread which causes problems on the mac (debug SC does not paint)
 
 			// make sure appserver is started here, plugin manager depends on Settings being initialized
@@ -753,11 +744,6 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		return ap != null ? ap.getEditingSolution() : null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.j2db.IServiceProvider#isSolutionLoaded()
-	 */
 	public boolean isSolutionLoaded()
 	{
 		return getSolution() != null;
@@ -891,6 +877,12 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 	}
 
 	@Override
+	public void reportJSWarning(String msg, Throwable t)
+	{
+		getClient().reportJSWarning(msg, t);
+	}
+
+	@Override
 	public void reportJSInfo(String msg)
 	{
 		getClient().reportJSInfo(msg);
@@ -980,9 +972,6 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 		return getClient().showURL(url, target, target_options, timeout_ms, onRootFrame);
 	}
 
-	/**
-	 * 
-	 */
 	public void refreshI18NMessages()
 	{
 		messages.clear();
@@ -1043,136 +1032,76 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 
 	}
 
-	/**
-	 *  
-	 * @see com.servoy.j2db.ISmartClientApplication#registerWindow(java.lang.String, java.awt.Window)
-	 */
 	public void registerWindow(String name, Window d)
 	{
 
 	}
 
-	/**
-	 * 
-	 * @see com.servoy.j2db.ISmartClientApplication#getWindow(java.lang.String)
-	 */
 	public Window getWindow(String name)
 	{
 		return null;
 	}
 
-	/**
-	 * 
-	 * @see com.servoy.j2db.ISmartClientApplication#getToolbarPanel()
-	 */
 	public IToolbarPanel getToolbarPanel()
 	{
 		return null;
 	}
 
-	/**
-	 * 
-	 * @see com.servoy.j2db.ISmartClientApplication#showI18NDialog(java.lang.String, java.lang.String)
-	 */
 	public String showI18NDialog(String preselect_key, String preselect_language)
 	{
 		return null;
 	}
 
-	/**
-	 * 
-	 * @see com.servoy.j2db.ISmartClientApplication#showCalendar(java.lang.String, java.util.Date)
-	 */
 	public Date showCalendar(String pattern, Date date)
 	{
 		return null;
 	}
 
-	/**
-	 * 
-	 * @see com.servoy.j2db.ISmartClientApplication#showColorChooser(java.lang.String)
-	 */
 	public String showColorChooser(String originalColor)
 	{
 		return null;
 	}
 
-	/**
-	 * 
-	 * @see com.servoy.j2db.ISmartClientApplication#showFontChooser(java.lang.String)
-	 */
 	public String showFontChooser(String font)
 	{
 		return null;
 	}
 
-	/**
-	 * 
-	 * @see com.servoy.j2db.ISmartClientApplication#beep()
-	 */
 	public void beep()
 	{
 
 	}
 
-	/**
-	 * 
-	 * @see com.servoy.j2db.ISmartClientApplication#setClipboardContent(java.lang.String)
-	 */
 	public void setClipboardContent(String string)
 	{
 
 	}
 
-	/**
-	 * 
-	 * @see com.servoy.j2db.ISmartClientApplication#getClipboardString()
-	 */
 	public String getClipboardString()
 	{
 		return null;
 	}
 
-	/**
-	 * 
-	 * @see com.servoy.j2db.ISmartClientApplication#setNumpadEnterAsFocusNextEnabled(boolean)
-	 */
 	public void setNumpadEnterAsFocusNextEnabled(boolean enabled)
 	{
 
 	}
 
-	/**
-	 * 
-	 * @see com.servoy.j2db.ISmartClientApplication#exportObject(java.rmi.Remote)
-	 */
 	public int exportObject(Remote object) throws RemoteException
 	{
 		return 0;
 	}
 
-	/**
-	 * 
-	 * @see com.servoy.j2db.ISmartClientApplication#setPaintTableImmediately(boolean)
-	 */
 	public void setPaintTableImmediately(boolean b)
 	{
 
 	}
 
-	/**
-	 * 
-	 * @see com.servoy.j2db.ISmartClientApplication#getPaintTableImmediately()
-	 */
 	public int getPaintTableImmediately()
 	{
 		return 0;
 	}
 
-	/**
-	 * 
-	 * @see com.servoy.j2db.ISmartClientApplication#updateInsertModeIcon(com.servoy.j2db.dataprocessing.IDisplay)
-	 */
 	public void updateInsertModeIcon(IDisplay display)
 	{
 
@@ -1180,27 +1109,16 @@ public class DesignApplication implements ISmartClientApplication, IMessagesCall
 
 	private boolean isFormElementsEditableInFindMode = true;
 
-	/*
-	 * @see com.servoy.j2db.IApplication#setFormElementsEditableInFindMode(boolean)
-	 */
 	public void setFormElementsEditableInFindMode(boolean editable)
 	{
 		isFormElementsEditableInFindMode = editable;
 	}
 
-	/*
-	 * @see com.servoy.j2db.IApplication#isFormElementsEditableInFindMode()
-	 */
 	public boolean isFormElementsEditableInFindMode()
 	{
 		return isFormElementsEditableInFindMode;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.j2db.IApplication#setValueListItems(java.lang.String, java.lang.Object[], java.lang.Object[], boolean)
-	 */
 	public void setValueListItems(String name, Object[] displayValues, Object[] realValues, boolean autoconvert)
 	{
 		client.setValueListItems(name, displayValues, realValues, autoconvert);
