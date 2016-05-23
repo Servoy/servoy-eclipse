@@ -1117,7 +1117,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 						for (IProject iProject : projects)
 						{
-							if (iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
+							if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
 							{
 
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(resolveWebPackageDisplayName(iProject), UserNodeType.WEB_PACKAGE,
@@ -1278,7 +1278,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 				for (IProject iProject : allReferencedProjects)
 				{
-					if (iProject.hasNature(ServoyNGPackageProject.NATURE_ID) && provider.getPackageNames().contains(iProject.getName()))
+					if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID) &&
+						provider.getPackageNames().contains(iProject.getName()))
 					{
 						String packageType = provider.getPackageType(iProject.getName());
 						if (packageType.equals(type))
