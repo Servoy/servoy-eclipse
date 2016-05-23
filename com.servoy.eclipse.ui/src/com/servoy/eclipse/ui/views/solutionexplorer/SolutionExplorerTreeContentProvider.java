@@ -1213,7 +1213,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		String imageFile = null;
 		boolean disabled = false;
 
-		if (WebComponentSpecProvider.getInstance().getWebComponentSpecifications().containsKey(iProject.getName())) imageFile = "components_package.png";
+		String packageType = WebComponentSpecProvider.getInstance().getPackageType(iProject.getName());
+		if (IPackageReader.WEB_COMPONENT.equals(packageType)) imageFile = "components_package.png";
+		else if (BaseNGPackageManager.WEB_LAYOUT.equals(packageType)) imageFile = "layout_package.png";
 		else if ((WebServiceSpecProvider.getInstance().getWebServiceSpecifications().containsKey(iProject.getName()))) imageFile = "services_package.png";
 		else
 		{
