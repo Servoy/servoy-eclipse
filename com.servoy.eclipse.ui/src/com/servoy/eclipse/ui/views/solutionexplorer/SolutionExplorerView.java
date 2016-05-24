@@ -182,7 +182,6 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
-import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -2774,7 +2773,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		NewPackageProjectAction newComponentsPackageProjectAction = new NewPackageProjectAction(this, shell, "Create component package project",
 			IPackageReader.WEB_COMPONENT);
 		NewPackageProjectAction newLayoutPackageProjectAction = new NewPackageProjectAction(this, shell, "Create layout package project",
-			BaseNGPackageManager.WEB_LAYOUT);
+			IPackageReader.WEB_LAYOUT);
 		NewPackageProjectAction newServicesPackageProjectAction = new NewPackageProjectAction(this, shell, "Create services package project",
 			IPackageReader.WEB_SERVICE);
 		IAction newServicePackageAction = new NewResourcesComponentsOrServicesPackageAction(this, shell, "Create service package", IPackageReader.WEB_SERVICE);

@@ -87,7 +87,6 @@ import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
-import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager.ContainerPackageReader;
 import com.servoy.eclipse.model.ngpackages.INGPackageChangeListener;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -938,7 +937,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 							List<PlatformSimpleUserNode> children = getWebProjects(un, componentSpecProvider, "components_package.png",
 								UserNodeType.COMPONENTS_PROJECT_PACKAGE, IPackageReader.WEB_COMPONENT);
 							List<PlatformSimpleUserNode> layoutProjects = getWebProjects(un, componentSpecProvider, "layout_package.png",
-								UserNodeType.LAYOUT_PROJECT_PACKAGE, BaseNGPackageManager.WEB_LAYOUT);
+								UserNodeType.LAYOUT_PROJECT_PACKAGE, IPackageReader.WEB_LAYOUT);
 							List<PlatformSimpleUserNode> servicesProjects = getWebProjects(un, serviceSpecProvider, "services_package.png",
 								UserNodeType.SERVICES_PROJECT_PACKAGE, IPackageReader.WEB_SERVICE);
 							children.addAll(servicesProjects);
@@ -1215,7 +1214,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 		String packageType = WebComponentSpecProvider.getInstance().getPackageType(iProject.getName());
 		if (IPackageReader.WEB_COMPONENT.equals(packageType)) imageFile = "components_package.png";
-		else if (BaseNGPackageManager.WEB_LAYOUT.equals(packageType)) imageFile = "layout_package.png";
+		else if (IPackageReader.WEB_LAYOUT.equals(packageType)) imageFile = "layout_package.png";
 		else if ((WebServiceSpecProvider.getInstance().getWebServiceSpecifications().containsKey(iProject.getName()))) imageFile = "services_package.png";
 		else
 		{

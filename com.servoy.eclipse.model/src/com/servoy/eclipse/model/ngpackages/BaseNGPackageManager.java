@@ -64,12 +64,6 @@ import com.servoy.j2db.util.Pair;
 // a lot of the initial code in this class was just taken out of the huge core plugin Activator and refactored to make it easier to follow and to maintain
 public abstract class BaseNGPackageManager
 {
-	/**
-	 * Identifier used in the manifest of layout packages to list web services. Can also be returned by {@link #getPackageType()}.
-	 */
-	public static final String WEB_LAYOUT = "Web-Layout"; //$NON-NLS-1$
-
-
 	private static final String DUPLICATE_COMPONENT_MARKER = "com.servoy.eclipse.debug.DUPLICATE_COMPONENT_MARKER";
 	private static final String SPEC_READ_MARKER = "com.servoy.eclipse.debug.SPEC_READ_MARKER";
 
@@ -254,7 +248,7 @@ public abstract class BaseNGPackageManager
 
 		Map<String, Map<String, IPackageReader>> packagesTypeToReaders = new HashMap<String, Map<String, IPackageReader>>();
 		packagesTypeToReaders.put(IPackageReader.WEB_COMPONENT, componentProjectReaders);
-		packagesTypeToReaders.put(WEB_LAYOUT, componentProjectReaders);
+		packagesTypeToReaders.put(IPackageReader.WEB_LAYOUT, componentProjectReaders);
 		packagesTypeToReaders.put(IPackageReader.WEB_SERVICE, serviceProjectReaders);
 
 		for (ServoyProject solution : modules)
@@ -522,7 +516,7 @@ public abstract class BaseNGPackageManager
 					newServiceReaders.put(nameAndReader.getLeft(), nameAndReader.getRight());
 				}
 				else if (IPackageReader.WEB_COMPONENT.equals(nameAndReader.getRight().getPackageType()) ||
-					BaseNGPackageManager.WEB_LAYOUT.equals(nameAndReader.getRight().getPackageType()))
+					IPackageReader.WEB_LAYOUT.equals(nameAndReader.getRight().getPackageType()))
 				{
 					newComponentReaders.put(nameAndReader.getLeft(), nameAndReader.getRight());
 				}
