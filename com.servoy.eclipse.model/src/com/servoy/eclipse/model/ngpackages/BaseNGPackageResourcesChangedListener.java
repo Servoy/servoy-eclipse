@@ -148,10 +148,10 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 						{
 							if (binaryFile.getParent().getName().equals(SolutionSerializer.NG_PACKAGES_DIR_NAME))
 							{//component package
-								Pair<String, IPackageReader> readPackageResource = baseNGPackageManager.readPackageResource(resource);
 								if ((resourceDelta.getKind() & IResourceDelta.CHANGED) != 0)
 								{
 									removedPackageFiles.add(new File(resource.getLocationURI()));
+									Pair<String, IPackageReader> readPackageResource = baseNGPackageManager.readPackageResource(resource);
 									if (readPackageResource != null) addedPackageReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
 								}
 								else if ((resourceDelta.getKind() & IResourceDelta.REMOVED) != 0)
@@ -160,6 +160,7 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 								}
 								else if ((resourceDelta.getKind() & IResourceDelta.ADDED) != 0)
 								{
+									Pair<String, IPackageReader> readPackageResource = baseNGPackageManager.readPackageResource(resource);
 									if (readPackageResource != null) addedPackageReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
 								}
 							}
