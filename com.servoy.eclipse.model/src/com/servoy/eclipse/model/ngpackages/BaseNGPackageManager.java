@@ -254,6 +254,7 @@ public abstract class BaseNGPackageManager
 
 		Map<String, Map<String, IPackageReader>> packagesTypeToReaders = new HashMap<String, Map<String, IPackageReader>>();
 		packagesTypeToReaders.put(IPackageReader.WEB_COMPONENT, componentProjectReaders);
+		packagesTypeToReaders.put(WEB_LAYOUT, componentProjectReaders);
 		packagesTypeToReaders.put(IPackageReader.WEB_SERVICE, serviceProjectReaders);
 
 		for (ServoyProject solution : modules)
@@ -428,7 +429,7 @@ public abstract class BaseNGPackageManager
 
 	/**
 	 * Unloads some previously loaded ngPackage projects and loads others as needed (as they change in workspace).
-
+	
 	 * IMPORTANT: only call this if these packages are the only ones that changed (so there were no changes in the ng packages from the resouces project; cause if
 	 * for example a package is moved between the resources project and a separate ng pacakge project it would error out because it might not be unloaded
 	 * properly before being loaded again if you sequentially call reload on resources project packages and on ng package projects)
