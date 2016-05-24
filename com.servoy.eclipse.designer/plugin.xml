@@ -24,6 +24,7 @@
       <editor
             class="com.servoy.eclipse.designer.webpackages.WebPackageManager"
             default="false"
+            icon="icons/webpackagemanager.png"
             id="com.servoy.eclipse.ui.webpackagemanager"
             name="Web Package Manager">
       </editor>
