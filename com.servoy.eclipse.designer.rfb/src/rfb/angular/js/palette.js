@@ -94,10 +94,6 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 						   	else
 						   	    editorScope.getEditorContentRootScope().drop_highlight = packageName + "." + type;
 						   	editorScope.getEditorContentRootScope().$apply();
-						    if (insertedClone){
-								insertedCloneParent.removeChild(insertedClone);
-								insertedClone = null;
-							}
 							var css = {
 								top: ev.pageY,
 								left: ev.pageX
@@ -127,12 +123,12 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 									t = setTimeout(function() {
 										
 										if (canDrop.beforeChild) {
-											insertedClone = angular.element(angularElement)[0].firstElementChild.cloneNode(true);
+											if (insertedClone == null) insertedClone = angular.element(angularElement)[0].firstElementChild.cloneNode(true);
 											canDrop.dropTarget.insertBefore(insertedClone, canDrop.beforeChild);
 											angularElement.css('opacity', '1');
 											insertedCloneParent = canDrop.dropTarget;
 										} else if (angularElement.parent()[0] != canDrop.dropTarget || canDrop.append) {
-											insertedClone = angular.element(angularElement)[0].firstElementChild.cloneNode(true);
+											if (insertedClone == null) insertedClone = angular.element(angularElement)[0].firstElementChild.cloneNode(true);
 											angular.element(canDrop.dropTarget).append(insertedClone);
 											angularElement.css('opacity', '1');
 											insertedCloneParent = canDrop.dropTarget;
