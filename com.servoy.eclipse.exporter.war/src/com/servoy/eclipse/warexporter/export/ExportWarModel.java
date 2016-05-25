@@ -28,11 +28,13 @@ import java.util.TreeSet;
 import javax.crypto.Cipher;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.SecuritySupport;
@@ -89,6 +91,8 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean clearReferencesStopTimerThreads;
 	private String defaultAdminUser;
 	private String defaultAdminPassword;
+
+	private final List<String> excludedPackages = new ArrayList<>();
 
 	private static final String enc_prefix = "encrypted:";
 
@@ -229,6 +233,17 @@ public class ExportWarModel extends AbstractWarExportModel
 		{
 			defaultAdminPassword = decryptPassword(settings, desCipher, "export.defaultAdminPassword");
 		}
+
+
+		Set<String> defaultPackageNames = ResourceProvider.getDefaultPackageNames();
+		for (String packageName : defaultPackageNames)
+		{
+			if (!PlatformUI.getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.packages.enable." + packageName))
+			{
+				excludedPackages.add(packageName);
+			}
+		}
+
 	}
 
 	private String decryptPassword(IDialogSettings settings, Cipher desCipher, String propertyName)
@@ -1003,26 +1018,16 @@ public class ExportWarModel extends AbstractWarExportModel
 		this.antiResourceLocking = antiResourceLocking;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getExcludedComponentPackages()
-	 */
 	@Override
 	public List<String> getExcludedComponentPackages()
 	{
-		return null;
+		return excludedPackages;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getExcludedServicePackages()
-	 */
 	@Override
 	public List<String> getExcludedServicePackages()
 	{
-		return null;
+		return excludedPackages;
 	}
 
 	/**
