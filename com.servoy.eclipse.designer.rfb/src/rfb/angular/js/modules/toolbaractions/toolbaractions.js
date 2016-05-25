@@ -120,6 +120,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 				btnToggleDesignMode.state = result;
 				editorScope.getEditorContentRootScope().showWireframe = result;
 				editorScope.getEditorContentRootScope().$apply();
+				$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, editorScope.getSelection());
 			});
 		}
 	};
