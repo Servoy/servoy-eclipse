@@ -201,7 +201,11 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 					setErrorMessage(text + " is an invalid project name.");
 					return false;
 				}
-
+				if (!text.matches("^[a-z][0-9a-z]*$"))
+				{
+					setErrorMessage("Package name must start with a letter and can contain only lowercase letters and numbers.");
+					return false;
+				}
 				IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 				for (IProject iProject : projects)
 				{
@@ -211,7 +215,6 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 						result = false;
 					}
 				}
-
 			}
 			return result;
 		}
