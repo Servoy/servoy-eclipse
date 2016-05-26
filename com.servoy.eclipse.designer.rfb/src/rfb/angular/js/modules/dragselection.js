@@ -1,4 +1,4 @@
-angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pluginRegistry, $editorService, $selectionUtils, EDITOR_CONSTANTS, $interval) {
+angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pluginRegistry, $editorService, $selectionUtils, EDITOR_EVENTS, EDITOR_CONSTANTS, $interval) {
 	$pluginRegistry.registerPlugin(function(editorScope) {
 
 		var utils = $selectionUtils.getUtilsForScope(editorScope);
@@ -322,6 +322,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 				if (!dragging) {
 					if (Math.abs(dragStartEvent.screenX - event.screenX) > 5 || Math.abs(dragStartEvent.screenY - event.screenY) > 5) {
 						dragging = true;
+						$rootScope.$broadcast(EDITOR_EVENTS.HIDE_DECORATORS);
 						utils.setDraggingFromPallete(true);
 
 						//if the click starts in the bottom 20px and going up, 
@@ -439,7 +440,6 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						var changeX = event.screenX- dragStartEvent.screenX;
 						var changeY = event.screenY- dragStartEvent.screenY;
 						updateAbsoluteLayoutComponentsLocations(editorScope, editorScope.selectionToDrag, changeX, changeY);
-						editorScope.refreshEditorContent();
 						dragStartEvent = event;
 					}
 				}

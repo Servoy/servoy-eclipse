@@ -111,6 +111,16 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 					}
 				}
 			}
+			
+			function hideDecorators() {
+			    for(var i=0;i<$scope.nodes.length;i++) {
+				$scope.nodes[i].style.display = 'none';
+			    }
+			}
+			
+			$rootScope.$on(EDITOR_EVENTS.HIDE_DECORATORS, function(event, selection) {
+				hideDecorators();
+			})
 	    	  
 			$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
 				renderDecorators(selection,true);
