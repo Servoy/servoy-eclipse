@@ -12,7 +12,6 @@ public class ResourcePropertyTester extends PropertyTester
 	public ResourcePropertyTester()
 	{
 		// nothing to do here; docs say a public 0 arg constructor is required - don't know if implicit is enough
-		System.out.println("a");
 	}
 
 	@Override
