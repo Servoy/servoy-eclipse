@@ -244,6 +244,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.ImageLoader;
@@ -2342,9 +2343,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.SERVERS)
 		{
 			MenuManager submenu = new MenuManager("Connect to existing database", "newServer");
-			for (Map.Entry<String, ServerConfig> template : ServerConfig.TEMPLATES.entrySet())
+			for (Map.Entry<String, ServerTemplateDefinition> template : ServerConfig.TEMPLATES.entrySet())
 			{
-				submenu.add(new NewServerAction(template.getKey(), template.getValue()));
+				submenu.add(new NewServerAction(template.getKey(), template.getValue().getTemplate()));
 			}
 			manager.add(submenu);
 		}

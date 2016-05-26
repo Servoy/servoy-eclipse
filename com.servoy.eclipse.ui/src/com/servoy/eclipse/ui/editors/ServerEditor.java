@@ -16,9 +16,13 @@
  */
 package com.servoy.eclipse.ui.editors;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
@@ -35,10 +39,14 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
+import org.eclipse.swt.layout.grouplayout.GroupLayout.ParallelGroup;
+import org.eclipse.swt.layout.grouplayout.GroupLayout.SequentialGroup;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -60,6 +68,7 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ImmutableObjectObservable;
 import com.servoy.j2db.persistence.IServerConfigListener;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -67,6 +76,8 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Table;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
 import com.servoy.j2db.util.Settings;
 
 public class ServerEditor extends EditorPart
@@ -99,12 +110,24 @@ public class ServerEditor extends EditorPart
 	private Text userNameField;
 	private Text serverNameField;
 
+	private ServerTemplateDefinition serverTemplateDefinition;
+	private final ArrayList<Label> urlPropertiesLabels = new ArrayList<Label>();
+	private final ArrayList<Text> urlPropertiesFields = new ArrayList<Text>();
+
+	private Label noDriverWarning;
+	private Text noDriverMessage;
+	private Button addDriverButton;
+
 	private String oldServerName = null;
 
 	private IServerConfigListener logServerListener = null;
 
+	private boolean isAdvancedMode;
+	private Button advancedToggle;
+	private final ArrayList<Control> advancedControls = new ArrayList<Control>();
+
 	@Override
-	public void createPartControl(Composite parent)
+	public void createPartControl(final Composite parent)
 	{
 		ScrolledComposite myScrolledComposite = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		myScrolledComposite.setExpandHorizontal(true);
@@ -131,17 +154,128 @@ public class ServerEditor extends EditorPart
 
 		passwordField = new Text(comp, SWT.BORDER | SWT.PASSWORD);
 
+		if (serverTemplateDefinition != null)
+		{
+			String[] urlKeys = serverTemplateDefinition.getUrlKeys();
+			if (urlKeys != null)
+			{
+				ModifyListener ml = new ModifyListener()
+				{
+					@Override
+					public void modifyText(ModifyEvent e)
+					{
+						String[] values = new String[urlPropertiesFields.size()];
+						for (int z = 0; z < urlPropertiesFields.size(); z++)
+						{
+							values[z] = urlPropertiesFields.get(z).getText();
+						}
+						String newUrl = serverTemplateDefinition.getUrlForValues(values);
+						if (newUrl != null)
+						{
+							urlField.setText(newUrl);
+						}
+					}
+				};
+				String[] urlValues = serverTemplateDefinition.getUrlValues(serverConfigObservable.getObject().getServerUrl());
+
+				for (int z = 0; z < urlKeys.length; z++)
+				{
+					Label templateLabel;
+					templateLabel = new Label(comp, SWT.RIGHT);
+					templateLabel.setText(urlKeys[z]);
+					urlPropertiesLabels.add(templateLabel);
+
+					Text templateField = new Text(comp, SWT.BORDER);
+					if (urlValues != null && z < urlValues.length)
+					{
+						templateField.setText(urlValues[z]);
+					}
+					templateField.addModifyListener(ml);
+
+					urlPropertiesFields.add(templateField);
+				}
+			}
+		}
+
+		if (!isExistingDriver(((ServerEditorInput)getEditorInput()).getServerConfig().getDriver()))
+		{
+			noDriverWarning = new Label(comp, SWT.LEFT);
+			noDriverWarning.setText("No driver installed for this database type");
+			noDriverWarning.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
+
+			noDriverMessage = new Text(comp, SWT.MULTI | SWT.WRAP);
+			noDriverMessage.setBackground(comp.getBackground());
+			StringBuffer msg = new StringBuffer("Please download a driver for this type of database (\"");
+			msg.append(((ServerEditorInput)getEditorInput()).getServerConfig().getDriver()).append(
+				"\") and use the \"Add driver\" button bellow to install it,");
+			msg.append(" or you can install it manually, by copying it to the Servoy application server's \"drivers\" directory and restarting the developer.");
+
+			if (serverTemplateDefinition.getDriverDownloadURL() != null)
+			{
+				msg.append("\n\nYou can download a driver from here : ").append(serverTemplateDefinition.getDriverDownloadURL());
+			}
+
+			noDriverMessage.setText(msg.toString());
+
+			addDriverButton = new Button(comp, SWT.PUSH);
+			addDriverButton.setText("Add driver");
+			addDriverButton.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					DirectoryDialog directoryOpenDlg = new DirectoryDialog(Display.getDefault().getActiveShell(), SWT.OPEN);
+					directoryOpenDlg.setText("Select folder with database driver files to import");
+					directoryOpenDlg.setMessage("Select the folder that contains the database driver's files (jars, zips ...)");
+					String selectedDir;
+					if ((selectedDir = directoryOpenDlg.open()) != null)
+					{
+						File driversDir = new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory(), "drivers");
+						try
+						{
+							FileUtils.copyDirectory(new File(selectedDir), driversDir);
+							ServoyModel.getServerManager().loadInstalledDrivers();
+							ServerEditor.this.getEditorSite().getPage().closeEditor(ServerEditor.this, false);
+							EditorUtil.openServerEditor(serverConfigObservable.getObject(), true);
+						}
+						catch (IOException ex)
+						{
+							MessageDialog.openError(Display.getDefault().getActiveShell(), "Add driver",
+								"Error during copy of database driver files to Servoy");
+							ServoyLog.logError(ex);
+						}
+					}
+				}
+			});
+		}
+
+		advancedToggle = new Button(comp, SWT.PUSH);
+		advancedToggle.setText("Show advanced connection settings");
+		advancedToggle.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				isAdvancedMode = !isAdvancedMode;
+				setAdvancedMode(isAdvancedMode);
+			}
+		});
+
 		Label urlLabel;
 		urlLabel = new Label(comp, SWT.RIGHT);
+		advancedControls.add(urlLabel);
 		urlLabel.setText("URL");
 
 		urlField = new Text(comp, SWT.BORDER);
+		advancedControls.add(urlField);
 
 		Label driverLabel;
 		driverLabel = new Label(comp, SWT.RIGHT);
+		advancedControls.add(driverLabel);
 		driverLabel.setText("Driver");
 
 		driverField = new Combo(comp, SWT.BORDER);
+		advancedControls.add(driverField);
 		UIUtils.setDefaultVisibleItemCount(driverField);
 		driverField.addModifyListener(new ModifyListener()
 		{
@@ -155,73 +289,95 @@ public class ServerEditor extends EditorPart
 
 		Label catalogLabel;
 		catalogLabel = new Label(comp, SWT.RIGHT);
+		advancedControls.add(catalogLabel);
 		catalogLabel.setText("Catalog");
 
 		catalogField = new Combo(comp, SWT.BORDER);
+		advancedControls.add(catalogField);
 		UIUtils.setDefaultVisibleItemCount(catalogField);
 
 		Label schemaLabel;
 		schemaLabel = new Label(comp, SWT.RIGHT);
+		advancedControls.add(schemaLabel);
 		schemaLabel.setText("Schema");
 
 		schemaField = new Combo(comp, SWT.BORDER);
+		advancedControls.add(schemaField);
 		UIUtils.setDefaultVisibleItemCount(schemaField);
 
 		Label maxActiveLabel;
 		maxActiveLabel = new Label(comp, SWT.RIGHT);
+		advancedControls.add(maxActiveLabel);
 		maxActiveLabel.setText("Max Connections Active");
 
 		maxActiveField = new Text(comp, SWT.BORDER);
+		advancedControls.add(maxActiveField);
 
 		Label maxIdleLabel;
 		maxIdleLabel = new Label(comp, SWT.RIGHT);
+		advancedControls.add(maxIdleLabel);
 		maxIdleLabel.setText("Max Connections Idle");
 
 		maxIdleField = new Text(comp, SWT.BORDER);
+		advancedControls.add(maxIdleField);
 
 		Label idleTimoutLabel;
 		idleTimoutLabel = new Label(comp, SWT.RIGHT);
+		advancedControls.add(idleTimoutLabel);
 		idleTimoutLabel.setText("Connections Idle Timeout");
 
 		idleTimoutField = new Text(comp, SWT.BORDER);
+		advancedControls.add(idleTimoutField);
 
 		Label maxPreparedStatementsIdleLabel;
 		maxPreparedStatementsIdleLabel = new Label(comp, SWT.RIGHT);
+		advancedControls.add(maxPreparedStatementsIdleLabel);
 		maxPreparedStatementsIdleLabel.setText("Max Prepared Statements Idle");
 
 		maxPreparedStatementsIdleField = new Text(comp, SWT.BORDER);
+		advancedControls.add(maxPreparedStatementsIdleField);
 
 		Label validationTypeLabel;
 		validationTypeLabel = new Label(comp, SWT.RIGHT);
+		advancedControls.add(validationTypeLabel);
 		validationTypeLabel.setText("Validation Type");
 
 		validationTypeField = new Combo(comp, SWT.BORDER | SWT.READ_ONLY);
+		advancedControls.add(validationTypeField);
 		UIUtils.setDefaultVisibleItemCount(validationTypeField);
 
 		Label validationQueryLabel;
 		validationQueryLabel = new Label(comp, SWT.RIGHT);
+		advancedControls.add(validationQueryLabel);
 		validationQueryLabel.setText("Validation Query");
 
 		validationQueryField = new Text(comp, SWT.BORDER);
+		advancedControls.add(validationQueryField);
 
 		Label dataModel_cloneFromLabel;
 		dataModel_cloneFromLabel = new Label(comp, SWT.RIGHT);
+		advancedControls.add(dataModel_cloneFromLabel);
 		dataModel_cloneFromLabel.setText("Data model clone from");
 
 		dataModel_cloneFromField = new Combo(comp, SWT.BORDER | SWT.READ_ONLY);
+		advancedControls.add(dataModel_cloneFromField);
 		UIUtils.setDefaultVisibleItemCount(dataModel_cloneFromField);
 
 		Label enabledLabel;
 		enabledLabel = new Label(comp, SWT.RIGHT);
+		advancedControls.add(enabledLabel);
 		enabledLabel.setText("Enabled");
 
 		enabledButton = new Button(comp, SWT.CHECK);
+		advancedControls.add(enabledButton);
 
 		Label logServerLabel;
 		logServerLabel = new Label(comp, SWT.RIGHT);
+		advancedControls.add(logServerLabel);
 		logServerLabel.setText("Log Server");
 
 		logServerButton = new Button(comp, SWT.CHECK);
+		advancedControls.add(logServerButton);
 		logServerButton.addListener(SWT.Selection, new Listener()
 		{
 			public void handleEvent(Event event)
@@ -233,6 +389,7 @@ public class ServerEditor extends EditorPart
 		ServoyModel.getServerManager().addServerConfigListener(logServerListener = new LogServerListener());
 
 		createLogTableButton = new Button(comp, SWT.PUSH);
+		advancedControls.add(createLogTableButton);
 		createLogTableButton.setText("Create Log Table");
 		createLogTableButton.addSelectionListener(new SelectionAdapter()
 		{
@@ -242,8 +399,8 @@ public class ServerEditor extends EditorPart
 				IServerInternal logServer = (IServerInternal)ServoyModel.getServerManager().getLogServer();
 				if (logServer == null)
 				{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Log server not found", "Required server '" +
-						ServoyModel.getServerManager().getLogServerName() + "' not found or cannot be reached.");
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Log server not found",
+						"Required server '" + ServoyModel.getServerManager().getLogServerName() + "' not found or cannot be reached.");
 					return;
 				}
 
@@ -253,13 +410,13 @@ public class ServerEditor extends EditorPart
 					if (logTable == null)
 					{
 						logTable = logServer.createLogTable();
-						MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Table log created", "Table log successfully created in '" +
-							ServoyModel.getServerManager().getLogServerName() + "'.");
+						MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Table log created",
+							"Table log successfully created in '" + ServoyModel.getServerManager().getLogServerName() + "'.");
 					}
 					else
 					{
-						MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Table already exists", "Log table already exists in '" +
-							ServoyModel.getServerManager().getLogServerName() + "'.");
+						MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Table already exists",
+							"Log table already exists in '" + ServoyModel.getServerManager().getLogServerName() + "'.");
 					}
 					createLogTableButton.setEnabled(logTable != null);
 				}
@@ -278,6 +435,7 @@ public class ServerEditor extends EditorPart
 		});
 
 		createClientstatsTableButton = new Button(comp, SWT.PUSH);
+		advancedControls.add(createClientstatsTableButton);
 		createClientstatsTableButton.setText("Create Client Statistics Table");
 		createClientstatsTableButton.addSelectionListener(new SelectionAdapter()
 		{
@@ -287,8 +445,8 @@ public class ServerEditor extends EditorPart
 				IServerInternal logServer = (IServerInternal)ServoyModel.getServerManager().getLogServer();
 				if (logServer == null)
 				{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Log server not found", "Required server '" +
-						ServoyModel.getServerManager().getLogServerName() + "' not found or cannot be reached.");
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Log server not found",
+						"Required server '" + ServoyModel.getServerManager().getLogServerName() + "' not found or cannot be reached.");
 					return;
 				}
 
@@ -298,23 +456,21 @@ public class ServerEditor extends EditorPart
 					if (statsTable == null)
 					{
 						statsTable = logServer.createClientStatsTable();
-						MessageDialog.openInformation(Display.getDefault().getActiveShell(),
-							"Table client_stats created", "Table client_stats successfully created in '" +
-								ServoyModel.getServerManager().getLogServerName() + "'.");
+						MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Table client_stats created",
+							"Table client_stats successfully created in '" + ServoyModel.getServerManager().getLogServerName() + "'.");
 					}
 					else
 					{
-						MessageDialog.openInformation(Display.getDefault().getActiveShell(),
-							"Table already exists", "Client statistics table already exists in '" +
-								ServoyModel.getServerManager().getLogServerName() + "'.");
+						MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Table already exists",
+							"Client statistics table already exists in '" + ServoyModel.getServerManager().getLogServerName() + "'.");
 					}
 					createClientstatsTableButton.setEnabled(statsTable != null);
 				}
 				catch (RepositoryException re)
 				{
 					ServoyLog.logError(re);
-					MessageDialog.openError(Display.getDefault().getActiveShell(),
-						"Error creating table", "Could not create client statistics table: " + re.getMessage());
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Error creating table",
+						"Could not create client statistics table: " + re.getMessage());
 				}
 				catch (Exception err)
 				{
@@ -328,93 +484,204 @@ public class ServerEditor extends EditorPart
 
 		Label skipSysTablesLabel;
 		skipSysTablesLabel = new Label(comp, SWT.RIGHT);
+		advancedControls.add(skipSysTablesLabel);
 		skipSysTablesLabel.setText("Skip System Tables");
 
 		skipSysTablesButton = new Button(comp, SWT.CHECK);
+		advancedControls.add(skipSysTablesButton);
 
 		final GroupLayout groupLayout = new GroupLayout(comp);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(serverNameLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(
-					validationTypeLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(validationQueryLabel, GroupLayout.PREFERRED_SIZE,
-					190, GroupLayout.PREFERRED_SIZE).add(enabledLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(logServerLabel,
-					GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(maxPreparedStatementsIdleLabel, GroupLayout.PREFERRED_SIZE, 190,
-					GroupLayout.PREFERRED_SIZE).add(maxIdleLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(maxActiveLabel,
-					GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(idleTimoutLabel, GroupLayout.PREFERRED_SIZE, 190,
-					GroupLayout.PREFERRED_SIZE).add(schemaLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(catalogLabel,
-					GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(driverLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(
-					urlLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(passwordLabel, GroupLayout.PREFERRED_SIZE, 190,
-					GroupLayout.PREFERRED_SIZE).add(userNameLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(dataModel_cloneFromLabel,
-					GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(skipSysTablesLabel, GroupLayout.PREFERRED_SIZE, 190,
-					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(serverNameField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(userNameField,
-					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(passwordField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(urlField,
-					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(driverField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(catalogField,
-					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(schemaField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(maxActiveField,
-					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(maxIdleField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(idleTimoutField,
-					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(maxPreparedStatementsIdleField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(
-					validationTypeField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(validationQueryField, GroupLayout.PREFERRED_SIZE, 161,
-					Short.MAX_VALUE).add(enabledButton, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(
-					groupLayout.createSequentialGroup().add(logServerButton, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(createLogTableButton,
-						GroupLayout.PREFERRED_SIZE, 161, GroupLayout.PREFERRED_SIZE).add(createClientstatsTableButton, GroupLayout.PREFERRED_SIZE, 220,
-						GroupLayout.PREFERRED_SIZE)).add(dataModel_cloneFromField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(skipSysTablesButton,
-					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE)).addContainerGap()));
 
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(serverNameField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(serverNameLabel)).addPreferredGap(LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(userNameField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(userNameLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
+		ParallelGroup pg1 = groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(serverNameLabel, GroupLayout.PREFERRED_SIZE, 190,
+			GroupLayout.PREFERRED_SIZE);
+
+		for (Label l : urlPropertiesLabels)
+		{
+			pg1 = pg1.add(l, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE);
+		}
+
+		pg1.add(validationTypeLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(validationQueryLabel, GroupLayout.PREFERRED_SIZE, 190,
+			GroupLayout.PREFERRED_SIZE).add(enabledLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(logServerLabel,
+				GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(maxPreparedStatementsIdleLabel, GroupLayout.PREFERRED_SIZE, 190,
+					GroupLayout.PREFERRED_SIZE).add(maxIdleLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(maxActiveLabel,
+						GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(idleTimoutLabel, GroupLayout.PREFERRED_SIZE, 190,
+							GroupLayout.PREFERRED_SIZE).add(schemaLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(catalogLabel,
+								GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(driverLabel, GroupLayout.PREFERRED_SIZE, 190,
+									GroupLayout.PREFERRED_SIZE).add(urlLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(passwordLabel,
+										GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(userNameLabel, GroupLayout.PREFERRED_SIZE, 190,
+											GroupLayout.PREFERRED_SIZE).add(dataModel_cloneFromLabel, GroupLayout.PREFERRED_SIZE, 190,
+												GroupLayout.PREFERRED_SIZE).add(skipSysTablesLabel, GroupLayout.PREFERRED_SIZE, 190,
+													GroupLayout.PREFERRED_SIZE);
+
+
+		ParallelGroup pg2 = groupLayout.createParallelGroup(GroupLayout.LEADING).add(serverNameField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE);
+
+		for (Text tx : urlPropertiesFields)
+		{
+			pg2 = pg2.add(tx, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE);
+		}
+
+		if (noDriverMessage != null)
+		{
+			pg2 = pg2.add(noDriverWarning, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(noDriverMessage, GroupLayout.PREFERRED_SIZE, 161,
+				Short.MAX_VALUE).add(addDriverButton, GroupLayout.PREFERRED_SIZE, 161, GroupLayout.PREFERRED_SIZE);
+		}
+
+		pg2.add(userNameField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(passwordField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(
+			urlField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(advancedToggle, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(driverField,
+				GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(catalogField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(schemaField,
+					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(maxActiveField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(maxIdleField,
+						GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(idleTimoutField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(
+							maxPreparedStatementsIdleField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(validationTypeField,
+								GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(validationQueryField, GroupLayout.PREFERRED_SIZE, 161,
+									Short.MAX_VALUE).add(enabledButton, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(
+										groupLayout.createSequentialGroup().add(logServerButton, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(
+											createLogTableButton, GroupLayout.PREFERRED_SIZE, 161, GroupLayout.PREFERRED_SIZE).add(createClientstatsTableButton,
+												GroupLayout.PREFERRED_SIZE, 220, GroupLayout.PREFERRED_SIZE)).add(dataModel_cloneFromField,
+													GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(skipSysTablesButton, GroupLayout.PREFERRED_SIZE, 161,
+														Short.MAX_VALUE);
+
+
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
+			groupLayout.createSequentialGroup().addContainerGap().add(pg1).addPreferredGap(LayoutStyle.RELATED).add(pg2).addContainerGap()));
+
+
+		SequentialGroup sg1 = groupLayout.createSequentialGroup().addContainerGap().add(
+			groupLayout.createParallelGroup(GroupLayout.BASELINE).add(serverNameField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+				GroupLayout.PREFERRED_SIZE).add(serverNameLabel)).addPreferredGap(LayoutStyle.RELATED);
+
+
+		for (int z = 0; z < urlPropertiesLabels.size(); z++)
+		{
+			sg1 = sg1.add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(urlPropertiesFields.get(z), GroupLayout.PREFERRED_SIZE,
+				GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(urlPropertiesLabels.get(z), GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED);
+		}
+
+		sg1 = sg1.add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(userNameField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+			GroupLayout.PREFERRED_SIZE).add(userNameLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
 				LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(passwordField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(passwordLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-				LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(urlField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(urlLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-				LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(driverField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(driverLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-				LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(catalogField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(catalogLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-				LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(schemaField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(schemaLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-				LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(maxActiveField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(maxActiveLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-				LayoutStyle.RELATED).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(maxIdleField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(maxIdleLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10,
-				10, 10).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(idleTimoutField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(idleTimoutLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10,
-				10, 10).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(maxPreparedStatementsIdleField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(maxPreparedStatementsIdleLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE)).add(10, 10, 10).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(validationTypeLabel).add(validationTypeField, GroupLayout.PREFERRED_SIZE,
-					GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10, 10, 10).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(validationQueryField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(validationQueryLabel)).add(10, 10, 10).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(dataModel_cloneFromField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(dataModel_cloneFromLabel)).add(10, 10, 10).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(enabledButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(enabledLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10,
-				10, 10).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(createClientstatsTableButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(createLogTableButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
-					logServerButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(logServerLabel,
-					GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10, 10, 10).add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(skipSysTablesButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE).add(skipSysTablesLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addContainerGap(
-				GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(passwordField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+						GroupLayout.PREFERRED_SIZE).add(passwordLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
+
+
+		if (noDriverMessage != null)
+		{
+			sg1 = sg1.add(20, 20, 20).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(noDriverWarning, GroupLayout.PREFERRED_SIZE,
+				GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(noDriverMessage, GroupLayout.PREFERRED_SIZE, 100,
+						GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(addDriverButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED);
+		}
+
+		sg1.add(20, 20, 20).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(advancedToggle, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+			GroupLayout.PREFERRED_SIZE)).add(40, 40, 40).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(urlField, GroupLayout.PREFERRED_SIZE,
+				GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(urlLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(driverField,
+						GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(driverLabel, GroupLayout.PREFERRED_SIZE,
+							GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(groupLayout.createParallelGroup(
+								GroupLayout.BASELINE).add(catalogField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
+									catalogLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
+										LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(schemaField,
+											GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(schemaLabel,
+												GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
+													LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(maxActiveField,
+														GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(maxActiveLabel,
+															GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
+																LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(maxIdleField,
+																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
+																		maxIdleLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																		GroupLayout.PREFERRED_SIZE)).add(10,
+																			10,
+																			10).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(idleTimoutField,
+																				GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																				GroupLayout.PREFERRED_SIZE).add(idleTimoutLabel, GroupLayout.PREFERRED_SIZE,
+																					GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10,
+																						10,
+																						10).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(
+																							maxPreparedStatementsIdleField, GroupLayout.PREFERRED_SIZE,
+																							GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
+																								maxPreparedStatementsIdleLabel, GroupLayout.PREFERRED_SIZE,
+																								GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10,
+																									10,
+																									10).add(groupLayout.createParallelGroup(
+																										GroupLayout.BASELINE).add(validationTypeLabel).add(
+																											validationTypeField, GroupLayout.PREFERRED_SIZE,
+																											GroupLayout.DEFAULT_SIZE,
+																											GroupLayout.PREFERRED_SIZE)).add(10,
+																												10,
+																												10).add(groupLayout.createParallelGroup(
+																													GroupLayout.BASELINE).add(
+																														validationQueryField,
+																														GroupLayout.PREFERRED_SIZE,
+																														GroupLayout.DEFAULT_SIZE,
+																														GroupLayout.PREFERRED_SIZE).add(
+																															validationQueryLabel)).add(10, 10,
+																																10).add(
+																																	groupLayout.createParallelGroup(
+																																		GroupLayout.BASELINE).add(
+																																			dataModel_cloneFromField,
+																																			GroupLayout.PREFERRED_SIZE,
+																																			GroupLayout.DEFAULT_SIZE,
+																																			GroupLayout.PREFERRED_SIZE).add(
+																																				dataModel_cloneFromLabel)).add(
+																																					10, 10,
+																																					10).add(
+																																						groupLayout.createParallelGroup(
+																																							GroupLayout.BASELINE).add(
+																																								enabledButton,
+																																								GroupLayout.PREFERRED_SIZE,
+																																								GroupLayout.DEFAULT_SIZE,
+																																								GroupLayout.PREFERRED_SIZE).add(
+																																									enabledLabel,
+																																									GroupLayout.PREFERRED_SIZE,
+																																									GroupLayout.DEFAULT_SIZE,
+																																									GroupLayout.PREFERRED_SIZE)).add(
+																																										10,
+																																										10,
+																																										10).add(
+																																											groupLayout.createParallelGroup(
+																																												GroupLayout.BASELINE).add(
+																																													createClientstatsTableButton,
+																																													GroupLayout.PREFERRED_SIZE,
+																																													GroupLayout.DEFAULT_SIZE,
+																																													GroupLayout.PREFERRED_SIZE).add(
+																																														createLogTableButton,
+																																														GroupLayout.PREFERRED_SIZE,
+																																														GroupLayout.DEFAULT_SIZE,
+																																														GroupLayout.PREFERRED_SIZE).add(
+																																															logServerButton,
+																																															GroupLayout.PREFERRED_SIZE,
+																																															GroupLayout.DEFAULT_SIZE,
+																																															GroupLayout.PREFERRED_SIZE).add(
+																																																logServerLabel,
+																																																GroupLayout.PREFERRED_SIZE,
+																																																GroupLayout.DEFAULT_SIZE,
+																																																GroupLayout.PREFERRED_SIZE)).add(
+																																																	10,
+																																																	10,
+																																																	10).add(
+																																																		groupLayout.createParallelGroup(
+																																																			GroupLayout.BASELINE).add(
+																																																				skipSysTablesButton,
+																																																				GroupLayout.PREFERRED_SIZE,
+																																																				GroupLayout.DEFAULT_SIZE,
+																																																				GroupLayout.PREFERRED_SIZE).add(
+																																																					skipSysTablesLabel,
+																																																					GroupLayout.PREFERRED_SIZE,
+																																																					GroupLayout.DEFAULT_SIZE,
+																																																					GroupLayout.PREFERRED_SIZE)).addContainerGap(
+																																																						GroupLayout.DEFAULT_SIZE,
+																																																						Short.MAX_VALUE);
+		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(sg1));
 		comp.setLayout(groupLayout);
 		myScrolledComposite.setMinSize(comp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
 		initComboData();
 		initDataBindings();
+
+		setAdvancedMode(false);
 	}
 
 	@Override
@@ -446,11 +713,20 @@ public class ServerEditor extends EditorPart
 		ServerEditorInput serverInput = (ServerEditorInput)input;
 
 		ServerConfig inputConfig = serverInput.getServerConfig();
-		ServerConfig serverConfig = inputConfig == null ? ServerConfig.TEMPLATES.get(ServerConfig.EMPTY_TEMPLATE_NAME) : inputConfig;
+		ServerConfig serverConfig = inputConfig == null ? ServerConfig.TEMPLATES.get(ServerConfig.EMPTY_TEMPLATE_NAME).getTemplate() : inputConfig;
 		oldServerName = inputConfig == null ? null : inputConfig.getServerName();
 
-		serverConfigObservable = new ImmutableObjectObservable<ServerConfig>(
-			serverConfig,
+
+		for (ServerTemplateDefinition templateDefinition : ServerConfig.TEMPLATES.values())
+		{
+			if (templateDefinition.getTemplate().getDriver().equals(serverConfig.getDriver()))
+			{
+				serverTemplateDefinition = templateDefinition;
+				break;
+			}
+		}
+
+		serverConfigObservable = new ImmutableObjectObservable<ServerConfig>(serverConfig,
 			new Class[] { String.class, String.class, String.class, String.class, Map.class, String.class, String.class, String.class, int.class, int.class, int.class, int.class, String.class, String.class, boolean.class, boolean.class, int.class, String.class },
 			new String[] { "serverName", "userName", "password", "serverUrl", "connectionProperties", "driver", "catalog", "schema", "maxActive", "maxIdle", "maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", "skipSysTables", "idleTimeout", "dialectClass" });
 
@@ -515,18 +791,15 @@ public class ServerEditor extends EditorPart
 			if (serverConfig.isOracleDriver() && (serverConfig.getSchema() == null || serverConfig.getSchema().trim().length() == 0))
 			{
 				// if you do not specify the schema in oracle you see thousands of non-useful system tables/views in that server
-				MessageDialog.openInformation(
-					getSite().getShell(),
-					"Oracle server",
+				MessageDialog.openInformation(getSite().getShell(), "Oracle server",
 					"You should add a 'schema' for Oracle servers = the Oracle user name.\n\nNot specifying a schema will probably result in seing lots of system tables/views in this server, not just user tables/views.");
 			}
 			if (serverConfig.getDataModelCloneFrom() != null && !Utils.equalObject(dataModelCloneFrom, serverConfig.getDataModelCloneFrom()))
 			{
 				DataModelManager dataModelManager = ServoyModelManager.getServoyModelManager().getServoyModel().getDataModelManager();
 				if (dataModelManager != null &&
-					MessageDialog.openQuestion(getSite().getShell(), "Copy files",
-						"Server '" + currentServerName + "' was marked as clone of '" + serverConfig.getDataModelCloneFrom() +
-							"'. Do you want to copy(overwrite) all table related files from parent server?"))
+					MessageDialog.openQuestion(getSite().getShell(), "Copy files", "Server '" + currentServerName + "' was marked as clone of '" +
+						serverConfig.getDataModelCloneFrom() + "'. Do you want to copy(overwrite) all table related files from parent server?"))
 				{
 					IFolder sourceFolder = dataModelManager.getDBIFileContainer(serverConfig.getDataModelCloneFrom());
 					IFolder cloneFolder = dataModelManager.getDBIFileContainer(currentServerName);
@@ -832,29 +1105,28 @@ public class ServerEditor extends EditorPart
 			{
 				createLogTableButton.setEnabled(false);
 				// FIXME: show tooltips for disabled button
-				createLogTableButton.setToolTipText("Log table already exists in '" +
-					ServoyModel.getServerManager().getLogServerName() + "'.");
+				createLogTableButton.setToolTipText("Log table already exists in '" + ServoyModel.getServerManager().getLogServerName() + "'.");
 			}
 			else
 			{
 				createLogTableButton.setEnabled(true);
-				createLogTableButton.setToolTipText("Create a log table for tracking; "
-					+ "the creation of such a table is possible only if the current database server is the log server "
-					+ "and if it does not already contain a log table.");
+				createLogTableButton.setToolTipText(
+					"Create a log table for tracking; " + "the creation of such a table is possible only if the current database server is the log server " +
+						"and if it does not already contain a log table.");
 			}
 			if (ServoyModel.getServerManager().clientStatsTableExists())
 			{
 				createClientstatsTableButton.setEnabled(false);
 				// FIXME: show tooltips for disabled button
-				createClientstatsTableButton.setToolTipText("Client statistics table already exists in '" +
-					ServoyModel.getServerManager().getLogServerName() + "'.");
+				createClientstatsTableButton.setToolTipText(
+					"Client statistics table already exists in '" + ServoyModel.getServerManager().getLogServerName() + "'.");
 			}
 			else
 			{
 				createClientstatsTableButton.setEnabled(true);
-				createClientstatsTableButton.setToolTipText("Create a client statistics table for logging (un)registering of clients; "
-					+ "the creation of such a table is possible only if the current database server is the log server "
-					+ "and if it does not already contain a client_stats table.");
+				createClientstatsTableButton.setToolTipText("Create a client statistics table for logging (un)registering of clients; " +
+					"the creation of such a table is possible only if the current database server is the log server " +
+					"and if it does not already contain a client_stats table.");
 			}
 		}
 		else
@@ -862,6 +1134,16 @@ public class ServerEditor extends EditorPart
 			createLogTableButton.setEnabled(false);
 			createClientstatsTableButton.setEnabled(false);
 		}
+	}
+
+	private void setAdvancedMode(boolean isAdvanced)
+	{
+		for (Control c : advancedControls)
+		{
+			c.setVisible(isAdvanced);
+		}
+
+		advancedToggle.setText(isAdvanced ? "Hide advanced connection settings" : "Show advanced connection settings");
 	}
 
 	class LogServerListener implements IServerConfigListener

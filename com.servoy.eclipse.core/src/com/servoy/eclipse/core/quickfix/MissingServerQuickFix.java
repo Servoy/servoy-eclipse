@@ -48,14 +48,13 @@ public class MissingServerQuickFix implements IMarkerResolution
 			ServerConfig serverConfig = ServoyModel.getServerManager().getServerConfig(serverName);
 			if (serverConfig == null)
 			{
-				serverConfig = ServerConfig.TEMPLATES.get(ServerConfig.POSTGRESQL_TEMPLATE_NAME).getNamedCopy(serverName);
+				serverConfig = ServerConfig.TEMPLATES.get(ServerConfig.POSTGRESQL_TEMPLATE_NAME).getTemplate().getNamedCopy(serverName);
 				isNew = true;
 			}
 			ServerEditorInput serverConfigEditorInput = new ServerEditorInput(serverConfig);
 			serverConfigEditorInput.setIsNew(isNew);
 
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
-				serverConfigEditorInput,
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(serverConfigEditorInput,
 				PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
 					Platform.getContentTypeManager().getContentType(ServerEditorInput.SERVER_RESOURCE_ID)).getId());
 		}

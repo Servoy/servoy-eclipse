@@ -40,7 +40,7 @@ import com.servoy.j2db.persistence.ServerConfig;
 
 /**
  * Wizard for creating a new database server.
- * 
+ *
  * @author gerzse
  */
 public class NewServerWizard extends Wizard implements INewWizard
@@ -58,7 +58,7 @@ public class NewServerWizard extends Wizard implements INewWizard
 	public boolean performFinish()
 	{
 		String selectedServerType = typeSelectionPage.getSelectedServerType();
-		ServerConfig template = ServerConfig.TEMPLATES.get(selectedServerType);
+		ServerConfig template = ServerConfig.TEMPLATES.get(selectedServerType).getTemplate();
 		NewServerAction newServer = new NewServerAction(selectedServerType, template);
 		newServer.run();
 		return true;
