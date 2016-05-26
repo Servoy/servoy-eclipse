@@ -100,16 +100,6 @@
       </handler>
    </extension>
    <extension
-         point="org.eclipse.core.expressions.propertyTesters">
-      <propertyTester
-            class="com.servoy.eclipse.core.nature.ResourcePropertyTester"
-            id="com.servoy.eclipse.core.nature.projectTester"
-            namespace="com.servoy.eclipse.core.testers.IResource"
-            properties="hasNature"
-            type="org.eclipse.core.resources.IResource">
-      </propertyTester>
-   </extension>
-   <extension
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
@@ -126,29 +116,36 @@
                   <iterate
                         ifEmpty="false"
                         operator="and">
-                     <and>
-                        <not>
+                     <adapt
+                           type="org.eclipse.core.resources.IProject">
+                        <and>
                            <test
-                                 forcePluginActivation="true"
-                                 property="com.servoy.eclipse.core.testers.IResource.hasNature"
-                                 value="com.servoy.eclipse.core.ServoyProject">
+                                 property="org.eclipse.core.resources.open"
+                                 value="true">
                            </test>
-                        </not>
-                        <not>
-                           <test
-                                 forcePluginActivation="true"
-                                 property="com.servoy.eclipse.core.testers.IResource.hasNature"
-                                 value="com.servoy.eclipse.core.ServoyNGPackage">
-                           </test>
-                        </not>
-                        <not>
-                           <test
-                                 forcePluginActivation="true"
-                                 property="com.servoy.eclipse.core.testers.IResource.hasNature"
-                                 value="com.servoy.eclipse.core.ServoyResources">
-                           </test>
-                        </not>
-                     </and>
+                           <not>
+                              <test
+                                    forcePluginActivation="true"
+                                    property="org.eclipse.core.resources.projectNature"
+                                    value="com.servoy.eclipse.core.ServoyProject">
+                              </test>
+                           </not>
+                           <not>
+                              <test
+                                    forcePluginActivation="true"
+                                    property="org.eclipse.core.resources.projectNature"
+                                    value="com.servoy.eclipse.core.ServoyNGPackage">
+                              </test>
+                           </not>
+                           <not>
+                              <test
+                                    forcePluginActivation="true"
+                                    property="org.eclipse.core.resources.projectNature"
+                                    value="com.servoy.eclipse.core.ServoyResources">
+                              </test>
+                           </not>
+                        </and>
+                     </adapt>
                   </iterate>
                </with>
             </visibleWhen>
@@ -169,29 +166,36 @@
                   <iterate
                         ifEmpty="false"
                         operator="and">
-                     <and>
-                        <not>
+                     <adapt
+                           type="org.eclipse.core.resources.IProject">
+                        <and>
                            <test
-                                 forcePluginActivation="true"
-                                 property="com.servoy.eclipse.core.testers.IResource.hasNature"
-                                 value="com.servoy.eclipse.core.ServoyProject">
+                                 property="org.eclipse.core.resources.open"
+                                 value="true">
                            </test>
-                        </not>
-                        <not>
-                           <test
-                                 forcePluginActivation="true"
-                                 property="com.servoy.eclipse.core.testers.IResource.hasNature"
-                                 value="com.servoy.eclipse.core.ServoyNGPackage">
-                           </test>
-                        </not>
-                        <not>
-                           <test
-                                 forcePluginActivation="true"
-                                 property="com.servoy.eclipse.core.testers.IResource.hasNature"
-                                 value="com.servoy.eclipse.core.ServoyResources">
-                           </test>
-                        </not>
-                     </and>
+                           <not>
+                              <test
+                                    forcePluginActivation="true"
+                                    property="org.eclipse.core.resources.projectNature"
+                                    value="com.servoy.eclipse.core.ServoyProject">
+                              </test>
+                           </not>
+                           <not>
+                              <test
+                                    forcePluginActivation="true"
+                                    property="org.eclipse.core.resources.projectNature"
+                                    value="com.servoy.eclipse.core.ServoyNGPackage">
+                              </test>
+                           </not>
+                           <not>
+                              <test
+                                    forcePluginActivation="true"
+                                    property="org.eclipse.core.resources.projectNature"
+                                    value="com.servoy.eclipse.core.ServoyResources">
+                              </test>
+                           </not>
+                        </and>
+                     </adapt>
                   </iterate>
                </with>
             </visibleWhen>
@@ -212,29 +216,36 @@
                   <iterate
                         ifEmpty="false"
                         operator="and">
-                     <and>
-                        <not>
+                     <adapt
+                           type="org.eclipse.core.resources.IProject">
+                        <and>
                            <test
-                                 forcePluginActivation="true"
-                                 property="com.servoy.eclipse.core.testers.IResource.hasNature"
-                                 value="com.servoy.eclipse.core.ServoyProject">
+                                 property="org.eclipse.core.resources.open"
+                                 value="true">
                            </test>
-                        </not>
-                        <not>
-                           <test
-                                 forcePluginActivation="true"
-                                 property="com.servoy.eclipse.core.testers.IResource.hasNature"
-                                 value="com.servoy.eclipse.core.ServoyNGPackage">
-                           </test>
-                        </not>
-                        <not>
-                           <test
-                                 forcePluginActivation="true"
-                                 property="com.servoy.eclipse.core.testers.IResource.hasNature"
-                                 value="com.servoy.eclipse.core.ServoyResources">
-                           </test>
-                        </not>
-                     </and>
+                           <not>
+                              <test
+                                    forcePluginActivation="true"
+                                    property="org.eclipse.core.resources.projectNature"
+                                    value="com.servoy.eclipse.core.ServoyProject">
+                              </test>
+                           </not>
+                           <not>
+                              <test
+                                    forcePluginActivation="true"
+                                    property="org.eclipse.core.resources.projectNature"
+                                    value="com.servoy.eclipse.core.ServoyNGPackage">
+                              </test>
+                           </not>
+                           <not>
+                              <test
+                                    forcePluginActivation="true"
+                                    property="org.eclipse.core.resources.projectNature"
+                                    value="com.servoy.eclipse.core.ServoyResources">
+                              </test>
+                           </not>
+                        </and>
+                     </adapt>
                   </iterate>
                </with>
             </visibleWhen>
@@ -255,11 +266,14 @@
                   <iterate
                         ifEmpty="false"
                         operator="and">
-                     <test
-                           forcePluginActivation="true"
-                           property="com.servoy.eclipse.core.testers.IResource.hasNature"
-                           value="com.servoy.eclipse.core.ServoyProject">
-                     </test>
+                     <adapt
+                           type="org.eclipse.core.resources.IProject">
+	                     <test
+	                           forcePluginActivation="true"
+	                           property="org.eclipse.core.resources.projectNature"
+	                           value="com.servoy.eclipse.core.ServoyProject">
+	                     </test>
+                     </adapt>
                   </iterate>
                </with>
             </visibleWhen>
@@ -280,11 +294,14 @@
                   <iterate
                         ifEmpty="false"
                         operator="and">
-                     <test
-                           forcePluginActivation="true"
-                           property="com.servoy.eclipse.core.testers.IResource.hasNature"
-                           value="com.servoy.eclipse.core.ServoyResources">
-                     </test>
+                     <adapt
+                           type="org.eclipse.core.resources.IProject">
+	                     <test
+	                           forcePluginActivation="true"
+	                           property="org.eclipse.core.resources.projectNature"
+	                           value="com.servoy.eclipse.core.ServoyResources">
+	                     </test>
+                     </adapt>
                   </iterate>
                </with>
             </visibleWhen>
@@ -305,11 +322,14 @@
                   <iterate
                         ifEmpty="false"
                         operator="and">
-                     <test
-                           forcePluginActivation="true"
-                           property="com.servoy.eclipse.core.testers.IResource.hasNature"
-                           value="com.servoy.eclipse.core.ServoyNGPackage">
-                     </test>
+                     <adapt
+                           type="org.eclipse.core.resources.IProject">
+	                     <test
+	                           forcePluginActivation="true"
+	                           property="org.eclipse.core.resources.projectNature"
+	                           value="com.servoy.eclipse.core.ServoyNGPackage">
+	                     </test>
+                     </adapt>
                   </iterate>
                </with>
             </visibleWhen>

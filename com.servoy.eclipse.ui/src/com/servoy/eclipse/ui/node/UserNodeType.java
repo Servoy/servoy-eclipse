@@ -48,7 +48,7 @@ public enum UserNodeType
 	SOLUTION_ITEM,
 	SOLUTION_ITEM_NOT_ACTIVE_MODULE,
 	ALL_WEB_PACKAGE_PROJECTS,
-	WEB_PACKAGE,
+	WEB_PACKAGE_PROJECT_IN_WORKSPACE, // not necessarily used by active solution
 	APPLICATION,
 	SOLUTION_MODEL,
 	HISTORY,
@@ -126,6 +126,10 @@ public enum UserNodeType
 	COMPONENTS_NONPROJECT_PACKAGE, //node in solex under Resources->NG Components or under Solution->Web Packages it is a folder or zip component package
 	COMPONENTS_PROJECT_PACKAGE, //node in solex under Solution->Web Packages it is a project component package
 	COMPONENT, // one component - it can either belong to a folder/zip or to a project package
+	SERVICES_FROM_RESOURCES, //unique node in solex under Resources - holds folder and zip service packages
+	SERVICES_NONPROJECT_PACKAGE, //node in solex under Resources->NG Services or under Solution->Web Packages  it is a folder or zip service package
+	SERVICES_PROJECT_PACKAGE, //node in solex under Solution->Web Packages it is a project service package
+	SERVICE, // one service - it can either belong to a folder/zip or to a project package
 	LAYOUT_NONPROJECT_PACKAGE, //node in solex under  Solution->Web Packages it is a folder or zip layout package
 	LAYOUT_PROJECT_PACKAGE, //node in solex under Solution->Web Packages it is a project layout package
 	LAYOUT, // one layout - it can either belong to a folder/zip or to a project package	XML_METHODS,
@@ -136,10 +140,6 @@ public enum UserNodeType
 	GRAYED_OUT,
 	WORKING_SET,
 	DATASOURCES,
-	SERVICES_FROM_RESOURCES, //unique node in solex under Resources - holds folder and zip service packages
-	SERVICES_NONPROJECT_PACKAGE, //node in solex under Resources->NG Services or under Solution->Web Packages  it is a folder or zip service package
-	SERVICES_PROJECT_PACKAGE, //node in solex under Solution->Web Packages it is a project service package
-	SERVICE, // one service - it can either belong to a folder/zip or to a project package
 	COMPONENT_RESOURCE,
 	SOLUTION_DATASOURCES,
 	INMEMORY_DATASOURCES,

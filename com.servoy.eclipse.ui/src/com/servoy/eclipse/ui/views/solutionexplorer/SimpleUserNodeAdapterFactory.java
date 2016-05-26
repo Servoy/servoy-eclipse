@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IFile;
@@ -27,19 +28,23 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.mapping.CompositeResourceMapping;
 import org.eclipse.core.resources.mapping.ModelProvider;
 import org.eclipse.core.resources.mapping.ResourceMapping;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.ui.model.IWorkbenchAdapter;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.actions.Openable;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -210,6 +215,50 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 					if (forms != null) mappings.add(forms);
 				}
 			}
+			else if (nodeType == UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE || nodeType == UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE ||
+				nodeType == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || nodeType == UserNodeType.COMPONENTS_PROJECT_PACKAGE ||
+				nodeType == UserNodeType.SERVICES_NONPROJECT_PACKAGE || nodeType == UserNodeType.SERVICES_PROJECT_PACKAGE ||
+				nodeType == UserNodeType.LAYOUT_NONPROJECT_PACKAGE || nodeType == UserNodeType.LAYOUT_PROJECT_PACKAGE)
+			{
+				mappings.add(new SimpleResourceMapping((IProject)simpleUserNode.getRealObject()));
+			}
+			else if (nodeType == UserNodeType.ALL_WEB_PACKAGE_PROJECTS)
+			{
+				IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+				for (IProject iProject : projects)
+				{
+					try
+					{
+						if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
+						{
+							mappings.add(new SimpleResourceMapping(iProject));
+						}
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+			}
+			else if (nodeType == UserNodeType.COMPONENT || nodeType == UserNodeType.LAYOUT || nodeType == UserNodeType.SERVICE)
+			{
+				WebObjectSpecification spec = (WebObjectSpecification)simpleUserNode.getRealObject();
+				if ("file".equals(spec.getSpecURL().getProtocol()))
+				{
+					try
+					{
+						IFile[] specFile = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
+						if (specFile.length == 1)
+						{
+							mappings.add(new SimpleResourceMapping(specFile[0].getParent())); // here we assume all files in a component are nicely placed in the parent dir. of the spec file; for other path usages inside web packages this won't work well
+						}
+					}
+					catch (URISyntaxException e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+			}
 
 			if (mappings.size() > 0)
 			{
@@ -346,6 +395,32 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 						pair.getRight().toString() + SolutionSerializer.JS_FILE_EXTENSION);
 				}
 			}
+			else if (type == UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE || type == UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE ||
+				type == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || type == UserNodeType.COMPONENTS_PROJECT_PACKAGE ||
+				type == UserNodeType.SERVICES_NONPROJECT_PACKAGE || type == UserNodeType.SERVICES_PROJECT_PACKAGE ||
+				type == UserNodeType.LAYOUT_NONPROJECT_PACKAGE || type == UserNodeType.LAYOUT_PROJECT_PACKAGE)
+			{
+				return userNode.getRealObject();
+			}
+			else if (type == UserNodeType.COMPONENT || type == UserNodeType.LAYOUT || type == UserNodeType.SERVICE)
+			{
+				WebObjectSpecification spec = (WebObjectSpecification)userNode.getRealObject();
+				if ("file".equals(spec.getSpecURL().getProtocol()))
+				{
+					try
+					{
+						IFile[] specFile = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
+						if (specFile.length == 1)
+						{
+							return specFile[0].getParent(); // here we assume all files in a component are nicely placed in the parent dir. of the spec file; for other path usages inside web packages this won't work well
+						}
+					}
+					catch (URISyntaxException e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+			}
 		}
 		else if (adapterType == Openable.class)
 		{
@@ -380,6 +455,10 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 				if (realObject instanceof ServoyProject)
 				{
 					return ((ServoyProject)realObject).getProject();
+				}
+				else if (realObject instanceof IProject)
+				{
+					return realObject;
 				}
 			}
 		}

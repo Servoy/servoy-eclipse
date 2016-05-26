@@ -2918,7 +2918,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			UserNodeType.LAYOUT_PROJECT_PACKAGE);
 		IAction deleteServiceProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service package project",
 			UserNodeType.SERVICES_PROJECT_PACKAGE);
-		IAction deleteProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete Package Project", UserNodeType.WEB_PACKAGE);
+		IAction deleteProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete Package Project", UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE);
 		exportComponentPackage = new ExportPackageResourceAction(this, shell);
 		editWebPackageDetailsAction = new EditWebPackageDetailsAction(this, shell, "Edit package details");
 
@@ -2989,7 +2989,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		deleteActionInTree.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, deleteComponentProjectPackage);
 		deleteActionInTree.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, deleteLayoutProjectPackage);
 		deleteActionInTree.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, deleteServiceProjectPackage);
-		deleteActionInTree.registerAction(UserNodeType.WEB_PACKAGE, deleteProjectPackage);
+		deleteActionInTree.registerAction(UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, deleteProjectPackage);
 		deleteActionInTree.registerAction(UserNodeType.COMPONENT, deleteComponent);
 		deleteActionInTree.registerAction(UserNodeType.LAYOUT, deleteLayout);
 		deleteActionInTree.registerAction(UserNodeType.SERVICE, deleteService);
