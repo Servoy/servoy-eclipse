@@ -43,18 +43,18 @@ public class RelationPropertyController extends PropertyController<String, Objec
 {
 	private final ITable primaryTable;
 	private final ITable foreignTable;
-	private final boolean incudeNone;
+	private final boolean includeNone;
 	private final boolean includeNested;
 	private final PersistContext persistContext;
 
 	public RelationPropertyController(Object id, String displayName, PersistContext persistContext, ITable primaryTable, ITable foreignTable,
-		boolean incudeNone, boolean includeNested)
+		boolean includeNone, boolean includeNested)
 	{
 		super(id, displayName);
 		this.persistContext = persistContext;
 		this.primaryTable = primaryTable;
 		this.foreignTable = foreignTable;
-		this.incudeNone = incudeNone;
+		this.includeNone = includeNone;
 		this.includeNested = includeNested;
 		setLabelProvider(new SolutionContextDelegateLabelProvider(RelationLabelProvider.INSTANCE_ALL_NO_IMAGE, persistContext.getContext()));
 		setSupportsReadonly(true);
@@ -69,12 +69,12 @@ public class RelationPropertyController extends PropertyController<String, Objec
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		return new RelationPropertyEditor(parent, persistContext, primaryTable, foreignTable, incudeNone, includeNested, isReadOnly());
+		return new RelationPropertyEditor(parent, persistContext, primaryTable, foreignTable, includeNone, includeNested, isReadOnly());
 	}
 
 	public static class RelationPropertyEditor extends ListSelectCellEditor
 	{
-		public RelationPropertyEditor(Composite parent, PersistContext persistContext, ITable primaryTable, final ITable foreignTable, boolean incudeNone,
+		public RelationPropertyEditor(Composite parent, PersistContext persistContext, ITable primaryTable, final ITable foreignTable, boolean includeNone,
 			boolean includeNested, boolean isReadOnly)
 		{
 			super(parent, "Select relation",
@@ -82,7 +82,8 @@ public class RelationPropertyController extends PropertyController<String, Objec
 					persistContext.getContext()),
 				new SolutionContextDelegateLabelProvider(RelationLabelProvider.INSTANCE_LAST_NAME_ONLY, persistContext.getContext()),
 				RelationValueEditor.INSTANCE, isReadOnly,
-				new RelationContentProvider.RelationListOptions(primaryTable, foreignTable, incudeNone, includeNested), SWT.NONE, null, "selectRelationDialog");
+				new RelationContentProvider.RelationListOptions(primaryTable, foreignTable, includeNone, includeNested), SWT.NONE, null,
+				"selectRelationDialog");
 			setShowFilterMenu(true);
 
 			setSelectionFilter(new IFilter()

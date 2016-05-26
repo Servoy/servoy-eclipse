@@ -2768,7 +2768,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				primaryTable = flattenedEditingSolution.getTable(flattenedEditingSolution.getFlattenedForm(form).getDataSource());
 			}
 			ITable foreignTable = null;
-			boolean incudeNone = false;
+			boolean includeNone = true;
 			if (persistContext != null && persistContext.getPersist() instanceof Tab)
 			{
 				Form tabForm = flattenedEditingSolution.getForm(((Tab)persistContext.getPersist()).getContainsFormID());
@@ -2776,7 +2776,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				{
 					foreignTable = flattenedEditingSolution.getTable(tabForm.getDataSource());
 				}
-				incudeNone = true; // unrelated tabs
 			}
 			else if (persistContext.getPersist() instanceof Portal)
 			{
@@ -2787,8 +2786,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					foreignTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(
 						relationSequence[relationSequence.length - 1].getForeignDataSource());
 				}
+				includeNone = false;
 			}
-			return new RelationPropertyController(id, displayName, persistContext, primaryTable, foreignTable, incudeNone, true);
+			return new RelationPropertyController(id, displayName, persistContext, primaryTable, foreignTable, includeNone, true);
 		}
 
 		if (propertyType == FormatPropertyType.INSTANCE)
