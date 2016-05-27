@@ -27,6 +27,7 @@ import org.eclipse.gef.commands.Command;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.j2db.persistence.IChildWebObject;
+import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
@@ -55,8 +56,9 @@ public class ChangeParentCommand extends Command
 	public ChangeParentCommand(IPersist child, ISupportChilds newParent, IPersist targetChild, boolean insertAfterTarget)
 	{
 		super("Change Parent");
-		this.child = child;
-		this.targetChild = targetChild;
+		this.child = child instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)child).getWrappedPersist() : child;
+		this.targetChild = targetChild instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)targetChild).getWrappedPersist()
+			: targetChild;
 		this.newParent = newParent;
 		this.insertAfterTarget = insertAfterTarget;
 
