@@ -46,9 +46,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
@@ -224,16 +224,18 @@ public class ServerEditor extends EditorPart
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-					DirectoryDialog directoryOpenDlg = new DirectoryDialog(Display.getDefault().getActiveShell(), SWT.OPEN);
-					directoryOpenDlg.setText("Select folder with database driver files to import");
-					directoryOpenDlg.setMessage("Select the folder that contains the database driver's files (jars, zips ...)");
-					String selectedDir;
-					if ((selectedDir = directoryOpenDlg.open()) != null)
+					FileDialog fileOpenDlg = new FileDialog(Display.getDefault().getActiveShell(), SWT.OPEN | SWT.MULTI);
+					fileOpenDlg.setText("Select database driver files to import");
+					if (fileOpenDlg.open() != null)
 					{
 						File driversDir = new File(ApplicationServerRegistry.get().getServoyApplicationServerDirectory(), "drivers");
 						try
 						{
-							FileUtils.copyDirectory(new File(selectedDir), driversDir);
+							for (String f : fileOpenDlg.getFileNames())
+							{
+								FileUtils.copyFileToDirectory(new File(fileOpenDlg.getFilterPath(), f), driversDir);
+							}
+
 							ServoyModel.getServerManager().loadInstalledDrivers();
 							ServerEditor.this.getEditorSite().getPage().closeEditor(ServerEditor.this, false);
 							EditorUtil.openServerEditor(serverConfigObservable.getObject(), true);
