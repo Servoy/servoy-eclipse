@@ -85,8 +85,8 @@ public class FormContentProvider implements ITreeContentProvider
 						Form obj = forms.next();
 						if (((options.showInMenu == null || options.showInMenu.booleanValue() == obj.getShowInMenu()) &&
 							(options.showTemplates == Utils.getAsBoolean(obj.getReferenceForm())) &&
-							((options.datasource == null || Utils.equalObjects(options.datasource, obj.getDataSource())))) && form != obj &&
-							!PersistEncapsulation.isModuleScope(obj, flattenedSolution.getSolution()))
+							((options.datasource == null || obj.getDataSource() == null || Utils.equalObjects(options.datasource, obj.getDataSource())))) &&
+							form != obj && !PersistEncapsulation.isModuleScope(obj, flattenedSolution.getSolution()))
 						{
 							addFormInList(activeProject, obj, solutionNames, formIdsAndWorkingSets);
 						}
