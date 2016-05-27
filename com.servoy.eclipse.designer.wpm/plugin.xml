@@ -8,5 +8,63 @@
             id="com.servoy.eclipse.designer.wpm.serviceprovider">
       </serviceprovider>
    </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="com.servoy.eclipse.designer.webpackage.WebPackageManager"
+            default="false"
+            icon="icons/webpackagemanager.png"
+            id="com.servoy.eclipse.ui.webpackagemanager"
+            name="Web Package Manager">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="com.servoy.eclipse.designer.webpackage.open.OpenWebPackageManagerCommandHandler"
+            id="com.servoy.eclipse.designer.wpm.open"
+            name="Open Web Package Manager">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.eclipse.ui.popup.any">
+         <command
+               commandId="com.servoy.eclipse.designer.wpm.open"
+               label="Open Web Package Manager"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeMenuSelection">
+                  <iterate
+                        ifEmpty="false"
+                        operator="and">
+                     <instanceof
+                           value="com.servoy.eclipse.ui.node.SimpleUserNode">
+                     </instanceof>
+                     <test
+                           forcePluginActivation="true"
+                           property="com.servoy.eclipse.designer.wpm.testers.SimpleUserNode.isWebPackagesNode"
+                           value="true">
+                     </test>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+            class="com.servoy.eclipse.designer.webpackage.open.WebPackagesNodePropertyTester"
+            id="com.servoy.eclipse.designer.wpm.propertyTester"
+            namespace="com.servoy.eclipse.designer.wpm.testers.SimpleUserNode"
+            properties="isWebPackagesNode"
+            type="com.servoy.eclipse.ui.node.SimpleUserNode">
+      </propertyTester>
+   </extension>
 
 </plugin>

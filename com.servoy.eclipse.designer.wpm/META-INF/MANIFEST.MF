@@ -15,4 +15,7 @@ Require-Bundle: javax.servlet,
  com.servoy.eclipse.model,
  com.servoy.eclipse.core,
  org.apache.tomcat,
- org.eclipse.ui.workbench
+ org.eclipse.ui.workbench,
+ org.eclipse.ui,
+ org.eclipse.core.expressions,
+ com.servoy.eclipse.ui

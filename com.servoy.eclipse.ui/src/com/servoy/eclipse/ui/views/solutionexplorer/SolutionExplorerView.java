@@ -1495,7 +1495,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private ContextAction createActionInTree;
 	private ExportPackageResourceAction exportComponentPackage;
 	private EditWebPackageDetailsAction editWebPackageDetailsAction;
-	private StartWebPackageManager manageWebPackagesAction;
 	private ImportZipPackageAsProjectAction importComponentAsProject;
 	private IAction importComponentInSolution;
 
@@ -2451,7 +2450,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (editWebPackageDetailsAction.isEnabled()) manager.add(editWebPackageDetailsAction);
 		if (deleteActionInTree.isEnabled()) manager.add(deleteActionInTree);
 		if (renameActionInTree.isEnabled()) manager.add(renameActionInTree);
-		if (manageWebPackagesAction.isEnabled()) manager.add(manageWebPackagesAction);
 		if (importComponentAsProject.isEnabled()) manager.add(importComponentAsProject);
 		if (importComponentInSolution.isEnabled()) manager.add(importComponentInSolution);
 
@@ -2764,7 +2762,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		movePersistAction = new MovePersistAction(shell);
 		duplicatePersistAction = new DuplicatePersistAction(shell);
 		importComponentInSolution = new ImportZipPackageAsZipAction(this, SolutionSerializer.NG_PACKAGES_DIR_NAME);
-		manageWebPackagesAction = new StartWebPackageManager(this);
 		importComponentAsProject = new ImportZipPackageAsProjectAction(this);
 		IAction newComponentAction = new NewWebObjectAction(this, shell, "Component", "Create new component");
 		IAction newLayoutAction = new NewWebObjectAction(this, shell, "Layout", "Create new layout");
@@ -2918,7 +2915,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			UserNodeType.LAYOUT_PROJECT_PACKAGE);
 		IAction deleteServiceProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service package project",
 			UserNodeType.SERVICES_PROJECT_PACKAGE);
-		IAction deleteProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete Package Project", UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE);
+		IAction deleteProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete Package Project",
+			UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE);
 		exportComponentPackage = new ExportPackageResourceAction(this, shell);
 		editWebPackageDetailsAction = new EditWebPackageDetailsAction(this, shell, "Edit package details");
 

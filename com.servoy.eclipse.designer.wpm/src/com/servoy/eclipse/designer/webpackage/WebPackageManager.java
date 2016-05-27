@@ -1,4 +1,4 @@
-package com.servoy.eclipse.designer.webpackages;
+package com.servoy.eclipse.designer.webpackage;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
