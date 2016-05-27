@@ -1117,7 +1117,7 @@ public class MobileExporter
 		if (mediaOrder == null)
 		{
 			FlattenedSolution fs = getFlattenedSolution();
-			java.util.List<String> lst = (java.util.List<String>)fs.getSolution().getFlattenedCustomProperty(new String[] { "mobileexport", "mediaorder" });
+			java.util.List<String> lst = (java.util.List<String>)fs.getSolution().getCustomProperty(new String[] { "mobileexport", "mediaorder" });
 			if (lst == null)
 			{
 				lst = new ArrayList<String>();
