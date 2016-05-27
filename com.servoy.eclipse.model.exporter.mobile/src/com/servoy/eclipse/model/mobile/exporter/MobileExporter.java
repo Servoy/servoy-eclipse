@@ -977,7 +977,7 @@ public class MobileExporter
 		IScriptProvider sm = ModelUtils.getScriptMethod(parent, parent, null, methodID);
 		if (sm != null)
 		{
-			List<Object> arguments = ((AbstractBase)persist).getInstanceMethodArguments(key);
+			List<Object> arguments = ((AbstractBase)persist).getFlattenedMethodArguments(key);
 			StringBuilder sb = new StringBuilder(ScopesUtils.getScopeString(((AbstractScriptProvider)sm).getScopeName(), sm.getDataProviderID()));
 			sb.append('(');
 			if (arguments != null && arguments.size() > 0)
@@ -1073,7 +1073,7 @@ public class MobileExporter
 		if (mediaOrder == null)
 		{
 			FlattenedSolution fs = getFlattenedSolution();
-			java.util.List<String> lst = (java.util.List<String>)fs.getSolution().getCustomProperty(new String[] { "mobileexport", "mediaorder" });
+			java.util.List<String> lst = (java.util.List<String>)fs.getSolution().getFlattenedCustomProperty(new String[] { "mobileexport", "mediaorder" });
 			if (lst == null)
 			{
 				lst = new ArrayList<String>();

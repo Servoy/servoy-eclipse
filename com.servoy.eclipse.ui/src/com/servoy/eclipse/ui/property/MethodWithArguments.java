@@ -25,9 +25,9 @@ import com.servoy.j2db.util.SafeArrayList;
 
 /**
  * Holder for method id and actual arguments
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class MethodWithArguments
 {
@@ -36,7 +36,7 @@ public class MethodWithArguments
 
 	public final int methodId;
 	public final SafeArrayList<Object> arguments;
-	public final SafeArrayList<Object> paramNames;
+	public final SafeArrayList<String> paramNames;
 	public final ITable table;
 
 	public MethodWithArguments(int methodId, ITable table)
@@ -44,7 +44,7 @@ public class MethodWithArguments
 		this(methodId, null, null, table);
 	}
 
-	public MethodWithArguments(int methodId, SafeArrayList<Object> paramNames, SafeArrayList<Object> arguments, ITable table)
+	public MethodWithArguments(int methodId, SafeArrayList<String> paramNames, SafeArrayList<Object> arguments, ITable table)
 	{
 		this.methodId = methodId;
 		this.arguments = arguments;
@@ -54,10 +54,10 @@ public class MethodWithArguments
 
 	public static MethodWithArguments create(IPersist script, SafeArrayList<Object> arguments)
 	{
-		return create(script, new SafeArrayList<Object>(), arguments);
+		return create(script, new SafeArrayList<String>(), arguments);
 	}
 
-	public static MethodWithArguments create(IPersist script, SafeArrayList<Object> paramNames, SafeArrayList<Object> arguments)
+	public static MethodWithArguments create(IPersist script, SafeArrayList<String> paramNames, SafeArrayList<Object> arguments)
 	{
 		if (script == null)
 		{

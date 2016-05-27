@@ -44,18 +44,20 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.SafeArrayList;
 import com.servoy.j2db.util.Utils;
 
 /**
  * Property controller for method properties, subproperties are instance arguments
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class MethodPropertyController<P> extends PropertyController<P, Object>
 {
@@ -68,16 +70,16 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 		super(id, displayName);
 		this.options = options;
 		this.persistContext = persistContext;
-		setLabelProvider(new AccesCheckingContextDelegateLabelProvider(new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(
-			new MethodLabelProvider(persistContext, true, !options.includeDefault), persistContext.getContext()))));
+		setLabelProvider(new AccesCheckingContextDelegateLabelProvider(new SolutionContextDelegateLabelProvider(
+			new FormContextDelegateLabelProvider(new MethodLabelProvider(persistContext, true, !options.includeDefault), persistContext.getContext()))));
 		setSupportsReadonly(true);
 	}
 
 	@Override
 	public CellEditor createPropertyEditor(Composite parent)
 	{
-		ILabelProvider methodLabelProvider = new AccesCheckingContextDelegateLabelProvider(new FormContextDelegateLabelProvider(new MethodLabelProvider(
-			persistContext, false, !options.includeDefault), persistContext.getContext()));
+		ILabelProvider methodLabelProvider = new AccesCheckingContextDelegateLabelProvider(
+			new FormContextDelegateLabelProvider(new MethodLabelProvider(persistContext, false, !options.includeDefault), persistContext.getContext()));
 		return new MethodCellEditor(parent, methodLabelProvider, new MethodValueEditor(persistContext), persistContext, getId(), false, // readonly is handled in openDialogBox below
 			options)
 		{
@@ -99,7 +101,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 							// the context is the currently viewed form
 							NewMethodAction.createNewMethod(getControl().getShell(), persistContext.getContext(), getId().toString(), true,
 								scriptMethod.getName(), null);
-							// Note: the original value is returned, but FormInheritenceMethodConverter.getScriptMethod() will find 
+							// Note: the original value is returned, but FormInheritenceMethodConverter.getScriptMethod() will find
 							// the new method via the form hierarchy
 						}
 					}
@@ -159,7 +161,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 								List<Form> formHierarchy = ModelUtils.getEditingFlattenedSolution(context.getContext()).getFormHierarchy(contextForm);
 								for (Form form : formHierarchy)
 								{
-									List<Object> instanceMethodArguments = form.getInstanceMethodArguments(methodKey);
+									List<Object> instanceMethodArguments = form.getFlattenedMethodArguments(methodKey);
 									if (instanceMethodArguments != null && instanceMethodArguments.size() > index)
 									{
 										Object inherited = instanceMethodArguments.get(index);
@@ -200,9 +202,9 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 	private static MethodArgument[] getCombinedParams(MethodArgument[] formalArguments, IPersist context, IScriptProvider scriptMethod, String methodKey)
 	{
 		if (formalArguments == null) return null;
-		ArrayList<MethodArgument> finalParamsList = new ArrayList<MethodArgument>(); // the returned computed list 
-		Pair<List<Object>, List<Object>> instanceParamsArgs = ((AbstractBase)context).getInstanceMethodParametersLocal(methodKey);
-		List<Object> persistParamNames = instanceParamsArgs.getLeft() != null ? instanceParamsArgs.getLeft() : new ArrayList<Object>();
+		ArrayList<MethodArgument> finalParamsList = new ArrayList<MethodArgument>(); // the returned computed list
+		Pair<List<String>, List<Object>> instanceParamsArgs = ((AbstractBase)context).getFlattenedMethodParameters(methodKey);
+		List<String> persistParamNames = instanceParamsArgs.getLeft() != null ? instanceParamsArgs.getLeft() : new ArrayList<String>();
 		List<Object> actualArguments = instanceParamsArgs.getRight() != null ? instanceParamsArgs.getRight() : new ArrayList<Object>();
 
 		for (int i = 0; i < formalArguments.length; i++)
@@ -211,8 +213,8 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			Object persistParamName = persistParamNames.size() > i ? persistParamNames.get(i) : "";
 			if (persistParamNames.size() > i && !methodArgument.getName().equals(persistParamName) && !methodArgument.getName().contains("("))
 			{
-				finalParamsList.add(new MethodArgument(methodArgument.getName() + " (" + persistParamName + ")", methodArgument.getType(),
-					methodArgument.getDescription()));
+				finalParamsList.add(
+					new MethodArgument(methodArgument.getName() + " (" + persistParamName + ")", methodArgument.getType(), methodArgument.getDescription()));
 			}
 			else
 			{
@@ -235,7 +237,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 		return finalParamsList.toArray(new MethodArgument[finalParamsList.size()]);//Utils.arrayJoin(formalArguments, paramsList.toArray());
 	}
 
-	public static void setInstancMethodArguments(IPersist persist, Object id, List<Object> paramNames, List<Object> arguments)
+	public static void setMethodArguments(IPersist persist, Object id, List<String> paramNames, List<Object> arguments)
 	{
 		if (persist instanceof AbstractBase)
 		{
@@ -249,13 +251,13 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			if (arguments != null && arguments.size() > 0 && (paramNames.size() != arguments.size()))
 			{
 				//forms can be without new parameter Names if they updated before the parameter names array was introduced
-				((AbstractBase)persist).putInstanceMethodArguments(id.toString(), new ArrayList<Object>(arguments.subList(0, len)));
+				((AbstractBase)persist).putMethodArguments(id.toString(), new ArrayList<Object>(arguments.subList(0, len)));
 			}
 			else
 			{
 				// save a copy of the mwa.arguments list so that changes in mwa.arguments are not affecting customProperties
-				((AbstractBase)persist).putInstanceMethodParameters(id.toString(), len == 0 ? null : paramNames.subList(0, len), len == 0 ? null
-					: new ArrayList<Object>(arguments.subList(0, len)));
+				((AbstractBase)persist).putMethodParameters(id.toString(), len == 0 ? null : paramNames.subList(0, len),
+					len == 0 ? null : new ArrayList<Object>(arguments.subList(0, len)));
 			}
 		}
 	}
@@ -277,8 +279,8 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 
 		public void openEditor(MethodWithArguments value)
 		{
-			EditorUtil.openScriptEditor(ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), value.table, value.methodId),
-				null, true);
+			EditorUtil.openScriptEditor(ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), value.table, value.methodId), null,
+				true);
 		}
 	}
 
@@ -328,8 +330,8 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 				}
 				IScriptProvider scriptMethod = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), table, methodId);
 				// make sure sub-properties are sorted in defined order
-				propertyDescriptors = PropertyController.applySequencePropertyComparator(createMethodPropertyDescriptors(scriptMethod, persistContext,
-					methodKey));
+				propertyDescriptors = PropertyController.applySequencePropertyComparator(
+					createMethodPropertyDescriptors(scriptMethod, persistContext, methodKey));
 			}
 			return propertyDescriptors;
 		}
@@ -354,7 +356,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			MethodWithArguments mwa = getEditableValue();
 			if (mwa.arguments == null)
 			{
-				mwa = new MethodWithArguments(mwa.methodId, new SafeArrayList<Object>(), new SafeArrayList<Object>(), mwa.table);
+				mwa = new MethodWithArguments(mwa.methodId, new SafeArrayList<String>(), new SafeArrayList<Object>(), mwa.table);
 			}
 			boolean delete = false;
 			String value;
@@ -393,7 +395,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 						mwa.paramNames.set(i, formalArguments[i].getName());
 					}
 					// one edit by the user should make the props view valid with current jsfunction signature
-					// clear the rest of the missing args 
+					// clear the rest of the missing args
 					if (idx < formalArguments.length)
 					{
 						for (int i = formalArguments.length; i < mwa.arguments.size(); i++)
@@ -418,6 +420,46 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			}
 			return mwa;
 		}
+
+		@Override
+		public Object resetComplexPropertyValue(Object id)
+		{
+			Object resetToValue = super.resetComplexPropertyValue(id); // basically null
+
+			// if the element extends another element in super form - reset to the value super element has for that param name if possible
+			if (id instanceof Integer)
+			{
+				IPersist persist = persistContext.getPersist();
+				if (persist instanceof ISupportExtendsID)
+				{
+					persist = PersistHelper.getSuperPersist((ISupportExtendsID)persist);
+
+					if (persist != null) // parent persist
+					{
+						int idx = ((Integer)id).intValue();
+						String paramName = null;
+						// it's the index in the parameters list; find the one from extended persist if applicable and revert to that
+						MethodWithArguments mwa = getEditableValue();
+						if (mwa.paramNames != null && mwa.paramNames.size() > idx) paramName = mwa.paramNames.get(idx);
+
+						Pair<List<String>, List<Object>> superMethodParams = ((AbstractBase)persist).getFlattenedMethodParameters(methodKey);
+
+						if (paramName != null)
+						{
+							// search by param name; newer persists will always have param names stored as well; older ones might only have values stored
+							int searchIdx = superMethodParams.getLeft().indexOf(paramName);
+							if (searchIdx >= 0) idx = searchIdx;
+						}
+
+						List<Object> superParamValues = superMethodParams.getRight();
+						if (superParamValues != null && superParamValues.size() > idx) resetToValue = superParamValues.get(idx);
+					}
+				}
+			}
+
+			return resetToValue;
+		}
+
 	}
 
 }

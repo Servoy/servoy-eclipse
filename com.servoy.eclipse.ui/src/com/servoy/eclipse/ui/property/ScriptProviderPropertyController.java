@@ -42,9 +42,9 @@ import com.servoy.j2db.util.ScopesUtils;
 
 /**
  * Property controller for String properties that are script names, subproperties are instance arguments
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class ScriptProviderPropertyController extends PropertyController<String, Object>
 {
@@ -58,8 +58,8 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 		super(id, displayName);
 		this.table = table;
 		this.persistContext = persistContext;
-		setLabelProvider(new SolutionContextDelegateLabelProvider(new ScriptProviderCellEditor.ScriptDialog.ScriptDialogLabelProvider(persistContext, table,
-			true), persistContext.getContext()));
+		setLabelProvider(new SolutionContextDelegateLabelProvider(
+			new ScriptProviderCellEditor.ScriptDialog.ScriptDialogLabelProvider(persistContext, table, true), persistContext.getContext()));
 		setSupportsReadonly(true);
 	}
 
@@ -95,7 +95,7 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 						SafeArrayList<Object> args = null;
 						if (persist instanceof AbstractBase)
 						{
-							List<Object> instanceArgs = ((AbstractBase)persist).getInstanceMethodArguments(id.toString());
+							List<Object> instanceArgs = ((AbstractBase)persist).getFlattenedMethodArguments(id.toString());
 							if (instanceArgs != null)
 							{
 								args = new SafeArrayList<Object>(instanceArgs);
@@ -137,7 +137,7 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 				}
 				if (mwa != null)
 				{
-					MethodPropertyController.setInstancMethodArguments(persistContext.getPersist(), id, mwa.paramNames, mwa.arguments);
+					MethodPropertyController.setMethodArguments(persistContext.getPersist(), id, mwa.paramNames, mwa.arguments);
 					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), mwa.table,
 						mwa.methodId);
 					if (scriptProvider != null)
