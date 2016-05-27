@@ -159,7 +159,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 								List<Form> formHierarchy = ModelUtils.getEditingFlattenedSolution(context.getContext()).getFormHierarchy(contextForm);
 								for (Form form : formHierarchy)
 								{
-									List<Object> instanceMethodArguments = form.getInstanceMethodArguments(methodKey);
+									List<Object> instanceMethodArguments = form.getFlattenedMethodArguments(methodKey);
 									if (instanceMethodArguments != null && instanceMethodArguments.size() > index)
 									{
 										Object inherited = instanceMethodArguments.get(index);
@@ -201,8 +201,8 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 	{
 		if (formalArguments == null) return null;
 		ArrayList<MethodArgument> finalParamsList = new ArrayList<MethodArgument>(); // the returned computed list
-		Pair<List<Object>, List<Object>> instanceParamsArgs = ((AbstractBase)context).getInstanceMethodParametersLocal(methodKey);
-		List<Object> persistParamNames = instanceParamsArgs.getLeft() != null ? instanceParamsArgs.getLeft() : new ArrayList<Object>();
+		Pair<List<String>, List<Object>> instanceParamsArgs = ((AbstractBase)context).getFlattenedMethodParameters(methodKey);
+		List<String> persistParamNames = instanceParamsArgs.getLeft() != null ? instanceParamsArgs.getLeft() : new ArrayList<String>();
 		List<Object> actualArguments = instanceParamsArgs.getRight() != null ? instanceParamsArgs.getRight() : new ArrayList<Object>();
 
 		for (int i = 0; i < formalArguments.length; i++)
@@ -235,7 +235,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 		return finalParamsList.toArray(new MethodArgument[finalParamsList.size()]);//Utils.arrayJoin(formalArguments, paramsList.toArray());
 	}
 
-	public static void setInstancMethodArguments(IPersist persist, Object id, List<Object> paramNames, List<Object> arguments)
+	public static void setMethodArguments(IPersist persist, Object id, List<String> paramNames, List<Object> arguments)
 	{
 		if (persist instanceof AbstractBase)
 		{
@@ -249,12 +249,12 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			if (arguments != null && arguments.size() > 0 && (paramNames.size() != arguments.size()))
 			{
 				//forms can be without new parameter Names if they updated before the parameter names array was introduced
-				((AbstractBase)persist).putInstanceMethodArguments(id.toString(), new ArrayList<Object>(arguments.subList(0, len)));
+				((AbstractBase)persist).putMethodArguments(id.toString(), new ArrayList<Object>(arguments.subList(0, len)));
 			}
 			else
 			{
 				// save a copy of the mwa.arguments list so that changes in mwa.arguments are not affecting customProperties
-				((AbstractBase)persist).putInstanceMethodParameters(id.toString(), len == 0 ? null : paramNames.subList(0, len),
+				((AbstractBase)persist).putMethodParameters(id.toString(), len == 0 ? null : paramNames.subList(0, len),
 					len == 0 ? null : new ArrayList<Object>(arguments.subList(0, len)));
 			}
 		}
@@ -354,7 +354,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			MethodWithArguments mwa = getEditableValue();
 			if (mwa.arguments == null)
 			{
-				mwa = new MethodWithArguments(mwa.methodId, new SafeArrayList<Object>(), new SafeArrayList<Object>(), mwa.table);
+				mwa = new MethodWithArguments(mwa.methodId, new SafeArrayList<String>(), new SafeArrayList<Object>(), mwa.table);
 			}
 			boolean delete = false;
 			String value;
@@ -418,6 +418,46 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			}
 			return mwa;
 		}
+
+		@Override
+		public Object resetComplexPropertyValue(Object id)
+		{
+			Object resetToValue = super.resetComplexPropertyValue(id); // basically null
+
+			// if the element extends another element in super form - reset to the value super element has for that param name if possible
+			if (id instanceof Integer)
+			{
+				IPersist persist = persistContext.getPersist();
+				if (persist instanceof ISupportExtendsID)
+				{
+					persist = PersistHelper.getSuperPersist((ISupportExtendsID)persist);
+
+					if (persist != null) // parent persist
+					{
+						int idx = ((Integer)id).intValue();
+						String paramName = null;
+						// it's the index in the parameters list; find the one from extended persist if applicable and revert to that
+						MethodWithArguments mwa = getEditableValue();
+						if (mwa.paramNames != null && mwa.paramNames.size() > idx) paramName = mwa.paramNames.get(idx);
+
+						Pair<List<String>, List<Object>> superMethodParams = ((AbstractBase)persist).getFlattenedMethodParameters(methodKey);
+
+						if (paramName != null)
+						{
+							// search by param name; newer persists will always have param names stored as well; older ones might only have values stored
+							int searchIdx = superMethodParams.getLeft().indexOf(paramName);
+							if (searchIdx >= 0) idx = searchIdx;
+						}
+
+						List<Object> superParamValues = superMethodParams.getRight();
+						if (superParamValues != null && superParamValues.size() > idx) resetToValue = superParamValues.get(idx);
+					}
+				}
+			}
+
+			return resetToValue;
+		}
+
 	}
 
 }

@@ -95,7 +95,7 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 						SafeArrayList<Object> args = null;
 						if (persist instanceof AbstractBase)
 						{
-							List<Object> instanceArgs = ((AbstractBase)persist).getInstanceMethodArguments(id.toString());
+							List<Object> instanceArgs = ((AbstractBase)persist).getFlattenedMethodArguments(id.toString());
 							if (instanceArgs != null)
 							{
 								args = new SafeArrayList<Object>(instanceArgs);
@@ -137,7 +137,7 @@ public class ScriptProviderPropertyController extends PropertyController<String,
 				}
 				if (mwa != null)
 				{
-					MethodPropertyController.setInstancMethodArguments(persistContext.getPersist(), id, mwa.paramNames, mwa.arguments);
+					MethodPropertyController.setMethodArguments(persistContext.getPersist(), id, mwa.paramNames, mwa.arguments);
 					IScriptProvider scriptProvider = ModelUtils.getScriptMethod(persistContext.getPersist(), persistContext.getContext(), mwa.table,
 						mwa.methodId);
 					if (scriptProvider != null)
