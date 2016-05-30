@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.Action;
@@ -30,6 +31,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
+import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -40,6 +42,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
 import com.servoy.j2db.util.Debug;
 
 /**
@@ -179,7 +182,8 @@ public class RemovePackageProjectAction extends Action implements ISelectionChan
 				node.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE);
 			if (state) try
 			{
-				selectedProject = (ServoyNGPackageProject)((IProject)node.getRealObject()).getNature(ServoyNGPackageProject.NATURE_ID);
+				IResource packageRoot = SolutionExplorerTreeContentProvider.getResource((IPackageReader)node.getRealObject());
+				if (packageRoot != null) selectedProject = (ServoyNGPackageProject)packageRoot.getProject().getNature(ServoyNGPackageProject.NATURE_ID);
 			}
 			catch (CoreException e)
 			{

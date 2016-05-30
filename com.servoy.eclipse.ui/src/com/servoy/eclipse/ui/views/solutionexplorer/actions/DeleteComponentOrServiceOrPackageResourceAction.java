@@ -45,12 +45,14 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
+import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
 
 /**
  * Deletes the selected components or services or packages of components or services.
@@ -115,10 +117,15 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 					resource = (IResource)realObject;
 
 				}
+				else if (realObject instanceof IPackageReader)
+				{
+					resource = SolutionExplorerTreeContentProvider.getResource((IPackageReader)realObject);
+				}
 				else if (next.getType() == UserNodeType.COMPONENT || next.getType() == UserNodeType.SERVICE || next.getType() == UserNodeType.LAYOUT)
 				{
 					resource = getComponentFolderToDelete(resources, next);
 				}
+
 
 				if (resource != null)
 				{

@@ -39,6 +39,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
@@ -46,6 +47,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
 /**
@@ -85,7 +87,7 @@ public class NewWebObjectAction extends Action
 		componentOrServiceName = componentOrServiceName.trim();
 
 		final String compOrSrvName = componentOrServiceName;
-		final IResource packageRoot = (IResource)node.getRealObject();
+		final IResource packageRoot = SolutionExplorerTreeContentProvider.getResource((IPackageReader)node.getRealObject());
 		IWorkspaceRunnable createJob = new IWorkspaceRunnable()
 		{
 
@@ -274,7 +276,7 @@ public class NewWebObjectAction extends Action
 	public boolean isEnabled()
 	{
 		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
-		IResource packageRoot = (IResource)node.getRealObject();
+		IResource packageRoot = SolutionExplorerTreeContentProvider.getResource((IPackageReader)node.getRealObject());
 		return (packageRoot instanceof IFolder || packageRoot instanceof IProject);
 	}
 }
