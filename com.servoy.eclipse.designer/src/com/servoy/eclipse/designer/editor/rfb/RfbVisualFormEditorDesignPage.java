@@ -18,9 +18,10 @@
 package com.servoy.eclipse.designer.editor.rfb;
 
 import java.awt.Dimension;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.gef.ui.actions.SelectAllAction;
@@ -484,10 +485,10 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	 * @param form
 	 * @return
 	 */
-	private List<IPersist> filterByParent(List<IPersist> persists, Form form)
+	private Set<IPersist> filterByParent(List<IPersist> persists, Form form)
 	{
 		// first add the stuff of the form itself to the map.
-		List<IPersist> filtered = new ArrayList<>();
+		Set<IPersist> filtered = new HashSet<>();
 		if (persists != null)
 		{
 			for (IPersist persist : persists)

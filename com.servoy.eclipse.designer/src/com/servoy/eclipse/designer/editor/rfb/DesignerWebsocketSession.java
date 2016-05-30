@@ -50,9 +50,9 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormReference;
+import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.LayoutContainer;
@@ -237,6 +237,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					if (layoutId != null)
 					{
 						IPersist child = flattenedForm.findChild(UUID.fromString(layoutId), true);
+						if (child instanceof IFlattenedPersistWrapper< ? >) child = ((IFlattenedPersistWrapper< ? >)child).getWrappedPersist();
 						if (child instanceof LayoutContainer)
 						{
 							componentFound = true;
@@ -311,23 +312,21 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	}
 
 	/**
-	 * @param fe
+	 * @param persist
 	 * @return
 	 */
 	private UUID findNextSibling(IPersist persist)
 	{
-		if (persist != null && persist.getParent() instanceof LayoutContainer)
+		if (persist != null && persist.getParent() instanceof AbstractContainer)
 		{
-			LayoutContainer layoutContainer = (LayoutContainer)persist.getParent();
-			List<IPersist> hierarchyChildren = layoutContainer.getHierarchyChildren();
-			Collections.sort(hierarchyChildren, PositionComparator.XY_PERSIST_COMPARATOR);
-			int indexOf = hierarchyChildren.indexOf(persist);
-			if (indexOf > -1 && (indexOf + 1) < hierarchyChildren.size()) return hierarchyChildren.get(indexOf + 1).getUUID();
+			ArrayList<IPersist> children = ((AbstractContainer)persist.getParent()).getSortedChildren();
+			int indexOf = children.indexOf(persist);
+			if (indexOf > -1 && (indexOf + 1) < children.size()) return children.get(indexOf + 1).getUUID();
 		}
 		return null;
 	}
 
-	public String getComponentsJSON(FlattenedSolution fs, List<IPersist> persists)
+	public String getComponentsJSON(FlattenedSolution fs, Set<IPersist> persists)
 	{
 		Set<IFormElement> baseComponents = new HashSet<>();
 		Set<IFormElement> refreshTemplate = new HashSet<>();
@@ -568,21 +567,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					writer.value(parent.getUUID().toString());
 				}
 				writer.key("index");
-				if (parent instanceof LayoutContainer)
+				if (parent instanceof AbstractContainer)
 				{
-					ArrayList<IPersist> children = new ArrayList<IPersist>();
-					Iterator<IPersist> it = parent.getAllObjects();
-					while (it.hasNext())
-					{
-						IPersist persist = it.next();
-						if (persist instanceof ISupportBounds)
-						{
-							children.add(persist);
-						}
-					}
-					IPersist[] sortedChildArray = children.toArray(new IPersist[0]);
-					Arrays.sort(sortedChildArray, PositionComparator.XY_PERSIST_COMPARATOR);
-					children = new ArrayList<IPersist>(Arrays.asList(sortedChildArray));
+					ArrayList<IPersist> children = ((AbstractContainer)parent).getSortedChildren();
 					writer.value(children.indexOf(p));
 				}
 				else
