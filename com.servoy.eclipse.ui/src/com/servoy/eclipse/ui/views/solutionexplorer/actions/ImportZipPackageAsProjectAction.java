@@ -40,7 +40,6 @@ import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ngpackages.NGPackageManager;
-import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
@@ -83,12 +82,7 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 						ZipInputStream zis = null;
 						try
 						{
-							if (root.getProject(projectName).exists())
-							{
-								UIUtils.reportError("Import component as project",
-									"Project with name : '" + projectName + "' already exist in the current workspace. Skipping import.");
-								continue;
-							}
+							if (!checkForExistingProject(projectName)) continue;
 							IProject newProject = NGPackageManager.createProject(projectName);
 
 							zis = new ZipInputStream(new FileInputStream(filterPath + File.separator + zipFile));

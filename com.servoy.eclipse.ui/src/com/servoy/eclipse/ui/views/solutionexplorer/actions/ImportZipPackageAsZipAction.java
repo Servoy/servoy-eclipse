@@ -72,7 +72,6 @@ public class ImportZipPackageAsZipAction extends ImportZipPackageAction
 		overrideReturnCode = IDialogConstants.YES_TO_ALL_ID;
 
 		final List<String> existingComponents = existingComponents(fileNames);
-
 		if (!existingComponents.isEmpty())
 		{
 			UIUtils.runInUI(new Runnable()
@@ -101,6 +100,7 @@ public class ImportZipPackageAsZipAction extends ImportZipPackageAction
 		IFolder componentsFolder = checkComponentsFolderCreated();
 		for (String fileName : fileNames)
 		{
+			if (!checkForExistingProject(fileName.split("\\.")[0])) continue;
 			File javaFile = new File(filterPath + File.separator + fileName);
 			if (javaFile.exists() && javaFile.isFile())
 			{
