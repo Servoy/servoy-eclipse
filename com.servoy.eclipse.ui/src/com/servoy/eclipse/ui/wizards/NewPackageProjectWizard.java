@@ -284,11 +284,11 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 			final GroupLayout groupLayout = new GroupLayout(container);
 			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 				groupLayout.createSequentialGroup().add(packageLabel).addPreferredGap(LayoutStyle.UNRELATED).add(packName, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).add(selectSolutionLabel).add(ftv, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
+					GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).add(selectSolutionLabel).add(ftv, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
 						Short.MAX_VALUE));
 			groupLayout.setVerticalGroup(
 				groupLayout.createSequentialGroup().add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(packageLabel).add(packName)).add(
-					selectSolutionLabel).add(ftv));
+					selectSolutionLabel).add(ftv, GroupLayout.PREFERRED_SIZE, 280, Short.MAX_VALUE));
 			groupLayout.setAutocreateGaps(true);
 			groupLayout.setAutocreateContainerGaps(true);
 			container.setLayout(groupLayout);
