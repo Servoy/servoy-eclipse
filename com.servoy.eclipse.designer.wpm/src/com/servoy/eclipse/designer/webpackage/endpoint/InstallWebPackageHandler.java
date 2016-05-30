@@ -63,7 +63,8 @@ public class InstallWebPackageHandler implements IDeveloperService
 			URLConnection conn = url.openConnection();
 			InputStream in = conn.getInputStream();
 			String packageName = pck.getString("name");
-			IFolder componentsFolder = RemoveWebPackageHandler.checkPackagesFolderCreated(SolutionSerializer.NG_PACKAGES_DIR_NAME);
+			String solutionName = pck.getString("activeSolution");
+			IFolder componentsFolder = RemoveWebPackageHandler.checkPackagesFolderCreated(solutionName, SolutionSerializer.NG_PACKAGES_DIR_NAME);
 
 			importZipFileComponent(componentsFolder, in, packageName);
 			in.close();

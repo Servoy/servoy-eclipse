@@ -27,6 +27,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.specification.BaseSpecProvider;
@@ -64,7 +67,9 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		try
 		{
 			Map<String, String> packagesToVersions = provider.getPackagesToVersions();
+			Map<String, URL> packagesToURL = provider.getPackagesToURLs();
 			packagesToVersions.putAll(WebServiceSpecProvider.getInstance().getPackagesToVersions());
+			packagesToURL.putAll(WebServiceSpecProvider.getInstance().getPackagesToURLs());
 			List<JSONObject> remotePackages = getRemotePackages();
 
 			for (JSONObject pack : remotePackages)
@@ -73,8 +78,8 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 				if (packagesToVersions.containsKey(name))
 				{
 					pack.put("installed", packagesToVersions.get(name));
-					// TODO get the solution of the package.
-					pack.put("activeSolution", activeSolutionName);
+					String parentSolutionName = getParentProjectNameForPackage(packagesToURL.get(name));
+					pack.put("activeSolution", parentSolutionName != null ? parentSolutionName : activeSolutionName);
 				}
 				else
 				{
@@ -89,6 +94,25 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 			Debug.log(e);
 		}
 		return result;
+	}
+
+	private String getParentProjectNameForPackage(URL packageURL)
+	{
+		if (packageURL != null)
+		{
+			String ws = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
+			String file = packageURL.getFile();
+			if (file != null && file.startsWith(ws))
+			{
+				IResource r = ResourcesPlugin.getWorkspace().getRoot().findMember(file.substring(ws.length()));
+				if (r != null)
+				{
+					IProject p = r.getProject();
+					if (p != null) return p.getName();
+				}
+			}
+		}
+		return null;
 	}
 
 	/**

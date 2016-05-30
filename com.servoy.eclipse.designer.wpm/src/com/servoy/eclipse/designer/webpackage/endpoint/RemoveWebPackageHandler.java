@@ -44,7 +44,8 @@ public class RemoveWebPackageHandler implements IDeveloperService
 		JSONObject pck = msg.getJSONObject("package");
 
 		String packageName = pck.getString("name");
-		IFolder packagesFolder = checkPackagesFolderCreated(SolutionSerializer.NG_PACKAGES_DIR_NAME);
+		String solutionName = pck.getString("activeSolution");
+		IFolder packagesFolder = checkPackagesFolderCreated(solutionName, SolutionSerializer.NG_PACKAGES_DIR_NAME);
 		IFile file = packagesFolder.getFile(packageName + ".zip");
 		try
 		{
@@ -57,9 +58,9 @@ public class RemoveWebPackageHandler implements IDeveloperService
 		return null;
 	}
 
-	static IFolder checkPackagesFolderCreated(String webPackagesFolder)
+	static IFolder checkPackagesFolderCreated(String solutionName, String webPackagesFolder)
 	{
-		IProject project = getInstallTargetProject();
+		IProject project = getInstallTargetProject(solutionName);
 
 		try
 		{
@@ -84,10 +85,9 @@ public class RemoveWebPackageHandler implements IDeveloperService
 		return folder;
 	}
 
-	//TODO get the target from the client
-	static IProject getInstallTargetProject()
+	static IProject getInstallTargetProject(String solutionName)
 	{
-		ServoyProject initialActiveProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		ServoyProject initialActiveProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
 		IProject project = initialActiveProject.getProject();
 		return project;
 	}

@@ -30,7 +30,7 @@
     </td>
     <td>
       <div class="align-center">  
-        <md-select ng-model="package.activeSolution" style="width: 200px;">
+        <md-select ng-model="package.activeSolution" ng-disabled="!installEnabled($index)" style="width: 200px;">
           <md-option ng-value="solution" ng-repeat="solution in $parent.solutionList">{{solution}}</md-option>
         </md-select>
         <!--<i class="fa fa-check-circle-o release-action success" ng-if="package.installed"></i>-->
