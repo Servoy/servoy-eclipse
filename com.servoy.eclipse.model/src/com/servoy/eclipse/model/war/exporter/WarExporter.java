@@ -270,12 +270,7 @@ public class WarExporter
 				if (resource != null)
 				{
 					boolean copy = false;
-					String name = resource.getName();
-					if (resource.isFile())
-					{
-						int index = name.lastIndexOf('.');
-						name = name.substring(0, index);
-					}
+					String name = packageReader.getPackageName();
 					if (IPackageReader.WEB_COMPONENT.equals(packageReader.getPackageType()))
 					{
 						if (excludedComponentPackages == null || !excludedComponentPackages.contains(name))
@@ -300,7 +295,7 @@ public class WarExporter
 						}
 						else
 						{
-							extractJar(resource, tmpWarDir);
+							extractJar(name, resource, tmpWarDir);
 						}
 					}
 				}
@@ -458,7 +453,7 @@ public class WarExporter
 		}
 	}
 
-	private void extractJar(File file, File tmpWarDir)
+	private void extractJar(String dirName, File file, File tmpWarDir)
 	{
 		JarFile jarfile = null;
 		try
@@ -467,14 +462,7 @@ public class WarExporter
 			Enumeration<JarEntry> enu = jarfile.entries();
 			while (enu.hasMoreElements())
 			{
-				String name = file.getName();
-				int index = name.lastIndexOf('.');
-				if (index != -1)
-				{
-					name = name.substring(0, index);
-				}
-
-				String destdir = tmpWarDir + "/" + name;
+				String destdir = tmpWarDir + "/" + dirName;
 				JarEntry je = enu.nextElement();
 				File fl = new File(destdir, je.getName());
 				if (!fl.exists())
