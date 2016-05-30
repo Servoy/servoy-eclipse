@@ -42,6 +42,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.util.Utils;
 
 
 /**
@@ -98,7 +99,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	protected void createPages()
 	{
 		super.createPages();
-		if (!isMobile())
+		if (!isMobile() && !Utils.getAsBoolean(getForm().getReferenceForm()))
 		{
 			if (!isClosing())
 			{
