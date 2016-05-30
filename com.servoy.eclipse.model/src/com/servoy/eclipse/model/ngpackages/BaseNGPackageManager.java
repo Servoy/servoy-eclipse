@@ -53,7 +53,6 @@ import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
-import com.servoy.j2db.util.Pair;
 
 /**
  * A class for managing the loaded NG custom web components and services.
@@ -275,11 +274,10 @@ public abstract class BaseNGPackageManager
 						IResource[] members = folder.members();
 						for (IResource resource : members)
 						{
-							Pair<String, IPackageReader> nameAndReader = readPackageResource(resource);
-							if (nameAndReader != null)
+							IPackageReader reader = readPackageResource(resource);
+							if (reader != null)
 							{
-								String packageType = nameAndReader.getRight().getPackageType();
-								packagesTypeToReaders.get(packageType).put(nameAndReader.getLeft(), nameAndReader.getRight());
+								packagesTypeToReaders.get(reader.getPackageType()).put(reader.getPackageName(), reader);
 							}
 						}
 					}
@@ -434,7 +432,7 @@ public abstract class BaseNGPackageManager
 
 	/**
 	 * Unloads some previously loaded ngPackage projects and loads others as needed (as they change in workspace).
-
+	
 	 * IMPORTANT: only call this if these packages are the only ones that changed (so there were no changes in the ng packages from the resouces project; cause if
 	 * for example a package is moved between the resources project and a separate ng pacakge project it would error out because it might not be unloaded
 	 * properly before being loaded again if you sequentially call reload on resources project packages and on ng package projects)
@@ -518,18 +516,17 @@ public abstract class BaseNGPackageManager
 		{
 			if (canChangeResources) project.refreshLocal(IResource.DEPTH_INFINITE, m);
 			project.deleteMarkers(SPEC_READ_MARKER, false, IResource.DEPTH_ONE);
-			Pair<String, IPackageReader> nameAndReader = readPackageResource(project);
-			if (nameAndReader != null)
+			IPackageReader reader = readPackageResource(project);
+			if (reader != null)
 			{
 				// see if it is a component package or a service package
-				if (IPackageReader.WEB_SERVICE.equals(nameAndReader.getRight().getPackageType()))
+				if (IPackageReader.WEB_SERVICE.equals(reader.getPackageType()))
 				{
-					newServiceReaders.put(nameAndReader.getLeft(), nameAndReader.getRight());
+					newServiceReaders.put(reader.getPackageName(), reader);
 				}
-				else if (IPackageReader.WEB_COMPONENT.equals(nameAndReader.getRight().getPackageType()) ||
-					IPackageReader.WEB_LAYOUT.equals(nameAndReader.getRight().getPackageType()))
+				else if (IPackageReader.WEB_COMPONENT.equals(reader.getPackageType()) || IPackageReader.WEB_LAYOUT.equals(reader.getPackageType()))
 				{
-					newComponentReaders.put(nameAndReader.getLeft(), nameAndReader.getRight());
+					newComponentReaders.put(reader.getPackageName(), reader);
 				}
 				else
 				{
@@ -578,8 +575,8 @@ public abstract class BaseNGPackageManager
 				IResource[] members = folder.members();
 				for (IResource resource : members)
 				{
-					Pair<String, IPackageReader> nameAndReader = readPackageResource(resource);
-					if (nameAndReader != null) readers.put(nameAndReader.getLeft(), nameAndReader.getRight());
+					IPackageReader reader = readPackageResource(resource);
+					if (reader != null) readers.put(reader.getPackageName(), reader);
 				}
 			}
 			catch (CoreException e)
@@ -589,14 +586,13 @@ public abstract class BaseNGPackageManager
 		}
 	}
 
-	protected Pair<String, IPackageReader> readPackageResource(IResource resource)
+	protected IPackageReader readPackageResource(IResource resource)
 	{
 		if (resource instanceof IContainer)
 		{
 			if (((IContainer)resource).getFile(new Path("META-INF/MANIFEST.MF")).exists())
 			{
-				return new Pair<String, IPackageReader>(resource.getName(),
-					new ContainerPackageReader(new File(resource.getLocationURI()), (IContainer)resource));
+				return new ContainerPackageReader(new File(resource.getLocationURI()), (IContainer)resource);
 			}
 		}
 		else if (resource instanceof IFile)
@@ -611,7 +607,7 @@ public abstract class BaseNGPackageManager
 			{
 				ZipFilePackageReader reader = new ZipFilePackageReader(resource);
 				if (reader.getPackageType() == null) return null;
-				return new Pair<String, IPackageReader>(name, reader);
+				return reader;
 			}
 		}
 		return null;

@@ -249,10 +249,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib), //
 			createTypeNode(Messages.TreeStrings_SpecialOperators, UserNodeType.SPECIAL_OPERATORS,
 				com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, jslib), //
-				createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
-				createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
-				createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
-					jslib) };
+			createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
+			createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
+			createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
+				jslib) };
 
 		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, invisibleRootNode);
 
@@ -1107,7 +1107,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					}
 					else if (type == UserNodeType.ALL_WEB_PACKAGE_PROJECTS)
 					{
-
+						// this has to be just the projects, can't be the IPackageReaders because for a none referenced project
+						// the package reader is not loaded/created.
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 						for (IProject iProject : projects)
@@ -1194,8 +1195,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			File resource = reader.getResource();
 			if (resource != null && resource.isFile())
 			{
-				IFile file = root.getFile(Path.fromOSString(resource.getAbsolutePath()));
-				if (allReferencedProjects.contains(file.getProject()))
+				IFile[] files = root.findFilesForLocationURI(resource.toURI());
+				if (files.length == 1 && allReferencedProjects.contains(files[0].getProject()))
 				{
 					String displayName = reader.getPackageDisplayname();
 					PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayName, nodeType, reader, packageIcon);

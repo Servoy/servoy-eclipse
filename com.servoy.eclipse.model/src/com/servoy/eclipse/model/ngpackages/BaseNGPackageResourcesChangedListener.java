@@ -85,7 +85,7 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 		final List<IProject> newNGPackageProjectsToLoad = new ArrayList<>();
 		final List<IProject> oldNGPackageProjectsToUnload = new ArrayList<>();
 
-		checkForChangesInSolutionBinaryPackages(delta);
+		Pair<Boolean, Boolean> changesInBinary = checkForChangesInSolutionBinaryPackages(delta);
 
 		checkForChangesInNGPackageProjects(activeProject, affectedChildren, refreshAllNGPackageProjects, clearReferencedProjectsCache,
 			newNGPackageProjectsToLoad, oldNGPackageProjectsToUnload);
@@ -94,7 +94,8 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 		boolean somethingChangedInNGPackageProjects = (refreshAllNGPackageProjects.value.booleanValue() || newNGPackageProjectsToLoad.size() > 0 ||
 			oldNGPackageProjectsToUnload.size() > 0);
 
-		if (somethingChangedInResourcesProject && somethingChangedInNGPackageProjects)
+		if ((somethingChangedInResourcesProject && somethingChangedInNGPackageProjects) ||
+			(changesInBinary.getLeft().booleanValue() || changesInBinary.getRight().booleanValue()))
 		{
 			// we have to reload all to avoid a problem where when moving a package completely between resources project and it's own project
 			// it could be loaded twice (if we would reload first resources project and then it's own project, then while reloading from one the others will not yet be unloaded)
@@ -128,7 +129,7 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 	 * @param delta
 	 * @return
 	 */
-	private void checkForChangesInSolutionBinaryPackages(IResourceDelta delta)
+	private Pair<Boolean, Boolean> checkForChangesInSolutionBinaryPackages(IResourceDelta delta)
 	{
 		final Map<String, IPackageReader> addedPackageReaders = new HashMap<String, IPackageReader>();
 		final List<File> removedPackageFiles = new ArrayList<>();
@@ -140,6 +141,7 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 				@Override
 				public boolean visit(IResourceDelta resourceDelta) throws CoreException
 				{
+					if (resourceDelta.getMarkerDeltas().length > 0 && (resourceDelta.getKind() & IResourceDelta.CHANGED) != 0) return true;
 					IResource resource = resourceDelta.getResource();
 					if (resource instanceof IFile)
 					{
@@ -151,8 +153,8 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 								if ((resourceDelta.getKind() & IResourceDelta.CHANGED) != 0)
 								{
 									removedPackageFiles.add(new File(resource.getLocationURI()));
-									Pair<String, IPackageReader> readPackageResource = baseNGPackageManager.readPackageResource(resource);
-									if (readPackageResource != null) addedPackageReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
+									IPackageReader reader = baseNGPackageManager.readPackageResource(resource);
+									if (reader != null) addedPackageReaders.put(reader.getPackageName(), reader);
 								}
 								else if ((resourceDelta.getKind() & IResourceDelta.REMOVED) != 0)
 								{
@@ -160,8 +162,8 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 								}
 								else if ((resourceDelta.getKind() & IResourceDelta.ADDED) != 0)
 								{
-									Pair<String, IPackageReader> readPackageResource = baseNGPackageManager.readPackageResource(resource);
-									if (readPackageResource != null) addedPackageReaders.put(readPackageResource.getLeft(), readPackageResource.getRight());
+									IPackageReader reader = baseNGPackageManager.readPackageResource(resource);
+									if (reader != null) addedPackageReaders.put(reader.getPackageName(), reader);
 								}
 							}
 						}
@@ -175,9 +177,6 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 		{
 			Debug.log(e);
 		}
-
-		boolean componentsReloaded = false;
-		boolean servicesReloaded = false;
 
 		List<String> removedComponentPackageNames = new ArrayList<>();
 		List<String> removedServicePackageNames = new ArrayList<>();
@@ -206,19 +205,8 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 			}
 		}
 
-
-		if (removedComponentPackageNames.size() > 0 || addedComponentPackageReaders.size() > 0)
-		{
-			ResourceProvider.updateComponentResources(removedComponentPackageNames, addedComponentPackageReaders);
-			componentsReloaded = true;
-		}
-		if (removedServicePackageNames.size() > 0 || addedServicePackageReaders.size() > 0)
-		{
-			ResourceProvider.updateServiceResources(removedServicePackageNames, addedServicePackageReaders);
-			servicesReloaded = true;
-		}
-
-		if (componentsReloaded || servicesReloaded) baseNGPackageManager.ngPackagesChanged(componentsReloaded, servicesReloaded);
+		return new Pair<Boolean, Boolean>(Boolean.valueOf(removedComponentPackageNames.size() > 0 || addedComponentPackageReaders.size() > 0),
+			Boolean.valueOf(removedServicePackageNames.size() > 0 || addedServicePackageReaders.size() > 0));
 	}
 
 	protected void checkForChangesInNGPackageProjects(ServoyProject activeProject, IResourceDelta[] affectedChildren,
