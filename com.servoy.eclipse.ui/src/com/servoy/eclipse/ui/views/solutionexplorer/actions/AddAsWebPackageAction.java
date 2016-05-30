@@ -19,11 +19,13 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
+import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.Activator;
@@ -112,7 +114,9 @@ public class AddAsWebPackageAction extends AddAsSolutionReference
 	@Override
 	protected String getSelectedNodeName(SimpleUserNode node)
 	{
-		return ((IProject)node.getRealObject()).getName();
+		Object realObject = node.getRealObject();
+		if (realObject instanceof IResource) return ((IResource)realObject).getName();
+		return ((IPackageReader)realObject).getName();
 	}
 
 }

@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
@@ -85,7 +86,12 @@ public class EditWebPackageDetailsAction extends Action implements ISelectionCha
 		if (it.hasNext() && state)
 		{
 			SimpleUserNode node = it.next();
-			state = node.getRealObject() instanceof IContainer && (node.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE ||
+			Object realObject = node.getRealObject();
+			if (realObject instanceof IPackageReader)
+			{
+				realObject = SolutionExplorerTreeContentProvider.getResource((IPackageReader)realObject);
+			}
+			state = realObject instanceof IContainer && (node.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE ||
 				node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE || node.getType() == UserNodeType.SERVICES_NONPROJECT_PACKAGE ||
 				node.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE || node.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE);
 		}
@@ -96,40 +102,31 @@ public class EditWebPackageDetailsAction extends Action implements ISelectionCha
 	public void run()
 	{
 		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
+		IPackageReader packageReader = (IPackageReader)node.getRealObject();
 		boolean componentsNotServices = (node.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE ||
 			node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE || node.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE);
-		String packageName = SolutionExplorerTreeContentProvider.getPackageName(node); // we cannot rely on node name to be the display name directly cause if 'includeFromModules' option is enabled in SolEx the node name will be prefixed with the module name in some cases
-		String name = (componentsNotServices ? WebComponentSpecProvider.getInstance().getPackageDisplayName(packageName)
-			: WebServiceSpecProvider.getInstance().getPackageDisplayName(packageName));
-		String version = null;
-		try
-		{
-			version = (componentsNotServices ? WebComponentSpecProvider.getInstance().getPackagesToVersions().get(packageName)
-				: WebServiceSpecProvider.getInstance().getPackagesToVersions().get(packageName));
-		}
-		catch (IOException ex)
-		{
-			ServoyLog.logError(ex);
-		}
+		String packageName = packageReader.getPackageName();
+		String displayName = packageReader.getPackageDisplayname();
+		String version = packageReader.getVersion();
 		String newName = null;
 		String newVersion = null;
 
-		EditDialog dialog = new EditDialog(packageName, name, version);
+		EditDialog dialog = new EditDialog(packageName, displayName, version);
 		int code = dialog.open();
 		newName = dialog.getSelectedName();
 		newVersion = dialog.getSelectedVersion();
-		if (code != 0 || (name.equals(newName) && Utils.equalObjects(version, newVersion))) return;
-		if (!name.equals(newName))
+		if (code != 0 || (displayName.equals(newName) && Utils.equalObjects(version, newVersion))) return;
+		if (!displayName.equals(newName))
 		{
 			while (!isNameValid(node, newName, componentsNotServices))
 			{
 				code = dialog.open();
 				newName = dialog.getSelectedName();
-				if (code != 0 || (name.equals(newName) && Utils.equalObjects(version, newVersion))) return;
+				if (code != 0 || (displayName.equals(newName) && Utils.equalObjects(version, newVersion))) return;
 			}
 		}
 
-		updatePackageDetails(node, newName, newVersion);
+		updatePackageDetails((IContainer)SolutionExplorerTreeContentProvider.getResource(packageReader), newName, newVersion);
 	}
 
 	private boolean isNameValid(PlatformSimpleUserNode node, String packageDisplayName, boolean componentsNotServices)
@@ -154,13 +151,13 @@ public class EditWebPackageDetailsAction extends Action implements ISelectionCha
 		return true;
 	}
 
-	private void updatePackageDetails(PlatformSimpleUserNode node, String newName, String newVersion)
+	private void updatePackageDetails(IContainer container, String newName, String newVersion)
 	{
 		OutputStream out = null;
 		InputStream in = null;
 		try
 		{
-			IFile m = ((IContainer)node.getRealObject()).getFile(new Path("META-INF/MANIFEST.MF"));
+			IFile m = container.getFile(new Path("META-INF/MANIFEST.MF"));
 			m.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
 			Manifest manifest = new Manifest(m.getContents());
 			Attributes attr = manifest.getMainAttributes();

@@ -39,10 +39,12 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
 /**
@@ -77,9 +79,16 @@ public class ExportPackageResourceAction extends Action implements ISelectionCha
 				SimpleUserNode next = it.next();
 				Object realObject = next.getRealObject();
 				IResource resource = null;
-				if (realObject instanceof IContainer || realObject instanceof IFile)
+				if (realObject instanceof IPackageReader)
+				{
+					resource = SolutionExplorerTreeContentProvider.getResource((IPackageReader)realObject);
+				}
+				else if (realObject instanceof IContainer || realObject instanceof IFile)
 				{
 					resource = (IResource)realObject;
+				}
+				if (resource != null)
+				{
 					FileDialog dialog = new FileDialog(shell, SWT.SAVE);
 					dialog.setFileName(resource.getName() + (resource instanceof IContainer ? ".zip" : ""));
 					String selectedFile = dialog.open();

@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.ui.model.IWorkbenchAdapter;
+import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -400,7 +401,9 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 				type == UserNodeType.SERVICES_NONPROJECT_PACKAGE || type == UserNodeType.SERVICES_PROJECT_PACKAGE ||
 				type == UserNodeType.LAYOUT_NONPROJECT_PACKAGE || type == UserNodeType.LAYOUT_PROJECT_PACKAGE)
 			{
-				return userNode.getRealObject();
+				Object realObject = userNode.getRealObject();
+				if (realObject instanceof IResource) return realObject;
+				return SolutionExplorerTreeContentProvider.getResource((IPackageReader)realObject);
 			}
 			else if (type == UserNodeType.COMPONENT || type == UserNodeType.LAYOUT || type == UserNodeType.SERVICE)
 			{
