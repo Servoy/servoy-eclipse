@@ -44,10 +44,12 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.SafeArrayList;
 import com.servoy.j2db.util.Utils;
 
@@ -57,7 +59,7 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  *
  */
-public class MethodPropertyController<P> extends PropertyController<P, Object>
+public class MethodPropertyController<P> extends PropertyController<P, Object> implements IPropertySetter<P, ISetterAwarePropertySource>
 {
 	private final PersistContext persistContext;
 	private final MethodListOptions options;
@@ -458,6 +460,35 @@ public class MethodPropertyController<P> extends PropertyController<P, Object>
 			return resetToValue;
 		}
 
+	}
+
+
+	// IPropertySetter is implemented just for resetting a value - which also needs to reset the method arguments;
+	// the other methods of the interface are just forwarding the call to default given property source handling
+	@Override
+	public void setProperty(ISetterAwarePropertySource propertySource, P value)
+	{
+		propertySource.defaultSetProperty(getId(), value);
+	}
+
+	@Override
+	public P getProperty(ISetterAwarePropertySource propertySource)
+	{
+		return (P)propertySource.defaultGetProperty(getId());
+	}
+
+	@Override
+	public boolean isPropertySet(ISetterAwarePropertySource propertySource)
+	{
+		return propertySource.defaultIsPropertySet(getId());
+	}
+
+	@Override
+	public void resetPropertyValue(ISetterAwarePropertySource propertySource)
+	{
+		// reset method arguments as well
+		((AbstractBase)persistContext.getPersist()).clearMethodParameters(getId().toString());
+		propertySource.defaultResetProperty(getId());
 	}
 
 }

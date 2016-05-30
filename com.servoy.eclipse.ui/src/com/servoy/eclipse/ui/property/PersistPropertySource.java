@@ -1486,10 +1486,10 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							if (value == null) return null;
 
 							SafeArrayList<Object> args = null;
-							SafeArrayList<Object> params = null;
+							SafeArrayList<String> params = null;
 							if (persistContext != null && persistContext.getPersist() instanceof AbstractBase)
 							{
-								Pair<List<Object>, List<Object>> instanceParamsArgs = ((AbstractBase)persistContext.getPersist()).getInstanceMethodParametersLocal(
+								Pair<List<String>, List<Object>> instanceParamsArgs = ((AbstractBase)persistContext.getPersist()).getFlattenedMethodParameters(
 									id.toString());
 								if (instanceParamsArgs != null)
 								{
@@ -1501,7 +1501,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 										{
 											MethodArgument[] formalArguments = ((AbstractBase)scriptMethod).getRuntimeProperty(
 												IScriptProvider.METHOD_ARGUMENTS);
-											params = new SafeArrayList<Object>();
+											params = new SafeArrayList<String>();
 											for (MethodArgument methodArgument : formalArguments)
 											{
 												params.add(methodArgument.getName());
@@ -1509,15 +1509,15 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 										}
 										else
 										{
-											params = new SafeArrayList<Object>(new ArrayList<Object>());
+											params = new SafeArrayList<String>(new ArrayList<String>());
 										}
 									}
 									else
 									{
-										params = new SafeArrayList<Object>(instanceParamsArgs.getLeft());
+										params = new SafeArrayList<String>(instanceParamsArgs.getLeft());
 									}
 									args = new SafeArrayList<Object>(
-										instanceParamsArgs.getRight() == null ? new ArrayList<Object>() : instanceParamsArgs.getRight());
+										instanceParamsArgs.getRight() == null ? new SafeArrayList<Object>() : instanceParamsArgs.getRight());
 								}
 							}
 							return new MethodWithArguments(value.intValue(), params, args, table);
@@ -1525,7 +1525,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 						public Integer convertValue(Object id, MethodWithArguments value)
 						{
-							if (persistContext != null) setInstancMethodArguments(persistContext.getPersist(), id, value.paramNames, value.arguments);
+							if (persistContext != null) setMethodArguments(persistContext.getPersist(), id, value.paramNames, value.arguments);
 							return Integer.valueOf(value.methodId);
 						}
 					};

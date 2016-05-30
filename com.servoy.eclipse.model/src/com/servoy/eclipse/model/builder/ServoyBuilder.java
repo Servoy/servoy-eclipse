@@ -2294,7 +2294,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											}
 											if (o instanceof AbstractBase)
 											{
-												Pair<List<Object>, List<Object>> instanceParameters = ((AbstractBase)o).getInstanceMethodParametersLocal(
+												Pair<List<String>, List<Object>> instanceParameters = ((AbstractBase)o).getFlattenedMethodParameters(
 													element.getName());
 												MethodArgument[] methodArguments = ((ScriptMethod)foundPersist).getRuntimeProperty(
 													IScriptProvider.METHOD_ARGUMENTS);
@@ -2306,7 +2306,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 														// check for parameter name differences
 														for (int i = 0; i < instanceParameters.getLeft().size(); i++)
 														{
-															String name = (String)instanceParameters.getLeft().get(i);
+															String name = instanceParameters.getLeft().get(i);
 															if (i >= methodArguments.length)
 															{
 																signatureMismatch = true;
