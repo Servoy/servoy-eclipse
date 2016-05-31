@@ -2907,6 +2907,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction deleteGlobalVariable = new DeleteScriptAction(UserNodeType.GLOBAL_VARIABLE_ITEM, "Delete variable", this);
 		IAction deleteComponentPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component package",
 			UserNodeType.COMPONENTS_NONPROJECT_PACKAGE);
+		IAction deleteLayoutPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete layout package",
+			UserNodeType.LAYOUT_NONPROJECT_PACKAGE);
 		IAction deleteServicePackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete service package",
 			UserNodeType.SERVICES_NONPROJECT_PACKAGE);
 		IAction deleteComponentProjectPackage = new DeleteComponentOrServiceOrPackageResourceAction(shell, "Delete component package project",
@@ -2982,7 +2984,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		deleteActionInTree.registerAction(UserNodeType.GLOBALS_ITEM, deleteScope);
 		deleteActionInTree.registerAction(UserNodeType.WORKING_SET, new DeleteWorkingSetAction());
 		deleteActionInTree.registerAction(UserNodeType.COMPONENTS_NONPROJECT_PACKAGE, deleteComponentPackage);
-		deleteActionInTree.registerAction(UserNodeType.LAYOUT_NONPROJECT_PACKAGE, deleteComponentPackage);
+		deleteActionInTree.registerAction(UserNodeType.LAYOUT_NONPROJECT_PACKAGE, deleteLayoutPackage);
 		deleteActionInTree.registerAction(UserNodeType.SERVICES_NONPROJECT_PACKAGE, deleteServicePackage);
 		deleteActionInTree.registerAction(UserNodeType.COMPONENTS_PROJECT_PACKAGE, deleteComponentProjectPackage);
 		deleteActionInTree.registerAction(UserNodeType.LAYOUT_PROJECT_PACKAGE, deleteLayoutProjectPackage);

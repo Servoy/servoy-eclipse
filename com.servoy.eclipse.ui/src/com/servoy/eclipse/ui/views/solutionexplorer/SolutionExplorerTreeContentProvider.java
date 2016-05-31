@@ -1178,15 +1178,13 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 			allReferencedProjects.remove(activeResourcesProject.getProject());
 
-			addBinaryReferecedPackages(un, UserNodeType.COMPONENTS_NONPROJECT_PACKAGE, result, packageIcon, allReferencedProjects,
-				componentsProvider.getAllPackageReaders());
-			addBinaryReferecedPackages(un, UserNodeType.SERVICES_NONPROJECT_PACKAGE, result, packageIcon, allReferencedProjects,
-				servicesProvider.getAllPackageReaders());
+			addBinaryReferecedPackages(un, result, packageIcon, allReferencedProjects, componentsProvider.getAllPackageReaders());
+			addBinaryReferecedPackages(un, result, packageIcon, allReferencedProjects, servicesProvider.getAllPackageReaders());
 		}
 		return result;
 	}
 
-	private void addBinaryReferecedPackages(PlatformSimpleUserNode un, UserNodeType nodeType, List<PlatformSimpleUserNode> result, Image packageIcon,
+	private void addBinaryReferecedPackages(PlatformSimpleUserNode un, List<PlatformSimpleUserNode> result, Image packageIcon,
 		List<IProject> allReferencedProjects, IPackageReader[] packages)
 	{
 		IWorkspaceRoot root = ServoyModel.getWorkspace().getRoot();
@@ -1198,7 +1196,16 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				IFile[] files = root.findFilesForLocationURI(resource.toURI());
 				if (files.length == 1 && allReferencedProjects.contains(files[0].getProject()))
 				{
+					UserNodeType nodeType = UserNodeType.COMPONENTS_NONPROJECT_PACKAGE;
 					String displayName = reader.getPackageDisplayname();
+					if (IPackageReader.WEB_LAYOUT.equals(reader.getPackageType()))
+					{
+						nodeType = UserNodeType.LAYOUT_NONPROJECT_PACKAGE;
+					}
+					else if (IPackageReader.WEB_SERVICE.equals(reader.getPackageType()))
+					{
+						nodeType = UserNodeType.SERVICES_NONPROJECT_PACKAGE;
+					}
 					PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayName, nodeType, reader, packageIcon);
 					node.parent = un;
 					result.add(node);
