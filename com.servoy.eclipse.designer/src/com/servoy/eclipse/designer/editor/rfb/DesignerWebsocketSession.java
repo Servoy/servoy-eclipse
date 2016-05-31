@@ -567,7 +567,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					writer.value(parent.getUUID().toString());
 				}
 				writer.key("index");
-				if (parent instanceof AbstractContainer)
+				if (parent instanceof AbstractContainer && form.isResponsiveLayout())
 				{
 					ArrayList<IPersist> children = ((AbstractContainer)parent).getSortedChildren();
 					writer.value(children.indexOf(p));
