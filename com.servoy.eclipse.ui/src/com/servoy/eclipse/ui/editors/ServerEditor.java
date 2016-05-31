@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -125,34 +126,37 @@ public class ServerEditor extends EditorPart
 	private boolean isAdvancedMode;
 	private Button advancedToggle;
 	private final ArrayList<Control> advancedControls = new ArrayList<Control>();
+	private Composite mainComposite;
 
 	@Override
 	public void createPartControl(final Composite parent)
 	{
 		ScrolledComposite myScrolledComposite = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+		myScrolledComposite.setShowFocusedControl(true);
 		myScrolledComposite.setExpandHorizontal(true);
 		myScrolledComposite.setExpandVertical(true);
 
-		Composite comp = new Composite(myScrolledComposite, SWT.NONE);
-		myScrolledComposite.setContent(comp);
+
+		mainComposite = new Composite(myScrolledComposite, SWT.NONE);
+		myScrolledComposite.setContent(mainComposite);
 
 		Label serverNameLabel;
-		serverNameLabel = new Label(comp, SWT.LEFT);
+		serverNameLabel = new Label(mainComposite, SWT.LEFT);
 		serverNameLabel.setText("Server name");
 
-		serverNameField = new Text(comp, SWT.BORDER);
+		serverNameField = new Text(mainComposite, SWT.BORDER);
 
 		Label userNameLabel;
-		userNameLabel = new Label(comp, SWT.LEFT);
+		userNameLabel = new Label(mainComposite, SWT.LEFT);
 		userNameLabel.setText("User name");
 
-		userNameField = new Text(comp, SWT.BORDER);
+		userNameField = new Text(mainComposite, SWT.BORDER);
 
 		Label passwordLabel;
-		passwordLabel = new Label(comp, SWT.LEFT);
+		passwordLabel = new Label(mainComposite, SWT.LEFT);
 		passwordLabel.setText("Password");
 
-		passwordField = new Text(comp, SWT.BORDER | SWT.PASSWORD);
+		passwordField = new Text(mainComposite, SWT.BORDER | SWT.PASSWORD);
 
 		if (serverTemplateDefinition != null)
 		{
@@ -181,11 +185,11 @@ public class ServerEditor extends EditorPart
 				for (int z = 0; z < urlKeys.length; z++)
 				{
 					Label templateLabel;
-					templateLabel = new Label(comp, SWT.LEFT);
+					templateLabel = new Label(mainComposite, SWT.LEFT);
 					templateLabel.setText(urlKeys[z]);
 					urlPropertiesLabels.add(templateLabel);
 
-					Text templateField = new Text(comp, SWT.BORDER);
+					Text templateField = new Text(mainComposite, SWT.BORDER);
 					if (urlValues != null && z < urlValues.length)
 					{
 						templateField.setText(urlValues[z]);
@@ -199,12 +203,12 @@ public class ServerEditor extends EditorPart
 
 		if (!isExistingDriver(((ServerEditorInput)getEditorInput()).getServerConfig().getDriver()))
 		{
-			noDriverWarning = new Label(comp, SWT.LEFT);
+			noDriverWarning = new Label(mainComposite, SWT.LEFT);
 			noDriverWarning.setText("No driver installed for this database type");
 			noDriverWarning.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
 
-			noDriverMessage = new Text(comp, SWT.MULTI | SWT.WRAP);
-			noDriverMessage.setBackground(comp.getBackground());
+			noDriverMessage = new Text(mainComposite, SWT.MULTI | SWT.WRAP);
+			noDriverMessage.setBackground(mainComposite.getBackground());
 			StringBuffer msg = new StringBuffer("Please download a driver for this type of database (\"");
 			msg.append(((ServerEditorInput)getEditorInput()).getServerConfig().getDriver()).append(
 				"\") and use the \"Add driver\" button bellow to install it,");
@@ -217,7 +221,7 @@ public class ServerEditor extends EditorPart
 
 			noDriverMessage.setText(msg.toString());
 
-			addDriverButton = new Button(comp, SWT.PUSH);
+			addDriverButton = new Button(mainComposite, SWT.PUSH);
 			addDriverButton.setText("Add driver");
 			addDriverButton.addSelectionListener(new SelectionAdapter()
 			{
@@ -251,7 +255,7 @@ public class ServerEditor extends EditorPart
 			});
 		}
 
-		advancedToggle = new Button(comp, SWT.PUSH);
+		advancedToggle = new Button(mainComposite, SWT.PUSH);
 		advancedToggle.setText("Show advanced connection settings");
 		advancedToggle.addSelectionListener(new SelectionAdapter()
 		{
@@ -264,19 +268,19 @@ public class ServerEditor extends EditorPart
 		});
 
 		Label urlLabel;
-		urlLabel = new Label(comp, SWT.LEFT);
+		urlLabel = new Label(mainComposite, SWT.LEFT);
 		advancedControls.add(urlLabel);
 		urlLabel.setText("URL");
 
-		urlField = new Text(comp, SWT.BORDER);
+		urlField = new Text(mainComposite, SWT.BORDER);
 		advancedControls.add(urlField);
 
 		Label driverLabel;
-		driverLabel = new Label(comp, SWT.LEFT);
+		driverLabel = new Label(mainComposite, SWT.LEFT);
 		advancedControls.add(driverLabel);
 		driverLabel.setText("Driver");
 
-		driverField = new Combo(comp, SWT.BORDER);
+		driverField = new Combo(mainComposite, SWT.BORDER);
 		advancedControls.add(driverField);
 		UIUtils.setDefaultVisibleItemCount(driverField);
 		driverField.addModifyListener(new ModifyListener()
@@ -290,95 +294,95 @@ public class ServerEditor extends EditorPart
 			isExistingDriver(((ServerEditorInput)getEditorInput()).getServerConfig().getDriver()) ? SWT.COLOR_BLACK : SWT.COLOR_RED));
 
 		Label catalogLabel;
-		catalogLabel = new Label(comp, SWT.LEFT);
+		catalogLabel = new Label(mainComposite, SWT.LEFT);
 		advancedControls.add(catalogLabel);
 		catalogLabel.setText("Catalog");
 
-		catalogField = new Combo(comp, SWT.BORDER);
+		catalogField = new Combo(mainComposite, SWT.BORDER);
 		advancedControls.add(catalogField);
 		UIUtils.setDefaultVisibleItemCount(catalogField);
 
 		Label schemaLabel;
-		schemaLabel = new Label(comp, SWT.LEFT);
+		schemaLabel = new Label(mainComposite, SWT.LEFT);
 		advancedControls.add(schemaLabel);
 		schemaLabel.setText("Schema");
 
-		schemaField = new Combo(comp, SWT.BORDER);
+		schemaField = new Combo(mainComposite, SWT.BORDER);
 		advancedControls.add(schemaField);
 		UIUtils.setDefaultVisibleItemCount(schemaField);
 
 		Label maxActiveLabel;
-		maxActiveLabel = new Label(comp, SWT.LEFT);
+		maxActiveLabel = new Label(mainComposite, SWT.LEFT);
 		advancedControls.add(maxActiveLabel);
 		maxActiveLabel.setText("Max Connections Active");
 
-		maxActiveField = new Text(comp, SWT.BORDER);
+		maxActiveField = new Text(mainComposite, SWT.BORDER);
 		advancedControls.add(maxActiveField);
 
 		Label maxIdleLabel;
-		maxIdleLabel = new Label(comp, SWT.LEFT);
+		maxIdleLabel = new Label(mainComposite, SWT.LEFT);
 		advancedControls.add(maxIdleLabel);
 		maxIdleLabel.setText("Max Connections Idle");
 
-		maxIdleField = new Text(comp, SWT.BORDER);
+		maxIdleField = new Text(mainComposite, SWT.BORDER);
 		advancedControls.add(maxIdleField);
 
 		Label idleTimoutLabel;
-		idleTimoutLabel = new Label(comp, SWT.LEFT);
+		idleTimoutLabel = new Label(mainComposite, SWT.LEFT);
 		advancedControls.add(idleTimoutLabel);
 		idleTimoutLabel.setText("Connections Idle Timeout");
 
-		idleTimoutField = new Text(comp, SWT.BORDER);
+		idleTimoutField = new Text(mainComposite, SWT.BORDER);
 		advancedControls.add(idleTimoutField);
 
 		Label maxPreparedStatementsIdleLabel;
-		maxPreparedStatementsIdleLabel = new Label(comp, SWT.LEFT);
+		maxPreparedStatementsIdleLabel = new Label(mainComposite, SWT.LEFT);
 		advancedControls.add(maxPreparedStatementsIdleLabel);
 		maxPreparedStatementsIdleLabel.setText("Max Prepared Statements Idle");
 
-		maxPreparedStatementsIdleField = new Text(comp, SWT.BORDER);
+		maxPreparedStatementsIdleField = new Text(mainComposite, SWT.BORDER);
 		advancedControls.add(maxPreparedStatementsIdleField);
 
 		Label validationTypeLabel;
-		validationTypeLabel = new Label(comp, SWT.LEFT);
+		validationTypeLabel = new Label(mainComposite, SWT.LEFT);
 		advancedControls.add(validationTypeLabel);
 		validationTypeLabel.setText("Validation Type");
 
-		validationTypeField = new Combo(comp, SWT.BORDER | SWT.READ_ONLY);
+		validationTypeField = new Combo(mainComposite, SWT.BORDER | SWT.READ_ONLY);
 		advancedControls.add(validationTypeField);
 		UIUtils.setDefaultVisibleItemCount(validationTypeField);
 
 		Label validationQueryLabel;
-		validationQueryLabel = new Label(comp, SWT.LEFT);
+		validationQueryLabel = new Label(mainComposite, SWT.LEFT);
 		advancedControls.add(validationQueryLabel);
 		validationQueryLabel.setText("Validation Query");
 
-		validationQueryField = new Text(comp, SWT.BORDER);
+		validationQueryField = new Text(mainComposite, SWT.BORDER);
 		advancedControls.add(validationQueryField);
 
 		Label dataModel_cloneFromLabel;
-		dataModel_cloneFromLabel = new Label(comp, SWT.LEFT);
+		dataModel_cloneFromLabel = new Label(mainComposite, SWT.LEFT);
 		advancedControls.add(dataModel_cloneFromLabel);
 		dataModel_cloneFromLabel.setText("Data model clone from");
 
-		dataModel_cloneFromField = new Combo(comp, SWT.BORDER | SWT.READ_ONLY);
+		dataModel_cloneFromField = new Combo(mainComposite, SWT.BORDER | SWT.READ_ONLY);
 		advancedControls.add(dataModel_cloneFromField);
 		UIUtils.setDefaultVisibleItemCount(dataModel_cloneFromField);
 
 		Label enabledLabel;
-		enabledLabel = new Label(comp, SWT.LEFT);
+		enabledLabel = new Label(mainComposite, SWT.LEFT);
 		advancedControls.add(enabledLabel);
 		enabledLabel.setText("Enabled");
 
-		enabledButton = new Button(comp, SWT.CHECK);
+		enabledButton = new Button(mainComposite, SWT.CHECK);
 		advancedControls.add(enabledButton);
 
 		Label logServerLabel;
-		logServerLabel = new Label(comp, SWT.LEFT);
+		logServerLabel = new Label(mainComposite, SWT.LEFT);
 		advancedControls.add(logServerLabel);
 		logServerLabel.setText("Log Server");
 
-		logServerButton = new Button(comp, SWT.CHECK);
+		logServerButton = new Button(mainComposite, SWT.CHECK);
 		advancedControls.add(logServerButton);
 		logServerButton.addListener(SWT.Selection, new Listener()
 		{
@@ -390,7 +394,7 @@ public class ServerEditor extends EditorPart
 
 		ServoyModel.getServerManager().addServerConfigListener(logServerListener = new LogServerListener());
 
-		createLogTableButton = new Button(comp, SWT.PUSH);
+		createLogTableButton = new Button(mainComposite, SWT.PUSH);
 		advancedControls.add(createLogTableButton);
 		createLogTableButton.setText("Create Log Table");
 		createLogTableButton.addSelectionListener(new SelectionAdapter()
@@ -436,7 +440,7 @@ public class ServerEditor extends EditorPart
 			}
 		});
 
-		createClientstatsTableButton = new Button(comp, SWT.PUSH);
+		createClientstatsTableButton = new Button(mainComposite, SWT.PUSH);
 		advancedControls.add(createClientstatsTableButton);
 		createClientstatsTableButton.setText("Create Client Statistics Table");
 		createClientstatsTableButton.addSelectionListener(new SelectionAdapter()
@@ -485,62 +489,62 @@ public class ServerEditor extends EditorPart
 		enableButtons();
 
 		Label skipSysTablesLabel;
-		skipSysTablesLabel = new Label(comp, SWT.LEFT);
+		skipSysTablesLabel = new Label(mainComposite, SWT.LEFT);
 		advancedControls.add(skipSysTablesLabel);
 		skipSysTablesLabel.setText("Skip System Tables");
 
-		skipSysTablesButton = new Button(comp, SWT.CHECK);
+		skipSysTablesButton = new Button(mainComposite, SWT.CHECK);
 		advancedControls.add(skipSysTablesButton);
 
-		final GroupLayout groupLayout = new GroupLayout(comp);
+		final GroupLayout groupLayout = new GroupLayout(mainComposite);
 
-		ParallelGroup pg1 = groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(serverNameLabel, GroupLayout.PREFERRED_SIZE, 190,
+		ParallelGroup pg1 = groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(serverNameLabel, GroupLayout.PREFERRED_SIZE, 140,
 			GroupLayout.PREFERRED_SIZE);
 
 		for (Label l : urlPropertiesLabels)
 		{
-			pg1 = pg1.add(l, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE);
+			pg1 = pg1.add(l, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE);
 		}
 
-		pg1.add(validationTypeLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(validationQueryLabel, GroupLayout.PREFERRED_SIZE, 190,
-			GroupLayout.PREFERRED_SIZE).add(enabledLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(logServerLabel,
-				GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(maxPreparedStatementsIdleLabel, GroupLayout.PREFERRED_SIZE, 190,
-					GroupLayout.PREFERRED_SIZE).add(maxIdleLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(maxActiveLabel,
-						GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(idleTimoutLabel, GroupLayout.PREFERRED_SIZE, 190,
-							GroupLayout.PREFERRED_SIZE).add(schemaLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(catalogLabel,
-								GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(driverLabel, GroupLayout.PREFERRED_SIZE, 190,
-									GroupLayout.PREFERRED_SIZE).add(urlLabel, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(passwordLabel,
-										GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE).add(userNameLabel, GroupLayout.PREFERRED_SIZE, 190,
-											GroupLayout.PREFERRED_SIZE).add(dataModel_cloneFromLabel, GroupLayout.PREFERRED_SIZE, 190,
-												GroupLayout.PREFERRED_SIZE).add(skipSysTablesLabel, GroupLayout.PREFERRED_SIZE, 190,
+		pg1.add(validationTypeLabel, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(validationQueryLabel, GroupLayout.PREFERRED_SIZE, 140,
+			GroupLayout.PREFERRED_SIZE).add(enabledLabel, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(logServerLabel,
+				GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(maxPreparedStatementsIdleLabel, GroupLayout.PREFERRED_SIZE, 140,
+					GroupLayout.PREFERRED_SIZE).add(maxIdleLabel, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(maxActiveLabel,
+						GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(idleTimoutLabel, GroupLayout.PREFERRED_SIZE, 140,
+							GroupLayout.PREFERRED_SIZE).add(schemaLabel, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(catalogLabel,
+								GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(driverLabel, GroupLayout.PREFERRED_SIZE, 140,
+									GroupLayout.PREFERRED_SIZE).add(urlLabel, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(passwordLabel,
+										GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(userNameLabel, GroupLayout.PREFERRED_SIZE, 140,
+											GroupLayout.PREFERRED_SIZE).add(dataModel_cloneFromLabel, GroupLayout.PREFERRED_SIZE, 140,
+												GroupLayout.PREFERRED_SIZE).add(skipSysTablesLabel, GroupLayout.PREFERRED_SIZE, 140,
 													GroupLayout.PREFERRED_SIZE);
 
 
-		ParallelGroup pg2 = groupLayout.createParallelGroup(GroupLayout.LEADING).add(serverNameField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE);
+		ParallelGroup pg2 = groupLayout.createParallelGroup(GroupLayout.LEADING).add(serverNameField, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE);
 
 		for (Text tx : urlPropertiesFields)
 		{
-			pg2 = pg2.add(tx, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE);
+			pg2 = pg2.add(tx, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE);
 		}
 
 		if (noDriverMessage != null)
 		{
-			pg2 = pg2.add(noDriverWarning, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(noDriverMessage, GroupLayout.PREFERRED_SIZE, 161,
-				Short.MAX_VALUE).add(addDriverButton, GroupLayout.PREFERRED_SIZE, 161, GroupLayout.PREFERRED_SIZE);
+			pg2 = pg2.add(noDriverWarning, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(noDriverMessage, GroupLayout.PREFERRED_SIZE, 141,
+				Short.MAX_VALUE).add(addDriverButton, GroupLayout.PREFERRED_SIZE, 141, GroupLayout.PREFERRED_SIZE);
 		}
 
-		pg2.add(userNameField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(passwordField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(
-			urlField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(advancedToggle, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(driverField,
-				GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(catalogField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(schemaField,
-					GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(maxActiveField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(maxIdleField,
-						GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(idleTimoutField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(
-							maxPreparedStatementsIdleField, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(validationTypeField,
-								GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(validationQueryField, GroupLayout.PREFERRED_SIZE, 161,
-									Short.MAX_VALUE).add(enabledButton, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(
-										groupLayout.createSequentialGroup().add(logServerButton, GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(
-											createLogTableButton, GroupLayout.PREFERRED_SIZE, 161, GroupLayout.PREFERRED_SIZE).add(createClientstatsTableButton,
-												GroupLayout.PREFERRED_SIZE, 220, GroupLayout.PREFERRED_SIZE)).add(dataModel_cloneFromField,
-													GroupLayout.PREFERRED_SIZE, 161, Short.MAX_VALUE).add(skipSysTablesButton, GroupLayout.PREFERRED_SIZE, 161,
+		pg2.add(userNameField, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(passwordField, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(
+			urlField, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(advancedToggle, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(driverField,
+				GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(catalogField, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(schemaField,
+					GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(maxActiveField, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(maxIdleField,
+						GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(idleTimoutField, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(
+							maxPreparedStatementsIdleField, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(validationTypeField,
+								GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(validationQueryField, GroupLayout.PREFERRED_SIZE, 141,
+									Short.MAX_VALUE).add(enabledButton, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(
+										groupLayout.createSequentialGroup().add(logServerButton, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(
+											createLogTableButton, GroupLayout.PREFERRED_SIZE, 141, GroupLayout.PREFERRED_SIZE).add(createClientstatsTableButton,
+												GroupLayout.PREFERRED_SIZE, 160, GroupLayout.PREFERRED_SIZE)).add(dataModel_cloneFromField,
+													GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(skipSysTablesButton, GroupLayout.PREFERRED_SIZE, 141,
 														Short.MAX_VALUE);
 
 
@@ -678,13 +682,53 @@ public class ServerEditor extends EditorPart
 																																																						GroupLayout.DEFAULT_SIZE,
 																																																						Short.MAX_VALUE);
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(sg1));
-		comp.setLayout(groupLayout);
-		myScrolledComposite.setMinSize(comp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		mainComposite.setLayout(groupLayout);
+		myScrolledComposite.setMinSize(mainComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
 		initComboData();
 		initDataBindings();
 
 		setAdvancedMode(false);
+	}
+
+	/**
+	 * @param comp
+	 */
+	private void setTabSequence(boolean advancedMode)
+	{
+		List<Control> tabSequence = new ArrayList<>();
+		tabSequence.add(serverNameField);
+
+		for (Text tx : urlPropertiesFields)
+		{
+			tabSequence.add(tx);
+		}
+		tabSequence.add(userNameField);
+		tabSequence.add(passwordField);
+		tabSequence.add(advancedToggle);
+
+		if (advancedMode)
+		{
+			tabSequence.add(urlField);
+			tabSequence.add(driverField);
+			tabSequence.add(catalogField);
+			tabSequence.add(schemaField);
+			tabSequence.add(maxActiveField);
+			tabSequence.add(maxIdleField);
+			tabSequence.add(idleTimoutField);
+			tabSequence.add(maxPreparedStatementsIdleField);
+			tabSequence.add(validationTypeField);
+			tabSequence.add(validationQueryField);
+			tabSequence.add(dataModel_cloneFromField);
+			tabSequence.add(enabledButton);
+			tabSequence.add(logServerButton);
+			tabSequence.add(createLogTableButton);
+			tabSequence.add(createClientstatsTableButton);
+			tabSequence.add(skipSysTablesButton);
+		}
+		tabSequence.add(serverNameField);
+
+		mainComposite.setTabList(tabSequence.toArray(new Control[tabSequence.size()]));
 	}
 
 	@Override
@@ -1070,6 +1114,7 @@ public class ServerEditor extends EditorPart
 	@Override
 	public void setFocus()
 	{
+		serverNameField.setFocus();
 		//in case log table is deleted but the current log server remains the same
 		enableButtons();
 	}
@@ -1146,7 +1191,8 @@ public class ServerEditor extends EditorPart
 			c.setVisible(isAdvanced);
 		}
 
-		advancedToggle.setText(isAdvanced ? "Hide advanced connection settings" : "Show advanced connection settings");
+		advancedToggle.setText(isAdvanced ? "Hide advanced server settings" : "Show advanced server settings");
+		setTabSequence(isAdvanced);
 	}
 
 	class LogServerListener implements IServerConfigListener
