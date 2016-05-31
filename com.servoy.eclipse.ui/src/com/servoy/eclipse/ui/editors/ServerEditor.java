@@ -137,19 +137,19 @@ public class ServerEditor extends EditorPart
 		myScrolledComposite.setContent(comp);
 
 		Label serverNameLabel;
-		serverNameLabel = new Label(comp, SWT.RIGHT);
+		serverNameLabel = new Label(comp, SWT.LEFT);
 		serverNameLabel.setText("Server name");
 
 		serverNameField = new Text(comp, SWT.BORDER);
 
 		Label userNameLabel;
-		userNameLabel = new Label(comp, SWT.RIGHT);
+		userNameLabel = new Label(comp, SWT.LEFT);
 		userNameLabel.setText("User name");
 
 		userNameField = new Text(comp, SWT.BORDER);
 
 		Label passwordLabel;
-		passwordLabel = new Label(comp, SWT.RIGHT);
+		passwordLabel = new Label(comp, SWT.LEFT);
 		passwordLabel.setText("Password");
 
 		passwordField = new Text(comp, SWT.BORDER | SWT.PASSWORD);
@@ -181,7 +181,7 @@ public class ServerEditor extends EditorPart
 				for (int z = 0; z < urlKeys.length; z++)
 				{
 					Label templateLabel;
-					templateLabel = new Label(comp, SWT.RIGHT);
+					templateLabel = new Label(comp, SWT.LEFT);
 					templateLabel.setText(urlKeys[z]);
 					urlPropertiesLabels.add(templateLabel);
 
@@ -264,7 +264,7 @@ public class ServerEditor extends EditorPart
 		});
 
 		Label urlLabel;
-		urlLabel = new Label(comp, SWT.RIGHT);
+		urlLabel = new Label(comp, SWT.LEFT);
 		advancedControls.add(urlLabel);
 		urlLabel.setText("URL");
 
@@ -272,7 +272,7 @@ public class ServerEditor extends EditorPart
 		advancedControls.add(urlField);
 
 		Label driverLabel;
-		driverLabel = new Label(comp, SWT.RIGHT);
+		driverLabel = new Label(comp, SWT.LEFT);
 		advancedControls.add(driverLabel);
 		driverLabel.setText("Driver");
 
@@ -290,7 +290,7 @@ public class ServerEditor extends EditorPart
 			isExistingDriver(((ServerEditorInput)getEditorInput()).getServerConfig().getDriver()) ? SWT.COLOR_BLACK : SWT.COLOR_RED));
 
 		Label catalogLabel;
-		catalogLabel = new Label(comp, SWT.RIGHT);
+		catalogLabel = new Label(comp, SWT.LEFT);
 		advancedControls.add(catalogLabel);
 		catalogLabel.setText("Catalog");
 
@@ -299,7 +299,7 @@ public class ServerEditor extends EditorPart
 		UIUtils.setDefaultVisibleItemCount(catalogField);
 
 		Label schemaLabel;
-		schemaLabel = new Label(comp, SWT.RIGHT);
+		schemaLabel = new Label(comp, SWT.LEFT);
 		advancedControls.add(schemaLabel);
 		schemaLabel.setText("Schema");
 
@@ -308,7 +308,7 @@ public class ServerEditor extends EditorPart
 		UIUtils.setDefaultVisibleItemCount(schemaField);
 
 		Label maxActiveLabel;
-		maxActiveLabel = new Label(comp, SWT.RIGHT);
+		maxActiveLabel = new Label(comp, SWT.LEFT);
 		advancedControls.add(maxActiveLabel);
 		maxActiveLabel.setText("Max Connections Active");
 
@@ -316,7 +316,7 @@ public class ServerEditor extends EditorPart
 		advancedControls.add(maxActiveField);
 
 		Label maxIdleLabel;
-		maxIdleLabel = new Label(comp, SWT.RIGHT);
+		maxIdleLabel = new Label(comp, SWT.LEFT);
 		advancedControls.add(maxIdleLabel);
 		maxIdleLabel.setText("Max Connections Idle");
 
@@ -324,7 +324,7 @@ public class ServerEditor extends EditorPart
 		advancedControls.add(maxIdleField);
 
 		Label idleTimoutLabel;
-		idleTimoutLabel = new Label(comp, SWT.RIGHT);
+		idleTimoutLabel = new Label(comp, SWT.LEFT);
 		advancedControls.add(idleTimoutLabel);
 		idleTimoutLabel.setText("Connections Idle Timeout");
 
@@ -332,7 +332,7 @@ public class ServerEditor extends EditorPart
 		advancedControls.add(idleTimoutField);
 
 		Label maxPreparedStatementsIdleLabel;
-		maxPreparedStatementsIdleLabel = new Label(comp, SWT.RIGHT);
+		maxPreparedStatementsIdleLabel = new Label(comp, SWT.LEFT);
 		advancedControls.add(maxPreparedStatementsIdleLabel);
 		maxPreparedStatementsIdleLabel.setText("Max Prepared Statements Idle");
 
@@ -340,7 +340,7 @@ public class ServerEditor extends EditorPart
 		advancedControls.add(maxPreparedStatementsIdleField);
 
 		Label validationTypeLabel;
-		validationTypeLabel = new Label(comp, SWT.RIGHT);
+		validationTypeLabel = new Label(comp, SWT.LEFT);
 		advancedControls.add(validationTypeLabel);
 		validationTypeLabel.setText("Validation Type");
 
@@ -349,7 +349,7 @@ public class ServerEditor extends EditorPart
 		UIUtils.setDefaultVisibleItemCount(validationTypeField);
 
 		Label validationQueryLabel;
-		validationQueryLabel = new Label(comp, SWT.RIGHT);
+		validationQueryLabel = new Label(comp, SWT.LEFT);
 		advancedControls.add(validationQueryLabel);
 		validationQueryLabel.setText("Validation Query");
 
@@ -357,7 +357,7 @@ public class ServerEditor extends EditorPart
 		advancedControls.add(validationQueryField);
 
 		Label dataModel_cloneFromLabel;
-		dataModel_cloneFromLabel = new Label(comp, SWT.RIGHT);
+		dataModel_cloneFromLabel = new Label(comp, SWT.LEFT);
 		advancedControls.add(dataModel_cloneFromLabel);
 		dataModel_cloneFromLabel.setText("Data model clone from");
 
@@ -366,7 +366,7 @@ public class ServerEditor extends EditorPart
 		UIUtils.setDefaultVisibleItemCount(dataModel_cloneFromField);
 
 		Label enabledLabel;
-		enabledLabel = new Label(comp, SWT.RIGHT);
+		enabledLabel = new Label(comp, SWT.LEFT);
 		advancedControls.add(enabledLabel);
 		enabledLabel.setText("Enabled");
 
@@ -374,7 +374,7 @@ public class ServerEditor extends EditorPart
 		advancedControls.add(enabledButton);
 
 		Label logServerLabel;
-		logServerLabel = new Label(comp, SWT.RIGHT);
+		logServerLabel = new Label(comp, SWT.LEFT);
 		advancedControls.add(logServerLabel);
 		logServerLabel.setText("Log Server");
 
@@ -485,7 +485,7 @@ public class ServerEditor extends EditorPart
 		enableButtons();
 
 		Label skipSysTablesLabel;
-		skipSysTablesLabel = new Label(comp, SWT.RIGHT);
+		skipSysTablesLabel = new Label(comp, SWT.LEFT);
 		advancedControls.add(skipSysTablesLabel);
 		skipSysTablesLabel.setText("Skip System Tables");
 
@@ -582,16 +582,17 @@ public class ServerEditor extends EditorPart
 				GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(urlLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(driverField,
 						GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(driverLabel, GroupLayout.PREFERRED_SIZE,
-							GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(groupLayout.createParallelGroup(
-								GroupLayout.BASELINE).add(catalogField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
-									catalogLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-										LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(schemaField,
-											GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(schemaLabel,
-												GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-													LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(maxActiveField,
-														GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(maxActiveLabel,
-															GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-																LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(maxIdleField,
+							GroupLayout.DEFAULT_SIZE,
+							GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(
+								catalogField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(catalogLabel,
+									GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+										groupLayout.createParallelGroup(GroupLayout.BASELINE).add(schemaField, GroupLayout.PREFERRED_SIZE,
+											GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(schemaLabel, GroupLayout.PREFERRED_SIZE,
+												GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+													groupLayout.createParallelGroup(GroupLayout.BASELINE).add(maxActiveField, GroupLayout.PREFERRED_SIZE,
+														GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(maxActiveLabel, GroupLayout.PREFERRED_SIZE,
+															GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+																groupLayout.createParallelGroup(GroupLayout.BASELINE).add(maxIdleField,
 																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
 																		maxIdleLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 																		GroupLayout.PREFERRED_SIZE)).add(10,
