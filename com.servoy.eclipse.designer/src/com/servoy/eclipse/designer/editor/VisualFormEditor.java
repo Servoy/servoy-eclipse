@@ -259,7 +259,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	@Override
 	public void doSave(IProgressMonitor monitor)
 	{
-		if (!isMobile()) seceditor.saveSecurityElements();
+		if (!isMobile() && seceditor != null) seceditor.saveSecurityElements();
 		super.doSave(monitor);
 	}
 
