@@ -714,10 +714,28 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					adjustGlassPaneSize();
 				}
 			}
+			
+			function adjustIFrameSize(){
+		        	delete $scope.contentStyle.height;
+		        	$element.find('.content')[0].style.height = "";
+		        	$element.find('.content')[0].style.bottom = "20px";
+		        	$element.find('.contentframe')[0].style.height = "100%";
+		        	
+		        	$scope.contentStyle.bottom = "20px";
+
+		        	var h = editorContentRootScope.computeHeight();
+		        	if (h > $element.find('.content-area')[0].offsetHeight) {
+		        	    delete $scope.contentStyle.bottom;
+		        	    $scope.contentStyle.height = h;
+		        	    $element.find('.content')[0].style.bottom = "";
+		        	    $element.find('.content')[0].style.height = h + "px";
+		        	    $element.find('.contentframe')[0].style.height = h + "px";
+				}
+			}
 
 			function adjustGlassPaneSize() {
 				if ($scope.isAbsoluteFormLayout()) {
-					var sizes = getScrollSizes($scope.contentDocument.querySelectorAll(".sfcontent"));
+				    	var sizes = getScrollSizes($scope.contentDocument.querySelectorAll(".sfcontent"));
 					if (sizes.height > 0 && sizes.width > 0) {
 					    	var contentDiv = $element.find('.content-area')[0];
 					    	var height = contentDiv.scrollHeight;
@@ -746,6 +764,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					var contentDiv = $($scope.contentDocument).find('.svy-form')[0];
 					if (contentDiv) {
 					        if (contentDiv.offsetHeight > 0 ){
+					            	adjustIFrameSize();
         						$scope.glasspaneStyle.width = (contentDiv.offsetWidth +20) + 'px';
         						$scope.glasspaneStyle.height = (contentDiv.offsetHeight + 20) + 'px';
 					        }
@@ -801,7 +820,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 						return true;
 					});
 
-					$($element.find('.content-area')[0]).on("mousedown", null, function() {
+					$element.find('.content-area').on("mousedown", function() {
 						$scope.setContentSizes();
 					});
 				});
@@ -871,7 +890,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 							});
 						}
 					} else {
-						$scope.setContentSizes();
+					    	$scope.setContentSizes();
 					}
 				}
 				

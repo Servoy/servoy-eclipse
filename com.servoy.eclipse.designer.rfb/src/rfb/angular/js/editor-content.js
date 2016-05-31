@@ -186,6 +186,9 @@ angular.module('editorContent',['servoyApp'])
     "overflow-y": "hidden"
   }
   
+  $rootScope.computeHeight = function () {
+      return $element[0].scrollHeight;
+  } 
   var watches = [];
   
   $scope.originalWatch = $scope.$watch;
