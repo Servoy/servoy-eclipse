@@ -1222,7 +1222,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		String packageType = WebComponentSpecProvider.getInstance().getPackageType(iProject.getName());
 		if (IPackageReader.WEB_COMPONENT.equals(packageType)) imageFile = "components_package.png";
 		else if (IPackageReader.WEB_LAYOUT.equals(packageType)) imageFile = "layout_package.png";
-		else if ((WebServiceSpecProvider.getInstance().getWebServiceSpecifications().containsKey(iProject.getName()))) imageFile = "services_package.png";
+		else if (IPackageReader.WEB_SERVICE.equals(WebServiceSpecProvider.getInstance().getPackageType(iProject.getName()))) imageFile = "services_package.png";
 		else
 		{
 			disabled = true;
@@ -1230,8 +1230,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			imageFile = "components_package.png";
 			if (iProject.getFile(new Path("META-INF/MANIFEST.MF")).exists())
 			{
-				if (Package.IPackageReader.WEB_SERVICE.equals(new ContainerPackageReader(new File(iProject.getLocationURI()), iProject).getPackageType()))
-					imageFile = "services_package.png";
+				String notReferencesProjectPackageType = new ContainerPackageReader(new File(iProject.getLocationURI()), iProject).getPackageType();
+				if (Package.IPackageReader.WEB_SERVICE.equals(notReferencesProjectPackageType)) imageFile = "services_package.png";
+				else if (Package.IPackageReader.WEB_LAYOUT.equals(notReferencesProjectPackageType)) imageFile = "layout_package.png";
 			}
 
 		}
