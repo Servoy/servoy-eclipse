@@ -179,17 +179,17 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 
 				if (parent == undefined) {
 					var defer = $q.defer();
-					$timeout(function() {
-
+					function testElement() {
 						var p = $('.contentframe').contents().find('[svy-id="' + uuid + '"]');
 						if (p[0] != undefined) {
 							parent = p[0];
 							$scope.ghostContainerElements[uuid] = parent;
 							defer.resolve(parent);
 						} else {
-							defer.reject();
+							$timeout(testElement, 400);
 						}
-					}, 400);
+					}
+					$timeout(testElement, 400);
 					$scope.ghostContainerElements[uuid] = defer.promise;
 					return defer.promise;
 				}
@@ -202,17 +202,23 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				ghostContainer.style.left = bounds.left;
 				ghostContainer.style.display = "block";
 			}
+			var realContainerPromise = null;
 			$scope.getGhostContainerStyle = function(ghostContainer) {
 				if (!$scope.isAbsoluteFormLayout()) {
-					var p = getRealContainerElement(ghostContainer.uuid);
-					if (p.then) {
-						p.then(function(parent) {
-							getBounds(ghostContainer, parent);
-						}, function() {
-							ghostContainer.style.display = "none";
-						});
-					} else {
-						getBounds(ghostContainer, p);
+					if (realContainerPromise == null) {
+						var p = getRealContainerElement(ghostContainer.uuid);
+						if (p.then) {
+							realContainerPromise = p;
+							p.then(function(parent) {
+								realContainerPromise = null;
+								getBounds(ghostContainer, parent);
+							}, function() {
+								realContainerPromise = null;
+								ghostContainer.style.display = "none";
+							});
+						} else {
+							getBounds(ghostContainer, p);
+						}
 					}
 				} else {
 					if (ghostContainer.style == undefined) {
