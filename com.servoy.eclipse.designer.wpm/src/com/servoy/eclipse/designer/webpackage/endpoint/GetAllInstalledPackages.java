@@ -18,6 +18,7 @@
 package com.servoy.eclipse.designer.webpackage.endpoint;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -27,9 +28,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.specification.BaseSpecProvider;
@@ -37,6 +37,7 @@ import org.sablo.specification.BaseSpecProvider.ISpecReloadListener;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.j2db.util.Debug;
 
@@ -49,9 +50,6 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	public static final String CLIENT_SERVER_METHOD = "requestAllInstalledPackages";
 	private final WebPackageManagerEndpoint endpoint;
 
-	/**
-	 * @param endpoint
-	 */
 	public GetAllInstalledPackages(WebPackageManagerEndpoint endpoint)
 	{
 		this.endpoint = endpoint;
@@ -67,9 +65,9 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		try
 		{
 			Map<String, String> packagesToVersions = provider.getPackagesToVersions();
-			Map<String, URL> packagesToURL = provider.getPackagesToURLs();
+			Map<String, File> packagesToFiles = provider.getPackagesToResources();
 			packagesToVersions.putAll(WebServiceSpecProvider.getInstance().getPackagesToVersions());
-			packagesToURL.putAll(WebServiceSpecProvider.getInstance().getPackagesToURLs());
+			packagesToFiles.putAll(WebServiceSpecProvider.getInstance().getPackagesToResources());
 			List<JSONObject> remotePackages = getRemotePackages();
 
 			for (JSONObject pack : remotePackages)
@@ -78,7 +76,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 				if (packagesToVersions.containsKey(name))
 				{
 					pack.put("installed", packagesToVersions.get(name));
-					String parentSolutionName = getParentProjectNameForPackage(packagesToURL.get(name));
+					String parentSolutionName = getParentProjectNameForPackage(packagesToFiles.get(name));
 					pack.put("activeSolution", parentSolutionName != null ? parentSolutionName : activeSolutionName);
 				}
 				else
@@ -96,29 +94,21 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return result;
 	}
 
-	private String getParentProjectNameForPackage(URL packageURL)
+	private String getParentProjectNameForPackage(File packageFile)
 	{
-		if (packageURL != null)
+		if (packageFile != null && packageFile.isFile())
 		{
-			String ws = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
-			String file = packageURL.getFile();
-			if (file != null && file.startsWith(ws))
+			IWorkspaceRoot root = ServoyModel.getWorkspace().getRoot();
+			IFile[] files = root.findFilesForLocationURI(packageFile.toURI());
+			if (files.length == 1 && files[0] != null && files[0].exists())
 			{
-				IResource r = ResourcesPlugin.getWorkspace().getRoot().findMember(file.substring(ws.length()));
-				if (r != null)
-				{
-					IProject p = r.getProject();
-					if (p != null) return p.getName();
-				}
+				return files[0].getProject().getName();
 			}
 		}
+
 		return null;
 	}
 
-	/**
-	 * @return
-	 * @throws Exception
-	 */
 	private List<JSONObject> getRemotePackages() throws Exception
 	{
 		List<JSONObject> result = new ArrayList<>();
@@ -208,4 +198,5 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		jsonResult.put("result", packages);
 		endpoint.send(jsonResult.toString());
 	}
+
 }
