@@ -65,7 +65,6 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.mozilla.javascript.JavaMembers;
 import org.sablo.specification.BaseSpecProvider;
-import org.sablo.specification.Package;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -930,11 +929,11 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						BaseSpecProvider serviceSpecProvider = WebServiceSpecProvider.getInstance();
 						if (componentSpecProvider != null && serviceSpecProvider != null) // the package management system might not yet be initialized at developer startup
 						{
-							List<PlatformSimpleUserNode> children = getWebProjects(un, componentSpecProvider, "components_package.png",
+							List<PlatformSimpleUserNode> children = getWebProjects(un, componentSpecProvider, "package_obj.gif",
 								UserNodeType.COMPONENTS_PROJECT_PACKAGE, IPackageReader.WEB_COMPONENT);
-							List<PlatformSimpleUserNode> layoutProjects = getWebProjects(un, componentSpecProvider, "layout_package.png",
+							List<PlatformSimpleUserNode> layoutProjects = getWebProjects(un, componentSpecProvider, "package_obj.gif",
 								UserNodeType.LAYOUT_PROJECT_PACKAGE, IPackageReader.WEB_LAYOUT);
-							List<PlatformSimpleUserNode> servicesProjects = getWebProjects(un, serviceSpecProvider, "services_package.png",
+							List<PlatformSimpleUserNode> servicesProjects = getWebProjects(un, serviceSpecProvider, "package_obj.gif",
 								UserNodeType.SERVICES_PROJECT_PACKAGE, IPackageReader.WEB_SERVICE);
 							children.addAll(servicesProjects);
 							children.addAll(layoutProjects);
@@ -1111,13 +1110,16 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						// the package reader is not loaded/created.
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+						Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
 						for (IProject iProject : projects)
 						{
 							if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
 							{
-
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(resolveWebPackageDisplayName(iProject),
-									UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, iProject, resolveWebPackageImage(iProject));
+									UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, iProject, packageIcon);
+								//if it is not loaded, hide it so that it will have the gray icon
+								if (WebComponentSpecProvider.getInstance().getPackageType(iProject.getName()) == null &&
+									WebServiceSpecProvider.getInstance().getPackageType(iProject.getName()) == null) node.hide();
 								node.parent = un;
 								children.add(node);
 							}
@@ -1212,31 +1214,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 			}
 		}
-	}
-
-	private Image resolveWebPackageImage(IProject iProject)
-	{
-		String imageFile = null;
-		boolean disabled = false;
-
-		String packageType = WebComponentSpecProvider.getInstance().getPackageType(iProject.getName());
-		if (IPackageReader.WEB_COMPONENT.equals(packageType)) imageFile = "components_package.png";
-		else if (IPackageReader.WEB_LAYOUT.equals(packageType)) imageFile = "layout_package.png";
-		else if (IPackageReader.WEB_SERVICE.equals(WebServiceSpecProvider.getInstance().getPackageType(iProject.getName()))) imageFile = "services_package.png";
-		else
-		{
-			disabled = true;
-			//now we have to read the package type from the manifest
-			imageFile = "components_package.png";
-			if (iProject.getFile(new Path("META-INF/MANIFEST.MF")).exists())
-			{
-				String notReferencesProjectPackageType = new ContainerPackageReader(new File(iProject.getLocationURI()), iProject).getPackageType();
-				if (Package.IPackageReader.WEB_SERVICE.equals(notReferencesProjectPackageType)) imageFile = "services_package.png";
-				else if (Package.IPackageReader.WEB_LAYOUT.equals(notReferencesProjectPackageType)) imageFile = "layout_package.png";
-			}
-
-		}
-		return uiActivator.loadImageFromBundle(imageFile, disabled);
 	}
 
 	private String resolveWebPackageDisplayName(IProject iProject)

@@ -68,7 +68,7 @@ public class PlatformSimpleUserNode extends SimpleUserNode implements IAdaptable
 	public Image getIcon()
 	{
 		Image icon = super.getIcon();
-		if (hidden && icon instanceof Image)
+		if (hidden)
 		{
 			icon = Activator.getDefault().createGrayImage(getName(), icon);
 		}

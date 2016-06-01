@@ -1033,7 +1033,20 @@
      <description>
         Servoy solution explorer problem decorator
      </description>
-  	</decorator>  	  	
+  	</decorator>
+   <decorator
+         adaptable="true"
+         class="com.servoy.eclipse.ui.views.solutionexplorer.WebPackageDecorator"
+         id="com.servoy.eclipse.ui.views.solutionexplorer.WebPackageDecorator"
+         label="Web Package Decorator"
+         lightweight="true"
+         state="true">
+      <enablement>
+         <objectClass
+               name="com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode">
+         </objectClass>
+      </enablement>
+   </decorator>  	  	
    </extension>
    <extension
          point="org.eclipse.ui.actionSetPartAssociations">
