@@ -221,25 +221,13 @@ public class WarExporter
 			webObjects.append(service + ",");
 		}
 		properties.put("usedWebObjects", webObjects.substring(0, webObjects.length() - 1));
-		FileOutputStream fos = null;
-		try
+		try (FileOutputStream fos = new FileOutputStream(exported))
 		{
-			fos = new FileOutputStream(exported);
 			properties.store(fos, "");
 		}
 		catch (Exception e)
 		{
 			throw new ExportException("Couldn't generate the exported_web_objects.properties file", e);
-		}
-		finally
-		{
-			if (fos != null) try
-			{
-				fos.close();
-			}
-			catch (IOException e)
-			{
-			}
 		}
 	}
 
@@ -431,34 +419,20 @@ public class WarExporter
 	{
 		Properties properties = new Properties();
 		properties.put("locations", locations);
-		FileOutputStream fos = null;
-		try
+		try (FileOutputStream fos = new FileOutputStream(file))
 		{
-			fos = new FileOutputStream(file);
 			properties.store(fos, "");
 		}
 		catch (Exception e)
 		{
 			throw new ExportException("Couldn't generate the components.properties file", e);
 		}
-		finally
-		{
-			if (fos != null) try
-			{
-				fos.close();
-			}
-			catch (IOException e)
-			{
-			}
-		}
 	}
 
 	private void extractJar(String dirName, File file, File tmpWarDir)
 	{
-		JarFile jarfile = null;
-		try
+		try (JarFile jarfile = new JarFile(file))
 		{
-			jarfile = new JarFile(file);
 			Enumeration<JarEntry> enu = jarfile.entries();
 			while (enu.hasMoreElements())
 			{
@@ -474,29 +448,18 @@ public class WarExporter
 				{
 					continue;
 				}
-				InputStream is = jarfile.getInputStream(je);
-				FileOutputStream fo = new FileOutputStream(fl);
-				while (is.available() > 0)
+				try (InputStream is = jarfile.getInputStream(je); FileOutputStream fo = new FileOutputStream(fl))
 				{
-					fo.write(is.read());
+					while (is.available() > 0)
+					{
+						fo.write(is.read());
+					}
 				}
-				fo.close();
-				is.close();
 			}
 		}
 		catch (IOException e)
 		{
 			Debug.error("IO exception when extracting from file " + file.getAbsolutePath(), e);
-		}
-		finally
-		{
-			if (jarfile != null) try
-			{
-				jarfile.close();
-			}
-			catch (IOException e)
-			{
-			}
 		}
 	}
 
@@ -527,14 +490,7 @@ public class WarExporter
 	{
 		File tmpDir = new File(System.getProperty("java.io.tmpdir"));
 
-		File tmpWarDir = new File(tmpDir, "warexport/");
-		if (tmpWarDir.exists())
-		{
-			if (!deleteDirectory(tmpWarDir))
-			{
-				throw new ExportException("Can't delete the temp dir  " + tmpWarDir);
-			}
-		}
+		File tmpWarDir = new File(tmpDir, "warexport" + System.currentTimeMillis() + "/");
 		if (!tmpWarDir.mkdirs())
 		{
 			throw new ExportException("Can't create the temp dir  " + tmpWarDir);
@@ -634,8 +590,7 @@ public class WarExporter
 			metaDir.mkdir();
 			File contextFile = new File(tmpWarDir, "META-INF/context.xml");
 			contextFile.createNewFile();
-			FileWriter writer = new FileWriter(contextFile);
-			try
+			try (FileWriter writer = new FileWriter(contextFile))
 			{
 				String fileContent = "<Context ";
 				if (exportModel.isAntiResourceLocking()) fileContent += "antiResourceLocking=\"true\" ";
@@ -644,10 +599,6 @@ public class WarExporter
 				if (exportModel.isClearReferencesStopTimerThreads()) fileContent += "clearReferencesStopTimerThreads=\"true\" ";
 				fileContent += "></Context>";
 				writer.write(fileContent);
-			}
-			finally
-			{
-				writer.close();
 			}
 		}
 		catch (Exception e)
@@ -735,13 +686,9 @@ public class WarExporter
 	{
 		// copy war web.xml
 		File webXMLFile = new File(tmpWarDir, "WEB-INF/web.xml");
-		BufferedOutputStream bos = null;
-		InputStream webXmlIS = null;
-		try
+		try (InputStream webXmlIS = WarExporter.class.getResourceAsStream("resources/web.xml");
+			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(webXMLFile)))
 		{
-			webXmlIS = WarExporter.class.getResourceAsStream("resources/web.xml");
-			bos = new BufferedOutputStream(new FileOutputStream(webXMLFile));
-
 			byte[] buffer = new byte[8096];
 			int read = webXmlIS.read(buffer);
 			while (read != -1)
@@ -753,23 +700,6 @@ public class WarExporter
 		catch (Exception e)
 		{
 			throw new ExportException("Can't create the web.xml file: " + webXMLFile.getAbsolutePath(), e);
-		}
-		finally
-		{
-			if (bos != null) try
-			{
-				bos.close();
-			}
-			catch (IOException e)
-			{
-			}
-			if (webXmlIS != null) try
-			{
-				webXmlIS.close();
-			}
-			catch (IOException e)
-			{
-			}
 		}
 	}
 
@@ -834,7 +764,7 @@ public class WarExporter
 
 	private void copyLafs(File tmpWarDir, String appServerDir) throws ExportException
 	{
-		Writer fw;
+
 		// copy the lafs
 		File lafSourceDir = new File(appServerDir, "lafs");
 		File lafTargetDir = new File(tmpWarDir, "lafs");
@@ -843,10 +773,8 @@ public class WarExporter
 		Map<String, List<ExtensionResource>> loadedLafDefs = lafManager.getLoadedLAFDefs();
 		List<String> lafs = exportModel.getLafs();
 		File lafProperties = new File(lafTargetDir, "lafs.properties");
-		fw = null;
-		try
+		try (Writer fw = new FileWriter(lafProperties))
 		{
-			fw = new FileWriter(lafProperties);
 			Set<File> writtenFiles = new HashSet<File>();
 			for (String lafName : lafs)
 			{
@@ -875,17 +803,6 @@ public class WarExporter
 		{
 			throw new ExportException("Error creating lafs properties file " + lafProperties.getAbsolutePath(), e2);
 		}
-		finally
-		{
-			if (fw != null) try
-			{
-				fw.close();
-				fw = null;
-			}
-			catch (IOException e)
-			{
-			}
-		}
 	}
 
 	private void copyPlugins(File tmpWarDir, String appServerDir) throws ExportException
@@ -895,10 +812,8 @@ public class WarExporter
 		pluginsDir.mkdirs();
 		List<String> plugins = exportModel.getPlugins();
 		File pluginProperties = new File(pluginsDir, "plugins.properties");
-		Writer fw = null;
-		try
+		try (Writer fw = new FileWriter(pluginProperties))
 		{
-			fw = new FileWriter(pluginProperties);
 			Set<File> writtenFiles = new HashSet<File>();
 			for (String plugin : plugins)
 			{
@@ -937,17 +852,6 @@ public class WarExporter
 		{
 			throw new ExportException("Error creating plugins dir", e1);
 		}
-		finally
-		{
-			if (fw != null) try
-			{
-				fw.close();
-				fw = null;
-			}
-			catch (IOException e)
-			{
-			}
-		}
 	}
 
 	private void copyBeans(File tmpWarDir, String appServerDir) throws ExportException
@@ -960,10 +864,8 @@ public class WarExporter
 		Map<String, List<ExtensionResource>> loadedBeanDefs = beanManager.getLoadedBeanDefs();
 		List<String> beans = exportModel.getBeans();
 		File beanProperties = new File(beanTargetDir, "beans.properties");
-		Writer fw = null;
-		try
+		try (Writer fw = new FileWriter(beanProperties))
 		{
-			fw = new FileWriter(beanProperties);
 			Set<File> writtenFiles = new HashSet<File>();
 			for (String beanName : beans)
 			{
@@ -982,17 +884,6 @@ public class WarExporter
 		catch (IOException e2)
 		{
 			throw new ExportException("Error creating beans dir", e2);
-		}
-		finally
-		{
-			if (fw != null) try
-			{
-				fw.close();
-				fw = null;
-			}
-			catch (IOException e)
-			{
-			}
 		}
 	}
 
@@ -1021,11 +912,9 @@ public class WarExporter
 
 	private void changeAndWritePropertiesFile(File tmpWarDir, File sourceFile) throws ExportException
 	{
-		FileInputStream fis = null;
-		FileOutputStream fos = null;
-		try
+		try (FileInputStream fis = new FileInputStream(sourceFile);
+			FileOutputStream fos = new FileOutputStream(new File(tmpWarDir, "WEB-INF/servoy.properties")))
 		{
-			fis = new FileInputStream(sourceFile);
 			Properties properties = new SortedProperties();
 			properties.load(fis);
 
@@ -1033,24 +922,11 @@ public class WarExporter
 			properties.setProperty("SocketFactory.tunnelConnectionMode", "http&socket");
 			if (properties.containsKey("SocketFactory.useTwoWaySocket")) properties.remove("SocketFactory.useTwoWaySocket");
 
-			fos = new FileOutputStream(new File(tmpWarDir, "WEB-INF/servoy.properties"));
 			properties.store(fos, "");
 		}
 		catch (IOException e)
 		{
 			throw new ExportException("Failed to overwrite properties file", e);
-		}
-		finally
-		{
-			try
-			{
-				if (fis != null) fis.close();
-				if (fos != null) fos.close();
-			}
-			catch (IOException e)
-			{
-				// ignore
-			}
 		}
 	}
 
@@ -1061,27 +937,13 @@ public class WarExporter
 		{
 			if (destFile.createNewFile())
 			{
-				FileInputStream fis = null;
-				FileOutputStream fos = null;
-				FileChannel sourceChannel = null;
-				FileChannel destinationChannel = null;
-
-
-				try
+				try (FileInputStream fis = new FileInputStream(sourceFile);
+					FileOutputStream fos = new FileOutputStream(destFile);
+					FileChannel sourceChannel = fis.getChannel();
+					FileChannel destinationChannel = fos.getChannel())
 				{
-					fis = new FileInputStream(sourceFile);
-					fos = new FileOutputStream(destFile);
-					sourceChannel = fis.getChannel();
-					destinationChannel = fos.getChannel();
 					// Copy source file to destination file
 					destinationChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
-				}
-				finally
-				{
-					if (sourceChannel != null) sourceChannel.close();
-					if (destinationChannel != null) destinationChannel.close();
-					if (fis != null) fis.close();
-					if (fos != null) fos.close();
 				}
 			}
 		}
@@ -1182,10 +1044,8 @@ public class WarExporter
 			i++;
 		}
 
-		FileOutputStream fos = null;
-		try
+		try (FileOutputStream fos = new FileOutputStream(new File(tmpWarDir, "WEB-INF/servoy.properties")))
 		{
-			fos = new FileOutputStream(new File(tmpWarDir, "WEB-INF/servoy.properties"));
 			properties.store(fos, "");
 		}
 		catch (FileNotFoundException fileNotFoundException)
@@ -1195,16 +1055,6 @@ public class WarExporter
 		catch (IOException e)
 		{
 			throw new ExportException("Couldn't generate the properties file", e);
-		}
-		finally
-		{
-			if (fos != null) try
-			{
-				fos.close();
-			}
-			catch (IOException e)
-			{
-			}
 		}
 	}
 
@@ -1224,25 +1074,13 @@ public class WarExporter
 
 	private void zipDirectory(File directory, File zip) throws ExportException
 	{
-		ZipOutputStream zos = null;
-		try
+		try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zip)))
 		{
-			zos = new ZipOutputStream(new FileOutputStream(zip));
 			zip(directory, directory, zos);
 		}
 		catch (Exception e)
 		{
 			throw new ExportException("Can't create the war file " + zip, e);
-		}
-		finally
-		{
-			if (zos != null) try
-			{
-				zos.close();
-			}
-			catch (IOException e)
-			{
-			}
 		}
 	}
 
@@ -1422,8 +1260,7 @@ public class WarExporter
 			{
 				destFile.createNewFile();
 			}
-			FileInputStream fis = new FileInputStream(sourceFile);
-			try
+			try (FileInputStream fis = new FileInputStream(sourceFile))
 			{
 				String compileLessWithNashorn = null;
 				if (sourceFile.getName().endsWith(".less") && (compileLessWithNashorn = ResourceProvider.compileLessWithNashorn(fis)) != null)
@@ -1435,36 +1272,16 @@ public class WarExporter
 				}
 				else
 				{
-					FileChannel source = fis.getChannel();
-					FileOutputStream fos = new FileOutputStream(destFile);
-					FileChannel destination = fos.getChannel();
-					try
+					try (FileChannel source = fis.getChannel();
+						FileOutputStream fos = new FileOutputStream(destFile);
+						FileChannel destination = fos.getChannel())
 					{
 						if (destination != null && source != null)
 						{
 							destination.transferFrom(source, 0, source.size());
 						}
 					}
-					finally
-					{
-						if (source != null)
-						{
-							source.close();
-						}
-						if (destination != null)
-						{
-							destination.close();
-						}
-						if (fos != null)
-						{
-							fos.close();
-						}
-					}
 				}
-			}
-			finally
-			{
-				fis.close();
 			}
 		}
 		catch (Exception e)
