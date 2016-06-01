@@ -39,11 +39,6 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 public class RenameComponentOrService extends AbstractRenameAction
 {
 
-	/**
-	 * @param viewer
-	 * @param shell
-	 * @param nodeType
-	 */
 	public RenameComponentOrService(SolutionExplorerView viewer, Shell shell, UserNodeType nodeType)
 	{
 		super(viewer, shell, nodeType);

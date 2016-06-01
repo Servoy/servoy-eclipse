@@ -42,7 +42,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.json.JSONObject;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebObjectSpecification;
 
@@ -53,9 +52,11 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.util.StableKeysJSONObject;
 
 /**
- * Action to rename a component.
+ * Action to rename a web object (component, service or layout).
+ *
  * @author emera
  */
 public abstract class AbstractRenameAction extends Action
@@ -118,7 +119,7 @@ public abstract class AbstractRenameAction extends Action
 								IContainer parent = pack.getParent();
 								IFile specFile = pack.getFile(currentName + ".spec");
 								InputStream is = specFile.getContents();
-								JSONObject specJSON = new JSONObject(IOUtils.toString(is, "UTF-8"));
+								StableKeysJSONObject specJSON = new StableKeysJSONObject(IOUtils.toString(is, "UTF-8"));
 								specJSON.put("name", specJSON.getString("name").replace("-" + NewWebObjectAction.getDashedName(currentName), "-" + newName));
 								String definition = specJSON.getString("definition").replace("/" + currentName, "/" + newName);
 								if (definition.startsWith(currentName))
@@ -137,7 +138,7 @@ public abstract class AbstractRenameAction extends Action
 
 								renameFiles(pack, currentName, newName);
 								IFile newSpecFile = pack.getFile(newName + ".spec");
-								newSpecFile.create(new ByteArrayInputStream(specJSON.toString(3).getBytes()), IResource.NONE, new NullProgressMonitor());
+								newSpecFile.create(new ByteArrayInputStream(specJSON.toString(4).getBytes()), IResource.NONE, new NullProgressMonitor());
 								is.close();
 
 								specFile.delete(true, new NullProgressMonitor());
