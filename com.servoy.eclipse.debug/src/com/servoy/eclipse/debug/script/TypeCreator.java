@@ -94,6 +94,7 @@ import org.sablo.specification.property.types.FloatPropertyType;
 import org.sablo.specification.property.types.IntPropertyType;
 import org.sablo.specification.property.types.LongPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
+import org.sablo.websocket.impl.ClientService;
 
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.IActiveProjectListener;
@@ -2779,10 +2780,11 @@ public class TypeCreator extends TypeCache
 					if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)
 					{
 						Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
-						property.setName(spec.getName());
+						String name = ClientService.convertToJSName(spec.getName());
+						property.setName(name);
 						property.setReadOnly(true);
-						wcServices.put("WebService<" + spec.getName() + '>', spec);
-						property.setType(getTypeRef(context, "WebService<" + spec.getName() + '>'));
+						wcServices.put("WebService<" + name + '>', spec);
+						property.setType(getTypeRef(context, "WebService<" + name + '>'));
 						members.add(property);
 					}
 				}
