@@ -494,7 +494,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 					return new ListSelectCellEditor(parent, "Select navigator form", new FormContentProvider(flattenedEditingSolution, form), formLabelProvider,
 						new FormValueEditor(flattenedEditingSolution), false,
 						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, Boolean.valueOf(isMobile), true, !isMobile, true, false,
-							null),
+							null, true),
 						SWT.NONE, null, "navigatorFormDialog", "Only forms that have navigator set to -none- and showInMenu deselected appear in this list.");
 				}
 			};
@@ -516,7 +516,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				{
 					return new ListSelectCellEditor(parent, "Select parent form", new FormContentProvider(flattenedEditingSolution, form), formLabelProvider,
 						new FormValueEditor(flattenedEditingSolution), false, new FormContentProvider.FormListOptions(FormListOptions.FormListType.HIERARCHY,
-							null, true, false, false, form.getReferenceForm(), null),
+							null, true, false, false, form.getReferenceForm(), null, true),
 						SWT.NONE, null, "parentFormDialog")
 					{
 						@Override

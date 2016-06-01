@@ -785,7 +785,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 		public void updateExtendsFormViewer(final FlattenedSolution flattenedSolution)
 		{
 			extendsFormViewer.setContentProvider(new FormContentProvider(flattenedSolution, null));
-			extendsFormViewer.setInput(new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false, false, null));
+			extendsFormViewer.setInput(
+				new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false, false, null, true));
 			extendsFormViewer.setLabelProvider(
 				new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedSolution, true), flattenedSolution.getSolution()));
 		}

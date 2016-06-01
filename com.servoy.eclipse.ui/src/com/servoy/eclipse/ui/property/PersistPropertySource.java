@@ -1126,7 +1126,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 								new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null,
 									Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)), false, false,
 									persistContext.getPersist() instanceof FormReference,
-									(persistContext.getPersist() instanceof FormReference) ? ((Form)persistContext.getContext()).getDataSource() : null),
+									(persistContext.getPersist() instanceof FormReference) ? ((Form)persistContext.getContext()).getDataSource() : null, true),
 								SWT.NONE, null, "Select form dialog");
 						}
 
@@ -2812,11 +2812,12 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				@Override
 				public CellEditor createPropertyEditor(Composite parent)
 				{
-					return new ListSelectCellEditor(parent, "Select form", new FormContentProvider(flattenedEditingSolution, null /* persist is solution */),
+					return new ListSelectCellEditor(parent, "Select form", new FormContentProvider(flattenedEditingSolution, (Form)persistContext.getContext()),
 						formLabelProvider, new FormValueEditor(flattenedEditingSolution), readOnly,
 						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false,
 							persistContext.getPersist() instanceof FormReference,
-							(persistContext.getPersist() instanceof FormReference) ? ((Form)persistContext.getContext()).getDataSource() : null),
+							(persistContext.getPersist() instanceof FormReference) ? ((Form)persistContext.getContext()).getDataSource() : null,
+							!(persistContext.getPersist() instanceof FormReference)),
 						SWT.NONE, null, "Select form dialog");
 				}
 			};

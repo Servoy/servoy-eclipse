@@ -160,6 +160,9 @@ public class MarkerMessages
 	 */
 	public static ServoyMarker DuplicateEntityFound = new ServoyMarker("Duplicate {0} found \"{1}\" in {2}.", ServoyBuilder.DUPLICATE_NAME_MARKER_TYPE);
 
+	public static ServoyMarker DuplicateReferencedFormFound = new ServoyMarker(
+		"Duplicate referenced form \"{0}\" found in form \"{1}\". This is not supported.", ServoyBuilder.DUPLICATE_REFERENCED_FORM_MARKER_TYPE);
+
 
 	/**
 	 * This means that for a mobile solution, they use for variables names that are reserved because of the window object in a browser.

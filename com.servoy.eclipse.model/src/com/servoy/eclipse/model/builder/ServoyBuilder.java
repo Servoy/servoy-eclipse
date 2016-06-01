@@ -106,7 +106,6 @@ import com.servoy.j2db.dataprocessing.IPropertyDescriptorProvider;
 import com.servoy.j2db.dataprocessing.ITypedColumnConverter;
 import com.servoy.j2db.dataprocessing.IUIConverter;
 import com.servoy.j2db.persistence.AbstractBase;
-import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -118,6 +117,7 @@ import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.FlattenedPortal;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormReference;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IBasicWebObject;
@@ -302,6 +302,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String DUPLICATE_UUID = _PREFIX + ".duplicateUUID";
 	public static final String DUPLICATE_SIBLING_UUID = _PREFIX + ".duplicateSiblingUUID";
 	public static final String DUPLICATE_NAME_MARKER_TYPE = _PREFIX + ".duplicateNameProblem";
+	public static final String DUPLICATE_REFERENCED_FORM_MARKER_TYPE = _PREFIX + ".duplicateReferencedFormProblem";
 	public static final String RESERVED_WINDOW_OBJECT_USAGE_TYPE = _PREFIX + ".reservedWindowObjectUsageProblem";
 	public static final String DUPLICATE_SCOPE_NAME_MARKER_TYPE = _PREFIX + ".duplicateScopeNameProblem";
 	public static final String INVALID_SORT_OPTION = _PREFIX + ".invalidSortOption";
@@ -387,6 +388,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> DUPLICATION_UUID_DUPLICATE = new Pair<String, ProblemSeverity>("duplicationUUIDDuplicate",
 		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> DUPLICATION_DUPLICATE_ENTITY_FOUND = new Pair<String, ProblemSeverity>("duplicationDuplicateEntityFound",
+		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> DUPLICATION_SAME_REFERENCED_FORM = new Pair<String, ProblemSeverity>("duplicationSameReferencedForm",
 		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> RESERVED_WINDOW_OBJECT_PROPERTY = new Pair<String, ProblemSeverity>("reservedWindowObjectProperty",
 		ProblemSeverity.WARNING);
@@ -1253,7 +1256,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 		if (persist instanceof Form)
 		{
-			String name = ((ISupportName)persist).getName();
+			final String name = ((ISupportName)persist).getName();
 			if (name != null)
 			{
 				Map<Integer, Set<Pair<String, ISupportChilds>>> persistSet = duplicationMap.get(name);
@@ -1296,11 +1299,42 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				parents.add(new Pair<String, ISupportChilds>(null, persist.getParent()));
 			}
 			final Map<String, Set<IPersist>> formElementsByName = new HashMap<String, Set<IPersist>>();
+			final Map<String, Set<FormReference>> referencedFormsByName = new HashMap<String, Set<FormReference>>();
 			Form flattenedForm = ServoyBuilder.getPersistFlattenedSolution(persist, getServoyModel().getFlattenedSolution()).getFlattenedForm(persist);
 			flattenedForm.acceptVisitor(new IPersistVisitor()
 			{
 				public Object visit(IPersist o)
 				{
+					if (o instanceof FormReference)
+					{
+						int formID = ((FormReference)o).getContainsFormID();
+						if (formID > 0)
+						{
+							Form referenceForm = ServoyBuilder.getPersistFlattenedSolution(persist, getServoyModel().getFlattenedSolution()).getForm(formID);
+							if (referenceForm != null)
+							{
+								Set<FormReference> duplicates = referencedFormsByName.get(referenceForm.getName());
+								if (duplicates != null)
+								{
+									for (FormReference duplicatePersist : duplicates)
+									{
+										ServoyMarker mk = MarkerMessages.DuplicateReferencedFormFound.fill(referenceForm.getName(), name);
+										addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_SAME_REFERENCED_FORM, IMarker.PRIORITY_NORMAL, null,
+											duplicatePersist);
+
+										mk = MarkerMessages.DuplicateReferencedFormFound.fill(referenceForm.getName(), name);
+										addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_SAME_REFERENCED_FORM, IMarker.PRIORITY_NORMAL, null, o);
+									}
+								}
+								else
+								{
+									duplicates = new HashSet<FormReference>();
+									duplicates.add((FormReference)o);
+								}
+								referencedFormsByName.put(referenceForm.getName(), duplicates);
+							}
+						}
+					}
 					if (!(o instanceof ScriptVariable) && !(o instanceof ScriptMethod) && !(o instanceof Form) && o instanceof ISupportName &&
 						((ISupportName)o).getName() != null)
 					{
@@ -1325,8 +1359,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						formElementsByName.put(((ISupportName)o).getName(), duplicates);
 					}
-					if (o instanceof AbstractContainer) return IPersistVisitor.CONTINUE_TRAVERSAL;
-					else return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+					return IPersistVisitor.CONTINUE_TRAVERSAL;
 				}
 			});
 		}
@@ -1427,6 +1460,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			for (ServoyProject module : modules)
 			{
 				deleteMarkers(module.getProject(), DUPLICATE_NAME_MARKER_TYPE);
+				deleteMarkers(module.getProject(), DUPLICATE_REFERENCED_FORM_MARKER_TYPE);
 			}
 			for (final ServoyProject module : modules)
 			{
@@ -1805,6 +1839,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, DUPLICATE_UUID);
 		deleteMarkers(project, DUPLICATE_SIBLING_UUID);
 		deleteMarkers(project, DUPLICATE_NAME_MARKER_TYPE);
+		deleteMarkers(project, DUPLICATE_REFERENCED_FORM_MARKER_TYPE);
 		deleteMarkers(project, RESERVED_WINDOW_OBJECT_USAGE_TYPE);
 		deleteMarkers(project, MISSING_SERVER);
 		deleteMarkers(project, BAD_STRUCTURE_MARKER_TYPE);
@@ -5847,7 +5882,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					marker.setAttribute("DataProviderID", ((ISupportDataProviderID)persist).getDataProviderID());
 				}
 			}
-			else if (type.equals(DUPLICATE_NAME_MARKER_TYPE))
+			else if (type.equals(DUPLICATE_NAME_MARKER_TYPE) || type.equals(DUPLICATE_REFERENCED_FORM_MARKER_TYPE))
 			{
 				marker.setAttribute("Uuid", persist.getUUID().toString());
 				marker.setAttribute("SolutionName", persist.getRootObject().getName());
