@@ -2812,7 +2812,9 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				@Override
 				public CellEditor createPropertyEditor(Composite parent)
 				{
-					return new ListSelectCellEditor(parent, "Select form", new FormContentProvider(flattenedEditingSolution, (Form)persistContext.getContext()),
+					return new ListSelectCellEditor(parent, "Select form",
+						new FormContentProvider(flattenedEditingSolution,
+							persistContext.getContext() instanceof Form ? (Form)persistContext.getContext() : null),
 						formLabelProvider, new FormValueEditor(flattenedEditingSolution), readOnly,
 						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false,
 							persistContext.getPersist() instanceof FormReference,
