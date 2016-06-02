@@ -31,6 +31,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.IPropertyType;
 
 import com.servoy.eclipse.ui.Activator;
@@ -42,8 +43,10 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.FormReference;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.property.types.NGCustomJSONObjectType;
 import com.servoy.j2db.util.Pair;
@@ -135,41 +138,50 @@ public class FormOutlineLabelprovider extends LabelProvider implements IPersistL
 				WebCustomType webCustomType = ((WebCustomType)(((PersistContext)element).getPersist()));
 
 				String typeName = webCustomType.getTypeName();
-				IPropertyType< ? > iPropertyType = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-					webCustomType.getParent().getTypeName()).getDeclaredCustomObjectTypes().get(typeName);
 				String postFix = "";
-				if (iPropertyType instanceof NGCustomJSONObjectType)
+				String webComponentType = null;
+				WebComponent wc = (WebComponent)webCustomType.getAncestor(IRepository.WEBCOMPONENTS);
+				if (wc != null)
 				{
-					NGCustomJSONObjectType ngCustomJSONObjectType = (NGCustomJSONObjectType)iPropertyType;
-					Collection<PropertyDescription> taggedProperties = ngCustomJSONObjectType.getCustomJSONTypeDefinition().getTaggedProperties(
-						"showInOutlineView");
-
-					//we got an unsorted collection, add it to a list and sort it so that we show consistent labels
-					ArrayList<PropertyDescription> asList = new ArrayList<PropertyDescription>(taggedProperties);
-
-					Collections.sort(asList, new Comparator<PropertyDescription>()
+					webComponentType = wc.getTypeName();
+				}
+				WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(webComponentType);
+				if (spec != null)
+				{
+					IPropertyType< ? > iPropertyType = spec.getDeclaredCustomObjectTypes().get(typeName);
+					if (iPropertyType instanceof NGCustomJSONObjectType)
 					{
+						NGCustomJSONObjectType ngCustomJSONObjectType = (NGCustomJSONObjectType)iPropertyType;
+						Collection<PropertyDescription> taggedProperties = ngCustomJSONObjectType.getCustomJSONTypeDefinition().getTaggedProperties(
+							"showInOutlineView");
 
-						@Override
-						public int compare(PropertyDescription o1, PropertyDescription o2)
-						{
-							return o1.getName().compareTo(o2.getName());
-						}
+						//we got an unsorted collection, add it to a list and sort it so that we show consistent labels
+						ArrayList<PropertyDescription> asList = new ArrayList<PropertyDescription>(taggedProperties);
 
-					});
-					for (PropertyDescription propertyDescription : asList)
-					{
-						Object showInOutlineView = propertyDescription.getTag("showInOutlineView");
-						if (Boolean.valueOf(showInOutlineView.toString()).booleanValue())
+						Collections.sort(asList, new Comparator<PropertyDescription>()
 						{
-							if (webCustomType.getJson().has(propertyDescription.getName()))
+
+							@Override
+							public int compare(PropertyDescription o1, PropertyDescription o2)
 							{
-								Object property = webCustomType.getJson().get(propertyDescription.getName());
-								postFix += "_" + property;
+								return o1.getName().compareTo(o2.getName());
 							}
-							else if (propertyDescription.hasDefault())
+
+						});
+						for (PropertyDescription propertyDescription : asList)
+						{
+							Object showInOutlineView = propertyDescription.getTag("showInOutlineView");
+							if (Boolean.valueOf(showInOutlineView.toString()).booleanValue())
 							{
-								postFix += "_" + propertyDescription.getDefaultValue();
+								if (webCustomType.getJson().has(propertyDescription.getName()))
+								{
+									Object property = webCustomType.getJson().get(propertyDescription.getName());
+									postFix += "_" + property;
+								}
+								else if (propertyDescription.hasDefault())
+								{
+									postFix += "_" + propertyDescription.getDefaultValue();
+								}
 							}
 						}
 					}

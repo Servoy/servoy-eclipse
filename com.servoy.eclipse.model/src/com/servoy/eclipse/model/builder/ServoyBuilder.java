@@ -119,7 +119,6 @@ import com.servoy.j2db.persistence.FlattenedPortal;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormReference;
 import com.servoy.j2db.persistence.GraphicalComponent;
-import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -3490,16 +3489,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							else
 							{
 								WebCustomType customType = (WebCustomType)o;
-								IBasicWebComponent parent = (IBasicWebComponent)customType.getParent();
+								WebComponent parent = (WebComponent)customType.getAncestor(IRepository.WEBCOMPONENTS);
 								WebObjectSpecification parentSpec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parent.getTypeName());
-								PropertyDescription spec = parentSpec.getProperties().get(customType.getJsonKey());
-								if (spec != null)
+								PropertyDescription cpd = ((ICustomType< ? >)parentSpec.getDeclaredCustomObjectTypes().get(
+									customType.getTypeName())).getCustomJSONTypeDefinition();
+								if (cpd != null)
 								{
-									PropertyDescription cpd = ((ICustomType< ? >)spec.getType()).getCustomJSONTypeDefinition();
-									if (cpd != null)
-									{
-										dpProperties.addAll(cpd.getProperties().values());
-									}
+									dpProperties.addAll(cpd.getProperties().values());
 								}
 							}
 
