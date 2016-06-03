@@ -192,7 +192,7 @@ public class NewResourcesComponentsOrServicesPackageAction extends Action
 					}
 
 					pack.create(IResource.FORCE, true, monitor);
-					createManifest(pack, packageDisplayName, packageName, packageType);
+					createManifest(pack, packageDisplayName, packageName, "1.0.0", packageType);
 
 					if (componentOrServiceName != null)
 					{
@@ -274,14 +274,15 @@ public class NewResourcesComponentsOrServicesPackageAction extends Action
 		return true;
 	}
 
-	public static void createManifest(IContainer pack, String packageDisplayName, String packageName, String packageType) throws CoreException, IOException
+	public static void createManifest(IContainer pack, String packageDisplayName, String packageName, String version, String packageType)
+		throws CoreException, IOException
 	{
 		Manifest manifest = new Manifest();
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-		manifest.getMainAttributes().put(new Attributes.Name("Bundle-Name"), packageDisplayName);
+		manifest.getMainAttributes().put(new Attributes.Name("Bundle-Name"), isEmpty(packageDisplayName) ? packageName : packageDisplayName);
 		manifest.getMainAttributes().put(new Attributes.Name("Bundle-SymbolicName"), packageName);
 		manifest.getMainAttributes().put(new Attributes.Name(Package.PACKAGE_TYPE), packageType);
-		manifest.getMainAttributes().put(Attributes.Name.IMPLEMENTATION_VERSION, "1.0.0");
+		manifest.getMainAttributes().put(new Attributes.Name("Bundle-Version"), isEmpty(version) ? "1.0.0" : version);
 
 		IFolder metainf = pack.getFolder(new Path("META-INF"));
 		metainf.create(true, true, new NullProgressMonitor());
@@ -292,6 +293,16 @@ public class NewResourcesComponentsOrServicesPackageAction extends Action
 		{
 			manifest.write(out);
 		}
+		m.refreshLocal(0, new NullProgressMonitor());
+	}
+
+	/**
+	 * @param packageDisplayName2
+	 * @return
+	 */
+	private static boolean isEmpty(String str)
+	{
+		return str == null || str.trim().length() == 0;
 	}
 
 }

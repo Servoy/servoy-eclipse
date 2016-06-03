@@ -89,7 +89,8 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 	@Override
 	public boolean performFinish()
 	{
-		CreatePackageProjectJob createPackageProjectJob = new CreatePackageProjectJob(page1.getPackageName(), page1.getReferencedProjects());
+		CreatePackageProjectJob createPackageProjectJob = new CreatePackageProjectJob(page1.getPackageName(), page1.getPackageDisplay(),
+			page1.getPackageVersion(), page1.getReferencedProjects());
 		createPackageProjectJob.schedule();
 		return true;
 	}
@@ -98,11 +99,15 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 	{
 		private final String projectName;
 		private final IProject[] referencedProjects;
+		private final String displayName;
+		private final String version;
 
-		public CreatePackageProjectJob(String projectName, IProject[] referencedProjects)
+		public CreatePackageProjectJob(String projectName, String displayName, String version, IProject[] referencedProjects)
 		{
 			super("Creating Package Project");
 			this.projectName = projectName;
+			this.displayName = displayName;
+			this.version = version;
 			this.referencedProjects = referencedProjects;
 		}
 
@@ -118,7 +123,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 					AddAsWebPackageAction.addReferencedProjectToDescription(newProject, solutionProjectDescription);
 					iProject.setDescription(solutionProjectDescription, new NullProgressMonitor());
 				}
-				NewResourcesComponentsOrServicesPackageAction.createManifest(newProject, projectName, projectName, packageType); // TODO symbolic name here instead of double projectName?
+				NewResourcesComponentsOrServicesPackageAction.createManifest(newProject, displayName, projectName, version, packageType); // TODO symbolic name here instead of double projectName?
 
 				if (viewer != null)
 				{
@@ -164,6 +169,8 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 	{
 		private Text packName;
 		private FilteredTreeViewer ftv;
+		private Text packDisplay;
+		private Text packVersion;
 
 		protected NewPackageProjectPage()
 		{
@@ -231,7 +238,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 		{
 			Composite container = new Composite(parent, SWT.NONE);
 			Label packageLabel = new Label(container, SWT.NONE);
-			packageLabel.setText("Package Project name");
+			packageLabel.setText("Package project name");
 			packName = new Text(container, SWT.BORDER);
 			packName.setFocus();
 			packName.addModifyListener(new ModifyListener()
@@ -243,6 +250,15 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 					setPageComplete(validatePage());
 				}
 			});
+
+			Label packageDisplayLabel = new Label(container, SWT.NONE);
+			packageDisplayLabel.setText("Package display name");
+			packDisplay = new Text(container, SWT.BORDER);
+
+			Label packageVersionLabel = new Label(container, SWT.NONE);
+			packageVersionLabel.setText("Package version");
+			packVersion = new Text(container, SWT.BORDER);
+			packVersion.setText("1.0.0");
 
 			Label selectSolutionLabel = new Label(container, SWT.NONE);
 			selectSolutionLabel.setText("Select the solutions that will use the new package");
@@ -283,12 +299,21 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 
 			final GroupLayout groupLayout = new GroupLayout(container);
 			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-				groupLayout.createSequentialGroup().add(packageLabel).addPreferredGap(LayoutStyle.UNRELATED).add(packName, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).add(selectSolutionLabel).add(ftv, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-						Short.MAX_VALUE));
+				groupLayout.createSequentialGroup().add(packageLabel, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.PREFERRED_SIZE).addPreferredGap(
+					LayoutStyle.RELATED).add(packName, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).add(
+						groupLayout.createSequentialGroup().add(packageDisplayLabel, GroupLayout.PREFERRED_SIZE, 150,
+							GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(packDisplay, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).add(
+									groupLayout.createSequentialGroup().add(packageVersionLabel, GroupLayout.PREFERRED_SIZE, 150,
+										GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(packVersion, GroupLayout.DEFAULT_SIZE,
+											GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)).add(selectSolutionLabel).add(ftv, GroupLayout.PREFERRED_SIZE,
+												GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE));
+
 			groupLayout.setVerticalGroup(
 				groupLayout.createSequentialGroup().add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(packageLabel).add(packName)).add(
-					selectSolutionLabel).add(ftv, GroupLayout.PREFERRED_SIZE, 280, Short.MAX_VALUE));
+					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(packageDisplayLabel).add(packDisplay)).add(
+						groupLayout.createParallelGroup(GroupLayout.BASELINE).add(packageVersionLabel).add(packVersion)).add(selectSolutionLabel).add(ftv,
+							GroupLayout.PREFERRED_SIZE, 280, Short.MAX_VALUE));
 			groupLayout.setAutocreateGaps(true);
 			groupLayout.setAutocreateContainerGaps(true);
 			container.setLayout(groupLayout);
@@ -300,6 +325,16 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 		public String getPackageName()
 		{
 			return packName.getText();
+		}
+
+		public String getPackageDisplay()
+		{
+			return packDisplay.getText();
+		}
+
+		public String getPackageVersion()
+		{
+			return packVersion.getText();
 		}
 	}
 }
