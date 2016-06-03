@@ -55,7 +55,6 @@ import org.sablo.specification.WebServiceSpecProvider;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
-import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.util.Utils;
@@ -101,7 +100,7 @@ public class EditWebPackageDetailsAction extends Action implements ISelectionCha
 	@Override
 	public void run()
 	{
-		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
+		SimpleUserNode node = viewer.getSelectedTreeNode();
 		IPackageReader packageReader = (IPackageReader)node.getRealObject();
 		boolean componentsNotServices = (node.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE ||
 			node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE || node.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE);
@@ -129,7 +128,7 @@ public class EditWebPackageDetailsAction extends Action implements ISelectionCha
 		updatePackageDetails((IContainer)SolutionExplorerTreeContentProvider.getResource(packageReader), newName, newVersion);
 	}
 
-	private boolean isNameValid(PlatformSimpleUserNode node, String packageDisplayName, boolean componentsNotServices)
+	private boolean isNameValid(SimpleUserNode node, String packageDisplayName, boolean componentsNotServices)
 	{
 		if ("".equals(packageDisplayName))
 		{

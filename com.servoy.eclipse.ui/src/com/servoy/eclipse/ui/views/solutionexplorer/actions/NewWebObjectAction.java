@@ -45,8 +45,8 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
@@ -75,7 +75,7 @@ public class NewWebObjectAction extends Action
 	@Override
 	public void run()
 	{
-		final PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
+		final SimpleUserNode node = viewer.getSelectedTreeNode();
 
 		String componentOrServiceName = UIUtils.showTextFieldDialog(shell, getText(), "Please provide the " + type.toLowerCase() + " name.");
 		if (componentOrServiceName == null) return;
@@ -118,7 +118,7 @@ public class NewWebObjectAction extends Action
 		return true;
 	}
 
-	void createComponentOrService(IResource packageRoot, final String elementType, final String componentOrServiceName, PlatformSimpleUserNode parentNode)
+	void createComponentOrService(IResource packageRoot, final String elementType, final String componentOrServiceName, SimpleUserNode parentNode)
 	{
 		if (!(packageRoot instanceof IFolder) && !(packageRoot instanceof IProject)) return;
 		IFolder folder = null;
@@ -275,7 +275,7 @@ public class NewWebObjectAction extends Action
 	@Override
 	public boolean isEnabled()
 	{
-		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
+		SimpleUserNode node = viewer.getSelectedTreeNode();
 		IResource packageRoot = SolutionExplorerTreeContentProvider.getResource((IPackageReader)node.getRealObject());
 		return (packageRoot instanceof IFolder || packageRoot instanceof IProject);
 	}

@@ -47,7 +47,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.sablo.specification.Package;
-import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
@@ -57,8 +56,8 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
-import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
 /**
@@ -89,7 +88,7 @@ public class NewResourcesComponentsOrServicesPackageAction extends Action
 	@Override
 	public void run()
 	{
-		final PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
+		final SimpleUserNode node = viewer.getSelectedTreeNode();
 		final String type = packageType.replace("Web-", "");
 		final IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
 			(String)node.getRealObject());
@@ -221,7 +220,7 @@ public class NewResourcesComponentsOrServicesPackageAction extends Action
 		job.schedule();
 	}
 
-	private boolean isNameValid(PlatformSimpleUserNode node)
+	private boolean isNameValid(SimpleUserNode node)
 	{
 		Collection<PackageSpecification<WebObjectSpecification>> packages = null;
 		if (node.getType() == UserNodeType.SERVICES_FROM_RESOURCES)

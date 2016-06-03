@@ -47,7 +47,6 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
-import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.util.Utils;
 
@@ -143,7 +142,7 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 	@Override
 	public boolean isEnabled()
 	{
-		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
+		SimpleUserNode node = viewer.getSelectedTreeNode();
 		return node.getType() == UserNodeType.ALL_WEB_PACKAGE_PROJECTS || node.getType() == UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES;
 	}
 }

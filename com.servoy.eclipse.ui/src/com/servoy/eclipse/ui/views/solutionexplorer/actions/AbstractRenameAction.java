@@ -48,8 +48,8 @@ import org.sablo.specification.WebObjectSpecification;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
-import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.util.StableKeysJSONObject;
@@ -75,7 +75,7 @@ public abstract class AbstractRenameAction extends Action
 	@Override
 	public void run()
 	{
-		final PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
+		final SimpleUserNode node = viewer.getSelectedTreeNode();
 		String type = node.getType().toString().toLowerCase();
 
 		WebObjectSpecification spec = (WebObjectSpecification)node.getRealObject();
@@ -231,7 +231,7 @@ public abstract class AbstractRenameAction extends Action
 	@Override
 	public boolean isEnabled()
 	{
-		PlatformSimpleUserNode node = (PlatformSimpleUserNode)viewer.getSelectedTreeNode();
+		SimpleUserNode node = viewer.getSelectedTreeNode();
 		IResource packageRoot = SolutionExplorerTreeContentProvider.getResource((IPackageReader)node.parent.getRealObject());
 		return (packageRoot instanceof IContainer);
 	}
