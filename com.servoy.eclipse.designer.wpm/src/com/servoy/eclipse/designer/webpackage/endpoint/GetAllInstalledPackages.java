@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -34,6 +33,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.specification.BaseSpecProvider;
 import org.sablo.specification.BaseSpecProvider.ISpecReloadListener;
+import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
@@ -60,23 +60,22 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	public JSONArray executeMethod(JSONObject msg)
 	{
 		String activeSolutionName = ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
-		BaseSpecProvider provider = WebComponentSpecProvider.getInstance();
+		BaseSpecProvider componentSpecProvider = WebComponentSpecProvider.getInstance();
+		WebServiceSpecProvider serviceSpecProvider = WebServiceSpecProvider.getInstance();
 		JSONArray result = new JSONArray();
 		try
 		{
-			Map<String, String> packagesToVersions = provider.getPackagesToVersions();
-			Map<String, File> packagesToFiles = provider.getPackagesToResources();
-			packagesToVersions.putAll(WebServiceSpecProvider.getInstance().getPackagesToVersions());
-			packagesToFiles.putAll(WebServiceSpecProvider.getInstance().getPackagesToResources());
 			List<JSONObject> remotePackages = getRemotePackages();
 
 			for (JSONObject pack : remotePackages)
 			{
 				String name = pack.getString("name");
-				if (packagesToVersions.containsKey(name))
+				IPackageReader reader = componentSpecProvider.getPackageReader(name);
+				if (reader == null) reader = serviceSpecProvider.getPackageReader(name);
+				if (reader != null)
 				{
-					pack.put("installed", packagesToVersions.get(name));
-					String parentSolutionName = getParentProjectNameForPackage(packagesToFiles.get(name));
+					pack.put("installed", reader.getVersion());
+					String parentSolutionName = getParentProjectNameForPackage(reader.getResource());
 					pack.put("activeSolution", parentSolutionName != null ? parentSolutionName : activeSolutionName);
 				}
 				else
