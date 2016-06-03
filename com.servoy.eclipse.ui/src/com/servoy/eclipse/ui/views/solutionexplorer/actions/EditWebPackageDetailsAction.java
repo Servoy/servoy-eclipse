@@ -161,8 +161,8 @@ public class EditWebPackageDetailsAction extends Action implements ISelectionCha
 			Manifest manifest = new Manifest(m.getContents());
 			Attributes attr = manifest.getMainAttributes();
 			attr.putValue("Bundle-Name", newName);
-			if (newVersion != null && newVersion.trim().length() > 0) attr.putValue("Implementation-Version", newVersion);
-			else attr.remove(new Name("Implementation-Version"));
+			if (newVersion != null && newVersion.trim().length() > 0) attr.putValue("Bundle-Version", newVersion);
+			else attr.remove(new Name("Bundle-Version"));
 
 			out = new ByteArrayOutputStream();
 			manifest.write(out);
