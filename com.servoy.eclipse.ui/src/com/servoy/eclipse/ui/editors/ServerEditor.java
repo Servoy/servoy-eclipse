@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -35,20 +34,24 @@ import org.eclipse.jface.databinding.swt.SWTObservables;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ExpandEvent;
+import org.eclipse.swt.events.ExpandListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.grouplayout.GroupLayout;
-import org.eclipse.swt.layout.grouplayout.GroupLayout.ParallelGroup;
-import org.eclipse.swt.layout.grouplayout.GroupLayout.SequentialGroup;
-import org.eclipse.swt.layout.grouplayout.LayoutStyle;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.ExpandBar;
+import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -67,9 +70,11 @@ import com.servoy.eclipse.core.resource.ServerEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.util.ExpandBarWidthAware;
 import com.servoy.eclipse.ui.util.ImmutableObjectObservable;
 import com.servoy.j2db.persistence.IServerConfigListener;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -123,19 +128,18 @@ public class ServerEditor extends EditorPart
 
 	private IServerConfigListener logServerListener = null;
 
-	private boolean isAdvancedMode;
-	private Button advancedToggle;
-	private final ArrayList<Control> advancedControls = new ArrayList<Control>();
 	private Composite mainComposite;
+	private ExpandItem collapsableItem;
+	private ScrolledComposite myScrolledComposite;
+	private Composite advancedSettingsComposite;
 
 	@Override
 	public void createPartControl(final Composite parent)
 	{
-		ScrolledComposite myScrolledComposite = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+		myScrolledComposite = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		myScrolledComposite.setShowFocusedControl(true);
 		myScrolledComposite.setExpandHorizontal(true);
 		myScrolledComposite.setExpandVertical(true);
-
 
 		mainComposite = new Composite(myScrolledComposite, SWT.NONE);
 		myScrolledComposite.setContent(mainComposite);
@@ -145,18 +149,6 @@ public class ServerEditor extends EditorPart
 		serverNameLabel.setText("Server name");
 
 		serverNameField = new Text(mainComposite, SWT.BORDER);
-
-		Label userNameLabel;
-		userNameLabel = new Label(mainComposite, SWT.LEFT);
-		userNameLabel.setText("User name");
-
-		userNameField = new Text(mainComposite, SWT.BORDER);
-
-		Label passwordLabel;
-		passwordLabel = new Label(mainComposite, SWT.LEFT);
-		passwordLabel.setText("Password");
-
-		passwordField = new Text(mainComposite, SWT.BORDER | SWT.PASSWORD);
 
 		if (serverTemplateDefinition != null)
 		{
@@ -201,28 +193,61 @@ public class ServerEditor extends EditorPart
 			}
 		}
 
+		Label userNameLabel;
+		userNameLabel = new Label(mainComposite, SWT.LEFT);
+		userNameLabel.setText("User name");
+
+		userNameField = new Text(mainComposite, SWT.BORDER);
+
+		Label passwordLabel;
+		passwordLabel = new Label(mainComposite, SWT.LEFT);
+		passwordLabel.setText("Password");
+
+		passwordField = new Text(mainComposite, SWT.BORDER | SWT.PASSWORD);
+
 		if (!isExistingDriver(((ServerEditorInput)getEditorInput()).getServerConfig().getDriver()))
 		{
-			noDriverWarning = new Label(mainComposite, SWT.LEFT);
-			noDriverWarning.setText("No driver installed for this database type");
+			noDriverWarning = new Label(mainComposite, SWT.WRAP)
+			{
+				@Override
+				public Point computeSize(int wHint, int hHint, boolean changed)
+				{
+					// this label doesn't care to take up any width space when asked what it wants
+					Point superComputedSize = super.computeSize(wHint, hHint, changed);
+					Point adjustedComputedSize;
+					if (wHint == SWT.DEFAULT || hHint == SWT.DEFAULT)
+					{
+						adjustedComputedSize = new Point(0, superComputedSize.y); // workaround to make a label inside a ScrolledComposite with setExpandHorizontal(true) be able to wrap to the width of the other components in that composite
+					}
+					else adjustedComputedSize = superComputedSize;
+					return adjustedComputedSize;
+				}
+
+				@Override
+				protected void checkSubclass()
+				{
+					// remove subclass protection; TODO use a wrapper composite instead of subclassing
+				}
+			};
+			noDriverWarning.setText(
+				"No driver installed for this database typeNo driver installed for this database typeNo driver installed for this database typeNo driver installed for this database typeNo driver installed for this database typeNo driver installed for this database typeNo driver installed for this database typeNo driver installed for this database typeNo driver installed for this database type");
 			noDriverWarning.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
 
-			noDriverMessage = new Text(mainComposite, SWT.MULTI | SWT.WRAP);
-			noDriverMessage.setBackground(mainComposite.getBackground());
-			StringBuffer msg = new StringBuffer("Please download a driver for this type of database (\"");
-			msg.append(((ServerEditorInput)getEditorInput()).getServerConfig().getDriver()).append(
-				"\") and use the \"Add driver\" button bellow to install it,");
-			msg.append(" or you can install it manually, by copying it to the Servoy application server's \"drivers\" directory and restarting the developer.");
-
-			if (serverTemplateDefinition.getDriverDownloadURL() != null)
-			{
-				msg.append("\n\nYou can download a driver from here : ").append(serverTemplateDefinition.getDriverDownloadURL());
-			}
-
-			noDriverMessage.setText(msg.toString());
+			noDriverMessage = new Text(mainComposite, SWT.LEFT | SWT.MULTI | SWT.WRAP);
+//			noDriverMessage.setBackground(mainComposite.getBackground());
+//			StringBuffer msg = new StringBuffer("Please download a driver for this type of database (\"");
+//			msg.append(((ServerEditorInput)getEditorInput()).getServerConfig().getDriver()).append(
+//				"\") and use the \"Install (downloaded) driver\" button bellow to install it. You can also install the driver manually by copying it to the Servoy application server's \"drivers\" directory and then restarting Servoy Developer.");
+//
+//			if (serverTemplateDefinition.getDriverDownloadURL() != null)
+//			{
+//				msg.append("\n\nYou can download a driver from: ").append(serverTemplateDefinition.getDriverDownloadURL());
+//			}
+//
+//			noDriverMessage.setText(msg.toString());
 
 			addDriverButton = new Button(mainComposite, SWT.PUSH);
-			addDriverButton.setText("Add driver");
+			addDriverButton.setText("Install (downloaded) driver");
 			addDriverButton.addSelectionListener(new SelectionAdapter()
 			{
 				@Override
@@ -246,7 +271,7 @@ public class ServerEditor extends EditorPart
 						}
 						catch (IOException ex)
 						{
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Add driver",
+							MessageDialog.openError(Display.getDefault().getActiveShell(), "Install (downloaded) driver",
 								"Error during copy of database driver files to Servoy");
 							ServoyLog.logError(ex);
 						}
@@ -255,33 +280,58 @@ public class ServerEditor extends EditorPart
 			});
 		}
 
-		advancedToggle = new Button(mainComposite, SWT.PUSH);
-		advancedToggle.setText("Show advanced connection settings");
-		advancedToggle.addSelectionListener(new SelectionAdapter()
+		Composite advancedSettingsCollapserComposite = new Composite(mainComposite, SWT.NONE);
+
+		Label separator1 = new Label(advancedSettingsCollapserComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
+		ExpandBar advancedSettingsCollapser = new ExpandBarWidthAware(advancedSettingsCollapserComposite, SWT.V_SCROLL);
+		Label separator2 = new Label(advancedSettingsCollapserComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
+
+		collapsableItem = new ExpandItem(advancedSettingsCollapser, SWT.NONE, 0);
+		collapsableItem.setText("Show advanced server settings");
+
+		advancedSettingsCollapser.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+		advancedSettingsCollapser.setForeground(parent.getDisplay().getSystemColor(SWT.COLOR_DARK_BLUE));
+
+		advancedSettingsComposite = new Composite(advancedSettingsCollapser, SWT.NONE);
+		collapsableItem.setImage(Activator.getDefault().loadImageFromBundle("outline_co.gif"));
+
+		advancedSettingsCollapser.addExpandListener(new ExpandListener()
+		{
+			public void itemExpanded(ExpandEvent e)
+			{
+				collapsableItem.setText("Hide advanced server settings");
+				relayout();
+			}
+
+			public void itemCollapsed(ExpandEvent e)
+			{
+				collapsableItem.setText("Show advanced server settings");
+				relayout();
+			}
+
+		});
+
+		// partial fix for a Linux (Ubuntu) bug (that I think has to do with ExpandBar's implementation)
+		advancedSettingsComposite.addControlListener(new ControlAdapter()
 		{
 			@Override
-			public void widgetSelected(SelectionEvent e)
+			public void controlResized(ControlEvent e)
 			{
-				isAdvancedMode = !isAdvancedMode;
-				setAdvancedMode(isAdvancedMode);
+				relayout();
 			}
 		});
 
 		Label urlLabel;
-		urlLabel = new Label(mainComposite, SWT.LEFT);
-		advancedControls.add(urlLabel);
+		urlLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		urlLabel.setText("URL");
 
-		urlField = new Text(mainComposite, SWT.BORDER);
-		advancedControls.add(urlField);
+		urlField = new Text(advancedSettingsComposite, SWT.BORDER);
 
 		Label driverLabel;
-		driverLabel = new Label(mainComposite, SWT.LEFT);
-		advancedControls.add(driverLabel);
+		driverLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		driverLabel.setText("Driver");
 
-		driverField = new Combo(mainComposite, SWT.BORDER);
-		advancedControls.add(driverField);
+		driverField = new Combo(advancedSettingsComposite, SWT.BORDER);
 		UIUtils.setDefaultVisibleItemCount(driverField);
 		driverField.addModifyListener(new ModifyListener()
 		{
@@ -294,96 +344,82 @@ public class ServerEditor extends EditorPart
 			isExistingDriver(((ServerEditorInput)getEditorInput()).getServerConfig().getDriver()) ? SWT.COLOR_BLACK : SWT.COLOR_RED));
 
 		Label catalogLabel;
-		catalogLabel = new Label(mainComposite, SWT.LEFT);
-		advancedControls.add(catalogLabel);
+		catalogLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		catalogLabel.setText("Catalog");
 
-		catalogField = new Combo(mainComposite, SWT.BORDER);
-		advancedControls.add(catalogField);
+		catalogField = new Combo(advancedSettingsComposite, SWT.BORDER);
 		UIUtils.setDefaultVisibleItemCount(catalogField);
 
 		Label schemaLabel;
-		schemaLabel = new Label(mainComposite, SWT.LEFT);
-		advancedControls.add(schemaLabel);
+		schemaLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		schemaLabel.setText("Schema");
 
-		schemaField = new Combo(mainComposite, SWT.BORDER);
-		advancedControls.add(schemaField);
+		schemaField = new Combo(advancedSettingsComposite, SWT.BORDER);
 		UIUtils.setDefaultVisibleItemCount(schemaField);
 
 		Label maxActiveLabel;
-		maxActiveLabel = new Label(mainComposite, SWT.LEFT);
-		advancedControls.add(maxActiveLabel);
-		maxActiveLabel.setText("Max Connections Active");
+		maxActiveLabel = new Label(advancedSettingsComposite, SWT.LEFT);
+		maxActiveLabel.setText("Max Active Connections");
 
-		maxActiveField = new Text(mainComposite, SWT.BORDER);
-		advancedControls.add(maxActiveField);
+		maxActiveField = new Text(advancedSettingsComposite, SWT.BORDER);
 
 		Label maxIdleLabel;
-		maxIdleLabel = new Label(mainComposite, SWT.LEFT);
-		advancedControls.add(maxIdleLabel);
-		maxIdleLabel.setText("Max Connections Idle");
+		maxIdleLabel = new Label(advancedSettingsComposite, SWT.LEFT);
+		maxIdleLabel.setText("Max Idle Connections");
 
-		maxIdleField = new Text(mainComposite, SWT.BORDER);
-		advancedControls.add(maxIdleField);
+		maxIdleField = new Text(advancedSettingsComposite, SWT.BORDER);
 
 		Label idleTimoutLabel;
-		idleTimoutLabel = new Label(mainComposite, SWT.LEFT);
-		advancedControls.add(idleTimoutLabel);
-		idleTimoutLabel.setText("Connections Idle Timeout");
+		idleTimoutLabel = new Label(advancedSettingsComposite, SWT.LEFT);
+		idleTimoutLabel.setText("Connection Idle Timeout");
 
-		idleTimoutField = new Text(mainComposite, SWT.BORDER);
-		advancedControls.add(idleTimoutField);
+		idleTimoutField = new Text(advancedSettingsComposite, SWT.BORDER);
 
 		Label maxPreparedStatementsIdleLabel;
-		maxPreparedStatementsIdleLabel = new Label(mainComposite, SWT.LEFT);
-		advancedControls.add(maxPreparedStatementsIdleLabel);
-		maxPreparedStatementsIdleLabel.setText("Max Prepared Statements Idle");
+		maxPreparedStatementsIdleLabel = new Label(advancedSettingsComposite, SWT.LEFT);
+		maxPreparedStatementsIdleLabel.setText("Max Idle Prepared Statements");
 
-		maxPreparedStatementsIdleField = new Text(mainComposite, SWT.BORDER);
-		advancedControls.add(maxPreparedStatementsIdleField);
+		maxPreparedStatementsIdleField = new Text(advancedSettingsComposite, SWT.BORDER);
+
+		Label separator4 = new Label(advancedSettingsComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 
 		Label validationTypeLabel;
-		validationTypeLabel = new Label(mainComposite, SWT.LEFT);
-		advancedControls.add(validationTypeLabel);
-		validationTypeLabel.setText("Validation Type");
+		validationTypeLabel = new Label(advancedSettingsComposite, SWT.LEFT);
+		validationTypeLabel.setText("Connection Validation Type");
 
-		validationTypeField = new Combo(mainComposite, SWT.BORDER | SWT.READ_ONLY);
-		advancedControls.add(validationTypeField);
+		validationTypeField = new Combo(advancedSettingsComposite, SWT.BORDER | SWT.READ_ONLY);
 		UIUtils.setDefaultVisibleItemCount(validationTypeField);
 
 		Label validationQueryLabel;
-		validationQueryLabel = new Label(mainComposite, SWT.LEFT);
-		advancedControls.add(validationQueryLabel);
-		validationQueryLabel.setText("Validation Query");
+		validationQueryLabel = new Label(advancedSettingsComposite, SWT.LEFT);
+		validationQueryLabel.setText("Connection Validation Query");
 
-		validationQueryField = new Text(mainComposite, SWT.BORDER);
-		advancedControls.add(validationQueryField);
+		validationQueryField = new Text(advancedSettingsComposite, SWT.BORDER);
 
 		Label dataModel_cloneFromLabel;
-		dataModel_cloneFromLabel = new Label(mainComposite, SWT.LEFT);
-		advancedControls.add(dataModel_cloneFromLabel);
+		dataModel_cloneFromLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		dataModel_cloneFromLabel.setText("Data model clone from");
 
-		dataModel_cloneFromField = new Combo(mainComposite, SWT.BORDER | SWT.READ_ONLY);
-		advancedControls.add(dataModel_cloneFromField);
+		dataModel_cloneFromField = new Combo(advancedSettingsComposite, SWT.BORDER | SWT.READ_ONLY);
 		UIUtils.setDefaultVisibleItemCount(dataModel_cloneFromField);
 
 		Label enabledLabel;
-		enabledLabel = new Label(mainComposite, SWT.LEFT);
-		advancedControls.add(enabledLabel);
+		enabledLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		enabledLabel.setText("Enabled");
 
-		enabledButton = new Button(mainComposite, SWT.CHECK);
-		advancedControls.add(enabledButton);
+		enabledButton = new Button(advancedSettingsComposite, SWT.CHECK);
+
+		Label skipSysTablesLabel;
+		skipSysTablesLabel = new Label(advancedSettingsComposite, SWT.LEFT);
+		skipSysTablesLabel.setText("Skip System Tables");
+
+		skipSysTablesButton = new Button(advancedSettingsComposite, SWT.CHECK);
 
 		Label logServerLabel;
-		logServerLabel = new Label(mainComposite, SWT.LEFT);
-		advancedControls.add(logServerLabel);
+		logServerLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		logServerLabel.setText("Log Server");
 
-		logServerButton = new Button(mainComposite, SWT.CHECK);
-		advancedControls.add(logServerButton);
+		logServerButton = new Button(advancedSettingsComposite, SWT.CHECK);
 		logServerButton.addListener(SWT.Selection, new Listener()
 		{
 			public void handleEvent(Event event)
@@ -394,8 +430,9 @@ public class ServerEditor extends EditorPart
 
 		ServoyModel.getServerManager().addServerConfigListener(logServerListener = new LogServerListener());
 
-		createLogTableButton = new Button(mainComposite, SWT.PUSH);
-		advancedControls.add(createLogTableButton);
+		Composite buttonsComposite = new Composite(advancedSettingsComposite, SWT.NONE);
+
+		createLogTableButton = new Button(buttonsComposite, SWT.PUSH);
 		createLogTableButton.setText("Create Log Table");
 		createLogTableButton.addSelectionListener(new SelectionAdapter()
 		{
@@ -440,8 +477,7 @@ public class ServerEditor extends EditorPart
 			}
 		});
 
-		createClientstatsTableButton = new Button(mainComposite, SWT.PUSH);
-		advancedControls.add(createClientstatsTableButton);
+		createClientstatsTableButton = new Button(buttonsComposite, SWT.PUSH);
 		createClientstatsTableButton.setText("Create Client Statistics Table");
 		createClientstatsTableButton.addSelectionListener(new SelectionAdapter()
 		{
@@ -488,247 +524,202 @@ public class ServerEditor extends EditorPart
 		});
 		enableButtons();
 
-		Label skipSysTablesLabel;
-		skipSysTablesLabel = new Label(mainComposite, SWT.LEFT);
-		advancedControls.add(skipSysTablesLabel);
-		skipSysTablesLabel.setText("Skip System Tables");
+		// now do the main composite layout
+		GridLayout gridLayout = new GridLayout(4, false);
+		gridLayout.marginWidth = gridLayout.marginHeight = 10;
+		gridLayout.verticalSpacing = 6;
+		gridLayout.horizontalSpacing = 10;
+		mainComposite.setLayout(gridLayout);
 
-		skipSysTablesButton = new Button(mainComposite, SWT.CHECK);
-		advancedControls.add(skipSysTablesButton);
+		// simple part of editor layout setup follows
+		serverNameLabel.setLayoutData(col1GD());
+		serverNameField.setLayoutData(col234GD());
 
-		final GroupLayout groupLayout = new GroupLayout(mainComposite);
-
-		ParallelGroup pg1 = groupLayout.createParallelGroup(GroupLayout.LEADING, false).add(serverNameLabel, GroupLayout.PREFERRED_SIZE, 140,
-			GroupLayout.PREFERRED_SIZE);
-
-		for (Label l : urlPropertiesLabels)
+		for (int i = 0; i < urlPropertiesLabels.size(); i += 2)
 		{
-			pg1 = pg1.add(l, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE);
+			urlPropertiesLabels.get(i).setLayoutData(col1GD());
+			urlPropertiesFields.get(i).setLayoutData(col2GD());
+			if (i + 1 < urlPropertiesLabels.size())
+			{
+				urlPropertiesLabels.get(i + 1).setLayoutData(col3GD());
+				urlPropertiesFields.get(i + 1).setLayoutData(col4GD());
+			}
+			else
+			{
+				urlPropertiesFields.get(i).setLayoutData(col234GD());
+			}
 		}
 
-		pg1.add(validationTypeLabel, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(validationQueryLabel, GroupLayout.PREFERRED_SIZE, 140,
-			GroupLayout.PREFERRED_SIZE).add(enabledLabel, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(logServerLabel,
-				GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(maxPreparedStatementsIdleLabel, GroupLayout.PREFERRED_SIZE, 140,
-					GroupLayout.PREFERRED_SIZE).add(maxIdleLabel, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(maxActiveLabel,
-						GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(idleTimoutLabel, GroupLayout.PREFERRED_SIZE, 140,
-							GroupLayout.PREFERRED_SIZE).add(schemaLabel, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(catalogLabel,
-								GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(driverLabel, GroupLayout.PREFERRED_SIZE, 140,
-									GroupLayout.PREFERRED_SIZE).add(urlLabel, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(passwordLabel,
-										GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE).add(userNameLabel, GroupLayout.PREFERRED_SIZE, 140,
-											GroupLayout.PREFERRED_SIZE).add(dataModel_cloneFromLabel, GroupLayout.PREFERRED_SIZE, 140,
-												GroupLayout.PREFERRED_SIZE).add(skipSysTablesLabel, GroupLayout.PREFERRED_SIZE, 140,
-													GroupLayout.PREFERRED_SIZE);
+		userNameLabel.setLayoutData(col1GD());
+		userNameField.setLayoutData(col2GD());
 
+		passwordLabel.setLayoutData(col3GD());
+		passwordField.setLayoutData(col4GD());
 
-		ParallelGroup pg2 = groupLayout.createParallelGroup(GroupLayout.LEADING).add(serverNameField, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE);
-
-		for (Text tx : urlPropertiesFields)
-		{
-			pg2 = pg2.add(tx, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE);
-		}
-
+		// layout missing driver if necessary
 		if (noDriverMessage != null)
 		{
-			pg2 = pg2.add(noDriverWarning, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(noDriverMessage, GroupLayout.PREFERRED_SIZE, 141,
-				Short.MAX_VALUE).add(addDriverButton, GroupLayout.PREFERRED_SIZE, 141, GroupLayout.PREFERRED_SIZE);
+			noDriverWarning.setLayoutData(col1234GD());
+			noDriverMessage.setLayoutData(col1234GD());
+			addDriverButton.setLayoutData(col1234GD());
 		}
 
-		pg2.add(userNameField, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(passwordField, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(
-			urlField, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(advancedToggle, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(driverField,
-				GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(catalogField, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(schemaField,
-					GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(maxActiveField, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(maxIdleField,
-						GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(idleTimoutField, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(
-							maxPreparedStatementsIdleField, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(validationTypeField,
-								GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(validationQueryField, GroupLayout.PREFERRED_SIZE, 141,
-									Short.MAX_VALUE).add(enabledButton, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(
-										groupLayout.createSequentialGroup().add(logServerButton, GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(
-											createLogTableButton, GroupLayout.PREFERRED_SIZE, 141, GroupLayout.PREFERRED_SIZE).add(createClientstatsTableButton,
-												GroupLayout.PREFERRED_SIZE, 160, GroupLayout.PREFERRED_SIZE)).add(dataModel_cloneFromField,
-													GroupLayout.PREFERRED_SIZE, 141, Short.MAX_VALUE).add(skipSysTablesButton, GroupLayout.PREFERRED_SIZE, 141,
-														Short.MAX_VALUE);
+		// layout advanced settings
 
+		gridLayout = new GridLayout(1, false);
+		gridLayout.marginWidth = gridLayout.marginHeight = 0;
+		gridLayout.verticalSpacing = 0;
+		gridLayout.horizontalSpacing = 0;
+		advancedSettingsCollapserComposite.setLayout(gridLayout);
 
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(pg1).addPreferredGap(LayoutStyle.RELATED).add(pg2).addContainerGap()));
+		advancedSettingsCollapserComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
+		GridData tmpGD = new GridData(SWT.FILL, SWT.BOTTOM, true, false);
+		tmpGD.verticalIndent = 30;
+		separator1.setLayoutData(tmpGD);
+		advancedSettingsCollapser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		separator2.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 
+		gridLayout = new GridLayout(4, false);
+		gridLayout.marginRight = 0;
+		gridLayout.marginLeft = 20;
+		gridLayout.marginTop = 10;
+		gridLayout.marginBottom = 0;
+		gridLayout.verticalSpacing = 6;
+		gridLayout.horizontalSpacing = 10;
+		advancedSettingsComposite.setLayout(gridLayout);
 
-		SequentialGroup sg1 = groupLayout.createSequentialGroup().addContainerGap().add(
-			groupLayout.createParallelGroup(GroupLayout.BASELINE).add(serverNameField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-				GroupLayout.PREFERRED_SIZE).add(serverNameLabel)).addPreferredGap(LayoutStyle.RELATED);
+		urlLabel.setLayoutData(col1GD());
+		urlField.setLayoutData(col234GD());
 
+		driverLabel.setLayoutData(col1GD());
+		driverField.setLayoutData(col234GD());
 
-		for (int z = 0; z < urlPropertiesLabels.size(); z++)
-		{
-			sg1 = sg1.add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(urlPropertiesFields.get(z), GroupLayout.PREFERRED_SIZE,
-				GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(urlPropertiesLabels.get(z), GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED);
-		}
+		catalogLabel.setLayoutData(col1GD());
+		catalogField.setLayoutData(col2GD());
 
-		sg1 = sg1.add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(userNameField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-			GroupLayout.PREFERRED_SIZE).add(userNameLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-				LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(passwordField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-						GroupLayout.PREFERRED_SIZE).add(passwordLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE));
+		schemaLabel.setLayoutData(col3GD());
+		schemaField.setLayoutData(col4GD());
 
+		maxActiveLabel.setLayoutData(col1GD());
+		maxActiveField.setLayoutData(col2GD());
 
-		if (noDriverMessage != null)
-		{
-			sg1 = sg1.add(20, 20, 20).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(noDriverWarning, GroupLayout.PREFERRED_SIZE,
-				GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(noDriverMessage, GroupLayout.PREFERRED_SIZE, 100,
-						GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-							groupLayout.createParallelGroup(GroupLayout.BASELINE).add(addDriverButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-								GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED);
-		}
+		maxIdleLabel.setLayoutData(col3GD());
+		maxIdleField.setLayoutData(col4GD());
 
-		sg1.add(20, 20, 20).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(advancedToggle, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-			GroupLayout.PREFERRED_SIZE)).add(40, 40, 40).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(urlField, GroupLayout.PREFERRED_SIZE,
-				GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(urlLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(driverField,
-						GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(driverLabel, GroupLayout.PREFERRED_SIZE,
-							GroupLayout.DEFAULT_SIZE,
-							GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(
-								catalogField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(catalogLabel,
-									GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-										groupLayout.createParallelGroup(GroupLayout.BASELINE).add(schemaField, GroupLayout.PREFERRED_SIZE,
-											GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(schemaLabel, GroupLayout.PREFERRED_SIZE,
-												GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-													groupLayout.createParallelGroup(GroupLayout.BASELINE).add(maxActiveField, GroupLayout.PREFERRED_SIZE,
-														GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(maxActiveLabel, GroupLayout.PREFERRED_SIZE,
-															GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-																groupLayout.createParallelGroup(GroupLayout.BASELINE).add(maxIdleField,
-																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
-																		maxIdleLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-																		GroupLayout.PREFERRED_SIZE)).add(10,
-																			10,
-																			10).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(idleTimoutField,
-																				GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-																				GroupLayout.PREFERRED_SIZE).add(idleTimoutLabel, GroupLayout.PREFERRED_SIZE,
-																					GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10,
-																						10,
-																						10).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(
-																							maxPreparedStatementsIdleField, GroupLayout.PREFERRED_SIZE,
-																							GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
-																								maxPreparedStatementsIdleLabel, GroupLayout.PREFERRED_SIZE,
-																								GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).add(10,
-																									10,
-																									10).add(groupLayout.createParallelGroup(
-																										GroupLayout.BASELINE).add(validationTypeLabel).add(
-																											validationTypeField, GroupLayout.PREFERRED_SIZE,
-																											GroupLayout.DEFAULT_SIZE,
-																											GroupLayout.PREFERRED_SIZE)).add(10,
-																												10,
-																												10).add(groupLayout.createParallelGroup(
-																													GroupLayout.BASELINE).add(
-																														validationQueryField,
-																														GroupLayout.PREFERRED_SIZE,
-																														GroupLayout.DEFAULT_SIZE,
-																														GroupLayout.PREFERRED_SIZE).add(
-																															validationQueryLabel)).add(10, 10,
-																																10).add(
-																																	groupLayout.createParallelGroup(
-																																		GroupLayout.BASELINE).add(
-																																			dataModel_cloneFromField,
-																																			GroupLayout.PREFERRED_SIZE,
-																																			GroupLayout.DEFAULT_SIZE,
-																																			GroupLayout.PREFERRED_SIZE).add(
-																																				dataModel_cloneFromLabel)).add(
-																																					10, 10,
-																																					10).add(
-																																						groupLayout.createParallelGroup(
-																																							GroupLayout.BASELINE).add(
-																																								enabledButton,
-																																								GroupLayout.PREFERRED_SIZE,
-																																								GroupLayout.DEFAULT_SIZE,
-																																								GroupLayout.PREFERRED_SIZE).add(
-																																									enabledLabel,
-																																									GroupLayout.PREFERRED_SIZE,
-																																									GroupLayout.DEFAULT_SIZE,
-																																									GroupLayout.PREFERRED_SIZE)).add(
-																																										10,
-																																										10,
-																																										10).add(
-																																											groupLayout.createParallelGroup(
-																																												GroupLayout.BASELINE).add(
-																																													createClientstatsTableButton,
-																																													GroupLayout.PREFERRED_SIZE,
-																																													GroupLayout.DEFAULT_SIZE,
-																																													GroupLayout.PREFERRED_SIZE).add(
-																																														createLogTableButton,
-																																														GroupLayout.PREFERRED_SIZE,
-																																														GroupLayout.DEFAULT_SIZE,
-																																														GroupLayout.PREFERRED_SIZE).add(
-																																															logServerButton,
-																																															GroupLayout.PREFERRED_SIZE,
-																																															GroupLayout.DEFAULT_SIZE,
-																																															GroupLayout.PREFERRED_SIZE).add(
-																																																logServerLabel,
-																																																GroupLayout.PREFERRED_SIZE,
-																																																GroupLayout.DEFAULT_SIZE,
-																																																GroupLayout.PREFERRED_SIZE)).add(
-																																																	10,
-																																																	10,
-																																																	10).add(
-																																																		groupLayout.createParallelGroup(
-																																																			GroupLayout.BASELINE).add(
-																																																				skipSysTablesButton,
-																																																				GroupLayout.PREFERRED_SIZE,
-																																																				GroupLayout.DEFAULT_SIZE,
-																																																				GroupLayout.PREFERRED_SIZE).add(
-																																																					skipSysTablesLabel,
-																																																					GroupLayout.PREFERRED_SIZE,
-																																																					GroupLayout.DEFAULT_SIZE,
-																																																					GroupLayout.PREFERRED_SIZE)).addContainerGap(
-																																																						GroupLayout.DEFAULT_SIZE,
-																																																						Short.MAX_VALUE);
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(sg1));
-		mainComposite.setLayout(groupLayout);
+		idleTimoutLabel.setLayoutData(col1GD());
+		idleTimoutField.setLayoutData(col2GD());
+
+		maxPreparedStatementsIdleLabel.setLayoutData(col3GD());
+		maxPreparedStatementsIdleField.setLayoutData(col4GD());
+
+		tmpGD = new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1);
+		tmpGD.verticalIndent = 10;
+		separator4.setLayoutData(tmpGD);
+
+		tmpGD = col1GD();
+		tmpGD.verticalIndent = 10;
+		validationTypeLabel.setLayoutData(tmpGD);
+
+		tmpGD = col2GD();
+		tmpGD.verticalIndent = 10;
+		validationTypeField.setLayoutData(tmpGD);
+
+		tmpGD = col3GD();
+		tmpGD.verticalIndent = 10;
+		validationQueryLabel.setLayoutData(tmpGD);
+
+		tmpGD = col4GD();
+		tmpGD.verticalIndent = 10;
+		validationQueryField.setLayoutData(tmpGD);
+
+		dataModel_cloneFromLabel.setLayoutData(col1GD());
+		dataModel_cloneFromField.setLayoutData(col234GD());
+
+		enabledLabel.setLayoutData(col1GD());
+		enabledButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+
+		skipSysTablesLabel.setLayoutData(col3GD());
+		skipSysTablesButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+
+		logServerLabel.setLayoutData(col1GD());
+		logServerButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+
+		buttonsComposite.setLayoutData(col34GD());
+
+		gridLayout = new GridLayout(2, false);
+		gridLayout.marginWidth = gridLayout.marginHeight = 0;
+		gridLayout.horizontalSpacing = 10;
+		buttonsComposite.setLayout(gridLayout);
+
+		createLogTableButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		createClientstatsTableButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+		collapsableItem.setHeight(advancedSettingsComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
+		collapsableItem.setControl(advancedSettingsComposite);
+
 		myScrolledComposite.setMinSize(mainComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
 		initComboData();
 		initDataBindings();
-
-		setAdvancedMode(false);
 	}
 
-	/**
-	 * @param comp
-	 */
-	private void setTabSequence(boolean advancedMode)
+	protected void relayout()
 	{
-		List<Control> tabSequence = new ArrayList<>();
-		tabSequence.add(serverNameField);
-
-		for (Text tx : urlPropertiesFields)
+		getSite().getShell().getDisplay().asyncExec(new Runnable()
 		{
-			tabSequence.add(tx);
-		}
-		tabSequence.add(userNameField);
-		tabSequence.add(passwordField);
-		tabSequence.add(advancedToggle);
+			public void run()
+			{
+				collapsableItem.setHeight(advancedSettingsComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
+				myScrolledComposite.setMinSize(mainComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+				mainComposite.layout(true, true);
+			}
+		});
+	}
 
-		if (advancedMode)
-		{
-			tabSequence.add(urlField);
-			tabSequence.add(driverField);
-			tabSequence.add(catalogField);
-			tabSequence.add(schemaField);
-			tabSequence.add(maxActiveField);
-			tabSequence.add(maxIdleField);
-			tabSequence.add(idleTimoutField);
-			tabSequence.add(maxPreparedStatementsIdleField);
-			tabSequence.add(validationTypeField);
-			tabSequence.add(validationQueryField);
-			tabSequence.add(dataModel_cloneFromField);
-			tabSequence.add(enabledButton);
-			tabSequence.add(logServerButton);
-			tabSequence.add(createLogTableButton);
-			tabSequence.add(createClientstatsTableButton);
-			tabSequence.add(skipSysTablesButton);
-		}
-		tabSequence.add(serverNameField);
+	// declare some grid-datas creators to be reused per column for easier tuning
+	protected GridData col1GD()
+	{
+		return new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
+	}
 
-		mainComposite.setTabList(tabSequence.toArray(new Control[tabSequence.size()]));
+	protected GridData col2GD()
+	{
+		GridData col2GD = new GridData(SWT.FILL, SWT.CENTER, true, false);
+		col2GD.minimumWidth = 100;
+		return col2GD;
+	}
+
+	protected GridData col3GD()
+	{
+		return new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
+	}
+
+	protected GridData col4GD()
+	{
+		GridData col4GD = new GridData(SWT.FILL, SWT.CENTER, true, false);
+		col4GD.minimumWidth = 100;
+		return col4GD;
+	}
+
+	protected GridData col234GD()
+	{
+		GridData col234GD = new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1);
+		col234GD.minimumWidth = 100;
+		return col234GD;
+	}
+
+	protected GridData col34GD()
+	{
+		GridData col1234GD = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
+		col1234GD.minimumWidth = 100;
+		return col1234GD;
+	}
+
+	protected GridData col1234GD()
+	{
+		GridData col1234GD = new GridData(SWT.FILL, SWT.TOP, true, false, 4, 1);
+//		col1234GD.minimumWidth = 100;
+		return col1234GD;
 	}
 
 	@Override
@@ -1182,17 +1173,6 @@ public class ServerEditor extends EditorPart
 			createLogTableButton.setEnabled(false);
 			createClientstatsTableButton.setEnabled(false);
 		}
-	}
-
-	private void setAdvancedMode(boolean isAdvanced)
-	{
-		for (Control c : advancedControls)
-		{
-			c.setVisible(isAdvanced);
-		}
-
-		advancedToggle.setText(isAdvanced ? "Hide advanced server settings" : "Show advanced server settings");
-		setTabSequence(isAdvanced);
 	}
 
 	class LogServerListener implements IServerConfigListener
