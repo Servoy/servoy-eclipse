@@ -63,6 +63,7 @@ import org.eclipse.swt.widgets.Widget;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.inmemory.MemTable;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.TableEditor;
@@ -137,7 +138,7 @@ public class ColumnComposite extends Composite
 				if (sel instanceof IStructuredSelection)
 				{
 					final Object first = ((IStructuredSelection)sel).getFirstElement();
-					if (first instanceof Column)
+					if (first instanceof Column && !(((Column)first).getTable() instanceof MemTable))
 					{
 						Column c = (Column)first;
 						boolean b = (c.getColumnInfo() != null);

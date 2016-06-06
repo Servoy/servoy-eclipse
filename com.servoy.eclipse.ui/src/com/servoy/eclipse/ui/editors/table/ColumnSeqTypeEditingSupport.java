@@ -98,10 +98,10 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 			IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(table.getServerName());
 			for (int element : types)
 			{
-				if (element == ColumnInfo.SERVOY_SEQUENCE || element == ColumnInfo.NO_SEQUENCE_SELECTED ||
-					(!(table instanceof MemTable) && server.supportsSequenceType(element, null/*
-																								 * TODO: add current selected column
-																								 */)))
+				if (element == ColumnInfo.NO_SEQUENCE_SELECTED || (!(table instanceof MemTable) &&
+					(element == ColumnInfo.SERVOY_SEQUENCE || server.supportsSequenceType(element, null/*
+																										 * TODO: add current selected column
+																										 */))))
 				{
 					seqType.add(ColumnInfo.getSeqDisplayTypeString(element));
 				}
