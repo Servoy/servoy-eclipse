@@ -30,7 +30,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="popup:org.eclipse.ui.popup.any">
+            locationURI="popup:org.eclipse.ui.popup.any?before=com.servoy.action.new">
          <command
                commandId="com.servoy.eclipse.designer.wpm.open"
                label="Open Web Package Manager"
@@ -54,6 +54,10 @@
                </with>
             </visibleWhen>
          </command>
+         <separator
+               name="com.servoy.eclipse.designer.wpm.separator"
+               visible="true">
+         </separator>
       </menuContribution>
    </extension>
    <extension
