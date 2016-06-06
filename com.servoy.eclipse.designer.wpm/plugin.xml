@@ -33,6 +33,7 @@
             locationURI="popup:org.eclipse.ui.popup.any?before=com.servoy.action.new">
          <command
                commandId="com.servoy.eclipse.designer.wpm.open"
+               icon="icons/webpackagemanager.png"
                label="Open Web Package Manager"
                style="push">
             <visibleWhen
