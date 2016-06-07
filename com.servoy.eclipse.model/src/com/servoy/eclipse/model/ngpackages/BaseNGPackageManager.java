@@ -627,20 +627,25 @@ public abstract class BaseNGPackageManager
 	{
 		try
 		{
+			IResource res = resource;
+			if (!res.exists())
+			{
+				res = res.getParent();
+			}
 			IMarker marker = null;
 			if (e instanceof DuplicatePackageException)
 			{
-				resource.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_ONE);
+				res.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_ONE);
 				marker = resource.createMarker(DUPLICATE_COMPONENT_MARKER);
 			}
 			else
 			{
-				marker = resource.createMarker(SPEC_READ_MARKER);
+				marker = res.createMarker(SPEC_READ_MARKER);
 			}
 			marker.setAttribute(IMarker.MESSAGE, e.getMessage());
 			marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
 			marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
-			marker.setAttribute(IMarker.LOCATION, resource.getLocation().toString());
+			marker.setAttribute(IMarker.LOCATION, res.getLocation().toString());
 		}
 		catch (CoreException ex)
 		{
