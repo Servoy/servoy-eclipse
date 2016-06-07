@@ -103,7 +103,7 @@ public class MovePersistAction extends AbstractMovePersistAction
 						{
 							// reset all uuids
 							IPersist duplicate = null;
-							final Map<Integer, Integer> idMap;
+							final Map< ? extends Object, ? extends Object> idMap;
 							if (editingNode instanceof Media)
 							{
 								duplicate = PersistCloner.duplicatePersist(editingNode, ((Media)editingNode).getName(), destination.getServoyProject(),
@@ -128,8 +128,8 @@ public class MovePersistAction extends AbstractMovePersistAction
 								public void run()
 								{
 									ServoyLog.logError(e);
-									MessageDialog.openError(shell, "Cannot move form", persistString + " " + ((ISupportName)persist).getName() +
-										"cannot be moved. Reason:\n" + e.getMessage());
+									MessageDialog.openError(shell, "Cannot move form",
+										persistString + " " + ((ISupportName)persist).getName() + "cannot be moved. Reason:\n" + e.getMessage());
 								}
 							});
 						}
@@ -210,8 +210,8 @@ public class MovePersistAction extends AbstractMovePersistAction
 					public void run()
 					{
 						ServoyLog.logError(e);
-						MessageDialog.openError(shell, "Cannot move form", persistString + " " + ((ISupportName)editingNode).getName() +
-							"cannot be moved. Reason:\n" + e.getMessage());
+						MessageDialog.openError(shell, "Cannot move form",
+							persistString + " " + ((ISupportName)editingNode).getName() + "cannot be moved. Reason:\n" + e.getMessage());
 					}
 				});
 			}
@@ -223,7 +223,7 @@ public class MovePersistAction extends AbstractMovePersistAction
 		}
 	}
 
-	private void updateReferences(IPersist editingNode, final Map<Integer, Integer> idMap) throws RepositoryException
+	private void updateReferences(IPersist editingNode, final Map< ? extends Object, ? extends Object> idMap) throws RepositoryException
 	{
 		boolean saveEditingNode = true;
 		ServoyProject editingProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(editingNode.getRootObject().getName());
@@ -236,8 +236,8 @@ public class MovePersistAction extends AbstractMovePersistAction
 				{
 					try
 					{
-						for (ContentSpec.Element element : Utils.iterate(((EclipseRepository)ServoyModel.getDeveloperRepository()).getContentSpec().getPropertiesForObjectType(
-							o.getTypeID())))
+						for (ContentSpec.Element element : Utils.iterate(
+							((EclipseRepository)ServoyModel.getDeveloperRepository()).getContentSpec().getPropertiesForObjectType(o.getTypeID())))
 						{
 							// Don't set meta data properties.
 							if (element.isMetaData() || element.isDeprecated()) continue;
@@ -248,7 +248,7 @@ public class MovePersistAction extends AbstractMovePersistAction
 								int id = Utils.getAsInteger(property_value);
 								if (id > 0)
 								{
-									Integer newId = idMap.get(new Integer(id));
+									Object newId = idMap.get(new Integer(id));
 									if (newId != null)
 									{
 										((AbstractBase)o).setProperty(element.getName(), newId);
