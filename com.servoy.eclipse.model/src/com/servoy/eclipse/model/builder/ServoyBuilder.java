@@ -509,6 +509,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> FORM_REFERENCE_INVALID_SCRIPT = new Pair<String, ProblemSeverity>("formReferenceInvalidScript",
 		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> FORM_REFERENCE_CYCLE = new Pair<String, ProblemSeverity>("formReferenceCycle", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> NON_ACCESSIBLE_PERSIST_IN_MODULE_USED_IN_PARENT_SOLUTION = new Pair<String, ProblemSeverity>(
 		"nonAccessibleFormInModuleUsedInParentSolution", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> METHOD_NUMBER_OF_ARGUMENTS_MISMATCH = new Pair<String, ProblemSeverity>("methodNumberOfArgsMismatch",
@@ -2840,6 +2841,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									ServoyMarker mk = MarkerMessages.FormRowBGCalcTargetNotFound.fill(form.getName());
 									addMarker(project, mk.getType(), mk.getText(), -1, FORM_PROPERTY_TARGET_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, form);
 								}
+							}
+							Set<String> cycles = FormReference.detectFormReferenceCycles(flattenedSolution, form);
+							for (String cycle : cycles)
+							{
+								ServoyMarker mk = MarkerMessages.FormReferenceCycle.fill(cycle);
+								addMarker(ServoyModelFinder.getServoyModel().getServoyProject(flattenedSolution.getName()).getProject(), mk.getType(),
+									mk.getText(), -1, FORM_REFERENCE_CYCLE, IMarker.PRIORITY_NORMAL, null, form);
 							}
 						}
 						checkCancel();

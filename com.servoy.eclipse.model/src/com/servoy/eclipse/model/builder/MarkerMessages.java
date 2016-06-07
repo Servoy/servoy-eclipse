@@ -323,6 +323,8 @@ public class MarkerMessages
 	public static ServoyMarker FormReferenceInvalidScript = new ServoyMarker(
 		"Form \"{0}\" is a reference form and it is not allowed to have script variables or methods defined (\"{1}\").",
 		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
+
+	public static ServoyMarker FormReferenceCycle = new ServoyMarker("A form reference cycle was detected, path {0}", ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 	/**
 	 * This means that when using form inheritance a cycle was introduced in the dependency relation of some forms. This is not allowed.
 	 */
