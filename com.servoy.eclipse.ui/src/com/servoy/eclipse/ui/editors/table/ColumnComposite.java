@@ -189,6 +189,25 @@ public class ColumnComposite extends Composite
 					}
 					else
 					{
+						if (first instanceof Column && ((Column)first).getTable() instanceof MemTable)
+						{
+							Column c = (Column)first;
+							if (c.getColumnInfo() == null)
+							{
+								DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();
+								if (dmm != null)
+								{
+									try
+									{
+										dmm.createNewColumnInfo(c, false);
+									}
+									catch (RepositoryException e)
+									{
+										ServoyLog.logWarning("Cannot create new column info in table editor", e);
+									}
+								}
+							}
+						}
 						tabFolder.setVisible(false);
 						container.setLayout(tableLayout);
 						myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
