@@ -1333,6 +1333,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								referencedFormsByName.put(referenceForm.getName(), duplicates);
 							}
 						}
+						return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
 					}
 					if (!(o instanceof ScriptVariable) && !(o instanceof ScriptMethod) && !(o instanceof Form) && o instanceof ISupportName &&
 						((ISupportName)o).getName() != null)

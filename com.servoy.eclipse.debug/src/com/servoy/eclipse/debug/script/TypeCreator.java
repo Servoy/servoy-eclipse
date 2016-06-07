@@ -149,6 +149,7 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.FormReference;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IFormElement;
@@ -3815,7 +3816,8 @@ public class TypeCreator extends TypeCache
 							formToUse = fs.getFlattenedForm(form);
 						}
 						IApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
-						createFormElementProperties(context, application, members, formToUse.getFlattenedObjects(NameComparator.INSTANCE));
+						createFormElementProperties(context, application, members, formToUse.getFlattenedObjects(NameComparator.INSTANCE),
+							formToUse.getFormReferencesWithoutNesting());
 					}
 					catch (Exception e)
 					{
@@ -3832,7 +3834,8 @@ public class TypeCreator extends TypeCache
 		 * @param members
 		 * @param formObjects
 		 */
-		private void createFormElementProperties(String context, IApplication application, EList<Member> members, List<IFormElement> formElements)
+		private void createFormElementProperties(String context, IApplication application, EList<Member> members, List<IFormElement> formElements,
+			List<FormReference> formReferences)
 		{
 			for (IFormElement formElement : formElements)
 			{
@@ -3882,7 +3885,28 @@ public class TypeCreator extends TypeCache
 							children.add((IFormElement)persist);
 						}
 					}
-					createFormElementProperties(context, application, members, children);
+					createFormElementProperties(context, application, members, children, null);
+				}
+			}
+			if (formReferences != null)
+			{
+				for (FormReference formReference : formReferences)
+				{
+					if (formReference.getName() != null)
+					{
+						Type type = TypeInfoModelFactory.eINSTANCE.createType();
+						type.setName("RuntimeFormReference");
+						type.setKind(TypeKind.JAVA);
+
+						members.add(createProperty(formReference.getName(), true, TypeUtil.ref(type), null, PROPERTY));
+
+						Form form = application.getFlattenedSolution().getForm(formReference.getContainsFormID());
+						if (form != null)
+						{
+							createFormElementProperties(context, application, type.getMembers(), form.getFlattenedObjects(NameComparator.INSTANCE),
+								form.getFormReferencesWithoutNesting());
+						}
+					}
 				}
 			}
 		}
