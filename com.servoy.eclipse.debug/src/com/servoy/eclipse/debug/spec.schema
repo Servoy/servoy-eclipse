@@ -60,6 +60,16 @@
 			"description": "The javascript definition",
 			"type": "string"
 		},
+		"categoryName" : 
+		{
+			"description": "The category name which is a sub node in the palette",
+			"type": "string"
+		},
+		"designStyleClass" :
+		{
+			"description": "A style class that is being used for a layout container purely in the designer",
+			"type": "string"
+		},
 		"attributes": 
 		{
 			"description": "Layout attributes definition",
@@ -179,7 +189,10 @@
 				        			  "items": {
 				        				  "type": "string"
 				        			  }
-				        		  }
+				        		  },
+				        		  "max": {
+					            	"type": "number"
+						          }
 				        	  },
 				        	  "required":["type"],
 				        	  "additionalProperties": false
