@@ -65,7 +65,7 @@ public abstract class AddAsSolutionReference extends Action implements ISelectio
 			while (state && selit.hasNext())
 			{
 				SimpleUserNode node = selit.next();
-				state = (node.getType() == targetNodeType);
+				state = (node.getRealType() == targetNodeType);
 				if (state) selectedProjects.add(getSelectedNodeName(node));
 			}
 			if (!state)
