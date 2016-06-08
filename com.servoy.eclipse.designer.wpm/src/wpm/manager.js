@@ -16,8 +16,11 @@ angular.module('app', ['ngMaterial'])
 	var ws = new WebSocket(uri);
 	$scope.websocket = ws;
 	$scope.isLoading = true;
-	
-	
+    
+    $window.onbeforeunload = function() {
+    	ws.close();
+    }
+
 	ws.onopen = function (event) {
 	      var command = {"method":"requestAllInstalledPackages"};
 	      ws.send(JSON.stringify(command)); 
@@ -26,10 +29,6 @@ angular.module('app', ['ngMaterial'])
 	};
 	  
 	ws.onmessage = function (msg){
-		if ("p" == msg.data){
-			ws.send("P");
-			return;
-		}
 		$scope.$apply(function() {
 			var receivedJson = JSON.parse(msg.data);
 			var method = receivedJson["method"];
