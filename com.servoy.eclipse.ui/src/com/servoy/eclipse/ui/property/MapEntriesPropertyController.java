@@ -382,7 +382,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 		@Override
 		protected void doSetValue(Object val)
 		{
-			this.value = value instanceof Map< ? , ? > ? (Map<String, Object>)val : null;
+			this.value = val instanceof Map< ? , ? > ? (Map<String, Object>)val : null;
 		}
 
 		@Override
