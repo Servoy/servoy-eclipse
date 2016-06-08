@@ -20,9 +20,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.core.commands.Command;
+import org.eclipse.core.commands.ParameterizedCommand;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
@@ -42,7 +45,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -60,9 +63,19 @@ import org.eclipse.team.internal.ui.Utils;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
+import org.eclipse.ui.forms.HyperlinkSettings;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IHyperlinkListener;
+import org.eclipse.ui.forms.widgets.FormText;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.EditorPart;
+import org.eclipse.ui.part.IShowInSource;
+import org.eclipse.ui.part.ShowInContext;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -76,6 +89,8 @@ import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ExpandBarWidthAware;
 import com.servoy.eclipse.ui.util.ImmutableObjectObservable;
+import com.servoy.eclipse.ui.util.WrappingControl;
+import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IServerConfigListener;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.IServerManagerInternal;
@@ -86,7 +101,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
 import com.servoy.j2db.util.Settings;
 
-public class ServerEditor extends EditorPart
+public class ServerEditor extends EditorPart implements IShowInSource
 {
 	public ServerEditor()
 	{
@@ -101,6 +116,8 @@ public class ServerEditor extends EditorPart
 	private Button createLogTableButton;
 	private Button createClientstatsTableButton;
 	private Button skipSysTablesButton;
+	private Button saveButton;
+	private Button testConnectionButton;
 	private Text validationQueryField;
 	private Combo validationTypeField;
 	private Text maxPreparedStatementsIdleField;
@@ -121,7 +138,7 @@ public class ServerEditor extends EditorPart
 	private final ArrayList<Text> urlPropertiesFields = new ArrayList<Text>();
 
 	private Label noDriverWarning;
-	private Text noDriverMessage;
+	private FormText noDriverMessage;
 	private Button addDriverButton;
 
 	private String oldServerName = null;
@@ -133,26 +150,43 @@ public class ServerEditor extends EditorPart
 	private ScrolledComposite myScrolledComposite;
 	private Composite advancedSettingsComposite;
 
+	private Composite parentControl;
+
 	@Override
 	public void createPartControl(final Composite parent)
 	{
+		this.parentControl = parent;
+
+		GridData tmpGD;
+
+		String toolTip;
+		Display display = getDisplay(parent);
+
 		myScrolledComposite = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		myScrolledComposite.setShowFocusedControl(true);
 		myScrolledComposite.setExpandHorizontal(true);
 		myScrolledComposite.setExpandVertical(true);
 
+		Label mainSeparator = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
+
+		Composite bottomComposite = new Composite(parent, SWT.NONE);
+
 		mainComposite = new Composite(myScrolledComposite, SWT.NONE);
 		myScrolledComposite.setContent(mainComposite);
 
+		toolTip = "The (friendly) name that this DB server/connection will have in Servoy Developer.\nIt doesn't have to match the real database name (the one used by DB Server).";
 		Label serverNameLabel;
 		serverNameLabel = new Label(mainComposite, SWT.LEFT);
 		serverNameLabel.setText("Server name");
+		serverNameLabel.setToolTipText(toolTip);
 
 		serverNameField = new Text(mainComposite, SWT.BORDER);
+		serverNameField.setToolTipText(toolTip);
 
 		if (serverTemplateDefinition != null)
 		{
 			String[] urlKeys = serverTemplateDefinition.getUrlKeys();
+			String[] urlKeyDescriptions = serverTemplateDefinition.getUrlKeyDescriptions();
 			if (urlKeys != null)
 			{
 				ModifyListener ml = new ModifyListener()
@@ -176,9 +210,12 @@ public class ServerEditor extends EditorPart
 
 				for (int z = 0; z < urlKeys.length; z++)
 				{
+					toolTip = (urlKeyDescriptions != null && urlKeyDescriptions.length > z ? urlKeyDescriptions[z] : null);
+
 					Label templateLabel;
 					templateLabel = new Label(mainComposite, SWT.LEFT);
 					templateLabel.setText(urlKeys[z]);
+					templateLabel.setToolTipText(toolTip);
 					urlPropertiesLabels.add(templateLabel);
 
 					Text templateField = new Text(mainComposite, SWT.BORDER);
@@ -187,73 +224,93 @@ public class ServerEditor extends EditorPart
 						templateField.setText(urlValues[z]);
 					}
 					templateField.addModifyListener(ml);
+					templateField.setToolTipText(toolTip);
 
 					urlPropertiesFields.add(templateField);
 				}
 			}
 		}
 
+		toolTip = "User name for connecting to the database.";
 		Label userNameLabel;
 		userNameLabel = new Label(mainComposite, SWT.LEFT);
 		userNameLabel.setText("User name");
+		userNameLabel.setToolTipText(toolTip);
 
 		userNameField = new Text(mainComposite, SWT.BORDER);
+		userNameField.setToolTipText(toolTip);
 
+		toolTip = "Password to use when connecting to the database.";
 		Label passwordLabel;
 		passwordLabel = new Label(mainComposite, SWT.LEFT);
 		passwordLabel.setText("Password");
+		passwordLabel.setToolTipText(toolTip);
 
 		passwordField = new Text(mainComposite, SWT.BORDER | SWT.PASSWORD);
+		passwordField.setToolTipText(toolTip);
+
+		IHyperlinkListener hyperLinkNativeOpenHandler = new IHyperlinkListener()
+		{
+			@Override
+			public void linkExited(HyperlinkEvent e)
+			{
+				// nothing to do here
+			}
+
+			@Override
+			public void linkEntered(HyperlinkEvent e)
+			{
+				// nothing to do here
+			}
+
+			@Override
+			public void linkActivated(HyperlinkEvent e)
+			{
+				org.eclipse.swt.program.Program.launch((String)e.getHref());
+			}
+		};
+		HyperlinkSettings hyperlinkSettings = new HyperlinkSettings(display);
+		hyperlinkSettings.setHyperlinkUnderlineMode(HyperlinkSettings.UNDERLINE_HOVER);
+
+		WrappingControl<Label> noDriverWarningWrapper = null;
+		WrappingControl<FormText> noDriverMessageWrapper = null;
 
 		if (!isExistingDriver(((ServerEditorInput)getEditorInput()).getServerConfig().getDriver()))
 		{
-			noDriverWarning = new Label(mainComposite, SWT.WRAP)
+			noDriverWarningWrapper = new WrappingControl<Label>(mainComposite, SWT.NONE);
+			noDriverWarningWrapper.wrapControl(new Label(noDriverWarningWrapper, SWT.WRAP));
+			noDriverWarning = noDriverWarningWrapper.getWrappedControl();
+			noDriverWarning.setText("JDBC Driver is not installed for this database type.");
+			noDriverWarning.setForeground(display.getSystemColor(SWT.COLOR_RED));
+
+			// form text can handle links correctly
+			noDriverMessageWrapper = new WrappingControl<FormText>(mainComposite, SWT.NONE);
+			noDriverMessageWrapper.wrapControl(new FormText(noDriverMessageWrapper, SWT.NONE));
+			noDriverMessage = noDriverMessageWrapper.getWrappedControl();
+			StringBuffer msg = new StringBuffer("<form><p>Please download a driver for this type of database (\"");
+			msg.append(((ServerEditorInput)getEditorInput()).getServerConfig().getDriver()).append(
+				"\") and use the \"Install (downloaded) driver\" button bellow to install it. You can also install the driver manually by copying it to Servoy Application Server's \"drivers\" directory and then restarting Servoy Developer.</p>");
+
+			if (serverTemplateDefinition.getDriverDownloadURL() != null)
 			{
-				@Override
-				public Point computeSize(int wHint, int hHint, boolean changed)
-				{
-					// this label doesn't care to take up any width space when asked what it wants
-					Point superComputedSize = super.computeSize(wHint, hHint, changed);
-					Point adjustedComputedSize;
-					if (wHint == SWT.DEFAULT || hHint == SWT.DEFAULT)
-					{
-						adjustedComputedSize = new Point(0, superComputedSize.y); // workaround to make a label inside a ScrolledComposite with setExpandHorizontal(true) be able to wrap to the width of the other components in that composite
-					}
-					else adjustedComputedSize = superComputedSize;
-					return adjustedComputedSize;
-				}
+				msg.append("\n<p>You can download a driver from: ").append(serverTemplateDefinition.getDriverDownloadURL()).append("</p></form>");
+			}
 
-				@Override
-				protected void checkSubclass()
-				{
-					// remove subclass protection; TODO use a wrapper composite instead of subclassing
-				}
-			};
-			noDriverWarning.setText(
-				"No driver installed for this database typeNo driver installed for this database typeNo driver installed for this database typeNo driver installed for this database typeNo driver installed for this database typeNo driver installed for this database typeNo driver installed for this database typeNo driver installed for this database typeNo driver installed for this database type");
-			noDriverWarning.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
+			noDriverMessage.setHyperlinkSettings(hyperlinkSettings);
 
-			noDriverMessage = new Text(mainComposite, SWT.LEFT | SWT.MULTI | SWT.WRAP);
-//			noDriverMessage.setBackground(mainComposite.getBackground());
-//			StringBuffer msg = new StringBuffer("Please download a driver for this type of database (\"");
-//			msg.append(((ServerEditorInput)getEditorInput()).getServerConfig().getDriver()).append(
-//				"\") and use the \"Install (downloaded) driver\" button bellow to install it. You can also install the driver manually by copying it to the Servoy application server's \"drivers\" directory and then restarting Servoy Developer.");
-//
-//			if (serverTemplateDefinition.getDriverDownloadURL() != null)
-//			{
-//				msg.append("\n\nYou can download a driver from: ").append(serverTemplateDefinition.getDriverDownloadURL());
-//			}
-//
-//			noDriverMessage.setText(msg.toString());
+			noDriverMessage.setText(msg.toString(), true, true);
+			noDriverMessage.addHyperlinkListener(hyperLinkNativeOpenHandler);
 
 			addDriverButton = new Button(mainComposite, SWT.PUSH);
 			addDriverButton.setText("Install (downloaded) driver");
+			addDriverButton.setToolTipText(
+				"Once you have the needed JDBC Driver (.jar) you can install it into Servoy Developer. It will be copied to the drivers directory and loaded for usage.");
 			addDriverButton.addSelectionListener(new SelectionAdapter()
 			{
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-					FileDialog fileOpenDlg = new FileDialog(Display.getDefault().getActiveShell(), SWT.OPEN | SWT.MULTI);
+					FileDialog fileOpenDlg = new FileDialog(getDisplay(parent).getActiveShell(), SWT.OPEN | SWT.MULTI);
 					fileOpenDlg.setText("Select database driver files to import");
 					if (fileOpenDlg.open() != null)
 					{
@@ -271,7 +328,7 @@ public class ServerEditor extends EditorPart
 						}
 						catch (IOException ex)
 						{
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Install (downloaded) driver",
+							MessageDialog.openError(getDisplay(parent).getActiveShell(), "Install (downloaded) driver",
 								"Error during copy of database driver files to Servoy");
 							ServoyLog.logError(ex);
 						}
@@ -283,30 +340,34 @@ public class ServerEditor extends EditorPart
 		Composite advancedSettingsCollapserComposite = new Composite(mainComposite, SWT.NONE);
 
 		Label separator1 = new Label(advancedSettingsCollapserComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
-		ExpandBar advancedSettingsCollapser = new ExpandBarWidthAware(advancedSettingsCollapserComposite, SWT.V_SCROLL);
-		Label separator2 = new Label(advancedSettingsCollapserComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
+		ExpandBarWidthAware expandBarWrapper = new ExpandBarWidthAware(advancedSettingsCollapserComposite, SWT.NONE, SWT.NONE);
+		ExpandBar advancedSettingsCollapser = expandBarWrapper.getWrappedControl();
+		final Label separator2 = new Label(advancedSettingsCollapserComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 
 		collapsableItem = new ExpandItem(advancedSettingsCollapser, SWT.NONE, 0);
 		collapsableItem.setText("Show advanced server settings");
 
-		advancedSettingsCollapser.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
-		advancedSettingsCollapser.setForeground(parent.getDisplay().getSystemColor(SWT.COLOR_DARK_BLUE));
+		advancedSettingsCollapser.setBackground(display.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+		advancedSettingsCollapser.setForeground(display.getSystemColor(SWT.COLOR_DARK_BLUE));
 
 		advancedSettingsComposite = new Composite(advancedSettingsCollapser, SWT.NONE);
 		collapsableItem.setImage(Activator.getDefault().loadImageFromBundle("outline_co.gif"));
 
 		advancedSettingsCollapser.addExpandListener(new ExpandListener()
 		{
+
 			public void itemExpanded(ExpandEvent e)
 			{
+//				((GridData)separator2.getLayoutData()).exclude = true;
 				collapsableItem.setText("Hide advanced server settings");
-				relayout();
+				relayout(getDisplay(parent));
 			}
 
 			public void itemCollapsed(ExpandEvent e)
 			{
+//				((GridData)separator2.getLayoutData()).exclude = false;
 				collapsableItem.setText("Show advanced server settings");
-				relayout();
+				relayout(getDisplay(parent));
 			}
 
 		});
@@ -317,90 +378,126 @@ public class ServerEditor extends EditorPart
 			@Override
 			public void controlResized(ControlEvent e)
 			{
-				relayout();
+				relayout(getDisplay(parent));
 			}
 		});
 
 		Label urlLabel;
 		urlLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		urlLabel.setText("URL");
+		urlLabel.setToolTipText(ServerTemplateDefinition.JDBC_URL_DESCRIPTION);
 
 		urlField = new Text(advancedSettingsComposite, SWT.BORDER);
+		urlField.setToolTipText(ServerTemplateDefinition.JDBC_URL_DESCRIPTION);
 
+		toolTip = "JDBC driver to use. Each DB type has a different driver. For some DB types there are multiple drivers available.\nThis is the name of a driver class that is located in the driver directory's jar files.";
 		Label driverLabel;
 		driverLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		driverLabel.setText("Driver");
+		driverLabel.setToolTipText(toolTip);
 
 		driverField = new Combo(advancedSettingsComposite, SWT.BORDER);
+		driverField.setToolTipText(toolTip);
 		UIUtils.setDefaultVisibleItemCount(driverField);
 		driverField.addModifyListener(new ModifyListener()
 		{
 			public void modifyText(ModifyEvent e)
 			{
-				driverField.setForeground(Display.getCurrent().getSystemColor(isExistingDriver(driverField.getText()) ? SWT.COLOR_BLACK : SWT.COLOR_RED));
+				driverField.setForeground(getDisplay(parent).getSystemColor(isExistingDriver(driverField.getText()) ? SWT.COLOR_BLACK : SWT.COLOR_RED));
 			}
 		});
-		driverField.setForeground(Display.getCurrent().getSystemColor(
-			isExistingDriver(((ServerEditorInput)getEditorInput()).getServerConfig().getDriver()) ? SWT.COLOR_BLACK : SWT.COLOR_RED));
+		driverField.setForeground(
+			display.getSystemColor(isExistingDriver(((ServerEditorInput)getEditorInput()).getServerConfig().getDriver()) ? SWT.COLOR_BLACK : SWT.COLOR_RED));
 
+		toolTip = "The specific catalog to connect to; not all databases support this option.";
 		Label catalogLabel;
 		catalogLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		catalogLabel.setText("Catalog");
+		catalogLabel.setToolTipText(toolTip);
 
 		catalogField = new Combo(advancedSettingsComposite, SWT.BORDER);
+		catalogField.setToolTipText(toolTip);
 		UIUtils.setDefaultVisibleItemCount(catalogField);
 
+		toolTip = "The specific schema to connect to; not all databases support this option.";
 		Label schemaLabel;
 		schemaLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		schemaLabel.setText("Schema");
+		schemaLabel.setToolTipText(toolTip);
 
 		schemaField = new Combo(advancedSettingsComposite, SWT.BORDER);
+		schemaField.setToolTipText(toolTip);
 		UIUtils.setDefaultVisibleItemCount(schemaField);
 
+		toolTip = "Determines the maximum number of connections that will be made to the database simultaneously.";
 		Label maxActiveLabel;
 		maxActiveLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		maxActiveLabel.setText("Max Active Connections");
+		maxActiveLabel.setToolTipText(toolTip);
 
 		maxActiveField = new Text(advancedSettingsComposite, SWT.BORDER);
+		maxActiveField.setToolTipText(toolTip);
 
+		toolTip = "Determines the maximum number of unused connections that are in the pool.";
 		Label maxIdleLabel;
 		maxIdleLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		maxIdleLabel.setText("Max Idle Connections");
+		maxIdleLabel.setToolTipText(toolTip);
 
 		maxIdleField = new Text(advancedSettingsComposite, SWT.BORDER);
+		maxIdleField.setToolTipText(toolTip);
 
+		toolTip = "Idle connections from the connection pool will be disposed of if they are not used for this given amount of time (minutes).";
 		Label idleTimoutLabel;
 		idleTimoutLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		idleTimoutLabel.setText("Connection Idle Timeout");
+		idleTimoutLabel.setToolTipText(toolTip);
 
 		idleTimoutField = new Text(advancedSettingsComposite, SWT.BORDER);
+		idleTimoutField.setToolTipText(toolTip);
 
+		toolTip = "All Servoy generated SQL statements are in the form of Prepared statements, to increase the performance of statement execution.\nThis setting determines how many prepared statements are kept in cache.";
 		Label maxPreparedStatementsIdleLabel;
 		maxPreparedStatementsIdleLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		maxPreparedStatementsIdleLabel.setText("Max Idle Prepared Statements");
+		maxPreparedStatementsIdleLabel.setToolTipText(toolTip);
 
 		maxPreparedStatementsIdleField = new Text(advancedSettingsComposite, SWT.BORDER);
+		maxPreparedStatementsIdleField.setToolTipText(toolTip);
 
 		Label separator4 = new Label(advancedSettingsComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
+
+		toolTip = "Specifies a way to determine if a DB idle connection leased from the connection pool is still valid or not.\n\n" +
+			"\"exception validation\" - will consider a connection invalid if it's getException() returns non-null.\n" +
+			"\"meta data validation\" - will consider a connection invalid if fetching database metadata fails.\n" +
+			"\"query validation\" - will consider a connection valid as long as it is able to run the given query scucessfully.";
 
 		Label validationTypeLabel;
 		validationTypeLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		validationTypeLabel.setText("Connection Validation Type");
+		validationTypeLabel.setToolTipText(toolTip);
 
 		validationTypeField = new Combo(advancedSettingsComposite, SWT.BORDER | SWT.READ_ONLY);
+		validationTypeField.setToolTipText(toolTip);
 		UIUtils.setDefaultVisibleItemCount(validationTypeField);
 
+		toolTip = "If validation type is set to \"query validation\", then this is the query that must run successfully in order for the connection to be considered valid.";
 		Label validationQueryLabel;
 		validationQueryLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		validationQueryLabel.setText("Connection Validation Query");
+		validationQueryLabel.setToolTipText(toolTip);
 
 		validationQueryField = new Text(advancedSettingsComposite, SWT.BORDER);
+		validationQueryField.setToolTipText(toolTip);
 
+		toolTip = "This setting allows marking a Database Server as a clone of another Database Server.\nWhen marked as such, if a Solution is imported on the Servoy Application Server, any updates to the datamodel of the master Database Server are also applied to the Database Servers that are marked as a clone of the master Database Server.";
 		Label dataModel_cloneFromLabel;
 		dataModel_cloneFromLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		dataModel_cloneFromLabel.setText("Data model clone from");
+		dataModel_cloneFromLabel.setToolTipText(toolTip);
 
 		dataModel_cloneFromField = new Combo(advancedSettingsComposite, SWT.BORDER | SWT.READ_ONLY);
+		dataModel_cloneFromField.setToolTipText(toolTip);
 		UIUtils.setDefaultVisibleItemCount(dataModel_cloneFromField);
 
 		Label enabledLabel;
@@ -408,18 +505,40 @@ public class ServerEditor extends EditorPart
 		enabledLabel.setText("Enabled");
 
 		enabledButton = new Button(advancedSettingsComposite, SWT.CHECK);
+		enabledButton.addSelectionListener(new SelectionListener()
+		{
 
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				widgetDefaultSelected(e);
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+				updateTestConnectionButton();
+			}
+
+		});
+
+		toolTip = "Specifies whether or not System Tables and Views from the database are to be exposed in Servoy.";
 		Label skipSysTablesLabel;
 		skipSysTablesLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		skipSysTablesLabel.setText("Skip System Tables");
+		skipSysTablesLabel.setToolTipText(toolTip);
 
 		skipSysTablesButton = new Button(advancedSettingsComposite, SWT.CHECK);
+		skipSysTablesButton.setToolTipText(toolTip);
 
+		toolTip = "Servoy has functionality that allows to automatically track all insert/updates/deletes on tables.\nThis functionality can be enabled through the Security layer inside the Solution.\nThis functionality relies on one of the enabled Database Servers configured on the Servoy Application Server being marked at 'Log server'.";
 		Label logServerLabel;
 		logServerLabel = new Label(advancedSettingsComposite, SWT.LEFT);
 		logServerLabel.setText("Log Server");
+		logServerLabel.setToolTipText(toolTip);
 
 		logServerButton = new Button(advancedSettingsComposite, SWT.CHECK);
+		logServerButton.setToolTipText(toolTip);
 		logServerButton.addListener(SWT.Selection, new Listener()
 		{
 			public void handleEvent(Event event)
@@ -442,7 +561,7 @@ public class ServerEditor extends EditorPart
 				IServerInternal logServer = (IServerInternal)ServoyModel.getServerManager().getLogServer();
 				if (logServer == null)
 				{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Log server not found",
+					MessageDialog.openError(getDisplay(parent).getActiveShell(), "Log server not found",
 						"Required server '" + ServoyModel.getServerManager().getLogServerName() + "' not found or cannot be reached.");
 					return;
 				}
@@ -453,12 +572,12 @@ public class ServerEditor extends EditorPart
 					if (logTable == null)
 					{
 						logTable = logServer.createLogTable();
-						MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Table log created",
+						MessageDialog.openInformation(getDisplay(parent).getActiveShell(), "Table log created",
 							"Table log successfully created in '" + ServoyModel.getServerManager().getLogServerName() + "'.");
 					}
 					else
 					{
-						MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Table already exists",
+						MessageDialog.openInformation(getDisplay(parent).getActiveShell(), "Table already exists",
 							"Log table already exists in '" + ServoyModel.getServerManager().getLogServerName() + "'.");
 					}
 					createLogTableButton.setEnabled(logTable != null);
@@ -466,12 +585,12 @@ public class ServerEditor extends EditorPart
 				catch (RepositoryException re)
 				{
 					ServoyLog.logError(re);
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Error creating table", "Could not create log table: " + re.getMessage());
+					MessageDialog.openError(getDisplay(parent).getActiveShell(), "Error creating table", "Could not create log table: " + re.getMessage());
 				}
 				catch (Exception err)
 				{
 					ServoyLog.logError(err);
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Error creating table",
+					MessageDialog.openError(getDisplay(parent).getActiveShell(), "Error creating table",
 						"Unexpected error while creating log table. Check the log for more details.");
 				}
 			}
@@ -487,7 +606,7 @@ public class ServerEditor extends EditorPart
 				IServerInternal logServer = (IServerInternal)ServoyModel.getServerManager().getLogServer();
 				if (logServer == null)
 				{
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Log server not found",
+					MessageDialog.openError(getDisplay(parent).getActiveShell(), "Log server not found",
 						"Required server '" + ServoyModel.getServerManager().getLogServerName() + "' not found or cannot be reached.");
 					return;
 				}
@@ -498,12 +617,12 @@ public class ServerEditor extends EditorPart
 					if (statsTable == null)
 					{
 						statsTable = logServer.createClientStatsTable();
-						MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Table client_stats created",
+						MessageDialog.openInformation(getDisplay(parent).getActiveShell(), "Table client_stats created",
 							"Table client_stats successfully created in '" + ServoyModel.getServerManager().getLogServerName() + "'.");
 					}
 					else
 					{
-						MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Table already exists",
+						MessageDialog.openInformation(getDisplay(parent).getActiveShell(), "Table already exists",
 							"Client statistics table already exists in '" + ServoyModel.getServerManager().getLogServerName() + "'.");
 					}
 					createClientstatsTableButton.setEnabled(statsTable != null);
@@ -511,21 +630,68 @@ public class ServerEditor extends EditorPart
 				catch (RepositoryException re)
 				{
 					ServoyLog.logError(re);
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Error creating table",
+					MessageDialog.openError(getDisplay(parent).getActiveShell(), "Error creating table",
 						"Could not create client statistics table: " + re.getMessage());
 				}
 				catch (Exception err)
 				{
 					ServoyLog.logError(err);
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Error creating table",
+					MessageDialog.openError(getDisplay(parent).getActiveShell(), "Error creating table",
 						"Unexpected error while creating client statistics table. Check the log for more details.");
 				}
 			}
 		});
+
+		saveButton = new Button(bottomComposite, SWT.PUSH);
+		saveButton.setText("Save");
+		saveButton.setToolTipText(
+			"You can also use CTRL+S (CMD+S) or main developer save button.\nThe connection will also be tested if 'enabled' is checked in advanced section.");
+		saveButton.addSelectionListener(new SelectionAdapter()
+		{
+
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				doSave(null);
+			}
+		});
+
+		testConnectionButton = new Button(bottomComposite, SWT.PUSH);
+		testConnectionButton.setToolTipText("Checks to see if a connection can be established to the server using this configuration.");
+		testConnectionButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				checkConnection();
+			}
+		});
+
+		FormText wikiLink = new FormText(bottomComposite, SWT.NONE);
+		wikiLink.setHyperlinkSettings(hyperlinkSettings);
+		wikiLink.setText(
+			"<form><p>See <a href='https://wiki.servoy.com/display/public/DOCS/Database+Connections'>wiki page</a> for more information...</p></form>", true,
+			true);
+		wikiLink.addHyperlinkListener(hyperLinkNativeOpenHandler);
+
 		enableButtons();
 
 		// now do the main composite layout
-		GridLayout gridLayout = new GridLayout(4, false);
+		GridLayout gridLayout = new GridLayout(1, false);
+		gridLayout.marginWidth = gridLayout.marginHeight = 10;
+		gridLayout.verticalSpacing = 6;
+		gridLayout.horizontalSpacing = 5;
+		parent.setLayout(gridLayout);
+
+		myScrolledComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		tmpGD = new GridData(SWT.FILL, SWT.BOTTOM, true, false);
+		tmpGD.verticalIndent = 10;
+		mainSeparator.setLayoutData(tmpGD);
+
+		bottomComposite.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+
+		gridLayout = new GridLayout(4, false);
 		gridLayout.marginWidth = gridLayout.marginHeight = 10;
 		gridLayout.verticalSpacing = 6;
 		gridLayout.horizontalSpacing = 10;
@@ -559,8 +725,10 @@ public class ServerEditor extends EditorPart
 		// layout missing driver if necessary
 		if (noDriverMessage != null)
 		{
-			noDriverWarning.setLayoutData(col1234GD());
-			noDriverMessage.setLayoutData(col1234GD());
+			tmpGD = col1234GD();
+			tmpGD.verticalIndent = 20;
+			noDriverWarningWrapper.setLayoutData(tmpGD);
+			noDriverMessageWrapper.setLayoutData(col1234GD());
 			addDriverButton.setLayoutData(col1234GD());
 		}
 
@@ -573,11 +741,13 @@ public class ServerEditor extends EditorPart
 		advancedSettingsCollapserComposite.setLayout(gridLayout);
 
 		advancedSettingsCollapserComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
-		GridData tmpGD = new GridData(SWT.FILL, SWT.BOTTOM, true, false);
+		tmpGD = new GridData(SWT.FILL, SWT.BOTTOM, true, false);
 		tmpGD.verticalIndent = 30;
 		separator1.setLayoutData(tmpGD);
-		advancedSettingsCollapser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		separator2.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		expandBarWrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tmpGD = new GridData(SWT.FILL, SWT.TOP, true, false);
+		tmpGD.minimumHeight = 0;
+		separator2.setLayoutData(tmpGD);
 
 		gridLayout = new GridLayout(4, false);
 		gridLayout.marginRight = 0;
@@ -654,6 +824,16 @@ public class ServerEditor extends EditorPart
 		createLogTableButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		createClientstatsTableButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
+		gridLayout = new GridLayout(3, false);
+		gridLayout.marginWidth = gridLayout.marginHeight = 0;
+		gridLayout.horizontalSpacing = 5;
+		bottomComposite.setLayout(gridLayout);
+
+		saveButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+		testConnectionButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+
+		wikiLink.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
+
 		collapsableItem.setHeight(advancedSettingsComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 		collapsableItem.setControl(advancedSettingsComposite);
 
@@ -661,17 +841,36 @@ public class ServerEditor extends EditorPart
 
 		initComboData();
 		initDataBindings();
+		updateSaveButton();
 	}
 
-	protected void relayout()
+	/**
+	 * @param parent can be null.
+	 */
+	protected Display getDisplay(final Composite parent)
 	{
-		getSite().getShell().getDisplay().asyncExec(new Runnable()
+		Display display = parent != null ? parent.getDisplay() : null;
+		if (display == null)
+		{
+			if (display == null)
+			{
+				display = getSite().getShell().getDisplay();
+				display = Display.getCurrent();
+				if (display == null) display = Display.getDefault();
+			}
+		}
+		return display;
+	}
+
+	protected void relayout(Display display)
+	{
+		display.asyncExec(new Runnable()
 		{
 			public void run()
 			{
 				collapsableItem.setHeight(advancedSettingsComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 				myScrolledComposite.setMinSize(mainComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-				mainComposite.layout(true, true);
+				parentControl.layout(true, true);
 			}
 		});
 	}
@@ -717,8 +916,7 @@ public class ServerEditor extends EditorPart
 
 	protected GridData col1234GD()
 	{
-		GridData col1234GD = new GridData(SWT.FILL, SWT.TOP, true, false, 4, 1);
-//		col1234GD.minimumWidth = 100;
+		GridData col1234GD = new GridData(SWT.FILL, SWT.CENTER, true, false, 4, 1);
 		return col1234GD;
 	}
 
@@ -777,6 +975,25 @@ public class ServerEditor extends EditorPart
 	{
 		setPartName(serverConfigObservable.getObject().getServerName());
 		setTitleToolTip(serverConfigObservable.getObject().getServerName());
+	}
+
+	protected void checkConnection()
+	{
+		ServerConfig serverConfig = serverConfigObservable.getObject();
+
+		if (serverConfig.isEnabled())
+		{
+			try
+			{
+				IServerManagerInternal serverManager = ServoyModel.getServerManager();
+				serverManager.testServerConfigConnection(serverConfig, 0); //test if we connect
+				MessageDialog.openInformation(getSite().getShell(), "Connection successful", "Test connection to DB server was established successfully.");
+			}
+			catch (Exception e)
+			{
+				MessageDialog.openError(getSite().getShell(), "Connection to DB server could not be established using this configuration", e.getMessage());
+			}
+		} // else should never happen as the test connection button should be disabled in that case
 	}
 
 	@Override
@@ -862,8 +1079,23 @@ public class ServerEditor extends EditorPart
 		}
 		catch (Exception e)
 		{
-			ServoyLog.logError("Cannot setup server", e);
-			MessageDialog.openError(getSite().getShell(), "Cannot setup server", e.getMessage());
+			ServoyLog.logError("Cannot save server", e);
+			MessageDialog.openError(getSite().getShell(), "Cannot save server", e.getMessage());
+		}
+
+		// show in solution explorer view so that new users notice that something has happened
+		try
+		{
+			IWorkbench workbench = PlatformUI.getWorkbench();
+			ICommandService commandService = workbench.getService(ICommandService.class);
+			IHandlerService handlerService = workbench.getService(IHandlerService.class);
+			Command showInCommand = commandService.getCommand(IWorkbenchCommandConstants.NAVIGATE_SHOW_IN);
+			handlerService.executeCommand(ParameterizedCommand.generateCommand(showInCommand,
+				Collections.singletonMap(IWorkbenchCommandConstants.NAVIGATE_SHOW_IN_PARM_TARGET, SolutionExplorerView.PART_ID)), null);
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError("Cannot expand server node in SolEx after save", e);
 		}
 	}
 
@@ -912,7 +1144,6 @@ public class ServerEditor extends EditorPart
 			cloneServerName = sc.getServerName();
 			if (cloneServerName != null && !cloneServerName.equals(serverName)) dataModel_cloneFromField.add(cloneServerName);
 		}
-
 	}
 
 	protected void initDataBindings()
@@ -1078,6 +1309,8 @@ public class ServerEditor extends EditorPart
 		validationQueryField.setEnabled(serverConfigObservable.getObject().getConnectionValidationType() == ServerConfig.CONNECTION_QUERY_VALIDATION);
 
 		logServerButton.setSelection(serverConfigObservable.getObject().getServerName().equals(ServoyModel.getServerManager().getLogServerName()));
+
+		updateTestConnectionButton();
 	}
 
 	public void flagModified()
@@ -1090,6 +1323,17 @@ public class ServerEditor extends EditorPart
 				firePropertyChange(IEditorPart.PROP_DIRTY);
 			}
 		});
+	}
+
+	@Override
+	protected void firePropertyChange(int propertyId)
+	{
+		super.firePropertyChange(propertyId);
+
+		if (propertyId == IEditorPart.PROP_DIRTY)
+		{
+			updateSaveButton();
+		}
 	}
 
 	@Override
@@ -1133,6 +1377,28 @@ public class ServerEditor extends EditorPart
 			}
 		}
 		return existing;
+	}
+
+	protected void updateSaveButton()
+	{
+		saveButton.setEnabled(isDirty());
+	}
+
+	protected void updateTestConnectionButton()
+	{
+		final String testConnectionTextEnabled = "Test connection";
+		final String testConnectionTextDisabled = "Test connection (n/a for disabled servers)";
+
+		if (enabledButton.getSelection())
+		{
+			testConnectionButton.setText(testConnectionTextEnabled);
+			testConnectionButton.setEnabled(true);
+		}
+		else
+		{
+			testConnectionButton.setText(testConnectionTextDisabled);
+			testConnectionButton.setEnabled(false);
+		}
 	}
 
 	private void enableButtons()
@@ -1189,4 +1455,11 @@ public class ServerEditor extends EditorPart
 			}
 		}
 	}
+
+	@Override
+	public ShowInContext getShowInContext()
+	{
+		return new ShowInContext(getEditorInput(), null);
+	}
+
 }

@@ -41,6 +41,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
@@ -377,7 +378,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private Action collapseTreeAction;
 
-	private Action linkWithEditorAction;
+	private LinkWithEditorAction linkWithEditorAction;
 
 	private ChangeResourcesProjectAction changeResourcesProjectAction;
 	private RemoveSolutionProtectionAction removeSolutionProtectionAction;
@@ -3444,6 +3445,29 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			if (input instanceof IFileEditorInput)
 			{
 				showFile(((IFileEditorInput)input).getFile());
+			}
+			else
+			{
+				// try using the link with editor action
+
+				// see if the context input can adapt to other things
+				IAdaptable adaptable = null;
+				if (context.getInput() instanceof IAdaptable) adaptable = (IAdaptable)context.getInput();
+
+				// see if selection actually contains an editor
+				IEditorPart editor = null;
+				if (selection instanceof StructuredSelection)
+				{
+					StructuredSelection ss = (StructuredSelection)selection;
+					if (!ss.isEmpty())
+					{
+						if (ss.getFirstElement() instanceof IEditorPart) editor = (IEditorPart)ss.getFirstElement();
+						else if (ss.getFirstElement() instanceof IAdaptable) adaptable = (IAdaptable)ss.getFirstElement();
+					}
+				}
+
+
+				linkWithEditorAction.showInSolex(getTreeContentProvider(), selection, adaptable, editor);
 			}
 		}
 		return false;

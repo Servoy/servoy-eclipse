@@ -26,54 +26,47 @@ import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
 
 /**
- * An expand bar that is able to take expanded content's width into account as well when computing default/desired size.
+ * An expand bar wrapper that is able to take expanded content's width into account as well when computing default/desired size.
  *
  * @author acostescu
  */
-public class ExpandBarWidthAware extends ExpandBar
+public class ExpandBarWidthAware extends CompositeWithCalculatedPreferredWidth<ExpandBar>
 {
 
-	public ExpandBarWidthAware(Composite parent, int style)
+	public ExpandBarWidthAware(Composite parent, int style, int expandBarStyle)
 	{
 		super(parent, style);
-	}
-
-	@Override
-	protected void checkSubclass()
-	{
-		// force allowing subclass; TODO do this nice as ExpandBar it seems should not be subclassed
-		// we should use a wrapper composite instead of subclassing
-	}
-
-	@Override
-	public Point computeSize(int wHint, int hHint, boolean changed)
-	{
-		Point superComputedSize = super.computeSize(wHint, hHint, changed);
-		Point adjustedComputedSize;
-		if (wHint == SWT.DEFAULT || hHint == SWT.DEFAULT)
-		{
-			// expand bar ignores the content of expanded items - we need that as well for scrolling parent's content without scolling horizontally inside each expanded item
-			int width = superComputedSize.x; // super computes only text and icon for expanding line, not the expanded content; to this is the max of the expanding lines
-			// we must check to see if any of the expanded items needs larger width and use that instead; otherwise super value is good.
-
-			for (int i = 0; i < getItemCount(); i++)
-			{
-				ExpandItem item = getItem(i);
-				if (item.getExpanded()) width = Math.max(width, getExpandChildWidth(item, changed));
-			}
-
-			Rectangle trim = computeTrim(0, 0, width, superComputedSize.y);
-			adjustedComputedSize = new Point(trim.width, superComputedSize.y);
-		}
-		else adjustedComputedSize = superComputedSize;
-
-		return adjustedComputedSize;
+		createWrappedControl(expandBarStyle);
 	}
 
 	protected int getExpandChildWidth(ExpandItem item, boolean changed)
 	{
 		Control child = item.getControl();
 		return child != null ? child.computeSize(SWT.DEFAULT, SWT.DEFAULT, changed).x : -1;
+	}
+
+	protected void createWrappedControl(int expandBarStyle)
+	{
+		wrapControl(new ExpandBar(this, expandBarStyle));
+	}
+
+	@Override
+	protected Point adjustComputedPreferredSize(ExpandBar expandBar, boolean changed)
+	{
+		Point childReportedPreferredSize = expandBar.computeSize(SWT.DEFAULT, SWT.DEFAULT, changed);
+
+		// expand bar ignores the content of expanded items - we need that as well for scrolling parent's content without scolling horizontally inside each expanded item
+		int width = childReportedPreferredSize.x; // super computes only text and icon for expanding line, not the expanded content; to this is the max of the expanding lines
+		// we must check to see if any of the expanded items needs larger width and use that instead; otherwise super value is good.
+
+		for (int i = 0; i < expandBar.getItemCount(); i++)
+		{
+			ExpandItem item = expandBar.getItem(i);
+			if (item.getExpanded()) width = Math.max(width, getExpandChildWidth(item, changed));
+		}
+
+		Rectangle trim = computeTrim(0, 0, width, childReportedPreferredSize.y);
+		return new Point(trim.width, childReportedPreferredSize.y);
 	}
 
 }

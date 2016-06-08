@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -81,9 +82,6 @@ public class LinkWithEditorAction extends Action
 	private final TreeViewer tree;
 	private final TableViewer list;
 
-	/**
-	 * @param tree
-	 */
 	public LinkWithEditorAction(TreeViewer tree, TableViewer list)
 	{
 		this.tree = tree;
@@ -92,9 +90,6 @@ public class LinkWithEditorAction extends Action
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle("synced.gif"));
 	}
 
-	/**
-	 * @see org.eclipse.jface.action.Action#run()
-	 */
 	@Override
 	public void run()
 	{
@@ -106,9 +101,21 @@ public class LinkWithEditorAction extends Action
 		}
 
 		// find the persists from the selection
+		showInSolex(contentProvider, null, activeEditor, activeEditor);
+	}
+
+	public void showInSolex(IContentProvider treeContentProvider, ISelection selectionP, IAdaptable editorOrAdaptable, IEditorPart editor)
+	{
+		ISelection selection;
+		if (selectionP == null && editor != null)
+		{
+			// get selection from editor if a selection was not provided
+			ISelectionProvider selectionProvider = editor.getSite().getSelectionProvider();
+			selection = selectionProvider == null ? null : selectionProvider.getSelection();
+		}
+		else selection = selectionP;
+
 		List<IPersist> persists = new ArrayList<IPersist>();
-		ISelectionProvider selectionProvider = activeEditor.getSite().getSelectionProvider();
-		ISelection selection = selectionProvider == null ? null : selectionProvider.getSelection();
 		if (selection instanceof IStructuredSelection)
 		{
 			Iterator< ? > iterator = ((IStructuredSelection)selection).iterator();
@@ -128,7 +135,7 @@ public class LinkWithEditorAction extends Action
 		if (persists.size() == 0)
 		{
 			// none found, go via the editor
-			IPersist persist = activeEditor.getAdapter(IPersist.class);
+			IPersist persist = (editorOrAdaptable != null ? editorOrAdaptable.getAdapter(IPersist.class) : null);
 			if (persist instanceof TableNode)
 			{
 				serverName = ((TableNode)persist).getServerName();
@@ -158,7 +165,7 @@ public class LinkWithEditorAction extends Action
 		}
 		else if (serverName == null)
 		{
-			IFile file = activeEditor.getEditorInput().getAdapter(IFile.class);
+			IFile file = (editor != null ? editor.getEditorInput().getAdapter(IFile.class) : null);
 			if (file != null)
 			{
 				// globals, scope or foundset
@@ -169,12 +176,12 @@ public class LinkWithEditorAction extends Action
 					{
 						String name = file.getName().substring(0, file.getName().indexOf('.'));
 						// globals or scope
-						PlatformSimpleUserNode solutionNode = ((SolutionExplorerTreeContentProvider)contentProvider).getSolutionNode(parent.getName());
+						PlatformSimpleUserNode solutionNode = ((SolutionExplorerTreeContentProvider)treeContentProvider).getSolutionNode(parent.getName());
 						if (solutionNode.children == null)
 						{
 							// subtree is lazy loaded and currently oppened js file in editor might not be loaded in the Solex tree
 							// load modules subtree
-							((SolutionExplorerTreeContentProvider)contentProvider).getChildren(solutionNode);
+							((SolutionExplorerTreeContentProvider)treeContentProvider).getChildren(solutionNode);
 						}
 						for (SimpleUserNode node : solutionNode.children)
 						{
@@ -196,7 +203,7 @@ public class LinkWithEditorAction extends Action
 				}
 				else if (file.getName().endsWith(".css"))
 				{
-					PlatformSimpleUserNode styleNode = ((SolutionExplorerTreeContentProvider)contentProvider).getStylesNode();
+					PlatformSimpleUserNode styleNode = ((SolutionExplorerTreeContentProvider)treeContentProvider).getStylesNode();
 					tree.setSelection(new StructuredSelection(styleNode), true);
 					Object[] elements = ((IStructuredContentProvider)list.getContentProvider()).getElements(list.getInput());
 					if (elements != null)
@@ -217,10 +224,10 @@ public class LinkWithEditorAction extends Action
 			}
 			else
 			{
-				ServerConfig config = activeEditor.getAdapter(ServerConfig.class);
+				ServerConfig config = editorOrAdaptable.getAdapter(ServerConfig.class);
 				if (config == null)
 				{
-					Table table = activeEditor.getAdapter(Table.class);
+					Table table = editorOrAdaptable.getAdapter(Table.class);
 					if (table != null)
 					{
 						serverName = table.getServerName();
@@ -235,8 +242,8 @@ public class LinkWithEditorAction extends Action
 		}
 		if (serverName != null)
 		{
-			PlatformSimpleUserNode servers = ((SolutionExplorerTreeContentProvider)contentProvider).getServers();
-			SimpleUserNode[] children = (SimpleUserNode[])((SolutionExplorerTreeContentProvider)contentProvider).getChildren(servers);
+			PlatformSimpleUserNode servers = ((SolutionExplorerTreeContentProvider)treeContentProvider).getServers();
+			SimpleUserNode[] children = (SimpleUserNode[])((SolutionExplorerTreeContentProvider)treeContentProvider).getChildren(servers);
 			if (children != null)
 			{
 				for (SimpleUserNode child : children)
@@ -275,22 +282,22 @@ public class LinkWithEditorAction extends Action
 		}
 		if (persists.size() == 1 && persists.get(0) instanceof Relation)
 		{
-			setProperSelection(persists.get(0), UserNodeType.ALL_RELATIONS, contentProvider);
+			setProperSelection(persists.get(0), UserNodeType.ALL_RELATIONS, treeContentProvider);
 		}
 		else if (persists.size() == 1 && persists.get(0) instanceof ValueList)
 		{
-			setProperSelection(persists.get(0), UserNodeType.VALUELISTS, contentProvider);
+			setProperSelection(persists.get(0), UserNodeType.VALUELISTS, treeContentProvider);
 		}
 		else if (persists.size() == 1 && persists.get(0) instanceof Media)
 		{
-			setProperSelection(persists.get(0), UserNodeType.MEDIA, contentProvider);
+			setProperSelection(persists.get(0), UserNodeType.MEDIA, treeContentProvider);
 		}
 		else if (files.size() > 0)
 		{
 			List<TreePath> paths = new ArrayList<TreePath>();
 			for (Map.Entry<UUID, IFile> entry : files.entrySet())
 			{
-				TreePath path = ((SolutionExplorerTreeContentProvider)contentProvider).getTreePath(entry.getKey());
+				TreePath path = ((SolutionExplorerTreeContentProvider)treeContentProvider).getTreePath(entry.getKey());
 				if (path != null)
 				{
 					tree.expandToLevel(path, 1);
@@ -346,4 +353,5 @@ public class LinkWithEditorAction extends Action
 			}
 		}
 	}
+
 }
