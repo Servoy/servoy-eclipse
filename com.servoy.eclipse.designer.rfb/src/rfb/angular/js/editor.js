@@ -936,6 +936,29 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			promise.then(function(result) {
 				$scope.setGhosts(result);
 			});
+			
+			function isAllGhostContainersVisible() {
+				if ($scope.ghosts.ghostContainers) {
+					for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
+						if(!$scope.ghosts.ghostContainers[i].style  || $scope.ghosts.ghostContainers[i].style.display !== "block") {
+							return false;
+						}	
+					}
+				}
+				
+				return true;
+			}
+			
+			var windowHeight = 0;
+			var windowWidth = 0;
+			$($window).resize(function() {
+				if (isAllGhostContainersVisible() && ($($window).height() != windowHeight || $($window).width() != windowWidth)) {
+					windowHeight = $($window).height();
+					windowWidth =  $($window).width();
+					$element.trigger('renderDecorators.content');
+				}
+			});			
+			
 		},
 		templateUrl: 'templates/editor.html',
 		replace: true
