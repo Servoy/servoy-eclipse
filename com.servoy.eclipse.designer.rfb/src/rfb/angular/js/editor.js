@@ -596,6 +596,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				top: "20px",
 				left: "20px",
 				right: "20px",
+				minWidth: "992px",
 				bottom: "20px"
 			};
 			$scope.glasspaneStyle = {};
@@ -628,6 +629,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					top: "20px",
 					left: "20px",
 					right: "20px",
+					minWidth: "992px",
 					bottom: "20px"
 				};
 				delete $scope.contentStyle.width;
