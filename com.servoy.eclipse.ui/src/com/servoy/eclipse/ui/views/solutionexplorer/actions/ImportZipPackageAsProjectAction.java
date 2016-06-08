@@ -28,7 +28,6 @@ import java.util.zip.ZipInputStream;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -38,11 +37,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.sablo.specification.Package.IPackageReader;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ngpackages.NGPackageManager;
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -70,8 +66,6 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 			{
-				IWorkspaceRoot root = ServoyModel.getWorkspace().getRoot();
-				BaseNGPackageManager packageManager = ServoyModelFinder.getServoyModel().getNGPackageManager();
 				for (String zipFile : fileNames)
 				{
 					IPackageReader reader = new org.sablo.specification.Package.ZipPackageReader(new File(filterPath + File.separator + zipFile), zipFile);
@@ -89,19 +83,22 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 							while (ze != null)
 							{
 								String fileName = ze.getName();
-								if (ze.isDirectory())
+								if (!".project".equals(fileName))
 								{
-									WorkspaceFileAccess.mkdirs(newProject.getFolder(fileName));
-								}
-								else
-								{
-									ByteArrayOutputStream bos = new ByteArrayOutputStream();
-									BufferedInputStream bis = new BufferedInputStream(zis);
-									Utils.streamCopy(bis, bos);
-									IFile newFile = newProject.getFile(fileName);
-									WorkspaceFileAccess.mkdirs(newFile.getParent());
-									newFile.create(new ByteArrayInputStream(bos.toByteArray()), true, new NullProgressMonitor());
-									bos.close();
+									if (ze.isDirectory())
+									{
+										WorkspaceFileAccess.mkdirs(newProject.getFolder(fileName));
+									}
+									else
+									{
+										ByteArrayOutputStream bos = new ByteArrayOutputStream();
+										BufferedInputStream bis = new BufferedInputStream(zis);
+										Utils.streamCopy(bis, bos);
+										IFile newFile = newProject.getFile(fileName);
+										WorkspaceFileAccess.mkdirs(newFile.getParent());
+										newFile.create(new ByteArrayInputStream(bos.toByteArray()), true, new NullProgressMonitor());
+										bos.close();
+									}
 								}
 								ze = zis.getNextEntry();
 							}
