@@ -14,7 +14,16 @@
    
    <listener>
 		<listener-class>com.servoy.j2db.server.servlets.WarClientServletContextListener</listener-class>
-  </listener>  
+  </listener>
+
+	<filter>
+		<filter-name>errorFilter</filter-name>
+		<filter-class>com.servoy.j2db.server.servlets.ErrorFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>errorFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>  
    
 	<servlet>
 		<servlet-name>http-tunnel-servlet</servlet-name>
