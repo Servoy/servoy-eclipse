@@ -262,7 +262,8 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 			state = (node.getType() == nodeType);
 			if (node.getType() == UserNodeType.COMPONENT || node.getType() == UserNodeType.SERVICE || node.getType() == UserNodeType.LAYOUT)
 			{
-				state = node.parent.getRealObject() instanceof IFolder || node.parent.getRealObject() instanceof IProject;
+				state = node.getRealObject() instanceof WebObjectSpecification || node.parent.getRealObject() instanceof IFolder ||
+					node.parent.getRealObject() instanceof IProject;
 			}
 		}
 		if (state)

@@ -2387,8 +2387,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (reloadTablesOfServerAction.isEnabled()) manager.add(reloadTablesOfServerAction);
 		if (updateServoySequencesAction.isEnabled()) manager.add(updateServoySequencesAction);
 		if (loadRelationsAction.isEnabled()) manager.add(loadRelationsAction);
-		// Other plug-ins can contribute their actions here
-		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 
 		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.SOLUTION && exportActiveSolutionAction.isEnabled() &&
 			selectedTreeNode.getRealObject() != null)
@@ -2456,6 +2454,9 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		if (renameActionInTree.isEnabled()) manager.add(renameActionInTree);
 		if (importComponentAsProject.isEnabled()) manager.add(importComponentAsProject);
 		if (importComponentInSolution.isEnabled()) manager.add(importComponentInSolution);
+
+		// Other plug-ins can contribute their actions here
+		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 
 		if (selectedTreeNode != null && selectedTreeNode.getType() == UserNodeType.COMPONENT && addComponentIcon.isEnabled())
 		{

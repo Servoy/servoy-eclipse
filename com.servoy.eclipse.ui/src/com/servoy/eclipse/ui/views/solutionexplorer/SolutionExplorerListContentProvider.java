@@ -39,8 +39,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.wicket.util.io.IOUtils;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -742,7 +742,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				IFile[] specFile = resources.getWorkspace().getRoot().findFilesForLocationURI(spec.getSpecURL().toURI());
 				if (specFile.length == 1)
 				{
-					List<SimpleUserNode> list = createComponentList("", (IFolder)specFile[0].getParent());
+					List<SimpleUserNode> list = createComponentList("", specFile[0].getParent());
 					return list.toArray(new SimpleUserNode[list.size()]);
 				}
 			}
@@ -759,23 +759,24 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	 * @param resources
 	 * @return
 	 */
-	private List<SimpleUserNode> createComponentList(String path, IFolder folder)
+	private List<SimpleUserNode> createComponentList(String path, IContainer folder)
 	{
 		List<SimpleUserNode> list = new ArrayList<SimpleUserNode>();
 		try
 		{
 			if (!folder.exists()) return list;
 			IResource[] members = folder.members();
-			for (IResource iResource : members)
+			for (IResource resource : members)
 			{
-				String name = iResource.getName();
-				if (iResource.getType() == IResource.FOLDER)
+				if (resource.isHidden() || resource.isTeamPrivateMember() || resource.isDerived()) continue;
+				String name = resource.getName();
+				if (resource.getType() == IResource.FOLDER)
 				{
-					list.addAll(createComponentList(path + name + "/", (IFolder)iResource));
+					list.addAll(createComponentList(path + name + "/", (IContainer)resource));
 				}
 				else
 				{
-					PlatformSimpleUserNode node = new PlatformSimpleUserNode(path + name, UserNodeType.COMPONENT_RESOURCE, iResource,
+					PlatformSimpleUserNode node = new PlatformSimpleUserNode(path + name, UserNodeType.COMPONENT_RESOURCE, resource,
 						uiActivator.loadImageFromBundle("js.gif"));
 					list.add(node);
 				}
