@@ -17,9 +17,9 @@ angular.module('app', ['ngMaterial'])
 	$scope.websocket = ws;
 	$scope.isLoading = true;
     
-    $window.onbeforeunload = function() {
+	$window.addEventListener("beforeunload", function() {
     	ws.close();
-    }
+    });
 
 	ws.onopen = function (event) {
 	      var command = {"method":"requestAllInstalledPackages"};
