@@ -26,6 +26,10 @@ angular.module('app', ['ngMaterial'])
 	};
 	  
 	ws.onmessage = function (msg){
+		if ("p" == msg.data){
+			ws.send("P");
+			return;
+		}
 		$scope.$apply(function() {
 			var receivedJson = JSON.parse(msg.data);
 			var method = receivedJson["method"];

@@ -53,6 +53,10 @@ public class WebPackagesServiceHandler
 
 	public void dispose()
 	{
+		for (IDeveloperService service : configuredHandlers.values())
+		{
+			service.dispose();
+		}
 	}
 }
 

@@ -18,6 +18,7 @@
 package com.servoy.eclipse.designer.webpackage.endpoint;
 
 
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -44,6 +45,7 @@ public class WebPackageManagerEndpoint
 
 	private final WebPackagesServiceHandler webPackagesServiceHandler = new WebPackagesServiceHandler(this);
 	private Session session;
+	private volatile boolean pingReceived = false;
 
 	public WebPackageManagerEndpoint()
 	{
@@ -53,11 +55,49 @@ public class WebPackageManagerEndpoint
 	public void start(Session newSession) throws Exception
 	{
 		this.session = newSession;
+
+		new Thread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				while (session != null)
+				{
+					pingReceived = false;
+					send("p");
+					try
+					{
+						Thread.sleep(5000);
+					}
+					catch (InterruptedException e)
+					{
+						e.printStackTrace();
+					}
+					if (!pingReceived)
+					{
+						try
+						{
+							session.close();
+						}
+						catch (IOException e)
+						{
+							// ignore
+						}
+						break;
+					}
+				}
+			}
+		}).start();
 	}
 
 	@OnMessage
 	public void incoming(String msg, boolean lastPart)
 	{
+		if ("P".equals(msg))
+		{
+			pingReceived = true;
+			return;
+		}
 		String handleMessage = this.webPackagesServiceHandler.handleMessage(msg);
 		send(handleMessage);
 	}
@@ -65,7 +105,7 @@ public class WebPackageManagerEndpoint
 	/**
 	 * @param message
 	 */
-	public void send(String message)
+	public synchronized void send(String message)
 	{
 		if (message != null && session != null && session.isOpen())
 		{
@@ -85,6 +125,7 @@ public class WebPackageManagerEndpoint
 	public void onClose(CloseReason closeReason)
 	{
 		webPackagesServiceHandler.dispose();
+		session = null;
 	}
 
 	@OnError
