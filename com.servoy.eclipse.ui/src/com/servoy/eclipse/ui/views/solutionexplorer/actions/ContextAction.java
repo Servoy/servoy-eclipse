@@ -17,7 +17,6 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -35,7 +34,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
 /**
  * Action delegates to other registered action depending on the selection.
- * 
+ *
  * @author rgansevles
  */
 public class ContextAction extends Action implements ISelectionChangedListener
@@ -87,7 +86,7 @@ public class ContextAction extends Action implements ISelectionChangedListener
 		while (sel.hasNext())
 		{
 			SimpleUserNode node = sel.next();
-			IAction act = registeredActions.get(node.getType());
+			IAction act = registeredActions.get(node.getRealType());
 			if (action == null)
 			{
 				action = act;
