@@ -293,8 +293,9 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 			if (serverTemplateDefinition.getDriverDownloadURL() != null)
 			{
-				msg.append("\n<p>You can download a driver from: ").append(serverTemplateDefinition.getDriverDownloadURL()).append("</p></form>");
+				msg.append("\n<p>You can download a driver from: ").append(serverTemplateDefinition.getDriverDownloadURL()).append("</p>");
 			}
+			msg.append("</form>");
 
 			noDriverMessage.setHyperlinkSettings(hyperlinkSettings);
 
@@ -360,14 +361,14 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			{
 //				((GridData)separator2.getLayoutData()).exclude = true;
 				collapsableItem.setText("Hide advanced server settings");
-				relayout(getDisplay(parent));
+				relayout(getDisplay(parent), true);
 			}
 
 			public void itemCollapsed(ExpandEvent e)
 			{
 //				((GridData)separator2.getLayoutData()).exclude = false;
 				collapsableItem.setText("Show advanced server settings");
-				relayout(getDisplay(parent));
+				relayout(getDisplay(parent), true);
 			}
 
 		});
@@ -378,7 +379,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			@Override
 			public void controlResized(ControlEvent e)
 			{
-				relayout(getDisplay(parent));
+				relayout(getDisplay(parent), false);
 			}
 		});
 
@@ -862,9 +863,9 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		return display;
 	}
 
-	protected void relayout(Display display)
+	protected void relayout(Display display, boolean async)
 	{
-		display.asyncExec(new Runnable()
+		Runnable r = new Runnable()
 		{
 			public void run()
 			{
@@ -872,7 +873,9 @@ public class ServerEditor extends EditorPart implements IShowInSource
 				myScrolledComposite.setMinSize(mainComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 				parentControl.layout(true, true);
 			}
-		});
+		};
+		if (async) display.asyncExec(r);
+		else r.run();
 	}
 
 	// declare some grid-datas creators to be reused per column for easier tuning
