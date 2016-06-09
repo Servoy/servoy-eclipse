@@ -83,7 +83,7 @@ public class FormContentProvider implements ITreeContentProvider
 			final Set<Integer> excludedForms = new HashSet<Integer>();
 			if (!options.showReferenceDuplicates)
 			{
-				form.acceptVisitor(new IPersistVisitor()
+				flattenedSolution.getFlattenedForm(form).acceptVisitor(new IPersistVisitor()
 				{
 
 					@Override
