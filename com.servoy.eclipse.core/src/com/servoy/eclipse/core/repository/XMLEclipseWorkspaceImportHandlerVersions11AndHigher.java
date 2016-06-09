@@ -271,7 +271,9 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 								p.setDescription(description, null);
 							}
 						}
-
+						
+						ServoyModelManager.getServoyModelManager().getServoyModel().refreshServoyProjects();
+						
 						m.setTaskName("Updating workbench state");
 
 						job = new RunInWorkspaceJob(importJob3);
@@ -353,6 +355,8 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 						Solution dummySolution = (Solution)repository.createNewRootObject(dummySolProject[0].getName(), IRepository.SOLUTIONS);
 						SolutionSerializer.writePersist(dummySolution, wsa, repository, true, false, true);
 
+						ServoyModelManager.getServoyModelManager().getServoyModel().refreshServoyProjects();
+						
 						m.setTaskName("Updating workbench state");
 						job = new RunInWorkspaceJob(importJob2);
 						job.setRule(ServoyModel.getWorkspace().getRoot());
