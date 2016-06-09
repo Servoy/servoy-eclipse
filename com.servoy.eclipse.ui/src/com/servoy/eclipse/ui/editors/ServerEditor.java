@@ -37,8 +37,6 @@ import org.eclipse.jface.databinding.swt.SWTObservables;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.ControlAdapter;
-import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ExpandEvent;
 import org.eclipse.swt.events.ExpandListener;
 import org.eclipse.swt.events.ModifyEvent;
@@ -373,15 +371,15 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		});
 
-		// partial fix for a Linux (Ubuntu) bug (that I think has to do with ExpandBar's implementation)
-		advancedSettingsComposite.addControlListener(new ControlAdapter()
-		{
-			@Override
-			public void controlResized(ControlEvent e)
-			{
-				relayout(getDisplay(parent), false);
-			}
-		});
+//		// partial fix for a Linux (Ubuntu) bug (that I think has to do with ExpandBar's implementation)
+//		advancedSettingsComposite.addControlListener(new ControlAdapter()
+//		{
+//			@Override
+//			public void controlResized(ControlEvent e)
+//			{
+//				relayout(getDisplay(parent), false);
+//			}
+//		});
 
 		Label urlLabel;
 		urlLabel = new Label(advancedSettingsComposite, SWT.LEFT);
@@ -754,7 +752,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		gridLayout.marginRight = 0;
 		gridLayout.marginLeft = 20;
 		gridLayout.marginTop = 10;
-		gridLayout.marginBottom = 0;
+		gridLayout.marginBottom = 5;
 		gridLayout.verticalSpacing = 6;
 		gridLayout.horizontalSpacing = 10;
 		advancedSettingsComposite.setLayout(gridLayout);
