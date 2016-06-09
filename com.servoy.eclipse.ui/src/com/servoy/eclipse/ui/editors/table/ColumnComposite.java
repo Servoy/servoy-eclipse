@@ -617,7 +617,7 @@ public class ColumnComposite extends Composite
 			String colname = tname.substring(0, Math.min(tname.length(), Column.MAX_SQL_OBJECT_NAME_LENGTH - 3)) + "_id";
 			try
 			{
-				int defaultFirstColumnSequenceType = getDefaultFirstColumnSequenceType();
+				int defaultFirstColumnSequenceType = getDefaultFirstColumnSequenceType(t);
 				if (defaultFirstColumnSequenceType == ColumnInfo.UUID_GENERATOR)
 				{
 					Column id = t.createNewColumn(nameValidator, colname, IColumnTypes.TEXT, 36);
@@ -645,8 +645,12 @@ public class ColumnComposite extends Composite
 		tableViewer.setInput(columnsList);
 	}
 
-	private int getDefaultFirstColumnSequenceType()
+	private int getDefaultFirstColumnSequenceType(ITable table)
 	{
+		if (table instanceof MemTable)
+		{
+			return ColumnInfo.NO_SEQUENCE_SELECTED;
+		}
 		return new DesignerPreferences().getPrimaryKeySequenceType();
 	}
 
