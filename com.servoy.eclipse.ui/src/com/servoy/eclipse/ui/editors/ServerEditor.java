@@ -669,7 +669,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		FormText wikiLink = new FormText(bottomComposite, SWT.NONE);
 		wikiLink.setHyperlinkSettings(hyperlinkSettings);
 		wikiLink.setText(
-			"<form><p>See <a href='https://wiki.servoy.com/display/public/DOCS/Database+Connections'>wiki page</a> for more information...</p></form>", true,
+			"<form><p><a href='https://wiki.servoy.com/display/public/DOCS/Database+Connections'>See wiki page for more information...</a></p></form>", true,
 			true);
 		wikiLink.addHyperlinkListener(hyperLinkNativeOpenHandler);
 

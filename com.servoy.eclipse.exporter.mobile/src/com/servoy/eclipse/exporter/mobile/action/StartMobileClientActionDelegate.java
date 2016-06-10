@@ -60,7 +60,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * @author jcompagner
- * 
+ *
  */
 public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldownDelegate2
 {
@@ -147,11 +147,6 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 		return browsersImagesList.get(name);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.servoy.eclipse.debug.actions.StartDebugAction#dispose()
-	 */
 	@Override
 	public void dispose()
 	{
@@ -165,11 +160,6 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IWorkbenchWindowPulldownDelegate2#getMenu(org.eclipse.swt.widgets.Menu)
-	 */
 	public Menu getMenu(Menu parent)
 	{
 		return sharedGetMenu(parent);
@@ -276,7 +266,7 @@ public class StartMobileClientActionDelegate implements IWorkbenchWindowPulldown
 
 	public static ILaunchConfiguration[] getLaunchConfigsForProject(ServoyProject project, boolean defaultLaunchConfigs, String launchConfigurationID)
 	{
-		if (project.getSolution().getSolutionType() != SolutionMetaData.MOBILE)
+		if (project == null || project.getSolution().getSolutionType() != SolutionMetaData.MOBILE)
 		{
 			return new ILaunchConfiguration[0];
 		}

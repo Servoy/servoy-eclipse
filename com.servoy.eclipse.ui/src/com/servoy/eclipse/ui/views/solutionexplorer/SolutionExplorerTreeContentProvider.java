@@ -383,7 +383,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				{
 					try
 					{
-						if (resource.getProject().hasNature(ServoyNGPackageProject.NATURE_ID))
+						if (resource.isAccessible() && resource.getProject().hasNature(ServoyNGPackageProject.NATURE_ID))
 						{
 							boolean havePackageProjects = false;
 							IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
@@ -1525,7 +1525,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 					{
 						try
 						{
-							if (iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
+							if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
 							{
 								return true;
 							}
