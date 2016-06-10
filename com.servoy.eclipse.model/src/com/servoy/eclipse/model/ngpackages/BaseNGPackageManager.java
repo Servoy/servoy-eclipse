@@ -191,20 +191,19 @@ public abstract class BaseNGPackageManager
 		setRemovedPackages();
 		SubMonitor monitor = SubMonitor.convert(m, "Reloading all ng packages", 100);//TODO check monitor steps counter
 		Map<String, IPackageReader> allPackageReaders = new HashMap<String, IPackageReader>();
-
 		monitor.subTask("Preparing to reload resources project ng packages");
 		collectResourcesProjectNGPackages(true, true, monitor.newChild(8), allPackageReaders, canChangeResources);
-
+		monitor.worked(30);
 		monitor.subTask("Preparing to reload referenced ng package projects");
 		collectNGPackageProjects(allPackageReaders, monitor.newChild(8), canChangeResources);
-
+		monitor.worked(30);
 		monitor.subTask("Preparing to reload solution contained binary packages");
 		collectSolutionContainedBinaryPackages(allPackageReaders, monitor.newChild(8), canChangeResources);
-
+		monitor.worked(30);
 		monitor.subTask("Reloading component packages");
 		ResourceProvider.setPackages(allPackageReaders.values());
-		monitor.worked(62);
-		monitor.worked(21);
+
+		monitor.worked(9);
 		monitor.setTaskName("Announcing ng packages load");
 		ngPackagesChanged(true, true);
 		monitor.worked(1);
@@ -250,6 +249,7 @@ public abstract class BaseNGPackageManager
 				}
 			}
 		}
+		monitor.worked(8);
 	}
 
 	protected void updateFromResourceChangeListener(String projectName, Set<String> unloadPackages, Set<IPackageReader> toAdd)
@@ -316,7 +316,7 @@ public abstract class BaseNGPackageManager
 	 * @param canChangeResources
 	 */
 	private void collectNGPackageProjects(Map<String, IPackageReader> componentReaders, IProgressMonitor m, boolean canChangeResources)
-	{ //TODO check monitor steps!!!
+	{
 		ServoyProject activeSolutionProject = ServoyModelFinder.getServoyModel().getActiveProject();
 		if (activeSolutionProject != null)
 		{
@@ -330,7 +330,7 @@ public abstract class BaseNGPackageManager
 						canChangeResources);
 				}
 			}
-			m.worked(3);
+			m.worked(8);
 		}
 	}
 
