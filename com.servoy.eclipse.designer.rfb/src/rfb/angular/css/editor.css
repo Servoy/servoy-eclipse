@@ -23,6 +23,30 @@
 	pointer-events: none;
 }
 
+.leftAutoscrollArea {
+	z-index: 3;
+	position: fixed;
+	width: 20px;
+	height: 100%;
+	margin-top : -20px;
+	margin-left: -20px;
+	/* background-color: blue;
+	opacity: 0.3; */
+	pointer-events: none;
+}
+
+.topAutoscrollArea {
+	z-index: 3;
+	position: fixed;
+	height: 20px;
+	width: 100%;
+	margin-top : -20px;
+	margin-left : -20px;
+	/* background-color: blue;
+	opacity: 0.3; */
+	pointer-events: none;
+}
+
 /* Helper classes */
 .user-selection-off {
 	-webkit-user-select: none; /* Chrome all / Safari all */

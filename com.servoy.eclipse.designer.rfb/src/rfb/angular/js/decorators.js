@@ -128,7 +128,12 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 			$rootScope.$on(EDITOR_EVENTS.SELECTION_MOVED, function(event, selection) {
 				// do not render resize knobs while selection is moving; performance optimization
 				//if it's just one element selected, then we don't need to optimize so much (especially if it's the form - otherwise the knobs are gone after 1 resize of the form)
-				renderDecorators(selection, selection.length == 1);
+				var isFormSelected = false;
+				if(selection.length == 1) {
+					var ghost = $scope.getGhost($(selection[0]).attr("svy-id"));
+					isFormSelected = ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM);
+				}
+				renderDecorators(selection, isFormSelected);
 			})
 			$rootScope.$on(EDITOR_EVENTS.RENDER_DECORATORS, function(event, selection) {
 				renderDecorators(selection,true);

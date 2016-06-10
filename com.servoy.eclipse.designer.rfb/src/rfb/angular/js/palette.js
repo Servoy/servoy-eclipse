@@ -81,12 +81,10 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 					var insertedClone;
 					var insertedCloneParent;
 					
-					var bottomAutoscrollEnter;
-					var bottomAutoscrollLeave;
-					
-					var rightAutoscrollEnter;
-					var rightAutoscrollLeave;
-					
+					var autoscrollEnter = [];
+					var autoscrollLeave = [];
+					var autoscrollStop = [];
+
 					var mousemovecallback = $scope.registerDOMEvent("mousemove", "EDITOR", function(ev) {
 						if (dragClone) {
 						    if (layoutName)
@@ -202,51 +200,51 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 						}
 					});
 					
-					var bottomStop;
-					bottomAutoscrollEnter = $scope.registerDOMEvent("mouseenter","BOTTOM_AUTOSCROLL", function(event){
-					    bottomStop = $scope.startBottomAutoScroll();
-					});
+					var directions = ["BOTTOM_AUTOSCROLL", "RIGHT_AUTOSCROLL", "LEFT_AUTOSCROLL", "TOP_AUTOSCROLL"];
+					function getAutoscrollEnterCallback(direction) {
+						return $scope.registerDOMEvent("mouseenter",direction, function(event){
+						    autoscrollStop[direction] = $scope.startAutoScroll(direction);
+						});						
+					}
+					function getAutoscrollLeaveCallback(direction) {
+						return $scope.registerDOMEvent("mouseleave",direction, function(){
+						    if (angular.isDefined(autoscrollStop[direction])) {
+						            $interval.cancel(autoscrollStop[direction]);
+						            autoscrollStop[direction] = undefined;
+						    }
+						});				
+					}					
 					
-					bottomAutoscrollLeave = $scope.registerDOMEvent("mouseleave","BOTTOM_AUTOSCROLL", function(){
-					    if (angular.isDefined(bottomStop)) {
-					            $interval.cancel(bottomStop);
-					            bottomStop = undefined;
-					    }
-					});
-					
-
-					var rightStop;
-					bottomAutoscrollEnter = $scope.registerDOMEvent("mouseenter","RIGHT_AUTOSCROLL", function(event){
-					    rightStop = $scope.startRightAutoScroll();
-					});
-					
-					bottomAutoscrollLeave = $scope.registerDOMEvent("mouseleave","RIGHT_AUTOSCROLL", function(){
-					    if (angular.isDefined(rightStop)) {
-					            $interval.cancel(rightStop);
-					            rightStop = undefined;
-					    }
-					});
+					for(var i = 0; i < directions.length; i++) {
+						var direction = directions[i];
+						autoscrollEnter[direction] =  getAutoscrollEnterCallback(direction);
+						autoscrollLeave[direction] = getAutoscrollLeaveCallback(direction);
+					}
 					
 					mouseupcallback = $scope.registerDOMEvent("mouseup", "EDITOR", function(ev) {
 					    
-					    	if (angular.isDefined(bottomStop)) {
-					    	    $interval.cancel(bottomStop);
-					    	    bottomStop = undefined;
-					    	}
-					    	if (angular.isDefined(rightStop)) {
-					    	    $interval.cancel(rightStop);
-					    	    rightStop = undefined;
-					    	}
-					    	$scope.setPointerEvents("none");
+						for (var direction in autoscrollStop) {
+							if (angular.isDefined(autoscrollStop[direction])) {
+								$interval.cancel(autoscrollStop[direction]);
+								autoscrollStop[direction] = undefined;
+							}
+						}
+
+					    $scope.setPointerEvents("none");
 						if (mousemovecallback) $scope.unregisterDOMEvent("mousemove", "EDITOR", mousemovecallback);
 						if (mouseupcallback) $scope.unregisterDOMEvent("mouseup", "EDITOR", mouseupcallback);
 						if (mouseentercallback) $scope.unregisterDOMEvent("mouseenter", "CONTENTFRAME_OVERLAY",
 						mouseentercallback);
 						if (mouseleavecallback) $scope.unregisterDOMEvent("mouseenter", "PALETTE", mouseleavecallback);
-						if (bottomAutoscrollEnter) $scope.unregisterDOMEvent("mouseenter", "BOTTOM_AUTOSCROLL", bottomAutoscrollEnter);
-						if (bottomAutoscrollLeave) $scope.unregisterDOMEvent("mouseleave", "BOTTOM_AUTOSCROLL", bottomAutoscrollLeave);
-						if (rightAutoscrollEnter) $scope.unregisterDOMEvent("mouseenter", "RIGHT_AUTOSCROLL", rightAutoscrollEnter);
-						if (rightAutoscrollLeave) $scope.unregisterDOMEvent("mouseleave", "RIGHT_AUTOSCROLL", rightAutoscrollLeave);
+
+						for (var direction in autoscrollEnter) {
+							if(autoscrollEnter[direction]) $scope.unregisterDOMEvent("mouseenter", direction, autoscrollEnter[direction]);
+						}
+						for (var direction in autoscrollLeave) {
+							if(autoscrollLeave[direction]) $scope.unregisterDOMEvent("mouseleave", direction, autoscrollLeave[direction]);
+						}
+						
+						
 						$scope.glasspane.style.cursor = "";
 						editorScope.getEditorContentRootScope().drop_highlight = null;
 						editorScope.getEditorContentRootScope().$apply();
