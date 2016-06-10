@@ -247,6 +247,32 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		passwordField = new Text(mainComposite, SWT.BORDER | SWT.PASSWORD);
 		passwordField.setToolTipText(toolTip);
 
+
+		saveButton = new Button(mainComposite, SWT.PUSH);
+		saveButton.setText("Save");
+		saveButton.setToolTipText(
+			"You can also use CTRL+S (CMD+S) or main developer save button.\nThe connection will also be tested if 'enabled' is checked in advanced section.");
+		saveButton.addSelectionListener(new SelectionAdapter()
+		{
+
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				doSave(null);
+			}
+		});
+
+		testConnectionButton = new Button(mainComposite, SWT.PUSH);
+		testConnectionButton.setToolTipText("Checks to see if a connection can be established to the server using this configuration.");
+		testConnectionButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				checkConnection();
+			}
+		});
+
 		IHyperlinkListener hyperLinkNativeOpenHandler = new IHyperlinkListener()
 		{
 			@Override
@@ -517,6 +543,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			public void widgetDefaultSelected(SelectionEvent e)
 			{
 				updateTestConnectionButton();
+				relayout(getDisplay(parent), true);
 			}
 
 		});
@@ -641,31 +668,6 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			}
 		});
 
-		saveButton = new Button(bottomComposite, SWT.PUSH);
-		saveButton.setText("Save");
-		saveButton.setToolTipText(
-			"You can also use CTRL+S (CMD+S) or main developer save button.\nThe connection will also be tested if 'enabled' is checked in advanced section.");
-		saveButton.addSelectionListener(new SelectionAdapter()
-		{
-
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				doSave(null);
-			}
-		});
-
-		testConnectionButton = new Button(bottomComposite, SWT.PUSH);
-		testConnectionButton.setToolTipText("Checks to see if a connection can be established to the server using this configuration.");
-		testConnectionButton.addSelectionListener(new SelectionAdapter()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				checkConnection();
-			}
-		});
-
 		FormText wikiLink = new FormText(bottomComposite, SWT.NONE);
 		wikiLink.setHyperlinkSettings(hyperlinkSettings);
 		wikiLink.setText(
@@ -721,6 +723,13 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		passwordLabel.setLayoutData(col3GD());
 		passwordField.setLayoutData(col4GD());
 
+		tmpGD = new GridData(SWT.FILL, SWT.CENTER, false, false);
+		tmpGD.verticalIndent = 15;
+		saveButton.setLayoutData(tmpGD);
+		tmpGD = new GridData(SWT.BEGINNING, SWT.CENTER, true, false, 3, 1);
+		tmpGD.verticalIndent = 15;
+		testConnectionButton.setLayoutData(tmpGD);
+
 		// layout missing driver if necessary
 		if (noDriverMessage != null)
 		{
@@ -741,7 +750,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		advancedSettingsCollapserComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 4, 1));
 		tmpGD = new GridData(SWT.FILL, SWT.BOTTOM, true, false);
-		tmpGD.verticalIndent = 30;
+		tmpGD.verticalIndent = 20;
 		separator1.setLayoutData(tmpGD);
 		expandBarWrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tmpGD = new GridData(SWT.FILL, SWT.TOP, true, false);
@@ -823,24 +832,21 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		createLogTableButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		createClientstatsTableButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-		gridLayout = new GridLayout(3, false);
+		gridLayout = new GridLayout(1, false);
 		gridLayout.marginWidth = gridLayout.marginHeight = 0;
 		gridLayout.horizontalSpacing = 5;
 		bottomComposite.setLayout(gridLayout);
 
-		saveButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
-		testConnectionButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
-
 		wikiLink.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
+
+		initComboData();
+		initDataBindings();
+		updateSaveButton();
 
 		collapsableItem.setHeight(advancedSettingsComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
 		collapsableItem.setControl(advancedSettingsComposite);
 
 		myScrolledComposite.setMinSize(mainComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-
-		initComboData();
-		initDataBindings();
-		updateSaveButton();
 	}
 
 	/**
