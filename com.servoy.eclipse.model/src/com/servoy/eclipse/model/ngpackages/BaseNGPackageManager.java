@@ -45,6 +45,8 @@ import org.sablo.specification.Package;
 import org.sablo.specification.Package.DirPackageReader;
 import org.sablo.specification.Package.DuplicatePackageException;
 import org.sablo.specification.Package.IPackageReader;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
@@ -68,14 +70,10 @@ public abstract class BaseNGPackageManager
 
 	private final BaseNGPackageResourcesChangedListener resourceChangeListener;
 
-	private final Map<String, IPackageReader> resourcesProjectComponentReaders = new HashMap<String, IPackageReader>(); // resource name (folder name or archive name without extension) -> package reader
-	private final Map<String, IPackageReader> resourcesProjectServiceReaders = new HashMap<String, IPackageReader>(); // resource name (folder name or archive name without extension) -> package reader
-
-	private final Map<String, IPackageReader> ngPackageProjectComponentReaders = new HashMap<String, IPackageReader>(); // resource name (project name) -> package reader
-	private final Map<String, IPackageReader> ngPackageProjectServiceReaders = new HashMap<String, IPackageReader>(); // resource name (project name) -> package reader
-
 	private ServoyNGPackageProject[] referencedNGPackageProjects;
 	private Set<String> activeSolutionReferencedProjectNames = new HashSet<>();
+
+	private final Map<String, Map<String, IPackageReader>> projectNameToContainedPackages = new HashMap<>();
 
 	private final List<INGPackageChangeListener> webResourceChangedListeners = Collections.synchronizedList(new ArrayList<INGPackageChangeListener>());
 
@@ -134,10 +132,16 @@ public abstract class BaseNGPackageManager
 	public List<IPackageReader> getAllPackageReaders()
 	{
 		List<IPackageReader> all = new ArrayList<>();
-		all.addAll(resourcesProjectComponentReaders.values());
-		all.addAll(resourcesProjectServiceReaders.values());
-		all.addAll(ngPackageProjectComponentReaders.values());
-		all.addAll(ngPackageProjectServiceReaders.values());
+		IPackageReader[] allPackageReaders = WebComponentSpecProvider.getInstance().getAllPackageReaders();
+		for (IPackageReader iPackageReader : allPackageReaders)
+		{
+			all.add(iPackageReader);
+		}
+		allPackageReaders = WebServiceSpecProvider.getInstance().getAllPackageReaders();
+		for (IPackageReader iPackageReader : allPackageReaders)
+		{
+			all.add(iPackageReader);
+		}
 		return all;
 	}
 
@@ -183,63 +187,26 @@ public abstract class BaseNGPackageManager
 	 */
 	public void reloadAllNGPackages(IProgressMonitor m, boolean canChangeResources)
 	{
+		projectNameToContainedPackages.clear();
 		setRemovedPackages();
-
-		SubMonitor monitor = SubMonitor.convert(m, "Reloading all ng packages", 100);
-
-
-		Map<String, IPackageReader> componentResourcesProjectReaders = new HashMap<>();
-		Map<String, IPackageReader> serviceResourcesProjectReaders = new HashMap<>();
-
-
-		Map<String, IPackageReader> componentProjectReaders = new HashMap<String, IPackageReader>();
-		Map<String, IPackageReader> serviceProjectReaders = new HashMap<String, IPackageReader>();
+		SubMonitor monitor = SubMonitor.convert(m, "Reloading all ng packages", 100);//TODO check monitor steps counter
+		Map<String, IPackageReader> allPackageReaders = new HashMap<String, IPackageReader>();
 
 		monitor.subTask("Preparing to reload resources project ng packages");
-		prepareReloadOfResourcesProjectNGPackages(true, true, monitor.newChild(8), componentResourcesProjectReaders, serviceResourcesProjectReaders,
-			canChangeResources);
+		collectResourcesProjectNGPackages(true, true, monitor.newChild(8), allPackageReaders, canChangeResources);
+
 		monitor.subTask("Preparing to reload referenced ng package projects");
-		prepareToReloadNGPackageProjects(componentProjectReaders, serviceProjectReaders, monitor.newChild(8), canChangeResources);
+		collectNGPackageProjects(allPackageReaders, monitor.newChild(8), canChangeResources);
 
 		monitor.subTask("Preparing to reload solution contained binary packages");
-		prepareToReloadSolutionContainedBinaryPackages(componentProjectReaders, serviceProjectReaders, monitor.newChild(8), canChangeResources);
-
-		Map<String, IPackageReader> allComponentsToLoad = new HashMap<>();
-		allComponentsToLoad.putAll(componentResourcesProjectReaders);
-		allComponentsToLoad.putAll(componentProjectReaders);
-
-		Map<String, IPackageReader> allServicesToLoad = new HashMap<>();
-		allServicesToLoad.putAll(serviceResourcesProjectReaders);
-		allServicesToLoad.putAll(serviceProjectReaders);
-
-		Map<String, IPackageReader> allComponentsToUnload = new HashMap<>();
-		allComponentsToUnload.putAll(resourcesProjectComponentReaders);
-		allComponentsToUnload.putAll(ngPackageProjectComponentReaders);
-
-		Map<String, IPackageReader> allServicesToUnload = new HashMap<>();
-		allServicesToUnload.putAll(resourcesProjectServiceReaders);
-		allServicesToUnload.putAll(ngPackageProjectServiceReaders);
+		collectSolutionContainedBinaryPackages(allPackageReaders, monitor.newChild(8), canChangeResources);
 
 		monitor.subTask("Reloading component packages");
-		boolean componentsReloaded = (allComponentsToUnload.size() > 0 || allComponentsToLoad.size() > 0);
-		ResourceProvider.updateComponentResources(allComponentsToUnload.keySet(), allComponentsToLoad.values());
+		ResourceProvider.setPackages(allPackageReaders.values());
 		monitor.worked(62);
-		resourcesProjectComponentReaders.clear();
-		resourcesProjectComponentReaders.putAll(componentResourcesProjectReaders);
-		ngPackageProjectComponentReaders.clear();
-		ngPackageProjectComponentReaders.putAll(componentProjectReaders);
-
-		monitor.subTask("Reloading service packages");
-		boolean servicesReloaded = (allServicesToUnload.size() > 0 || allServicesToLoad.size() > 0);
-		ResourceProvider.updateServiceResources(allServicesToUnload.keySet(), allServicesToLoad.values());
 		monitor.worked(21);
-		resourcesProjectServiceReaders.clear();
-		resourcesProjectServiceReaders.putAll(serviceResourcesProjectReaders);
-		ngPackageProjectServiceReaders.clear();
-		ngPackageProjectServiceReaders.putAll(serviceProjectReaders);
-
 		monitor.setTaskName("Announcing ng packages load");
-		if (componentsReloaded || servicesReloaded) ngPackagesChanged(componentsReloaded, servicesReloaded);
+		ngPackagesChanged(true, true);
 		monitor.worked(1);
 		monitor.done();
 	}
@@ -251,15 +218,9 @@ public abstract class BaseNGPackageManager
 	 * @param newChild
 	 * @param canChangeResources
 	 */
-	private void prepareToReloadSolutionContainedBinaryPackages(Map<String, IPackageReader> componentProjectReaders,
-		Map<String, IPackageReader> serviceProjectReaders, SubMonitor monitor, boolean canChangeResources)
+	private void collectSolutionContainedBinaryPackages(Map<String, IPackageReader> componentProjectReaders, SubMonitor monitor, boolean canChangeResources)
 	{
 		ServoyProject[] modules = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
-
-		Map<String, Map<String, IPackageReader>> packagesTypeToReaders = new HashMap<String, Map<String, IPackageReader>>();
-		packagesTypeToReaders.put(IPackageReader.WEB_COMPONENT, componentProjectReaders);
-		packagesTypeToReaders.put(IPackageReader.WEB_LAYOUT, componentProjectReaders);
-		packagesTypeToReaders.put(IPackageReader.WEB_SERVICE, serviceProjectReaders);
 
 		for (ServoyProject solution : modules)
 		{
@@ -277,7 +238,8 @@ public abstract class BaseNGPackageManager
 							IPackageReader reader = readPackageResource(resource);
 							if (reader != null)
 							{
-								packagesTypeToReaders.get(reader.getPackageType()).put(reader.getPackageName(), reader);
+								componentProjectReaders.put(reader.getPackageName(), reader);
+								getProjectContainedPackagesMap(project.getName()).put(reader.getPackageName(), reader);
 							}
 						}
 					}
@@ -290,100 +252,90 @@ public abstract class BaseNGPackageManager
 		}
 	}
 
-	/**
-	 * Reloads all ng packages from the active resources project.
-	 * IMPORTANT: only call this if these packages are the only ones that changed (so there were no changes in the ng packages from the solution project
-	 * referenced ng package projects; cause if for example a package is moved between the resources project and a separate ng pacakge project it would
-	 * error out because it might not be unloaded properly before being loaded again if you sequentially call reload on resources project packages and on ng package projects)
-	 */
-	protected void reloadResourcesProjectNGPackages(boolean reloadComponents, boolean reloadServices, IProgressMonitor m, boolean canChangeResources)
+	protected void updateFromResourceChangeListener(String projectName, Set<String> unloadPackages, Set<IPackageReader> toAdd)
 	{
-		SubMonitor monitor = SubMonitor.convert(m, "Reloading ng packages from resources project", 27);
-		Map<String, IPackageReader> newComponents = new HashMap<>();
-		Map<String, IPackageReader> newServices = new HashMap<>();
-
-		prepareReloadOfResourcesProjectNGPackages(reloadComponents, reloadServices, monitor.newChild(8), newComponents, newServices, canChangeResources);
-		monitor.setWorkRemaining(19);
-
-		boolean componentsReloaded = false;
-		boolean servicesReloaded = false;
-
-		if (reloadComponents)
+		//first update our cache
+		Map<String, IPackageReader> projectContainedPackagesMap = getProjectContainedPackagesMap(projectName);
+		for (String packageName : unloadPackages)
 		{
-			componentsReloaded = (resourcesProjectComponentReaders.size() > 0 || newComponents.size() > 0);
-			ResourceProvider.updateComponentResources(resourcesProjectComponentReaders.keySet(), newComponents.values());
-			monitor.worked(9);
-			resourcesProjectComponentReaders.clear();
-			resourcesProjectComponentReaders.putAll(newComponents);
+			projectContainedPackagesMap.remove(packageName);
 		}
-		monitor.setWorkRemaining(10);
-
-		if (reloadServices)
+		for (IPackageReader iPackageReader : toAdd)
 		{
-			servicesReloaded = (resourcesProjectServiceReaders.size() > 0 || newServices.size() > 0);
-			ResourceProvider.updateServiceResources(resourcesProjectServiceReaders.keySet(), newServices.values());
-			monitor.worked(9);
-			resourcesProjectServiceReaders.clear();
-			resourcesProjectServiceReaders.putAll(newServices);
+			projectContainedPackagesMap.put(iPackageReader.getPackageName(), iPackageReader);
 		}
-		monitor.setWorkRemaining(1);
-		monitor.setTaskName("Ng packages were loaded; notifying interested parties");
 
-		if (componentsReloaded || servicesReloaded) ngPackagesChanged(componentsReloaded, servicesReloaded);
-		monitor.worked(1);
-		monitor.done();
-	}
-
-	/**
-	 * Reloads all ng packages that are referenced projects of the active solution project.
-	 *
-	 * IMPORTANT: only call this if these packages are the only ones that changed (so there were no changes in the ng packages from the resouces project; cause if
-	 * for example a package is moved between the resources project and a separate ng pacakge project it would error out because it might not be unloaded
-	 * properly before being loaded again if you sequentially call reload on resources project packages and on ng package projects)
-	 */
-	protected void reloadAllSolutionReferencedPackages(IProgressMonitor m, boolean canChangeResources)
-	{
-		Map<String, IPackageReader> componentReaders = new HashMap<String, IPackageReader>();
-		Map<String, IPackageReader> serviceReaders = new HashMap<String, IPackageReader>();
-		SubMonitor monitor = SubMonitor.convert(m, "Reloading all referenced ng package projects", 100);
-
-		prepareToReloadNGPackageProjects(componentReaders, serviceReaders, monitor.newChild(10), canChangeResources);
-
-		prepareToReloadSolutionContainedBinaryPackages(componentReaders, serviceReaders, monitor.newChild(8), canChangeResources);
-
-		monitor.setWorkRemaining((serviceReaders.size() + componentReaders.size()) * 10 + 3);
-		HashMap<String, IPackageReader> thisComponentReaders = new HashMap<String, IPackageReader>();
-		thisComponentReaders.putAll(ngPackageProjectComponentReaders);
-		HashMap<String, IPackageReader> thisServiceReaders = new HashMap<String, IPackageReader>();
-		thisServiceReaders.putAll(ngPackageProjectServiceReaders);
-		reloadActualSpecs(thisComponentReaders, componentReaders, thisServiceReaders, serviceReaders,
-			monitor.newChild((serviceReaders.size() + componentReaders.size()) * 10 + 3));
-		monitor.done();
-	}
-
-	private void prepareToReloadNGPackageProjects(Map<String, IPackageReader> componentReaders, Map<String, IPackageReader> serviceReaders, IProgressMonitor m,
-		boolean canChangeResources)
-	{
-		ServoyProject activeSolutionProject = ServoyModelFinder.getServoyModel().getActiveProject();
-		SubMonitor monitor = SubMonitor.convert(m, 10);
-		if (activeSolutionProject != null)
+		//for each change add/remove we first check that the project isn't already loaded in the spec readers
+		//and also split up into services and non-services
+		Set<String> componentsReallyToUnload = new HashSet<>();
+		Set<String> serviceReallyToUnload = new HashSet<>();
+		for (String packageName : unloadPackages)
 		{
-			ServoyNGPackageProject[] ngPackageProjects = getReferencedNGPackageProjects();
-			monitor.worked(3);
-
-			monitor.setWorkRemaining(ngPackageProjects.length);
-
-			for (ServoyNGPackageProject ngPackageProject : ngPackageProjects)
+			if (notContainedByOtherProjects(projectName, packageName))
 			{
-				IProject project = ngPackageProject.getProject();
-				readNewNGPackageProject(componentReaders, serviceReaders, project, monitor.newChild(1), canChangeResources);
+				if (WebComponentSpecProvider.getInstance().getPackageNames().contains(packageName)) componentsReallyToUnload.add(packageName);
+				else serviceReallyToUnload.add(packageName);
 			}
 		}
-		monitor.done();
+		Set<IPackageReader> componentsReallyToLoad = new HashSet<>();
+		Set<IPackageReader> serviceReallyToLoad = new HashSet<>();
+		for (IPackageReader packageReader : toAdd)
+		{
+			if (notContainedByOtherProjects(projectName, packageReader.getPackageName()))
+			{
+				if (packageReader.getPackageType().equals(IPackageReader.WEB_SERVICE)) serviceReallyToLoad.add(packageReader);
+				else componentsReallyToLoad.add(packageReader);
+			}
+		}
+
+		ResourceProvider.updatePackageResources(componentsReallyToUnload, componentsReallyToLoad, serviceReallyToUnload, serviceReallyToLoad);
+		ngPackagesChanged(true, true);
 	}
 
-	protected void prepareReloadOfResourcesProjectNGPackages(boolean reloadComponents, boolean reloadServices, IProgressMonitor m,
-		Map<String, IPackageReader> newComponents, Map<String, IPackageReader> newServices, boolean canChangeResources)
+
+	/**	Search in all other projects if the given package is not contained also there
+	 * @param projectName
+	 * @param name
+	 * @return
+	 */
+	private boolean notContainedByOtherProjects(String projectName, String name)
+	{
+		for (String currentProjectName : projectNameToContainedPackages.keySet())
+		{
+			if (currentProjectName.equals(projectName)) continue;
+			if (projectNameToContainedPackages.get(currentProjectName) != null && projectNameToContainedPackages.get(currentProjectName).containsKey(name))
+				return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Collects all package project readers of the active solution and its modules into componentReaders and caches a list of readers per each solution project into @{projectNameToContainedPackages}
+	 * @param componentReaders
+	 * @param m
+	 * @param canChangeResources
+	 */
+	private void collectNGPackageProjects(Map<String, IPackageReader> componentReaders, IProgressMonitor m, boolean canChangeResources)
+	{ //TODO check monitor steps!!!
+		ServoyProject activeSolutionProject = ServoyModelFinder.getServoyModel().getActiveProject();
+		if (activeSolutionProject != null)
+		{
+			ServoyProject[] modulesOfActiveProject = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
+			for (ServoyProject servoyProject : modulesOfActiveProject)
+			{
+				ServoyNGPackageProject[] ngPackageProjects = servoyProject.getNGPackageProjects();
+				for (ServoyNGPackageProject servoyNGPackageProject : ngPackageProjects)
+				{
+					collectReferencedProjectAsPackageReader(componentReaders, servoyProject.getProject().getName(), servoyNGPackageProject.getProject(), m,
+						canChangeResources);
+				}
+			}
+			m.worked(3);
+		}
+	}
+
+	protected void collectResourcesProjectNGPackages(boolean reloadComponents, boolean reloadServices, IProgressMonitor m,
+		Map<String, IPackageReader> newComponents, boolean canChangeResources)
 	{
 		ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 		SubMonitor monitor = SubMonitor.convert(m, 8);
@@ -423,7 +375,7 @@ public abstract class BaseNGPackageManager
 			monitor.setWorkRemaining(21);
 			if (reloadServices)
 			{
-				readParentOfPackagesDir(newServices, activeResourcesProject.getProject(), SolutionSerializer.SERVICES_DIR_NAME, monitor.newChild(2),
+				readParentOfPackagesDir(newComponents, activeResourcesProject.getProject(), SolutionSerializer.SERVICES_DIR_NAME, monitor.newChild(2),
 					canChangeResources);
 			}
 		}
@@ -431,85 +383,14 @@ public abstract class BaseNGPackageManager
 	}
 
 	/**
-	 * Unloads some previously loaded ngPackage projects and loads others as needed (as they change in workspace).
-	
-	 * IMPORTANT: only call this if these packages are the only ones that changed (so there were no changes in the ng packages from the resouces project; cause if
-	 * for example a package is moved between the resources project and a separate ng pacakge project it would error out because it might not be unloaded
-	 * properly before being loaded again if you sequentially call reload on resources project packages and on ng package projects)
-	 *
-	 * @param oldNGPackageProjectsToUnload the projects to unload
-	 * @param newNGPackageProjectsToLoad the projects to load
+	 * Transform this package project into a package reader and add it to newComponentReaders and to our local map
+	 * @param newComponentReaders
+	 * @param solutionProjectName
+	 * @param project
+	 * @param m
+	 * @param canChangeResources
 	 */
-	protected void reloadNGPackageProjects(List<IProject> oldNGPackageProjectsToUnload, List<IProject> newNGPackageProjectsToLoad, IProgressMonitor m,
-		boolean canChangeResources)
-	{
-		// split them into services and components; prepare readers for new ones in order to do that
-		Map<String, IPackageReader> oldNGComponentProjectsToUnload = new HashMap<>();
-		Map<String, IPackageReader> oldNGServiceProjectsToUnload = new HashMap<>();
-
-		Map<String, IPackageReader> newNGComponentProjectsToLoad = new HashMap<>();
-		Map<String, IPackageReader> newNGServiceProjectsToLoad = new HashMap<>();
-
-		SubMonitor monitor = SubMonitor.convert(m, "Reloading changed referenced ng package projects", newNGPackageProjectsToLoad.size() * 11 + 3);
-		// split old/removed
-		for (IProject oldP : oldNGPackageProjectsToUnload)
-		{
-			IPackageReader oldR = ngPackageProjectComponentReaders.get(oldP.getName());
-			if (oldR != null)
-			{
-				oldNGComponentProjectsToUnload.put(oldP.getName(), oldR);
-			}
-			else
-			{
-				oldR = ngPackageProjectServiceReaders.get(oldP.getName());
-				if (oldR != null)
-				{
-					oldNGServiceProjectsToUnload.put(oldP.getName(), oldR);
-				}
-			}
-		}
-
-		// read and split new/to be loaded
-		for (IProject newP : newNGPackageProjectsToLoad)
-		{
-			readNewNGPackageProject(newNGComponentProjectsToLoad, newNGServiceProjectsToLoad, newP, monitor.newChild(1), canChangeResources);
-		}
-
-		reloadActualSpecs(oldNGComponentProjectsToUnload, newNGComponentProjectsToLoad, oldNGServiceProjectsToUnload, newNGServiceProjectsToLoad,
-			monitor.newChild(newNGPackageProjectsToLoad.size() * 10 + 3));
-		monitor.done();
-	}
-
-	protected void reloadActualSpecs(Map<String, IPackageReader> componentReadersToUnload, Map<String, IPackageReader> componentReadersToLoad,
-		Map<String, IPackageReader> serviceReadersToUnload, Map<String, IPackageReader> serviceReadersToLoad, IProgressMonitor monitor)
-	{
-		boolean componentsReloaded = (componentReadersToUnload.size() > 0 || componentReadersToLoad.size() > 0);
-		boolean servicesReloaded = (serviceReadersToUnload.size() > 0 || serviceReadersToLoad.size() > 0);
-
-		monitor.beginTask("Reading actual specs", (componentReadersToLoad.size() + serviceReadersToLoad.size()) * 10 + 3);
-
-		ResourceProvider.updateServiceResources(serviceReadersToUnload.keySet(), serviceReadersToLoad.values());
-		monitor.worked(serviceReadersToLoad.size() * 10 + 1);
-		for (String x : serviceReadersToUnload.keySet())
-		{
-			ngPackageProjectServiceReaders.remove(x);
-		}
-		ngPackageProjectServiceReaders.putAll(serviceReadersToLoad);
-
-		ResourceProvider.updateComponentResources(componentReadersToUnload.keySet(), componentReadersToLoad.values());
-		monitor.worked(componentReadersToLoad.size() * 10 + 1);
-		for (String x : componentReadersToUnload.keySet())
-		{
-			ngPackageProjectComponentReaders.remove(x);
-		}
-		ngPackageProjectComponentReaders.putAll(componentReadersToLoad);
-
-		if (componentsReloaded || servicesReloaded) ngPackagesChanged(componentsReloaded, servicesReloaded);
-		monitor.worked(1);
-		monitor.done();
-	}
-
-	protected void readNewNGPackageProject(Map<String, IPackageReader> newComponentReaders, Map<String, IPackageReader> newServiceReaders, IProject project,
+	private void collectReferencedProjectAsPackageReader(Map<String, IPackageReader> newComponentReaders, String solutionProjectName, IProject project,
 		IProgressMonitor m, boolean canChangeResources)
 	{
 		try
@@ -520,13 +401,11 @@ public abstract class BaseNGPackageManager
 			if (reader != null)
 			{
 				// see if it is a component package or a service package
-				if (IPackageReader.WEB_SERVICE.equals(reader.getPackageType()))
-				{
-					newServiceReaders.put(reader.getPackageName(), reader);
-				}
-				else if (IPackageReader.WEB_COMPONENT.equals(reader.getPackageType()) || IPackageReader.WEB_LAYOUT.equals(reader.getPackageType()))
+				if (IPackageReader.WEB_COMPONENT.equals(reader.getPackageType()) || IPackageReader.WEB_LAYOUT.equals(reader.getPackageType()) ||
+					IPackageReader.WEB_SERVICE.equals(reader.getPackageType()))
 				{
 					newComponentReaders.put(reader.getPackageName(), reader);
+					getProjectContainedPackagesMap(solutionProjectName).put(reader.getPackageName(), reader);
 				}
 				else
 				{
@@ -555,7 +434,7 @@ public abstract class BaseNGPackageManager
 	}
 
 	/**
-	 * Checks whether or not a default (Servoy supplied) component or service packace should be loaded/used.
+	 * Checks whether or not a default (Servoy supplied) component or service package should be loaded/used.
 	 * This for example when running from the UI can be changed in Servoy preferences pages; command line exporter could get this info as an argument.
 	 *
 	 * @param packageName the name of the package to be checked
@@ -576,7 +455,11 @@ public abstract class BaseNGPackageManager
 				for (IResource resource : members)
 				{
 					IPackageReader reader = readPackageResource(resource);
-					if (reader != null) readers.put(reader.getPackageName(), reader);
+					if (reader != null)
+					{
+						readers.put(reader.getPackageName(), reader);
+						getProjectContainedPackagesMap(iProject.getName()).put(reader.getPackageName(), reader);
+					}
 				}
 			}
 			catch (CoreException e)
@@ -584,6 +467,18 @@ public abstract class BaseNGPackageManager
 				ServoyLog.logError(e);
 			}
 		}
+	}
+
+	private Map<String, IPackageReader> getProjectContainedPackagesMap(String projectName)
+	{
+		Map<String, IPackageReader> map = projectNameToContainedPackages.get(projectName);
+		if (map == null)
+		{
+			map = new HashMap<>();
+			projectNameToContainedPackages.put(projectName, map);
+		}
+		return map;
+
 	}
 
 	protected IPackageReader readPackageResource(IResource resource)
@@ -611,16 +506,6 @@ public abstract class BaseNGPackageManager
 			}
 		}
 		return null;
-	}
-
-	public boolean isComponentPackageProject(String resourceName)
-	{
-		return ngPackageProjectComponentReaders.containsKey(resourceName);
-	}
-
-	public boolean isServicePackageProject(String resourceName)
-	{
-		return ngPackageProjectServiceReaders.containsKey(resourceName);
 	}
 
 	protected static void addErrorMarker(IResource resource, Exception e)
@@ -721,6 +606,32 @@ public abstract class BaseNGPackageManager
 			super.reportError(specpath, e);
 			addErrorMarker(e instanceof DuplicatePackageException ? container : container.getFile(new Path(specpath)), e);
 		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see java.lang.Object#hashCode()
+		 */
+		@Override
+		public int hashCode()
+		{
+			return container.hashCode();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (obj instanceof ContainerPackageReader)
+			{
+				return container.equals(((ContainerPackageReader)obj).container);
+			}
+			return false;
+		}
 	}
 
 	private class ZipFilePackageReader extends Package.ZipPackageReader
@@ -744,8 +655,22 @@ public abstract class BaseNGPackageManager
 	public void dispose()
 	{
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
-		ResourceProvider.updateComponentResources(resourcesProjectComponentReaders.keySet(), new ArrayList<IPackageReader>());
-		ResourceProvider.updateServiceResources(resourcesProjectServiceReaders.keySet(), new ArrayList<IPackageReader>());
+		ResourceProvider.setPackages(new ArrayList<IPackageReader>());
+	}
+
+	/** Get the cached package project references of this project
+	 * @param name
+	 * @return
+	 */
+	public List<String> getOldUsedPackageProjectsList(String projectName)
+	{
+		List<String> result = new ArrayList<>();
+		Map<String, IPackageReader> map = getProjectContainedPackagesMap(projectName);
+		for (String packageName : map.keySet())
+		{
+			if (ResourcesPlugin.getWorkspace().getRoot().getProject(packageName).exists()) result.add(packageName);
+		}
+		return result;
 	}
 
 }

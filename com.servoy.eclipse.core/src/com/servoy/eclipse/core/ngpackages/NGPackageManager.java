@@ -17,8 +17,7 @@
 
 package com.servoy.eclipse.core.ngpackages;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -28,12 +27,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.PlatformUI;
+import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
@@ -43,7 +42,6 @@ import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 
 import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
@@ -90,13 +88,15 @@ public class NGPackageManager extends BaseNGPackageManager
 				{
 					if (updateInfo == RESOURCES_UPDATED_ON_ACTIVE_PROJECT)
 					{
-						reloadResourcesProjectNGPackages(true, true, null, false);
+						reloadAllNGPackages(null, false);
 					}
 					else if (updateInfo == MODULES_UPDATED)
 					{
 						// TODO if we will take referenced ng package projects even from modules, we should enable this code...
 						clearActiveSolutionReferencesCache();
-						reloadAllSolutionReferencedPackages(new NullProgressMonitor(), false);
+						//TODO can we improve this?
+						reloadAllNGPackages(null, false);
+//						reloadAllSolutionReferencedPackages(new NullProgressMonitor(), false);
 					}
 				}
 
@@ -130,35 +130,15 @@ public class NGPackageManager extends BaseNGPackageManager
 	}
 
 	@Override
-	protected void reloadResourcesProjectNGPackages(final boolean reloadComponents, final boolean reloadServices, IProgressMonitor m,
-		boolean canChangeResources)
+	protected void updateFromResourceChangeListener(final String projectName, final Set<String> unloadPackages, final Set<IPackageReader> toAdd)
 	{
-		Job registerResourceNGPackagesJob = new Job("Reading ng packages from resources project...")
+		Job registerNgPackagesJob = new Job("Update packages ...")
 		{
 			@Override
 			public IStatus run(IProgressMonitor monitor)
 			{
 				// do the actual work
-				NGPackageManager.super.reloadResourcesProjectNGPackages(reloadComponents, reloadServices, monitor, true);
-				return Status.OK_STATUS;
-			}
-
-		};
-		ServoyResourcesProject r = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
-		registerResourceNGPackagesJob.setRule(MultiRule.combine(r != null ? r.getProject() : null, serialRule));
-		registerResourceNGPackagesJob.schedule();
-	}
-
-	@Override
-	protected void reloadAllSolutionReferencedPackages(IProgressMonitor m, final boolean canChangeResources)
-	{
-		Job registerNgPackagesJob = new Job("Reading all ng package projects...")
-		{
-			@Override
-			public IStatus run(IProgressMonitor monitor)
-			{
-				// do the actual work
-				NGPackageManager.super.reloadAllSolutionReferencedPackages(monitor, canChangeResources);
+				NGPackageManager.super.updateFromResourceChangeListener(projectName, unloadPackages, toAdd);
 				return Status.OK_STATUS;
 			}
 
@@ -167,28 +147,6 @@ public class NGPackageManager extends BaseNGPackageManager
 		registerNgPackagesJob.schedule();
 	}
 
-	@Override
-	protected void reloadNGPackageProjects(final List<IProject> oldNGPackageProjectsToUnload, final List<IProject> newNGPackageProjectsToLoad,
-		IProgressMonitor m, boolean canChangeResources)
-	{
-		Job registerSomeNGPackageProjectsJob = new Job("Reading some ng package projects...")
-		{
-			@Override
-			public IStatus run(IProgressMonitor monitor)
-			{
-				// do the actual work
-				NGPackageManager.super.reloadNGPackageProjects(oldNGPackageProjectsToUnload, newNGPackageProjectsToLoad, monitor, true);
-				return Status.OK_STATUS;
-			}
-
-		};
-		List<ISchedulingRule> allRules = new ArrayList<>(oldNGPackageProjectsToUnload.size() + newNGPackageProjectsToLoad.size() + 1);
-		allRules.addAll(oldNGPackageProjectsToUnload);
-		allRules.addAll(newNGPackageProjectsToLoad);
-		allRules.add(serialRule);
-		registerSomeNGPackageProjectsJob.setRule(MultiRule.combine(allRules.toArray(new ISchedulingRule[allRules.size()])));
-		registerSomeNGPackageProjectsJob.schedule();
-	}
 
 	@Override
 	public void dispose()

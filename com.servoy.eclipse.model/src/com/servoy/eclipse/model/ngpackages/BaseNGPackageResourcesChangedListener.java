@@ -20,10 +20,13 @@ package com.servoy.eclipse.model.ngpackages;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -32,16 +35,12 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.sablo.specification.Package.IPackageReader;
-import org.sablo.util.ValueReference;
 
-import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
@@ -64,79 +63,44 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 	@Override
 	public void resourceChanged(IResourceChangeEvent event)
 	{
-		ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
-		ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
 		IResourceDelta delta = event.getDelta();
-		IResourceDelta[] affectedChildren = delta.getAffectedChildren();
-
-		boolean refreshResourcesServices = false;
-		boolean refreshResourcesComponents = false;
-
-		// check for changes in the resources project ngpackages
-		if (activeResourcesProject != null)
-		{
-			IProject resourceProject = activeResourcesProject.getProject();
-			refreshResourcesServices = shouldRefresh(resourceProject, affectedChildren, SolutionSerializer.SERVICES_DIR_NAME);
-			refreshResourcesComponents = shouldRefresh(resourceProject, affectedChildren, SolutionSerializer.COMPONENTS_DIR_NAME);
-		}
-
-		ValueReference<Boolean> refreshAllNGPackageProjects = new ValueReference<>(Boolean.FALSE);
-		ValueReference<Boolean> clearReferencedProjectsCache = new ValueReference<>(Boolean.FALSE);
-		final List<IProject> newNGPackageProjectsToLoad = new ArrayList<>();
-		final List<IProject> oldNGPackageProjectsToUnload = new ArrayList<>();
-
-		Pair<Boolean, Boolean> changesInBinary = checkForChangesInSolutionBinaryPackages(delta);
-
-		checkForChangesInNGPackageProjects(activeProject, affectedChildren, refreshAllNGPackageProjects, clearReferencedProjectsCache,
-			newNGPackageProjectsToLoad, oldNGPackageProjectsToUnload);
-
-		boolean somethingChangedInResourcesProject = (refreshResourcesServices || refreshResourcesComponents);
-		boolean somethingChangedInNGPackageProjects = (refreshAllNGPackageProjects.value.booleanValue() || newNGPackageProjectsToLoad.size() > 0 ||
-			oldNGPackageProjectsToUnload.size() > 0);
-
-		if ((somethingChangedInResourcesProject && somethingChangedInNGPackageProjects) ||
-			(changesInBinary.getLeft().booleanValue() || changesInBinary.getRight().booleanValue()))
-		{
-			// we have to reload all to avoid a problem where when moving a package completely between resources project and it's own project
-			// it could be loaded twice (if we would reload first resources project and then it's own project, then while reloading from one the others will not yet be unloaded)
-			if (clearReferencedProjectsCache.value.booleanValue()) baseNGPackageManager.clearActiveSolutionReferencesCache();
-			baseNGPackageManager.reloadAllNGPackages(null, false);
-			if (clearReferencedProjectsCache.value.booleanValue()) baseNGPackageManager.ngPackageProjectListChanged();
-		}
-		else if (somethingChangedInResourcesProject)
-		{
-			// something changed only in resources project ngpackages
-			baseNGPackageManager.reloadResourcesProjectNGPackages(refreshResourcesComponents, refreshResourcesServices, null, false);
-		}
-		else
-		{
-			// maybe something changed only in ng package projects
-			if (clearReferencedProjectsCache.value.booleanValue()) baseNGPackageManager.clearActiveSolutionReferencesCache();
-			if (refreshAllNGPackageProjects.value.booleanValue())
-			{
-				baseNGPackageManager.reloadAllSolutionReferencedPackages(null, false);
-			}
-			else if (newNGPackageProjectsToLoad.size() > 0 || oldNGPackageProjectsToUnload.size() > 0)
-			{
-				baseNGPackageManager.reloadNGPackageProjects(oldNGPackageProjectsToUnload, newNGPackageProjectsToLoad, null, false);
-			}
-			if (clearReferencedProjectsCache.value.booleanValue()) baseNGPackageManager.ngPackageProjectListChanged();
-		}
+		checkForChangesInWebPackages(delta);
 	}
 
 
-	/** Checks for resources changes of binary packages and updates the  @ResourceProvider if needed
+	/** Checks for resources changes of web packages and updates the  @ResourceProvider if needed
 	 * @param delta
 	 * @return
 	 */
-	private Pair<Boolean, Boolean> checkForChangesInSolutionBinaryPackages(IResourceDelta delta)
+	private void checkForChangesInWebPackages(IResourceDelta delta)
 	{
-		final Map<String, IPackageReader> addedPackageReaders = new HashMap<String, IPackageReader>();
-		final List<File> removedPackageFiles = new ArrayList<>();
+		final Map<String, Pair<Set<String>, Set<IPackageReader>>> changedProjects = new HashMap<String, Pair<Set<String>, Set<IPackageReader>>>();
 		try
 		{
 			delta.accept(new IResourceDeltaVisitor()
 			{
+
+				private Set<IPackageReader> getAddedPackageReaders(String projectname)
+				{
+					if (!changedProjects.containsKey(projectname))
+					{
+						Set<String> removed = new HashSet<String>();
+						Set<IPackageReader> added = new HashSet<IPackageReader>();
+						changedProjects.put(projectname, new Pair<Set<String>, Set<IPackageReader>>(removed, added));
+					}
+					return changedProjects.get(projectname).getRight();
+				}
+
+				private Set<String> getRemovedPackageReaders(String projectname)
+				{
+					if (!changedProjects.containsKey(projectname))
+					{
+						Set<String> removed = new HashSet<String>();
+						Set<IPackageReader> added = new HashSet<IPackageReader>();
+						changedProjects.put(projectname, new Pair<Set<String>, Set<IPackageReader>>(removed, added));
+					}
+					return changedProjects.get(projectname).getLeft();
+				}
 
 				@Override
 				public boolean visit(IResourceDelta resourceDelta) throws CoreException
@@ -149,25 +113,150 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 						if (binaryFile.getName().endsWith(".zip"))
 						{
 							if (binaryFile.getParent().getName().equals(SolutionSerializer.NG_PACKAGES_DIR_NAME))
-							{//component package
+							{//web package
 								if ((resourceDelta.getKind() & IResourceDelta.CHANGED) != 0)
 								{
-									removedPackageFiles.add(new File(resource.getLocationURI()));
+									List<String> toRemove = new ArrayList<>();
+									String componentPackageNameForFile = ResourceProvider.getComponentPackageNameForFile(new File(resource.getLocationURI()));
+									if (componentPackageNameForFile == null)
+										componentPackageNameForFile = ResourceProvider.getServicePackageNameForFile(new File(resource.getLocationURI()));
+									toRemove.add(componentPackageNameForFile);
 									IPackageReader reader = baseNGPackageManager.readPackageResource(resource);
-									if (reader != null) addedPackageReaders.put(reader.getPackageName(), reader);
+									if (reader != null) getAddedPackageReaders(resource.getProject().getName()).add(reader);
+									if (componentPackageNameForFile != null)
+										getRemovedPackageReaders(resource.getProject().getName()).add(componentPackageNameForFile);
 								}
 								else if ((resourceDelta.getKind() & IResourceDelta.REMOVED) != 0)
 								{
-									removedPackageFiles.add(new File(resource.getLocationURI()));
+									String componentPackageNameForFile = ResourceProvider.getComponentPackageNameForFile(new File(resource.getLocationURI()));
+									if (componentPackageNameForFile == null)
+										componentPackageNameForFile = ResourceProvider.getServicePackageNameForFile(new File(resource.getLocationURI()));
+									getRemovedPackageReaders(resource.getProject().getName()).add(componentPackageNameForFile);
 								}
 								else if ((resourceDelta.getKind() & IResourceDelta.ADDED) != 0)
 								{
 									IPackageReader reader = baseNGPackageManager.readPackageResource(resource);
-									if (reader != null) addedPackageReaders.put(reader.getPackageName(), reader);
+									if (reader != null) getAddedPackageReaders(resource.getProject().getName()).add(reader);
+								}
+							}
+						}
+						else
+						{ //check if this file change happened in a project
+
+							if (resource.getProject().hasNature(ServoyNGPackageProject.NATURE_ID))
+							{
+								//we have a change in a file of a package project - reload that package for all referencing solutions
+								IProject[] referencingProjects = resource.getProject().getReferencingProjects();
+								{
+									if (referencingProjects.length > 0)
+									{
+										String componentPackageNameForFile = ResourceProvider.getComponentPackageNameForFile(
+											new File(resource.getProject().getLocationURI()));
+										if (componentPackageNameForFile == null) componentPackageNameForFile = ResourceProvider.getServicePackageNameForFile(
+											new File(resource.getProject().getLocationURI()));
+
+										IPackageReader reader = baseNGPackageManager.readPackageResource(resource.getProject());
+
+										for (IProject iProject : referencingProjects)
+										{
+											if (iProject.hasNature(ServoyProject.NATURE_ID))
+											{
+												if (reader != null) getAddedPackageReaders(iProject.getName()).add(reader);
+												if (componentPackageNameForFile != null)
+													getRemovedPackageReaders(iProject.getName()).add(componentPackageNameForFile);
+											}
+										}
+									}
+								}
+							}
+							else
+							{
+								if (resource.getProject().hasNature(ServoyResourcesProject.NATURE_ID))
+								{
+									//first determine the folder that is the dir package in "components" or in "services"
+									IContainer packageDirectory = resource.getParent();
+
+									while ((packageDirectory.getParent() != null &&
+										!packageDirectory.getParent().getName().equals(SolutionSerializer.COMPONENTS_DIR_NAME) &&
+										!packageDirectory.getParent().getName().equals(SolutionSerializer.SERVICES_DIR_NAME)) ||
+										//this is for the case that (for some reason) a component or service has its own "components" or "services" folder
+										!resource.getProject().equals(packageDirectory.getParent().getParent()))
+									{
+										packageDirectory = packageDirectory.getParent();
+									}
+
+									String componentPackageNameForFile = ResourceProvider.getComponentPackageNameForFile(
+										new File(packageDirectory.getLocationURI()));
+									if (componentPackageNameForFile == null) componentPackageNameForFile = ResourceProvider.getServicePackageNameForFile(
+										new File(packageDirectory.getLocationURI()));
+
+									IPackageReader reader = baseNGPackageManager.readPackageResource(packageDirectory);
+									if (reader != null) getAddedPackageReaders(resource.getProject().getName()).add(reader);
+									if (componentPackageNameForFile != null)
+										getRemovedPackageReaders(resource.getProject().getName()).add(componentPackageNameForFile);
 								}
 							}
 						}
 						return false;
+					}
+					else if (resource instanceof IProject)
+					{ // maybe references to package projects changed
+						IProject solutionProject = (IProject)resource;
+						if (solutionProject.exists() && solutionProject.hasNature(ServoyProject.NATURE_ID))
+						{
+							IProject[] referencedProjects = solutionProject.getDescription().getReferencedProjects();
+							List<IProject> usedPackageProjects = new ArrayList<>();
+							for (IProject project : referencedProjects)
+							{
+								if (project.hasNature(ServoyNGPackageProject.NATURE_ID))
+								{
+									usedPackageProjects.add(project);
+								}
+							}
+							List<String> oldUsedPackageList = baseNGPackageManager.getOldUsedPackageProjectsList(solutionProject.getName());
+							List<String> oldUsedPackageListCopy = new ArrayList<>();
+							oldUsedPackageListCopy.addAll(oldUsedPackageList);
+
+							//retain in oldUsedPackageList only the projects that are not used anymore
+							Iterator<String> oldUsedPackageNameIterator = oldUsedPackageList.iterator();
+							while (oldUsedPackageNameIterator.hasNext())
+							{
+								String next = oldUsedPackageNameIterator.next();
+								for (IProject usedProject : usedPackageProjects)
+								{
+									if (next.equals(usedProject.getName()))
+									{
+										oldUsedPackageNameIterator.remove();
+										break;
+									}
+								}
+							}
+
+							//retain in usedPackageProjects only the projects that were not used before
+							Iterator<IProject> usedPackageProjectIterator = usedPackageProjects.iterator();
+							while (usedPackageProjectIterator.hasNext())
+							{
+								IProject next = usedPackageProjectIterator.next();
+								for (String oldUsedPackageName : oldUsedPackageListCopy)
+								{
+									if (next.getName().equals(oldUsedPackageName))
+									{
+										usedPackageProjectIterator.remove();
+										break;
+									}
+
+								}
+							}
+							for (String removedProject : oldUsedPackageList)
+							{
+								getRemovedPackageReaders(solutionProject.getName()).add(removedProject);
+							}
+							for (IProject addedProject : usedPackageProjects)
+							{
+								IPackageReader readPackageResource = baseNGPackageManager.readPackageResource(addedProject);
+								getAddedPackageReaders(solutionProject.getName()).add(readPackageResource);
+							}
+						}
 					}
 					return true;
 				}
@@ -178,175 +267,13 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 			Debug.log(e);
 		}
 
-		List<String> removedComponentPackageNames = new ArrayList<>();
-		List<String> removedServicePackageNames = new ArrayList<>();
-		for (File file : removedPackageFiles)
-		{
-			String packageName = ResourceProvider.getComponentPackageNameForFile(file);
-			if (packageName != null) removedComponentPackageNames.add(packageName);
-			else
-			{
-				packageName = ResourceProvider.getServicePackageNameForFile(file);
-				if (packageName != null) removedServicePackageNames.add(packageName);
-			}
-		}
-		List<IPackageReader> addedComponentPackageReaders = new ArrayList<>();
-		List<IPackageReader> addedServicePackageReaders = new ArrayList<>();
-		for (Entry<String, IPackageReader> entry : addedPackageReaders.entrySet())
-		{
-			if (IPackageReader.WEB_SERVICE.equals(entry.getValue().getPackageType()))
-			{
-				addedServicePackageReaders.add(entry.getValue());
-			}
-			else
-			{
-				// for now always fall back to a component
-				addedComponentPackageReaders.add(entry.getValue());
-			}
+		for (String projectName : changedProjects.keySet())
+
+		{//TODO this call triggers an eclipse job - maybe move the for inside updateFromResourceChangeListener
+			baseNGPackageManager.updateFromResourceChangeListener(projectName, changedProjects.get(projectName).getLeft(),
+				changedProjects.get(projectName).getRight());
 		}
 
-		return new Pair<Boolean, Boolean>(Boolean.valueOf(removedComponentPackageNames.size() > 0 || addedComponentPackageReaders.size() > 0),
-			Boolean.valueOf(removedServicePackageNames.size() > 0 || addedServicePackageReaders.size() > 0));
-	}
-
-	protected void checkForChangesInNGPackageProjects(ServoyProject activeProject, IResourceDelta[] affectedChildren,
-		ValueReference<Boolean> refreshAllNGPackageProjects, ValueReference<Boolean> clearReferencedProjectsCache,
-		final List<IProject> newNGPackageProjectsToLoad, final List<IProject> oldNGPackageProjectsToUnload)
-	{
-		if (activeProject != null)
-		{
-			for (IResourceDelta rd : affectedChildren)
-			{
-				if (rd.getFlags() == IResourceDelta.MARKERS) continue;
-				IResource resource = rd.getResource();
-
-				// check for changes in the list of projects that the active solution references
-				IResourceDelta[] affectedProjectChildren = rd.getAffectedChildren(IResourceDelta.CHANGED, IResource.HIDDEN);
-				for (IResourceDelta firstLevelChanges : affectedProjectChildren)
-				{
-					if (".project".equals(firstLevelChanges.getResource().getName()))
-					{
-						refreshAllNGPackageProjects.value = Boolean.TRUE; // this could be refined further to check new vs. old (that we have cached) and only refresh what is needed, not all ng package projects
-						clearReferencedProjectsCache.value = Boolean.TRUE;
-						break;
-					}
-				}
-				if (refreshAllNGPackageProjects.value.booleanValue()) break;
-				// - we need to know if it's a project that has been referenced before but was missing and now it is available and of type ngPackage
-				// or
-				// - if it was previously available and loaded as an ngPackage project, we must check to see if manifest or .spec files changed or if the project is no longer available
-				boolean wasPreviouslyLoaded = false;
-				for (ServoyNGPackageProject p : baseNGPackageManager.getReferencedNGPackageProjectsInternal())
-				{
-					if (resource.equals(p.getProject()))
-					{
-						wasPreviouslyLoaded = true;
-						break;
-					}
-				}
-
-				final IProject p = resource.getProject(); // kind of a cast cause it's already a project on this branch
-				boolean isValidNGPackageProject;
-				try
-				{
-					isValidNGPackageProject = (p.exists() && p.isOpen() && p.hasNature(ServoyNGPackageProject.NATURE_ID));
-				}
-				catch (CoreException e1)
-				{
-					ServoyLog.logError(e1);
-					isValidNGPackageProject = false;
-				}
-				if (wasPreviouslyLoaded)
-				{
-					if (isValidNGPackageProject)
-					{
-						// check for changes in spec or manifest files
-						try
-						{
-							rd.accept(new IResourceDeltaVisitor()
-							{
-								boolean continueSearching = true;
-
-								@Override
-								public boolean visit(IResourceDelta delta) throws CoreException
-								{
-									if (continueSearching)
-									{
-										if (delta.getFlags() == IResourceDelta.MARKERS) return false;
-
-										if (delta.getResource().getName().toLowerCase().endsWith(".spec") ||
-											delta.getResource().getName().equalsIgnoreCase("MANIFEST.MF"))
-										{
-											oldNGPackageProjectsToUnload.add(p);
-											newNGPackageProjectsToLoad.add(p);
-											continueSearching = false;
-										}
-									}
-									return continueSearching;
-								}
-							});
-						}
-						catch (CoreException e)
-						{
-							ServoyLog.logError(e);
-							oldNGPackageProjectsToUnload.add(p);
-							newNGPackageProjectsToLoad.add(p);
-						}
-					}
-					else
-					{
-						// that means it's no longer available although it was loaded before; it needs to be unloaded
-						clearReferencedProjectsCache.value = Boolean.TRUE;
-						oldNGPackageProjectsToUnload.add(p);
-					}
-				}
-				else
-				{
-					if (isValidNGPackageProject)
-					{
-						// a new referenced ngPackage project is available; load it
-						clearReferencedProjectsCache.value = Boolean.TRUE;
-						if (p.getReferencingProjects().length > 0) newNGPackageProjectsToLoad.add(p);
-					} // else just some other type of referenced project changed; ignore
-				}
-			}
-		}
-	}
-
-	private boolean shouldRefresh(IProject resourceProject, IResourceDelta[] affectedChildren, String parentDir)
-	{
-		for (IResourceDelta rd : affectedChildren)
-		{
-			if (rd.getFlags() == IResourceDelta.MARKERS) continue;
-			IResource resource = rd.getResource();
-			if (resourceProject.equals(resource.getProject()))
-			{
-				IPath path = resource.getProjectRelativePath();
-				if (path.segmentCount() > 1)
-				{
-					if (path.segment(0).equals(parentDir))
-					{
-						if (path.segmentCount() == 2 && resource instanceof IFile)
-						{
-							// a zip is changed refresh
-							return true;
-						}
-						else if (path.lastSegment().equalsIgnoreCase("MANIFEST.MF") || path.lastSegment().toLowerCase().endsWith(".spec"))
-						{
-							return true;
-						}
-					}
-				}
-				if (path.segmentCount() == 0 || (path.segmentCount() > 0 && path.segment(0).equals(parentDir)))
-				{
-					if (shouldRefresh(resourceProject, rd.getAffectedChildren(), parentDir))
-					{
-						return true;
-					}
-				}
-			}
-		}
-		return false;
 	}
 
 }
