@@ -1,39 +1,42 @@
-
-.list-packages md-divider {
-    margin-top: 10px;
-    margin-bottom: 10px; 
+/* Content should take full height of the page */
+.wpm {
+    display: table;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(255,255,255);
 }
 
-.list-packages md-list-item > p,
-.list-packages md-list-item > .md-list-item-inner > p,
-.list-packages md-list-item .md-list-item-inner > p,
-.list-packages md-list-item .md-list-item-inner > .md-list-item-inner > p {
-    -webkit-user-select: none;
-    /* Chrome all / Safari all */
-    -moz-user-select: none;
-    /* Firefox all */
-    -ms-user-select: none;
-    /* IE 10+ */
-    user-select: none;
-    /* Likely future */ 
- }
-.list-packages > md-list-item {
-  height: 50px;
- }
-.list-packages .secondary-button-padding p {
-    padding-right: 100px; 
+.wpm-header,
+.wpm-content {
+  display: table-row;
+  height: 0;
 }
 
-.title {
+.wpm-header > md-content {
   padding-left: 10px;
   padding-right: 10px;
 }
 
-.title,
+.wpm-content {
+  height: auto;
+}
+
+.wpm-header md-content,
 md-tabs-canvas,
 md-tabs .md-tab {
   background-color: #000;
   color: #fff;
+}
+
+/*
+.md-padding {
+  padding: 8px;
+}
+*/
+/* Tab's content */
+md-content {
+  background-color: rgb(255,255,255);
+  box-sizing: border-box;
 }
 
 md-tabs.md-default-theme md-ink-bar, md-tabs md-ink-bar {
@@ -53,23 +56,24 @@ md-tabs .md-tab.md-focused md-icon {
   color: #e4844a;
 }
 
-md-content {
-  background-color: rgb(255,255,255);
-}
-
-.svy-primary.md-button.md-raised:not([disabled]) {
-    color: #fff;
-    background-color: #e4844a;
-}
-
-.svy-primary.md-button.md-raised:not([disabled]):hover {
-    background-color: #e4844a;
-}
-
+/* Table */
 .table-package {
   width: 100%;
 }
-._md-select-value {min-height: 0px;}
+
+/* Table header */
+.md-subheader.md-default-theme, .md-subheader {
+    background-color: rgb(248,248,248);
+    color: rgba(0,0,0,0.55);
+}
+
+.table-package th,
+.table-package td {
+  padding-right: 2px;
+  padding-left: 2px;
+}
+
+
 .table-package .md-avatar {
     margin-top: 8px;
     margin-bottom: 8px;
@@ -96,6 +100,8 @@ md-content {
     -ms-flex-align: center;
     align-items: center;
     min-height: 48px;
+    margin-left: 5px;
+    margin-right: 5px;
     height: auto;
 }
 
@@ -114,6 +120,68 @@ md-content {
   float: right;
 }
 
+.column-release .select {
+  flex-grow: 1;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.column-release .btn-group {
+  min-width: 220px;
+  flex-grow: 1;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+/* list of items */
+.list-packages md-divider {
+    margin-top: 10px;
+    margin-bottom: 10px; 
+}
+
+.list-packages md-list-item > p,
+.list-packages md-list-item > .md-list-item-inner > p,
+.list-packages md-list-item .md-list-item-inner > p,
+.list-packages md-list-item .md-list-item-inner > .md-list-item-inner > p {
+    -webkit-user-select: none;
+    /* Chrome all / Safari all */
+    -moz-user-select: none;
+    /* Firefox all */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Likely future */ 
+ }
+.list-packages > md-list-item {
+  height: 50px;
+ }
+.list-packages .secondary-button-padding p {
+    padding-right: 100px; 
+}
+
+/* Style buttons */
+.svy-primary.md-button.md-raised:not([disabled]) {
+    color: #fff;
+    background-color: #e4844a;
+}
+
+.svy-primary.md-button.md-raised:not([disabled]):hover {
+    background-color: #e4844a;
+}
+
+/* Select */
+._md-select-value {
+  min-height: 0px;
+}
+
+/* General */
 .success {
   color: green;
 }

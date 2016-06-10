@@ -37,15 +37,13 @@
   
 </head>
 <body ng-app="app" ng-cloak>
-<!--
-    Your HTML content here
-  -->  
-  <md-content class="title">
+<div class="wpm"> 
+  <div class="wpm-header">
+    <md-content>
           <h1 class="">Servoy Package Manager</h1>
-  </md-content>
-
-  <div ng-cloak>
-  <md-content ng-controller="appPackages">
+    </md-content>
+  </div>
+  <div class="wpm-content" ng-controller="appPackages" ng-cloak>
   	<md-content layout="column" layout-align="space-around center center" ng-if="isLoading" style="min-height: 150px;">
   		<md-content>Loading ...</md-content>
   		<md-progress-circular md-mode="indeterminate"></md-progress-circular>
@@ -73,7 +71,7 @@
       </md-tab>
 -->      
     </md-tabs>
-  </md-content>
+  </div>
 </div>
 </body>
 </html>

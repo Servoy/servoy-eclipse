@@ -90,15 +90,25 @@ angular.module('app', ['ngMaterial'])
 		    } else if($scope.packages[index].installing) {
 			  return "Installing ...";		      
 		    } else {
-		      return "Add to solution";
+		      return "Install in solution";
+		    }
+		  }
+
+		  $scope.getInstallTooltip = function(index) {
+		    if ($scope.packages[index].installed) { 
+		      return $scope.packages[index].installing ? "Upgrading the web package..." : "Upgrade the web package to the selected release version";
+		    } else if($scope.packages[index].installing) {
+			  return "Installing the web package ...";		      
+		    } else {
+		      return "Install the web package in the 'Install solution'";
 		    }
 		  }
 
 		  $scope.getRemoveText = function(index) {
 			  if($scope.packages[index].removing) {
-				  return "Removing ...";		      
+				  return "Unistalling ...";		      
 			  } else {
-			      return "Remove";
+			      return "Uninstall";
 			  }
 		  }		  
 		  

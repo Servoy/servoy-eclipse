@@ -1,10 +1,10 @@
 <table style="width:100%" class="table-package">
   <tr>
     <th><md-subheader class="md-no-sticky">Package</md-subheader></th>
-    <th><md-subheader class="md-no-sticky">Release</md-subheader></th>
+    <th><md-subheader class="md-no-sticky">Released versions</md-subheader></th>
+    <th><md-subheader class="md-no-sticky">Install solution</md-subheader></th>  
     <th><md-subheader class="md-no-sticky">Installed</md-subheader></th>  
-    <th><md-subheader class="md-no-sticky">Solution</md-subheader></th>  
-    <th><md-subheader class="md-no-sticky">Demo</md-subheader></th>
+    <th><md-subheader class="md-no-sticky">References</md-subheader></th>
   </tr>
   <tr ng-repeat="package in packages">
     <td>
@@ -15,17 +15,23 @@
     </td>
     <td>
       <div class="column-release">
-        <md-select ng-model="package.selected" style="width: 200px;" md-selected-text="getSelectedRelease($index)">
-          <md-option ng-value="release.version" ng-repeat="release in package.releases">{{release.version}}</md-option>
-        </md-select>
-        <md-button class="md-raised" ng-click="install(package, $index)" ng-bind="getInstallText($index)" ng-disabled="!installEnabled($index)"></md-button>
-        <md-button class="md-raised" ng-click="uninstall(package, $index)" ng-if="package.installed" ng-bind="getRemoveText($index)" ng-disabled="!removeEnabled($index)"></md-button>
-      </div>
-    </td>
-    <td>
-      <div class="align-center"> 
-        <p> {{package.installed}} </p>
-        <!--<i class="fa fa-check-circle-o release-action success" ng-if="package.installed"></i>-->
+        <div class= "select"> 
+          <md-select ng-model="package.selected" style="width: 200px;" md-selected-text="getSelectedRelease($index)">
+            <md-option ng-value="release.version" ng-repeat="release in package.releases">{{release.version}}</md-option>
+          </md-select>
+        </div>
+        <div class="btn-group">
+          <md-button class="md-raised" ng-click="install(package, $index)" ng-bind="getInstallText($index)" ng-disabled="!installEnabled($index)">
+            <md-tooltip md-direction="bottom">
+              {{getInstallTooltip($index)}}
+            </md-tooltip>
+          </md-button>
+          <md-button class="md-raised" ng-click="uninstall(package, $index)" ng-if="package.installed" ng-bind="getRemoveText($index)" ng-disabled="!removeEnabled($index)">
+            <md-tooltip md-direction="bottom">
+              Uninstall the web package from the 'Install solution'
+            </md-tooltip>
+          </md-button>
+        </div>
       </div>
     </td>
     <td>
@@ -36,11 +42,25 @@
         <!--<i class="fa fa-check-circle-o release-action success" ng-if="package.installed"></i>-->
       </div>
     </td>
+    <td>
+      <div class="align-center"> 
+        <p> {{package.installed}} </p>
+        <!--<i class="fa fa-check-circle-o release-action success" ng-if="package.installed"></i>-->
+      </div>
+    </td>
     <td>    
       <div class="align-center">  
         <md-button class="md-raised svy-primary" ng-disabled="!package.sampleUrl" ng-click="showUrl(package.sampleUrl)">View Demo</md-button>
-        <md-button class="md-icon-button fa fa-book"  ng-disabled="!package.wikiUrl" ng-click="showUrl(package.wikiUrl)"></md-button>
-        <md-button class="md-icon-button fa fa-github"  ng-disabled="!package.sourceUrl" ng-click="showUrl(package.sourceUrl)"></md-button>
+        <md-button class="md-icon-button fa fa-book"  ng-disabled="!package.wikiUrl" ng-click="showUrl(package.wikiUrl)">
+          <md-tooltip md-direction="bottom">
+            Documentation
+          </md-tooltip>
+        </md-button>
+        <md-button class="md-icon-button fa fa-github"  ng-disabled="!package.sourceUrl" ng-click="showUrl(package.sourceUrl)">
+          <md-tooltip md-direction="bottom">
+            Source code
+          </md-tooltip>
+        </md-button>
       </div>
     </td> 
   </tr>
