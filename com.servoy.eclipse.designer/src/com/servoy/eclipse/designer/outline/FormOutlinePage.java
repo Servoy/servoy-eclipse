@@ -233,6 +233,11 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 								dropTargetComponent = targetLayoutContainer;
 								targetLayoutContainer = targetLayoutContainer.getParent();
 							}
+						}
+
+						if (inputPersist instanceof WebComponent || inputPersist instanceof LayoutContainer)
+						{
+							// check cycle drop
 							if (dragObjects != null)
 							{
 								boolean doAllow = true;
@@ -254,6 +259,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 								}
 							}
 						}
+
 
 						if (targetLayoutContainer instanceof LayoutContainer)
 						{
@@ -309,8 +315,31 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 						}
 						else if (targetLayoutContainer instanceof Form)
 						{
-							dropTarget = targetLayoutContainer;
-							return true;
+							Boolean doAllow = null;
+							if (dragObjects != null)
+							{
+								for (IPersist p : dragObjects)
+								{
+									if (p instanceof LayoutContainer)
+									{
+										PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+											((LayoutContainer)p).getPackageName());
+										WebLayoutSpecification spec = pkg.getSpecification(((LayoutContainer)p).getName());
+										doAllow = new Boolean(spec.isTopContainer());
+									}
+									else
+									{
+										doAllow = Boolean.FALSE;
+									}
+									if (doAllow.booleanValue()) continue;
+								}
+							}
+
+							if (doAllow != null && doAllow.booleanValue())
+							{
+								dropTarget = targetLayoutContainer;
+								return true;
+							}
 						}
 					}
 					return false;
