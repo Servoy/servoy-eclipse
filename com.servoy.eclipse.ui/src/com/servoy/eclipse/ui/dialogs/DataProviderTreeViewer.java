@@ -264,7 +264,8 @@ public class DataProviderTreeViewer extends FilteredTreeViewer
 					}
 
 					// form variables
-					if (options.includeFormVariables && persistContext != null && persistContext.getContext().getAncestor(IRepository.FORMS) != null)
+					if (options.includeFormVariables && persistContext != null && persistContext.getContext().getAncestor(IRepository.FORMS) != null &&
+						!Utils.getAsBoolean(((Form)persistContext.getContext().getAncestor(IRepository.FORMS)).getReferenceForm()))
 					{
 						input.add(new DataProviderNodeWrapper(FORM_VARIABLES, (RelationList)null));
 					}
