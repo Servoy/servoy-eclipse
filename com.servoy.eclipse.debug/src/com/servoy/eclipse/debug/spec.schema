@@ -47,7 +47,12 @@
 		},
 		"contains": 
 		{
-			"description": "Array of allowed elements this layout cand contain",
+			"description": "Array of allowed elements this layout can contain",
+			"type": "array"
+		},
+		"excludes": 
+		{
+			"description": "Array of elements this layout cannot contain",
 			"type": "array"
 		},
 		"topContainer": 
