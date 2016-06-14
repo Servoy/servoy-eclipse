@@ -326,21 +326,24 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	@Override
 	public void refreshPersists(final List<IPersist> persists)
 	{
-		final Form form = editorPart.getForm();
-		FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(form);
-		final String componentsJSON = designerWebsocketSession.getComponentsJSON(fs, filterByParent(persists, form));
-		CurrentWindow.runForWindow(new WebsocketSessionWindows(designerWebsocketSession), new Runnable()
+		if (persists != null)
 		{
-			@Override
-			public void run()
+			final Form form = editorPart.getForm();
+			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(form);
+			final String componentsJSON = designerWebsocketSession.getComponentsJSON(fs, filterByParent(persists, form));
+			CurrentWindow.runForWindow(new WebsocketSessionWindows(designerWebsocketSession), new Runnable()
 			{
-				designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateFormData", new Object[] { componentsJSON });
-				if (persists.contains(form)) designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateForm",
-					new Object[] { form.getUUID(), form.getSize().width, form.getSize().height });
-				designerWebsocketSession.valueChanged();
-			}
-		});
-
+				@Override
+				public void run()
+				{
+					designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateFormData",
+						new Object[] { componentsJSON });
+					if (persists.contains(form)) designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateForm",
+						new Object[] { form.getUUID(), form.getSize().width, form.getSize().height });
+					designerWebsocketSession.valueChanged();
+				}
+			});
+		}
 		// TODO new impl
 //		IWindow window = null;
 //		final INGClientWebsocketSession editorContentWebsocketSession = (INGClientWebsocketSession)WebsocketSessionManager.getSession(
