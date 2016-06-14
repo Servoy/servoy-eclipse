@@ -322,10 +322,14 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 								{
 									if (p instanceof LayoutContainer)
 									{
+										WebLayoutSpecification spec = null;
 										PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
 											((LayoutContainer)p).getPackageName());
-										WebLayoutSpecification spec = pkg.getSpecification(((LayoutContainer)p).getName());
-										doAllow = new Boolean(spec.isTopContainer());
+										if (pkg != null)
+										{
+											spec = pkg.getSpecification(((LayoutContainer)p).getName());
+										}
+										doAllow = new Boolean(spec != null && spec.isTopContainer());
 									}
 									else
 									{
