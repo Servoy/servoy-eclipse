@@ -159,9 +159,6 @@ body {
 	overflow: auto;
 	background-image: url('../images/light-raster-background.png');
 	vertical-align: top;
-}
-
-.content-area.non-full {
 	padding-top: 20px;
 	padding-left: 20px
 }

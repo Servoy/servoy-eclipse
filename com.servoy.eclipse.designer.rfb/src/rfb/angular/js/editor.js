@@ -282,14 +282,9 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 						padding: "3px"
 					};
 				}
-				var xOffset = 0;
-				var yOffset = 0;
+				var xOffset = 20;
+				var yOffset = 20;
 
-				//TODO refactor out this 20px addition
-				if (!$scope.isContentSizeFull()) {
-					xOffset += 20;
-					yOffset += 20;
-				}
 				var style = {
 					opacity: 0.7,
 					padding: "3px",
@@ -669,7 +664,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				};
 			}
 			$scope.isContentSizeFull = function() {
-				return ($scope.contentStyle.paddingRight == "80px") && ($scope.contentStyle.bottom == "0px");
+				return ($scope.contentStyle.right == "20px") && ($scope.contentStyle.bottom == "20px");
 			}
 
 			$scope.setCursorStyle = function(cursor) {
@@ -733,15 +728,16 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 								$scope.contentStyle.h - 20 > sizes.height)) {
 							$scope.contentStyle.h = sizes.height
 						}
-						if ($scope.isContentSizeFull()) {
-							if (contentDiv.clientWidth < sizes.width && (!$scope.contentStyle.w || $scope.contentStyle.w + 20 < sizes.width ||
-									$scope.contentStyle.w - 20 > sizes.width)) {
-								$scope.contentStyle.w = sizes.width
-								if (!$scope.isAbsoluteFormLayout()) {
-									$scope.contentStyle.width = (sizes.width + 20) + "px"
-								}
-							}
-						}
+						// not needed ?
+//						if ($scope.isContentSizeFull()) {
+//							if (contentDiv.clientWidth < sizes.width && (!$scope.contentStyle.w || $scope.contentStyle.w + 20 < sizes.width ||
+//									$scope.contentStyle.w - 20 > sizes.width)) {
+//								$scope.contentStyle.w = sizes.width
+//								if (!$scope.isAbsoluteFormLayout()) {
+//									$scope.contentStyle.width = (sizes.width + 20) + "px"
+//								}
+//							}
+//						}
 					}
 					adjustGlassPaneSize();
 				}
@@ -796,7 +792,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					var contentDiv = $($scope.contentDocument).find('.svy-form')[0];
 					if (contentDiv) {
 					        if (contentDiv.offsetHeight > 0 ){
+					            if ($scope.isContentSizeFull()) 
+					            {	
 					            	adjustIFrameSize();
+					            }
         						$scope.glasspaneStyle.width = (contentDiv.offsetWidth +20) + 'px';
         						$scope.glasspaneStyle.height = (contentDiv.offsetHeight + 20) + 'px';
 					        }
