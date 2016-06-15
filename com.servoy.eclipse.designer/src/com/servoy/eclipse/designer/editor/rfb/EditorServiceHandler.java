@@ -229,6 +229,7 @@ public class EditorServiceHandler implements IServerService
 
 		configuredHandlers.put("createGroup", new GroupCommand(editorPart, selectionProvider));
 		configuredHandlers.put("clearGroup", new UngroupCommand(editorPart, selectionProvider));
+		configuredHandlers.put("getAllowedChildren", new LayoutsHandler());
 	}
 
 	@Override

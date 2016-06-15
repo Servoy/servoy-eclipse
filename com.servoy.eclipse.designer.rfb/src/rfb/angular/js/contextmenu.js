@@ -2,7 +2,7 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 	return {
 		restrict: 'E',
 		transclude: true,
-		controller: function($scope, $element, $attrs,$contextmenu) {
+		controller: function($scope, $element, $attrs,$contextmenu, $allowedChildren) {
 
 			function findComponentDisplayName(arrayOfComponents, componentName) {
 				if(arrayOfComponents && arrayOfComponents.length) {
@@ -61,12 +61,12 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 				var i;
 				for (i = 0; i < $scope.actions.length; i++){
 					if ($scope.actions[i].text === "Add") {
-						var allowedChildren = selection.getAttribute("svy-allowed-children");
+						var allowedChildren = $allowedChildren.get(selection.getAttribute("svy-layoutname"));
 						var types = selection.getAttribute("svy-types");
 						if (allowedChildren || types){
 							$scope.actions[i].getItemClass = function() { return "dropdown-submenu"};
 							$scope.actions[i].subMenu = [];
-							var typesArray = allowedChildren ? allowedChildren.split(",") : [];
+							var typesArray = allowedChildren ? allowedChildren : [];
 
 							var typesStartIdx = typesArray.length; 
 							if(types) {

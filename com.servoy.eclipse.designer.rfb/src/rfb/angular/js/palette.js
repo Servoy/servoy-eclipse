@@ -109,7 +109,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 								angularElement.css($scope.convertToContentPoint(angularCss));
 							}
 
-							var canDrop = utils.getDropNode(type, topContainer, layoutName, ev, componentName);
+							var canDrop = utils.getDropNode(type, topContainer, layoutName ? packageName + "." + layoutName : layoutName, ev, componentName);
 							if (!canDrop.dropAllowed) {
 								$scope.glasspane.style.cursor = "not-allowed";
 							} else $scope.glasspane.style.cursor = "pointer";
@@ -255,7 +255,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 							}
 							$document[0].body.removeChild(dragClone[0]);
 							
-							var canDrop = utils.getDropNode(type, topContainer, layoutName, ev, componentName);
+							var canDrop = utils.getDropNode(type, topContainer, layoutName ? packageName + "." + layoutName : layoutName, ev, componentName);
 							utils.setDraggingFromPallete(null);
 							
 							if (angularElement) {

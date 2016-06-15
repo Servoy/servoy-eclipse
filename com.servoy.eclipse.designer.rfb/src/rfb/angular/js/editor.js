@@ -14,6 +14,17 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			plugins[plugins.length] = plugin;
 		}
 	}
+}).factory("$allowedChildren", function() {
+	var allowedChildren = {};	
+	return {
+		get: function(layoutName) {
+			return allowedChildren[layoutName];
+		},
+		set: function(map)
+		{
+			allowedChildren = map;
+		}
+	}
 }).value("EDITOR_EVENTS", {
 	SELECTION_CHANGED: "SELECTION_CHANGED",
 	SELECTION_MOVED: "SELECTION_MOVED",
@@ -35,7 +46,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	GHOST_TYPE_INVISIBLE: "invisible",
 	GHOST_TYPE_GROUP: "group"
 }).directive("editor", function($window, $pluginRegistry, $rootScope, EDITOR_EVENTS, EDITOR_CONSTANTS, $timeout,
-	$editorService, $webSocket, $q, $interval) {
+	$editorService, $webSocket, $q, $interval,$allowedChildren) {
 	return {
 		restrict: 'E',
 		transclude: true,
@@ -811,6 +822,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 
 				if (!$scope.editorInitialized)
 					$pluginRegistry.registerEditor($scope);
+				
 
 				$scope.contentDocument = contentDocument;
 				var htmlTag = $scope.contentDocument.getElementsByTagName("html")[0];
@@ -873,6 +885,12 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					}, 500);
 				}
 
+				var promise = $editorService.loadAllowedChildren();
+				promise.then(function(result) {
+					var allowedChildren = JSON.parse(result);
+					$allowedChildren.set(allowedChildren);
+					$scope.getEditorContentRootScope().allowedChildren = allowedChildren;
+				});
 				$scope.editorInitialized = true;
 			});
 
@@ -988,7 +1006,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	};
 
 }).factory("$editorService", function($rootScope, $webSocket, $log, $q, $window, EDITOR_EVENTS, $rootScope, $timeout,
-	$selectionUtils) {
+	$selectionUtils, $allowedChildren) {
 	var realConsole = $window.console;
 	$window.console = {
 		log: function(msg) {
@@ -1274,6 +1292,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		showImageInOverlayDiv: function(url) {
 			editorScope.previewOverlayImgURL = url;
 			editorScope.displayOverlay = true;
+		},
+		
+		loadAllowedChildren: function()
+		{
+			return wsSession.callService('formeditor', 'getAllowedChildren');
 		}
 
 		// add more service methods here
