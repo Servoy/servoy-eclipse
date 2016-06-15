@@ -88,6 +88,7 @@ import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ExpandBarWidthAware;
 import com.servoy.eclipse.ui.util.ImmutableObjectObservable;
 import com.servoy.eclipse.ui.util.WrappingControl;
+import com.servoy.eclipse.ui.util.XLControl;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IServerConfigListener;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -377,35 +378,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 
 		advancedSettingsComposite = new Composite(advancedSettingsCollapser, SWT.NONE);
 		collapsableItem.setImage(Activator.getDefault().loadImageFromBundle("outline_co.gif"));
-
-		advancedSettingsCollapser.addExpandListener(new ExpandListener()
-		{
-
-			public void itemExpanded(ExpandEvent e)
-			{
-//				((GridData)separator2.getLayoutData()).exclude = true;
-				collapsableItem.setText("Hide advanced server settings");
-				relayout(getDisplay(parent), true);
-			}
-
-			public void itemCollapsed(ExpandEvent e)
-			{
-//				((GridData)separator2.getLayoutData()).exclude = false;
-				collapsableItem.setText("Show advanced server settings");
-				relayout(getDisplay(parent), true);
-			}
-
-		});
-
-//		// partial fix for a Linux (Ubuntu) bug (that I think has to do with ExpandBar's implementation)
-//		advancedSettingsComposite.addControlListener(new ControlAdapter()
-//		{
-//			@Override
-//			public void controlResized(ControlEvent e)
-//			{
-//				relayout(getDisplay(parent), false);
-//			}
-//		});
+		collapsableItem.setControl(advancedSettingsComposite);
 
 		Label urlLabel;
 		urlLabel = new Label(advancedSettingsComposite, SWT.LEFT);
@@ -543,7 +516,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			public void widgetDefaultSelected(SelectionEvent e)
 			{
 				updateTestConnectionButton();
-				relayout(getDisplay(parent), true);
+				relayoutAsync(getDisplay(parent));
 			}
 
 		});
@@ -668,10 +641,13 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			}
 		});
 
-		FormText wikiLink = new FormText(bottomComposite, SWT.NONE);
+		XLControl<FormText> wikiLinkWrapper = new XLControl<FormText>(bottomComposite, SWT.NONE);
+		wikiLinkWrapper.wrapControl(new FormText(wikiLinkWrapper, SWT.NONE));
+		wikiLinkWrapper.setExtraWidth(10); // workaround for a SWT-native bug on Mac where the FormText reports less preferred width then it actually needs and then when painting it wraps
+		FormText wikiLink = wikiLinkWrapper.getWrappedControl();
 		wikiLink.setHyperlinkSettings(hyperlinkSettings);
 		wikiLink.setText(
-			"<form><p><a href='https://wiki.servoy.com/display/public/DOCS/Database+Connections'>See wiki page for more information...</a></p></form>", true,
+			"<form><p>See <a href='https://wiki.servoy.com/display/public/DOCS/Database+Connections'>wiki page</a> for more information...</p></form>", true,
 			true);
 		wikiLink.addHyperlinkListener(hyperLinkNativeOpenHandler);
 
@@ -837,16 +813,33 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		gridLayout.horizontalSpacing = 5;
 		bottomComposite.setLayout(gridLayout);
 
-		wikiLink.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
+		wikiLinkWrapper.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
 
 		initComboData();
 		initDataBindings();
 		updateSaveButton();
 
 		collapsableItem.setHeight(advancedSettingsComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
-		collapsableItem.setControl(advancedSettingsComposite);
 
 		myScrolledComposite.setMinSize(mainComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+		final RelayoutWhenExpandBarPreferredHeightChanges r = new RelayoutWhenExpandBarPreferredHeightChanges();
+		advancedSettingsCollapser.addExpandListener(new ExpandListener()
+		{
+
+			public void itemExpanded(ExpandEvent e)
+			{
+				collapsableItem.setText("Hide advanced server settings");
+				runLaterInDisplayThread(getDisplay(parent), 0, r);
+			}
+
+			public void itemCollapsed(ExpandEvent e)
+			{
+				collapsableItem.setText("Show advanced server settings");
+				runLaterInDisplayThread(getDisplay(parent), 0, r);
+			}
+
+		});
 	}
 
 	/**
@@ -867,19 +860,75 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		return display;
 	}
 
-	protected void relayout(Display display, boolean async)
+	protected void relayoutAsync(Display display)
 	{
-		Runnable r = new Runnable()
+		runLaterInDisplayThread(display, 0, new Runnable()
 		{
 			public void run()
 			{
-				collapsableItem.setHeight(advancedSettingsComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
-				myScrolledComposite.setMinSize(mainComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-				parentControl.layout(true, true);
+				relayout();
 			}
-		};
-		if (async) display.asyncExec(r);
-		else r.run();
+		});
+	}
+
+	protected void runLaterInDisplayThread(Display display, int afterMillis, Runnable r)
+	{
+		if (afterMillis <= 0) display.asyncExec(r);
+		else display.timerExec(afterMillis, r);
+	}
+
+	/**
+	 * This would not normally be needed but there is a bug in Ubuntu native SWT implementation that once the expand bar expands an item,
+	 * the expand bar still computes default size ignoring the extended size of the composite - but at some point in time it will see the newly expanded item contents
+	 * as well in native code and compute preferred size correctly. But I didn't find a trigger for when that happens - tried show/hide event of item contents, resize (which partially worked but only when
+	 * it needed scrollbars somewhere in the parent hierarchy), tried wrapping the contents of the item inside a wrapper composite and manually showing and hiding that to generare resizes but with no luck.<br/><br/>
+	 *
+	 * So now we simply wait for the native GTK-SWT code to be aware of the new contents after an expand/collapse and then we update the layout of the editor.<br/><br/>
+	 *
+	 * If it weren't for that bug, a simple asyncExec with relayout on expand/collapse would have been enough (it worked like that on Windows).
+	 */
+	protected class RelayoutWhenExpandBarPreferredHeightChanges implements Runnable
+	{
+
+		protected final static int MAX_DELAYED_ATTEMPTS = 100;
+		protected final static int WAIT_TIME_BETWEEN_ATTEMPTS_MS = 50;
+
+		protected int oldMainCompositePreferredHeight;
+		protected int attemptNo = 0;
+
+		/**
+		 * See class description.
+		 */
+		public RelayoutWhenExpandBarPreferredHeightChanges()
+		{
+			oldMainCompositePreferredHeight = mainComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+		}
+
+		@Override
+		public void run()
+		{
+			int newPreferredHeight = mainComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+			if ((newPreferredHeight != oldMainCompositePreferredHeight) || (attemptNo == MAX_DELAYED_ATTEMPTS))
+			{
+				oldMainCompositePreferredHeight = newPreferredHeight;
+				attemptNo = 0;
+				relayout();
+			}
+			else
+			{
+				attemptNo += 1;
+				// wait until it changes preferred size to refresh layout
+				runLaterInDisplayThread(getDisplay(parentControl), WAIT_TIME_BETWEEN_ATTEMPTS_MS, this);
+			}
+		}
+
+	}
+
+	protected void relayout()
+	{
+		collapsableItem.setHeight(advancedSettingsComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
+		myScrolledComposite.setMinSize(mainComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		parentControl.layout(true, true);
 	}
 
 	// declare some grid-datas creators to be reused per column for easier tuning

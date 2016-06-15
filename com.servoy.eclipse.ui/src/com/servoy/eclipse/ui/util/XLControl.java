@@ -23,27 +23,35 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 /**
- * An wrapper around a control that can wrap content such as label; it makes the child not have a preferred width, wrapping to whatever width the layout gives it.<br/>
- * It is useful when you need labels or other controls with large text not to expand a layout when using in a ScrolledComposite - but wrap according to the other existing components in the layout instead.
+ * An wrapper around a control that will always report extra-width and extra-height as preferred size (so for computeSize(SWT.DEFAULT, SWT.DEFAULT, ...)).<br/><br/>
+ *
+ * Useful if you want controls to end up occupying more space then they need in some layouts. Or for working around SWT native integration bugs that report one size but then they wrap content
+ * when being given that size.
  *
  * @author acostescu
  */
-public class WrappingControl<CT extends Control> extends CompositeWithCalculatedPreferredWidth<CT>
+public class XLControl<CT extends Control> extends CompositeWithCalculatedPreferredWidth<CT>
 {
 
-	protected int minWidth = 0;
+	protected int extraWidth = 0;
+	protected int extraHeight = 0;
 
 	/**
 	 * The caller Should create the (child) wrapped control and call {@link #wrapControl(Control)} with it.
 	 */
-	public WrappingControl(Composite parent, int style)
+	public XLControl(Composite parent, int style)
 	{
 		super(parent, style);
 	}
 
-	public void setMinWidth(int minWidth)
+	public void setExtraWidth(int extraWidth)
 	{
-		this.minWidth = minWidth;
+		this.extraWidth = extraWidth;
+	}
+
+	public void setExtraHeight(int extraHeight)
+	{
+		this.extraHeight = extraHeight;
 	}
 
 	@Override
@@ -55,7 +63,8 @@ public class WrappingControl<CT extends Control> extends CompositeWithCalculated
 	@Override
 	protected Point adjustComputedPreferredSize(CT wrappedControl, boolean changed)
 	{
-		return new Point(minWidth, wrappedControl.computeSize(minWidth > 0 ? minWidth : SWT.DEFAULT, SWT.DEFAULT, changed).y); // workaround to make a label inside a ScrolledComposite with setExpandHorizontal(true) be able to wrap to the width of the other components in that composite
+		Point normalPreferred = wrappedControl.computeSize(SWT.DEFAULT, SWT.DEFAULT, changed);
+		return new Point(normalPreferred.x + extraWidth, normalPreferred.y + extraHeight); // workaround to make a label inside a ScrolledComposite with setExpandHorizontal(true) be able to wrap to the width of the other components in that composite
 	}
 
 }
