@@ -220,7 +220,7 @@ public class ExportPackageResourceAction extends Action implements ISelectionCha
 			SimpleUserNode node = it.next();
 			state = node.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || node.getType() == UserNodeType.SERVICES_NONPROJECT_PACKAGE ||
 				node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE || node.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE ||
-				node.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE;
+				node.getType() == UserNodeType.LAYOUT_NONPROJECT_PACKAGE || node.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE;
 		}
 		if (state)
 		{
