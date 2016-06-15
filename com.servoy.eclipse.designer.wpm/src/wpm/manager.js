@@ -6,7 +6,7 @@ angular.module('app', ['ngMaterial'])
     .iconSet('communication', 'img/icons/sets/communication-icons.svg', 24)
     .defaultIconSet('img/icons/sets/core-icons.svg', 24);
 })
-.controller('appPackages', function($scope,$window) {
+.controller('appPackages', function($scope,$window,$sce) {
     var loc = $window.location;
     var self = this;
 		  
@@ -73,7 +73,29 @@ angular.module('app', ['ngMaterial'])
     }
 
     $scope.tabSelected = 1;
-}).directive('packages',  function () {
+
+    $scope.getActiveSolution = function() {
+    	if ($scope.solutionList && $scope.solutionList.length) {
+    		return $scope.solutionList[$scope.solutionList.length -1];
+    	}
+    	return "";
+    }
+
+    // check if there are pending upgrades for the installed packages
+    $scope.getUpgradeCount = function(packageList) {
+      var count = 0;
+      try {
+	      for (var i = 0; i < packageList.length; i++) {
+	          var item = packageList[i];
+	          if (item.installed && item.installed < item.releases[0].version) {
+	            count++;
+	          }
+    	  }
+  	  } catch (e) {}
+      return count ? "(" + count +")" : "";
+    }
+
+}).directive('packages',  function ($sce) {
 	return {
 		restrict: 'E',
 		templateUrl: 'packages.html',
@@ -83,14 +105,26 @@ angular.module('app', ['ngMaterial'])
 			websocket: "=websocket"
 		},
 		link:function($scope, $element, $attrs) {
+
+		  $scope.selectedPackage;
 			
 		  $scope.getInstallText = function(index) {
 		    if ($scope.packages[index].installed) { 
 		      return $scope.packages[index].installing ? "Upgrading ..." : "Upgrade";
 		    } else if($scope.packages[index].installing) {
-			  return "Installing ...";		      
+			  return "Adding to Solution ...";		      
 		    } else {
-		      return "Install in solution";
+		      return "Add to Solution";
+		    }
+		  }
+
+		  $scope.getInstallClass = function(index) {
+		  	if ($scope.packages[index].installed) { 
+		      return $scope.packages[index].installing ? "fa fa-level-up" : "fa fa-level-up";
+		    } else if($scope.packages[index].installing) {
+			  return "fa fa-plus-square";		      
+		    } else {
+		      return "fa fa-plus-square";
 		    }
 		  }
 
@@ -98,21 +132,13 @@ angular.module('app', ['ngMaterial'])
 		    if ($scope.packages[index].installed) { 
 		      return $scope.packages[index].installing ? "Upgrading the web package..." : "Upgrade the web package to the selected release version";
 		    } else if($scope.packages[index].installing) {
-			  return "Installing the web package ...";		      
+			  return "Adding the web package...";		      
 		    } else {
-		      return "Install the web package in the 'Install solution'";
+		      return "Add the web package to solution " + $scope.packages[index].activeSolution;
 		    }
-		  }
-
-		  $scope.getRemoveText = function(index) {
-			  if($scope.packages[index].removing) {
-				  return "Unistalling ...";		      
-			  } else {
-			      return "Uninstall";
-			  }
-		  }		  
+		  }  
 		  
-		   $scope.getSelectedRelease = function(index) {
+		  $scope.getSelectedRelease = function(index) {
 			if (angular.isUndefined($scope.packages[index].selected)) {
 				$scope.packages[index].selected = $scope.packages[index].releases[0].version; 
 			}
@@ -140,17 +166,44 @@ angular.module('app', ['ngMaterial'])
 		    return $scope.packages[index].installed == $scope.packages[index].releases[0];
 		  }
 
+		  /* return true if install is available and there is no pending operation */
 		  $scope.installEnabled = function (index) {
-		    return !$scope.packages[index].installing && !$scope.packages[index].removing && (!$scope.packages[index].installed || (!$scope.isLatestRelease(index) && $scope.packages[index].selected > $scope.packages[index].installed ))
+		    return !$scope.isInstallingOrRemoving(index) && $scope.installAvailable(index);
 		  }
+
+		  /* return true if install or update is available */
+		  $scope.installAvailable = function (index) {
+		  	return !$scope.packages[index].installed || (!$scope.isLatestRelease(index) && $scope.packages[index].selected > $scope.packages[index].installed);
+		  }
+
+		  /* return true if there is installing or removing is pending */
+		  $scope.isInstallingOrRemoving = function (index) {
+		  	return $scope.packages[index].installing || $scope.packages[index].removing;
+		  }
+
+		  $scope.isPackageSelected = function(index) {
+        	return $scope.selectedPackage && $scope.selectedPackage === $scope.packages[index].displayName;
+          }
+
+	      $scope.togglePackageSelection = function(index, event) {
+	    	if ($scope.isPackageSelected(index) || !$scope.packages[index].description) {
+	          $scope.selectedPackage = null;
+	        } else {
+	          $scope.selectedPackage = $scope.packages[index].displayName;
+	        }
+	        event.stopPropagation();
+	      }
+
+	      $scope.getPackageDescription = function(index) {
+	      	if ($scope.packages[index].description) {
+	      		return $sce.trustAsHtml($scope.packages[index].description);
+	      	}
+	      	return "";
+	      }
 
 		  $scope.showUrl = function(value) {
 			  var command = {"method":"showurl","url": value};
 			   $scope.websocket.send(JSON.stringify(command));
-		  }
-		  
-		  $scope.removeEnabled = function (index) {
-			  return !$scope.packages[index].installing && !$scope.packages[index].removing;
 		  }
 		}
 	}

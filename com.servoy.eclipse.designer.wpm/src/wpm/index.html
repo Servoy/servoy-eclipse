@@ -36,30 +36,31 @@
   <script src="manager.js"></script>
   
 </head>
-<body ng-app="app" ng-cloak>
+<body ng-app="app" ng-controller="appPackages" ng-cloak>
 <div class="wpm"> 
   <div class="wpm-header">
     <md-content>
-          <h1 class="">Servoy Package Manager</h1>
+      <h1 class="wpm-title">Servoy Package Manager</h1>
+      <p class="wpm-subtitle">Manage web packages in the active solution {{getActiveSolution()}}</p>
     </md-content>
   </div>
-  <div class="wpm-content" ng-controller="appPackages" ng-cloak>
+  <div class="wpm-content">
   	<md-content layout="column" layout-align="space-around center center" ng-if="isLoading" style="min-height: 150px;">
   		<md-content>Loading ...</md-content>
   		<md-progress-circular md-mode="indeterminate"></md-progress-circular>
   	</md-content>
     <md-tabs md-dynamic-height md-border-bottom md-selected="selectedTab" ng-if="!isLoading">
-      <md-tab label="NG Components">
+      <md-tab label="NG Components {{getUpgradeCount(componentPackages)}}">
         <md-content class="md-padding">
         	<packages packages="componentPackages" solution-list="solutionList" websocket="websocket">
         </md-content>
       </md-tab>
-      <md-tab label="NG Services">
+      <md-tab label="NG Services {{getUpgradeCount(servicePackages)}}">
         <md-content class="md-padding">
 			<packages packages="servicePackages" solution-list="solutionList" websocket="websocket">
         </md-content>
       </md-tab>
-	  <md-tab label="NG Layouts">
+	    <md-tab label="NG Layouts {{getUpgradeCount(layoutPackages)}}">
         <md-content class="md-padding">
           <packages packages="layoutPackages" solution-list="solutionList" websocket="websocket">
         </md-content>

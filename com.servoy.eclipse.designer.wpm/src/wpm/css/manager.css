@@ -28,11 +28,6 @@ md-tabs .md-tab {
   color: #fff;
 }
 
-/*
-.md-padding {
-  padding: 8px;
-}
-*/
 /* Tab's content */
 md-content {
   background-color: rgb(255,255,255);
@@ -62,6 +57,10 @@ md-tabs .md-tab.md-focused md-icon {
 }
 
 /* Table header */
+.md-subheader {
+    white-space: nowrap;
+}
+
 .md-subheader.md-default-theme, .md-subheader {
     background-color: rgb(248,248,248);
     color: rgba(0,0,0,0.55);
@@ -89,7 +88,6 @@ md-tabs .md-tab.md-focused md-icon {
 }
 
 .table-package td > div {
-
     display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
@@ -111,33 +109,20 @@ md-tabs .md-tab.md-focused md-icon {
   justify-content: center;
 }
 
-.table-package .fa {
-  font-size: 28px;
+.table-package td > div.align-right {
+  -webkit-justify-content: flex-end;
+  -ms-flex-pack: flex-end;
+  justify-content: flex-end;
 }
 
-.table-package .column-release .release-action {
+td.column-fitwidth {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.table-package .release-action {
   font-size: 24px;
   float: right;
-}
-
-.column-release .select {
-  flex-grow: 1;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.column-release .btn-group {
-  min-width: 220px;
-  flex-grow: 1;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
 }
 
 /* list of items */
@@ -177,11 +162,79 @@ md-tabs .md-tab.md-focused md-icon {
 }
 
 /* Select */
+md-select.select-solution {
+  width: 100%;
+  min-width: 120px;
+  max-width: 260px;
+}
+
+md-select.select-release {
+  min-width: 120px;
+  max-width: 160px;
+  width: 100%;
+}
+
+@media (min-width:1200px) {
+  /* add padding to select box */
+  td.column-fitwidth md-select {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+}
+
+@media (min-width:1400px) {
+  md-select.select-solution {
+    max-width: 360px;
+  }
+}
+
 ._md-select-value {
   min-height: 0px;
 }
 
+/* Target elements */
+.wpm-package-name {
+  flex-grow: 0;
+}
+
+.wpm-title {
+  margin-bottom: 4px;
+}
+
+.wpm-subtitle {
+  margin-top: 0px;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+.wpm-clickable {
+  cursor: hand;
+}
+
+.wpm-clickable:focus {
+  outline: none;
+}
+
 /* General */
+.md-icon-button {
+  font-size: 28px;
+}
+
+.wpm-icon-small {
+  font-size: 14px;
+  color: gray;
+}
+
+.wpm-icon-small:not(.md-icon-button) {
+  margin: 0 6px;
+  padding: 8px;
+}
+
+.md-padding {
+    padding: 8px;
+}
+
 .success {
   color: green;
 }
@@ -202,3 +255,57 @@ md-tabs .md-tab.md-focused md-icon {
 .visible, .hidden {
   transition: width 2s;
 }
+
+/* Table Description row */
+.table-package {
+  border-spacing: 0px;
+  padding: 2px;
+}
+
+.table-package th,
+.table-package td {
+  padding-right: 4px;
+  padding-left: 4px;
+}
+
+.wpm-package-selected,
+.wpm-package-description {
+/*  background-color: rgb(250,250,250);*/
+}
+
+tr.wpm-package-description > td {
+  padding: 8px;
+}
+
+tr.wpm-package-description > td > md-content {
+  overflow: hidden;
+/*  background-color: rgb(250,250,250);*/
+/* box-shadow: 0px 0px 1px 1px rgba(0, 0, 0, 0.14), 
+    0px 0px 2px 2px rgba(0, 0, 0, 0.098), 
+    0px 0px 5px 1px rgba(0, 0, 0, 0.084); */
+/* -moz-box-shadow: inset 0 2px 2px -2px rgba(0,0,0,0.84), inset 0 -2px 2px -2px rgba(0,0,0,0.84);
+  -webkit-box-shadow: inset 0 2px 2px -2px rgba(0,0,0,0.84), inset 0 -2px 2px -2px rgba(0,0,0,0.84);
+  box-shadow: inset 0 2px 2px -2px rgba(0,0,0,0.84), inset 0 -2px 2px -2px rgba(0,0,0,0.84);*/
+}
+
+.wpm-collapsible.wpm-collapsible-content {
+  -webkit-transition: max-height 0.35s linear;
+  transition: max-height 0.35s linear;
+}
+
+.wpm-collapsible.ng-enter.wpm-collapsible-content {
+  max-height:0px;
+}
+
+.wpm-collapsible.ng-enter.ng-enter-active.wpm-collapsible-content {
+  max-height:1024px;
+}
+
+.wpm-collapsible.ng-leave.wpm-collapsible-content {
+  max-height:1024px;
+}
+
+.wpm-collapsible.ng-leave.ng-leave-active.wpm-collapsible-content {
+  max-height:0px;
+}
+
