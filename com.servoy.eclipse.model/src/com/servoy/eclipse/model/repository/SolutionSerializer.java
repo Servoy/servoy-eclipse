@@ -56,6 +56,7 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormReference;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IPersist;
@@ -1236,7 +1237,7 @@ public class SolutionSerializer
 		}
 
 		// Some persists do not have a file of its own, but are saved as item in its parents file
-		if (isCompositeWithItems(persist.getParent()))
+		if (isCompositeWithItems(persist.getParent()) || persist instanceof IChildWebObject)
 		{
 			return getFileName(persist.getParent(), useOldName);
 		}

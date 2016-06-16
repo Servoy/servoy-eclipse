@@ -109,6 +109,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.ColumnWrapper;
@@ -2011,6 +2012,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											{
 												public Object visit(IPersist p)
 												{
+													// uuid is inherited as it is in json, thus generating duplicate uuids; we should fix inheritance
+													if (p instanceof ChildWebComponent) return IPersistVisitor.CONTINUE_TRAVERSAL;
 													elementIdPersistMap.put(p.getID(), p);
 													List<IPersist> lst = theMakeSureNoDuplicateUUIDsAreFound.get(p.getUUID());
 													if (lst == null)
