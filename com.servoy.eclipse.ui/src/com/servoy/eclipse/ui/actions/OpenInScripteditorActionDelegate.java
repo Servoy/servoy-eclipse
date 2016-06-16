@@ -16,16 +16,20 @@
  */
 package com.servoy.eclipse.ui.actions;
 
+import java.util.List;
+
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 
 
 /**
  * Open script file for menu item object contribution and action class.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class OpenInScripteditorActionDelegate extends AbstractFormSelectionActionDelegate
 {
@@ -41,5 +45,18 @@ public class OpenInScripteditorActionDelegate extends AbstractFormSelectionActio
 		{
 			EditorUtil.openScriptEditor((IPersist)((Pair< ? , ? >)openable.getData()).getLeft(), (String)((Pair< ? , ? >)openable.getData()).getRight(), true);
 		}
+	}
+
+	@Override
+	protected boolean checkEnabled(List<Openable> lst)
+	{
+		for (Openable openable : lst)
+		{
+			if (openable.getData() instanceof Form && Utils.getAsBoolean(((Form)openable.getData()).getReferenceForm()))
+			{
+				return false;
+			}
+		}
+		return super.checkEnabled(lst);
 	}
 }
