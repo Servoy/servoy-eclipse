@@ -11,6 +11,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -78,9 +79,18 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 					{
 						try
 						{
-							PersistContext persistContext = DesignerUtil.getContentOutlineSelection();
+							PersistContext persistContext = null;
+							final ISelectionProvider selectionProvider = activeEditor.getSite().getSelectionProvider();
+							IStructuredSelection sel = (IStructuredSelection)selectionProvider.getSelection();
+							if (!sel.isEmpty())
+							{
+								Object[] selection = sel.toArray();
+								persistContext = selection[0] instanceof PersistContext ? (PersistContext)selection[0]
+									: PersistContext.create((IPersist)selection[0]);
+							}
 							if (persistContext != null)
 							{
+
 								if (event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property") != null)
 								{
 									if (persistContext.getPersist() instanceof IBasicWebComponent)
@@ -173,7 +183,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 												@Override
 												public void run()
 												{
-													DesignerUtil.getContentOutline().setSelection(structuredSelection);
+													selectionProvider.setSelection(structuredSelection);
 												}
 											});
 
