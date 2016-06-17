@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.ui.PlatformUI;
@@ -62,44 +63,55 @@ public class AddContainerContributionItem extends CompoundContributionItem
 				if (layoutSpec != null)
 				{
 					//for the right-clicked persist we iterate through all it's possible children
-					List<String> allowedChildren = layoutSpec.getAllowedChildren();
+					Set<String> allowedChildren = DesignerUtil.getAllowedChildren().get(layoutSpec.getPackageName() + "." + layoutSpec.getName());
+					boolean isComponentAdded = false;
 					for (String allowedChildName : allowedChildren)
 					{
-						//then we iterate through all the layouts that we have and check if the layoutName matches the current allowedChildName
-						for (WebLayoutSpecification specification : specifications.getSpecifications().values())
-						{
-							String layoutName;
-							try
-							{
-								layoutName = new JSONObject((String)specification.getConfig()).optString("layoutName", null);
-								if (layoutName == null)
-								{
-									layoutName = specification.getName();
-								}
-
-								//if the layoutName matches the current allowedChildName then we add this container as a menu entry
-								if (allowedChildName.equals(((LayoutContainer)persist).getPackageName() + "." + layoutName))
-								{
-									String config = specification.getConfig() instanceof String ? specification.getConfig().toString() : "{}";
-									addMenuItem(list, specification, config, null);
-								}
-
-							}
-							catch (JSONException e)
-							{
-								Debug.log(e);
-							}
-						}
-					}
-					for (String allowedChildName : allowedChildren)
-					{
-						if (allowedChildName.endsWith(".*"))
+						if ("component".equalsIgnoreCase(allowedChildName))
 						{
 							addMenuItem(list, null, null, null);
-							break;
+							isComponentAdded = true;
+						}
+						else
+						{
+							//then we iterate through all the layouts that we have and check if the layoutName matches the current allowedChildName
+							for (WebLayoutSpecification specification : specifications.getSpecifications().values())
+							{
+								String layoutName;
+								try
+								{
+									layoutName = new JSONObject((String)specification.getConfig()).optString("layoutName", null);
+									if (layoutName == null)
+									{
+										layoutName = specification.getName();
+									}
+
+									//if the layoutName matches the current allowedChildName then we add this container as a menu entry
+									if (allowedChildName.equals(((LayoutContainer)persist).getPackageName() + "." + layoutName))
+									{
+										String config = specification.getConfig() instanceof String ? specification.getConfig().toString() : "{}";
+										addMenuItem(list, specification, config, null);
+									}
+
+								}
+								catch (JSONException e)
+								{
+									Debug.log(e);
+								}
+							}
 						}
 					}
-
+					if (!isComponentAdded)
+					{
+						for (String allowedChildName : allowedChildren)
+						{
+							if (allowedChildName.endsWith(".*"))
+							{
+								addMenuItem(list, null, null, null);
+								break;
+							}
+						}
+					}
 				}
 			}
 		}

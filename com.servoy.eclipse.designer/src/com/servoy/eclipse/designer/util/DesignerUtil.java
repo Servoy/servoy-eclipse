@@ -17,9 +17,12 @@
 package com.servoy.eclipse.designer.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.draw2d.geometry.Dimension;
@@ -33,6 +36,11 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.sablo.specification.PackageSpecification;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebLayoutSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
@@ -280,5 +288,78 @@ public class DesignerUtil
 			}
 		}
 		return null;
+	}
+
+
+	public static Map<String, Set<String>> getAllowedChildren()
+	{
+		final Map<String, Set<String>> map = new HashMap<String, Set<String>>();
+		fillAllowedChildrenInternal(new AllowChildrenMapFiller()
+		{
+			@Override
+			public void add(String key, Set<String> values)
+			{
+				map.put(key, values);
+			}
+		});
+		return map;
+	}
+
+	public static JSONObject getAllowedChildrenAsJSON()
+	{
+		final JSONObject obj = new JSONObject();
+		fillAllowedChildrenInternal(new AllowChildrenMapFiller()
+		{
+			@Override
+			public void add(String key, Set<String> values)
+			{
+				JSONArray ar = new JSONArray();
+				for (String child : values)
+				{
+					ar.put(child);
+				}
+				obj.put(key, ar);
+			}
+		});
+		return obj;
+	}
+
+	private static void fillAllowedChildrenInternal(AllowChildrenMapFiller mapFiller)
+	{
+		Map<String, PackageSpecification<WebLayoutSpecification>> map = WebComponentSpecProvider.getInstance().getLayoutSpecifications();
+		for (PackageSpecification<WebLayoutSpecification> pack : map.values())
+		{
+			for (WebLayoutSpecification spec : pack.getSpecifications().values())
+			{
+				List<String> excludedChildren = spec.getExcludedChildren();
+				Set<String> allowedChildren = excludedChildren.size() > 0 ? new HashSet<String>() : new HashSet<String>(spec.getAllowedChildren());
+				if (excludedChildren.size() > 0)
+				{
+					for (PackageSpecification<WebLayoutSpecification> pack2 : map.values())
+					{
+						String packageName = pack2.getPackageName();
+						Collection<String> objs = WebComponentSpecProvider.getInstance().getLayoutsInPackage(packageName);
+						for (String layoutName : objs)
+						{
+							if (!excludedChildren.contains(layoutName) && !excludedChildren.contains(packageName + "." + layoutName))
+							{
+								allowedChildren.add(packageName + "." + layoutName);
+							}
+						}
+					}
+					if (!excludedChildren.contains("component")) allowedChildren.add("component");
+				}
+
+				if (allowedChildren.size() > 0)
+				{
+					mapFiller.add(spec.getPackageName() + "." + spec.getName(), allowedChildren);
+				}
+			}
+		}
+	}
+
+	private interface AllowChildrenMapFiller
+	{
+		void add(String key, Set<String> values);
 	}
 }

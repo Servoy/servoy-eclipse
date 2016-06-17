@@ -17,19 +17,10 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.json.JSONObject;
-import org.json.JSONStringer;
-import org.json.JSONWriter;
-import org.sablo.specification.PackageSpecification;
-import org.sablo.specification.WebComponentSpecProvider;
-import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.websocket.IServerService;
+
+import com.servoy.eclipse.designer.util.DesignerUtil;
 
 /**
  * Sends to the client editor all possible children of layouts.
@@ -42,46 +33,7 @@ public class LayoutsHandler implements IServerService
 	{
 		if ("getAllowedChildren".equals(methodName))
 		{
-			JSONWriter writer = new JSONStringer();
-			writer.object();
-			Map<String, PackageSpecification<WebLayoutSpecification>> map = WebComponentSpecProvider.getInstance().getLayoutSpecifications();
-			for (PackageSpecification<WebLayoutSpecification> pack : map.values())
-			{
-				for (WebLayoutSpecification spec : pack.getSpecifications().values())
-				{
-					List<String> excludedChildren = spec.getExcludedChildren();
-					Set<String> allowedChildren = excludedChildren.size() > 0 ? new HashSet<String>() : new HashSet<String>(spec.getAllowedChildren());
-					if (excludedChildren.size() > 0)
-					{
-						for (PackageSpecification<WebLayoutSpecification> pack2 : map.values())
-						{
-							String packageName = pack2.getPackageName();
-							Collection<String> objs = WebComponentSpecProvider.getInstance().getLayoutsInPackage(packageName);
-							for (String layoutName : objs)
-							{
-								if (!excludedChildren.contains(layoutName) && !excludedChildren.contains(packageName + "." + layoutName))
-								{
-									allowedChildren.add(packageName + "." + layoutName);
-								}
-							}
-						}
-						if (!excludedChildren.contains("component")) allowedChildren.add("component");
-					}
-
-					if (allowedChildren.size() > 0)
-					{
-						writer.key(spec.getPackageName() + "." + spec.getName());
-						writer.array();
-						for (String child : allowedChildren)
-						{
-							writer.value(child);
-						}
-						writer.endArray();
-					}
-				}
-			}
-			writer.endObject();
-			return writer.toString();
+			return DesignerUtil.getAllowedChildrenAsJSON().toString();
 		}
 		return null;
 	}
