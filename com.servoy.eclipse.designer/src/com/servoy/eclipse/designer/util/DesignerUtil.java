@@ -338,9 +338,10 @@ public class DesignerUtil
 					for (PackageSpecification<WebLayoutSpecification> pack2 : map.values())
 					{
 						String packageName = pack2.getPackageName();
-						Collection<String> objs = WebComponentSpecProvider.getInstance().getLayoutsInPackage(packageName);
-						for (String layoutName : objs)
+						for (WebLayoutSpecification layoutSpec : pack.getSpecifications().values())
 						{
+							if (layoutSpec.isTopContainer()) continue;
+							String layoutName = layoutSpec.getName();
 							if (!excludedChildren.contains(layoutName) && !excludedChildren.contains(packageName + "." + layoutName))
 							{
 								allowedChildren.add(packageName + "." + layoutName);
