@@ -17,7 +17,6 @@
 package com.servoy.eclipse.designer.util;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -340,7 +339,8 @@ public class DesignerUtil
 						String packageName = pack2.getPackageName();
 						for (WebLayoutSpecification layoutSpec : pack.getSpecifications().values())
 						{
-							if (layoutSpec.isTopContainer()) continue;
+							// this can't be a filter. because also row can be a top level container and needs to be able to get into a column.
+//							if (layoutSpec.isTopContainer()) continue;
 							String layoutName = layoutSpec.getName();
 							if (!excludedChildren.contains(layoutName) && !excludedChildren.contains(packageName + "." + layoutName))
 							{
