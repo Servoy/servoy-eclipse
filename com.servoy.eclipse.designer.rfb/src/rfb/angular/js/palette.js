@@ -25,6 +25,11 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 				}
 			};
 			$scope.searchText = '';
+			$scope.openPackageManager = function()
+			{
+				$editorService.openPackageManager();
+			}
+			
 			var utils = $selectionUtils.getUtilsForScope($scope);
 
 			var layoutType = null;

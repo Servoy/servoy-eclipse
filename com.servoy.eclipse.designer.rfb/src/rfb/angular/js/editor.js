@@ -1289,6 +1289,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			return wsSession.callService('formeditor', 'updatePaletteOrder', paletteOrder, false);
 		},
 
+		openPackageManager: function() {
+			return wsSession.callService('formeditor', 'openPackageManager', null, true);
+		},
+		
 		showImageInOverlayDiv: function(url) {
 			editorScope.previewOverlayImgURL = url;
 			editorScope.displayOverlay = true;

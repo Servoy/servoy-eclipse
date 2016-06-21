@@ -264,3 +264,9 @@ body {
   background-color: #D0D0D0;
   outline: 1px solid red;
 }
+
+.linkbtn
+{
+	border: 0;
+	padding-left: 2px;
+}

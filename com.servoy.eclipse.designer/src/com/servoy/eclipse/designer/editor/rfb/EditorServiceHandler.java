@@ -50,6 +50,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdateFieldPositi
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdatePaletteOrder;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IPersist;
 
@@ -226,7 +227,15 @@ public class EditorServiceHandler implements IServerService
 				return null;
 			}
 		});
-
+		configuredHandlers.put("openPackageManager", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				EditorUtil.openWebPackageManager();
+				return null;
+			}
+		});
 		configuredHandlers.put("createGroup", new GroupCommand(editorPart, selectionProvider));
 		configuredHandlers.put("clearGroup", new UngroupCommand(editorPart, selectionProvider));
 		configuredHandlers.put("getAllowedChildren", new LayoutsHandler());
