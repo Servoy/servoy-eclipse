@@ -173,10 +173,12 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				{
 					if (dropTarget != null && dragObjects != null && dragObjects.length > 0)
 					{
+						Form dropTargetForm = (Form)dropTarget.getAncestor(IRepository.FORMS);
 						final CompoundCommand cc = new CompoundCommand();
 						for (final IPersist p : dragObjects)
 						{
-							cc.add(new ChangeParentCommand(p, dropTarget, dropTargetComponent, getCurrentLocation() == LOCATION_AFTER)
+							cc.add(new ChangeParentCommand(p, dropTargetForm.equals(p.getAncestor(IRepository.FORMS)) ? dropTarget : null, dropTargetComponent,
+								getCurrentLocation() == LOCATION_AFTER)
 							{
 								@Override
 								public void execute()

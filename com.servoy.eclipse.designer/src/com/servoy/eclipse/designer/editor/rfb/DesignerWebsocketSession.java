@@ -44,13 +44,13 @@ import org.sablo.websocket.impl.ClientService;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormReference;
-import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
@@ -241,7 +241,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					if (layoutId != null)
 					{
 						IPersist child = flattenedForm.findChild(UUID.fromString(layoutId), true);
-						if (child instanceof IFlattenedPersistWrapper< ? >) child = ((IFlattenedPersistWrapper< ? >)child).getWrappedPersist();
 						if (child instanceof LayoutContainer)
 						{
 							componentFound = true;
@@ -323,7 +322,15 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	{
 		if (persist != null && persist.getParent() instanceof AbstractContainer)
 		{
-			ArrayList<IPersist> children = ((AbstractContainer)persist.getParent()).getSortedChildren();
+			AbstractContainer persistParent = (AbstractContainer)persist.getParent();
+
+			if (persistParent instanceof Form)
+			{
+				FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
+				persistParent = flattenedSolution.getFlattenedForm(persistParent);
+			}
+
+			ArrayList<IPersist> children = persistParent.getSortedChildren();
 			int indexOf = children.indexOf(persist);
 			if (indexOf > -1 && (indexOf + 1) < children.size()) return children.get(indexOf + 1).getUUID();
 		}
