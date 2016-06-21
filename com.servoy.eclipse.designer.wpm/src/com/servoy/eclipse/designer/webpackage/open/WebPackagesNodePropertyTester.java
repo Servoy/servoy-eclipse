@@ -12,7 +12,7 @@ public class WebPackagesNodePropertyTester extends org.eclipse.core.expressions.
 		if (receiver instanceof SimpleUserNode)
 		{
 			return (((SimpleUserNode)receiver).getType() == UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES) ||
-				(((SimpleUserNode)receiver).getType() == UserNodeType.SOLUTION);
+				((((SimpleUserNode)receiver).getType() == UserNodeType.SOLUTION) && ((SimpleUserNode)receiver).getRealObject() != null);
 		}
 		return false;
 	}
