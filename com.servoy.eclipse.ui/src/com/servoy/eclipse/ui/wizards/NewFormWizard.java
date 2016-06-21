@@ -55,6 +55,7 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.sablo.specification.WebComponentSpecProvider;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IFormConstants;
@@ -376,7 +377,17 @@ public class NewFormWizard extends Wizard implements INewWizard
 			servoyModel.getDataModelManager().testTableAndCreateDBIFile(servoyModel.getDataSourceManager().getDataSource(form.getDataSource()));
 
 			// open newly created form in the editor (as new editor)
-			return EditorUtil.openFormDesignEditor(form, true, true) != null;
+			boolean returnValue = EditorUtil.openFormDesignEditor(form, true, true) != null;
+
+			if (form.isResponsiveLayout() && WebComponentSpecProvider.getInstance().getLayoutSpecifications().isEmpty())
+			{
+				if (MessageDialog.openConfirm(getShell(), "No Responsive Layout present", "Do you want to download a responsive layout now?"))
+				{
+					EditorUtil.openWebPackageManager();
+				}
+			}
+
+			return returnValue;
 		}
 		catch (RepositoryException e)
 		{

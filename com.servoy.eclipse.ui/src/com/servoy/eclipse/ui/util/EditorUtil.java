@@ -44,6 +44,7 @@ import org.eclipse.dltk.internal.core.SourceField;
 import org.eclipse.dltk.internal.core.SourceMethod;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -58,6 +59,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -120,6 +122,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 
@@ -649,6 +652,63 @@ public class EditorUtil
 			ServoyLog.logError(ex);
 		}
 		return null;
+	}
+
+	public static void openWebPackageManager()
+	{
+		try
+		{
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new IEditorInput()
+			{
+
+				@Override
+				public <T> T getAdapter(Class<T> adapter)
+				{
+					return null;
+				}
+
+				@Override
+				public String getToolTipText()
+				{
+					return "Web Package Manager";
+				}
+
+				@Override
+				public IPersistableElement getPersistable()
+				{
+					return null;
+				}
+
+				@Override
+				public String getName()
+				{
+					return "Web Package Manager";
+				}
+
+				@Override
+				public ImageDescriptor getImageDescriptor()
+				{
+					return null;
+				}
+
+				@Override
+				public boolean exists()
+				{
+					return true;
+				}
+
+				@Override
+				public boolean equals(Object obj)
+				{
+					if (obj instanceof IEditorInput) return ((IEditorInput)obj).getName().equals(this.getName());
+					return super.equals(obj);
+				}
+			}, "com.servoy.eclipse.ui.webpackagemanager");
+		}
+		catch (PartInitException e)
+		{
+			Debug.log(e);
+		}
 	}
 
 	public static void closeEditor(Object object)

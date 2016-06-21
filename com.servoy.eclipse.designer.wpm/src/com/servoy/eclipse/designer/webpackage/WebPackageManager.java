@@ -14,7 +14,6 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 public class WebPackageManager extends EditorPart
 {
-	public static final String EDITOR_ID = "com.servoy.eclipse.ui.webpackagemanager";
 	private Browser browser;
 
 	@Override
