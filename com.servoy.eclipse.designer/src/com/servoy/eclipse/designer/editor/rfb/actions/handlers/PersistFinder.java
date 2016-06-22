@@ -38,6 +38,7 @@ public class PersistFinder
 	{
 		INSTANCE = new PersistFinder();
 	}
+
 	public static PersistFinder INSTANCE;
 	private final AtomicInteger id = new AtomicInteger();
 
@@ -106,7 +107,8 @@ public class PersistFinder
 
 	public boolean checkName(BaseVisualFormEditor editorPart, String compName)
 	{
-		Iterator<IFormElement> fields = editorPart.getForm().getFlattenedObjects(null).iterator();
+		Iterator<IFormElement> fields = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).getFlattenedForm(editorPart.getForm()).getFlattenedObjects(
+			null).iterator();
 		for (IFormElement element : Utils.iterate(fields))
 		{
 			if (compName.equals(element.getName()))
