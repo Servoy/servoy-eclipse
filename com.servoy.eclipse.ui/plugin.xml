@@ -625,6 +625,10 @@
               class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
               markerType="com.servoy.eclipse.core.duplicateMemTable">
         </markerResolutionGenerator>
+      	<markerResolutionGenerator
+            class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.superformProblem">
+     	</markerResolutionGenerator>          
      </extension>
      <extension
            point="org.eclipse.ui.commands">

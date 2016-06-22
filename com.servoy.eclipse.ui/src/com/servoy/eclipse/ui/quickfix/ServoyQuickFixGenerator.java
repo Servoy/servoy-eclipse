@@ -191,6 +191,15 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				resolutions.add(new RenameMemTableQuickFix(persist, servoyProject));
 				resolutions.add(new DeleteMemTableQuickFix(persist, servoyProject));
 			}
+			else if (type.equals(ServoyBuilder.SUPERFORM_PROBLEM_TYPE))
+			{
+				String solName = (String)marker.getAttribute("SolutionName");
+				String uuid = (String)marker.getAttribute("Uuid");
+				final UUID id = UUID.fromString(uuid);
+				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
+				Form form = (Form)servoyProject.getEditingPersist(id);
+				resolutions.add(new ChangeSuperFormQuickFix(form, servoyProject));
+			}
 
 			return resolutions.toArray(new IMarkerResolution[resolutions.size()]);
 		}

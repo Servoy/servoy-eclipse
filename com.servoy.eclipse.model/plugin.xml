@@ -591,6 +591,17 @@
       <persistent
             value="true">
       </persistent>
+  	 </extension>
+  	 <extension
+         id="com.servoy.eclipse.core.superformProblem"
+         name="Superform problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="com.servoy.eclipse.core.servoyProblem">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
    </extension>
    <extension
          id="com.servoy.eclipse.core.servoyProblem"
