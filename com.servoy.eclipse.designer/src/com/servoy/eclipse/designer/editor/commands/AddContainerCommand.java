@@ -79,14 +79,21 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 					{
 						try
 						{
-							PersistContext persistContext = null;
 							final ISelectionProvider selectionProvider = activeEditor.getSite().getSelectionProvider();
-							IStructuredSelection sel = (IStructuredSelection)selectionProvider.getSelection();
-							if (!sel.isEmpty())
+							PersistContext persistContext = null;
+							if (DesignerUtil.getContentOutline() != null)
 							{
-								Object[] selection = sel.toArray();
-								persistContext = selection[0] instanceof PersistContext ? (PersistContext)selection[0]
-									: PersistContext.create((IPersist)selection[0]);
+								persistContext = DesignerUtil.getContentOutlineSelection();
+							}
+							else
+							{
+								IStructuredSelection sel = (IStructuredSelection)selectionProvider.getSelection();
+								if (!sel.isEmpty())
+								{
+									Object[] selection = sel.toArray();
+									persistContext = selection[0] instanceof PersistContext ? (PersistContext)selection[0]
+										: PersistContext.create((IPersist)selection[0]);
+								}
 							}
 							if (persistContext != null)
 							{
@@ -183,8 +190,14 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 												@Override
 												public void run()
 												{
-												
-													selectionProvider.setSelection(structuredSelection);
+													if (DesignerUtil.getContentOutline() != null)
+													{
+														DesignerUtil.getContentOutline().setSelection(structuredSelection);
+													}
+													else
+													{
+														selectionProvider.setSelection(structuredSelection);
+													}
 												}
 											});
 
