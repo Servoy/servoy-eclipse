@@ -183,6 +183,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 												@Override
 												public void run()
 												{
+												
 													selectionProvider.setSelection(structuredSelection);
 												}
 											});
