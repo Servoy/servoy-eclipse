@@ -195,6 +195,7 @@ import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.ICanBeLinkedToFoundset;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormatPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
@@ -559,7 +560,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		throws RepositoryException
 	{
 		if (persistContext.getPersist() == propertyDescriptor.valueObject // for beans we show all
-		&& !shouldShow(propertyDescriptor))
+			&& !shouldShow(propertyDescriptor))
 		{
 			return;
 		}
@@ -706,7 +707,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 	public static IPropertyDescriptor createPropertyDescriptor(IPropertySource propertySource, final String id, final PersistContext persistContext,
 		boolean readOnly, PropertyDescriptorWrapper propertyDescriptor, String displayName, FlattenedSolution flattenedEditingSolution, Form form)
-			throws RepositoryException
+		throws RepositoryException
 	{
 		if (!propertyDescriptor.propertyDescriptor.isProperty())
 		{
@@ -716,7 +717,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		IPropertyDescriptor desc = createPropertyDescriptor(propertySource, persistContext, readOnly, propertyDescriptor, id, displayName,
 			flattenedEditingSolution, form);
 		if (desc != null //
-		&& persistContext != null && persistContext.getPersist() != null &&
+			&& persistContext != null && persistContext.getPersist() != null &&
 			persistContext.getPersist().getAncestor(IRepository.FORMS) == persistContext.getContext() // only show overrides when element is shown in its 'own' form
 			&&
 			// skip some specific properties
@@ -2488,7 +2489,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Form flattenedSuperForm = flattenedEditingSolution.getFlattenedForm(
 					flattenedEditingSolution.getForm(((Form)persistContext.getPersist()).getExtendsID()));
 				propertyReadOnly = flattenedSuperForm == null /* superform not found? make readonly for safety */
-				|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
+					|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
 
 				if (propertyReadOnly && flattenedSuperForm != null && ((Form)persistContext.getPersist()).getDataSource() != null &&
 					!((Form)persistContext.getPersist()).getDataSource().equals(flattenedSuperForm.getDataSource()))
@@ -2820,6 +2821,27 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							persistContext.getPersist() instanceof FormReference,
 							(persistContext.getPersist() instanceof FormReference) ? ((Form)persistContext.getContext()).getDataSource() : null,
 							!(persistContext.getPersist() instanceof FormReference)),
+						SWT.NONE, null, "Select form dialog");
+				}
+			};
+			pd.setLabelProvider(formLabelProvider);
+			return pd;
+		}
+		if (propertyType instanceof FormComponentPropertyType)
+		{
+			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, false),
+				persistContext.getContext());
+			PropertyDescriptor pd = new PropertyDescriptor(id, displayName)
+			{
+				@Override
+				public CellEditor createPropertyEditor(Composite parent)
+				{
+					return new ListSelectCellEditor(parent, "Select form",
+						new FormContentProvider(flattenedEditingSolution,
+							persistContext.getContext() instanceof Form ? (Form)persistContext.getContext() : null),
+						formLabelProvider, new FormValueEditor(flattenedEditingSolution), readOnly,
+						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false, true,
+							((Form)persistContext.getContext()).getDataSource(), true),
 						SWT.NONE, null, "Select form dialog");
 				}
 			};
