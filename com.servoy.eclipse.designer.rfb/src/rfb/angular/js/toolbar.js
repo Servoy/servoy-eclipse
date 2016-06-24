@@ -59,7 +59,7 @@ angular.module("toolbar",['toolbaractions','designsize'])
 			    	$scope.display = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISPLAY);
 //			    	$scope.show_data = $toolbar.getButtons(TOOLBAR_CATEGORIES.SHOW_DATA);
 	    			if(editor.isAbsoluteFormLayout()) {
-			    	  $scope.ordering = $toolbar.getButtons(TOOLBAR_CATEGORIES.ORDERING);
+	    			  $scope.ordering = $toolbar.getButtons(TOOLBAR_CATEGORIES.ORDERING);
 			    	  $scope.alignment = $toolbar.getButtons(TOOLBAR_CATEGORIES.ALIGNMENT);
 			    	  $scope.distribution = $toolbar.getButtons(TOOLBAR_CATEGORIES.DISTRIBUTION);
 			    	  $scope.sizing = $toolbar.getButtons(TOOLBAR_CATEGORIES.SIZING);
@@ -67,6 +67,7 @@ angular.module("toolbar",['toolbaractions','designsize'])
 
 	    			}
 	    			else {
+	    				$scope.ordering = $toolbar.getButtons(TOOLBAR_CATEGORIES.ORDERING_RESPONSIVE);
 	    				$scope.design_mode = $toolbar.getButtons(TOOLBAR_CATEGORIES.DESIGN_MODE);
 	    				$scope.sticky = $toolbar.getButtons(TOOLBAR_CATEGORIES.STICKY);
 	    			}
@@ -103,6 +104,7 @@ angular.module("toolbar",['toolbaractions','designsize'])
 .value("TOOLBAR_CATEGORIES", {
 	ELEMENTS: "elements",
 	ORDERING: "ordering",
+	ORDERING_RESPONSIVE: "ordering_responsive",
 	ALIGNMENT: "alignment",
 	DISTRIBUTION: "distribution",
 	SIZING: "sizing",

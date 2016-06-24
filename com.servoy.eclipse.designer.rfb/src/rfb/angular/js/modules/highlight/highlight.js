@@ -45,20 +45,41 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 					else {
 							highlightDiv.style.outline = "1px solid #FFBBBB";
 					}
+
+					if (!editorScope.isAbsoluteFormLayout()) {
+						var nodeParents = $(node).parents('[svy-id]');
+						var statusBarTxt = '';
+						for(var n = nodeParents.length - 1; n > -2; n--) {
+							var currentNode = n > -1 ? $(nodeParents[n]) : $(node);
+							var type = currentNode.attr('svy-layoutname');
+							if(!type) type = currentNode.attr('svy-formelement-type');
+							if(!type) type = currentNode.get(0).nodeName;
+							var name = currentNode.attr('svy-name');
+							if(!name) name = currentNode.attr('name');
+							
+							statusBarTxt += '<strong>' + type + '</strong>';
+							if(name) statusBarTxt += ' [ ' + name + ' ] ';
+							if(n > -1) statusBarTxt += ' / ';
+						}
+						$editorService.setStatusBarText(statusBarTxt); 
+					}
 				}
 				else {
 					highlightDiv.style.display = 'none';
 					highlightDiv.style.outline = "";
+					if (!editorScope.isAbsoluteFormLayout()) $editorService.setStatusBarText("");
 				}
 			}
 			else {
 				highlightDiv.style.display = 'none';
 				highlightDiv.style.outline = "";
+				if (!editorScope.isAbsoluteFormLayout()) $editorService.setStatusBarText("");
 			}
 		}
 		
 		function disableHighlightDiv(){
 			highlightDiv.style.display = 'none';
+			if (!editorScope.isAbsoluteFormLayout()) $editorService.setStatusBarText("");
 			enabled = false;
 		}
 		function enableHighlightDiv(){

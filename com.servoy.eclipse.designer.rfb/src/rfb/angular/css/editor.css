@@ -1,3 +1,26 @@
+.statusbar-area {
+	display: -webkit-flex;
+  	display: flex;
+  	display: -ms-flexbox;
+  	flex-wrap: wrap;
+    flex-direction: row;
+    -webkit-flex-wrap: wrap;
+    -webkit-flex-direction: row;
+    -ms-flex-wrap: wrap;
+    -ms-flex-direction: row;
+    align-items: flex-start;
+    -webkit-align-items: flex-start;
+    -ms-align-items: flex-start;
+    flex-shrink : 0;
+    -webkit-flex-shrink : 0;
+	border: 0px solid #C0C0C0;
+	border-bottom-width: 1px;
+	background-color: #F2F2F2;
+	padding: 2px;
+	line-height: 25px;
+	min-height: 25px;
+	font-size: 10pt;
+}
 
 .rightAutoscrollArea {
 	z-index: 3;

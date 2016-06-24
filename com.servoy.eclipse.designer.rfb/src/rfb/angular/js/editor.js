@@ -1301,6 +1301,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		loadAllowedChildren: function()
 		{
 			return wsSession.callService('formeditor', 'getAllowedChildren');
+		},
+		
+		setStatusBarText: function(text) {
+			var statusBarDiv = angular.element(document.querySelector('#statusbar'))[0];
+			statusBarDiv.innerHTML = !text ? '&nbsp;' : text;
 		}
 
 		// add more service methods here

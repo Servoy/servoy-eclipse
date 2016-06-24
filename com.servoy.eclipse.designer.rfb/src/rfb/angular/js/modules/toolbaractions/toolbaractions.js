@@ -212,7 +212,28 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	$toolbar.add(btnBringForward, TOOLBAR_CATEGORIES.ORDERING);
 	$toolbar.add(btnSendBackward, TOOLBAR_CATEGORIES.ORDERING);
 	$toolbar.add(btnBringToFront, TOOLBAR_CATEGORIES.ORDERING);
-	$toolbar.add(btnSendToBack, TOOLBAR_CATEGORIES.ORDERING);
+	$toolbar.add(btnSendToBack, TOOLBAR_CATEGORIES.ORDERING);		
+
+	var btnMoveUp = {
+		text: "Move to left inside parent container",
+		icon: "../../images/back.gif",
+		enabled: false,
+		onclick: function() {
+			$editorService.executeAction('responsive_move_up');
+		},
+	};
+
+	var btnMoveDown = {
+		text: "Move to right inside parent container",
+		icon: "../../images/forward.gif",
+		enabled: false,
+		onclick: function() {
+			$editorService.executeAction('responsive_move_down');
+		},
+	};
+	$toolbar.add(btnMoveUp, TOOLBAR_CATEGORIES.ORDERING_RESPONSIVE);
+	$toolbar.add(btnMoveDown, TOOLBAR_CATEGORIES.ORDERING_RESPONSIVE);
+
 
 	var btnSameWidth = {
 		text: "Same width",
@@ -624,11 +645,15 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 					}
 					return false;
 				}();
+				btnBringForward.enabled = selection.length > 0;
+				btnSendBackward.enabled = selection.length > 0;
+				btnBringToFront.enabled = selection.length > 0;
+				btnSendToBack.enabled = selection.length > 0;				
 			}
-			btnBringForward.enabled = selection.length > 0;
-			btnSendBackward.enabled = selection.length > 0;
-			btnBringToFront.enabled = selection.length > 0;
-			btnSendToBack.enabled = selection.length > 0;
+			else {
+				btnMoveUp.enabled = selection.length == 1;
+				btnMoveDown.enabled = selection.length == 1;
+			}
 		});
 	})
 

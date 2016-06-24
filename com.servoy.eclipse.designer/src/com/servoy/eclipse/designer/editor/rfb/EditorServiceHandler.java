@@ -30,6 +30,8 @@ import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.commands.MoveDownCommand;
+import com.servoy.eclipse.designer.editor.commands.MoveUpCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupCommand.GroupCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupCommand.UngroupCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentHandler;
@@ -239,6 +241,9 @@ public class EditorServiceHandler implements IServerService
 		configuredHandlers.put("createGroup", new GroupCommand(editorPart, selectionProvider));
 		configuredHandlers.put("clearGroup", new UngroupCommand(editorPart, selectionProvider));
 		configuredHandlers.put("getAllowedChildren", new LayoutsHandler());
+
+		configuredHandlers.put("responsive_move_up", new MoveUpCommand(editorPart, selectionProvider));
+		configuredHandlers.put("responsive_move_down", new MoveDownCommand(editorPart, selectionProvider));
 	}
 
 	@Override
