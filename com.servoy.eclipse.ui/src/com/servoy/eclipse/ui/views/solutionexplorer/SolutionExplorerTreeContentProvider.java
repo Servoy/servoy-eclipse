@@ -205,7 +205,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private final PlatformSimpleUserNode[] scriptingNodes;
 
-//	private final PlatformSimpleUserNode[] resourceNodes;
+	private final PlatformSimpleUserNode[] resourceNodes;
 
 	private final SolutionExplorerView view;
 
@@ -449,7 +449,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, utils, history, security, i18n, /*
 																																			 * exceptions ,
 																																			 */jsunit, plugins };
-		//resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsFromResourcesNode, servicesFromResourcesNode };
+		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsFromResourcesNode, servicesFromResourcesNode };
 
 		// we want to load the plugins node in a background low prio job so that it will expand fast
 		// when used...
@@ -537,7 +537,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	public void setResourceNodesEnabled(boolean isEnabled)
 	{
-		setNodesEnabled(resources.children, isEnabled);
+		setNodesEnabled(resourceNodes, isEnabled);
 	}
 
 	private void setNodesEnabled(SimpleUserNode[] nodes, boolean isEnabled)
