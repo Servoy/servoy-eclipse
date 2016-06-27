@@ -106,6 +106,7 @@ import com.servoy.j2db.dataprocessing.IPropertyDescriptorProvider;
 import com.servoy.j2db.dataprocessing.ITypedColumnConverter;
 import com.servoy.j2db.dataprocessing.IUIConverter;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -1363,7 +1364,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						formElementsByName.put(((ISupportName)o).getName(), duplicates);
 					}
-					return IPersistVisitor.CONTINUE_TRAVERSAL;
+					if (o instanceof AbstractContainer) return IPersistVisitor.CONTINUE_TRAVERSAL;
+					else return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
 				}
 			});
 		}
