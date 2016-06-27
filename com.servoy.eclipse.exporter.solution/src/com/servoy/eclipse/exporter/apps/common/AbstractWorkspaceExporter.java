@@ -324,14 +324,14 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 								if (configuration.exportIfDBDown()) // TODO see large comment some lines above; remove this when error markers can be generated based on dbi files only
 								{
 									// as -dbd decides by itself if it uses DB or not, let the user know that .dbi files were used
-									output("Found error markers that would suggest at least a DB used by this solution or it's exported modules is down."); //$NON-NLS-1$
+									output("Found error markers that would suggest at least a DB used by this solution or its exported modules is down."); //$NON-NLS-1$
 									output("Exporting with DB down is allowed. Proceeding..."); //$NON-NLS-1$
 								}
 								else if (configuration.getExportUsingDbiFileInfoOnly())
 								{
-									// user requested .dbi files anyway, so not really relevant
-									outputExtra("Found error markers that would suggest at least a DB used by this solution or it's exported modules is down."); //$NON-NLS-1$
-									outputExtra("Exporting based on .dbi files instead of DB as requested..."); //$NON-NLS-1$
+									// user requested .dbi files anyway, so markers are not really relevant
+									outputExtra("Found error markers that would suggest at least a DB used by this solution or its exported modules is down."); //$NON-NLS-1$
+									outputExtra("Exporting based on .dbi files, as requested."); //$NON-NLS-1$
 								}
 								else
 								{
@@ -345,11 +345,12 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 							{
 								if (configuration.isIgnoreBuildErrors())
 								{
-									output("Found error markers but -ie was specified. Ignoring the following errors."); //$NON-NLS-1$
+									outputExtra("Found error markers but -ie was specified. Ignoring the following errors."); //$NON-NLS-1$
 								}
 								else
 								{
-									output("Found error markers but -dbi was specified. Ignoring the following errors and exporting based on .dbi files instead of database contents..."); //$NON-NLS-1$
+									outputExtra(
+										"Found error markers but -dbi was specified. Ignoring the following errors and exporting based on .dbi files..."); //$NON-NLS-1$
 								}
 								if (verbose)
 								{
@@ -403,6 +404,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 			}
 		}
 		finally
+
 		{
 			outputExtra("Restoring closed projects if needed."); //$NON-NLS-1$
 			for (IProject p : existingClosedProjects)
@@ -496,7 +498,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 				else if (useLinks && !p.getLocation().toFile().equals(f))
 				{
 					outputError("Cannot use project in alternate location '" + f.getAbsolutePath() +
-						"'. Another project with that name is already present in workspace from location '" + p.getLocation().toFile().getAbsolutePath() + "'.");
+							"'. Another project with that name is already present in workspace from location '" + p.getLocation().toFile().getAbsolutePath() + "'.");
 				}
 			}
 		}
