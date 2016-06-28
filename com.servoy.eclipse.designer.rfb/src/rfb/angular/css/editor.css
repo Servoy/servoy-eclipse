@@ -204,7 +204,7 @@ body {
 	pointer-events: none;
 	box-sizing: border-box;
 	position: absolute;
-	border: 1px solid black;
+	border: 1px solid #4d4d4d;
 	cursor: move;
 	cursor: -webkit-grab;
 	cursor: -moz-grab;
