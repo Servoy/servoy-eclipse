@@ -44,7 +44,6 @@ import org.eclipse.dltk.internal.core.SourceField;
 import org.eclipse.dltk.internal.core.SourceMethod;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -59,7 +58,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -78,6 +76,7 @@ import com.servoy.eclipse.core.resource.I18NEditorInput;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
 import com.servoy.eclipse.core.resource.TableEditorInput;
+import com.servoy.eclipse.core.resource.WebPackageManagerEditorInput;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -656,54 +655,15 @@ public class EditorUtil
 
 	public static void openWebPackageManager()
 	{
+		openWebPackageManager(null);
+	}
+
+	public static void openWebPackageManager(String solutionName)
+	{
 		try
 		{
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new IEditorInput()
-			{
-
-				@Override
-				public <T> T getAdapter(Class<T> adapter)
-				{
-					return null;
-				}
-
-				@Override
-				public String getToolTipText()
-				{
-					return "Web Package Manager";
-				}
-
-				@Override
-				public IPersistableElement getPersistable()
-				{
-					return null;
-				}
-
-				@Override
-				public String getName()
-				{
-					return "Web Package Manager";
-				}
-
-				@Override
-				public ImageDescriptor getImageDescriptor()
-				{
-					return null;
-				}
-
-				@Override
-				public boolean exists()
-				{
-					return true;
-				}
-
-				@Override
-				public boolean equals(Object obj)
-				{
-					if (obj instanceof IEditorInput) return ((IEditorInput)obj).getName().equals(this.getName());
-					return super.equals(obj);
-				}
-			}, "com.servoy.eclipse.ui.webpackagemanager");
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new WebPackageManagerEditorInput(solutionName),
+				"com.servoy.eclipse.ui.webpackagemanager");
 		}
 		catch (PartInitException e)
 		{

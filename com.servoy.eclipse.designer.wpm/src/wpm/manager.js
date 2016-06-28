@@ -23,6 +23,11 @@ angular.module('app', ['ngMaterial'])
 
 	ws.onopen = function (event) {
 	      var command = {"method":"requestAllInstalledPackages"};
+	      var solutionName = decodeURIComponent((new RegExp('[?|&]solution=' + '([^&;]+?)(&|#|;|$)').exec($window.location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+		  if (solutionName)
+		  {
+			  command.solution = solutionName;
+		  }	
 	      ws.send(JSON.stringify(command)); 
 	      command = {"method":"getSolutionList"};
 	      ws.send(JSON.stringify(command)); 
