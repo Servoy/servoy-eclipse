@@ -39,11 +39,14 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.sablo.specification.Package;
 import org.sablo.specification.Package.DirPackageReader;
-import org.sablo.specification.Package.DuplicatePackageException;
+import org.sablo.specification.Package.DuplicateEntityException;
 import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -81,7 +84,7 @@ public abstract class BaseNGPackageManager
 
 	public BaseNGPackageManager()
 	{
-		if (ServoyModelFinder.getServoyModel().getActiveProject() != null) reloadAllNGPackages(null, true); // initial load
+		if (ServoyModelFinder.getServoyModel().getActiveProject() != null) reloadAllNGPackages(null); // initial load
 
 		resourceChangeListener = new BaseNGPackageResourcesChangedListener(this);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
@@ -181,7 +184,7 @@ public abstract class BaseNGPackageManager
 	 * Reloads all ng packages (both resources project ones and referenced ng package project ones).
 	 * It takes care to unload all from all places before loading in the new ones to avoid generating wrong duplicate conflicts problems (if a package is moved between it's own project and the resources project).
 	 */
-	public void reloadAllNGPackages(IProgressMonitor m, boolean canChangeResources)
+	public void reloadAllNGPackages(IProgressMonitor m)
 	{
 		setRemovedPackages();
 
@@ -196,13 +199,12 @@ public abstract class BaseNGPackageManager
 		Map<String, IPackageReader> serviceProjectReaders = new HashMap<String, IPackageReader>();
 
 		monitor.subTask("Preparing to reload resources project ng packages");
-		prepareReloadOfResourcesProjectNGPackages(true, true, monitor.newChild(8), componentResourcesProjectReaders, serviceResourcesProjectReaders,
-			canChangeResources);
+		prepareReloadOfResourcesProjectNGPackages(true, true, monitor.newChild(8), componentResourcesProjectReaders, serviceResourcesProjectReaders);
 		monitor.subTask("Preparing to reload referenced ng package projects");
-		prepareToReloadNGPackageProjects(componentProjectReaders, serviceProjectReaders, monitor.newChild(8), canChangeResources);
+		prepareToReloadNGPackageProjects(componentProjectReaders, serviceProjectReaders, monitor.newChild(8));
 
 		monitor.subTask("Preparing to reload solution contained binary packages");
-		prepareToReloadSolutionContainedBinaryPackages(componentProjectReaders, serviceProjectReaders, monitor.newChild(8), canChangeResources);
+		prepareToReloadSolutionContainedBinaryPackages(componentProjectReaders, serviceProjectReaders, monitor.newChild(8));
 
 		Map<String, IPackageReader> allComponentsToLoad = new HashMap<>();
 		allComponentsToLoad.putAll(componentResourcesProjectReaders);
@@ -252,7 +254,7 @@ public abstract class BaseNGPackageManager
 	 * @param canChangeResources
 	 */
 	private void prepareToReloadSolutionContainedBinaryPackages(Map<String, IPackageReader> componentProjectReaders,
-		Map<String, IPackageReader> serviceProjectReaders, SubMonitor monitor, boolean canChangeResources)
+		Map<String, IPackageReader> serviceProjectReaders, SubMonitor monitor)
 	{
 		ServoyProject[] modules = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
 
@@ -270,7 +272,7 @@ public abstract class BaseNGPackageManager
 				{
 					try
 					{
-						if (canChangeResources) folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+						refreshResourceLater(folder, IResource.DEPTH_INFINITE);
 						IResource[] members = folder.members();
 						for (IResource resource : members)
 						{
@@ -296,13 +298,13 @@ public abstract class BaseNGPackageManager
 	 * referenced ng package projects; cause if for example a package is moved between the resources project and a separate ng pacakge project it would
 	 * error out because it might not be unloaded properly before being loaded again if you sequentially call reload on resources project packages and on ng package projects)
 	 */
-	protected void reloadResourcesProjectNGPackages(boolean reloadComponents, boolean reloadServices, IProgressMonitor m, boolean canChangeResources)
+	protected void reloadResourcesProjectNGPackages(boolean reloadComponents, boolean reloadServices, IProgressMonitor m)
 	{
 		SubMonitor monitor = SubMonitor.convert(m, "Reloading ng packages from resources project", 27);
 		Map<String, IPackageReader> newComponents = new HashMap<>();
 		Map<String, IPackageReader> newServices = new HashMap<>();
 
-		prepareReloadOfResourcesProjectNGPackages(reloadComponents, reloadServices, monitor.newChild(8), newComponents, newServices, canChangeResources);
+		prepareReloadOfResourcesProjectNGPackages(reloadComponents, reloadServices, monitor.newChild(8), newComponents, newServices);
 		monitor.setWorkRemaining(19);
 
 		boolean componentsReloaded = false;
@@ -341,15 +343,15 @@ public abstract class BaseNGPackageManager
 	 * for example a package is moved between the resources project and a separate ng pacakge project it would error out because it might not be unloaded
 	 * properly before being loaded again if you sequentially call reload on resources project packages and on ng package projects)
 	 */
-	protected void reloadAllSolutionReferencedPackages(IProgressMonitor m, boolean canChangeResources)
+	protected void reloadAllSolutionReferencedPackages(IProgressMonitor m)
 	{
 		Map<String, IPackageReader> componentReaders = new HashMap<String, IPackageReader>();
 		Map<String, IPackageReader> serviceReaders = new HashMap<String, IPackageReader>();
 		SubMonitor monitor = SubMonitor.convert(m, "Reloading all referenced ng package projects", 100);
 
-		prepareToReloadNGPackageProjects(componentReaders, serviceReaders, monitor.newChild(10), canChangeResources);
+		prepareToReloadNGPackageProjects(componentReaders, serviceReaders, monitor.newChild(10));
 
-		prepareToReloadSolutionContainedBinaryPackages(componentReaders, serviceReaders, monitor.newChild(8), canChangeResources);
+		prepareToReloadSolutionContainedBinaryPackages(componentReaders, serviceReaders, monitor.newChild(8));
 
 		monitor.setWorkRemaining((serviceReaders.size() + componentReaders.size()) * 10 + 3);
 		HashMap<String, IPackageReader> thisComponentReaders = new HashMap<String, IPackageReader>();
@@ -361,8 +363,7 @@ public abstract class BaseNGPackageManager
 		monitor.done();
 	}
 
-	private void prepareToReloadNGPackageProjects(Map<String, IPackageReader> componentReaders, Map<String, IPackageReader> serviceReaders, IProgressMonitor m,
-		boolean canChangeResources)
+	private void prepareToReloadNGPackageProjects(Map<String, IPackageReader> componentReaders, Map<String, IPackageReader> serviceReaders, IProgressMonitor m)
 	{
 		ServoyProject activeSolutionProject = ServoyModelFinder.getServoyModel().getActiveProject();
 		SubMonitor monitor = SubMonitor.convert(m, 10);
@@ -376,55 +377,73 @@ public abstract class BaseNGPackageManager
 			for (ServoyNGPackageProject ngPackageProject : ngPackageProjects)
 			{
 				IProject project = ngPackageProject.getProject();
-				readNewNGPackageProject(componentReaders, serviceReaders, project, monitor.newChild(1), canChangeResources);
+				readNewNGPackageProject(componentReaders, serviceReaders, project, monitor.newChild(1));
 			}
 		}
 		monitor.done();
 	}
 
 	protected void prepareReloadOfResourcesProjectNGPackages(boolean reloadComponents, boolean reloadServices, IProgressMonitor m,
-		Map<String, IPackageReader> newComponents, Map<String, IPackageReader> newServices, boolean canChangeResources)
+		Map<String, IPackageReader> newComponents, Map<String, IPackageReader> newServices)
 	{
 		ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 		SubMonitor monitor = SubMonitor.convert(m, 8);
 		if (activeResourcesProject != null)
 		{
-			if (canChangeResources)
+			final IFolder components = activeResourcesProject.getProject().getFolder(SolutionSerializer.COMPONENTS_DIR_NAME);
+			scheduleSystemJob(new Job("Removing any duplicate markers and refreshing...")
 			{
-				try
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
 				{
-					IFolder components = activeResourcesProject.getProject().getFolder(SolutionSerializer.COMPONENTS_DIR_NAME);
-					if (components != null && components.exists())
+					try
 					{
-						components.refreshLocal(IResource.DEPTH_INFINITE, monitor.newChild(1));
-						components.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_INFINITE);
-						components.refreshLocal(IResource.DEPTH_INFINITE, monitor.newChild(1));
+						if (components != null && components.exists())
+						{
+							components.refreshLocal(IResource.DEPTH_INFINITE, null);
+							components.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_INFINITE);
+							components.refreshLocal(IResource.DEPTH_INFINITE, null);
+						}
 					}
-					monitor.setWorkRemaining(25);
-					IFolder services = activeResourcesProject.getProject().getFolder(SolutionSerializer.SERVICES_DIR_NAME);
-					if (services != null && services.exists())
+					catch (CoreException ex)
 					{
-						services.refreshLocal(IResource.DEPTH_INFINITE, monitor.newChild(1));
-						services.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_INFINITE);
-						services.refreshLocal(IResource.DEPTH_INFINITE, monitor.newChild(1));
+						ServoyLog.logError(ex);
 					}
+					return Status.OK_STATUS;
 				}
-				catch (CoreException e)
+			}, components.getParent());
+			monitor.setWorkRemaining(25);
+			final IFolder services = activeResourcesProject.getProject().getFolder(SolutionSerializer.SERVICES_DIR_NAME);
+			scheduleSystemJob(new Job("Removing any duplicate markers and refreshing...")
+			{
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
 				{
-					ServoyLog.logError(e);
+					try
+					{
+						if (services != null && services.exists())
+						{
+							services.refreshLocal(IResource.DEPTH_INFINITE, null);
+							services.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_INFINITE);
+							services.refreshLocal(IResource.DEPTH_INFINITE, null);
+						}
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
+					return Status.OK_STATUS;
 				}
-			}
+			}, services.getParent());
 			monitor.setWorkRemaining(23);
 			if (reloadComponents)
 			{
-				readParentOfPackagesDir(newComponents, activeResourcesProject.getProject(), SolutionSerializer.COMPONENTS_DIR_NAME, monitor.newChild(2),
-					canChangeResources);
+				readParentOfPackagesDir(newComponents, activeResourcesProject.getProject(), SolutionSerializer.COMPONENTS_DIR_NAME, monitor.newChild(2));
 			}
 			monitor.setWorkRemaining(21);
 			if (reloadServices)
 			{
-				readParentOfPackagesDir(newServices, activeResourcesProject.getProject(), SolutionSerializer.SERVICES_DIR_NAME, monitor.newChild(2),
-					canChangeResources);
+				readParentOfPackagesDir(newServices, activeResourcesProject.getProject(), SolutionSerializer.SERVICES_DIR_NAME, monitor.newChild(2));
 			}
 		}
 		monitor.done();
@@ -440,8 +459,7 @@ public abstract class BaseNGPackageManager
 	 * @param oldNGPackageProjectsToUnload the projects to unload
 	 * @param newNGPackageProjectsToLoad the projects to load
 	 */
-	protected void reloadNGPackageProjects(List<IProject> oldNGPackageProjectsToUnload, List<IProject> newNGPackageProjectsToLoad, IProgressMonitor m,
-		boolean canChangeResources)
+	protected void reloadNGPackageProjects(List<IProject> oldNGPackageProjectsToUnload, List<IProject> newNGPackageProjectsToLoad, IProgressMonitor m)
 	{
 		// split them into services and components; prepare readers for new ones in order to do that
 		Map<String, IPackageReader> oldNGComponentProjectsToUnload = new HashMap<>();
@@ -472,7 +490,7 @@ public abstract class BaseNGPackageManager
 		// read and split new/to be loaded
 		for (IProject newP : newNGPackageProjectsToLoad)
 		{
-			readNewNGPackageProject(newNGComponentProjectsToLoad, newNGServiceProjectsToLoad, newP, monitor.newChild(1), canChangeResources);
+			readNewNGPackageProject(newNGComponentProjectsToLoad, newNGServiceProjectsToLoad, newP, monitor.newChild(1));
 		}
 
 		reloadActualSpecs(oldNGComponentProjectsToUnload, newNGComponentProjectsToLoad, oldNGServiceProjectsToUnload, newNGServiceProjectsToLoad,
@@ -509,49 +527,131 @@ public abstract class BaseNGPackageManager
 		monitor.done();
 	}
 
-	protected void readNewNGPackageProject(Map<String, IPackageReader> newComponentReaders, Map<String, IPackageReader> newServiceReaders, IProject project,
-		IProgressMonitor m, boolean canChangeResources)
+	protected void readNewNGPackageProject(Map<String, IPackageReader> newComponentReaders, Map<String, IPackageReader> newServiceReaders,
+		final IProject project, IProgressMonitor m)
 	{
-		try
+		refreshResourceLater(project, IResource.DEPTH_INFINITE);
+
+		removeSpecMarkersInJob(project);
+
+		IPackageReader reader = readPackageResource(project);
+		if (reader != null)
 		{
-			if (canChangeResources) project.refreshLocal(IResource.DEPTH_INFINITE, m);
-			project.deleteMarkers(SPEC_READ_MARKER, false, IResource.DEPTH_ONE);
-			IPackageReader reader = readPackageResource(project);
-			if (reader != null)
+			// see if it is a component package or a service package
+			if (IPackageReader.WEB_SERVICE.equals(reader.getPackageType()))
 			{
-				// see if it is a component package or a service package
-				if (IPackageReader.WEB_SERVICE.equals(reader.getPackageType()))
-				{
-					newServiceReaders.put(reader.getPackageName(), reader);
-				}
-				else if (IPackageReader.WEB_COMPONENT.equals(reader.getPackageType()) || IPackageReader.WEB_LAYOUT.equals(reader.getPackageType()))
-				{
-					newComponentReaders.put(reader.getPackageName(), reader);
-				}
-				else
-				{
-					IMarker marker = project.createMarker(SPEC_READ_MARKER);
-					marker.setAttribute(IMarker.MESSAGE,
-						"NG Package Project '" + project.getName() + "' cannot be loaded; no web component or service found in it's manifest file.");
-					marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-					marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
-					marker.setAttribute(IMarker.LOCATION, project.getLocation().toString());
-				}
+				newServiceReaders.put(reader.getPackageName(), reader);
+			}
+			else if (IPackageReader.WEB_COMPONENT.equals(reader.getPackageType()) || IPackageReader.WEB_LAYOUT.equals(reader.getPackageType()))
+			{
+				newComponentReaders.put(reader.getPackageName(), reader);
 			}
 			else
 			{
-				IMarker marker = project.createMarker(SPEC_READ_MARKER);
-				marker.setAttribute(IMarker.MESSAGE, "NG Package Project '" + project.getName() +
-					" cannot be loaded; please check the contents/structure of that project. Does it have a manifest file?");
-				marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-				marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
-				marker.setAttribute(IMarker.LOCATION, project.getLocation().toString());
+				scheduleSystemJob(new Job("Adding package project error markers...")
+				{
+					@Override
+					protected IStatus run(IProgressMonitor monitor)
+					{
+						try
+						{
+							if (project != null && project.isAccessible())
+							{
+								IMarker marker = project.createMarker(SPEC_READ_MARKER);
+								marker.setAttribute(IMarker.MESSAGE, "NG Package Project '" + project.getName() +
+									"' cannot be loaded; no web component or service found in it's manifest file.");
+								marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+								marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
+								marker.setAttribute(IMarker.LOCATION, project.getLocation().toString());
+							}
+						}
+						catch (Exception e)
+						{
+							ServoyLog.logError(e);
+						}
+						return Status.OK_STATUS;
+					}
+				}, project);
 			}
 		}
-		catch (Exception e)
+		else
 		{
-			ServoyLog.logError(e);
+			scheduleSystemJob(new Job("Adding package project errors marker...")
+			{
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
+				{
+					try
+					{
+						if (project != null && project.isAccessible())
+						{
+							IMarker marker = project.createMarker(SPEC_READ_MARKER);
+							marker.setAttribute(IMarker.MESSAGE, "NG Package Project '" + project.getName() +
+								" cannot be loaded; please check the contents/structure of that project. Does it have a manifest file?");
+							marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+							marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
+							marker.setAttribute(IMarker.LOCATION, project.getLocation().toString());
+						}
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
+					return Status.OK_STATUS;
+				}
+			}, project);
 		}
+	}
+
+	protected static void refreshResourceLater(final IResource resource, final int levels)
+	{
+		scheduleSystemJob(new Job("Refreshing package resources...")
+		{
+			@Override
+			protected IStatus run(IProgressMonitor monitor)
+			{
+				try
+				{
+					resource.refreshLocal(levels, monitor);
+				}
+				catch (CoreException e)
+				{
+					ServoyLog.logError(e);
+				}
+				return Status.OK_STATUS;
+			}
+		}, (resource.getProject() == resource || resource.getWorkspace().getRoot() == resource) ? resource : resource.getParent()); // refresh actually needs the parent rule for non-projects and non-workspace-root, cause the resource itself might have dissapeared
+	}
+
+	protected static void removeSpecMarkersInJob(final IResource resource)
+	{
+		scheduleSystemJob(new Job("Removing spec file markers...")
+		{
+			@Override
+			protected IStatus run(IProgressMonitor monitor)
+			{
+				if (resource != null && resource.isAccessible())
+				{
+					try
+					{
+						resource.deleteMarkers(SPEC_READ_MARKER, false, IResource.DEPTH_ONE);
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+				return Status.OK_STATUS;
+			}
+		}, resource);
+	}
+
+	protected static void scheduleSystemJob(Job job, IResource r)
+	{
+		job.setRule(r);
+		job.setSystem(true);
+		job.setUser(false);
+		job.schedule();
 	}
 
 	/**
@@ -563,15 +663,14 @@ public abstract class BaseNGPackageManager
 	 */
 	protected abstract boolean isDefaultPackageEnabled(String packageName);
 
-	protected void readParentOfPackagesDir(Map<String, IPackageReader> readers, IProject iProject, String folderName, IProgressMonitor monitor,
-		boolean canChangeResources)
+	protected void readParentOfPackagesDir(Map<String, IPackageReader> readers, IProject iProject, String folderName, IProgressMonitor monitor)
 	{
 		IFolder folder = iProject.getFolder(folderName);
 		if (folder.exists())
 		{
 			try
 			{
-				if (canChangeResources) folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+				refreshResourceLater(folder, IResource.DEPTH_INFINITE);
 				IResource[] members = folder.members();
 				for (IResource resource : members)
 				{
@@ -623,34 +722,47 @@ public abstract class BaseNGPackageManager
 		return ngPackageProjectServiceReaders.containsKey(resourceName);
 	}
 
-	protected static void addErrorMarker(IResource resource, Exception e)
+	protected static void addErrorMarker(IResource resource, final Exception e)
 	{
-		try
+		IResource res = resource;
+		if (!res.exists())
 		{
-			IResource res = resource;
-			if (!res.exists())
-			{
-				res = res.getParent();
-			}
-			IMarker marker = null;
-			if (e instanceof DuplicatePackageException)
-			{
-				res.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_ONE);
-				marker = resource.createMarker(DUPLICATE_COMPONENT_MARKER);
-			}
-			else
-			{
-				marker = res.createMarker(SPEC_READ_MARKER);
-			}
-			marker.setAttribute(IMarker.MESSAGE, e.getMessage());
-			marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-			marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
-			marker.setAttribute(IMarker.LOCATION, res.getLocation().toString());
+			res = res.getParent();
 		}
-		catch (CoreException ex)
+		final IResource r = res;
+
+		scheduleSystemJob(new Job("Adding spec error marker...")
 		{
-			ServoyLog.logError(ex);
-		}
+			@Override
+			protected IStatus run(IProgressMonitor monitor)
+			{
+				try
+				{
+					if (r != null && r.isAccessible())
+					{
+						IMarker marker = null;
+						if (e instanceof DuplicateEntityException)
+						{
+							r.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_ONE);
+							marker = r.createMarker(DUPLICATE_COMPONENT_MARKER);
+						}
+						else
+						{
+							marker = r.createMarker(SPEC_READ_MARKER);
+						}
+						marker.setAttribute(IMarker.MESSAGE, e.getMessage());
+						marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+						marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
+						marker.setAttribute(IMarker.LOCATION, r.getLocation().toString());
+					}
+				}
+				catch (CoreException ex)
+				{
+					ServoyLog.logError(ex);
+				}
+				return Status.OK_STATUS;
+			}
+		}, r);
 	}
 
 	protected ServoyNGPackageProject[] getReferencedNGPackageProjectsInternal()
@@ -678,14 +790,8 @@ public abstract class BaseNGPackageManager
 		{
 			if (manifest != null) return manifest;
 			IFile file = container.getFile(new Path("META-INF/MANIFEST.MF"));
-			try
-			{
-				file.deleteMarkers(SPEC_READ_MARKER, false, IResource.DEPTH_ONE);
-			}
-			catch (CoreException e)
-			{
-				ServoyLog.logError(e);
-			}
+			removeSpecMarkersInJob(file);
+
 			try
 			{
 				return super.getManifest();
@@ -703,14 +809,7 @@ public abstract class BaseNGPackageManager
 			IFile file = container.getFile(new Path(path));
 			if (file != null && file.exists())
 			{
-				try
-				{
-					file.deleteMarkers(SPEC_READ_MARKER, false, IResource.DEPTH_ONE);
-				}
-				catch (CoreException e)
-				{
-					ServoyLog.logError(e);
-				}
+				removeSpecMarkersInJob(file);
 			}
 			return super.readTextFile(path, charset);
 		}
@@ -719,7 +818,7 @@ public abstract class BaseNGPackageManager
 		public void reportError(String specpath, Exception e)
 		{
 			super.reportError(specpath, e);
-			addErrorMarker(e instanceof DuplicatePackageException ? container : container.getFile(new Path(specpath)), e);
+			addErrorMarker(e instanceof DuplicateEntityException ? container : container.getFile(new Path(specpath)), e);
 		}
 	}
 

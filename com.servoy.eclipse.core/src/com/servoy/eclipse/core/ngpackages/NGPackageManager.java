@@ -73,7 +73,7 @@ public class NGPackageManager extends BaseNGPackageManager
 				//default packages preferences changed - flush everything
 				WebComponentSpecProvider.disposeInstance();
 				WebServiceSpecProvider.disposeInstance();
-				reloadAllNGPackages(null, true);
+				reloadAllNGPackages(null);
 			}
 		});
 
@@ -90,20 +90,20 @@ public class NGPackageManager extends BaseNGPackageManager
 				{
 					if (updateInfo == RESOURCES_UPDATED_ON_ACTIVE_PROJECT)
 					{
-						reloadResourcesProjectNGPackages(true, true, null, false);
+						reloadResourcesProjectNGPackages(true, true, null);
 					}
 					else if (updateInfo == MODULES_UPDATED)
 					{
 						// TODO if we will take referenced ng package projects even from modules, we should enable this code...
 						clearActiveSolutionReferencesCache();
-						reloadAllSolutionReferencedPackages(new NullProgressMonitor(), false);
+						reloadAllSolutionReferencedPackages(new NullProgressMonitor());
 					}
 				}
 
 				public void activeProjectChanged(ServoyProject activeProject)
 				{
 					clearActiveSolutionReferencesCache();
-					reloadAllNGPackages(null, false);
+					reloadAllNGPackages(null);
 				}
 			};
 			((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(activeProjectListenerForRegisteringResources);
@@ -111,7 +111,7 @@ public class NGPackageManager extends BaseNGPackageManager
 	}
 
 	@Override
-	public void reloadAllNGPackages(IProgressMonitor m, boolean canChangeResources)
+	public void reloadAllNGPackages(IProgressMonitor m)
 	{
 		// do what super does but in a job; this is what code prior to the refactor did as well
 		Job registerAllNGPackagesJob = new Job("Reading ng packages from resources project...")
@@ -120,7 +120,7 @@ public class NGPackageManager extends BaseNGPackageManager
 			public IStatus run(IProgressMonitor monitor)
 			{
 				// do the actual work
-				NGPackageManager.super.reloadAllNGPackages(monitor, true);
+				NGPackageManager.super.reloadAllNGPackages(monitor);
 				return Status.OK_STATUS;
 			}
 
@@ -130,8 +130,7 @@ public class NGPackageManager extends BaseNGPackageManager
 	}
 
 	@Override
-	protected void reloadResourcesProjectNGPackages(final boolean reloadComponents, final boolean reloadServices, IProgressMonitor m,
-		boolean canChangeResources)
+	protected void reloadResourcesProjectNGPackages(final boolean reloadComponents, final boolean reloadServices, IProgressMonitor m)
 	{
 		Job registerResourceNGPackagesJob = new Job("Reading ng packages from resources project...")
 		{
@@ -139,7 +138,7 @@ public class NGPackageManager extends BaseNGPackageManager
 			public IStatus run(IProgressMonitor monitor)
 			{
 				// do the actual work
-				NGPackageManager.super.reloadResourcesProjectNGPackages(reloadComponents, reloadServices, monitor, true);
+				NGPackageManager.super.reloadResourcesProjectNGPackages(reloadComponents, reloadServices, monitor);
 				return Status.OK_STATUS;
 			}
 
@@ -150,7 +149,7 @@ public class NGPackageManager extends BaseNGPackageManager
 	}
 
 	@Override
-	protected void reloadAllSolutionReferencedPackages(IProgressMonitor m, final boolean canChangeResources)
+	protected void reloadAllSolutionReferencedPackages(IProgressMonitor m)
 	{
 		Job registerNgPackagesJob = new Job("Reading all ng package projects...")
 		{
@@ -158,7 +157,7 @@ public class NGPackageManager extends BaseNGPackageManager
 			public IStatus run(IProgressMonitor monitor)
 			{
 				// do the actual work
-				NGPackageManager.super.reloadAllSolutionReferencedPackages(monitor, canChangeResources);
+				NGPackageManager.super.reloadAllSolutionReferencedPackages(monitor);
 				return Status.OK_STATUS;
 			}
 
@@ -169,7 +168,7 @@ public class NGPackageManager extends BaseNGPackageManager
 
 	@Override
 	protected void reloadNGPackageProjects(final List<IProject> oldNGPackageProjectsToUnload, final List<IProject> newNGPackageProjectsToLoad,
-		IProgressMonitor m, boolean canChangeResources)
+		IProgressMonitor m)
 	{
 		Job registerSomeNGPackageProjectsJob = new Job("Reading some ng package projects...")
 		{
@@ -177,7 +176,7 @@ public class NGPackageManager extends BaseNGPackageManager
 			public IStatus run(IProgressMonitor monitor)
 			{
 				// do the actual work
-				NGPackageManager.super.reloadNGPackageProjects(oldNGPackageProjectsToUnload, newNGPackageProjectsToLoad, monitor, true);
+				NGPackageManager.super.reloadNGPackageProjects(oldNGPackageProjectsToUnload, newNGPackageProjectsToLoad, monitor);
 				return Status.OK_STATUS;
 			}
 

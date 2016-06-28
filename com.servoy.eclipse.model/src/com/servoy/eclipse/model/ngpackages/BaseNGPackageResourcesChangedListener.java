@@ -100,13 +100,13 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 			// we have to reload all to avoid a problem where when moving a package completely between resources project and it's own project
 			// it could be loaded twice (if we would reload first resources project and then it's own project, then while reloading from one the others will not yet be unloaded)
 			if (clearReferencedProjectsCache.value.booleanValue()) baseNGPackageManager.clearActiveSolutionReferencesCache();
-			baseNGPackageManager.reloadAllNGPackages(null, false);
+			baseNGPackageManager.reloadAllNGPackages(null);
 			if (clearReferencedProjectsCache.value.booleanValue()) baseNGPackageManager.ngPackageProjectListChanged();
 		}
 		else if (somethingChangedInResourcesProject)
 		{
 			// something changed only in resources project ngpackages
-			baseNGPackageManager.reloadResourcesProjectNGPackages(refreshResourcesComponents, refreshResourcesServices, null, false);
+			baseNGPackageManager.reloadResourcesProjectNGPackages(refreshResourcesComponents, refreshResourcesServices, null);
 		}
 		else
 		{
@@ -114,11 +114,11 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 			if (clearReferencedProjectsCache.value.booleanValue()) baseNGPackageManager.clearActiveSolutionReferencesCache();
 			if (refreshAllNGPackageProjects.value.booleanValue())
 			{
-				baseNGPackageManager.reloadAllSolutionReferencedPackages(null, false);
+				baseNGPackageManager.reloadAllSolutionReferencedPackages(null);
 			}
 			else if (newNGPackageProjectsToLoad.size() > 0 || oldNGPackageProjectsToUnload.size() > 0)
 			{
-				baseNGPackageManager.reloadNGPackageProjects(oldNGPackageProjectsToUnload, newNGPackageProjectsToLoad, null, false);
+				baseNGPackageManager.reloadNGPackageProjects(oldNGPackageProjectsToUnload, newNGPackageProjectsToLoad, null);
 			}
 			if (clearReferencedProjectsCache.value.booleanValue()) baseNGPackageManager.ngPackageProjectListChanged();
 		}

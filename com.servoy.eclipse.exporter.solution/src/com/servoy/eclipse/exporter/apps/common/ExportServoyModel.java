@@ -61,7 +61,7 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 			System.out.println("Cannot find solution project named '" + solutionName + "'. Are you sure you specified the correct workspace location?");
 		}
 		getNGPackageManager().clearActiveSolutionReferencesCache();
-		getNGPackageManager().reloadAllNGPackages(null, true);
+		getNGPackageManager().reloadAllNGPackages(null);
 	}
 
 	private void setActiveResourcesProject(ServoyResourcesProject servoyResourcesProject)
@@ -93,7 +93,8 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 		((WorkspaceUserManager)ApplicationServerRegistry.get().getUserManager()).setResourcesProject(
 			activeResourcesProject != null ? activeResourcesProject.getProject() : null); // this needs to always be done to refresh in case the main solution changed
 	}
-		@Override
+
+	@Override
 	protected BaseNGPackageManager createNGPackageManager()
 	{
 		return new ExportNGPackageManager();
