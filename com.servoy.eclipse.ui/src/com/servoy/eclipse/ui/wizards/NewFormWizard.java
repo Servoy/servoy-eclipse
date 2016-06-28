@@ -381,7 +381,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			if (form.isResponsiveLayout() && WebComponentSpecProvider.getInstance().getLayoutSpecifications().isEmpty())
 			{
-				if (MessageDialog.openConfirm(getShell(), "No Responsive Layout present", "Do you want to download a responsive layout now?"))
+				if (MessageDialog.openConfirm(getShell(), "No Responsive Layout present",
+					"This solution does not have a responsive layout yet. You need a responsive layout to build responsive form, do you want to download a responsive layout now ?"))
 				{
 					EditorUtil.openWebPackageManager();
 				}
@@ -745,8 +746,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 					groupLayout.createSequentialGroup().addContainerGap().add(
 						groupLayout.createParallelGroup(GroupLayout.LEADING).add(formNameLabel).add(extendsLabel).add(datasourceLabel).add(projectLabel).add(
 							styleLabel).add(templateLabel).add(listFormLabel).add(refFormLabel)).add(15,
-									15,
-									15).add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(referenceFormCheck, GroupLayout.DEFAULT_SIZE, 159,
+								15,
+								15).add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(referenceFormCheck, GroupLayout.DEFAULT_SIZE, 159,
 									Short.MAX_VALUE).add(listFormCheck, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(projectComboControl,
 										GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(templateNameComboControl, GroupLayout.DEFAULT_SIZE, 159,
 											Short.MAX_VALUE).add(styleNameComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(extendsFormControl,
@@ -768,14 +769,14 @@ public class NewFormWizard extends Wizard implements INewWizard
 														GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
 															templateLabel)).addPreferredGap(LayoutStyle.RELATED).add(
 																groupLayout.createParallelGroup(GroupLayout.CENTER).add(projectLabel).add(projectComboControl,
-																		GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-																		GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-																			groupLayout.createParallelGroup(GroupLayout.CENTER).add(listFormLabel).add(
-																				listFormCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-																				GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-																					groupLayout.createParallelGroup(GroupLayout.CENTER).add(refFormLabel).add(
-																						referenceFormCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-																						GroupLayout.PREFERRED_SIZE)).addContainerGap(100, Short.MAX_VALUE)));
+																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																	GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+																		groupLayout.createParallelGroup(GroupLayout.CENTER).add(listFormLabel).add(
+																			listFormCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																			GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+																				groupLayout.createParallelGroup(GroupLayout.CENTER).add(refFormLabel).add(
+																					referenceFormCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																					GroupLayout.PREFERRED_SIZE)).addContainerGap(100, Short.MAX_VALUE)));
 			topLevel.setLayout(groupLayout);
 			topLevel.setTabList(
 				new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl, listFormCheck, referenceFormCheck });
