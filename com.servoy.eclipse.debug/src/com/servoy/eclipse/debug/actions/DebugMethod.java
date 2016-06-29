@@ -35,6 +35,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.j2db.IDebugClientHandler;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
@@ -57,8 +58,14 @@ public class DebugMethod implements IViewActionDelegate
 	 */
 	public void run(IAction action)
 	{
-		if (sm != null && Activator.getDefault().getDebugClientHandler().getDebugReadyClient() != null)
+		final IDebugClientHandler debugClientHandler = Activator.getDefault().getDebugClientHandler();
+		if (sm != null && debugClientHandler.getDebugReadyClient() != null)
 		{
+			if (debugClientHandler.getDebugWebClient() != null)
+			{
+				//make sure the web client gets the latest changes
+				debugClientHandler.getDebugWebClient().checkForChanges();
+			}
 			IPath path = sm.getPath();
 			String[] segments = path.segments();
 			String solutionName = segments[0];
@@ -79,11 +86,11 @@ public class DebugMethod implements IViewActionDelegate
 						String basename = segments[segments.length - 1];
 						scopeName = basename.substring(0, basename.length() - 3); // remove .js
 					}
-					Activator.getDefault().getDebugClientHandler().executeMethod((ISupportChilds)parent, scopeName, sm.getElementName());
+					debugClientHandler.executeMethod((ISupportChilds)parent, scopeName, sm.getElementName());
 				}
 			}
 		}
-		else if (Activator.getDefault().getDebugClientHandler().getDebugReadyClient() == null)
+		else if (debugClientHandler.getDebugReadyClient() == null)
 		{
 			MessageDialog.openError(Display.getDefault().getActiveShell(), "Debug Method Problem", "Cannot debug method; please start a debug client first."); //$NON-NLS-1$ //$NON-NLS-2$
 		}
