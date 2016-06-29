@@ -8,22 +8,21 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 		var enabled = true;
 		var execute = null;
 
-		function shouldDrawIfDragging(dropTarget) {
-			if (utils.getDraggingFromPallete() != null) {
-				if (!editorScope.isAbsoluteFormLayout())
+		function getHighlightNode(event) {
+			if (utils.getDraggingFromPallete() != null && editorScope.getEditorContentRootScope().drop_highlight) {
+				var drop = editorScope.getEditorContentRootScope().drop_highlight.split(".");
+				var canDrop = utils.getDropNode(utils.getDraggingFromPallete(), null, drop[drop.length-1], event);
+				if (canDrop && canDrop.dropAllowed && canDrop.dropTarget)
 				{
-					// always draw for flow layout
-					return true;
-				}
-				var draggedItem = utils.getDraggingFromPallete();
-				return ((dropTarget.getAttribute("svy-types") != null) && (dropTarget.getAttribute("svy-types").indexOf(draggedItem) > 0))
+					return canDrop.dropTarget;
+				}	
 			}
-			return true;
+			return utils.getNode(event);
 		}
 
 		function drawHighlightDiv() {
-			var node = utils.getNode(event);
-			if (node && enabled && shouldDrawIfDragging(node) && !editorScope.highlight) {
+			var node = getHighlightNode(event);
+			if (node && enabled && !editorScope.highlight) {
 				if (node.parentElement != undefined && node.parentElement.parentElement !== editorScope.glasspane) {
 					if (node.clientWidth == 0 && node.clientHeight == 0 && node.firstElementChild) node = node.firstElementChild;
 					if (!node.getBoundingClientRect) node = node.parentNode;
