@@ -80,7 +80,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 				}
 				else
 				{
-					pack.put("activeSolution", msg.has("solution") ? msg.get("solution") : activeSolutionName);
+					pack.put("activeSolution", msg != null && msg.has("solution") ? msg.get("solution") : activeSolutionName);
 				}
 				// TODO add the solution where this package is installed in.
 				result.put(pack);
