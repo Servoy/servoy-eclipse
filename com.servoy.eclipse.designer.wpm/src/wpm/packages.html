@@ -30,7 +30,7 @@
     <td class="column-fitwidth">
       <!-- Add/Upgrade button -->
       <div class="align-center btn-group">
-        <md-button class="md-icon-button" ng-class="getInstallClass($index)" ng-click="install(package, $index)" ng-if="installAvailable($index)" ng-disabled="isInstallingOrRemoving($index)" >
+        <md-button class="md-icon-button svy-primary" ng-class="getInstallClass($index)" ng-click="install(package, $index)" ng-if="installAvailable($index)" ng-disabled="isInstallingOrRemoving($index)" >
           <md-tooltip md-direction="bottom">
             {{getInstallTooltip($index)}}
           </md-tooltip>
@@ -53,7 +53,7 @@
       <!-- Active Solution -->
       <div class="align-center">  
         <md-select ng-model="package.activeSolution" class="select-solution" ng-disabled="!installEnabled($index)">
-          <md-option ng-value="solution" ng-repeat="solution in $parent.solutionList">{{solution}}</md-option>
+          <md-option ng-value="solution" ng-repeat="solution in $parent.solutionList | orderBy">{{solution}}</md-option>
           <md-tooltip md-direction="bottom" md-autohide="true">
             {{package.activeSolution}}
           </md-tooltip>

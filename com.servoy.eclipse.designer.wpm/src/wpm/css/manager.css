@@ -161,6 +161,11 @@ td.column-fitwidth {
     background-color: #e4844a;
 }
 
+.svy-primary.md-icon-button:not([disabled]),
+.svy-primary.md-icon-button:not([disabled]):hover {
+    color: #e4844a;
+}
+
 /* Select */
 md-select.select-solution {
   width: 100%;
