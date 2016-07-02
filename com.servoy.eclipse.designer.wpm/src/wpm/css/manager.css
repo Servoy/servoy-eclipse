@@ -26,6 +26,8 @@ md-tabs-canvas,
 md-tabs .md-tab {
   background-color: #000;
   color: #fff;
+  font-size: medium;
+  text-transform: none;
 }
 
 /* Tab's content */
@@ -49,6 +51,8 @@ md-tabs .md-tab.md-focused,
 md-tabs.md-default-theme .md-tab.md-focused md-icon, 
 md-tabs .md-tab.md-focused md-icon {
   color: #e4844a;
+  font-size: medium;
+  text-transform: none;
 }
 
 /* Table */
@@ -59,6 +63,8 @@ md-tabs .md-tab.md-focused md-icon {
 /* Table header */
 .md-subheader {
     white-space: nowrap;
+	font-size: medium;
+	font-weight: bold;
 }
 
 .md-subheader.md-default-theme, .md-subheader {
@@ -209,7 +215,6 @@ md-select.select-release {
 .wpm-subtitle {
   margin-top: 0px;
   margin-bottom: 20px;
-  text-transform: uppercase;
   font-size: 14px;
 }
 
@@ -223,7 +228,7 @@ md-select.select-release {
 
 /* General */
 .md-icon-button {
-  font-size: 28px;
+  font-size: medium;
 }
 
 .wpm-icon-small {
@@ -273,18 +278,26 @@ md-select.select-release {
   padding-left: 4px;
 }
 
-.wpm-package-selected,
+.wpm-package-selected {
+  background-color: rgb(210,210,210);
+}
+
 .wpm-package-description {
-/*  background-color: rgb(250,250,250);*/
 }
 
 tr.wpm-package-description > td {
-  padding: 8px;
+  padding-left: 60px;
+  padding-right: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
 }
 
 tr.wpm-package-description > td > md-content {
   overflow: hidden;
-/*  background-color: rgb(250,250,250);*/
+  background-color: rgb(240,240,240);
+  padding-bottom: 15px;
+  padding-top: 15px;
+
 /* box-shadow: 0px 0px 1px 1px rgba(0, 0, 0, 0.14), 
     0px 0px 2px 2px rgba(0, 0, 0, 0.098), 
     0px 0px 5px 1px rgba(0, 0, 0, 0.084); */

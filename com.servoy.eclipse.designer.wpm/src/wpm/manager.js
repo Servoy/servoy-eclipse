@@ -112,6 +112,7 @@ angular.module('app', ['ngMaterial'])
 		link:function($scope, $element, $attrs) {
 
 		  $scope.selectedPackage;
+		  $scope.descriptionExpanded;
 			
 		  $scope.getInstallText = function(index) {
 		    if ($scope.packages[index].installed) { 
@@ -134,15 +135,33 @@ angular.module('app', ['ngMaterial'])
 		  }
 
 		  $scope.getInstallTooltip = function(index) {
-		    if ($scope.packages[index].installed) { 
-		      return $scope.packages[index].installing ? "Upgrading the web package..." : "Upgrade the web package to the selected release version";
-		    } else if($scope.packages[index].installing) {
-			  return "Adding the web package...";		      
-		    } else {
-		      return "Add the web package to solution " + $scope.packages[index].activeSolution;
-		    }
-		  }  
-		  
+			    if ($scope.packages[index].installed) { 
+			      return $scope.packages[index].installing ? "Upgrading the web package..." : "Upgrade the web package to the selected release version.";
+			    } else if($scope.packages[index].installing) {
+				  return "Adding the web package...";		      
+			    } else {
+			      return "Add the web package to solution '" + $scope.packages[index].activeSolution + "'.";
+			    }
+			  }  
+			  
+		  $scope.getSolutionTooltip = function(index) {
+			    if ($scope.packages[index].installed) { 
+			      return $scope.packages[index].installing ? "Solution that will contain this upgrading package..." : "The solution that already contains/references this package.";
+			    } else if($scope.packages[index].installing) {
+				  return "Solution that will contain this package...";		      
+			    } else {
+			      return "Solution that this package will be added to if you press the 'Add' button.";
+			    }
+			  }  
+			  
+		  $scope.getReleaseTooltip = function(index) {
+			    if ($scope.packages[index].installed) { 
+			      return "Version to upgrade to...";
+			    } else {
+			      return "Version to add to the active solution or modules...";
+			    }
+			  }  
+			  
 		  $scope.getSelectedRelease = function(index) {
 			if (angular.isUndefined($scope.packages[index].selected)) {
 				$scope.packages[index].selected = $scope.packages[index].releases[0].version; 
@@ -189,12 +208,18 @@ angular.module('app', ['ngMaterial'])
 		  $scope.isPackageSelected = function(index) {
         	return $scope.selectedPackage && $scope.selectedPackage === $scope.packages[index].displayName;
           }
+		  
+		  $scope.isSelectedAndWithDescriptionExpanded = function(index) {
+	        return $scope.isPackageSelected(index) && $scope.descriptionExpanded;
+          }
 
 	      $scope.togglePackageSelection = function(index, event) {
-	    	if ($scope.isPackageSelected(index) || !$scope.packages[index].description) {
-	          $scope.selectedPackage = null;
+	    	if ($scope.isPackageSelected(index)) {
+	          $scope.descriptionExpanded = !$scope.descriptionExpanded;
+	          if ($scope.descriptionExpanded) $scope.descriptionExpanded = !!$scope.packages[index].description; // allow expand only if it has a description
 	        } else {
 	          $scope.selectedPackage = $scope.packages[index].displayName;
+	          $scope.descriptionExpanded = !!$scope.packages[index].description;
 	        }
 	        event.stopPropagation();
 	      }

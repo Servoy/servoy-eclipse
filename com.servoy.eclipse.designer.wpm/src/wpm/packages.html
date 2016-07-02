@@ -11,9 +11,9 @@
       <div class="wpm-clickable" ng-click="togglePackageSelection($index, $event)">
         <img  ng-src="{{package.icon}}" class="md-avatar" />
         <span>{{package.displayName}}</span>
-        <span ng-if="package.description" class= "wpm-icon-small" ng-class="isPackageSelected($index) ? 'fa fa-caret-up' : 'fa fa-caret-down'"></span>
+        <span ng-if="package.description" class= "wpm-icon-small" ng-class="isSelectedAndWithDescriptionExpanded($index) ? 'fa fa-caret-up' : 'fa fa-caret-down'"></span>
         <md-tooltip md-direction="bottom" md-autohide="true" ng-if="package.description" >
-          Read more about {{package.displayName}}
+          Click to read more about package '{{package.displayName}}'.
         </md-tooltip>
       </div>
     </td>
@@ -23,6 +23,9 @@
         <div class= "select"> 
           <md-select ng-model="package.selected" class="select-release" md-selected-text="getSelectedRelease($index)">
             <md-option ng-value="release.version" ng-repeat="release in package.releases">{{release.version}}</md-option>
+            <md-tooltip md-direction="bottom" md-autohide="true">
+              {{getReleaseTooltip($index)}}
+            </md-tooltip>
           </md-select>
         </div>
       </div>
@@ -31,7 +34,7 @@
       <!-- Add/Upgrade button -->
       <div class="align-center btn-group">
         <md-button class="md-icon-button svy-primary" ng-class="getInstallClass($index)" ng-click="install(package, $index)" ng-if="installAvailable($index)" ng-disabled="isInstallingOrRemoving($index)" >
-          <md-tooltip md-direction="bottom">
+          <md-tooltip md-direction="bottom" md-autohide="true">
             {{getInstallTooltip($index)}}
           </md-tooltip>
         </md-button>
@@ -43,7 +46,7 @@
         <p> {{package.installed}} </p>
         <md-button class="md-icon-button fa fa-trash"  ng-click="uninstall(package, $index)" ng-if="package.installed" ng-disabled="isInstallingOrRemoving($index)">
           <md-tooltip md-direction="bottom" md-autohide="true">
-            Remove the web package from solution {{packages[$index].activeSolution}} 
+            Remove the web package from solution '{{packages[$index].activeSolution}}'.
           </md-tooltip>
         </md-button>
         <!--<i class="fa fa-check-circle-o release-action success" ng-if="package.installed"></i>-->
@@ -55,7 +58,7 @@
         <md-select ng-model="package.activeSolution" class="select-solution" ng-disabled="!installEnabled($index)">
           <md-option ng-value="solution" ng-repeat="solution in $parent.solutionList | orderBy">{{solution}}</md-option>
           <md-tooltip md-direction="bottom" md-autohide="true">
-            {{package.activeSolution}}
+            {{getSolutionTooltip($index)}}
           </md-tooltip>
         </md-select>
         <!--<i class="fa fa-check-circle-o release-action success" ng-if="package.installed"></i>-->
@@ -89,12 +92,10 @@
       <md-progress-linear md-mode="indeterminate" ng-if="true"></md-progress-linear>
     </td>
   </tr>
-  <tr ng-repeat-end ng-show="isPackageSelected($index)" class="wpm-package-description">
+  <tr ng-repeat-end ng-show="isSelectedAndWithDescriptionExpanded($index)" class="wpm-package-description">
     <!-- Description panel --> 
     <td colspan="6">
-      <hr/>
-      <md-content ng-if="isPackageSelected($index)" class="md-padding wpm-collapsible wpm-collapsible-content" ng-bind-html="getPackageDescription($index)">
-      </md-content>
+      <md-content ng-if="isSelectedAndWithDescriptionExpanded($index)" class="md-padding wpm-collapsible wpm-collapsible-content" ng-bind-html="getPackageDescription($index)">
       <hr/>
     </td>
   </tr>
