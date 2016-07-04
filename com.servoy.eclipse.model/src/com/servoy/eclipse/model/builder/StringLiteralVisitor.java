@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.ui.quickfix.jsexternalize;
+package com.servoy.eclipse.model.builder;
 
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.javascript.ast.CallExpression;
@@ -36,7 +36,7 @@ public abstract class StringLiteralVisitor extends org.eclipse.dltk.ast.ASTVisit
 
 	private final char[] scriptContent;
 
-	StringLiteralVisitor(char[] scriptContent)
+	public StringLiteralVisitor(char[] scriptContent)
 	{
 		this.scriptContent = scriptContent;
 	}

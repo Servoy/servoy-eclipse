@@ -24,6 +24,8 @@ import org.eclipse.dltk.ui.editor.IScriptAnnotation;
 import org.eclipse.dltk.ui.text.IScriptCorrectionContext;
 import org.eclipse.dltk.ui.text.IScriptCorrectionProcessor;
 
+import com.servoy.eclipse.model.builder.JSFileExternalizeProblem;
+
 /**
  * Script corrector for externalize strings
  * @author gboros

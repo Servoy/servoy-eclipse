@@ -27,6 +27,7 @@ import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.text.edits.InsertEdit;
 
+import com.servoy.eclipse.model.builder.StringLiteralVisitor;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.resource.ImageResource;
@@ -50,21 +51,11 @@ public class AddMissingNLSResolution extends TextFileEditResolution
 		return "Insert missing $NON-NLS$ tag";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IMarkerResolution2#getImage()
-	 */
 	public Image getImage()
 	{
 		return ImageResource.INSTANCE.getImage(Activator.loadImageDescriptorFromBundle("never_translate.gif"));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.dltk.ui.text.IAnnotationResolution2#getDescription()
-	 */
 	public String getDescription()
 	{
 		ISourceModule scriptFileSourceModule = DLTKCore.createSourceModuleFrom(scriptFile);

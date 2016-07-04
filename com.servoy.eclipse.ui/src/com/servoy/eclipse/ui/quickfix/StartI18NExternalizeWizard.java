@@ -30,9 +30,9 @@ import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolution2;
 import org.eclipse.ui.IMarkerResolutionGenerator;
 
+import com.servoy.eclipse.model.builder.JSFileExternalizeProblem;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.actions.ShowI18NDialogActionDelegate;
-import com.servoy.eclipse.ui.quickfix.jsexternalize.JSFileExternalizeProblem;
 import com.servoy.eclipse.ui.resource.ImageResource;
 
 /**

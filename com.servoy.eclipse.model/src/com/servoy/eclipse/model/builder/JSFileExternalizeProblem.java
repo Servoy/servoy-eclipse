@@ -15,11 +15,12 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.ui.quickfix.jsexternalize;
+package com.servoy.eclipse.model.builder;
 
 import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
 
-import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.model.Activator;
+
 
 /**
  * Problem identifier for non-externalized strings in js file
@@ -29,9 +30,6 @@ public enum JSFileExternalizeProblem implements IProblemIdentifier
 {
 	NON_EXTERNALIZED_STRING;
 
-	/*
-	 * @see org.eclipse.dltk.compiler.problem.IProblemIdentifier#contributor()
-	 */
 	public String contributor()
 	{
 		return Activator.getDefault() != null ? Activator.getDefault().toString() : null;

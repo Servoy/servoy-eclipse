@@ -15,7 +15,7 @@
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
 
-package com.servoy.eclipse.ui.quickfix.jsexternalize;
+package com.servoy.eclipse.model.builder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -121,7 +121,8 @@ public class JSFileExternalize implements IBuildParticipantFactory
 			{
 				script.traverse(new StringLiteralVisitor(content)
 				{
-					private final List<IProblemIdentifier> suppressProblems = Arrays.asList(new IProblemIdentifier[] { JSFileExternalizeProblem.NON_EXTERNALIZED_STRING });
+					private final List<IProblemIdentifier> suppressProblems = Arrays.asList(
+						new IProblemIdentifier[] { JSFileExternalizeProblem.NON_EXTERNALIZED_STRING });
 
 					/*
 					 * @see com.servoy.eclipse.core.builder.StringLiteralVisitor#visitStringLiteral(org.eclipse.dltk.javascript.ast.StringLiteral, int, int,
@@ -130,8 +131,8 @@ public class JSFileExternalize implements IBuildParticipantFactory
 					@Override
 					public boolean visitStringLiteral(StringLiteral node, int lineStartIdx, int lineEndIdx, int stringLiteralIdx)
 					{
-						if (!isMarkedForSkip(new String(content, lineStartIdx, lineEndIdx - lineStartIdx + 1), stringLiteralIdx)) reportWarning(reporter,
-							node.sourceStart(), node.sourceEnd(), stringLiteralIdx);
+						if (!isMarkedForSkip(new String(content, lineStartIdx, lineEndIdx - lineStartIdx + 1), stringLiteralIdx))
+							reportWarning(reporter, node.sourceStart(), node.sourceEnd(), stringLiteralIdx);
 						return true;
 					}
 
