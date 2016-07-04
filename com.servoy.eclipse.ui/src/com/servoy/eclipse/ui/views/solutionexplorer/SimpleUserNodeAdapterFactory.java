@@ -216,12 +216,12 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 					if (forms != null) mappings.add(forms);
 				}
 			}
-			else if (nodeType == UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE || nodeType == UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE ||
-				nodeType == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || nodeType == UserNodeType.COMPONENTS_PROJECT_PACKAGE ||
-				nodeType == UserNodeType.SERVICES_NONPROJECT_PACKAGE || nodeType == UserNodeType.SERVICES_PROJECT_PACKAGE ||
-				nodeType == UserNodeType.LAYOUT_NONPROJECT_PACKAGE || nodeType == UserNodeType.LAYOUT_PROJECT_PACKAGE)
+			else if (nodeType == UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE || nodeType == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE ||
+				nodeType == UserNodeType.COMPONENTS_PROJECT_PACKAGE || nodeType == UserNodeType.SERVICES_NONPROJECT_PACKAGE ||
+				nodeType == UserNodeType.SERVICES_PROJECT_PACKAGE || nodeType == UserNodeType.LAYOUT_NONPROJECT_PACKAGE ||
+				nodeType == UserNodeType.LAYOUT_PROJECT_PACKAGE)
 			{
-				mappings.add(new SimpleResourceMapping((IProject)simpleUserNode.getRealObject()));
+				mappings.add(new SimpleResourceMapping(SolutionExplorerTreeContentProvider.getResource((IPackageReader)simpleUserNode.getRealObject())));
 			}
 			else if (nodeType == UserNodeType.ALL_WEB_PACKAGE_PROJECTS)
 			{
