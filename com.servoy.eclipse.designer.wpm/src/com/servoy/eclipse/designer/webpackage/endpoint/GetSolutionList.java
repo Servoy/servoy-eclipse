@@ -62,7 +62,7 @@ public class GetSolutionList implements IDeveloperService, IActiveProjectListene
 	@Override
 	public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
 	{
-		return false;
+		return true;
 	}
 
 	@Override
