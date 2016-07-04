@@ -853,8 +853,11 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			if (display == null)
 			{
 				display = getSite().getShell().getDisplay();
-				display = Display.getCurrent();
-				if (display == null) display = Display.getDefault();
+				if (display == null)
+				{
+					display = Display.getCurrent();
+					if (display == null) display = Display.getDefault();
+				}
 			}
 		}
 		return display;
