@@ -474,6 +474,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private RenameMediaFolderAction renameMediaFolderAction;
 	private CreateMediaFolderAction createMediaFolderAction;
 	private CreateMediaFileAction createMediaFileAction;
+	private CreateMediaFileAction createMediaWebAppManifestAction;
+	private CreateMediaFileAction createMediaHeadIndexContributionsAction;
 
 	private MovePersistAction movePersistAction;
 	private DuplicatePersistAction duplicatePersistAction;
@@ -2361,6 +2363,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		if (createMediaFolderAction.isEnabled()) manager.add(createMediaFolderAction);
 		if (createMediaFileAction.isEnabled()) manager.add(createMediaFileAction);
+		if (createMediaWebAppManifestAction.isEnabled()) manager.add(createMediaWebAppManifestAction);
+		if (createMediaHeadIndexContributionsAction.isEnabled()) manager.add(createMediaHeadIndexContributionsAction);
 		if (renameMediaFolderAction.isEnabled()) manager.add(renameMediaFolderAction);
 
 		manager.add(new Separator());
@@ -2766,6 +2770,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		renameMediaAction = new RenameMediaAction(this);
 		createMediaFolderAction = new CreateMediaFolderAction(this);
 		createMediaFileAction = new CreateMediaFileAction(this);
+		createMediaWebAppManifestAction = new CreateMediaWebAppManifest(this);
+		createMediaHeadIndexContributionsAction = new CreateMediaHeadIndexContributions(this);
 		renameMediaFolderAction = new RenameMediaFolderAction(this);
 		movePersistAction = new MovePersistAction(shell);
 		duplicatePersistAction = new DuplicatePersistAction(shell);
@@ -3095,6 +3101,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		addTreeSelectionChangedListener(createMediaFolderAction);
 		addTreeSelectionChangedListener(createMediaFileAction);
+		addTreeSelectionChangedListener(createMediaWebAppManifestAction);
+		addTreeSelectionChangedListener(createMediaHeadIndexContributionsAction);
 		addTreeSelectionChangedListener(renameMediaFolderAction);
 
 		fRefreshAction = new RefreshAction(this);
