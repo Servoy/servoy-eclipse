@@ -34,6 +34,7 @@ import java.net.URI;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -241,9 +242,10 @@ public class WarExporter
 			StringBuilder componentLocations = new StringBuilder();
 			StringBuilder servicesLocations = new StringBuilder();
 
+			Map<String, File> allTemplates = new HashMap<String, File>();
 			List<String> excludedComponentPackages = exportModel.getExcludedComponentPackages();
 			List<String> excludedServicePackages = exportModel.getExcludedServicePackages();
-			ComponentResourcesExporter.copyDefaultComponentsAndServices(tmpWarDir, excludedComponentPackages, excludedServicePackages);
+			ComponentResourcesExporter.copyDefaultComponentsAndServices(tmpWarDir, excludedComponentPackages, excludedServicePackages, allTemplates);
 
 			componentLocations.append(ComponentResourcesExporter.getDefaultComponentDirectoryNames(excludedComponentPackages));
 			servicesLocations.append(ComponentResourcesExporter.getDefaultServicesDirectoryNames(excludedServicePackages));
@@ -279,11 +281,11 @@ public class WarExporter
 					{
 						if (resource.isDirectory())
 						{
-							copyDir(resource, new File(tmpWarDir, name), true);
+							copyDir(resource, new File(tmpWarDir, name), true, allTemplates);
 						}
 						else
 						{
-							extractJar(name, resource, tmpWarDir);
+							extractJar(name, resource, tmpWarDir, allTemplates);
 						}
 					}
 				}
@@ -293,6 +295,8 @@ public class WarExporter
 			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/components.properties"), componentLocations.toString());
 			createSpecLocationsPropertiesFile(new File(tmpWarDir, "WEB-INF/services.properties"), servicesLocations.toString());
 
+			copyAllHtmlTemplates(tmpWarDir, allTemplates);
+
 			copyNGLibs(targetLibDir);
 			monitor.worked(1);
 		}
@@ -300,6 +304,32 @@ public class WarExporter
 		{
 			throw new ExportException("Could not copy the components", e);
 		}
+	}
+
+	private void copyAllHtmlTemplates(File tmpWarDir, Map<String, File> allTemplates)
+	{
+		File allTemplatesFile = new File(tmpWarDir, "js/servoy_alltemplates.js");
+
+		StringBuilder allTemplatesContent = new StringBuilder();
+		allTemplatesContent.append("angular.module(\"servoyalltemplates\",[]).run([\"$templateCache\", function($templateCache) {\n");
+
+		for (String path : allTemplates.keySet())
+		{
+			allTemplatesContent.append("$templateCache.put(\"");
+			allTemplatesContent.append(path);
+			allTemplatesContent.append("\",\"");
+
+			String htmlContent = Utils.getTXTFileContent(allTemplates.get(path));
+			htmlContent = htmlContent.trim();
+			htmlContent = htmlContent.replaceAll("\r", "");
+			htmlContent = htmlContent.replaceAll("\n", "");
+			htmlContent = htmlContent.replaceAll("\"", "\\\\\"");
+			allTemplatesContent.append(htmlContent);
+			allTemplatesContent.append("\");\n");
+		}
+
+		allTemplatesContent.append("}]);");
+		Utils.writeTXTFile(allTemplatesFile, allTemplatesContent.toString());
 	}
 
 	/**
@@ -429,7 +459,7 @@ public class WarExporter
 		}
 	}
 
-	private void extractJar(String dirName, File file, File tmpWarDir)
+	private void extractJar(String dirName, File file, File tmpWarDir, Map<String, File> allTemplates)
 	{
 		try (JarFile jarfile = new JarFile(file))
 		{
@@ -454,6 +484,10 @@ public class WarExporter
 					{
 						fo.write(is.read());
 					}
+				}
+				if (fl.getName().endsWith(".html"))
+				{
+					allTemplates.put(dirName + "/" + je.getName(), fl);
 				}
 			}
 		}
@@ -1219,14 +1253,19 @@ public class WarExporter
 		return (path.delete());
 	}
 
-	private static Set<File> copyDir(File sourceDir, File destDir, boolean recusive) throws ExportException
+	private static Set<File> copyDir(File sourceDir, File destDir, boolean recusive, Map<String, File> allTemplates) throws ExportException
 	{
 		Set<File> writtenFiles = new HashSet<File>();
-		copyDir(sourceDir, destDir, recusive, writtenFiles);
+		copyDir(sourceDir, destDir, recusive, writtenFiles, allTemplates);
 		return writtenFiles;
 	}
 
-	private static void copyDir(File sourceDir, File destDir, boolean recusive, Set<File> writtenFiles) throws ExportException
+	private static Set<File> copyDir(File sourceDir, File destDir, boolean recusive) throws ExportException
+	{
+		return copyDir(sourceDir, destDir, recusive, null);
+	}
+
+	private static void copyDir(File sourceDir, File destDir, boolean recusive, Set<File> writtenFiles, Map<String, File> allTemplates) throws ExportException
 	{
 		if (!destDir.exists() && !destDir.mkdirs()) throw new ExportException("Can't create destination dir: " + destDir);
 		File[] listFiles = sourceDir.listFiles();
@@ -1234,11 +1273,20 @@ public class WarExporter
 		{
 			if (file.isDirectory())
 			{
-				if (recusive) copyDir(file, new File(destDir, file.getName()), recusive, writtenFiles);
+				if (recusive) copyDir(file, new File(destDir, file.getName()), recusive, writtenFiles, allTemplates);
 			}
 			else
 			{
-				copyFile(file, new File(destDir, file.getName()));
+				File newFile = new File(destDir, file.getName());
+				copyFile(file, newFile);
+				if (allTemplates != null && newFile.getName().endsWith(".html"))
+				{
+					String path = newFile.getPath();
+					path = path.replace('\\', '/');
+					path = path.substring(path.indexOf("/warexport") + 1);
+					path = path.substring(path.indexOf("/") + 1);
+					allTemplates.put(path, newFile);
+				}
 				writtenFiles.add(file);
 			}
 		}
