@@ -1160,4 +1160,11 @@
             updaterClass="org.eclipse.ui.internal.ide.ResourceWorkingSetUpdater">
       </workingSet>
    </extension>
+	<extension
+		point="org.eclipse.ui.cheatsheets.cheatSheetItemExtension">
+		<itemExtension
+			class="com.servoy.eclipse.cheatsheets.HyperlinkCheatSheetExtension"
+			itemAttribute="cheatsheetHyperlink">
+		</itemExtension>
+	</extension>   
 </plugin>

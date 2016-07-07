@@ -165,7 +165,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 		Form selectedForm = null;
 		IDataSourceWrapper selectedDataSource = null;
 		// find the Servoy project to which the new form will be added
-		if (selection.size() == 1)
+		if (selection != null && selection.size() == 1)
 		{
 			Object selected = selection.getFirstElement();
 			if (selected instanceof IResource)

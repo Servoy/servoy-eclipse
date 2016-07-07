@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cheatsheet
-      title="Title">
+      title="Create a Servoy form">
    <intro>
       <description>
-         <b>Body</b>
+         This cheat sheet shows you how to create a new Servoy form.
       </description>
    </intro>
    <item
-         title="Item">
-      <description>
-         <b>Body</b>
-      </description>
+         title="Create a new form" cheatsheetHyperlink="link:More info on wiki &lt;a href=&quot;https://wiki.servoy.com/display/public/DOCS/Creating+Forms&quot;&gt;here&lt;/a&gt;">
+		<description>
+         In the Solution Explorer right-click on the Forms node and select Create new form. A wizard will show up. Enter a name for the new form and click Finish.
+		</description>
+		<action pluginId="com.servoy.eclipse.ui" class="com.servoy.eclipse.cheatsheets.actions.CreateNewFormAction"/>
    </item>
 </cheatsheet>
