@@ -66,7 +66,6 @@ import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
 import com.servoy.j2db.server.ngclient.template.FormWrapper;
-import com.servoy.j2db.server.ngclient.template.IFormElementValidator;
 import com.servoy.j2db.server.ngclient.template.PartWrapper;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
@@ -152,15 +151,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		Form flattenedForm = fs.getFlattenedForm(form);
 
 		ServoyDataConverterContext context = new ServoyDataConverterContext(fs);
-		FormWrapper wrapper = new FormWrapper(flattenedForm, flattenedForm.getName(), false, new IFormElementValidator()
-		{
-
-			@Override
-			public boolean isComponentSpecValid(IFormElement formElement)
-			{
-				return true;
-			}
-		}, context, true);
+		FormWrapper wrapper = new FormWrapper(flattenedForm, flattenedForm.getName(), false, null, context, true);
 		switch (methodName)
 		{
 			case "getData" :
