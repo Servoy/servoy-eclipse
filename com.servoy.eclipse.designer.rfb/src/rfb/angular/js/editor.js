@@ -772,7 +772,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				}
 			}
 
-			function adjustGlassPaneSize() {
+			function adjustGlassPaneSize(gpWidth, gpHeight) {
 				if ($scope.isAbsoluteFormLayout()) {
 				    	var sizes = getScrollSizes($scope.contentDocument.querySelectorAll(".sfcontent"));
 					if (sizes.height > 0 && sizes.width > 0) {
@@ -807,8 +807,14 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					            {	
 					            	adjustIFrameSize();
 					            }
-        						$scope.glasspaneStyle.width = (contentDiv.offsetWidth +20) + 'px';
-        						$scope.glasspaneStyle.height = (contentDiv.offsetHeight + 20) + 'px';
+					            
+					            // we need to wait for the contentDiv to render with the values set for the content size
+					            // now we just do a timeout, but should try a better way ...
+					            $timeout(function() {
+					            	var contentDivRendered = $($scope.contentDocument).find('.svy-form')[0];
+	        						$scope.glasspaneStyle.width = (contentDivRendered.offsetWidth +20) + 'px';
+	        						$scope.glasspaneStyle.height = (contentDivRendered.offsetHeight + 20) + 'px';
+					            }, 200);
 					        }
 					}
 				}
@@ -903,42 +909,40 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 
 			$element.on('renderDecorators.content', function(event) {
 				var toRun = function() {
-					// TODO this is now in a timeout to let the editor-content be able to reload the form.
-					// could we have an event somewhere from the editor-content that the form is reloaded and ready?
-					// maybe the form controllers code could call $evalAsync as last thing in its controller when it is in design.
+					var shouldSetContentSizes = $scope.isAbsoluteFormLayout() || $scope.isContentSizeFull();
 					if (selection.length > 0) {
 						var ghost = $scope.getGhost(selection[0].getAttribute("svy-id"));
-						if (ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM)) {
+						if (shouldSetContentSizes && ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM)) {
 							$scope.setContentSizes();
 						} else {
 							var promise = $editorService.getGhostComponents(); //no parameter, then the ghosts are not repositioned
 							promise.then(function(result) {
 								$scope.setGhosts(result);
-								$timeout(function() {
-									var nodes = Array.prototype.slice.call($scope.contentDocument.querySelectorAll("[svy-id]"));
-									var ghosts = Array.prototype.slice.call($scope.glasspane.querySelectorAll("[svy-id]"));
-									nodes = nodes.concat(ghosts);
-									var matchedElements = []
-									for (var s = 0; s < selection.length; s++) 
-									{
-										for (var i = 0; i < nodes.length; i++) {
-											var element = nodes[i]
-											if (selection[s].getAttribute("svy-id") == element.getAttribute("svy-id")) {
-												matchedElements.push(element);
-												break;
-											}
+
+								var nodes = Array.prototype.slice.call($scope.contentDocument.querySelectorAll("[svy-id]"));
+								var ghosts = Array.prototype.slice.call($scope.glasspane.querySelectorAll("[svy-id]"));
+								nodes = nodes.concat(ghosts);
+								var matchedElements = []
+								for (var s = 0; s < selection.length; s++) 
+								{
+									for (var i = 0; i < nodes.length; i++) {
+										var element = nodes[i]
+										if (selection[s].getAttribute("svy-id") == element.getAttribute("svy-id")) {
+											matchedElements.push(element);
+											break;
 										}
 									}
-									selection = matchedElements;
-									if (selection.length != matchedElements.length) {
-										$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, selection);
-									} else {
-										$rootScope.$broadcast(EDITOR_EVENTS.RENDER_DECORATORS, selection);
-									}
-								}, 100);
+								}
+								selection = matchedElements;
+								if (selection.length != matchedElements.length) {
+									$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, selection);
+								} else {
+									$rootScope.$broadcast(EDITOR_EVENTS.RENDER_DECORATORS, selection);
+								}
+
 							});
 						}
-					} else {
+					} else if(shouldSetContentSizes){
 					    	$scope.setContentSizes();
 					}
 				}
