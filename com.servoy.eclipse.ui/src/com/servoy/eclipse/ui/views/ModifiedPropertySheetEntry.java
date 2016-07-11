@@ -298,9 +298,16 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 
 		if (val2 instanceof Object[])
 		{
-			for (Object obj : (Object[])val2)
+			if (((Object[])val2).length > 0)
 			{
-				if (!valueEquals(val1, obj)) return false;
+				for (Object obj : (Object[])val2)
+				{
+					if (!valueEquals(val1, obj)) return false;
+				}
+			}
+			else
+			{
+				return val1 == null || (val1 instanceof Object[] && ((Object[])val1).length == 0);
 			}
 			return true;
 		}
