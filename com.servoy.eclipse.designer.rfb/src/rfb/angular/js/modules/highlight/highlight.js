@@ -17,7 +17,13 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 					return canDrop.dropTarget;
 				}	
 			}
-			return utils.getNode(event);
+			var node = utils.getNode(event);
+			if (utils.getDraggingFromPallete() == null && editorScope.getSelection().indexOf(node) >= 0)
+			{
+				// do not highlight selected component
+				return null;
+			}	
+			return node;	
 		}
 
 		function drawHighlightDiv() {
