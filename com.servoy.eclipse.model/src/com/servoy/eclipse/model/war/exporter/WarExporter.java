@@ -18,6 +18,8 @@
 package com.servoy.eclipse.model.war.exporter;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -26,13 +28,17 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.Writer;
 import java.net.URI;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,19 +56,31 @@ import java.util.zip.ZipOutputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.json.JSONException;
+import org.sablo.IndexPageEnhancer;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -86,6 +104,8 @@ import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.headlessclient.dataui.TemplateGenerator;
+import com.servoy.j2db.server.ngclient.ComponentsModuleGenerator;
+import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ComponentResourcesExporter;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
@@ -120,6 +140,8 @@ public class WarExporter
 	private static final String[] EXCLUDE_FROM_NG_JAR = new String[] { "com/servoy/j2db/server/ngclient/startup", "war/", "META-INF/MANIFEST.", "META-INF/SERVOYCL." };
 	private static final String[] NG_LIBS = new String[] { "org.slf4j.api_*.jar", "log4j_*.jar", "org.freemarker*.jar", "org.jsoup*.jar", "servoy_ngclient_" +
 		ClientVersion.getBundleVersion() + ".jar", "sablo_" + ClientVersion.getBundleVersion() + ".jar", "commons-lang3_*.jar", "wro4j-core_*.jar" };
+
+	private static final String WRO4J_RUNNER = "wro4j-runner-1.7.6.jar";
 
 	public WarExporter(IWarExportModel exportModel)
 	{
@@ -175,13 +197,16 @@ public class WarExporter
 			monitor.subTask("Copy the active solution");
 			copyActiveSolution(monitor.newChild(2), tmpWarDir);
 		}
-		monitor.setWorkRemaining(8);
+		monitor.setWorkRemaining(9);
 		monitor.subTask("Copying NGClient components/services...");
 		copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, targetLibDir);
 		monitor.setWorkRemaining(5);
 		monitor.subTask("Copy exported components");
 		copyExportedComponentsAndServicesPropertyFile(tmpWarDir);
 		monitor.worked(2);
+		monitor.subTask("Grouping JS and CSS resources");
+		copyMinifiedAndGrouped(tmpWarDir);
+		monitor.worked(1);
 		monitor.subTask("Creating/zipping the WAR file");
 		zipDirectory(tmpWarDir, warFile);
 		monitor.worked(2);
@@ -190,6 +215,192 @@ public class WarExporter
 		monitor.done();
 		return;
 	}
+
+	/**
+	 * Group and minify (if checked) the JS and CSS resources.
+	 * @param tmpWarDir
+	 * @throws ExportException
+	 */
+	private void copyMinifiedAndGrouped(File tmpWarDir) throws ExportException
+	{
+		try
+		{
+			String id = Long.toHexString(System.currentTimeMillis());
+			try
+			{
+				File groupProperties = new File(tmpWarDir, "WEB-INF/groupid.properties");
+				Properties prop = new Properties();
+				prop.setProperty("groupid", id);
+
+				try (FileWriter writer = new FileWriter(groupProperties))
+				{
+					prop.store(writer, "group properties");
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+			}
+
+			//generate servoy-components.js
+			File componentsFile = new File(tmpWarDir, "js/servoy-components.js");
+			StringBuilder sb = ComponentsModuleGenerator.generateComponentsModule();
+			FileUtils.copyInputStreamToFile(new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8)), componentsFile);
+
+			//generate wro.xml
+			String warDirPath = tmpWarDir.getAbsolutePath();
+			File wroFile = generateWroXml(tmpWarDir, id);
+
+			//copy the wro4j command line runner to the war
+			File jarFile = new File(tmpWarDir, WRO4J_RUNNER);
+			FileUtils.copyInputStreamToFile(WarExporter.class.getResource("resources/" + WRO4J_RUNNER).openStream(), jarFile);
+
+			List<String> args = new ArrayList<String>();
+			args.add("java");
+			args.add("-jar");
+			args.add(jarFile.getAbsolutePath());
+			args.add("--contextFolder");
+			args.add(warDirPath);
+			args.add("--destinationFolder");
+			File dest = new File(tmpWarDir, "wro");
+			args.add(dest.getAbsolutePath());
+			args.add("--wroFile");
+			args.add(wroFile.getAbsolutePath());
+			args.add("-m");
+			args.add("-c");
+			String processors = "semicolonAppender";
+			if (exportModel.isMinimizeJsCssResources()) processors += ",jsMin,yuiCssMin";
+			args.add(processors);
+			Process proc = Runtime.getRuntime().exec(args.toArray(new String[args.size()]));
+			BufferedReader input = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+			String line = null;
+			StringBuilder errorMessage = new StringBuilder();
+			while ((line = input.readLine()) != null)
+			{
+				errorMessage.append(line);
+			}
+			input.close();
+			if (proc.waitFor() != 0)
+			{
+				Debug.error(errorMessage);
+				throw new ExportException("Could not group and minify JS and CSS resources.");
+			}
+
+			//delete unneeded files
+			Files.delete(wroFile.toPath());
+			Files.delete(jarFile.toPath());
+		}
+		catch (Exception e)
+		{
+			Debug.error(e);
+			throw new ExportException(e.getMessage());
+		}
+	}
+
+	private File generateWroXml(File tmpWarDir, String id)
+		throws ParserConfigurationException, TransformerFactoryConfigurationError, TransformerConfigurationException, TransformerException
+	{
+		File wroFile = new File(tmpWarDir, "wro.xml");
+		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+
+		// root elements
+		Document doc = docBuilder.newDocument();
+		Element rootElement = doc.createElement("groups");
+		doc.appendChild(rootElement);
+		Attr attr = doc.createAttribute("xmlns");
+		attr.setValue("http://www.isdc.ro/wro");
+		rootElement.setAttributeNode(attr);
+
+		Object[] allContributions = IndexPageEnhancer.getAllContributions();
+		Element group = doc.createElement("group");
+		rootElement.appendChild(group);
+		attr = doc.createAttribute("name");
+		attr.setValue(NGClientEntryFilter.SERVOY_THIRDPARTY_SVYGRP + id);
+		group.setAttributeNode(attr);
+		for (String relativePath : NGClientEntryFilter.INDEX_3TH_PARTY_JS)
+		{
+			addGroupElement(doc, group, tmpWarDir, "/" + relativePath, "js");
+		}
+
+		group = doc.createElement("group");
+		rootElement.appendChild(group);
+		attr = doc.createAttribute("name");
+		attr.setValue(NGClientEntryFilter.SERVOY_APP_SVYGRP + id);
+		group.setAttributeNode(attr);
+		for (String relativePath : NGClientEntryFilter.INDEX_SERVOY_JS)
+		{
+			addGroupElement(doc, group, tmpWarDir, "/" + relativePath, "js");
+		}
+
+		@SuppressWarnings("unchecked")
+		Collection<String> jsContributions = (Collection<String>)allContributions[1];
+		if (jsContributions != null)
+		{
+			group = doc.createElement("group");
+			rootElement.appendChild(group);
+			attr = doc.createAttribute("name");
+			attr.setValue(NGClientEntryFilter.SERVOY_CONTRIBUTIONS_SVYGRP + id);
+			group.setAttributeNode(attr);
+			for (String relativePath : jsContributions)
+			{
+				if (relativePath.startsWith("sablo")) continue;//exclude sablo from group, is used from .jar
+				addGroupElement(doc, group, tmpWarDir, "/" + relativePath, "js");
+			}
+		}
+
+		group = doc.createElement("group");
+		rootElement.appendChild(group);
+		attr = doc.createAttribute("name");
+		attr.setValue(NGClientEntryFilter.SERVOY_CSS_THIRDPARTY_SVYGRP + id);
+		group.setAttributeNode(attr);
+		for (String relativePath : NGClientEntryFilter.INDEX_3TH_PARTY_CSS)
+		{
+			addGroupElement(doc, group, tmpWarDir, "/" + relativePath, "css");
+		}
+
+		@SuppressWarnings("unchecked")
+		Collection<String> cssContributions = (Collection<String>)allContributions[0];
+		if (cssContributions != null)
+		{
+			group = doc.createElement("group");
+			rootElement.appendChild(group);
+			attr = doc.createAttribute("name");
+			attr.setValue(NGClientEntryFilter.SERVOY_CSS_CONTRIBUTIONS_SVYGRP + id);
+			group.setAttributeNode(attr);
+			for (String relativePath : cssContributions)
+			{
+				addGroupElement(doc, group, tmpWarDir, "/" + relativePath, "css");
+			}
+		}
+
+		TransformerFactory transformerFactory = TransformerFactory.newInstance();
+		Transformer transformer = transformerFactory.newTransformer();
+		DOMSource source = new DOMSource(doc);
+		StreamResult result = new StreamResult(wroFile);
+		transformer.transform(source, result);
+		return wroFile;
+	}
+
+	private void addGroupElement(Document doc, Element group, File tmpWarDir, String relativePath, String suffix)
+	{
+		String path = relativePath;
+		String minSuffix = ".min." + suffix;
+		if (!path.endsWith(minSuffix))
+		{
+			//the minified version is preferred if it exists
+			File f = new File(tmpWarDir, path.substring(0, path.lastIndexOf("." + suffix)) + minSuffix);
+			if (f.exists()) path = f.getAbsolutePath().replace(tmpWarDir.getAbsolutePath(), "").replaceAll("\\\\", "/");
+		}
+		Attr attr;
+		Element element = doc.createElement(suffix);
+		group.appendChild(element);
+		element.setTextContent(path);
+		attr = doc.createAttribute("minimize");
+		attr.setValue(Boolean.toString(exportModel.isMinimizeJsCssResources() && !path.endsWith(minSuffix)));
+		element.setAttributeNode(attr);
+	}
+
 
 	/**
 	 * Copy to the war the properties file containing the selected NG components and services.

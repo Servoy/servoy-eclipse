@@ -93,6 +93,7 @@ public class FileSelectionPage extends WizardPage implements Listener
 	private Button clearReferencesStatic;
 	private Button clearReferencesStopThreads;
 	private Button clearReferencesStopTimerThreads;
+	private Button minimizeJSAndCSS;
 
 	public FileSelectionPage(ExportWarModel exportModel, IWizardPage nextPage)
 	{
@@ -594,7 +595,17 @@ public class FileSelectionPage extends WizardPage implements Listener
 			}
 		});
 
-
+		minimizeJSAndCSS = new Button(horizontalComposite, SWT.CHECK);
+		minimizeJSAndCSS.setText("Minimize JS and CSS");
+		minimizeJSAndCSS.setSelection(exportModel.isMinimizeJsCssResources());
+		minimizeJSAndCSS.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				exportModel.setMinimizeJsCssResources(minimizeJSAndCSS.getSelection());
+			}
+		});
 		setControl(composite);
 	}
 

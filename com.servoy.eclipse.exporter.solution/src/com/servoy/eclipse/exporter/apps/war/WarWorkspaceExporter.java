@@ -429,6 +429,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			{
 				return configuration.getDefaultAdminPassword();
 			}
+
+			@Override
+			public boolean isMinimizeJsCssResources()
+			{
+				return configuration.isMinimizeJsCssResources();
+			}
 		});
 		try
 		{
