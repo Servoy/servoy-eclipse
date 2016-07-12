@@ -37,7 +37,6 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 
-import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -55,7 +54,7 @@ import com.servoy.j2db.persistence.Solution;
 /**
  * @author jcompagner
  */
-public abstract class PersistEditor extends EditorPart implements IActiveProjectListener, IPersistChangeListener
+public abstract class PersistEditor extends EditorPart implements IPersistChangeListener
 {
 	private ServoyProject servoyProject;
 	private IPersist persist;
@@ -155,7 +154,7 @@ public abstract class PersistEditor extends EditorPart implements IActiveProject
 
 	/**
 	 * Validate if the persist is supported by this editor.
-	 * 
+	 *
 	 * @param p
 	 */
 	protected abstract boolean validatePersist(IPersist p);
@@ -164,7 +163,6 @@ public abstract class PersistEditor extends EditorPart implements IActiveProject
 	public void dispose()
 	{
 		disposed = true;
-		ServoyModelManager.getServoyModelManager().getServoyModel().removeActiveProjectListener(this);
 		ServoyModelManager.getServoyModelManager().getServoyModel().removePersistChangeListener(false, this);
 		revert(false);
 		super.dispose();
@@ -172,7 +170,7 @@ public abstract class PersistEditor extends EditorPart implements IActiveProject
 
 	/**
 	 * Revert persist, remove changes.
-	 * 
+	 *
 	 * @param force
 	 */
 	public void revert(boolean force)
@@ -224,7 +222,6 @@ public abstract class PersistEditor extends EditorPart implements IActiveProject
 		if (input != null)
 		{
 			setInput(convertInput(input));
-			ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(this);
 			ServoyModelManager.getServoyModelManager().getServoyModel().addPersistChangeListener(false, this);
 		}
 		site.setSelectionProvider(new IPostSelectionProvider()
@@ -351,31 +348,6 @@ public abstract class PersistEditor extends EditorPart implements IActiveProject
 	public boolean isSaveAsAllowed()
 	{
 		return false;
-	}
-
-	public void activeProjectChanged(ServoyProject activeProject)
-	{
-	}
-
-	public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
-	{
-	}
-
-	public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
-	{
-		closeEditor(true);
-		return true;
-	}
-
-	protected void closeEditor(final boolean save)
-	{
-		getSite().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable()
-		{
-			public void run()
-			{
-				getSite().getPage().closeEditor(PersistEditor.this, save);
-			}
-		});
 	}
 
 	public void persistChanges(Collection<IPersist> changes)

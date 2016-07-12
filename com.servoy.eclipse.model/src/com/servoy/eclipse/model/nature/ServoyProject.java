@@ -658,9 +658,6 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 		return deserializeExceptions;
 	}
 
-	/**
-	 * @return
-	 */
 	public SolutionMetaData getSolutionMetaData()
 	{
 		IDeveloperRepository repository = ApplicationServerRegistry.get().getDeveloperRepository();
@@ -675,22 +672,40 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 		return null;
 	}
 
-	/**
-	 * @return
-	 */
 	public MemServer getMemServer()
 	{
 		if (memServer == null) refreshMemServer();
 		return memServer;
 	}
 
-	/**
-	 *
-	 */
 	public void refreshMemServer()
 	{
 		if (memServer == null) memServer = new MemServer(this);
 		else memServer.init();
+	}
+
+	/**
+	 * Returns a list of all IProjects referenced by this solution's project (both static references (.project) and dynamic ones (dltk js build refs)) in-depth, including the solution project itself.
+	 * So it should return main solution project, all module projects (no matter how nested they are), resources projects, all web package projects of all modules and any other project that is referenced.
+	 *
+	 * @return the full list of referenced projects no matter how deep the nesting is (including this solution's project).
+	 * @throws CoreException if something went wrong.
+	 */
+	public List<IProject> getReferencedProjectsIdDepth() throws CoreException
+	{
+		List<IProject> allReferencedProjects = new ArrayList<>();
+		fillAllReferencedProjects(getProject(), allReferencedProjects);
+		return allReferencedProjects;
+	}
+
+	public static void fillAllReferencedProjects(IProject project, List<IProject> allReferencedProjects) throws CoreException
+	{
+		if (allReferencedProjects.indexOf(project) != -1) return; // TODO change this list into a hashmap so that it's faster?
+		allReferencedProjects.add(project);
+		for (IProject iProject : project.getReferencedProjects())
+		{
+			fillAllReferencedProjects(iProject, allReferencedProjects);
+		}
 	}
 
 }

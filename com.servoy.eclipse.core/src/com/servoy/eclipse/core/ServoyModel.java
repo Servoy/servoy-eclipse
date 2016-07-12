@@ -90,12 +90,14 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.UIJob;
@@ -114,6 +116,7 @@ import com.servoy.eclipse.core.ngpackages.NGPackageManager;
 import com.servoy.eclipse.core.quickfix.ChangeResourcesProjectQuickFix.ResourcesProjectSetupJob;
 import com.servoy.eclipse.core.repository.EclipseUserManager;
 import com.servoy.eclipse.core.repository.SwitchableEclipseUserManager;
+import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.ReturnValueRunnable;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.extensions.AbstractServoyModel;
@@ -1137,8 +1140,80 @@ public class ServoyModel extends AbstractServoyModel
 								for (IWorkbenchWindow workbenchWindow : workbenchWindows)
 								{
 									if (workbenchWindow.getActivePage() == null) continue;
-									IEditorReference[] editorReferences = workbenchWindow.getActivePage().getEditorReferences();
-									workbenchWindow.getActivePage().closeEditors(editorReferences, true);
+
+									List<IProject> allActivatedSolutionProjects;
+									try
+									{
+										allActivatedSolutionProjects = project.getReferencedProjectsIdDepth(); // resources prj. are static references (in .project file), modules are dltk/js build dynamic references
+									}
+									catch (CoreException e1)
+									{
+										ServoyLog.logError(e1);
+										allActivatedSolutionProjects = new ArrayList<>(1);
+										allActivatedSolutionProjects.add(project.getProject());
+									}
+
+									IEditorReference[] openEditors = workbenchWindow.getActivePage().getEditorReferences();
+
+									ArrayList<IEditorReference> editorsToClose = new ArrayList<IEditorReference>();
+									for (IEditorReference editorReference : openEditors)
+									{
+										try
+										{
+											if (editorReference.getEditorInput().getPersistable() == null)
+											{
+												continue;
+											}
+											else
+											{
+												IEditorInput ei = editorReference.getEditorInput();
+												IFile file = null;
+												String solutionName = null;
+												if (ei instanceof PersistEditorInput)
+												{
+													file = ((PersistEditorInput)ei).getFile();
+													if (file == null)
+													{
+														solutionName = ((PersistEditorInput)ei).getSolutionName();
+													}
+												}
+												else if (ei instanceof FileEditorInput)
+												{
+													file = ((FileEditorInput)editorReference.getEditorInput()).getFile();
+												}
+												else
+												{
+													ServoyLog.logInfo("Cannot determine if editor '" + editorReference.getPartName() + "' with input '" + ei +
+														"' should be closed or not when changing active solution. Defaulting to 'should close'.");
+												}
+
+												if (file != null || solutionName != null)
+												{
+													boolean matchFound = false;
+													for (IProject projectToCheck : allActivatedSolutionProjects)
+													{
+														if ((file != null && projectToCheck.equals(file.getProject())) ||
+															projectToCheck.getName().equals(solutionName))
+														{
+															matchFound = true;
+															break;
+														}
+													}
+
+													if (matchFound)
+													{
+														continue;
+													}
+												}
+											}
+											editorsToClose.add(editorReference);
+										}
+										catch (PartInitException e)
+										{
+											ServoyLog.logError(e);
+										}
+									}
+									workbenchWindow.getActivePage().closeEditors(editorsToClose.toArray(new IEditorReference[editorsToClose.size()]), true);
 								}
 							}
 						});
