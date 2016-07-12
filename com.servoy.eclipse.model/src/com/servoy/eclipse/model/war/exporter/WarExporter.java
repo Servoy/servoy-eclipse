@@ -316,7 +316,7 @@ public class WarExporter
 		attr.setValue("http://www.isdc.ro/wro");
 		rootElement.setAttributeNode(attr);
 
-		Object[] allContributions = IndexPageEnhancer.getAllContributions();
+		Object[] allContributions = IndexPageEnhancer.getAllContributions(Boolean.TRUE);
 		Element group = doc.createElement("group");
 		rootElement.appendChild(group);
 		attr = doc.createAttribute("name");
