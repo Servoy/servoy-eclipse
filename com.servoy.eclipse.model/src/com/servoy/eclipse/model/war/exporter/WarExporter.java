@@ -141,7 +141,7 @@ public class WarExporter
 	private static final String[] NG_LIBS = new String[] { "org.slf4j.api_*.jar", "log4j_*.jar", "org.freemarker*.jar", "org.jsoup*.jar", "servoy_ngclient_" +
 		ClientVersion.getBundleVersion() + ".jar", "sablo_" + ClientVersion.getBundleVersion() + ".jar", "commons-lang3_*.jar", "wro4j-core_*.jar" };
 
-	private static final String WRO4J_RUNNER = "wro4j-runner-1.7.6.jar";
+	private static final String WRO4J_RUNNER = "wro4j-runner-1.7.6";
 
 	public WarExporter(IWarExportModel exportModel)
 	{
