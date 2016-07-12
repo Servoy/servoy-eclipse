@@ -141,7 +141,7 @@ public class WarExporter
 	private static final String[] NG_LIBS = new String[] { "org.slf4j.api_*.jar", "log4j_*.jar", "org.freemarker*.jar", "org.jsoup*.jar", "servoy_ngclient_" +
 		ClientVersion.getBundleVersion() + ".jar", "sablo_" + ClientVersion.getBundleVersion() + ".jar", "commons-lang3_*.jar", "wro4j-core_*.jar" };
 
-	private static final String WRO4J_RUNNER = "wro4j-runner-1.7.6";
+	private static final String WRO4J_RUNNER = "wro4j-runner-1.7.7";
 
 	public WarExporter(IWarExportModel exportModel)
 	{
@@ -268,21 +268,25 @@ public class WarExporter
 			args.add(wroFile.getAbsolutePath());
 			args.add("-m");
 			args.add("-c");
-			String processors = "semicolonAppender";
-			if (exportModel.isMinimizeJsCssResources()) processors += ",jsMin,yuiCssMin";
+			String processors = "semicolonAppender,cssDataUri";
+			if (exportModel.isMinimizeJsCssResources()) processors += ",jsMin,cssCompressor";
 			args.add(processors);
-			Process proc = Runtime.getRuntime().exec(args.toArray(new String[args.size()]));
-			BufferedReader input = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+
+			ProcessBuilder builder = new ProcessBuilder(args);
+			builder.redirectErrorStream(true);
+			Process proc = builder.start();
+
 			String line = null;
-			StringBuilder errorMessage = new StringBuilder();
-			while ((line = input.readLine()) != null)
+			BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			StringBuilder message = new StringBuilder();
+			while ((line = in.readLine()) != null)
 			{
-				errorMessage.append(line);
+				message.append(line);
 			}
-			input.close();
+			in.close();
 			if (proc.waitFor() != 0)
 			{
-				Debug.error(errorMessage);
+				Debug.error(message);
 				throw new ExportException("Could not group and minify JS and CSS resources.");
 			}
 
