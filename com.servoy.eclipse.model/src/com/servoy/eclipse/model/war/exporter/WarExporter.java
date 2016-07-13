@@ -76,6 +76,7 @@ import org.sablo.IndexPageEnhancer;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
 import org.w3c.dom.Attr;
@@ -491,6 +492,13 @@ public class WarExporter
 							servicesLocations.append("/" + name + "/;");
 							copy = true;
 						}
+					}
+					else if (IPackageReader.WEB_LAYOUT.equals(packageReader.getPackageType()))
+					{
+						PackageSpecification<WebLayoutSpecification> spec = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(name);
+						copy = spec != null && (spec.getCssClientLibrary() != null && !spec.getCssClientLibrary().isEmpty() ||
+							spec.getJsClientLibrary() != null && !spec.getJsClientLibrary().isEmpty());
+						if (copy) componentLocations.append("/" + name + "/;");
 					}
 					if (copy)
 					{
