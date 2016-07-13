@@ -307,7 +307,7 @@ public class ModifiedPropertySheetEntry extends PropertySheetEntry implements IA
 			}
 			else
 			{
-				return val1 == null || (val1 instanceof Object[] && ((Object[])val1).length == 0);
+				return val1 instanceof Object[] && ((Object[])val1).length == 0;
 			}
 			return true;
 		}
