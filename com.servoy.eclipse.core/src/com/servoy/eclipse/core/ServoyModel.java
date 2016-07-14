@@ -105,6 +105,7 @@ import org.jshybugger.proxy.DebugWebAppService;
 import org.jshybugger.proxy.ScriptSourceProvider;
 import org.json.JSONObject;
 import org.mozilla.javascript.ast.AstRoot;
+import org.osgi.framework.BundleException;
 import org.webbitserver.HttpControl;
 import org.webbitserver.HttpHandler;
 import org.webbitserver.HttpRequest;
@@ -1258,6 +1259,7 @@ public class ServoyModel extends AbstractServoyModel
 								fireActiveProjectChanged();
 							}
 						});
+						Platform.getBundle("com.servoy.eclipse.debug").start();
 						progressMonitor.worked(1);
 
 						updateWorkingSet();
@@ -1265,6 +1267,10 @@ public class ServoyModel extends AbstractServoyModel
 
 						progressMonitor.worked(1);
 					}
+				}
+				catch (BundleException e)
+				{
+					ServoyLog.logError(e);
 				}
 				finally
 				{
