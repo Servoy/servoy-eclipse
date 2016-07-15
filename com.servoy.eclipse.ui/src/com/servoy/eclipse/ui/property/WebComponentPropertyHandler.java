@@ -18,6 +18,7 @@
 package com.servoy.eclipse.ui.property;
 
 import org.eclipse.ui.views.properties.IPropertySource;
+import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.CustomJSONArrayType;
 import org.sablo.specification.property.IPropertyType;
@@ -36,6 +37,7 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
@@ -95,13 +97,17 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		Object value = webObject.getProperty(getName());
 		try
 		{
-
 			IPropertyType< ? > type = propertyDescription.getType();
 			if (type instanceof FunctionPropertyType || type instanceof ValueListPropertyType || type instanceof FormPropertyType ||
-				type instanceof MediaPropertyType)
+				type instanceof MediaPropertyType || type instanceof FormComponentPropertyType)
 			{
+				if (type instanceof FormComponentPropertyType && value instanceof JSONObject)
+				{
+					value = ((JSONObject)value).optString(FormComponentPropertyType.SVY_FORM);
+				}
 				if (value == null) return Integer.valueOf(0);
 				if (value instanceof Integer) return value;
+
 
 				IPersist persist = ModelUtils.getEditingFlattenedSolution(webObject, persistContext.getContext()).searchPersist(UUID.fromString((String)value));
 				if (persist instanceof AbstractBase)
@@ -151,6 +157,23 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		{
 			Media media = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getMedia(((Integer)value).intValue());
 			convertedValue = (media == null) ? null : media.getUUID().toString();
+		}
+		else if (propertyDescription.getType() instanceof FormComponentPropertyType)
+		{
+			if (convertedValue != null)
+			{
+				Form frm = ModelUtils.getEditingFlattenedSolution(bean, persistContext.getContext()).getForm(((Integer)value).intValue());
+				if (frm != null)
+				{
+					JSONObject json = new JSONObject();
+					json.put(FormComponentPropertyType.SVY_FORM, frm.getUUID());
+					convertedValue = json;
+				}
+				else
+				{
+					convertedValue = null;
+				}
+			}
 		}
 
 		bean.setProperty(getName(), convertedValue);
