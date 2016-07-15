@@ -18,6 +18,8 @@ package com.servoy.eclipse.designer.property;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -25,14 +27,17 @@ import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.gef.EditPart;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.PackageSpecification;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.WebObjectFunctionDefinition;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.WebFormComponentChildType;
 import com.servoy.eclipse.designer.mobile.property.MobileComponentWithTitlePropertySource;
 import com.servoy.eclipse.designer.mobile.property.MobileListPropertySource;
 import com.servoy.eclipse.designer.mobile.property.MobilePersistPropertySource;
@@ -45,6 +50,7 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.DimensionPropertySource;
 import com.servoy.eclipse.ui.property.IModelSavePropertySource;
+import com.servoy.eclipse.ui.property.IPropertyHandler;
 import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PDPropertySource;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -52,6 +58,7 @@ import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PointPropertySource;
 import com.servoy.eclipse.ui.property.RetargetToEditorPersistProperties;
 import com.servoy.eclipse.ui.property.SavingPersistPropertySource;
+import com.servoy.eclipse.ui.property.WebComponentPropertyHandler;
 import com.servoy.eclipse.ui.property.WebComponentPropertySource;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Form;
@@ -149,8 +156,8 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 				if (realObject instanceof FormElementGroup && key == IPropertySource.class)
 				{
 					SimpleUserNode formNode = userNode.getAncestorOfType(Form.class);
-					return new RetargetToEditorPersistProperties(createFormElementGroupPropertySource((FormElementGroup)realObject, formNode == null
-						? ((FormElementGroup)obj).getParent() : (Form)formNode.getRealObject()));
+					return new RetargetToEditorPersistProperties(createFormElementGroupPropertySource((FormElementGroup)realObject,
+						formNode == null ? ((FormElementGroup)obj).getParent() : (Form)formNode.getRealObject()));
 				}
 
 				if (realObject instanceof IPersist && !(realObject instanceof Solution) && !(realObject instanceof Style) &&
@@ -296,12 +303,45 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 				{
 
 					WebCustomType ghostBean = (WebCustomType)persist;
-					PropertyDescription propertyDescription = (PropertyDescription)ghostBean.getPropertyDescription();
+					PropertyDescription propertyDescription = ghostBean.getPropertyDescription();
 
 
 					if (propertyDescription != null)
 					{
 						persistProperties = new PDPropertySource(persistContext, false, propertyDescription);
+					}
+				}
+				else if (persist instanceof WebFormComponentChildType)
+				{
+					WebFormComponentChildType formComponentChild = (WebFormComponentChildType)persist;
+					PropertyDescription propertyDescription = formComponentChild.getPropertyDescription();
+
+					if (propertyDescription != null)
+					{
+						persistProperties = new PDPropertySource(persistContext, false, propertyDescription)
+						{
+							@Override
+							protected IPropertyHandler[] createPropertyHandlers(Object valueObject)
+							{
+								ArrayList<IPropertyHandler> handlers = new ArrayList<>();
+								handlers.addAll(Arrays.asList(super.createPropertyHandlers(valueObject)));
+								if (getPropertyDescription() instanceof WebObjectSpecification)
+								{
+									for (WebObjectFunctionDefinition desc : ((WebObjectSpecification)getPropertyDescription()).getHandlers().values())
+									{
+										handlers.add(new WebComponentPropertyHandler(desc.getAsPropertyDescription()));
+									}
+								}
+								return handlers.toArray(new IPropertyHandler[handlers.size()]);
+							}
+
+							@Override
+							public String toString()
+							{
+								final WebFormComponentChildType child = (WebFormComponentChildType)getPersist();
+								return child.getParentComponent().getName() + '.' + child.getKey() + " (" + getPropertyDescription().getName() + ')';
+							}
+						};
 					}
 				}
 				else if (persist instanceof LayoutContainer)
@@ -386,8 +426,8 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 			return null;
 		}
 		// make sure we have the in-memory editing version, the real solution is read-only
-		return new FormElementGroup(group.getGroupID(), servoyProject.getEditingFlattenedSolution(), AbstractRepository.searchPersist(
-			servoyProject.getEditingSolution(), group.getParent()));
+		return new FormElementGroup(group.getGroupID(), servoyProject.getEditingFlattenedSolution(),
+			AbstractRepository.searchPersist(servoyProject.getEditingSolution(), group.getParent()));
 	}
 
 	private static MobileListModel getEditingMobileListModel(MobileListModel model)
@@ -409,6 +449,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 		}
 
 		if (persist instanceof WebCustomType) return persist;
+		if (persist instanceof WebFormComponentChildType) return persist;
 		ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(persist.getRootObject().getName());
 		if (servoyProject == null)
 		{
