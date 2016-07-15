@@ -306,7 +306,10 @@ angular.module('editorContent',['servoyApp'])
     apply: function(propertyName) {},
     callServerSideApi: function(methodName, args) {
       return null;
-    }
+    },
+	getFormState: function() {
+		return $scope;
+	}
   }
   $scope.servoyApi = function(name) {
     return servoyApi;
