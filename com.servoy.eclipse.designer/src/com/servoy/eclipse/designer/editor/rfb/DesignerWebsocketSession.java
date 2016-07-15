@@ -189,11 +189,10 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						FormElement fe = FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true);
 						if (Utils.equalObjects(fe.getDesignId(), name) || Utils.equalObjects(fe.getName(), name))
 						{
-							if (!form.isResponsiveLayout())
-								FormLayoutGenerator.generateFormElementWrapper(w, fe, true, flattenedForm, form.isResponsiveLayout());
+							if (!form.isResponsiveLayout()) FormLayoutGenerator.generateFormElementWrapper(w, fe, flattenedForm, form.isResponsiveLayout());
 							if (!(baseComponent instanceof FormReference))
 							{
-								FormLayoutGenerator.generateFormElement(w, fe, flattenedForm, true);
+								FormLayoutGenerator.generateFormElement(w, fe, flattenedForm);
 							}
 							else if (form.isResponsiveLayout())
 							{
@@ -250,7 +249,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							}
 
 							insertBeforeUUID = findNextSibling(child);
-							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context.getSolution(), w, true);
+							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context.getSolution(), w, true,
+								FormElementHelper.INSTANCE);
 						}
 					}
 				}
