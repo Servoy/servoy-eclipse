@@ -800,7 +800,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			persistContext);
 		if (functionPropertyDescriptor != null) return functionPropertyDescriptor;
 
-		IPropertyType< ? > propertyType = (propertyDescription == null ? null : propertyDescription.getType());
 		/*
 		 * Property editors defined by beans
 		 */
@@ -2829,7 +2828,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		}
 		if (propertyType instanceof FormComponentPropertyType)
 		{
-			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, false),
+			final ILabelProvider formLabelProvider = new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedEditingSolution, true),
 				persistContext.getContext());
 			PropertyDescriptor pd = new PropertyDescriptor(id, displayName)
 			{
