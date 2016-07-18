@@ -21,6 +21,11 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -89,6 +94,7 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.util.IImportDefaultResponsivePackages;
 import com.servoy.eclipse.ui.util.IStatusChangedListener;
 import com.servoy.eclipse.ui.util.SnapToGridFieldPositioner;
 import com.servoy.eclipse.ui.views.PlaceFieldOptionGroup;
@@ -381,10 +387,42 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 			if (form.isResponsiveLayout() && WebComponentSpecProvider.getInstance().getLayoutSpecifications().isEmpty())
 			{
-				if (MessageDialog.openConfirm(getShell(), "No Responsive Layout present",
-					"This solution does not have a responsive layout yet. You need a responsive layout to build responsive form, do you want to download a responsive layout now ?"))
+				final MessageDialog dialog = new MessageDialog(getShell(), "No Responsive Layout present", null,
+					"This solution does not have a responsive layout yet. You need a responsive layout to build responsive form, do you want to download a responsive layout now ?",
+					MessageDialog.QUESTION, new String[] { "Automatic install (bootstrap/12grid)", "Manual install", "Cancel" }, 0);
+				dialog.setBlockOnOpen(true);
+				int pressedButton = dialog.open();
+
+				if (pressedButton == 1)
 				{
 					EditorUtil.openWebPackageManager();
+				}
+				else if (pressedButton == 0)
+				{
+					IExtensionRegistry reg = Platform.getExtensionRegistry();
+					IExtensionPoint ep = reg.getExtensionPoint(IImportDefaultResponsivePackages.EXTENSION_ID);
+					IExtension[] extensions = ep.getExtensions();
+
+					if (extensions != null)
+					{
+						for (IExtension extension : extensions)
+						{
+							IConfigurationElement[] ce = extension.getConfigurationElements();
+							if (ce != null)
+							{
+								try
+								{
+									IImportDefaultResponsivePackages defaultImport = (IImportDefaultResponsivePackages)ce[0].createExecutableExtension("class");
+									defaultImport.importDefaultResponsivePackages();
+									break;
+								}
+								catch (Exception ex)
+								{
+									ServoyLog.logError(ex);
+								}
+							}
+						}
+					}
 				}
 			}
 

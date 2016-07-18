@@ -108,7 +108,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return null;
 	}
 
-	private List<JSONObject> getRemotePackages() throws Exception
+	public static List<JSONObject> getRemotePackages() throws Exception
 	{
 		List<JSONObject> result = new ArrayList<>();
 		String repositoriesIndex = getUrlContents("http://servoy.github.io/webpackageindex");
@@ -156,7 +156,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return result;
 	}
 
-	private String getUrlContents(String urlToRead)
+	private static String getUrlContents(String urlToRead)
 	{
 		try
 		{
