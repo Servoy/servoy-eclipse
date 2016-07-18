@@ -133,8 +133,9 @@ public class ServoyExporterUtils
 			List<String> notFoundDBIFileTableNames = allNeededDbiFilesExist(tables, dbiz);
 			if (notFoundDBIFileTableNames.size() > 0)
 			{
-				throw new FileNotFoundException("Could not locate all needed dbi files for server '" + serverName + "', tablenames: '" +
-					Arrays.toString(notFoundDBIFileTableNames.toArray()) + "'.\nPlease make sure the necessary files exist.");
+				ServoyLog.logError(new FileNotFoundException("Could not locate all dbi files for server '" + serverName + "', tablenames: '" +
+					Arrays.toString(notFoundDBIFileTableNames.toArray()) + "'.\nPlease make sure the DBI files exist or remove the lingering .tbl or calculations/aggregations files from the workspace if the tables above are not used anymore."+
+						"\nThe exported solution might not work properly."));
 			}
 
 			server_tableDbiFiles.put(serverName, dbiz);
@@ -290,7 +291,7 @@ public class ServoyExporterUtils
 
 		// check if i18n info is needed
 		if (mainActiveSolution.getI18nDataSource() != null && includeI18NData) addServerTable(neededServersTablesMap, mainActiveSolution.getI18nServerName(),
-			mainActiveSolution.getI18nTableName());
+				mainActiveSolution.getI18nTableName());
 
 		return neededServersTablesMap;
 	}
