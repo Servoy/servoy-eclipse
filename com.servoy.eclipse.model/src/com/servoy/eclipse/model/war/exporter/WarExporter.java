@@ -245,7 +245,7 @@ public class WarExporter
 
 			//generate servoy-components.js
 			File componentsFile = new File(tmpWarDir, "js/servoy-components.js");
-			StringBuilder sb = ComponentsModuleGenerator.generateComponentsModule();
+			StringBuilder sb = ComponentsModuleGenerator.generateComponentsModule(exportModel.getExportedServices(), exportModel.getExportedComponents());
 			FileUtils.copyInputStreamToFile(new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8)), componentsFile);
 
 			//generate wro.xml
@@ -317,7 +317,9 @@ public class WarExporter
 		attr.setValue("http://www.isdc.ro/wro");
 		rootElement.setAttributeNode(attr);
 
-		Object[] allContributions = IndexPageEnhancer.getAllContributions(Boolean.TRUE);
+		Set<String> exportedWebObjects = new HashSet<>(exportModel.getExportedComponents());
+		exportedWebObjects.addAll(exportModel.getExportedServices());
+		Object[] allContributions = IndexPageEnhancer.getAllContributions(exportedWebObjects, Boolean.TRUE);
 		Element group = doc.createElement("group");
 		rootElement.appendChild(group);
 		attr = doc.createAttribute("name");
