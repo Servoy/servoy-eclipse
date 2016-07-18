@@ -358,7 +358,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 										{
 											JSONObject parameter = parameters.getJSONObject(i);
 											arguments.add(new MethodArgument(parameter.optString("name"), ArgumentType.valueOf(parameter.optString("type")),
-												parameter.optString("description", "")));
+												parameter.optString("description", ""), parameter.optBoolean("optional", false)));
 										}
 									}
 									template = (MethodTemplate)MethodTemplatesFactory.getInstance().createMethodTemplate(methodKey,
