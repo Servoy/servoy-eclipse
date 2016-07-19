@@ -591,6 +591,17 @@
       <persistent
             value="true">
       </persistent>
+  	 </extension>
+  	 <extension
+         id="com.servoy.eclipse.core.superformProblem"
+         name="Superform problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="com.servoy.eclipse.core.servoyProblem">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
    </extension>
    <extension
          id="com.servoy.eclipse.core.servoyProblem"
@@ -767,5 +778,38 @@
         <super
               type="org.eclipse.core.resources.problemmarker">
         </super>
+   </extension>
+   <extension
+         point="org.eclipse.dltk.core.problemFactory">
+      <problemIdentifierFactory
+            class="com.servoy.eclipse.model.builder.JSFileExternalizeProblemFactory"
+            namespace="com.servoy.eclipse.model.builder.JSFileExternalizeProblem">
+      </problemIdentifierFactory>
+	  <problemCategory
+            scope="@SuppressWarnings"
+            id="nls"
+            nature="org.eclipse.dltk.javascript.core.nature">
+			<problem>com.servoy.eclipse.model.builder.JSFileExternalizeProblem#NON_EXTERNALIZED_STRING</problem>
+	   </problemCategory>      
+   </extension>
+   <extension
+         point="org.eclipse.dltk.core.buildParticipant">
+      <buildParticipant
+            class="com.servoy.eclipse.model.builder.JSFileExternalize"
+            id="com.servoy.eclipse.model.builder.JSFileExternalize"
+            name="JavaScript file string externalize"
+            nature="org.eclipse.dltk.javascript.core.nature">
+      </buildParticipant>
+   </extension>
+   <extension
+   		point="org.eclipse.dltk.javascript.ui.problemSections">
+		<section
+				id="com.servoy.eclipse.model.builder.externalize"
+				name="Externalized strings"
+				priority="1000">
+      		<problem
+      			id="com.servoy.eclipse.model.builder.JSFileExternalizeProblem#NON_EXTERNALIZED_STRING"
+            	label="Non externalized string"/>
+        </section>
    </extension>
 </plugin>

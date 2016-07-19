@@ -19,6 +19,9 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.util.Iterator;
 
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebObjectSpecification;
+
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -42,6 +45,9 @@ import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.TableNode;
+import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.persistence.WebObjectImpl;
+import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 public class PersistCloner
@@ -94,54 +100,81 @@ public class PersistCloner
 			{
 				try
 				{
-					ServoyModelManager.getServoyModelManager().getServoyModel();
-					EclipseRepository er = (EclipseRepository)ServoyModel.getDeveloperRepository();
-					Iterator<ContentSpec.Element> iterator = er.getContentSpec().getPropertiesForObjectType(o.getTypeID());
-
-					while (iterator.hasNext())
+					if (o instanceof WebComponent)
 					{
-						final ContentSpec.Element element = iterator.next();
-						// Don't set meta data properties.
-						if (element.isMetaData() || element.isDeprecated()) continue;
-						// Get default property value as an object.
-						final int typeId = element.getTypeID();
-
-						if (typeId == IRepository.ELEMENTS)
+						WebComponent wc = (WebComponent)o;
+						PropertyDescription pd = ((WebObjectImpl)wc.getImplementation()).getPropertyDescription();
+						if (pd instanceof WebObjectSpecification)
 						{
-							Object property_value = ((AbstractBase)o).getProperty(element.getName());
-							final int element_id = Utils.getAsInteger(property_value);
-							if (element_id > 0)
+							for (String handler : ((WebObjectSpecification)pd).getHandlers().keySet())
 							{
-								boolean idFound = false;
-								Iterator<ScriptMethod> originalScriptMethods = original.getScriptMethods(false);
-								while (originalScriptMethods.hasNext())
+								UUID uuid = Utils.getAsUUID(wc.getProperty(handler), false);
+								if (uuid != null)
 								{
-									ScriptMethod originalMethod = originalScriptMethods.next();
-									if (originalMethod.getID() == element_id)
+									IPersist originalMethod = original.findChild(uuid);
+									if (originalMethod instanceof ScriptMethod)
 									{
-										// reference to a method in the original form - change this to the duplicated form method
-										ScriptMethod duplicateMethod = duplicate.getScriptMethod(originalMethod.getName());
-										if (duplicateMethod != null)
+										ScriptMethod clonedMethod = duplicate.getScriptMethod(((ScriptMethod)originalMethod).getName());
+										if (clonedMethod != null)
 										{
-											((AbstractBase)o).setProperty(element.getName(), new Integer(duplicateMethod.getID()));
+											wc.setProperty(handler, clonedMethod.getUUID().toString());
 										}
-										idFound = true;
 									}
 								}
+							}
+						}
+					}
+					else
+					{
+						ServoyModelManager.getServoyModelManager().getServoyModel();
+						EclipseRepository er = (EclipseRepository)ServoyModel.getDeveloperRepository();
+						Iterator<ContentSpec.Element> iterator = er.getContentSpec().getPropertiesForObjectType(o.getTypeID());
 
-								if (!idFound)
+						while (iterator.hasNext())
+						{
+							final ContentSpec.Element element = iterator.next();
+							// Don't set meta data properties.
+							if (element.isMetaData() || element.isDeprecated()) continue;
+							// Get default property value as an object.
+							final int typeId = element.getTypeID();
+
+							if (typeId == IRepository.ELEMENTS)
+							{
+								Object property_value = ((AbstractBase)o).getProperty(element.getName());
+								final int element_id = Utils.getAsInteger(property_value);
+								if (element_id > 0)
 								{
-									Iterator<ScriptVariable> originalScriptVariables = original.getScriptVariables(false);
-									while (originalScriptVariables.hasNext())
+									boolean idFound = false;
+									Iterator<ScriptMethod> originalScriptMethods = original.getScriptMethods(false);
+									while (originalScriptMethods.hasNext())
 									{
-										ScriptVariable originalVariable = originalScriptVariables.next();
-										if (originalVariable.getID() == element_id)
+										ScriptMethod originalMethod = originalScriptMethods.next();
+										if (originalMethod.getID() == element_id)
 										{
-											// reference to a variable in the original form - change this to the duplicated form variable
-											ScriptVariable duplicateVariable = duplicate.getScriptVariable(originalVariable.getName());
-											if (duplicateVariable != null)
+											// reference to a method in the original form - change this to the duplicated form method
+											ScriptMethod duplicateMethod = duplicate.getScriptMethod(originalMethod.getName());
+											if (duplicateMethod != null)
 											{
-												((AbstractBase)o).setProperty(element.getName(), new Integer(duplicateVariable.getID()));
+												((AbstractBase)o).setProperty(element.getName(), new Integer(duplicateMethod.getID()));
+											}
+											idFound = true;
+										}
+									}
+
+									if (!idFound)
+									{
+										Iterator<ScriptVariable> originalScriptVariables = original.getScriptVariables(false);
+										while (originalScriptVariables.hasNext())
+										{
+											ScriptVariable originalVariable = originalScriptVariables.next();
+											if (originalVariable.getID() == element_id)
+											{
+												// reference to a variable in the original form - change this to the duplicated form variable
+												ScriptVariable duplicateVariable = duplicate.getScriptVariable(originalVariable.getName());
+												if (duplicateVariable != null)
+												{
+													((AbstractBase)o).setProperty(element.getName(), new Integer(duplicateVariable.getID()));
+												}
 											}
 										}
 									}

@@ -25,6 +25,8 @@ import org.eclipse.dltk.compiler.problem.IProblemIdentifier;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator;
 
+import com.servoy.eclipse.model.builder.JSFileExternalizeProblem;
+
 /**
  * JS file externalize marker resolution generator
  * @author gboros

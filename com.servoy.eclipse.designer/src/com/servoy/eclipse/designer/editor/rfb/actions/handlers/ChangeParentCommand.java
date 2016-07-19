@@ -26,6 +26,9 @@ import java.util.Iterator;
 import org.eclipse.gef.commands.Command;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IPersist;
@@ -56,10 +59,11 @@ public class ChangeParentCommand extends Command
 	public ChangeParentCommand(IPersist child, ISupportChilds newParent, IPersist targetChild, boolean insertAfterTarget)
 	{
 		super("Change Parent");
-		this.child = child instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)child).getWrappedPersist() : child;
-		this.targetChild = targetChild instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)targetChild).getWrappedPersist()
-			: targetChild;
-		this.newParent = newParent;
+
+		this.child = child;
+		this.targetChild = targetChild;
+
+		this.newParent = newParent == null ? getFlattenedParent(child) : newParent;
 		this.insertAfterTarget = insertAfterTarget;
 
 		this.hasChildPositionSupport = child instanceof ISupportBounds || child instanceof IChildWebObject;
@@ -69,7 +73,7 @@ public class ChangeParentCommand extends Command
 	@Override
 	public void execute()
 	{
-		oldParent = child.getParent();
+		oldParent = getFlattenedParent(child);
 
 		if (hasChildPositionSupport)
 		{
@@ -96,7 +100,21 @@ public class ChangeParentCommand extends Command
 		}
 
 		newParent.addChild(child);
-		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, Arrays.asList(new IPersist[] { child }));
+
+		IPersist changedChild = child instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)child).getWrappedPersist() : child;
+		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, Arrays.asList(new IPersist[] { changedChild }));
+	}
+
+	private ISupportChilds getFlattenedParent(IPersist persist)
+	{
+		ISupportChilds flattenedParent = persist.getParent();
+		if (flattenedParent instanceof Form)
+		{
+			FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
+			flattenedParent = flattenedSolution.getFlattenedForm(flattenedParent);
+		}
+
+		return flattenedParent;
 	}
 
 	private void updateWithOrderedPosition(ArrayList<IPersist> children)
@@ -154,7 +172,8 @@ public class ChangeParentCommand extends Command
 		ArrayList<IPersist> changes = new ArrayList<IPersist>();
 		changes.add(child.getParent());
 		changes.add(oldParent);
-		changes.add(child);
+		IPersist changedChild = child instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)child).getWrappedPersist() : child;
+		changes.add(changedChild);
 		child.getParent().removeChild(child);
 
 		if (hasChildPositionSupport)

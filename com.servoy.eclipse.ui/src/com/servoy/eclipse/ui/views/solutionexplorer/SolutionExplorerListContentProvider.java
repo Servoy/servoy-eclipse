@@ -427,8 +427,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else if (type == UserNodeType.INMEMORY_DATASOURCES)
 			{
-				IProject project = ((MemServer)un.getRealObject()).getServoyProject().getProject();
-				lm = createInMemTables(project, includeModules);
+				lm = createInMemTables(((MemServer)un.getRealObject()).getServoyProject(), includeModules);
 			}
 			else if (type == UserNodeType.VIEWS && ServoyModel.isClientRepositoryAccessAllowed(((IServerInternal)un.getRealObject()).getName()))
 			{
@@ -1040,19 +1039,20 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return dlm.toArray(new SimpleUserNode[dlm.size()]);
 	}
 
-	public static SimpleUserNode[] createInMemTables(IProject project, boolean bIncludeModules)
+	public static SimpleUserNode[] createInMemTables(ServoyProject servoyProject, boolean bIncludeModules)
 	{
 		ArrayList<SimpleUserNode> serverNodeChildren = new ArrayList<SimpleUserNode>();
-		ArrayList<IProject> allReferencedProjects = new ArrayList<IProject>();
 		try
 		{
+			List<IProject> allReferencedProjects;
 			if (bIncludeModules)
 			{
-				SolutionExplorerTreeContentProvider.fillAllReferencedProjects(project, allReferencedProjects);
+				allReferencedProjects = servoyProject.getReferencedProjectsIdDepth();
 			}
 			else
 			{
-				allReferencedProjects.add(project);
+				allReferencedProjects = new ArrayList<IProject>(1);
+				allReferencedProjects.add(servoyProject.getProject());
 			}
 			for (IProject module : allReferencedProjects)
 			{
@@ -1063,7 +1063,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 					for (SimpleUserNode moduleTable : moduleTables)
 					{
-						if (module != project)
+						if (module != servoyProject.getProject())
 							moduleTable.setDisplayName(SolutionExplorerTreeContentProvider.appendModuleName(moduleTable.getName(), module.getName()));
 						serverNodeChildren.add(moduleTable);
 					}

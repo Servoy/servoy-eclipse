@@ -2,7 +2,7 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 	return {
 		restrict: 'E',
 		transclude: true,
-		controller: function($scope, $element, $attrs,$contextmenu) {
+		controller: function($scope, $element, $attrs,$contextmenu, $allowedChildren) {
 
 			function findComponentDisplayName(arrayOfComponents, componentName) {
 				if(arrayOfComponents && arrayOfComponents.length) {
@@ -18,7 +18,7 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 			function getDisplayName(componentName) {
 				if($scope.packages && $scope.packages.length) {
 					var packageAndComponent = componentName.split(".");
-					if(packageAndComponent[1] == "*") return "Component";
+					if(componentName == "component" || packageAndComponent[1] == "*") return "Component";
 					for(var i = 0; i < $scope.packages.length; i++) {
 						if($scope.packages[i].packageName == packageAndComponent[0]) {
 							var displayName = findComponentDisplayName($scope.packages[i].components, packageAndComponent[1]);
@@ -61,12 +61,12 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 				var i;
 				for (i = 0; i < $scope.actions.length; i++){
 					if ($scope.actions[i].text === "Add") {
-						var allowedChildren = selection.getAttribute("svy-allowed-children");
+						var allowedChildren = $allowedChildren.get(selection.getAttribute("svy-layoutname"));
 						var types = selection.getAttribute("svy-types");
 						if (allowedChildren || types){
 							$scope.actions[i].getItemClass = function() { return "dropdown-submenu"};
 							$scope.actions[i].subMenu = [];
-							var typesArray = allowedChildren ? allowedChildren.split(",") : [];
+							var typesArray = allowedChildren ? allowedChildren : [];
 
 							var typesStartIdx = typesArray.length; 
 							if(types) {
@@ -90,9 +90,17 @@ angular.module("contextmenu",['contextmenuactions']).directive("contextmenu", fu
 													if(selection.getAttribute("svy-id")) component.dropTargetUUID = selection.getAttribute("svy-id");
 
 													if(k < typesStartIdx) {
-														var nameAndPackage = typesArray[k].split(".");
-														component.name = nameAndPackage[1];
-														component.packageName = nameAndPackage[0];
+														if (typesArray[k].indexOf(".") > 0)
+														{
+															var nameAndPackage = typesArray[k].split(".");
+															component.name = nameAndPackage[1];
+															component.packageName = nameAndPackage[0];
+														}
+														else
+														{
+															component.name = typesArray[k];
+															component.packageName = undefined;
+														}
 													}
 													else {
 														component.type = typesArray[k].type; 

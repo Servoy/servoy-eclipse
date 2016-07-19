@@ -30,6 +30,8 @@ import com.servoy.eclipse.core.resource.DesignPagetype;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.designer.Activator;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.commands.MoveDownCommand;
+import com.servoy.eclipse.designer.editor.commands.MoveUpCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupCommand.GroupCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.AbstractGroupCommand.UngroupCommand;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.CreateComponentHandler;
@@ -50,6 +52,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdateFieldPositi
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.UpdatePaletteOrder;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ZOrderCommand;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IPersist;
 
@@ -226,9 +229,21 @@ public class EditorServiceHandler implements IServerService
 				return null;
 			}
 		});
-
+		configuredHandlers.put("openPackageManager", new IServerService()
+		{
+			@Override
+			public Object executeMethod(String methodName, JSONObject args) throws Exception
+			{
+				EditorUtil.openWebPackageManager();
+				return null;
+			}
+		});
 		configuredHandlers.put("createGroup", new GroupCommand(editorPart, selectionProvider));
 		configuredHandlers.put("clearGroup", new UngroupCommand(editorPart, selectionProvider));
+		configuredHandlers.put("getAllowedChildren", new LayoutsHandler());
+
+		configuredHandlers.put("responsive_move_up", new MoveUpCommand(editorPart, selectionProvider));
+		configuredHandlers.put("responsive_move_down", new MoveDownCommand(editorPart, selectionProvider));
 	}
 
 	@Override

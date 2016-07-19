@@ -40,6 +40,7 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 
 import com.servoy.eclipse.core.Activator;
+import com.servoy.eclipse.model.builder.StringLiteralVisitor;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 /**

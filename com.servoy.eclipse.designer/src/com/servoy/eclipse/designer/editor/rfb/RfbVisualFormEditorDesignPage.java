@@ -326,158 +326,24 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	@Override
 	public void refreshPersists(final List<IPersist> persists)
 	{
-		final Form form = editorPart.getForm();
-		FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(form);
-		final String componentsJSON = designerWebsocketSession.getComponentsJSON(fs, filterByParent(persists, form));
-		CurrentWindow.runForWindow(new WebsocketSessionWindows(designerWebsocketSession), new Runnable()
+		if (persists != null)
 		{
-			@Override
-			public void run()
+			final Form form = editorPart.getForm();
+			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(form);
+			final String componentsJSON = designerWebsocketSession.getComponentsJSON(fs, filterByParent(persists, form));
+			CurrentWindow.runForWindow(new WebsocketSessionWindows(designerWebsocketSession), new Runnable()
 			{
-				designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateFormData", new Object[] { componentsJSON });
-				if (persists.contains(form)) designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateForm",
-					new Object[] { form.getUUID(), form.getSize().width, form.getSize().height });
-				designerWebsocketSession.valueChanged();
-			}
-		});
-
-		// TODO new impl
-//		IWindow window = null;
-//		final INGClientWebsocketSession editorContentWebsocketSession = (INGClientWebsocketSession)WebsocketSessionManager.getSession(
-//			WebsocketSessionFactory.DESIGN_ENDPOINT, CONTENT_SESSION_ID);
-//		if (editorContentWebsocketSession != null)
-//		{
-//			window = editorContentWebsocketSession.getActiveWindow(getEditorPart().getForm().getName());
-//		}
-//
-//		if (window == null)
-//		{
-//			Debug.warn("Receiving changes for editor without active window");
-//			return;
-//		}
-//
-//		final Map<Form, List<IFormElement>> frms = new HashMap<Form, List<IFormElement>>();
-//		final List<Form> changedForms = new ArrayList<Form>();
-//		Media cssFile = null;
-//
-//		if (persists == null)
-//		{
-//			// this is supposed to mean "refresh everything"
-//			changedForms.add(getEditorPart().getForm());
-//		}
-//		else
-//		{
-//			for (IPersist persist : persists)
-//			{
-//				if (persist instanceof IFormElement || persist instanceof Tab || persist instanceof WebCustomType)
-//				{
-//					IPersist parent = persist;
-//					if (persist instanceof Tab)
-//					{
-//						parent = ((Tab)persist).getParent();
-//						persist = parent;
-//					}
-//					if (persist instanceof WebCustomType)
-//					{
-//						parent = ((WebCustomType)persist).getParentComponent();
-//						persist = parent;
-//					}
-//					while (parent != null)
-//					{
-//						if (parent instanceof Form)
-//						{
-//							List<IFormElement> list = frms.get(parent);
-//							if (list == null)
-//							{
-//								frms.put((Form)parent, list = new ArrayList<IFormElement>());
-//							}
-//							list.add((IFormElement)persist);
-//							break;
-//						}
-//						parent = parent.getParent();
-//					}
-//				}
-//				else if (persist instanceof Form)
-//				{
-//					Form changedForm = (Form)persist;
-//					if (!changedForms.contains(changedForm))
-//					{
-//						changedForms.add(changedForm);
-//					}
-//				}
-//				else if (persist instanceof Part)
-//				{
-//					Form changedForm = (Form)persist.getParent();
-//					if (!changedForms.contains(changedForm))
-//					{
-//						changedForms.add(changedForm);
-//					}
-//				}
-//				else if (persist instanceof LayoutContainer || persist instanceof Template)
-//				{
-//					Form changedForm = (Form)persist.getAncestor(IRepository.FORMS);
-//					if (!changedForms.contains(changedForm))
-//					{
-//						changedForms.add(changedForm);
-//					}
-//				}
-//				else if (persist instanceof Media)
-//				{
-//					if (((Media)persist).getName().endsWith(".css"))
-//					{
-//						cssFile = (Media)persist;
-//					}
-//				}
-//			}
-//		}
-//
-//		final Media fcssFile = cssFile;
-//
-//		CurrentWindow.runForWindow(window, new Runnable()
-//		{
-//			@Override
-//			public void run()
-//			{
-//				if (frms.size() > 0 || changedForms.size() > 0)
-//				{
-//					editorContentWebsocketSession.getEventDispatcher().addEvent(new FormUpdater(editorContentWebsocketSession, frms, changedForms));
-//				}
-//				if (fcssFile != null)
-//				{
-//					ISupportChilds parent = fcssFile.getParent();
-//					if (parent instanceof Solution)
-//					{
-//						Solution theSolution = (Solution)parent;
-//						//TODO change to commented code once IPersistChangeListener is notified only the modified file, not all media files: case SVY-7581
-//						/*
-//						 * Object property = theSolution.getProperty(StaticContentSpecLoader.PROPERTY_STYLESHEET.getPropertyName()); if
-//						 * (property.equals(cssFile.getID()) || (Integer)property == 0) websocketSession.getEventDispatcher().addEvent( new
-//						 * SendCSSFile(theSolution));
-//						 */
-//						editorContentWebsocketSession.getEventDispatcher().addEvent(new SendCSSFile(editorContentWebsocketSession, theSolution));
-//					}
-//				}
-//			}
-//		});
-//		if (persists != null && persists.size() == 1)
-//		{
-//			IPersist changedPersist = persists.get(0);
-//			StructuredSelection selection = (StructuredSelection)selectionProvider.getSelection();
-//			if (!selection.isEmpty() && selection.size() == 1 && selection.getFirstElement() instanceof PersistContext)
-//			{
-//				PersistContext selectedPersistContext = (PersistContext)selection.getFirstElement();
-//				if (changedPersist instanceof ISupportExtendsID && selectedPersistContext.getPersist() instanceof ISupportExtendsID)
-//				{
-//					IPersist changedSuperPersist = PersistHelper.getSuperPersist((ISupportExtendsID)changedPersist);
-//					if (selectedPersistContext.getPersist() == changedSuperPersist)
-//					{
-//						//the selected persist was overriden, we must update selection
-//						selectionProvider.setSelection(new StructuredSelection(PersistContext.create(changedPersist, selectedPersistContext.getContext())));
-//					}
-//				}
-//
-//			}
-//		}
+				@Override
+				public void run()
+				{
+					designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateFormData",
+						new Object[] { componentsJSON });
+					if (persists.contains(form)) designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateForm",
+						new Object[] { form.getUUID(), form.getSize().width, form.getSize().height });
+					designerWebsocketSession.valueChanged();
+				}
+			});
+		}
 	}
 
 	/**

@@ -347,7 +347,7 @@ public class DesignerFilter implements Filter
 										FormElement formElement = FormElementHelper.INSTANCE.getFormElement(obj, fl, null, true);
 										StringWriter stringWriter = new StringWriter();
 										PrintWriter printWriter = new PrintWriter(stringWriter);
-										FormLayoutGenerator.generateFormElement(printWriter, formElement, form, true);
+										FormLayoutGenerator.generateFormElement(printWriter, formElement, form);
 										componentJson.put("tagName", stringWriter.toString());
 										model.put("componentName", formElement.getDesignId());
 									}

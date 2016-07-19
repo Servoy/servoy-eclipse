@@ -21,9 +21,11 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
+            categoryId="com.servoy.eclipse.designer.category"
             defaultHandler="com.servoy.eclipse.designer.webpackage.open.OpenWebPackageManagerCommandHandler"
+            description="Opens the Web Package Manager to download/install components/services or layouts"
             id="com.servoy.eclipse.designer.wpm.open"
-            name="Open Web Package Manager">
+            name="Download/Install with Web Package Manager">
       </command>
    </extension>
    <extension
@@ -34,7 +36,7 @@
          <command
                commandId="com.servoy.eclipse.designer.wpm.open"
                icon="icons/webpackagemanager.png"
-               label="Open Web Package Manager"
+               label="Download/Install with Web Package Manager"
                style="push">
             <visibleWhen
                   checkEnabled="false">

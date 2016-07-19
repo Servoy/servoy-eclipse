@@ -76,6 +76,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private static final String defaultAdminPassword = "defaultAdminPassword";
 
 	private HashMap<String, String> argumentsMap;
+	private static final String minimizeJsCss = "minimize";
 
 	public WarArgumentChest(String[] args)
 	{
@@ -157,7 +158,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -" + clearReferencesStopTimerThreads + " ... add clearReferencesStopTimerThreads=\"true\" to\n"
 			+ "             Context element; may only be used with createTomcatContextXML.\n"
 			+ "        -" + defaultAdminUser + " user name for admin page when no admin user exists [ required ]\n"
-			+ "        -" + defaultAdminPassword + " password for defaultAdminUser  required ]\n";
+			+ "        -" + defaultAdminPassword + " password for defaultAdminUser  required ]\n"
+			+ "        -" + minimizeJsCss + " minimize JS and CSS files ]\n";
 		// @formatter:on
 	}
 
@@ -416,5 +418,10 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public String getDefaultAdminPassword()
 	{
 		return argumentsMap.get(defaultAdminPassword);
+	}
+
+	public boolean isMinimizeJsCssResources()
+	{
+		return argumentsMap.containsKey(minimizeJsCss);
 	}
 }

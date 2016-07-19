@@ -39,11 +39,15 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.sablo.specification.Package;
 import org.sablo.specification.Package.DirPackageReader;
-import org.sablo.specification.Package.DuplicatePackageException;
+import org.sablo.specification.Package.DuplicateEntityException;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
@@ -79,7 +83,7 @@ public abstract class BaseNGPackageManager
 
 	public BaseNGPackageManager()
 	{
-		if (ServoyModelFinder.getServoyModel().getActiveProject() != null) reloadAllNGPackages(null, true); // initial load
+		if (ServoyModelFinder.getServoyModel().getActiveProject() != null) reloadAllNGPackages(null); // initial load
 
 		resourceChangeListener = new BaseNGPackageResourcesChangedListener(this);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
@@ -185,20 +189,20 @@ public abstract class BaseNGPackageManager
 	 * Reloads all ng packages (both resources project ones and referenced ng package project ones).
 	 * It takes care to unload all from all places before loading in the new ones to avoid generating wrong duplicate conflicts problems (if a package is moved between it's own project and the resources project).
 	 */
-	public void reloadAllNGPackages(IProgressMonitor m, boolean canChangeResources)
+	public void reloadAllNGPackages(IProgressMonitor m)
 	{
 		projectNameToContainedPackages.clear();
 		setRemovedPackages();
 		SubMonitor monitor = SubMonitor.convert(m, "Reloading all ng packages", 100);//TODO check monitor steps counter
 		Map<String, IPackageReader> allPackageReaders = new HashMap<String, IPackageReader>();
 		monitor.subTask("Preparing to reload resources project ng packages");
-		collectResourcesProjectNGPackages(true, true, monitor.newChild(8), allPackageReaders, canChangeResources);
+		collectResourcesProjectNGPackages(true, true, monitor.newChild(8), allPackageReaders);
 		monitor.worked(30);
 		monitor.subTask("Preparing to reload referenced ng package projects");
-		collectNGPackageProjects(allPackageReaders, monitor.newChild(8), canChangeResources);
+		collectNGPackageProjects(allPackageReaders, monitor.newChild(8));
 		monitor.worked(30);
 		monitor.subTask("Preparing to reload solution contained binary packages");
-		collectSolutionContainedBinaryPackages(allPackageReaders, monitor.newChild(8), canChangeResources);
+		collectSolutionContainedBinaryPackages(allPackageReaders, monitor.newChild(8));
 		monitor.worked(30);
 		monitor.subTask("Reloading component packages");
 		ResourceProvider.setPackages(allPackageReaders.values());
@@ -210,14 +214,7 @@ public abstract class BaseNGPackageManager
 		monitor.done();
 	}
 
-	/**
-	 * @param activeSolutionProject
-	 * @param componentProjectReaders
-	 * @param serviceProjectReaders
-	 * @param newChild
-	 * @param canChangeResources
-	 */
-	private void collectSolutionContainedBinaryPackages(Map<String, IPackageReader> componentProjectReaders, SubMonitor monitor, boolean canChangeResources)
+	private void collectSolutionContainedBinaryPackages(Map<String, IPackageReader> componentProjectReaders, SubMonitor monitor)
 	{
 		ServoyProject[] modules = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
 
@@ -230,7 +227,7 @@ public abstract class BaseNGPackageManager
 				{
 					try
 					{
-						if (canChangeResources) folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+						refreshResourceLater(folder, IResource.DEPTH_INFINITE);
 						IResource[] members = folder.members();
 						for (IResource resource : members)
 						{
@@ -294,9 +291,6 @@ public abstract class BaseNGPackageManager
 
 
 	/**	Search in all other projects if the given package is not contained also there
-	 * @param projectName
-	 * @param name
-	 * @return
 	 */
 	private boolean notContainedByOtherProjects(String projectName, String name)
 	{
@@ -311,11 +305,8 @@ public abstract class BaseNGPackageManager
 
 	/**
 	 * Collects all package project readers of the active solution and its modules into componentReaders and caches a list of readers per each solution project into @{projectNameToContainedPackages}
-	 * @param componentReaders
-	 * @param m
-	 * @param canChangeResources
 	 */
-	private void collectNGPackageProjects(Map<String, IPackageReader> componentReaders, IProgressMonitor m, boolean canChangeResources)
+	private void collectNGPackageProjects(Map<String, IPackageReader> componentReaders, IProgressMonitor m)
 	{
 		ServoyProject activeSolutionProject = ServoyModelFinder.getServoyModel().getActiveProject();
 		if (activeSolutionProject != null)
@@ -326,8 +317,7 @@ public abstract class BaseNGPackageManager
 				ServoyNGPackageProject[] ngPackageProjects = servoyProject.getNGPackageProjects();
 				for (ServoyNGPackageProject servoyNGPackageProject : ngPackageProjects)
 				{
-					collectReferencedProjectAsPackageReader(componentReaders, servoyProject.getProject().getName(), servoyNGPackageProject.getProject(), m,
-						canChangeResources);
+					collectReferencedProjectAsPackageReader(componentReaders, servoyProject.getProject().getName(), servoyNGPackageProject.getProject(), m);
 				}
 			}
 			m.worked(8);
@@ -335,48 +325,76 @@ public abstract class BaseNGPackageManager
 	}
 
 	protected void collectResourcesProjectNGPackages(boolean reloadComponents, boolean reloadServices, IProgressMonitor m,
-		Map<String, IPackageReader> newComponents, boolean canChangeResources)
+		Map<String, IPackageReader> newComponents)
 	{
 		ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 		SubMonitor monitor = SubMonitor.convert(m, 8);
 		if (activeResourcesProject != null)
 		{
-			if (canChangeResources)
+			final IFolder components = activeResourcesProject.getProject().getFolder(SolutionSerializer.COMPONENTS_DIR_NAME);
+			scheduleSystemJob(new Job("Removing any duplicate markers and refreshing...")
 			{
-				try
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
 				{
-					IFolder components = activeResourcesProject.getProject().getFolder(SolutionSerializer.COMPONENTS_DIR_NAME);
-					if (components != null && components.exists())
+					monitor.beginTask("Refreshing...", 5);
+					try
 					{
-						components.refreshLocal(IResource.DEPTH_INFINITE, monitor.newChild(1));
-						components.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_INFINITE);
-						components.refreshLocal(IResource.DEPTH_INFINITE, monitor.newChild(1));
+						if (components != null && components.exists())
+						{
+							components.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
+							monitor.setTaskName("Removing markers...");
+							components.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_INFINITE);
+							monitor.worked(3);
+							monitor.setTaskName("Refreshing...");
+							components.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
+						}
 					}
-					monitor.setWorkRemaining(25);
-					IFolder services = activeResourcesProject.getProject().getFolder(SolutionSerializer.SERVICES_DIR_NAME);
-					if (services != null && services.exists())
+					catch (CoreException ex)
 					{
-						services.refreshLocal(IResource.DEPTH_INFINITE, monitor.newChild(1));
-						services.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_INFINITE);
-						services.refreshLocal(IResource.DEPTH_INFINITE, monitor.newChild(1));
+						ServoyLog.logError(ex);
 					}
+					monitor.done();
+					return Status.OK_STATUS;
 				}
-				catch (CoreException e)
+			}, components.getParent());
+			monitor.setWorkRemaining(25);
+			final IFolder services = activeResourcesProject.getProject().getFolder(SolutionSerializer.SERVICES_DIR_NAME);
+			scheduleSystemJob(new Job("Removing any duplicate markers and refreshing...")
+			{
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
 				{
-					ServoyLog.logError(e);
+					monitor.beginTask("Refreshing...", 5);
+					try
+					{
+						if (services != null && services.exists())
+						{
+							services.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
+							monitor.setTaskName("Removing markers...");
+							services.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_INFINITE);
+							monitor.setTaskName("Refreshing...");
+							monitor.worked(3);
+							services.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
+						}
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
+					monitor.done();
+					return Status.OK_STATUS;
 				}
-			}
+			}, services.getParent());
 			monitor.setWorkRemaining(23);
 			if (reloadComponents)
 			{
-				readParentOfPackagesDir(newComponents, activeResourcesProject.getProject(), SolutionSerializer.COMPONENTS_DIR_NAME, monitor.newChild(2),
-					canChangeResources);
+				readParentOfPackagesDir(newComponents, activeResourcesProject.getProject(), SolutionSerializer.COMPONENTS_DIR_NAME, monitor.newChild(2));
 			}
 			monitor.setWorkRemaining(21);
 			if (reloadServices)
 			{
-				readParentOfPackagesDir(newComponents, activeResourcesProject.getProject(), SolutionSerializer.SERVICES_DIR_NAME, monitor.newChild(2),
-					canChangeResources);
+				readParentOfPackagesDir(newComponents, activeResourcesProject.getProject(), SolutionSerializer.SERVICES_DIR_NAME, monitor.newChild(2));
 			}
 		}
 		monitor.done();
@@ -384,18 +402,13 @@ public abstract class BaseNGPackageManager
 
 	/**
 	 * Transform this package project into a package reader and add it to newComponentReaders and to our local map
-	 * @param newComponentReaders
-	 * @param solutionProjectName
-	 * @param project
-	 * @param m
-	 * @param canChangeResources
 	 */
 	private void collectReferencedProjectAsPackageReader(Map<String, IPackageReader> newComponentReaders, String solutionProjectName, IProject project,
-		IProgressMonitor m, boolean canChangeResources)
+		IProgressMonitor m)
 	{
 		try
 		{
-			if (canChangeResources) project.refreshLocal(IResource.DEPTH_INFINITE, m);
+			refreshResourceLater(project, IResource.DEPTH_INFINITE);
 			project.deleteMarkers(SPEC_READ_MARKER, false, IResource.DEPTH_ONE);
 			IPackageReader reader = readPackageResource(project);
 			if (reader != null)
@@ -442,16 +455,16 @@ public abstract class BaseNGPackageManager
 	 */
 	protected abstract boolean isDefaultPackageEnabled(String packageName);
 
-	protected void readParentOfPackagesDir(Map<String, IPackageReader> readers, IProject iProject, String folderName, IProgressMonitor monitor,
-		boolean canChangeResources)
+	protected void readParentOfPackagesDir(Map<String, IPackageReader> readers, IProject iProject, String folderName, IProgressMonitor m)
 	{
 		IFolder folder = iProject.getFolder(folderName);
 		if (folder.exists())
 		{
 			try
 			{
-				if (canChangeResources) folder.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+				refreshResourceLater(folder, IResource.DEPTH_INFINITE);
 				IResource[] members = folder.members();
+				m.beginTask("Reading packages", members.length);
 				for (IResource resource : members)
 				{
 					IPackageReader reader = readPackageResource(resource);
@@ -460,7 +473,9 @@ public abstract class BaseNGPackageManager
 						readers.put(reader.getPackageName(), reader);
 						getProjectContainedPackagesMap(iProject.getName()).put(reader.getPackageName(), reader);
 					}
+					m.worked(1);
 				}
+				m.done();
 			}
 			catch (CoreException e)
 			{
@@ -518,7 +533,7 @@ public abstract class BaseNGPackageManager
 				res = res.getParent();
 			}
 			IMarker marker = null;
-			if (e instanceof DuplicatePackageException)
+			if (e instanceof DuplicateEntityException)
 			{
 				res.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_ONE);
 				marker = resource.createMarker(DUPLICATE_COMPONENT_MARKER);
@@ -604,25 +619,15 @@ public abstract class BaseNGPackageManager
 		public void reportError(String specpath, Exception e)
 		{
 			super.reportError(specpath, e);
-			addErrorMarker(e instanceof DuplicatePackageException ? container : container.getFile(new Path(specpath)), e);
+			addErrorMarker(e instanceof DuplicateEntityException ? container : container.getFile(new Path(specpath)), e);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see java.lang.Object#hashCode()
-		 */
 		@Override
 		public int hashCode()
 		{
 			return container.hashCode();
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see java.lang.Object#equals(java.lang.Object)
-		 */
 		@Override
 		public boolean equals(Object obj)
 		{
@@ -659,8 +664,6 @@ public abstract class BaseNGPackageManager
 	}
 
 	/** Get the cached package project references of this project
-	 * @param name
-	 * @return
 	 */
 	public List<String> getOldUsedPackageProjectsList(String projectName)
 	{
@@ -671,6 +674,57 @@ public abstract class BaseNGPackageManager
 			if (ResourcesPlugin.getWorkspace().getRoot().getProject(packageName).exists()) result.add(packageName);
 		}
 		return result;
+	}
+
+	protected static void refreshResourceLater(final IResource resource, final int levels)
+	{
+		scheduleSystemJob(new Job("Refreshing package resources...")
+		{
+			@Override
+			protected IStatus run(IProgressMonitor monitor)
+			{
+				try
+				{
+					resource.refreshLocal(levels, monitor);
+				}
+				catch (CoreException e)
+				{
+					ServoyLog.logError(e);
+				}
+				return Status.OK_STATUS;
+			}
+		}, (resource.getProject() == resource || resource.getWorkspace().getRoot() == resource) ? resource : resource.getParent()); // refresh actually needs the parent rule for non-projects and non-workspace-root, cause the resource itself might have dissapeared
+	}
+
+	protected static void removeSpecMarkersInJob(final IResource resource)
+	{
+		scheduleSystemJob(new Job("Removing spec file markers...")
+		{
+			@Override
+			protected IStatus run(IProgressMonitor monitor)
+			{
+				if (resource != null && resource.isAccessible())
+				{
+					try
+					{
+						resource.deleteMarkers(SPEC_READ_MARKER, false, IResource.DEPTH_ONE);
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+				return Status.OK_STATUS;
+			}
+		}, resource);
+	}
+
+	protected static void scheduleSystemJob(Job job, IResource r)
+	{
+		job.setRule(r);
+		job.setSystem(true);
+		job.setUser(false);
+		job.schedule();
 	}
 
 }

@@ -889,6 +889,16 @@
             id="com.servoy.eclipse.designer.rfb.delete"
             name="Delete">
       </command>
+      <command
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.MoveUpCommand"
+            id="com.servoy.eclipse.designer.rfb.moveup"
+            name="Delete">
+      </command>
+	  <command
+            defaultHandler="com.servoy.eclipse.designer.editor.commands.MoveDownCommand"
+            id="com.servoy.eclipse.designer.rfb.movedown"
+            name="Delete">
+      </command>
    </extension>
       <extension
          point="org.eclipse.ui.preferencePages">
@@ -1264,6 +1274,50 @@
                   </with>  
                </visibleWhen>
             </menu>
+            <command
+                  commandId="com.servoy.eclipse.designer.rfb.moveup"
+                  label="Move Up"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with  
+                        variable="activeMenuSelection">  
+                     <and>
+                        <iterate
+                              operator="and">
+                           <test
+                                 property="com.servoy.eclipse.designer.editor.rfb.ismovable">
+                           </test>
+                        </iterate>
+                        <count
+                              value="1">
+                        </count>
+                     </and>  
+                  </with>  
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="com.servoy.eclipse.designer.rfb.movedown"
+                  label="Move Down"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with  
+                        variable="activeMenuSelection">  
+                     <and>
+                        <iterate
+                              operator="and">
+                           <test
+                                 property="com.servoy.eclipse.designer.editor.rfb.ismovable">
+                           </test>
+                        </iterate>
+                        <count
+                              value="1">
+                        </count>
+                     </and>  
+                  </with>  
+               </visibleWhen>
+            </command>
          </menuContribution>
       </extension>
       <extension
@@ -1276,4 +1330,15 @@
                type="java.lang.Object">
          </propertyTester>
       </extension>
+      
+      <extension
+            point="org.eclipse.core.expressions.propertyTesters">
+         <propertyTester
+               class="com.servoy.eclipse.designer.editor.rfb.menu.IsMovablePropertyTester"
+               id="com.servoy.eclipse.designer.rfb.ismovable"
+               namespace="com.servoy.eclipse.designer.editor.rfb"
+               properties="ismovable"
+               type="java.lang.Object">
+         </propertyTester>
+      </extension>      
 </plugin>

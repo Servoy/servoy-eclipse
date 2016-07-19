@@ -20,6 +20,8 @@ package com.servoy.eclipse.designer.webpackage.endpoint;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.core.IActiveProjectListener;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 
@@ -27,8 +29,18 @@ import com.servoy.eclipse.model.nature.ServoyProject;
  * @author jcompagner
  *
  */
-public class GetSolutionList implements IDeveloperService
+public class GetSolutionList implements IDeveloperService, IActiveProjectListener
 {
+	public static final String GET_SOLUTION_LIST_METHOD = "getSolutionList";
+
+	private final WebPackageManagerEndpoint endpoint;
+
+	public GetSolutionList(WebPackageManagerEndpoint endpoint)
+	{
+		this.endpoint = endpoint;
+		ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(this);
+	}
+
 	@Override
 	public JSONArray executeMethod(JSONObject msg)
 	{
@@ -44,6 +56,31 @@ public class GetSolutionList implements IDeveloperService
 	@Override
 	public void dispose()
 	{
+		ServoyModelManager.getServoyModelManager().getServoyModel().removeActiveProjectListener(this);
+	}
+
+	@Override
+	public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+	{
+		return true;
+	}
+
+	@Override
+	public void activeProjectChanged(ServoyProject activeProject)
+	{
+	}
+
+	@Override
+	public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+	{
+		if (updateInfo == IActiveProjectListener.MODULES_UPDATED)
+		{
+			JSONArray packages = executeMethod(null);
+			JSONObject jsonResult = new JSONObject();
+			jsonResult.put("method", GET_SOLUTION_LIST_METHOD);
+			jsonResult.put("result", packages);
+			endpoint.send(jsonResult.toString());
+		}
 	}
 
 

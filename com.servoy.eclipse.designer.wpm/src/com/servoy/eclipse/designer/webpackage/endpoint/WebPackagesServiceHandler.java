@@ -35,7 +35,7 @@ public class WebPackagesServiceHandler
 		configuredHandlers.put("install", new InstallWebPackageHandler());
 		configuredHandlers.put("showurl", new ShowUrllWebPackageHandler());
 		configuredHandlers.put("remove", new RemoveWebPackageHandler());
-		configuredHandlers.put("getSolutionList", new GetSolutionList());
+		configuredHandlers.put(GetSolutionList.GET_SOLUTION_LIST_METHOD, new GetSolutionList(endpoint));
 	}
 
 	public String handleMessage(String message)

@@ -169,7 +169,9 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		FormEditorDesignerPreference formEditorDesignerPreference = new DesignerPreferences().getFormEditorDesignerPreference();
 		if (isMobile(form))
 		{
-			if (formEditorDesignerPreference == FormEditorDesignerPreference.Classic)
+			if (formEditorDesignerPreference == FormEditorDesignerPreference.Classic
+			// TODO for now we also map automatic to classic, because mobile doesn't really work correctly currently
+				|| formEditorDesignerPreference == FormEditorDesignerPreference.Automatic)
 			{
 				return DesignPagetype.MobileClassic;
 			}

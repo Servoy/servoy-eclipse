@@ -14,6 +14,17 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			plugins[plugins.length] = plugin;
 		}
 	}
+}).factory("$allowedChildren", function() {
+	var allowedChildren = {};	
+	return {
+		get: function(layoutName) {
+			return allowedChildren[layoutName];
+		},
+		set: function(map)
+		{
+			allowedChildren = map;
+		}
+	}
 }).value("EDITOR_EVENTS", {
 	SELECTION_CHANGED: "SELECTION_CHANGED",
 	SELECTION_MOVED: "SELECTION_MOVED",
@@ -35,7 +46,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	GHOST_TYPE_INVISIBLE: "invisible",
 	GHOST_TYPE_GROUP: "group"
 }).directive("editor", function($window, $pluginRegistry, $rootScope, EDITOR_EVENTS, EDITOR_CONSTANTS, $timeout,
-	$editorService, $webSocket, $q, $interval) {
+	$editorService, $webSocket, $q, $interval,$allowedChildren) {
 	return {
 		restrict: 'E',
 		transclude: true,
@@ -77,28 +88,44 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			$scope.editorID = $element.attr('id');
 			$scope.contentDocument = null;
 			
-			$scope.startBottomAutoScroll = function (callback){
+			
+			$scope.startAutoScroll = function (direction, callback){
 				return $interval(function (){
 				    var contentArea = ($element.find('.content-area')[0]);
-				    if ((contentArea.scrollTop + contentArea.offsetHeight) === contentArea.scrollHeight)
-					angular.element($scope.glasspane).height(angular.element($scope.glasspane).height()+5);
-				    contentArea.scrollTop += 5;
-				    if (callback) callback($scope, $scope.selectionToDrag,0,5);
+				    var changeX = 0;
+				    var changeY = 0;
+				    switch(direction) {
+				    	case "BOTTOM_AUTOSCROLL":
+							if ((contentArea.scrollTop + contentArea.offsetHeight) === contentArea.scrollHeight)
+							angular.element($scope.glasspane).height(angular.element($scope.glasspane).height()+5);
+							contentArea.scrollTop += 5;
+							changeY = 5;
+							break;
+				    	case "RIGHT_AUTOSCROLL":
+							if ((contentArea.scrollLeft + contentArea.offsetWidth) === contentArea.scrollWidth)
+							angular.element($scope.glasspane).width(angular.element($scope.glasspane).width()+5);
+				    		contentArea.scrollLeft += 5;
+				    		changeX = 5;
+				    		break;
+				    	case "LEFT_AUTOSCROLL":
+				    		if(contentArea.scrollLeft >= 5) {
+				    			contentArea.scrollLeft -= 5;
+				    			changeX = -5;
+				    		}
+				    		break;
+				    	case "TOP_AUTOSCROLL":
+				    		if(contentArea.scrollTop >= 5) {
+				    			contentArea.scrollTop -= 5;
+				    			changeY = -5;
+				    		}
+				    		break;
+				    }
+				    
+				    if (callback) callback($scope, $scope.selectionToDrag,changeX,changeY,0,0);
 				    $scope.refreshEditorContent();
 				},100);
 			};
-			
-			$scope.startRightAutoScroll = function (callback){
-				return $interval(function (){
-				    var contentArea = ($element.find('.content-area')[0]);
-				    if ((contentArea.scrollLeft + contentArea.offsetWidth) === contentArea.scrollWidth)
-					angular.element($scope.glasspane).width(angular.element($scope.glasspane).width()+5);
-				    contentArea.scrollLeft += 5;
-				    if (callback) callback($scope, $scope.selectionToDrag,5,0);
-				    $scope.refreshEditorContent();
-				},100);
-			};
-			
+
 			$scope.registerDOMEvent = function(eventType, target, callback) {
 				var eventCallback = callback.bind(this);
 				if (target == "FORM") {
@@ -115,6 +142,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					$($element.find('.bottomAutoscrollArea')[0]).on(eventType, null, eventCallback)
 				} else if (target == "RIGHT_AUTOSCROLL") {
 					$($element.find('.rightAutoscrollArea')[0]).on(eventType, null, eventCallback)
+				} else if (target == "LEFT_AUTOSCROLL") {
+					$($element.find('.leftAutoscrollArea')[0]).on(eventType, null, eventCallback)
+				} else if (target == "TOP_AUTOSCROLL") {
+					$($element.find('.topAutoscrollArea')[0]).on(eventType, null, eventCallback)
 				}
 				
 				return eventCallback;
@@ -135,6 +166,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					$($element.find('.bottomAutoscrollArea')[0]).off(eventType, null, callback)
 				} else if (target == "RIGHT_AUTOSCROLL") {
 					$($element.find('.rightAutoscrollArea')[0]).off(eventType, null, callback)
+				} else if (target == "LEFT_AUTOSCROLL") {
+					$($element.find('.leftAutoscrollArea')[0]).off(eventType, null, callback)
+				} else if (target == "TOP_AUTOSCROLL") {
+					$($element.find('.topAutoscrollArea')[0]).off(eventType, null, callback)
 				}
 			}
 
@@ -258,14 +293,9 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 						padding: "3px"
 					};
 				}
-				var xOffset = 0;
-				var yOffset = 0;
+				var xOffset = 20;
+				var yOffset = 20;
 
-				//TODO refactor out this 20px addition
-				if (!$scope.isContentSizeFull()) {
-					xOffset += 20;
-					yOffset += 20;
-				}
 				var style = {
 					opacity: 0.7,
 					padding: "3px",
@@ -645,7 +675,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				};
 			}
 			$scope.isContentSizeFull = function() {
-				return ($scope.contentStyle.paddingRight == "80px") && ($scope.contentStyle.bottom == "0px");
+				return ($scope.contentStyle.right == "20px") && ($scope.contentStyle.bottom == "20px");
 			}
 
 			$scope.setCursorStyle = function(cursor) {
@@ -709,15 +739,16 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 								$scope.contentStyle.h - 20 > sizes.height)) {
 							$scope.contentStyle.h = sizes.height
 						}
-						if ($scope.isContentSizeFull()) {
-							if (contentDiv.clientWidth < sizes.width && (!$scope.contentStyle.w || $scope.contentStyle.w + 20 < sizes.width ||
-									$scope.contentStyle.w - 20 > sizes.width)) {
-								$scope.contentStyle.w = sizes.width
-								if (!$scope.isAbsoluteFormLayout()) {
-									$scope.contentStyle.width = (sizes.width + 20) + "px"
-								}
-							}
-						}
+						// not needed ?
+//						if ($scope.isContentSizeFull()) {
+//							if (contentDiv.clientWidth < sizes.width && (!$scope.contentStyle.w || $scope.contentStyle.w + 20 < sizes.width ||
+//									$scope.contentStyle.w - 20 > sizes.width)) {
+//								$scope.contentStyle.w = sizes.width
+//								if (!$scope.isAbsoluteFormLayout()) {
+//									$scope.contentStyle.width = (sizes.width + 20) + "px"
+//								}
+//							}
+//						}
 					}
 					adjustGlassPaneSize();
 				}
@@ -741,7 +772,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				}
 			}
 
-			function adjustGlassPaneSize() {
+			function adjustGlassPaneSize(gpWidth, gpHeight) {
 				if ($scope.isAbsoluteFormLayout()) {
 				    	var sizes = getScrollSizes($scope.contentDocument.querySelectorAll(".sfcontent"));
 					if (sizes.height > 0 && sizes.width > 0) {
@@ -772,9 +803,18 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					var contentDiv = $($scope.contentDocument).find('.svy-form')[0];
 					if (contentDiv) {
 					        if (contentDiv.offsetHeight > 0 ){
+					            if ($scope.isContentSizeFull()) 
+					            {	
 					            	adjustIFrameSize();
-        						$scope.glasspaneStyle.width = (contentDiv.offsetWidth +20) + 'px';
-        						$scope.glasspaneStyle.height = (contentDiv.offsetHeight + 20) + 'px';
+					            }
+					            
+					            // we need to wait for the contentDiv to render with the values set for the content size
+					            // now we just do a timeout, but should try a better way ...
+					            $timeout(function() {
+					            	var contentDivRendered = $($scope.contentDocument).find('.svy-form')[0];
+	        						$scope.glasspaneStyle.width = (contentDivRendered.offsetWidth +20) + 'px';
+	        						$scope.glasspaneStyle.height = (contentDivRendered.offsetHeight + 20) + 'px';
+					            }, 200);
 					        }
 					}
 				}
@@ -788,6 +828,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 
 				if (!$scope.editorInitialized)
 					$pluginRegistry.registerEditor($scope);
+				
 
 				$scope.contentDocument = contentDocument;
 				var htmlTag = $scope.contentDocument.getElementsByTagName("html")[0];
@@ -850,6 +891,12 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					}, 500);
 				}
 
+				var promise = $editorService.loadAllowedChildren();
+				promise.then(function(result) {
+					var allowedChildren = JSON.parse(result);
+					$allowedChildren.set(allowedChildren);
+					$scope.getEditorContentRootScope().allowedChildren = allowedChildren;
+				});
 				$scope.editorInitialized = true;
 			});
 
@@ -862,42 +909,40 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 
 			$element.on('renderDecorators.content', function(event) {
 				var toRun = function() {
-					// TODO this is now in a timeout to let the editor-content be able to reload the form.
-					// could we have an event somewhere from the editor-content that the form is reloaded and ready?
-					// maybe the form controllers code could call $evalAsync as last thing in its controller when it is in design.
+					var shouldSetContentSizes = $scope.isAbsoluteFormLayout() || $scope.isContentSizeFull();
 					if (selection.length > 0) {
 						var ghost = $scope.getGhost(selection[0].getAttribute("svy-id"));
-						if (ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM)) {
+						if (shouldSetContentSizes && ghost && (ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM)) {
 							$scope.setContentSizes();
 						} else {
 							var promise = $editorService.getGhostComponents(); //no parameter, then the ghosts are not repositioned
 							promise.then(function(result) {
 								$scope.setGhosts(result);
-								$timeout(function() {
-									var nodes = Array.prototype.slice.call($scope.contentDocument.querySelectorAll("[svy-id]"));
-									var ghosts = Array.prototype.slice.call($scope.glasspane.querySelectorAll("[svy-id]"));
-									nodes = nodes.concat(ghosts);
-									var matchedElements = []
-									for (var s = 0; s < selection.length; s++) 
-									{
-										for (var i = 0; i < nodes.length; i++) {
-											var element = nodes[i]
-											if (selection[s].getAttribute("svy-id") == element.getAttribute("svy-id")) {
-												matchedElements.push(element);
-												break;
-											}
+
+								var nodes = Array.prototype.slice.call($scope.contentDocument.querySelectorAll("[svy-id]"));
+								var ghosts = Array.prototype.slice.call($scope.glasspane.querySelectorAll("[svy-id]"));
+								nodes = nodes.concat(ghosts);
+								var matchedElements = []
+								for (var s = 0; s < selection.length; s++) 
+								{
+									for (var i = 0; i < nodes.length; i++) {
+										var element = nodes[i]
+										if (selection[s].getAttribute("svy-id") == element.getAttribute("svy-id")) {
+											matchedElements.push(element);
+											break;
 										}
 									}
-									selection = matchedElements;
-									if (selection.length != matchedElements.length) {
-										$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, selection);
-									} else {
-										$rootScope.$broadcast(EDITOR_EVENTS.RENDER_DECORATORS, selection);
-									}
-								}, 100);
+								}
+								selection = matchedElements;
+								if (selection.length != matchedElements.length) {
+									$rootScope.$broadcast(EDITOR_EVENTS.SELECTION_CHANGED, selection);
+								} else {
+									$rootScope.$broadcast(EDITOR_EVENTS.RENDER_DECORATORS, selection);
+								}
+
 							});
 						}
-					} else {
+					} else if(shouldSetContentSizes){
 					    	$scope.setContentSizes();
 					}
 				}
@@ -965,7 +1010,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	};
 
 }).factory("$editorService", function($rootScope, $webSocket, $log, $q, $window, EDITOR_EVENTS, $rootScope, $timeout,
-	$selectionUtils) {
+	$selectionUtils, $allowedChildren) {
 	var realConsole = $window.console;
 	$window.console = {
 		log: function(msg) {
@@ -1248,9 +1293,23 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			return wsSession.callService('formeditor', 'updatePaletteOrder', paletteOrder, false);
 		},
 
+		openPackageManager: function() {
+			return wsSession.callService('formeditor', 'openPackageManager', null, true);
+		},
+		
 		showImageInOverlayDiv: function(url) {
 			editorScope.previewOverlayImgURL = url;
 			editorScope.displayOverlay = true;
+		},
+		
+		loadAllowedChildren: function()
+		{
+			return wsSession.callService('formeditor', 'getAllowedChildren');
+		},
+		
+		setStatusBarText: function(text) {
+			var statusBarDiv = angular.element(document.querySelector('#statusbar'))[0];
+			statusBarDiv.innerHTML = !text ? '&nbsp;' : text;
 		}
 
 		// add more service methods here

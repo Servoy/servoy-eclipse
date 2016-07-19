@@ -1,3 +1,26 @@
+.statusbar-area {
+	display: -webkit-flex;
+  	display: flex;
+  	display: -ms-flexbox;
+  	flex-wrap: wrap;
+    flex-direction: row;
+    -webkit-flex-wrap: wrap;
+    -webkit-flex-direction: row;
+    -ms-flex-wrap: wrap;
+    -ms-flex-direction: row;
+    align-items: flex-start;
+    -webkit-align-items: flex-start;
+    -ms-align-items: flex-start;
+    flex-shrink : 0;
+    -webkit-flex-shrink : 0;
+	border: 0px solid #C0C0C0;
+	border-bottom-width: 1px;
+	background-color: #F2F2F2;
+	padding: 2px;
+	line-height: 25px;
+	min-height: 25px;
+	font-size: 10pt;
+}
 
 .rightAutoscrollArea {
 	z-index: 3;
@@ -17,6 +40,30 @@
 	bottom: 0px;
 	height: 20px;
 	width: 100%;
+	margin-left : -20px;
+	/* background-color: blue;
+	opacity: 0.3; */
+	pointer-events: none;
+}
+
+.leftAutoscrollArea {
+	z-index: 3;
+	position: fixed;
+	width: 20px;
+	height: 100%;
+	margin-top : -20px;
+	margin-left: -20px;
+	/* background-color: blue;
+	opacity: 0.3; */
+	pointer-events: none;
+}
+
+.topAutoscrollArea {
+	z-index: 3;
+	position: fixed;
+	height: 20px;
+	width: 100%;
+	margin-top : -20px;
 	margin-left : -20px;
 	/* background-color: blue;
 	opacity: 0.3; */
@@ -135,9 +182,6 @@ body {
 	overflow: auto;
 	background-image: url('../images/light-raster-background.png');
 	vertical-align: top;
-}
-
-.content-area.non-full {
 	padding-top: 20px;
 	padding-left: 20px
 }
@@ -160,7 +204,7 @@ body {
 	pointer-events: none;
 	box-sizing: border-box;
 	position: absolute;
-	border: 1px solid black;
+	border: 1px solid #4d4d4d;
 	cursor: move;
 	cursor: -webkit-grab;
 	cursor: -moz-grab;
@@ -229,7 +273,7 @@ body {
 	top: 0px;
 	height:20px;
 	width:20px;
-	outline:1px solid lightblue;
+	outline:1px solid rgb(0, 153, 255);
 	display: none
 }
 
@@ -242,4 +286,10 @@ body {
   cursor: pointer;
   background-color: #D0D0D0;
   outline: 1px solid red;
+}
+
+.linkbtn
+{
+	border: 0;
+	padding-left: 2px;
 }

@@ -501,7 +501,7 @@ public class CreateComponentHandler implements IServerService
 				}
 				else
 				{
-					if ("*".equals(name))
+					if ("*".equals(name) || "component".equals(name))
 					{
 						Command command = (PlatformUI.getWorkbench().getService(ICommandService.class)).getCommand(AddContainerCommand.COMMAND_ID);
 						final Event trigger = new Event();

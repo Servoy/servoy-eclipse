@@ -1,67 +1,102 @@
 <table style="width:100%" class="table-package">
   <tr>
     <th><md-subheader class="md-no-sticky">Package</md-subheader></th>
-    <th><md-subheader class="md-no-sticky">Released versions</md-subheader></th>
-    <th><md-subheader class="md-no-sticky">Install solution</md-subheader></th>  
-    <th><md-subheader class="md-no-sticky">Installed</md-subheader></th>  
+    <th colspan="2"><md-subheader class="md-no-sticky">Released version</md-subheader></th>  
+    <th><md-subheader class="md-no-sticky">Added</md-subheader></th>
+    <th><md-subheader class="md-no-sticky">In solution/module</md-subheader></th>  
     <th><md-subheader class="md-no-sticky">References</md-subheader></th>
   </tr>
-  <tr ng-repeat="package in packages">
+  <tr ng-repeat-start="package in packages" ng-class="isPackageSelected($index) ? 'wpm-package-selected' : ''">
     <td>
-      <div>
+      <div class="wpm-clickable" ng-click="togglePackageSelection($index, $event)">
         <img  ng-src="{{package.icon}}" class="md-avatar" />
         <span>{{package.displayName}}</span>
+        <span ng-if="package.description" class= "wpm-icon-small" ng-class="isSelectedAndWithDescriptionExpanded($index) ? 'fa fa-caret-up' : 'fa fa-caret-down'"></span>
+        <md-tooltip md-direction="bottom" md-autohide="true" ng-if="package.description" >
+          Click to read more about package '{{package.displayName}}'.
+        </md-tooltip>
       </div>
     </td>
-    <td>
-      <div class="column-release">
+    <td class="column-fitwidth">
+      <!-- Release Version-->
+      <div class="align-center">
         <div class= "select"> 
-          <md-select ng-model="package.selected" style="width: 200px;" md-selected-text="getSelectedRelease($index)">
+          <md-select ng-model="package.selected" class="select-release" md-selected-text="getSelectedRelease($index)">
             <md-option ng-value="release.version" ng-repeat="release in package.releases">{{release.version}}</md-option>
+            <md-tooltip md-direction="bottom" md-autohide="true">
+              {{getReleaseTooltip($index)}}
+            </md-tooltip>
           </md-select>
         </div>
-        <div class="btn-group">
-          <md-button class="md-raised" ng-click="install(package, $index)" ng-bind="getInstallText($index)" ng-disabled="!installEnabled($index)">
-            <md-tooltip md-direction="bottom">
-              {{getInstallTooltip($index)}}
-            </md-tooltip>
-          </md-button>
-          <md-button class="md-raised" ng-click="uninstall(package, $index)" ng-if="package.installed" ng-bind="getRemoveText($index)" ng-disabled="!removeEnabled($index)">
-            <md-tooltip md-direction="bottom">
-              Uninstall the web package from the 'Install solution'
-            </md-tooltip>
-          </md-button>
-        </div>
       </div>
     </td>
-    <td>
+    <td class="column-fitwidth">
+      <!-- Add/Upgrade button -->
+      <div class="align-center btn-group">
+        <md-button class="md-icon-button svy-primary" ng-class="getInstallClass($index)" ng-click="install(package, $index)" ng-if="installAvailable($index)" ng-disabled="isInstallingOrRemoving($index)" >
+          <md-tooltip md-direction="bottom" md-autohide="true">
+            {{getInstallTooltip($index)}}
+          </md-tooltip>
+        </md-button>
+      </div>
+    </td>
+    <td class="column-fitwidth">
+      <!-- Added -->
+      <div class="align-center"> 
+        <p> {{package.installed}} </p>
+        <md-button class="md-icon-button fa fa-trash"  ng-click="uninstall(package, $index)" ng-if="package.installed" ng-disabled="isInstallingOrRemoving($index)">
+          <md-tooltip md-direction="bottom" md-autohide="true">
+            Remove the web package from solution '{{packages[$index].activeSolution}}'.
+          </md-tooltip>
+        </md-button>
+        <!--<i class="fa fa-check-circle-o release-action success" ng-if="package.installed"></i>-->
+      </div>
+    </td>
+    <td class="column-fitwidth">
+      <!-- Active Solution -->
       <div class="align-center">  
-        <md-select ng-model="package.activeSolution" ng-disabled="!installEnabled($index)" style="width: 200px;">
-          <md-option ng-value="solution" ng-repeat="solution in $parent.solutionList">{{solution}}</md-option>
+        <md-select ng-model="package.activeSolution" class="select-solution" ng-disabled="!installEnabled($index)">
+          <md-option ng-value="solution" ng-repeat="solution in $parent.solutionList | orderBy">{{solution}}</md-option>
+          <md-tooltip md-direction="bottom" md-autohide="true">
+            {{getSolutionTooltip($index)}}
+          </md-tooltip>
         </md-select>
         <!--<i class="fa fa-check-circle-o release-action success" ng-if="package.installed"></i>-->
       </div>
     </td>
-    <td>
-      <div class="align-center"> 
-        <p> {{package.installed}} </p>
-        <!--<i class="fa fa-check-circle-o release-action success" ng-if="package.installed"></i>-->
-      </div>
-    </td>
-    <td>    
-      <div class="align-center">  
-        <md-button class="md-raised svy-primary" ng-disabled="!package.sampleUrl" ng-click="showUrl(package.sampleUrl)">View Demo</md-button>
-        <md-button class="md-icon-button fa fa-book"  ng-disabled="!package.wikiUrl" ng-click="showUrl(package.wikiUrl)">
-          <md-tooltip md-direction="bottom">
+    <td class="column-fitwidth">
+      <!-- References -->
+      <div class="align-right">  
+        <md-button ng-if="package.sampleUrl" class="md-raised svy-primary" ng-click="showUrl(package.sampleUrl)">
+          Demo
+          <md-tooltip md-direction="bottom" md-autohide="true">
+            View demo
+          </md-tooltip>
+        </md-button>
+        <md-button ng-if="package.wikiUrl" class="md-icon-button fa fa-book" ng-click="showUrl(package.wikiUrl)">
+          <md-tooltip md-direction="bottom" md-autohide="true">
             Documentation
           </md-tooltip>
         </md-button>
-        <md-button class="md-icon-button fa fa-github"  ng-disabled="!package.sourceUrl" ng-click="showUrl(package.sourceUrl)">
-          <md-tooltip md-direction="bottom">
+        <md-button ng-if="package.sourceUrl" class="md-icon-button fa fa-github"  ng-click="showUrl(package.sourceUrl)">
+          <md-tooltip md-direction="bottom" md-autohide="true">
             Source code
           </md-tooltip>
         </md-button>
       </div>
     </td> 
+  </tr>
+  <tr ng-if="isInstallingOrRemoving($index)"> 
+    <!-- Loading indicator -->
+    <td colspan="6">
+      <md-progress-linear md-mode="indeterminate" ng-if="true"></md-progress-linear>
+    </td>
+  </tr>
+  <tr ng-repeat-end ng-show="isSelectedAndWithDescriptionExpanded($index)" class="wpm-package-description">
+    <!-- Description panel --> 
+    <td colspan="6">
+      <md-content ng-if="isSelectedAndWithDescriptionExpanded($index)" class="md-padding wpm-collapsible wpm-collapsible-content" ng-bind-html="getPackageDescription($index)">
+      <hr/>
+    </td>
   </tr>
 </table>

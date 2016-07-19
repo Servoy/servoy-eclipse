@@ -4,14 +4,13 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IPersistableElement;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.ui.handlers.HandlerUtil;
 
-import com.servoy.eclipse.designer.webpackage.WebPackageManager;
-import com.servoy.j2db.util.Debug;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.util.EditorUtil;
 
 public class OpenWebPackageManagerCommandHandler extends AbstractHandler implements IHandler
 {
@@ -19,59 +18,17 @@ public class OpenWebPackageManagerCommandHandler extends AbstractHandler impleme
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException
 	{
-		try
+		ISelection selection = HandlerUtil.getActiveMenuSelection(event);
+		String solutionName = null;
+		if (selection instanceof StructuredSelection && ((StructuredSelection)selection).getFirstElement() instanceof SimpleUserNode)
 		{
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new IEditorInput()
+			SimpleUserNode project = ((SimpleUserNode)((StructuredSelection)selection).getFirstElement()).getAncestorOfType(ServoyProject.class);
+			if (project != null)
 			{
-
-				@Override
-				public <T> T getAdapter(Class<T> adapter)
-				{
-					return null;
-				}
-
-				@Override
-				public String getToolTipText()
-				{
-					return "Web Package Manager";
-				}
-
-				@Override
-				public IPersistableElement getPersistable()
-				{
-					return null;
-				}
-
-				@Override
-				public String getName()
-				{
-					return "Web Package Manager";
-				}
-
-				@Override
-				public ImageDescriptor getImageDescriptor()
-				{
-					return null;
-				}
-
-				@Override
-				public boolean exists()
-				{
-					return true;
-				}
-
-				@Override
-				public boolean equals(Object obj)
-				{
-					if (obj instanceof IEditorInput) return ((IEditorInput)obj).getName().equals(this.getName());
-					return super.equals(obj);
-				}
-			}, WebPackageManager.EDITOR_ID);
+				solutionName = ((ServoyProject)project.getRealObject()).getSolution().getName();
+			}
 		}
-		catch (PartInitException e)
-		{
-			Debug.log(e);
-		}
+		EditorUtil.openWebPackageManager(solutionName);
 		return null;
 	}
 

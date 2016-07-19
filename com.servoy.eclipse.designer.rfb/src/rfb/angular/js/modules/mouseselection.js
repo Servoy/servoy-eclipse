@@ -170,7 +170,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 			}
 		});
 	})
-}).factory("$selectionUtils", function(EDITOR_CONSTANTS) {
+}).factory("$selectionUtils", function(EDITOR_CONSTANTS,$allowedChildren) {
 	function hasClass(element, cls) {
 		return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
 	}
@@ -232,7 +232,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						} else {
 							function getParent(dt) {
 								if (!dt || !dt[0]) return null;
-								var allowedChildren = dt[0].getAttribute("svy-allowed-children");
+								var allowedChildren = $allowedChildren.get(dt[0].getAttribute("svy-layoutname"));
 								if (!allowedChildren || !(allowedChildren.indexOf(realName) >= 0)) {
 									// maybe this is a component that has svy-types instead of svy-allowed-childrent
 									allowedChildren = dt[0].getAttribute("svy-types");

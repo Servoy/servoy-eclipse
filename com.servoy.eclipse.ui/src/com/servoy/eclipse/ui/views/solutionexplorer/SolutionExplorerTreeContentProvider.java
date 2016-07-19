@@ -205,7 +205,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	private final PlatformSimpleUserNode[] scriptingNodes;
 
-//	private final PlatformSimpleUserNode[] resourceNodes;
+	private final PlatformSimpleUserNode[] resourceNodes;
 
 	private final SolutionExplorerView view;
 
@@ -449,7 +449,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, utils, history, security, i18n, /*
 																																			 * exceptions ,
 																																			 */jsunit, plugins };
-		//resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsFromResourcesNode, servicesFromResourcesNode };
+		resourceNodes = new PlatformSimpleUserNode[] { stylesNode, userGroupSecurityNode, i18nFilesNode, templatesNode, componentsFromResourcesNode, servicesFromResourcesNode };
 
 		// we want to load the plugins node in a background low prio job so that it will expand fast
 		// when used...
@@ -537,7 +537,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 	public void setResourceNodesEnabled(boolean isEnabled)
 	{
-		setNodesEnabled(resources.children, isEnabled);
+		setNodesEnabled(resourceNodes, isEnabled);
 	}
 
 	private void setNodesEnabled(SimpleUserNode[] nodes, boolean isEnabled)
@@ -1162,20 +1162,23 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			Image packageIcon = PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor("test.zip").createImage();
 
 
-			List<IProject> allReferencedProjects = new ArrayList<IProject>();
+			List<IProject> allReferencedProjects;
 			if (includeModules)
 			{
 				try
 				{
-					fillAllReferencedProjects(eclipseProject, allReferencedProjects);
+					allReferencedProjects = servoyProject.getReferencedProjectsIdDepth();
 				}
 				catch (CoreException e)
 				{
-					Debug.log(e);
+					ServoyLog.logError(e);
+					allReferencedProjects = new ArrayList<IProject>(1);
+					allReferencedProjects.add(eclipseProject);
 				}
 			}
 			else
 			{
+				allReferencedProjects = new ArrayList<IProject>(1);
 				allReferencedProjects.add(eclipseProject);
 			}
 			ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
@@ -1253,10 +1256,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			IProject eclipseProject = servoyProject.getProject();
 			try
 			{
-				List<IProject> allReferencedProjects = new ArrayList<IProject>();
+				List<IProject> allReferencedProjects;
 				if (includeModules)
 				{
-					fillAllReferencedProjects(eclipseProject, allReferencedProjects);
+					allReferencedProjects = servoyProject.getReferencedProjectsIdDepth();
 				}
 				else
 				{
@@ -1290,16 +1293,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			}
 		}
 		return children;
-	}
-
-	static void fillAllReferencedProjects(IProject project, List<IProject> allReferencedProjects) throws CoreException
-	{
-		if (allReferencedProjects.indexOf(project) != -1) return;//TODO change this list into a hashmap so that it's faster
-		allReferencedProjects.add(project);
-		for (IProject iProject : project.getReferencedProjects())
-		{
-			fillAllReferencedProjects(iProject, allReferencedProjects);
-		}
 	}
 
 	static String appendModuleName(String name, String moduleName)
@@ -1431,17 +1424,18 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				}
 				else if (un.getType() == UserNodeType.INMEMORY_DATASOURCES)
 				{
-					ArrayList<IProject> allReferencedProjects = new ArrayList<IProject>();
-					IProject project = ((MemServer)un.getRealObject()).getServoyProject().getProject();
+					ServoyProject servoyProject = ((MemServer)un.getRealObject()).getServoyProject();
 					try
 					{
+						List<IProject> allReferencedProjects;
 						if (includeModules)
 						{
-							fillAllReferencedProjects(project, allReferencedProjects);
+							allReferencedProjects = servoyProject.getReferencedProjectsIdDepth();
 						}
 						else
 						{
-							allReferencedProjects.add(project);
+							allReferencedProjects = new ArrayList<IProject>(1);
+							allReferencedProjects.add(servoyProject.getProject());
 						}
 						for (IProject module : allReferencedProjects)
 						{
@@ -1579,20 +1573,23 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 			IProject eclipseProject = servoyProject.getProject();
 
-			List<IProject> allReferencedProjects = new ArrayList<IProject>();
+			List<IProject> allReferencedProjects;
 			if (includeModules)
 			{
 				try
 				{
-					fillAllReferencedProjects(eclipseProject, allReferencedProjects);
+					allReferencedProjects = servoyProject.getReferencedProjectsIdDepth();
 				}
 				catch (CoreException e)
 				{
 					Debug.log(e);
+					allReferencedProjects = new ArrayList<IProject>(1);
+					allReferencedProjects.add(eclipseProject);
 				}
 			}
 			else
 			{
+				allReferencedProjects = new ArrayList<IProject>(1);
 				allReferencedProjects.add(eclipseProject);
 			}
 			ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
@@ -1635,10 +1632,10 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			IProject eclipseProject = servoyProject.getProject();
 			try
 			{
-				List<IProject> allReferencedProjects = new ArrayList<IProject>();
+				List<IProject> allReferencedProjects;
 				if (includeModules)
 				{
-					fillAllReferencedProjects(eclipseProject, allReferencedProjects);
+					allReferencedProjects = servoyProject.getReferencedProjectsIdDepth();
 				}
 				else
 				{
@@ -1687,8 +1684,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		// append inmemory ds from modules
 		if (serverNode.getType() == UserNodeType.INMEMORY_DATASOURCES)
 		{
-			IProject project = ((MemServer)serverNode.getRealObject()).getServoyProject().getProject();
-			serverNode.children = SolutionExplorerListContentProvider.createInMemTables(project, includeModules);
+			serverNode.children = SolutionExplorerListContentProvider.createInMemTables(((MemServer)serverNode.getRealObject()).getServoyProject(),
+				includeModules);
 		}
 		else
 		{

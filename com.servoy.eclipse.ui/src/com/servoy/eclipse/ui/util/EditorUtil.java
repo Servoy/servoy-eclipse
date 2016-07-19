@@ -76,6 +76,7 @@ import com.servoy.eclipse.core.resource.I18NEditorInput;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.resource.ServerEditorInput;
 import com.servoy.eclipse.core.resource.TableEditorInput;
+import com.servoy.eclipse.core.resource.WebPackageManagerEditorInput;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -120,6 +121,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
 
@@ -649,6 +651,24 @@ public class EditorUtil
 			ServoyLog.logError(ex);
 		}
 		return null;
+	}
+
+	public static void openWebPackageManager()
+	{
+		openWebPackageManager(null);
+	}
+
+	public static void openWebPackageManager(String solutionName)
+	{
+		try
+		{
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new WebPackageManagerEditorInput(solutionName),
+				"com.servoy.eclipse.ui.webpackagemanager");
+		}
+		catch (PartInitException e)
+		{
+			Debug.log(e);
+		}
 	}
 
 	public static void closeEditor(Object object)

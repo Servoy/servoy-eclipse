@@ -106,9 +106,11 @@ import com.servoy.j2db.dataprocessing.IPropertyDescriptorProvider;
 import com.servoy.j2db.dataprocessing.ITypedColumnConverter;
 import com.servoy.j2db.dataprocessing.IUIConverter;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.ColumnWrapper;
@@ -332,6 +334,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE = _PREFIX + ".elementExtendsDeletedElement";
 	public static final String LINGERING_TABLE_FILES_TYPE = _PREFIX + ".lingeringTableFiles";
 	public static final String DUPLICATE_MEM_TABLE_TYPE = _PREFIX + ".duplicateMemTable";
+	public static final String SUPERFORM_PROBLEM_TYPE = _PREFIX + ".superformProblem";
 
 
 	// warning/error level settings keys/defaults
@@ -462,6 +465,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> FORM_EDITABLE_COMBOBOX_CUSTOM_VALUELIST = new Pair<String, ProblemSeverity>(
 		"formEditableComboboxCustomValuelist", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> FORM_EXTENDS_CYCLE = new Pair<String, ProblemSeverity>("formExtendsCycle", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> SUPERFORM_PROBLEM = new Pair<String, ProblemSeverity>("superformProblem", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> FORM_FILE_NAME_INCONSISTENT = new Pair<String, ProblemSeverity>("formFileNameInconsistent",
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> FORM_FORMAT_INVALID = new Pair<String, ProblemSeverity>("formFormatInvalid", ProblemSeverity.WARNING);
@@ -1360,7 +1364,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 						formElementsByName.put(((ISupportName)o).getName(), duplicates);
 					}
-					return IPersistVisitor.CONTINUE_TRAVERSAL;
+					if (o instanceof AbstractContainer) return IPersistVisitor.CONTINUE_TRAVERSAL;
+					else return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
 				}
 			});
 		}
@@ -1536,15 +1541,43 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 		if (persist instanceof Form)
 		{
-			// check form extends of a deprecated form
-			Form extendsForm = ((Form)persist).getExtendsForm();
+			Form form = (Form)persist;
+			Form extendsForm = form.getExtendsForm();
+
 			if (extendsForm != null)
 			{
+				if (form.isResponsiveLayout() != extendsForm.isResponsiveLayout())
+				{
+
+					String message = null;
+					if (form.isResponsiveLayout())
+					{
+						message = "The responsive layout form '" + form.getName() + "' should not extend the absolute layout form '" + extendsForm.getName() +
+							"'.";
+					}
+					else
+					{
+						message = "The absolute layout form  '" + form.getName() + "' should not extend the responsive layout form '" + extendsForm.getName() +
+							"'.";
+					}
+					IMarker marker = addMarker(project, SUPERFORM_PROBLEM_TYPE, message, -1, SUPERFORM_PROBLEM, IMarker.PRIORITY_NORMAL, null, persist);
+					try
+					{
+						marker.setAttribute("Uuid", form.getUUID().toString());
+						marker.setAttribute("SolutionName", form.getSolution().getName());
+					}
+					catch (CoreException e)
+					{
+						Debug.error(e);
+					}
+				}
+
+				// check form extends of a deprecated form
 				addDeprecatedElementWarningIfNeeded(persist, extendsForm, project,
 					"Form \"" + elementName + "\" extends a deprecated form \"" + extendsForm.getName() + "\".");
 			}
 
-			String initialSort = ((Form)persist).getInitialSort();
+			String initialSort = form.getInitialSort();
 			if (initialSort != null)
 			{
 				addDeprecatedRelationWarningIfNeeded(persist, initialSort, project,
@@ -1869,6 +1902,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE);
 		deleteMarkers(project, LINGERING_TABLE_FILES_TYPE);
 		deleteMarkers(project, DUPLICATE_MEM_TABLE_TYPE);
+		deleteMarkers(project, SUPERFORM_PROBLEM_TYPE);
 
 		try
 		{
@@ -2011,6 +2045,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											{
 												public Object visit(IPersist p)
 												{
+													// uuid is inherited as it is in json, thus generating duplicate uuids; we should fix inheritance
+													if (p instanceof ChildWebComponent) return IPersistVisitor.CONTINUE_TRAVERSAL;
 													elementIdPersistMap.put(p.getID(), p);
 													List<IPersist> lst = theMakeSureNoDuplicateUUIDsAreFound.get(p.getUUID());
 													if (lst == null)

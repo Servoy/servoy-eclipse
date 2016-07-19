@@ -53,9 +53,9 @@ public class WrappingControl<CT extends Control> extends CompositeWithCalculated
 	}
 
 	@Override
-	protected Point adjustComputedPreferredSize(CT label, boolean changed)
+	protected Point adjustComputedPreferredSize(CT wrappedControl, boolean changed)
 	{
-		return new Point(minWidth, label.computeSize(minWidth > 0 ? minWidth : SWT.DEFAULT, SWT.DEFAULT, changed).y); // workaround to make a label inside a ScrolledComposite with setExpandHorizontal(true) be able to wrap to the width of the other components in that composite
+		return new Point(minWidth, wrappedControl.computeSize(minWidth > 0 ? minWidth : SWT.DEFAULT, SWT.DEFAULT, changed).y); // workaround to make a label inside a ScrolledComposite with setExpandHorizontal(true) be able to wrap to the width of the other components in that composite
 	}
 
 }

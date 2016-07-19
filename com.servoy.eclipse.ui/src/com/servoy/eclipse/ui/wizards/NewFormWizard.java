@@ -55,6 +55,7 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.sablo.specification.WebComponentSpecProvider;
 
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IFormConstants;
@@ -164,7 +165,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 		Form selectedForm = null;
 		IDataSourceWrapper selectedDataSource = null;
 		// find the Servoy project to which the new form will be added
-		if (selection.size() == 1)
+		if (selection != null && selection.size() == 1)
 		{
 			Object selected = selection.getFirstElement();
 			if (selected instanceof IResource)
@@ -376,7 +377,18 @@ public class NewFormWizard extends Wizard implements INewWizard
 			servoyModel.getDataModelManager().testTableAndCreateDBIFile(servoyModel.getDataSourceManager().getDataSource(form.getDataSource()));
 
 			// open newly created form in the editor (as new editor)
-			return EditorUtil.openFormDesignEditor(form, true, true) != null;
+			boolean returnValue = EditorUtil.openFormDesignEditor(form, true, true) != null;
+
+			if (form.isResponsiveLayout() && WebComponentSpecProvider.getInstance().getLayoutSpecifications().isEmpty())
+			{
+				if (MessageDialog.openConfirm(getShell(), "No Responsive Layout present",
+					"This solution does not have a responsive layout yet. You need a responsive layout to build responsive form, do you want to download a responsive layout now ?"))
+				{
+					EditorUtil.openWebPackageManager();
+				}
+			}
+
+			return returnValue;
 		}
 		catch (RepositoryException e)
 		{
@@ -969,15 +981,9 @@ public class NewFormWizard extends Wizard implements INewWizard
 				dataSourceViewer.setEditable(false);
 				styleNameCombo.setSelection(new StructuredSelection(superForm.getStyleName() == null ? "" : superForm.getStyleName()));
 			}
-			if (superForm != null && superForm.isResponsiveLayout())
-			{
-				listFormCheck.setSelection(true);
-				listFormCheck.setEnabled(false);
-			}
-			else
-			{
-				listFormCheck.setEnabled(true);
-			}
+
+			listFormCheck.setSelection(superForm != null ? superForm.isResponsiveLayout() : false);
+			listFormCheck.setEnabled(superForm == null);
 			dataSourceViewer.setButtonText((superForm == null || superForm.getDataSource() == null) ? TreeSelectViewer.DEFAULT_BUTTON_TEXT : "");
 			setPageComplete(validatePage());
 		}

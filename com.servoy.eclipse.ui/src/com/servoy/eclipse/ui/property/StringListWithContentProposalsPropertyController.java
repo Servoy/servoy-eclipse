@@ -363,6 +363,12 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 		{
 			super.openProposalPopup();
 		}
+
+		@Override
+		public void closeProposalPopup()
+		{
+			super.closeProposalPopup();
+		}
 	}
 
 	/**
@@ -405,6 +411,29 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 			}
 
 			return begin + replacement + remainder;
+		}
+	}
+
+	public static class ModifiedText extends Text
+	{
+		private final AbstractWordsWithContentProposalCellEditor cellEditor;
+
+		public ModifiedText(Composite parent, int style, AbstractWordsWithContentProposalCellEditor cellEditor)
+		{
+			super(parent, style);
+			this.cellEditor = cellEditor;
+		}
+
+		@Override
+		public void paste()
+		{
+			super.paste();
+			cellEditor.getContentProposalAdapter().closeProposalPopup();
+		}
+
+		@Override
+		protected void checkSubclass()
+		{
 		}
 	}
 
@@ -458,7 +487,7 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 		{
 			Composite composite = new Composite(parent, SWT.NONE);
 
-			text = new Text(composite, SWT.BORDER);
+			text = new ModifiedText(composite, SWT.BORDER, this);
 			addListeners();
 			text.addSelectionListener(new SelectionAdapter()
 			{

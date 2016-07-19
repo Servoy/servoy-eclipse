@@ -92,4 +92,5 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	public String getDefaultAdminPassword();
 
+	boolean isMinimizeJsCssResources();
 }

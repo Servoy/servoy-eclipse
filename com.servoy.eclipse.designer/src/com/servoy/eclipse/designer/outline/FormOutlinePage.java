@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.GraphicalViewer;
@@ -96,6 +98,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 	private ISupportChilds dropTarget;
 	private IPersist dropTargetComponent;
 
+
 	public FormOutlinePage(Form form, GraphicalViewer viewer, ActionRegistry registry)
 	{
 		this.form = form;
@@ -117,6 +120,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 
 		if (form != null && form.isResponsiveLayout())
 		{
+			final Map<String, Set<String>> allowedChildrenMap = DesignerUtil.getAllowedChildren();
 			getTreeViewer().addDragSupport(DND.DROP_MOVE, new Transfer[] { FormElementTransfer.getInstance() }, new DragSourceListener()
 			{
 				@Override
@@ -169,10 +173,12 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				{
 					if (dropTarget != null && dragObjects != null && dragObjects.length > 0)
 					{
+						Form dropTargetForm = (Form)dropTarget.getAncestor(IRepository.FORMS);
 						final CompoundCommand cc = new CompoundCommand();
 						for (final IPersist p : dragObjects)
 						{
-							cc.add(new ChangeParentCommand(p, dropTarget, dropTargetComponent, getCurrentLocation() == LOCATION_AFTER)
+							cc.add(new ChangeParentCommand(p, dropTargetForm.equals(p.getAncestor(IRepository.FORMS)) ? dropTarget : null, dropTargetComponent,
+								getCurrentLocation() == LOCATION_AFTER)
 							{
 								@Override
 								public void execute()
@@ -233,6 +239,11 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 								dropTargetComponent = targetLayoutContainer;
 								targetLayoutContainer = targetLayoutContainer.getParent();
 							}
+						}
+
+						if (inputPersist instanceof WebComponent || inputPersist instanceof LayoutContainer)
+						{
+							// check cycle drop
 							if (dragObjects != null)
 							{
 								boolean doAllow = true;
@@ -255,6 +266,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							}
 						}
 
+
 						if (targetLayoutContainer instanceof LayoutContainer)
 						{
 							PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
@@ -262,7 +274,8 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							WebLayoutSpecification spec = null;
 							if (pkg != null && (spec = pkg.getSpecification(((LayoutContainer)targetLayoutContainer).getSpecName())) != null)
 							{
-								List<String> allowedChildren = spec.getAllowedChildren();
+								Set<String> allowedChildren = allowedChildrenMap.get(pkg.getPackageName() + "." + spec.getName());
+
 								if (dragObjects != null)
 								{
 									boolean doAllow = true;
@@ -270,6 +283,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 									{
 										String sourcePackage = null;
 										String sourceType = null;
+										boolean isComponent = false;
 
 										if (p instanceof LayoutContainer)
 										{
@@ -282,18 +296,24 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 												((WebComponent)p).getTypeName());
 											sourcePackage = pSpec.getPackageName() + ".*";
 											sourceType = pSpec.getPackageName() + "." + ((WebComponent)p).getTypeName();
+											isComponent = true;
 										}
 										else if (p instanceof IFormElement && !(p instanceof IChildWebObject))
 										{
 											sourceType = "component";
+											isComponent = true;
 										}
 
 										if (sourceType != null)
 										{
-											doAllow = allowedChildren.indexOf(sourceType) != -1;
+											doAllow = allowedChildren.contains(sourceType);
 											if (!doAllow && sourcePackage != null)
 											{
-												doAllow = allowedChildren.indexOf(sourcePackage) != -1;
+												doAllow = allowedChildren.contains(sourcePackage);
+											}
+											if (!doAllow && isComponent)
+											{
+												doAllow = allowedChildren.contains("component");
 											}
 										}
 										else doAllow = false;
@@ -309,8 +329,35 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 						}
 						else if (targetLayoutContainer instanceof Form)
 						{
-							dropTarget = targetLayoutContainer;
-							return true;
+							Boolean doAllow = null;
+							if (dragObjects != null)
+							{
+								for (IPersist p : dragObjects)
+								{
+									if (p instanceof LayoutContainer)
+									{
+										WebLayoutSpecification spec = null;
+										PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+											((LayoutContainer)p).getPackageName());
+										if (pkg != null)
+										{
+											spec = pkg.getSpecification(((LayoutContainer)p).getSpecName());
+										}
+										doAllow = new Boolean(spec != null && spec.isTopContainer());
+									}
+									else
+									{
+										doAllow = Boolean.FALSE;
+									}
+									if (doAllow.booleanValue()) continue;
+								}
+							}
+
+							if (doAllow != null && doAllow.booleanValue())
+							{
+								dropTarget = targetLayoutContainer;
+								return true;
+							}
 						}
 					}
 					return false;

@@ -71,7 +71,7 @@ public class NGPackageManager extends BaseNGPackageManager
 				//default packages preferences changed - flush everything
 				WebComponentSpecProvider.disposeInstance();
 				WebServiceSpecProvider.disposeInstance();
-				reloadAllNGPackages(null, true);
+				reloadAllNGPackages(null);
 			}
 		});
 
@@ -88,14 +88,14 @@ public class NGPackageManager extends BaseNGPackageManager
 				{
 					if (updateInfo == RESOURCES_UPDATED_ON_ACTIVE_PROJECT)
 					{
-						reloadAllNGPackages(null, false);
+						reloadAllNGPackages(null);
 					}
 					else if (updateInfo == MODULES_UPDATED)
 					{
 						// TODO if we will take referenced ng package projects even from modules, we should enable this code...
 						clearActiveSolutionReferencesCache();
 						//TODO can we improve this?
-						reloadAllNGPackages(null, false);
+						reloadAllNGPackages(null);
 //						reloadAllSolutionReferencedPackages(new NullProgressMonitor(), false);
 					}
 				}
@@ -103,7 +103,7 @@ public class NGPackageManager extends BaseNGPackageManager
 				public void activeProjectChanged(ServoyProject activeProject)
 				{
 					clearActiveSolutionReferencesCache();
-					reloadAllNGPackages(null, false);
+					reloadAllNGPackages(null);
 				}
 			};
 			((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(activeProjectListenerForRegisteringResources);
@@ -111,7 +111,7 @@ public class NGPackageManager extends BaseNGPackageManager
 	}
 
 	@Override
-	public void reloadAllNGPackages(IProgressMonitor m, boolean canChangeResources)
+	public void reloadAllNGPackages(IProgressMonitor m)
 	{
 		// do what super does but in a job; this is what code prior to the refactor did as well
 		Job registerAllNGPackagesJob = new Job("Reading ng packages from resources project...")
@@ -120,7 +120,7 @@ public class NGPackageManager extends BaseNGPackageManager
 			public IStatus run(IProgressMonitor monitor)
 			{
 				// do the actual work
-				NGPackageManager.super.reloadAllNGPackages(monitor, true);
+				NGPackageManager.super.reloadAllNGPackages(monitor);
 				return Status.OK_STATUS;
 			}
 

@@ -248,9 +248,11 @@ angular.module('editorContent',['servoyApp'])
   $scope.canContainDraggedElement = function() {
 	  if($scope.drop_highlight) {
 	  	  var drop = $scope.drop_highlight.split(".");
-	      for (arg in arguments){
-			var a = arguments[arg].split(".");
-			if((a[0] == drop[0] || ($scope.drop_highlight == "component")) && ((a[1] == "*") || (a[1] == drop[1]))) return true;
+	  	  var allowedChildren = $rootScope.allowedChildren[arguments[0]];
+	  	  if (allowedChildren.indexOf(drop[1]) >= 0) return true; //component
+	      for (arg in allowedChildren){
+			var a = allowedChildren[arg].split(".");
+			if(a[0] == drop[0] && ((a[1] == "*") || (a[1] == drop[1]))) return true;
 	      }
 	  }
       return false;
@@ -304,7 +306,10 @@ angular.module('editorContent',['servoyApp'])
     apply: function(propertyName) {},
     callServerSideApi: function(methodName, args) {
       return null;
-    }
+    },
+	getFormState: function() {
+		return $scope;
+	}
   }
   $scope.servoyApi = function(name) {
     return servoyApi;
