@@ -105,8 +105,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			Collections.reverse(styleSheets);
 			for (int i = 0; i < styleSheets.size(); i++)
 			{
-				styleSheets.set(i,
-					"resources/" + MediaResourcesServlet.FLATTENED_SOLUTION_ACCESS + "/" + fs.getSolution().getName() + "/" + styleSheets.get(i));
+				styleSheets.set(i, "resources/" + MediaResourcesServlet.FLATTENED_SOLUTION_ACCESS + "/" + fs.getSolution().getName() + "/" +
+					styleSheets.get(i) + "?t=" + Long.toHexString(System.currentTimeMillis()));
 			}
 		}
 		return styleSheets.toArray(new String[0]);
