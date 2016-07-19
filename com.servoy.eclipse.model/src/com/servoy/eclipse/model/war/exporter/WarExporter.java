@@ -317,11 +317,13 @@ public class WarExporter
 		attr.setValue("http://www.isdc.ro/wro");
 		rootElement.setAttributeNode(attr);
 
-		Set<String> exportedWebObjects = new HashSet<>(exportModel.getExportedComponents() != null ? exportModel.getExportedComponents()
-			: getAllNames(WebComponentSpecProvider.getInstance().getAllWebComponentSpecifications()));
-		exportedWebObjects.addAll(exportModel.getExportedServices() != null ? exportModel.getExportedServices()
-			: getAllNames(WebServiceSpecProvider.getInstance().getAllWebServiceSpecifications()));
-
+		Set<String> exportedWebObjects = null;
+		if (exportModel.getExportedComponents() != null || exportModel.getExportedServices() != null)
+		{
+			exportedWebObjects = new HashSet<>();
+			if (exportModel.getExportedComponents() != null) exportedWebObjects.addAll(exportModel.getExportedComponents());
+			if (exportModel.getExportedServices() != null) exportedWebObjects.addAll(exportModel.getExportedServices());
+		}
 		Object[] allContributions = IndexPageEnhancer.getAllContributions(exportedWebObjects, Boolean.TRUE);
 		Element group = doc.createElement("group");
 		rootElement.appendChild(group);
