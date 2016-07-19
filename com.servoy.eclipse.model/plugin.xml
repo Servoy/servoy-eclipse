@@ -792,6 +792,17 @@
 			<problem>com.servoy.eclipse.model.builder.JSFileExternalizeProblem#NON_EXTERNALIZED_STRING</problem>
 	   </problemCategory>      
    </extension>
+    <extension
+         id="com.servoy.eclipse.core.missingSpec"
+         name="Missing Spec"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
+   </extension>
    <extension
          point="org.eclipse.dltk.core.buildParticipant">
       <buildParticipant

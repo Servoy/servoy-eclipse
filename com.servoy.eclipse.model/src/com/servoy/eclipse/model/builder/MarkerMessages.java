@@ -655,4 +655,9 @@ public class MarkerMessages
 	 */
 	public static ServoyMarker ElementExtendsDeletedElement = new ServoyMarker("Element in form \"{0}\" extends a deleted element from the parent form.", //$NON-NLS-1$
 		ServoyBuilder.ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE);
+
+	/**
+	 * The roll over imageand cursor is not working in Smart Client tableview/listview form.
+	 */
+	public static ServoyMarker MissingSpecification = new ServoyMarker("{0} specification is missing: \"{1}\"", ServoyBuilder.MISSING_SPEC);
 }

@@ -32,6 +32,7 @@ import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -84,6 +85,24 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 					displayName), new ClearPropertyQuickFix(solName, uuid, propertyName, displayName) };
 			}
 
+			if (type.equals(ServoyBuilder.MISSING_SPEC))
+			{
+				return new IMarkerResolution[] { new IMarkerResolution()
+				{
+
+					@Override
+					public void run(IMarker marker)
+					{
+						EditorUtil.openWebPackageManager();
+					}
+
+					@Override
+					public String getLabel()
+					{
+						return "Open Web Package Manager";
+					}
+				} };
+			}
 			// add dynamic resolutions below this line
 			List<IMarkerResolution> resolutions = new ArrayList<IMarkerResolution>();
 

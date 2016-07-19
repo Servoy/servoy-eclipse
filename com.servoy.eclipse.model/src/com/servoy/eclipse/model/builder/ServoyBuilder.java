@@ -64,8 +64,10 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.problem.ProblemSeverity;
 import org.json.JSONObject;
+import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.ICustomType;
 import org.xml.sax.SAXException;
@@ -144,6 +146,7 @@ import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
@@ -335,7 +338,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String LINGERING_TABLE_FILES_TYPE = _PREFIX + ".lingeringTableFiles";
 	public static final String DUPLICATE_MEM_TABLE_TYPE = _PREFIX + ".duplicateMemTable";
 	public static final String SUPERFORM_PROBLEM_TYPE = _PREFIX + ".superformProblem";
-
+	public static final String MISSING_SPEC = _PREFIX + ".missingSpec";
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels";
@@ -522,6 +525,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.INFO);
 	public final static Pair<String, ProblemSeverity> ELEMENT_EXTENDS_DELETED_ELEMENT = new Pair<String, ProblemSeverity>("elementExtendsDeletedElement", //$NON-NLS-1$
 		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> MISSING_SPECIFICATION = new Pair<String, ProblemSeverity>("missingSpec", ProblemSeverity.ERROR);
 
 	// relations related
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
@@ -1903,6 +1907,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, LINGERING_TABLE_FILES_TYPE);
 		deleteMarkers(project, DUPLICATE_MEM_TABLE_TYPE);
 		deleteMarkers(project, SUPERFORM_PROBLEM_TYPE);
+		deleteMarkers(project, MISSING_SPEC);
 
 		try
 		{
@@ -3368,6 +3373,32 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 						}
 						checkCancel();
+						if (o instanceof WebComponent)
+						{
+							WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)o).getTypeName());
+							if (spec == null)
+							{
+								ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Web Component", ((WebComponent)o).getTypeName());
+								addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
+							}
+						}
+						if (o instanceof LayoutContainer)
+						{
+							WebLayoutSpecification spec = null;
+							PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+								((LayoutContainer)o).getPackageName());
+							if (pkg != null)
+							{
+								spec = pkg.getSpecification(((LayoutContainer)o).getSpecName());
+							}
+							if (spec == null)
+							{
+								ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Layout",
+									((LayoutContainer)o).getPackageName() + "-" + ((LayoutContainer)o).getSpecName());
+								addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
+							}
+						}
+						checkCancel();
 						if (o.getTypeID() == IRepository.SHAPES)
 						{
 							ServoyMarker mk = MarkerMessages.ObsoleteElement.fill(((Form)o.getAncestor(IRepository.FORMS)).getName());
@@ -3536,11 +3567,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								WebCustomType customType = (WebCustomType)o;
 								WebComponent parent = (WebComponent)customType.getAncestor(IRepository.WEBCOMPONENTS);
 								WebObjectSpecification parentSpec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parent.getTypeName());
-								PropertyDescription cpd = ((ICustomType< ? >)parentSpec.getDeclaredCustomObjectTypes().get(
-									customType.getTypeName())).getCustomJSONTypeDefinition();
-								if (cpd != null)
+								if (parentSpec != null)
 								{
-									dpProperties.addAll(cpd.getProperties().values());
+									PropertyDescription cpd = ((ICustomType< ? >)parentSpec.getDeclaredCustomObjectTypes().get(
+										customType.getTypeName())).getCustomJSONTypeDefinition();
+									if (cpd != null)
+									{
+										dpProperties.addAll(cpd.getProperties().values());
+									}
 								}
 							}
 
@@ -3897,37 +3931,39 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					{
 						IDataProvider dataProvider = null;
 						WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(component.getTypeName());
-
-						Collection<PropertyDescription> fsPD = spec.getProperties(FoundsetPropertyType.INSTANCE);
-						for (PropertyDescription pd : fsPD)
+						if (spec != null)
 						{
-							Object relatedFS = component.getProperty(pd.getName());
-							if (relatedFS instanceof JSONObject)
+							Collection<PropertyDescription> fsPD = spec.getProperties(FoundsetPropertyType.INSTANCE);
+							for (PropertyDescription pd : fsPD)
 							{
-								String fs = ((JSONObject)relatedFS).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
-								if ("".equals(fs)) //Form foundset
+								Object relatedFS = component.getProperty(pd.getName());
+								if (relatedFS instanceof JSONObject)
 								{
-									Form f = (Form)component.getAncestor(IRepository.FORMS);
-									fs = f.getDataSource();
-								}
-								if (fs.contains(".") || fs.contains(":"))
-								{
-									ITable table = persistFlattenedSolution.getTable(fs);
-									if (table != null)
+									String fs = ((JSONObject)relatedFS).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
+									if ("".equals(fs)) //Form foundset
 									{
-										dataProvider = table.getColumn(id);
+										Form f = (Form)component.getAncestor(IRepository.FORMS);
+										fs = f.getDataSource();
 									}
-								}
-								else
-								{
-									Relation r = persistFlattenedSolution.getRelation(fs);
-									if (r != null)
+									if (fs.contains(".") || fs.contains(":"))
 									{
-										dataProvider = getDataProvider(id, r.getPrimaryServerName(), r.getPrimaryTableName());
-										if (dataProvider == null) dataProvider = getDataProvider(id, r.getForeignServerName(), r.getForeignTableName());
+										ITable table = persistFlattenedSolution.getTable(fs);
+										if (table != null)
+										{
+											dataProvider = table.getColumn(id);
+										}
 									}
+									else
+									{
+										Relation r = persistFlattenedSolution.getRelation(fs);
+										if (r != null)
+										{
+											dataProvider = getDataProvider(id, r.getPrimaryServerName(), r.getPrimaryTableName());
+											if (dataProvider == null) dataProvider = getDataProvider(id, r.getForeignServerName(), r.getForeignTableName());
+										}
+									}
+									if (dataProvider != null) break;
 								}
-								if (dataProvider != null) break;
 							}
 						}
 						return dataProvider;
