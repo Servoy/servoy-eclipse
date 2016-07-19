@@ -290,7 +290,8 @@ public abstract class BaseNGPackageManager
 	}
 
 
-	/**	Search in all other projects if the given package is not contained also there
+	/**
+	 * Search in all other projects if the given package is not contained also there
 	 */
 	private boolean notContainedByOtherProjects(String projectName, String name)
 	{
@@ -409,7 +410,8 @@ public abstract class BaseNGPackageManager
 		try
 		{
 			refreshResourceLater(project, IResource.DEPTH_INFINITE);
-			project.deleteMarkers(SPEC_READ_MARKER, false, IResource.DEPTH_ONE);
+			removeSpecMarkersInJob(project);
+
 			IPackageReader reader = readPackageResource(project);
 			if (reader != null)
 			{
@@ -422,22 +424,14 @@ public abstract class BaseNGPackageManager
 				}
 				else
 				{
-					IMarker marker = project.createMarker(SPEC_READ_MARKER);
-					marker.setAttribute(IMarker.MESSAGE,
-						"NG Package Project '" + project.getName() + "' cannot be loaded; no web component or service found in it's manifest file.");
-					marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-					marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
-					marker.setAttribute(IMarker.LOCATION, project.getLocation().toString());
+					addErrorMarker(project,
+						"NG Package Project '" + project.getName() + "' cannot be loaded; no web component or service found in it's manifest file.", null);
 				}
 			}
 			else
 			{
-				IMarker marker = project.createMarker(SPEC_READ_MARKER);
-				marker.setAttribute(IMarker.MESSAGE, "NG Package Project '" + project.getName() +
-					" cannot be loaded; please check the contents/structure of that project. Does it have a manifest file?");
-				marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-				marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
-				marker.setAttribute(IMarker.LOCATION, project.getLocation().toString());
+				addErrorMarker(project, "NG Package Project '" + project.getName() +
+					" cannot be loaded; please check the contents/structure of that project. Does it have a manifest file?", null);
 			}
 		}
 		catch (Exception e)
@@ -523,34 +517,47 @@ public abstract class BaseNGPackageManager
 		return null;
 	}
 
-	protected static void addErrorMarker(IResource resource, Exception e)
+	protected static void addErrorMarker(IResource resource, final String markerMessage, final Exception e)
 	{
-		try
+		IResource res = resource;
+		if (!res.exists())
 		{
-			IResource res = resource;
-			if (!res.exists())
-			{
-				res = res.getParent();
-			}
-			IMarker marker = null;
-			if (e instanceof DuplicateEntityException)
-			{
-				res.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_ONE);
-				marker = resource.createMarker(DUPLICATE_COMPONENT_MARKER);
-			}
-			else
-			{
-				marker = res.createMarker(SPEC_READ_MARKER);
-			}
-			marker.setAttribute(IMarker.MESSAGE, e.getMessage());
-			marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-			marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
-			marker.setAttribute(IMarker.LOCATION, res.getLocation().toString());
+			res = res.getParent();
 		}
-		catch (CoreException ex)
+		final IResource r = res;
+
+		scheduleSystemJob(new Job("Adding spec error marker...")
 		{
-			ServoyLog.logError(ex);
-		}
+			@Override
+			protected IStatus run(IProgressMonitor monitor)
+			{
+				try
+				{
+					if (r != null && r.isAccessible())
+					{
+						IMarker marker = null;
+						if (e instanceof DuplicateEntityException)
+						{
+							r.deleteMarkers(DUPLICATE_COMPONENT_MARKER, false, IResource.DEPTH_ONE);
+							marker = r.createMarker(DUPLICATE_COMPONENT_MARKER);
+						}
+						else
+						{
+							marker = r.createMarker(SPEC_READ_MARKER);
+						}
+						marker.setAttribute(IMarker.MESSAGE, (markerMessage != null) ? markerMessage : e.getMessage());
+						marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+						marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
+						marker.setAttribute(IMarker.LOCATION, r.getLocation().toString());
+					}
+				}
+				catch (CoreException ex)
+				{
+					ServoyLog.logError(ex);
+				}
+				return Status.OK_STATUS;
+			}
+		}, r);
 	}
 
 	protected ServoyNGPackageProject[] getReferencedNGPackageProjectsInternal()
@@ -578,21 +585,14 @@ public abstract class BaseNGPackageManager
 		{
 			if (manifest != null) return manifest;
 			IFile file = container.getFile(new Path("META-INF/MANIFEST.MF"));
-			try
-			{
-				file.deleteMarkers(SPEC_READ_MARKER, false, IResource.DEPTH_ONE);
-			}
-			catch (CoreException e)
-			{
-				ServoyLog.logError(e);
-			}
+			removeSpecMarkersInJob(file);
 			try
 			{
 				return super.getManifest();
 			}
 			catch (IOException ex)
 			{
-				addErrorMarker(file, ex);
+				addErrorMarker(file, null, ex);
 				throw ex;
 			}
 		}
@@ -603,14 +603,7 @@ public abstract class BaseNGPackageManager
 			IFile file = container.getFile(new Path(path));
 			if (file != null && file.exists())
 			{
-				try
-				{
-					file.deleteMarkers(SPEC_READ_MARKER, false, IResource.DEPTH_ONE);
-				}
-				catch (CoreException e)
-				{
-					ServoyLog.logError(e);
-				}
+				removeSpecMarkersInJob(file);
 			}
 			return super.readTextFile(path, charset);
 		}
@@ -619,7 +612,7 @@ public abstract class BaseNGPackageManager
 		public void reportError(String specpath, Exception e)
 		{
 			super.reportError(specpath, e);
-			addErrorMarker(e instanceof DuplicateEntityException ? container : container.getFile(new Path(specpath)), e);
+			addErrorMarker(e instanceof DuplicateEntityException ? container : container.getFile(new Path(specpath)), null, e);
 		}
 
 		@Override
@@ -653,7 +646,7 @@ public abstract class BaseNGPackageManager
 		public void reportError(String specpath, Exception e)
 		{
 			super.reportError(specpath, e);
-			addErrorMarker(resource, e);
+			addErrorMarker(resource, null, e);
 		}
 	}
 
