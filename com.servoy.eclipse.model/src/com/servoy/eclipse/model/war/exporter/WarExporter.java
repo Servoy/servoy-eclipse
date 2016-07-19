@@ -317,8 +317,11 @@ public class WarExporter
 		attr.setValue("http://www.isdc.ro/wro");
 		rootElement.setAttributeNode(attr);
 
-		Set<String> exportedWebObjects = new HashSet<>(exportModel.getExportedComponents());
-		exportedWebObjects.addAll(exportModel.getExportedServices());
+		Set<String> exportedWebObjects = new HashSet<>(exportModel.getExportedComponents() != null ? exportModel.getExportedComponents()
+			: getAllNames(WebComponentSpecProvider.getInstance().getAllWebComponentSpecifications()));
+		exportedWebObjects.addAll(exportModel.getExportedServices() != null ? exportModel.getExportedServices()
+			: getAllNames(WebServiceSpecProvider.getInstance().getAllWebServiceSpecifications()));
+
 		Object[] allContributions = IndexPageEnhancer.getAllContributions(exportedWebObjects, Boolean.TRUE);
 		Element group = doc.createElement("group");
 		rootElement.appendChild(group);
@@ -387,6 +390,16 @@ public class WarExporter
 		StreamResult result = new StreamResult(wroFile);
 		transformer.transform(source, result);
 		return wroFile;
+	}
+
+	private static Set<String> getAllNames(WebObjectSpecification[] allWebSpecifications)
+	{
+		Set<String> names = new HashSet<>();
+		for (WebObjectSpecification webSpec : allWebSpecifications)
+		{
+			names.add(webSpec.getName());
+		}
+		return names;
 	}
 
 	private void addGroupElement(Document doc, Element group, File tmpWarDir, String relativePath, String suffix)
