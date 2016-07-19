@@ -35,6 +35,7 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -55,6 +56,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.FixedSelectAllAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.ngpackages.INGPackageChangeListener;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
@@ -77,7 +79,7 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  *
  */
-public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage
+public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage implements INGPackageChangeListener
 {
 	// for setting selection when clicked in editor
 	private final ISelectionProvider selectionProvider = new SelectionProviderAdapter()
@@ -121,9 +123,6 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	// for updating selection in editor when selection changes in IDE
 	private RfbSelectionListener selectionListener;
 
-	// for reloading palette when components change
-	private final RfbWebResourceListener resourceChangedListener = new RfbWebResourceListener();
-
 	private Browser browser;
 
 	private EditorWebsocketSession editorWebsocketSession;
@@ -161,7 +160,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		getSite().setSelectionProvider(selectionProvider);
 		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(selectionListener);
 		editorWebsocketSession.registerServerService("formeditor", new EditorServiceHandler(editorPart, selectionProvider, selectionListener, fieldPositioner));
-		resourceChangedListener.setEditorWebsocketSession(editorWebsocketSession);
+		ServoyModelFinder.getServoyModel().getNGPackageManager().addNGPackagesChangedListener(this);
 		try
 		{
 			browser = new Browser(parent, SWT.NONE);
@@ -271,6 +270,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		getSite().setSelectionProvider(null);
 		WebsocketSessionManager.removeSession(editorWebsocketSession.getUuid());
 		WebsocketSessionManager.removeSession(designerWebsocketSession.getUuid());
+		ServoyModelFinder.getServoyModel().getNGPackageManager().removeNGPackagesChangedListener(this);
 	}
 
 //	protected IWebsocketSession getContentWebsocketSession()
@@ -476,6 +476,24 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	protected SelectAllAction createSelectAllAction()
 	{
 		return new FixedSelectAllAction(editorPart, selectionProvider);
+	}
+
+	@Override
+	public void ngPackageChanged(boolean componentsChanged, boolean servicesChanged)
+	{
+		Display.getDefault().asyncExec(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
+			}
+		});
+	}
+
+	@Override
+	public void ngPackageProjectListChanged()
+	{
 	}
 
 }

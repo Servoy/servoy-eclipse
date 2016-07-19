@@ -67,10 +67,6 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 				$editorService.showImageInOverlayDiv(protocol + "//" + host + "/" + preview);
 			};
 
-			$rootScope.$on(EDITOR_EVENTS.RELOAD_PALETTE, function(e) {
-				loadPalette(formName);
-			});
-
 			/**
 			* enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.topContainer,layoutName)  for new components from the palette
 			* enterDragMode($event,ghost,null,null,null,ghost,null) for a ghost
