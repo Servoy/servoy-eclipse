@@ -107,6 +107,11 @@
 			            }
 			         ]
 		},
+		"group": 
+		{
+			"description": "Specifies if this component can be grouped (for web resource optimization), default true",
+			"type": "boolean"
+		},
 		"model":
 		{
 			"description": "The model this component has",
