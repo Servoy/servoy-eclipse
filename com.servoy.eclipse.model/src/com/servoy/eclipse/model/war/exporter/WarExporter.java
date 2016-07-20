@@ -373,6 +373,7 @@ public class WarExporter
 
 		@SuppressWarnings("unchecked")
 		Collection<String> cssContributions = (Collection<String>)allContributions[0];
+		cssContributions.add(NGClientEntryFilter.SERVOY_CSS);
 		if (cssContributions != null)
 		{
 			group = doc.createElement("group");
