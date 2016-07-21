@@ -249,10 +249,14 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 								};
 							} else if (realDropTarget[0] != dropTarget) {
 								var clientRec = dropTarget.getBoundingClientRect();
-								var mousePos = this.getMousePosition(event);
 								var bottomPixels = (clientRec.bottom - clientRec.top) * 0.3;
 								var rightPixels = (clientRec.right - clientRec.left) * 0.3;
-								if (mousePos.top > (clientRec.bottom - bottomPixels) || mousePos.left > (clientRec.right - rightPixels)) {
+								var absolutePoint = editorScope.convertToAbsolutePoint({
+									x: clientRec.right,
+									y: clientRec.bottom
+								});
+								
+								if (event.pageY > (absolutePoint.y - bottomPixels) || event.pageX > (absolutePoint.x - rightPixels)) {
 									// this is in the 30% corner (bottom or right) of the component
 									// the beforeChild should be a sibling of the dropTarget (or empty if it is the last)
 
