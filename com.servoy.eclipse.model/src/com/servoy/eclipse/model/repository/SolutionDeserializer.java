@@ -853,7 +853,7 @@ public class SolutionDeserializer
 	private void readMediasFromSolutionDir(File dir, Solution parent, Map<IPersist, JSONObject> persist_json_map, List<File> changedFiles,
 		List<IPersist> strayCats, boolean readAll, boolean useFilesForDirtyMark) throws RepositoryException
 	{
-		if (dir.exists())
+		if (dir != null && dir.exists())
 		{
 			File fmediasobjects = new File(dir, SolutionSerializer.MEDIAS_FILE);
 			if (!readAll && (changedFiles == null /* || !changedFiles.contains(fmediasobjects) */)) // it is possible that only the media content has been updated
