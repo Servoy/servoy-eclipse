@@ -309,6 +309,9 @@ angular.module('editorContent',['servoyApp'])
     },
 	getFormState: function() {
 		return $scope;
+	},
+	isInDesigner: function() {
+		return true;
 	}
   }
   $scope.servoyApi = function(name) {
