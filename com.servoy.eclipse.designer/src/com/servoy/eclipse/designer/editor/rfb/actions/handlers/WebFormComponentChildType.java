@@ -27,6 +27,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IBasicWebObject;
+import com.servoy.j2db.persistence.IDesignValueConverter;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.util.UUID;
@@ -37,20 +38,23 @@ import com.servoy.j2db.util.UUID;
  */
 public class WebFormComponentChildType extends AbstractBase implements IBasicWebObject
 {
-	private final JSONObject apiJSON;
 	private final PropertyDescription propertyDescription;
 	private final String key;
+	private final String parentPropertyName;
+	private final String[] rest;
+	private final FlattenedSolution fs;
 
 	public WebFormComponentChildType(IBasicWebObject parentWebObject, String key, FlattenedSolution fs)
 	{
 		super(IRepository.WEBCUSTOMTYPES, parentWebObject, parentWebObject.getID(), UUID.randomUUID());
 		this.key = key;
+		this.fs = fs;
 		int index = key.indexOf('.');
-		String parentPropertyName = key.substring(0, index);
+		this.parentPropertyName = key.substring(0, index);
 		JSONObject propertyValue = (JSONObject)parentWebObject.getProperty(parentPropertyName);
 		PropertyDescription pd = FormComponentPropertyType.INSTANCE.getPropertyDescription(propertyValue, fs);
 
-		String[] rest = key.substring(index + 1).split("\\.");
+		this.rest = key.substring(index + 1).split("\\.");
 		for (String propertyName : rest)
 		{
 			pd = pd.getProperty(propertyName);
@@ -63,7 +67,6 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 			}
 			propertyValue = value;
 		}
-		apiJSON = propertyValue;
 		propertyDescription = pd;
 	}
 
@@ -83,17 +86,49 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 	@Override
 	public void setProperty(String propertyName, Object val)
 	{
-		apiJSON.put(propertyName, val);
+		PropertyDescription pd = propertyDescription.getProperty(propertyName);
+		if (pd != null && pd.getType() instanceof IDesignValueConverter< ? >)
+		{
+			getJson().put(propertyName, ((IDesignValueConverter< ? >)pd.getType()).toDesignValue(val, pd));
+		}
+		else getJson().put(propertyName, convertFromJavaType(propertyName, val));
 		getParentComponent().flagChanged();
+	}
+
+	private Object convertToJavaType(String propertyName, Object val)
+	{
+		Object value = val;
+		PropertyDescription pd = propertyDescription.getProperty(propertyName);
+		if (value != null && pd != null && getConverter(pd) != null)
+		{
+			value = getConverter(pd).fromDesignValue(value, pd);
+		}
+		return (val != JSONObject.NULL) ? value : null;
+	}
+
+	private Object convertFromJavaType(String propertyName, Object value)
+	{
+		PropertyDescription pd = propertyDescription.getProperty(propertyName);
+		if (pd != null && getConverter(pd) != null)
+		{
+			return getConverter(pd).toDesignValue(value, pd);
+		}
+		return value;
+	}
+
+	private IDesignValueConverter< ? > getConverter(PropertyDescription pd)
+	{
+		return (pd.getType() instanceof IDesignValueConverter< ? >) ? (IDesignValueConverter< ? >)pd.getType() : null;
 	}
 
 	@Override
 	public Map<String, Object> getPropertiesMap()
 	{
 		HashMap<String, Object> map = new HashMap<>();
-		for (String key : apiJSON.keySet())
+		JSONObject json = getJson();
+		for (String property : json.keySet())
 		{
-			map.put(key, apiJSON.get(key));
+			map.put(property, json.get(property));
 		}
 		return map;
 	}
@@ -101,19 +136,19 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 	@Override
 	public Object getProperty(String propertyName)
 	{
-		return apiJSON.opt(propertyName);
+		return convertToJavaType(propertyName, getJson().opt(propertyName));
 	}
 
 	@Override
 	public boolean hasProperty(String propertyName)
 	{
-		return apiJSON.has(propertyName);
+		return getJson().has(propertyName);
 	}
 
 	@Override
 	public void clearProperty(String propertyName)
 	{
-		apiJSON.remove(propertyName);
+		getJson().remove(propertyName);
 		getParentComponent().flagChanged();
 	}
 
@@ -142,7 +177,7 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 	@Override
 	public JSONObject getFlattenedJson()
 	{
-		return apiJSON;
+		return getJson();
 	}
 
 	@Override
@@ -159,6 +194,18 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 	@Override
 	public JSONObject getJson()
 	{
-		return apiJSON;
+		JSONObject propertyValue = (JSONObject)((IBasicWebObject)getParent()).getProperty(parentPropertyName);
+		for (String propertyName : rest)
+		{
+			// TODO check for nested FormComponents by checkign the type of the pd.
+			JSONObject value = propertyValue.optJSONObject(propertyName);
+			if (value == null)
+			{
+				value = new JSONObject();
+				propertyValue.put(propertyName, value);
+			}
+			propertyValue = value;
+		}
+		return propertyValue;
 	}
 }
