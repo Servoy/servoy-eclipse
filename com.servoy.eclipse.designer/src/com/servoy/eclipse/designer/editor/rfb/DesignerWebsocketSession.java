@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -35,6 +36,7 @@ import java.util.Set;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.json.JSONWriter;
+import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.websocket.BaseWebsocketSession;
 import org.sablo.websocket.IClientService;
@@ -61,8 +63,10 @@ import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementContext;
 import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
 import com.servoy.j2db.server.ngclient.MediaResourcesServlet;
 import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
+import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
 import com.servoy.j2db.server.ngclient.template.FormWrapper;
@@ -596,6 +600,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	{
 		if (baseComponents.size() > 0)
 		{
+			Map<String, String> formComponentTemplates = new HashMap<String, String>();
 			List<IFormElement> components = new ArrayList<IFormElement>(baseComponents);
 			Collections.sort(components, PositionComparator.XY_PERSIST_COMPARATOR);
 			writer.key("components");
@@ -613,8 +618,33 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					writer.key(fe.getName());
 				}
 				fe.propertiesAsTemplateJSON(writer, new FormElementContext(fe));
+
+				Collection<PropertyDescription> properties = fe.getProperties(FormComponentPropertyType.INSTANCE);
+				if (properties.size() > 0)
+				{
+					for (PropertyDescription pd : properties)
+					{
+						Object propertyValue = fe.getPropertyValue(pd.getName());
+						Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
+						if (frm == null) continue;
+						FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(fe, pd, (JSONObject)propertyValue, frm, fs);
+						// TODO check nesting.
+						formComponentTemplates.put(cache.getCacheUUID(), cache.getTemplate());
+					}
+				}
 			}
 			writer.endObject();
+			if (formComponentTemplates.size() > 0)
+			{
+				writer.key("formcomponenttemplates");
+				writer.object();
+				for (Entry<String, String> entry : formComponentTemplates.entrySet())
+				{
+					writer.key(entry.getKey());
+					writer.value(entry.getValue().replace("\\\"", "\""));
+				}
+				writer.endObject();
+			}
 		}
 		if (deletedComponents.size() > 0)
 		{
@@ -627,5 +657,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			}
 			writer.endArray();
 		}
+
 	}
 }
