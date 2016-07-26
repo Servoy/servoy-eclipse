@@ -28,6 +28,7 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.Form;
@@ -36,6 +37,7 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Tab;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
 
 /**
@@ -70,11 +72,27 @@ public class SetPropertiesHandler implements IServerService
 				while (keys.hasNext())
 				{
 					String uuid = (String)keys.next();
-					final IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart, uuid);
-					PersistContext context = PersistContext.create(persist, editorPart.getForm());
-					if (persist instanceof IFormElement || persist instanceof Tab || persist instanceof WebCustomType)
+					String fullUuid = uuid;
+					int index = uuid.indexOf('$');
+					if (index > 1)
 					{
-						JSONObject properties = args.optJSONObject(uuid);
+						// this is a form component selection
+						uuid = uuid.substring(0, index).replace('_', '-');
+					}
+					IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart, uuid);
+					if (persist != null)
+					{
+						if (index > 1)
+						{
+							persist = new WebFormComponentChildType((WebComponent)persist, fullUuid.substring(index + 1).replace('$', '.'),
+								ModelUtils.getEditingFlattenedSolution(editorPart.getForm()));
+						}
+					}
+					PersistContext context = PersistContext.create(persist, editorPart.getForm());
+					if (persist instanceof IFormElement || persist instanceof Tab || persist instanceof WebCustomType ||
+						persist instanceof WebFormComponentChildType)
+					{
+						JSONObject properties = args.optJSONObject(fullUuid);
 						Iterator it = properties.keys();
 						while (it.hasNext())
 						{
