@@ -31,6 +31,7 @@ import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
+import com.servoy.j2db.persistence.IDesignValueConverter;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ITable;
@@ -119,7 +120,12 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 			}
 			else if (value == null && propertyDescription.hasDefault())
 			{
-				return propertyDescription.getDefaultValue();
+				Object defaultValue = propertyDescription.getDefaultValue();
+				if (propertyDescription.getType() instanceof IDesignValueConverter)
+				{
+					return ((IDesignValueConverter< ? >)propertyDescription.getType()).fromDesignValue(defaultValue, propertyDescription);
+				}
+				return defaultValue;
 			}
 		}
 		catch (Exception e)
