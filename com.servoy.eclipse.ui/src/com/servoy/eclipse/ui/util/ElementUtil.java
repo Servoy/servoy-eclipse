@@ -245,10 +245,16 @@ public class ElementUtil
 			return persist;
 		}
 		IChildWebObject webObject = null;
+		IParentOverridable childOfParent = null;
 		if (persist instanceof IChildWebObject)
 		{
 			webObject = (IChildWebObject)persist;
 			persist = webObject.getParent();
+		}
+		else if (persist instanceof IParentOverridable)
+		{
+			childOfParent = (IParentOverridable)persist;
+			persist = childOfParent.getParentToOverride();
 		}
 		while (PersistHelper.getSuperPersist((ISupportExtendsID)persist) != null)
 		{
@@ -318,6 +324,10 @@ public class ElementUtil
 				ServoyLog.logError("Cannot find the override custom type in: " + newWebObject, null);
 				return webObject;
 			}
+		}
+		if (childOfParent != null)
+		{
+			newPersist = childOfParent.newOverwrittenParent(newPersist);
 		}
 		return newPersist;
 	}

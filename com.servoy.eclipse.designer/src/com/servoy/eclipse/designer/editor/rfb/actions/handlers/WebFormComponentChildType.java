@@ -23,11 +23,13 @@ import java.util.Map;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 
+import com.servoy.eclipse.ui.util.IParentOverridable;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IDesignValueConverter;
+import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.util.UUID;
@@ -36,7 +38,7 @@ import com.servoy.j2db.util.UUID;
  *
  * @author jcompagner
  */
-public class WebFormComponentChildType extends AbstractBase implements IBasicWebObject
+public class WebFormComponentChildType extends AbstractBase implements IBasicWebObject, IParentOverridable
 {
 	private final PropertyDescription propertyDescription;
 	private final String key;
@@ -208,4 +210,17 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 		}
 		return propertyValue;
 	}
+
+	@Override
+	public IPersist getParentToOverride()
+	{
+		return getParent();
+	}
+
+	@Override
+	public IPersist newOverwrittenParent(IPersist newPersist)
+	{
+		return new WebFormComponentChildType((IBasicWebObject)newPersist, key, fs);
+	}
+
 }
