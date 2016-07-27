@@ -35,7 +35,6 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.WebComponent;
 
 /**
  * @author user
@@ -71,20 +70,10 @@ public class SetSelectionHandler implements IServerService
 		for (int i = 0; i < json.length(); i++)
 		{
 			String uuid = json.getString(i);
-			int index = uuid.indexOf('$');
-			if (index > 1)
-			{
-				// this is a form component selection
-				uuid = uuid.substring(0, index).replace('_', '-');
-			}
+
 			IPersist searchPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, uuid);
 			if (searchPersist != null)
 			{
-				if (index > 1)
-				{
-					searchPersist = new WebFormComponentChildType((WebComponent)searchPersist, json.getString(i).substring(index + 1).replace('$', '.'),
-						ModelUtils.getEditingFlattenedSolution(editorPart.getForm()));
-				}
 				selection.add(PersistContext.create(searchPersist, editorPart.getForm()));
 			}
 			else
