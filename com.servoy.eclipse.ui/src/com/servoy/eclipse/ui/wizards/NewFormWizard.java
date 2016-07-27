@@ -229,7 +229,21 @@ public class NewFormWizard extends Wizard implements INewWizard
 			}
 			else
 			{
-				newFormWizardPage = new NewFormWizardPage("New form", selectedForm);
+				String title = "New form";
+				if (selectedForm != null && selectedForm.getReferenceForm().booleanValue())
+				{
+					title = "New reference form";
+					defaultSettings = new IDefaultSettings()
+					{
+						@Override
+						public boolean isReferenceForm()
+						{
+							return true;
+						}
+					};
+					setWindowTitle(title);
+				}
+				newFormWizardPage = new NewFormWizardPage(title, selectedForm);
 			}
 			if (servoyProject.getSolutionMetaData().getSolutionType() != SolutionMetaData.MOBILE)
 			{
@@ -458,8 +472,6 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 		private Button listFormCheck;
 
-		private Button referenceFormCheck;
-
 		/**
 		 * Creates a new form creation wizard page.
 		 *
@@ -571,7 +583,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 		public boolean isReferenceForm()
 		{
-			return referenceFormCheck.getSelection();
+			return defaultSettings != null ? defaultSettings.isReferenceForm() : false;
 		}
 
 		/**
@@ -753,46 +765,17 @@ public class NewFormWizard extends Wizard implements INewWizard
 			});
 
 
-			Label refFormLabel = new Label(topLevel, SWT.NONE);
-			refFormLabel.setText("R&eference Form");
-			refFormLabel.setVisible(isNgClient);
-
-			referenceFormCheck = new Button(topLevel, SWT.CHECK);
-			referenceFormCheck.setVisible(isNgClient);
-
-			referenceFormCheck.addSelectionListener(new SelectionListener()
-			{
-
-				@Override
-				public void widgetSelected(SelectionEvent e)
-				{
-					setPageComplete(validatePage());
-				}
-
-				@Override
-				public void widgetDefaultSelected(SelectionEvent e)
-				{
-				}
-			});
-
-			if (defaultSettings != null) referenceFormCheck.setSelection(defaultSettings.isReferenceForm());
-
-
 			final GroupLayout groupLayout = new GroupLayout(topLevel);
-			groupLayout.setHorizontalGroup(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-					groupLayout.createSequentialGroup().addContainerGap().add(
-						groupLayout.createParallelGroup(GroupLayout.LEADING).add(formNameLabel).add(extendsLabel).add(datasourceLabel).add(projectLabel).add(
-							styleLabel).add(templateLabel).add(listFormLabel).add(refFormLabel)).add(15,
-								15,
-								15).add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(referenceFormCheck, GroupLayout.DEFAULT_SIZE, 159,
-									Short.MAX_VALUE).add(listFormCheck, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(projectComboControl,
-										GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(templateNameComboControl, GroupLayout.DEFAULT_SIZE, 159,
-											Short.MAX_VALUE).add(styleNameComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(extendsFormControl,
-												GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(dataSOurceControl, GroupLayout.DEFAULT_SIZE, 159,
-													Short.MAX_VALUE).add(
-														groupLayout.createSequentialGroup().add(formNameField, GroupLayout.DEFAULT_SIZE, 374,
-															Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED))).addContainerGap()));
+			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
+				groupLayout.createParallelGroup(GroupLayout.LEADING).add(formNameLabel).add(extendsLabel).add(datasourceLabel).add(projectLabel).add(
+					styleLabel).add(templateLabel).add(listFormLabel)).add(15,
+						15,
+						15).add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(listFormCheck, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
+							projectComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(templateNameComboControl, GroupLayout.DEFAULT_SIZE, 159,
+								Short.MAX_VALUE).add(styleNameComboControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(extendsFormControl,
+									GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(dataSOurceControl, GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE).add(
+										groupLayout.createSequentialGroup().add(formNameField, GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE).addPreferredGap(
+											LayoutStyle.RELATED))).addContainerGap()));
 			groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 				groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.CENTER).add(formNameLabel).add(
 					formNameField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
@@ -807,17 +790,16 @@ public class NewFormWizard extends Wizard implements INewWizard
 														GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
 															templateLabel)).addPreferredGap(LayoutStyle.RELATED).add(
 																groupLayout.createParallelGroup(GroupLayout.CENTER).add(projectLabel).add(projectComboControl,
-																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-																	GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-																		groupLayout.createParallelGroup(GroupLayout.CENTER).add(listFormLabel).add(
-																			listFormCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-																			GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-																				groupLayout.createParallelGroup(GroupLayout.CENTER).add(refFormLabel).add(
-																					referenceFormCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-																					GroupLayout.PREFERRED_SIZE)).addContainerGap(100, Short.MAX_VALUE)));
+																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
+																		LayoutStyle.RELATED).add(
+																			groupLayout.createParallelGroup(GroupLayout.CENTER).add(listFormLabel).add(
+																				listFormCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
+																					LayoutStyle.RELATED).add(
+																						groupLayout.createParallelGroup(GroupLayout.CENTER)).addContainerGap(
+																							100, Short.MAX_VALUE)));
 			topLevel.setLayout(groupLayout);
 			topLevel.setTabList(
-				new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl, listFormCheck, referenceFormCheck });
+				new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl, listFormCheck });
 
 			if (superForm != null)
 			{
@@ -835,7 +817,8 @@ public class NewFormWizard extends Wizard implements INewWizard
 		public void updateExtendsFormViewer(final FlattenedSolution flattenedSolution)
 		{
 			extendsFormViewer.setContentProvider(new FormContentProvider(flattenedSolution, null));
-			extendsFormViewer.setInput(new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false, false, null));
+			extendsFormViewer.setInput(new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false,
+				defaultSettings != null ? defaultSettings.isReferenceForm() : false, null));
 			extendsFormViewer.setLabelProvider(
 				new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedSolution, true), flattenedSolution.getSolution()));
 		}
