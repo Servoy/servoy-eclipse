@@ -302,6 +302,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		Set<IFormElement> baseComponents = new HashSet<>();
 		Set<IFormElement> refreshTemplate = new HashSet<>();
 		Set<IFormElement> deletedComponents = new HashSet<>();
+		Set<String> updatedFormComponentsDesignId = new HashSet<>();
+		Set<IFormElement> formComponentsComponents = new HashSet<>();
 		Set<LayoutContainer> deletedLayoutContainers = new HashSet<>();
 		Set<Part> parts = new HashSet<>();
 		List<LayoutContainer> containers = new ArrayList<>();
@@ -357,6 +359,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							refreshTemplate.add(baseComponent);
 						}
 					}
+
+					checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents,
+						FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true), fs);
 				}
 				else
 				{
@@ -395,9 +400,39 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				}
 			}
 		}
+
+		if (formComponentsComponents.size() > 0)
+		{
+			baseComponents.addAll(formComponentsComponents);
+		}
+
 		JSONWriter writer = new JSONStringer();
 		writer.object();
 		sendComponents(fs, writer, baseComponents, deletedComponents);
+
+		if (formComponentsComponents.size() > 0)
+		{
+			writer.key("formComponentsComponents");
+			writer.array();
+			for (IFormElement fe : formComponentsComponents)
+			{
+				FormElement formElement = FormElementHelper.INSTANCE.getFormElement(fe, fs, null, true);
+				writer.value(formElement.getDesignId() != null ? formElement.getDesignId() : formElement.getName());
+			}
+			writer.endArray();
+		}
+
+		if (updatedFormComponentsDesignId.size() > 0)
+		{
+			writer.key("updatedFormComponentsDesignId");
+			writer.array();
+			for (String id : updatedFormComponentsDesignId)
+			{
+				writer.value(id);
+			}
+			writer.endArray();
+		}
+
 		if (renderGhosts)
 		{
 			writer.key("renderGhosts");
@@ -517,6 +552,33 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 
 		writer.endObject();
 		return writer.toString();
+	}
+
+	private void checkFormComponents(Set<String> updatedFormComponentsDesignId, Set<IFormElement> formComponentsComponents, FormElement formElement,
+		FlattenedSolution fs)
+	{
+		WebObjectSpecification spec = formElement.getWebComponentSpec();
+		if (spec != null)
+		{
+			Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
+			if (properties.size() > 0)
+			{
+				for (PropertyDescription pd : properties)
+				{
+					Object propertyValue = formElement.getPropertyValue(pd.getName());
+					Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
+					if (frm == null) continue;
+					updatedFormComponentsDesignId.add(
+						formElement.getName(formElement.getDesignId() != null ? formElement.getDesignId() : formElement.getName()));
+					FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formElement, pd, (JSONObject)propertyValue, frm, fs);
+					for (FormElement element : cache.getFormComponentElements())
+					{
+						formComponentsComponents.add((IFormElement)element.getPersistIfAvailable());
+						checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents, element, fs);
+					}
+				}
+			}
+		}
 	}
 
 	/**

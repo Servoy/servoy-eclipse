@@ -450,6 +450,28 @@ angular.module('editorContent',['servoyApp'])
             return function() { return formData.components[compName]; }
           }
 
+          var toDeleteA = [];
+          
+          if(data.updatedFormComponentsDesignId) {
+        	  for (var index in data.updatedFormComponentsDesignId) {
+                  for (var name in formData.components) {
+                	  if(name.lastIndexOf(data.updatedFormComponentsDesignId[index] + '$', 0) === 0) {
+                		  toDeleteA.push(name);
+                	  }
+                  }  
+        	  }
+          }
+
+          if(data.deleted) {
+        	  toDeleteA.concat(data.deleted);
+          }
+          
+          for (var index in toDeleteA) {
+              var toDelete = angular.element('[svy-id="' + toDeleteA[index] + '"]');
+              toDelete.remove();
+              $rootScope.getDesignFormControllerScope().removeComponent(toDeleteA[index]);
+          }          
+          
           for (var name in data.components) {
             var compData = formData.components[name];
             var newCompData = data.components[name];
@@ -485,8 +507,19 @@ angular.module('editorContent',['servoyApp'])
             			break;
             		}	
             	}
-            }	
-            updateElementIfParentChange(name, data, { name: name },forceUpdate);
+            }
+            
+            if(!forceUpdate && data.updatedFormComponentsDesignId) {
+            	var fixedName = name.replace(/-/g, "_");
+            	if(!isNaN(fixedName[0])) {
+            		fixedName = "_" + fixedName;
+            	}
+            	forceUpdate = data.updatedFormComponentsDesignId.indexOf(fixedName) != -1;
+            }
+            
+            if(!data.formComponentsComponents || data.formComponentsComponents.indexOf(name) == -1) {
+            	updateElementIfParentChange(name, data, { name: name },forceUpdate);
+            }
 
             var compLayout = layoutData[name];
             if (compLayout) {
@@ -499,11 +532,7 @@ angular.module('editorContent',['servoyApp'])
           for (var template in data.formcomponenttemplates) {
         	  $templateCache.put(template,data.formcomponenttemplates[template] )
           }
-          for (var index in data.deleted) {
-            var toDelete = angular.element('[svy-id="' + data.deleted[index] + '"]');
-            toDelete.remove();
-            $rootScope.getDesignFormControllerScope().removeComponent(data.deleted[index]);
-          }
+
           if (data.renderGhosts) renderGhosts();
           if (data.parts) {
             var scope = $rootScope.getDesignFormControllerScope();
