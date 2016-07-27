@@ -67,7 +67,6 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.FlattenedPortal;
 import com.servoy.j2db.persistence.FlattenedTabPanel;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormReference;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IPersistVisitor;
@@ -611,17 +610,6 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 				{
 					ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, form, true);
 					return;
-				}
-			}
-			else if (formParent != null)
-			{
-				for (FormReference formRef : PersistHelper.getAllFormReferences(form))
-				{
-					if (formRef.getContainsFormID() == formParent.getID())
-					{
-						changedChildren.add(changed);
-						break;
-					}
 				}
 			}
 		}

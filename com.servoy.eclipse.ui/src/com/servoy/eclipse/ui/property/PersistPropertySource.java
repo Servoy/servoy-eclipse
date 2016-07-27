@@ -148,7 +148,6 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormReference;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IColumnTypes;
@@ -560,7 +559,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		throws RepositoryException
 	{
 		if (persistContext.getPersist() == propertyDescriptor.valueObject // for beans we show all
-			&& !shouldShow(propertyDescriptor))
+		&& !shouldShow(propertyDescriptor))
 		{
 			return;
 		}
@@ -707,7 +706,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 	public static IPropertyDescriptor createPropertyDescriptor(IPropertySource propertySource, final String id, final PersistContext persistContext,
 		boolean readOnly, PropertyDescriptorWrapper propertyDescriptor, String displayName, FlattenedSolution flattenedEditingSolution, Form form)
-		throws RepositoryException
+			throws RepositoryException
 	{
 		if (!propertyDescriptor.propertyDescriptor.isProperty())
 		{
@@ -717,7 +716,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		IPropertyDescriptor desc = createPropertyDescriptor(propertySource, persistContext, readOnly, propertyDescriptor, id, displayName,
 			flattenedEditingSolution, form);
 		if (desc != null //
-			&& persistContext != null && persistContext.getPersist() != null &&
+		&& persistContext != null && persistContext.getPersist() != null &&
 			persistContext.getPersist().getAncestor(IRepository.FORMS) == persistContext.getContext() // only show overrides when element is shown in its 'own' form
 			&&
 			// skip some specific properties
@@ -1124,9 +1123,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 								new FormContentProvider(flattenedEditingSolution, null /* persist is solution */), formLabelProvider,
 								new FormValueEditor(flattenedEditingSolution), readOnly,
 								new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null,
-									Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)), false, false,
-									persistContext.getPersist() instanceof FormReference,
-									(persistContext.getPersist() instanceof FormReference) ? ((Form)persistContext.getContext()).getDataSource() : null, true),
+									Boolean.TRUE.equals(propertyEditorHint.getOption(PropertyEditorOption.includeNone)), false, false, false, null),
 								SWT.NONE, null, "Select form dialog");
 						}
 
@@ -1665,7 +1662,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			String name = propertyDescriptor.propertyDescriptor.getName();
 
-			if (name.equals("containsFormID") && !(persistContext.getPersist() instanceof FormReference))
+			if (name.equals("containsFormID"))
 			{
 				return createDelegatePropertyControllerForInheritance(persistContext.getPersist(), new RelatedTabController("containsForm", "containsForm",
 					"Select tab form", readOnly, form, ModelUtils.getEditingFlattenedSolution(persistContext.getPersist())), "containsFormID");
@@ -2488,7 +2485,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Form flattenedSuperForm = flattenedEditingSolution.getFlattenedForm(
 					flattenedEditingSolution.getForm(((Form)persistContext.getPersist()).getExtendsID()));
 				propertyReadOnly = flattenedSuperForm == null /* superform not found? make readonly for safety */
-					|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
+				|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
 
 				if (propertyReadOnly && flattenedSuperForm != null && ((Form)persistContext.getPersist()).getDataSource() != null &&
 					!((Form)persistContext.getPersist()).getDataSource().equals(flattenedSuperForm.getDataSource()))
@@ -2816,11 +2813,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						new FormContentProvider(flattenedEditingSolution,
 							persistContext.getContext() instanceof Form ? (Form)persistContext.getContext() : null),
 						formLabelProvider, new FormValueEditor(flattenedEditingSolution), readOnly,
-						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false,
-							persistContext.getPersist() instanceof FormReference,
-							(persistContext.getPersist() instanceof FormReference) ? ((Form)persistContext.getContext()).getDataSource() : null,
-							!(persistContext.getPersist() instanceof FormReference)),
-						SWT.NONE, null, "Select form dialog");
+						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false, false, null), SWT.NONE, null,
+						"Select form dialog");
 				}
 			};
 			pd.setLabelProvider(formLabelProvider);
@@ -2840,7 +2834,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 							persistContext.getContext() instanceof Form ? (Form)persistContext.getContext() : null),
 						formLabelProvider, new FormValueEditor(flattenedEditingSolution), readOnly,
 						new FormContentProvider.FormListOptions(FormListOptions.FormListType.FORMS, null, true, false, false, true,
-							((Form)persistContext.getContext()).getDataSource(), true),
+							((Form)persistContext.getContext()).getDataSource()),
 						SWT.NONE, null, "Select form dialog");
 				}
 			};

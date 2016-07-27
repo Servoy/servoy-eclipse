@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -52,7 +51,6 @@ import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormReference;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
@@ -194,14 +192,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						if (Utils.equalObjects(fe.getDesignId(), name) || Utils.equalObjects(fe.getName(), name))
 						{
 							if (!form.isResponsiveLayout()) FormLayoutGenerator.generateFormElementWrapper(w, fe, flattenedForm, form.isResponsiveLayout());
-							if (!(baseComponent instanceof FormReference))
-							{
-								FormLayoutGenerator.generateFormElement(w, fe, flattenedForm);
-							}
-							else if (form.isResponsiveLayout())
-							{
-								FormLayoutStructureGenerator.generateFormReference((FormReference)baseComponent, flattenedForm, fs, w, true, null);
-							}
+							FormLayoutGenerator.generateFormElement(w, fe, flattenedForm);
 							if (!form.isResponsiveLayout()) FormLayoutGenerator.generateEndDiv(w);
 							if (form.isResponsiveLayout())
 							{
@@ -209,21 +200,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 								insertBeforeUUID = findNextSibling(fe.getPersistIfAvailable());
 							}
 
-							IPersist superBaseComponent = PersistHelper.getSuperPersist(baseComponent);
-							ISupportChilds baseComponentParent = superBaseComponent != null ? superBaseComponent.getParent() : baseComponent.getParent();
-
-							if (baseComponentParent instanceof Form && ((Form)baseComponentParent).getReferenceForm().booleanValue())
-							{
-								Iterator<FormReference> formReferencesIte = form.getFormReferences();
-								while (formReferencesIte.hasNext())
-								{
-									FormReference formRef = formReferencesIte.next();
-									if (formRef.getContainsFormID() == baseComponentParent.getID())
-									{
-										parentuuid = formRef.getUUID();
-									}
-								}
-							}
 							componentFound = true;
 							break;
 						}
@@ -234,23 +210,12 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					String layoutId = args.optString("layoutId");
 					if (layoutId != null)
 					{
-						IPersist child = flattenedForm.findChild(UUID.fromString(layoutId), true);
+						IPersist child = flattenedForm.findChild(UUID.fromString(layoutId));
 						if (child instanceof LayoutContainer)
 						{
 							componentFound = true;
 							parentuuid = child.getParent().getUUID();
 							if (child.getParent().equals(form)) parentuuid = null;
-
-							if (child.getParent() instanceof Form && ((Form)child.getParent()).getReferenceForm().booleanValue())
-							{
-								for (FormReference formRef : PersistHelper.getAllFormReferences(form))
-								{
-									if (formRef.getContainsFormID() == child.getParent().getID())
-									{
-										parentuuid = formRef.getUUID();
-									}
-								}
-							}
 
 							insertBeforeUUID = findNextSibling(child);
 							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context.getSolution(), w, true,
@@ -390,43 +355,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						if (oldField != null && ((Field)persist).getDisplayType() != oldField.getDisplayType())
 						{
 							refreshTemplate.add(baseComponent);
-						}
-					}
-					else if (persist instanceof FormReference)
-					{
-						FormReference oldFormReference = null;
-						for (FormReference formRef : PersistHelper.getAllFormReferences(
-							ServoyModelFinder.getServoyModel().getFlattenedSolution().getFlattenedForm(form)))
-						{
-							if (formRef.getUUID().equals(persist.getUUID()))
-							{
-								oldFormReference = formRef;
-								break;
-							}
-						}
-
-						int oldFormReferenceId = oldFormReference != null ? oldFormReference.getContainsFormID() : 0;
-
-						if (oldFormReferenceId != ((FormReference)persist).getContainsFormID())
-						{
-							if (oldFormReference != null)
-							{
-								for (IPersist element : oldFormReference.getFlattenedFormElementsAndLayoutContainers())
-								{
-									if (element instanceof IFormElement) deletedComponents.add((IFormElement)element);
-									else if (element instanceof LayoutContainer) deletedLayoutContainers.add((LayoutContainer)element);
-								}
-							}
-
-							Form referencedForm = fs.getFlattenedForm(fs.getForm(((FormReference)persist).getContainsFormID()));
-							if (referencedForm != null)
-							{
-								for (IPersist element : referencedForm.getFlattenedFormElementsAndLayoutContainers())
-								{
-									if (element instanceof IFormElement) baseComponents.add((IFormElement)element);
-									else if (element instanceof LayoutContainer) containers.add((LayoutContainer)element);
-								}
-							}
 						}
 					}
 				}

@@ -18,11 +18,9 @@ package com.servoy.eclipse.ui.dialogs;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -32,9 +30,6 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormReference;
-import com.servoy.j2db.persistence.IPersist;
-import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.util.Utils;
@@ -80,23 +75,6 @@ public class FormContentProvider implements ITreeContentProvider
 			{
 				formIdsAndWorkingSets.addAll(workingSets);
 			}
-			final Set<Integer> excludedForms = new HashSet<Integer>();
-			if (!options.showReferenceDuplicates)
-			{
-				flattenedSolution.getFlattenedForm(form).acceptVisitor(new IPersistVisitor()
-				{
-
-					@Override
-					public Object visit(IPersist o)
-					{
-						if (o instanceof FormReference && ((FormReference)o).getContainsFormID() > 0)
-						{
-							excludedForms.add(((FormReference)o).getContainsFormID());
-						}
-						return IPersistVisitor.CONTINUE_TRAVERSAL;
-					}
-				});
-			}
 			switch (options.type)
 			{
 				case FORMS :
@@ -107,7 +85,7 @@ public class FormContentProvider implements ITreeContentProvider
 						if (((options.showInMenu == null || options.showInMenu.booleanValue() == obj.getShowInMenu()) &&
 							(options.showTemplates == Utils.getAsBoolean(obj.getReferenceForm())) &&
 							((options.datasource == null || obj.getDataSource() == null || Utils.equalObjects(options.datasource, obj.getDataSource())))) &&
-							form != obj && !PersistEncapsulation.isModuleScope(obj, flattenedSolution.getSolution()) && !excludedForms.contains(obj.getID()))
+							form != obj && !PersistEncapsulation.isModuleScope(obj, flattenedSolution.getSolution()))
 						{
 							addFormInList(activeProject, obj, solutionNames, formIdsAndWorkingSets);
 						}
@@ -123,8 +101,7 @@ public class FormContentProvider implements ITreeContentProvider
 						if (form.isResponsiveLayout() == possibleParentForm.isResponsiveLayout() &&
 							(form.getDataSource() == null || possibleParentForm.getDataSource() == null ||
 								form.getDataSource().equals(possibleParentForm.getDataSource())) &&
-							!PersistEncapsulation.isModuleScope(possibleParentForm, flattenedSolution.getSolution()) &&
-							!excludedForms.contains(possibleParentForm.getID()))
+							!PersistEncapsulation.isModuleScope(possibleParentForm, flattenedSolution.getSolution()))
 						{
 							// do not add the form if it is already a sub-form, to prevent cycles
 							if (!flattenedSolution.getFormHierarchy(possibleParentForm).contains(form))
@@ -178,10 +155,9 @@ public class FormContentProvider implements ITreeContentProvider
 		public final boolean showTemplates;
 		public final String datasource;
 		public final FormListType type;
-		public final boolean showReferenceDuplicates;
 
 		public FormListOptions(FormListType type, Boolean showInMenu, boolean includeNone, boolean includeDefault, boolean includeIgnore, boolean showTemplates,
-			String datasource, boolean showReferenceDuplicates)
+			String datasource)
 		{
 			this.type = type;
 			this.showInMenu = showInMenu;
@@ -190,7 +166,6 @@ public class FormContentProvider implements ITreeContentProvider
 			this.includeIgnore = includeIgnore;
 			this.showTemplates = showTemplates;
 			this.datasource = datasource;
-			this.showReferenceDuplicates = showReferenceDuplicates;
 		}
 	}
 

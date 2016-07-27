@@ -121,7 +121,6 @@ import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.FlattenedPortal;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormReference;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
@@ -516,7 +515,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> FORM_REFERENCE_INVALID_SCRIPT = new Pair<String, ProblemSeverity>("formReferenceInvalidScript",
 		ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> FORM_REFERENCE_CYCLE = new Pair<String, ProblemSeverity>("formReferenceCycle", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> NON_ACCESSIBLE_PERSIST_IN_MODULE_USED_IN_PARENT_SOLUTION = new Pair<String, ProblemSeverity>(
 		"nonAccessibleFormInModuleUsedInParentSolution", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> METHOD_NUMBER_OF_ARGUMENTS_MISMATCH = new Pair<String, ProblemSeverity>("methodNumberOfArgsMismatch",
@@ -1307,43 +1305,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				parents.add(new Pair<String, ISupportChilds>(null, persist.getParent()));
 			}
 			final Map<String, Set<IPersist>> formElementsByName = new HashMap<String, Set<IPersist>>();
-			final Map<String, Set<FormReference>> referencedFormsByName = new HashMap<String, Set<FormReference>>();
 			Form flattenedForm = ServoyBuilder.getPersistFlattenedSolution(persist, getServoyModel().getFlattenedSolution()).getFlattenedForm(persist);
 			flattenedForm.acceptVisitor(new IPersistVisitor()
 			{
 				public Object visit(IPersist o)
 				{
-					if (o instanceof FormReference)
-					{
-						int formID = ((FormReference)o).getContainsFormID();
-						if (formID > 0)
-						{
-							Form referenceForm = ServoyBuilder.getPersistFlattenedSolution(persist, getServoyModel().getFlattenedSolution()).getForm(formID);
-							if (referenceForm != null)
-							{
-								Set<FormReference> duplicates = referencedFormsByName.get(referenceForm.getName());
-								if (duplicates != null)
-								{
-									for (FormReference duplicatePersist : duplicates)
-									{
-										ServoyMarker mk = MarkerMessages.DuplicateReferencedFormFound.fill(referenceForm.getName(), name);
-										addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_SAME_REFERENCED_FORM, IMarker.PRIORITY_NORMAL, null,
-											duplicatePersist);
-
-										mk = MarkerMessages.DuplicateReferencedFormFound.fill(referenceForm.getName(), name);
-										addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_SAME_REFERENCED_FORM, IMarker.PRIORITY_NORMAL, null, o);
-									}
-								}
-								else
-								{
-									duplicates = new HashSet<FormReference>();
-									duplicates.add((FormReference)o);
-								}
-								referencedFormsByName.put(referenceForm.getName(), duplicates);
-							}
-						}
-						return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
-					}
 					if (!(o instanceof ScriptVariable) && !(o instanceof ScriptMethod) && !(o instanceof Form) && o instanceof ISupportName &&
 						((ISupportName)o).getName() != null)
 					{
@@ -2883,13 +2849,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									addMarker(project, mk.getType(), mk.getText(), -1, FORM_PROPERTY_TARGET_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, form);
 								}
 							}
-							Set<String> cycles = FormReference.detectFormReferenceCycles(flattenedSolution, form);
-							for (String cycle : cycles)
-							{
-								ServoyMarker mk = MarkerMessages.FormReferenceCycle.fill(cycle);
-								addMarker(ServoyModelFinder.getServoyModel().getServoyProject(flattenedSolution.getName()).getProject(), mk.getType(),
-									mk.getText(), -1, FORM_REFERENCE_CYCLE, IMarker.PRIORITY_NORMAL, null, form);
-							}
 						}
 						checkCancel();
 						if (o instanceof ScriptCalculation)
@@ -3451,7 +3410,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								case IRepository.FIELDS :
 								case IRepository.LAYOUTCONTAINERS :
 								case IRepository.WEBCOMPONENTS :
-								case IRepository.FORMREFERENCE :
 									break;
 								default :
 									addBadStructureMarker(o, servoyProject, project);

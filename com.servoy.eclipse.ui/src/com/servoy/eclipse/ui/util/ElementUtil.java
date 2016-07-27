@@ -30,6 +30,7 @@ import org.eclipse.swt.graphics.Image;
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.constants.IValueListConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.labelproviders.RelationLabelProvider;
@@ -47,7 +48,6 @@ import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
-import com.servoy.j2db.persistence.FormReference;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IFormElement;
@@ -233,12 +233,12 @@ public class ElementUtil
 	{
 		IPersist persist = persistContext.getPersist();
 		IPersist context = persistContext.getContext();
-		Form ancestorForm = (Form)persist.getAncestor(IRepository.FORMS);
-		FormReference ancestorFormReference = persist instanceof FormReference ? null : (FormReference)persist.getAncestor(IRepository.FORMREFERENCE);
+		IPersist ancestorForm = persist.getAncestor(IRepository.FORMS);
 		if (!(persist instanceof AbstractBase)//
 		|| !(context instanceof Form) //
 		|| ancestorForm == null // persist is something else, like a relation or a solution
 		|| ancestorForm == context // already in same form
+		|| !ModelUtils.getEditingFlattenedSolution(context).getFormHierarchy((Form)context).contains(ancestorForm)// check that the persist is in a parent form of the context
 		)
 		{
 			// no override
@@ -296,32 +296,6 @@ public class ElementUtil
 					parent = (ISupportChilds)((AbstractBase)persist.getParent()).cloneObj((Form)context, false, null, false, false, false);
 					((AbstractBase)parent).copyPropertiesMap(null, true);
 					((ISupportExtendsID)parent).setExtendsID(parentPersist.getParent().getID());
-				}
-			}
-			else
-			{
-				Form currentFormContext = (Form)context;
-				boolean formReferenceFound = false;
-				while (!formReferenceFound && (currentFormContext != null))
-				{
-					Iterator<FormReference> it = currentFormContext.getFormReferences();
-					while (!formReferenceFound && it.hasNext())
-					{
-						FormReference formReference = it.next();
-
-						if (formReference == ancestorFormReference || formReference.getContainsFormID() == ancestorForm.getID())
-						{
-							parent = formReference;
-							formReferenceFound = true;
-						}
-					}
-
-					currentFormContext = (Form)PersistHelper.getSuperPersist(currentFormContext);
-				}
-
-				if (formReferenceFound)
-				{
-					parent = (ISupportChilds)getOverridePersist(PersistContext.create(parent, context));
 				}
 			}
 			newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false, false);

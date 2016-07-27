@@ -109,7 +109,6 @@ import com.servoy.j2db.documentation.scripting.docs.JSLib;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
-import com.servoy.j2db.persistence.FormReference;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IMediaProvider;
 import com.servoy.j2db.persistence.IPersist;
@@ -2354,19 +2353,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			}
 		}
 
-		List<FormReference> formReferences = ancestorForm.getFormReferencesWithoutNesting();
-		for (FormReference formReference : formReferences)
-		{
-			if (formReference.getName() != null)
-			{
-				node = new PlatformSimpleUserNode(formReference.getName(), UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { formReference, null }, originalForm,
-					uiActivator.loadImageFromBundle("element.gif"));
-				node.setDeveloperFeedback(new SimpleDeveloperFeedback(formReference.getName() + ".", null, null));
-				elements.add(node);
-				node.parent = elementsNode;
-				addReferenceFormChildNodes(elements, formReference, node, originalForm);
-			}
-		}
 		// determine the children for each node
 		Map<SimpleUserNode, List<SimpleUserNode>> children = new HashMap<SimpleUserNode, List<SimpleUserNode>>(elements.size());
 		for (SimpleUserNode element : elements)
@@ -2406,43 +2392,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				for (SimpleUserNode n : nodeChildren)
 				{
 					element.children[i++] = n;
-				}
-			}
-		}
-	}
-
-	private void addReferenceFormChildNodes(List<PlatformSimpleUserNode> elements, FormReference formReference, PlatformSimpleUserNode parentNode, Form form)
-	{
-		if (formReference != null && formReference.getContainsFormID() > 0)
-		{
-			Form containedForm = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getForm(formReference.getContainsFormID());
-			if (containedForm != null)
-			{
-				List<IFormElement> formElements = containedForm.getFlattenedObjects(NameComparator.INSTANCE);
-				for (IFormElement formElement : formElements)
-				{
-					if (formElement.getName() != null)
-					{
-						PlatformSimpleUserNode node = new PlatformSimpleUserNode(formElement.getName(), UserNodeType.FORM_ELEMENTS_ITEM,
-							new Object[] { formElement, null }, form, uiActivator.loadImageFromBundle("element.gif"));
-						node.setDeveloperFeedback(new SimpleDeveloperFeedback(formElement.getName() + ".", null, null));
-						node.parent = parentNode;
-						elements.add(node);
-					}
-				}
-
-				List<FormReference> formReferences = containedForm.getFormReferencesWithoutNesting();
-				for (FormReference nestedFormReference : formReferences)
-				{
-					if (nestedFormReference.getName() != null)
-					{
-						PlatformSimpleUserNode node = new PlatformSimpleUserNode(nestedFormReference.getName(), UserNodeType.FORM_ELEMENTS_ITEM,
-							new Object[] { nestedFormReference, null }, form, uiActivator.loadImageFromBundle("element.gif"));
-						node.setDeveloperFeedback(new SimpleDeveloperFeedback(nestedFormReference.getName() + ".", null, null));
-						node.parent = parentNode;
-						elements.add(node);
-						addReferenceFormChildNodes(elements, nestedFormReference, node, form);
-					}
 				}
 			}
 		}
