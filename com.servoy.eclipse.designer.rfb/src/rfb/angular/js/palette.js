@@ -78,6 +78,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 					var mouseentercallback;
 					var mouseleavecallback;
 					var mouseupcallback;
+					var mouseoutcallback;
 					var t;
 					var insertedClone;
 					var insertedCloneParent;
@@ -222,8 +223,8 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 						autoscrollLeave[direction] = getAutoscrollLeaveCallback(direction);
 					}
 					
-					mouseupcallback = $scope.registerDOMEvent("mouseup", "EDITOR", function(ev) {
-					    
+					function canceldrag(ev)
+					{
 						for (var direction in autoscrollStop) {
 							if (angular.isDefined(autoscrollStop[direction])) {
 								$interval.cancel(autoscrollStop[direction]);
@@ -234,6 +235,7 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 					    $scope.setPointerEvents("none");
 						if (mousemovecallback) $scope.unregisterDOMEvent("mousemove", "EDITOR", mousemovecallback);
 						if (mouseupcallback) $scope.unregisterDOMEvent("mouseup", "EDITOR", mouseupcallback);
+						if (mouseoutcallback) $scope.unregisterDOMEvent("mouseleave", "EDITOR", mouseoutcallback);
 						if (mouseentercallback) $scope.unregisterDOMEvent("mouseenter", "CONTENTFRAME_OVERLAY",
 						mouseentercallback);
 						if (mouseleavecallback) $scope.unregisterDOMEvent("mouseenter", "PALETTE", mouseleavecallback);
@@ -249,6 +251,13 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 						$scope.glasspane.style.cursor = "";
 						editorScope.getEditorContentRootScope().drop_highlight = null;
 						editorScope.getEditorContentRootScope().$apply();
+
+						
+					}
+					
+					function onmouseup(ev)
+					{
+						canceldrag(); 
 						if (dragClone) {
 							if (insertedClone){
 								insertedCloneParent.removeChild(insertedClone);
@@ -316,6 +325,23 @@ angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 							if (angularElement) {
 								$scope.getEditorContentRootScope().getDesignFormElement().removeChild(angularElement);
 							}
+						}
+
+					}
+					
+					mouseupcallback = $scope.registerDOMEvent("mouseup", "EDITOR", onmouseup);
+					mouseoutcallback = $scope.registerDOMEvent("mouseleave", "EDITOR", function(ev){
+						canceldrag();
+						if (dragClone) {
+							if (insertedClone){
+								insertedCloneParent.removeChild(insertedClone);
+								insertedClone = null;
+							}
+							$document[0].body.removeChild(dragClone[0]);
+							utils.setDraggingFromPallete(null);
+						}
+						else if (angularElement) {
+							$scope.getEditorContentRootScope().getDesignFormElement().removeChild(angularElement);
 						}
 					});
 				}
