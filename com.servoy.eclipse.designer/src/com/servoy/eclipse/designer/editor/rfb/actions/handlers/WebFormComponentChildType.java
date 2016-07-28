@@ -18,6 +18,7 @@ package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONObject;
@@ -31,7 +32,10 @@ import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IDesignValueConverter;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
+import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -91,9 +95,9 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 		PropertyDescription pd = propertyDescription.getProperty(propertyName);
 		if (pd != null && pd.getType() instanceof IDesignValueConverter< ? >)
 		{
-			getJson().put(propertyName, ((IDesignValueConverter< ? >)pd.getType()).toDesignValue(val, pd));
+			getJson(true, false).put(propertyName, ((IDesignValueConverter< ? >)pd.getType()).toDesignValue(val, pd));
 		}
-		else getJson().put(propertyName, convertFromJavaType(propertyName, val));
+		else getJson(true, false).put(propertyName, convertFromJavaType(propertyName, val));
 		getParentComponent().flagChanged();
 	}
 
@@ -138,7 +142,7 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 	@Override
 	public Object getProperty(String propertyName)
 	{
-		return convertToJavaType(propertyName, getJson().opt(propertyName));
+		return convertToJavaType(propertyName, getJson(false, true).opt(propertyName));
 	}
 
 	@Override
@@ -150,7 +154,7 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 	@Override
 	public void clearProperty(String propertyName)
 	{
-		getJson().remove(propertyName);
+		getJson(true, false).remove(propertyName);
 		getParentComponent().flagChanged();
 	}
 
@@ -196,10 +200,45 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 	@Override
 	public JSONObject getJson()
 	{
-		JSONObject propertyValue = (JSONObject)((IBasicWebObject)getParent()).getProperty(parentPropertyName);
+		return getJson(false, false);
+	}
+
+
+	private JSONObject getJson(boolean forMutation, boolean flattened)
+	{
+		JSONObject propertyValue = null;
+		if (forMutation)
+		{
+			JSONObject jsonObject = (JSONObject)((AbstractBase)getParent()).getPropertiesMap().get(StaticContentSpecLoader.PROPERTY_JSON.getPropertyName());
+			if (jsonObject == null || !jsonObject.has(parentPropertyName))
+			{
+				JSONObject parentObject = new JSONObject();
+				JSONObject superValue = (JSONObject)((IBasicWebObject)getParent()).getProperty(parentPropertyName);
+				parentObject.put(FormComponentPropertyType.SVY_FORM, superValue.get(FormComponentPropertyType.SVY_FORM));
+				// this set property will override the cloned from super parent json in the parent, if the parent has a super persist.
+				((IBasicWebObject)getParent()).setProperty(parentPropertyName, parentObject);
+			}
+		}
+		propertyValue = (JSONObject)((IBasicWebObject)getParent()).getProperty(parentPropertyName);
+
+		if (flattened && PersistHelper.isOverrideElement(getParentComponent()))
+		{
+			JSONObject full = new JSONObject();
+			List<AbstractBase> hierarchy = PersistHelper.getOverrideHierarchy(getParentComponent());
+			for (int i = hierarchy.size(); --i >= 0;)
+			{
+				Object property = hierarchy.get(i).getProperty(parentPropertyName);
+				if (property instanceof JSONObject)
+				{
+					ServoyJSONObject.mergeAndDeepCloneJSON((JSONObject)property, full);
+				}
+			}
+
+			propertyValue = full;
+		}
+
 		for (String propertyName : rest)
 		{
-			// TODO check for nested FormComponents by checkign the type of the pd.
 			JSONObject value = propertyValue.optJSONObject(propertyName);
 			if (value == null)
 			{
