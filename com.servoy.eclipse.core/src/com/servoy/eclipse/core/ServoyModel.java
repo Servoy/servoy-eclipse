@@ -125,7 +125,7 @@ import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
-import com.servoy.eclipse.model.ngpackages.INGPackageChangeListener;
+import com.servoy.eclipse.model.ngpackages.IAvailableNGPackageProjectsListener;
 import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
@@ -1144,7 +1144,7 @@ public class ServoyModel extends AbstractServoyModel
 									List<IProject> allActivatedSolutionProjects;
 									try
 									{
-										allActivatedSolutionProjects = project.getReferencedProjectsIdDepth(); // resources prj. are static references (in .project file), modules are dltk/js build dynamic references
+										allActivatedSolutionProjects = project.getSolutionAndModuleReferencedProjects();
 									}
 									catch (CoreException e1)
 									{
@@ -3324,21 +3324,14 @@ public class ServoyModel extends AbstractServoyModel
 	{
 		super.initialize();
 
-		getNGPackageManager().addNGPackagesChangedListener(new INGPackageChangeListener()
+		getNGPackageManager().addAvailableNGPackageProjectsListener(new IAvailableNGPackageProjectsListener()
 		{
 
 			@Override
-			public void ngPackageChanged(boolean componentsChanged, boolean servicesChanged)
+			public void ngPackageProjectListChanged(boolean activePackageProjectsChanged)
 			{
-				// nothing to do here yet
+				if (activePackageProjectsChanged) updateWorkingSet();
 			}
-
-			@Override
-			public void ngPackageProjectListChanged()
-			{
-				updateWorkingSet();
-			}
-
 		});
 
 		getUserManager().setFormAndTableChangeAware();

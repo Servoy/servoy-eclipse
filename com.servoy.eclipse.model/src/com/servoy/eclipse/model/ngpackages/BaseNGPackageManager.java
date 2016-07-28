@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.jar.Manifest;
 
@@ -36,6 +37,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -59,6 +61,7 @@ import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
+import com.servoy.j2db.util.Pair;
 
 /**
  * A class for managing the loaded NG custom web components and services.
@@ -75,18 +78,20 @@ public abstract class BaseNGPackageManager
 	private final BaseNGPackageResourcesChangedListener resourceChangeListener;
 
 	private ServoyNGPackageProject[] referencedNGPackageProjects;
-	private Set<String> activeSolutionReferencedProjectNames = new HashSet<>();
 
 	private final Map<String, Map<String, IPackageReader>> projectNameToContainedPackages = new HashMap<>();
 
-	private final List<INGPackageChangeListener> webResourceChangedListeners = Collections.synchronizedList(new ArrayList<INGPackageChangeListener>());
+	private final List<ILoadedNGPackagesListener> loadedNGPackagesListeners = Collections.synchronizedList(new ArrayList<ILoadedNGPackagesListener>());
+	private final List<IAvailableNGPackageProjectsListener> availableNGPackageProjectsListeners = Collections.synchronizedList(
+		new ArrayList<IAvailableNGPackageProjectsListener>());
 
 	public BaseNGPackageManager()
 	{
 		if (ServoyModelFinder.getServoyModel().getActiveProject() != null) reloadAllNGPackages(null); // initial load
 
 		resourceChangeListener = new BaseNGPackageResourcesChangedListener(this);
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener,
+			IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
 		setRemovedPackages();
 	}
 
@@ -101,35 +106,44 @@ public abstract class BaseNGPackageManager
 		ResourceProvider.setRemovedPackages(toRemove);
 	}
 
-	public void clearActiveSolutionReferencesCache()
+	public void clearReferencedNGPackageProjectsCache()
 	{
 		referencedNGPackageProjects = null;
-		activeSolutionReferencedProjectNames = new HashSet<>();
 	}
 
-	public void addNGPackagesChangedListener(INGPackageChangeListener listener)
+	public void addLoadedNGPackagesListener(ILoadedNGPackagesListener listener)
 	{
-		webResourceChangedListeners.add(listener);
+		loadedNGPackagesListeners.add(listener);
 	}
 
-	public void removeNGPackagesChangedListener(INGPackageChangeListener listener)
+	public void removeLoadedNGPackagesListener(ILoadedNGPackagesListener listener)
 	{
-		webResourceChangedListeners.remove(listener);
+		loadedNGPackagesListeners.remove(listener);
 	}
 
-	public void ngPackagesChanged(boolean components, boolean services)
+	public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 	{
-		for (INGPackageChangeListener listener : webResourceChangedListeners)
+		for (ILoadedNGPackagesListener listener : loadedNGPackagesListeners)
 		{
-			listener.ngPackageChanged(components, services);
+			listener.ngPackagesChanged(loadedPackagesAreTheSameAlthoughReferencingModulesChanged);
 		}
 	}
 
-	public void ngPackageProjectListChanged()
+	public void addAvailableNGPackageProjectsListener(IAvailableNGPackageProjectsListener listener)
 	{
-		for (INGPackageChangeListener listener : webResourceChangedListeners)
+		availableNGPackageProjectsListeners.add(listener);
+	}
+
+	public void removeAvailableNGPackageProjectsListener(IAvailableNGPackageProjectsListener listener)
+	{
+		availableNGPackageProjectsListeners.remove(listener);
+	}
+
+	public void ngPackageProjectListChanged(boolean activePackageProjectsChanged)
+	{
+		for (IAvailableNGPackageProjectsListener listener : availableNGPackageProjectsListeners)
 		{
-			listener.ngPackageProjectListChanged();
+			listener.ngPackageProjectListChanged(activePackageProjectsChanged);
 		}
 	}
 
@@ -158,27 +172,11 @@ public abstract class BaseNGPackageManager
 			HashSet<ServoyNGPackageProject> referencedNGPackageProjectsSet = new HashSet<ServoyNGPackageProject>();
 			ServoyNGPackageProject[] ngPackageProjects = activeSolutionProject.getNGPackageProjects();
 			Collections.addAll(referencedNGPackageProjectsSet, ngPackageProjects);
-			try
-			{
-				IProject[] activeSolutionReferencedProjects = activeSolutionProject.getProject().getDescription().getReferencedProjects();
-				activeSolutionReferencedProjectNames = new HashSet<>();
-				for (IProject p : activeSolutionReferencedProjects)
-					activeSolutionReferencedProjectNames.add(p.getName());
-			}
-			catch (CoreException e)
-			{
-				ServoyLog.logError(e);
-			}
 			ServoyProject[] modulesOfActiveProject = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
 			for (ServoyProject module : modulesOfActiveProject)
 			{
 				ngPackageProjects = module.getNGPackageProjects();
 				Collections.addAll(referencedNGPackageProjectsSet, ngPackageProjects);
-				for (ServoyNGPackageProject packageProject : ngPackageProjects)
-				{
-					activeSolutionReferencedProjectNames.add(packageProject.getProject().getName());
-				}
-
 			}
 			referencedNGPackageProjects = referencedNGPackageProjectsSet.toArray(new ServoyNGPackageProject[referencedNGPackageProjectsSet.size()]);
 		}
@@ -209,7 +207,7 @@ public abstract class BaseNGPackageManager
 
 		monitor.worked(9);
 		monitor.setTaskName("Announcing ng packages load");
-		ngPackagesChanged(true, true);
+		ngPackagesChanged(false);
 		monitor.worked(1);
 		monitor.done();
 	}
@@ -249,57 +247,90 @@ public abstract class BaseNGPackageManager
 		monitor.worked(8);
 	}
 
-	protected void updateFromResourceChangeListener(String projectName, Set<String> unloadPackages, Set<IPackageReader> toAdd)
+	/**
+	 * @param ngPackageChangesPerReferencingProject keys of this map are projects that contain or reference a modified ng package, values is a pair of removed packages and added packages (as references or binaries of that project)
+	 * project can be a solution/module project that either references ng package projects or contains ng package binary/zip, can be a resources project.
+	 */
+	protected void updateFromResourceChangeListener(Map<String, Pair<Set<String>, Set<IPackageReader>>> ngPackageChangesPerReferencingProject)
 	{
-		//first update our cache
-		Map<String, IPackageReader> projectContainedPackagesMap = getProjectContainedPackagesMap(projectName);
-		for (String packageName : unloadPackages)
-		{
-			projectContainedPackagesMap.remove(packageName);
-		}
-		for (IPackageReader iPackageReader : toAdd)
-		{
-			projectContainedPackagesMap.put(iPackageReader.getPackageName(), iPackageReader);
-		}
+		if (ngPackageChangesPerReferencingProject == null || ngPackageChangesPerReferencingProject.size() == 0) return; // no changes
 
-		//for each change add/remove we first check that the project isn't already loaded in the spec readers
-		//and also split up into services and non-services
+		boolean reallyChanged = false;
+
+		// for each change add/remove we first check that the project isn't already loaded in the spec readers
+		// and also split up into services and non-services
+
+		// in case multiple modules of the active solution reference the same ng package project, if only one reference is removed we don't need to unload that project
+		// (if the project is changed, not removed/dereferenced a remove of all locations will be done and then a re-load - so we can detect that and unload then anyway)
 		Set<String> componentsReallyToUnload = new HashSet<>();
 		Set<String> serviceReallyToUnload = new HashSet<>();
-		for (String packageName : unloadPackages)
+		Map<File, IPackageReader> componentsReallyToLoad = new HashMap<>();
+		Map<File, IPackageReader> serviceReallyToLoad = new HashMap<>();
+
+		for (String projectName : ngPackageChangesPerReferencingProject.keySet())
 		{
-			if (notContainedByOtherProjects(projectName, packageName))
+			Pair<Set<String>, Set<IPackageReader>> projectChanges = ngPackageChangesPerReferencingProject.get(projectName);
+			Set<String> packagesToUnload = projectChanges.getLeft();
+			Set<IPackageReader> packagesToLoad = projectChanges.getRight();
+
+			// first update our cache
+			Map<String, IPackageReader> projectContainedPackagesMap = getProjectContainedPackagesMap(projectName);
+			for (String packageName : packagesToUnload)
 			{
-				if (WebComponentSpecProvider.getInstance().getPackageNames().contains(packageName)) componentsReallyToUnload.add(packageName);
-				else serviceReallyToUnload.add(packageName);
+				projectContainedPackagesMap.remove(packageName);
 			}
-		}
-		Set<IPackageReader> componentsReallyToLoad = new HashSet<>();
-		Set<IPackageReader> serviceReallyToLoad = new HashSet<>();
-		for (IPackageReader packageReader : toAdd)
-		{
-			if (notContainedByOtherProjects(projectName, packageReader.getPackageName()))
+			for (IPackageReader iPackageReader : packagesToLoad)
 			{
-				if (packageReader.getPackageType().equals(IPackageReader.WEB_SERVICE)) serviceReallyToLoad.add(packageReader);
-				else componentsReallyToLoad.add(packageReader);
+				projectContainedPackagesMap.put(iPackageReader.getPackageName(), iPackageReader);
+			}
+
+
+			for (String packageName : packagesToUnload)
+			{
+				if (notContainedByOtherProjectsAfterUnloads(projectName, packageName, ngPackageChangesPerReferencingProject))
+				{
+					if (WebComponentSpecProvider.getInstance().getPackageNames().contains(packageName)) componentsReallyToUnload.add(packageName);
+					else serviceReallyToUnload.add(packageName);
+				}
+			}
+
+			for (IPackageReader packageReader : packagesToLoad)
+			{
+				if (notContainedByOtherProjectsAfterUnloads(projectName, packageReader.getPackageName(), ngPackageChangesPerReferencingProject))
+				{
+					if (packageReader.getPackageType().equals(IPackageReader.WEB_SERVICE)) serviceReallyToLoad.put(packageReader.getResource(), packageReader); // could potentially replace another package reader in case it's referenced from multiple solution projects
+					else componentsReallyToLoad.put(packageReader.getResource(), packageReader); // could potentially replace another package reader in case it's referenced from multiple solution projects
+				}
 			}
 		}
 
-		ResourceProvider.updatePackageResources(componentsReallyToUnload, componentsReallyToLoad, serviceReallyToUnload, serviceReallyToLoad);
-		ngPackagesChanged(true, true);
+		reallyChanged = (reallyChanged || componentsReallyToUnload.size() > 0 || componentsReallyToLoad.size() > 0 || serviceReallyToUnload.size() > 0 ||
+			serviceReallyToLoad.size() > 0);
+		ResourceProvider.updatePackageResources(componentsReallyToUnload, new HashSet<IPackageReader>(componentsReallyToLoad.values()), serviceReallyToUnload,
+			new HashSet<IPackageReader>(serviceReallyToLoad.values()));
+
+		ngPackagesChanged(!reallyChanged); // we always have to notify, even for example when loaded packages are really the same, just a second (doubled) reference to a project was removed, because solex has to know that case as well
 	}
 
-
 	/**
-	 * Search in all other projects if the given package is not contained also there
+	 * Search in all other projects if the given package is not contained also there. An ng package that will be removed (see ngPackageChangesPerReferencingProject) from referencing projects is ignored.
+	 *
+	 * @param ngPackageChangesPerReferencingProject keys of this map are projects that contain or reference a modified ng package, values is a pair of removed packages and added packages (as references or binaries of that project)
+	 * project can be a solution/module project that either references ng package projects or contains ng package binary/zip, can be a resources project.
 	 */
-	private boolean notContainedByOtherProjects(String projectName, String name)
+	private boolean notContainedByOtherProjectsAfterUnloads(String referencingProjectName, String packageName,
+		Map<String, Pair<Set<String>, Set<IPackageReader>>> ngPackageChangesPerReferencingProject)
 	{
 		for (String currentProjectName : projectNameToContainedPackages.keySet())
 		{
-			if (currentProjectName.equals(projectName)) continue;
-			if (projectNameToContainedPackages.get(currentProjectName) != null && projectNameToContainedPackages.get(currentProjectName).containsKey(name))
-				return false;
+			if (currentProjectName.equals(referencingProjectName)) continue;
+			if (projectNameToContainedPackages.get(currentProjectName) != null &&
+				projectNameToContainedPackages.get(currentProjectName).containsKey(packageName))
+			{
+				// check that it won't be removed from this other found referencing project as well
+				Pair<Set<String>, Set<IPackageReader>> changesForCurrentProject = ngPackageChangesPerReferencingProject.get(currentProjectName);
+				if (changesForCurrentProject == null || !changesForCurrentProject.getLeft().contains(packageName)) return false; // getLeft() is contains the stuff that will be unloaded
+			}
 		}
 		return true;
 	}
@@ -565,11 +596,6 @@ public abstract class BaseNGPackageManager
 		return referencedNGPackageProjects == null ? new ServoyNGPackageProject[0] : referencedNGPackageProjects;
 	}
 
-	protected Set<String> getActiveSolutionReferencedProjectNamesInternal()
-	{
-		return activeSolutionReferencedProjectNames;
-	}
-
 	public static class ContainerPackageReader extends DirPackageReader
 	{
 		private final IContainer container;
@@ -656,15 +682,32 @@ public abstract class BaseNGPackageManager
 		ResourceProvider.setPackages(new ArrayList<IPackageReader>());
 	}
 
-	/** Get the cached package project references of this project
+	/**
+	 * Gets all the project names of referencing projects that have loaded the given package (by package name) from the given source (the projectDir).
 	 */
-	public List<String> getOldUsedPackageProjectsList(String projectName)
+	public List<String> getReferencingProjectsThatLoaded(String ngPackageName, File projectDir)
+	{
+		List<String> referencingProjectsThatLoadedIt = new ArrayList<String>();
+		for (Entry<String, Map<String, IPackageReader>> e : projectNameToContainedPackages.entrySet())
+		{
+			IPackageReader reader = e.getValue().get(ngPackageName);
+			if (reader != null && projectDir.equals(reader.getResource())) referencingProjectsThatLoadedIt.add(e.getKey());
+		}
+		return referencingProjectsThatLoadedIt;
+	}
+
+	/**
+	 * Get the names of the currently loaded/cached package project references of the given (solution) project.
+	 */
+	public List<String> getOldUsedPackageProjectsList(String solutionProjectName, IWorkspaceRoot workspaceRoot)
 	{
 		List<String> result = new ArrayList<>();
-		Map<String, IPackageReader> map = getProjectContainedPackagesMap(projectName);
-		for (String packageName : map.keySet())
+		Map<String, IPackageReader> map = getProjectContainedPackagesMap(solutionProjectName);
+		for (IPackageReader containedPackage : map.values())
 		{
-			if (ResourcesPlugin.getWorkspace().getRoot().getProject(packageName).exists()) result.add(packageName);
+			// get only the referenced web package projects, ignore the contained binary packages
+			IContainer[] containers = workspaceRoot.findContainersForLocationURI(containedPackage.getResource().toURI());
+			if (containers.length == 1 && containers[0] instanceof IProject) result.add(containers[0].getName());
 		}
 		return result;
 	}

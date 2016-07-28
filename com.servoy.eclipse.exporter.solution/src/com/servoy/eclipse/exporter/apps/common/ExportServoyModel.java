@@ -60,7 +60,7 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 		{
 			System.out.println("Cannot find solution project named '" + solutionName + "'. Are you sure you specified the correct workspace location?");
 		}
-		getNGPackageManager().clearActiveSolutionReferencesCache();
+		getNGPackageManager().clearReferencedNGPackageProjectsCache();
 		getNGPackageManager().reloadAllNGPackages(null);
 	}
 

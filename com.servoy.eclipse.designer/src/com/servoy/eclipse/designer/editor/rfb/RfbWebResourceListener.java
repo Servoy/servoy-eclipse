@@ -18,13 +18,14 @@
 package com.servoy.eclipse.designer.editor.rfb;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
-import com.servoy.eclipse.model.ngpackages.INGPackageChangeListener;
+import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 
 /**
  * Notify the editor about component changes to reload the palette.
+ *
  * @author emera
  */
-public class RfbWebResourceListener implements INGPackageChangeListener
+public class RfbWebResourceListener implements ILoadedNGPackagesListener
 {
 
 	private EditorWebsocketSession editorWebsocketSession;
@@ -33,16 +34,13 @@ public class RfbWebResourceListener implements INGPackageChangeListener
 	{
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.core.IWebResourceChangedListener#changed()
-	 */
 	@Override
-	public void ngPackageChanged(boolean components, boolean services)
+	public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 	{
-		if (components)
+		if (!loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 		{
+//		if (components)
+//		{
 			editorWebsocketSession.getEventDispatcher().addEvent(new Runnable()
 			{
 				@Override
@@ -51,22 +49,14 @@ public class RfbWebResourceListener implements INGPackageChangeListener
 					editorWebsocketSession.getClientService(EditorWebsocketSession.EDITOR_SERVICE).executeAsyncServiceCall("reloadPalette", new Object[] { });
 				}
 			});
+//		}
 		}
 	}
 
-	/**
-	 * @param editorWebsocketSession the editorWebsocketSession to set
-	 */
 	public void setEditorWebsocketSession(EditorWebsocketSession editorWebsocketSession)
 	{
-		if (this.editorWebsocketSession == null) ServoyModelFinder.getServoyModel().getNGPackageManager().addNGPackagesChangedListener(this);
+		if (this.editorWebsocketSession == null) ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(this);
 		this.editorWebsocketSession = editorWebsocketSession;
-	}
-
-	@Override
-	public void ngPackageProjectListChanged()
-	{
-		// not used right now
 	}
 
 }

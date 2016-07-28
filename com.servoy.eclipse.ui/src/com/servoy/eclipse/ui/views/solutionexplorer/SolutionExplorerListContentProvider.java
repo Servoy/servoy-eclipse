@@ -1047,7 +1047,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			List<IProject> allReferencedProjects;
 			if (bIncludeModules)
 			{
-				allReferencedProjects = servoyProject.getReferencedProjectsIdDepth();
+				allReferencedProjects = servoyProject.getSolutionAndModuleReferencedProjects();
 			}
 			else
 			{

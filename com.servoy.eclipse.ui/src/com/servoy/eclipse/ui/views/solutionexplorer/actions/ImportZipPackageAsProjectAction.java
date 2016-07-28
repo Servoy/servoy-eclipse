@@ -37,7 +37,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.sablo.specification.Package.IPackageReader;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ngpackages.NGPackageManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
@@ -134,6 +136,17 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 			}
 		};
 		job.schedule();
+	}
+
+	protected boolean checkForExistingProject(String projectName)
+	{
+		if (ServoyModel.getWorkspace().getRoot().getProject(projectName).exists())
+		{
+			UIUtils.reportError("Import component as project",
+				"Project with name : '" + projectName + "' already exist in the current workspace. Skipping import.");
+			return false;
+		}
+		return true;
 	}
 
 	@Override

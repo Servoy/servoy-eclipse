@@ -198,7 +198,7 @@ public class DeletePersistAction extends Action implements ISelectionChangedList
 				if (isTemplateChange)
 				{
 					// TODO how nice is this to force-call this just to refresh templates?
-					ServoyModelFinder.getServoyModel().getNGPackageManager().ngPackagesChanged(true, false);
+					ServoyModelFinder.getServoyModel().getNGPackageManager().ngPackagesChanged(false);
 				}
 
 				if (!formsToDelete.isEmpty())

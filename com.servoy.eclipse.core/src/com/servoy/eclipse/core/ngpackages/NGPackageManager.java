@@ -17,8 +17,6 @@
 
 package com.servoy.eclipse.core.ngpackages;
 
-import java.util.Set;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -32,7 +30,6 @@ import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.PlatformUI;
-import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
@@ -68,7 +65,8 @@ public class NGPackageManager extends BaseNGPackageManager
 			@Override
 			public void propertyChange(PropertyChangeEvent event)
 			{
-				//default packages preferences changed - flush everything
+				// default packages preferences changed? - flush everything
+				// TODO we should really check here if the property that changed does affect web packages!
 				WebComponentSpecProvider.disposeInstance();
 				WebServiceSpecProvider.disposeInstance();
 				reloadAllNGPackages(null);
@@ -93,7 +91,7 @@ public class NGPackageManager extends BaseNGPackageManager
 					else if (updateInfo == MODULES_UPDATED)
 					{
 						// TODO if we will take referenced ng package projects even from modules, we should enable this code...
-						clearActiveSolutionReferencesCache();
+						clearReferencedNGPackageProjectsCache();
 						//TODO can we improve this?
 						reloadAllNGPackages(null);
 //						reloadAllSolutionReferencedPackages(new NullProgressMonitor(), false);
@@ -102,7 +100,7 @@ public class NGPackageManager extends BaseNGPackageManager
 
 				public void activeProjectChanged(ServoyProject activeProject)
 				{
-					clearActiveSolutionReferencesCache();
+					clearReferencedNGPackageProjectsCache();
 					reloadAllNGPackages(null);
 				}
 			};
@@ -129,23 +127,25 @@ public class NGPackageManager extends BaseNGPackageManager
 		registerAllNGPackagesJob.schedule();
 	}
 
-	@Override
-	protected void updateFromResourceChangeListener(final String projectName, final Set<String> unloadPackages, final Set<IPackageReader> toAdd)
-	{
-		Job registerNgPackagesJob = new Job("Update packages ...")
-		{
-			@Override
-			public IStatus run(IProgressMonitor monitor)
-			{
-				// do the actual work
-				NGPackageManager.super.updateFromResourceChangeListener(projectName, unloadPackages, toAdd);
-				return Status.OK_STATUS;
-			}
-
-		};
-		registerNgPackagesJob.setRule(MultiRule.combine(ResourcesPlugin.getWorkspace().getRoot(), serialRule));
-		registerNgPackagesJob.schedule();
-	}
+	// commented this out as it gets called from a resource changed event; I don't think we need a job/rule to just re-read what changed
+	// can be removed in the future
+//	@Override
+//	protected void updateFromResourceChangeListener(final String projectName, final Set<String> unloadPackages, final Set<IPackageReader> toAdd)
+//	{
+//		Job registerNgPackagesJob = new Job("Update packages ...")
+//		{
+//			@Override
+//			public IStatus run(IProgressMonitor monitor)
+//			{
+//				// do the actual work
+//				NGPackageManager.super.updateFromResourceChangeListener(projectName, unloadPackages, toAdd);
+//				return Status.OK_STATUS;
+//			}
+//
+//		};
+//		registerNgPackagesJob.setRule(MultiRule.combine(ResourcesPlugin.getWorkspace().getRoot(), serialRule));
+//		registerNgPackagesJob.schedule();
+//	}
 
 
 	@Override

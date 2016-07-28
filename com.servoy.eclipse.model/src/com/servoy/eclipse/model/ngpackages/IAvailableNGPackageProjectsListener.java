@@ -18,16 +18,20 @@
 package com.servoy.eclipse.model.ngpackages;
 
 /**
- * @author jcompagner
+ * Should be implemented by classes interested in knowing when ng package projects (active or not) appear or dissapear (become available or unavailable) in the workspace.
+ *
+ * @author acostescu
  */
-public interface INGPackageChangeListener
+public interface IAvailableNGPackageProjectsListener
 {
-	void ngPackageChanged(boolean componentsChanged, boolean servicesChanged);
 
 	/**
 	 * Gets called when the list of referenced ng package projects changes (one is added or removed for example).
-	 * @param referencedNGPackageProjects
+	 * This only checks project accessibility and project nature to determine if an ngpackage project is available or not.
+	 *
+	 * @param activePackageProjectsChanged true if the one of the active (referenced by active solution) packages changed availability,
+	 * false if only non-referenced package projects changed availability.
 	 */
-	void ngPackageProjectListChanged(); // TODO should this be part of IActiveProjectListener instead?
+	void ngPackageProjectListChanged(boolean activePackageProjectsChanged); // TODO should this be part of IActiveProjectListener instead?
 
 }

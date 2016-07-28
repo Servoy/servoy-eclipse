@@ -100,13 +100,24 @@ public class ImportZipPackageAsZipAction extends ImportZipPackageAction
 		IFolder componentsFolder = checkComponentsFolderCreated();
 		for (String fileName : fileNames)
 		{
-			if (!checkForExistingProject(fileName.split("\\.")[0])) continue;
+			if (!checkForExistingBinary(componentsFolder, fileName)) continue;
 			File javaFile = new File(filterPath + File.separator + fileName);
 			if (javaFile.exists() && javaFile.isFile())
 			{
 				importZipFileComponent(componentsFolder, javaFile);
 			}
 		}
+	}
+
+	protected boolean checkForExistingBinary(IFolder componentsFolder, String fileName)
+	{
+		if (componentsFolder.getFile(fileName).exists() || componentsFolder.getFolder(fileName).exists())
+		{
+			UIUtils.reportError("Import component as zip",
+				"Resource with name : '" + fileName + "' already exist in the current solution/module. Skipping import.");
+			return false;
+		}
+		return true;
 	}
 
 	protected File[] getImportFolderEntries(File importFolder)

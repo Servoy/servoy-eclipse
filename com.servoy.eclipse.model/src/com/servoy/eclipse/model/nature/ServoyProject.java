@@ -684,27 +684,68 @@ public class ServoyProject implements IProjectNature, ErrorKeeper<File, String>
 		else memServer.init();
 	}
 
+//	/**
+//	 * Returns a list of all IProjects referenced by this solution's project (both static references (.project) and dynamic ones (dltk js build refs)) in-depth, including the solution project itself.
+//	 * So it should return main solution project, could return all module projects (BUT SOMETIMES this is wrong because solution modules are specified via a solution property
+//	 * not project references), resources projects, all web package projects of all found modules and any other project that is referenced.<br/><br/>
+//	 *
+//	 * DO NOT count on this method returning all modules, as modules might not be referenced and still work.
+//	 *
+//	 * @return the full list of referenced projects no matter how deep the nesting is (including this solution's project).
+//	 * @throws CoreException if something went wrong.
+//	 */
+//	public List<IProject> getAllReferencedProjectsIdDepth() throws CoreException
+//	{
+//		List<IProject> allReferencedProjects = new ArrayList<>();
+//		fillAllReferencedProjects(getProject(), allReferencedProjects);
+//		return allReferencedProjects;
+//	}
+//
+//	public static void fillAllReferencedProjects(IProject project, List<IProject> allReferencedProjects) throws CoreException
+//	{
+//		if (allReferencedProjects.indexOf(project) != -1) return; // TODO change this list into a hashmap so that it's faster?
+//		allReferencedProjects.add(project);
+//		if (project.isAccessible()) for (IProject iProject : project.getReferencedProjects())
+//		{
+//			fillAllReferencedProjects(iProject, allReferencedProjects);
+//		}
+//	}
+
 	/**
-	 * Returns a list of all IProjects referenced by this solution's project (both static references (.project) and dynamic ones (dltk js build refs)) in-depth, including the solution project itself.
-	 * So it should return main solution project, all module projects (no matter how nested they are), resources projects, all web package projects of all modules and any other project that is referenced.
-	 *
-	 * @return the full list of referenced projects no matter how deep the nesting is (including this solution's project).
+	 * Returns a list of all IProjects referenced by this solution's project (both static references (.project) and dynamic ones (dltk js build refs)) and it's modules, in-depth, including the solution project itself and it's modules.
+	 * Modules are computed correctly via solution property instead of via project references which are not reliable.
+	
+	 * @return the full list of referenced projects no matter how deep the module nesting is (including this solution's project); only goes in depth in modules.
 	 * @throws CoreException if something went wrong.
 	 */
-	public List<IProject> getReferencedProjectsIdDepth() throws CoreException
+	public List<IProject> getSolutionAndModuleReferencedProjects() throws CoreException
 	{
-		List<IProject> allReferencedProjects = new ArrayList<>();
-		fillAllReferencedProjects(getProject(), allReferencedProjects);
-		return allReferencedProjects;
+		List<IProject> allSolutionAndModuleReferencedProjects = new ArrayList<>();
+		Set<ServoyProject> visitedModules = new HashSet<>(); // this has to be separate because is a module is also a referenced project we still want to get that module's references even if it was adeed before to the list because if was a project reference of another solution
+		fillSolutionAndModulenReferencedProjectsIdDepth(this, visitedModules, allSolutionAndModuleReferencedProjects);
+		return allSolutionAndModuleReferencedProjects;
 	}
 
-	public static void fillAllReferencedProjects(IProject project, List<IProject> allReferencedProjects) throws CoreException
+	public static void fillSolutionAndModulenReferencedProjectsIdDepth(ServoyProject servoyProject, Set<ServoyProject> visitedModules,
+		List<IProject> allSolutionAndModuleReferencedProjects) throws CoreException
 	{
-		if (allReferencedProjects.indexOf(project) != -1) return; // TODO change this list into a hashmap so that it's faster?
-		allReferencedProjects.add(project);
-		for (IProject iProject : project.getReferencedProjects())
+		if (visitedModules.contains(servoyProject)) return;
+		visitedModules.add(servoyProject);
+
+		if (!allSolutionAndModuleReferencedProjects.contains(servoyProject.getProject()))
+			allSolutionAndModuleReferencedProjects.add(servoyProject.getProject());
+
+		// add all direct project references
+		for (IProject iProject : servoyProject.getProject().getReferencedProjects())
 		{
-			fillAllReferencedProjects(iProject, allReferencedProjects);
+			allSolutionAndModuleReferencedProjects.add(iProject);
+		}
+
+		for (Solution module : servoyProject.getModules())
+		{
+			fillSolutionAndModulenReferencedProjectsIdDepth(
+				(ServoyProject)servoyProject.getProject().getWorkspace().getRoot().getProject(module.getName()).getNature(ServoyProject.NATURE_ID),
+				visitedModules, allSolutionAndModuleReferencedProjects);
 		}
 	}
 

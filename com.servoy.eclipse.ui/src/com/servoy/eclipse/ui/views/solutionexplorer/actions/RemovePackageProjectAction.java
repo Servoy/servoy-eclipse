@@ -55,6 +55,7 @@ public class RemovePackageProjectAction extends Action implements ISelectionChan
 
 	private final Shell shell;
 	private ServoyNGPackageProject selectedProject;
+	private ServoyProject parentSolutionProject;
 
 	/**
 	 * Creates a new remove package project action.
@@ -135,12 +136,11 @@ public class RemovePackageProjectAction extends Action implements ISelectionChan
 		}
 		else if (activeParentModules.size() > 1)
 		{
-			ServoyProject activeProject = servoyModel.getActiveProject();
 			int defaultIndex = 0;
 			String options[] = new String[activeParentModules.size()];
 			for (int i = activeParentModules.size() - 1; i >= 0; i--)
 			{
-				if (activeParentModules.get(i) == activeProject)
+				if (activeParentModules.get(i) == parentSolutionProject)
 				{
 					defaultIndex = i;
 				}
@@ -173,17 +173,33 @@ public class RemovePackageProjectAction extends Action implements ISelectionChan
 	{
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
 		selectedProject = null;
+		parentSolutionProject = null;
 		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
 		boolean state = (sel.size() == 1) && (servoyModel.getActiveProject() != null);
 		if (state)
 		{
 			SimpleUserNode node = (SimpleUserNode)sel.getFirstElement();
 			state = (node.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE || node.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE ||
-				node.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE);
+				node.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE) || (node.getType() == UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE && node.isEnabled());
 			if (state) try
 			{
-				IResource packageRoot = SolutionExplorerTreeContentProvider.getResource((IPackageReader)node.getRealObject());
-				if (packageRoot != null) selectedProject = (ServoyNGPackageProject)packageRoot.getProject().getNature(ServoyNGPackageProject.NATURE_ID);
+				Object realObject = node.getRealObject();
+				if (realObject instanceof IPackageReader)
+				{
+					IResource packageRoot = SolutionExplorerTreeContentProvider.getResource((IPackageReader)realObject);
+					if (packageRoot != null)
+					{
+						selectedProject = (ServoyNGPackageProject)packageRoot.getProject().getNature(ServoyNGPackageProject.NATURE_ID);
+						SimpleUserNode parentSolutionNode = node.getAncestorOfType(ServoyProject.class);
+						parentSolutionProject = (parentSolutionNode != null ? (ServoyProject)parentSolutionNode.getRealObject() : null);
+					}
+				}
+				else if (realObject instanceof IProject && ((IProject)realObject).isAccessible() &&
+					((IProject)realObject).hasNature(ServoyNGPackageProject.NATURE_ID))
+				{
+					selectedProject = (ServoyNGPackageProject)((IProject)realObject).getNature(ServoyNGPackageProject.NATURE_ID);
+				}
+				else state = false;
 			}
 			catch (CoreException e)
 			{

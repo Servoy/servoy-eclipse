@@ -24,7 +24,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
@@ -73,17 +72,6 @@ public abstract class ImportZipPackageAction extends Action
 				return;
 			}
 		}
-	}
-
-	protected boolean checkForExistingProject(String projectName)
-	{
-		if (ServoyModel.getWorkspace().getRoot().getProject(projectName).exists())
-		{
-			UIUtils.reportError("Import component as project",
-				"Project with name : '" + projectName + "' already exist in the current workspace. Skipping import.");
-			return false;
-		}
-		return true;
 	}
 
 	protected abstract void doImport(String[] fileNames, String filterPath);

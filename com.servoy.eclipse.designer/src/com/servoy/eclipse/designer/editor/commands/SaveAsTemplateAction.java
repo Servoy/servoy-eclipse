@@ -255,7 +255,7 @@ public class SaveAsTemplateAction extends SelectionAction
 		}
 
 		// TODO - is this ok? manually triggering the ng component package change broadcast just to refresh the palette?
-		ServoyModelFinder.getServoyModel().getNGPackageManager().ngPackagesChanged(true, false);
+		ServoyModelFinder.getServoyModel().getNGPackageManager().ngPackagesChanged(false);
 	}
 
 	/**

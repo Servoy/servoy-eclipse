@@ -40,9 +40,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IResourceChangeListener;
-import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -83,7 +80,8 @@ import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager.ContainerPackageReader;
-import com.servoy.eclipse.model.ngpackages.INGPackageChangeListener;
+import com.servoy.eclipse.model.ngpackages.IAvailableNGPackageProjectsListener;
+import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Messages;
@@ -156,7 +154,8 @@ import com.servoy.j2db.util.Utils;
  *
  * @author jblok
  */
-public class SolutionExplorerTreeContentProvider implements IStructuredContentProvider, ITreeContentProvider, INGPackageChangeListener
+public class SolutionExplorerTreeContentProvider
+	implements IStructuredContentProvider, ITreeContentProvider, ILoadedNGPackagesListener, IAvailableNGPackageProjectsListener
 {
 	private static final String IMG_SOLUTION = "solution.gif";
 	private static final String IMG_SOLUTION_M = "module.gif";
@@ -367,83 +366,6 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		rootChildren.add(jsunit);
 		rootChildren.add(plugins);
 
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(new IResourceChangeListener()
-		{
-			@Override
-			public void resourceChanged(IResourceChangeEvent event)
-			{
-
-				IResource resource = event.getResource();
-				if (event.getType() == IResourceChangeEvent.POST_CHANGE)
-				{
-					IResourceDelta[] affectedChildren = event.getDelta().getAffectedChildren(IResourceDelta.ADDED, IResource.PROJECT);
-					if (affectedChildren.length == 1) resource = affectedChildren[0].getResource();
-				}
-				if (resource != null && resource.getType() == IResource.PROJECT)
-				{
-					try
-					{
-						if (resource.isAccessible() && resource.getProject().hasNature(ServoyNGPackageProject.NATURE_ID))
-						{
-							boolean havePackageProjects = false;
-							IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-							for (IProject project : projects)
-							{
-								try
-								{
-									if (project.hasNature(ServoyNGPackageProject.NATURE_ID) &&
-										((!project.equals(resource) && event.getType() == IResourceChangeEvent.PRE_DELETE) ||
-											event.getType() == IResourceChangeEvent.POST_CHANGE))
-									{
-										havePackageProjects = true;
-										break;
-									}
-								}
-								catch (CoreException e)
-								{
-									Debug.log(e);
-								}
-							}
-
-							if (havePackageProjects && !invisibleRootNode.children[1].equals(allWebPackagesNode))
-							{
-								addAllWebPackagesNode();
-							}
-							else if (!havePackageProjects && invisibleRootNode.children[1].equals(allWebPackagesNode))
-							{
-								removeAllWebPackagesNode();
-							}
-							refreshTreeNode(allWebPackagesNode);
-						}
-					}
-					catch (CoreException e)
-					{
-						Debug.log(e);
-					}
-				}
-			}
-
-			private void addAllWebPackagesNode()
-			{
-				List<SimpleUserNode> newRootChildren = new ArrayList<SimpleUserNode>();
-				newRootChildren.addAll(Arrays.asList(invisibleRootNode.children));
-				//add allWebPacakgesNode to second position
-				newRootChildren.add(1, allWebPackagesNode);
-				invisibleRootNode.children = newRootChildren.toArray(new PlatformSimpleUserNode[0]);
-				view.refreshTreeCompletely();
-			}
-
-			private void removeAllWebPackagesNode()
-			{
-				List<SimpleUserNode> newRootChildren = new ArrayList<SimpleUserNode>();
-				newRootChildren.addAll(Arrays.asList(invisibleRootNode.children));
-				//add allWebPacakgesNode to second position
-				newRootChildren.remove(allWebPackagesNode);
-				invisibleRootNode.children = newRootChildren.toArray(new PlatformSimpleUserNode[0]);
-				view.refreshTreeCompletely();
-			}
-		}, IResourceChangeEvent.PRE_DELETE | IResourceChangeEvent.POST_CHANGE);
-
 		invisibleRootNode.children = rootChildren.toArray(new PlatformSimpleUserNode[0]);// new PlatformSimpleUserNode[] { resources, allWebPackagesNode, allSolutionsNode, activeSolutionNode, jslib, application, solutionModel, databaseManager, utils, history, security, i18n, jsunit, plugins };
 
 		scriptingNodes = new PlatformSimpleUserNode[] { jslib, application, solutionModel, databaseManager, utils, history, security, i18n, /*
@@ -486,7 +408,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		job.setPriority(Job.LONG);
 		job.schedule();
 
-		ServoyModelFinder.getServoyModel().getNGPackageManager().addNGPackagesChangedListener(this);
+		ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(this);
+		ServoyModelFinder.getServoyModel().getNGPackageManager().addAvailableNGPackageProjectsListener(this);
 	}
 
 	/**
@@ -517,6 +440,9 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			i.dispose();
 		}
 		imagesConvertedFromSwing.clear();
+
+		ServoyModelFinder.getServoyModel().getNGPackageManager().removeLoadedNGPackagesListener(this);
+		ServoyModelFinder.getServoyModel().getNGPackageManager().removeAvailableNGPackageProjectsListener(this);
 	}
 
 	/**
@@ -1112,15 +1038,19 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 						Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
+						ServoyProject activeSolution = ServoyModelFinder.getServoyModel().getActiveProject();
+						List<IProject> solutionAndModuleReferencedProjects = (activeSolution != null ? activeSolution.getSolutionAndModuleReferencedProjects()
+							: null);
 						for (IProject iProject : projects)
 						{
 							if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
 							{
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(resolveWebPackageDisplayName(iProject),
 									UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, iProject, packageIcon);
+
 								//if it is not loaded, hide it so that it will have the gray icon
-								if (WebComponentSpecProvider.getInstance().getPackageType(iProject.getName()) == null &&
-									WebServiceSpecProvider.getInstance().getPackageType(iProject.getName()) == null) node.hide();
+								if (solutionAndModuleReferencedProjects == null || !solutionAndModuleReferencedProjects.contains(iProject)) node.hide();
+
 								node.parent = un;
 								children.add(node);
 							}
@@ -1142,12 +1072,8 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		return new Object[0];
 	}
 
-	/** Returns all zip packages contained by the given solution
-	 * @param un
-	 * @param componentsProvider
-	 * @param string
-	 * @param componentsPackageFromResources
-	 * @return
+	/**
+	 * Returns all zip packages contained by the given solution
 	 */
 	private Collection< ? extends PlatformSimpleUserNode> getBinaryPackages(PlatformSimpleUserNode un, BaseSpecProvider componentsProvider,
 		BaseSpecProvider servicesProvider)
@@ -1167,7 +1093,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			{
 				try
 				{
-					allReferencedProjects = servoyProject.getReferencedProjectsIdDepth();
+					allReferencedProjects = servoyProject.getSolutionAndModuleReferencedProjects();
 				}
 				catch (CoreException e)
 				{
@@ -1259,7 +1185,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				List<IProject> allReferencedProjects;
 				if (includeModules)
 				{
-					allReferencedProjects = servoyProject.getReferencedProjectsIdDepth();
+					allReferencedProjects = servoyProject.getSolutionAndModuleReferencedProjects();
 				}
 				else
 				{
@@ -1430,7 +1356,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 						List<IProject> allReferencedProjects;
 						if (includeModules)
 						{
-							allReferencedProjects = servoyProject.getReferencedProjectsIdDepth();
+							allReferencedProjects = servoyProject.getSolutionAndModuleReferencedProjects();
 						}
 						else
 						{
@@ -1578,7 +1504,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 			{
 				try
 				{
-					allReferencedProjects = servoyProject.getReferencedProjectsIdDepth();
+					allReferencedProjects = servoyProject.getSolutionAndModuleReferencedProjects();
 				}
 				catch (CoreException e)
 				{
@@ -1635,7 +1561,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 				List<IProject> allReferencedProjects;
 				if (includeModules)
 				{
-					allReferencedProjects = servoyProject.getReferencedProjectsIdDepth();
+					allReferencedProjects = servoyProject.getSolutionAndModuleReferencedProjects();
 				}
 				else
 				{
@@ -1644,7 +1570,7 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 
 				for (IProject iProject : allReferencedProjects)
 				{
-					if (iProject.hasNature(ServoyNGPackageProject.NATURE_ID)) return true;
+					if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID)) return true;
 				}
 			}
 			catch (CoreException e)
@@ -3237,34 +3163,24 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 	}
 
 	@Override
-	public void ngPackageChanged(final boolean componentsChanged, final boolean servicesChanged)
+	public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 	{
-		Job job = new Job("Refreshing tree due to ng component/service package changes...")
+		// refreshing tree due to ng component/service package changes...
+		refreshTreeNode(allWebPackagesNode);
+		refreshTreeNode(findChildNode(activeSolutionNode, Messages.TreeStrings_Web_Packages));
+
+		ServoyProject[] activeProjects = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
+		if (activeProjects != null)
 		{
-			@SuppressWarnings("unchecked")
-			@Override
-			public IStatus run(IProgressMonitor monitor)
+			for (ServoyProject servoyProject : activeProjects)
 			{
-				refreshTreeNode(allWebPackagesNode);
-				refreshTreeNode(findChildNode(activeSolutionNode, Messages.TreeStrings_Web_Packages));
-
-				ServoyProject[] activeProjects = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
-				if (activeProjects != null)
-				{
-					for (ServoyProject servoyProject : activeProjects)
-					{
-						SimpleUserNode moduleNode = findChildNode(modulesOfActiveSolution, servoyProject.getSolution().getName());
-						refreshTreeNode(findChildNode(moduleNode, Messages.TreeStrings_Web_Packages));
-					}
-				}
-
-				if (componentsChanged) refreshTreeNode(componentsFromResourcesNode);
-				if (servicesChanged) refreshTreeNode(servicesFromResourcesNode);
-				return Status.OK_STATUS;
+				SimpleUserNode moduleNode = findChildNode(modulesOfActiveSolution, servoyProject.getSolution().getName());
+				refreshTreeNode(findChildNode(moduleNode, Messages.TreeStrings_Web_Packages));
 			}
-		};
-		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
-		job.schedule();
+		}
+
+		/* if (componentsChanged) */refreshTreeNode(componentsFromResourcesNode);
+		/* if (servicesChanged) */ refreshTreeNode(servicesFromResourcesNode);
 	}
 
 	private void refreshTreeNode(SimpleUserNode nodeToRefresh)
@@ -3276,22 +3192,60 @@ public class SolutionExplorerTreeContentProvider implements IStructuredContentPr
 		}
 	}
 
-
 	@Override
-	public void ngPackageProjectListChanged()
+	public void ngPackageProjectListChanged(boolean activePackageProjectsChanged)
 	{
-		Job job = new Job("Refreshing allWebPackagesNode due to ngPackageProject list changed...")
+		// hide or show all web packages node if needed
+		boolean hasPackageProjects = false;
+
+		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+		for (IProject iProject : projects)
 		{
-			@SuppressWarnings("unchecked")
-			@Override
-			public IStatus run(IProgressMonitor monitor)
+			try
 			{
-				refreshTreeNode(allWebPackagesNode);
-				return Status.OK_STATUS;
+				if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
+				{
+					hasPackageProjects = true;
+					break;
+				}
 			}
-		};
-		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
-		job.schedule();
+			catch (CoreException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+
+		if (hasPackageProjects && !invisibleRootNode.children[1].equals(allWebPackagesNode))
+		{
+			addAllWebPackagesNode();
+		}
+		else if (!hasPackageProjects && invisibleRootNode.children[1].equals(allWebPackagesNode))
+		{
+			removeAllWebPackagesNode();
+		}
+
+		// refresh allWebPackagesNode due to ngPackageProject list changed...
+		refreshTreeNode(allWebPackagesNode);
+	}
+
+	private void addAllWebPackagesNode()
+	{
+		List<SimpleUserNode> newRootChildren = new ArrayList<SimpleUserNode>();
+		newRootChildren.addAll(Arrays.asList(invisibleRootNode.children));
+		//add allWebPacakgesNode to second position
+		newRootChildren.add(1, allWebPackagesNode);
+		invisibleRootNode.children = newRootChildren.toArray(new PlatformSimpleUserNode[0]);
+		view.refreshTreeCompletely();
+	}
+
+	private void removeAllWebPackagesNode()
+	{
+		List<SimpleUserNode> newRootChildren = new ArrayList<SimpleUserNode>();
+		newRootChildren.addAll(Arrays.asList(invisibleRootNode.children));
+		//add allWebPacakgesNode to second position
+		newRootChildren.remove(allWebPackagesNode);
+		invisibleRootNode.children = newRootChildren.toArray(new PlatformSimpleUserNode[0]);
+		view.refreshTreeCompletely();
 	}
 
 	public void setIncludeModules(boolean includeModules)

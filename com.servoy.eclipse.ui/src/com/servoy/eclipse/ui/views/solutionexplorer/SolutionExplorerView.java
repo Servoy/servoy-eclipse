@@ -1044,52 +1044,63 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 	private void runAndKeepTreePaths(final Runnable toRun)
 	{
-		Runnable runnable = new Runnable()
+		UIJob job = new UIJob(getTreeViewer().getControl().getDisplay(), "Solution explorer tree operation in progress...")
 		{
-			public void run()
+			@Override
+			public IStatus runInUIThread(IProgressMonitor monitor)
 			{
-				boolean treeWidgetDisposed = true;
-				try
+				if (getTreeViewer().isBusy())
 				{
-					treeWidgetDisposed = (tree.getControl().getDisplay() == null);
+					schedule(100);
 				}
-				catch (Exception e)
+				else
 				{
-					//it means widget has been disposed
-				}
-
-				if (!treeWidgetDisposed)
-				{
+					boolean treeWidgetDisposed = true;
 					try
 					{
-						tree.setComparer(nodeContentComparer); // make tree paths ignore
-						// instances and use only
-						// node contents
+						treeWidgetDisposed = (tree.getControl().getDisplay() == null);
+					}
+					catch (Exception e)
+					{
+						//it means widget has been disposed
+					}
+
+					if (!treeWidgetDisposed)
+					{
 						TreePath[] oldPath = tree.getExpandedTreePaths();
 						toRun.run();
-						// try to restore the old path
-						for (TreePath path : oldPath)
+
+						try
 						{
-							tree.setExpandedState(path, true);
+							// try to restore the old path
+							tree.setComparer(nodeContentComparer); // make tree paths ignore instances and use only node contents
+							for (TreePath path : oldPath)
+							{
+								tree.setExpandedState(path, true);
+							}
+							tree.setExpandedTreePaths(oldPath); // TODO hmm, isn't this redundant? I mean the loop above does the same thing right?
+							list.refresh();
 						}
-						tree.setExpandedTreePaths(oldPath);
-						list.refresh();
-					}
-					finally
-					{
-						tree.setComparer(null);
+						finally
+						{
+							tree.setComparer(null);
+						}
 					}
 				}
+				return Status.OK_STATUS;
 			}
 		};
+		job.setSystem(true);
+
 		if (Display.getCurrent() != null)
 		{
-			runnable.run();
+			job.runInUIThread(null);
 		}
 		else
 		{
-			Display.getDefault().asyncExec(runnable);
+			job.schedule();
 		}
+
 	}
 
 	/**

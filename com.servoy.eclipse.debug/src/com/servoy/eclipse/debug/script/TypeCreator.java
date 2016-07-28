@@ -109,7 +109,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.ngpackages.INGPackageChangeListener;
+import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
@@ -855,10 +855,11 @@ public class TypeCreator extends TypeCache
 						}
 					});
 				}
-				ServoyModelFinder.getServoyModel().getNGPackageManager().addNGPackagesChangedListener(new INGPackageChangeListener()
+				ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(new ILoadedNGPackagesListener()
 				{
+
 					@Override
-					public void ngPackageChanged(boolean components, boolean services)
+					public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 					{
 						Job job = new Job("clearing cache")
 						{
@@ -872,12 +873,6 @@ public class TypeCreator extends TypeCache
 						};
 						job.setRule(ResourcesPlugin.getWorkspace().getRoot());
 						job.schedule();
-					}
-
-					@Override
-					public void ngPackageProjectListChanged()
-					{
-						// not used for now
 					}
 
 				});

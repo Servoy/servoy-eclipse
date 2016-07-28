@@ -54,7 +54,7 @@ public class DecoratingColumnLabelProvider extends ColumnLabelProvider implement
 
 	/**
 	 * Creates a decorating label provider which uses the given label decorator to decorate labels provided by the given label provider.
-	 * 
+	 *
 	 * @param provider the nested label provider
 	 * @param decorator the label decorator, or <code>null</code> if no decorator is to be used initially
 	 */
@@ -68,7 +68,7 @@ public class DecoratingColumnLabelProvider extends ColumnLabelProvider implement
 	/**
 	 * The <code>DecoratingLabelProvider</code> implementation of this <code>IBaseLabelProvider</code> method adds the listener to both the nested label
 	 * provider and the label decorator.
-	 * 
+	 *
 	 * @param listener a label provider listener
 	 */
 	@Override
@@ -137,7 +137,7 @@ public class DecoratingColumnLabelProvider extends ColumnLabelProvider implement
 
 	/**
 	 * Returns the label decorator, or <code>null</code> if none has been set.
-	 * 
+	 *
 	 * @return the label decorator, or <code>null</code> if none has been set.
 	 */
 	public ILabelDecorator getLabelDecorator()
@@ -147,7 +147,7 @@ public class DecoratingColumnLabelProvider extends ColumnLabelProvider implement
 
 	/**
 	 * Returns the nested label provider.
-	 * 
+	 *
 	 * @return the nested label provider
 	 */
 	@Override
@@ -208,7 +208,7 @@ public class DecoratingColumnLabelProvider extends ColumnLabelProvider implement
 	/**
 	 * The <code>DecoratingLabelProvider</code> implementation of this <code>IBaseLabelProvider</code> method removes the listener from both the nested
 	 * label provider and the label decorator.
-	 * 
+	 *
 	 * @param listener a label provider listener
 	 */
 	@Override
@@ -227,7 +227,7 @@ public class DecoratingColumnLabelProvider extends ColumnLabelProvider implement
 	 * Sets the label decorator. Removes all known listeners from the old decorator, and adds all known listeners to the new decorator. The old decorator is not
 	 * disposed. Fires a label provider changed event indicating that all labels should be updated. Has no effect if the given decorator is identical to the
 	 * current one.
-	 * 
+	 *
 	 * @param decorator the label decorator, or <code>null</code> if no decorations are to be applied
 	 */
 	public void setLabelDecorator(ILabelDecorator decorator)
@@ -255,33 +255,18 @@ public class DecoratingColumnLabelProvider extends ColumnLabelProvider implement
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
-	 */
 	@Override
 	public Color getBackground(Object element)
 	{
 		return ((IColorProvider)provider).getBackground(element);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.viewers.IFontProvider#getFont(java.lang.Object)
-	 */
 	@Override
 	public Font getFont(Object element)
 	{
 		return ((IFontProvider)provider).getFont(element);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
-	 */
 	@Override
 	public Color getForeground(Object element)
 	{
@@ -291,9 +276,9 @@ public class DecoratingColumnLabelProvider extends ColumnLabelProvider implement
 	/**
 	 * Return the decoration context associated with this label provider. It will be passed to the decorator if the decorator is an instance of
 	 * {@link LabelDecorator}.
-	 * 
+	 *
 	 * @return the decoration context associated with this label provider
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public IDecorationContext getDecorationContext()
@@ -303,9 +288,9 @@ public class DecoratingColumnLabelProvider extends ColumnLabelProvider implement
 
 	/**
 	 * Set the decoration context that will be based to the decorator for this label provider if that decorator implements {@link LabelDecorator}.
-	 * 
+	 *
 	 * @param decorationContext the decoration context.
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public void setDecorationContext(IDecorationContext decorationContext)

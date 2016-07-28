@@ -96,17 +96,17 @@ public class SolutionExplorerNavigator
 	 *
 	 * @return true if the target element was revealed and selected. False otherwise. Even if it returns false, it will reveal (but not select) the most inner element found using the given criteria.
 	 */
-	public boolean reveaInTreel(SimpleUserNode startNode, String[] subPath, boolean select)
+	public boolean reveaInTree(SimpleUserNode startNode, String[] subPath, boolean select)
 	{
 		return revealInTree(getNamePathInTree(startNode, subPath), select);
 	}
 
 	/**
-	 * Same as {@link #reveaInTreel(SimpleUserNode, String[], boolean)} but the target node is specified by a full String name path (so names of nodes from the root of the tree up to the target node).
+	 * Same as {@link #reveaInTree(SimpleUserNode, String[], boolean)} but the target node is specified by a full String name path (so names of nodes from the root of the tree up to the target node).
 	 *
-	 * @param fullNamePath see {@link #reveaInTreel(SimpleUserNode, String[], boolean)}.
-	 * @param select see {@link #reveaInTreel(SimpleUserNode, String[], boolean)}.
-	 * @return see {@link #reveaInTreel(SimpleUserNode, String[], boolean)}
+	 * @param fullNamePath see {@link #reveaInTree(SimpleUserNode, String[], boolean)}.
+	 * @param select see {@link #reveaInTree(SimpleUserNode, String[], boolean)}.
+	 * @return see {@link #reveaInTree(SimpleUserNode, String[], boolean)}
 	 */
 	public boolean revealInTree(String[] fullNamePath, boolean select)
 	{
@@ -143,7 +143,11 @@ public class SolutionExplorerNavigator
 				if (treeContentProvider.hasChildren(endNode))
 				{
 					treeViewer.setExpandedState(endNode, true);
-					children = treeContentProvider.getChildren(endNode);
+
+					// if this node is in the process of being refreshed (so it has children but they are not yet cached) it's fine, just don't reveal it now;
+					// we called setExpandedState(..., true) already so next time it tries to reveal this path it will go one step further
+					//children = treeContentProvider.getChildren(endNode);
+					children = endNode.children;
 				}
 				else children = null;
 			}
@@ -171,7 +175,7 @@ public class SolutionExplorerNavigator
 	}
 
 	/**
-	 * Similar to {@link #reveaInTreel(SimpleUserNode, String[], boolean)}. But if the node is not available right away it will listen to tree changes
+	 * Similar to {@link #reveaInTree(SimpleUserNode, String[], boolean)}. But if the node is not available right away it will listen to tree changes
 	 * and it will reveal the target node later - when it becomes available. The next time this method is called, any previous not-yet-revealed target is discarded.<br/><br/>
 	 *
 	 * It will reveal (but not select) the most inner element found using the given criteria even if the target node is not found (but will continue to watch for tree change until it is found).
