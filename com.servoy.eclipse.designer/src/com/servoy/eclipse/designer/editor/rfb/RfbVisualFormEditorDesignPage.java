@@ -67,6 +67,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
@@ -329,6 +330,17 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			final Form form = editorPart.getForm();
 			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(form);
 			final String componentsJSON = designerWebsocketSession.getComponentsJSON(fs, filterByParent(persists, form));
+			List<String> styleSheets = PersistHelper.getOrderedStyleSheets(fs);
+			String[] newStylesheets = null;
+			for (IPersist persist : persists)
+			{
+				if (persist instanceof Media && styleSheets.contains(((Media)persist).getName()))
+				{
+					newStylesheets = designerWebsocketSession.getSolutionStyleSheets(fs);
+					break;
+				}
+			}
+			final String[] newStylesheetsFinal = newStylesheets;
 			CurrentWindow.runForWindow(new WebsocketSessionWindows(designerWebsocketSession), new Runnable()
 			{
 				@Override
@@ -338,6 +350,11 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 						new Object[] { componentsJSON });
 					if (persists.contains(form)) designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateForm",
 						new Object[] { form.getUUID(), form.getSize().width, form.getSize().height });
+					if (newStylesheetsFinal != null)
+					{
+						designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateStyleSheets",
+							new Object[] { newStylesheetsFinal });
+					}
 					designerWebsocketSession.valueChanged();
 				}
 			});

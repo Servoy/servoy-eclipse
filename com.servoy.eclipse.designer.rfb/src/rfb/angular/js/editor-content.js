@@ -434,6 +434,10 @@ angular.module('editorContent',['servoyApp'])
       
       return formData;
     },
+    updateStyleSheets : function(stylesheets)
+    {
+    	$applicationService.setStyleSheets(stylesheets);
+    },
     setLayoutData: function(data) {
       layoutData = data;
     },

@@ -99,7 +99,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		registerServerService("$editor", this);
 	}
 
-	private String[] getSolutionStyleSheets(FlattenedSolution fs)
+	public String[] getSolutionStyleSheets(FlattenedSolution fs)
 	{
 		List<String> styleSheets = PersistHelper.getOrderedStyleSheets(fs);
 		if (styleSheets != null && styleSheets.size() > 0)
