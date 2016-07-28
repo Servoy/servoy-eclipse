@@ -23,6 +23,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 
 import com.servoy.eclipse.ui.Messages;
+import com.servoy.eclipse.ui.util.IParentOverridable;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportExtendsID;
@@ -30,9 +31,9 @@ import com.servoy.j2db.util.PersistHelper;
 
 /**
  * Delegate label provider that adds the form inheritance context to the label.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class PersistInheritenceDelegateLabelProvider extends DelegateLabelProvider implements IFontProvider
 {
@@ -73,7 +74,12 @@ public class PersistInheritenceDelegateLabelProvider extends DelegateLabelProvid
 	public String getText(Object value)
 	{
 		String superText = super.getText(value);
-		if (persist instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)persist) &&
+		IPersist realPersist = persist;
+		if (realPersist instanceof IParentOverridable)
+		{
+			realPersist = ((IParentOverridable)realPersist).getParentToOverride();
+		}
+		if (realPersist instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)realPersist) &&
 			((AbstractBase)persist).hasProperty((String)propertyId))
 		{
 			superText = (superText != null ? superText : "") + " (" + Messages.LabelOverride + ')';
@@ -84,8 +90,9 @@ public class PersistInheritenceDelegateLabelProvider extends DelegateLabelProvid
 
 	/**
 	 * @see IFontProvider
-	 * 
+	 *
 	 */
+	@Override
 	public Font getFont(Object value)
 	{
 		if (getLabelProvider() instanceof IFontProvider)
