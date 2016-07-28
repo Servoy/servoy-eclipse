@@ -64,8 +64,10 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.problem.ProblemSeverity;
 import org.json.JSONObject;
+import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.ICustomType;
 import org.xml.sax.SAXException;
@@ -119,7 +121,6 @@ import com.servoy.j2db.persistence.DataSourceCollectorVisitor;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.FlattenedPortal;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormReference;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
@@ -144,6 +145,7 @@ import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.ISupportScope;
 import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.MethodArgument;
@@ -335,7 +337,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String LINGERING_TABLE_FILES_TYPE = _PREFIX + ".lingeringTableFiles";
 	public static final String DUPLICATE_MEM_TABLE_TYPE = _PREFIX + ".duplicateMemTable";
 	public static final String SUPERFORM_PROBLEM_TYPE = _PREFIX + ".superformProblem";
-
+	public static final String MISSING_SPEC = _PREFIX + ".missingSpec";
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels";
@@ -513,7 +515,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> FORM_REFERENCE_INVALID_SCRIPT = new Pair<String, ProblemSeverity>("formReferenceInvalidScript",
 		ProblemSeverity.WARNING);
-	public final static Pair<String, ProblemSeverity> FORM_REFERENCE_CYCLE = new Pair<String, ProblemSeverity>("formReferenceCycle", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> NON_ACCESSIBLE_PERSIST_IN_MODULE_USED_IN_PARENT_SOLUTION = new Pair<String, ProblemSeverity>(
 		"nonAccessibleFormInModuleUsedInParentSolution", ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> METHOD_NUMBER_OF_ARGUMENTS_MISMATCH = new Pair<String, ProblemSeverity>("methodNumberOfArgsMismatch",
@@ -522,6 +523,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.INFO);
 	public final static Pair<String, ProblemSeverity> ELEMENT_EXTENDS_DELETED_ELEMENT = new Pair<String, ProblemSeverity>("elementExtendsDeletedElement", //$NON-NLS-1$
 		ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> MISSING_SPECIFICATION = new Pair<String, ProblemSeverity>("missingSpec", ProblemSeverity.ERROR);
 
 	// relations related
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
@@ -1303,43 +1305,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				parents.add(new Pair<String, ISupportChilds>(null, persist.getParent()));
 			}
 			final Map<String, Set<IPersist>> formElementsByName = new HashMap<String, Set<IPersist>>();
-			final Map<String, Set<FormReference>> referencedFormsByName = new HashMap<String, Set<FormReference>>();
 			Form flattenedForm = ServoyBuilder.getPersistFlattenedSolution(persist, getServoyModel().getFlattenedSolution()).getFlattenedForm(persist);
 			flattenedForm.acceptVisitor(new IPersistVisitor()
 			{
 				public Object visit(IPersist o)
 				{
-					if (o instanceof FormReference)
-					{
-						int formID = ((FormReference)o).getContainsFormID();
-						if (formID > 0)
-						{
-							Form referenceForm = ServoyBuilder.getPersistFlattenedSolution(persist, getServoyModel().getFlattenedSolution()).getForm(formID);
-							if (referenceForm != null)
-							{
-								Set<FormReference> duplicates = referencedFormsByName.get(referenceForm.getName());
-								if (duplicates != null)
-								{
-									for (FormReference duplicatePersist : duplicates)
-									{
-										ServoyMarker mk = MarkerMessages.DuplicateReferencedFormFound.fill(referenceForm.getName(), name);
-										addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_SAME_REFERENCED_FORM, IMarker.PRIORITY_NORMAL, null,
-											duplicatePersist);
-
-										mk = MarkerMessages.DuplicateReferencedFormFound.fill(referenceForm.getName(), name);
-										addMarker(project, mk.getType(), mk.getText(), -1, DUPLICATION_SAME_REFERENCED_FORM, IMarker.PRIORITY_NORMAL, null, o);
-									}
-								}
-								else
-								{
-									duplicates = new HashSet<FormReference>();
-									duplicates.add((FormReference)o);
-								}
-								referencedFormsByName.put(referenceForm.getName(), duplicates);
-							}
-						}
-						return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
-					}
 					if (!(o instanceof ScriptVariable) && !(o instanceof ScriptMethod) && !(o instanceof Form) && o instanceof ISupportName &&
 						((ISupportName)o).getName() != null)
 					{
@@ -1903,6 +1873,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, LINGERING_TABLE_FILES_TYPE);
 		deleteMarkers(project, DUPLICATE_MEM_TABLE_TYPE);
 		deleteMarkers(project, SUPERFORM_PROBLEM_TYPE);
+		deleteMarkers(project, MISSING_SPEC);
 
 		try
 		{
@@ -2878,13 +2849,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									addMarker(project, mk.getType(), mk.getText(), -1, FORM_PROPERTY_TARGET_NOT_FOUND, IMarker.PRIORITY_NORMAL, null, form);
 								}
 							}
-							Set<String> cycles = FormReference.detectFormReferenceCycles(flattenedSolution, form);
-							for (String cycle : cycles)
-							{
-								ServoyMarker mk = MarkerMessages.FormReferenceCycle.fill(cycle);
-								addMarker(ServoyModelFinder.getServoyModel().getServoyProject(flattenedSolution.getName()).getProject(), mk.getType(),
-									mk.getText(), -1, FORM_REFERENCE_CYCLE, IMarker.PRIORITY_NORMAL, null, form);
-							}
 						}
 						checkCancel();
 						if (o instanceof ScriptCalculation)
@@ -3368,6 +3332,32 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 						}
 						checkCancel();
+						if (o instanceof WebComponent)
+						{
+							WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)o).getTypeName());
+							if (spec == null)
+							{
+								ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Web Component", ((WebComponent)o).getTypeName());
+								addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
+							}
+						}
+						if (o instanceof LayoutContainer)
+						{
+							WebLayoutSpecification spec = null;
+							PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+								((LayoutContainer)o).getPackageName());
+							if (pkg != null)
+							{
+								spec = pkg.getSpecification(((LayoutContainer)o).getSpecName());
+							}
+							if (spec == null)
+							{
+								ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Layout",
+									((LayoutContainer)o).getPackageName() + "-" + ((LayoutContainer)o).getSpecName());
+								addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
+							}
+						}
+						checkCancel();
 						if (o.getTypeID() == IRepository.SHAPES)
 						{
 							ServoyMarker mk = MarkerMessages.ObsoleteElement.fill(((Form)o.getAncestor(IRepository.FORMS)).getName());
@@ -3420,7 +3410,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								case IRepository.FIELDS :
 								case IRepository.LAYOUTCONTAINERS :
 								case IRepository.WEBCOMPONENTS :
-								case IRepository.FORMREFERENCE :
 									break;
 								default :
 									addBadStructureMarker(o, servoyProject, project);
@@ -3536,11 +3525,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								WebCustomType customType = (WebCustomType)o;
 								WebComponent parent = (WebComponent)customType.getAncestor(IRepository.WEBCOMPONENTS);
 								WebObjectSpecification parentSpec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parent.getTypeName());
-								PropertyDescription cpd = ((ICustomType< ? >)parentSpec.getDeclaredCustomObjectTypes().get(
-									customType.getTypeName())).getCustomJSONTypeDefinition();
-								if (cpd != null)
+								if (parentSpec != null)
 								{
-									dpProperties.addAll(cpd.getProperties().values());
+									PropertyDescription cpd = ((ICustomType< ? >)parentSpec.getDeclaredCustomObjectTypes().get(
+										customType.getTypeName())).getCustomJSONTypeDefinition();
+									if (cpd != null)
+									{
+										dpProperties.addAll(cpd.getProperties().values());
+									}
 								}
 							}
 
@@ -3897,37 +3889,39 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					{
 						IDataProvider dataProvider = null;
 						WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(component.getTypeName());
-
-						Collection<PropertyDescription> fsPD = spec.getProperties(FoundsetPropertyType.INSTANCE);
-						for (PropertyDescription pd : fsPD)
+						if (spec != null)
 						{
-							Object relatedFS = component.getProperty(pd.getName());
-							if (relatedFS instanceof JSONObject)
+							Collection<PropertyDescription> fsPD = spec.getProperties(FoundsetPropertyType.INSTANCE);
+							for (PropertyDescription pd : fsPD)
 							{
-								String fs = ((JSONObject)relatedFS).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
-								if ("".equals(fs)) //Form foundset
+								Object relatedFS = component.getProperty(pd.getName());
+								if (relatedFS instanceof JSONObject)
 								{
-									Form f = (Form)component.getAncestor(IRepository.FORMS);
-									fs = f.getDataSource();
-								}
-								if (fs.contains(".") || fs.contains(":"))
-								{
-									ITable table = persistFlattenedSolution.getTable(fs);
-									if (table != null)
+									String fs = ((JSONObject)relatedFS).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
+									if ("".equals(fs)) //Form foundset
 									{
-										dataProvider = table.getColumn(id);
+										Form f = (Form)component.getAncestor(IRepository.FORMS);
+										fs = f.getDataSource();
 									}
-								}
-								else
-								{
-									Relation r = persistFlattenedSolution.getRelation(fs);
-									if (r != null)
+									if (fs.contains(".") || fs.contains(":"))
 									{
-										dataProvider = getDataProvider(id, r.getPrimaryServerName(), r.getPrimaryTableName());
-										if (dataProvider == null) dataProvider = getDataProvider(id, r.getForeignServerName(), r.getForeignTableName());
+										ITable table = persistFlattenedSolution.getTable(fs);
+										if (table != null)
+										{
+											dataProvider = table.getColumn(id);
+										}
 									}
+									else
+									{
+										Relation r = persistFlattenedSolution.getRelation(fs);
+										if (r != null)
+										{
+											dataProvider = getDataProvider(id, r.getPrimaryServerName(), r.getPrimaryTableName());
+											if (dataProvider == null) dataProvider = getDataProvider(id, r.getForeignServerName(), r.getForeignTableName());
+										}
+									}
+									if (dataProvider != null) break;
 								}
-								if (dataProvider != null) break;
 							}
 						}
 						return dataProvider;

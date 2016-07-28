@@ -86,6 +86,10 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 		//these are always required
 		usedComponents.add("servoycore-errorbean");
 		usedComponents.add("servoycore-portal");
+		for (String name : WebServiceSpecProvider.getInstance().getServicesInPackage("servoyservices").getSpecifications().keySet())
+		{
+			usedServices.add(name);
+		}
 	}
 
 	private void findUsedComponents(ISupportChilds parent)

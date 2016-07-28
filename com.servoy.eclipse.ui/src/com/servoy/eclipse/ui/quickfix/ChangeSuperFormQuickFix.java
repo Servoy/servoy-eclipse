@@ -71,7 +71,7 @@ public class ChangeSuperFormQuickFix implements IMarkerResolution
 		TreeSelectDialog dlg = new TreeSelectDialog(shell, true, false, TreePatternFilter.FILTER_LEAFS, contentProvider,
 			new SolutionContextDelegateLabelProvider(new FormLabelProvider(flattenedSolution, true), flattenedSolution.getSolution()), null,
 			new LeafnodesSelectionFilter(contentProvider), SWT.SINGLE, "Select parent form",
-			new FormContentProvider.FormListOptions(FormContentProvider.FormListOptions.FormListType.HIERARCHY, null, true, false, false, false, null, true),
+			new FormContentProvider.FormListOptions(FormContentProvider.FormListOptions.FormListType.HIERARCHY, null, true, false, false, false, null),
 			StructuredSelection.EMPTY, true, null, null);
 
 		if (dlg.open() == Window.OK)

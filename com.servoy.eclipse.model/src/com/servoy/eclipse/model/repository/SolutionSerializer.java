@@ -55,7 +55,6 @@ import com.servoy.j2db.persistence.ArgumentType;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ContentSpec;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormReference;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDeveloperRepository;
@@ -647,7 +646,7 @@ public class SolutionSerializer
 		}
 
 		return p instanceof Relation || p instanceof TableNode || p instanceof Form || p instanceof TabPanel || p instanceof Portal ||
-			p instanceof LayoutContainer || p instanceof FormReference; // can only return true for objects containing SolutionSerializer.PROP_ITEMS
+			p instanceof LayoutContainer; // can only return true for objects containing SolutionSerializer.PROP_ITEMS
 	}
 
 	/**
@@ -667,7 +666,7 @@ public class SolutionSerializer
 		}
 
 		return p instanceof Solution || p instanceof Relation || p instanceof TableNode || p instanceof Form || p instanceof TabPanel || p instanceof Portal ||
-			p instanceof LayoutContainer || p instanceof FormReference;
+			p instanceof LayoutContainer;
 	}
 
 	public static boolean isCompositeItem(IPersist p)

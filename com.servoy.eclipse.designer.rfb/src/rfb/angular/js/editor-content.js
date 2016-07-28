@@ -171,7 +171,7 @@ angular.module('editorContent',['servoyApp'])
       }
     }
   };
-}).controller("DesignFormController", function($scope, $editorContentService, $rootScope, $element) {
+}).controller("DesignFormController", function($scope, $editorContentService, $rootScope, $element,$templateCache,$compile) {
   $rootScope.getDesignFormControllerScope = function() {
     return $scope;
   };
@@ -307,8 +307,11 @@ angular.module('editorContent',['servoyApp'])
     callServerSideApi: function(methodName, args) {
       return null;
     },
-	getFormState: function() {
-		return $scope;
+    getFormComponentElements: function(propertyName, templateUUID) {
+    	return $compile($templateCache.get(templateUUID))($scope);
+	},
+	isInDesigner: function() {
+		return true;
 	}
   }
   $scope.servoyApi = function(name) {
@@ -330,7 +333,7 @@ angular.module('editorContent',['servoyApp'])
     return ret;
   }
 }).factory("$editorContentService", function($rootScope, $applicationService, $sabloApplication, $sabloConstants,
-  $webSocket, $compile, $sabloConverters) {
+  $webSocket, $compile, $sabloConverters, $templateCache) {
   var formData = null;
   var layoutData = null;
 
@@ -421,12 +424,19 @@ angular.module('editorContent',['servoyApp'])
         	  formData.components[name] = $sabloConverters.convertFromServerToClient(compData, compData.conversions, undefined, $rootScope.getDesignFormControllerScope(), compModelGetter(name));
           }
         }
+        for (var template in formData.formcomponenttemplates) {
+        	$templateCache.put(template,formData.formcomponenttemplates[template] )
+        }
         if (formData.solutionProperties) {
           $applicationService.setStyleSheets(formData.solutionProperties.styleSheets);
         }
       }
       
       return formData;
+    },
+    updateStyleSheets : function(stylesheets)
+    {
+    	$applicationService.setStyleSheets(stylesheets);
     },
     setLayoutData: function(data) {
       layoutData = data;
@@ -485,6 +495,9 @@ angular.module('editorContent',['servoyApp'])
               compLayout.width = newCompData.size.width + "px";
               compLayout.height = newCompData.size.height + "px";
             }
+          }
+          for (var template in data.formcomponenttemplates) {
+        	  $templateCache.put(template,data.formcomponenttemplates[template] )
           }
           for (var index in data.deleted) {
             var toDelete = angular.element('[svy-id="' + data.deleted[index] + '"]');

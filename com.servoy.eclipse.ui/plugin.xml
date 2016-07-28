@@ -2,6 +2,7 @@
 <?eclipse version="3.2"?>
 <plugin>
    <extension-point id="com.servoy.eclipse.ui.exportSolutionProvider" name="Provide a solution export" schema="schema/exportSolutionProvider.exsd"/>
+   <extension-point id="com.servoy.eclipse.ui.importResponsivePackages" name="Import responsive packages" schema="schema/importResponsivePackages.exsd"/>
 	
    <extension
          point="org.eclipse.ui.views">
@@ -628,7 +629,11 @@
       	<markerResolutionGenerator
             class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.superformProblem">
-     	</markerResolutionGenerator>          
+     	</markerResolutionGenerator> 
+     	<markerResolutionGenerator
+            class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.core.missingSpec">
+      </markerResolutionGenerator>         
      </extension>
      <extension
            point="org.eclipse.ui.commands">

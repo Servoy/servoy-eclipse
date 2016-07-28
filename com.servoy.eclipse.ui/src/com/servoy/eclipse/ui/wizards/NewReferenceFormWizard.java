@@ -35,5 +35,6 @@ public class NewReferenceFormWizard extends NewFormWizard
 				return true;
 			}
 		});
+		setWindowTitle("New reference form");
 	}
 }

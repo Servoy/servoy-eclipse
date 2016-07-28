@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.j2db.util.Debug;
 
@@ -46,12 +47,19 @@ public class InstallWebPackageHandler implements IDeveloperService
 		JSONObject pck = msg.getJSONObject("package");
 		String selected = pck.optString("selected");
 		if (selected == null) return null;
+		importPackage(pck, selected);
+		return null;
+	}
+
+
+	public static void importPackage(JSONObject pck, String selectedVersion)
+	{
 		String urlString = null;
 		JSONArray jsonArray = pck.getJSONArray("releases");
 		for (int i = 0; i < jsonArray.length(); i++)
 		{
 			JSONObject release = jsonArray.optJSONObject(i);
-			if (release.optString("version", "").equals(selected))
+			if (selectedVersion == null || selectedVersion.equals(release.optString("version", "")))
 			{
 				urlString = release.optString("url");
 				break;
@@ -63,7 +71,11 @@ public class InstallWebPackageHandler implements IDeveloperService
 			URLConnection conn = url.openConnection();
 			InputStream in = conn.getInputStream();
 			String packageName = pck.getString("name");
-			String solutionName = pck.getString("activeSolution");
+			String solutionName = pck.optString("activeSolution", null);
+			if (solutionName == null)
+			{
+				solutionName = ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
+			}
 			IFolder componentsFolder = RemoveWebPackageHandler.checkPackagesFolderCreated(solutionName, SolutionSerializer.NG_PACKAGES_DIR_NAME);
 
 			importZipFileComponent(componentsFolder, in, packageName);
@@ -73,11 +85,9 @@ public class InstallWebPackageHandler implements IDeveloperService
 		{
 			Debug.log(e);
 		}
-		return null;
 	}
 
-
-	private void importZipFileComponent(IFolder componentsFolder, InputStream in, String name)
+	private static void importZipFileComponent(IFolder componentsFolder, InputStream in, String name)
 	{
 		IFile eclipseFile = componentsFolder.getFile(name + ".zip");
 

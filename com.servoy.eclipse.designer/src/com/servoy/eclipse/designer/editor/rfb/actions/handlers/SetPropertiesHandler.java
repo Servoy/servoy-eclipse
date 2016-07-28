@@ -70,59 +70,63 @@ public class SetPropertiesHandler implements IServerService
 				while (keys.hasNext())
 				{
 					String uuid = (String)keys.next();
-					final IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart, uuid);
-					PersistContext context = PersistContext.create(persist, editorPart.getForm());
-					if (persist instanceof IFormElement || persist instanceof Tab || persist instanceof WebCustomType)
+					IPersist persist = PersistFinder.INSTANCE.searchForPersist(editorPart, uuid);
+					if (persist != null)
 					{
-						JSONObject properties = args.optJSONObject(uuid);
-						Iterator it = properties.keys();
-						while (it.hasNext())
+						PersistContext context = PersistContext.create(persist, editorPart.getForm());
+						if (persist instanceof IFormElement || persist instanceof Tab || persist instanceof WebCustomType ||
+							persist instanceof WebFormComponentChildType)
 						{
-							String propertyName = (String)it.next();
-							if (!Arrays.asList("x", "y", "width", "height").contains(propertyName))
+							JSONObject properties = args.optJSONObject(uuid);
+							Iterator it = properties.keys();
+							while (it.hasNext())
 							{
-								cc.add(new SetPropertyCommand("propertyName", PersistPropertySource.createPersistPropertySource(context, false), propertyName,
-									properties.opt(propertyName)));
+								String propertyName = (String)it.next();
+								if (!Arrays.asList("x", "y", "width", "height").contains(propertyName))
+								{
+									cc.add(new SetPropertyCommand("propertyName", PersistPropertySource.createPersistPropertySource(context, false),
+										propertyName, properties.opt(propertyName)));
+								}
 							}
-						}
-						if (properties.has("x") && properties.has("y"))
-						{
-							if (persist instanceof WebCustomType)
+							if (properties.has("x") && properties.has("y"))
 							{
-								cc.add(new MoveCustomTypeCommand((WebCustomType)persist, new Point(properties.optInt("x"), properties.optInt("y"))));
-							}
-							else
-							{
-								cc.add(new SetPropertyCommand("move", PersistPropertySource.createPersistPropertySource(context, false),
-									StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(), new Point(properties.optInt("x"), properties.optInt("y"))));
-							}
+								if (persist instanceof WebCustomType)
+								{
+									cc.add(new MoveCustomTypeCommand((WebCustomType)persist, new Point(properties.optInt("x"), properties.optInt("y"))));
+								}
+								else
+								{
+									cc.add(new SetPropertyCommand("move", PersistPropertySource.createPersistPropertySource(context, false),
+										StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName(),
+										new Point(properties.optInt("x"), properties.optInt("y"))));
+								}
 
+							}
+							if (properties.has("width") && properties.has("height"))
+							{
+								cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(context, false),
+									StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(),
+									new Dimension(properties.optInt("width"), properties.optInt("height"))));
+							}
 						}
-						if (properties.has("width") && properties.has("height"))
+						else if (persist instanceof Part)
 						{
-							cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(context, false),
-								StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName(),
-								new Dimension(properties.optInt("width"), properties.optInt("height"))));
+							JSONObject properties = args.optJSONObject(uuid);
+							if (properties.has("y"))
+							{
+								cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(context, false),
+									StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), new Integer(properties.optInt("y"))));
+							}
 						}
-					}
-					else if (persist instanceof Part)
-					{
-						JSONObject properties = args.optJSONObject(uuid);
-						if (properties.has("y"))
+						else if (persist instanceof Form)
 						{
-							cc.add(new SetPropertyCommand("resize", PersistPropertySource.createPersistPropertySource(context, false),
-								StaticContentSpecLoader.PROPERTY_HEIGHT.getPropertyName(), new Integer(properties.optInt("y"))));
+							JSONObject properties = args.optJSONObject(uuid);
+							if (properties.has("width"))
+							{
+								cc.add(new SetPropertyCommand("formwidth", PersistPropertySource.createPersistPropertySource(context, false),
+									StaticContentSpecLoader.PROPERTY_WIDTH.getPropertyName(), new Integer(properties.optInt("width"))));
+							}
 						}
-					}
-					else if (persist instanceof Form)
-					{
-						JSONObject properties = args.optJSONObject(uuid);
-						if (properties.has("width"))
-						{
-							cc.add(new SetPropertyCommand("formwidth", PersistPropertySource.createPersistPropertySource(context, false),
-								StaticContentSpecLoader.PROPERTY_WIDTH.getPropertyName(), new Integer(properties.optInt("width"))));
-						}
-
 					}
 				}
 				if (!cc.isEmpty()) editorPart.getCommandStack().execute(cc);

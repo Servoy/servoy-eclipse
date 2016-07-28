@@ -29,7 +29,6 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	SELECTION_CHANGED: "SELECTION_CHANGED",
 	SELECTION_MOVED: "SELECTION_MOVED",
 	INITIALIZED: "INITIALIZED",
-	RELOAD_PALETTE: "RELOAD_PALETTE",
 	RENDER_DECORATORS: "RENDER_DECORATORS",
 	HIDE_DECORATORS: "HIDE_DECORATORS"
 }).value("EDITOR_CONSTANTS", {
@@ -1267,10 +1266,6 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				"svyId": svyId,
 				"propertyName": propertyName
 			}, false);
-		},
-
-		reloadPalette: function() {
-			$rootScope.$emit(EDITOR_EVENTS.RELOAD_PALETTE, "")
 		},
 
 		getShortcuts: function() {

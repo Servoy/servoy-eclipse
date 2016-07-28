@@ -35,6 +35,7 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -55,6 +56,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.FixedSelectAllAction;
 import com.servoy.eclipse.designer.editor.rfb.actions.PasteAction;
 import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.DefaultFieldPositioner;
@@ -62,11 +64,10 @@ import com.servoy.eclipse.ui.util.SelectionProviderAdapter;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.FormReference;
-import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.Utils;
@@ -77,7 +78,7 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  *
  */
-public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage
+public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage implements ILoadedNGPackagesListener
 {
 	// for setting selection when clicked in editor
 	private final ISelectionProvider selectionProvider = new SelectionProviderAdapter()
@@ -121,9 +122,6 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	// for updating selection in editor when selection changes in IDE
 	private RfbSelectionListener selectionListener;
 
-	// for reloading palette when components change
-	private final RfbWebResourceListener resourceChangedListener = new RfbWebResourceListener();
-
 	private Browser browser;
 
 	private EditorWebsocketSession editorWebsocketSession;
@@ -161,7 +159,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		getSite().setSelectionProvider(selectionProvider);
 		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(selectionListener);
 		editorWebsocketSession.registerServerService("formeditor", new EditorServiceHandler(editorPart, selectionProvider, selectionListener, fieldPositioner));
-		resourceChangedListener.setEditorWebsocketSession(editorWebsocketSession);
+		ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(this);
 		try
 		{
 			browser = new Browser(parent, SWT.NONE);
@@ -271,6 +269,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		getSite().setSelectionProvider(null);
 		WebsocketSessionManager.removeSession(editorWebsocketSession.getUuid());
 		WebsocketSessionManager.removeSession(designerWebsocketSession.getUuid());
+		ServoyModelFinder.getServoyModel().getNGPackageManager().removeLoadedNGPackagesListener(this);
 	}
 
 //	protected IWebsocketSession getContentWebsocketSession()
@@ -331,6 +330,17 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			final Form form = editorPart.getForm();
 			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(form);
 			final String componentsJSON = designerWebsocketSession.getComponentsJSON(fs, filterByParent(persists, form));
+			List<String> styleSheets = PersistHelper.getOrderedStyleSheets(fs);
+			String[] newStylesheets = null;
+			for (IPersist persist : persists)
+			{
+				if (persist instanceof Media && styleSheets.contains(((Media)persist).getName()))
+				{
+					newStylesheets = designerWebsocketSession.getSolutionStyleSheets(fs);
+					break;
+				}
+			}
+			final String[] newStylesheetsFinal = newStylesheets;
 			CurrentWindow.runForWindow(new WebsocketSessionWindows(designerWebsocketSession), new Runnable()
 			{
 				@Override
@@ -340,6 +350,11 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 						new Object[] { componentsJSON });
 					if (persists.contains(form)) designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateForm",
 						new Object[] { form.getUUID(), form.getSize().width, form.getSize().height });
+					if (newStylesheetsFinal != null)
+					{
+						designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateStyleSheets",
+							new Object[] { newStylesheetsFinal });
+					}
 					designerWebsocketSession.valueChanged();
 				}
 			});
@@ -360,31 +375,9 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			for (IPersist persist : persists)
 			{
 				IPersist ancestor = persist.getAncestor(IRepository.FORMS);
-				if (ancestor != null)
+				if (ancestor != null && ancestor.getUUID().equals(form.getUUID()))
 				{
-					boolean isPartOfForm = ancestor.getUUID().equals(form.getUUID());
-					if (!isPartOfForm && persist.getParent().getChild(persist.getUUID()) != null)
-					{
-						for (FormReference formRef : PersistHelper.getAllFormReferences(
-							ServoyModelFinder.getServoyModel().getFlattenedSolution().getFlattenedForm(form)))
-						{
-							if (formRef.getContainsFormID() == ancestor.getID())
-							{
-								for (IFormElement formElement : formRef.getFlattenedObjects(FlattenedForm.FORM_INDEX_WITH_HIERARCHY_COMPARATOR))
-								{
-									if (PersistHelper.getOverrideHierarchy(formElement).indexOf(persist) != -1)
-									{
-										filtered.add(formElement);
-									}
-								}
-							}
-						}
-					}
-					else
-					{
-						filtered.add(persist);
-					}
-
+					filtered.add(persist);
 				}
 			}
 			// if there are other persist left, check if they are in the hierarchy
@@ -476,6 +469,19 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	protected SelectAllAction createSelectAllAction()
 	{
 		return new FixedSelectAllAction(editorPart, selectionProvider);
+	}
+
+	@Override
+	public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
+	{
+		if (!loadedPackagesAreTheSameAlthoughReferencingModulesChanged) Display.getDefault().asyncExec(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
+			}
+		});
 	}
 
 }

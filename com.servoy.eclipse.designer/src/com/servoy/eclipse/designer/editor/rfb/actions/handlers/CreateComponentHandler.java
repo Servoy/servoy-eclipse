@@ -68,7 +68,6 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.FormElementGroup;
-import com.servoy.j2db.persistence.FormReference;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IChildWebObject;
@@ -493,12 +492,6 @@ public class CreateComponentHandler implements IServerService
 					shape.setSize(new Dimension(w, h));
 					return new IPersist[] { shape };
 				}
-				else if ("servoydefault-formreference".equals(name))
-				{
-					FormReference formReference = parentSupportingElements.createNewFormReference(new Point(x, y));
-					formReference.setSize(new Dimension(w, h));
-					return new IPersist[] { formReference };
-				}
 				else
 				{
 					if ("*".equals(name) || "component".equals(name))
@@ -568,31 +561,20 @@ public class CreateComponentHandler implements IServerService
 								WebLayoutSpecification layoutSpec = specifications.getSpecification(name);
 								if (layoutSpec != null)
 								{
-									if (layoutSpec.getName().equals("formreference"))
+									Iterator<IPersist> childContainersIte = parentSupportingElements.getObjects(IRepositoryConstants.LAYOUTCONTAINERS);
+									LayoutContainer sameTypeChildContainer = null;
+									while (childContainersIte.hasNext())
 									{
-										FormReference formReference = (FormReference)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(
-											parentSupportingElements, IRepository.FORMREFERENCE);
-										parentSupportingElements.addChild(formReference);
-										formReference.setLocation(new Point(x, x));
-										return new IPersist[] { formReference };
-									}
-									else
-									{
-										Iterator<IPersist> childContainersIte = parentSupportingElements.getObjects(IRepositoryConstants.LAYOUTCONTAINERS);
-										LayoutContainer sameTypeChildContainer = null;
-										while (childContainersIte.hasNext())
+										LayoutContainer childContainer = (LayoutContainer)childContainersIte.next();
+										if (layoutSpec.getName().equals(childContainer.getSpecName()))
 										{
-											LayoutContainer childContainer = (LayoutContainer)childContainersIte.next();
-											if (layoutSpec.getName().equals(childContainer.getSpecName()))
-											{
-												sameTypeChildContainer = childContainer;
-											}
+											sameTypeChildContainer = childContainer;
 										}
-
-										JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
-										return new IPersist[] { createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, x,
-											specifications, args.optString("packageName")) };
 									}
+
+									JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
+									return new IPersist[] { createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, x,
+										specifications, args.optString("packageName")) };
 								}
 							}
 							else

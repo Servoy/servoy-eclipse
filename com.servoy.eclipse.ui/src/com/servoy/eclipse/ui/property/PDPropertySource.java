@@ -223,9 +223,8 @@ public class PDPropertySource extends PersistPropertySource
 			{
 				config.addDefault(desc.getDefaultValue(), null);
 			}
-			createdPropertyHandler = createWebComponentPropertyHandler(
-					new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config, desc.getDefaultValue(), desc.hasDefault(), null, null, null, false),
-					persistContext);
+			createdPropertyHandler = createWebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config,
+				desc.getDefaultValue(), desc.hasDefault(), null, null, null, false), persistContext);
 		}
 		else
 		{
@@ -246,7 +245,12 @@ public class PDPropertySource extends PersistPropertySource
 	@Override
 	public String toString()
 	{
-		return propertyDescription.getName();
+		String name = propertyDescription.getName();
+		if ("".equals(name) || name == null)
+		{
+			name = persistContext.getPersist().toString();
+		}
+		return name;
 	}
 
 }

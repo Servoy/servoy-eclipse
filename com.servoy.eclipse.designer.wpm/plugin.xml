@@ -73,5 +73,13 @@
             type="com.servoy.eclipse.ui.node.SimpleUserNode">
       </propertyTester>
    </extension>
+   <extension
+         point="com.servoy.eclipse.ui.importResponsivePackages">
+          <provider
+            class="com.servoy.eclipse.designer.webpackage.InstallDefaultResponsivePackages"
+            id="com.servoy.eclipse.designer.webpackage.importResponsivePackages"
+            name="Import default responsive packages">
+      </provider>
+   </extension>
 
 </plugin>

@@ -324,7 +324,6 @@ public class MarkerMessages
 		"Form \"{0}\" is a reference form and it is not allowed to have script variables or methods defined (\"{1}\").",
 		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 
-	public static ServoyMarker FormReferenceCycle = new ServoyMarker("A form reference cycle was detected, path {0}", ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 	/**
 	 * This means that when using form inheritance a cycle was introduced in the dependency relation of some forms. This is not allowed.
 	 */
@@ -655,4 +654,9 @@ public class MarkerMessages
 	 */
 	public static ServoyMarker ElementExtendsDeletedElement = new ServoyMarker("Element in form \"{0}\" extends a deleted element from the parent form.", //$NON-NLS-1$
 		ServoyBuilder.ELEMENT_EXTENDS_DELETED_ELEMENT_TYPE);
+
+	/**
+	 * The roll over imageand cursor is not working in Smart Client tableview/listview form.
+	 */
+	public static ServoyMarker MissingSpecification = new ServoyMarker("{0} specification is missing: \"{1}\"", ServoyBuilder.MISSING_SPEC);
 }

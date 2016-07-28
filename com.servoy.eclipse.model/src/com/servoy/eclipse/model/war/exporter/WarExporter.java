@@ -245,7 +245,7 @@ public class WarExporter
 
 			//generate servoy-components.js
 			File componentsFile = new File(tmpWarDir, "js/servoy-components.js");
-			StringBuilder sb = ComponentsModuleGenerator.generateComponentsModule();
+			StringBuilder sb = ComponentsModuleGenerator.generateComponentsModule(exportModel.getExportedServices(), exportModel.getExportedComponents());
 			FileUtils.copyInputStreamToFile(new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8)), componentsFile);
 
 			//generate wro.xml
@@ -317,7 +317,14 @@ public class WarExporter
 		attr.setValue("http://www.isdc.ro/wro");
 		rootElement.setAttributeNode(attr);
 
-		Object[] allContributions = IndexPageEnhancer.getAllContributions(Boolean.TRUE);
+		Set<String> exportedWebObjects = null;
+		if (exportModel.getExportedComponents() != null || exportModel.getExportedServices() != null)
+		{
+			exportedWebObjects = new HashSet<>();
+			if (exportModel.getExportedComponents() != null) exportedWebObjects.addAll(exportModel.getExportedComponents());
+			if (exportModel.getExportedServices() != null) exportedWebObjects.addAll(exportModel.getExportedServices());
+		}
+		Object[] allContributions = IndexPageEnhancer.getAllContributions(exportedWebObjects, Boolean.TRUE);
 		Element group = doc.createElement("group");
 		rootElement.appendChild(group);
 		attr = doc.createAttribute("name");
@@ -366,6 +373,7 @@ public class WarExporter
 
 		@SuppressWarnings("unchecked")
 		Collection<String> cssContributions = (Collection<String>)allContributions[0];
+		cssContributions.add(NGClientEntryFilter.SERVOY_CSS);
 		if (cssContributions != null)
 		{
 			group = doc.createElement("group");
@@ -385,6 +393,16 @@ public class WarExporter
 		StreamResult result = new StreamResult(wroFile);
 		transformer.transform(source, result);
 		return wroFile;
+	}
+
+	private static Set<String> getAllNames(WebObjectSpecification[] allWebSpecifications)
+	{
+		Set<String> names = new HashSet<>();
+		for (WebObjectSpecification webSpec : allWebSpecifications)
+		{
+			names.add(webSpec.getName());
+		}
+		return names;
 	}
 
 	private void addGroupElement(Document doc, Element group, File tmpWarDir, String relativePath, String suffix)

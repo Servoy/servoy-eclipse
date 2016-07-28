@@ -17,12 +17,3 @@
 	opacity: 0.3;
 	border: 2px dashed;
 }
-
-.form_reference {
-	outline: 1px dotted red;
-}
-
-.form_reference_element {
-	outline: 1px dotted red;
-	cursor: not-allowed;
-}

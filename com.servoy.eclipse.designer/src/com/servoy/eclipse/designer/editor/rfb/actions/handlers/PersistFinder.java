@@ -18,12 +18,12 @@
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
 import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -40,70 +40,34 @@ public class PersistFinder
 	}
 
 	public static PersistFinder INSTANCE;
-	private final AtomicInteger id = new AtomicInteger();
 
 	private PersistFinder()
 	{
 	}
 
-	public IPersist searchForPersist(BaseVisualFormEditor editorPart, String uuid)
+	public IPersist searchForPersist(BaseVisualFormEditor editorPart, String fullUUID)
 	{
-		if (uuid == null) return null;
-//		if (!uuid.contains("_"))
-//		{
-		return ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(uuid));
-//		}
-//		else
-//		{
-//			// THIS 'else' code is only for deprecated usage of WebComponents represented as Bean persist (instead of new WebComponent persist)
-//			// developer will not generate this type of persist now - it is just for solutions already built on 8.0 alphas and some of the betas
-//			// that relied on Bean.getBeanXML to store the WebComponent's design json
-
-//          // this will not work unless WebCustomType equals and getUUIDAsString are re-instated as well I think
-//
-//			String searchFor = uuid;
-//			String[] split = searchFor.split("_");
-//			if (split.length != 3) return null;
-//			String parentUUID = split[0];
-//			String fieldName = split[1];
-//			String typeName = split[2];
-//			int index = -1;
-//			IWebComponent parentBean = (IWebComponent)ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(parentUUID));
-//
-//			if (fieldName.indexOf('.') > 0)
-//			{
-//				index = extractIndex(fieldName);
-//				fieldName = fieldName.substring(0, fieldName.indexOf('.'));
-//			}
-//
-//			// only Bean instances should produce this kind of uuids
-////			if (parentBean instanceof Bean)
-////			{
-//			Bean bean = (Bean)parentBean;
-//			PropertyDescription pd = bean.getPropertyDescription().getProperty(fieldName);
-//			if (index != -1) pd = ((CustomJSONPropertyType< ? >)pd.getType()).getCustomJSONTypeDefinition(); // element type of array
-//			WebCustomType customType = new WebCustomType(bean, pd, fieldName, index, false); // because we create a new persist here editing it will not work; at this time a warning message is already printed in the developer log that the bean should be re-added to form for that (to be created as WebComponent persist instead)
-//			String customPropName = "customProp_" + id.incrementAndGet();
-//			while (!checkName(editorPart, customPropName))
-//			{
-//				customPropName = "customProp_" + id.incrementAndGet();
-//			}
-//			customType.setName(customPropName);
-//			customType.setTypeName(typeName);
-//			return customType;
-////			}
-//		}
-	}
-
-	private int extractIndex(String dropTargetFieldName)
-	{
-		int index = -1;
-		if (dropTargetFieldName.indexOf('.') > 0)
+		if (fullUUID == null) return null;
+		String uuid = fullUUID;
+		int index = uuid.indexOf('$');
+		if (index > 1)
 		{
-			index = Integer.parseInt(dropTargetFieldName.substring(dropTargetFieldName.indexOf('.') + 1, dropTargetFieldName.length()));
+			// this is a form component selection
+			int start = 0;
+			if (uuid.startsWith("_")) start = 1;
+			uuid = uuid.substring(start, index).replace('_', '-');
 		}
-		return index;
+		IPersist searchPersist = ModelUtils.getEditingFlattenedSolution(editorPart.getForm()).searchPersist(UUID.fromString(uuid));
+		if (index > 1)
+		{
+			searchPersist = new WebFormComponentChildType((WebComponent)searchPersist, fullUUID.substring(index + 1).replace('$', '.'),
+				ModelUtils.getEditingFlattenedSolution(editorPart.getForm()));
+		}
+
+		return searchPersist;
+
 	}
+
 
 	public boolean checkName(BaseVisualFormEditor editorPart, String compName)
 	{
