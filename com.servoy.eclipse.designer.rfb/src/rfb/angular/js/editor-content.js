@@ -171,7 +171,7 @@ angular.module('editorContent',['servoyApp'])
       }
     }
   };
-}).controller("DesignFormController", function($scope, $editorContentService, $rootScope, $element,$formcomponentCache) {
+}).controller("DesignFormController", function($scope, $editorContentService, $rootScope, $element,$templateCache,$compile) {
   $rootScope.getDesignFormControllerScope = function() {
     return $scope;
   };
@@ -308,7 +308,7 @@ angular.module('editorContent',['servoyApp'])
       return null;
     },
     getFormComponentElements: function(propertyName, templateUUID) {
-    	return $formcomponentCache.get(templateUUID)($scope);
+    	return $compile($templateCache.get(templateUUID))($scope);
 	},
 	isInDesigner: function() {
 		return true;
@@ -333,7 +333,7 @@ angular.module('editorContent',['servoyApp'])
     return ret;
   }
 }).factory("$editorContentService", function($rootScope, $applicationService, $sabloApplication, $sabloConstants,
-  $webSocket, $compile, $sabloConverters, $formcomponentCache) {
+  $webSocket, $compile, $sabloConverters, $templateCache) {
   var formData = null;
   var layoutData = null;
 
@@ -425,7 +425,7 @@ angular.module('editorContent',['servoyApp'])
           }
         }
         for (var template in formData.formcomponenttemplates) {
-        	$formcomponentCache.put(template,formData.formcomponenttemplates[template] )
+        	$templateCache.put(template,formData.formcomponenttemplates[template] )
         }
         if (formData.solutionProperties) {
           $applicationService.setStyleSheets(formData.solutionProperties.styleSheets);
@@ -493,7 +493,7 @@ angular.module('editorContent',['servoyApp'])
             }
           }
           for (var template in data.formcomponenttemplates) {
-        	  $formcomponentCache.put(template,data.formcomponenttemplates[template] )
+        	  $templateCache.put(template,data.formcomponenttemplates[template] )
           }
           for (var index in data.deleted) {
             var toDelete = angular.element('[svy-id="' + data.deleted[index] + '"]');
@@ -592,17 +592,4 @@ angular.module('editorContent',['servoyApp'])
     showLoading: function() {},
     hideLoading: function() {}
   }
-})
-.factory('$formcomponentCache',['$compile',function($compile){
-	var cache = {};
-	return {
-		get: function(key) {
-			return cache[key];
-		},
-		put: function(key, value) {
-			if(!cache[key]) {
-				cache[key] = $compile(value);
-			}
-		}
-	}
-}]);
+});
