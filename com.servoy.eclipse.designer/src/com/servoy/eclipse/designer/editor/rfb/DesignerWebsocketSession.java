@@ -386,6 +386,11 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			}
 			else if (persist instanceof LayoutContainer)
 			{
+				IPersist superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)persist);
+				if (superPersist instanceof LayoutContainer)
+				{
+					deletedLayoutContainers.add((LayoutContainer)superPersist);
+				}
 				if (persist.getParent().getChild(persist.getUUID()) != null)
 				{
 					containers.add((LayoutContainer)persist);

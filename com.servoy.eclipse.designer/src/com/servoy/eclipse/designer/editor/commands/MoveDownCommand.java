@@ -36,14 +36,13 @@ public class MoveDownCommand extends MoveCommand
 					if (selectedPersistIdx + 1 < sortedChildren.size())
 					{
 						editorPart.getCommandStack().execute(
-							new ChangeParentCommand(singleSelection, singleSelection.getParent(), sortedChildren.get(selectedPersistIdx + 1), true));
+							new ChangeParentCommand(singleSelection, null, sortedChildren.get(selectedPersistIdx + 1), editorPart.getForm(), true));
 					}
 				}
 			}
 		}
 		return null;
 	}
-
 
 	/*
 	 * (non-Javadoc)

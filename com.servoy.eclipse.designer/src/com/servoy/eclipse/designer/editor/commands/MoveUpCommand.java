@@ -37,7 +37,7 @@ public class MoveUpCommand extends MoveCommand
 					if (selectedPersistIdx > 0)
 					{
 						editorPart.getCommandStack().execute(
-							new ChangeParentCommand(singleSelection, singleSelection.getParent(), sortedChildren.get(selectedPersistIdx - 1), false));
+							new ChangeParentCommand(singleSelection, null, sortedChildren.get(selectedPersistIdx - 1), editorPart.getForm(), false));
 					}
 				}
 			}
