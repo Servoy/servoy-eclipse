@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -143,6 +144,7 @@ import com.servoy.j2db.documentation.ServoyDocumented;
 import com.servoy.j2db.documentation.scripting.docs.FormElements;
 import com.servoy.j2db.documentation.scripting.docs.Forms;
 import com.servoy.j2db.documentation.scripting.docs.Globals;
+import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AggregateVariable;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Column;
@@ -163,6 +165,7 @@ import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Portal;
+import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -217,6 +220,7 @@ import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ServoyStringPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
@@ -363,7 +367,7 @@ public class TypeCreator extends TypeCache
 	 */
 	private final ConcurrentMap<String, Class< ? >> classTypes = new ConcurrentHashMap<String, Class< ? >>();
 	private final ConcurrentMap<String, Class< ? >> anonymousClassTypes = new ConcurrentHashMap<String, Class< ? >>();
-	private final ConcurrentMap<String, String> wcTypeNames = new ConcurrentHashMap<String, String>();
+	private final ConcurrentMap<String, WebObjectSpecification> wcTypeNames = new ConcurrentHashMap<String, WebObjectSpecification>();
 	private final ConcurrentMap<String, WebObjectSpecification> wcServices = new ConcurrentHashMap<String, WebObjectSpecification>();
 
 
@@ -430,6 +434,7 @@ public class TypeCreator extends TypeCache
 		addScopeType("InvisibleDataproviders", new InvisibleDataprovidersScopeCreator());
 		addScopeType("Scopes", new ScopesScopeCreator());
 		addScopeType("Scope", new ScopeScopeCreator());
+		addScopeType("FormComponentType", new FormComponentTypeCreator());
 		addScopeType(QBAggregate.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBColumn.class.getSimpleName(), new QueryBuilderCreator());
 		addScopeType(QBCondition.class.getSimpleName(), new QueryBuilderCreator());
@@ -1043,13 +1048,10 @@ public class TypeCreator extends TypeCache
 		{
 			return createType(context, fullTypeName, cls);
 		}
-		if (wcTypeNames.get(typeNameClassName) != null)
+		WebObjectSpecification spec = wcTypeNames.get(typeNameClassName);
+		if (spec != null)
 		{
-			WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(typeNameClassName);
-			if (spec != null)
-			{
-				return createWebComponentType(context, fullTypeName, spec);
-			}
+			return createWebComponentType(context, fullTypeName, spec);
 		}
 		WebObjectSpecification webComponentSpecification = wcServices.get(typeNameClassName);
 		if (webComponentSpecification != null)
@@ -1067,11 +1069,25 @@ public class TypeCreator extends TypeCache
 	 */
 	private Type createWebComponentType(String context, String fullTypeName, WebObjectSpecification spec)
 	{
+		String bucket = "WEB:COMPONENTS";
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
 		type.setName(fullTypeName);
 		type.setKind(TypeKind.JAVA);
 		EList<Member> members = type.getMembers();
 		Map<String, PropertyDescription> properties = spec.getProperties();
+		int index = fullTypeName.indexOf('<');
+		Map<String, String> configProperties = new HashMap<String, String>();
+		if (index != -1)
+		{
+			String part = fullTypeName.substring(index + 1, fullTypeName.length() - 1);
+			String[] props = part.split(",");
+			for (String prop : props)
+			{
+				String[] propAndValue = prop.split(":");
+				configProperties.put(propAndValue[0], propAndValue[1]);
+			}
+
+		}
 		for (PropertyDescription pd : properties.values())
 		{
 			if (WebFormComponent.isDesignOnlyProperty(pd) || WebFormComponent.isPrivateProperty(pd))
@@ -1085,6 +1101,11 @@ public class TypeCreator extends TypeCache
 			if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && !(pd.getType() instanceof DataproviderPropertyType))
 			{
 				JSType memberType = getType(context, pd);
+				if (pd.getType() == FormComponentPropertyType.INSTANCE)
+				{
+					memberType = getTypeRef(context, "FormComponentType<" + configProperties.get(pd.getName()) + ">");
+					bucket = context;
+				}
 				if (memberType == null) memberType = getTypeRef(null, pd.getType().getName());
 				if (pd.getType() instanceof CustomJSONArrayType< ? , ? >)
 				{
@@ -1143,7 +1164,7 @@ public class TypeCreator extends TypeCache
 				"</br></br><b>@return</b> The name of the form.");
 			members.add(method);
 		}
-		return addType("WEB:COMPONENTS", type);
+		return addType(bucket, type);
 	}
 
 	/**
@@ -3601,6 +3622,41 @@ public class TypeCreator extends TypeCache
 		}
 	}
 
+	public class FormComponentTypeCreator implements IScopeTypeCreator
+	{
+		@Override
+		public Type createType(String context, String fullTypeName)
+		{
+			Type type = TypeInfoModelFactory.eINSTANCE.createType();
+			type.setName(fullTypeName);
+			type.setKind(TypeKind.JAVA);
+			FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
+			String formName = fullTypeName.substring(fullTypeName.indexOf('<') + 1, fullTypeName.length() - 1);
+			Form form = fs.getForm(formName);
+			if (form != null)
+			{
+				List<IFormElement> formelements = form.getFlattenedObjects(PositionComparator.XY_PERSIST_COMPARATOR);
+				ElementsScopeCreator elementScopeCreator = (ElementsScopeCreator)scopeTypes.get("Elements");
+				IApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
+				EList<Member> members = type.getMembers();
+				elementScopeCreator.createFormElementProperties(context, application, members, formelements);
+			}
+			return type;
+		}
+
+		@Override
+		public ClientSupport getClientSupport()
+		{
+			return ClientSupport.ng;
+		}
+
+		@Override
+		public void flush()
+		{
+		}
+	}
+
+
 	/**
 	 * Parse the config for a type. Possible combinations:
 	 *
@@ -3836,8 +3892,31 @@ public class TypeCreator extends TypeCache
 					SimpleType elementType = null;
 					if (FormTemplateGenerator.isWebcomponentBean(formElement))
 					{
-						String typeName = FormTemplateGenerator.getComponentTypeName(formElement);
-						wcTypeNames.put(typeName, typeName);
+						WebObjectSpecification spec = FormTemplateGenerator.getWebObjectSpecification(formElement);
+						String typeName = spec.getName();
+						wcTypeNames.put(typeName, spec);
+						Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
+						if (properties.size() > 0)
+						{
+							FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
+							AbstractBase element = (AbstractBase)formElement;
+							StringBuilder sb = new StringBuilder(spec.getName());
+							sb.append('<');
+							for (PropertyDescription pd : properties)
+							{
+								sb.append(pd.getName());
+								Object propValue = element.getProperty(pd.getName());
+								Form form = FormComponentPropertyType.INSTANCE.getForm(propValue, fs);
+								if (form != null)
+								{
+									sb.append(':');
+									sb.append(form.getName());
+								}
+								sb.append(',');
+							}
+							sb.append('>');
+							typeName = sb.toString();
+						}
 						elementType = getTypeRef(context, typeName);
 					}
 					else
