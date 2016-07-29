@@ -455,7 +455,7 @@ angular.module('editorContent',['servoyApp'])
           if(data.updatedFormComponentsDesignId) {
         	  for (var index in data.updatedFormComponentsDesignId) {
                   for (var name in formData.components) {
-                	  if(name.lastIndexOf(data.updatedFormComponentsDesignId[index] + '$', 0) === 0) {
+                	  if((name.lastIndexOf(data.updatedFormComponentsDesignId[index] + '$', 0) === 0) && (data.formComponentsComponents.indexOf(name) == -1) ) {
                 		  toDeleteA.push(name);
                 	  }
                   }  
@@ -473,12 +473,24 @@ angular.module('editorContent',['servoyApp'])
           }          
           
           for (var name in data.components) {
+        	var forceUpdate = false;
             var compData = formData.components[name];
             var newCompData = data.components[name];
             if (newCompData.conversions) {
               newCompData = $sabloConverters.convertFromServerToClient(newCompData, newCompData.conversions, compData, $rootScope.getDesignFormControllerScope(), compModelGetter(name))
             }
             if (compData) {
+            	
+              if(data.updatedFormComponentsDesignId) {
+            	  var fixedName = name.replace(/-/g, "_");
+            	  if(!isNaN(fixedName[0])) {
+            		  fixedName = "_" + fixedName;
+            	  }
+            	  if((data.updatedFormComponentsDesignId.indexOf(fixedName)) != -1 && (compData.containedForm != newCompData.containedForm)) {
+            		  forceUpdate = true;
+            	  }
+              }
+            	
               var modifyFunction = compData[$sabloConstants.modelChangeNotifier];
               var key;
               for (key in compData) {
@@ -496,8 +508,7 @@ angular.module('editorContent',['servoyApp'])
               formData.components[name] = newCompData;
             }
 
-            var forceUpdate = false;
-            if (data.refreshTemplate)
+            if (!forceUpdate && data.refreshTemplate)
             {
             	for (var index in data.refreshTemplate) 
             	{
@@ -508,16 +519,8 @@ angular.module('editorContent',['servoyApp'])
             		}	
             	}
             }
-            
-            if(!forceUpdate && data.updatedFormComponentsDesignId) {
-            	var fixedName = name.replace(/-/g, "_");
-            	if(!isNaN(fixedName[0])) {
-            		fixedName = "_" + fixedName;
-            	}
-            	forceUpdate = data.updatedFormComponentsDesignId.indexOf(fixedName) != -1;
-            }
-            
-            if(!data.formComponentsComponents || data.formComponentsComponents.indexOf(name) == -1) {
+      
+            if((!data.formComponentsComponents || data.formComponentsComponents.indexOf(name) == -1) && data.childParentMap[name] != undefined) {
             	updateElementIfParentChange(name, data, { name: name },forceUpdate);
             }
 

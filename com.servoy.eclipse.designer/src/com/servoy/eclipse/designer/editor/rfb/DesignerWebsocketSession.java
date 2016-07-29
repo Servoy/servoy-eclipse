@@ -43,6 +43,7 @@ import org.sablo.websocket.IServerService;
 import org.sablo.websocket.impl.ClientService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.WebFormComponentChildType;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
@@ -312,6 +313,17 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		editor.setRenderGhosts(false);
 		for (IPersist persist : persists)
 		{
+			if (persist instanceof WebFormComponentChildType)
+			{
+				IPersist formComponent = persist.getParent();
+				if (formComponent instanceof IFormElement)
+				{
+					String elementName = getFixedFormElementName(
+						formComponent.getUUID().toString() + "$" + ((WebFormComponentChildType)persist).getKey().replace('.', '$'));
+					persist = getFormComponentElement(fs, (IFormElement)formComponent, elementName);
+					if (persist == null) continue;
+				}
+			}
 			if (persist instanceof IFormElement)
 			{
 				IFormElement baseComponent = (IFormElement)persist;
@@ -579,6 +591,54 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				}
 			}
 		}
+	}
+
+	private IFormElement getFormComponentElement(FlattenedSolution fs, IFormElement formComponent, String elementName)
+	{
+		FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement(formComponent, fs, null, true);
+		WebObjectSpecification spec = formComponentEl.getWebComponentSpec();
+		if (spec != null)
+		{
+			Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
+			if (properties.size() > 0)
+			{
+				for (PropertyDescription pd : properties)
+				{
+					Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
+					Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
+					if (frm == null) continue;
+					FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, pd, (JSONObject)propertyValue, frm, fs);
+					for (FormElement element : cache.getFormComponentElements())
+					{
+						IPersist p = element.getPersistIfAvailable();
+						if (p instanceof IFormElement)
+						{
+							IFormElement pfe = (IFormElement)p;
+							String pfeName = getFixedFormElementName(pfe.getName());
+
+							if (pfeName.equals(elementName))
+							{
+								return pfe;
+							}
+							pfe = getFormComponentElement(fs, pfe, elementName);
+							if (pfe != null) return pfe;
+						}
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
+	private static String getFixedFormElementName(String name)
+	{
+		String fixedFormElementName = name;
+		if (Character.isDigit(fixedFormElementName.charAt(0)))
+		{
+			fixedFormElementName = "_" + fixedFormElementName;
+		}
+		return fixedFormElementName.replace('-', '_');
 	}
 
 	/**
