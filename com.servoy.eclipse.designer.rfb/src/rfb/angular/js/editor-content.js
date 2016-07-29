@@ -463,7 +463,7 @@ angular.module('editorContent',['servoyApp'])
           }
 
           if(data.deleted) {
-        	  toDeleteA.concat(data.deleted);
+        	  toDeleteA = toDeleteA.concat(data.deleted);
           }
           
           for (var index in toDeleteA) {
