@@ -5,7 +5,6 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 
 		var highlightDiv = angular.element(document.querySelector('#highlight'))[0];
 		var event = null;
-		var enabled = true;
 		var execute = null;
 
 		function getHighlightNode(event) {
@@ -28,7 +27,7 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 
 		function drawHighlightDiv() {
 			var node = getHighlightNode(event);
-			if (node && enabled && !editorScope.highlight) {
+			if (node && !editorScope.highlight) {
 				if (node.parentElement != undefined && node.parentElement.parentElement !== editorScope.glasspane) {
 					if (node.clientWidth == 0 && node.clientHeight == 0 && node.firstElementChild) node = node.firstElementChild;
 					if (!node.getBoundingClientRect) node = node.parentNode;
@@ -82,14 +81,6 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 			}
 		}
 		
-		function disableHighlightDiv(){
-			highlightDiv.style.display = 'none';
-			if (!editorScope.isAbsoluteFormLayout()) $editorService.setStatusBarText("");
-			enabled = false;
-		}
-		function enableHighlightDiv(){
-			enabled = true;
-		}
 
 		function onmousemove(e) {
 			if (execute)
@@ -99,7 +90,5 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 		}
 		
 		editorScope.registerDOMEvent("mousemove","CONTENTFRAME_OVERLAY", onmousemove); // real selection in editor content iframe
-		editorScope.registerDOMEvent("mousedown","CONTENTFRAME_OVERLAY", disableHighlightDiv); // real selection in editor content iframe
-		editorScope.registerDOMEvent("mouseup","CONTENTFRAME_OVERLAY", enableHighlightDiv); // real selection in editor content iframe
 	});
 });

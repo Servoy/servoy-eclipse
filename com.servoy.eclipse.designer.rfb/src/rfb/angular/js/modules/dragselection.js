@@ -385,7 +385,8 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 							editorScope.getEditorContentRootScope().drop_highlight = layoutName;
 							type = "layout";
 						}
-
+						
+						utils.setDraggingFromPallete(type,true);
 
 						editorScope.getEditorContentRootScope().$apply();
 

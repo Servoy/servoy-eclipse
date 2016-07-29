@@ -314,9 +314,9 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						editorScope.getEditorContentRootScope().$digest();
 					}
 				},
-				setDraggingFromPallete: function(dragging) {
+				setDraggingFromPallete: function(dragging,skipUpdateDesignMode) {
 					draggingFromPallete = dragging;
-					this.updateDesignMode(dragging != null);
+					if (!skipUpdateDesignMode) this.updateDesignMode(dragging != null);
 				},
 				getDraggingFromPallete: function() {
 					return draggingFromPallete;
