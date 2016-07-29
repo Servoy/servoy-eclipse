@@ -101,6 +101,14 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 		getParentComponent().flagChanged();
 	}
 
+	@Override
+	protected void setPropertyInternal(String propertyName, Object val)
+	{
+		// this is an override so that custom properties are set also in the json.
+		// this does mean that a webcomponent can't have its own property called "customProperties"
+		setProperty(propertyName, val);
+	}
+
 	private Object convertToJavaType(String propertyName, Object val)
 	{
 		Object value = val;
