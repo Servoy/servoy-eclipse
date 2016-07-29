@@ -1084,7 +1084,7 @@ public class TypeCreator extends TypeCache
 			for (String prop : props)
 			{
 				String[] propAndValue = prop.split(":");
-				configProperties.put(propAndValue[0], propAndValue[1]);
+				configProperties.put(propAndValue[0], propAndValue.length > 1 ? propAndValue[1] : "");
 			}
 
 		}
@@ -3905,11 +3905,11 @@ public class TypeCreator extends TypeCache
 							for (PropertyDescription pd : properties)
 							{
 								sb.append(pd.getName());
+								sb.append(':');
 								Object propValue = element.getProperty(pd.getName());
 								Form form = FormComponentPropertyType.INSTANCE.getForm(propValue, fs);
 								if (form != null)
 								{
-									sb.append(':');
 									sb.append(form.getName());
 								}
 								sb.append(',');
