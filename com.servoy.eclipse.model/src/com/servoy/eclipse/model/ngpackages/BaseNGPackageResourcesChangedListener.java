@@ -264,11 +264,9 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 					// web package binary
 					if ((resourceDelta.getKind() & IResourceDelta.CHANGED) != 0)
 					{
-						List<String> toRemove = new ArrayList<>();
 						String webPackageNameForFile = ResourceProvider.getComponentPackageNameForFile(new File(resource.getLocationURI()));
 						if (webPackageNameForFile == null)
 							webPackageNameForFile = ResourceProvider.getServicePackageNameForFile(new File(resource.getLocationURI()));
-						toRemove.add(webPackageNameForFile);
 						IPackageReader reader = baseNGPackageManager.readPackageResource(resource);
 						if (reader != null) getAddedPackageReaders(resource.getProject().getName()).add(reader);
 						if (webPackageNameForFile != null) getRemovedPackageReaders(resource.getProject().getName()).add(webPackageNameForFile);
@@ -278,7 +276,7 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 						String componentPackageNameForFile = ResourceProvider.getComponentPackageNameForFile(new File(resource.getLocationURI()));
 						if (componentPackageNameForFile == null)
 							componentPackageNameForFile = ResourceProvider.getServicePackageNameForFile(new File(resource.getLocationURI()));
-						getRemovedPackageReaders(resource.getProject().getName()).add(componentPackageNameForFile);
+						if (componentPackageNameForFile != null) getRemovedPackageReaders(resource.getProject().getName()).add(componentPackageNameForFile);
 					}
 					else if ((resourceDelta.getKind() & IResourceDelta.ADDED) != 0)
 					{
@@ -409,7 +407,11 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 				}
 				for (String removedProject : oldUsedPackageList)
 				{
-					getRemovedPackageReaders(changedProject.getName()).add(removedProject);
+					File projectDir = new File(changedProject.getWorkspace().getRoot().getProject(removedProject).getLocationURI());
+					String webPackageNameForFile = ResourceProvider.getComponentPackageNameForFile(projectDir);
+					if (webPackageNameForFile == null) webPackageNameForFile = ResourceProvider.getServicePackageNameForFile(projectDir);
+
+					if (webPackageNameForFile != null) getRemovedPackageReaders(changedProject.getName()).add(webPackageNameForFile);
 				}
 				for (IProject addedProject : usedPackageProjects)
 				{

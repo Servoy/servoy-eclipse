@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -49,7 +50,7 @@ import com.servoy.j2db.util.Debug;
  * @author gganea@servoy.com
  *
  */
-public class RemovePackageProjectAction extends Action implements ISelectionChangedListener
+public class RemovePackageProjectReferenceAction extends Action implements ISelectionChangedListener
 {
 
 
@@ -62,7 +63,7 @@ public class RemovePackageProjectAction extends Action implements ISelectionChan
 	 *
 	 * @param shell shell that might be used to display a dialog to the user (too choose a parent solution).
 	 */
-	public RemovePackageProjectAction(Shell shell)
+	public RemovePackageProjectReferenceAction(Shell shell)
 	{
 		this.shell = shell;
 		setText("Remove reference to this Package Project");
@@ -80,11 +81,11 @@ public class RemovePackageProjectAction extends Action implements ISelectionChan
 			if (parentProject == null) return;
 			IProject project = parentProject.getProject();
 			IProject projectToBeRemoved = selectedProject.getProject();
-			removeProjecReference(project, projectToBeRemoved);
+			removeProjectReference(project, projectToBeRemoved);
 		}
 	}
 
-	public static void removeProjecReference(IProject fromProject, IProject projectToBeRemoved)
+	public static void removeProjectReference(IProject fromProject, IProject projectToBeRemoved)
 	{
 		try
 		{
@@ -110,18 +111,20 @@ public class RemovePackageProjectAction extends Action implements ISelectionChan
 	private ServoyProject askUserForParentProject()
 	{
 		ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+		HashSet<ServoyProject> activeSolutionProjects = new HashSet<>(Arrays.asList(servoyModel.getModulesOfActiveProject()));
 		IProject[] referencingProjects = selectedProject.getProject().getReferencingProjects();
 
 
-		ArrayList<ServoyProject> activeParentModules = new ArrayList<ServoyProject>();
+		ArrayList<ServoyProject> activeReferencingModules = new ArrayList<ServoyProject>();
 
 		for (IProject servoyProject : referencingProjects)
 		{
 			try
 			{
-				if (servoyProject.hasNature(ServoyProject.NATURE_ID))
+				if (servoyProject.isAccessible() && servoyProject.hasNature(ServoyProject.NATURE_ID) &&
+					activeSolutionProjects.contains(servoyProject.getNature(ServoyProject.NATURE_ID)))
 				{
-					activeParentModules.add((ServoyProject)servoyProject.getNature(ServoyProject.NATURE_ID));
+					activeReferencingModules.add((ServoyProject)servoyProject.getNature(ServoyProject.NATURE_ID));
 				}
 			}
 			catch (CoreException e)
@@ -130,21 +133,21 @@ public class RemovePackageProjectAction extends Action implements ISelectionChan
 			}
 		}
 
-		if (activeParentModules.size() == 1)
+		if (activeReferencingModules.size() == 1)
 		{
-			return activeParentModules.get(0);
+			return activeReferencingModules.get(0);
 		}
-		else if (activeParentModules.size() > 1)
+		else if (activeReferencingModules.size() > 1)
 		{
 			int defaultIndex = 0;
-			String options[] = new String[activeParentModules.size()];
-			for (int i = activeParentModules.size() - 1; i >= 0; i--)
+			String options[] = new String[activeReferencingModules.size()];
+			for (int i = activeReferencingModules.size() - 1; i >= 0; i--)
 			{
-				if (activeParentModules.get(i) == parentSolutionProject)
+				if (activeReferencingModules.get(i) == parentSolutionProject)
 				{
 					defaultIndex = i;
 				}
-				options[i] = activeParentModules.get(i).getProject().getName();
+				options[i] = activeReferencingModules.get(i).getProject().getName();
 			}
 			int selectedProjectIndex = UIUtils.showOptionDialog(shell, "Choose parent solution",
 				"You may remove the selected solution (as module) from any of the following parent solutions (all of them are modules of the active solution that declare the selected solution as a module).\nPlease choose one of these solutions.",
@@ -153,7 +156,7 @@ public class RemovePackageProjectAction extends Action implements ISelectionChan
 			if (selectedProjectIndex >= 0)
 			{
 				// the user selected a project
-				return activeParentModules.get(selectedProjectIndex);
+				return activeReferencingModules.get(selectedProjectIndex);
 			}
 			else
 			{

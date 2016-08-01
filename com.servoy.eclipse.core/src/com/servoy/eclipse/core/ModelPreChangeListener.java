@@ -34,7 +34,7 @@ import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
- * 
+ *
  * @author acostescu
  */
 public class ModelPreChangeListener implements IResourceChangeListener
@@ -59,7 +59,7 @@ public class ModelPreChangeListener implements IResourceChangeListener
 				// if the user changes the resources project for a solution that used to it
 				try
 				{
-					if (projectThatWillChange.hasNature(ServoyResourcesProject.NATURE_ID))
+					if (projectThatWillChange.isAccessible() && projectThatWillChange.hasNature(ServoyResourcesProject.NATURE_ID))
 					{
 						for (ServoyProject sp : model.getServoyProjects())
 						{
@@ -80,10 +80,8 @@ public class ModelPreChangeListener implements IResourceChangeListener
 												{
 													QualifiedName qn = new QualifiedName(Activator.PLUGIN_ID,
 														ResourcesProjectSetupJob.CLOSED_DELETED_RESOURCES_PROJECT_KEY);
-													solutionP.setPersistentProperty(
-														qn,
-														addToken(solutionP.getPersistentProperty(qn),
-															ResourcesProjectSetupJob.CLOSED_DELETED_RESOURCES_PROJECT_DELIM, projectThatWillChange.getName()));
+													solutionP.setPersistentProperty(qn, addToken(solutionP.getPersistentProperty(qn),
+														ResourcesProjectSetupJob.CLOSED_DELETED_RESOURCES_PROJECT_DELIM, projectThatWillChange.getName()));
 												}
 												return Status.OK_STATUS;
 											}

@@ -143,7 +143,7 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 								IProject[] referencingProjects = ((IProject)resource).getReferencingProjects();
 								for (IProject iProject : referencingProjects)
 								{
-									RemovePackageProjectAction.removeProjecReference(iProject, (IProject)resource);
+									RemovePackageProjectReferenceAction.removeProjectReference(iProject, (IProject)resource);
 								}
 							}
 							resource.delete(true, new NullProgressMonitor());

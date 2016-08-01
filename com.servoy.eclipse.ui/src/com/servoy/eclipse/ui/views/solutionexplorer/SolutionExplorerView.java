@@ -350,7 +350,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private ContextAction renameActionInTree;
 
 	private RemoveModuleAction removeModuleAction;
-	private RemovePackageProjectAction removePackageProjectAction;
+	private RemovePackageProjectReferenceAction removePackageProjectAction;
 
 	private AddModuleAction addModuleAction;
 	private AddPackageProjectAction addPackageProjectAction;
@@ -3042,7 +3042,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		addAsModuleAction = new AddAsModuleAction(shell);
 		addAsWebPackageAction = new AddAsWebPackageAction(shell);
 		removeModuleAction = new RemoveModuleAction(shell);
-		removePackageProjectAction = new RemovePackageProjectAction(shell);
+		removePackageProjectAction = new RemovePackageProjectReferenceAction(shell);
 		addModuleAction = new AddModuleAction(shell);
 		addPackageProjectAction = new AddPackageProjectAction(shell);
 
