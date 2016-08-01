@@ -18,8 +18,8 @@ package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
@@ -27,14 +27,19 @@ import org.sablo.specification.PropertyDescription;
 import com.servoy.eclipse.ui.util.IParentOverridable;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IDesignValueConverter;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.server.ngclient.FormElement;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
-import com.servoy.j2db.util.PersistHelper;
+import com.servoy.j2db.server.ngclient.property.types.PropertyPath;
 import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.UUID;
 
@@ -49,6 +54,7 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 	private final String parentPropertyName;
 	private final String[] rest;
 	private final FlattenedSolution fs;
+	private IFormElement element;
 
 	public WebFormComponentChildType(IBasicWebObject parentWebObject, String key, FlattenedSolution fs)
 	{
@@ -58,13 +64,20 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 		int index = key.indexOf('.');
 		this.parentPropertyName = key.substring(0, index);
 		JSONObject propertyValue = (JSONObject)parentWebObject.getProperty(parentPropertyName);
-		PropertyDescription pd = FormComponentPropertyType.INSTANCE.getPropertyDescription(propertyValue, fs);
+		PropertyDescription pd = FormComponentPropertyType.INSTANCE.getPropertyDescription(parentPropertyName, propertyValue, fs);
 
 		this.rest = key.substring(index + 1).split("\\.");
+
+		FormElement parentFormElement = FormElementHelper.INSTANCE.getFormElement(getParentComponent(), fs, new PropertyPath(), true);
+		PropertyDescription parentPD = pd;
+		JSONObject parentValue = propertyValue;
+		Form form = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
+		StringBuilder name = new StringBuilder();
+		name.append("$");
+		name.append(parentPropertyName);
 		for (String propertyName : rest)
 		{
 			pd = pd.getProperty(propertyName);
-			// TODO check for nested FormComponents by checkign the type of the pd.
 			JSONObject value = propertyValue.optJSONObject(propertyName);
 			if (value == null)
 			{
@@ -72,6 +85,45 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 				propertyValue.put(propertyName, value);
 			}
 			propertyValue = value;
+			if (pd.getType() == FormComponentPropertyType.INSTANCE && form != null)
+			{
+				// this is a nested form component, try to find that FormElement so we have the full flattened properties.
+				String currentName = name.toString();
+				FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(parentFormElement, parentPD, parentValue, form, fs);
+				for (FormElement fe : cache.getFormComponentElements())
+				{
+					String feName = fe.getName();
+					int firstDollar = feName.indexOf('$');
+					if (currentName.equals(feName.substring(firstDollar)))
+					{
+						parentFormElement = fe;
+						parentPD = pd;
+						parentValue = (JSONObject)fe.getPropertyValue(pd.getName());
+						form = FormComponentPropertyType.INSTANCE.getForm(parentValue, fs);
+						break;
+					}
+				}
+			}
+			name.append('$');
+			name.append(propertyName);
+		}
+		if (form != null)
+		{
+			// get the merged/fully flattened form element from the form component cache for the current parent form element.
+			String currentName = name.toString();
+			FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(parentFormElement, parentPD, parentValue, form, fs);
+			for (FormElement fe : cache.getFormComponentElements())
+			{
+				String feName = fe.getName();
+				int firstDollar = feName.indexOf('$');
+				if (currentName.equals(feName.substring(firstDollar)))
+				{
+					// element is found which is the fully flattened one that has all the properties.
+					// this is used in the getJSON() when the flattened form must be returned.
+					element = (IFormElement)fe.getPersistIfAvailable();
+					break;
+				}
+			}
 		}
 		propertyDescription = pd;
 	}
@@ -229,22 +281,6 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 		}
 		propertyValue = (JSONObject)((IBasicWebObject)getParent()).getProperty(parentPropertyName);
 
-		if (flattened && PersistHelper.isOverrideElement(getParentComponent()))
-		{
-			JSONObject full = new JSONObject();
-			List<AbstractBase> hierarchy = PersistHelper.getOverrideHierarchy(getParentComponent());
-			for (int i = hierarchy.size(); --i >= 0;)
-			{
-				Object property = hierarchy.get(i).getProperty(parentPropertyName);
-				if (property instanceof JSONObject)
-				{
-					ServoyJSONObject.mergeAndDeepCloneJSON((JSONObject)property, full);
-				}
-			}
-
-			propertyValue = full;
-		}
-
 		for (String propertyName : rest)
 		{
 			JSONObject value = propertyValue.optJSONObject(propertyName);
@@ -254,6 +290,17 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 				propertyValue.put(propertyName, value);
 			}
 			propertyValue = value;
+		}
+		if (flattened && element != null)
+		{
+			JSONObject full = new JSONObject();
+			Map<String, Object> elementProps = element.getFlattenedPropertiesMap();
+			for (Entry<String, Object> entry : elementProps.entrySet())
+			{
+				full.put(entry.getKey(), convertFromJavaType(entry.getKey(), entry.getValue()));
+			}
+			ServoyJSONObject.mergeAndDeepCloneJSON(propertyValue, full);
+			propertyValue = full;
 		}
 		return propertyValue;
 	}
