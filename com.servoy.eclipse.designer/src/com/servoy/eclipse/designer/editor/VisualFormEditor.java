@@ -289,31 +289,9 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 						{
 							RfbVisualFormEditorDesignPage rfbVisualFormEditorDesignPage = (RfbVisualFormEditorDesignPage)baseVisualFormEditorDesignPage;
 							Form f = visualFormEditor.getForm();
-
 							final FlattenedSolution fs = Activator.getDefault().getDesignClient().getFlattenedSolution();
-							Form flattenedForm = fs.getFlattenedForm(f);
-							final boolean shouldRefreshBrowserUrl[] = { false };
-							flattenedForm.acceptVisitor(new IPersistVisitor()
-							{
-								@Override
-								public Object visit(IPersist o)
-								{
-									if (o instanceof IFormElement)
-									{
-										IFormElement formElement = (IFormElement)o;
-										FormElement fe = FormElementHelper.INSTANCE.getFormElement(formElement, fs, null, true);
-										if (hasFormReference(fs, fe, getForm()))
-										{
-											shouldRefreshBrowserUrl[0] = true;
-											return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
-										}
 
-									}
-									return IPersistVisitor.CONTINUE_TRAVERSAL;
-								}
-							});
-
-							if (shouldRefreshBrowserUrl[0])
+							if (hasFormReference(fs, f, getForm()))
 							{
 								rfbVisualFormEditorDesignPage.refreshBrowserUrl(true);
 							}
@@ -325,7 +303,33 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 
 	}
 
-	private boolean hasFormReference(FlattenedSolution fs, FormElement formElement, Form f)
+	private static boolean hasFormReference(final FlattenedSolution fs, Form form, final Form formRef)
+	{
+		final boolean hasFormReference[] = { false };
+		Form flattenedForm = fs.getFlattenedForm(form);
+		flattenedForm.acceptVisitor(new IPersistVisitor()
+		{
+			@Override
+			public Object visit(IPersist o)
+			{
+				if (o instanceof IFormElement)
+				{
+					IFormElement formElement = (IFormElement)o;
+					FormElement fe = FormElementHelper.INSTANCE.getFormElement(formElement, fs, null, true);
+					if (hasFormReference(fs, fe, formRef))
+					{
+						hasFormReference[0] = true;
+						return IPersistVisitor.CONTINUE_TRAVERSAL_BUT_DONT_GO_DEEPER;
+					}
+				}
+				return IPersistVisitor.CONTINUE_TRAVERSAL;
+			}
+		});
+
+		return hasFormReference[0];
+	}
+
+	private static boolean hasFormReference(FlattenedSolution fs, FormElement formElement, Form formRef)
 	{
 		WebObjectSpecification spec = formElement.getWebComponentSpec();
 		if (spec != null)
@@ -337,7 +341,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 				{
 					Object propertyValue = formElement.getPropertyValue(pd.getName());
 					Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
-					if (frm == f)
+					if (frm != null && (frm == formRef || hasFormReference(fs, frm, formRef)))
 					{
 						return true;
 					}
