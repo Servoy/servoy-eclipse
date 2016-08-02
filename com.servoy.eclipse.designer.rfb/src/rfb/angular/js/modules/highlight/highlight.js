@@ -58,12 +58,13 @@ angular.module('highlight', ['editor']).run(function($pluginRegistry, $editorSer
 							var type = currentNode.attr('svy-layoutname');
 							if(!type) type = currentNode.attr('svy-formelement-type');
 							if(!type) type = currentNode.get(0).nodeName;
+							if (type && type.indexOf(".") >= 0) type = type.substring(type.indexOf(".")+1);
 							var name = currentNode.attr('svy-name');
 							if(!name) name = currentNode.attr('name');
 							
-							statusBarTxt += '<strong>' + type + '</strong>';
+							statusBarTxt += type ;
 							if(name) statusBarTxt += ' [ ' + name + ' ] ';
-							if(n > -1) statusBarTxt += ' / ';
+							if(n > -1) statusBarTxt += ' <strong>&nbsp;/&nbsp;</strong> ';
 						}
 						$editorService.setStatusBarText(statusBarTxt); 
 					}
