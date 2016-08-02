@@ -165,7 +165,6 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 		PropertyDescription pd = FormComponentPropertyType.INSTANCE.getPropertyDescription(parentPropertyName, propertyValue, fs);
 		FormElement parentFormElement = FormElementHelper.INSTANCE.getFormElement(getParentComponent(), fs, new PropertyPath(), true);
 		PropertyDescription parentPD = pd;
-		JSONObject parentValue = propertyValue;
 		Form form = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
 		StringBuilder name = new StringBuilder();
 		name.append("$");
@@ -184,7 +183,8 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 			{
 				// this is a nested form component, try to find that FormElement so we have the full flattened properties.
 				String currentName = name.toString();
-				FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(parentFormElement, parentPD, parentValue, form, fs);
+				FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(parentFormElement, parentPD,
+					(JSONObject)parentFormElement.getPropertyValue(parentPD.getName()), form, fs);
 				for (FormElement fe : cache.getFormComponentElements())
 				{
 					String feName = fe.getName();
@@ -193,8 +193,7 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 					{
 						parentFormElement = fe;
 						parentPD = pd;
-						parentValue = (JSONObject)fe.getPropertyValue(pd.getName());
-						form = FormComponentPropertyType.INSTANCE.getForm(parentValue, fs);
+						form = FormComponentPropertyType.INSTANCE.getForm(fe.getPropertyValue(parentPD.getName()), fs);
 						break;
 					}
 				}
@@ -206,7 +205,8 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 		{
 			// get the merged/fully flattened form element from the form component cache for the current parent form element.
 			String currentName = name.toString();
-			FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(parentFormElement, parentPD, parentValue, form, fs);
+			FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(parentFormElement, parentPD,
+				(JSONObject)parentFormElement.getPropertyValue(parentPD.getName()), form, fs);
 			for (FormElement fe : cache.getFormComponentElements())
 			{
 				String feName = fe.getName();
