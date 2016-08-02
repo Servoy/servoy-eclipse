@@ -683,15 +683,29 @@ public abstract class BaseNGPackageManager
 	}
 
 	/**
-	 * Gets all the project names of referencing projects that have loaded the given package (by package name) from the given source (the projectDir).
+	 * Gets all the project names of referencing projects that have loaded the given package (by package name) from the given source (the "romResource").
 	 */
-	public List<String> getReferencingProjectsThatLoaded(String ngPackageName, File projectDir)
+	public List<String> getReferencingProjectsThatLoaded(String ngPackageName, File fromResource)
 	{
 		List<String> referencingProjectsThatLoadedIt = new ArrayList<String>();
 		for (Entry<String, Map<String, IPackageReader>> e : projectNameToContainedPackages.entrySet())
 		{
 			IPackageReader reader = e.getValue().get(ngPackageName);
-			if (reader != null && projectDir.equals(reader.getResource())) referencingProjectsThatLoadedIt.add(e.getKey());
+			if (reader != null && fromResource.equals(reader.getResource())) referencingProjectsThatLoadedIt.add(e.getKey());
+		}
+		return referencingProjectsThatLoadedIt;
+	}
+
+	/**
+	 * Gets all the project names of referencing projects and the location (zip or project) from where the package was loaded.
+	 */
+	public List<Pair<String, File>> getReferencingProjectsThatLoaded(String ngPackageName)
+	{
+		List<Pair<String, File>> referencingProjectsThatLoadedIt = new ArrayList<>();
+		for (Entry<String, Map<String, IPackageReader>> e : projectNameToContainedPackages.entrySet())
+		{
+			IPackageReader reader = e.getValue().get(ngPackageName);
+			if (reader != null) referencingProjectsThatLoadedIt.add(new Pair<>(e.getKey(), reader.getResource()));
 		}
 		return referencingProjectsThatLoadedIt;
 	}

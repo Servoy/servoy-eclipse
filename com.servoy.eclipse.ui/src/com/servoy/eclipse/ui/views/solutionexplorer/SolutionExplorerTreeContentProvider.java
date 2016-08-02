@@ -1197,7 +1197,10 @@ public class SolutionExplorerTreeContentProvider
 						provider.getPackageNames().contains(iProject.getName()))
 					{
 						IPackageReader packageType = provider.getPackageReader(iProject.getName());
-						if (packageType.getPackageType().equals(type))
+
+						// we also check that reader resource matches project just in case there are also for example zip references currently loaded
+						// with same package name - in which case the project is actually not loaded although it is valid and referenced
+						if (packageType.getPackageType().equals(type) && packageType.getResource().equals(new File(iProject.getLocationURI())))
 						{
 							String displayName = packageType.getPackageDisplayname();
 							List<IProject> referencingProjects = Arrays.asList(iProject.getReferencingProjects());

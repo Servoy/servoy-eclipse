@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -62,24 +63,20 @@ public class ImportZipPackageAsZipAction extends ImportZipPackageAction
 		this.folderName = folder;
 	}
 
-	/**
-	 * @param fileNames
-	 * @param filterPath
-	 */
 	@Override
 	protected void doImport(String[] fileNames, String filterPath)
 	{
 		overrideReturnCode = IDialogConstants.YES_TO_ALL_ID;
 
-		final List<String> existingComponents = existingComponents(fileNames);
-		if (!existingComponents.isEmpty())
+		final List<String> existingFiles = existingComponents(fileNames);
+		if (!existingFiles.isEmpty())
 		{
 			UIUtils.runInUI(new Runnable()
 			{
 				public void run()
 				{
 					ScrollableDialog dialog = new ScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.ERROR, "Error",
-						"The folowing files already exist: ", existingComponents.toString());
+						"The folowing files already exist: ", existingFiles.toString());
 					List<Pair<Integer, String>> buttonsAndLabels = new ArrayList<Pair<Integer, String>>();
 					buttonsAndLabels.add(new Pair<Integer, String>(IDialogConstants.YES_TO_ALL_ID, "Overwrite all"));
 					buttonsAndLabels.add(new Pair<Integer, String>(IDialogConstants.CANCEL_ID, "Cancel"));
@@ -89,33 +86,52 @@ public class ImportZipPackageAsZipAction extends ImportZipPackageAction
 				}
 			}, true);
 		}
-		if (overrideReturnCode == IDialogConstants.YES_TO_ALL_ID) addComponents(filterPath, fileNames);
+		if (overrideReturnCode == IDialogConstants.YES_TO_ALL_ID) addNGPackages(filterPath, fileNames, existingFiles);
 	}
 
-	/**
-	 * @param fileNames
-	 */
-	private void addComponents(String filterPath, String[] fileNames)
+	private void addNGPackages(String filterPath, String[] fileNames, List<String> existingFiles)
 	{
 		IFolder componentsFolder = checkComponentsFolderCreated();
 		for (String fileName : fileNames)
 		{
-			if (!checkForExistingBinary(componentsFolder, fileName)) continue;
-			File javaFile = new File(filterPath + File.separator + fileName);
-			if (javaFile.exists() && javaFile.isFile())
+			IPackageReader reader = new org.sablo.specification.Package.ZipPackageReader(new File(filterPath + File.separator + fileName), fileName);
+			String packageNameToImport = reader.getPackageName();
+
+			if (packageNameToImport != null)
 			{
-				importZipFileComponent(componentsFolder, javaFile);
+				if (!checkForAlreadyLoadedPackage(packageNameToImport, componentsFolder, fileName, existingFiles)) continue;
+				File javaFile = new File(filterPath + File.separator + fileName);
+				if (javaFile.exists() && javaFile.isFile())
+				{
+					importZipFileComponent(componentsFolder, javaFile);
+				}
+			}
+			else
+			{
+				UIUtils.reportError("Import ng package zip",
+					"The selected file doesn't seem to be an ng package zip.\nCannot read it's package name.\n\nSkipping import.");
 			}
 		}
 	}
 
-	protected boolean checkForExistingBinary(IFolder componentsFolder, String fileName)
+	protected boolean checkForAlreadyLoadedPackage(String packageNameToImport, IFolder componentsFolder, String fileName,
+		List<String> existingThatWillBeReplacedFiles)
 	{
-		if (componentsFolder.getFile(fileName).exists() || componentsFolder.getFolder(fileName).exists())
+		// see if an active zip or package project with the same package name exists (so we don't end up having two separate locations the same package can be loaded from in the active solution)
+		List<Pair<String, File>> loadedSamePackageNameReferences = ServoyModelFinder.getServoyModel().getNGPackageManager().getReferencingProjectsThatLoaded(
+			packageNameToImport);
+		for (Pair<String, File> loaded : loadedSamePackageNameReferences)
 		{
-			UIUtils.reportError("Import component as zip",
-				"Resource with name : '" + fileName + "' already exist in the current solution/module. Skipping import.");
+			if (!existingThatWillBeReplacedFiles.contains(loaded.getRight().getName()) ||
+				!(new File(componentsFolder.getLocationURI()).equals(loaded.getRight().getParentFile())))
+			{
+				// so this package name is already loaded in the active solution from a location that will not be replaced right now
+				UIUtils.reportError("Cannot import zip package as project",
+					"The package with name: '" + packageNameToImport + "' is already used/loaded in currently active solution.\n(by project '" +
+						loaded.getLeft() + "' from location '" + loaded.getRight() + "')\n\nSkipping import.");
+			}
 			return false;
+
 		}
 		return true;
 	}
@@ -125,9 +141,6 @@ public class ImportZipPackageAsZipAction extends ImportZipPackageAction
 		return importFolder.listFiles();
 	}
 
-	/**
-	 * @param javaFile
-	 */
 	private void importZipFileComponent(IFolder componentsFolder, File javaFile)
 	{
 		IFile eclipseFile = componentsFolder.getFile(javaFile.getName());

@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -40,12 +41,14 @@ import org.sablo.specification.Package.IPackageReader;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ngpackages.NGPackageManager;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -71,14 +74,14 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 				for (String zipFile : fileNames)
 				{
 					IPackageReader reader = new org.sablo.specification.Package.ZipPackageReader(new File(filterPath + File.separator + zipFile), zipFile);
-					String projectName = reader.getPackageName();
-					if (projectName != null)
+					String packageNameToImport = reader.getPackageName();
+					if (packageNameToImport != null)
 					{
 						ZipInputStream zis = null;
 						try
 						{
-							if (!checkForExistingProject(projectName)) continue;
-							IProject newProject = NGPackageManager.createProject(projectName);
+							if (!checkForExistingProjectOrLoadedPackage(packageNameToImport)) continue;
+							IProject newProject = NGPackageManager.createProject(packageNameToImport);
 
 							zis = new ZipInputStream(new FileInputStream(filterPath + File.separator + zipFile));
 							ZipEntry ze = zis.getNextEntry();
@@ -131,6 +134,11 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 							}
 						}
 					}
+					else
+					{
+						UIUtils.reportError("Import ng package zip as a project",
+							"The selected file doesn't seem to be an ng package zip.\nCannot read it's package name.\n\nSkipping import.");
+					}
 				}
 				return Status.OK_STATUS;
 			}
@@ -138,13 +146,26 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 		job.schedule();
 	}
 
-	protected boolean checkForExistingProject(String projectName)
+	protected boolean checkForExistingProjectOrLoadedPackage(String packageNameToBeLoaded)
 	{
-		if (ServoyModel.getWorkspace().getRoot().getProject(projectName).exists())
+		if (ServoyModel.getWorkspace().getRoot().getProject(packageNameToBeLoaded).exists()) // we will create a new project using the packageName if no such project exists
 		{
-			UIUtils.reportError("Import component as project",
-				"Project with name : '" + projectName + "' already exist in the current workspace. Skipping import.");
+			UIUtils.reportError("Cannot import zip package as project",
+				"Project with name : '" + packageNameToBeLoaded + "' already exist in the current workspace.\n\nSkipping import.");
 			return false;
+		}
+		else
+		{
+			// see if an active zip or package project with the same package name exists (so we don't end up having two separate locations the same package can be loaded from in the active solution)
+			List<Pair<String, File>> loaded = ServoyModelFinder.getServoyModel().getNGPackageManager().getReferencingProjectsThatLoaded(packageNameToBeLoaded);
+			if (loaded.size() > 0)
+			{
+				UIUtils.reportError("Cannot import zip package as project",
+					"The package with name: '" + packageNameToBeLoaded + "' is already used/loaded in currently active solution.\n(by project '" +
+						loaded.get(0).getLeft() + "' from location '" + loaded.get(0).getRight() + "')\n\nSkipping import.");
+				return false;
+
+			}
 		}
 		return true;
 	}
