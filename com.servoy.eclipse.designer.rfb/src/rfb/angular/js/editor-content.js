@@ -248,6 +248,10 @@ angular.module('editorContent',['servoyApp'])
   $scope.canContainDraggedElement = function() {
 	  if($scope.drop_highlight) {
 	  	  var drop = $scope.drop_highlight.split(".");
+	  	  if (arguments.length == 2)
+	  	  {
+	  		  return arguments[1].indexOf(drop[1]) >= 0 ;
+	  	  }	  
 	  	  var allowedChildren = $rootScope.allowedChildren[arguments[0]];
 	  	  if (allowedChildren.indexOf(drop[1]) >= 0) return true; //component
 	      for (arg in allowedChildren){
