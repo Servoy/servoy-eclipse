@@ -171,7 +171,7 @@ angular.module('editorContent',['servoyApp'])
       }
     }
   };
-}).controller("DesignFormController", function($scope, $editorContentService, $rootScope, $element,$templateCache,$compile) {
+}).controller("DesignFormController", function($scope, $editorContentService, $rootScope, $element,$templateCache,$compile,$webSocket) {
   $rootScope.getDesignFormControllerScope = function() {
     return $scope;
   };
@@ -304,7 +304,7 @@ angular.module('editorContent',['servoyApp'])
       return null;
     },
     getFormUrl: function(formUrl) {
-      return "/designer/formplaceholder.html?formName="+formUrl;
+      return "/designer/formplaceholder.html?formName="+formUrl+"&editingForm="+ $webSocket.getURLParameter("f") ;
     },
     startEdit: function(propertyName) {},
     apply: function(propertyName) {},

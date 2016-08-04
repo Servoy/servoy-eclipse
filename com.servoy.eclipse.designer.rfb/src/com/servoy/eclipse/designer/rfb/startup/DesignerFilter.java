@@ -433,18 +433,27 @@ public class DesignerFilter implements Filter
 				if (formName != null)
 				{
 					FlattenedSolution fl = ServoyModelFinder.getServoyModel().getActiveProject().getEditingFlattenedSolution();
-					Form form = fl.getForm(formName);
-					if (form != null)
+					Form editingForm = fl.getForm(request.getParameter("editingForm"));
+					if (editingForm == null || editingForm.isResponsiveLayout())
 					{
-						if (!form.isResponsiveLayout())
+						Form form = fl.getForm(formName);
+						if (form != null)
 						{
-							width = form.getSize().width + "px";
-							height = form.getSize().height + "px";
+							if (!form.isResponsiveLayout())
+							{
+								width = form.getSize().width + "px";
+								height = form.getSize().height + "px";
+							}
+							else
+							{
+								width = "100%";
+							}
 						}
-						else
-						{
-							width = "100%";
-						}
+					}
+					else
+					{
+						height = "100%";
+						width = "100%";
 					}
 				}
 				if (formName == null) formName = "";
