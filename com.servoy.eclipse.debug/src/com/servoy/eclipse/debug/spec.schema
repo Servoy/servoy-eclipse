@@ -160,6 +160,8 @@
 				        		  },
 				        		  "default": {
 				        		  },
+				        		  "initialValue": {
+				        		  },
 				        		  "ondatachange" : {
 				        			  "description": "object that configures that this dataprovider type has ondatachange support",
 				        			  "type": "object",
@@ -382,6 +384,8 @@
 					        			  "type": "array"
 					        		  },
 					        		  "default": {
+					        		  },
+					        		   "initialValue": {
 					        		  },
 					        		  "pushToServer": {
 				        			  		"enum" : ["reject", "allow", "shallow", "deep"]

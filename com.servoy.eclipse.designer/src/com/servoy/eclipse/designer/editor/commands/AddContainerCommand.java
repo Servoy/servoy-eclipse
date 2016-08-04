@@ -3,6 +3,7 @@ package com.servoy.eclipse.designer.editor.commands;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -54,6 +55,7 @@ import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.server.ngclient.property.types.NGCustomJSONObjectType;
 import com.servoy.j2db.util.Debug;
 
 
@@ -152,6 +154,19 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 											}
 											persist = parentPersist.createNewWebComponent(componentName,
 												(String)((StructuredSelection)dialog.getSelection()).getFirstElement());
+
+											WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+												(String)((StructuredSelection)dialog.getSelection()).getFirstElement());
+											Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
+											for (String string : allPropertiesNames)
+											{
+												PropertyDescription property = spec.getProperty(string);
+												if (property != null && property.getInitialValue() != null)
+												{
+													Object initialValue = property.getInitialValue();
+													if (initialValue != null) ((WebComponent)persist).setProperty(string, initialValue);
+												}
+											}
 										}
 									}
 								}
@@ -324,6 +339,21 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			WebCustomType bean = WebCustomType.createNewInstance(parentBean, targetPD, propertyName, index, true);
 			bean.setName(compName);
 			bean.setTypeName(typeName);
+
+			if (targetPD.getType() instanceof NGCustomJSONObjectType)
+			{
+				Collection<String> allPropertiesNames = ((NGCustomJSONObjectType)targetPD.getType()).getCustomJSONTypeDefinition().getAllPropertiesNames();
+				for (String string : allPropertiesNames)
+				{
+					PropertyDescription property = ((NGCustomJSONObjectType)targetPD.getType()).getCustomJSONTypeDefinition().getProperty(string);
+					if (property != null && property.getInitialValue() != null)
+					{
+						Object initialValue = property.getInitialValue();
+						if (initialValue != null) bean.setProperty(string, initialValue);
+					}
+				}
+			}
+
 			if (isArray)
 			{
 				if (arrayValue == null)

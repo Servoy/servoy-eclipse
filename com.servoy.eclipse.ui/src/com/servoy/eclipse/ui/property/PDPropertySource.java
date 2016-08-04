@@ -224,7 +224,7 @@ public class PDPropertySource extends PersistPropertySource
 				config.addDefault(desc.getDefaultValue(), null);
 			}
 			createdPropertyHandler = createWebComponentPropertyHandler(new PropertyDescription(desc.getName(), ValuesPropertyType.INSTANCE, config,
-				desc.getDefaultValue(), desc.hasDefault(), null, null, null, false), persistContext);
+				desc.getDefaultValue(), desc.getInitialValue(), desc.hasDefault(), null, null, null, false), persistContext);
 		}
 		else
 		{

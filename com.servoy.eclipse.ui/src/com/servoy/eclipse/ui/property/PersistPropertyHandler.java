@@ -891,12 +891,12 @@ public class PersistPropertyHandler extends BasePropertyHandler
 
 		if (name.equals(IContentSpecConstants.PROPERTY_NG_READONLY_MODE))
 		{
-			return new PropertyDescription(name, BooleanPropertyType.INSTANCE, null, null, true, null, null, null, false);
+			return new PropertyDescription(name, BooleanPropertyType.INSTANCE, null, null, null, true, null, null, null, false);
 		}
 
 		if (name.equals(IContentSpecConstants.PROPERTY_REFERENCE_FORM))
 		{
-			return new PropertyDescription(name, BooleanPropertyType.INSTANCE, null, null, true, null, null, null, false);
+			return new PropertyDescription(name, BooleanPropertyType.INSTANCE, null, null, null, true, null, null, null, false);
 		}
 
 		return super.getPropertyDescription(obj, propertySource, persistContext);

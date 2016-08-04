@@ -353,16 +353,22 @@ public class DesignerFilter implements Filter
 									}
 									else componentJson.put("tagName", FormTemplateGenerator.getTagName(spec.getName()));
 
-									PropertyDescription pd = spec.getProperty("size");
 									Set<String> allPropertiesNames = spec.getAllPropertiesNames();
 									for (String string : allPropertiesNames)
 									{
-										if (spec.getProperty(string) != null && spec.getProperty(string).getDefaultValue() != null)
+										PropertyDescription property = spec.getProperty(string);
+										if (property != null && property.getDefaultValue() != null)
 										{
-											Object defaultValue = spec.getProperty(string).getDefaultValue();
+											Object defaultValue = property.getDefaultValue();
 											if (defaultValue != null) model.put(string, defaultValue);
 										}
+										if (property != null && property.getInitialValue() != null)
+										{
+											Object initialValue = property.getInitialValue();
+											if (initialValue != null) model.put(string, initialValue);
+										}
 									}
+									PropertyDescription pd = spec.getProperty("size");
 									if (pd != null && pd.getDefaultValue() != null)
 									{
 										model.put("size", pd.getDefaultValue());
@@ -377,10 +383,6 @@ public class DesignerFilter implements Filter
 									}
 
 									model.put("visible", Boolean.TRUE);
-									if ("servoydefault-label".equals(spec.getName()))
-									{
-										model.put("text", "label");
-									}
 									componentJson.put("model", new JSONObject(model));
 									if (spec.getIcon() != null)
 									{

@@ -21,6 +21,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
@@ -549,6 +550,16 @@ public class CreateComponentHandler implements IServerService
 							{
 								webComponent.setSize(new Dimension(((JSONObject)description.getDefaultValue()).optInt("width", 80),
 									((JSONObject)description.getDefaultValue()).optInt("height", 80)));
+							}
+							Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
+							for (String string : allPropertiesNames)
+							{
+								PropertyDescription property = spec.getProperty(string);
+								if (property != null && property.getInitialValue() != null)
+								{
+									Object initialValue = property.getInitialValue();
+									if (initialValue != null) webComponent.setProperty(string, initialValue);
+								}
 							}
 							return new IPersist[] { webComponent };
 						}
