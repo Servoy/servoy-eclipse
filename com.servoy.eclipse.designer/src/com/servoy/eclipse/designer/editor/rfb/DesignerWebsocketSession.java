@@ -313,6 +313,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		editor.setRenderGhosts(false);
 		for (IPersist persist : persists)
 		{
+			boolean formComponentChild = false;
 			if (persist instanceof WebFormComponentChildType)
 			{
 				IPersist formComponent = persist.getParent();
@@ -322,6 +323,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						formComponent.getUUID().toString() + "$" + ((WebFormComponentChildType)persist).getKey().replace('.', '$'));
 					persist = getFormComponentElement(fs, (IFormElement)formComponent, elementName);
 					if (persist == null) continue;
+					formComponentChild = true;
 				}
 			}
 			if (persist instanceof IFormElement)
@@ -339,7 +341,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				}
 
 
-				if (persist.getParent().getChild(persist.getUUID()) != null)
+				if (formComponentChild || persist.getParent().getChild(persist.getUUID()) != null)
 				{
 					ISupportChilds parent = persist.getParent();
 					if (parent instanceof AbstractContainer)
@@ -683,7 +685,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
 						if (frm == null) continue;
 						FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(fe, pd, (JSONObject)propertyValue, frm, fs);
-						// TODO check nesting.
 						formComponentTemplates.put(cache.getCacheUUID(), cache.getTemplate());
 					}
 				}
