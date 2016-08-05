@@ -81,12 +81,11 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				timeout = null
 			}
 
-
 			$scope.contentWindow = $element.find('.contentframe')[0].contentWindow;
 			$scope.glasspane = $element.find('.contentframe-overlay')[0];
 			$scope.editorID = $element.attr('id');
 			$scope.contentDocument = null;
-			
+			$scope.contentSizeFull = true;
 			
 			$scope.startAutoScroll = function (direction, callback){
 				return $interval(function (){
@@ -639,9 +638,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			    $scope.$apply();
 			}
 
-			$scope.setContentSize = function(width, height) {
+			$scope.setContentSize = function(width, height,fixedSize) {
 				$scope.contentStyle.width = width;
 				$scope.contentStyle.height = height;
+				if (fixedSize) $scope.contentSizeFull = false;
 				delete $scope.contentStyle.top;
 				delete $scope.contentStyle.left;
 				delete $scope.contentStyle.position;
@@ -661,6 +661,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 					minWidth: "992px",
 					bottom: "20px"
 				};
+				$scope.contentSizeFull = true;
 				delete $scope.contentStyle.width;
 				delete $scope.contentStyle.height;
 				delete $scope.contentStyle.h
@@ -674,7 +675,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				};
 			}
 			$scope.isContentSizeFull = function() {
-				return ($scope.contentStyle.right == "20px") && ($scope.contentStyle.bottom == "20px");
+				return $scope.contentSizeFull;
 			}
 
 			$scope.setCursorStyle = function(cursor) {

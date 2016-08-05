@@ -18,9 +18,9 @@ angular.module('designsize',['toolbar','editor']).run(function($rootScope, $tool
 			onclick: function() {
 				if(lastClicked == "Tablet") isPortrait = !isPortrait;
 				if(isPortrait) 
-					editor.setContentSize("768px", "1024px");
+					editor.setContentSize("768px", "1024px",true);
 				else
-					editor.setContentSize("1024px", "768px");
+					editor.setContentSize("1024px", "768px",true);
 				lastClicked = "Tablet";
 			},
 		};	
@@ -32,9 +32,9 @@ angular.module('designsize',['toolbar','editor']).run(function($rootScope, $tool
 			onclick: function() {
 				if(lastClicked == "Phone") isPortrait = !isPortrait;
 				if(isPortrait) 
-					editor.setContentSize("320px", "568px");
+					editor.setContentSize("320px", "568px",true);
 				else
-					editor.setContentSize("568px", "320px");
+					editor.setContentSize("568px", "320px",true);
 				lastClicked = "Phone";
 			},
 		};
@@ -49,9 +49,9 @@ angular.module('designsize',['toolbar','editor']).run(function($rootScope, $tool
 				if (s.length == 2)
 				{
 					if(isPortrait) 
-						editor.setContentSize(s[0] + "px", s[1] + "px");
+						editor.setContentSize(s[0] + "px", s[1] + "px",true);
 					else
-						editor.setContentSize(s[1] + "px", s[0] + "px");
+						editor.setContentSize(s[1] + "px", s[0] + "px",true);
 				}
 				lastClicked = selection;
 			},
