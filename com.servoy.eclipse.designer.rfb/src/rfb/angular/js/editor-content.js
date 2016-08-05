@@ -248,7 +248,7 @@ angular.module('editorContent',['servoyApp'])
   $scope.canContainDraggedElement = function() {
 	  if($scope.drop_highlight) {
 	  	  var drop = $scope.drop_highlight.split(".");
-	  	  if (arguments.length == 2)
+	  	  if (arguments.length == 2 && arguments[1] instanceof Array)
 	  	  {
 	  		  return arguments[1].indexOf(drop[1]) >= 0 ;
 	  	  }	  
