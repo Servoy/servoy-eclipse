@@ -32,7 +32,7 @@ and will be prosecuted to the maximum extent possible under law.
 256m
       </programArgs>
       <vmArgs>-Xms40m
--Xmx512m
+-Xmx1G
 -XX:MaxPermSize=256M
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
