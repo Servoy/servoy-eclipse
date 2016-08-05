@@ -366,10 +366,11 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 					};
 					var elements = this.getElementsByRectangle(glassPaneMousePosition1, glassPaneMousePosition2, 0.000001, true, !skipGlass, skipNodeId);
 
-					if (elements.length == 1)
-						return elements[0];
-					else
-					if (elements.length > 1) {
+					if (elements.length == 1) {
+						if (!(angular.element(elements[0]).is("[svy-non-selectable]")))
+							return elements[0];
+					}
+					else if (elements.length > 1) {
 						var node = elements[elements.length - 1];
 						var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
 						if (ghostObject && ghostObject.type == EDITOR_CONSTANTS.GHOST_TYPE_FORM && !(angular.element(elements[elements.length - 2]).is("[svy-non-selectable]"))) {
@@ -419,7 +420,10 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 						}
 							
 						// always return the one on top (visible); this is due to formIndex implementation
-						return elements[elements.length - 1]
+						for (var i=elements.length;--i;) {
+							if (!(angular.element(elements[i]).is("[svy-non-selectable]")))
+								return elements[i];
+						}
 					}
 
 					return null;
