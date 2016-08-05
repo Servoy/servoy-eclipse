@@ -879,6 +879,13 @@
             Shows you how to install the SQL Explorer plugin.
          </description>
       </cheatsheet>
+      <cheatsheet
+            category="com.servoy.eclipse.ui.CheatSheetCategory"
+            composite="true"
+            contentFile="cheatsheets/helloworld/HelloWorld.xml"
+            id="com.servoy.eclipse.ui.cheatsheet.helloworld.helloworld"
+            name="Building a Hello World Solution">
+      </cheatsheet>      
    </extension>
    <extension
          point="org.eclipse.ui.activities">

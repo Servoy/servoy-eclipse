@@ -40,10 +40,12 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+import org.json.JSONObject;
 import org.sablo.eventthread.WebsocketSessionWindows;
 import org.sablo.websocket.CurrentWindow;
 import org.sablo.websocket.WebsocketSessionManager;
 
+import com.servoy.eclipse.cheatsheets.actions.ISupportCheatSheetActions;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
 import com.servoy.eclipse.core.resource.DesignPagetype;
@@ -78,7 +80,7 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  *
  */
-public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage implements ILoadedNGPackagesListener
+public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage implements ILoadedNGPackagesListener, ISupportCheatSheetActions
 {
 	// for setting selection when clicked in editor
 	private final ISelectionProvider selectionProvider = new SelectionProviderAdapter()
@@ -127,6 +129,8 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	private EditorWebsocketSession editorWebsocketSession;
 	private DesignerWebsocketSession designerWebsocketSession;
 
+	private EditorServiceHandler editorServiceHandler;
+
 	private String layout = null;
 	private String editorId = null;
 	private String clientId = null;
@@ -158,7 +162,10 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		selectionListener = new RfbSelectionListener(editorPart.getForm(), editorWebsocketSession);
 		getSite().setSelectionProvider(selectionProvider);
 		getSite().getWorkbenchWindow().getSelectionService().addSelectionListener(selectionListener);
-		editorWebsocketSession.registerServerService("formeditor", new EditorServiceHandler(editorPart, selectionProvider, selectionListener, fieldPositioner));
+
+		editorServiceHandler = new EditorServiceHandler(editorPart, selectionProvider, selectionListener, fieldPositioner);
+
+		editorWebsocketSession.registerServerService("formeditor", editorServiceHandler);
 		ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(this);
 		try
 		{
@@ -484,4 +491,11 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		});
 	}
 
+	public void createNewComponent(JSONObject componentDefinition)
+	{
+		if (editorServiceHandler != null)
+		{
+			editorServiceHandler.executeMethod("createComponent", componentDefinition);
+		}
+	}
 }

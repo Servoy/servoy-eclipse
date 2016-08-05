@@ -73,7 +73,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jface,
  sj.jsonschemavalidation
 Bundle-ActivationPolicy: lazy
-Export-Package: com.servoy.eclipse.ui,
+Export-Package: com.servoy.eclipse.cheatsheets.actions,
+ com.servoy.eclipse.ui,
  com.servoy.eclipse.ui.actions,
  com.servoy.eclipse.ui.dialogs,
  com.servoy.eclipse.ui.editors,

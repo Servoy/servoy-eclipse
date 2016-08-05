@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet
+      title="Create a helloWorld Servoy form">
+   <intro>
+      <description>
+         This cheat sheet shows you how to create a helloWorld Servoy form.
+      </description>
+   </intro>
+   <item
+         title="Create a helloWorld form" cheatsheetHyperlink="bigimage:cheatsheets/helloworld/CreateHWForm1.png">
+    <description>
+         In the Solution Explorer right-click on the 'Hello World' Solution node and select Create new form. A wizard will show up. Enter 'helloWorld' for the name of the new form and click Finish.
+         <!-- Attach Image CreateHWForm1.png -->
+         <!-- Attach Image CreateHWForm2.png -->
+    </description>
+    <action pluginId="com.servoy.eclipse.ui" class="com.servoy.eclipse.cheatsheets.actions.CreateNewFormAction"/>
+   </item>
+</cheatsheet>

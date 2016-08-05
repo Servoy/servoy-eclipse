@@ -337,7 +337,7 @@ public class CreateComponentHandler implements IServerService
 				else if ("servoydefault-label".equals(name))
 				{
 					GraphicalComponent gc = parentSupportingElements.createNewGraphicalComponent(new Point(x, y));
-					gc.setText("label");
+					gc.setText(args.has("text") ? args.getString("text") : "label");
 					gc.setSize(new Dimension(w, h));
 					return new IPersist[] { gc };
 				}

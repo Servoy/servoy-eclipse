@@ -48,7 +48,9 @@ import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
+import org.json.JSONObject;
 
+import com.servoy.eclipse.cheatsheets.actions.ISupportCheatSheetActions;
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
@@ -89,7 +91,8 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  */
 
-public abstract class BaseVisualFormEditor extends MultiPageEditorPart implements IActiveProjectListener, IPersistChangeListener, IShowEditorInput
+public abstract class BaseVisualFormEditor extends MultiPageEditorPart
+	implements IActiveProjectListener, IPersistChangeListener, IShowEditorInput, ISupportCheatSheetActions
 {
 	private static final String COM_SERVOY_ECLIPSE_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.context";
 	private static final String COM_SERVOY_ECLIPSE_RFB_DESIGNER_CONTEXT = "com.servoy.eclipse.designer.rfb.context";
@@ -922,4 +925,10 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart implement
 		return renderGhosts;
 	}
 
+	// cheat sheet helper methods
+
+	public void createNewComponent(JSONObject componentDefinition)
+	{
+		if (graphicaleditor instanceof ISupportCheatSheetActions) ((ISupportCheatSheetActions)graphicaleditor).createNewComponent(componentDefinition);
+	}
 }

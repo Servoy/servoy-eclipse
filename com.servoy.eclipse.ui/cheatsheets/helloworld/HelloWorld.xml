@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<compositeCheatsheet name="Building a Hello World Solution">
+   <taskGroup kind="sequence" name="Building a Hello World Solution" skip="false">
+      <intro>
+        This cheat sheet shows you how to build and run a 'Hello World' Servoy solution.
+      </intro>
+      <onCompletion>
+         Congratulations! You were able to create and run your first Servoy solution.
+      </onCompletion>
+      <task kind="cheatsheet" name="Create a Hello World Servoy Solution" skip="false">
+         <intro>
+            <b>Introduction</b>
+         </intro>
+         <onCompletion>
+            <b>Conclusion</b>
+         </onCompletion>
+         <param name="path" value="CreateHWSolution.xml">
+         </param>
+      </task>
+      <task kind="cheatsheet" name="Create Hello World Form" skip="true">
+         <intro>
+            <b>Introduction</b>
+         </intro>
+         <onCompletion>
+            <b>Conclusion</b>
+         </onCompletion>
+         <param name="path" value="CreateHWForm.xml">
+         </param>
+      </task>
+       <task kind="cheatsheet" name="Add label element to form" skip="false">
+         <intro>
+            <b>Introduction</b>
+         </intro>
+         <onCompletion>
+            <b>Conclusion</b>
+         </onCompletion>
+         <param name="path" value="CreateHWElement.xml">
+         </param>
+      </task>
+             <task kind="cheatsheet" name="Run the solution using Smart Client" skip="false">
+         <intro>
+            <b>Introduction</b>
+         </intro>
+         <onCompletion>
+            <b>Conclusion</b>
+         </onCompletion>
+         <param name="path" value="runSmartClient.xml">
+         </param>
+      </task>
+   </taskGroup>
+</compositeCheatsheet>
