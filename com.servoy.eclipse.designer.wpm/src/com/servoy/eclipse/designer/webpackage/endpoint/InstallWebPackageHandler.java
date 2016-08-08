@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -56,12 +57,14 @@ public class InstallWebPackageHandler implements IDeveloperService
 	{
 		String urlString = null;
 		JSONArray jsonArray = pck.getJSONArray("releases");
+		String dependency = null;
 		for (int i = 0; i < jsonArray.length(); i++)
 		{
 			JSONObject release = jsonArray.optJSONObject(i);
 			if (selectedVersion == null || selectedVersion.equals(release.optString("version", "")))
 			{
 				urlString = release.optString("url");
+				dependency = release.optString("dependency", null);
 				break;
 			}
 		}
@@ -80,11 +83,79 @@ public class InstallWebPackageHandler implements IDeveloperService
 
 			importZipFileComponent(componentsFolder, in, packageName);
 			in.close();
+
+			if (dependency != null)
+			{
+				try
+				{
+					List<JSONObject> remotePackages = GetAllInstalledPackages.getRemotePackages();
+					String[] packages = dependency.split(",");
+					for (String dependendPck : packages)
+					{
+						String[] nameAndVersion = dependendPck.split("#");
+						for (JSONObject pckObject : remotePackages)
+						{
+							if (pckObject.get("name").equals(nameAndVersion[0]))
+							{
+								JSONArray releases = pckObject.getJSONArray("releases");
+								if (nameAndVersion.length > 1)
+								{
+									String version = "";
+									String prefix = "=";
+									if (nameAndVersion[1].startsWith(">="))
+									{
+										prefix = nameAndVersion[1].substring(0, 2);
+										version = nameAndVersion[1].substring(2);
+									}
+									else if (nameAndVersion[1].startsWith(">"))
+									{
+										prefix = nameAndVersion[1].substring(0, 1);
+										version = nameAndVersion[1].substring(1);
+									}
+									for (int j = 0; j < releases.length(); j++)
+									{
+										if (versionCheck(releases.getJSONObject(j).optString("version"), version, prefix))
+										{
+											importPackage(pckObject, releases.getJSONObject(j).optString("version"));
+											break;
+										}
+									}
+								}
+								else
+								{
+									importPackage(pckObject, releases.getJSONObject(0).optString("version"));
+								}
+								break;
+							}
+						}
+
+					}
+				}
+				catch (Exception e)
+				{
+					Debug.log(e);
+				}
+			}
 		}
 		catch (IOException e)
 		{
 			Debug.log(e);
 		}
+	}
+
+	private static boolean versionCheck(String version1, String version2, String prefix)
+	{
+		if (version1 == null) return false;
+		switch (prefix)
+		{
+			case "=" :
+				return version1.equals(version2);
+			case ">=" :
+				return version1.compareTo(version2) >= 0;
+			case ">" :
+				return version1.compareTo(version2) > 0;
+		}
+		return false;
 	}
 
 	private static void importZipFileComponent(IFolder componentsFolder, InputStream in, String name)
