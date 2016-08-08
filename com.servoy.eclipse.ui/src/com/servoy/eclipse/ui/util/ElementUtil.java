@@ -235,10 +235,10 @@ public class ElementUtil
 		IPersist context = persistContext.getContext();
 		IPersist ancestorForm = persist.getAncestor(IRepository.FORMS);
 		if (!(persist instanceof AbstractBase)//
-		|| !(context instanceof Form) //
-		|| ancestorForm == null // persist is something else, like a relation or a solution
-		|| ancestorForm == context // already in same form
-		|| !ModelUtils.getEditingFlattenedSolution(context).getFormHierarchy((Form)context).contains(ancestorForm)// check that the persist is in a parent form of the context
+			|| !(context instanceof Form) //
+			|| ancestorForm == null // persist is something else, like a relation or a solution
+			|| ancestorForm == context // already in same form
+			|| !ModelUtils.getEditingFlattenedSolution(context).getFormHierarchy((Form)context).contains(ancestorForm)// check that the persist is in a parent form of the context
 		)
 		{
 			// no override
@@ -277,36 +277,10 @@ public class ElementUtil
 		{
 			// override does not exist yet, create it
 			ISupportChilds parent = (Form)context;
-			if (!(parentPersist.getParent() instanceof Form))
-			{
-				parent = null;
-				parent = (ISupportChilds)context.acceptVisitor(new IPersistVisitor()
-				{
-					public Object visit(IPersist o)
-					{
-						if (o instanceof ISupportExtendsID && ((ISupportExtendsID)o).getExtendsID() == parentPersist.getParent().getID())
-						{
-							return o;
-						}
-						return CONTINUE_TRAVERSAL;
-					}
-				});
-
-				if (parent == null && parentPersist.getParent() instanceof LayoutContainer)
-				{
-					ISupportChilds originalParent = parentPersist.getParent();
-					parent = reconstructContainmentHierarchy(originalParent, context);
-				}
-				else if (parent == null)
-				{
-					parent = (ISupportChilds)((AbstractBase)persist.getParent()).cloneObj((Form)context, false, null, false, false, false);
-					((AbstractBase)parent).copyPropertiesMap(null, true);
-					((ISupportExtendsID)parent).setExtendsID(parentPersist.getParent().getID());
-				}
-			}
 			newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false, false);
 			((AbstractBase)newPersist).copyPropertiesMap(null, true);
 			((ISupportExtendsID)newPersist).setExtendsID(parentPersist.getID());
+
 		}
 		if (webObject != null)
 		{
@@ -332,63 +306,6 @@ public class ElementUtil
 		return newPersist;
 	}
 
-	/**
-	 * @param context
-	 * @param originalParent
-	 * @return
-	 *
-	 */
-	private static ISupportChilds reconstructContainmentHierarchy(ISupportChilds originalParent, IPersist context)
-	{
-		ISupportChilds parent = originalParent;
-		ArrayList<ISupportChilds> containmentHierrachy = new ArrayList<>();
-		containmentHierrachy.add(parent);
-		while (!(parent.getParent() instanceof Form))
-		{
-			parent = parent.getParent();
-			containmentHierrachy.add(0, parent);
-		}
-		ISupportChilds currentParrent = (ISupportChilds)context;
-		for (int i = 0; i < containmentHierrachy.size(); i++)
-		{
-			ISupportChilds nextParentSrc = containmentHierrachy.get(i);
-			try
-			{
-				IPersist newPersist = getOrCreateNewParent(currentParrent, nextParentSrc);
-
-				currentParrent = (ISupportChilds)newPersist;
-			}
-			catch (RepositoryException e)
-			{
-				Debug.log(e);
-			}
-
-		}
-		return currentParrent;
-	}
-
-	/**
-	 * @param currentParrent is the Target parent ISupportChilds. This is where we search for an already existing  overriding parent where we create a new one if none is found.
-	 * @param nextParentSrc is the Source parent. This is the LayoutContainer from the inherited form what we are searching for in the derived form. If not found we clone it in the derived form.
-	 * @return the found or created parent in the derived form.
-	 * @throws RepositoryException
-	 */
-	private static IPersist getOrCreateNewParent(ISupportChilds currentParrent, ISupportChilds nextParentSrc) throws RepositoryException
-	{
-		Iterator<IPersist> allObjects = currentParrent.getAllObjects();
-		while (allObjects.hasNext())
-		{
-			IPersist next = allObjects.next();
-			if (next instanceof ISupportExtendsID)
-			{
-				if (((ISupportExtendsID)next).getExtendsID() == nextParentSrc.getID()) return next;
-			}
-		}
-		IPersist newPersist = ((AbstractBase)nextParentSrc).cloneObj(currentParrent, false, null, false, false, false);
-		((AbstractBase)newPersist).copyPropertiesMap(null, true);
-		((ISupportExtendsID)newPersist).setExtendsID(nextParentSrc.getID());
-		return newPersist;
-	}
 
 	private static Map<String, WeakReference<Class< ? >>> beanClassCache = new ConcurrentHashMap<String, WeakReference<Class< ? >>>();
 

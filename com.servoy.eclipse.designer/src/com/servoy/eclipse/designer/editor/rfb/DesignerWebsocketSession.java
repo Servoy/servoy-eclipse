@@ -197,8 +197,18 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							if (!form.isResponsiveLayout()) FormLayoutGenerator.generateEndDiv(w);
 							if (form.isResponsiveLayout())
 							{
-								parentuuid = fe.getPersistIfAvailable().getParent().getUUID();
-								insertBeforeUUID = findNextSibling(fe.getPersistIfAvailable());
+								if (((ISupportExtendsID)fe.getPersistIfAvailable()).getExtendsID() > 0 &&
+									fe.getPersistIfAvailable().getParent() instanceof Form)
+								{
+									IPersist p = PersistHelper.getSuperPersist((ISupportExtendsID)fe.getPersistIfAvailable());
+									parentuuid = p.getParent().getUUID();
+									insertBeforeUUID = findNextSibling(fe.getPersistIfAvailable());
+								}
+								else
+								{
+									parentuuid = fe.getPersistIfAvailable().getParent().getUUID();
+									insertBeforeUUID = findNextSibling(fe.getPersistIfAvailable());
+								}
 							}
 
 							componentFound = true;
@@ -216,9 +226,17 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						{
 							componentFound = true;
 							parentuuid = child.getParent().getUUID();
-							if (child.getParent().equals(form)) parentuuid = null;
-
-							insertBeforeUUID = findNextSibling(child);
+							if (((ISupportExtendsID)child).getExtendsID() > 0 && child.getParent() instanceof Form)
+							{
+								IPersist p = PersistHelper.getSuperPersist((ISupportExtendsID)child);
+								parentuuid = p.getParent().getUUID();
+								insertBeforeUUID = findNextSibling(p);
+							}
+							else
+							{
+								if (child.getParent().equals(form)) parentuuid = null;
+								insertBeforeUUID = findNextSibling(child);
+							}
 							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context.getSolution(), w, true,
 								FormElementHelper.INSTANCE);
 						}
@@ -283,14 +301,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	{
 		if (persist != null && persist.getParent() instanceof AbstractContainer)
 		{
-			AbstractContainer persistParent = (AbstractContainer)persist.getParent();
-
-			if (persistParent instanceof Form)
-			{
-				FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
-				persistParent = flattenedSolution.getFlattenedForm(persistParent);
-			}
-
+			AbstractContainer persistParent = (AbstractContainer)PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(persist), form,
+				persist.getParent());
 			ArrayList<IPersist> children = persistParent.getSortedChildren();
 			int indexOf = children.indexOf(persist);
 			if (indexOf > -1 && (indexOf + 1) < children.size()) return children.get(indexOf + 1).getUUID();

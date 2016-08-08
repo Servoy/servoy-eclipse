@@ -31,11 +31,10 @@ import org.sablo.websocket.IServerService;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.persistence.AbstractBase;
-import com.servoy.j2db.persistence.FlattenedLayoutContainer;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
-import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.PositionComparator;
+import com.servoy.j2db.util.PersistHelper;
 
 /**
  * @author gboros
@@ -95,21 +94,14 @@ public abstract class MoveCommand extends ContentOutlineCommand implements IServ
 	{
 		if (parent instanceof AbstractBase)
 		{
-			ISupportChilds persist = parent;
-			if (parent instanceof FlattenedLayoutContainer)
-			{
-				persist = parent;
-			}
-			else if (parent instanceof LayoutContainer)
-			{
-				persist = new FlattenedLayoutContainer(ModelUtils.getEditingFlattenedSolution(parent), (LayoutContainer)parent);
-			}
+			ISupportChilds persist = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(parent), editorPart.getForm(), parent);
 			ArrayList<IPersist> allObjectsAsList = new ArrayList<>(((AbstractBase)persist).getAllObjectsAsList());
 			Collections.sort(allObjectsAsList, PositionComparator.XY_PERSIST_COMPARATOR);
 
 			return allObjectsAsList;
 		}
 		return null;
+
 	}
 
 	protected IPersist getSingleSelection()
