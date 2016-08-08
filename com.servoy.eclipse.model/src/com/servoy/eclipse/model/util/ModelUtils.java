@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -80,6 +82,7 @@ import com.servoy.j2db.util.Utils;
 
 public class ModelUtils
 {
+	private static final ConcurrentMap<String, Pair<Long, List<String>>> cachedStyleNames = new ConcurrentHashMap<>();
 
 	public static final String ONLY_WHEN_UI_DISABLED_ATTRIBUTE_NAME = "whenUIDisabledStateIs";
 
@@ -195,11 +198,26 @@ public class ModelUtils
 				Media media = flattenedSolution.getMedia(styleSheet);
 				if (media != null)
 				{
+					List<String> styleNames = null;
+					Pair<Long, List<String>> pair = cachedStyleNames.get(media.getName());
+					if (pair != null)
+					{
+						if (pair.getLeft().longValue() == media.getLastModifiedTime())
+						{
+							styleNames = pair.getRight();
+						}
+					}
 					try
 					{
-						String cssContent = new String(media.getMediaData(), "UTF-8");
-						IStyleSheet ss = new ServoyStyleSheet(cssContent, media.getName(), true);
-						for (String cssSelector : ss.getStyleNames())
+						if (styleNames == null)
+						{
+							String cssContent = new String(media.getMediaData(), "UTF-8");
+							// we only use the css3 styling (getStyleNames() so that we can give a boolean to ignore/don't create the rest
+							IStyleSheet ss = new ServoyStyleSheet(cssContent, media.getName(), true);
+							styleNames = ss.getStyleNames();
+							cachedStyleNames.put(styleSheet, new Pair<Long, List<String>>(Long.valueOf(media.getLastModifiedTime()), styleNames));
+						}
+						for (String cssSelector : styleNames)
 						{
 							if (cssSelector.contains("."))
 							{
@@ -320,7 +338,7 @@ public class ModelUtils
 				}
 
 				if ((matchedFormPrefix && stylePartsCount == 1) // found a match with form prefix, skip root matches
-				|| stylePartsCount > 2 || !styleName.startsWith(lookupName) || (stylePartsCount == 2 && !styleParts[0].equals(formPrefix)))
+					|| stylePartsCount > 2 || !styleName.startsWith(lookupName) || (stylePartsCount == 2 && !styleParts[0].equals(formPrefix)))
 				{
 					continue;
 				}
