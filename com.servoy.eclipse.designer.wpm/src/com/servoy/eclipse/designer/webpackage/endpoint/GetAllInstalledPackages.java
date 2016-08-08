@@ -39,6 +39,7 @@ import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.util.Debug;
 
 /**
@@ -128,12 +129,26 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 				}
 				try
 				{
+					String currentVersion = ClientVersion.getPureVersion();
 					JSONObject packageObject = new JSONObject(packageResponse);
 					JSONArray jsonArray = packageObject.getJSONArray("releases");
 					List<JSONObject> toSort = new ArrayList<>();
 					for (int k = jsonArray.length(); k-- > 0;)
 					{
-						toSort.add(jsonArray.getJSONObject(k));
+						JSONObject jsonObject = jsonArray.getJSONObject(k);
+						if (jsonObject.has("servoy-version"))
+						{
+							String servoyVersion = jsonObject.getString("servoy-version");
+							String[] minAndMax = servoyVersion.split(" - ");
+							if (minAndMax[0].compareTo(currentVersion) <= 0)
+							{
+								if (minAndMax.length == 1 || minAndMax[1].compareTo(currentVersion) >= 0)
+								{
+									toSort.add(jsonObject);
+								}
+							}
+						}
+						else toSort.add(jsonObject);
 					}
 					Collections.sort(toSort, new Comparator<JSONObject>()
 					{
