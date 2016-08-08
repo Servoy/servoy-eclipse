@@ -37,14 +37,14 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Settings;
 
 /**
- * Editor used to show the Servoy Marketplace. 
- *  
+ * Editor used to show the Servoy Marketplace.
+ *
  * @author pbakker
  */
 public class StartPageBrowserEditor extends EditorPart
 {
 	public static final String STARTPAGE_BROWSER_EDITOR_ID = "com.servoy.eclipse.core.StartPageBrowserEditor";
-	public static final String STARTPAGE_URL = "http://developer.servoy.com/developer/8xx_intro/startpage.html";
+	public static final String STARTPAGE_URL = "http://servoy.com/start-servoy-developer/";
 
 	public static final StartPageBrowserEditorInput INPUT = new StartPageBrowserEditorInput();
 
