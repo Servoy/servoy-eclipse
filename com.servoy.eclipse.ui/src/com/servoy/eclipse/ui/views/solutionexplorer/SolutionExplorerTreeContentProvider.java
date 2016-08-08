@@ -247,10 +247,10 @@ public class SolutionExplorerTreeContentProvider
 			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib), //
 			createTypeNode(Messages.TreeStrings_SpecialOperators, UserNodeType.SPECIAL_OPERATORS,
 				com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, jslib), //
-				createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
-				createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
-				createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
-					jslib) };
+			createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
+			createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
+			createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
+				jslib) };
 
 		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, invisibleRootNode);
 
@@ -1193,10 +1193,21 @@ public class SolutionExplorerTreeContentProvider
 
 				for (IProject iProject : allReferencedProjects)
 				{
-					if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID) &&
-						provider.getPackageNames().contains(iProject.getName()))
+					if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
 					{
-						IPackageReader packageType = provider.getPackageReader(iProject.getName());
+						String packageName = iProject.getName();
+						IPackageReader packageType = provider.getPackageReader(packageName);
+						if (packageType == null)
+						{
+							// TODO this is a partial fix for the problem that the project is not the package name
+							// see also the method resolveWebPackageDisplayName above.
+							if (iProject.getFile(new Path("META-INF/MANIFEST.MF")).exists())
+							{
+								packageName = new ContainerPackageReader(new File(iProject.getLocationURI()), iProject).getPackageName();
+								packageType = provider.getPackageReader(packageName);
+							}
+						}
+						if (packageType == null) continue;
 
 						// we also check that reader resource matches project just in case there are also for example zip references currently loaded
 						// with same package name - in which case the project is actually not loaded although it is valid and referenced
