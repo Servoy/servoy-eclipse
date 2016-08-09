@@ -31,6 +31,7 @@ import org.eclipse.ui.views.contentoutline.ContentOutline;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.j2db.persistence.IPersist;
 
@@ -48,10 +49,12 @@ public abstract class ContentOutlineCommand extends AbstractHandler implements I
 		ArrayList<IPersist> result = new ArrayList<IPersist>();
 		for (Object next : getSelectionList())
 		{
+			if (next instanceof WebFormComponentChildType) continue;
 			if (next instanceof PersistContext)
 			{
 				PersistContext persistContext = (PersistContext)next;
-				if (persistContext.getPersist() != null) result.add(persistContext.getPersist());
+				if (persistContext.getPersist() != null && !(persistContext.getPersist() instanceof WebFormComponentChildType))
+					result.add(persistContext.getPersist());
 			}
 			else if (next instanceof IPersist)
 			{

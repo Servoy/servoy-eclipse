@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 
+import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -95,23 +96,39 @@ public class RfbSelectionListener implements ISelectionListener
 			IPersist persist = Platform.getAdapterManager().getAdapter(sel, IPersist.class);
 			if (persist != null)
 			{
-				IPersist ancestor = persist.getAncestor(IRepository.FORMS);
-				if (ancestor == null) continue;
-				if (form.getID() == ancestor.getID())
+				if (persist instanceof WebFormComponentChildType)
 				{
-					/*
-					 * if (persist instanceof WebCustomType) { WebCustomType ghostBean = (WebCustomType)persist; uuids.add(ghostBean.getUUIDString()); } else
-					 */
-					uuids.add(persist.getUUID().toString());
+					String uuid = ((WebFormComponentChildType)persist).getElement().getName();
+					if (Character.isDigit(uuid.charAt(0)))
+					{
+						uuid = "_" + uuid;
+					}
+					uuid = uuid.replace('-', '_');
+					// TODO check if this is really on the form
+					uuids.add(uuid);
 					forCurrentForm = true;
 				}
 				else
 				{
-					List<Form> formHierarchy = ServoyModelFinder.getServoyModel().getFlattenedSolution().getFormHierarchy(form);
-					if (formHierarchy.contains(ancestor))
+					IPersist ancestor = persist.getAncestor(IRepository.FORMS);
+					if (ancestor == null) continue;
+					if (form.getID() == ancestor.getID())
 					{
+						/*
+						 * if (persist instanceof WebCustomType) { WebCustomType ghostBean = (WebCustomType)persist; uuids.add(ghostBean.getUUIDString()); }
+						 * else
+						 */
 						uuids.add(persist.getUUID().toString());
 						forCurrentForm = true;
+					}
+					else
+					{
+						List<Form> formHierarchy = ServoyModelFinder.getServoyModel().getFlattenedSolution().getFormHierarchy(form);
+						if (formHierarchy.contains(ancestor))
+						{
+							uuids.add(persist.getUUID().toString());
+							forCurrentForm = true;
+						}
 					}
 				}
 			}

@@ -14,7 +14,7 @@
  with this program; if not, see http://www.gnu.org/licenses or write to the Free
  Software Foundation,Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301
  */
-package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
+package com.servoy.eclipse.designer.util;
 
 
 import java.util.HashMap;
@@ -205,13 +205,14 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 		{
 			// get the merged/fully flattened form element from the form component cache for the current parent form element.
 			String currentName = name.toString();
+			String currentNameExtended = parentFormElement.getName() + name.toString();
 			FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(parentFormElement, parentPD,
 				(JSONObject)parentFormElement.getPropertyValue(parentPD.getName()), form, fs);
 			for (FormElement fe : cache.getFormComponentElements())
 			{
 				String feName = fe.getName();
 				int firstDollar = feName.indexOf('$');
-				if (currentName.equals(feName.substring(firstDollar)))
+				if (currentName.equals(feName.substring(firstDollar)) || currentNameExtended.equals(feName))
 				{
 					// element is found which is the fully flattened one that has all the properties.
 					// this is used in the getJSON() when the flattened form must be returned.
@@ -322,4 +323,20 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 		return new WebFormComponentChildType((IBasicWebObject)newPersist, key, fs);
 	}
 
+	public IFormElement getElement()
+	{
+		return element;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj == this) return true;
+		if (obj != null && obj.getClass() == getClass() && element != null)
+		{
+			WebFormComponentChildType webFormComponentChildType = (WebFormComponentChildType)obj;
+			return element.equals(webFormComponentChildType.getElement());
+		}
+		return false;
+	}
 }

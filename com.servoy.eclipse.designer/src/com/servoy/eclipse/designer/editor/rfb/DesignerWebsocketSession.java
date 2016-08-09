@@ -43,7 +43,7 @@ import org.sablo.websocket.IServerService;
 import org.sablo.websocket.impl.ClientService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.rfb.actions.handlers.WebFormComponentChildType;
+import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;

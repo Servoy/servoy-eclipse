@@ -34,6 +34,7 @@ import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.IPropertyType;
 
+import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.labelproviders.IPersistLabelProvider;
@@ -183,6 +184,11 @@ public class FormOutlineLabelprovider extends LabelProvider implements IPersistL
 				}
 				return typeName + postFix;
 			}
+			if (((PersistContext)element).getPersist() instanceof WebFormComponentChildType)
+			{
+				return ((WebFormComponentChildType)((PersistContext)element).getPersist()).getKey();
+			}
+
 			return SupportNameLabelProvider.INSTANCE_DEFAULT_ANONYMOUS.getText(((PersistContext)element).getPersist());
 		}
 		if (element instanceof FormElementGroup)
@@ -200,7 +206,8 @@ public class FormOutlineLabelprovider extends LabelProvider implements IPersistL
 
 	public Color getForeground(Object element)
 	{
-		if (element instanceof PersistContext && Utils.isInheritedFormElement(((PersistContext)element).getPersist(), ((PersistContext)element).getContext()))
+		if (element instanceof PersistContext && !(((PersistContext)element).getPersist() instanceof WebFormComponentChildType) &&
+			Utils.isInheritedFormElement(((PersistContext)element).getPersist(), ((PersistContext)element).getContext()))
 		{
 			// inherited elements
 			return Display.getCurrent().getSystemColor(SWT.COLOR_RED);
@@ -219,11 +226,20 @@ public class FormOutlineLabelprovider extends LabelProvider implements IPersistL
 
 	protected Image getImageForPersist(IPersist persist)
 	{
-		Pair<String, Image> elementNameAndImage = ElementUtil.getPersistNameAndImage(persist);
+		IPersist p = persist instanceof WebFormComponentChildType ? ((WebFormComponentChildType)persist).getElement() : persist;
+		Pair<String, Image> elementNameAndImage = ElementUtil.getPersistNameAndImage(p);
 		String imageName = elementNameAndImage.getLeft();
 		if (imageName == null)
 		{
-			imageName = "element.gif";
+			// TODO use the image from the webcomponent spec
+			if (p instanceof WebComponent && "servoycore-formcomponent".equals(((WebComponent)p).getTypeName()))
+			{
+				imageName = "designer.gif";
+			}
+			else
+			{
+				imageName = "element.gif";
+			}
 		}
 		else return elementNameAndImage.getRight();
 		Image img = Activator.getDefault().loadImageFromOldLocation(imageName);
