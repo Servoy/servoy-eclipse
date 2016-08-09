@@ -59,7 +59,7 @@ public class ChangeParentCommand extends Command
 	private final boolean hasChildPositionSupport;
 	private final Class< ? > childPositionClass;
 	private ISupportChilds oldParent;
-	private IPersist oldChild;
+	private int insertIndex;
 
 	public ChangeParentCommand(IPersist child, ISupportChilds newParent, IPersist targetChild, Form form, boolean insertAfterTarget)
 	{
@@ -99,33 +99,35 @@ public class ChangeParentCommand extends Command
 			oldParent.removeChild(child);
 		}
 
-		oldChild = child;
+		IPersist oldChild = child;
+		child = getOverridePersist(child);
+		if (child.getParent() instanceof Form)
+		{
+			child.getParent().removeChild(child);
+		}
+		ArrayList<IPersist> children = null;
 		if (hasChildPositionSupport)
 		{
-			ArrayList<IPersist> children = getChildrenSortedOnType(newParent);
-			children.remove(child);
-			child = getOverridePersist(child);
-			int insertIdx = childPositionClass.isInstance(targetChild) ? children.indexOf(targetChild) : -1;
-			if (insertIdx == -1) children.add(child);
+			children = getChildrenSortedOnType(newParent);
+			children.remove(oldChild);
+
+			insertIndex = childPositionClass.isInstance(targetChild) ? children.indexOf(targetChild) : -1;
+			if (insertIndex == -1) children.add(child);
 			else
 			{
-				if (insertAfterTarget) insertIdx++;
-				if (insertIdx < children.size()) children.add(insertIdx, child);
+				if (insertAfterTarget) insertIndex++;
+				if (insertIndex < children.size()) children.add(insertIndex, child);
 				else children.add(child);
 			}
-
-			updateWithOrderedPosition(children);
-		}
-		else
-		{
-			child = getOverridePersist(child);
 		}
 
 		newParent.addChild(child);
+		if (hasChildPositionSupport) updateWithOrderedPosition(children);
 
 		List<IPersist> changes = new ArrayList<>();
 		if (initialParent.equals(superPersist))
 		{
+			oldParent = newParent;//if it's an override, then on undo we just want to change the position
 			changes.add(newParent);
 			changes.addAll(getChildrenSortedOnType(newParent));
 		}
@@ -158,7 +160,17 @@ public class ChangeParentCommand extends Command
 		int counter = child instanceof ISupportBounds ? 1 : 0;
 		for (IPersist p : children)
 		{
-			p = getOverridePersist(p);
+			IPersist override = getOverridePersist(p);
+			if (!children.contains(override))
+			{
+				if (override.getParent() instanceof Form)
+				{
+					override.getParent().removeChild(override);
+				}
+				newParent.removeChild(p);
+				newParent.addChild(override);
+				p = override;
+			}
 			if (child instanceof ISupportBounds)
 			{
 				((ISupportBounds)p).setLocation(new Point(counter, counter));
@@ -216,6 +228,7 @@ public class ChangeParentCommand extends Command
 		if (hasChildPositionSupport)
 		{
 			ArrayList<IPersist> children = getChildrenSortedOnType(oldParent);
+			children.remove(insertIndex);
 			if (oldIndex < children.size())
 			{
 				children.add(oldIndex, child);
@@ -224,10 +237,13 @@ public class ChangeParentCommand extends Command
 			{
 				children.add(child);
 			}
+			oldParent.addChild(child);
 			updateWithOrderedPosition(children);
 		}
-
-		oldParent.addChild(child);
+		else
+		{
+			oldParent.addChild(child);
+		}
 		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changes);
 	}
 
