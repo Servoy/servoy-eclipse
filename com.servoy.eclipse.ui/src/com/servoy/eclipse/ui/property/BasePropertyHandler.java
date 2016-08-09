@@ -249,7 +249,7 @@ public class BasePropertyHandler implements IPropertyHandler
 					form.getView() != IFormConstants.VIEW_TYPE_RECORD && form.getView() != IFormConstants.VIEW_TYPE_RECORD_LOCKED;
 			}
 
-			if (obj instanceof Form && ((Form)obj).getReferenceForm() && BaseComponent.isEventOrCommandProperty(name))
+			if (obj instanceof Form && ((Form)obj).isFormComponent() && BaseComponent.isEventOrCommandProperty(name))
 			{
 				return false;
 			}

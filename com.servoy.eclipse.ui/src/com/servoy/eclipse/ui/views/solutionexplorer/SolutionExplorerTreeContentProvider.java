@@ -793,7 +793,7 @@ public class SolutionExplorerTreeContentProvider
 					{
 						addFormsNodeChildren(un, false);
 					}
-					else if (type == UserNodeType.REFERENCE_FORMS || (type == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.REFERENCE_FORMS))
+					else if (type == UserNodeType.COMPONENT_FORMS || (type == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.COMPONENT_FORMS))
 					{
 						addFormsNodeChildren(un, true);
 					}
@@ -1320,17 +1320,17 @@ public class SolutionExplorerTreeContentProvider
 				}
 				else if (un.getType() == UserNodeType.FORMS || (un.getType() == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.FORMS))
 				{
-					if (((Solution)un.getRealObject()).getAllNonReferenceForms(false).hasNext()) return true;
+					if (((Solution)un.getRealObject()).getAllNormalForms(false).hasNext()) return true;
 					if (ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null &&
 						ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject().hasServoyWorkingSets(
 							new String[] { ((Solution)un.getRealObject()).getName() }))
 						return true;
 					return false;
 				}
-				else if (un.getType() == UserNodeType.REFERENCE_FORMS ||
-					(un.getType() == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.REFERENCE_FORMS))
+				else if (un.getType() == UserNodeType.COMPONENT_FORMS ||
+					(un.getType() == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.COMPONENT_FORMS))
 				{
-					if (((Solution)un.getRealObject()).getAllReferenceForms(false).hasNext()) return true;
+					if (((Solution)un.getRealObject()).getAllComponentForms(false).hasNext()) return true;
 					return false;
 				}
 				else if (un.getType() == UserNodeType.WORKING_SET || (un.getType() == UserNodeType.GRAYED_OUT && un.getRealType() == UserNodeType.WORKING_SET))
@@ -1879,7 +1879,7 @@ public class SolutionExplorerTreeContentProvider
 				uiActivator.loadImageFromBundle("forms.gif"));
 			forms.parent = projectNode;
 
-			PlatformSimpleUserNode formReferences = new PlatformSimpleUserNode(Messages.TreeStrings_ReferenceForms, UserNodeType.REFERENCE_FORMS, solution,
+			PlatformSimpleUserNode formReferences = new PlatformSimpleUserNode(Messages.TreeStrings_FormComponents, UserNodeType.COMPONENT_FORMS, solution,
 				uiActivator.loadImageFromBundle("forms.gif"));
 			formReferences.parent = projectNode;
 			PlatformSimpleUserNode allRelations = null;
@@ -2015,7 +2015,7 @@ public class SolutionExplorerTreeContentProvider
 				for (String formName : forms)
 				{
 					Form form = workingSetNode.getSolution().getForm(formName);
-					if (form != null && !form.getReferenceForm().booleanValue())
+					if (form != null && !form.isFormComponent().booleanValue())
 					{
 						addFormNode(form, nodes, workingSetNode);
 					}
@@ -2054,8 +2054,8 @@ public class SolutionExplorerTreeContentProvider
 			}
 		}
 		Iterator<Form> it = null;
-		if (!referenceForms) it = solution.getAllNonReferenceForms(true);
-		else it = solution.getAllReferenceForms(true);
+		if (!referenceForms) it = solution.getAllNormalForms(true);
+		else it = solution.getAllComponentForms(true);
 		while (it.hasNext())
 		{
 			Form f = it.next();
@@ -2075,7 +2075,7 @@ public class SolutionExplorerTreeContentProvider
 		Form f = (Form)formNode.getRealObject();
 
 		// no scripting for form references
-		if (f.getReferenceForm()) return;
+		if (f.isFormComponent()) return;
 
 		List<PlatformSimpleUserNode> node = new ArrayList<PlatformSimpleUserNode>();
 		PlatformSimpleUserNode functionsNode = new PlatformSimpleUserNode(Messages.TreeStrings_controller, UserNodeType.FORM_CONTROLLER, f,
@@ -2626,9 +2626,9 @@ public class SolutionExplorerTreeContentProvider
 						{
 							// don't refresh if we also refresh the solution
 							if (persists.contains(s)) continue;
-							boolean referenceForms = ((Form)persist).getReferenceForm().booleanValue();
+							boolean formAsComponent = ((Form)persist).isFormComponent().booleanValue();
 
-							if (referenceForms) node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_ReferenceForms);
+							if (formAsComponent) node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_FormComponents);
 							else node = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_Forms);
 
 							if (node != null)
@@ -2639,7 +2639,7 @@ public class SolutionExplorerTreeContentProvider
 									if (!refreshedFormsNode)
 									{
 										refreshedFormsNode = true;
-										addFormsNodeChildren(node, referenceForms);
+										addFormsNodeChildren(node, formAsComponent);
 									}
 									else
 									{
@@ -2681,7 +2681,7 @@ public class SolutionExplorerTreeContentProvider
 								addFormsNodeChildren(solutionChildNode, false);
 								view.refreshTreeNodeFromModel(solutionChildNode);
 							}
-							solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_ReferenceForms);
+							solutionChildNode = (PlatformSimpleUserNode)findChildNode(node, Messages.TreeStrings_FormComponents);
 							if (solutionChildNode != null)
 							{
 								addFormsNodeChildren(solutionChildNode, true);

@@ -40,7 +40,7 @@ public class ReferenceToRegularFormAction extends Action
 	{
 		this.viewer = viewer;
 		setText("Transform to regular form");
-		setToolTipText("Transform reference form to regular form");
+		setToolTipText("Transform form component to regular form");
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class ReferenceToRegularFormAction extends Action
 	{
 		SimpleUserNode node = viewer.getSelectedTreeNode();
 		if (node == null || !(node.getRealObject() instanceof Form)) return false;
-		return (node.getRealObject() instanceof Form) && ((Form)node.getRealObject()).getReferenceForm().booleanValue();
+		return (node.getRealObject() instanceof Form) && ((Form)node.getRealObject()).isFormComponent().booleanValue();
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class ReferenceToRegularFormAction extends Action
 		Form form = (Form)node.getRealObject();
 		ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(form.getSolution().getName());
 		Form editingForm = (Form)servoyProject.getEditingPersist(form.getUUID());
-		editingForm.setReferenceForm(Boolean.FALSE);
+		editingForm.setFormComponent(Boolean.FALSE);
 
 		try
 		{

@@ -2291,7 +2291,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										{
 											addEncapsulationMarker(project, o, foundPersist, (Form)context);
 										}
-										if (context instanceof Form && ((Form)context).getReferenceForm().booleanValue() &&
+										if (context instanceof Form && ((Form)context).isFormComponent().booleanValue() &&
 											BaseComponent.isEventOrCommandProperty(element.getName()))
 										{
 											ServoyMarker mk = MarkerMessages.FormReferenceInvalidProperty.fill(((Form)context).getName(), element.getName());
@@ -3449,7 +3449,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							addBadStructureMarker(o, servoyProject, project);
 						}
 
-						if (context instanceof Form && ((Form)context).getReferenceForm().booleanValue() && o instanceof IScriptElement)
+						if (context instanceof Form && ((Form)context).isFormComponent().booleanValue() && o instanceof IScriptElement)
 						{
 							ServoyMarker mk = MarkerMessages.FormReferenceInvalidScript.fill(((Form)context).getName(), ((IScriptElement)o).getName());
 							addMarker(project, mk.getType(), mk.getText(), ((IScriptElement)o).getLineNumberOffset(), FORM_REFERENCE_INVALID_SCRIPT,

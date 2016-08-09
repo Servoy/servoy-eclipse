@@ -109,7 +109,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 	protected void createPages()
 	{
 		super.createPages();
-		if (!isMobile() && !Utils.getAsBoolean(getForm().getReferenceForm()))
+		if (!isMobile() && !Utils.getAsBoolean(getForm().isFormComponent()))
 		{
 			if (!isClosing())
 			{
@@ -274,7 +274,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		if (!isMobile() && seceditor != null) seceditor.saveSecurityElements();
 		super.doSave(monitor);
 
-		if (getForm().getReferenceForm().booleanValue())
+		if (getForm().isFormComponent().booleanValue())
 		{
 			for (IWorkbenchPage page : PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPages())
 			{

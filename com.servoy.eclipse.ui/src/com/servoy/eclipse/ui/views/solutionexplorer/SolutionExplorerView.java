@@ -217,7 +217,7 @@ import com.servoy.eclipse.ui.wizards.IExportSolutionWizardProvider;
 import com.servoy.eclipse.ui.wizards.ImportSolutionWizard;
 import com.servoy.eclipse.ui.wizards.NewFormWizard;
 import com.servoy.eclipse.ui.wizards.NewModuleWizard;
-import com.servoy.eclipse.ui.wizards.NewReferenceFormWizard;
+import com.servoy.eclipse.ui.wizards.NewFormComponentWizard;
 import com.servoy.eclipse.ui.wizards.NewSolutionWizard;
 import com.servoy.eclipse.ui.wizards.NewStyleWizard;
 import com.servoy.j2db.documentation.ClientSupport;
@@ -545,7 +545,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 						}
 						else
 						{
-							formsNode = (PlatformSimpleUserNode)cp.findChildNode(solutionNode, Messages.TreeStrings_ReferenceForms);
+							formsNode = (PlatformSimpleUserNode)cp.findChildNode(solutionNode, Messages.TreeStrings_FormComponents);
 							if (formsNode != null)
 							{
 								cp.refreshFormsNode(formsNode, true);
@@ -2828,8 +2828,8 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreePrimary.registerAction(UserNodeType.SERVICES_PROJECT_PACKAGE, newServiceAction);
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newComponentsPackageProjectAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newComponentsPackageProjectAction);
-		newActionInTreePrimary.registerAction(UserNodeType.REFERENCE_FORMS,
-			new OpenWizardAction(NewReferenceFormWizard.class, Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new reference form"));
+		newActionInTreePrimary.registerAction(UserNodeType.COMPONENT_FORMS,
+			new OpenWizardAction(NewFormComponentWizard.class, Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new form component"));
 
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA_FOLDER, importMediaFolder);
