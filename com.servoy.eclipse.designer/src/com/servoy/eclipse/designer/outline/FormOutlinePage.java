@@ -512,36 +512,41 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			IPersist parentForm = changed.getAncestor(IRepository.FORMS);
 			if (parentForm != null && (formHierarchy.contains(parentForm) || ((Form)parentForm).isFormComponent().booleanValue()))
 			{
-				refreshing = true;
-				Display.getDefault().asyncExec(new Runnable()
-				{
-					public void run()
-					{
-						try
-						{
-							Control control = getControl();
-							if (control != null && !control.isDisposed())
-							{
-								getTreeViewer().refresh();
-							}
-						}
-						finally
-						{
-							refreshing = false;
-						}
-					}
-				});
+				refresh();
 				return;
 			}
 		}
 	}
 
 
+	public void refresh()
+	{
+		refreshing = true;
+		Display.getDefault().asyncExec(new Runnable()
+		{
+			public void run()
+			{
+				try
+				{
+					Control control = getControl();
+					if (control != null && !control.isDisposed())
+					{
+						getTreeViewer().refresh();
+					}
+				}
+				finally
+				{
+					refreshing = false;
+				}
+			}
+		});
+	}
+
 	@Override
 	public void setActionBars(IActionBars actionBars)
 	{
 		super.setActionBars(actionBars);
 		IMenuManager menuManager = actionBars.getMenuManager();
-		menuManager.add(GroupedOutlineViewToggleAction.addListener(getTreeViewer()));
+		menuManager.add(GroupedOutlineViewToggleAction.addListener(this));
 	}
 }
