@@ -428,8 +428,16 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 								String[] name = ((IFormElement)p).getName().split("\\$");
 								if (name.length > 2 && !name[name.length - 1].startsWith(FormElement.SVY_NAME_PREFIX))
 								{
-									persistChildrenAsList.add(new WebFormComponentChildType((IBasicWebObject)formComponentEl.getPersistIfAvailable(),
-										name[name.length - 2] + "." + name[name.length - 1], ModelUtils.getEditingFlattenedSolution(form)));
+									StringBuilder keyBuilder = new StringBuilder();
+									for (int i = 1; i < name.length; i++)
+									{
+										if (i > 1) keyBuilder.append(".");
+										keyBuilder.append(name[i]);
+									}
+									persistChildrenAsList.add(new WebFormComponentChildType(
+										persist instanceof WebFormComponentChildType ? ((WebFormComponentChildType)persist).getParentComponent()
+											: (IBasicWebObject)formComponentEl.getPersistIfAvailable(),
+										keyBuilder.toString(), ModelUtils.getEditingFlattenedSolution(form)));
 									if (stopOnFirstFound && !firstFound)
 									{
 										firstFound = true;

@@ -332,10 +332,10 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 	public boolean equals(Object obj)
 	{
 		if (obj == this) return true;
-		if (obj != null && obj.getClass() == getClass() && element != null)
+		if (obj != null && obj.getClass() == getClass())
 		{
 			WebFormComponentChildType webFormComponentChildType = (WebFormComponentChildType)obj;
-			return element.equals(webFormComponentChildType.getElement());
+			return getParent().equals(webFormComponentChildType.getParent()) && getKey().equals(webFormComponentChildType.getKey());
 		}
 		return false;
 	}

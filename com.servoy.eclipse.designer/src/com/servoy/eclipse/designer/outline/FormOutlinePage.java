@@ -430,7 +430,18 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 				selectionObject = iterator.next();
 				IPersist persist = Platform.getAdapterManager().getAdapter(selectionObject, IPersist.class);
 				WebFormComponentChildType webFormComponentChildType = persist instanceof WebFormComponentChildType ? (WebFormComponentChildType)persist : null;
-				if (webFormComponentChildType != null) persist = webFormComponentChildType.getParent();
+				if (webFormComponentChildType != null)
+				{
+					String wfcName = webFormComponentChildType.getElement().getName();
+					int first$ = wfcName.indexOf("$");
+					if (first$ > 0)
+					{
+						String uuid = wfcName.substring(0, first$);
+						if (uuid.startsWith("_")) uuid = uuid.substring(1);
+						uuid = uuid.replace('_', '-');
+						persist = ModelUtils.getEditingFlattenedSolution(form).searchPersist(UUID.fromString(uuid));
+					}
+				}
 				if (persist != null)
 				{
 					IPersist f = persist.getAncestor(IRepository.FORMS);
