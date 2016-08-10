@@ -191,16 +191,19 @@ public class DesignerFilter implements Filter
 					{
 						boolean startedArray = false;
 						JSONObject categories = new JSONObject(); // categorised items (components/layouts can have "category" : "categoryName" in their spec)
-						if ((provider.getLayoutSpecifications().containsKey(key) &&
-							isAccesibleInLayoutType(provider.getLayoutSpecifications().get(key), layoutType)))
+						if (provider.getLayoutSpecifications().containsKey(key))
 						{
-							PackageSpecification<WebLayoutSpecification> pkg = provider.getLayoutSpecifications().get(key);
-							jsonWriter.object();
-							jsonWriter.key("packageName").value(pkg.getPackageName());
-							jsonWriter.key("packageDisplayname").value(pkg.getPackageDisplayname());
-							jsonWriter.key("components");
-							jsonWriter.array();
-							startedArray = true;
+							// TODO check why getWebComponentSpecifications call below also returns the layout specifications.
+							if (!"Absolute-Layout".equals(layoutType))
+							{
+								PackageSpecification<WebLayoutSpecification> pkg = provider.getLayoutSpecifications().get(key);
+								jsonWriter.object();
+								jsonWriter.key("packageName").value(pkg.getPackageName());
+								jsonWriter.key("packageDisplayname").value(pkg.getPackageDisplayname());
+								jsonWriter.key("components");
+								jsonWriter.array();
+								startedArray = true;
+							}
 						}
 						else if (provider.getWebComponentSpecifications().containsKey(key) &&
 							isAccesibleInLayoutType(provider.getWebComponentSpecifications().get(key), layoutType))
