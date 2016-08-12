@@ -149,6 +149,12 @@
 				        		  "provideColumnFormats": {
 				        			  "type": "boolean"
 				        		  },
+				        		  "includeColumnNames": {
+				        		  	  "type": "boolean"
+				        		  },
+				        		  "columnTypes":{
+				        		  	  "type": "object"
+				        		  },
 				        		  "pushToServer": {
 				        			  "enum" : ["reject", "allow", "shallow", "deep"]
 				        		  },
