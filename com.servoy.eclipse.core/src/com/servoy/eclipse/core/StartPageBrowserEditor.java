@@ -44,7 +44,7 @@ import com.servoy.j2db.util.Settings;
 public class StartPageBrowserEditor extends EditorPart
 {
 	public static final String STARTPAGE_BROWSER_EDITOR_ID = "com.servoy.eclipse.core.StartPageBrowserEditor";
-	public static final String STARTPAGE_URL = "http://servoy.com/start-servoy-developer/";
+	public static final String STARTPAGE_URL = "https://servoy.com/start-servoy-developer/";
 
 	public static final StartPageBrowserEditorInput INPUT = new StartPageBrowserEditorInput();
 
