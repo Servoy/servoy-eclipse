@@ -17,6 +17,9 @@
 
 package com.servoy.eclipse.core;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
@@ -28,6 +31,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.intro.impl.model.loader.ModelLoaderUtil;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
 import org.eclipse.ui.internal.intro.impl.model.url.IntroURLParser;
@@ -143,13 +147,29 @@ public class StartPageBrowserEditor extends EditorPart
 							{
 								public void run()
 								{
-									((IStartPageAction)actionObject).runAction(introURL.getParameter("a"));
+									((IStartPageAction)actionObject).runAction(introURL);
 								}
 							});
 							return;
 						}
 					}
 					introURL.execute();
+				}
+				else if (!url.startsWith(STARTPAGE_URL))
+				{
+					event.doit = false;
+					try
+					{
+						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
+					}
+					catch (PartInitException e)
+					{
+						e.printStackTrace();
+					}
+					catch (MalformedURLException e)
+					{
+						e.printStackTrace();
+					}
 				}
 			}
 		});

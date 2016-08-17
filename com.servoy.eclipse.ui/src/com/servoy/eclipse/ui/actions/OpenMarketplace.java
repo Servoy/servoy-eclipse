@@ -22,6 +22,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
 
 import com.servoy.eclipse.core.IStartPageAction;
 import com.servoy.eclipse.marketplace.MarketplaceBrowserEditor;
@@ -49,7 +50,7 @@ public class OpenMarketplace implements IWorkbenchWindowActionDelegate, IStartPa
 		runAction(null);
 	}
 
-	public void runAction(String param)
+	public void runAction(IntroURL introUrl)
 	{
 		try
 		{
@@ -58,15 +59,15 @@ public class OpenMarketplace implements IWorkbenchWindowActionDelegate, IStartPa
 			if (p == null)
 			{ //MarketPlaceEditor not already showing in the Active window, so opening with deeplink in launch URL
 				p = (MarketplaceBrowserEditor)activePage.openEditor(MarketplaceBrowserEditor.INPUT, MarketplaceBrowserEditor.MARKETPLACE_BROWSER_EDITOR_ID);
-				if (param != null)
+				if (introUrl != null && introUrl.getParameter("a") != null)
 				{
-					p.deepLink("/filter/" + param);
+					p.deepLink("/filter/" + introUrl.getParameter("a"));
 				}
 			}
-			else
+			else if (introUrl != null)
 			//MarketPlace already opened, so calling the deeplink through a exposed callback method in the Web Client solution, after which the MarketPlace editor is activated
 			{
-				p.executeDeepLink(param);
+				p.executeDeepLink(introUrl.getParameter("a"));
 				activePage.openEditor(MarketplaceBrowserEditor.INPUT, MarketplaceBrowserEditor.MARKETPLACE_BROWSER_EDITOR_ID);
 			}
 		}

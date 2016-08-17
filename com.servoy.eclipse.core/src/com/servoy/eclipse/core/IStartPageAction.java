@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.core;
 
+import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
+
 /**
  * Interface that must be implemented by start page actions
  * @author gboros
@@ -24,5 +26,5 @@ package com.servoy.eclipse.core;
  */
 public interface IStartPageAction
 {
-	public void runAction(String param);
+	public void runAction(IntroURL introUrl);
 }
