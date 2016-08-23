@@ -58,7 +58,8 @@ public class WebComponentPropertySource extends PDPropertySource
 				if (StaticContentSpecLoader.PROPERTY_LOCATION.getPropertyName().equals(desc.getName()) ||
 					StaticContentSpecLoader.PROPERTY_SIZE.getPropertyName().equals(desc.getName()) ||
 					StaticContentSpecLoader.PROPERTY_ANCHORS.getPropertyName().equals(desc.getName()) ||
-					StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName().equals(desc.getName()))
+					StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName().equals(desc.getName()) ||
+					StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName().equals(desc.getName()))
 				{
 					BEAN_PROPERTIES.put(desc.getName(), desc);
 				}
@@ -107,6 +108,8 @@ public class WebComponentPropertySource extends PDPropertySource
 		handlers.addAll(Arrays.asList(tmp2));
 		IPropertyHandler groupIDHandler = new BeanPropertyHandler(BEAN_PROPERTIES.get(StaticContentSpecLoader.PROPERTY_GROUPID.getPropertyName()));
 		if (groupIDHandler != null) handlers.add(groupIDHandler);
+		IPropertyHandler zIndexHandler = new BeanPropertyHandler(BEAN_PROPERTIES.get(StaticContentSpecLoader.PROPERTY_FORMINDEX.getPropertyName()));
+		if (zIndexHandler != null) handlers.add(zIndexHandler);
 		return handlers.toArray(new IPropertyHandler[handlers.size()]);
 	}
 
