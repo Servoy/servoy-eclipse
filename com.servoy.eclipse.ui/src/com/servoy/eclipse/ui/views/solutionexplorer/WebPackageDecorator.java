@@ -87,7 +87,7 @@ public class WebPackageDecorator implements ILightweightLabelDecorator
 
 	private ImageDescriptor resolveWebPackageImage(IProject iProject)
 	{
-		String imageFile = null;
+		String imageFile;
 
 		String packageType = WebComponentSpecProvider.getInstance().getPackageType(iProject.getName());
 		if (IPackageReader.WEB_COMPONENT.equals(packageType)) imageFile = "bean_decorator.png";
@@ -96,7 +96,7 @@ public class WebPackageDecorator implements ILightweightLabelDecorator
 			imageFile = "service_decorator.png";
 		else
 		{
-			//now we have to read the package type from the manifest
+			// now we have to read the package type from the manifest
 			imageFile = "bean_decorator.png";
 			if (iProject.getFile(new Path("META-INF/MANIFEST.MF")).exists())
 			{

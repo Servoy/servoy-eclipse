@@ -247,10 +247,10 @@ public class SolutionExplorerTreeContentProvider
 			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib), //
 			createTypeNode(Messages.TreeStrings_SpecialOperators, UserNodeType.SPECIAL_OPERATORS,
 				com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, jslib), //
-			createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
-			createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
-			createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
-				jslib) };
+				createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
+				createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
+				createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
+					jslib) };
 
 		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, invisibleRootNode);
 
@@ -1136,7 +1136,7 @@ public class SolutionExplorerTreeContentProvider
 					else if (IPackageReader.WEB_SERVICE.equals(reader.getPackageType()))
 					{
 						nodeType = UserNodeType.SERVICES_NONPROJECT_PACKAGE;
-					}
+					} // else it's a components package
 					PlatformSimpleUserNode node = new PlatformSimpleUserNode(displayName, nodeType, reader, packageIcon);
 					node.parent = un;
 					result.add(node);
@@ -1211,7 +1211,7 @@ public class SolutionExplorerTreeContentProvider
 
 						// we also check that reader resource matches project just in case there are also for example zip references currently loaded
 						// with same package name - in which case the project is actually not loaded although it is valid and referenced
-						if (packageType.getPackageType().equals(type) && packageType.getResource().equals(new File(iProject.getLocationURI())))
+						if (type.equals(packageType.getPackageType()) && packageType.getResource().equals(new File(iProject.getLocationURI()))) // package project do not allow packageType.getPackageType() == null (an error marker will/should be generated if that info is missing from the manifest); so if it is null it will just be ignored
 						{
 							String displayName = packageType.getPackageDisplayname();
 							List<IProject> referencingProjects = Arrays.asList(iProject.getReferencingProjects());

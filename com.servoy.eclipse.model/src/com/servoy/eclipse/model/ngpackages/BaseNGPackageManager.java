@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.model.ngpackages;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -28,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import org.eclipse.core.resources.IContainer;
@@ -54,6 +57,7 @@ import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
+import com.servoy.eclipse.model.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -194,15 +198,15 @@ public abstract class BaseNGPackageManager
 		SubMonitor monitor = SubMonitor.convert(m, "Reloading all ng packages", 100);//TODO check monitor steps counter
 		Map<String, IPackageReader> allPackageReaders = new HashMap<String, IPackageReader>();
 		monitor.subTask("Preparing to reload resources project ng packages");
-		collectResourcesProjectNGPackages(true, true, monitor.newChild(8), allPackageReaders);
+		collectResourcesProjectNGPackages(monitor.newChild(8), allPackageReaders);
 		monitor.worked(30);
 		monitor.subTask("Preparing to reload referenced ng package projects");
 		collectNGPackageProjects(allPackageReaders, monitor.newChild(8));
 		monitor.worked(30);
-		monitor.subTask("Preparing to reload solution contained binary packages");
+		monitor.subTask("Preparing to reload solution contained binary ng packages");
 		collectSolutionContainedBinaryPackages(allPackageReaders, monitor.newChild(8));
 		monitor.worked(30);
-		monitor.subTask("Reloading component packages");
+		monitor.subTask("Reloading NG packages");
 		ResourceProvider.setPackages(allPackageReaders.values());
 
 		monitor.worked(9);
@@ -212,7 +216,7 @@ public abstract class BaseNGPackageManager
 		monitor.done();
 	}
 
-	private void collectSolutionContainedBinaryPackages(Map<String, IPackageReader> componentProjectReaders, SubMonitor monitor)
+	private void collectSolutionContainedBinaryPackages(Map<String, IPackageReader> packageReaders, SubMonitor monitor)
 	{
 		ServoyProject[] modules = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
 
@@ -225,14 +229,13 @@ public abstract class BaseNGPackageManager
 				{
 					try
 					{
-						refreshResourceLater(folder, IResource.DEPTH_INFINITE);
 						IResource[] members = folder.members();
 						for (IResource resource : members)
 						{
 							IPackageReader reader = readPackageResource(resource);
 							if (reader != null)
 							{
-								componentProjectReaders.put(reader.getPackageName(), reader);
+								packageReaders.put(reader.getPackageName(), reader);
 								getProjectContainedPackagesMap(project.getName()).put(reader.getPackageName(), reader);
 							}
 						}
@@ -298,7 +301,7 @@ public abstract class BaseNGPackageManager
 			{
 				if (notContainedByOtherProjectsAfterUnloads(projectName, packageReader.getPackageName(), ngPackageChangesPerReferencingProject))
 				{
-					if (packageReader.getPackageType().equals(IPackageReader.WEB_SERVICE)) serviceReallyToLoad.put(packageReader.getResource(), packageReader); // could potentially replace another package reader in case it's referenced from multiple solution projects
+					if (IPackageReader.WEB_SERVICE.equals(packageReader.getPackageType())) serviceReallyToLoad.put(packageReader.getResource(), packageReader); // could potentially replace another package reader in case it's referenced from multiple solution projects
 					else componentsReallyToLoad.put(packageReader.getResource(), packageReader); // could potentially replace another package reader in case it's referenced from multiple solution projects
 				}
 			}
@@ -356,8 +359,7 @@ public abstract class BaseNGPackageManager
 		}
 	}
 
-	protected void collectResourcesProjectNGPackages(boolean reloadComponents, boolean reloadServices, IProgressMonitor m,
-		Map<String, IPackageReader> newComponents)
+	protected void collectResourcesProjectNGPackages(IProgressMonitor m, Map<String, IPackageReader> newPackages)
 	{
 		ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
 		SubMonitor monitor = SubMonitor.convert(m, 8);
@@ -419,15 +421,9 @@ public abstract class BaseNGPackageManager
 				}
 			}, services.getParent());
 			monitor.setWorkRemaining(23);
-			if (reloadComponents)
-			{
-				readParentOfPackagesDir(newComponents, activeResourcesProject.getProject(), SolutionSerializer.COMPONENTS_DIR_NAME, monitor.newChild(2));
-			}
+			readParentOfPackagesDir(newPackages, activeResourcesProject.getProject(), SolutionSerializer.COMPONENTS_DIR_NAME, monitor.newChild(2));
 			monitor.setWorkRemaining(21);
-			if (reloadServices)
-			{
-				readParentOfPackagesDir(newComponents, activeResourcesProject.getProject(), SolutionSerializer.SERVICES_DIR_NAME, monitor.newChild(2));
-			}
+			readParentOfPackagesDir(newPackages, activeResourcesProject.getProject(), SolutionSerializer.SERVICES_DIR_NAME, monitor.newChild(2));
 		}
 		monitor.done();
 	}
@@ -435,39 +431,27 @@ public abstract class BaseNGPackageManager
 	/**
 	 * Transform this package project into a package reader and add it to newComponentReaders and to our local map
 	 */
-	private void collectReferencedProjectAsPackageReader(Map<String, IPackageReader> newComponentReaders, String solutionProjectName, IProject project,
+	private void collectReferencedProjectAsPackageReader(Map<String, IPackageReader> newPackageReaders, String solutionProjectName, IProject project,
 		IProgressMonitor m)
 	{
+		m.beginTask("Reading package project '" + project.getName() + "'.", 1);
 		try
 		{
-			refreshResourceLater(project, IResource.DEPTH_INFINITE);
-			removeSpecMarkersInJob(project);
-
 			IPackageReader reader = readPackageResource(project);
+			m.worked(1);
 			if (reader != null)
 			{
-				// see if it is a component package or a service package
-				if (IPackageReader.WEB_COMPONENT.equals(reader.getPackageType()) || IPackageReader.WEB_LAYOUT.equals(reader.getPackageType()) ||
-					IPackageReader.WEB_SERVICE.equals(reader.getPackageType()))
-				{
-					newComponentReaders.put(reader.getPackageName(), reader);
-					getProjectContainedPackagesMap(solutionProjectName).put(reader.getPackageName(), reader);
-				}
-				else
-				{
-					addErrorMarker(project,
-						"NG Package Project '" + project.getName() + "' cannot be loaded; no web component or service found in it's manifest file.", null);
-				}
-			}
-			else
-			{
-				addErrorMarker(project, "NG Package Project '" + project.getName() +
-					" cannot be loaded; please check the contents/structure of that project. Does it have a manifest file?", null);
+				newPackageReaders.put(reader.getPackageName(), reader);
+				getProjectContainedPackagesMap(solutionProjectName).put(reader.getPackageName(), reader);
 			}
 		}
 		catch (Exception e)
 		{
 			ServoyLog.logError(e);
+		}
+		finally
+		{
+			m.done();
 		}
 	}
 
@@ -487,7 +471,6 @@ public abstract class BaseNGPackageManager
 		{
 			try
 			{
-				refreshResourceLater(folder, IResource.DEPTH_INFINITE);
 				IResource[] members = folder.members();
 				m.beginTask("Reading packages", members.length);
 				for (IResource resource : members)
@@ -523,11 +506,13 @@ public abstract class BaseNGPackageManager
 
 	protected IPackageReader readPackageResource(IResource resource)
 	{
+		IPackageReader reader = null;
+
 		if (resource instanceof IContainer)
 		{
 			if (((IContainer)resource).getFile(new Path("META-INF/MANIFEST.MF")).exists())
 			{
-				return new ContainerPackageReader(new File(resource.getLocationURI()), (IContainer)resource);
+				reader = new ContainerPackageReader(new File(resource.getLocationURI()), (IContainer)resource);
 			}
 		}
 		else if (resource instanceof IFile)
@@ -540,17 +525,46 @@ public abstract class BaseNGPackageManager
 			}
 			if (resource.getName().endsWith(".zip") || resource.getName().endsWith(".jar"))
 			{
-				ZipFilePackageReader reader = new ZipFilePackageReader(resource);
-				if (reader.getPackageType() == null) return null;
-				return reader;
+				reader = new ZipFilePackageReader(resource);
 			}
 		}
-		return null;
+
+		// see if it could be read and if it is a component package or a service package or a layout package; one of those must be present, otherwise it will not get loaded
+		reader = verifyNGPackage(resource, reader);
+
+		return reader;
+	}
+
+	private IPackageReader verifyNGPackage(IResource resource, IPackageReader reader)
+	{
+		refreshResourceLater(resource, IResource.DEPTH_INFINITE);
+		removeSpecMarkersInJob(resource);
+
+		if (reader == null)
+		{
+			addErrorMarker(resource,
+				"NG Package '" + resource.getName() + " cannot be loaded; please check the contents/structure of that package. Does it have a manifest file?",
+				null);
+		}
+		else if (!(IPackageReader.WEB_COMPONENT.equals(reader.getPackageType()) || IPackageReader.WEB_LAYOUT.equals(reader.getPackageType()) ||
+			IPackageReader.WEB_SERVICE.equals(reader.getPackageType())))
+		{
+			addErrorMarker(resource,
+				"NG Package '" + resource.getName() +
+					"' cannot be loaded; the manifest file does not declare Package-Type correctly (must be one of Web-Component, Web-Service or Web-Layout)",
+				null);
+			return null;
+		}
+
+		return reader;
 	}
 
 	protected static void addErrorMarker(IResource resource, final String markerMessage, final Exception e)
 	{
 		IResource res = resource;
+		// I think this search in parents is for unzipped packages only - where a file nested somewhere inside the container is given here as resource - which means
+		// that the parent search should always end at most in ng package dir, not higher (so normally when this mehod gets called the ng package root container should always exist);
+		// so remove markers call will remove markers correctly when it is called on the ng package dir or zip directly (when that package is reloaded...)
 		if (!res.exists())
 		{
 			res = res.getParent();
@@ -639,6 +653,67 @@ public abstract class BaseNGPackageManager
 		{
 			super.reportError(specpath, e);
 			addErrorMarker(e instanceof DuplicateEntityException ? container : container.getFile(new Path(specpath)), null, e);
+		}
+
+		@Override
+		public String getPackageType()
+		{
+			try
+			{
+				final Manifest man = getManifest();
+				if (man.getMainAttributes().getValue("Package-Type") != null) return Package.getPackageType(man);
+				else
+				{
+					String result = Package.getPackageType(man);
+					if (result != null)
+					{
+						// this package does not have the 'Package-Type' attribute, but it does contain at least one item
+						// so if we know the kind of package, we should add the type to the manifest of this DirPackage
+
+						man.getMainAttributes().put(new Attributes.Name(Package.PACKAGE_TYPE), result);
+						File mfFile = new File(dir, "META-INF/MANIFEST.MF");
+
+						final IFile[] workspaceMFs = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(mfFile.toURI());
+						if (workspaceMFs.length == 1 && workspaceMFs[0] != null)
+						{
+							// we do this later as currently we are executing during a read/get (maybe resource change listener notification) - and we might not be allowed to write or event want to write right away
+							scheduleSystemJob(new Job("Updating manifest file in package from '" + dir.getAbsolutePath() + "'; auto-adding package type...")
+							{
+								@Override
+								protected IStatus run(IProgressMonitor monitor)
+								{
+									if (workspaceMFs[0].exists())
+									{
+										try
+										{
+											ByteArrayOutputStream contentWriter = new ByteArrayOutputStream(1024);
+											man.write(contentWriter);
+
+											workspaceMFs[0].setContents(new ByteArrayInputStream(contentWriter.toByteArray()),
+												IResource.FORCE | IResource.KEEP_HISTORY, monitor);
+										}
+										catch (IOException | CoreException e)
+										{
+											ServoyLog.logError(e);
+											return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Failed to auto-add package type to manifest file of '" +
+												dir.getAbsolutePath() + "'. Check workspace log for more details.");
+										}
+									}
+									return Status.OK_STATUS;
+								}
+							}, workspaceMFs[0]);
+						}
+
+					}
+
+					return result;
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError("Error getting package type." + getName(), e);
+			}
+			return null;
 		}
 
 		@Override
@@ -743,7 +818,7 @@ public abstract class BaseNGPackageManager
 				}
 				return Status.OK_STATUS;
 			}
-		}, (resource.getProject() == resource || resource.getWorkspace().getRoot() == resource) ? resource : resource.getParent()); // refresh actually needs the parent rule for non-projects and non-workspace-root, cause the resource itself might have dissapeared
+		}, (resource.getProject() == resource || resource.getWorkspace().getRoot() == resource) ? resource : resource.getParent()); // refresh actually needs the parent rule for non-projects and non-workspace-root, cause the resource itself might have disappeared
 	}
 
 	protected static void removeSpecMarkersInJob(final IResource resource)
