@@ -1160,7 +1160,7 @@ public class ServoyModel extends AbstractServoyModel
 									{
 										try
 										{
-											if (editorReference.getEditorInput().getPersistable() == null)
+											if (editorReference.getEditorInput() != null && editorReference.getEditorInput().getPersistable() == null)
 											{
 												continue;
 											}
