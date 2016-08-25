@@ -516,7 +516,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				{
 					return new ListSelectCellEditor(parent, "Select parent form", new FormContentProvider(flattenedEditingSolution, form), formLabelProvider,
 						new FormValueEditor(flattenedEditingSolution), false, new FormContentProvider.FormListOptions(FormListOptions.FormListType.HIERARCHY,
-							null, true, false, false, form.getReferenceForm(), null),
+							null, true, false, false, form.isFormComponent(), null),
 						SWT.NONE, null, "parentFormDialog")
 					{
 						@Override
@@ -894,7 +894,7 @@ public class PersistPropertyHandler extends BasePropertyHandler
 			return new PropertyDescription(name, BooleanPropertyType.INSTANCE, null, null, null, true, null, null, null, false);
 		}
 
-		if (name.equals(IContentSpecConstants.PROPERTY_REFERENCE_FORM))
+		if (name.equals(IContentSpecConstants.PROPERTY_FORM_COMPONENT))
 		{
 			return new PropertyDescription(name, BooleanPropertyType.INSTANCE, null, null, null, true, null, null, null, false);
 		}

@@ -5,7 +5,7 @@ angular.module('designsize',['toolbar','editor']).run(function($rootScope, $tool
 			icon: "designsize/imac-64x64.png",
 			enabled: true,
 			onclick: function() { 
-				editor.setContentSizeFull();
+				editor.setContentSizeFull(true);
 			},
 		};
 

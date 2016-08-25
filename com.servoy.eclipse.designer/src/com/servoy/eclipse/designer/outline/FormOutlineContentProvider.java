@@ -17,6 +17,7 @@
 package com.servoy.eclipse.designer.outline;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -29,7 +30,11 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
+import org.json.JSONObject;
+import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.WebObjectSpecification;
 
+import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -38,6 +43,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptElement;
@@ -45,6 +51,10 @@ import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.server.ngclient.FormElement;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
+import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.SortedList;
 
@@ -121,7 +131,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 		else if (parentElement instanceof PersistContext && ((PersistContext)parentElement).getPersist() instanceof AbstractBase)
 		{
 			List<PersistContext> list = new ArrayList<PersistContext>();
-			List<IPersist> allObjectsAsList = new ArrayList<>(((AbstractBase)((PersistContext)parentElement).getPersist()).getAllObjectsAsList());
+			List<IPersist> allObjectsAsList = new ArrayList<>(getPersistChildrenAsList(((AbstractBase)((PersistContext)parentElement).getPersist()), false));
 			Collections.sort(allObjectsAsList, PositionComparator.XY_PERSIST_COMPARATOR);
 			for (IPersist persist : allObjectsAsList)
 			{
@@ -209,7 +219,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 		else if (parentElement instanceof PersistContext && ((PersistContext)parentElement).getPersist() instanceof AbstractBase)
 		{
 			List<PersistContext> list = new ArrayList<PersistContext>();
-			for (IPersist persist : ((AbstractBase)((PersistContext)parentElement).getPersist()).getAllObjectsAsList())
+			for (IPersist persist : getPersistChildrenAsList(((AbstractBase)((PersistContext)parentElement).getPersist()), false))
 			{
 				list.add(PersistContext.create(persist, ((PersistContext)parentElement).getContext()));
 			}
@@ -312,7 +322,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 	{
 		return element == ELEMENTS || element == PARTS || element instanceof Pair || element instanceof FormElementGroup ||
 			(element instanceof PersistContext && ((PersistContext)element).getPersist() instanceof AbstractBase &&
-				(((AbstractBase)((PersistContext)element).getPersist())).getAllObjects().hasNext());
+				hasPersistChild(((AbstractBase)((PersistContext)element).getPersist())));
 	}
 
 	public Object[] getElements(Object inputElement)
@@ -382,5 +392,69 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 		return displayType;
 	}
 
+	private boolean hasPersistChild(AbstractBase persist)
+	{
+		return getPersistChildrenAsList(persist, true).size() > 0;
+	}
 
+	private List<IPersist> getPersistChildrenAsList(AbstractBase persist, boolean stopOnFirstFound)
+	{
+		List<IPersist> persistChildrenAsList = persist.getAllObjectsAsList();
+		IPersist formElement = persist instanceof WebFormComponentChildType ? ((WebFormComponentChildType)persist).getElement() : persist;
+		if (persistChildrenAsList.isEmpty() && formElement instanceof IFormElement)
+		{
+			persistChildrenAsList = new ArrayList<IPersist>();
+			FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement((IFormElement)formElement, ModelUtils.getEditingFlattenedSolution(form),
+				null, true);
+			WebObjectSpecification spec = formComponentEl.getWebComponentSpec();
+			if (spec != null)
+			{
+				Collection<PropertyDescription> properties = spec.getProperties(FormComponentPropertyType.INSTANCE);
+				if (properties.size() > 0)
+				{
+					boolean firstFound = false;
+					for (PropertyDescription pd : properties)
+					{
+						Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
+						Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, ModelUtils.getEditingFlattenedSolution(form));
+						if (frm == null) continue;
+						FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, pd, (JSONObject)propertyValue, frm,
+							ModelUtils.getEditingFlattenedSolution(form));
+						for (FormElement element : cache.getFormComponentElements())
+						{
+							IPersist p = element.getPersistIfAvailable();
+							if (p instanceof IFormElement)
+							{
+								String[] name = ((IFormElement)p).getName().split("\\$");
+								if (name.length > 2 && !name[name.length - 1].startsWith(FormElement.SVY_NAME_PREFIX))
+								{
+									StringBuilder keyBuilder = new StringBuilder();
+									for (int i = 1; i < name.length; i++)
+									{
+										if (i > 1) keyBuilder.append(".");
+										keyBuilder.append(name[i]);
+									}
+									persistChildrenAsList.add(new WebFormComponentChildType(
+										persist instanceof WebFormComponentChildType ? ((WebFormComponentChildType)persist).getParentComponent()
+											: (IBasicWebObject)formComponentEl.getPersistIfAvailable(),
+										keyBuilder.toString(), ModelUtils.getEditingFlattenedSolution(form)));
+									if (stopOnFirstFound && !firstFound)
+									{
+										firstFound = true;
+										break;
+									}
+								}
+							}
+						}
+						if (stopOnFirstFound && firstFound)
+						{
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		return persistChildrenAsList;
+	}
 }

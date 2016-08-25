@@ -2454,7 +2454,7 @@ public class TypeCreator extends TypeCache
 				while (forms.hasNext())
 				{
 					Form form = forms.next();
-					if (!form.getReferenceForm())
+					if (!form.isFormComponent())
 					{
 						Property formProperty = createProperty(form.getName(), true, getTypeRef(context, "RuntimeForm<" + form.getName() + '>'),
 							getDescription(form.getDataSource()), getImageDescriptorForFormEncapsulation(form.getEncapsulation()), null, form.getDeprecated());

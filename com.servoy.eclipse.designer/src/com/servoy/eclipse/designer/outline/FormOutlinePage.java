@@ -59,6 +59,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.mobile.editparts.MobileListGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ChangeParentCommand;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -447,6 +448,19 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 			{
 				selectionObject = iterator.next();
 				IPersist persist = Platform.getAdapterManager().getAdapter(selectionObject, IPersist.class);
+				WebFormComponentChildType webFormComponentChildType = persist instanceof WebFormComponentChildType ? (WebFormComponentChildType)persist : null;
+				if (webFormComponentChildType != null)
+				{
+					String wfcName = webFormComponentChildType.getElement().getName();
+					int first$ = wfcName.indexOf("$");
+					if (first$ > 0)
+					{
+						String uuid = wfcName.substring(0, first$);
+						if (uuid.startsWith("_")) uuid = uuid.substring(1);
+						uuid = uuid.replace('_', '-');
+						persist = ModelUtils.getEditingFlattenedSolution(form).searchPersist(UUID.fromString(uuid));
+					}
+				}
 				if (persist != null)
 				{
 					IPersist f = persist.getAncestor(IRepository.FORMS);
@@ -466,7 +480,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 						});
 						if (searchPersist instanceof IPersist)
 						{
-							persist = (IPersist)searchPersist;
+							persist = webFormComponentChildType != null ? webFormComponentChildType : (IPersist)searchPersist;
 						}
 						selectionPath.add(PersistContext.create(persist, form));
 					}
@@ -515,38 +529,43 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 		for (IPersist changed : changes)
 		{
 			IPersist parentForm = changed.getAncestor(IRepository.FORMS);
-			if (parentForm != null && formHierarchy.contains(parentForm))
+			if (parentForm != null && (formHierarchy.contains(parentForm) || ((Form)parentForm).isFormComponent().booleanValue()))
 			{
-				refreshing = true;
-				Display.getDefault().asyncExec(new Runnable()
-				{
-					public void run()
-					{
-						try
-						{
-							Control control = getControl();
-							if (control != null && !control.isDisposed())
-							{
-								getTreeViewer().refresh();
-							}
-						}
-						finally
-						{
-							refreshing = false;
-						}
-					}
-				});
+				refresh();
 				return;
 			}
 		}
 	}
 
 
+	public void refresh()
+	{
+		refreshing = true;
+		Display.getDefault().asyncExec(new Runnable()
+		{
+			public void run()
+			{
+				try
+				{
+					Control control = getControl();
+					if (control != null && !control.isDisposed())
+					{
+						getTreeViewer().refresh();
+					}
+				}
+				finally
+				{
+					refreshing = false;
+				}
+			}
+		});
+	}
+
 	@Override
 	public void setActionBars(IActionBars actionBars)
 	{
 		super.setActionBars(actionBars);
 		IMenuManager menuManager = actionBars.getMenuManager();
-		menuManager.add(GroupedOutlineViewToggleAction.addListener(getTreeViewer()));
+		menuManager.add(GroupedOutlineViewToggleAction.addListener(this));
 	}
 }

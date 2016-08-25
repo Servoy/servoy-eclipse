@@ -20,6 +20,7 @@ package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 import java.util.Iterator;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;

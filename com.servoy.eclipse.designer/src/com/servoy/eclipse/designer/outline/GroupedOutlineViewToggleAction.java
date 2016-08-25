@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -38,7 +37,7 @@ public class GroupedOutlineViewToggleAction extends Action implements IPropertyC
 {
 	private static GroupedOutlineViewToggleAction INSTANCE = null;
 
-	private static List<TreeViewer> treeViewerList = null;
+	private static List<FormOutlinePage> formOutlinePageList = null;
 
 	protected GroupedOutlineViewToggleAction()
 	{
@@ -48,12 +47,12 @@ public class GroupedOutlineViewToggleAction extends Action implements IPropertyC
 		addListenerObject(this);
 	}
 
-	public static GroupedOutlineViewToggleAction addListener(TreeViewer treeViewer)
+	public static GroupedOutlineViewToggleAction addListener(FormOutlinePage formOutlinePage)
 	{
 		if (INSTANCE == null) INSTANCE = new GroupedOutlineViewToggleAction();
-		if (treeViewerList == null) treeViewerList = new ArrayList<TreeViewer>();
+		if (formOutlinePageList == null) formOutlinePageList = new ArrayList<FormOutlinePage>();
 
-		treeViewerList.add(treeViewer);
+		formOutlinePageList.add(formOutlinePage);
 
 		return INSTANCE;
 	}
@@ -61,8 +60,8 @@ public class GroupedOutlineViewToggleAction extends Action implements IPropertyC
 	public void propertyChange(PropertyChangeEvent event)
 	{
 		FormOutlineContentProvider.setDisplayType(((Boolean)event.getNewValue()).booleanValue());
-		for (TreeViewer treeViewer : treeViewerList)
-			treeViewer.refresh();
+		for (FormOutlinePage formOutlinePage : formOutlinePageList)
+			formOutlinePage.refresh();
 
 		IEclipsePreferences preferences = new InstanceScope().getNode("com.servoy.eclipse.designer");
 		preferences.putBoolean("OutlineViewMode", ((Boolean)event.getNewValue()).booleanValue());

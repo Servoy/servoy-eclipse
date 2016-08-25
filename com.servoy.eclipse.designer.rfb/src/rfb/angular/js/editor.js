@@ -638,6 +638,19 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			    $scope.$apply();
 			}
 
+			function redrawDecorators()
+			{
+				var selection = $editorService.getEditor().getSelection();
+				if (selection && selection.length > 0) 
+				{
+					//redraw decorators, position may have changed
+					// same issue as comment from adjustGlassPaneSize, we have to wait for render to be done
+					$timeout(function(){
+						$rootScope.$broadcast(EDITOR_EVENTS.RENDER_DECORATORS, selection);
+					},200);
+				}
+			}
+			
 			$scope.setContentSize = function(width, height,fixedSize) {
 				$scope.contentStyle.width = width;
 				$scope.contentStyle.height = height;
@@ -651,8 +664,12 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				delete $scope.contentStyle.h
 				delete $scope.contentStyle.w
 				adjustGlassPaneSize(width, height);
+				if (fixedSize)
+				{
+					redrawDecorators()
+				}	
 			}
-			$scope.setContentSizeFull = function() {
+			$scope.setContentSizeFull = function(redraw) {
 				$scope.contentStyle = {
 					position: "absolute",
 					top: "20px",
@@ -667,6 +684,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				delete $scope.contentStyle.h
 				delete $scope.contentStyle.w
 				adjustGlassPaneSize();
+				if (redraw)
+				{
+					redrawDecorators()
+				}	
 			}
 			$scope.getContentSize = function() {
 				return {

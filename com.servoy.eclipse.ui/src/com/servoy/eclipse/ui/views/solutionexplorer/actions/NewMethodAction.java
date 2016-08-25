@@ -151,7 +151,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 				setImageDescriptor(newFormMethodImage);
 				state = true;
 				if (((SimpleUserNode)sel.getFirstElement()).getRealObject() instanceof Form &&
-					Utils.getAsBoolean(((Form)(((SimpleUserNode)sel.getFirstElement()).getRealObject())).getReferenceForm()))
+					Utils.getAsBoolean(((Form)(((SimpleUserNode)sel.getFirstElement()).getRealObject())).isFormComponent()))
 				{
 					state = false;
 				}

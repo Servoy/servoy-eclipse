@@ -25,14 +25,17 @@ import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.cheatsheets.OpenCheatSheetAction;
+import org.eclipse.ui.internal.intro.impl.model.url.IntroURL;
 import org.eclipse.ui.intro.IIntroSite;
 import org.eclipse.ui.intro.config.IIntroAction;
+
+import com.servoy.eclipse.core.IStartPageAction;
 
 /**
  * @author gboros
  *
  */
-public class OpenCheatSheet implements IIntroAction
+public class OpenCheatSheet implements IIntroAction, IStartPageAction
 {
 	/*
 	 * @see org.eclipse.ui.intro.config.IIntroAction#run(org.eclipse.ui.intro.IIntroSite, java.util.Properties)
@@ -56,5 +59,11 @@ public class OpenCheatSheet implements IIntroAction
 				new OpenCheatSheetAction(params.getProperty("id")).run();
 			}
 		});
+	}
+
+	@Override
+	public void runAction(IntroURL introUrl)
+	{
+		new OpenCheatSheetAction(introUrl.getParameter("id")).run();
 	}
 }

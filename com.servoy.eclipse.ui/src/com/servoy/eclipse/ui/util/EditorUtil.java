@@ -151,9 +151,9 @@ public class EditorUtil
 			scriptPath = SolutionSerializer.getScriptPath(persist, false);
 		}
 		Form parentForm = (Form)persist.getAncestor(IRepository.FORMS);
-		if (parentForm != null && parentForm.getReferenceForm())
+		if (parentForm != null && parentForm.isFormComponent())
 		{
-			// no scripting for reference form
+			// no scripting for form component
 			return null;
 		}
 		if (scriptPath == null)
@@ -782,18 +782,18 @@ public class EditorUtil
 						{
 							TreeSelectDialog dialog = new TreeSelectDialog(shell, false, false, TreePatternFilter.FILTER_LEAFS,
 								FlatTreeContentProvider.INSTANCE, new LabelProvider()
-							{
-								@Override
-								public String getText(Object element)
 								{
-									if (element instanceof IEditorPart)
+									@Override
+									public String getText(Object element)
 									{
-										IEditorPart part = (IEditorPart)element;
-										return part.getTitle();
+										if (element instanceof IEditorPart)
+										{
+											IEditorPart part = (IEditorPart)element;
+											return part.getTitle();
+										}
+										return super.getText(element);
 									}
-									return super.getText(element);
-								}
-							}, null, null, SWT.MULTI | SWT.CHECK, "Select editors to save", dirtyparts, new StructuredSelection(dirtyparts), true,
+								}, null, null, SWT.MULTI | SWT.CHECK, "Select editors to save", dirtyparts, new StructuredSelection(dirtyparts), true,
 								"saveEditors", null);
 							dialog.open();
 							if (dialog.getReturnCode() == Window.OK)

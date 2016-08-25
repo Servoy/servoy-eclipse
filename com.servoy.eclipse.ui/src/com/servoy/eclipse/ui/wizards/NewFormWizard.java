@@ -230,9 +230,9 @@ public class NewFormWizard extends Wizard implements INewWizard
 			else
 			{
 				String title = "New form";
-				if (selectedForm != null && selectedForm.getReferenceForm().booleanValue())
+				if (selectedForm != null && selectedForm.isFormComponent().booleanValue())
 				{
-					title = "New reference form";
+					title = "New form component";
 					defaultSettings = new IDefaultSettings()
 					{
 						@Override
@@ -338,7 +338,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 					form.setResponsiveLayout(true);
 				}
 
-				form.setReferenceForm(new Boolean(newFormWizardPage.isReferenceForm()));
+				form.setFormComponent(new Boolean(newFormWizardPage.isReferenceForm()));
 			}
 			else
 			{

@@ -141,7 +141,7 @@ public class ServoyResourcesProject implements IProjectNature
 	}
 
 	/**
-	 * Returns true if the working set contains forms that are not reference forms
+	 * Returns true if the working set contains forms that are not form components
 	 * @param workingSetName
 	 * @param solutionNames
 	 * @return
@@ -162,7 +162,7 @@ public class ServoyResourcesProject implements IProjectNature
 					if (solution != null)
 					{
 						Form form = solution.getForm(formName);
-						if (form != null && form.getReferenceForm().booleanValue())
+						if (form != null && form.isFormComponent().booleanValue())
 						{
 							iterator.remove();
 							continue formNamesWhile; // removed it already, no point in continuing the for

@@ -52,7 +52,7 @@ public class OpenInScripteditorActionDelegate extends AbstractFormSelectionActio
 	{
 		for (Openable openable : lst)
 		{
-			if (openable.getData() instanceof Form && Utils.getAsBoolean(((Form)openable.getData()).getReferenceForm()))
+			if (openable.getData() instanceof Form && Utils.getAsBoolean(((Form)openable.getData()).isFormComponent()))
 			{
 				return false;
 			}

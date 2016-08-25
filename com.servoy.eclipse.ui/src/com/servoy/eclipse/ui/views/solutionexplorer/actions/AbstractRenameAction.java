@@ -76,7 +76,7 @@ public abstract class AbstractRenameAction extends Action
 	public void run()
 	{
 		final SimpleUserNode node = viewer.getSelectedTreeNode();
-		String type = node.getType().toString().toLowerCase();
+		final String type = node.getType().toString().toLowerCase();
 
 		WebObjectSpecification spec = (WebObjectSpecification)node.getRealObject();
 		IContainer[] dirResource;
@@ -120,7 +120,18 @@ public abstract class AbstractRenameAction extends Action
 								IFile specFile = pack.getFile(currentName + ".spec");
 								InputStream is = specFile.getContents();
 								StableKeysJSONObject specJSON = new StableKeysJSONObject(IOUtils.toString(is, "UTF-8"));
-								specJSON.put("name", specJSON.getString("name").replace("-" + NewWebObjectAction.getDashedName(currentName), "-" + newName));
+								String currentComponentName, newComponentName;
+								if ("service".equals(type))
+								{
+									currentComponentName = currentName;
+									newComponentName = newName;
+								}
+								else
+								{
+									currentComponentName = NewWebObjectAction.getDashedName(currentName);
+									newComponentName = NewWebObjectAction.getDashedName(newName);
+								}
+								specJSON.put("name", specJSON.getString("name").replace("-" + currentComponentName, "-" + newComponentName));
 								String definition = specJSON.getString("definition").replace("/" + currentName, "/" + newName);
 								if (definition.startsWith(currentName))
 								{

@@ -214,7 +214,7 @@ public class AddMethodButtonsComposite extends Composite
 		this.persistContext = persistContext;
 		this.methodKey = methodKey;
 		Form form = (Form)persistContext.getContext().getAncestor(IRepository.FORMS);
-		createFormMethodButton.setEnabled(form != null && !form.getReferenceForm());
+		createFormMethodButton.setEnabled(form != null && !form.isFormComponent());
 		createFoundsetMethodButton.setEnabled(
 			(form != null && form.getDataSource() != null && form.getSolution().getSolutionType() != SolutionMetaData.MOBILE) ||
 				persistContext.getContext().getAncestor(IRepository.TABLENODES) != null);

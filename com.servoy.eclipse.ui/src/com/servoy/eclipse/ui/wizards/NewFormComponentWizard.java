@@ -23,9 +23,9 @@ package com.servoy.eclipse.ui.wizards;
  * @author gboros
  *
  */
-public class NewReferenceFormWizard extends NewFormWizard
+public class NewFormComponentWizard extends NewFormWizard
 {
-	public NewReferenceFormWizard()
+	public NewFormComponentWizard()
 	{
 		super(new NewFormWizard.IDefaultSettings()
 		{
@@ -35,6 +35,6 @@ public class NewReferenceFormWizard extends NewFormWizard
 				return true;
 			}
 		});
-		setWindowTitle("New reference form");
+		setWindowTitle("New form component");
 	}
 }

@@ -1470,7 +1470,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			final ITable table = form == null ? null : ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(form.getDataSource());
 			return new MethodPropertyController<Integer>(id, displayName, persistContext,
-				new MethodListOptions(true, Boolean.TRUE.equals(propertyDescription.getConfig()), form != null && !form.getReferenceForm(), true,
+				new MethodListOptions(true, Boolean.TRUE.equals(propertyDescription.getConfig()), form != null && !form.isFormComponent(), true,
 					allowFoundsetMethods(persistContext, id) && table != null, table))
 			{
 				@Override

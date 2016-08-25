@@ -318,10 +318,10 @@ public class MarkerMessages
 		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 
 	public static ServoyMarker FormReferenceInvalidProperty = new ServoyMarker(
-		"Form \"{0}\" is a reference form and it is not allowed to have the property \"{1}\" set.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
+		"Form \"{0}\" is a form component and it is not allowed to have the property \"{1}\" set.", ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 
 	public static ServoyMarker FormReferenceInvalidScript = new ServoyMarker(
-		"Form \"{0}\" is a reference form and it is not allowed to have script variables or methods defined (\"{1}\").",
+		"Form \"{0}\" is a form component and it is not allowed to have script variables or methods defined (\"{1}\").",
 		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 
 	/**
