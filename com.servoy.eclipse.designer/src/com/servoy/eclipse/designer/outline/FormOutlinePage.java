@@ -62,9 +62,11 @@ import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
@@ -76,6 +78,7 @@ import com.servoy.j2db.persistence.IPersistChangeListener;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.UUID;
@@ -250,6 +253,19 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 								boolean doAllow = true;
 								for (IPersist p : dragObjects)
 								{
+									try
+									{
+										if (!p.getParent().equals(targetLayoutContainer) && (((ISupportExtendsID)p).getExtendsID() > 0 ||
+											!p.equals(ElementUtil.getOverridePersist(PersistContext.create(p, form)))))
+										{
+											//do not allow changing the parent for inherited elements
+											return false;
+										}
+									}
+									catch (Exception e)
+									{
+										ServoyLog.logError(e);
+									}
 									ISupportChilds parentContainer = targetLayoutContainer;
 									do
 									{
