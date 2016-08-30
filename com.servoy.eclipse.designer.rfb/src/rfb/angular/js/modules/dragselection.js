@@ -7,16 +7,20 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 		editorScope.selectionToDrag = null;
 		var dragCloneDiv = null;
 		var COMPONENT_TYPE = 7;
+		var initialParent = null;
+		var dragNode = null;
 
 		function onmousedown(event) {
-			var dragNode = utils.getNode(event);
-			// skip dragging if it is an inherited element from a form reference
+			dragNode = utils.getNode(event);
+			// skip dragging if it is an child element of a form reference
 			if (event.button == 0 && dragNode) {
 				dragStartEvent = event;
+				initialParent = null;
 				if(!editorScope.isAbsoluteFormLayout()){
-					if (angular.element(dragNode).hasClass("inheritedElement") || angular.element(dragNode).hasClass("formComponentChild")) {//do not grab if this is an inherited element or form component element
+					if (angular.element(dragNode).hasClass("formComponentChild")) {//do not grab if this is a form component element
 						dragStartEvent = null;
 					}
+					initialParent = utils.getParent($(dragNode), dragNode.getAttribute("svy-layoutname")? "layout" : "component");
 					dragCloneDiv = editorScope.getEditorContentRootScope().createTransportDiv(dragNode, event);
 				}
 			}
@@ -75,17 +79,17 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 							type = "component";
 							layoutName = node.getAttribute("svy-layoutname");
 							if (layoutName) type = "layout"
-								ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
+							ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
 							if (ghostObject)
 								type = ghostObject.propertyType;
-							canDrop = utils.getDropNode(type, topContainer, layoutName, event, undefined, node.getAttribute("svy-id"));
+							canDrop = getDropNode(type, topContainer, layoutName, event, node.getAttribute("svy-id"));
 							if (!canDrop.dropAllowed) {
 								// full refresh the editor content, it can be moved to different places already.
 								// TODO this is not enough
 								editorScope.refreshEditorContent();
 								continue;
 							}
-							if (canDrop.dropAllowed && !canDrop.beforeChild) {
+							if (canDrop.dropAllowed && !canDrop.beforeChild && !canDrop.append) {
 								canDrop.beforeChild = node.nextElementSibling;
 							}
 
@@ -288,8 +292,15 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 
 			editorScope.registerDOMEvent("mouseleave",direction, autoscrollLeave[direction]);
 			editorScope.registerDOMEvent("mouseup",direction, autoscrollLeave[direction]);
-		}		
+		}	
 		
+		function getDropNode(type, topContainer, layoutName, event, svyId)
+		{
+			var canDrop = utils.getDropNode(type, topContainer, layoutName, event, undefined, svyId);
+			canDrop.dropAllowed = canDrop.dropAllowed && angular.element(dragNode).hasClass("inheritedElement")
+					&& initialParent[0].getAttribute("svy-id") !== canDrop.dropTarget.getAttribute("svy-id") ? false : canDrop.dropAllowed;
+			return canDrop;
+		}
 		function onmousemove(event) {
 			if (dragStartEvent) {
 				var i;
@@ -396,15 +407,13 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						if (ghostObject) return;
 
 
-						var canDrop = utils.getDropNode(type, topContainer, layoutName, event);
+						var canDrop = getDropNode(type, topContainer, layoutName, event);
 						if (!canDrop.dropAllowed) {
 							editorScope.glasspane.style.cursor = "not-allowed";
 						} else editorScope.glasspane.style.cursor = "pointer";
 
 						dragStartEvent = event;
 
-						if (t) clearTimeout(t);
-						t = setTimeout(function() {
 							if (canDrop.dropTarget && editorScope.selectionToDrag) {
 								for (var i = 0; i < editorScope.selectionToDrag.length; i++) {
 									var node = angular.element(editorScope.selectionToDrag[i]);
@@ -416,9 +425,11 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 										}
 									}
 								}
-								editorScope.refreshEditorContent();
+								if (t) clearTimeout(t);
+								t = setTimeout(function(){
+									editorScope.refreshEditorContent();
+								}, 200);
 							}
-						}, 200);
 					} else {
 						var changeX = event.screenX- dragStartEvent.screenX;
 						var changeY = event.screenY- dragStartEvent.screenY;

@@ -208,6 +208,19 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 					selection = selection.concat(addToSelection);
 					return selection;
 				},
+				
+				getParent: function getParent(dt,realName) {
+					if (!dt || !dt[0]) return null;
+					var allowedChildren = $allowedChildren.get(dt[0].getAttribute("svy-layoutname"));
+					if (!allowedChildren || !(allowedChildren.indexOf(realName) >= 0)) {
+						// maybe this is a component that has svy-types instead of svy-allowed-childrent
+						allowedChildren = dt[0].getAttribute("svy-types");
+						if (!allowedChildren || !(allowedChildren.indexOf(realName) >= 0)) {
+							return this.getParent( $(dt).parent("[svy-id]"),realName); // the drop target doesn't allow this layout container type
+						}
+					}
+					return dt;
+				},
 
 				getDropNode: function(type, topContainer, layoutName, event, componentName, skipNodeId) {
 					var dropTarget = null;
@@ -230,32 +243,19 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 								dropTarget: null
 							};
 						} else {
-							function getParent(dt) {
-								if (!dt || !dt[0]) return null;
-								var allowedChildren = $allowedChildren.get(dt[0].getAttribute("svy-layoutname"));
-								if (!allowedChildren || !(allowedChildren.indexOf(realName) >= 0)) {
-									// maybe this is a component that has svy-types instead of svy-allowed-childrent
-									allowedChildren = dt[0].getAttribute("svy-types");
-									if (!allowedChildren || !(allowedChildren.indexOf(realName) >= 0)) {
-										return getParent( $(dt).parent("[svy-id]")); // the drop target doesn't allow this layout container type
-									}
-								}
-								return dt;
-							}
-							var realDropTarget = getParent($(dropTarget));
+							var realDropTarget = this.getParent($(dropTarget),realName);
 							if (realDropTarget == null) {
 								return {
 									dropAllowed: false
 								};
 							} else if (realDropTarget[0] != dropTarget) {
 								var clientRec = dropTarget.getBoundingClientRect();
-								var bottomPixels = (clientRec.bottom - clientRec.top) * 0.3;
-								var rightPixels = (clientRec.right - clientRec.left) * 0.3;
+								var bottomPixels = (clientRec.bottom - clientRec.top);// * 0.3;
+								var rightPixels = (clientRec.right - clientRec.left);// * 0.3;
 								var absolutePoint = editorScope.convertToAbsolutePoint({
 									x: clientRec.right,
 									y: clientRec.bottom
 								});
-								
 								if (event.pageY > (absolutePoint.y - bottomPixels) || event.pageX > (absolutePoint.x - rightPixels)) {
 									// this is in the 30% corner (bottom or right) of the component
 									// the beforeChild should be a sibling of the dropTarget (or empty if it is the last)
