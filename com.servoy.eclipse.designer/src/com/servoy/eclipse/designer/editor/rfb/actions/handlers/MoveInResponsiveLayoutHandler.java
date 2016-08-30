@@ -25,9 +25,12 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.Debug;
@@ -94,6 +97,19 @@ public class MoveInResponsiveLayoutHandler implements IServerService
 								Debug.error("drop target with uuid: " + dropTarget + " not found in form: " + parent);
 							}
 
+							try
+							{
+								if (!persist.getParent().equals(parent) && (((ISupportExtendsID)persist).getExtendsID() > 0 ||
+									!persist.equals(ElementUtil.getOverridePersist(PersistContext.create(persist, editorPart.getForm())))))
+								{
+									//do not allow changing the parent for inherited elements
+									continue;
+								}
+							}
+							catch (Exception e)
+							{
+								Debug.error(e);
+							}
 							IPersist rightSiblingPersist = PersistFinder.INSTANCE.searchForPersist(editorPart, rightSibling);
 							cc.add(new ChangeParentCommand(persist, parent, rightSiblingPersist, editorPart.getForm(), false));
 						}
