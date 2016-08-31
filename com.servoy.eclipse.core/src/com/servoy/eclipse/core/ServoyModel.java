@@ -1141,18 +1141,19 @@ public class ServoyModel extends AbstractServoyModel
 								{
 									if (workbenchWindow.getActivePage() == null) continue;
 
-									List<IProject> allActivatedSolutionProjects;
-									try
+									List<IProject> allActivatedSolutionProjects = new ArrayList<>(1);
+									if (project != null)
 									{
-										allActivatedSolutionProjects = project.getSolutionAndModuleReferencedProjects();
+										try
+										{
+											allActivatedSolutionProjects = project.getSolutionAndModuleReferencedProjects();
+										}
+										catch (CoreException e1)
+										{
+											ServoyLog.logError(e1);
+											allActivatedSolutionProjects.add(project.getProject());
+										}
 									}
-									catch (CoreException e1)
-									{
-										ServoyLog.logError(e1);
-										allActivatedSolutionProjects = new ArrayList<>(1);
-										allActivatedSolutionProjects.add(project.getProject());
-									}
-
 									IEditorReference[] openEditors = workbenchWindow.getActivePage().getEditorReferences();
 
 									ArrayList<IEditorReference> editorsToClose = new ArrayList<IEditorReference>();
