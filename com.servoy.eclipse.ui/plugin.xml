@@ -821,7 +821,7 @@
             id="com.servoy.eclipse.ui.CheatSheetCategory"
             name="Servoy">
       </category>
-      <cheatsheet
+      <!-- cheatsheet
             category="com.servoy.eclipse.ui.CheatSheetCategory"
             composite="false"
             contentFile="cheatsheets/CreateSolution.xml"
@@ -878,12 +878,12 @@
          <description>
             Shows you how to install the SQL Explorer plugin.
          </description>
-      </cheatsheet>
+      </cheatsheet -->
       <cheatsheet
             category="com.servoy.eclipse.ui.CheatSheetCategory"
             composite="true"
             contentFile="cheatsheets/helloworld/HelloWorld.xml"
-            id="com.servoy.eclipse.ui.cheatsheet.helloworld.helloworld"
+            id="com.servoy.eclipse.ui.cheatsheet.firstcontact"
             name="Building a Hello World Solution">
       </cheatsheet>      
    </extension>

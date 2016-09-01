@@ -37,14 +37,14 @@
          <param name="path" value="CreateHWElement.xml">
          </param>
       </task>
-             <task kind="cheatsheet" name="Run the solution using Smart Client" skip="false">
+             <task kind="cheatsheet" name="Run the solution using NG Client" skip="false">
          <intro>
             <b>Introduction</b>
          </intro>
          <onCompletion>
             <b>Conclusion</b>
          </onCompletion>
-         <param name="path" value="runSmartClient.xml">
+         <param name="path" value="runNGClient.xml">
          </param>
       </task>
    </taskGroup>
