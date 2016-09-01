@@ -1547,17 +1547,21 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						@Override
 						public ASTNode visitObjectInitializer(ObjectInitializer node)
 						{
-							ReturnStatement ret = null;
+							CallExpression call = null;
 							try
 							{
-								ret = node.getParent() != null ? node.getAncestor(ReturnStatement.class) : null;
+								ReturnStatement ret = node.getParent() != null ? node.getAncestor(ReturnStatement.class) : null;
+								if (ret != null)
+								{
+									call = ret.getAncestor(CallExpression.class);
+								}
 							}
 							catch (Exception e)
 							{
 								//ignore, why is this getAncestor throwing error if ancestor doesn't exist
 							}
-							CallExpression call = null;
-							if (ret != null && (call = ret.getAncestor(CallExpression.class)) != null && call.getExpression().toString().endsWith(".factory"))
+
+							if (call != null && call.getExpression().toString().endsWith(".factory"))
 							{
 								PropertyInitializer[] initializers = node.getPropertyInitializers();
 								for (PropertyInitializer initializer : initializers)

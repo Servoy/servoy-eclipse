@@ -33,12 +33,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -48,7 +46,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebObjectSpecification;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.RunInWorkspaceJob;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -86,24 +86,26 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 			while (it.hasNext())
 				saveTheSelection.add(it.next());
 			//start the delete job
-			WorkspaceJob deleteJob = new DeleteComponentOrServiceResourcesWorkspaceJob(saveTheSelection);
+			RunInWorkspaceJob deleteJob = new RunInWorkspaceJob(new DeleteComponentOrServiceResourcesWorkspaceJob(saveTheSelection));
+			deleteJob.setName("Deleting component or service resources");
+			deleteJob.setRule(ServoyModel.getWorkspace().getRoot());
+			deleteJob.setUser(false);
 			deleteJob.schedule();
 		}
 	}
 
-	private class DeleteComponentOrServiceResourcesWorkspaceJob extends WorkspaceJob
+	private class DeleteComponentOrServiceResourcesWorkspaceJob implements IWorkspaceRunnable
 	{
 
 		private final List<SimpleUserNode> savedSelection;
 
 		public DeleteComponentOrServiceResourcesWorkspaceJob(List<SimpleUserNode> selection)
 		{
-			super("Deleting component or service resources");
 			savedSelection = selection;
 		}
 
 		@Override
-		public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+		public void run(IProgressMonitor monitor) throws CoreException
 		{
 			IProject resources = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject();
 			Iterator<SimpleUserNode> it = savedSelection.iterator();
@@ -156,7 +158,6 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 					}
 				}
 			}
-			return Status.OK_STATUS;
 		}
 
 		private void deleteFolder(IFolder folder) throws CoreException
