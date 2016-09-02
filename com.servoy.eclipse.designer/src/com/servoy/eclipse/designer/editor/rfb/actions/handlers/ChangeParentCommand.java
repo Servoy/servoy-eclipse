@@ -24,6 +24,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 
 import org.eclipse.gef.commands.Command;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -64,14 +66,16 @@ public class ChangeParentCommand extends Command
 	private final Class< ? > childPositionClass;
 	private ISupportChilds oldParent;
 	private IPersist oldChild;
+	private int insertIdx;
 
 	public ChangeParentCommand(IPersist child, ISupportChilds newParent, IPersist targetChild, Form form, boolean insertAfterTarget)
 	{
 		super("Change Parent");
 
 		this.form = form;
-		this.child = child;
-		this.targetChild = targetChild;
+		this.child = child instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)child).getWrappedPersist() : child;
+		this.targetChild = targetChild instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)targetChild).getWrappedPersist()
+			: targetChild;
 
 		this.newParent = newParent;
 		this.insertAfterTarget = insertAfterTarget;
@@ -105,8 +109,9 @@ public class ChangeParentCommand extends Command
 		if (hasChildPositionSupport)
 		{
 			ArrayList<IPersist> children = getChildrenSortedOnType(newParent);
+			newParent.removeChild(child);
 			children.remove(child);
-			int insertIdx = childPositionClass.isInstance(targetChild) ? children.indexOf(targetChild) : -1;
+			insertIdx = childPositionClass.isInstance(targetChild) ? children.indexOf(targetChild) : -1;
 			if (insertIdx == -1) children.add(child);
 			else
 			{
@@ -119,7 +124,7 @@ public class ChangeParentCommand extends Command
 		}
 
 		newParent.addChild(child);
-
+		ArrayList<IPersist> changes = new ArrayList<>();
 		if (initialParent.equals(superPersist))
 		{
 			oldParent = newParent;//if it's an override, then on undo we just want to change the position
@@ -127,12 +132,25 @@ public class ChangeParentCommand extends Command
 			//changed persist should be the parent and its children (it is necessary to also send the children, otherwise the model is gone)
 			//changedPersist = newParent;
 			//if we don't override the whole hierarchy this full refresh is not needed anymore
-			BaseVisualFormEditorDesignPage activePage = ((BaseVisualFormEditor)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart()).getGraphicaleditor();
-			if (activePage instanceof RfbVisualFormEditorDesignPage) ((RfbVisualFormEditorDesignPage)activePage).refreshBrowserUrl(true);
+			IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
+			for (IEditorReference editorRef : editorRefs)
+			{
+				IEditorPart editor = editorRef.getEditor(false);
+				if (editor instanceof BaseVisualFormEditor)
+				{
+					BaseVisualFormEditorDesignPage activePage = ((BaseVisualFormEditor)editor).getGraphicaleditor();
+					if (activePage instanceof RfbVisualFormEditorDesignPage) ((RfbVisualFormEditorDesignPage)activePage).refreshBrowserUrl(true);
+					break;
+				}
+			}
+			changes.add((((IFlattenedPersistWrapper< ? >)newParent).getWrappedPersist()));
+			changes.addAll(getChildrenSortedOnType(newParent));
 		}
-		IPersist changedPersist = child instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)child).getWrappedPersist() : child;
-		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, Arrays.asList(new IPersist[] { changedPersist }));
-
+		else
+		{
+			changes.add(child);
+		}
+		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changes);
 	}
 
 	private ISupportChilds getFlattenedPersist(ISupportChilds persist)
@@ -194,7 +212,7 @@ public class ChangeParentCommand extends Command
 
 			if (childPositionClass.isInstance(persist))
 			{
-				children.add(persist);
+				children.add(persist instanceof IFlattenedPersistWrapper ? ((IFlattenedPersistWrapper< ? >)persist).getWrappedPersist() : persist);
 			}
 		}
 		IPersist[] sortedChildArray = children.toArray(new IPersist[0]);
@@ -229,6 +247,7 @@ public class ChangeParentCommand extends Command
 		if (hasChildPositionSupport)
 		{
 			ArrayList<IPersist> children = getChildrenSortedOnType(oldParent);
+			children.remove(insertIdx);
 			if (oldIndex < children.size())
 			{
 				children.add(oldIndex, child);
@@ -237,10 +256,13 @@ public class ChangeParentCommand extends Command
 			{
 				children.add(child);
 			}
+			oldParent.addChild(child);
 			updateWithOrderedPosition(children);
 		}
-
-		oldParent.addChild(child);
+		else
+		{
+			oldParent.addChild(child);
+		}
 		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changes);
 	}
 
