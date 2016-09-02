@@ -316,6 +316,9 @@ angular.module('editorContent',['servoyApp'])
 	},
 	isInDesigner: function() {
 		return true;
+	},
+	trustAsHtml: function() {
+		return false;
 	}
   }
   $scope.servoyApi = function(name) {
