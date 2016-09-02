@@ -1493,12 +1493,20 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	 */
 	public static void extractApiDocs(WebObjectSpecification spec)
 	{
-		if (spec.getApiFunctions().size() > 0 && spec.getDefinitionURL() != null)
+		if (spec.getApiFunctions().size() > 0)
+		{
+			extractDocsFromJsFile(spec, spec.getDefinitionURL());
+			extractDocsFromJsFile(spec, spec.getServerScript());
+		}
+	}
+
+	private static void extractDocsFromJsFile(WebObjectSpecification spec, URL url)
+	{
+		if (spec != null && url != null)
 		{
 			final Map<String, WebObjectFunctionDefinition> apis = spec.getApiFunctions();
 			try
 			{
-				URL url = spec.getDefinitionURL();
 				URLConnection openConnection = url.openConnection();
 				openConnection.setUseCaches(false);
 				InputStream is = openConnection.getInputStream();
@@ -1539,9 +1547,21 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						@Override
 						public ASTNode visitObjectInitializer(ObjectInitializer node)
 						{
-							ReturnStatement ret = node.getParent() != null ? node.getAncestor(ReturnStatement.class) : null;
 							CallExpression call = null;
-							if (ret != null && (call = ret.getAncestor(CallExpression.class)) != null && call.getExpression().toString().endsWith(".factory"))
+							try
+							{
+								ReturnStatement ret = node.getParent() != null ? node.getAncestor(ReturnStatement.class) : null;
+								if (ret != null)
+								{
+									call = ret.getAncestor(CallExpression.class);
+								}
+							}
+							catch (Exception e)
+							{
+								//ignore, why is this getAncestor throwing error if ancestor doesn't exist
+							}
+
+							if (call != null && call.getExpression().toString().endsWith(".factory"))
 							{
 								PropertyInitializer[] initializers = node.getPropertyInitializers();
 								for (PropertyInitializer initializer : initializers)
@@ -1565,7 +1585,6 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				ServoyLog.logError(e);
 			}
 		}
-
 	}
 
 	public static String getParsedComment(String comment)
@@ -1951,6 +1970,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(webComponentClassName);
 		if (spec != null)
 		{
+			extractApiDocs(spec);
+
 			Map<String, PropertyDescription> properties = spec.getProperties();
 			for (PropertyDescription pd : properties.values())
 			{
@@ -1965,24 +1986,64 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 			}
 			Map<String, WebObjectFunctionDefinition> apis = spec.getApiFunctions();
-			for (WebObjectFunctionDefinition api : apis.values())
+			for (final WebObjectFunctionDefinition api : apis.values())
 			{
 				String name = api.getName();
 				String displayParams = "(";
 				List<PropertyDescription> parameters = api.getParameters();
+				final List<String> parNames = new ArrayList<String>();
+				List<String> parTypes = new ArrayList<String>();
 
 				for (int i = 0; i < parameters.size(); i++)
 				{
 					displayParams += parameters.get(i).getName();
+					parNames.add(parameters.get(i).getName());
+					parTypes.add(parameters.get(i).getType().getName());
 					if (i < parameters.size() - 1) displayParams += ", ";
 				}
 				displayParams += ")";
-				String codeFragment = prefixForWebComponentMembers + name + displayParams;
-				nodes.add(new UserNode(name + displayParams, UserNodeType.FORM_ELEMENTS, codeFragment, codeFragment, webcomponent, functionIcon));
+
+				MethodFeedback feedback = new MethodFeedback(name, parTypes.toArray(new String[0]), prefixForWebComponentMembers, null, new IScriptObject()
+				{
+
+					@Override
+					public Class< ? >[] getAllReturnedTypes()
+					{
+						return null;
+					}
+
+					@Override
+					public String getSample(String methodName)
+					{
+						return null;
+					}
+
+					@Override
+					public String getToolTip(String methodName)
+					{
+						return getParsedComment(api.getDocumentation());
+					}
+
+					@Override
+					public String[] getParameterNames(String methodName)
+					{
+						return parNames.toArray(new String[0]);
+					}
+
+					@Override
+					public boolean isDeprecated(String methodName)
+					{
+						return api.getDocumentation() != null && api.getDocumentation().contains("@deprecated");
+					}
+
+				}, null, api.getReturnType() != null ? api.getReturnType().getType().getName() : "void");
+
+				nodes.add(new UserNode(name + displayParams, UserNodeType.FORM_ELEMENTS, feedback, webcomponent, functionIcon));
 			}
 		}
 
 		return nodes.toArray(new SimpleUserNode[nodes.size()]);
+
 	}
 
 	private SimpleUserNode[] getScriptableMethods(Scriptable scriptable, String elementName, String prefix)

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cheatsheet
+      title="Run the helloWorld solution">
+   <intro>
+      <description>
+         This cheat sheet shows you how to execute the helloWorld solution.
+      </description>
+   </intro>
+   <!-- item
+         title="Run the Smart Client" cheatsheetHyperlink="bigimage:cheatsheets/helloworld/runSmartClient.png" -->
+   <item
+         title="Run the NG Client">
+    <description>
+         Using the keyboard press and hold Alt-Shift-G or go under the Run menu and look for 'Start NGClient'.  This will launch the NG Client and run your current solution.
+         <!-- Attach Image runSmartClient.png -->
+    </description>
+    <action pluginId="com.servoy.eclipse.ui" class="com.servoy.eclipse.cheatsheets.actions.RunNGClientAction"/>
+   </item>
+</cheatsheet>

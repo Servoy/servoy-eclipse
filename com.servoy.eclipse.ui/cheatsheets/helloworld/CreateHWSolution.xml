@@ -24,10 +24,12 @@
     </description>
     <action pluginId="com.servoy.eclipse.ui" class="com.servoy.eclipse.cheatsheets.actions.ShowSolutionExplorerAction"/>
    </item>
+   <!-- item
+         title="Create a new solution" cheatsheetHyperlink="bigimage:cheatsheets/helloworld/CreateHWSolution1.png" -->
    <item
-         title="Create a new solution" cheatsheetHyperlink="bigimage:cheatsheets/helloworld/CreateHWSolution1.png">
+         title="Create a new solution">         
     <description>
-         In the Solution Explorer right-click on the All Solutions node and select Create New Solution. A wizard will show up. Enter 'Hello World' for the name of the new solution and click Finish. Leave the solution type to Normal and also leave the settings about the resource project unchanged.
+         In the Solution Explorer right-click on the All Solutions node and select Create New Solution. A wizard will show up. Enter 'HelloWorld' for the name of the new solution and click Finish. Leave the solution type to 'NG client only' and also leave the settings about the resource project unchanged.
 
          <!-- Attach Image CreateHWSolution1.png -->
          <!-- Attach Image CreateHWSolution2.png -->
