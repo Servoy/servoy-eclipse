@@ -6,8 +6,10 @@
          This cheat sheet shows you how to create a 'Hello World' label for the helloWorld form.
       </description>
    </intro>
+   <!-- item
+         title="Create a helloWorld label element" cheatsheetHyperlink="bigimage:cheatsheets/helloworld/CreateHWElement1.png" -->
    <item
-         title="Create a helloWorld label element" cheatsheetHyperlink="bigimage:cheatsheets/helloworld/CreateHWElement1.png">
+         title="Create a helloWorld label element">         
     <description>
          Within the form editor, look for the Servoy Default Components.  This drop-down contains numerous elements that can be added to the form.  Expand the block and look for the label element.  Click and drag the label element on to your form.  Then double click on the label within the form.  This will allow you to edit the value of the element.  Type in 'Hello World'.
          <!-- Attach Image CreateHWElement1.png -->

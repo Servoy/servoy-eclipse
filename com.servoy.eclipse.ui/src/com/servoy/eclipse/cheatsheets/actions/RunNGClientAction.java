@@ -35,12 +35,12 @@ import com.servoy.j2db.util.Debug;
  * @author gboros
  *
  */
-public class RunSmartClientAction extends Action
+public class RunNGClientAction extends Action
 {
 	@Override
 	public void run()
 	{
-		Command command = (PlatformUI.getWorkbench().getService(ICommandService.class)).getCommand("com.servoy.eclipse.ui.StartSmartClient");
+		Command command = (PlatformUI.getWorkbench().getService(ICommandService.class)).getCommand("com.servoy.eclipse.ui.StartNGClient");
 		final Event trigger = new Event();
 		ExecutionEvent executionEvent = (PlatformUI.getWorkbench().getService(IHandlerService.class)).createExecutionEvent(command, trigger);
 		try

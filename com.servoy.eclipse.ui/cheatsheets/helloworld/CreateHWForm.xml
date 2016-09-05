@@ -6,8 +6,10 @@
          This cheat sheet shows you how to create a helloWorld Servoy form.
       </description>
    </intro>
+   <!-- item
+         title="Create a helloWorld form" cheatsheetHyperlink="bigimage:cheatsheets/helloworld/CreateHWForm1.png" -->
    <item
-         title="Create a helloWorld form" cheatsheetHyperlink="bigimage:cheatsheets/helloworld/CreateHWForm1.png">
+         title="Create a helloWorld form">         
     <description>
          In the Solution Explorer right-click on the 'Hello World' Solution node and select Create new form. A wizard will show up. Enter 'helloWorld' for the name of the new form and click Finish.
          <!-- Attach Image CreateHWForm1.png -->

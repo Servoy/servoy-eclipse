@@ -25,8 +25,14 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.gef.commands.Command;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
+import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -60,14 +66,17 @@ public class ChangeParentCommand extends Command
 	private final Class< ? > childPositionClass;
 	private ISupportChilds oldParent;
 	private int insertIndex;
+	private IPersist oldChild;
+
 
 	public ChangeParentCommand(IPersist child, ISupportChilds newParent, IPersist targetChild, Form form, boolean insertAfterTarget)
 	{
 		super("Change Parent");
 
 		this.form = form;
-		this.child = child;
-		this.targetChild = targetChild;
+		this.child = child instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)child).getWrappedPersist() : child;
+		this.targetChild = targetChild instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)targetChild).getWrappedPersist()
+			: targetChild;
 
 		this.newParent = newParent;
 		this.insertAfterTarget = insertAfterTarget;
@@ -99,7 +108,7 @@ public class ChangeParentCommand extends Command
 			oldParent.removeChild(child);
 		}
 
-		IPersist oldChild = child;
+		oldChild = child;
 		child = getOverridePersist(child);
 		if (child.getParent() instanceof Form)
 		{
@@ -109,8 +118,9 @@ public class ChangeParentCommand extends Command
 		if (hasChildPositionSupport)
 		{
 			children = getChildrenSortedOnType(newParent);
+			newParent.removeChild(child);
 			children.remove(oldChild);
-
+			children.remove(child);
 			insertIndex = childPositionClass.isInstance(targetChild) ? children.indexOf(targetChild) : -1;
 			if (insertIndex == -1) children.add(child);
 			else
@@ -127,14 +137,28 @@ public class ChangeParentCommand extends Command
 		List<IPersist> changes = new ArrayList<>();
 		if (initialParent.equals(superPersist))
 		{
+			if (superPersist.getParent() instanceof Form)
+			{
+				//in this case we really need a full refresh
+				IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
+				for (IEditorReference editorRef : editorRefs)
+				{
+					IEditorPart editor = editorRef.getEditor(false);
+					if (editor instanceof BaseVisualFormEditor)
+					{
+						BaseVisualFormEditorDesignPage activePage = ((BaseVisualFormEditor)editor).getGraphicaleditor();
+						if (activePage instanceof RfbVisualFormEditorDesignPage) ((RfbVisualFormEditorDesignPage)activePage).refreshBrowserUrl(true);
+						break;
+					}
+				}
+			}
 			oldParent = newParent;//if it's an override, then on undo we just want to change the position
-			changes.add(newParent);
+			changes.add((((IFlattenedPersistWrapper< ? >)newParent).getWrappedPersist()));
 			changes.addAll(getChildrenSortedOnType(newParent));
 		}
 		else
 		{
-			IPersist changedPersist = child instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)child).getWrappedPersist() : child;
-			changes.add(changedPersist);
+			changes.add(child);
 		}
 		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changes);
 	}
@@ -193,7 +217,7 @@ public class ChangeParentCommand extends Command
 
 			if (childPositionClass.isInstance(persist))
 			{
-				children.add(persist);
+				children.add(persist instanceof IFlattenedPersistWrapper ? ((IFlattenedPersistWrapper< ? >)persist).getWrappedPersist() : persist);
 			}
 		}
 		IPersist[] sortedChildArray = children.toArray(new IPersist[0]);
