@@ -280,7 +280,14 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 								}
 							}
 						} // children and layoutName are special
-						else if (!"layoutName".equals(key)) container.putAttribute(key, value.toString());
+						else if (!"layoutName".equals(key))
+						{
+							container.putAttribute(key, value.toString());
+						}
+						else if ("layoutName".equals(key))
+						{
+							container.setSpecName(value.toString());
+						}
 					}
 					return container;
 				}
