@@ -103,6 +103,23 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 					for(var i=selection.length;i<$scope.nodes.length;i++) {
 						$scope.nodes[i].style.display = 'none';
 					}
+					if($scope.nodes.length > 0) {
+						var target = $scope.nodes[0].node.get(0);
+					    var targetRect = target.getBoundingClientRect();
+						var contentFrameRectTop = $(".contentframe").get(0).getBoundingClientRect().top;
+						var toolbarBottom = $(".toolbar-area").get(0).getBoundingClientRect().bottom;
+						var statusBarHeight = $(".statusbar-area").get(0).getBoundingClientRect().height;
+						
+						var top = targetRect.top + contentFrameRectTop;
+						var bottom = targetRect.bottom + contentFrameRectTop;
+						
+					    if (bottom > window.innerHeight - statusBarHeight) {
+					        target.scrollIntoView(false);
+					    }
+					    if (top < toolbarBottom) {
+					        target.scrollIntoView();
+					    } 						
+					}
 				});
 				}
 				else {

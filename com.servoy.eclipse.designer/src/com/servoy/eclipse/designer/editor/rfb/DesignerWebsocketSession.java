@@ -52,6 +52,7 @@ import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
@@ -292,7 +293,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			}
 
 			ArrayList<IPersist> children = persistParent.getSortedChildren();
-			int indexOf = children.indexOf(persist);
+			int indexOf = children.indexOf(
+				persist instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)persist).getWrappedPersist() : persist);
 			if (indexOf > -1 && (indexOf + 1) < children.size()) return children.get(indexOf + 1).getUUID();
 		}
 		return null;
