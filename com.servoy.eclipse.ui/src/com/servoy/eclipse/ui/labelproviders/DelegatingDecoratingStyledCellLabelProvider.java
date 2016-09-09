@@ -21,19 +21,21 @@ package com.servoy.eclipse.ui.labelproviders;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.IToolTipProvider;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 /** Delegate label provider for DecoratingStyledCellLabelProviders.
- * 
+ *
  * @author rgansevles
  *
  */
-public class DelegatingDecoratingStyledCellLabelProvider extends DecoratingStyledCellLabelProvider implements ILabelProvider, IFontProvider
+public class DelegatingDecoratingStyledCellLabelProvider extends DecoratingStyledCellLabelProvider implements ILabelProvider, IFontProvider, IColorProvider
 {
 	private final IBaseLabelProvider labelProvider;
 
@@ -49,7 +51,7 @@ public class DelegatingDecoratingStyledCellLabelProvider extends DecoratingStyle
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider#getBackground(java.lang.Object)
 	 */
 	@Override
@@ -59,12 +61,16 @@ public class DelegatingDecoratingStyledCellLabelProvider extends DecoratingStyle
 		{
 			return ((DecoratingStyledCellLabelProvider)labelProvider).getBackground(element);
 		}
+		if (labelProvider instanceof IColorProvider)
+		{
+			return ((IColorProvider)labelProvider).getBackground(element);
+		}
 		return super.getBackground(element);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider#getForeground(java.lang.Object)
 	 */
 	@Override
@@ -74,12 +80,26 @@ public class DelegatingDecoratingStyledCellLabelProvider extends DecoratingStyle
 		{
 			return ((DecoratingStyledCellLabelProvider)labelProvider).getForeground(element);
 		}
+		if (labelProvider instanceof IColorProvider)
+		{
+			return ((IColorProvider)labelProvider).getForeground(element);
+		}
 		return super.getForeground(element);
+	}
+
+	@Override
+	public Font getFont(Object element)
+	{
+		if (labelProvider instanceof IFontProvider)
+		{
+			return ((IFontProvider)labelProvider).getFont(element);
+		}
+		return super.getFont(element);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.CellLabelProvider#getToolTipBackgroundColor(java.lang.Object)
 	 */
 	@Override
@@ -94,7 +114,7 @@ public class DelegatingDecoratingStyledCellLabelProvider extends DecoratingStyle
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.CellLabelProvider#getToolTipDisplayDelayTime(java.lang.Object)
 	 */
 	@Override
@@ -109,7 +129,7 @@ public class DelegatingDecoratingStyledCellLabelProvider extends DecoratingStyle
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.CellLabelProvider#getToolTipFont(java.lang.Object)
 	 */
 	@Override
@@ -124,7 +144,7 @@ public class DelegatingDecoratingStyledCellLabelProvider extends DecoratingStyle
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.CellLabelProvider#getToolTipForegroundColor(java.lang.Object)
 	 */
 	@Override
@@ -139,7 +159,7 @@ public class DelegatingDecoratingStyledCellLabelProvider extends DecoratingStyle
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.CellLabelProvider#getToolTipImage(java.lang.Object)
 	 */
 	@Override
@@ -154,7 +174,7 @@ public class DelegatingDecoratingStyledCellLabelProvider extends DecoratingStyle
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.CellLabelProvider#getToolTipShift(java.lang.Object)
 	 */
 	@Override
@@ -169,7 +189,7 @@ public class DelegatingDecoratingStyledCellLabelProvider extends DecoratingStyle
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.CellLabelProvider#getToolTipStyle(java.lang.Object)
 	 */
 	@Override
@@ -184,22 +204,22 @@ public class DelegatingDecoratingStyledCellLabelProvider extends DecoratingStyle
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.CellLabelProvider#getToolTipText(java.lang.Object)
 	 */
 	@Override
 	public String getToolTipText(Object element)
 	{
-		if (labelProvider instanceof CellLabelProvider)
+		if (labelProvider instanceof IToolTipProvider)
 		{
-			return ((CellLabelProvider)labelProvider).getToolTipText(element);
+			return ((IToolTipProvider)labelProvider).getToolTipText(element);
 		}
 		return super.getToolTipText(element);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.CellLabelProvider#getToolTipTimeDisplayed(java.lang.Object)
 	 */
 	@Override
