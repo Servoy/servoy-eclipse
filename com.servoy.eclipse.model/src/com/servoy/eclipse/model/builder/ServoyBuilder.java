@@ -3933,11 +3933,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						if (server != null)
 						{
 							ITable table = server.getTable(tableName);
-							for (Column c : table.getColumns())
+							if (table != null)
 							{
-								if (c.getDataProviderID().equals(id))
+								for (Column c : table.getColumns())
 								{
-									return c;
+									if (c.getDataProviderID().equals(id))
+									{
+										return c;
+									}
 								}
 							}
 						}
