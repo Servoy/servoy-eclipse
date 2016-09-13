@@ -594,7 +594,7 @@ public class TypeCreator extends TypeCache
 
 		String realTypeName = typeName;
 		if (realTypeName.equals("JSFoundset")) realTypeName = FoundSet.JS_FOUNDSET;
-		type = createClassType(context, realTypeName, realTypeName);
+		if (!scopeTypes.containsKey(realTypeName)) type = createClassType(context, realTypeName, realTypeName);
 		if (type != null)
 		{
 			if (type.eResource() != null) return type;
