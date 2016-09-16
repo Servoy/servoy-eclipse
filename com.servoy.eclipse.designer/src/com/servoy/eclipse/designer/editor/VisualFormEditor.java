@@ -43,6 +43,7 @@ import com.servoy.eclipse.ui.editors.ITabbedEditor;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.FormEditorDesignerPreference;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.FlattenedForm;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
@@ -341,7 +342,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 				{
 					Object propertyValue = formElement.getPropertyValue(pd.getName());
 					Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
-					if (frm != null && (frm == formRef || hasFormReference(fs, frm, formRef)))
+					if (frm != null && (frm == formRef || FlattenedForm.hasFormInHierarchy(frm, formRef) || hasFormReference(fs, frm, formRef)))
 					{
 						return true;
 					}

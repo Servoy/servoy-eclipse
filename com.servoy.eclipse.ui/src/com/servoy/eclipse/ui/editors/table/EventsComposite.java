@@ -247,13 +247,17 @@ public class EventsComposite extends Composite
 				rows.add(new EventNode(solution, t));
 				solutions.add(solution.getUUID());
 
-				String[] modulesNames = new StringTokenizerConverter(",", true).convertProperty("modulesNames", solution.getModulesNames());
-				for (String modulename : modulesNames)
+				for (int i = 0; i < rows.size(); i++)
 				{
-					ServoyProject moduleProject = servoyModel.getServoyProject(modulename);
-					if (moduleProject != null && moduleProject.getSolution() != null && solutions.add(moduleProject.getSolution().getUUID()))
+					Solution sol = rows.get(i).getSolution();
+					String[] modulesNames = new StringTokenizerConverter(",", true).convertProperty("modulesNames", sol.getModulesNames());
+					for (String modulename : modulesNames)
 					{
-						rows.add(new EventNode((Solution)moduleProject.getEditingPersist(moduleProject.getSolution().getUUID()), t));
+						ServoyProject moduleProject = servoyModel.getServoyProject(modulename);
+						if (moduleProject != null && moduleProject.getSolution() != null && solutions.add(moduleProject.getSolution().getUUID()))
+						{
+							rows.add(new EventNode((Solution)moduleProject.getEditingPersist(moduleProject.getSolution().getUUID()), t));
+						}
 					}
 				}
 			}

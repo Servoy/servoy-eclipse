@@ -3933,11 +3933,14 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						if (server != null)
 						{
 							ITable table = server.getTable(tableName);
-							for (Column c : table.getColumns())
+							if (table != null)
 							{
-								if (c.getDataProviderID().equals(id))
+								for (Column c : table.getColumns())
 								{
-									return c;
+									if (c.getDataProviderID().equals(id))
+									{
+										return c;
+									}
 								}
 							}
 						}
@@ -4846,7 +4849,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INCOMPATIBLE_TYPE_FOR_SEQUENCE, IMarker.PRIORITY_NORMAL, null,
 										null).setAttribute("columnName", column.getName());
 								}
-								if (column.getAllowNull() && column.getRowIdentType() != Column.NORMAL_COLUMN)
+								if (table.getTableType() != ITable.VIEW && column.getAllowNull() && column.getRowIdentType() != Column.NORMAL_COLUMN)
 								{
 									ServoyMarker mk = MarkerMessages.ColumnRowIdentShouldNotAllowNull.fill(tableName, column.getName());
 									addMarker(res, mk.getType(), mk.getText(), -1, ROW_IDENT_SHOULD_NOT_BE_NULL, IMarker.PRIORITY_NORMAL, null,

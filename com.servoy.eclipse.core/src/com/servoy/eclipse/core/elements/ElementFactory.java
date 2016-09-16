@@ -346,6 +346,7 @@ public class ElementFactory
 			{
 				firstPart = firstPart.substring(index + 1);
 			}
+			firstPart = firstPart.replaceAll("-", "_");
 			compName = firstPart + "_" + random.nextInt(1024);
 			webComponent = parent.createNewWebComponent(compName, name);
 			if (webComponent != null)

@@ -748,7 +748,24 @@ public class TypeCreator extends TypeCache
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class), null);
-			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDataSources.class), null);
+			registerConstantsForScriptObject(new IReturnedTypesProvider()
+			{
+				@Override
+				public Class< ? >[] getAllReturnedTypes()
+				{
+					// filter out the 2 DB and MemDataSources (databasers.db/mem) because those shoud only map on the Scope type
+					List<Class< ? >> clsses = new ArrayList<>();
+					IReturnedTypesProvider datasourceReturns = ScriptObjectRegistry.getScriptObjectForClass(JSDataSources.class);
+					for (Class< ? > cls : datasourceReturns.getAllReturnedTypes())
+					{
+						if (cls != DBDataSource.class && cls != MemDataSource.class)
+						{
+							clsses.add(cls);
+						}
+					}
+					return clsses.toArray(new Class< ? >[clsses.size()]);
+				}
+			}, null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(ServoyException.class), null);
 
 			List<IClientPlugin> lst = application.getPluginManager().getPlugins(IClientPlugin.class);
