@@ -249,9 +249,10 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 									dropAllowed: false
 								};
 							} else if (realDropTarget[0] != dropTarget) {
-								var clientRec = dropTarget.getBoundingClientRect();
-								var bottomPixels = (clientRec.bottom - clientRec.top);// * 0.3;
-								var rightPixels = (clientRec.right - clientRec.left);// * 0.3;
+								var drop = dropTarget.clientWidth == 0 && dropTarget.clientHeight == 0 && dropTarget.firstElementChild ? dropTarget.firstElementChild : dropTarget;
+								var clientRec = drop.getBoundingClientRect();
+								var bottomPixels = (clientRec.bottom - clientRec.top) * 0.3;
+								var rightPixels = (clientRec.right - clientRec.left) * 0.3;
 								var absolutePoint = editorScope.convertToAbsolutePoint({
 									x: clientRec.right,
 									y: clientRec.bottom
