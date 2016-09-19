@@ -357,24 +357,34 @@ angular.module('editorContent',['servoyApp'])
 	    }
 	    var tpl = $compile(json.template)($rootScope.getDesignFormControllerScope());
 	    if (json.insertBeforeUUID) {
-	    	var testSibling = function(counter,insertBeforeUUID)
-			{
-				var sibling = document.querySelectorAll("[svy-id='" + insertBeforeUUID + "']");
-			   	if(sibling[0])
-			   	{
-			   		var nextSibling = angular.element(sibling);
-			   		tpl.insertBefore(nextSibling);
-			   	}
-			   	else if (counter++ < 10)
-			   	{
-			   		$timeout(function() {testSibling(counter, insertBeforeUUID)},100);
-			   	}
-			   	else
-			   	{
-			   		parent.append(tpl);//next sibling is not here yet, append to parent
-			   	}
-			};
-			testSibling(0,json.insertBeforeUUID);
+//	    	var testSibling = function(counter,insertBeforeUUID)
+//			{
+//				var sibling = document.querySelectorAll("[svy-id='" + insertBeforeUUID + "']");
+//			   	if(sibling[0])
+//			   	{
+//			   		var nextSibling = angular.element(sibling);
+//			   		tpl.insertBefore(nextSibling);
+//			   	}
+//			   	else if (counter++ < 10)
+//			   	{
+//			   		$timeout(function() {testSibling(counter, insertBeforeUUID)},100);
+//			   	}
+//			   	else
+//			   	{
+//			   		parent.append(tpl);//next sibling is not here yet, append to parent
+//			   	}
+//			};
+//			testSibling(0,json.insertBeforeUUID);
+			var sibling = document.querySelectorAll("[svy-id='" + json.insertBeforeUUID + "']");
+	    	if(sibling[0])
+	    	{
+	    		var nextSibling = angular.element(sibling);
+	    		tpl.insertBefore(nextSibling);
+	    	}
+	    	else
+	    	{
+	    		parent.append(tpl);//next sibling is not here yet, append to parent
+	    	}
 	    } else
 	    {
 	    	parent.append(tpl)
