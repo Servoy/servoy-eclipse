@@ -38,6 +38,7 @@ import org.sablo.IndexPageEnhancer;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -112,6 +113,17 @@ public class EditorContentFilter implements Filter
 					if (entry.getJsClientLibrary() != null)
 					{
 						formScripts.addAll(entry.getJsClientLibrary());
+					}
+				}
+				for (PackageSpecification<WebObjectSpecification> entry : WebComponentSpecProvider.getInstance().getWebComponentSpecifications().values())
+				{
+					if (entry.getCssDesignLibrary() != null)
+					{
+						css.addAll(entry.getCssDesignLibrary());
+					}
+					if (entry.getJsDesignLibrary() != null)
+					{
+						formScripts.addAll(entry.getJsDesignLibrary());
 					}
 				}
 				IndexPageEnhancer.enhance(getClass().getResource("editor-content.html"), httpServletRequest.getContextPath(), css, formScripts, null,

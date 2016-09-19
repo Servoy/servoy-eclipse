@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.labelproviders;
 
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IFontProvider;
+import org.eclipse.jface.viewers.IToolTipProvider;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 
@@ -26,11 +27,12 @@ import com.servoy.j2db.persistence.IPersist;
 
 /**
  * Base delegate label provider that use the context of a persist.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
-public abstract class AbstractPersistContextDelegateLabelProvider extends DelegateLabelProvider implements IFontProvider, IColorProvider, IPersistLabelProvider
+public abstract class AbstractPersistContextDelegateLabelProvider extends DelegateLabelProvider
+	implements IFontProvider, IColorProvider, IPersistLabelProvider, IToolTipProvider
 {
 	private final IPersist context;
 
@@ -50,8 +52,9 @@ public abstract class AbstractPersistContextDelegateLabelProvider extends Delega
 
 	/**
 	 * @see IFontProvider
-	 * 
+	 *
 	 */
+	@Override
 	public Font getFont(Object element)
 	{
 		if (getLabelProvider() instanceof IFontProvider)
@@ -63,8 +66,9 @@ public abstract class AbstractPersistContextDelegateLabelProvider extends Delega
 
 	/**
 	 * @see IColorProvider
-	 * 
+	 *
 	 */
+	@Override
 	public Color getBackground(Object element)
 	{
 		if (getLabelProvider() instanceof IColorProvider)
@@ -76,8 +80,9 @@ public abstract class AbstractPersistContextDelegateLabelProvider extends Delega
 
 	/**
 	 * @see IColorProvider
-	 * 
+	 *
 	 */
+	@Override
 	public Color getForeground(Object element)
 	{
 		if (getLabelProvider() instanceof IColorProvider)
@@ -90,5 +95,15 @@ public abstract class AbstractPersistContextDelegateLabelProvider extends Delega
 	public IPersist getPersist(Object value)
 	{
 		return ((IPersistLabelProvider)getLabelProvider()).getPersist(value);
+	}
+
+	@Override
+	public String getToolTipText(Object element)
+	{
+		if (getLabelProvider() instanceof IToolTipProvider)
+		{
+			return ((IToolTipProvider)getLabelProvider()).getToolTipText(element);
+		}
+		return null;
 	}
 }

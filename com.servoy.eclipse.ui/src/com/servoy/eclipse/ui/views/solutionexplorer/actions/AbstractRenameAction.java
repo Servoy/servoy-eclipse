@@ -98,7 +98,7 @@ public abstract class AbstractRenameAction extends Action
 					{
 						componentName = UIUtils.showTextFieldDialog(shell, getText(),
 							"Please provide a new unique name for the '" + node.getName() + "' " + type +
-								".\n\nPlease note that this action does not update references.\nIf the display name was different, it will not be changed (only the name will change).\nDisplay name can be changed directly from the .spec file.\n",
+								".\n\nPlease note that this action does not update references.\nDisplay name will only be changed if it is the same as old name (display name can also be changed directly from the .spec file).\n",
 							currentName);
 						if (componentName == null) return;
 					}

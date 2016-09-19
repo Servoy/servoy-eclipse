@@ -32,16 +32,14 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 						
 						// this node could be the angular tag (replace is false, or dynamic template) with a 0 size
 						// try to look if there is a child element that is better suited.
-						var height = value.clientHeight
-						var width = value.clientWidth
-						if (height == 0 && width == 0) {
+						if (value.clientHeight == 0 && value.clientWidth == 0) {
 							var children = node.children();
 							if (children.length == 1 && children[0].clientHeight > 0 && children[0].clientWidth > 0) {
 								node = $(children[0]);
 							}
-							height = node.outerHeight();
-							width = node.outerWidth();
 						}
+						var height = node.outerHeight();
+						var width = node.outerWidth();
 						
 						currentNode.name =  node.attr('name');
 						currentNode.node = node;
@@ -102,6 +100,23 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 					})
 					for(var i=selection.length;i<$scope.nodes.length;i++) {
 						$scope.nodes[i].style.display = 'none';
+					}
+					if($scope.nodes.length > 0) {
+						var target = $scope.nodes[0].node.get(0);
+					    var targetRect = target.getBoundingClientRect();
+						var contentFrameRectTop = $(".contentframe").get(0).getBoundingClientRect().top;
+						var toolbarBottom = $(".toolbar-area").get(0).getBoundingClientRect().bottom;
+						var statusBarHeight = $(".statusbar-area").get(0).getBoundingClientRect().height;
+						
+						var top = targetRect.top + contentFrameRectTop;
+						var bottom = targetRect.bottom + contentFrameRectTop;
+						
+					    if (bottom > window.innerHeight - statusBarHeight) {
+					        target.scrollIntoView(false);
+					    }
+					    if (top < toolbarBottom) {
+					        target.scrollIntoView();
+					    } 						
 					}
 				});
 				}

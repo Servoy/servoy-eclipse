@@ -351,7 +351,11 @@
 						}
 					},
 					"delayUntilFormLoad": {
-						"description": "Delay this api call until the form is reall loaded on the client (requestFocus)",
+						"description": "Deprecated. Use delayUntilFormLoads instead.",
+						"type": "boolean"
+					},
+					"delayUntilFormLoads": {
+						"description": "Delay this api call until the form is really loaded on the client (example: requestFocus).",
 						"type": "boolean"
 					},
 					"async": {
@@ -359,7 +363,11 @@
 						"type": "boolean"
 					},
 					"globalExclusive": {
-						"description": "Should only 1 of this api call be invoke after a request (like 1 request focus)",
+						"description": "Deprecated. Use discardPreviouslyQueuedSimilarCalls instead.",
+						"type": "boolean"
+					},
+					"discardPreviouslyQueuedSimilarCalls": {
+						"description": "False by default. When true (only makes sense for async or delayUntilFormLoads type of calls), only the last call (inside an event handler on the event thread - when multiple async/delayed API calls get queued before being sent to the client) to this method (identified by method name) on any component on the current window will be executed. The previous calls are discarded. For example when the user clicks a button, an event handler on the server that executes lots of code might end up calling .requestFocus() on many components for many different forms on this window. But to keep things fast, only the last requestFocus() is really relevant and only that really needs to get executed on the client - there is no use in executing any of the others. So by marking requestFocus() with this flag in the .spec you can achieve that.",
 						"type": "boolean"
 					}
 				},

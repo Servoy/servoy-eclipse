@@ -784,13 +784,13 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		        	$scope.contentStyle.bottom = "20px";
 
 		        	var h = editorContentRootScope.computeHeight();
-		        	if (h > $element.find('.content-area')[0].offsetHeight) {
+		        	//if (h > $element.find('.content-area')[0].offsetHeight) {
 		        	    delete $scope.contentStyle.bottom;
 		        	    $scope.contentStyle.height = h;
 		        	    $element.find('.content')[0].style.bottom = "";
 		        	    $element.find('.content')[0].style.height = h + "px";
 		        	    $element.find('.contentframe')[0].style.height = h + "px";
-				}
+				//}
 			}
 
 			function adjustGlassPaneSize(gpWidth, gpHeight) {

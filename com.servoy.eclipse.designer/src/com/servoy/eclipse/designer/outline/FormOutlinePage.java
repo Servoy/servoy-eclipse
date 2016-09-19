@@ -29,6 +29,7 @@ import org.eclipse.gef.commands.CompoundCommand;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -63,6 +64,7 @@ import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.labelproviders.DelegatingDecoratingStyledCellLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.property.MobileListModel;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -117,10 +119,11 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 		super.createControl(parent);
 		boolean mobile = form != null && form.getCustomMobileProperty(IMobileProperties.MOBILE_FORM.propertyName) != null;
 
+		ColumnViewerToolTipSupport.enableFor(getTreeViewer());
 		getTreeViewer().setContentProvider(mobile ? new MobileFormOutlineContentProvider(form) : new FormOutlineContentProvider(form));
-		getTreeViewer().setLabelProvider(new FormContextDelegateLabelProvider(
+		getTreeViewer().setLabelProvider(new DelegatingDecoratingStyledCellLabelProvider(new FormContextDelegateLabelProvider(
 			mobile ? MobileFormOutlineLabelprovider.MOBILE_FORM_OUTLINE_LABEL_PROVIDER_INSTANCE : FormOutlineLabelprovider.FORM_OUTLINE_LABEL_PROVIDER_INSTANCE,
-			form));
+			form)));
 		getTreeViewer().setInput(form);
 
 		if (form != null && form.isResponsiveLayout())

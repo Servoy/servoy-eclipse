@@ -23,8 +23,8 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.IColorProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
@@ -44,6 +44,7 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.WebComponent;
@@ -58,7 +59,7 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  */
 
-public class FormOutlineLabelprovider extends LabelProvider implements IPersistLabelProvider, IColorProvider
+public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPersistLabelProvider, IColorProvider
 {
 	public static final FormOutlineLabelprovider FORM_OUTLINE_LABEL_PROVIDER_INSTANCE = new FormOutlineLabelprovider();
 
@@ -199,11 +200,13 @@ public class FormOutlineLabelprovider extends LabelProvider implements IPersistL
 		return "???";
 	}
 
+	@Override
 	public Color getBackground(Object element)
 	{
 		return null;
 	}
 
+	@Override
 	public Color getForeground(Object element)
 	{
 		if (element instanceof PersistContext && !(((PersistContext)element).getPersist() instanceof WebFormComponentChildType) &&
@@ -248,5 +251,24 @@ public class FormOutlineLabelprovider extends LabelProvider implements IPersistL
 			img = Activator.getDefault().loadImageFromBundle(imageName);
 		}
 		return img;
+	}
+
+	@Override
+	public String getToolTipText(Object element)
+	{
+		IPersist persist = null;
+		if (element instanceof PersistContext)
+		{
+			persist = ((PersistContext)element).getPersist();
+		}
+		else if (element instanceof IPersist)
+		{
+			persist = (IPersist)element;
+		}
+		if (persist instanceof ISupportName)
+		{
+			return ((ISupportName)persist).getName();
+		}
+		return null;
 	}
 }

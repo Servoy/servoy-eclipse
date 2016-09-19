@@ -748,7 +748,24 @@ public class TypeCreator extends TypeCache
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSecurity.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSSolutionModel.class), null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDatabaseManager.class), null);
-			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(JSDataSources.class), null);
+			registerConstantsForScriptObject(new IReturnedTypesProvider()
+			{
+				@Override
+				public Class< ? >[] getAllReturnedTypes()
+				{
+					// filter out the 2 DB and MemDataSources (databasers.db/mem) because those shoud only map on the Scope type
+					List<Class< ? >> clsses = new ArrayList<>();
+					IReturnedTypesProvider datasourceReturns = ScriptObjectRegistry.getScriptObjectForClass(JSDataSources.class);
+					for (Class< ? > cls : datasourceReturns.getAllReturnedTypes())
+					{
+						if (cls != DBDataSource.class && cls != MemDataSource.class)
+						{
+							clsses.add(cls);
+						}
+					}
+					return clsses.toArray(new Class< ? >[clsses.size()]);
+				}
+			}, null);
 			registerConstantsForScriptObject(ScriptObjectRegistry.getScriptObjectForClass(ServoyException.class), null);
 
 			List<IClientPlugin> lst = application.getPluginManager().getPlugins(IClientPlugin.class);
@@ -3688,13 +3705,17 @@ public class TypeCreator extends TypeCache
 						try
 						{
 							FlattenedSolution fs = servoyProject.getEditingFlattenedSolution();
-							String[] dbServernameTablename = DataSourceUtilsBase.getDBServernameTablename(config.substring(sep + 1));
+							String tablePart = config.substring(sep + 1);
+							String[] dbServernameTablename = tablePart.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON)
+								? DataSourceUtils.getMemServernameTablename(tablePart) : DataSourceUtilsBase.getDBServernameTablename(tablePart);
 							if (dbServernameTablename != null)
 							{
-								IServer server = fs.getSolution().getRepository().getServer(dbServernameTablename[0]);
+								IServer server = tablePart.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON)
+									? ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(fs.getName()).getMemServer()
+									: fs.getSolution().getRepository().getServer(dbServernameTablename[0]);
 								if (server != null)
 								{
-									Table table = (Table)server.getTable(dbServernameTablename[1]);
+									ITable table = server.getTable(dbServernameTablename[1]);
 									if (table != null)
 									{
 										return new TypeConfig(fs, table);
@@ -3713,15 +3734,19 @@ public class TypeCreator extends TypeCache
 					// this is only dataSource or solutionname[/scope]
 					if (servoyModel.getFlattenedSolution().getSolution() != null)
 					{
-						String[] dbServernameTablename = DataSourceUtilsBase.getDBServernameTablename(config);
+						String[] dbServernameTablename = config.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON)
+							? DataSourceUtils.getMemServernameTablename(config) : DataSourceUtilsBase.getDBServernameTablename(config);
 						if (dbServernameTablename != null)
 						{
 							try
 							{
-								IServer server = servoyModel.getFlattenedSolution().getSolution().getRepository().getServer(dbServernameTablename[0]);
+								IServer server = config.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON)
+									? ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
+										servoyModel.getFlattenedSolution().getName()).getMemServer()
+									: servoyModel.getFlattenedSolution().getSolution().getRepository().getServer(dbServernameTablename[0]);
 								if (server != null)
 								{
-									Table table = (Table)server.getTable(dbServernameTablename[1]);
+									ITable table = server.getTable(dbServernameTablename[1]);
 									if (table != null)
 									{
 										return new TypeConfig(table);
@@ -4305,17 +4330,17 @@ public class TypeCreator extends TypeCache
 	public static class TypeConfig
 	{
 		public final FlattenedSolution flattenedSolution;
-		public final Table table;
+		public final ITable table;
 		public final String scopeName;
 
-		public TypeConfig(FlattenedSolution flattenedSolution, String scopeName, Table table)
+		public TypeConfig(FlattenedSolution flattenedSolution, String scopeName, ITable table)
 		{
 			this.flattenedSolution = flattenedSolution;
 			this.scopeName = scopeName;
 			this.table = table;
 		}
 
-		public TypeConfig(FlattenedSolution flattenedSolution, Table table)
+		public TypeConfig(FlattenedSolution flattenedSolution, ITable table)
 		{
 			this(flattenedSolution, null, table);
 		}
@@ -4325,7 +4350,7 @@ public class TypeCreator extends TypeCache
 			this(flattenedSolution, scopeName, null);
 		}
 
-		public TypeConfig(Table table)
+		public TypeConfig(ITable table)
 		{
 			this(null, null, table);
 		}
