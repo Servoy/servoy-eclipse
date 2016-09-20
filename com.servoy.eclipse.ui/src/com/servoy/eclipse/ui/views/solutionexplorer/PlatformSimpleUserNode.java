@@ -26,6 +26,7 @@ import com.servoy.eclipse.ui.node.SimpleDeveloperFeedback;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.util.Utils;
 
 public class PlatformSimpleUserNode extends SimpleUserNode implements IAdaptable, IActionFilter
 {
@@ -88,5 +89,24 @@ public class PlatformSimpleUserNode extends SimpleUserNode implements IAdaptable
 			if (value != null && value.toLowerCase().equals("all_solutions") && getType() == UserNodeType.ALL_SOLUTIONS) return true;
 		}
 		return false;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		if (getName() != null && getType() != null)
+		{
+			return getName().hashCode() * 31 + getType().hashCode();
+		}
+		return super.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (!(obj instanceof PlatformSimpleUserNode)) return false;
+		return Utils.equalObjects(getName(), ((PlatformSimpleUserNode)obj).getName()) &&
+			Utils.equalObjects(getType(), ((PlatformSimpleUserNode)obj).getType()) && hidden == ((PlatformSimpleUserNode)obj).isHidden() &&
+			Utils.equalObjects(getRealObject(), ((PlatformSimpleUserNode)obj).getRealObject());
 	}
 }
