@@ -115,13 +115,18 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 	{
 		ArrayList<String> appendRequiredServerNames = new ArrayList<String>();
 		List<String> requiredServersAsList = requiredServers != null && requiredServers.length > 0 ? Arrays.asList(requiredServers) : null;
+		if (requiredServersAsList != null)
+		{
+			for (String requiredServerName : requiredServersAsList)
+			{
+				appendRequiredServerNames.add(requiredServerName + DirectorySelectionPage.REQUIRED_LABEL);
+			}
+		}
 		String sServerName;
 		for (Object serverName : serverNames)
 		{
 			sServerName = serverName.toString();
-			if (requiredServersAsList != null && requiredServersAsList.indexOf(sServerName) != -1) appendRequiredServerNames.add(0, sServerName +
-				DirectorySelectionPage.REQUIRED_LABEL);
-			else appendRequiredServerNames.add(sServerName);
+			if (requiredServersAsList == null || requiredServersAsList.indexOf(sServerName) == -1) appendRequiredServerNames.add(sServerName);
 		}
 		return appendRequiredServerNames.toArray(new String[appendRequiredServerNames.size()]);
 
@@ -219,7 +224,7 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.ICheckBoxView#selectAll()
 	 */
 	@Override
@@ -230,7 +235,7 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.ICheckBoxView#deselectAll()
 	 */
 	@Override
@@ -240,8 +245,8 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 		if (requiredServers != null)
 		{
 			for (String requiredServer : requiredServers)
-				if (requiredServer != null && requiredServers.length > 0) checkboxTableViewer.setChecked(
-					requiredServer + DirectorySelectionPage.REQUIRED_LABEL, true);
+				if (requiredServer != null && requiredServers.length > 0)
+					checkboxTableViewer.setChecked(requiredServer + DirectorySelectionPage.REQUIRED_LABEL, true);
 		}
 	}
 }
