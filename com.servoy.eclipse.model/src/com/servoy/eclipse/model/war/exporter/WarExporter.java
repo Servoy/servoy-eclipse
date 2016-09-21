@@ -292,8 +292,22 @@ public class WarExporter
 			}
 
 			//delete unneeded files
-			Files.delete(wroFile.toPath());
-			Files.delete(jarFile.toPath());
+			try
+			{
+				Files.delete(wroFile.toPath());
+			}
+			catch (Exception e)
+			{
+				// ignore will try to delete on exit later on.
+			}
+			try
+			{
+				Files.delete(jarFile.toPath());
+			}
+			catch (Exception e)
+			{
+				// ignore will try to delete on exit later on.
+			}
 		}
 		catch (Exception e)
 		{
@@ -1366,6 +1380,8 @@ public class WarExporter
 		int read = 0;
 		for (File file : files)
 		{
+			// skip the WRO4J_RUNNNER if somehow it couldn't be deleted.
+			if (file.getName().equals(WRO4J_RUNNER) || file.getName().equals("wro.xml")) continue;
 			if (file.isDirectory())
 			{
 				zip(file, base, zos);
@@ -1474,10 +1490,13 @@ public class WarExporter
 		return null;
 	}
 
-	private static boolean deleteDirectory(File path)
+	private static void deleteDirectory(File path)
 	{
 		if (path.exists())
 		{
+			// always call delete on exit so it will be tried to delete again later on
+			// delete on exit uses reversed order so you have to call it first for the dir then the files.
+			path.deleteOnExit();
 			File[] files = path.listFiles();
 			for (File file : files)
 			{
@@ -1487,11 +1506,14 @@ public class WarExporter
 				}
 				else
 				{
-					file.delete();
+					if (!file.delete())
+					{
+						file.deleteOnExit();
+					}
 				}
 			}
 		}
-		return (path.delete());
+		path.delete();
 	}
 
 	private static Set<File> copyDir(File sourceDir, File destDir, boolean recusive, Map<String, File> allTemplates) throws ExportException
