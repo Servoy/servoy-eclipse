@@ -334,6 +334,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	{
 		if (persists != null)
 		{
+
 			final Form form = editorPart.getForm();
 			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(form);
 			final String componentsJSON = designerWebsocketSession.getComponentsJSON(fs, filterByParent(persists, form));
@@ -355,8 +356,12 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 				{
 					designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateFormData",
 						new Object[] { componentsJSON });
-					if (persists.contains(form)) designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateForm",
-						new Object[] { form.getUUID(), form.getSize().width, form.getSize().height });
+//					if (persists.contains(form)) designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateForm",
+//						new Object[] { form.getUUID(), form.extendsForm != null ? form.extendsForm.getUUID()
+//							: null, form.getSize().width, form.getSize().height });
+					if (persists.contains(form))
+						designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("contentRefresh", new Object[] { });
+
 					if (newStylesheetsFinal != null)
 					{
 						designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateStyleSheets",
@@ -497,5 +502,17 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		{
 			editorServiceHandler.executeMethod("createComponent", componentDefinition);
 		}
+	}
+
+	public void refreshContent()
+	{
+		CurrentWindow.runForWindow(new WebsocketSessionWindows(designerWebsocketSession), new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("contentRefresh", new Object[] { });
+			}
+		});
 	}
 }

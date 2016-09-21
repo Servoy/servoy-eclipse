@@ -149,6 +149,11 @@ angular.module('editorContent',['servoyApp'])
   var solutionName = $webSocket.getURLParameter("s");
   var formModelData = null;
   var formUrl = null;
+  $rootScope.flushMain = function()
+  {
+	  formModelData = null;
+	  formUrl = null;  
+  };
   $scope.getUrl = function() {
     if (formUrl) return formUrl;
     if ($webSocket.isConnected()) {
@@ -336,6 +341,15 @@ angular.module('editorContent',['servoyApp'])
     }
     return ret;
   }
+  $scope.flushDesign = function()
+  {
+	  delete formData;
+	  delete model;
+      delete api;
+      delete handlers;
+      delete servoyApi;
+      delete layout;
+  }
 }).factory("$editorContentService", function($rootScope, $applicationService, $sabloApplication, $sabloConstants,
   $webSocket, $compile, $sabloConverters, $templateCache, $timeout) {
   var formData = null;
@@ -384,13 +398,13 @@ angular.module('editorContent',['servoyApp'])
 	    	else
 	    	{
 	    		parent.append(tpl);//next sibling is not here yet, append to parent
-	    	}
-	    } else
+	    	} 
+	    		    } else
 	    {
 	    	parent.append(tpl)
 	    }
 	  }
-  
+	   
   function updateElementIfParentChange(elementId, updateData, getTemplateParam,forceUpdate) {
     var elementTemplate = angular.element('[svy-id="' + elementId + '"]');
     var shouldGetTemplate = true;
@@ -423,12 +437,28 @@ angular.module('editorContent',['servoyApp'])
     refreshGhosts: function() {
       renderGhosts();
     },
-    updateForm: function(uuid,w, h) {
-      updateForm({
-    	uuid : uuid,  
-        w: w,
-        h: h
-      });
+    updateForm: function(uuid,parentUuid,w, h) {
+      if (formData.parentUuid !== parentUuid)
+      {
+    	  this.contentRefresh();
+      }
+      else
+      {
+	      updateForm({
+	    	uuid : uuid,  
+	        w: w,
+	        h: h
+	      });
+      }
+    },
+    contentRefresh: function()
+    {
+    	formData.components = null;
+    	formData.parts = null;
+    	$rootScope.getDesignFormControllerScope().flushDesign();
+    	$rootScope.flushMain();
+    	$templateCache.removeAll();
+    	$rootScope.$digest();
     },
     formData: function(designControllerReady, data) {
       if (data) {
