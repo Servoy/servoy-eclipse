@@ -150,16 +150,19 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 						}
 						else toSort.add(jsonObject);
 					}
-					Collections.sort(toSort, new Comparator<JSONObject>()
+					if (toSort.size() > 0)
 					{
-						@Override
-						public int compare(JSONObject o1, JSONObject o2)
+						Collections.sort(toSort, new Comparator<JSONObject>()
 						{
-							return o2.optString("version", "").compareTo(o1.optString("version", ""));
-						}
-					});
-					packageObject.put("releases", toSort);
-					result.add(packageObject);
+							@Override
+							public int compare(JSONObject o1, JSONObject o2)
+							{
+								return o2.optString("version", "").compareTo(o1.optString("version", ""));
+							}
+						});
+						packageObject.put("releases", toSort);
+						result.add(packageObject);
+					}
 				}
 				catch (Exception e)
 				{
