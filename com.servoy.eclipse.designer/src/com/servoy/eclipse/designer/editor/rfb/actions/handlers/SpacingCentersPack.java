@@ -85,7 +85,7 @@ public class SpacingCentersPack implements IServerService
 					CompoundCommand cc = new CompoundCommand();
 					for (int i = 0; i < selection.length; i++)
 					{
-						Point newLocation = new Point(((ISupportBounds)selection[i]).getLocation());
+						Point newLocation = new Point(((ISupportBounds)selection[i].getPersist()).getLocation());
 						newLocation.x += deltas.get(i).x;
 						newLocation.y += deltas.get(i).y;
 						cc.add(new SetPropertyCommand("move", PersistPropertySource.createPersistPropertySource(selection[i], false),
