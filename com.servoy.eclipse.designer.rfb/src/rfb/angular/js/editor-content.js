@@ -438,18 +438,15 @@ angular.module('editorContent',['servoyApp'])
       renderGhosts();
     },
     updateForm: function(uuid,parentUuid,w, h) {
-      if (formData.parentUuid !== parentUuid)
-      {
-    	  this.contentRefresh();
-      }
-      else
-      {
-	      updateForm({
-	    	uuid : uuid,  
-	        w: w,
-	        h: h
-	      });
-      }
+    	if (formData.parentUuid !== parentUuid)
+    	{
+    		this.contentRefresh();
+    	}
+    	updateForm({
+    		uuid : uuid,  
+    		w: w,
+    		h: h
+    	});
     },
     contentRefresh: function()
     {
