@@ -83,6 +83,8 @@ import com.servoy.eclipse.designer.editor.palette.VisualFormEditorPaletteFactory
 import com.servoy.eclipse.designer.editor.rulers.FormRulerComposite;
 import com.servoy.eclipse.designer.editor.rulers.RulerManager;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.CoolbarLayout;
 import com.servoy.eclipse.ui.property.MobileListModel;
@@ -98,7 +100,7 @@ import com.servoy.j2db.persistence.Part;
  *
  * @author rgansevles
  */
-public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPage
+public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPage implements ILoadedNGPackagesListener
 {
 	/**
 	 * A viewer property indicating whether inherited elements are hidden. The value must  be a Boolean.
@@ -488,6 +490,8 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 
 		fillToolbar();
 
+		ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(this);
+
 		super.createPartControl(composite);
 	}
 
@@ -780,7 +784,17 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 	@Override
 	public void dispose()
 	{
+		ServoyModelFinder.getServoyModel().getNGPackageManager().removeLoadedNGPackagesListener(this);
 		com.servoy.eclipse.ui.Activator.getDefault().getEclipsePreferences().removePreferenceChangeListener(preferenceChangeListener);
 		super.dispose();
+	}
+
+	@Override
+	public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
+	{
+		if (!loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
+		{
+			refreshPalette();
+		}
 	}
 }
