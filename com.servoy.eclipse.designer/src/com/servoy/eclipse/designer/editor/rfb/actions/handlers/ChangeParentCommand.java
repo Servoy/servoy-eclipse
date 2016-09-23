@@ -137,15 +137,18 @@ public class ChangeParentCommand extends Command
 		List<IPersist> changes = new ArrayList<>();
 		if (initialParent.equals(superPersist))
 		{
-			IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
-			for (IEditorReference editorRef : editorRefs)
+			if (superPersist.getParent() instanceof Form)
 			{
-				IEditorPart editor = editorRef.getEditor(false);
-				if (editor instanceof BaseVisualFormEditor)
+				IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
+				for (IEditorReference editorRef : editorRefs)
 				{
-					BaseVisualFormEditorDesignPage activePage = ((BaseVisualFormEditor)editor).getGraphicaleditor();
-					if (activePage instanceof RfbVisualFormEditorDesignPage) ((RfbVisualFormEditorDesignPage)activePage).refreshContent();
-					break;
+					IEditorPart editor = editorRef.getEditor(false);
+					if (editor instanceof BaseVisualFormEditor)
+					{
+						BaseVisualFormEditorDesignPage activePage = ((BaseVisualFormEditor)editor).getGraphicaleditor();
+						if (activePage instanceof RfbVisualFormEditorDesignPage) ((RfbVisualFormEditorDesignPage)activePage).refreshContent();
+						break;
+					}
 				}
 			}
 			oldParent = newParent;//if it's an override, then on undo we just want to change the position
