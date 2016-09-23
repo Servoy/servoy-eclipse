@@ -36,12 +36,14 @@ import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.util.DesignerUtil;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
 import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.IBasicWebComponent;
@@ -57,6 +59,7 @@ import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.server.ngclient.property.types.NGCustomJSONObjectType;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.PersistHelper;
 
 
 public class AddContainerCommand extends AbstractHandler implements IHandler
@@ -98,7 +101,6 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 							}
 							if (persistContext != null)
 							{
-
 								if (event.getParameter("com.servoy.eclipse.designer.editor.rfb.menu.customtype.property") != null)
 								{
 									if (persistContext.getPersist() instanceof IBasicWebComponent)
@@ -172,8 +174,25 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 								}
 								if (persist != null)
 								{
-									ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false,
-										Arrays.asList(new IPersist[] { persist }));
+									List<IPersist> changes = new ArrayList<>();
+									if (!persistContext.getPersist().getUUID().equals(persist.getParent().getUUID()))
+									{
+										ISupportChilds parent = persist.getParent();
+										changes.add(persist.getParent());
+
+										FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(persist);
+										parent = PersistHelper.getFlattenedPersist(flattenedSolution, activeEditor.getForm(), parent);
+										Iterator<IPersist> it = parent.getAllObjects();
+										while (it.hasNext())
+										{
+											changes.add(it.next());
+										}
+									}
+									else
+									{
+										changes.add(persist);
+									}
+									ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changes);
 									Object[] selection = new Object[] { PersistContext.create(persist, persistContext.getContext()) };
 									final IStructuredSelection structuredSelection = new StructuredSelection(selection);
 									// wait for tree to be refreshed with new element

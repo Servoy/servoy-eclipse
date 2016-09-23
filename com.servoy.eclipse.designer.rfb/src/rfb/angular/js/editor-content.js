@@ -149,6 +149,11 @@ angular.module('editorContent',['servoyApp'])
   var solutionName = $webSocket.getURLParameter("s");
   var formModelData = null;
   var formUrl = null;
+  $rootScope.flushMain = function()
+  {
+	  formModelData = null;
+	  formUrl = null;  
+  };
   $scope.getUrl = function() {
     if (formUrl) return formUrl;
     if ($webSocket.isConnected()) {
@@ -339,6 +344,15 @@ angular.module('editorContent',['servoyApp'])
     }
     return ret;
   }
+  $scope.flushDesign = function()
+  {
+	  delete formData;
+	  delete model;
+      delete api;
+      delete handlers;
+      delete servoyApi;
+      delete layout;
+  }
 }).factory("$editorContentService", function($rootScope, $applicationService, $sabloApplication, $sabloConstants,
   $webSocket, $compile, $sabloConverters, $templateCache, $timeout) {
   var formData = null;
@@ -360,30 +374,40 @@ angular.module('editorContent',['servoyApp'])
 	    }
 	    var tpl = $compile(json.template)($rootScope.getDesignFormControllerScope());
 	    if (json.insertBeforeUUID) {
-	    	var testSibling = function(counter,insertBeforeUUID)
-			{
-				var sibling = document.querySelectorAll("[svy-id='" + insertBeforeUUID + "']");
-			   	if(sibling[0])
-			   	{
-			   		var nextSibling = angular.element(sibling);
-			   		tpl.insertBefore(nextSibling);
-			   	}
-			   	else if (counter++ < 10)
-			   	{
-			   		$timeout(function() {testSibling(counter, insertBeforeUUID)},100);
-			   	}
-			   	else
-			   	{
-			   		parent.append(tpl);//next sibling is not here yet, append to parent
-			   	}
-			};
-			testSibling(0,json.insertBeforeUUID);
-	    } else
+//	    	var testSibling = function(counter,insertBeforeUUID)
+//			{
+//				var sibling = document.querySelectorAll("[svy-id='" + insertBeforeUUID + "']");
+//			   	if(sibling[0])
+//			   	{
+//			   		var nextSibling = angular.element(sibling);
+//			   		tpl.insertBefore(nextSibling);
+//			   	}
+//			   	else if (counter++ < 10)
+//			   	{
+//			   		$timeout(function() {testSibling(counter, insertBeforeUUID)},100);
+//			   	}
+//			   	else
+//			   	{
+//			   		parent.append(tpl);//next sibling is not here yet, append to parent
+//			   	}
+//			};
+//			testSibling(0,json.insertBeforeUUID);
+			var sibling = document.querySelectorAll("[svy-id='" + json.insertBeforeUUID + "']");
+	    	if(sibling[0])
+	    	{
+	    		var nextSibling = angular.element(sibling);
+	    		tpl.insertBefore(nextSibling);
+	    	}
+	    	else
+	    	{
+	    		parent.append(tpl);//next sibling is not here yet, append to parent
+	    	} 
+	    		    } else
 	    {
 	    	parent.append(tpl)
 	    }
 	  }
-  
+	   
   function updateElementIfParentChange(elementId, updateData, getTemplateParam,forceUpdate) {
     var elementTemplate = angular.element('[svy-id="' + elementId + '"]');
     var shouldGetTemplate = true;
@@ -416,12 +440,25 @@ angular.module('editorContent',['servoyApp'])
     refreshGhosts: function() {
       renderGhosts();
     },
-    updateForm: function(uuid,w, h) {
-      updateForm({
-    	uuid : uuid,  
-        w: w,
-        h: h
-      });
+    updateForm: function(uuid,parentUuid,w, h) {
+    	if (formData.parentUuid !== parentUuid)
+    	{
+    		this.contentRefresh();
+    	}
+    	updateForm({
+    		uuid : uuid,  
+    		w: w,
+    		h: h
+    	});
+    },
+    contentRefresh: function()
+    {
+    	formData.components = null;
+    	formData.parts = null;
+    	$rootScope.getDesignFormControllerScope().flushDesign();
+    	$rootScope.flushMain();
+    	$templateCache.removeAll();
+    	$rootScope.$digest();
     },
     formData: function(designControllerReady, data) {
       if (data) {

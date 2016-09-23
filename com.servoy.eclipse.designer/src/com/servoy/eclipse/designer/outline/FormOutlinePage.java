@@ -83,6 +83,7 @@ import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.WebComponent;
+import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -234,7 +235,8 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							WebComponent wc = (WebComponent)inputPersist;
 							if (wc.getParent() instanceof LayoutContainer)
 							{
-								targetLayoutContainer = wc.getParent();
+								targetLayoutContainer = (((ISupportExtendsID)wc.getParent()).getExtendsID() > 0 && wc.getParent() instanceof Form)
+									? (ISupportChilds)PersistHelper.getSuperPersist((ISupportExtendsID)wc.getParent()) : wc.getParent();
 								dropTargetComponent = wc;
 							}
 						}
@@ -244,7 +246,10 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							if (getCurrentLocation() == LOCATION_BEFORE || getCurrentLocation() == LOCATION_AFTER)
 							{
 								dropTargetComponent = targetLayoutContainer;
-								targetLayoutContainer = targetLayoutContainer.getParent();
+								targetLayoutContainer = (((ISupportExtendsID)targetLayoutContainer.getParent()).getExtendsID() > 0 &&
+									targetLayoutContainer.getParent() instanceof Form)
+										? (ISupportChilds)PersistHelper.getSuperPersist((ISupportExtendsID)targetLayoutContainer.getParent())
+										: targetLayoutContainer.getParent();
 							}
 						}
 
@@ -276,6 +281,18 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 										{
 											doAllow = false;
 											break;
+										}
+										if (parentContainer instanceof ISupportExtendsID && ((ISupportExtendsID)parentContainer).getExtendsID() > 0 &&
+											parentContainer.getParent() instanceof Form)
+										{
+											IPersist superParent = PersistHelper.getSuperPersist((ISupportExtendsID)parentContainer);
+											if (superParent == null)
+											{
+												ServoyLog.logError("Super persist not found for " + parentContainer.toString() + " extends id " +
+													((ISupportExtendsID)parentContainer).getExtendsID(), new Exception("Cannot move " + p.toString()));
+												return false;
+											}
+											parentContainer = (ISupportChilds)superParent;
 										}
 										parentContainer = parentContainer.getParent();
 									}

@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.FlatTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.LeafnodesSelectionFilter;
 import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
@@ -47,7 +48,6 @@ import com.servoy.eclipse.ui.dialogs.TreeSelectDialog;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.PlatformSimpleUserNode;
 import com.servoy.j2db.persistence.Solution;
-import com.servoy.j2db.util.Debug;
 
 /**
  * @author gganea@servoy.com
@@ -89,7 +89,7 @@ public class AddPackageProjectAction extends Action implements ISelectionChanged
 				IProject[] allProjects = ServoyModel.getWorkspace().getRoot().getProjects();
 				for (IProject iProject : allProjects)
 				{
-					if (iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
+					if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
 					{
 						selectablePackages.add(iProject);
 					}
@@ -100,7 +100,7 @@ public class AddPackageProjectAction extends Action implements ISelectionChanged
 				IProject[] referencedProjects = solutionProject.getReferencedProjects();
 				for (IProject iProject : referencedProjects)
 				{
-					if (iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
+					if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
 					{
 						selectedProjectsList.add(iProject);
 					}
@@ -130,7 +130,7 @@ public class AddPackageProjectAction extends Action implements ISelectionChanged
 			}
 			catch (CoreException e)
 			{
-				Debug.log(e);
+				ServoyLog.logError(e);
 			}
 		}
 

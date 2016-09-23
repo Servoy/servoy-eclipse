@@ -60,9 +60,11 @@ import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -97,6 +99,7 @@ import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.persistence.WebObjectImpl;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.PersistHelper;
 
 /**
  * @author user
@@ -224,11 +227,13 @@ public class CreateComponentHandler implements IServerService
 		{
 			ISupportFormElements parentSupportingElements = editorPart.getForm();
 			IPersist dropTarget = null;
+			IPersist initialDropTarget = null;
 			if (args.has("dropTargetUUID"))
 			{
 				dropTarget = PersistFinder.INSTANCE.searchForPersist(editorPart, args.getString("dropTargetUUID"));
 				if (dropTarget != null)
 				{
+					initialDropTarget = dropTarget;
 					dropTarget = ElementUtil.getOverridePersist(PersistContext.create(dropTarget, editorPart.getForm()));
 				}
 				if (dropTarget != null)
@@ -247,7 +252,8 @@ public class CreateComponentHandler implements IServerService
 			if (editorPart.getForm().isResponsiveLayout())
 			{
 				List<IPersist> children = new ArrayList<IPersist>();
-				Iterator<IPersist> it = parentSupportingElements.getAllObjects();
+				Iterator<IPersist> it = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(editorPart.getForm()), editorPart.getForm(),
+					parentSupportingElements).getAllObjects();
 				while (it.hasNext())
 				{
 					IPersist persist = it.next();
@@ -561,7 +567,26 @@ public class CreateComponentHandler implements IServerService
 									if (initialValue != null) webComponent.setProperty(string, initialValue);
 								}
 							}
-							return new IPersist[] { webComponent };
+							List<IPersist> changes = new ArrayList<>();
+							if (initialDropTarget != null && !initialDropTarget.getUUID().equals(webComponent.getParent().getUUID()))
+							{
+								ISupportChilds parent = webComponent.getParent();
+								changes.add(webComponent.getParent());
+
+								FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(webComponent);
+								parent = PersistHelper.getFlattenedPersist(flattenedSolution, editorPart.getForm(), parent);
+								Iterator<IPersist> it = parent.getAllObjects();
+								while (it.hasNext())
+								{
+									changes.add(it.next());
+								}
+							}
+							else
+							{
+								changes.add(webComponent);
+							}
+
+							return changes.toArray(new IPersist[changes.size()]);
 						}
 						else
 						{

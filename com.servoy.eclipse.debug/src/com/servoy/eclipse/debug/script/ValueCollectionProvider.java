@@ -156,6 +156,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 					// config is either a dataSource or a relation name
 
 					String[] dbServernameTablename = DataSourceUtils.getDBServernameTablename(config);
+					if (dbServernameTablename == null) dbServernameTablename = DataSourceUtils.getMemServernameTablename(config);
 					String dataSource = null;
 					if (dbServernameTablename == null)
 					{
@@ -327,7 +328,7 @@ public class ValueCollectionProvider implements IMemberEvaluator
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.dltk.javascript.typeinfo.IElementResolver#getTopValueCollection(org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext)
 	 */
 	public IValueCollection getTopValueCollection(ITypeInfoContext context)
@@ -445,8 +446,8 @@ public class ValueCollectionProvider implements IMemberEvaluator
 						IFolder serverFolder = folder.getFolder(serverName);
 						if (serverFolder.exists())
 						{
-							IValueCollection moduleCollection = getValueCollection(serverFolder.getFile(tableName +
-								(calcs ? SolutionSerializer.CALCULATIONS_POSTFIX : SolutionSerializer.FOUNDSET_POSTFIX)));
+							IValueCollection moduleCollection = getValueCollection(
+								serverFolder.getFile(tableName + (calcs ? SolutionSerializer.CALCULATIONS_POSTFIX : SolutionSerializer.FOUNDSET_POSTFIX)));
 							if (moduleCollection != null)
 							{
 								ValueCollectionFactory.copyInto(collection, moduleCollection);
@@ -516,15 +517,13 @@ public class ValueCollectionProvider implements IMemberEvaluator
 						collection = ValueCollectionFactory.makeImmutable(collection);
 						if (globalsFile)
 						{
-							globalScriptCache.put(file,
-								new SoftReference<Pair<Long, IValueCollection>>(new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()),
-									collection)));
+							globalScriptCache.put(file, new SoftReference<Pair<Long, IValueCollection>>(
+								new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()), collection)));
 						}
 						else
 						{
-							scriptCache.put(file,
-								new SoftReference<Pair<Long, IValueCollection>>(new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()),
-									collection)));
+							scriptCache.put(file, new SoftReference<Pair<Long, IValueCollection>>(
+								new Pair<Long, IValueCollection>(new Long(file.getModificationStamp()), collection)));
 						}
 					}
 					finally
