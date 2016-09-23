@@ -335,7 +335,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		if (persists != null)
 		{
 			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(editorPart.getForm());
-			final FlattenedForm form = (FlattenedForm)fs.getFlattenedForm(editorPart.getForm());
+			final Form form = fs.getFlattenedForm(editorPart.getForm());
 			final String componentsJSON = designerWebsocketSession.getComponentsJSON(fs, filterByParent(persists, form));
 			List<String> styleSheets = PersistHelper.getOrderedStyleSheets(fs);
 			String[] newStylesheets = null;
@@ -355,7 +355,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 				{
 					designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateFormData",
 						new Object[] { componentsJSON });
-					if (persists.contains(form.getWrappedPersist()))
+					if (persists.contains(form instanceof FlattenedForm ? ((FlattenedForm)form).getWrappedPersist() : form))
 					{
 						designerWebsocketSession.getClientService("$editorContentService").executeAsyncServiceCall("updateForm",
 							new Object[] { form.getUUID(), form.extendsForm != null ? form.extendsForm.getUUID()
