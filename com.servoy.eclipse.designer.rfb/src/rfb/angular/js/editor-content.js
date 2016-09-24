@@ -373,40 +373,35 @@ angular.module('editorContent',['servoyApp'])
 	      parent = angular.element(document.querySelectorAll("[svy-id='" + parentId + "']"));
 	    }
 	    var tpl = $compile(json.template)($rootScope.getDesignFormControllerScope());
+	    var old_element = parent.querySelectorAll("[svy-id='" + tpl[0].getAttribute("svy-id") + "']");
+		//when it's already there, we want to remove it in order to avoid duplicates and keep the latest
+		if (old_element[0]) angular.element(old_element).detach();
+		
 	    if (json.insertBeforeUUID) {
-//	    	var testSibling = function(counter,insertBeforeUUID)
-//			{
-//				var sibling = document.querySelectorAll("[svy-id='" + insertBeforeUUID + "']");
-//			   	if(sibling[0])
-//			   	{
-//			   		var nextSibling = angular.element(sibling);
-//			   		tpl.insertBefore(nextSibling);
-//			   	}
-//			   	else if (counter++ < 10)
-//			   	{
-//			   		$timeout(function() {testSibling(counter, insertBeforeUUID)},100);
-//			   	}
-//			   	else
-//			   	{
-//			   		parent.append(tpl);//next sibling is not here yet, append to parent
-//			   	}
-//			};
-//			testSibling(0,json.insertBeforeUUID);
-			var sibling = document.querySelectorAll("[svy-id='" + json.insertBeforeUUID + "']");
-	    	if(sibling[0])
+	    	var testSibling = function(counter,insertBeforeUUID)
 	    	{
-	    		var nextSibling = angular.element(sibling);
-	    		tpl.insertBefore(nextSibling);
-	    	}
-	    	else
-	    	{
-	    		parent.append(tpl);//next sibling is not here yet, append to parent
-	    	} 
-	    		    } else
+	    		var sibling = document.querySelectorAll("[svy-id='" + insertBeforeUUID + "']");
+	    		if(sibling[0])
+	    		{
+	    			var nextSibling = angular.element(sibling);
+	    			tpl.insertBefore(nextSibling);
+	    		}
+	    		else if (counter++ < 10)
+	    		{
+	    			$timeout(function() {testSibling(counter, insertBeforeUUID)},100);
+	    		}
+	    		else
+	    		{
+	    			parent.append(tpl);//next sibling is not here yet, append to parent
+	    		}
+	    	};
+	    	testSibling(0,json.insertBeforeUUID);
+	    }
+	    else
 	    {
 	    	parent.append(tpl)
 	    }
-	  }
+  }
 	   
   function updateElementIfParentChange(elementId, updateData, getTemplateParam,forceUpdate) {
     var elementTemplate = angular.element('[svy-id="' + elementId + '"]');
@@ -503,6 +498,62 @@ angular.module('editorContent',['servoyApp'])
           }
 
           var toDeleteA = [];
+          
+          if (data.containers) {
+              for(var j = 0; j < data.containers.length; j++) {
+                var key = data.containers[j].uuid;
+                var element = updateElementIfParentChange(key, data, { layoutId: key },false);
+                if(element) {
+          		  for (attribute in data.containers[j]) {
+          		      if('uuid' === attribute) continue;
+          			  if ('class' === attribute)
+          			  {
+          				  var oldValue = element.attr(attribute);
+          				  var newValue = data.containers[j][attribute];
+          				  if (oldValue)
+          				  {
+          					  var oldValuesArray = oldValue.split(" ");
+          					  var newValuesArray = newValue.split(" ");
+          					  var ngClassValues = [];
+          					  var ngClassValue= element.attr('ng-class');
+          					  if (ngClassValue)
+          					  {
+          						  // this is not valid json, how to parse it ?
+          						  ngClassValue = ngClassValue.replace("{","").replace("}","").replace(/"/g,"");
+          						  ngClassValues = ngClassValue.split(":");
+          						  for (var i=0;i< ngClassValues.length-1;i++ )
+          						  {
+          							  if (ngClassValues[i].indexOf(',') >= 0)
+          							  {
+          								  ngClassValues[i] = ngClassValues[i].slice(ngClassValues[i].lastIndexOf(',')+1,ngClassValues[i].length);
+          							  }	  
+          						  }	  
+          					  }	  
+          					  for (var i=0;i< oldValuesArray.length;i++)
+          					  {
+          						  if (newValuesArray.indexOf(oldValuesArray[i]) < 0 && ngClassValues.indexOf(oldValuesArray[i]) >= 0)
+          						  {
+          							  //this value is missing, check if servoy added class
+          							  newValue += " " + oldValuesArray[i];
+          						  }	  
+          					  }	  
+          				  }	
+          				  element.attr(attribute,newValue); 
+          			  }
+          			  else
+          			  {
+          				  element.attr(attribute,data.containers[j][attribute]); 
+          			  }	  
+                    }
+                }
+              }
+            }          
+            
+            for (var index in data.deletedContainers) {
+              var toDelete = angular.element('[svy-id="' + data.deletedContainers[index] + '"]');
+              toDelete.remove();
+
+            }          
           
           if(data.updatedFormComponentsDesignId) {
         	  for (var index in data.updatedFormComponentsDesignId) {
@@ -608,62 +659,6 @@ angular.module('editorContent',['servoyApp'])
         		  }
         	  }
           }
-
-          if (data.containers) {
-            for(var j = 0; j < data.containers.length; j++) {
-              var key = data.containers[j].uuid;
-              var element = updateElementIfParentChange(key, data, { layoutId: key },false);
-              if(element) {
-        		  for (attribute in data.containers[j]) {
-        		      if('uuid' === attribute) continue;
-        			  if ('class' === attribute)
-        			  {
-        				  var oldValue = element.attr(attribute);
-        				  var newValue = data.containers[j][attribute];
-        				  if (oldValue)
-        				  {
-        					  var oldValuesArray = oldValue.split(" ");
-        					  var newValuesArray = newValue.split(" ");
-        					  var ngClassValues = [];
-        					  var ngClassValue= element.attr('ng-class');
-        					  if (ngClassValue)
-        					  {
-        						  // this is not valid json, how to parse it ?
-        						  ngClassValue = ngClassValue.replace("{","").replace("}","").replace(/"/g,"");
-        						  ngClassValues = ngClassValue.split(":");
-        						  for (var i=0;i< ngClassValues.length-1;i++ )
-        						  {
-        							  if (ngClassValues[i].indexOf(',') >= 0)
-        							  {
-        								  ngClassValues[i] = ngClassValues[i].slice(ngClassValues[i].lastIndexOf(',')+1,ngClassValues[i].length);
-        							  }	  
-        						  }	  
-        					  }	  
-        					  for (var i=0;i< oldValuesArray.length;i++)
-        					  {
-        						  if (newValuesArray.indexOf(oldValuesArray[i]) < 0 && ngClassValues.indexOf(oldValuesArray[i]) >= 0)
-        						  {
-        							  //this value is missing, check if servoy added class
-        							  newValue += " " + oldValuesArray[i];
-        						  }	  
-        					  }	  
-        				  }	
-        				  element.attr(attribute,newValue); 
-        			  }
-        			  else
-        			  {
-        				  element.attr(attribute,data.containers[j][attribute]); 
-        			  }	  
-                  }
-              }
-            }
-          }          
-          
-          for (var index in data.deletedContainers) {
-            var toDelete = angular.element('[svy-id="' + data.deletedContainers[index] + '"]');
-            toDelete.remove();
-
-          }          
 
           renderDecorators();
         });

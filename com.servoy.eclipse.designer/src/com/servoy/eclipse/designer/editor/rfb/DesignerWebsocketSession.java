@@ -306,9 +306,21 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		{
 			AbstractContainer persistParent = (AbstractContainer)PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(persist), form,
 				persist.getParent());
+			IPersist superPersist = null;
+			if (((ISupportExtendsID)persist).getExtendsID() > 0 && persist.getParent() instanceof Form)
+			{
+				superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)persist);
+				persistParent = (AbstractContainer)PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(persist), form,
+					superPersist.getParent());
+			}
 			ArrayList<IPersist> children = persistParent.getSortedChildren();
 			int indexOf = children.indexOf(
 				persist instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)persist).getWrappedPersist() : persist);
+			if (indexOf == -1 && superPersist != null)
+			{
+				indexOf = children.indexOf(
+					superPersist instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)superPersist).getWrappedPersist() : superPersist);
+			}
 			if (indexOf > -1 && (indexOf + 1) < children.size()) return children.get(indexOf + 1).getUUID();
 		}
 		return null;
@@ -676,6 +688,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			Map<String, String> formComponentTemplates = new HashMap<String, String>();
 			List<IFormElement> components = new ArrayList<IFormElement>(baseComponents);
 			Collections.sort(components, PositionComparator.XY_PERSIST_COMPARATOR);
+			Collections.reverse(components);
 			writer.key("components");
 			writer.object();
 			// TODO is this really all the data? or are there properties that would normally go through the webcomponents..

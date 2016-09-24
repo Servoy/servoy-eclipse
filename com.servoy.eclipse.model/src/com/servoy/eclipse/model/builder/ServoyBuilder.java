@@ -1518,27 +1518,31 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				if (form.isResponsiveLayout() != extendsForm.isResponsiveLayout())
 				{
-
-					String message = null;
-					if (form.isResponsiveLayout())
+					Iterator<IFormElement> uiElements = extendsForm.getFormElementsSortedByFormIndex();
+					// do now show if no ui is present
+					if (uiElements.hasNext())
 					{
-						message = "The responsive layout form '" + form.getName() + "' should not extend the absolute layout form '" + extendsForm.getName() +
-							"'.";
-					}
-					else
-					{
-						message = "The absolute layout form  '" + form.getName() + "' should not extend the responsive layout form '" + extendsForm.getName() +
-							"'.";
-					}
-					IMarker marker = addMarker(project, SUPERFORM_PROBLEM_TYPE, message, -1, SUPERFORM_PROBLEM, IMarker.PRIORITY_NORMAL, null, persist);
-					try
-					{
-						marker.setAttribute("Uuid", form.getUUID().toString());
-						marker.setAttribute("SolutionName", form.getSolution().getName());
-					}
-					catch (CoreException e)
-					{
-						Debug.error(e);
+						String message = null;
+						if (form.isResponsiveLayout())
+						{
+							message = "The responsive layout form '" + form.getName() + "' should not extend the absolute layout form '" +
+								extendsForm.getName() + "'.";
+						}
+						else
+						{
+							message = "The absolute layout form  '" + form.getName() + "' should not extend the responsive layout form '" +
+								extendsForm.getName() + "'.";
+						}
+						IMarker marker = addMarker(project, SUPERFORM_PROBLEM_TYPE, message, -1, SUPERFORM_PROBLEM, IMarker.PRIORITY_NORMAL, null, persist);
+						try
+						{
+							marker.setAttribute("Uuid", form.getUUID().toString());
+							marker.setAttribute("SolutionName", form.getSolution().getName());
+						}
+						catch (CoreException e)
+						{
+							Debug.error(e);
+						}
 					}
 				}
 
