@@ -343,7 +343,7 @@
 			<pathelement path="${build.result.folder}/../org.apache.tomcat_8.0.28/@dot"/>
 			<pathelement path="../../servoy-osgi-target/eclipse_target/compile_target/install/plugins/javax.servlet.jsp_2.2.0.v201112011158.jar"/>
 			<pathelement path="../../servoy-osgi-target/eclipse_target/compile_target/install/plugins/javax.el_2.2.0.v201303151357.jar"/>
-			<pathelement path="../../servoy-osgi-target/eclipse_target/ship_plugins/plugins/jsoup-1.7.3.jar"/>
+			<pathelement path="../../servoy-osgi-target/eclipse_target/ship_plugins/plugins/jsoup-1.9.2.jar"/>
 			<pathelement path="../../servoy-osgi-target/eclipse_target/ship_plugins/plugins/freemarker.jar"/>
 			<pathelement path="../../servoy-osgi-target/eclipse_target/compile_target/install/plugins/org.apache.ant_1.9.4.v201504302020/lib/ant-antlr.jar"/>
 			<pathelement path="../../servoy-osgi-target/eclipse_target/compile_target/install/plugins/org.apache.ant_1.9.4.v201504302020/lib/ant-apache-bcel.jar"/>
