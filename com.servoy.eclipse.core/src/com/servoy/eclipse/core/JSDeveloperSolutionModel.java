@@ -141,17 +141,16 @@ public class JSDeveloperSolutionModel
 							objectsToSave.add(solutionCopy.getOrCreateTableNode(dataSourceName));
 
 						}
-
-						eclipseRepository = (EclipseRepository)ServoyModel.getDeveloperRepository();
-						eclipseRepository.loadForeignElementsIDs(loadForeignElementsIDs(solutionCopy));
-						for (IPersist persist : objectsToSave)
+					}
+					eclipseRepository = (EclipseRepository)ServoyModel.getDeveloperRepository();
+					eclipseRepository.loadForeignElementsIDs(loadForeignElementsIDs(solutionCopy));
+					for (IPersist persist : objectsToSave)
+					{
+						checkParent(persist);
+						SolutionSerializer.writePersist(persist, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
+						if (persist instanceof AbstractBase)
 						{
-							checkParent(persist);
-							SolutionSerializer.writePersist(persist, wfa, ServoyModel.getDeveloperRepository(), true, false, true);
-							if (persist instanceof AbstractBase)
-							{
-								((AbstractBase)persist).setParent(solutionCopy);
-							}
+							((AbstractBase)persist).setParent(solutionCopy);
 						}
 					}
 				}
@@ -341,7 +340,8 @@ public class JSDeveloperSolutionModel
 					{
 						try
 						{
-							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(PersistEditorInput.createFormEditorInput(frm).setNew(false),
+							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
+								PersistEditorInput.createFormEditorInput(frm).setNew(false),
 								PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(null,
 									Platform.getContentTypeManager().getContentType(PersistEditorInput.FORM_RESOURCE_ID)).getId());
 						}
