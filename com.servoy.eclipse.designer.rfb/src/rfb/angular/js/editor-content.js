@@ -32,9 +32,10 @@ window.onerror = function(message, source, lineno, colno, error) {
 		div.style.position = "absolute";
 		div.style.overflow = "auto";
 		div.style.left = "0px";
-		div.style.right = "0px";
-		div.style.bottom = "0px";
+		//div.style.right = "0px";
+		div.style.height = "300px";
 		div.style.top = "0px";
+		div.style.zIndex = "10000";
 		window.parent.document.body.appendChild(div);
 		catchedErrors.catchedErrorsDiv = document.createElement('pre');
 		catchedErrors.catchedErrorsDiv.style.color = "red";
