@@ -205,13 +205,12 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 								{
 									IPersist p = PersistHelper.getSuperPersist((ISupportExtendsID)fe.getPersistIfAvailable());
 									parentuuid = p.getParent().getUUID();
-									insertBeforeUUID = findNextSibling(fe.getPersistIfAvailable());
 								}
 								else
 								{
 									parentuuid = fe.getPersistIfAvailable().getParent().getUUID();
-									insertBeforeUUID = findNextSibling(fe.getPersistIfAvailable());
 								}
+								insertBeforeUUID = findNextSibling(fe.getPersistIfAvailable());
 							}
 
 							componentFound = true;
@@ -233,13 +232,12 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							{
 								IPersist p = PersistHelper.getSuperPersist((ISupportExtendsID)child);
 								parentuuid = p.getParent().getUUID();
-								insertBeforeUUID = findNextSibling(p);
 							}
 							else
 							{
 								if (child.getParent().equals(form)) parentuuid = null;
-								insertBeforeUUID = findNextSibling(child);
 							}
+							insertBeforeUUID = findNextSibling(child);
 							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context.getSolution(), w, true,
 								FormElementHelper.INSTANCE);
 						}
@@ -297,25 +295,26 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	}
 
 	/**
-	 * @param persist
+	 * @param wrappedPersist
 	 * @return
 	 */
-	private UUID findNextSibling(IPersist persist)
+	private UUID findNextSibling(IPersist wrappedPersist)
 	{
-		if (persist != null && persist.getParent() instanceof AbstractContainer)
+		if (wrappedPersist != null && wrappedPersist.getParent() instanceof AbstractContainer)
 		{
+			IPersist persist = wrappedPersist instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)wrappedPersist).getWrappedPersist()
+				: wrappedPersist;
 			AbstractContainer persistParent = (AbstractContainer)PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(persist), form,
 				persist.getParent());
 			IPersist superPersist = null;
 			if (((ISupportExtendsID)persist).getExtendsID() > 0 && persist.getParent() instanceof Form)
 			{
 				superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)persist);
-				persistParent = (AbstractContainer)PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(persist), form,
+				persistParent = (AbstractContainer)PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(wrappedPersist), form,
 					superPersist.getParent());
 			}
 			ArrayList<IPersist> children = persistParent.getSortedChildren();
-			int indexOf = children.indexOf(
-				persist instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)persist).getWrappedPersist() : persist);
+			int indexOf = children.indexOf(persist);
 			if (indexOf == -1 && superPersist != null)
 			{
 				indexOf = children.indexOf(
