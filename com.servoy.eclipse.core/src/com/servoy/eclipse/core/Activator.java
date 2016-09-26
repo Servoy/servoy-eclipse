@@ -1016,29 +1016,6 @@ public class Activator extends Plugin
 				processMethodTemplates(((IMethodTemplatesProvider)conv).getMethodTemplates(MethodTemplatesFactory.getInstance()));
 			}
 		}
-
-		// the .getActionSetRegistry() can end up calling a Display.syncExec deep inside Eclipse code (is context is not defined for actionsets it will get defined, trigger listeners and try to update UI) which can deadlock;
-		// the deadlock can happen because for example this Activator gets called from the build job thread (due to loading some class from this plugin) while at the same time
-		// the workbench UI is being initialized because of developer startup (so it holds the UI thread) and the UI also needs to activate plugins (and then waits for the activation above to be done)
-		Display.getDefault().asyncExec(new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				String[] actionIds = { "org.eclipse.ui.edit.text.actionSet.convertLineDelimitersTo" };
-				ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
-				IActionSetDescriptor[] actionSets = reg.getActionSets();
-				for (IActionSetDescriptor element : actionSets)
-				{
-					for (String actionSetId : actionIds)
-					{
-						if (Utils.stringSafeEquals(element.getId(), actionSetId)) element.setInitiallyVisible(false);
-					}
-				}
-			}
-
-		});
 	}
 
 	private void processMethodTemplates(Map<String, IMethodTemplate> templs)
