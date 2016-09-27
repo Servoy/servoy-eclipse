@@ -47,6 +47,9 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ISetSelectionTarget;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -219,7 +222,41 @@ public class LinkWithEditorAction extends Action
 							}
 						}
 					}
-
+				}
+				if (file.getName().endsWith(".spec") || file.getName().endsWith(".js") || file.getName().endsWith(".html") || file.getName().endsWith(".json"))
+				{
+					if (file.getParent() != null && file.getParent().getParent() != null)
+					{
+						String packageName = file.getParent().getParent().getName();
+						String componentName = file.getParent().getName();
+						WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(packageName + "-" + componentName);
+						if (spec != null)
+						{
+							tree.setSelection(new StructuredSelection(new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec, null)),
+								true);
+						}
+						else
+						{
+							spec = WebServiceSpecProvider.getInstance().getWebServiceSpecification(packageName + "-" + componentName);
+							if (spec != null)
+							{
+								tree.setSelection(new StructuredSelection(new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec, null)),
+									true);
+							}
+							else
+							{
+								spec = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(packageName) != null
+									? WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(packageName).getSpecification(
+										packageName + "-" + componentName)
+									: null;
+								if (spec != null)
+								{
+									tree.setSelection(
+										new StructuredSelection(new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec, null)), true);
+								}
+							}
+						}
+					}
 				}
 			}
 			else
