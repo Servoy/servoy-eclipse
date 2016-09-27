@@ -374,9 +374,8 @@ angular.module('editorContent',['servoyApp'])
 	      parent = angular.element(document.querySelectorAll("[svy-id='" + parentId + "']"));
 	    }
 	    var tpl = $compile(json.template)($rootScope.getDesignFormControllerScope());
-	    var old_element = parent.querySelectorAll("[svy-id='" + tpl[0].getAttribute("svy-id") + "']");
-		//when it's already there, we want to remove it in order to avoid duplicates and keep the latest
-		if (old_element[0]) angular.element(old_element).detach();
+	    var old_element = document.querySelectorAll("[svy-id='" + tpl[0].getAttribute("svy-id") + "']");
+		if (old_element.length == 1) return; //when it's already there, we don't do anything (this happens when the parent is overridden)
 		
 	    if (json.insertBeforeUUID) {
 	    	var testSibling = function(counter,insertBeforeUUID)

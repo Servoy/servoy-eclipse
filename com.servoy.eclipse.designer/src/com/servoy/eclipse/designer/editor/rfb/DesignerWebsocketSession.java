@@ -47,6 +47,8 @@ import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -200,16 +202,15 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							if (!form.isResponsiveLayout()) FormLayoutGenerator.generateEndDiv(w);
 							if (form.isResponsiveLayout())
 							{
+								IPersist parent = fe.getPersistIfAvailable().getParent();
 								if (((ISupportExtendsID)fe.getPersistIfAvailable()).getExtendsID() > 0 &&
 									fe.getPersistIfAvailable().getParent() instanceof Form)
 								{
 									IPersist p = PersistHelper.getSuperPersist((ISupportExtendsID)fe.getPersistIfAvailable());
-									parentuuid = p.getParent().getUUID();
+									parent = p.getParent();
 								}
-								else
-								{
-									parentuuid = fe.getPersistIfAvailable().getParent().getUUID();
-								}
+								parent = ElementUtil.getOverridePersist(PersistContext.create(parent, editor.getForm()));
+								parentuuid = parent.getUUID();
 								insertBeforeUUID = findNextSibling(fe.getPersistIfAvailable());
 							}
 
@@ -227,16 +228,13 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						if (child instanceof LayoutContainer)
 						{
 							componentFound = true;
-							parentuuid = child.getParent().getUUID();
+							IPersist parent = child.getParent();
 							if (((ISupportExtendsID)child).getExtendsID() > 0 && child.getParent() instanceof Form)
 							{
 								IPersist p = PersistHelper.getSuperPersist((ISupportExtendsID)child);
-								parentuuid = p.getParent().getUUID();
+								parent = p.getParent();
 							}
-							else
-							{
-								if (child.getParent().equals(form)) parentuuid = null;
-							}
+							parentuuid = parent instanceof Form ? null : parent.getUUID();
 							insertBeforeUUID = findNextSibling(child);
 							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context.getSolution(), w, true,
 								FormElementHelper.INSTANCE);

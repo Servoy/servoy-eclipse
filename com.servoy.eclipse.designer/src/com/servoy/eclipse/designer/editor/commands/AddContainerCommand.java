@@ -185,7 +185,12 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 										Iterator<IPersist> it = parent.getAllObjects();
 										while (it.hasNext())
 										{
-											changes.add(it.next());
+											IPersist next = it.next();
+											IPersist child = ElementUtil.getOverridePersist(PersistContext.create(next, activeEditor.getForm()));
+											changes.add(child);
+											if (child.equals(next)) continue;
+											parent.removeChild(next);
+											parent.addChild(child);
 										}
 									}
 									else
