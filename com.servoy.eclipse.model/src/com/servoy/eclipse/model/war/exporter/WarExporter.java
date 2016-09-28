@@ -255,6 +255,8 @@ public class WarExporter
 			//copy the wro4j command line runner to the war
 			File jarFile = new File(tmpWarDir, WRO4J_RUNNER);
 			FileUtils.copyInputStreamToFile(WarExporter.class.getResource("resources/" + WRO4J_RUNNER).openStream(), jarFile);
+			File wroPropertiesFile = new File(tmpWarDir, "wro.properties");
+			FileUtils.copyInputStreamToFile(WarExporter.class.getResource("resources/wro.properties").openStream(), wroPropertiesFile);
 
 			List<String> args = new ArrayList<String>();
 			args.add("java");
@@ -267,6 +269,8 @@ public class WarExporter
 			args.add(dest.getAbsolutePath());
 			args.add("--wroFile");
 			args.add(wroFile.getAbsolutePath());
+			args.add("--wroConfigurationFile");
+			args.add(wroPropertiesFile.getAbsolutePath());
 			args.add("-m");
 			args.add("-c");
 			String processors = "semicolonAppender,cssDataUri";
@@ -303,6 +307,14 @@ public class WarExporter
 			try
 			{
 				Files.delete(jarFile.toPath());
+			}
+			catch (Exception e)
+			{
+				// ignore will try to delete on exit later on.
+			}
+			try
+			{
+				Files.delete(wroPropertiesFile.toPath());
 			}
 			catch (Exception e)
 			{
