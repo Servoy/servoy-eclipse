@@ -505,7 +505,9 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 
 			writer.key("containers");
 			writer.array();
-			for (LayoutContainer container : containersA)
+			List<LayoutContainer> containersList = Arrays.asList(containersA);
+			Collections.reverse(containersList);
+			for (LayoutContainer container : containersList)
 			{
 				// TODO what the send over, if new then just the id? but what about the properties?
 				Map<String, String> attributes = container.getAttributes();
