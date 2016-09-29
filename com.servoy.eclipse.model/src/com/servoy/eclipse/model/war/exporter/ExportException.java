@@ -19,25 +19,18 @@ package com.servoy.eclipse.model.war.exporter;
 
 /**
  * Exception that will be thrown by the exporter if some thing fails in the export.
- * 
+ *
  * @author jcompagner
  * @since 6.1
  */
 public class ExportException extends Exception
 {
 
-	/**
-	 * @param string
-	 */
 	public ExportException(String msg)
 	{
 		super(msg);
 	}
 
-	/**
-	 * @param string
-	 * @param e
-	 */
 	public ExportException(String msg, Exception exception)
 	{
 		super(msg, exception);

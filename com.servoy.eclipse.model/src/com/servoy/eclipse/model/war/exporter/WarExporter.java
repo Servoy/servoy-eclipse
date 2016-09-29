@@ -324,7 +324,7 @@ public class WarExporter
 		catch (Exception e)
 		{
 			Debug.error(e);
-			throw new ExportException(e.getMessage());
+			throw new ExportException(e.getMessage(), e);
 		}
 	}
 
