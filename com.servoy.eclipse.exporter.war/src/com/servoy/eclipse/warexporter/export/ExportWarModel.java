@@ -541,7 +541,8 @@ public class ExportWarModel extends AbstractWarExportModel
 			}
 			else if (serverName.equals(IServer.REPOSITORY_SERVER))
 			{
-				serverConfiguration = new ServerConfiguration(serverName);
+				server = (IServerInternal)ApplicationServerRegistry.get().getServerManager().getServer(serverName, false, true);
+				serverConfiguration = server != null ? new ServerConfiguration(serverName, server.getConfig()) : new ServerConfiguration(serverName);
 				servers.put(serverName, serverConfiguration);
 			}
 		}

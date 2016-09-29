@@ -249,26 +249,13 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 
 			String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, true, false);
 			ArrayList<String> srvNames = new ArrayList<String>(Arrays.asList(serverNames));
-			boolean repositoryServerPresent = true;
 			if (!srvNames.contains(IServer.REPOSITORY_SERVER))
 			{
-				repositoryServerPresent = false;
 				srvNames.add(IServer.REPOSITORY_SERVER);
 			}
 			for (String serverName : srvNames)
 			{
 				ServerConfiguration serverConfiguration = exportModel.getServerConfiguration(serverName);
-				//handle required repository_server if not present in the servers list
-				if (serverName.equals(IServer.REPOSITORY_SERVER) && !repositoryServerPresent)
-				{
-					//set some default configuration
-					serverConfiguration.setDriver((exportModel.getServerConfiguration(srvNames.get(0))).getDriver());
-					serverConfiguration.setUserName((exportModel.getServerConfiguration(srvNames.get(0))).getUserName());
-					serverConfiguration.setPassword((exportModel.getServerConfiguration(srvNames.get(0))).getPassword());
-					serverConfiguration.setMaxActive((exportModel.getServerConfiguration(srvNames.get(0))).getMaxActive());
-					serverConfiguration.setMaxIdle((exportModel.getServerConfiguration(srvNames.get(0))).getMaxIdle());
-					serverConfiguration.setMaxPreparedStatementsIdle((exportModel.getServerConfiguration(srvNames.get(0))).getMaxPreparedStatementsIdle());
-				}
 				ServerConfigurationPage configurationPage = new ServerConfigurationPage("serverconf:" + serverName, serverConfiguration,
 					exportModel.getSelectedServerNames(), serverConfigurationPages);
 				addPage(configurationPage);
