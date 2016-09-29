@@ -150,6 +150,7 @@ import com.servoy.j2db.persistence.ContentSpec.Element;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IBasicWebComponent;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -2099,7 +2100,24 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					changed |= !Utils.equalObjects(value,
 						beanPropertyDescriptor.propertyDescriptor.getValue(beanPropertyDescriptor.valueObject, persistContext));
 
-					beanPropertyDescriptor.propertyDescriptor.setValue(beanPropertyDescriptor.valueObject, value, persistContext);
+					boolean childObjectValueFromDifferenParent = false;
+					if (value instanceof IChildWebObject)
+					{
+						childObjectValueFromDifferenParent = ((IChildWebObject)value).getParent() != persistContext.getPersist();
+					}
+					else if (value instanceof IChildWebObject[])
+					{
+						for (IChildWebObject childWebObject : (IChildWebObject[])value)
+						{
+							childObjectValueFromDifferenParent = childWebObject.getParent() != persistContext.getPersist();
+							if (childObjectValueFromDifferenParent) break;
+						}
+					}
+
+					if (!childObjectValueFromDifferenParent)
+					{
+						beanPropertyDescriptor.propertyDescriptor.setValue(beanPropertyDescriptor.valueObject, value, persistContext);
+					}
 					if ("view".equals(id) && changed)
 					{
 						refreshPropertiesView();

@@ -25,6 +25,7 @@ import org.eclipse.swt.graphics.Image;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.util.IParentOverridable;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.util.PersistHelper;
@@ -74,15 +75,23 @@ public class PersistInheritenceDelegateLabelProvider extends DelegateLabelProvid
 	public String getText(Object value)
 	{
 		String superText = super.getText(value);
-		IPersist realPersist = persist;
-		if (realPersist instanceof IParentOverridable)
+
+		if (!(value instanceof IChildWebObject) && !(value instanceof IChildWebObject[]))
 		{
-			realPersist = ((IParentOverridable)realPersist).getParentToOverride();
-		}
-		if (realPersist instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)realPersist) &&
-			((AbstractBase)persist).hasProperty((String)propertyId))
-		{
-			superText = (superText != null ? superText : "") + " (" + Messages.LabelOverride + ')';
+			IPersist realPersist = persist;
+			if (realPersist instanceof IChildWebObject)
+			{
+				realPersist = ((IChildWebObject)realPersist).getParent();
+			}
+			else if (realPersist instanceof IParentOverridable)
+			{
+				realPersist = ((IParentOverridable)realPersist).getParentToOverride();
+			}
+			if (realPersist instanceof ISupportExtendsID && PersistHelper.isOverrideElement((ISupportExtendsID)realPersist) &&
+				((AbstractBase)persist).hasProperty((String)propertyId))
+			{
+				superText = (superText != null ? superText : "") + " (" + Messages.LabelOverride + ')';
+			}
 		}
 
 		return superText;
