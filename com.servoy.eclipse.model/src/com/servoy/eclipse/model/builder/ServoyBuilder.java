@@ -783,6 +783,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					// a project that this builder in interested in was deleted (so a module or the resources proj.)
 					// or something has changed in this builder's solution project
 					checkServoyProject(getProject());
+					checkMissingSpecs(getProject());
 					checkModules(getProject());
 					checkResourcesForServoyProject(getProject());
 					checkResourcesForModules(getProject());
@@ -860,6 +861,61 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 					}
 				}
+			}
+		}
+	}
+
+	private void checkMissingSpecs(IProject buildProject)
+	{
+		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
+		if (modules != null)
+		{
+			for (final ServoyProject module : modules)
+			{
+				if (!Utils.equalObjects(module.getProject().getName(), buildProject.getName()))
+				{
+					deleteMarkers(module.getProject(), MISSING_SPEC);
+					module.getSolution().acceptVisitor(new IPersistVisitor()
+					{
+
+						@Override
+						public Object visit(IPersist o)
+						{
+							checkMissingSpecs(o, module.getProject());
+							return null;
+						}
+					});
+				}
+			}
+		}
+
+	}
+
+	private void checkMissingSpecs(IPersist o, IProject project)
+	{
+		if (o instanceof WebComponent)
+		{
+			WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)o).getTypeName());
+			if (spec == null)
+			{
+				ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Web Component", ((WebComponent)o).getTypeName());
+				addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
+			}
+		}
+		if (o instanceof LayoutContainer)
+		{
+			WebLayoutSpecification spec = null;
+			PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+				((LayoutContainer)o).getPackageName());
+			if (pkg != null)
+			{
+				spec = pkg.getSpecification(((LayoutContainer)o).getSpecName());
+			}
+			if (spec == null)
+			{
+				ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Layout",
+					((LayoutContainer)o).getPackageName() + "-" + ((LayoutContainer)o).getSpecName());
+				addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
 			}
 		}
 	}
@@ -3336,31 +3392,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 						}
 						checkCancel();
-						if (o instanceof WebComponent)
-						{
-							WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)o).getTypeName());
-							if (spec == null)
-							{
-								ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Web Component", ((WebComponent)o).getTypeName());
-								addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
-							}
-						}
-						if (o instanceof LayoutContainer)
-						{
-							WebLayoutSpecification spec = null;
-							PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
-								((LayoutContainer)o).getPackageName());
-							if (pkg != null)
-							{
-								spec = pkg.getSpecification(((LayoutContainer)o).getSpecName());
-							}
-							if (spec == null)
-							{
-								ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Layout",
-									((LayoutContainer)o).getPackageName() + "-" + ((LayoutContainer)o).getSpecName());
-								addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
-							}
-						}
+						checkMissingSpecs(o, project);
 						checkCancel();
 						if (o.getTypeID() == IRepository.SHAPES)
 						{
