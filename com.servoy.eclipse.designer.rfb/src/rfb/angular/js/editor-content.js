@@ -16,12 +16,6 @@ var catchedErrors = {
 		}
 }
 
-//this preventDefault should not be needed because we have the glasspane 
-//however, the SWT browser on OS X needs this in order to show our editor context menu when right-clicking on the iframe 
-window.addEventListener('contextmenu', function (e) { // Not compatible with IE < 9
-    e.preventDefault();
-}, false);
-
 window.onerror = function(message, source, lineno, colno, error) {
 	if (!window.parent.document.body) {
 		catchedErrors.array.push({message:message,source:source,lineno:lineno,colno:colno,error:error});
@@ -70,6 +64,13 @@ angular.module('editorContent',['servoyApp'])
     $rootScope.getDesignFormElement().append(el);
     return el;
   }
+  
+  //this preventDefault should not be needed because we have the glasspane 
+  //however, the SWT browser on OS X needs this in order to show our editor context menu when right-clicking on the iframe 
+  window.addEventListener('contextmenu', function (e) { // Not compatible with IE < 9
+    e.preventDefault();
+    $rootScope.ctxmenu(e);//workaround to make the contextmenu show on osx
+  }, false);
      	
   $rootScope.createAbsoluteComponent = function(html, model) {
       var compScope = $scope.$new(true);

@@ -135,6 +135,8 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				} else if (target == "PALETTE") {
 					$($element.find('.palette')[0]).on(eventType, null, eventCallback)
 				} else if (target == "CONTENTFRAME_OVERLAY") {
+					//workaround to make the contextmenu show on osx
+					if (eventType == "contextmenu") $scope.ctxmenu = eventCallback;
 					$($scope.glasspane).on(eventType, null, eventCallback)
 				} else if (target == "BOTTOM_AUTOSCROLL") {
 					$($element.find('.bottomAutoscrollArea')[0]).on(eventType, null, eventCallback)
@@ -855,6 +857,9 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				var htmlTag = $scope.contentDocument.getElementsByTagName("html")[0];
 				var injector = $scope.contentWindow.angular.element(htmlTag).injector();
 				editorContentRootScope = injector.get("$rootScope");
+				//workaround to make the contextmenu show on osx
+				editorContentRootScope.ctxmenu = $scope.ctxmenu;
+				delete $scope.ctxmenu;
 				servoyInternal = injector.get("$servoyInternal");
 				$scope.glasspane.focus()
 				$(function() {
