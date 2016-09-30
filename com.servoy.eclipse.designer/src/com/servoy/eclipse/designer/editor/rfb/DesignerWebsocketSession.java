@@ -157,7 +157,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		Form flattenedForm = fs.getFlattenedForm(form);
 
 		ServoyDataConverterContext context = new ServoyDataConverterContext(fs);
-		FormWrapper wrapper = new FormWrapper(flattenedForm, flattenedForm.getName(), false, null, context, true);
+		FormWrapper wrapper = new FormWrapper(flattenedForm, flattenedForm.getName(), false, context, true, null);
 		switch (methodName)
 		{
 			case "getData" :
