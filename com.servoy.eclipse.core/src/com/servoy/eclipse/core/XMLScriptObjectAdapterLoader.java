@@ -51,7 +51,7 @@ public class XMLScriptObjectAdapterLoader
 {
 	/**
 	 * The name of the XML file which holds documentation and other Servoy extension related info.
-	 * 
+	 *
 	 * @see com.servoy.eclipse.docgenerator.parser.DocumentationXMLBuilder.EXTENSION_XML_FILE
 	 */
 	private static final String EXTENSION_XML_FILE = "servoy-extension.xml";
@@ -69,7 +69,7 @@ public class XMLScriptObjectAdapterLoader
 			{
 				docManager = documentationManagerProvider.fromXML(url, null);
 			}
-			loadDocumentationFromXML(null, docManager);
+			loadDocumentationFromXML(XMLScriptObjectAdapterLoader.class.getClassLoader(), docManager);
 			coreLoaded = true;
 		}
 	}
