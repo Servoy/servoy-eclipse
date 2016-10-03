@@ -1285,7 +1285,16 @@ public class WarExporter
 
 			properties.put("server." + i + ".serverName", sc.getName());
 			properties.put("server." + i + ".userName", sc.getUserName());
-			properties.put("server." + i + ".password", sc.getPassword());
+			String password = sc.getPassword();
+			try
+			{
+				password = "sec:" + SecuritySupport.encrypt(Settings.getInstance(), password);
+			}
+			catch (Exception e)
+			{
+				Debug.error("Could not encrypt password for sever " + sc.getName(), e);
+			}
+			properties.put("server." + i + ".password", password);
 			properties.put("server." + i + ".URL", sc.getServerUrl());
 //			Map<String, String> connectionProperties = sc.getConnectionProperties();
 //			if (connectionProperties == null)
