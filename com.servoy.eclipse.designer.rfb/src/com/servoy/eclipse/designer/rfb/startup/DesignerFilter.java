@@ -73,6 +73,7 @@ import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HTTPUtils;
+import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
  * Filter for designer editor
@@ -233,23 +234,30 @@ public class DesignerFilter implements Filter
 									{
 										StringResource stringResource = (StringResource)iRootObject;
 										String content = stringResource.getContent();
-										JSONObject templateJSON = new JSONObject(content);
-										if ((layoutType.equals(layoutTypeNames[0]) && (!templateJSON.has(Template.PROP_LAYOUT)) ||
-											(templateJSON.has(Template.PROP_LAYOUT) && templateJSON.get(Template.PROP_LAYOUT).equals(layoutType))))
+										try
 										{
-											jsonWriter.object();
-											jsonWriter.key("name").value(iRootObject.getName());
-											jsonWriter.key("componentType").value("template");
-											jsonWriter.key("displayName").value(iRootObject.getName());
-											jsonWriter.key("tagName").value("<div  style=\"border-style: dotted;\"></div>");
-											Map<String, Object> model = new HashMap<String, Object>();
-											HashMap<String, Number> size = new HashMap<String, Number>();
-											size.put("height", Integer.valueOf(80));
-											size.put("width", Integer.valueOf(80));
-											model.put("size", size);
-											jsonWriter.key("model").value(new JSONObject(model));
-											jsonWriter.key("icon").value("rfb/angular/js/modules/toolbaractions/icons/template.gif");
-											jsonWriter.endObject();
+											JSONObject templateJSON = new ServoyJSONObject(content, false);
+											if ((layoutType.equals(layoutTypeNames[0]) && (!templateJSON.has(Template.PROP_LAYOUT)) ||
+												(templateJSON.has(Template.PROP_LAYOUT) && templateJSON.get(Template.PROP_LAYOUT).equals(layoutType))))
+											{
+												jsonWriter.object();
+												jsonWriter.key("name").value(iRootObject.getName());
+												jsonWriter.key("componentType").value("template");
+												jsonWriter.key("displayName").value(iRootObject.getName());
+												jsonWriter.key("tagName").value("<div  style=\"border-style: dotted;\"></div>");
+												Map<String, Object> model = new HashMap<String, Object>();
+												HashMap<String, Number> size = new HashMap<String, Number>();
+												size.put("height", Integer.valueOf(80));
+												size.put("width", Integer.valueOf(80));
+												model.put("size", size);
+												jsonWriter.key("model").value(new JSONObject(model));
+												jsonWriter.key("icon").value("rfb/angular/js/modules/toolbaractions/icons/template.gif");
+												jsonWriter.endObject();
+											}
+										}
+										catch (Exception e)
+										{
+											Debug.error("error parsing " + content, e);
 										}
 									}
 								}
