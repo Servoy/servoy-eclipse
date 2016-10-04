@@ -1119,39 +1119,51 @@ public class WarExporter
 			for (String plugin : plugins)
 			{
 				String pluginName = "plugins/" + plugin;
-				File pluginJarFile = new File(appServerDir, pluginName);
+				File pluginFile = new File(appServerDir, pluginName);
 
-				writeFileEntry(fw, pluginJarFile, plugin, writtenFiles);
-
-				copyFile(pluginJarFile, new File(tmpWarDir, pluginName));
-
-				copyJnlp(tmpWarDir, appServerDir, pluginName + ".jnlp", fw, writtenFiles);
-
-				if (pluginName.toLowerCase().endsWith(".jar") || pluginName.toLowerCase().endsWith(".zip"))
+				if (pluginFile.isDirectory())
 				{
-					String pluginLibDir = pluginName.substring(0, pluginName.length() - 4);
-					File pluginLibDirFile = new File(appServerDir, pluginLibDir);
-					if (pluginLibDirFile.exists() && pluginLibDirFile.isDirectory())
+					copyDir(pluginName, pluginFile, tmpWarDir, fw, writtenFiles, true);
+				}
+				else
+				{
+					writeFileEntry(fw, pluginFile, plugin, writtenFiles);
+
+					copyFile(pluginFile, new File(tmpWarDir, pluginName));
+
+					copyJnlp(tmpWarDir, appServerDir, pluginName + ".jnlp", fw, writtenFiles);
+
+					if (pluginName.toLowerCase().endsWith(".jar") || pluginName.toLowerCase().endsWith(".zip"))
 					{
-						Set<File> copiedFiles = copyDir(pluginLibDirFile, new File(tmpWarDir, pluginLibDir), false);
-						for (File file : copiedFiles)
-						{
-							String fileName = file.getAbsolutePath().replace('\\', '/');
-							int index = fileName.indexOf("plugins/");
-							if (index != -1)
-							{
-								fileName = fileName.substring(index + "plugins/".length());
-							}
-							writeFileEntry(fw, file, fileName, writtenFiles);
-						}
+						String pluginLibDir = pluginName.substring(0, pluginName.length() - 4);
+						File pluginLibDirFile = new File(appServerDir, pluginLibDir);
+						copyDir(pluginLibDir, pluginLibDirFile, tmpWarDir, fw, writtenFiles, false);
 					}
 				}
-
 			}
 		}
 		catch (IOException e1)
 		{
 			throw new ExportException("Error creating plugins dir", e1);
+		}
+	}
+
+	private static void copyDir(String dirName, File dirFile, File tmpWarDir, Writer propertiesWriter, Set<File> writtenFiles, boolean recursive)
+		throws ExportException, IOException
+	{
+		if (dirFile.exists() && dirFile.isDirectory())
+		{
+			Set<File> copiedFiles = copyDir(dirFile, new File(tmpWarDir, dirName), recursive);
+			for (File file : copiedFiles)
+			{
+				String fileName = file.getAbsolutePath().replace('\\', '/');
+				int index = fileName.indexOf("plugins/");
+				if (index != -1)
+				{
+					fileName = fileName.substring(index + "plugins/".length());
+				}
+				writeFileEntry(propertiesWriter, file, fileName, writtenFiles);
+			}
 		}
 	}
 
@@ -1368,7 +1380,7 @@ public class WarExporter
 		}
 	}
 
-	private void writeFileEntry(Writer fw, File file, String name, Set<File> writtenFiles) throws IOException
+	private static void writeFileEntry(Writer fw, File file, String name, Set<File> writtenFiles) throws IOException
 	{
 
 		if (writtenFiles.add(file) && file.exists())

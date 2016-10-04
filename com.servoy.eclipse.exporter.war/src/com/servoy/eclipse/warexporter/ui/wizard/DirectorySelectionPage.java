@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.servoy.eclipse.ui.wizards.ICheckBoxView;
 import com.servoy.eclipse.ui.wizards.SelectAllButtonsBar;
+import com.servoy.j2db.util.Utils;
 
 /**
  *
@@ -55,11 +56,12 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 	private CheckboxTableViewer checkboxTableViewer;
 	private SelectAllButtonsBar selectAllButtons;
 	private final boolean selectAll;
+	private final boolean includeSubdirectories;
 
 	public DirectorySelectionPage(String pagename, String title, String description, File directory, List<String> files, String[] requiredFiles,
 		boolean selectAll)
 	{
-		this(pagename, title, description, directory, files, requiredFiles, selectAll, null);
+		this(pagename, title, description, directory, files, requiredFiles, selectAll, null, false);
 	}
 
 	/**
@@ -70,7 +72,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 	 * @param beanSelectionPage
 	 */
 	public DirectorySelectionPage(String pagename, String title, String description, File directory, List<String> files, String[] requiredFiles,
-		boolean selectAll, IWizardPage nextPage)
+		boolean selectAll, IWizardPage nextPage, boolean includeSubdirectories)
 	{
 		super(pagename);
 		this.directory = directory;
@@ -78,6 +80,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 		this.requiredFiles = requiredFiles;
 		this.nextPage = nextPage;
 		this.selectAll = selectAll;
+		this.includeSubdirectories = includeSubdirectories;
 		setTitle(title);
 		setDescription(description);
 	}
@@ -108,7 +111,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 		}
 		else
 		{
-			checkboxTableViewer.setCheckedElements(appendRequiredLabel(files.toArray()));
+			checkboxTableViewer.setCheckedElements(appendRequiredLabelAndFolderBrackets(files.toArray()));
 		}
 		if (checkboxTableViewer.getTable().getItemCount() == 0)
 		{
@@ -124,7 +127,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 	public void storeInput()
 	{
 		files.clear();
-		String[] checkedElements = removeRequiredLabel(checkboxTableViewer.getCheckedElements());
+		String[] checkedElements = removeRequiredLabelAndFolderBrackets(checkboxTableViewer.getCheckedElements());
 		for (String el : checkedElements)
 			files.add(el);
 	}
@@ -148,7 +151,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 		return super.getNextPage();
 	}
 
-	private String[] appendRequiredLabel(Object[] fileNames)
+	private String[] appendRequiredLabelAndFolderBrackets(Object[] fileNames)
 	{
 		ArrayList<String> appendRequiredFileNames = new ArrayList<String>();
 		List<String> requiredFilesAsList = requiredFiles != null && requiredFiles.length > 0 ? Arrays.asList(requiredFiles) : null;
@@ -156,14 +159,21 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 		for (Object fileName : fileNames)
 		{
 			sFileName = fileName.toString();
-			if (requiredFilesAsList != null && requiredFilesAsList.indexOf(sFileName) != -1) appendRequiredFileNames.add(0, sFileName + REQUIRED_LABEL);
-			else appendRequiredFileNames.add(sFileName);
+			if (isAcceptedFileType(sFileName))
+			{
+				if (requiredFilesAsList != null && requiredFilesAsList.indexOf(sFileName) != -1) appendRequiredFileNames.add(0, sFileName + REQUIRED_LABEL);
+				else appendRequiredFileNames.add(sFileName);
+			}
+			else
+			{
+				appendRequiredFileNames.add('[' + sFileName + ']');
+			}
 		}
 		return appendRequiredFileNames.toArray(new String[appendRequiredFileNames.size()]);
 
 	}
 
-	private String[] removeRequiredLabel(Object[] fileNames)
+	private String[] removeRequiredLabelAndFolderBrackets(Object[] fileNames)
 	{
 		ArrayList<String> removeRequiedFileNames = new ArrayList<String>();
 		List<String> requiredFilesAsList = requiredFiles != null && requiredFiles.length > 0 ? Arrays.asList(requiredFiles) : null;
@@ -175,6 +185,10 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 			{
 				requiredFileName = sFileName.substring(0, sFileName.length() - REQUIRED_LABEL.length());
 				if (requiredFilesAsList.indexOf(requiredFileName) != -1) sFileName = requiredFileName;
+			}
+			else if (sFileName.startsWith("[") && sFileName.endsWith("]"))
+			{
+				sFileName = sFileName.substring(1, sFileName.length() - 1);
 			}
 			removeRequiedFileNames.add(sFileName);
 		}
@@ -195,18 +209,42 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 		{
 			if (inputElement instanceof File)
 			{
-				String[] fileNames = ((File)inputElement).list(new FilenameFilter()
+				final String[] fileNames = ((File)inputElement).list(new FilenameFilter()
 				{
-
 					public boolean accept(File dir, String name)
 					{
-						return name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip");
+						return isAcceptedFileType(name);
 					}
 				});
-				return appendRequiredLabel(fileNames);
+
+				if (includeSubdirectories)
+				{
+					String[] directoryNames = ((File)inputElement).list(new FilenameFilter()
+					{
+						public boolean accept(File dir, String name)
+						{
+							for (String fileName : fileNames)
+							{
+								String fileNameNoExtension = fileName.substring(0, fileName.indexOf('.'));
+								if (fileNameNoExtension.equalsIgnoreCase(name)) return false;
+							}
+							return new File(dir, name).isDirectory();
+						}
+					});
+					return appendRequiredLabelAndFolderBrackets(Utils.arrayJoin(fileNames, directoryNames));
+				}
+				else
+				{
+					return appendRequiredLabelAndFolderBrackets(fileNames);
+				}
 			}
 			return null;
 		}
+	}
+
+	private static boolean isAcceptedFileType(String fileName)
+	{
+		return fileName.toLowerCase().endsWith(".jar") || fileName.toLowerCase().endsWith(".zip");
 	}
 
 	/*
@@ -256,7 +294,8 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 		if (requiredFiles != null)
 		{
 			for (String requiredFile : requiredFiles)
-				if (requiredFile != null && requiredFiles.length > 0) checkboxTableViewer.setChecked(requiredFile + DirectorySelectionPage.REQUIRED_LABEL, true);
+				if (requiredFile != null && requiredFiles.length > 0)
+					checkboxTableViewer.setChecked(requiredFile + DirectorySelectionPage.REQUIRED_LABEL, true);
 		}
 	}
 }
