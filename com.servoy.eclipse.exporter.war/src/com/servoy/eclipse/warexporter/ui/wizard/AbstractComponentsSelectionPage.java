@@ -20,6 +20,7 @@ package com.servoy.eclipse.warexporter.ui.wizard;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -216,18 +217,18 @@ public abstract class AbstractComponentsSelectionPage extends WizardPage
 
 		final GroupLayout groupLayout = new GroupLayout(container);
 		groupLayout.setHorizontalGroup(groupLayout.createSequentialGroup().add(
-			groupLayout.createParallelGroup().add(exportedLabel).add(availableComponentsList, GroupLayout.PREFERRED_SIZE, 150, Short.MAX_VALUE)).addPreferredGap(
-			LayoutStyle.UNRELATED).add(
-			groupLayout.createParallelGroup().add(btnSelect, GroupLayout.PREFERRED_SIZE, 50, Short.MAX_VALUE).add(btnRemove, GroupLayout.PREFERRED_SIZE, 50,
-				Short.MAX_VALUE).add(btnSelectAll, GroupLayout.PREFERRED_SIZE, 50, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.UNRELATED).add(
-			groupLayout.createParallelGroup().add(availableLabel).add(selectedComponentsList, GroupLayout.PREFERRED_SIZE, 150, Short.MAX_VALUE)));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup().add(
-			groupLayout.createSequentialGroup().add(exportedLabel).addPreferredGap(LayoutStyle.RELATED).add(availableComponentsList,
-				GroupLayout.PREFERRED_SIZE, 250, Short.MAX_VALUE)).add(
-			groupLayout.createSequentialGroup().add(50).add(btnSelect).addPreferredGap(LayoutStyle.RELATED).add(btnRemove).addPreferredGap(LayoutStyle.RELATED).add(
-				btnSelectAll)).add(
-			groupLayout.createSequentialGroup().add(availableLabel).addPreferredGap(LayoutStyle.RELATED).add(selectedComponentsList,
-				GroupLayout.PREFERRED_SIZE, 250, Short.MAX_VALUE)));
+				groupLayout.createParallelGroup().add(exportedLabel).add(availableComponentsList, GroupLayout.PREFERRED_SIZE, 150, Short.MAX_VALUE)).addPreferredGap(
+				LayoutStyle.UNRELATED).add(
+				groupLayout.createParallelGroup().add(btnSelect, GroupLayout.PREFERRED_SIZE, 50, Short.MAX_VALUE).add(btnRemove, GroupLayout.PREFERRED_SIZE, 50,
+					Short.MAX_VALUE).add(btnSelectAll, GroupLayout.PREFERRED_SIZE, 50, Short.MAX_VALUE)).addPreferredGap(LayoutStyle.UNRELATED).add(
+				groupLayout.createParallelGroup().add(availableLabel).add(selectedComponentsList, GroupLayout.PREFERRED_SIZE, 150, Short.MAX_VALUE)));
+			groupLayout.setVerticalGroup(groupLayout.createParallelGroup().add(
+				groupLayout.createSequentialGroup().add(exportedLabel).addPreferredGap(LayoutStyle.RELATED).add(availableComponentsList,
+					GroupLayout.PREFERRED_SIZE, 250, Short.MAX_VALUE)).add(
+				groupLayout.createSequentialGroup().add(50).add(btnSelect).addPreferredGap(LayoutStyle.RELATED).add(btnRemove).addPreferredGap(LayoutStyle.RELATED).add(
+					btnSelectAll)).add(
+				groupLayout.createSequentialGroup().add(availableLabel).addPreferredGap(LayoutStyle.RELATED).add(selectedComponentsList,
+					GroupLayout.PREFERRED_SIZE, 250, Short.MAX_VALUE)));
 		container.setLayout(groupLayout);
 	}
 
@@ -263,4 +264,11 @@ public abstract class AbstractComponentsSelectionPage extends WizardPage
 	}
 
 	protected abstract Set<String> getAvailableItems();
+
+	public void setComponentsUsed(Set<String> componentsUsed)
+	{
+		this.componentsUsed = componentsUsed;
+		selectedComponents = new TreeSet<String>(componentsUsed);
+		selectedComponentsList.setItems(selectedComponents.toArray(new String[selectedComponents.size()]));
+	}
 }

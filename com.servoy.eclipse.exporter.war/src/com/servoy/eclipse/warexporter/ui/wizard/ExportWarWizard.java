@@ -42,6 +42,7 @@ import org.eclipse.ui.IWorkbench;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
@@ -278,5 +279,47 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 			return currentPage.getNextPage() == null;
 		}
 		return false;
+	}
+
+	@Override
+	public IWizardPage getNextPage(IWizardPage page)
+	{
+		if (page.equals(componentsSelectionPage) && !exportModel.isReady())
+		{
+			try
+			{
+				getContainer().run(true, true, new IRunnableWithProgress()
+				{
+					public void run(IProgressMonitor monitor) throws InterruptedException
+					{
+						monitor.beginTask("Searching for used components and services", 100);
+						while (!exportModel.isReady())
+						{
+							Thread.sleep(100);
+							monitor.worked(1);
+						}
+						Display.getDefault().syncExec(new Runnable()
+						{
+							public void run()
+							{
+								componentsSelectionPage.setComponentsUsed(exportModel.getUsedComponents());
+								servicesSelectionPage.setComponentsUsed(exportModel.getUsedServices());
+							}
+						});
+						monitor.done();
+					}
+				});
+			}
+			catch (InvocationTargetException e)
+			{
+				ServoyLog.logError(e);
+			}
+			catch (InterruptedException e)
+			{
+				ServoyLog.logError(e);
+			}
+
+		}
+		return super.getNextPage(page);
 	}
 }

@@ -50,6 +50,393 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentChest>
 {
 
+	private final class CommandLineWarExportModel extends AbstractWarExportModel
+	{
+		private final WarArgumentChest configuration;
+
+		/**
+		 * @param configuration
+		 */
+		private CommandLineWarExportModel(WarArgumentChest configuration)
+		{
+			this.configuration = configuration;
+			search();
+		}
+
+		@Override
+		public boolean isExportActiveSolution()
+		{
+			return configuration.isExportActiveSolutionOnly();
+		}
+
+		@Override
+		public String getStartRMIPort()
+		{
+			return null;
+		}
+
+		@Override
+		public boolean getStartRMI()
+		{
+			return false;
+		}
+
+		@Override
+		public String getServoyPropertiesFileName()
+		{
+			String warSettingsFileName = configuration.getWarSettingsFileName();
+			if (warSettingsFileName == null)
+			{
+				String servoyPropertiesFileName = configuration.getSettingsFileName();
+				if (servoyPropertiesFileName == null)
+				{
+					servoyPropertiesFileName = getServoyApplicationServerDir() + File.separator + "servoy.properties";
+				}
+				return servoyPropertiesFileName;
+			}
+			return warSettingsFileName;
+		}
+
+		@Override
+		public ServerConfiguration getServerConfiguration(String serverName)
+		{
+			return null;
+		}
+
+		@Override
+		public SortedSet<String> getSelectedServerNames()
+		{
+			return null;
+		}
+
+		@Override
+		public List<String> getPlugins()
+		{
+			Set<String> names = null;
+			if (configuration.getPlugins() != null)
+			{
+				names = new HashSet<String>(Arrays.asList(configuration.getPlugins().toLowerCase().split(" ")));
+			}
+			return getFiles(ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), names);
+		}
+
+		@Override
+		public List<String> getLafs()
+		{
+			Set<String> names = null;
+			if (configuration.getLafs() != null)
+			{
+				names = new HashSet<String>(Arrays.asList(configuration.getLafs().toLowerCase().split(" ")));
+			}
+			return getFiles(ApplicationServerRegistry.get().getLafManager().getLAFDir(), names);
+		}
+
+		@Override
+		public String getWarFileName()
+		{
+			String warFileName = configuration.getWarFileName();
+			if (warFileName == null)
+			{
+				ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+				warFileName = activeProject.getProject().getName();
+			}
+			if (!warFileName.endsWith(".war")) warFileName += ".war";
+			return configuration.getExportFilePath() + File.separator + warFileName;
+		}
+
+		@Override
+		public List<String> getDrivers()
+		{
+			Set<String> names = null;
+			if (configuration.getDrivers() != null)
+			{
+				names = new HashSet<String>(Arrays.asList(configuration.getDrivers().toLowerCase().split(" ")));
+			}
+			return getFiles(ApplicationServerRegistry.get().getServerManager().getDriversDir(), names);
+		}
+
+		@Override
+		public List<String> getBeans()
+		{
+			Set<String> names = null;
+			if (configuration.getBeans() != null)
+			{
+				names = new HashSet<String>(Arrays.asList(configuration.getBeans().toLowerCase().split(" ")));
+			}
+			return getFiles(ApplicationServerRegistry.get().getBeanManager().getBeansDir(), names);
+		}
+
+		@Override
+		public boolean allowOverwriteSocketFactoryProperties()
+		{
+			return false;
+		}
+
+		@Override
+		public String getServoyApplicationServerDir()
+		{
+			return configuration.getAppServerDir();
+		}
+
+		List<String> getFiles(File dir, final Set<String> fileNames)
+		{
+			String[] list = dir.list(new FilenameFilter()
+			{
+				public boolean accept(File dir, String name)
+				{
+					boolean accept = fileNames != null ? fileNames.contains(name.toLowerCase()) : true;
+					return accept && (name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip"));
+				}
+			});
+			if (list == null || list.length == 0) return Collections.emptyList();
+			return Arrays.asList(list);
+		}
+
+		@Override
+		public List<String> getPluginLocations()
+		{
+			return Arrays.asList(configuration.getPluginLocations().split(" "));
+		}
+
+		@Override
+		public Set<String> getExportedComponents()
+		{
+			if (configuration.getSelectedComponents() == null) return configuration.getSelectedServices() != null ? getUsedComponents() : null;
+			if (configuration.getSelectedComponents().equals("")) return getUsedComponents();
+
+			WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
+			Set<String> set = new HashSet<String>();
+			if (configuration.getSelectedComponents().trim().equalsIgnoreCase("all"))
+			{
+				for (WebObjectSpecification spec : provider.getAllWebComponentSpecifications())
+				{
+					set.add(spec.getName());
+				}
+			}
+			else
+			{
+				set.addAll(Arrays.asList(configuration.getSelectedComponents().split(" ")));
+				for (String componentName : set)
+				{
+					if (provider.getWebComponentSpecification(componentName) == null)
+					{
+						// TODO shouldn't this be an error and shouldn't the exporter fail nicely with a new exit code? I'm thinking now of Jenkins usage and failing sooner rather then later (at export rather then when testing)
+						output("'" + componentName + "' is not a valid component name or it could not be found. Ignoring.");
+						set.remove(componentName);
+					}
+				}
+				set.addAll(getUsedComponents());
+			}
+			return set;
+
+		}
+
+		@Override
+		public Set<String> getExportedServices()
+		{
+			if (configuration.getSelectedServices() == null) return configuration.getSelectedComponents() != null ? getUsedServices() : null;
+			if (configuration.getSelectedServices().equals("")) return getUsedServices();
+			Set<String> set = new HashSet<String>();
+			WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
+			if (configuration.getSelectedServices().trim().equalsIgnoreCase("all"))
+			{
+				for (WebObjectSpecification spec : NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport())
+				{
+					set.add(spec.getName());
+				}
+			}
+			else
+			{
+				set.addAll(Arrays.asList(configuration.getSelectedServices().split(" ")));
+				for (String serviceName : set)
+				{
+					if (provider.getWebServiceSpecification(serviceName) == null)
+					{
+						// TODO shouldn't this be an error and shouldn't the exporter fail nicely with a new exit code? I'm thinking now of Jenkins usage and failing sooner rather then later (at export rather then when testing)
+						output("'" + serviceName + "' is not a valid service name or it could not be found. Ignoring.");
+						set.remove(serviceName);
+					}
+				}
+				set.addAll(getUsedServices());
+			}
+			return set;
+		}
+
+		@Override
+		public String getFileName()
+		{
+			return null;
+		}
+
+		@Override
+		public boolean isExportMetaData()
+		{
+			return configuration.shouldExportMetadata();
+		}
+
+		@Override
+		public boolean isExportSampleData()
+		{
+			return configuration.isExportSampleData();
+		}
+
+		@Override
+		public boolean isExportI18NData()
+		{
+			return configuration.isExportI18NData();
+		}
+
+		@Override
+		public int getNumberOfSampleDataExported()
+		{
+			return configuration.getNumberOfSampleDataExported();
+		}
+
+		@Override
+		public boolean isExportAllTablesFromReferencedServers()
+		{
+			return configuration.isExportAllTablesFromReferencedServers();
+		}
+
+		@Override
+		public boolean isCheckMetadataTables()
+		{
+			return configuration.checkMetadataTables();
+		}
+
+		@Override
+		public boolean isExportUsingDbiFileInfoOnly()
+		{
+			return configuration.shouldExportUsingDbiFileInfoOnly();
+		}
+
+		@Override
+		public boolean isExportUsers()
+		{
+			return configuration.exportUsers();
+		}
+
+		@Override
+		public boolean isOverwriteGroups()
+		{
+			return configuration.isOverwriteGroups();
+		}
+
+		@Override
+		public boolean isAllowSQLKeywords()
+		{
+			return configuration.isAllowSQLKeywords();
+		}
+
+		@Override
+		public boolean isOverrideSequenceTypes()
+		{
+			return configuration.isOverwriteGroups();
+		}
+
+		@Override
+		public boolean isInsertNewI18NKeysOnly()
+		{
+			return configuration.isInsertNewI18NKeysOnly();
+		}
+
+		@Override
+		public boolean isOverrideDefaultValues()
+		{
+			return configuration.isOverrideDefaultValues();
+		}
+
+		@Override
+		public int getImportUserPolicy()
+		{
+			return configuration.getImportUserPolicy();
+		}
+
+		@Override
+		public boolean isAddUsersToAdminGroup()
+		{
+			return configuration.isAddUsersToAdminGroup();
+		}
+
+		@Override
+		public boolean isAllowDataModelChanges()
+		{
+			return !configuration.isStopOnAllowDataModelChanges();
+		}
+
+		@Override
+		public boolean isUpdateSequences()
+		{
+			return configuration.isUpdateSequences();
+		}
+
+		@Override
+		public boolean isAutomaticallyUpgradeRepository()
+		{
+			return configuration.automaticallyUpdateRepository();
+		}
+
+		@Override
+		public boolean isCreateTomcatContextXML()
+		{
+			return configuration.isCreateTomcatContextXML();
+		}
+
+		@Override
+		public boolean isClearReferencesStatic()
+		{
+			return configuration.isClearReferencesStatic();
+		}
+
+		@Override
+		public boolean isClearReferencesStopThreads()
+		{
+			return configuration.isClearReferencesStopThreads();
+		}
+
+		@Override
+		public boolean isClearReferencesStopTimerThreads()
+		{
+			return configuration.isClearReferencesStopTimerThreads();
+		}
+
+		@Override
+		public boolean isAntiResourceLocking()
+		{
+			return configuration.isAntiResourceLocking();
+		}
+
+		@Override
+		public List<String> getExcludedComponentPackages()
+		{
+			return configuration.getExcludedComponentPackages() == null ? null : Arrays.asList(configuration.getExcludedComponentPackages().split(" "));
+		}
+
+		@Override
+		public List<String> getExcludedServicePackages()
+		{
+			return configuration.getExcludedServicePackages() == null ? null : Arrays.asList(configuration.getExcludedServicePackages().split(" "));
+		}
+
+		@Override
+		public String getDefaultAdminUser()
+		{
+			return configuration.getDefaultAdminUser();
+		}
+
+		@Override
+		public String getDefaultAdminPassword()
+		{
+			return configuration.getDefaultAdminPassword();
+		}
+
+		@Override
+		public boolean isMinimizeJsCssResources()
+		{
+			return configuration.isMinimizeJsCssResources();
+		}
+	}
+
 	@Override
 	protected WarArgumentChest createArgumentChest(IApplicationContext context)
 	{
@@ -59,383 +446,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 	@Override
 	protected void exportActiveSolution(final WarArgumentChest configuration)
 	{
-		WarExporter warExporter = new WarExporter(new AbstractWarExportModel()
-		{
-			@Override
-			public boolean isExportActiveSolution()
-			{
-				return configuration.isExportActiveSolutionOnly();
-			}
-
-			@Override
-			public String getStartRMIPort()
-			{
-				return null;
-			}
-
-			@Override
-			public boolean getStartRMI()
-			{
-				return false;
-			}
-
-			@Override
-			public String getServoyPropertiesFileName()
-			{
-				String warSettingsFileName = configuration.getWarSettingsFileName();
-				if (warSettingsFileName == null)
-				{
-					String servoyPropertiesFileName = configuration.getSettingsFileName();
-					if (servoyPropertiesFileName == null)
-					{
-						servoyPropertiesFileName = getServoyApplicationServerDir() + File.separator + "servoy.properties";
-					}
-					return servoyPropertiesFileName;
-				}
-				return warSettingsFileName;
-			}
-
-			@Override
-			public ServerConfiguration getServerConfiguration(String serverName)
-			{
-				return null;
-			}
-
-			@Override
-			public SortedSet<String> getSelectedServerNames()
-			{
-				return null;
-			}
-
-			@Override
-			public List<String> getPlugins()
-			{
-				Set<String> names = null;
-				if (configuration.getPlugins() != null)
-				{
-					names = new HashSet<String>(Arrays.asList(configuration.getPlugins().toLowerCase().split(" ")));
-				}
-				return getFiles(ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), names);
-			}
-
-			@Override
-			public List<String> getLafs()
-			{
-				Set<String> names = null;
-				if (configuration.getLafs() != null)
-				{
-					names = new HashSet<String>(Arrays.asList(configuration.getLafs().toLowerCase().split(" ")));
-				}
-				return getFiles(ApplicationServerRegistry.get().getLafManager().getLAFDir(), names);
-			}
-
-			@Override
-			public String getWarFileName()
-			{
-				String warFileName = configuration.getWarFileName();
-				if (warFileName == null)
-				{
-					ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
-					warFileName = activeProject.getProject().getName();
-				}
-				if (!warFileName.endsWith(".war")) warFileName += ".war";
-				return configuration.getExportFilePath() + File.separator + warFileName;
-			}
-
-			@Override
-			public List<String> getDrivers()
-			{
-				Set<String> names = null;
-				if (configuration.getDrivers() != null)
-				{
-					names = new HashSet<String>(Arrays.asList(configuration.getDrivers().toLowerCase().split(" ")));
-				}
-				return getFiles(ApplicationServerRegistry.get().getServerManager().getDriversDir(), names);
-			}
-
-			@Override
-			public List<String> getBeans()
-			{
-				Set<String> names = null;
-				if (configuration.getBeans() != null)
-				{
-					names = new HashSet<String>(Arrays.asList(configuration.getBeans().toLowerCase().split(" ")));
-				}
-				return getFiles(ApplicationServerRegistry.get().getBeanManager().getBeansDir(), names);
-			}
-
-			@Override
-			public boolean allowOverwriteSocketFactoryProperties()
-			{
-				return false;
-			}
-
-			@Override
-			public String getServoyApplicationServerDir()
-			{
-				return configuration.getAppServerDir();
-			}
-
-			List<String> getFiles(File dir, final Set<String> fileNames)
-			{
-				String[] list = dir.list(new FilenameFilter()
-				{
-					public boolean accept(File dir, String name)
-					{
-						boolean accept = fileNames != null ? fileNames.contains(name.toLowerCase()) : true;
-						return accept && (name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip"));
-					}
-				});
-				if (list == null || list.length == 0) return Collections.emptyList();
-				return Arrays.asList(list);
-			}
-
-			@Override
-			public List<String> getPluginLocations()
-			{
-				return Arrays.asList(configuration.getPluginLocations().split(" "));
-			}
-
-			@Override
-			public Set<String> getExportedComponents()
-			{
-				if (configuration.getSelectedComponents() == null) return configuration.getSelectedServices() != null ? getUsedComponents() : null;
-				if (configuration.getSelectedComponents().equals("")) return getUsedComponents();
-
-				WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
-				Set<String> set = new HashSet<String>();
-				if (configuration.getSelectedComponents().trim().equalsIgnoreCase("all"))
-				{
-					for (WebObjectSpecification spec : provider.getAllWebComponentSpecifications())
-					{
-						set.add(spec.getName());
-					}
-				}
-				else
-				{
-					set.addAll(Arrays.asList(configuration.getSelectedComponents().split(" ")));
-					for (String componentName : set)
-					{
-						if (provider.getWebComponentSpecification(componentName) == null)
-						{
-							// TODO shouldn't this be an error and shouldn't the exporter fail nicely with a new exit code? I'm thinking now of Jenkins usage and failing sooner rather then later (at export rather then when testing)
-							output("'" + componentName + "' is not a valid component name or it could not be found. Ignoring.");
-							set.remove(componentName);
-						}
-					}
-					set.addAll(getUsedComponents());
-				}
-				return set;
-
-			}
-
-			@Override
-			public Set<String> getExportedServices()
-			{
-				if (configuration.getSelectedServices() == null) return configuration.getSelectedComponents() != null ? getUsedServices() : null;
-				if (configuration.getSelectedServices().equals("")) return getUsedServices();
-				Set<String> set = new HashSet<String>();
-				WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
-				if (configuration.getSelectedServices().trim().equalsIgnoreCase("all"))
-				{
-					for (WebObjectSpecification spec : NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport())
-					{
-						set.add(spec.getName());
-					}
-				}
-				else
-				{
-					set.addAll(Arrays.asList(configuration.getSelectedServices().split(" ")));
-					for (String serviceName : set)
-					{
-						if (provider.getWebServiceSpecification(serviceName) == null)
-						{
-							// TODO shouldn't this be an error and shouldn't the exporter fail nicely with a new exit code? I'm thinking now of Jenkins usage and failing sooner rather then later (at export rather then when testing)
-							output("'" + serviceName + "' is not a valid service name or it could not be found. Ignoring.");
-							set.remove(serviceName);
-						}
-					}
-					set.addAll(getUsedServices());
-				}
-				return set;
-			}
-
-
-			@Override
-			public String getFileName()
-			{
-				return null;
-			}
-
-			@Override
-			public boolean isExportMetaData()
-			{
-				return configuration.shouldExportMetadata();
-			}
-
-			@Override
-			public boolean isExportSampleData()
-			{
-				return configuration.isExportSampleData();
-			}
-
-			@Override
-			public boolean isExportI18NData()
-			{
-				return configuration.isExportI18NData();
-			}
-
-			@Override
-			public int getNumberOfSampleDataExported()
-			{
-				return configuration.getNumberOfSampleDataExported();
-			}
-
-			@Override
-			public boolean isExportAllTablesFromReferencedServers()
-			{
-				return configuration.isExportAllTablesFromReferencedServers();
-			}
-
-			@Override
-			public boolean isCheckMetadataTables()
-			{
-				return configuration.checkMetadataTables();
-			}
-
-			@Override
-			public boolean isExportUsingDbiFileInfoOnly()
-			{
-				return configuration.shouldExportUsingDbiFileInfoOnly();
-			}
-
-			@Override
-			public boolean isExportUsers()
-			{
-				return configuration.exportUsers();
-			}
-
-
-			@Override
-			public boolean isOverwriteGroups()
-			{
-				return configuration.isOverwriteGroups();
-			}
-
-			@Override
-			public boolean isAllowSQLKeywords()
-			{
-				return configuration.isAllowSQLKeywords();
-			}
-
-			@Override
-			public boolean isOverrideSequenceTypes()
-			{
-				return configuration.isOverwriteGroups();
-			}
-
-			@Override
-			public boolean isInsertNewI18NKeysOnly()
-			{
-				return configuration.isInsertNewI18NKeysOnly();
-			}
-
-			@Override
-			public boolean isOverrideDefaultValues()
-			{
-				return configuration.isOverrideDefaultValues();
-			}
-
-			@Override
-			public int getImportUserPolicy()
-			{
-				return configuration.getImportUserPolicy();
-			}
-
-			@Override
-			public boolean isAddUsersToAdminGroup()
-			{
-				return configuration.isAddUsersToAdminGroup();
-			}
-
-			@Override
-			public boolean isAllowDataModelChanges()
-			{
-				return !configuration.isStopOnAllowDataModelChanges();
-			}
-
-			@Override
-			public boolean isUpdateSequences()
-			{
-				return configuration.isUpdateSequences();
-			}
-
-			@Override
-			public boolean isAutomaticallyUpgradeRepository()
-			{
-				return configuration.automaticallyUpdateRepository();
-			}
-
-			@Override
-			public boolean isCreateTomcatContextXML()
-			{
-				return configuration.isCreateTomcatContextXML();
-			}
-
-			@Override
-			public boolean isClearReferencesStatic()
-			{
-				return configuration.isClearReferencesStatic();
-			}
-
-			@Override
-			public boolean isClearReferencesStopThreads()
-			{
-				return configuration.isClearReferencesStopThreads();
-			}
-
-			@Override
-			public boolean isClearReferencesStopTimerThreads()
-			{
-				return configuration.isClearReferencesStopTimerThreads();
-			}
-
-			@Override
-			public boolean isAntiResourceLocking()
-			{
-				return configuration.isAntiResourceLocking();
-			}
-
-			@Override
-			public List<String> getExcludedComponentPackages()
-			{
-				return configuration.getExcludedComponentPackages() == null ? null : Arrays.asList(configuration.getExcludedComponentPackages().split(" "));
-			}
-
-			@Override
-			public List<String> getExcludedServicePackages()
-			{
-				return configuration.getExcludedServicePackages() == null ? null : Arrays.asList(configuration.getExcludedServicePackages().split(" "));
-			}
-
-			@Override
-			public String getDefaultAdminUser()
-			{
-				return configuration.getDefaultAdminUser();
-			}
-
-			@Override
-			public String getDefaultAdminPassword()
-			{
-				return configuration.getDefaultAdminPassword();
-			}
-
-			@Override
-			public boolean isMinimizeJsCssResources()
-			{
-				return configuration.isMinimizeJsCssResources();
-			}
-		});
+		WarExporter warExporter = new WarExporter(new CommandLineWarExportModel(configuration));
 		try
 		{
 			warExporter.doExport(new IProgressMonitor()

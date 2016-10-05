@@ -27,6 +27,12 @@ import java.util.TreeSet;
 
 import javax.crypto.Cipher;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.ui.PlatformUI;
 
@@ -96,12 +102,28 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean minimizeJsCssResources;
 
 	private static final String enc_prefix = "encrypted:";
+	private boolean ready = false;
 
 	/**
 	 * @param dialogSettings
 	 */
 	public ExportWarModel(IDialogSettings settings)
 	{
+		WorkspaceJob job = new WorkspaceJob("Searching used components and services data")
+		{
+
+			@Override
+			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+			{
+				search();
+				ready = true;
+				return Status.OK_STATUS;
+			}
+		};
+		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		job.setUser(false);
+		job.schedule();
+
 		Cipher desCipher = null;
 		try
 		{
@@ -1076,4 +1098,10 @@ public class ExportWarModel extends AbstractWarExportModel
 	{
 		minimizeJsCssResources = selection;
 	}
+
+	public boolean isReady()
+	{
+		return ready;
+	}
+
 }

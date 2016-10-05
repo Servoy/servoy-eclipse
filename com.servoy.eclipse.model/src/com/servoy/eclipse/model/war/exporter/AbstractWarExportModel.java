@@ -61,35 +61,8 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 	public AbstractWarExportModel()
 	{
-		FlattenedSolution solution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
-		Iterator<Form> forms = solution.getForms(false);
 		usedComponents = new TreeSet<String>();
 		usedServices = new TreeSet<String>();
-		while (forms.hasNext())
-		{
-			Form form = forms.next();
-			findUsedComponents(form);
-			extractUsedComponentsAndServices(SolutionSerializer.getRelativePath(form, false) + form.getName() + SolutionSerializer.JS_FILE_EXTENSION);
-			if (form.getNavigatorID() == Form.NAVIGATOR_DEFAULT)
-			{
-				usedComponents.add("servoycore-navigator");
-				usedComponents.add("servoycore-slider");
-			}
-		}
-
-		for (Pair<String, IRootObject> scope : solution.getAllScopes())
-		{
-			extractUsedComponentsAndServices(
-				SolutionSerializer.getRelativePath(scope.getRight(), false) + scope.getLeft() + SolutionSerializer.JS_FILE_EXTENSION);
-		}
-
-		//these are always required
-		usedComponents.add("servoycore-errorbean");
-		usedComponents.add("servoycore-portal");
-		for (String name : WebServiceSpecProvider.getInstance().getServicesInPackage("servoyservices").getSpecifications().keySet())
-		{
-			usedServices.add(name);
-		}
 	}
 
 	private void findUsedComponents(ISupportChilds parent)
@@ -227,5 +200,36 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	public boolean isExportReferencedModules()
 	{
 		return true;
+	}
+
+	protected void search()
+	{
+		FlattenedSolution solution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
+		Iterator<Form> forms = solution.getForms(false);
+		while (forms.hasNext())
+		{
+			Form form = forms.next();
+			findUsedComponents(form);
+			extractUsedComponentsAndServices(SolutionSerializer.getRelativePath(form, false) + form.getName() + SolutionSerializer.JS_FILE_EXTENSION);
+			if (form.getNavigatorID() == Form.NAVIGATOR_DEFAULT)
+			{
+				usedComponents.add("servoycore-navigator");
+				usedComponents.add("servoycore-slider");
+			}
+		}
+
+		for (Pair<String, IRootObject> scope : solution.getAllScopes())
+		{
+			extractUsedComponentsAndServices(
+				SolutionSerializer.getRelativePath(scope.getRight(), false) + scope.getLeft() + SolutionSerializer.JS_FILE_EXTENSION);
+		}
+
+		//these are always required
+		usedComponents.add("servoycore-errorbean");
+		usedComponents.add("servoycore-portal");
+		for (String name : WebServiceSpecProvider.getInstance().getServicesInPackage("servoyservices").getSpecifications().keySet())
+		{
+			usedServices.add(name);
+		}
 	}
 }
