@@ -19,18 +19,16 @@ package com.servoy.eclipse.designer.editor;
 
 import java.util.List;
 
-import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
-
 import com.servoy.eclipse.designer.property.IPersistEditPart;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Form;
 
 /**
  * The Contents Graphical Edit Part for a Servoy Form.
- * 
+ *
  * @author rgansevles
  */
-public abstract class BaseFormGraphicalEditPart extends AbstractGraphicalEditPart implements IPersistEditPart
+public abstract class BaseFormGraphicalEditPart extends BaseGraphicalEditPart implements IPersistEditPart
 {
 	private final IApplication application;
 	private final BaseVisualFormEditor editorPart;

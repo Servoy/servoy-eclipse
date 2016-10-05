@@ -22,10 +22,10 @@ import java.util.Collection;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
-import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.designer.editor.BaseGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.ComponentDeleteEditPolicy;
 import com.servoy.eclipse.designer.editor.SetBoundsToPartFigureListener;
@@ -39,11 +39,11 @@ import com.servoy.j2db.persistence.Part;
 
 /**
  * Edit part for header or footer part in mobile form editor.
- * 
+ *
  * @author rgansevles
  *
  */
-public abstract class MobilePartGraphicalEditPart extends AbstractGraphicalEditPart implements IPersistChangeListener
+public abstract class MobilePartGraphicalEditPart extends BaseGraphicalEditPart implements IPersistChangeListener
 {
 	protected IApplication application;
 
@@ -98,8 +98,8 @@ public abstract class MobilePartGraphicalEditPart extends AbstractGraphicalEditP
 
 	protected void updateFigure(IFigure fig)
 	{
-		fig.setBackgroundColor(ColorResource.INSTANCE.getColor(ColorResource.ColorAwt2Rgb(ComponentFactory.getPartBackground(application, getModel(),
-			editorPart.getForm()))));
+		fig.setBackgroundColor(
+			ColorResource.INSTANCE.getColor(ColorResource.ColorAwt2Rgb(ComponentFactory.getPartBackground(application, getModel(), editorPart.getForm()))));
 	}
 
 	@Override

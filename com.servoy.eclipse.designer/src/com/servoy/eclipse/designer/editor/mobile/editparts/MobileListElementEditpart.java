@@ -24,7 +24,6 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.ImageFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.PositionConstants;
-import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
@@ -34,6 +33,7 @@ import org.xhtmlrenderer.css.constants.CSSName;
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.Activator;
+import com.servoy.eclipse.designer.editor.BaseGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.SetBoundsToSupportBoundsFigureListener;
 import com.servoy.eclipse.ui.property.MobileListModel;
@@ -54,11 +54,11 @@ import com.servoy.j2db.util.Pair;
 
 /**
  * Edit part for items inside the inset list in mobile form editor.
- * 
+ *
  * @author rgansevles
  *
  */
-public class MobileListElementEditpart extends AbstractGraphicalEditPart implements IPersistChangeListener
+public class MobileListElementEditpart extends BaseGraphicalEditPart implements IPersistChangeListener
 {
 	public static final Image COUNTBUBBLE_IMAGE = Activator.loadImageDescriptorFromBundle("mobile/list_countbubble.png").createImage();
 	public static final Image IMAGE_IMAGE = Activator.loadImageDescriptorFromBundle("image.gif").createImage();
@@ -259,9 +259,9 @@ public class MobileListElementEditpart extends AbstractGraphicalEditPart impleme
 				dataIcon = "arrow-r"; // default
 			}
 			image = ImageResource.INSTANCE.getImageWithRoundBackground(
-				Activator.loadImageDescriptorFromBundle("mobile/icons-18-white-" + dataIcon + ".png"),
-				new RGB(IconWithRoundBackground.DATA_ICON_BG.getRed(), IconWithRoundBackground.DATA_ICON_BG.getGreen(),
-					IconWithRoundBackground.DATA_ICON_BG.getBlue()), backgroundColor != null ? backgroundColor.getRGB() : null);
+				Activator.loadImageDescriptorFromBundle("mobile/icons-18-white-" + dataIcon + ".png"), new RGB(IconWithRoundBackground.DATA_ICON_BG.getRed(),
+					IconWithRoundBackground.DATA_ICON_BG.getGreen(), IconWithRoundBackground.DATA_ICON_BG.getBlue()),
+				backgroundColor != null ? backgroundColor.getRGB() : null);
 			fig.setImage(image);
 		}
 	}

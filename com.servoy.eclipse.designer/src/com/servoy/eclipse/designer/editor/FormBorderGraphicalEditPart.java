@@ -31,7 +31,6 @@ import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.Handle;
 import org.eclipse.gef.LayerConstants;
-import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.gef.editparts.LayerManager;
 import org.eclipse.swt.widgets.Display;
 
@@ -53,15 +52,15 @@ import com.servoy.j2db.util.Utils;
 /**
  * Edit part for painting the form border.
  * This editpart is only for showing the border, it cannot be selected.
- * 
+ *
  * It is also used for resizing the form.
- * 
+ *
  * @since 6.0
- * 
+ *
  * @author rgansevles
  *
  */
-public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
+public class FormBorderGraphicalEditPart extends BaseGraphicalEditPart
 {
 	public static final int BORDER_MARGIN = 10;
 
@@ -250,10 +249,10 @@ public class FormBorderGraphicalEditPart extends AbstractGraphicalEditPart
 		return borderImageNotifier;
 	}
 
-	/** 
+	/**
 	 * Model container for border.
 	 * Note: need wrapper to not conflict with form model in editpart registry.
-	 * 
+	 *
 	 * @author rgansevles
 	 *
 	 */

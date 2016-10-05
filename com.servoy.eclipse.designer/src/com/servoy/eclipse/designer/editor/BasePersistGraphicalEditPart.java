@@ -30,7 +30,6 @@ import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.commands.Command;
-import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.requests.SelectionRequest;
 import org.eclipse.gef.tools.DragEditPartsTracker;
@@ -50,11 +49,11 @@ import com.servoy.j2db.persistence.TabPanel;
 
 /**
  * Base class for editparts with persist model.
- * 
+ *
  * @author rgansevles
  */
 
-public abstract class BasePersistGraphicalEditPart extends AbstractGraphicalEditPart implements IPersistEditPart, IFieldPositionerProvider
+public abstract class BasePersistGraphicalEditPart extends BaseGraphicalEditPart implements IPersistEditPart, IFieldPositionerProvider
 {
 	protected final IApplication application;
 	private final boolean inherited;
@@ -252,10 +251,10 @@ public abstract class BasePersistGraphicalEditPart extends AbstractGraphicalEdit
 
 	/**
 	 * Limit a change bounds request.
-	 * 
+	 *
 	 * <p>
 	 * Update the request when it updates the edit parts to move/resize beyond (0, 0)
-	 * 
+	 *
 	 * @param targetRequest
 	 */
 	public static void limitChangeBoundsRequest(ChangeBoundsRequest targetRequest)

@@ -36,7 +36,6 @@ import org.eclipse.gef.Request;
 import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
-import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.requests.SelectionRequest;
 import org.eclipse.gef.tools.DirectEditManager;
@@ -64,11 +63,11 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
  * Edit part for parts in form designer.
- * 
+ *
  * @author rgansevles
  */
 
-public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart implements IPersistEditPart, IFieldPositionerProvider, IPersistChangeListener
+public class FormPartGraphicalEditPart extends BaseGraphicalEditPart implements IPersistEditPart, IFieldPositionerProvider, IPersistChangeListener
 {
 	protected IApplication application;
 	private DirectEditManager directEditManager;
@@ -241,7 +240,7 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 			{
 				return;
 				// Disabled direct edit via drag tracker, it activates direct edit on single click on selected	  element;
-				// direct edit is handled in FormSelectionTool on double-click 
+				// direct edit is handled in FormSelectionTool on double-click
 			}
 
 			@Override
@@ -310,9 +309,9 @@ public class FormPartGraphicalEditPart extends AbstractGraphicalEditPart impleme
 
 	/**
 	 * Limit a change bounds request.
-	 * 
+	 *
 	 * Update the request when it updates the edit parts to move/resize beyond (0, 0)
-	 * 
+	 *
 	 */
 	public Point limitPartMove(Point moveDelta)
 	{

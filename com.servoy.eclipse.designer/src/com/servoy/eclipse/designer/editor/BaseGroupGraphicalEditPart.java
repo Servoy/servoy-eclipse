@@ -20,7 +20,6 @@ package com.servoy.eclipse.designer.editor;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -34,11 +33,11 @@ import com.servoy.j2db.persistence.IPersistChangeListener;
 
 /**
  * Base graphical edit part for element groups.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
-public abstract class BaseGroupGraphicalEditPart extends AbstractGraphicalEditPart implements IPersistChangeListener
+public abstract class BaseGroupGraphicalEditPart extends BaseGraphicalEditPart implements IPersistChangeListener
 {
 	private final IApplication application;
 

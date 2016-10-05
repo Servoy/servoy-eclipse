@@ -21,7 +21,6 @@ package com.servoy.eclipse.designer.editor;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.ImageFigure;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 
 import com.servoy.eclipse.designer.internal.core.IImageNotifier;
 import com.servoy.eclipse.designer.internal.core.ImageFigureController;
@@ -32,13 +31,13 @@ import com.servoy.j2db.persistence.Part;
 
 /**
  * Edit part for painting the part background, it cannot be selected.
- * 
+ *
  * @since 6.1
- * 
+ *
  * @author rgansevles
  *
  */
-public class FormPartpanelGraphicalEditPart extends AbstractGraphicalEditPart
+public class FormPartpanelGraphicalEditPart extends BaseGraphicalEditPart
 {
 	private final IApplication application;
 
@@ -123,7 +122,7 @@ public class FormPartpanelGraphicalEditPart extends AbstractGraphicalEditPart
 	/**
 	 * Model container for part.
 	 * Note: need wrapper to not conflict with form model in editpart registry.
-	 * 
+	 *
 	 * @author rgansevles
 	 *
 	 */

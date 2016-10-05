@@ -25,12 +25,12 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.GraphicalEditPart;
-import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.designer.editor.BaseGraphicalEditPart;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.ComponentDeleteEditPolicy;
 import com.servoy.eclipse.designer.editor.SetBoundsToSupportBoundsFigureListener;
@@ -45,11 +45,11 @@ import com.servoy.j2db.util.Pair;
 /**
  * Edit part for Lists in mobile form editor.
  * Model is MobileListModel.
- * 
+ *
  * @author rgansevles
  *
  */
-public class MobileListGraphicalEditPart extends AbstractGraphicalEditPart implements IPersistChangeListener
+public class MobileListGraphicalEditPart extends BaseGraphicalEditPart implements IPersistChangeListener
 {
 	private final IApplication application;
 	private final BaseVisualFormEditor editorPart;
