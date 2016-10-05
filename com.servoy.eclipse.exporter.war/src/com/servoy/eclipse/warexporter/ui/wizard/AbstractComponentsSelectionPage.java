@@ -227,8 +227,8 @@ public abstract class AbstractComponentsSelectionPage extends WizardPage
 					GroupLayout.PREFERRED_SIZE, 250, Short.MAX_VALUE)).add(
 				groupLayout.createSequentialGroup().add(50).add(btnSelect).addPreferredGap(LayoutStyle.RELATED).add(btnRemove).addPreferredGap(LayoutStyle.RELATED).add(
 					btnSelectAll)).add(
-				groupLayout.createSequentialGroup().add(availableLabel).addPreferredGap(LayoutStyle.RELATED).add(selectedComponentsList,
-					GroupLayout.PREFERRED_SIZE, 250, Short.MAX_VALUE)));
+							groupLayout.createSequentialGroup().add(availableLabel).addPreferredGap(LayoutStyle.RELATED).add(selectedComponentsList,
+								GroupLayout.PREFERRED_SIZE, 250, Short.MAX_VALUE)));
 		container.setLayout(groupLayout);
 	}
 
@@ -270,5 +270,7 @@ public abstract class AbstractComponentsSelectionPage extends WizardPage
 		this.componentsUsed = componentsUsed;
 		selectedComponents = new TreeSet<String>(componentsUsed);
 		selectedComponentsList.setItems(selectedComponents.toArray(new String[selectedComponents.size()]));
+		availableComponents = getAvailableItems();
+		availableComponentsList.setItems(availableComponents.toArray(new String[availableComponents.size()]));
 	}
 }
