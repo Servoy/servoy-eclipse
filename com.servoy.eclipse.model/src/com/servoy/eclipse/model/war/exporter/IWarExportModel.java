@@ -15,6 +15,8 @@ import com.servoy.eclipse.model.export.IExportSolutionModel;
  */
 public interface IWarExportModel extends IExportSolutionModel
 {
+	public String enc_prefix = "encrypted:";
+
 	public boolean isExportActiveSolution();
 
 	public String getWarFileName();

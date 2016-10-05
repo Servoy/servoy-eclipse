@@ -37,6 +37,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
+import com.servoy.eclipse.model.war.exporter.IWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -101,7 +102,6 @@ public class ExportWarModel extends AbstractWarExportModel
 	private final List<String> excludedPackages = new ArrayList<>();
 	private boolean minimizeJsCssResources;
 
-	private static final String enc_prefix = "encrypted:";
 	private boolean ready = false;
 
 	/**
@@ -275,11 +275,11 @@ public class ExportWarModel extends AbstractWarExportModel
 	{
 		String value = "";
 		String password = settings.get(propertyName);
-		if (password.startsWith(enc_prefix))
+		if (password.startsWith(IWarExportModel.enc_prefix))
 		{
 			try
 			{
-				String val_val = password.substring(enc_prefix.length());
+				String val_val = password.substring(IWarExportModel.enc_prefix.length());
 				byte[] array_val = Utils.decodeBASE64(val_val);
 				value = new String(desCipher.doFinal(array_val));
 			}
@@ -429,13 +429,13 @@ public class ExportWarModel extends AbstractWarExportModel
 	private String encryptPassword(Cipher desCipher, String propertyName, String password)
 	{
 		String val = password;
-		if (!val.startsWith(enc_prefix) && propertyName.toLowerCase().indexOf("password") != -1) //$NON-NLS-1$
+		if (!val.startsWith(IWarExportModel.enc_prefix) && propertyName.toLowerCase().indexOf("password") != -1) //$NON-NLS-1$
 		{
 			try
 			{
 				byte[] array_val = password.getBytes();
 				String new_val = Utils.encodeBASE64(desCipher.doFinal(array_val));
-				val = enc_prefix + new_val;
+				val = IWarExportModel.enc_prefix + new_val;
 			}
 			catch (Exception e)
 			{

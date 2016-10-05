@@ -1300,7 +1300,7 @@ public class WarExporter
 			String password = sc.getPassword();
 			try
 			{
-				password = "sec:" + SecuritySupport.encrypt(Settings.getInstance(), password);
+				password = IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), password);
 			}
 			catch (Exception e)
 			{
