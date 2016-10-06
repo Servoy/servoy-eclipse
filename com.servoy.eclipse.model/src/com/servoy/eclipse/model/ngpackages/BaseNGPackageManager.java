@@ -77,7 +77,7 @@ import com.servoy.j2db.util.Pair;
 public abstract class BaseNGPackageManager
 {
 	private static final String DUPLICATE_COMPONENT_MARKER = "com.servoy.eclipse.debug.DUPLICATE_COMPONENT_MARKER";
-	private static final String SPEC_READ_MARKER = "com.servoy.eclipse.debug.SPEC_READ_MARKER";
+	public static final String SPEC_READ_MARKER = "com.servoy.eclipse.debug.SPEC_READ_MARKER";
 
 	private final BaseNGPackageResourcesChangedListener resourceChangeListener;
 

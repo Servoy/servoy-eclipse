@@ -28,6 +28,7 @@ import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.builder.ServoyBuilder;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -218,6 +219,11 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solName);
 				Form form = (Form)servoyProject.getEditingPersist(id);
 				resolutions.add(new ChangeSuperFormQuickFix(form, servoyProject));
+			}
+			else if (type.equals(BaseNGPackageManager.SPEC_READ_MARKER))
+			{
+				String location = (String)marker.getAttribute(IMarker.LOCATION);
+				resolutions.add(new SpecReadMarkerQuickFix(location));
 			}
 
 			return resolutions.toArray(new IMarkerResolution[resolutions.size()]);
