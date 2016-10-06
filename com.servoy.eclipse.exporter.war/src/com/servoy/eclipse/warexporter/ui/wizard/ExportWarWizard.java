@@ -284,39 +284,47 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 	@Override
 	public IWizardPage getNextPage(IWizardPage page)
 	{
-		if (page.equals(componentsSelectionPage) && !exportModel.isReady())
+		if (page.equals(componentsSelectionPage))
 		{
-			try
+			if (!exportModel.isReady())
 			{
-				getContainer().run(true, true, new IRunnableWithProgress()
+				try
 				{
-					public void run(IProgressMonitor monitor) throws InterruptedException
+					getContainer().run(true, true, new IRunnableWithProgress()
 					{
-						monitor.beginTask("Searching for used components and services", 100);
-						while (!exportModel.isReady())
+						public void run(IProgressMonitor monitor) throws InterruptedException
 						{
-							Thread.sleep(100);
-							monitor.worked(1);
-						}
-						Display.getDefault().syncExec(new Runnable()
-						{
-							public void run()
+							monitor.beginTask("Searching for used components and services", 100);
+							while (!exportModel.isReady())
 							{
-								componentsSelectionPage.setComponentsUsed(exportModel.getUsedComponents());
-								servicesSelectionPage.setComponentsUsed(exportModel.getUsedServices());
+								Thread.sleep(100);
+								monitor.worked(1);
 							}
-						});
-						monitor.done();
-					}
-				});
+							Display.getDefault().syncExec(new Runnable()
+							{
+								public void run()
+								{
+									componentsSelectionPage.setComponentsUsed(exportModel.getUsedComponents());
+									servicesSelectionPage.setComponentsUsed(exportModel.getUsedServices());
+								}
+							});
+							monitor.done();
+						}
+					});
+				}
+				catch (InvocationTargetException e)
+				{
+					ServoyLog.logError(e);
+				}
+				catch (InterruptedException e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
-			catch (InvocationTargetException e)
+			else
 			{
-				ServoyLog.logError(e);
-			}
-			catch (InterruptedException e)
-			{
-				ServoyLog.logError(e);
+				componentsSelectionPage.setComponentsUsed(exportModel.getUsedComponents());
+				servicesSelectionPage.setComponentsUsed(exportModel.getUsedServices());
 			}
 
 		}
