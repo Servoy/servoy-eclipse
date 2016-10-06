@@ -95,7 +95,11 @@ public class OverrideMethodAction extends Action implements ISelectionChangedLis
 							declaration = declaration.substring(declaration.indexOf("@return"));
 							declaration = declaration.substring(0, declaration.indexOf("\n"));
 							String type = declaration.substring(declaration.indexOf("{") + 1, declaration.indexOf("}"));
-							String description = declaration.substring(declaration.indexOf("}") + 2);
+							String description = "";
+							if (declaration.length() >= (declaration.indexOf("}") + 2))
+							{
+								description = declaration.substring(declaration.indexOf("}") + 2);
+							}
 							returnType = new MethodArgument("", ArgumentType.valueOf(type), description);
 							((ScriptMethod)listNode.getRealObject()).setRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE, returnType);
 						}
