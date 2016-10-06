@@ -612,7 +612,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	$rootScope.$on(EDITOR_EVENTS.SELECTION_CHANGED, function(event, selection) {
 		// disable or enable buttons.
-		$rootScope.$apply(function() {
+		$rootScope.$evalAsync(function() {
 			btnTabSequence.enabled = selection.length > 1;
 			btnSameWidth.enabled = selection.length > 1;
 			btnSameHeight.enabled = selection.length > 1;

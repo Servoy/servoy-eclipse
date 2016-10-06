@@ -56,6 +56,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					dragCloneDiv = null;
 				}
 				editorScope.getEditorContentRootScope().drop_highlight = null;
+				editorScope.getEditorContentRootScope().drag_highlight = null;
 				editorScope.getEditorContentRootScope().$apply();
 				if (dragging) {
 
@@ -435,6 +436,9 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						var changeY = event.screenY- dragStartEvent.screenY;
 						updateAbsoluteLayoutComponentsLocations(editorScope, editorScope.selectionToDrag, changeX, changeY);
 						dragStartEvent = event;
+						
+						editorScope.getEditorContentRootScope().drag_highlight = editorScope.selectionToDrag;
+						editorScope.getEditorContentRootScope().$apply();
 					}
 				}
 			}

@@ -98,6 +98,11 @@ angular.module('editorContent',['servoyApp'])
       'list-style-type': 'none',
       display: 'none'
     });
+    
+    var highlightEl = dragClone;
+	if (highlightEl.clientWidth == 0 && highlightEl.clientHeight == 0 && highlightEl.firstElementChild) highlightEl = highlightEl.firstElementChild;
+    $(highlightEl).addClass('highlight_element');
+    
     dragCloneDiv.append(dragClone);
     angular.element($document[0].body).append(dragCloneDiv);
     return dragCloneDiv;
@@ -267,6 +272,20 @@ angular.module('editorContent',['servoyApp'])
 	      }
 	  }
       return false;
+  }
+  
+  $scope.highlightElement = function(elementId) {
+	  var designHighlightOn = $rootScope.design_highlight == "highlight_element";
+	  if(!designHighlightOn && $rootScope.drag_highlight && $rootScope.drag_highlight.length) {
+		  for(var i = 0; i < $rootScope.drag_highlight.length; i++) {
+			  var id = $($rootScope.drag_highlight[i]).attr("svy-id");
+			  if(elementId == id) {
+				  designHighlightOn = true;
+				  break;
+			  }
+		  }
+	  }
+	  return designHighlightOn;
   }
   
   $scope.model = function(name, noCreate) {
