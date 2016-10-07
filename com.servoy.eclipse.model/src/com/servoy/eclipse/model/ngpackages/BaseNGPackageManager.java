@@ -284,6 +284,7 @@ public abstract class BaseNGPackageManager
 			}
 			for (IPackageReader iPackageReader : packagesToLoad)
 			{
+				if (iPackageReader == null) continue;//spec reader marker will show in this case
 				projectContainedPackagesMap.put(iPackageReader.getPackageName(), iPackageReader);
 			}
 
@@ -299,6 +300,7 @@ public abstract class BaseNGPackageManager
 
 			for (IPackageReader packageReader : packagesToLoad)
 			{
+				if (packageReader == null) continue;//spec reader marker will show in this case
 				if (notContainedByOtherProjectsAfterUnloads(projectName, packageReader.getPackageName(), ngPackageChangesPerReferencingProject))
 				{
 					if (IPackageReader.WEB_SERVICE.equals(packageReader.getPackageType())) serviceReallyToLoad.put(packageReader.getResource(), packageReader); // could potentially replace another package reader in case it's referenced from multiple solution projects
