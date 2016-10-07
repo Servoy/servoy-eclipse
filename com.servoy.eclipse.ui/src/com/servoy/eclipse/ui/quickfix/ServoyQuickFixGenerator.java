@@ -222,8 +222,7 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 			}
 			else if (type.equals(BaseNGPackageManager.SPEC_READ_MARKER))
 			{
-				String location = (String)marker.getAttribute(IMarker.LOCATION);
-				resolutions.add(new SpecReadMarkerQuickFix(location));
+				resolutions.add(new SpecReadMarkerQuickFix(marker.getResource()));
 			}
 
 			return resolutions.toArray(new IMarkerResolution[resolutions.size()]);

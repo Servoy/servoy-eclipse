@@ -17,98 +17,51 @@
 
 package com.servoy.eclipse.ui.quickfix;
 
-import java.io.File;
-import java.util.Collection;
-
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMarkerResolution;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.RemovePackageProjectReferenceAction;
 
 /**
  * @author emera
  */
 public class SpecReadMarkerQuickFix implements IMarkerResolution
 {
-	private final String location;
+	private final IResource resource;
 
-	public SpecReadMarkerQuickFix(String location)
+	public SpecReadMarkerQuickFix(IResource iResource)
 	{
-		this.location = location;
+		this.resource = iResource;
 	}
 
 	@Override
 	public String getLabel()
 	{
-		return "Search the manifest file in subfolders and remove extra folder";
+		return "Delete the package";
 	}
 
 	@Override
 	public void run(IMarker marker)
 	{
-		final File loc = new File(location);
 		try
 		{
-			Collection<File> files = FileUtils.listFiles(loc, null, true);
-			for (File file : files)
+			if (resource instanceof IProject)
 			{
-				if (file.getName().equals("MANIFEST.MF"))
+				IProject[] referencingProjects = ((IProject)resource).getReferencingProjects();
+				for (IProject iProject : referencingProjects)
 				{
-					File toMove = file.getParentFile().getParentFile();
-					for (File child : toMove.listFiles())
-					{
-						if (child.isDirectory())
-						{
-							final File dest = new File(loc, child.getName() + "/");
-							final boolean[] move = new boolean[] { true };
-							if (dest.exists())
-							{
-								move[0] = false;
-								Display.getDefault().asyncExec(new Runnable()
-								{
-									public void run()
-									{
-										move[0] = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), "Folder already exists",
-											"The folder " + dest.getName() + " already exists at the location" + loc.getAbsolutePath() + ". Overwrite?");
-									}
-								});
-							}
-							if (move[0]) FileUtils.moveDirectoryToDirectory(child, loc, false);
-
-						}
-						else
-						{
-							final File dest = new File(loc, child.getName());
-							final boolean[] move = new boolean[] { true };
-							if (dest.exists())
-							{
-								move[0] = false;
-								Display.getDefault().asyncExec(new Runnable()
-								{
-									public void run()
-									{
-										move[0] = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), "File already exists",
-											"The file " + dest.getName() + " already exists at the location " + loc.getAbsolutePath() + ". Overwrite?");
-									}
-								});
-							}
-							if (move[0]) FileUtils.moveFileToDirectory(child, loc, false);
-						}
-					}
-					return;
+					RemovePackageProjectReferenceAction.removeProjectReference(iProject, (IProject)resource);
 				}
+				resource.delete(true, new NullProgressMonitor());
+				IProject resources = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject();
+				resources.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 			}
-			Display.getDefault().asyncExec(new Runnable()
-			{
-				public void run()
-				{
-					MessageDialog.openError(Display.getCurrent().getActiveShell(), "Cannot fix package", "Manifest file not found");
-				}
-			});
-
 		}
 		catch (final Exception e)
 		{
@@ -117,7 +70,8 @@ public class SpecReadMarkerQuickFix implements IMarkerResolution
 			{
 				public void run()
 				{
-					MessageDialog.openError(Display.getCurrent().getActiveShell(), "Cannot fix package", e.getMessage());
+					org.eclipse.jface.dialogs.MessageDialog.openError(Display.getCurrent().getActiveShell(), "Cannot delete package " + resource.getName(),
+						e.getMessage());
 				}
 			});
 		}

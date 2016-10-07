@@ -22,6 +22,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -73,7 +78,26 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 			{
 				for (String zipFile : fileNames)
 				{
-					IPackageReader reader = new org.sablo.specification.Package.ZipPackageReader(new File(filterPath + File.separator + zipFile), zipFile);
+					File file = new File(filterPath + File.separator + zipFile);
+					try
+					{
+						Path zipFilePath = Paths.get(file.getPath());
+						FileSystem fs = FileSystems.newFileSystem(zipFilePath, null);
+						Path manifest = fs.getPath("META-INF/MANIFEST.MF");
+						if (!Files.exists(manifest))
+						{
+							UIUtils.reportError("Cannot import package",
+								" Manifest file not found in '" + file.getName() + "'. Please make sure that your zip is a valid package.");
+							continue;
+						}
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+						continue;
+					}
+
+					IPackageReader reader = new org.sablo.specification.Package.ZipPackageReader(file, zipFile);
 					String packageNameToImport = reader.getPackageName();
 					if (packageNameToImport != null)
 					{

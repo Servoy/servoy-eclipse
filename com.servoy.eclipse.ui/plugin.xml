@@ -633,7 +633,11 @@
      	<markerResolutionGenerator
             class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
             markerType="com.servoy.eclipse.core.missingSpec">
-      	</markerResolutionGenerator>
+      	</markerResolutionGenerator>  
+      	<markerResolutionGenerator
+            class="com.servoy.eclipse.ui.quickfix.ServoyQuickFixGenerator"
+            markerType="com.servoy.eclipse.debug.SPEC_READ_MARKER">
+     	</markerResolutionGenerator>        
      </extension>
      <extension
            point="org.eclipse.ui.commands">
