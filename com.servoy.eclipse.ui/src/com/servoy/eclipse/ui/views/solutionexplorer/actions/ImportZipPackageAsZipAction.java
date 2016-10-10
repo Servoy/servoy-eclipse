@@ -94,22 +94,23 @@ public class ImportZipPackageAsZipAction extends ImportZipPackageAction
 		IFolder componentsFolder = checkComponentsFolderCreated();
 		for (String fileName : fileNames)
 		{
-			IPackageReader reader = new org.sablo.specification.Package.ZipPackageReader(new File(filterPath + File.separator + fileName), fileName);
+			File file = new File(filterPath + File.separator + fileName);
+			if (!checkManifestLocation(file)) continue;
+			IPackageReader reader = new org.sablo.specification.Package.ZipPackageReader(file, fileName);
 			String packageNameToImport = reader.getPackageName();
 
 			if (packageNameToImport != null)
 			{
 				if (!checkForAlreadyLoadedPackage(packageNameToImport, componentsFolder, fileName, existingFiles)) continue;
-				File javaFile = new File(filterPath + File.separator + fileName);
-				if (javaFile.exists() && javaFile.isFile())
+				if (file.exists() && file.isFile())
 				{
-					importZipFileComponent(componentsFolder, javaFile);
+					importZipFileComponent(componentsFolder, file);
 				}
 			}
 			else
 			{
 				UIUtils.reportError("Import ng package zip",
-					"The selected file doesn't seem to be an ng package zip.\nCannot read it's package name.\n\nSkipping import.");
+					"The selected file doesn't seem to be an ng package zip.\nCannot read its package name.\n\nSkipping import.");
 			}
 		}
 	}
