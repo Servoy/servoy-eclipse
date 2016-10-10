@@ -487,8 +487,8 @@ angular.module('editorContent',['servoyApp'])
         }
         for (var name in formData.components) {
           var compData = formData.components[name];
-          if (compData.conversions) {
-        	  formData.components[name] = $sabloConverters.convertFromServerToClient(compData, compData.conversions, undefined, $rootScope.getDesignFormControllerScope(), compModelGetter(name));
+          if (compData[$sabloConverters.TYPES_KEY]) {
+        	  formData.components[name] = $sabloConverters.convertFromServerToClient(compData, compData[$sabloConverters.TYPES_KEY], undefined, $rootScope.getDesignFormControllerScope(), compModelGetter(name));
           }
         }
         for (var template in formData.formcomponenttemplates) {
@@ -599,8 +599,8 @@ angular.module('editorContent',['servoyApp'])
         	var forceUpdate = false;
             var compData = formData.components[name];
             var newCompData = data.components[name];
-            if (newCompData.conversions) {
-              newCompData = $sabloConverters.convertFromServerToClient(newCompData, newCompData.conversions, compData, $rootScope.getDesignFormControllerScope(), compModelGetter(name))
+            if (newCompData[$sabloConverters.TYPES_KEY]) {
+              newCompData = $sabloConverters.convertFromServerToClient(newCompData, newCompData[$sabloConverters.TYPES_KEY], compData, $rootScope.getDesignFormControllerScope(), compModelGetter(name))
             }
             if (compData) {
             	
