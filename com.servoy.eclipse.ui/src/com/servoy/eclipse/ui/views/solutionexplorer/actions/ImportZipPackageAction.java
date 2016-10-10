@@ -17,6 +17,12 @@
 
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import java.io.File;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Set;
 
 import org.eclipse.jface.action.Action;
@@ -25,6 +31,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
@@ -72,6 +79,35 @@ public abstract class ImportZipPackageAction extends Action
 				return;
 			}
 		}
+	}
+
+	protected boolean checkManifestLocation(final File file)
+	{
+		try
+		{
+			Path zipFilePath = Paths.get(file.getPath());
+			try (FileSystem fs = FileSystems.newFileSystem(zipFilePath, null))
+			{
+				Path manifest = fs.getPath("META-INF/MANIFEST.MF");
+				if (!Files.exists(manifest))
+				{
+					UIUtils.reportError("Cannot import package",
+						" Manifest file not found in '" + file.getName() + "'. Please make sure that your zip is a valid package.");
+					return false;
+				}
+			}
+			catch (Exception e)
+			{
+				ServoyLog.logError(e);
+				return false;
+			}
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+			return false;
+		}
+		return true;
 	}
 
 	protected abstract void doImport(String[] fileNames, String filterPath);
