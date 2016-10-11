@@ -22,6 +22,11 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 				 * Shift-Click does range select: all elements within the box defined by the uttermost top/left point of selected elements
 				 * to the uttermost bottom-right of the clicked element
 				 */
+				if (!node || $(node).hasClass("ghost"))
+				{
+					editorScope.setSelection([]);
+					return;
+				}
 				var selection = editorScope.getSelection();
 				if (selection.length > 0) {
 					var rec = node.getBoundingClientRect();
@@ -44,7 +49,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 							left: Math.max(p2.left, rect.right)
 						}
 					}
-					var elements = utils.getElementsByRectangle(p1, p2, 1, true, true)
+					var elements = utils.getElementsByRectangle(p1, p2, 1, true, true,undefined,true)
 					editorScope.setSelection(elements);
 				} else {
 					editorScope.setSelection(node);
@@ -465,7 +470,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 					}
 				},
 
-				getElementsByRectangle: function(p1, p2, percentage, fromDoc, fromGlass, skipId) {
+				getElementsByRectangle: function(p1, p2, percentage, fromDoc, fromGlass, skipId,skipConversion) {
 					var temp = 0;
 					if (p1.left > p2.left) {
 						var temp = p1.left;
@@ -488,8 +493,12 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 					var matchedFromDoc = [];
 					var matchedFromGlass = [];
 					this.collectMatchedElements(matchedFromGlass, ghosts, p1, p2, percentage);
-					p1 = this.adjustForPadding(p1);
-					p2 = this.adjustForPadding(p2);
+					if (!skipConversion)
+					{
+						p1 = this.adjustForPadding(p1);
+						p2 = this.adjustForPadding(p2);
+
+					}	
 					this.collectMatchedElements(matchedFromDoc, nodes, p1, p2, percentage);
 
 					var concat = matchedFromDoc.concat(matchedFromGlass);
