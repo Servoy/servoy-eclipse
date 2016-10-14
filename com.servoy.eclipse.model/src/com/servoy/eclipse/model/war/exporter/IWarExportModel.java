@@ -1,10 +1,12 @@
 package com.servoy.eclipse.model.war.exporter;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
 import com.servoy.eclipse.model.export.IExportSolutionModel;
+import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 
 
 /**
@@ -95,4 +97,6 @@ public interface IWarExportModel extends IExportSolutionModel
 	public String getDefaultAdminPassword();
 
 	boolean isMinimizeJsCssResources();
+
+	Collection<License> getLicenses();
 }

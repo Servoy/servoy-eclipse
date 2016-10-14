@@ -88,6 +88,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 
 	private ServicesSelectionPage servicesSelectionPage;
 
+	private LicensePage licenseConfigurationPage;
+
 	public ExportWarWizard()
 	{
 		setWindowTitle("War Export");
@@ -215,7 +217,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 			serversSelectionPage = new ServersSelectionPage("serverspage", "Choose the database servernames to export",
 				"Select the database server names that will be used on the application server", exportModel.getSelectedServerNames(),
 				new String[] { IServer.REPOSITORY_SERVER }, serverConfigurationPages);
-			servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel, serversSelectionPage);
+			licenseConfigurationPage = new LicensePage("licensepage", "Enter license key", exportModel, serversSelectionPage);
+			servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel, licenseConfigurationPage);
 			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel, servoyPropertiesConfigurationPage);
 			componentsSelectionPage = new ComponentsSelectionPage(exportModel, "componentspage", "Select components to export",
 				"View the components used and select others which you want to export.", servicesSelectionPage);
@@ -247,6 +250,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 			addPage(serversSelectionPage);
 			addPage(componentsSelectionPage);
 			addPage(servicesSelectionPage);
+			addPage(licenseConfigurationPage);
 
 			String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, true, false);
 			ArrayList<String> srvNames = new ArrayList<String>(Arrays.asList(serverNames));

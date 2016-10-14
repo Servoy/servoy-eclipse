@@ -19,7 +19,10 @@ package com.servoy.eclipse.model.war.exporter;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -58,11 +61,58 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 	private final Set<String> usedComponents;
 	private final Set<String> usedServices;
+	protected final Map<String, License> licenses;
 
 	public AbstractWarExportModel()
 	{
 		usedComponents = new TreeSet<String>();
 		usedServices = new TreeSet<String>();
+		licenses = new HashMap<String, License>();
+	}
+
+	public static class License
+	{
+		private String companyKey;
+		private String code;
+		private int numberOfLicenses;
+
+		public License(String company, String code, int numLicenses)
+		{
+			this.companyKey = company;
+			this.code = code;
+			this.numberOfLicenses = numLicenses;
+		}
+
+		public String getCompanyKey()
+		{
+			return companyKey;
+		}
+
+		public void setCompanyKey(String companyKey)
+		{
+			this.companyKey = companyKey;
+		}
+
+		public String getCode()
+		{
+			return code;
+		}
+
+		public void setCode(String code)
+		{
+			this.code = code;
+		}
+
+		public int getNumberOfLicenses()
+		{
+			return numberOfLicenses;
+		}
+
+		public void setNumberOfLicenses(int numberOfLicenses)
+		{
+			this.numberOfLicenses = numberOfLicenses;
+		}
+
 	}
 
 	private void findUsedComponents(ISupportChilds parent)
@@ -232,4 +282,16 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			usedServices.add(name);
 		}
 	}
+
+	@Override
+	public Collection<License> getLicenses()
+	{
+		return licenses.values();
+	}
+
+	public void addLicense(License license)
+	{
+		licenses.put(license.code, license);
+	}
+
 }

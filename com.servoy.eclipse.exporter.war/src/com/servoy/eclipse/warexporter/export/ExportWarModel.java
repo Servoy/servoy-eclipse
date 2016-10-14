@@ -269,6 +269,16 @@ public class ExportWarModel extends AbstractWarExportModel
 			}
 		}
 
+		if (settings.get("export.totalLicenses") != null)
+		{
+			int totalLicenses = settings.getInt("export.totalLicenses");
+			for (int i = 1; i <= totalLicenses; i++)
+			{
+				String code = decryptPassword(settings, desCipher, "export.license." + i + ".code");
+				licenses.put(code,
+					new License(settings.get("export.license." + i + ".company_name"), code, settings.getInt("export.license." + i + ".licenses")));
+			}
+		}
 	}
 
 	private String decryptPassword(IDialogSettings settings, Cipher desCipher, String propertyName)
@@ -424,12 +434,25 @@ public class ExportWarModel extends AbstractWarExportModel
 			}
 			settings.put("export.servers", sb.toString());
 		}
+		if (!licenses.isEmpty())
+		{
+			settings.put("export.totalLicenses", licenses.size());
+			int i = 1;
+			for (License license : licenses.values())
+			{
+				settings.put("export.license." + i + ".company_name", license.getCompanyKey());
+				settings.put("export.license." + i + ".code", encryptPassword(desCipher, "export.license." + i + ".code", license.getCode()));
+				settings.put("export.license." + i + ".licenses", license.getNumberOfLicenses());
+				i++;
+			}
+		}
 	}
 
 	private String encryptPassword(Cipher desCipher, String propertyName, String password)
 	{
 		String val = password;
-		if (!val.startsWith(IWarExportModel.enc_prefix) && propertyName.toLowerCase().indexOf("password") != -1) //$NON-NLS-1$
+		if (!val.startsWith(IWarExportModel.enc_prefix) &&
+			(propertyName.toLowerCase().indexOf("password") != -1 || propertyName.toLowerCase().startsWith("export.license"))) //$NON-NLS-1$
 		{
 			try
 			{
@@ -1104,4 +1127,8 @@ public class ExportWarModel extends AbstractWarExportModel
 		return ready;
 	}
 
+	public void removeLicense(String code)
+	{
+		licenses.remove(code);
+	}
 }

@@ -96,6 +96,7 @@ import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBeanManagerInternal;
@@ -1287,6 +1288,28 @@ public class WarExporter
 		properties.setProperty("servoy.server.start.rmi", Boolean.toString(exportModel.getStartRMI()));
 		properties.setProperty("servoy.rmiStartPort", exportModel.getStartRMIPort());
 
+		if (!exportModel.getLicenses().isEmpty())
+		{
+			int i = 1;
+			//THE FOLLOWING PROPERTY NAMES MUST BE THE SAME AS IN LicenseManager
+			properties.setProperty("licenseManager.numberOfLicenses", Integer.toString(exportModel.getLicenses().size()));
+			for (License license : exportModel.getLicenses())
+			{
+				properties.setProperty("license." + i + ".company_name", license.getCompanyKey());
+				properties.setProperty("license." + i + ".licenses", Integer.toString(license.getNumberOfLicenses()));
+				properties.setProperty("license." + i + ".product", "0");//client
+				try
+				{
+					properties.setProperty("license." + i + ".code",
+						IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), license.getCode()));
+				}
+				catch (Exception e)
+				{
+					Debug.error("Could not encrypt license key.", e);
+				}
+				i++;
+			}
+		}
 		// store the servers
 		SortedSet<String> selectedServerNames = exportModel.getSelectedServerNames();
 		properties.setProperty("ServerManager.numberOfServers", Integer.toString(selectedServerNames.size()));
