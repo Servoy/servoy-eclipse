@@ -20,6 +20,7 @@ package com.servoy.eclipse.ui.property.types;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.dialogs.CombinedTreeContentProvider;
@@ -95,9 +96,9 @@ public class FoundsetDesignToChooserConverter
 				}
 
 				if (value instanceof RelationsWrapper) newFoundsetSelector = relationNameConverter.convertValue(null, value);
-				else if (value instanceof TableWrapper)
+				else if (value instanceof IDataSourceWrapper)
 				{
-					newFoundsetSelector = datasourcePropertyConverter.convertValue(null, (TableWrapper)value);
+					newFoundsetSelector = datasourcePropertyConverter.convertValue(null, (IDataSourceWrapper)value);
 				}
 				else if (value == FormFoundsetEntryContentProvider.FORM_FOUNDSET) newFoundsetSelector = "";
 				else if (value instanceof UnresolvedValue) newFoundsetSelector = null;
@@ -122,8 +123,8 @@ public class FoundsetDesignToChooserConverter
 
 						if (oldValue != null)
 						{
-							if (oldValue.has(FoundsetPropertyTypeConfig.DATAPROVIDERS) && Utils.equalObjects(oldFoundsetSelector, newFoundsetSelector)) jsonValue.put(
-								FoundsetPropertyTypeConfig.DATAPROVIDERS, oldValue.get(FoundsetPropertyTypeConfig.DATAPROVIDERS));
+							if (oldValue.has(FoundsetPropertyTypeConfig.DATAPROVIDERS) && Utils.equalObjects(oldFoundsetSelector, newFoundsetSelector))
+								jsonValue.put(FoundsetPropertyTypeConfig.DATAPROVIDERS, oldValue.get(FoundsetPropertyTypeConfig.DATAPROVIDERS));
 						}
 					}
 					catch (JSONException e)
