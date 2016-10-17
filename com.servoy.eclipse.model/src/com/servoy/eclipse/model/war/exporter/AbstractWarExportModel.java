@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.crypto.Cipher;
+
 import org.apache.wicket.util.io.IOUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -51,6 +53,7 @@ import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Pair;
+import com.servoy.j2db.util.Utils;
 
 /**
  * Base class for the war export model used in the developer and the one used in command line export.
@@ -307,4 +310,26 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 		licenses.put(license.code, license);
 	}
 
+	public String decryptPassword(Cipher desCipher, String password)
+	{
+		String result = "";
+		if (password.startsWith(IWarExportModel.enc_prefix))
+		{
+			try
+			{
+				String val_val = password.substring(IWarExportModel.enc_prefix.length());
+				byte[] array_val = Utils.decodeBASE64(val_val);
+				result = new String(desCipher.doFinal(array_val));
+			}
+			catch (Exception e)
+			{
+				Debug.error("Could not decrypt property");
+			}
+		}
+		else if (!"".equals(password))
+		{
+			result = new String(Utils.decodeBASE64(password));
+		}
+		return result;
+	}
 }

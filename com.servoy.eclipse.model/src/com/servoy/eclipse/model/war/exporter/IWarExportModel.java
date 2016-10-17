@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
+import javax.crypto.Cipher;
+
 import com.servoy.eclipse.model.export.IExportSolutionModel;
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 
@@ -99,4 +101,6 @@ public interface IWarExportModel extends IExportSolutionModel
 	boolean isMinimizeJsCssResources();
 
 	Collection<License> getLicenses();
+
+	String decryptPassword(Cipher desCipher, String code);
 }

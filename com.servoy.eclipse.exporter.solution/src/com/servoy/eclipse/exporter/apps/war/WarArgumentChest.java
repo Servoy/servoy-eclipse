@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractArgumentChest;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel.License;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.IXMLImportUserChannel;
 
@@ -74,9 +76,11 @@ public class WarArgumentChest extends AbstractArgumentChest
 
 	private static final String defaultAdminUser = "defaultAdminUser";
 	private static final String defaultAdminPassword = "defaultAdminPassword";
+	private static final String minimizeJsCss = "minimize";
+	private static final String licenses = "licenses";
 
 	private HashMap<String, String> argumentsMap;
-	private static final String minimizeJsCss = "minimize";
+	private Map<String, License> licenseMap = new HashMap<>();
 
 	public WarArgumentChest(String[] args)
 	{
@@ -159,7 +163,9 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             Context element; may only be used with createTomcatContextXML.\n"
 			+ "        -" + defaultAdminUser + " user name for admin page when no admin user exists [ required ]\n"
 			+ "        -" + defaultAdminPassword + " password for defaultAdminUser  required ]\n"
-			+ "        -" + minimizeJsCss + " minimize JS and CSS files ]\n";
+			+ "        -" + minimizeJsCss + " minimize JS and CSS files \n"
+			+ "        -" + licenses + " <company_name> <number_of_licenses> <code>... export Servoy Client licenses\n"
+			+ "             to add more licenses, use ',' as delimiter\n";
 		// @formatter:on
 	}
 
@@ -196,7 +202,32 @@ public class WarArgumentChest extends AbstractArgumentChest
 		parseArg("defaultAdminUser", "Parameters'-defaultAdminUser' and '-defaultAdminPassword' are required.", argsMap, true);
 		parseArg("defaultAdminPassword", "Parameters'-defaultAdminUser' and '-defaultAdminPassword' are required.", argsMap, true);
 
+		if (argsMap.containsKey(licenses)) licenseMap = parseLicensesArg(argsMap);
 		argumentsMap = argsMap;
+	}
+
+	private Map<String, License> parseLicensesArg(HashMap<String, String> argsMap)
+	{
+		Map<String, License> result = new HashMap<>();
+		if (argsMap.containsKey(licenses))
+		{
+			String l = argsMap.get(licenses);
+			String[] l_array = l.split(",");
+			for (String license : l_array)
+			{
+				String[] parts = license.trim().split(" ");
+				if (parts.length != 3)
+				{
+					ServoyLog.logError(new Exception("Please specify license as <company_name> <number_of_licenses> <code>. \"" + license + "\" is not valid"));
+					continue;
+				}
+				String company = parts[0].trim();
+				String code = parts[2].trim();
+				int number = Integer.parseInt(parts[1].trim());
+				result.put(code, new License(company, code, number));
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -423,5 +454,10 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public boolean isMinimizeJsCssResources()
 	{
 		return argumentsMap.containsKey(minimizeJsCss);
+	}
+
+	public Map<String, License> getLicenses()
+	{
+		return licenseMap;
 	}
 }

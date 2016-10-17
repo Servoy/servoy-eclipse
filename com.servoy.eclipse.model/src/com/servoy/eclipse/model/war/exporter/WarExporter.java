@@ -54,6 +54,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import javax.crypto.Cipher;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -973,7 +974,7 @@ public class WarExporter
 		else
 		{
 			File sourceFile = new File(exportModel.getServoyPropertiesFileName());
-			if (exportModel.allowOverwriteSocketFactoryProperties())
+			if (exportModel.allowOverwriteSocketFactoryProperties() || !exportModel.getLicenses().isEmpty())
 			{
 				changeAndWritePropertiesFile(tmpWarDir, sourceFile);
 			}
@@ -1232,9 +1233,64 @@ public class WarExporter
 			Properties properties = new SortedProperties();
 			properties.load(fis);
 
-			properties.setProperty("SocketFactory.rmiServerFactory", "com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory");
-			properties.setProperty("SocketFactory.tunnelConnectionMode", "http&socket");
-			if (properties.containsKey("SocketFactory.useTwoWaySocket")) properties.remove("SocketFactory.useTwoWaySocket");
+			if (exportModel.allowOverwriteSocketFactoryProperties())
+			{
+				properties.setProperty("SocketFactory.rmiServerFactory", "com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory");
+				properties.setProperty("SocketFactory.tunnelConnectionMode", "http&socket");
+				if (properties.containsKey("SocketFactory.useTwoWaySocket")) properties.remove("SocketFactory.useTwoWaySocket");
+			}
+
+			if (!exportModel.getLicenses().isEmpty())
+			{
+				List<License> licenses = new ArrayList<>();
+				Cipher desCipher = null;
+				try
+				{
+					Cipher cipher = Cipher.getInstance("DESede"); //$NON-NLS-1$
+					cipher.init(Cipher.DECRYPT_MODE, SecuritySupport.getCryptKey(null));
+					desCipher = cipher;
+				}
+				catch (Exception e)
+				{
+					Debug.error("Cannot load encrypted previous export passwords", e);
+				}
+
+				Set<String> codes = new HashSet<String>();
+				if (properties.get("licenseManager.numberOfLicenses") != null)
+				{
+					int totalLicenses = Integer.parseInt(properties.getProperty("licenseManager.numberOfLicenses"));
+					for (int i = 0; i < totalLicenses; i++)
+					{
+						String code = properties.getProperty("license." + i + ".code", "");
+						if (code.startsWith(IWarExportModel.enc_prefix)) code = exportModel.decryptPassword(desCipher, code);
+						codes.add(code);
+						licenses.add(new License(properties.getProperty("license." + i + ".company_name"), code,
+							Integer.parseInt(properties.getProperty("license." + i + ".licenses"))));
+					}
+				}
+
+				for (License license : exportModel.getLicenses())
+				{
+					if (ApplicationServerRegistry.get().checkClientLicense(license.getCompanyKey(), license.getCode(), license.getNumberOfLicenses()))
+					{
+						if (codes.contains(license.getCode()))
+						{
+							ServoyLog.logInfo("Duplicate license for license key " + license.getCode().substring(0, 4) +
+								"**-******-******. Please check the servoy.properties file");
+							continue;
+						}
+						licenses.add(license);
+					}
+					else
+					{
+						ServoyLog.logError(new Exception("The license \"" + license.getCompanyKey() + ", " + license.getCode().substring(0, 4) +
+							"**-******-******," + license.getNumberOfLicenses() + "\" is not valid"));
+					}
+				}
+
+				writeLicenses(properties, licenses);
+
+			}
 
 			properties.store(fos, "");
 		}
@@ -1290,25 +1346,7 @@ public class WarExporter
 
 		if (!exportModel.getLicenses().isEmpty())
 		{
-			int i = 1;
-			//THE FOLLOWING PROPERTY NAMES MUST BE THE SAME AS IN LicenseManager
-			properties.setProperty("licenseManager.numberOfLicenses", Integer.toString(exportModel.getLicenses().size()));
-			for (License license : exportModel.getLicenses())
-			{
-				properties.setProperty("license." + i + ".company_name", license.getCompanyKey());
-				properties.setProperty("license." + i + ".licenses", Integer.toString(license.getNumberOfLicenses()));
-				properties.setProperty("license." + i + ".product", "0");//client
-				try
-				{
-					properties.setProperty("license." + i + ".code",
-						IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), license.getCode()));
-				}
-				catch (Exception e)
-				{
-					Debug.error("Could not encrypt license key.", e);
-				}
-				i++;
-			}
+			writeLicenses(properties, exportModel.getLicenses());
 		}
 		// store the servers
 		SortedSet<String> selectedServerNames = exportModel.getSelectedServerNames();
@@ -1400,6 +1438,29 @@ public class WarExporter
 		catch (IOException e)
 		{
 			throw new ExportException("Couldn't generate the properties file", e);
+		}
+	}
+
+	private void writeLicenses(Properties properties, Collection<License> licenses)
+	{
+		int i = 0;
+		//THE FOLLOWING PROPERTY NAMES MUST BE THE SAME AS IN LicenseManager
+		properties.setProperty("licenseManager.numberOfLicenses", Integer.toString(exportModel.getLicenses().size()));
+		for (License license : licenses)
+		{
+			properties.setProperty("license." + i + ".company_name", license.getCompanyKey());
+			properties.setProperty("license." + i + ".licenses", Integer.toString(license.getNumberOfLicenses()));
+			properties.setProperty("license." + i + ".product", "0");//client
+			try
+			{
+				properties.setProperty("license." + i + ".code",
+					IWarExportModel.enc_prefix + SecuritySupport.encrypt(Settings.getInstance(), license.getCode()));
+			}
+			catch (Exception e)
+			{
+				Debug.error("Could not encrypt license key.", e);
+			}
+			i++;
 		}
 	}
 

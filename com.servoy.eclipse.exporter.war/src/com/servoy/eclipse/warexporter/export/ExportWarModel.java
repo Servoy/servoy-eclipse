@@ -283,26 +283,7 @@ public class ExportWarModel extends AbstractWarExportModel
 
 	private String decryptPassword(IDialogSettings settings, Cipher desCipher, String propertyName)
 	{
-		String value = "";
-		String password = settings.get(propertyName);
-		if (password.startsWith(IWarExportModel.enc_prefix))
-		{
-			try
-			{
-				String val_val = password.substring(IWarExportModel.enc_prefix.length());
-				byte[] array_val = Utils.decodeBASE64(val_val);
-				value = new String(desCipher.doFinal(array_val));
-			}
-			catch (Exception e)
-			{
-				Debug.error("Could not decrypt property");
-			}
-		}
-		else if (!"".equals(password))
-		{
-			value = new String(Utils.decodeBASE64(password));
-		}
-		return value;
+		return decryptPassword(desCipher, settings.get(propertyName));
 	}
 
 	public void saveSettings(IDialogSettings settings)

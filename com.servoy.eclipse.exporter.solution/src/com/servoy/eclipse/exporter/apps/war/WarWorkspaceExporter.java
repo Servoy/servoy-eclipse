@@ -20,6 +20,7 @@ package com.servoy.eclipse.exporter.apps.war;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -434,6 +435,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		public boolean isMinimizeJsCssResources()
 		{
 			return configuration.isMinimizeJsCssResources();
+		}
+
+		@Override
+		public Collection<License> getLicenses()
+		{
+			return configuration.getLicenses().values();
 		}
 	}
 
