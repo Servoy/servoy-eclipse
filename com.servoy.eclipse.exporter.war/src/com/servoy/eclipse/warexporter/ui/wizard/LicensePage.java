@@ -25,12 +25,13 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
@@ -49,9 +50,11 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
  */
 public class LicensePage extends WizardPage
 {
+
 	final ExportWarModel exportModel;
 	private final WizardPage nextPage;
 	private Composite mainContainer;
+	private ScrolledComposite sc;
 
 	public LicensePage(String pageName, String title, ExportWarModel exportModel, WizardPage next)
 	{
@@ -66,12 +69,11 @@ public class LicensePage extends WizardPage
 		private final Text companyText;
 		private final Text licenseText;
 		private final Text noOfLicensesText;
-		private final WizardPage page;
 
-		public LicenseFieldsComposite(WizardPage page, final Composite container, int style, String company, String license, String licensesNo)
+		public LicenseFieldsComposite(final Composite container, int style, String company, String license, String licensesNo)
 		{
 			super(container, style);
-			this.page = page;
+			container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 			Label companyLabel = new Label(container, SWT.NONE);
 			companyLabel.setText("Company name");
@@ -119,7 +121,7 @@ public class LicensePage extends WizardPage
 				@Override
 				public void widgetSelected(SelectionEvent e)
 				{
-					checkLicense(container);
+					checkLicense(container, companyText.getText(), licenseText.getText(), noOfLicensesText.getText());
 				}
 			});
 
@@ -161,47 +163,15 @@ public class LicensePage extends WizardPage
 		private void removeLicense()
 		{
 			exportModel.removeLicense(licenseText.getText());
-			setVisible(false);
 			for (Control c : mainContainer.getChildren())
 			{
-				if (c.equals(this))
+				if (c.equals(this.getParent()))
 				{
 					c.dispose();
+					break;
 				}
 			}
-			mainContainer.layout(true);
-		}
-
-		private void checkLicense(Composite container)
-		{
-			page.setMessage("");
-			try
-			{
-				int numLicenses = Integer.parseInt(noOfLicensesText.getText().trim());
-				if (numLicenses < 1)
-				{
-					page.setMessage("The number of licenses must be greater or equal to 1.", IMessageProvider.ERROR);
-				}
-				else if (ApplicationServerRegistry.get().checkClientLicense(companyText.getText(), licenseText.getText(), numLicenses))
-				{
-					page.setMessage("License " + licenseText.getText() + " is correct.", IMessageProvider.INFORMATION);
-					exportModel.addLicense(new License(companyText.getText(), licenseText.getText(), numLicenses));
-
-					//add new
-					LicenseFieldsComposite license = new LicenseFieldsComposite(page, new Composite(mainContainer, SWT.BORDER), SWT.NONE, "", "", "");
-					mainContainer.layout(new Control[] { license });
-				}
-				else
-				{
-					page.setMessage("License " + licenseText.getText() + " invalid.", IMessageProvider.ERROR);
-				}
-			}
-			catch (Exception e)
-			{
-				page.setMessage("Please enter a number in the 'Number of licenses' field. " + noOfLicensesText.getText() + " is not a number.",
-					IMessageProvider.ERROR);
-			}
-			container.layout();
+			mainContainer.update();
 		}
 
 		private void setEnabledButtons(final Button licenseButton, final Button deleteButton)
@@ -214,27 +184,76 @@ public class LicensePage extends WizardPage
 
 	}
 
+	private void checkLicense(Composite container, String companyText, String licenseText, String noOfLicensesText)
+	{
+		setMessage("");
+		try
+		{
+			int numLicenses = Integer.parseInt(noOfLicensesText.trim());
+			if (numLicenses < 1)
+			{
+				setMessage("The number of licenses must be greater or equal to 1.", IMessageProvider.ERROR);
+			}
+			else if (ApplicationServerRegistry.get().checkClientLicense(companyText, licenseText, numLicenses))
+			{
+				setMessage("License " + licenseText + " is correct.", IMessageProvider.INFORMATION);
+				License l = new License(companyText, licenseText, numLicenses);
+				boolean isNew = !exportModel.getLicenses().contains(l);
+				exportModel.addLicense(l);
+
+				if (isNew)
+				{
+					Composite composite = new Composite(mainContainer, SWT.BORDER);
+					LicenseFieldsComposite license = new LicenseFieldsComposite(composite, SWT.NONE, "", "", "");
+					composite.moveAbove(mainContainer.getChildren()[0]);
+					mainContainer.layout(new Control[] { license });
+					sc.setMinSize(mainContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+					sc.update();
+				}
+			}
+			else
+			{
+				setMessage("License " + licenseText + " invalid.", IMessageProvider.ERROR);
+			}
+		}
+		catch (Exception e)
+		{
+			setMessage("Please enter a number in the 'Number of licenses' field. " + noOfLicensesText + " is not a number.", IMessageProvider.ERROR);
+		}
+		container.layout();
+	}
+
+
 	public void createControl(Composite parent)
 	{
-		mainContainer = new Composite(parent, SWT.NONE);
-		setControl(mainContainer);
-		mainContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
-		FillLayout layout = new FillLayout();
-		layout.type = SWT.VERTICAL;
-		layout.marginHeight = 5;
+		Composite rootComposite = new Composite(parent, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		layout.numColumns = 1;
+		rootComposite.setLayout(layout);
+		rootComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		sc = new ScrolledComposite(rootComposite, SWT.V_SCROLL | SWT.BORDER);
+		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		mainContainer = new Composite(sc, SWT.NONE);
+		sc.setContent(mainContainer);
+		setControl(rootComposite);
+		mainContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		mainContainer.setLayout(layout);
 
 
 		List<Control> ctrls = new ArrayList<>();
-		LicenseFieldsComposite licenseFieldsComposite = new LicenseFieldsComposite(this, new Composite(mainContainer, SWT.BORDER | SWT.FILL), SWT.NONE, "", "",
-			"");
+		LicenseFieldsComposite licenseFieldsComposite = new LicenseFieldsComposite(new Composite(mainContainer, SWT.BORDER | SWT.FILL), SWT.NONE, "", "", "");
 		ctrls.add(licenseFieldsComposite);
 		for (License license : exportModel.getLicenses())
 		{
-			LicenseFieldsComposite licenseComposite = new LicenseFieldsComposite(this, new Composite(mainContainer, SWT.BORDER), SWT.NONE,
-				license.getCompanyKey(), license.getCode(), Integer.toString(license.getNumberOfLicenses()));
+			LicenseFieldsComposite licenseComposite = new LicenseFieldsComposite(new Composite(mainContainer, SWT.BORDER), SWT.NONE, license.getCompanyKey(),
+				license.getCode(), Integer.toString(license.getNumberOfLicenses()));
 			ctrls.add(licenseComposite);
 		}
+		sc.setExpandHorizontal(true);
+		sc.setExpandVertical(true);
+		sc.setMinSize(mainContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+		mainContainer.layout();
+		sc.layout();
 	}
 
 	@Override

@@ -113,6 +113,19 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			this.numberOfLicenses = numberOfLicenses;
 		}
 
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (obj instanceof License)
+			{
+				License l = (License)obj;
+				return code.equals(l.code) && companyKey.equals(l.companyKey) && numberOfLicenses == l.numberOfLicenses;
+			}
+			return false;
+		}
+
+
 	}
 
 	private void findUsedComponents(ISupportChilds parent)
