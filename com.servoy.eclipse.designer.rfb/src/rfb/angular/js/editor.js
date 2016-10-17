@@ -45,7 +45,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 	GHOST_TYPE_INVISIBLE: "invisible",
 	GHOST_TYPE_GROUP: "group"
 }).directive("editor", function($window, $pluginRegistry, $rootScope, EDITOR_EVENTS, EDITOR_CONSTANTS, $timeout,
-	$editorService, $webSocket, $q, $interval,$allowedChildren) {
+	$editorService, $webSocket, $q, $interval,$allowedChildren,$document) {
 	return {
 		restrict: 'E',
 		transclude: true,
@@ -65,6 +65,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				timeout = $timeout(fireSelectionChanged, 1)
 			}
 
+			 $document.bind('selectstart', function(event) {
+		            return false
+		      })
+		          
 			var formName = $webSocket.getURLParameter("f");
 			var formLayout = $webSocket.getURLParameter("l");
 			var formWidth = parseInt($webSocket.getURLParameter("w"), 10);
