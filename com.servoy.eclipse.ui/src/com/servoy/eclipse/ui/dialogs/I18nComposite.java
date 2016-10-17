@@ -38,6 +38,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
@@ -75,6 +77,7 @@ public class I18nComposite extends Composite
 	private static final int FILTER_TEXT_HEIGHT = 29;
 	private static final int LANG_COMBO_WIDTH = 128;
 	private static final String DIALOGSTORE_FILTER = "I18NComposite.filter";
+	private static final String DIALOGSTORE_LANG_COUNTRY = "I18NComposite.lang_country";
 	private static final String COLUMN_WIDTHS = "I18NComposite.table.widths";
 	private static final String KEY_COLUMN = "key.column";
 	private static final String DEFAULT_COLUMN = "default.column";
@@ -283,7 +286,21 @@ public class I18nComposite extends Composite
 		}
 		setLayout(getLayout(tableContainer, languageComboViewer.getCombo(), countryComboViewer.getCombo()));
 
-		selectedLanguage = new Locale(application.getLocale().getLanguage(), "", application.getLocale().getVariant());
+		String lang_country = dialogSettings.get(DIALOGSTORE_LANG_COUNTRY);
+		if (lang_country != null)
+		{
+			String[] split = lang_country.split("_");
+			if (split.length == 1)
+			{
+				selectedLanguage = new Locale(split[0]);
+			}
+			else if (split.length == 2)
+			{
+				selectedLanguage = new Locale(split[0], split[1]);
+			}
+		}
+		selectedLanguage = selectedLanguage != null ? selectedLanguage
+			: new Locale(application.getLocale().getLanguage(), "", application.getLocale().getVariant());
 
 		IApplicationServerSingleton appServer = ApplicationServerRegistry.get();
 		ServoyProject ap = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
@@ -296,6 +313,21 @@ public class I18nComposite extends Composite
 
 		tableViewer.setComparator(new ColumnsSorter(tableViewer, new TableColumn[] { keyColumn, defaultColumn, localeColumn },
 			new Comparator[] { I18NEditorKeyColumnComparator.INSTANCE, I18NEditorDefaultColumnComparator.INSTANCE, I18NEditorLocaleColumnComparator.INSTANCE }));
+
+		addDisposeListener(new DisposeListener()
+		{
+
+			@Override
+			public void widgetDisposed(DisposeEvent e)
+			{
+				if (delayedFilterJob != null)
+				{
+					delayedFilterJob.cancel();
+					delayedFilterJob = null;
+				}
+				dialogSettings.put(DIALOGSTORE_LANG_COUNTRY, selectedLanguage.toString());
+			}
+		});
 	}
 
 	private ISelectionChangedListener getLanguageSelectionHandler()
@@ -331,21 +363,24 @@ public class I18nComposite extends Composite
 	private GroupLayout getLayout(Composite container, Combo languageCombo, Combo countryCombo)
 	{
 		GroupLayout i18NLayout = new GroupLayout(this);
-		i18NLayout.setHorizontalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(
-				i18NLayout.createSequentialGroup().addContainerGap().add(
-					i18NLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING, container, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE).add(
-						i18NLayout.createSequentialGroup().add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(
-							LayoutStyle.RELATED).add(filterText, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(
-							languageLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
-							languageCombo, GroupLayout.PREFERRED_SIZE, LANG_COMBO_WIDTH, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
-							countryCombo, GroupLayout.PREFERRED_SIZE, LANG_COMBO_WIDTH, GroupLayout.PREFERRED_SIZE))).addContainerGap()));
-			i18NLayout.setVerticalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(
-				i18NLayout.createSequentialGroup().addContainerGap().add(
-					i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.PREFERRED_SIZE).add(filterText, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(languageCombo, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(languageLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.PREFERRED_SIZE).add(countryCombo, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-					LayoutStyle.RELATED).add(container, GroupLayout.PREFERRED_SIZE, 100, Short.MAX_VALUE).addContainerGap()));
+		i18NLayout.setHorizontalGroup(
+			i18NLayout.createParallelGroup(
+				GroupLayout.LEADING).add(
+					i18NLayout.createSequentialGroup().addContainerGap().add(
+						i18NLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING, container, GroupLayout.PREFERRED_SIZE, 0,
+							Short.MAX_VALUE).add(i18NLayout.createSequentialGroup().add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+								GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(filterText, GroupLayout.PREFERRED_SIZE, 0,
+									Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(languageLabel, GroupLayout.PREFERRED_SIZE,
+										GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(languageCombo,
+											GroupLayout.PREFERRED_SIZE, LANG_COMBO_WIDTH, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
+												countryCombo, GroupLayout.PREFERRED_SIZE, LANG_COMBO_WIDTH, GroupLayout.PREFERRED_SIZE))).addContainerGap()));
+		i18NLayout.setVerticalGroup(i18NLayout.createParallelGroup(GroupLayout.LEADING).add(i18NLayout.createSequentialGroup().addContainerGap().add(
+			i18NLayout.createParallelGroup(GroupLayout.CENTER, false).add(filterLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+				GroupLayout.PREFERRED_SIZE).add(filterText, 0, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).add(languageCombo, GroupLayout.PREFERRED_SIZE,
+					GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).add(languageLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.PREFERRED_SIZE).add(countryCombo, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE,
+							GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(container, GroupLayout.PREFERRED_SIZE, 100,
+								Short.MAX_VALUE).addContainerGap()));
 		return i18NLayout;
 	}
 
@@ -362,8 +397,8 @@ public class I18nComposite extends Composite
 		countryComboViewer.addSelectionChangedListener(getCountrySelectionHandler());
 
 
-		tableViewer.setInput(messagesModel.getMessages(filter, null, null, null,
-				ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile()));
+		tableViewer.setInput(
+			messagesModel.getMessages(filter, null, null, null, ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile()));
 	}
 
 
@@ -486,17 +521,6 @@ public class I18nComposite extends Composite
 		{
 			tableViewer.setSelection(new StructuredSelection());
 		}
-	}
-
-	@Override
-	public void dispose()
-	{
-		if (delayedFilterJob != null)
-		{
-			delayedFilterJob.cancel();
-			delayedFilterJob = null;
-		}
-		super.dispose();
 	}
 
 	public void saveTableColumnWidths()
