@@ -141,6 +141,8 @@ public class ElementResolver implements IElementResolver
 				// globals.js (or other scope)
 				// global, remove the form only things.
 				typeNames.removeAll(formOnlyNames);
+				// only add the globals. prefix when it is a scope but no the globals itself.
+				if (!path.lastSegment().equals("globals.js")) typeNames.add(ScriptVariable.GLOBAL_SCOPE);
 				try
 				{
 					Iterator<Relation> relations = fs.getRelations(null, true, false);
