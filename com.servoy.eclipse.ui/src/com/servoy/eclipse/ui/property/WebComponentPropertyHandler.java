@@ -116,7 +116,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 					return new Integer(persist.getID());
 				}
 
-				return Integer.valueOf(-1);
+				return Integer.MAX_VALUE;
 			}
 			else if (value == null && propertyDescription.hasDefault())
 			{

@@ -2476,6 +2476,28 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								ApplicationServerRegistry.get().getServerManager(), false), vl);
 						}
 						checkCancel();
+						if (o instanceof WebComponent)
+						{
+							WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)o).getTypeName());
+							if (spec != null && spec.getHandlers() != null)
+							{
+								for (String handler : spec.getHandlers().keySet())
+								{
+									UUID uuid = Utils.getAsUUID(((WebComponent)o).getProperty(handler), false);
+									if (uuid != null)
+									{
+										if (!((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).containsElement(uuid))
+										{
+											ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(handler, ((WebComponent)o).getName(),
+												o.getAncestor(IRepository.FORMS));
+											addMarker(project, INVALID_EVENT_METHOD, mk.getText(), -1, FORM_PROPERTY_TARGET_NOT_FOUND, IMarker.PRIORITY_LOW,
+												null, o);
+										}
+									}
+								}
+							}
+						}
+						checkCancel();
 						if (o instanceof Media)
 						{
 							Media oMedia = (Media)o;

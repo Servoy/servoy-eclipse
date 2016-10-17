@@ -845,4 +845,9 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 		return repositoryUUID;
 	}
 
+	public boolean containsElement(UUID uuid)
+	{
+		return foreignElementUUIDs.containsKey(uuid) || uuid_element_id_map.containsKey(uuid);
+	}
+
 }
