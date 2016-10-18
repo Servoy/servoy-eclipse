@@ -835,7 +835,7 @@ public class WarExporter
 		}
 		catch (Exception ex)
 		{
-			throw new ExportException("Cannot write the active solution in war file", ex);
+			throw new ExportException("Cannot write the active solution in war file: " + ex.getMessage(), ex);
 		}
 
 		try
@@ -949,17 +949,18 @@ public class WarExporter
 		}
 		catch (RepositoryException e)
 		{
-			throw new ExportException("Repository exception", e);
+			throw new ExportException(e.getMessage(), e);
 		}
 		catch (JSONException jsonex)
 		{
-			throw new ExportException("Bad JSON file structure.", jsonex);
+			throw new ExportException("Bad JSON file structure: " + jsonex.getMessage(), jsonex);
 		}
 		catch (IOException ioex)
 		{
-			throw new ExportException("Exception getting files.", ioex);
+			throw new ExportException("Exception getting files: " + ioex.getMessage(), ioex);
 		}
 	}
+
 
 	/**
 	 * @param tmpWarDir
