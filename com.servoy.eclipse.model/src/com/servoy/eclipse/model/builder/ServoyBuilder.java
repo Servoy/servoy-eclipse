@@ -3961,6 +3961,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										Form f = (Form)component.getAncestor(IRepository.FORMS);
 										fs = f.getDataSource();
 									}
+									if (fs == null) break;
 									if (fs.contains(".") || fs.contains(":"))
 									{
 										ITable table = persistFlattenedSolution.getTable(fs);
