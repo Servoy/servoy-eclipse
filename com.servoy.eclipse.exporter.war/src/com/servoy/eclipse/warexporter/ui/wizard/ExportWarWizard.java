@@ -217,7 +217,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 			serversSelectionPage = new ServersSelectionPage("serverspage", "Choose the database servernames to export",
 				"Select the database server names that will be used on the application server", exportModel.getSelectedServerNames(),
 				new String[] { IServer.REPOSITORY_SERVER }, serverConfigurationPages);
-			licenseConfigurationPage = new LicensePage("licensepage", "Enter license key", exportModel, serversSelectionPage);
+			licenseConfigurationPage = new LicensePage("licensepage", "Enter license key",
+				"Please enter the Servoy client license key(s), or leave empty for running the solution in trial mode.", exportModel, serversSelectionPage);
 			servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel, licenseConfigurationPage);
 			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel, servoyPropertiesConfigurationPage);
 			componentsSelectionPage = new ComponentsSelectionPage(exportModel, "componentspage", "Select components to export",

@@ -56,10 +56,11 @@ public class LicensePage extends WizardPage
 	private Composite mainContainer;
 	private ScrolledComposite sc;
 
-	public LicensePage(String pageName, String title, ExportWarModel exportModel, WizardPage next)
+	public LicensePage(String pageName, String title, String description, ExportWarModel exportModel, WizardPage next)
 	{
 		super(pageName);
 		setTitle(title);
+		setDescription(description);
 		this.exportModel = exportModel;
 		this.nextPage = next;
 	}
