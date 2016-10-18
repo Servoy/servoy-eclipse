@@ -20,6 +20,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.json.JSONObject;
 import org.sablo.specification.IYieldingType;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -44,11 +45,15 @@ import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValueList;
 import com.servoy.j2db.persistence.WebCustomType;
+import com.servoy.j2db.server.ngclient.property.FoundsetLinkedConfig;
+import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.ValueListPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
+import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
@@ -131,6 +136,43 @@ public class FormatCellEditor extends TextDialogCellEditor
 							}
 							if (dataProviderID != null)
 							{
+								Object config = pd.getConfig();
+								// if it is a dataprovider type. look if it is foundset linked
+								if (config instanceof FoundsetLinkedConfig && ((FoundsetLinkedConfig)config).getForFoundsetName() != null)
+								{
+									Object json = ((AbstractBase)persist.getParent()).getProperty(((FoundsetLinkedConfig)config).getForFoundsetName());
+									if (json instanceof JSONObject)
+									{
+										// get the foundset selector and try to resolve the table
+										String fs = ((JSONObject)json).optString(FoundsetPropertyType.FOUNDSET_SELECTOR);
+										ITable table = servoyModel.getDataSourceManager().getDataSource(fs);
+										if (table == null)
+										{
+											// table not found is the foundset selector a relation.
+											Relation[] relations = flattenedSolution.getRelationSequence(fs);
+											if (relations != null && relations.length > 0)
+											{
+												table = servoyModel.getDataSourceManager().getDataSource(
+													relations[relations.length - 1].getForeignDataSource());
+											}
+										}
+										try
+										{
+											IDataProvider dataProvider = flattenedSolution.getDataProviderForTable(table, dataProviderID);
+											// the dataprovider is found through the table, returns for this the ComponentFormat, if not fall through through the forms
+											// dataprovider lookup below
+											if (dataProvider != null)
+											{
+												type = dataProvider.getDataProviderType();
+												break;
+											}
+										}
+										catch (RepositoryException e)
+										{
+											Debug.error(e);
+										}
+									}
+								}
 								Form form = (Form)persist.getAncestor(IRepository.FORMS);
 								if (form != null)
 								{
