@@ -62,6 +62,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.mozilla.javascript.JavaMembers;
 import org.sablo.specification.BaseSpecProvider;
+import org.sablo.specification.BaseSpecProvider.ISpecReloadListener;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -154,7 +155,7 @@ import com.servoy.j2db.util.Utils;
  * @author jblok
  */
 public class SolutionExplorerTreeContentProvider
-	implements IStructuredContentProvider, ITreeContentProvider, ILoadedNGPackagesListener, IAvailableNGPackageProjectsListener
+	implements IStructuredContentProvider, ITreeContentProvider, ILoadedNGPackagesListener, IAvailableNGPackageProjectsListener, ISpecReloadListener
 {
 	private static final String IMG_SOLUTION = "solution.gif";
 	private static final String IMG_SOLUTION_M = "module.gif";
@@ -341,10 +342,14 @@ public class SolutionExplorerTreeContentProvider
 			resourcesChildren.add(componentsFromResourcesNode);
 		}
 
+		WebComponentSpecProvider.getInstance().addSpecReloadListener(null, this);
+
 		if (hasChildren(servicesFromResourcesNode))
 		{
 			resourcesChildren.add(servicesFromResourcesNode);
 		}
+
+		WebServiceSpecProvider.getInstance().addSpecReloadListener(null, this);
 
 		resources.children = resourcesChildren.toArray(new PlatformSimpleUserNode[0]);
 
@@ -442,6 +447,8 @@ public class SolutionExplorerTreeContentProvider
 
 		ServoyModelFinder.getServoyModel().getNGPackageManager().removeLoadedNGPackagesListener(this);
 		ServoyModelFinder.getServoyModel().getNGPackageManager().removeAvailableNGPackageProjectsListener(this);
+		WebComponentSpecProvider.getInstance().removeSpecReloadListener(null, this);
+		WebServiceSpecProvider.getInstance().removeSpecReloadListener(null, this);
 	}
 
 	/**
@@ -3214,5 +3221,51 @@ public class SolutionExplorerTreeContentProvider
 	public void setIncludeModules(boolean includeModules)
 	{
 		this.includeModules = includeModules;
+	}
+
+	@Override
+	public void webObjectSpecificationReloaded()
+	{
+		if (resources != null && resources.children != null && componentsFromResourcesNode != null)
+		{
+			ArrayList<SimpleUserNode> resourcesChildren = new ArrayList<SimpleUserNode>(Arrays.asList(resources.children));
+			if (hasChildren(componentsFromResourcesNode))
+			{
+				if (!resourcesChildren.contains(componentsFromResourcesNode))
+				{
+					resourcesChildren.add(componentsFromResourcesNode);
+					resources.children = resourcesChildren.toArray(new PlatformSimpleUserNode[0]);
+				}
+			}
+			else
+			{
+				if (resourcesChildren.contains(componentsFromResourcesNode))
+				{
+					resourcesChildren.remove(componentsFromResourcesNode);
+					resources.children = resourcesChildren.toArray(new PlatformSimpleUserNode[0]);
+				}
+			}
+		}
+
+		if (resources != null && resources.children != null && servicesFromResourcesNode != null)
+		{
+			ArrayList<SimpleUserNode> resourcesChildren = new ArrayList<SimpleUserNode>(Arrays.asList(resources.children));
+			if (hasChildren(servicesFromResourcesNode))
+			{
+				if (!resourcesChildren.contains(servicesFromResourcesNode))
+				{
+					resourcesChildren.add(servicesFromResourcesNode);
+					resources.children = resourcesChildren.toArray(new PlatformSimpleUserNode[0]);
+				}
+			}
+			else
+			{
+				if (resourcesChildren.contains(servicesFromResourcesNode))
+				{
+					resourcesChildren.remove(servicesFromResourcesNode);
+					resources.children = resourcesChildren.toArray(new PlatformSimpleUserNode[0]);
+				}
+			}
+		}
 	}
 }
