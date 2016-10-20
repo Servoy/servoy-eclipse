@@ -514,7 +514,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			exportAllTablesFromReferencedServers.addListener(SWT.Selection, this);
 
 			exportMetadataTablesButton = new Button(composite, SWT.CHECK);
-			exportMetadataTablesButton.setText("Export metadata tables");
+			exportMetadataTablesButton.setText("Export metadata tables (from database)");
 			exportMetadataTablesButton.setSelection(exportModel.isExportMetaData());
 			exportMetadataTablesButton.addListener(SWT.Selection, this);
 
@@ -639,7 +639,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			}
 			else
 			{
-				checkMetadataTablesButton.setText("Check metadata tables");
+				checkMetadataTablesButton.setText("Check metadata tables (compare workspace and database table)");
 			}
 		}
 
@@ -693,6 +693,14 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 				if (!modulesSelectionPage.hasDBDownErrors())
 				{
 					updateMessages();
+				}
+				if (exportUsingDbiFileInfoOnlyButton.getSelection())
+				{
+					exportMetadataTablesButton.setText("Export metadata tables(from workspace)");
+				}
+				else
+				{
+					exportMetadataTablesButton.setText("Export metadata tables(from database)");
 				}
 			}
 			getWizard().getContainer().updateButtons();

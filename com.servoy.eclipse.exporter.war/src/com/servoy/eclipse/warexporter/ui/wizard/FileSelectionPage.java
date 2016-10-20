@@ -158,6 +158,14 @@ public class FileSelectionPage extends WizardPage implements Listener
 			public void widgetSelected(SelectionEvent e)
 			{
 				exportModel.setExportUsingDbiFileInfoOnly(exportUsingDbiFileInfoOnlyButton.getSelection());
+				if (exportUsingDbiFileInfoOnlyButton.getSelection())
+				{
+					exportMetadataTablesButton.setText("Export metadata tables(from workspace)");
+				}
+				else
+				{
+					exportMetadataTablesButton.setText("Export metadata tables(from database)");
+				}
 			}
 		});
 
@@ -221,7 +229,7 @@ public class FileSelectionPage extends WizardPage implements Listener
 		});
 
 		exportMetadataTablesButton = new Button(composite, SWT.CHECK);
-		exportMetadataTablesButton.setText("Export metadata tables");
+		exportMetadataTablesButton.setText("Export metadata tables(from database)");
 		exportMetadataTablesButton.setSelection(exportModel.isExportMetaData());
 		exportMetadataTablesButton.addSelectionListener(new SelectionAdapter()
 		{
@@ -640,7 +648,7 @@ public class FileSelectionPage extends WizardPage implements Listener
 		}
 		else
 		{
-			checkMetadataTablesButton.setText("Check metadata tables");
+			checkMetadataTablesButton.setText("Check metadata tables (compare workspace and database table)");
 		}
 	}
 
