@@ -38,6 +38,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.handlers.IHandlerService;
@@ -59,7 +61,9 @@ import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
 import com.servoy.eclipse.designer.editor.BaseRestorableCommand;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.commands.AddContainerCommand;
+import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -70,6 +74,7 @@ import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Field;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IBasicWebComponent;
@@ -614,8 +619,25 @@ public class CreateComponentHandler implements IServerService
 									}
 
 									JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
-									return new IPersist[] { createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, x,
-										specifications, args.optString("packageName")) };
+									boolean fullRefreshNeeded = !initialDropTarget.equals(dropTarget) && initialDropTarget.getParent() instanceof Form;
+									IPersist[] result = new IPersist[] { createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer,
+										config, x, specifications, args.optString("packageName")) };
+									if (fullRefreshNeeded)
+									{
+										IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
+										for (IEditorReference editorRef : editorRefs)
+										{
+											IEditorPart editor = editorRef.getEditor(false);
+											if (editor instanceof BaseVisualFormEditor)
+											{
+												BaseVisualFormEditorDesignPage activePage = ((BaseVisualFormEditor)editor).getGraphicaleditor();
+												if (activePage instanceof RfbVisualFormEditorDesignPage)
+													((RfbVisualFormEditorDesignPage)activePage).refreshContent();
+												break;
+											}
+										}
+									}
+									return result;
 								}
 							}
 							else
