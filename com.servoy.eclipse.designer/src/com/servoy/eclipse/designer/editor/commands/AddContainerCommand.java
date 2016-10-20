@@ -85,7 +85,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 						{
 							final ISelectionProvider selectionProvider = activeEditor.getSite().getSelectionProvider();
 							PersistContext persistContext = null;
-							if (DesignerUtil.getContentOutline() != null)
+							if (DesignerUtil.getContentOutlineSelection() != null)
 							{
 								persistContext = DesignerUtil.getContentOutlineSelection();
 							}
