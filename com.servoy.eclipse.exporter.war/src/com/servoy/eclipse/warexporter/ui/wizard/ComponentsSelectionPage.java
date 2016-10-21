@@ -34,13 +34,13 @@ import com.servoy.eclipse.warexporter.export.ExportWarModel;
 public class ComponentsSelectionPage extends AbstractComponentsSelectionPage
 {
 
-	protected ComponentsSelectionPage(ExportWarModel exportModel, String pageName, String title, String description, IWizardPage nextPage)
+	protected ComponentsSelectionPage(ExportWarModel exportModel, String pageName, String title, String description)
 	{
-		super(exportModel, pageName, title, description, nextPage, "component");
+		super(exportModel, pageName, title, description, "component");
 		componentsUsed = exportModel.getUsedComponents();
 		selectedComponents = new TreeSet<String>(componentsUsed);
-		if (exportModel.getExportedComponents() == null || exportModel.getExportedComponents().containsAll(componentsUsed) &&
-			componentsUsed.containsAll(exportModel.getExportedComponents())) return;
+		if (exportModel.getExportedComponents() == null ||
+			exportModel.getExportedComponents().containsAll(componentsUsed) && componentsUsed.containsAll(exportModel.getExportedComponents())) return;
 		WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
 		for (String component : exportModel.getExportedComponents())
 		{
@@ -64,7 +64,6 @@ public class ComponentsSelectionPage extends AbstractComponentsSelectionPage
 	public IWizardPage getNextPage()
 	{
 		exportModel.setExportedComponents(new TreeSet<String>(Arrays.asList(selectedComponentsList.getItems())));
-		if (nextPage != null) return nextPage;
 		return super.getNextPage();
 	}
 

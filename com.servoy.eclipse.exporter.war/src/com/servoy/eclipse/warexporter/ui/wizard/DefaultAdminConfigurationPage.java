@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.warexporter.ui.wizard;
 
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -40,16 +39,14 @@ import com.servoy.j2db.util.Utils;
 public class DefaultAdminConfigurationPage extends WizardPage implements Listener
 {
 	private final ExportWarModel exportModel;
-	private final IWizardPage nextPage;
 	private Text defaultAdminUserText;
 	private Text defaultAdminPasswordText;
 	private Text defaultAdminPasswordText2;
 
-	public DefaultAdminConfigurationPage(String title, ExportWarModel exportModel, IWizardPage nextPage)
+	public DefaultAdminConfigurationPage(String title, ExportWarModel exportModel)
 	{
 		super(title);
 		this.exportModel = exportModel;
-		this.nextPage = nextPage;
 		setTitle("Configuration settings for the default admin user");
 		setDescription("Specify default admin username and password");
 	}
@@ -132,11 +129,5 @@ public class DefaultAdminConfigurationPage extends WizardPage implements Listene
 		}
 
 		return true;
-	}
-
-	@Override
-	public IWizardPage getNextPage()
-	{
-		return nextPage;
 	}
 }

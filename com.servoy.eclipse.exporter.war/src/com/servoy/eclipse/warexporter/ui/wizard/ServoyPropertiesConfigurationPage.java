@@ -17,7 +17,6 @@
 
 package com.servoy.eclipse.warexporter.ui.wizard;
 
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -43,15 +42,13 @@ import com.servoy.eclipse.warexporter.export.ExportWarModel;
 public class ServoyPropertiesConfigurationPage extends WizardPage implements Listener
 {
 	private final ExportWarModel exportModel;
-	private final IWizardPage nextPage;
 	private Button useRMI;
 	private Text startRMIPortText;
 
-	public ServoyPropertiesConfigurationPage(String title, ExportWarModel exportModel, IWizardPage nextPage)
+	public ServoyPropertiesConfigurationPage(String title, ExportWarModel exportModel)
 	{
 		super(title);
 		this.exportModel = exportModel;
-		this.nextPage = nextPage;
 		setTitle("Configuration settings for the generated servoy properties file");
 		setDescription("Specify following settings");
 	}
@@ -127,11 +124,5 @@ public class ServoyPropertiesConfigurationPage extends WizardPage implements Lis
 	public boolean canFlipToNextPage()
 	{
 		return !useRMI.getSelection() || (startRMIPortText.getText() != null && startRMIPortText.getText().length() > 0);
-	}
-
-	@Override
-	public IWizardPage getNextPage()
-	{
-		return nextPage;
 	}
 }

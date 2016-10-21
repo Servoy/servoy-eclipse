@@ -216,30 +216,28 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 
 			serversSelectionPage = new ServersSelectionPage("serverspage", "Choose the database servernames to export",
 				"Select the database server names that will be used on the application server", exportModel.getSelectedServerNames(),
-				new String[] { IServer.REPOSITORY_SERVER }, serverConfigurationPages);
+				new String[] { IServer.REPOSITORY_SERVER });
 			licenseConfigurationPage = new LicensePage("licensepage", "Enter license key",
-				"Please enter the Servoy client license key(s), or leave empty for running the solution in trial mode.", exportModel, serversSelectionPage);
-			servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel, licenseConfigurationPage);
-			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel, servoyPropertiesConfigurationPage);
+				"Please enter the Servoy client license key(s), or leave empty for running the solution in trial mode.", exportModel);
+			servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel);
+			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel);
 			componentsSelectionPage = new ComponentsSelectionPage(exportModel, "componentspage", "Select components to export",
-				"View the components used and select others which you want to export.", servicesSelectionPage);
-			defaultAdminConfigurationPage = new DefaultAdminConfigurationPage("defaultAdminPage", exportModel, servoyPropertiesSelectionPage);
+				"View the components used and select others which you want to export.");
+			defaultAdminConfigurationPage = new DefaultAdminConfigurationPage("defaultAdminPage", exportModel);
 			servicesSelectionPage = new ServicesSelectionPage(exportModel, "servicespage", "Select services to export",
-				"View the services used and select others which you want to export.", defaultAdminConfigurationPage);
+				"View the services used and select others which you want to export.");
 			driverSelectionPage = new DirectorySelectionPage("driverpage", "Choose the jdbc drivers to export",
 				"Select the jdbc drivers that you want to use in the war (if the app server doesn't provide them)",
 				ApplicationServerRegistry.get().getServerManager().getDriversDir(), exportModel.getDrivers(), new String[] { "hsqldb.jar" },
-				getDialogSettings().get("export.drivers") == null, componentsSelectionPage, false);
+				getDialogSettings().get("export.drivers") == null, false);
 			lafSelectionPage = new DirectorySelectionPage("lafpage", "Choose the lafs to export", "Select the lafs that you want to use in the war",
-				ApplicationServerRegistry.get().getLafManager().getLAFDir(), exportModel.getLafs(), null, getDialogSettings().get("export.lafs") == null,
-				driverSelectionPage, false);
+				ApplicationServerRegistry.get().getLafManager().getLAFDir(), exportModel.getLafs(), null, getDialogSettings().get("export.lafs") == null, false);
 			beanSelectionPage = new DirectorySelectionPage("beanpage", "Choose the beans to export", "Select the beans that you want to use in the war",
-				ApplicationServerRegistry.get().getBeanManager().getBeansDir(), exportModel.getBeans(), null, getDialogSettings().get("export.beans") == null,
-				lafSelectionPage, false);
+				ApplicationServerRegistry.get().getBeanManager().getBeansDir(), exportModel.getBeans(), null, getDialogSettings().get("export.beans") == null,false);
 			pluginSelectionPage = new DirectorySelectionPage("pluginpage", "Choose the plugins to export", "Select the plugins that you want to use in the war",
 				ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), exportModel.getPlugins(), null,
-				getDialogSettings().get("export.plugins") == null, beanSelectionPage, true);
-			fileSelectionPage = new FileSelectionPage(exportModel, pluginSelectionPage);
+				getDialogSettings().get("export.plugins") == null, true);
+			fileSelectionPage = new FileSelectionPage(exportModel);
 			addPage(fileSelectionPage);
 			addPage(pluginSelectionPage);
 			addPage(beanSelectionPage);

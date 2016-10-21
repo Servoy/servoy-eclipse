@@ -61,7 +61,6 @@ public class FileSelectionPage extends WizardPage implements Listener
 	private Text fileNameText;
 	private Button browseButton;
 	private Button exportActiveSolution;
-	private final IWizardPage nextPage;
 	private Button allRowsRadioButton;
 	private Button exportI18NDataButton;
 	private Button exportUsersButton;
@@ -95,11 +94,10 @@ public class FileSelectionPage extends WizardPage implements Listener
 	private Button clearReferencesStopTimerThreads;
 	private Button minimizeJSAndCSS;
 
-	public FileSelectionPage(ExportWarModel exportModel, IWizardPage nextPage)
+	public FileSelectionPage(ExportWarModel exportModel)
 	{
 		super("warfileselection");
 		this.exportModel = exportModel;
-		this.nextPage = nextPage;
 		setTitle("Choose the destination file");
 		setDescription("Select the file where you want your solution exported to");
 	}
@@ -775,7 +773,7 @@ public class FileSelectionPage extends WizardPage implements Listener
 			msg.setMessage("The file you selected already exists on disk. Do you want to overwrite it?");
 			if (msg.open() == SWT.YES)
 			{
-				return nextPage;
+				return super.getNextPage();
 			}
 			else
 			{
@@ -784,7 +782,7 @@ public class FileSelectionPage extends WizardPage implements Listener
 		}
 		else
 		{
-			return nextPage;
+			return super.getNextPage();
 		}
 	}
 }

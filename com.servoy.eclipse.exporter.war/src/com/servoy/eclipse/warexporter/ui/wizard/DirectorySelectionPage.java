@@ -29,7 +29,6 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ICheckable;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -50,7 +49,6 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 	public static final String REQUIRED_LABEL = " (required)";
 
 	private final File directory;
-	private final IWizardPage nextPage;
 	private final List<String> files;
 	private final String[] requiredFiles;
 	private CheckboxTableViewer checkboxTableViewer;
@@ -61,7 +59,7 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 	public DirectorySelectionPage(String pagename, String title, String description, File directory, List<String> files, String[] requiredFiles,
 		boolean selectAll)
 	{
-		this(pagename, title, description, directory, files, requiredFiles, selectAll, null, false);
+		this(pagename, title, description, directory, files, requiredFiles, selectAll, false);
 	}
 
 	/**
@@ -72,13 +70,12 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 	 * @param beanSelectionPage
 	 */
 	public DirectorySelectionPage(String pagename, String title, String description, File directory, List<String> files, String[] requiredFiles,
-		boolean selectAll, IWizardPage nextPage, boolean includeSubdirectories)
+		boolean selectAll, boolean includeSubdirectories)
 	{
 		super(pagename);
 		this.directory = directory;
 		this.files = files;
 		this.requiredFiles = requiredFiles;
-		this.nextPage = nextPage;
 		this.selectAll = selectAll;
 		this.includeSubdirectories = includeSubdirectories;
 		setTitle(title);
@@ -137,18 +134,6 @@ public class DirectorySelectionPage extends WizardPage implements ICheckStateLis
 	{
 		super.dispose();
 		if (checkboxTableViewer != null) checkboxTableViewer.removeCheckStateListener(this);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.wizard.WizardPage#getNextPage()
-	 */
-	@Override
-	public IWizardPage getNextPage()
-	{
-		if (nextPage != null) return nextPage;
-		return super.getNextPage();
 	}
 
 	private String[] appendRequiredLabelAndFolderBrackets(Object[] fileNames)

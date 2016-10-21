@@ -34,9 +34,9 @@ import com.servoy.j2db.server.ngclient.utils.NGUtils;
  */
 public class ServicesSelectionPage extends AbstractComponentsSelectionPage
 {
-	protected ServicesSelectionPage(ExportWarModel exportModel, String pageName, String title, String description, IWizardPage nextPage)
+	protected ServicesSelectionPage(ExportWarModel exportModel, String pageName, String title, String description)
 	{
-		super(exportModel, pageName, title, description, nextPage, "service");
+		super(exportModel, pageName, title, description, "service");
 		componentsUsed = exportModel.getUsedServices();
 		selectedComponents = new TreeSet<String>(componentsUsed);
 		if (exportModel.getExportedServices() == null ||
@@ -63,7 +63,6 @@ public class ServicesSelectionPage extends AbstractComponentsSelectionPage
 	public IWizardPage getNextPage()
 	{
 		exportModel.setExportedServices(new TreeSet<String>(Arrays.asList(selectedComponentsList.getItems())));
-		if (nextPage != null) return nextPage;
 		return super.getNextPage();
 	}
 }

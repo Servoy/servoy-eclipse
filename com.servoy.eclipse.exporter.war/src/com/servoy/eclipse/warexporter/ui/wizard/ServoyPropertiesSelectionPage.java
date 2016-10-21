@@ -54,13 +54,11 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 	private final ExportWarModel exportModel;
 	private Text fileNameText;
 	private Button browseButton;
-	private final IWizardPage nextPage;
 
-	public ServoyPropertiesSelectionPage(ExportWarModel exportModel, IWizardPage nextPage)
+	public ServoyPropertiesSelectionPage(ExportWarModel exportModel)
 	{
 		super("servoypropertyselection");
 		this.exportModel = exportModel;
-		this.nextPage = nextPage;
 		setTitle("Choose an existing servoy properties file (skip to generate default)");
 		setDescription("Select the servoy properties file that you want to use, skip if default should be generated");
 	}
@@ -191,9 +189,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 						{
 							public void run()
 							{
-								ok[0] = MessageDialog.openConfirm(
-									shell,
-									"Overwrite SocketFactory properties",
+								ok[0] = MessageDialog.openConfirm(shell, "Overwrite SocketFactory properties",
 									"In the selected properties file SocketFactory.rmiServerFactory is not set to 'com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory'. Please allow exporter to overwrite properties or cancel the export.");
 							}
 						});
@@ -243,7 +239,7 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 	@Override
 	public IWizardPage getNextPage()
 	{
-		if (exportModel.getServoyPropertiesFileName() == null) return nextPage;
+		if (exportModel.getServoyPropertiesFileName() == null) return super.getNextPage();
 		return null;
 	}
 }

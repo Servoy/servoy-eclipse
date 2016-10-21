@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -52,17 +51,15 @@ public class LicensePage extends WizardPage
 {
 
 	final ExportWarModel exportModel;
-	private final WizardPage nextPage;
 	private Composite mainContainer;
 	private ScrolledComposite sc;
 
-	public LicensePage(String pageName, String title, String description, ExportWarModel exportModel, WizardPage next)
+	public LicensePage(String pageName, String title, String description, ExportWarModel exportModel)
 	{
 		super(pageName);
 		setTitle(title);
 		setDescription(description);
 		this.exportModel = exportModel;
-		this.nextPage = next;
 	}
 
 	private class LicenseFieldsComposite extends Composite
@@ -255,11 +252,5 @@ public class LicensePage extends WizardPage
 		sc.setMinSize(mainContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 		mainContainer.layout();
 		sc.layout();
-	}
-
-	@Override
-	public IWizardPage getNextPage()
-	{
-		return nextPage;
 	}
 }
