@@ -38,6 +38,9 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.sablo.specification.SpecProviderState;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
@@ -90,6 +93,10 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 
 	private LicensePage licenseConfigurationPage;
 
+	private final SpecProviderState componentsSpecProviderState;
+
+	private final SpecProviderState servicesSpecProviderState;
+
 	public ExportWarWizard()
 	{
 		setWindowTitle("War Export");
@@ -98,6 +105,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard:" + activeProject.getSolution().getName());
 		setDialogSettings(section);
 		setNeedsProgressMonitor(true);
+		this.componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+		this.servicesSpecProviderState = WebServiceSpecProvider.getInstance().getSpecProviderState();
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
@@ -114,7 +123,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		}
 		else
 		{
-			exportModel = new ExportWarModel(getDialogSettings());
+			exportModel = new ExportWarModel(getDialogSettings(), componentsSpecProviderState, servicesSpecProviderState);
 		}
 	}
 
@@ -147,7 +156,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		{
 			public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
-				final WarExporter exporter = new WarExporter(exportModel);
+				final WarExporter exporter = new WarExporter(exportModel, componentsSpecProviderState, servicesSpecProviderState);
 				try
 				{
 					final boolean[] cancel = new boolean[] { false };
@@ -221,10 +230,10 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 				"Please enter the Servoy client license key(s), or leave empty for running the solution in trial mode.", exportModel);
 			servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel);
 			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel);
-			componentsSelectionPage = new ComponentsSelectionPage(exportModel, "componentspage", "Select components to export",
+			componentsSelectionPage = new ComponentsSelectionPage(exportModel, componentsSpecProviderState, "componentspage", "Select components to export",
 				"View the components used and select others which you want to export.");
 			defaultAdminConfigurationPage = new DefaultAdminConfigurationPage("defaultAdminPage", exportModel);
-			servicesSelectionPage = new ServicesSelectionPage(exportModel, "servicespage", "Select services to export",
+			servicesSelectionPage = new ServicesSelectionPage(exportModel, servicesSpecProviderState, "servicespage", "Select services to export",
 				"View the services used and select others which you want to export.");
 			driverSelectionPage = new DirectorySelectionPage("driverpage", "Choose the jdbc drivers to export",
 				"Select the jdbc drivers that you want to use in the war (if the app server doesn't provide them)",

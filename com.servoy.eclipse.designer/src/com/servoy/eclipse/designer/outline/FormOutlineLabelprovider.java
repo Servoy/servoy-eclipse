@@ -142,7 +142,7 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 				{
 					webComponentType = wc.getTypeName();
 				}
-				WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(webComponentType);
+				WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(webComponentType);
 				if (spec != null)
 				{
 					IPropertyType< ? > iPropertyType = spec.getDeclaredCustomObjectTypes().get(typeName);

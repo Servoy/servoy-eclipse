@@ -89,10 +89,10 @@ public class WebPackageDecorator implements ILightweightLabelDecorator
 	{
 		String imageFile;
 
-		String packageType = WebComponentSpecProvider.getInstance().getPackageType(iProject.getName());
+		String packageType = WebComponentSpecProvider.getInstance().getSpecProviderState().getPackageType(iProject.getName());
 		if (IPackageReader.WEB_COMPONENT.equals(packageType)) imageFile = "bean_decorator.png";
 		else if (IPackageReader.WEB_LAYOUT.equals(packageType)) imageFile = "layout_decorator.png";
-		else if (IPackageReader.WEB_SERVICE.equals(WebServiceSpecProvider.getInstance().getPackageType(iProject.getName())))
+		else if (IPackageReader.WEB_SERVICE.equals(WebServiceSpecProvider.getInstance().getSpecProviderState().getPackageType(iProject.getName())))
 			imageFile = "service_decorator.png";
 		else
 		{

@@ -92,8 +92,7 @@ public class SetTabSequenceCommand extends AbstractEditorActionDelegateHandler i
 			{
 				if (persist.getPersist() instanceof Bean)
 				{
-					WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-						((Bean)persist.getPersist()).getBeanClassName());
+					WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(((Bean)persist.getPersist()).getBeanClassName());
 					Collection<PropertyDescription> tabSeqProps = spec.getProperties(TypesRegistry.getType("tabseq"));
 					for (PropertyDescription pd : tabSeqProps)
 					{

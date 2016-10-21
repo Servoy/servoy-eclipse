@@ -44,7 +44,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
  * Palette items for mobile form editor.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -55,18 +55,18 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 	private static final String BUTTONS_HEADER_TITLE_ID = "headertitle";
 
 	private static final String[] BUTTONS_IDS = new String[] {
-	/* */BUTTON_BUTTON_ID
-	/* */, BUTTONS_HEADER_TITLE_ID
-	/* */};
+		/* */BUTTON_BUTTON_ID
+		/* */, BUTTONS_HEADER_TITLE_ID
+		/* */ };
 
 	private static final String PARTS_ID = "toolbars";
 	private static final String PARTS_HEADER_ID = "header";
 	private static final String PARTS_FOOTER_ID = "footer";
 
 	private static final String[] PARTS_IDS = new String[] {
-	/* */PARTS_HEADER_ID
-	/* */, PARTS_FOOTER_ID
-	/* */};
+		/* */PARTS_HEADER_ID
+		/* */, PARTS_FOOTER_ID
+		/* */ };
 
 	private static final String ELEMENTS_ID = "elements";
 	private static final String ELEMENTS_TEXT_FIELD_ID = "text field";
@@ -80,24 +80,25 @@ public class MobileVisualFormEditorPaletteFactory extends BaseVisualFormEditorPa
 	private static final String ELEMENTS_BEAN_ID = "bean";
 
 	private static final String[] ELEMENTS_IDS = new String[] {
-	/* */ELEMENTS_TEXT_FIELD_ID
-	/* */, ELEMENTS_TEXTAREA_ID
-	/* */, ELEMENTS_CALENDAR_ID
-	/* */, ELEMENTS_COMBOBOX_ID
-	/* */, ELEMENTS_CHECKBOXES_ID
-	/* */, ELEMENTS_RADIOBUTTONS_ID
-	/* */, ELEMENTS_PASSWORD_ID
-	/* */, ELEMENTS_LABEL_ID
-	/* */, ELEMENTS_BEAN_ID
-	/* */};
+		/* */ELEMENTS_TEXT_FIELD_ID
+		/* */, ELEMENTS_TEXTAREA_ID
+		/* */, ELEMENTS_CALENDAR_ID
+		/* */, ELEMENTS_COMBOBOX_ID
+		/* */, ELEMENTS_CHECKBOXES_ID
+		/* */, ELEMENTS_RADIOBUTTONS_ID
+		/* */, ELEMENTS_PASSWORD_ID
+		/* */, ELEMENTS_LABEL_ID
+		/* */, ELEMENTS_BEAN_ID
+		/* */ };
 
 	private static final String LISTS_ID = "lists";
 	private static final String LISTS_FORM_ID = "list form";
 	private static final String LISTS_INSET_ID = "inset list";
 	private static final String[] LISTS_IDS = new String[] {
-	/* */LISTS_FORM_ID
-	/* */, LISTS_INSET_ID
-	/* */};
+		/* */LISTS_FORM_ID
+		/* */, LISTS_INSET_ID
+		/* */ };
+
 
 	@Override
 	protected void fillPalette(PaletteRoot palette)

@@ -64,7 +64,7 @@ public class ReorderCustomTypesCommand extends Command
 	{
 		int index = inPlaceOf.getIndex();
 		String propertyName = inPlaceOf.getJsonKey();
-		WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getTypeName());
+		WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(parentBean.getTypeName());
 		boolean isArray = spec.isArrayReturnType(propertyName);
 		PropertyDescription targetPD = spec.getProperty(propertyName);
 		IChildWebObject[] arrayValue = null;

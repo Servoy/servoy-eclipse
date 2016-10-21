@@ -51,6 +51,7 @@ import org.json.JSONWriter;
 import org.osgi.service.prefs.BackingStoreException;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
@@ -103,7 +104,7 @@ public class DesignerFilter implements Filter
 			String formName = request.getParameter("formName");
 			if (uri != null && uri.endsWith("palette"))
 			{
-				WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
+				SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
 
 				((HttpServletResponse)servletResponse).setContentType("application/json");
 
@@ -114,21 +115,15 @@ public class DesignerFilter implements Filter
 					JSONWriter jsonWriter = new JSONWriter(servletResponse.getWriter());
 					jsonWriter.array();
 
-
-					//Step 1: create a list with all keys containing first the layout and then the component packages
-					ArrayList<String> orderedKeys = new ArrayList<String>();
+					// Step 1: create a list with all keys containing first the layout and then the component packages
+					List<String> orderedKeys = new ArrayList<String>();
 					orderedKeys.add("Templates");
-					Set<String> keySet = provider.getLayoutSpecifications().keySet();
-					for (String key : keySet)
-					{
-						orderedKeys.add(key);
-					}
+					orderedKeys.addAll(componentsSpecProviderState.getLayoutSpecifications().keySet());
 
-					//Create a list with a default sort where the default components are always first
-					keySet = provider.getWebComponentSpecifications().keySet();
+					// Create a list with a default sort where the default components are always first
 
-					ArrayList<String> componentPackages = new ArrayList<String>();
-					for (String key : keySet)
+					List<String> componentPackages = new ArrayList<String>();
+					for (String key : componentsSpecProviderState.getWebObjectSpecifications().keySet())
 					{
 						if (IGNORE_PACKAGE_LIST.contains(key)) continue;
 						componentPackages.add(key);
@@ -192,12 +187,12 @@ public class DesignerFilter implements Filter
 					{
 						boolean startedArray = false;
 						JSONObject categories = new JSONObject(); // categorised items (components/layouts can have "category" : "categoryName" in their spec)
-						if (provider.getLayoutSpecifications().containsKey(key))
+						if (componentsSpecProviderState.getLayoutSpecifications().containsKey(key))
 						{
 							// TODO check why getWebComponentSpecifications call below also returns the layout specifications.
 							if (!"Absolute-Layout".equals(layoutType))
 							{
-								PackageSpecification<WebLayoutSpecification> pkg = provider.getLayoutSpecifications().get(key);
+								PackageSpecification<WebLayoutSpecification> pkg = componentsSpecProviderState.getLayoutSpecifications().get(key);
 								jsonWriter.object();
 								jsonWriter.key("packageName").value(pkg.getPackageName());
 								jsonWriter.key("packageDisplayname").value(pkg.getPackageDisplayname());
@@ -206,10 +201,10 @@ public class DesignerFilter implements Filter
 								startedArray = true;
 							}
 						}
-						else if (provider.getWebComponentSpecifications().containsKey(key) &&
-							isAccesibleInLayoutType(provider.getWebComponentSpecifications().get(key), layoutType))
+						else if (componentsSpecProviderState.getWebObjectSpecifications().containsKey(key) &&
+							isAccesibleInLayoutType(componentsSpecProviderState.getWebObjectSpecifications().get(key), layoutType))
 						{
-							PackageSpecification<WebObjectSpecification> pkg = provider.getWebComponentSpecifications().get(key);
+							PackageSpecification<WebObjectSpecification> pkg = componentsSpecProviderState.getWebObjectSpecifications().get(key);
 							jsonWriter.object();
 							jsonWriter.key("packageName").value(pkg.getPackageName());
 							jsonWriter.key("packageDisplayname").value(pkg.getPackageDisplayname());
@@ -265,9 +260,9 @@ public class DesignerFilter implements Filter
 								jsonWriter.endObject();
 							}
 						}
-						if (startedArray && provider.getLayoutSpecifications().containsKey(key))
+						if (startedArray && componentsSpecProviderState.getLayoutSpecifications().containsKey(key))
 						{
-							PackageSpecification<WebLayoutSpecification> entry = provider.getLayoutSpecifications().get(key);
+							PackageSpecification<WebLayoutSpecification> entry = componentsSpecProviderState.getLayoutSpecifications().get(key);
 							for (WebLayoutSpecification spec : entry.getSpecifications().values())
 							{
 								JSONObject layoutJson = new JSONObject();
@@ -327,15 +322,15 @@ public class DesignerFilter implements Filter
 								else jsonWriter.value(layoutJson);
 							}
 						}
-						if (startedArray && provider.getWebComponentSpecifications().containsKey(key))
+						if (startedArray && componentsSpecProviderState.getWebObjectSpecifications().containsKey(key))
 						{
-							PackageSpecification<WebObjectSpecification> pkg = provider.getWebComponentSpecifications().get(key);
+							PackageSpecification<WebObjectSpecification> pkg = componentsSpecProviderState.getWebObjectSpecifications().get(key);
 							Collection<WebObjectSpecification> webComponentSpecsCollection = pkg.getSpecifications().values();
 							if ("servoydefault".equals(key))
 							{
 								ArrayList<WebObjectSpecification> webComponentSpecsCollectionEx = new ArrayList<WebObjectSpecification>(
 									webComponentSpecsCollection);
-								webComponentSpecsCollectionEx.addAll(provider.getWebComponentSpecifications().get("servoycore").getSpecifications().values());
+								webComponentSpecsCollectionEx.addAll(componentsSpecProviderState.getWebObjectSpecifications().get("servoycore").getSpecifications().values());
 								webComponentSpecsCollection = webComponentSpecsCollectionEx;
 							}
 							for (WebObjectSpecification spec : webComponentSpecsCollection)

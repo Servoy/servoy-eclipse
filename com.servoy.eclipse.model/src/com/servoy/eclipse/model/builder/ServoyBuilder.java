@@ -66,6 +66,7 @@ import org.eclipse.dltk.compiler.problem.ProblemSeverity;
 import org.json.JSONObject;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
@@ -767,6 +768,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	{
 		try
 		{
+			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+
 			if (resource instanceof IFile && resource.getName().endsWith(".js"))
 			{
 				checkDuplicateScopes((IFile)resource);
@@ -782,8 +785,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				{
 					// a project that this builder in interested in was deleted (so a module or the resources proj.)
 					// or something has changed in this builder's solution project
-					checkServoyProject(getProject());
-					checkMissingSpecs(getProject());
+					checkServoyProject(getProject(), componentsSpecProviderState);
+					checkMissingSpecs(getProject(), componentsSpecProviderState);
 					checkModules(getProject());
 					checkResourcesForServoyProject(getProject());
 					checkResourcesForModules(getProject());
@@ -801,7 +804,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					{
 						if (servoyModel.isSolutionActive(getProject().getName()))
 						{
-							checkServoyProject(getProject());
+							checkServoyProject(getProject(), componentsSpecProviderState);
 							checkColumns(getProject());
 						}
 					}
@@ -865,7 +868,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		}
 	}
 
-	private void checkMissingSpecs(IProject buildProject)
+	private void checkMissingSpecs(IProject buildProject, final SpecProviderState componentsSpecProviderState)
 	{
 		ServoyProject[] modules = servoyModel.getModulesOfActiveProject();
 		if (modules != null)
@@ -881,7 +884,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						@Override
 						public Object visit(IPersist o)
 						{
-							checkMissingSpecs(o, module.getProject());
+							checkMissingSpecs(o, module.getProject(), componentsSpecProviderState);
 							return null;
 						}
 					});
@@ -891,11 +894,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	}
 
-	private void checkMissingSpecs(IPersist o, IProject project)
+	private void checkMissingSpecs(IPersist o, IProject project, SpecProviderState componentsSpecProviderState)
 	{
 		if (o instanceof WebComponent)
 		{
-			WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)o).getTypeName());
+			WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(((WebComponent)o).getTypeName());
 			if (spec == null)
 			{
 				ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Web Component", ((WebComponent)o).getTypeName());
@@ -905,8 +908,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		if (o instanceof LayoutContainer)
 		{
 			WebLayoutSpecification spec = null;
-			PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
-				((LayoutContainer)o).getPackageName());
+			PackageSpecification<WebLayoutSpecification> pkg = componentsSpecProviderState.getLayoutSpecifications().get(((LayoutContainer)o).getPackageName());
 			if (pkg != null)
 			{
 				spec = pkg.getSpecification(((LayoutContainer)o).getSpecName());
@@ -1888,7 +1890,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	private boolean hasDeletedMarkers = false;
 
-	private void checkServoyProject(final IProject project)
+	private void checkServoyProject(final IProject project, final SpecProviderState componentsSpecProviderState)
 	{
 		// only log exceptions to max count
 		exceptionCount = 0;
@@ -2478,7 +2480,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						checkCancel();
 						if (o instanceof WebComponent)
 						{
-							WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)o).getTypeName());
+							WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(((WebComponent)o).getTypeName());
 							if (spec != null && spec.getHandlers() != null)
 							{
 								for (String handler : spec.getHandlers().keySet())
@@ -2936,9 +2938,10 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						if (o instanceof ScriptCalculation)
 						{
 							ScriptCalculation calc = (ScriptCalculation)o;
-							if (calc.getMethodCode() != null)
+							String methodCode = calc.getMethodCode();
+							if (methodCode != null)
 							{
-								String text = calc.getMethodCode().toLowerCase();
+								String text = methodCode.toLowerCase();
 								if (text.contains("forms."))
 								{
 									String[] s = text.split("forms.");
@@ -3414,7 +3417,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 						}
 						checkCancel();
-						checkMissingSpecs(o, project);
+						checkMissingSpecs(o, project, componentsSpecProviderState);
 						checkCancel();
 						if (o.getTypeID() == IRepository.SHAPES)
 						{
@@ -3571,8 +3574,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 							if (o instanceof WebComponent)
 							{
-								WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
-									((WebComponent)o).getTypeName());
+								WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(((WebComponent)o).getTypeName());
 								if (spec != null)
 								{
 									dpProperties.addAll(spec.getProperties().values());
@@ -3582,7 +3584,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							{
 								WebCustomType customType = (WebCustomType)o;
 								WebComponent parent = (WebComponent)customType.getAncestor(IRepository.WEBCOMPONENTS);
-								WebObjectSpecification parentSpec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parent.getTypeName());
+								WebObjectSpecification parentSpec = componentsSpecProviderState.getWebComponentSpecification(parent.getTypeName());
 								if (parentSpec != null)
 								{
 									PropertyDescription cpd = ((ICustomType< ? >)parentSpec.getDeclaredCustomObjectTypes().get(
@@ -3946,7 +3948,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						throws RepositoryException
 					{
 						IDataProvider dataProvider = null;
-						WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(component.getTypeName());
+						WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(component.getTypeName());
 						if (spec != null)
 						{
 							Collection<PropertyDescription> fsPD = spec.getProperties(FoundsetPropertyType.INSTANCE);

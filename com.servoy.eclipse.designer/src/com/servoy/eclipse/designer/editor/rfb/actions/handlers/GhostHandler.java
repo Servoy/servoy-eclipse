@@ -31,6 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.CustomJSONArrayType;
@@ -99,11 +100,12 @@ public class GhostHandler implements IServerService
 			{
 				if (FormTemplateGenerator.isWebcomponentBean(bean))
 				{
-					WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(bean.getTypeName());
+					SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+					WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(bean.getTypeName());
 					if (spec == null)
 					{
 						//error bean
-						spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(FormElement.ERROR_BEAN);
+						spec = componentsSpecProviderState.getWebComponentSpecification(FormElement.ERROR_BEAN);
 					}
 					Map<String, PropertyDescription> properties = spec.getProperties();
 					if (bean instanceof WebComponent && !FormElement.ERROR_BEAN.equals(spec.getName())) // could be legacy Bean (was used in alphas/betas) - that is unlikely though
@@ -551,7 +553,7 @@ public class GhostHandler implements IServerService
 			if (fe instanceof WebComponent && fe.getFlattenedPropertiesMap().containsKey("json"))
 			{
 				JSONObject obj = (JSONObject)fe.getFlattenedPropertiesMap().get("json");
-				WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(((WebComponent)fe).getTypeName());
+				WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(((WebComponent)fe).getTypeName());
 				if (spec != null && !spec.getProperties(VisiblePropertyType.INSTANCE).isEmpty())
 				{
 					PropertyDescription pd = spec.getProperties(VisiblePropertyType.INSTANCE).iterator().next();

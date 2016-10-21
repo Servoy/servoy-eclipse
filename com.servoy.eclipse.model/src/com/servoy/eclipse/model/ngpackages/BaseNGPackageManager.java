@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,6 +55,7 @@ import org.sablo.specification.Package;
 import org.sablo.specification.Package.DirPackageReader;
 import org.sablo.specification.Package.DuplicateEntityException;
 import org.sablo.specification.Package.IPackageReader;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
@@ -154,16 +156,8 @@ public abstract class BaseNGPackageManager
 	public List<IPackageReader> getAllPackageReaders()
 	{
 		List<IPackageReader> all = new ArrayList<>();
-		IPackageReader[] allPackageReaders = WebComponentSpecProvider.getInstance().getAllPackageReaders();
-		for (IPackageReader iPackageReader : allPackageReaders)
-		{
-			all.add(iPackageReader);
-		}
-		allPackageReaders = WebServiceSpecProvider.getInstance().getAllPackageReaders();
-		for (IPackageReader iPackageReader : allPackageReaders)
-		{
-			all.add(iPackageReader);
-		}
+		all.addAll(Arrays.asList(WebComponentSpecProvider.getInstance().getSpecProviderState().getAllPackageReaders()));
+		all.addAll(Arrays.asList(WebServiceSpecProvider.getInstance().getSpecProviderState().getAllPackageReaders()));
 		return all;
 	}
 
@@ -289,11 +283,12 @@ public abstract class BaseNGPackageManager
 			}
 
 
+			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
 			for (String packageName : packagesToUnload)
 			{
 				if (notContainedByOtherProjectsAfterUnloads(projectName, packageName, ngPackageChangesPerReferencingProject))
 				{
-					if (WebComponentSpecProvider.getInstance().getPackageNames().contains(packageName)) componentsReallyToUnload.add(packageName);
+					if (componentsSpecProviderState.getPackageNames().contains(packageName)) componentsReallyToUnload.add(packageName);
 					else serviceReallyToUnload.add(packageName);
 				}
 			}

@@ -122,7 +122,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 								else
 								{
 									List<String> specs = new ArrayList<String>();
-									WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getInstance().getAllWebComponentSpecifications();
+									WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getInstance().getSpecProviderState().getAllWebComponentSpecifications();
 									for (WebObjectSpecification webComponentSpec : webComponentSpecifications)
 									{
 										if (!webComponentSpec.getPackageName().equals("servoydefault"))
@@ -157,7 +157,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 											persist = parentPersist.createNewWebComponent(componentName,
 												(String)((StructuredSelection)dialog.getSelection()).getFirstElement());
 
-											WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+											WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(
 												(String)((StructuredSelection)dialog.getSelection()).getFirstElement());
 											Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
 											for (String string : allPropertiesNames)
@@ -268,7 +268,8 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 			if (parentPersist != null && parentPersist.getPersist() instanceof AbstractBase && parentPersist.getPersist() instanceof ISupportChilds)
 			{
 				AbstractBase parent = (AbstractBase)ElementUtil.getOverridePersist(parentPersist);
-				PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(packageName);
+				PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getSpecProviderState().getLayoutSpecifications().get(
+					packageName);
 				container = (LayoutContainer)parent.getRootObject().getChangeHandler().createNewObject(((ISupportChilds)parent), IRepository.LAYOUTCONTAINERS);
 				container.setSpecName(specName);
 				container.setPackageName(packageName);
@@ -351,7 +352,7 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 	public static WebCustomType addCustomType(IBasicWebComponent parentBean, String propertyName, String compName, int arrayIndex)
 	{
 		int index = arrayIndex;
-		WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(parentBean.getTypeName());
+		WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(parentBean.getTypeName());
 		boolean isArray = spec.isArrayReturnType(propertyName);
 		PropertyDescription targetPD = spec.getProperty(propertyName);
 		String typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(targetPD.getType());

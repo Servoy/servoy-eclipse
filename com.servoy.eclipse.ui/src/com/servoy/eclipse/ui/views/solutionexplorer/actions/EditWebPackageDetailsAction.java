@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
 import java.util.jar.Manifest;
@@ -48,6 +47,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
@@ -133,12 +133,11 @@ public class EditWebPackageDetailsAction extends Action implements ISelectionCha
 		if ("".equals(packageDisplayName))
 		{
 			MessageDialog.openError(shell, getText(), "The package display name cannot be empty");
-
 			return false;
 		}
-		Map<String, PackageSpecification<WebObjectSpecification>> specifications = (componentsNotServices
-			? WebComponentSpecProvider.getInstance().getWebComponentSpecifications() : WebServiceSpecProvider.getInstance().getWebServiceSpecifications());
-		for (PackageSpecification<WebObjectSpecification> p : specifications.values())
+
+		SpecProviderState specProviderState = componentsNotServices ? WebComponentSpecProvider.getInstance().getSpecProviderState() : WebServiceSpecProvider.getInstance().getSpecProviderState();
+		for (PackageSpecification<WebObjectSpecification> p : specProviderState.getWebObjectSpecifications().values())
 		{
 			if (p.getPackageDisplayname().equals(packageDisplayName))
 			{

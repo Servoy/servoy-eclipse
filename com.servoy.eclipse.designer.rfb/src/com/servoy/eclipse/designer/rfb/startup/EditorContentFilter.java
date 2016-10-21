@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.sablo.IndexPageEnhancer;
 import org.sablo.specification.PackageSpecification;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
@@ -96,7 +97,8 @@ public class EditorContentFilter implements Filter
 				variableSubstitution.put("orientation", String.valueOf(0)); // fs.getSolution().getTextOrientation()
 				ArrayList<String> css = new ArrayList<String>();
 				css.add("css/servoy.css");
-				for (PackageSpecification<WebLayoutSpecification> entry : WebComponentSpecProvider.getInstance().getLayoutSpecifications().values())
+				SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+				for (PackageSpecification<WebLayoutSpecification> entry : componentsSpecProviderState.getLayoutSpecifications().values())
 				{
 					if (entry.getCssDesignLibrary() != null)
 					{
@@ -115,7 +117,7 @@ public class EditorContentFilter implements Filter
 						formScripts.addAll(entry.getJsClientLibrary());
 					}
 				}
-				for (PackageSpecification<WebObjectSpecification> entry : WebComponentSpecProvider.getInstance().getWebComponentSpecifications().values())
+				for (PackageSpecification<WebObjectSpecification> entry : componentsSpecProviderState.getWebObjectSpecifications().values())
 				{
 					if (entry.getCssDesignLibrary() != null)
 					{

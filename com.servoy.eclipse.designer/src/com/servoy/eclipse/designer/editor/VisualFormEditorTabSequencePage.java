@@ -405,7 +405,7 @@ public class VisualFormEditorTabSequencePage extends Composite
 			{
 				IBasicWebComponent webComponent = (IBasicWebComponent)persist;
 				String componentType = FormTemplateGenerator.getComponentTypeName(webComponent);
-				WebObjectSpecification specification = WebComponentSpecProvider.getInstance().getWebComponentSpecification(componentType);
+				WebObjectSpecification specification = WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(componentType);
 				if (specification != null)
 				{
 					Collection<PropertyDescription> properties = specification.getProperties(NGTabSeqPropertyType.NG_INSTANCE);
