@@ -290,7 +290,7 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 					PropertyDescription propertyDescription = null;
 					if (persist.getParent() != null)
 					{
-						propertyDescription = WebComponentSpecProvider.getInstance().getWebComponentSpecification(
+						propertyDescription = WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(
 							FormTemplateGenerator.getComponentTypeName((IBasicWebComponent)persist));
 					}
 
@@ -350,9 +350,8 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 					PropertyDescription propertyDescription = null;
 					if (persist.getParent() != null)
 					{
-						PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+						PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getSpecProviderState().getLayoutSpecifications().get(
 							layoutContainer.getPackageName());
-
 						if (pkg != null)
 						{
 							propertyDescription = pkg.getSpecification(layoutContainer.getSpecName());

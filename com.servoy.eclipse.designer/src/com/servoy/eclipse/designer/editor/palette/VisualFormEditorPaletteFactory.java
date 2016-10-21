@@ -38,8 +38,9 @@ import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.PackageSpecification;
+import org.sablo.specification.SpecProviderState;
+import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 
@@ -162,6 +163,8 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		/* */CONTAINERS_ACCORDION_PANEL_ID
 		/* */ };
 
+	private SpecProviderState componentsSpecProviderState;
+
 	@Override
 	protected PaletteCustomization getDefaultPaletteCustomization()
 	{
@@ -192,7 +195,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		addBeans(false, drawers, drawerEntries, entryProperties);
 
 		// add components
-		addComponents(drawers, drawerEntries, entryProperties);
+		addComponents(drawers, drawerEntries, entryProperties, componentsSpecProviderState);
 
 		// add shapes
 		addFixedEntries(SHAPES_ID, Messages.LabelShapesPalette, SHAPES_IDS, drawers, drawerEntries, entryProperties);
@@ -268,12 +271,13 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		}
 	}
 
-	private static void addComponents(List<String> drawers, Map<String, List<String>> drawerEntries, Map<String, Object> entryProperties)
+	private static void addComponents(List<String> drawers, Map<String, List<String>> drawerEntries, Map<String, Object> entryProperties,
+		SpecProviderState componentsSpecProviderState)
 	{
 		Map<String, List<String>> allComponents = new HashMap<String, List<String>>();
 		Map<String, String> drawerNames = new HashMap<String, String>();
 
-		for (PackageSpecification<WebObjectSpecification> pkg : WebComponentSpecProvider.getInstance().getWebComponentSpecifications().values())
+		for (PackageSpecification<WebObjectSpecification> pkg : componentsSpecProviderState.getWebObjectSpecifications().values())
 		{
 			String packageName = pkg.getPackageDisplayname();
 			String id = COMPONENTS_ID + "." + packageName;
@@ -317,7 +321,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 	}
 
-	private PaletteEntry createPaletteEntry(String drawerId, String id)
+	private static PaletteEntry createPaletteEntry(String drawerId, String id, SpecProviderState componentsSpecProviderState)
 	{
 		if (ELEMENTS_ID.equals(drawerId))
 		{
@@ -341,7 +345,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 		if (drawerId.startsWith(COMPONENTS_ID))
 		{
-			return createComponentsEntry(id);
+			return createComponentsEntry(id, componentsSpecProviderState);
 		}
 
 		if (drawerId.startsWith(BEANS_ID_PREFIX))
@@ -368,7 +372,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		return null;
 	}
 
-	private PaletteEntry createElementsEntry(String id)
+	private static PaletteEntry createElementsEntry(String id)
 	{
 		ImageDescriptor icon = null;
 		Dimension size = new Dimension(140, 20);
@@ -502,7 +506,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		return null;
 	}
 
-	private PaletteEntry createShapesEntry(String id)
+	private static PaletteEntry createShapesEntry(String id)
 	{
 		ImageDescriptor icon = null;
 		Dimension size = new Dimension(70, 70);
@@ -583,7 +587,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		return null;
 	}
 
-	private PaletteEntry createContainersEntry(String id)
+	private static PaletteEntry createContainersEntry(String id)
 	{
 		ImageDescriptor icon = null;
 		RequestTypeCreationFactory factory = null;
@@ -716,10 +720,10 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		return new ElementCreationToolEntry("", "", factory, icon, icon);
 	}
 
-	private static PaletteEntry createComponentsEntry(String beanClassName)
+	private static PaletteEntry createComponentsEntry(String beanClassName, SpecProviderState componentsSpecProviderState)
 	{
 		String webComponentClassName = FormTemplateGenerator.getComponentTypeName(beanClassName);
-		WebObjectSpecification webComponentDescription = WebComponentSpecProvider.getInstance().getWebComponentSpecification(webComponentClassName);
+		WebObjectSpecification webComponentDescription = componentsSpecProviderState.getWebComponentSpecification(webComponentClassName);
 		Dimension dimension = getDimensionFromSpec(webComponentDescription);
 		ImageDescriptor beanIcon = Activator.loadImageDescriptorFromBundle("bean.gif");
 		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_COMPONENT, dimension);
@@ -745,7 +749,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 				{
 					Integer width = ((JSONObject)defaultValue).getInt("width");
 					Integer height = ((JSONObject)defaultValue).getInt("height");
-					dimension = new Dimension(width, height);
+					dimension = new Dimension(width.intValue(), height.intValue());
 				}
 				catch (JSONException e)
 				{
@@ -756,7 +760,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		return dimension;
 	}
 
-	private PaletteEntry createTemplateToolEntry(String templateName, int element)
+	private static PaletteEntry createTemplateToolEntry(String templateName, int element)
 	{
 		Template template = (Template)ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObject(templateName, IRepository.TEMPLATES);
 		if (template == null)
@@ -777,7 +781,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 	 * @param json
 	 * @return
 	 */
-	public PaletteEntry createTemplateToolEntry(Template template, JSONObject json, String displayName, int element)
+	public static PaletteEntry createTemplateToolEntry(Template template, JSONObject json, String displayName, int element)
 	{
 		TemplateElementHolder data = new TemplateElementHolder(template, element);
 		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_TEMPLATE,
@@ -875,6 +879,8 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 	@Override
 	protected void fillPalette(PaletteRoot palette)
 	{
+		componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+
 		PaletteCustomization defaultPaletteCustomization = getDefaultPaletteCustomization();
 		PaletteCustomization savedPaletteCustomization = new DesignerPreferences().getPaletteCustomization();
 		PaletteCustomization paletteCustomization = savedPaletteCustomization == null ? defaultPaletteCustomization : savedPaletteCustomization;
@@ -916,7 +922,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 				for (String itemId : itemIds)
 				{
-					PaletteEntry entry = createPaletteEntry(drawerId, itemId);
+					PaletteEntry entry = createPaletteEntry(drawerId, itemId, componentsSpecProviderState);
 					if (entry != null)
 					{
 						entry.setId(itemId);

@@ -29,6 +29,7 @@ import java.util.SortedSet;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.equinox.app.IApplicationContext;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
@@ -57,9 +58,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 
 		/**
 		 * @param configuration
+		 * @param servicesSpecProviderState
+		 * @param componentsSpecProviderState
 		 */
-		private CommandLineWarExportModel(WarArgumentChest configuration)
+		private CommandLineWarExportModel(WarArgumentChest configuration, SpecProviderState componentsSpecProviderState, SpecProviderState servicesSpecProviderState)
 		{
+			super(componentsSpecProviderState, servicesSpecProviderState);
 			this.configuration = configuration;
 			search();
 		}
@@ -183,7 +187,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		{
 			String[] list = dir.list(new FilenameFilter()
 			{
-				public boolean accept(File dir, String name)
+				public boolean accept(File d, String name)
 				{
 					boolean accept = fileNames != null ? fileNames.contains(name.toLowerCase()) : true;
 					return accept && (name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith(".zip"));
@@ -205,11 +209,10 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			if (configuration.getSelectedComponents() == null) return configuration.getSelectedServices() != null ? getUsedComponents() : null;
 			if (configuration.getSelectedComponents().equals("")) return getUsedComponents();
 
-			WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
 			Set<String> set = new HashSet<String>();
 			if (configuration.getSelectedComponents().trim().equalsIgnoreCase("all"))
 			{
-				for (WebObjectSpecification spec : provider.getAllWebComponentSpecifications())
+				for (WebObjectSpecification spec : componentsSpecProviderState.getAllWebComponentSpecifications())
 				{
 					set.add(spec.getName());
 				}
@@ -219,7 +222,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 				set.addAll(Arrays.asList(configuration.getSelectedComponents().split(" ")));
 				for (String componentName : set)
 				{
-					if (provider.getWebComponentSpecification(componentName) == null)
+					if (componentsSpecProviderState.getWebComponentSpecification(componentName) == null)
 					{
 						// TODO shouldn't this be an error and shouldn't the exporter fail nicely with a new exit code? I'm thinking now of Jenkins usage and failing sooner rather then later (at export rather then when testing)
 						output("'" + componentName + "' is not a valid component name or it could not be found. Ignoring.");
@@ -229,7 +232,6 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 				set.addAll(getUsedComponents());
 			}
 			return set;
-
 		}
 
 		@Override
@@ -238,10 +240,9 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			if (configuration.getSelectedServices() == null) return configuration.getSelectedComponents() != null ? getUsedServices() : null;
 			if (configuration.getSelectedServices().equals("")) return getUsedServices();
 			Set<String> set = new HashSet<String>();
-			WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
 			if (configuration.getSelectedServices().trim().equalsIgnoreCase("all"))
 			{
-				for (WebObjectSpecification spec : NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport())
+				for (WebObjectSpecification spec : NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState))
 				{
 					set.add(spec.getName());
 				}
@@ -251,7 +252,7 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 				set.addAll(Arrays.asList(configuration.getSelectedServices().split(" ")));
 				for (String serviceName : set)
 				{
-					if (provider.getWebServiceSpecification(serviceName) == null)
+					if (servicesSpecProviderState.getWebComponentSpecification(serviceName) == null)
 					{
 						// TODO shouldn't this be an error and shouldn't the exporter fail nicely with a new exit code? I'm thinking now of Jenkins usage and failing sooner rather then later (at export rather then when testing)
 						output("'" + serviceName + "' is not a valid service name or it could not be found. Ignoring.");
@@ -453,7 +454,10 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 	@Override
 	protected void exportActiveSolution(final WarArgumentChest configuration)
 	{
-		WarExporter warExporter = new WarExporter(new CommandLineWarExportModel(configuration));
+		SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+		SpecProviderState servicesSpecProviderState = WebServiceSpecProvider.getInstance().getSpecProviderState();
+		WarExporter warExporter = new WarExporter(new CommandLineWarExportModel(configuration, componentsSpecProviderState, servicesSpecProviderState), componentsSpecProviderState,
+			servicesSpecProviderState);
 		try
 		{
 			warExporter.doExport(new IProgressMonitor()

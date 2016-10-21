@@ -37,13 +37,13 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * Utility class that can create a GEF Palette for the Visual Form Editor.
- * 
+ *
  * @author rgansevles
  * @since 6.0
  */
 public abstract class BaseVisualFormEditorPaletteFactory implements IPaletteFactory
 {
-	protected void addFixedEntries(String id, String label, String[] entries, List<String> drawers, Map<String, List<String>> drawerEntries,
+	protected static void addFixedEntries(String id, String label, String[] entries, List<String> drawers, Map<String, List<String>> drawerEntries,
 		Map<String, Object> entryProperties)
 	{
 		drawers.add(id);
@@ -56,12 +56,12 @@ public abstract class BaseVisualFormEditorPaletteFactory implements IPaletteFact
 		}
 	}
 
-	protected void setProperty(Map<String, Object> map, TypedProperty< ? > property, Object value)
+	protected static void setProperty(Map<String, Object> map, TypedProperty< ? > property, Object value)
 	{
 		map.put(SetValueCommand.REQUEST_PROPERTY_PREFIX + property.getPropertyName(), value);
 	}
 
-	protected void setProperty(Map<String, Object> map, String propertyName, Object value)
+	protected static void setProperty(Map<String, Object> map, String propertyName, Object value)
 	{
 		map.put(SetValueCommand.REQUEST_PROPERTY_PREFIX + propertyName, value);
 	}
@@ -69,7 +69,7 @@ public abstract class BaseVisualFormEditorPaletteFactory implements IPaletteFact
 	/**
 	 * Creates the PaletteRoot and adds all palette elements. Use this factory
 	 * method to create a new palette for your graphical editor.
-	 * 
+	 *
 	 * @return a new PaletteRoot
 	 */
 	public PaletteRoot createPalette()

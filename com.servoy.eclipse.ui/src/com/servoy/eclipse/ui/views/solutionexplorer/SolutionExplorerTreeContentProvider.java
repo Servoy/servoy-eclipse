@@ -61,10 +61,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.mozilla.javascript.JavaMembers;
-import org.sablo.specification.BaseSpecProvider;
 import org.sablo.specification.BaseSpecProvider.ISpecReloadListener;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
@@ -155,7 +155,7 @@ import com.servoy.j2db.util.Utils;
  * @author jblok
  */
 public class SolutionExplorerTreeContentProvider
-	implements IStructuredContentProvider, ITreeContentProvider, ILoadedNGPackagesListener, IAvailableNGPackageProjectsListener, ISpecReloadListener
+	implements IStructuredContentProvider, ITreeContentProvider, ILoadedNGPackagesListener, IAvailableNGPackageProjectsListener
 {
 	private static final String IMG_SOLUTION = "solution.gif";
 	private static final String IMG_SOLUTION_M = "module.gif";
@@ -223,6 +223,10 @@ public class SolutionExplorerTreeContentProvider
 	private final List<Image> imagesConvertedFromSwing = new ArrayList<Image>();
 
 	private boolean includeModules;
+	private SpecProviderState componentsSpecProviderState;
+	private SpecProviderState servicesSpecProviderState;
+
+	private final ISpecReloadListener specReloadListener = new SpecReloadListener();
 
 	private static PlatformSimpleUserNode createTypeNode(String displayName, UserNodeType type, Class< ? > realType, PlatformSimpleUserNode parent)
 	{
@@ -330,7 +334,7 @@ public class SolutionExplorerTreeContentProvider
 		plugins.parent = invisibleRootNode;
 
 
-		ArrayList<PlatformSimpleUserNode> resourcesChildren = new ArrayList<PlatformSimpleUserNode>();
+		List<PlatformSimpleUserNode> resourcesChildren = new ArrayList<PlatformSimpleUserNode>();
 
 		resourcesChildren.add(servers);
 		resourcesChildren.add(stylesNode);
@@ -342,18 +346,18 @@ public class SolutionExplorerTreeContentProvider
 			resourcesChildren.add(componentsFromResourcesNode);
 		}
 
-		WebComponentSpecProvider.getInstance().addSpecReloadListener(null, this);
+		WebComponentSpecProvider.getInstance().addSpecReloadListener(null, specReloadListener);
 
 		if (hasChildren(servicesFromResourcesNode))
 		{
 			resourcesChildren.add(servicesFromResourcesNode);
 		}
 
-		WebServiceSpecProvider.getInstance().addSpecReloadListener(null, this);
+		WebServiceSpecProvider.getInstance().addSpecReloadListener(null, specReloadListener);
 
 		resources.children = resourcesChildren.toArray(new PlatformSimpleUserNode[0]);
 
-		ArrayList<PlatformSimpleUserNode> rootChildren = new ArrayList<PlatformSimpleUserNode>();
+		List<PlatformSimpleUserNode> rootChildren = new ArrayList<PlatformSimpleUserNode>();
 
 		rootChildren.add(resources);
 		if (hasChildren(allWebPackagesNode)) rootChildren.add(allWebPackagesNode);
@@ -416,8 +420,37 @@ public class SolutionExplorerTreeContentProvider
 		ServoyModelFinder.getServoyModel().getNGPackageManager().addAvailableNGPackageProjectsListener(this);
 	}
 
+	private SpecProviderState getComponentsSpecProviderState()
+	{
+		if (componentsSpecProviderState == null && WebComponentSpecProvider.getInstance() != null)
+		{
+			componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+		}
+		return componentsSpecProviderState;
+	}
+
+	public void resetComponentsSpecProviderState()
+	{
+		componentsSpecProviderState = null;
+	}
+
+	private SpecProviderState getServicesSpecProviderState()
+	{
+		if (servicesSpecProviderState == null && WebServiceSpecProvider.getInstance() != null)
+		{
+			servicesSpecProviderState = WebServiceSpecProvider.getInstance().getSpecProviderState();
+		}
+
+		return servicesSpecProviderState;
+	}
+
+	private void resetServicesSpecProviderState()
+	{
+		servicesSpecProviderState = null;
+	}
+
 	/**
-	 * Returns a 'virtual' non shown root node - the parent of all visilbe first level nodes.
+	 * Returns a 'virtual' non shown root node - the parent of all visible first level nodes.
 	 * Used for caching.
 	 *
 	 * @return the invisible root node.
@@ -447,8 +480,8 @@ public class SolutionExplorerTreeContentProvider
 
 		ServoyModelFinder.getServoyModel().getNGPackageManager().removeLoadedNGPackagesListener(this);
 		ServoyModelFinder.getServoyModel().getNGPackageManager().removeAvailableNGPackageProjectsListener(this);
-		WebComponentSpecProvider.getInstance().removeSpecReloadListener(null, this);
-		WebServiceSpecProvider.getInstance().removeSpecReloadListener(null, this);
+		WebComponentSpecProvider.getInstance().removeSpecReloadListener(null, specReloadListener);
+		WebServiceSpecProvider.getInstance().removeSpecReloadListener(null, specReloadListener);
 	}
 
 	/**
@@ -830,12 +863,12 @@ public class SolutionExplorerTreeContentProvider
 					}
 					else if (type == UserNodeType.COMPONENTS_FROM_RESOURCES)
 					{
-						BaseSpecProvider provider = WebComponentSpecProvider.getInstance();
-						if (provider != null) // the package management system might not yet be initialized at developer startup
+						SpecProviderState componentsSpecProviderState = getComponentsSpecProviderState();
+						if (componentsSpecProviderState != null) // the package management system might not yet be initialized at developer startup
 						{
 							Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
 							Image zipPackageIcon = PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor("test.zip").createImage();
-							IPackageReader[] packages = provider.getAllPackageReaders();
+							IPackageReader[] packages = componentsSpecProviderState.getAllPackageReaders();
 							List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 							for (IPackageReader entry : packages)
 							{
@@ -858,8 +891,8 @@ public class SolutionExplorerTreeContentProvider
 					}
 					else if (type == UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES)
 					{
-						BaseSpecProvider componentSpecProvider = WebComponentSpecProvider.getInstance();
-						BaseSpecProvider serviceSpecProvider = WebServiceSpecProvider.getInstance();
+						SpecProviderState componentSpecProvider = getComponentsSpecProviderState();
+						SpecProviderState serviceSpecProvider = getServicesSpecProviderState();
 						if (componentSpecProvider != null && serviceSpecProvider != null) // the package management system might not yet be initialized at developer startup
 						{
 							List<PlatformSimpleUserNode> children = getWebProjects(un, componentSpecProvider, "package_obj.gif",
@@ -876,9 +909,8 @@ public class SolutionExplorerTreeContentProvider
 					}
 					else if (type == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || type == UserNodeType.LAYOUT_NONPROJECT_PACKAGE)
 					{
-						WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
 						String packageName = getPackageName(un);
-						List<String> components = new ArrayList<>(provider.getComponentsInPackage(packageName));
+						List<String> components = new ArrayList<>(getComponentsSpecProviderState().getComponentsInPackage(packageName));
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (components.size() > 0)
 						{
@@ -888,7 +920,7 @@ public class SolutionExplorerTreeContentProvider
 							Image componentIcon = uiActivator.loadImageFromBundle("bean.gif");
 							for (String component : components)
 							{
-								WebObjectSpecification spec = provider.getWebComponentSpecification(component);
+								WebObjectSpecification spec = getComponentsSpecProviderState().getWebComponentSpecification(component);
 								Image img = loadImageFromFolder(folder, spec.getIcon());
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec,
 									img != null ? img : componentIcon);
@@ -896,7 +928,7 @@ public class SolutionExplorerTreeContentProvider
 								children.add(node);
 							}
 						}
-						List<String> layouts = new ArrayList<>(provider.getLayoutsInPackage(packageName));
+						List<String> layouts = new ArrayList<>(getComponentsSpecProviderState().getLayoutsInPackage(packageName));
 						if (layouts.size() > 0)
 						{
 							Collections.sort(layouts);
@@ -905,7 +937,7 @@ public class SolutionExplorerTreeContentProvider
 							Image componentIcon = uiActivator.loadImageFromBundle("layout.png");
 							for (String layout : layouts)
 							{
-								WebLayoutSpecification spec = provider.getLayoutSpecifications().get(packageName).getSpecification(layout);
+								WebLayoutSpecification spec = getComponentsSpecProviderState().getLayoutSpecifications().get(packageName).getSpecification(layout);
 								Image img = loadImageFromFolder(folder, spec.getIcon());
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
 									img != null ? img : componentIcon);
@@ -917,9 +949,8 @@ public class SolutionExplorerTreeContentProvider
 					}
 					else if (type == UserNodeType.COMPONENTS_PROJECT_PACKAGE || type == UserNodeType.LAYOUT_PROJECT_PACKAGE)
 					{
-						WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
 						String packageName = getPackageName(un);
-						List<String> components = new ArrayList<>(provider.getComponentsInPackage(packageName));
+						List<String> components = new ArrayList<>(getComponentsSpecProviderState().getComponentsInPackage(packageName));
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						if (components.size() > 0)
 						{
@@ -928,7 +959,7 @@ public class SolutionExplorerTreeContentProvider
 							Image componentIcon = uiActivator.loadImageFromBundle("bean.gif");
 							for (String component : components)
 							{
-								WebObjectSpecification spec = provider.getWebComponentSpecification(component);
+								WebObjectSpecification spec = getComponentsSpecProviderState().getWebComponentSpecification(component);
 								Image img = loadImageFromProject(project, spec.getIcon());
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec,
 									img != null ? img : componentIcon);
@@ -936,7 +967,7 @@ public class SolutionExplorerTreeContentProvider
 								children.add(node);
 							}
 						}
-						List<String> layouts = new ArrayList<>(provider.getLayoutsInPackage(packageName));
+						List<String> layouts = new ArrayList<>(getComponentsSpecProviderState().getLayoutsInPackage(packageName));
 						if (layouts.size() > 0)
 						{
 							Collections.sort(layouts);
@@ -944,7 +975,7 @@ public class SolutionExplorerTreeContentProvider
 							Image componentIcon = uiActivator.loadImageFromBundle("layout.png");
 							for (String layout : layouts)
 							{
-								WebLayoutSpecification spec = provider.getLayoutSpecifications().get(packageName).getSpecification(layout);
+								WebLayoutSpecification spec = getComponentsSpecProviderState().getLayoutSpecifications().get(packageName).getSpecification(layout);
 								Image img = loadImageFromProject(project, spec.getIcon());
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec,
 									img != null ? img : componentIcon);
@@ -956,7 +987,7 @@ public class SolutionExplorerTreeContentProvider
 					}
 					else if (type == UserNodeType.SERVICES_FROM_RESOURCES)
 					{
-						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
+						SpecProviderState provider = getServicesSpecProviderState();
 						if (provider != null) // the package management system might not yet be initialized at developer startup
 						{
 							IPackageReader[] packages = provider.getAllPackageReaders();
@@ -984,11 +1015,11 @@ public class SolutionExplorerTreeContentProvider
 					}
 					else if (type == UserNodeType.SERVICES_NONPROJECT_PACKAGE)
 					{
-						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
+						SpecProviderState provider = getServicesSpecProviderState();
 						if (provider != null) // the package management system might not yet be initialized at developer startup
 						{
 							String packageName = getPackageName(un);
-							PackageSpecification<WebObjectSpecification> servicesPackage = provider.getServicesInPackage(packageName);
+							PackageSpecification<WebObjectSpecification> servicesPackage = provider.getWebObjectSpecifications().get(packageName);
 							List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 							if (servicesPackage != null)
 							{
@@ -999,7 +1030,7 @@ public class SolutionExplorerTreeContentProvider
 								Image serviceDefaultIcon = uiActivator.loadImageFromBundle("service.png");
 								for (String component : services)
 								{
-									WebObjectSpecification spec = provider.getWebServiceSpecification(component);
+									WebObjectSpecification spec = provider.getWebComponentSpecification(component);
 									Image img = loadImageFromFolder(folder, spec.getIcon());
 									PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec,
 										img != null ? img : serviceDefaultIcon);
@@ -1012,11 +1043,11 @@ public class SolutionExplorerTreeContentProvider
 					}
 					else if (type == UserNodeType.SERVICES_PROJECT_PACKAGE)
 					{
-						WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
+						SpecProviderState provider = getServicesSpecProviderState();
 						if (provider != null) // the package management system might not yet be initialized at developer startup
 						{
 							String packageName = getPackageName(un);
-							PackageSpecification<WebObjectSpecification> servicesPackage = provider.getServicesInPackage(packageName);
+							PackageSpecification<WebObjectSpecification> servicesPackage = provider.getWebObjectSpecifications().get(packageName);
 							List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 							if (servicesPackage != null)
 							{
@@ -1026,7 +1057,7 @@ public class SolutionExplorerTreeContentProvider
 								Image serviceDefaultIcon = uiActivator.loadImageFromBundle("service.png");
 								for (String component : services)
 								{
-									WebObjectSpecification spec = provider.getWebServiceSpecification(component);
+									WebObjectSpecification spec = provider.getWebComponentSpecification(component);
 									Image img = loadImageFromProject(project, spec.getIcon());
 									PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec,
 										img != null ? img : serviceDefaultIcon);
@@ -1081,8 +1112,7 @@ public class SolutionExplorerTreeContentProvider
 	/**
 	 * Returns all zip packages contained by the given solution
 	 */
-	private Collection< ? extends PlatformSimpleUserNode> getBinaryPackages(PlatformSimpleUserNode un, BaseSpecProvider componentsProvider,
-		BaseSpecProvider servicesProvider)
+	private Collection< ? extends PlatformSimpleUserNode> getBinaryPackages(PlatformSimpleUserNode un, SpecProviderState componentsProvider, SpecProviderState servicesProvider)
 	{
 		List<PlatformSimpleUserNode> result = new ArrayList<PlatformSimpleUserNode>();
 		Object realObject = un.getRealObject();
@@ -1157,10 +1187,10 @@ public class SolutionExplorerTreeContentProvider
 		String displayName;
 
 		// the package project could be referenced by active solution/modules or not (we still have to know it's display name)
-		if (WebComponentSpecProvider.getInstance().getWebComponentSpecifications().containsKey(iProject.getName()))
-			displayName = WebComponentSpecProvider.getInstance().getPackageDisplayName(iProject.getName());
-		else if ((WebServiceSpecProvider.getInstance().getWebServiceSpecifications().containsKey(iProject.getName())))
-			displayName = WebServiceSpecProvider.getInstance().getPackageDisplayName(iProject.getName());
+		if (getComponentsSpecProviderState().getWebObjectSpecifications().containsKey(iProject.getName()))
+			displayName = getComponentsSpecProviderState().getPackageDisplayName(iProject.getName());
+		else if (getServicesSpecProviderState().getWebObjectSpecifications().containsKey(iProject.getName()))
+			displayName = getServicesSpecProviderState().getPackageDisplayName(iProject.getName());
 		else
 		{
 			// now we have to read the package type from the manifest
@@ -1169,14 +1199,12 @@ public class SolutionExplorerTreeContentProvider
 			{
 				displayName = new ContainerPackageReader(new File(iProject.getLocationURI()), iProject).getPackageDisplayname();
 			}
-
 		}
 
 		return displayName;
 	}
 
-	private List<PlatformSimpleUserNode> getWebProjects(PlatformSimpleUserNode un, BaseSpecProvider provider, String imageFileName, UserNodeType nodeType,
-		String type)
+	private List<PlatformSimpleUserNode> getWebProjects(PlatformSimpleUserNode un, SpecProviderState provider, String imageFileName, UserNodeType nodeType, String type)
 	{
 		List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 		Image packageIcon = uiActivator.loadImageFromBundle(imageFileName);
@@ -1410,7 +1438,7 @@ public class SolutionExplorerTreeContentProvider
 				}
 				else if (un.getType() == UserNodeType.COMPONENTS_FROM_RESOURCES)
 				{
-					WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
+					SpecProviderState provider = getComponentsSpecProviderState();
 					if (provider != null)
 					{
 						IPackageReader[] packages = provider.getAllPackageReaders();
@@ -1437,7 +1465,7 @@ public class SolutionExplorerTreeContentProvider
 				}
 				else if (un.getType() == UserNodeType.SERVICES_FROM_RESOURCES)
 				{
-					WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
+					SpecProviderState provider = getServicesSpecProviderState();
 					if (provider != null)
 					{
 						IPackageReader[] packages = provider.getAllPackageReaders();
@@ -1480,16 +1508,15 @@ public class SolutionExplorerTreeContentProvider
 				else if (un.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE || un.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE ||
 					un.getType() == UserNodeType.LAYOUT_NONPROJECT_PACKAGE || un.getType() == UserNodeType.LAYOUT_PROJECT_PACKAGE)
 				{
-					return (WebComponentSpecProvider.getInstance() != null &&
-						!WebComponentSpecProvider.getInstance().getComponentsInPackage(getPackageName(un)).isEmpty() ||
-						!WebComponentSpecProvider.getInstance().getLayoutsInPackage(getPackageName(un)).isEmpty());
+					return (getComponentsSpecProviderState() != null && !getComponentsSpecProviderState().getComponentsInPackage(getPackageName(un)).isEmpty() ||
+						!getComponentsSpecProviderState().getLayoutsInPackage(getPackageName(un)).isEmpty());
 				}
 				else if (un.getType() == UserNodeType.SERVICES_NONPROJECT_PACKAGE || un.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE)
 				{
-					WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
+					SpecProviderState provider = getServicesSpecProviderState();
 					if (provider == null) return false;// the package management system might not yet be initialized at developer startup
 
-					PackageSpecification<WebObjectSpecification> services = provider.getServicesInPackage(getPackageName(un));
+					PackageSpecification<WebObjectSpecification> services = provider.getWebObjectSpecifications().get(getPackageName(un));
 					return services != null && !services.getSpecifications().isEmpty();
 				}
 			}
@@ -1507,8 +1534,8 @@ public class SolutionExplorerTreeContentProvider
 
 	private boolean containsBinaryPackages(PlatformSimpleUserNode un)
 	{
-		BaseSpecProvider componentProvider = WebComponentSpecProvider.getInstance();
-		BaseSpecProvider serviceProvider = WebServiceSpecProvider.getInstance();
+		SpecProviderState componentProvider = getComponentsSpecProviderState();
+		SpecProviderState serviceProvider = getServicesSpecProviderState();
 		if (componentProvider == null || serviceProvider == null) return false; // the package management system is not yet initialized; this is probably at developer startup
 
 		Object realObject = un.getRealObject();
@@ -1753,7 +1780,7 @@ public class SolutionExplorerTreeContentProvider
 					node.parent = pluginNode;
 				}
 			}
-			WebObjectSpecification[] serviceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList();
+			WebObjectSpecification[] serviceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList(getServicesSpecProviderState());
 			Arrays.sort(serviceSpecifications, new Comparator<WebObjectSpecification>()
 			{
 				@Override
@@ -3223,47 +3250,57 @@ public class SolutionExplorerTreeContentProvider
 		this.includeModules = includeModules;
 	}
 
-	@Override
-	public void webObjectSpecificationReloaded()
-	{
-		if (resources != null && resources.children != null && componentsFromResourcesNode != null)
-		{
-			ArrayList<SimpleUserNode> resourcesChildren = new ArrayList<SimpleUserNode>(Arrays.asList(resources.children));
-			if (hasChildren(componentsFromResourcesNode))
-			{
-				if (!resourcesChildren.contains(componentsFromResourcesNode))
-				{
-					resourcesChildren.add(componentsFromResourcesNode);
-					resources.children = resourcesChildren.toArray(new PlatformSimpleUserNode[0]);
-				}
-			}
-			else
-			{
-				if (resourcesChildren.contains(componentsFromResourcesNode))
-				{
-					resourcesChildren.remove(componentsFromResourcesNode);
-					resources.children = resourcesChildren.toArray(new PlatformSimpleUserNode[0]);
-				}
-			}
-		}
 
-		if (resources != null && resources.children != null && servicesFromResourcesNode != null)
+	public class SpecReloadListener implements ISpecReloadListener
+	{
+		@Override
+		public void webObjectSpecificationReloaded()
 		{
-			ArrayList<SimpleUserNode> resourcesChildren = new ArrayList<SimpleUserNode>(Arrays.asList(resources.children));
-			if (hasChildren(servicesFromResourcesNode))
+			resetServicesSpecProviderState();
+			resetComponentsSpecProviderState();
+
+			if (resources != null && resources.children != null)
 			{
-				if (!resourcesChildren.contains(servicesFromResourcesNode))
+				if (componentsFromResourcesNode != null)
 				{
-					resourcesChildren.add(servicesFromResourcesNode);
-					resources.children = resourcesChildren.toArray(new PlatformSimpleUserNode[0]);
+					List<SimpleUserNode> resourcesChildren = new ArrayList<SimpleUserNode>(Arrays.asList(resources.children));
+					if (hasChildren(componentsFromResourcesNode))
+					{
+						if (!resourcesChildren.contains(componentsFromResourcesNode))
+						{
+							resourcesChildren.add(componentsFromResourcesNode);
+							resources.children = resourcesChildren.toArray(new PlatformSimpleUserNode[resourcesChildren.size()]);
+						}
+					}
+					else
+					{
+						if (resourcesChildren.contains(componentsFromResourcesNode))
+						{
+							resourcesChildren.remove(componentsFromResourcesNode);
+							resources.children = resourcesChildren.toArray(new PlatformSimpleUserNode[resourcesChildren.size()]);
+						}
+					}
 				}
-			}
-			else
-			{
-				if (resourcesChildren.contains(servicesFromResourcesNode))
+
+				if (servicesFromResourcesNode != null)
 				{
-					resourcesChildren.remove(servicesFromResourcesNode);
-					resources.children = resourcesChildren.toArray(new PlatformSimpleUserNode[0]);
+					List<SimpleUserNode> resourcesChildren = new ArrayList<SimpleUserNode>(Arrays.asList(resources.children));
+					if (hasChildren(servicesFromResourcesNode))
+					{
+						if (!resourcesChildren.contains(servicesFromResourcesNode))
+						{
+							resourcesChildren.add(servicesFromResourcesNode);
+							resources.children = resourcesChildren.toArray(new PlatformSimpleUserNode[resourcesChildren.size()]);
+						}
+					}
+					else
+					{
+						if (resourcesChildren.contains(servicesFromResourcesNode))
+						{
+							resourcesChildren.remove(servicesFromResourcesNode);
+							resources.children = resourcesChildren.toArray(new PlatformSimpleUserNode[resourcesChildren.size()]);
+						}
+					}
 				}
 			}
 		}

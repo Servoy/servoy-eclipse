@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.ui.PlatformUI;
+import org.sablo.specification.SpecProviderState;
 
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
@@ -105,10 +106,13 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean ready = false;
 
 	/**
+	 * @param servicesSpecProviderState
+	 * @param componentsSpecProviderState
 	 * @param dialogSettings
 	 */
-	public ExportWarModel(IDialogSettings settings)
+	public ExportWarModel(IDialogSettings settings, SpecProviderState componentsSpecProviderState, SpecProviderState servicesSpecProviderState)
 	{
+		super(componentsSpecProviderState, servicesSpecProviderState);
 		WorkspaceJob job = new WorkspaceJob("Searching used components and services data")
 		{
 

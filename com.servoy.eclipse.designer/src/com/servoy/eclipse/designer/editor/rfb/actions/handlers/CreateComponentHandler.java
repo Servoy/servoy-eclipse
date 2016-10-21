@@ -522,7 +522,7 @@ public class CreateComponentHandler implements IServerService
 					}
 					else
 					{
-						WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(name);
+						WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(name);
 						if (spec != null)
 						{
 							String compName = null;
@@ -600,7 +600,7 @@ public class CreateComponentHandler implements IServerService
 						}
 						else
 						{
-							PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+							PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getSpecProviderState().getLayoutSpecifications().get(
 								args.optString("packageName"));
 							if (specifications != null)
 							{
@@ -711,7 +711,7 @@ public class CreateComponentHandler implements IServerService
 	protected ChildWebComponent createNestedWebComponent(WebComponent parentWC, PropertyDescription pd, String componentSpecName, String propertyName,
 		int indexIfInArray, int x, int y, int width, int height)
 	{
-		WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(componentSpecName);
+		WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(componentSpecName);
 		if (spec != null)
 		{
 			String compName = null;

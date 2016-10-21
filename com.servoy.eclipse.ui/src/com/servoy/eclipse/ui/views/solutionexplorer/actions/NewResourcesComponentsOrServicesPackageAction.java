@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collection;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -48,6 +47,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.sablo.specification.Package;
 import org.sablo.specification.PackageSpecification;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
@@ -222,16 +222,16 @@ public class NewResourcesComponentsOrServicesPackageAction extends Action
 
 	private boolean isNameValid(SimpleUserNode node)
 	{
-		Collection<PackageSpecification<WebObjectSpecification>> packages = null;
+		SpecProviderState specProviderState;
 		if (node.getType() == UserNodeType.SERVICES_FROM_RESOURCES)
 		{
-			packages = WebServiceSpecProvider.getInstance().getWebServiceSpecifications().values();
+			specProviderState = WebServiceSpecProvider.getInstance().getSpecProviderState();
 		}
 		else
 		{
-			packages = WebComponentSpecProvider.getInstance().getWebComponentSpecifications().values();
+			specProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
 		}
-		for (PackageSpecification<WebObjectSpecification> p : packages)
+		for (PackageSpecification<WebObjectSpecification> p : specProviderState.getWebObjectSpecifications().values())
 		{
 			if (p.getPackageName().equals(packageName))
 			{

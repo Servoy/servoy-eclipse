@@ -38,6 +38,7 @@ import org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor;
 import org.eclipse.dltk.javascript.ast.CallExpression;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
@@ -66,11 +67,17 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	private final Set<String> usedServices;
 	protected final Map<String, License> licenses;
 
-	public AbstractWarExportModel()
+	protected final SpecProviderState componentsSpecProviderState;
+	protected final SpecProviderState servicesSpecProviderState;
+
+	public AbstractWarExportModel(SpecProviderState componentsSpecProviderState, SpecProviderState servicesSpecProviderState)
 	{
 		usedComponents = new TreeSet<String>();
 		usedServices = new TreeSet<String>();
 		licenses = new HashMap<String, License>();
+
+		this.componentsSpecProviderState = componentsSpecProviderState;
+		this.servicesSpecProviderState = servicesSpecProviderState;
 	}
 
 	public static class License
@@ -175,13 +182,14 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 						{
 							if (node.getExpression().getChilds().size() > 0)
 							{
+								SpecProviderState servicesSpecProviderState = WebServiceSpecProvider.getInstance().getSpecProviderState();
 								String expr = node.getExpression().getChilds().get(0).toString();
 								if (expr.startsWith("plugins."))
 								{
 									String[] parts = expr.split("\\.");
-									if (parts.length > 1 && WebServiceSpecProvider.getInstance().getWebServiceSpecification(parts[1]) != null)
+									if (parts.length > 1 && servicesSpecProviderState.getWebComponentSpecification(parts[1]) != null)
 									{
-										usedServices.add(WebServiceSpecProvider.getInstance().getWebServiceSpecification(parts[1]).getName());
+										usedServices.add(servicesSpecProviderState.getWebComponentSpecification(parts[1]).getName());
 									}
 								}
 								else if (expr.contains("newWebComponent"))
@@ -192,7 +200,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 										if (componentName.startsWith("\"") || componentName.startsWith("'"))
 										{
 											componentName = componentName.replaceAll("'|\"", "");
-											if (WebComponentSpecProvider.getInstance().getWebComponentSpecification(componentName) != null)
+											if (WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(componentName) != null)
 											{
 												usedComponents.add(componentName);
 											}
@@ -293,10 +301,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 		//these are always required
 		usedComponents.add("servoycore-errorbean");
 		usedComponents.add("servoycore-portal");
-		for (String name : WebServiceSpecProvider.getInstance().getServicesInPackage("servoyservices").getSpecifications().keySet())
-		{
-			usedServices.add(name);
-		}
+		usedServices.addAll(servicesSpecProviderState.getWebObjectSpecifications().get("servoyservices").getSpecifications().keySet());
 	}
 
 	@Override

@@ -47,6 +47,7 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ISetSelectionTarget;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
@@ -229,7 +230,8 @@ public class LinkWithEditorAction extends Action
 					{
 						String packageName = file.getParent().getParent().getName();
 						String componentName = file.getParent().getName();
-						WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(packageName + "-" + componentName);
+						SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+						WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(packageName + "-" + componentName);
 						if (spec != null)
 						{
 							tree.setSelection(new StructuredSelection(new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec, null)),
@@ -237,7 +239,7 @@ public class LinkWithEditorAction extends Action
 						}
 						else
 						{
-							spec = WebServiceSpecProvider.getInstance().getWebServiceSpecification(packageName + "-" + componentName);
+							spec = WebServiceSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(packageName + "-" + componentName);
 							if (spec != null)
 							{
 								tree.setSelection(new StructuredSelection(new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec, null)),
@@ -245,8 +247,8 @@ public class LinkWithEditorAction extends Action
 							}
 							else
 							{
-								spec = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(packageName) != null
-									? WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(packageName).getSpecification(
+								spec = componentsSpecProviderState.getLayoutSpecifications().get(packageName) != null
+									? componentsSpecProviderState.getLayoutSpecifications().get(packageName).getSpecification(
 										packageName + "-" + componentName)
 									: null;
 								if (spec != null)

@@ -17,6 +17,7 @@
 package com.servoy.eclipse.designer.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -325,8 +326,8 @@ public class DesignerUtil
 
 	private static void fillAllowedChildrenInternal(AllowChildrenMapFiller mapFiller)
 	{
-		Map<String, PackageSpecification<WebLayoutSpecification>> map = WebComponentSpecProvider.getInstance().getLayoutSpecifications();
-		for (PackageSpecification<WebLayoutSpecification> pack : map.values())
+		Collection<PackageSpecification<WebLayoutSpecification>> packs = WebComponentSpecProvider.getInstance().getSpecProviderState().getLayoutSpecifications().values();
+		for (PackageSpecification<WebLayoutSpecification> pack : packs)
 		{
 			for (WebLayoutSpecification spec : pack.getSpecifications().values())
 			{
@@ -334,7 +335,7 @@ public class DesignerUtil
 				Set<String> allowedChildren = excludedChildren.size() > 0 ? new HashSet<String>() : new HashSet<String>(spec.getAllowedChildren());
 				if (excludedChildren.size() > 0)
 				{
-					for (PackageSpecification<WebLayoutSpecification> pack2 : map.values())
+					for (PackageSpecification<WebLayoutSpecification> pack2 : packs)
 					{
 						String packageName = pack2.getPackageName();
 						for (WebLayoutSpecification layoutSpec : pack.getSpecifications().values())

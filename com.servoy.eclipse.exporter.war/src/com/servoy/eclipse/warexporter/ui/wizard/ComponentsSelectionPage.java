@@ -22,7 +22,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.eclipse.jface.wizard.IWizardPage;
-import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
@@ -34,18 +34,21 @@ import com.servoy.eclipse.warexporter.export.ExportWarModel;
 public class ComponentsSelectionPage extends AbstractComponentsSelectionPage
 {
 
-	protected ComponentsSelectionPage(ExportWarModel exportModel, String pageName, String title, String description, IWizardPage nextPage)
+	private final SpecProviderState componentsSpecProviderState;
+
+	protected ComponentsSelectionPage(ExportWarModel exportModel, SpecProviderState componentsSpecProviderState, String pageName, String title, String description,
+		IWizardPage nextPage)
 	{
 		super(exportModel, pageName, title, description, nextPage, "component");
+		this.componentsSpecProviderState = componentsSpecProviderState;
 		componentsUsed = exportModel.getUsedComponents();
 		selectedComponents = new TreeSet<String>(componentsUsed);
-		if (exportModel.getExportedComponents() == null || exportModel.getExportedComponents().containsAll(componentsUsed) &&
-			componentsUsed.containsAll(exportModel.getExportedComponents())) return;
-		WebComponentSpecProvider provider = WebComponentSpecProvider.getInstance();
+		if (exportModel.getExportedComponents() == null ||
+			exportModel.getExportedComponents().containsAll(componentsUsed) && componentsUsed.containsAll(exportModel.getExportedComponents())) return;
 		for (String component : exportModel.getExportedComponents())
 		{
 			//make sure that the component exported the last time was not removed
-			if (provider.getWebComponentSpecification(component) != null) selectedComponents.add(component);
+			if (componentsSpecProviderState.getWebComponentSpecification(component) != null) selectedComponents.add(component);
 		}
 	}
 
@@ -53,7 +56,7 @@ public class ComponentsSelectionPage extends AbstractComponentsSelectionPage
 	protected Set<String> getAvailableItems()
 	{
 		Set<String> availableComponents = new TreeSet<String>();
-		for (WebObjectSpecification spec : WebComponentSpecProvider.getInstance().getAllWebComponentSpecifications())
+		for (WebObjectSpecification spec : componentsSpecProviderState.getAllWebComponentSpecifications())
 		{
 			if (!selectedComponents.contains(spec.getName())) availableComponents.add(spec.getName());
 		}

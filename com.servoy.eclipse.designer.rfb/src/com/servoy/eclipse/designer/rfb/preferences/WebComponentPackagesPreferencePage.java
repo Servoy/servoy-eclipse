@@ -7,6 +7,7 @@ import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
@@ -36,13 +37,18 @@ public class WebComponentPackagesPreferencePage extends FieldEditorPreferencePag
 		for (String packageName : defaultPackageNames)
 		{
 			String displayName = packageName;
-			if (WebComponentSpecProvider.getInstance().getPackageDisplayName(packageName) != null)
+			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+			if (componentsSpecProviderState.getPackageDisplayName(packageName) != null)
 			{
-				displayName = WebComponentSpecProvider.getInstance().getPackageDisplayName(packageName);
+				displayName = componentsSpecProviderState.getPackageDisplayName(packageName);
 			}
-			else if (WebServiceSpecProvider.getInstance().getPackageDisplayName(packageName) != null)
+			else
 			{
-				displayName = WebServiceSpecProvider.getInstance().getPackageDisplayName(packageName);
+				SpecProviderState servicesSpecProviderState = WebServiceSpecProvider.getInstance().getSpecProviderState();
+				if (servicesSpecProviderState.getPackageDisplayName(packageName) != null)
+				{
+					displayName = servicesSpecProviderState.getPackageDisplayName(packageName);
+				}
 			}
 			if (packageName.equals("servoyservices")) continue;//we do not allow disabling the services package
 			if (packageName.equals("servoycore")) continue;//we do not allow disabling the core package

@@ -22,8 +22,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.eclipse.jface.wizard.IWizardPage;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebObjectSpecification;
-import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
@@ -34,17 +34,20 @@ import com.servoy.j2db.server.ngclient.utils.NGUtils;
  */
 public class ServicesSelectionPage extends AbstractComponentsSelectionPage
 {
-	protected ServicesSelectionPage(ExportWarModel exportModel, String pageName, String title, String description, IWizardPage nextPage)
+	private final SpecProviderState servicesSpecProviderState;
+
+	protected ServicesSelectionPage(ExportWarModel exportModel, SpecProviderState servicesSpecProviderState, String pageName, String title, String description,
+		IWizardPage nextPage)
 	{
 		super(exportModel, pageName, title, description, nextPage, "service");
+		this.servicesSpecProviderState = servicesSpecProviderState;
 		componentsUsed = exportModel.getUsedServices();
 		selectedComponents = new TreeSet<String>(componentsUsed);
 		if (exportModel.getExportedServices() == null ||
 			exportModel.getExportedServices().containsAll(componentsUsed) && componentsUsed.containsAll(exportModel.getExportedServices())) return;
-		WebServiceSpecProvider provider = WebServiceSpecProvider.getInstance();
 		for (String service : exportModel.getExportedServices())
 		{
-			if (provider.getWebServiceSpecification(service) != null) selectedComponents.add(service);
+			if (servicesSpecProviderState.getWebComponentSpecification(service) != null) selectedComponents.add(service);
 		}
 	}
 
@@ -52,7 +55,7 @@ public class ServicesSelectionPage extends AbstractComponentsSelectionPage
 	protected Set<String> getAvailableItems()
 	{
 		Set<String> availableComponents = new TreeSet<String>();
-		for (WebObjectSpecification spec : NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport())
+		for (WebObjectSpecification spec : NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState))
 		{
 			if (!selectedComponents.contains(spec.getName())) availableComponents.add(spec.getName());
 		}

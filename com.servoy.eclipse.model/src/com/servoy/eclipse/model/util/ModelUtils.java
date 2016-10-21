@@ -163,11 +163,12 @@ public class ModelUtils
 		WebObjectSpecification spec = null;
 		if (persist instanceof IFormElement)
 		{
-			spec = WebComponentSpecProvider.getInstance().getWebComponentSpecification(FormTemplateGenerator.getComponentTypeName((IFormElement)persist));
+			spec = WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(
+				FormTemplateGenerator.getComponentTypeName((IFormElement)persist));
 		}
 		else if (persist instanceof LayoutContainer)
 		{
-			PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(
+			PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getSpecProviderState().getLayoutSpecifications().get(
 				((LayoutContainer)persist).getPackageName());
 			if (pkg != null)
 			{
@@ -338,7 +339,7 @@ public class ModelUtils
 				}
 
 				if ((matchedFormPrefix && stylePartsCount == 1) // found a match with form prefix, skip root matches
-					|| stylePartsCount > 2 || !styleName.startsWith(lookupName) || (stylePartsCount == 2 && !styleParts[0].equals(formPrefix)))
+				|| stylePartsCount > 2 || !styleName.startsWith(lookupName) || (stylePartsCount == 2 && !styleParts[0].equals(formPrefix)))
 				{
 					continue;
 				}

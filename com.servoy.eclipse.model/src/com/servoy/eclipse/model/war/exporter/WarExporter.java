@@ -76,10 +76,9 @@ import org.json.JSONException;
 import org.sablo.IndexPageEnhancer;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
-import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
-import org.sablo.specification.WebServiceSpecProvider;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -136,19 +135,21 @@ import com.servoy.j2db.util.xmlxport.IXMLExporter;
  */
 public class WarExporter
 {
-
-	private static final String COMPONENTS_DIR_NAME = "components";
-	private static final String SERVICES_DIR_NAME = "services";
-	private final IWarExportModel exportModel;
 	private static final String[] EXCLUDE_FROM_NG_JAR = new String[] { "com/servoy/j2db/server/ngclient/startup", "war/", "META-INF/MANIFEST.", "META-INF/SERVOYCL." };
 	private static final String[] NG_LIBS = new String[] { "org.slf4j.api_*.jar", "log4j_*.jar", "org.freemarker*.jar", "servoy_ngclient_" +
 		ClientVersion.getBundleVersion() + ".jar", "sablo_" + ClientVersion.getBundleVersion() + ".jar", "commons-lang3_*.jar", "wro4j-core_*.jar" };
 
 	private static final String WRO4J_RUNNER = "wro4j-runner-1.7.7";
 
-	public WarExporter(IWarExportModel exportModel)
+	private final IWarExportModel exportModel;
+	private final SpecProviderState componentsSpecProviderState;
+	private final SpecProviderState servicesSpecProviderState;
+
+	public WarExporter(IWarExportModel exportModel, SpecProviderState componentsSpecProviderState, SpecProviderState servicesSpecProviderState)
 	{
 		this.exportModel = exportModel;
+		this.componentsSpecProviderState = componentsSpecProviderState;
+		this.servicesSpecProviderState = servicesSpecProviderState;
 	}
 
 	/**
@@ -423,16 +424,6 @@ public class WarExporter
 		return wroFile;
 	}
 
-	private static Set<String> getAllNames(WebObjectSpecification[] allWebSpecifications)
-	{
-		Set<String> names = new HashSet<>();
-		for (WebObjectSpecification webSpec : allWebSpecifications)
-		{
-			names.add(webSpec.getName());
-		}
-		return names;
-	}
-
 	private void addGroupElement(Document doc, Element group, File tmpWarDir, String relativePath, String suffix)
 	{
 		String path = relativePath;
@@ -452,7 +443,6 @@ public class WarExporter
 		element.setAttributeNode(attr);
 	}
 
-
 	/**
 	 * Copy to the war the properties file containing the selected NG components and services.
 	 * This is needed to optimize the references included in the index.html file.
@@ -461,8 +451,8 @@ public class WarExporter
 	private void copyExportedComponentsAndServicesPropertyFile(File tmpWarDir) throws ExportException
 	{
 		if ((exportModel.getExportedComponents() == null && exportModel.getExportedServices() == null) ||
-			(exportModel.getExportedComponents().size() == WebComponentSpecProvider.getInstance().getWebComponentSpecifications().size() &&
-				exportModel.getExportedServices().size() == NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport().length))
+			(exportModel.getExportedComponents().size() == componentsSpecProviderState.getWebObjectSpecifications().size() &&
+				exportModel.getExportedServices().size() == NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState).length))
 			return;
 
 		File exported = new File(tmpWarDir, "WEB-INF/exported_web_objects.properties");
@@ -475,7 +465,7 @@ public class WarExporter
 
 		TreeSet<String> allServices = new TreeSet<String>();
 		// append internal servoy services
-		PackageSpecification<WebObjectSpecification> servoyservices = WebServiceSpecProvider.getInstance().getServicesInPackage("servoyservices");
+		PackageSpecification<WebObjectSpecification> servoyservices = servicesSpecProviderState.getWebObjectSpecifications().get("servoyservices");
 		if (servoyservices != null) allServices.addAll(servoyservices.getSpecifications().keySet());
 		// append user services
 		if (exportModel.getExportedServices() != null) allServices.addAll(exportModel.getExportedServices());
@@ -541,7 +531,7 @@ public class WarExporter
 					}
 					else if (IPackageReader.WEB_LAYOUT.equals(packageReader.getPackageType()))
 					{
-						PackageSpecification<WebLayoutSpecification> spec = WebComponentSpecProvider.getInstance().getLayoutSpecifications().get(name);
+						PackageSpecification<WebLayoutSpecification> spec = componentsSpecProviderState.getLayoutSpecifications().get(name);
 						copy = spec != null && (spec.getCssClientLibrary() != null && !spec.getCssClientLibrary().isEmpty() ||
 							spec.getJsClientLibrary() != null && !spec.getJsClientLibrary().isEmpty());
 						if (copy) componentLocations.append("/" + name + "/;");
@@ -884,7 +874,7 @@ public class WarExporter
 		}
 	}
 
-	protected void createTomcatContextXML(File tmpWarDir) throws ExportException
+	protected void createTomcatContextXML(File tmpWarDir)
 	{
 		if (!exportModel.isCreateTomcatContextXML()) return;
 		try
