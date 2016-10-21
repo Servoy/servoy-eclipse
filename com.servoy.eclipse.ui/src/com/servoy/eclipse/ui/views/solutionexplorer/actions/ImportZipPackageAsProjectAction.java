@@ -84,7 +84,7 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 						try
 						{
 							if (!checkForExistingProjectOrLoadedPackage(packageNameToImport)) continue;
-							IProject newProject = NGPackageManager.createProject(packageNameToImport);
+							IProject newProject = NGPackageManager.createNGPackageProject(packageNameToImport);
 
 							zis = new ZipInputStream(new FileInputStream(filterPath + File.separator + zipFile));
 							ZipEntry ze = zis.getNextEntry();

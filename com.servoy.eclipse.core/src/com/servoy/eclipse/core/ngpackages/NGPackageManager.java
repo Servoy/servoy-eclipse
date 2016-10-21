@@ -40,11 +40,12 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
+import com.servoy.j2db.persistence.WebObjectRegistry;
 
 import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
 
 /**
- * A class for managing the loaded NG custom web components and services when developer is run as UI (so not jos as a command line app that works on the workspace).
+ * A class for managing the loaded NG custom web components and services when developer is run as UI (so not just as a command line app that works on the workspace).
  * These can be found in the resources project as folders or archives or each in a separate project with {@link ServoyNGPackageProject} nature (here only as expanded folder contents).
  *
  * @author acostescu
@@ -100,12 +101,18 @@ public class NGPackageManager extends BaseNGPackageManager
 
 				public void activeProjectChanged(ServoyProject activeProject)
 				{
+					// clear the web object registry as persists are completely different
+					WebObjectRegistry.stopTracking();
+					WebObjectRegistry.startTracking();
+
 					clearReferencedNGPackageProjectsCache();
 					reloadAllNGPackages(null);
 				}
 			};
 			((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(activeProjectListenerForRegisteringResources);
 		}
+
+		WebObjectRegistry.startTracking();
 	}
 
 	@Override
@@ -162,7 +169,7 @@ public class NGPackageManager extends BaseNGPackageManager
 		return PlatformUI.getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.packages.enable." + packageName);
 	}
 
-	public static IProject createProject(String name) throws CoreException
+	public static IProject createNGPackageProject(String name) throws CoreException
 	{
 		IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(name);
 		newProject.create(new NullProgressMonitor());
@@ -173,4 +180,12 @@ public class NGPackageManager extends BaseNGPackageManager
 
 		return newProject;
 	}
+
+	@Override
+	public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
+	{
+		super.ngPackagesChanged(loadedPackagesAreTheSameAlthoughReferencingModulesChanged);
+		WebObjectRegistry.clearWebObjectCaches();
+	}
+
 }

@@ -116,7 +116,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 		{
 			try
 			{
-				IProject newProject = NGPackageManager.createProject(projectName);
+				IProject newProject = NGPackageManager.createNGPackageProject(projectName);
 				for (IProject iProject : referencedProjects)
 				{
 					IProjectDescription solutionProjectDescription = iProject.getDescription();
