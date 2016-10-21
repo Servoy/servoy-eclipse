@@ -31,9 +31,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.sablo.specification.BaseSpecProvider;
 import org.sablo.specification.BaseSpecProvider.ISpecReloadListener;
 import org.sablo.specification.Package.IPackageReader;
+import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
@@ -61,8 +61,8 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	public JSONArray executeMethod(JSONObject msg)
 	{
 		String activeSolutionName = ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
-		BaseSpecProvider componentSpecProvider = WebComponentSpecProvider.getInstance();
-		WebServiceSpecProvider serviceSpecProvider = WebServiceSpecProvider.getInstance();
+		SpecProviderState componentSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+		SpecProviderState serviceSpecProviderState = WebServiceSpecProvider.getInstance().getSpecProviderState();
 		JSONArray result = new JSONArray();
 		try
 		{
@@ -71,8 +71,8 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 			for (JSONObject pack : remotePackages)
 			{
 				String name = pack.getString("name");
-				IPackageReader reader = componentSpecProvider.getPackageReader(name);
-				if (reader == null) reader = serviceSpecProvider.getPackageReader(name);
+				IPackageReader reader = componentSpecProviderState.getPackageReader(name);
+				if (reader == null) reader = serviceSpecProviderState.getPackageReader(name);
 				if (reader != null)
 				{
 					pack.put("installed", reader.getVersion());
