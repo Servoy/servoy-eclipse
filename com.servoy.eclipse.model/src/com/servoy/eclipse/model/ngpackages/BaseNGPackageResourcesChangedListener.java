@@ -104,11 +104,11 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 		{
 			if ((event.getType() & (IResourceChangeEvent.PRE_DELETE | IResourceChangeEvent.PRE_CLOSE)) != 0)
 			{
-				IProject project = (IProject)event.getResource(); // PRE_DELETE will give the project here not in the resource delta which will be null
+				IProject project = (IProject)event.getResource(); // PRE_DELETE will give the project here in the event, not in the resource delta (which will be null)
 				recourceChangeHandler.handleProjectChanged(project);
 
 				// we did process the pre-delete or pre-close, but we don't fire it right now cause it will trigger things like refreshing the
-				// solex tree - which then end up reading stale Resource states (workspace things they are still there but on disk they are already deleted);
+				// solex tree - which then end up reading stale Resource states (workspace thinks they are still there but on disk they are already deleted);
 				// that can lead to exceptions for example meta-inf not existing on disk but the IResource.exists() for that says true => exception when trying to read contents
 
 				// because of that we just keep the changes for later; when the first post-change event happens we notify those as well...
@@ -273,10 +273,13 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 					}
 					else if ((resourceDelta.getKind() & IResourceDelta.REMOVED) != 0)
 					{
-						String componentPackageNameForFile = ResourceProvider.getComponentPackageNameForFile(new File(resource.getLocationURI()));
-						if (componentPackageNameForFile == null)
-							componentPackageNameForFile = ResourceProvider.getServicePackageNameForFile(new File(resource.getLocationURI()));
-						if (componentPackageNameForFile != null) getRemovedPackageReaders(resource.getProject().getName()).add(componentPackageNameForFile);
+						if (resource.getLocationURI() != null)
+						{
+							String componentPackageNameForFile = ResourceProvider.getComponentPackageNameForFile(new File(resource.getLocationURI()));
+							if (componentPackageNameForFile == null)
+								componentPackageNameForFile = ResourceProvider.getServicePackageNameForFile(new File(resource.getLocationURI()));
+							if (componentPackageNameForFile != null) getRemovedPackageReaders(resource.getProject().getName()).add(componentPackageNameForFile);
+						} // otherwise it's probably a post-delete event which was already handled by the pre-delete step handled before; so do nothing here
 					}
 					else if ((resourceDelta.getKind() & IResourceDelta.ADDED) != 0)
 					{
