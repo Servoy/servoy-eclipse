@@ -335,7 +335,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		if (persists != null)
 		{
 			FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(editorPart.getForm());
-			final Form form = fs.getFlattenedForm(editorPart.getForm());
+			final Form form = fs.getFlattenedForm(editorPart.getForm(), false);
 			final String componentsJSON = designerWebsocketSession.getComponentsJSON(fs, filterByParent(persists, form));
 			List<String> styleSheets = PersistHelper.getOrderedStyleSheets(fs);
 			String[] newStylesheets = null;
