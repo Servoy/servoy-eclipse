@@ -307,12 +307,13 @@
                contentTypeId="com.servoy.eclipse.core.resource.security">
          </contentTypeBinding>
       </editor>
+      <!-- marketplace/extensions are not currently used in production; disabled for now
 	  <editor
 	  		class="com.servoy.eclipse.marketplace.MarketplaceBrowserEditor"
 	  		icon="icons/marketplace.gif"
 	  		id="com.servoy.eclipse.marketplace.MarketplaceBrowserEditor"
       		name="Servoy Marketplace">
-      </editor>
+      </editor>-->
       <editor
 	  		class="com.servoy.eclipse.core.StartPageBrowserEditor"
 	  		icon="icons/servoy_donut16x16.png"
@@ -811,13 +812,14 @@
             id="com.servoy.eclipse.ui.ImportSolutionWizard"
             name="Import Solution">
       </wizard>
+      <!-- Disabled for now as marketplace/extension packages are not in production yet.
       <wizard
             category="com.servoy.eclipse.ui.ImportCategory"
             class="com.servoy.eclipse.ui.wizards.extension.InstallExtensionWizard"
             icon="icons/extension16.png"
             id="com.servoy.eclipse.ui.InstallExtensionWizard"
             name="Install Extension Package">
-      </wizard>
+      </wizard>-->
    </extension>
    <extension
          point="org.eclipse.ui.cheatsheets.cheatSheetContent">

@@ -94,7 +94,7 @@ public class Activator extends AbstractUIPlugin
 		com.servoy.eclipse.core.Activator.getDefault();
 
 		// warn if incompatible extensions are found
-		doExtensionRelatedChecks();
+//		doExtensionRelatedChecks(); disabled for now as marketplace/extensions are not currently in production
 	}
 
 	@Override
@@ -244,7 +244,7 @@ public class Activator extends AbstractUIPlugin
 
 	/**
 	 * Tries to find the image with the specified file name in the old application image folder.
-	 * 
+	 *
 	 * @param name the filename of the image to load.
 	 * @return the loaded image descriptor or null if the image was not found.
 	 */
@@ -261,7 +261,7 @@ public class Activator extends AbstractUIPlugin
 
 	/**
 	 * Get an image with the given name from this plugin's bundle.
-	 * 
+	 *
 	 * @param name the name of the image file.
 	 * @return the image descriptor for the file.
 	 */
@@ -272,7 +272,7 @@ public class Activator extends AbstractUIPlugin
 
 	/**
 	 * Returns the shared instance.
-	 * 
+	 *
 	 * @return the shared instance
 	 */
 	public static Activator getDefault()
@@ -290,7 +290,7 @@ public class Activator extends AbstractUIPlugin
 
 	/**
 	 * Returns an image descriptor for the image file at the given plug-in relative path.
-	 * 
+	 *
 	 * @param path the path
 	 * @return the image descriptor
 	 */
