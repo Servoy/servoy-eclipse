@@ -575,7 +575,15 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				writer.key("uuid");
 				if (parent instanceof Form)
 				{
-					writer.value(null);
+					if (p instanceof ISupportExtendsID && ((ISupportExtendsID)p).getExtendsID() > 0)
+					{
+						parent = (ISupportChilds)PersistHelper.getSuperPersist((ISupportExtendsID)p);
+						writer.value(parent.getUUID().toString());
+					}
+					else
+					{
+						writer.value(null);
+					}
 				}
 				else
 				{

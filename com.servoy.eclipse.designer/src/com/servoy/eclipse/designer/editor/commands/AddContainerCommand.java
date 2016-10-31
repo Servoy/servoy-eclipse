@@ -46,6 +46,7 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractContainer;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebComponent;
 import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IDeveloperRepository;
@@ -187,6 +188,10 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 										{
 											IPersist next = it.next();
 											IPersist child = ElementUtil.getOverridePersist(PersistContext.create(next, activeEditor.getForm()));
+											if (child.getParent() instanceof Form)
+											{
+												child.getParent().removeChild(child);
+											}
 											changes.add(child);
 											if (child.equals(next)) continue;
 											parent.removeChild(next);
