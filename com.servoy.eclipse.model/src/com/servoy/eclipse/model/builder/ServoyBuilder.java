@@ -2488,7 +2488,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									UUID uuid = Utils.getAsUUID(((WebComponent)o).getProperty(handler), false);
 									if (uuid != null)
 									{
-										if (!((EclipseRepository)ApplicationServerRegistry.get().getDeveloperRepository()).containsElement(uuid))
+										ScriptMethod scriptMethod = flattenedSolution.getScriptMethod(uuid.toString());
+										if (scriptMethod == null)
 										{
 											ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(handler, ((WebComponent)o).getName(),
 												o.getAncestor(IRepository.FORMS));
