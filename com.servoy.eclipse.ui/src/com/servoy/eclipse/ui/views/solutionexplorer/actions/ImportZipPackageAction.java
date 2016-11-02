@@ -18,12 +18,8 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import java.io.File;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Set;
+import java.util.zip.ZipFile;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -85,11 +81,9 @@ public abstract class ImportZipPackageAction extends Action
 	{
 		try
 		{
-			Path zipFilePath = Paths.get(file.getPath());
-			try (FileSystem fs = FileSystems.newFileSystem(zipFilePath, null))
+			try (ZipFile zip = new ZipFile(file.getAbsolutePath()))
 			{
-				Path manifest = fs.getPath("META-INF/MANIFEST.MF");
-				if (!Files.exists(manifest))
+				if (zip.getEntry("META-INF/MANIFEST.MF") == null)
 				{
 					UIUtils.reportError("Cannot import package",
 						" Manifest file not found in '" + file.getName() + "'. Please make sure that your zip is a valid package.");
