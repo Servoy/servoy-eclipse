@@ -20,7 +20,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
@@ -30,6 +29,7 @@ import org.eclipse.core.resources.mapping.ModelProvider;
 import org.eclipse.core.resources.mapping.ResourceMapping;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdapterFactory;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.team.core.RepositoryProvider;
@@ -41,17 +41,20 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.repository.StringResourceDeserializer;
 import com.servoy.eclipse.model.repository.WorkspaceUserManager;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.actions.Openable;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.preferences.TeamPreferences;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Style;
@@ -148,6 +151,20 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 			{
 				SimpleResourceMapping servers = getResourceProjectResourceMapping(SolutionSerializer.DATASOURCES_DIR_NAME);
 				if (servers != null) mappings.add(servers);
+			}
+			else if (nodeType == UserNodeType.SERVER && simpleUserNode.getRealObject() instanceof IServerInternal)
+			{
+				IServerInternal server = (IServerInternal)simpleUserNode.getRealObject();
+				SimpleResourceMapping serverResourceMapping = getResourceProjectResourceMapping(
+					SolutionSerializer.DATASOURCES_DIR_NAME + IPath.SEPARATOR + server.getName());
+				if (serverResourceMapping != null) mappings.add(serverResourceMapping);
+			}
+			else if (nodeType == UserNodeType.TABLE && simpleUserNode.getRealObject() instanceof TableWrapper)
+			{
+				TableWrapper table = (TableWrapper)simpleUserNode.getRealObject();
+				SimpleResourceMapping tableResourceMapping = getResourceProjectResourceMapping(SolutionSerializer.DATASOURCES_DIR_NAME + IPath.SEPARATOR +
+					table.getServerName() + IPath.SEPARATOR + table.getTableName() + DataModelManager.COLUMN_INFO_FILE_EXTENSION_WITH_DOT);
+				if (tableResourceMapping != null) mappings.add(tableResourceMapping);
 			}
 			else if (nodeType == UserNodeType.USER_GROUP_SECURITY)
 			{
@@ -477,7 +494,7 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 		return null;
 	}
 
-	private SimpleResourceMapping getResourceProjectResourceMapping(String resourceDir)
+	private SimpleResourceMapping getResourceProjectResourceMapping(String resource)
 	{
 		ServoyResourcesProject servoyResourcesProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 
@@ -485,18 +502,18 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 		{
 			IProject project = servoyResourcesProject.getProject();
 
-			return getProjectResourceMapping(project, resourceDir);
+			return getProjectResourceMapping(project, resource);
 		}
 
 		return null;
 	}
 
-	private SimpleResourceMapping getProjectResourceMapping(IProject project, String resourceDir)
+	private SimpleResourceMapping getProjectResourceMapping(IProject project, String resource)
 	{
 		if (project.exists())
 		{
-			IFolder resourceDirFolder = (IFolder)project.findMember(resourceDir);
-			if (resourceDirFolder != null) return new SimpleResourceMapping(resourceDirFolder);
+			IResource res = project.findMember(resource);
+			if (res != null) return new SimpleResourceMapping(res);
 		}
 
 		return null;
