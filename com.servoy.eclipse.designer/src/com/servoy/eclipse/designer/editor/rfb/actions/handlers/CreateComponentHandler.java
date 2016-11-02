@@ -623,7 +623,8 @@ public class CreateComponentHandler implements IServerService
 									}
 
 									JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
-									boolean fullRefreshNeeded = !initialDropTarget.equals(dropTarget) && initialDropTarget.getParent() instanceof Form;
+									boolean fullRefreshNeeded = initialDropTarget != null && !initialDropTarget.equals(dropTarget) &&
+										initialDropTarget.getParent() instanceof Form;
 									IPersist[] result = new IPersist[] { createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer,
 										config, x, specifications, args.optString("packageName")) };
 									if (fullRefreshNeeded)
