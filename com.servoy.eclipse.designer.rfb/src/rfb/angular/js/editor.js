@@ -726,11 +726,6 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 						}
 					}
 				}
-
-				if ($scope.refocusGlasspane) {
-					$scope.glasspane.focus();
-					$scope.refocusGlasspane = false;
-				}
 			}
 
 			function getScrollSizes(x) {

@@ -1,4 +1,4 @@
-angular.module('keyboardlayoutupdater', [ 'editor' ]).run(function($pluginRegistry, $editorService, $selectionUtils, $timeout) {
+angular.module('keyboardlayoutupdater', [ 'editor' ]).run(function($pluginRegistry, $editorService, $selectionUtils, $timeout,$document) {
 
     $pluginRegistry.registerPlugin(function(editorScope) {
 
@@ -110,7 +110,6 @@ angular.module('keyboardlayoutupdater', [ 'editor' ]).run(function($pluginRegist
 			    x : ghostObject.location.x,
 			    y : ghostObject.location.y
 			}
-			editorScope.refocusGlasspane = true;
 		    }
 		}
 	    }
@@ -121,8 +120,7 @@ angular.module('keyboardlayoutupdater', [ 'editor' ]).run(function($pluginRegist
 	    }, 50);
 	}
 
-	editorScope.registerDOMEvent("keydown", "CONTENTFRAME_OVERLAY", onkeydown);
-	editorScope.registerDOMEvent("keyup", "CONTENTFRAME_OVERLAY", onkeyup);
-
+		$document.keydown(onkeydown)
+		$document.keyup(onkeyup)
     });
 });
