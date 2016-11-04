@@ -46,7 +46,6 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
@@ -202,13 +201,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							if (!form.isResponsiveLayout()) FormLayoutGenerator.generateEndDiv(w);
 							if (form.isResponsiveLayout())
 							{
-								IPersist parent = fe.getPersistIfAvailable().getParent();
-								if (((ISupportExtendsID)fe.getPersistIfAvailable()).getExtendsID() > 0 &&
-									fe.getPersistIfAvailable().getParent() instanceof Form)
-								{
-									IPersist p = PersistHelper.getSuperPersist((ISupportExtendsID)fe.getPersistIfAvailable());
-									parent = p.getParent();
-								}
+								IPersist parent = ((ISupportExtendsID)fe.getPersistIfAvailable()).getRealParent();
 								parent = ElementUtil.getOverridePersist(PersistContext.create(parent, editor.getForm()));
 								parentuuid = parent.getUUID();
 								insertBeforeUUID = findNextSibling(fe.getPersistIfAvailable());
@@ -228,12 +221,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						if (child instanceof LayoutContainer)
 						{
 							componentFound = true;
-							IPersist parent = child.getParent();
-							if (((ISupportExtendsID)child).getExtendsID() > 0 && child.getParent() instanceof Form)
-							{
-								IPersist p = PersistHelper.getSuperPersist((ISupportExtendsID)child);
-								parent = p.getParent();
-							}
+							IPersist parent = ((ISupportExtendsID)child).getRealParent();
 							parentuuid = parent instanceof Form ? null : parent.getUUID();
 							insertBeforeUUID = findNextSibling(child);
 							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context.getSolution(), w, true,
@@ -302,15 +290,8 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		{
 			IPersist persist = wrappedPersist instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)wrappedPersist).getWrappedPersist()
 				: wrappedPersist;
-			AbstractContainer persistParent = (AbstractContainer)PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(persist), form,
-				persist.getParent());
-			IPersist superPersist = null;
-			if (((ISupportExtendsID)persist).getExtendsID() > 0 && persist.getParent() instanceof Form)
-			{
-				superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)persist);
-				persistParent = (AbstractContainer)PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(wrappedPersist), form,
-					superPersist.getParent());
-			}
+			AbstractContainer persistParent = (AbstractContainer)((ISupportExtendsID)persist).getRealParent();
+			IPersist superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)persist);
 			ArrayList<IPersist> children = persistParent.getSortedChildren();
 			int indexOf = children.indexOf(persist);
 			if (indexOf == -1 && superPersist != null)

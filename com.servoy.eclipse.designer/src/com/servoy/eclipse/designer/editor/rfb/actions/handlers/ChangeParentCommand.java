@@ -88,14 +88,13 @@ public class ChangeParentCommand extends Command
 	@Override
 	public void execute()
 	{
-		ISupportChilds initialParent = ((ISupportExtendsID)child).getExtendsID() > 0 && child.getParent() instanceof Form
-			? PersistHelper.getSuperPersist((ISupportExtendsID)child).getParent() : child.getParent();
+		ISupportChilds initialParent = ((ISupportExtendsID)child).getRealParent();
 
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(child.getParent());
 		oldParent = PersistHelper.getFlattenedPersist(flattenedSolution, (Form)child.getAncestor(IRepository.FORMS), initialParent);
 		this.newParent = PersistHelper.getFlattenedPersist(flattenedSolution, form,
 			(ISupportChilds)getOverridePersist(newParent == null ? initialParent : newParent));
-		IPersist superPersist = ((ISupportExtendsID)newParent).getExtendsID() > 0 ? PersistHelper.getSuperPersist((ISupportExtendsID)newParent) : null;
+		IPersist superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)newParent);
 
 		if (hasChildPositionSupport)
 		{
