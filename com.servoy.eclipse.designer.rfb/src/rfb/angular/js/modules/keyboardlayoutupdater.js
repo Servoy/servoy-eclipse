@@ -62,13 +62,15 @@ angular.module('keyboardlayoutupdater', [ 'editor' ]).run(function($pluginRegist
 			var node = selection[i];
 			var beanModel = editorScope.getBeanModel(node);
 			if (beanModel) {
+				var css = {}
 			    if (isResize) {
-				beanModel.size.width = beanModel.size.width + changeW;
-				beanModel.size.height = beanModel.size.height + changeH;
+					if (beanModel.size.width + changeW > 0) css.width = beanModel.size.width = beanModel.size.width + changeW;
+					if (beanModel.size.height + changeH > 0) css.height = beanModel.size.height = beanModel.size.height + changeH;
 			    } else {
-				beanModel.location.y = beanModel.location.y + changeY;
-				beanModel.location.x = beanModel.location.x + changeX;
+					if (beanModel.location.y + changeY > -1) css.top = beanModel.location.y = beanModel.location.y + changeY;
+					if (beanModel.location.x + changeX > -1) css.left = beanModel.location.x = beanModel.location.x + changeX;
 			    }
+				angular.element(node).css(css);
 			} else if (!isResize) {
 			    var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
 			    editorScope.updateGhostLocation(ghostObject, ghostObject.location.x + changeX, ghostObject.location.y + changeY)
