@@ -550,21 +550,13 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			writer.object();
 			for (IPersist p : componentsWithParents)
 			{
-				ISupportChilds parent = p.getParent();
+				ISupportChilds parent = ((ISupportExtendsID)p).getRealParent();
 				writer.key(p.getUUID().toString());
 				writer.object();
 				writer.key("uuid");
 				if (parent instanceof Form)
 				{
-					if (p instanceof ISupportExtendsID && ((ISupportExtendsID)p).getExtendsID() > 0)
-					{
-						parent = (ISupportChilds)PersistHelper.getSuperPersist((ISupportExtendsID)p);
-						writer.value(parent.getUUID().toString());
-					}
-					else
-					{
-						writer.value(null);
-					}
+					writer.value(null);
 				}
 				else
 				{

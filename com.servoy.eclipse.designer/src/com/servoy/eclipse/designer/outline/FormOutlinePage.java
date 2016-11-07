@@ -235,8 +235,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 							WebComponent wc = (WebComponent)inputPersist;
 							if (wc.getParent() instanceof LayoutContainer)
 							{
-								targetLayoutContainer = (((ISupportExtendsID)wc.getParent()).getExtendsID() > 0 && wc.getParent() instanceof Form)
-									? (ISupportChilds)PersistHelper.getSuperPersist((ISupportExtendsID)wc.getParent()) : wc.getParent();
+								targetLayoutContainer = wc.getRealParent();
 								dropTargetComponent = wc;
 							}
 						}
@@ -329,7 +328,8 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 										}
 										else if (p instanceof WebComponent)
 										{
-											WebObjectSpecification pSpec = WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(((WebComponent)p).getTypeName());
+											WebObjectSpecification pSpec = WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(
+												((WebComponent)p).getTypeName());
 											sourcePackage = pSpec.getPackageName() + ".*";
 											sourceType = pSpec.getPackageName() + "." + ((WebComponent)p).getTypeName();
 											isComponent = true;
