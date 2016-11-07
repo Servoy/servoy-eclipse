@@ -625,8 +625,9 @@ public class CreateComponentHandler implements IServerService
 									JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
 									boolean fullRefreshNeeded = initialDropTarget != null && !initialDropTarget.equals(dropTarget) &&
 										initialDropTarget.getParent() instanceof Form;
-									IPersist[] result = new IPersist[] { createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer,
-										config, x, specifications, args.optString("packageName")) };
+									IPersist res = createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, x,
+										specifications, args.optString("packageName"));
+									IPersist[] result = !dropTarget.equals(initialDropTarget) ? new IPersist[] { res, dropTarget } : new IPersist[] { res };
 									if (fullRefreshNeeded)
 									{
 										IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
