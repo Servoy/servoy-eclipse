@@ -195,6 +195,12 @@
 				        		  "dynamicDataproviders": {
 				        			  "type":"boolean"
 				        		  },
+				        		  "initialPreferredViewPortSize": {
+				        			  "type":"number"
+				        		  },
+				        		  "sendSelectionViewportInitially": {
+				        			  "type":"boolean"
+				        		  },
 				        		  "stringformat": {
 				        			  "type":"boolean"
 				        		  },
