@@ -399,6 +399,8 @@ public class TypeCreator extends TypeCache
 
 	private final MetaType javaMetaType = new JavaRuntimeMetaType(servoyStaticTypeSystem);
 
+	private boolean specTypesCreated = false;
+
 
 	public TypeCreator()
 	{
@@ -460,11 +462,11 @@ public class TypeCreator extends TypeCache
 		addScopeType(DBDataSourceServer.class.getSimpleName(), new DBDataSourceServerCreator());
 		addScopeType(JSDataSource.class.getSimpleName(), new TypeWithConfigCreator(JSDataSource.class, ClientSupport.ng_wc_sc));
 		addScopeType(JSDataSources.class.getSimpleName(), new JSDataSourcesCreator());
-		createSpecTypeDefinitions();
 	}
 
 	private void createSpecTypeDefinitions()
 	{
+		specTypesCreated = true;
 		WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getInstance().getAllWebComponentSpecifications();
 		WebObjectSpecification[] webServiceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList();
 		Collection<WebObjectSpecification> specs = new ArrayList<WebObjectSpecification>();
@@ -499,7 +501,9 @@ public class TypeCreator extends TypeCache
 						if (!name.equals("location") && !name.equals("size") && !name.equals("anchors") && !(pd.getType() instanceof DataproviderPropertyType))
 						{
 							JSType memberType = getType(null, pd);
-							if (memberType == null) memberType = getTypeRef(null, pd.getType().getName());
+							String pdTypeName = pd.getType().getName();
+							if ("object".equals(pdTypeName)) pdTypeName = "Object";
+							if (memberType == null) memberType = getTypeRef(null, pdTypeName);
 							if (pd.getType() instanceof CustomJSONArrayType< ? , ? >)
 							{
 								memberType = TypeUtil.arrayOf(memberType);
@@ -730,6 +734,7 @@ public class TypeCreator extends TypeCache
 				}
 				servoyStaticTypeSystem.reset();
 				clear(null);
+				specTypesCreated = false;
 				flushCache();
 				docCache.clear();
 				return Status.OK_STATUS;
@@ -1086,7 +1091,11 @@ public class TypeCreator extends TypeCache
 	 */
 	private Type createWebComponentType(String context, String fullTypeName, WebObjectSpecification spec)
 	{
-		String bucket = "WEB:COMPONENTS";
+		String bucket = null;
+		if (!specTypesCreated)
+		{
+			createSpecTypeDefinitions();
+		}
 		Type type = TypeInfoModelFactory.eINSTANCE.createType();
 		type.setName(fullTypeName);
 		type.setKind(TypeKind.JAVA);
