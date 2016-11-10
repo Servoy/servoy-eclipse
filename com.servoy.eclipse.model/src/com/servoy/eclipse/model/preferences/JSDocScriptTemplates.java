@@ -32,11 +32,11 @@ import com.servoy.eclipse.model.util.ServoyLog;
 /**
  * Preferences for templates in jsdoc for new methods and variables.
  * Are stored at project level.
- * 
+ *
  * @author rgansevles
- * 
+ *
  * @since 6.1
- * 
+ *
  */
 public class JSDocScriptTemplates
 {
@@ -45,11 +45,12 @@ public class JSDocScriptTemplates
 	public final static String JSDOC_SCRIPT_TEMPLATES_NODE = Activator.PLUGIN_ID + "/jsdoctemplates";
 	public static final String METHOD_TEMPLATE_SETTING = "methodTemplate";
 	public static final String VARIABLE_TEMPLATE_SETTING = "variableTemplate";
+	public static final String CLEAN_METHOD_TEMPLATE_SETTING = "cleanMethodTemplate";
 
 	/**
-	 * Can be called from anywhere , returns the JSdocScriptTemplates of the active project 
+	 * Can be called from anywhere , returns the JSdocScriptTemplates of the active project
 	 * or of the workspace if the active project doesn't have project specific templates defined
-	 * @return  JSDocScriptTemplates 
+	 * @return  JSDocScriptTemplates
 	 */
 	public static JSDocScriptTemplates getTemplates()
 	{
@@ -63,10 +64,10 @@ public class JSDocScriptTemplates
 	}
 
 	/**
-	 * 
+	 *
 	 * @param project the project specific templates to return  or <b>null</b> if workspace settings is desired
 	 * @param inherit this parameter is used to search for templates in the workspace settings
-	 * @return 
+	 * @return
 	 */
 	public static JSDocScriptTemplates getTemplates(IProject project, boolean inherit)
 	{
@@ -109,6 +110,16 @@ public class JSDocScriptTemplates
 	public void setMethodTemplateProperty(String template)
 	{
 		setProperty(METHOD_TEMPLATE_SETTING, template);
+	}
+
+	public boolean getCleanMethodTemplateProperty()
+	{
+		return com.servoy.j2db.util.Utils.getAsBoolean(settingsNode.get(CLEAN_METHOD_TEMPLATE_SETTING, ""));
+	}
+
+	public void setCleanMethodTemplateProperty(boolean cleanTemplate)
+	{
+		setProperty(CLEAN_METHOD_TEMPLATE_SETTING, String.valueOf(cleanTemplate));
 	}
 
 	public String getVariableTemplateProperty()

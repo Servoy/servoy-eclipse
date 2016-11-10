@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -37,7 +38,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * Preference page method and variable jsdoc templates.
- * 
+ *
  * @author rgansevles
  *
  * @since 6.1
@@ -48,6 +49,7 @@ public class JSDocScriptTemplatesPreferencePage extends WorkspaceOrProjectPrefer
 	private JSDocScriptTemplates jsDocScriptTemplates;
 	private Text newVarJsDoc;
 	private Text newMethodJsDoc;
+	private Button btnCleanTemplate;
 	ControlEnableState rootPannelEnabledState = null;
 	Composite rootPanel = null;
 
@@ -86,6 +88,10 @@ public class JSDocScriptTemplatesPreferencePage extends WorkspaceOrProjectPrefer
 		lblNewVariableJavadoc.setText("New variable javadoc tags");
 		lblNewVariableJavadoc.setBounds(10, 165, 290, 17);
 
+		btnCleanTemplate = new Button(rootPanel, SWT.CHECK);
+		btnCleanTemplate.setText("Clean templates of default doc");
+		btnCleanTemplate.setBounds(10, 330, 290, 17);
+
 		initializeFields();
 		if (isProjectPreferencePage())
 		{
@@ -108,6 +114,7 @@ public class JSDocScriptTemplatesPreferencePage extends WorkspaceOrProjectPrefer
 	{
 		newMethodJsDoc.setText(jsDocScriptTemplates.getMethodTemplateProperty());
 		newVarJsDoc.setText(jsDocScriptTemplates.getVariableTemplateProperty());
+		btnCleanTemplate.setSelection(jsDocScriptTemplates.getCleanMethodTemplateProperty());
 	}
 
 	@Override
@@ -115,7 +122,7 @@ public class JSDocScriptTemplatesPreferencePage extends WorkspaceOrProjectPrefer
 	{
 		newMethodJsDoc.setText("");
 		newVarJsDoc.setText("");
-
+		btnCleanTemplate.setSelection(false);
 		super.performDefaults();
 	}
 
@@ -134,6 +141,7 @@ public class JSDocScriptTemplatesPreferencePage extends WorkspaceOrProjectPrefer
 		}
 		jsDocScriptTemplates.setMethodTemplateProperty(method);
 		jsDocScriptTemplates.setVariableTemplateProperty(var);
+		jsDocScriptTemplates.setCleanMethodTemplateProperty(btnCleanTemplate.getSelection());
 		jsDocScriptTemplates.save();
 		return true;
 	}
