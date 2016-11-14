@@ -97,6 +97,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.IPluginBaseClassLoaderProvider;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.ClientVersion;
@@ -987,6 +988,20 @@ public class Activator extends Plugin
 						});
 					}
 				});
+
+				servoyModel.getNGPackageManager().addLoadedNGPackagesListener(new ILoadedNGPackagesListener()
+				{
+
+					@Override
+					public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
+					{
+						IDebugClientHandler dch = getDebugClientHandler();
+						if (dch.getDebugNGClient() != null)
+						{
+							dch.getDebugNGClient().recreateForms();
+						}
+					}
+				});
 				return Status.OK_STATUS;
 			}
 		}.schedule();
@@ -1249,12 +1264,12 @@ public class Activator extends Plugin
 													monitor.beginTask("Updating...", IProgressMonitor.UNKNOWN);
 													updatedToVersion[0] = updateAppServerFromSerclipse(new File(appServerDir).getParentFile(), version,
 														ClientVersion.getReleaseNumber(), new ActionListener()
-													{
-														public void actionPerformed(ActionEvent e)
 														{
-															monitor.worked(1);
-														}
-													});
+															public void actionPerformed(ActionEvent e)
+															{
+																monitor.worked(1);
+															}
+														});
 												}
 												catch (Exception e)
 												{
