@@ -12,7 +12,7 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 			function hasClass(element, cls) {
 				return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
 			}
-			function renderDecorators(selection,renderResizeKnobs) {	
+			function renderDecorators(selection,renderResizeKnobs, doNotScrollIntoView) {	
 				if (renderResizeKnobs) {
 				$timeout(function(){
 					if (selection.length == 1){
@@ -101,7 +101,7 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 					for(var i=selection.length;i<$scope.nodes.length;i++) {
 						$scope.nodes[i].style.display = 'none';
 					}
-					if($scope.nodes.length > 0) {
+					if(!doNotScrollIntoView && $scope.nodes.length > 0) {
 						var target = $scope.nodes[0].node.get(0);
 					    var targetRect = target.getBoundingClientRect();
 						var contentFrameRectTop = $(".contentframe").get(0).getBoundingClientRect().top;
@@ -141,7 +141,7 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 				renderDecorators(selection,true);
 			})
 			$rootScope.$on(EDITOR_EVENTS.SELECTION_MOVED, function(event, selection) {
-				renderDecorators(selection, true);
+				renderDecorators(selection, true, true);
 			})
 			$rootScope.$on(EDITOR_EVENTS.RENDER_DECORATORS, function(event, selection) {
 				renderDecorators(selection,true);
