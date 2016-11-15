@@ -316,7 +316,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 			msg.append(((ServerEditorInput)getEditorInput()).getServerConfig().getDriver()).append(
 				"\") and use the \"Install (downloaded) driver\" button bellow to install it. You can also install the driver manually by copying it to Servoy Application Server's \"drivers\" directory and then restarting Servoy Developer.</p>");
 
-			if (serverTemplateDefinition.getDriverDownloadURL() != null)
+			if (serverTemplateDefinition != null && serverTemplateDefinition.getDriverDownloadURL() != null)
 			{
 				msg.append("\n<p>You can download a driver from: ").append(serverTemplateDefinition.getDriverDownloadURL()).append("</p>");
 			}
