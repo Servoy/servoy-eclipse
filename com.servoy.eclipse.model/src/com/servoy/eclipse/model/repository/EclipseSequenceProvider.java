@@ -114,7 +114,7 @@ public class EclipseSequenceProvider implements ISequenceProvider
 				String tid = null;
 				IServiceProvider client = J2DBGlobals.getServiceProvider();
 
-				if (client != null)
+				if (client != null && client.getFoundSetManager() != null)
 				{
 					// in case switchServer was called tableServer will be new_server because DataServerProxy was called
 					String possibleMappedServerName = update && (client.getDataServer() instanceof DataServerProxy)
@@ -127,9 +127,9 @@ public class EclipseSequenceProvider implements ISequenceProvider
 				rs = dataServer.performCustomQuery(clientId, column.getTable().getServerName(), column.getTable().getName(), tid,
 					new QueryCustomSelect(maxSeqSelect), null, 0, -1);
 				String val = null;
-				if (rs.getRowCount() == 1)
+				if (rs.getRowCount() == 1 && rs.getRow(0)[0] != null)
 				{
-					val = "" + rs.getRow(0)[0];//doing string lookup, can be other thing than long type in table
+					val = rs.getRow(0)[0].toString();//doing string lookup, can be other thing than long type in table
 				}
 
 				if (val != null)
@@ -202,27 +202,25 @@ public class EclipseSequenceProvider implements ISequenceProvider
 
 
 		//make return value
-		boolean b1 = (preSequenceChars == null || preSequenceChars.trim().length() == 0);
-		boolean b2 = (postSequenceChars == null || postSequenceChars.trim().length() == 0);
+		boolean preSequenceEmpty = (preSequenceChars == null || preSequenceChars.trim().length() == 0);
+		boolean postSequenceEmpty = (postSequenceChars == null || postSequenceChars.trim().length() == 0);
 
-		if (b1 && b2)
+		if (preSequenceEmpty && postSequenceEmpty)
 		{
-			return new Long(nextSequence);
+			return Long.valueOf(nextSequence);
 		}
-		else
+
+		StringBuilder sb = new StringBuilder();
+		if (!preSequenceEmpty)
 		{
-			StringBuffer sb = new StringBuffer();
-			if (!b1)
-			{
-				sb.append(preSequenceChars);
-			}
-			sb.append(nextSequence);
-			if (!b2)
-			{
-				sb.append(postSequenceChars);
-			}
-			return sb.toString();
+			sb.append(preSequenceChars);
 		}
+		sb.append(nextSequence);
+		if (!postSequenceEmpty)
+		{
+			sb.append(postSequenceChars);
+		}
+		return sb.toString();
 	}
 
 	public Object syncSequence(Column column) throws RepositoryException
