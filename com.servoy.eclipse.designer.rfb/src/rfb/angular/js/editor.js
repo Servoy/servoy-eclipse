@@ -66,7 +66,10 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}
 
 			 $document.bind('selectstart', function(event) {
-		            return false
+				 if (!$editorService.isInlineEditMode())
+				 {
+					 return false
+				 }	 
 		      })
 		          
 			var formName = $webSocket.getURLParameter("f");
@@ -1124,6 +1127,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		}, true)
 	})
 	var editorScope; //todo this should become a array if we want to support multiply editors on 1 html page.
+	var inlineEdit;
 	return {
 		registerEditor: function(scope) {
 			editorScope = scope;
@@ -1281,12 +1285,16 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 			}, true)
 		},
 
-		setInlineEditMode: function(inlineEdit) {
+		setInlineEditMode: function(edit) {
+			inlineEdit = edit
 			wsSession.callService('formeditor', 'setInlineEditMode', {
 				"inlineEdit": inlineEdit
 			}, true)
 		},
 
+		isInlineEditMode: function(){
+			return inlineEdit;
+		},
 		getComponentPropertyWithTags: function(svyId, propertyName) {
 			return wsSession.callService('formeditor', 'getComponentPropertyWithTags', {
 				"svyId": svyId,
