@@ -627,7 +627,8 @@ public class CreateComponentHandler implements IServerService
 										initialDropTarget.getParent() instanceof Form;
 									IPersist res = createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, x,
 										specifications, args.optString("packageName"));
-									IPersist[] result = !dropTarget.equals(initialDropTarget) ? new IPersist[] { res, dropTarget } : new IPersist[] { res };
+									IPersist[] result = dropTarget != null && !dropTarget.equals(initialDropTarget) ? new IPersist[] { res, dropTarget }
+										: new IPersist[] { res };
 									if (fullRefreshNeeded)
 									{
 										IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
