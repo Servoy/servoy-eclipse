@@ -29,6 +29,10 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.specification.BaseSpecProvider.ISpecReloadListener;
@@ -37,8 +41,12 @@ import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
+import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.resource.WebPackageManagerEditorInput;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.util.Debug;
 
@@ -46,7 +54,7 @@ import com.servoy.j2db.util.Debug;
  * @author gganea
  *
  */
-public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadListener
+public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadListener, IActiveProjectListener
 {
 	public static final String CLIENT_SERVER_METHOD = "requestAllInstalledPackages";
 	private final WebPackageManagerEndpoint endpoint;
@@ -56,6 +64,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		this.endpoint = endpoint;
 		WebComponentSpecProvider.getInstance().addSpecReloadListener(null, this);
 		WebServiceSpecProvider.getInstance().addSpecReloadListener(null, this);
+		ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(this);
 	}
 
 	public JSONArray executeMethod(JSONObject msg)
@@ -204,6 +213,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	{
 		WebComponentSpecProvider.getInstance().removeSpecReloadListener(null, this);
 		WebServiceSpecProvider.getInstance().removeSpecReloadListener(null, this);
+		ServoyModelManager.getServoyModelManager().getServoyModel().removeActiveProjectListener(this);
 	}
 
 	@Override
@@ -216,4 +226,46 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		endpoint.send(jsonResult.toString());
 	}
 
+	@Override
+	public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+	{
+		return true;
+	}
+
+	@Override
+	public void activeProjectChanged(ServoyProject activeProject)
+	{
+		if (activeProject == null)
+		{
+			closeWPMEditors();
+			return;
+		}
+		if (!"import_placeholder".equals(activeProject.getSolution().getName()))
+
+			webObjectSpecificationReloaded();
+
+	}
+
+	private void closeWPMEditors()
+	{
+		for (IWorkbenchPage page : PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPages())
+		{
+			for (IEditorReference editorReference : page.getEditorReferences())
+			{
+				IEditorPart editor = editorReference.getEditor(false);
+				if (editor != null)
+				{
+					if (editor.getEditorInput() instanceof WebPackageManagerEditorInput)
+					{
+						page.closeEditor(editor, false);
+					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+	{
+	}
 }
