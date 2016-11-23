@@ -97,6 +97,7 @@ import org.sablo.specification.property.types.IntPropertyType;
 import org.sablo.specification.property.types.LongPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.websocket.impl.ClientService;
+import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.IActiveProjectListener;
@@ -1157,9 +1158,9 @@ public class TypeCreator extends TypeCache
 			if (returnType == null && api.getReturnType() != null)
 			{
 				returnType = getTypeRef(null, api.getReturnType().getType().getName());
-				if (api.getReturnType().getConfig() instanceof Boolean)
+				if (PropertyUtils.isCustomJSONArrayPropertyType(api.getReturnType().getType()))
 				{
-					if ((Boolean)api.getReturnType().getConfig()) returnType = TypeUtil.arrayOf(returnType);
+					returnType = TypeUtil.arrayOf(returnType);
 				}
 			}
 			method.setType(returnType);
