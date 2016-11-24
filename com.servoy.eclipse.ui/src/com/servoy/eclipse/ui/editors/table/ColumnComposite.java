@@ -606,7 +606,7 @@ public class ColumnComposite extends Composite
 	protected void initDataBindings(ITable t)
 	{
 		// if there are no columns in the table create a pk column
-		if (t.getColumns().size() == 0)
+		if (t.getColumns().size() == 0 && !(t instanceof MemTable))
 		{
 			String tname = t.getName();
 			if (tname.length() > 1 && tname.endsWith("s"))
