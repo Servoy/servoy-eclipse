@@ -1175,9 +1175,9 @@ public class TypeCreator extends TypeCache
 				if (paramType == null)
 				{
 					paramType = getTypeRef(null, paramDesc.getType().getName());
-					if (paramDesc.getConfig() instanceof Boolean)
+					if (PropertyUtils.isCustomJSONArrayPropertyType(paramDesc.getType()))
 					{
-						if ((Boolean)paramDesc.getConfig()) paramType = TypeUtil.arrayOf(paramType);
+						paramType = TypeUtil.arrayOf(paramType);
 					}
 				}
 				param.setType(paramType);
