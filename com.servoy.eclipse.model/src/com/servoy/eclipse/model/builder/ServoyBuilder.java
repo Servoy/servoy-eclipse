@@ -5688,9 +5688,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								boolean foreignColumnUuidFlag = ((Column)column).getColumnInfo().hasFlag(Column.UUID_COLUMN);
 								if ((primaryColumnUuidFlag && !foreignColumnUuidFlag) || (!primaryColumnUuidFlag && foreignColumnUuidFlag))
 								{
-									mk = MarkerMessages.RelationItemUUIDProblem.fill(element.getName(), primaryDataProvider, foreignColumn);
-									errorsFound = true;
-									addMarker(project, mk.getType(), mk.getText(), -1, RELATION_ITEM_UUID_PROBLEM, IMarker.PRIORITY_NORMAL, null, element);
+									if (!(((Column)dataProvider).getTable() instanceof MemTable) && !(((Column)column).getTable() instanceof MemTable))
+									{
+										// for memtable flag cannot be set, ignore then
+										mk = MarkerMessages.RelationItemUUIDProblem.fill(element.getName(), primaryDataProvider, foreignColumn);
+										errorsFound = true;
+										addMarker(project, mk.getType(), mk.getText(), -1, RELATION_ITEM_UUID_PROBLEM, IMarker.PRIORITY_NORMAL, null, element);
+									}
 								}
 								if (((Column)dataProvider).getColumnInfo().isExcluded())
 								{
