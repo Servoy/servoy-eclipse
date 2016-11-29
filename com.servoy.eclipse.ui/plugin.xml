@@ -16,6 +16,13 @@
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView"
             id="com.servoy.eclipse.ui.views.SolutionExplorerView">
+      </view>
+      <view
+            category="com.servoy.eclipse.ui"
+            class="com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView"
+            icon="icons/forms.gif"
+            id="com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView"
+            name="Form Hierarchy">
       </view>      
    </extension>
    <extension
@@ -70,6 +77,15 @@
          <perspectiveShortcut
                id="com.servoy.eclipse.ui.DesignPerspective">
          </perspectiveShortcut>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               id="com.servoy.eclipse.ui.views.FormHierarchyView"
+               ratio="0.5"
+               relationship="right"
+               relative="com.servoy.eclipse.ui.views.SolutionExplorerView">
+         </view>
       </perspectiveExtension>
    </extension>
    <extension
@@ -465,6 +481,14 @@
                style="push"
                tooltip="Open form in Debug Client">
          </action>
+         <action
+               class="com.servoy.eclipse.ui.actions.OpenFormHierarchyActionDelegate"
+               id="com.servoy.eclipse.ui.openFormHierarchy"
+               definitionId="com.servoy.eclipse.ui.OpenFormHierarchyAction"
+               label="Open Form Hierarchy"
+               style="push"
+               tooltip="Open form hierarchy">
+         </action>
       </actionSet>
       <actionSet
             id="com.servoy.eclipse.ui.openURL"
@@ -660,6 +684,12 @@
               id="com.servoy.eclipse.ui.OpenFormInClientAction"
               name="Open in Debug Client">
         </command>
+        <command
+              categoryId="com.servoy.eclipse.ui"
+              description="Open Form Hierarchy"
+              id="com.servoy.eclipse.ui.OpenFormHierarchyAction"
+              name="Open Form Hierarchy">
+        </command>
          <category
                description="Other Servoy Commands"
                id="com.servoy.eclipse.ui"
@@ -687,6 +717,11 @@
               commandId="com.servoy.eclipse.ui.OpenFormInClientAction"
               schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
               sequence="M1+L">
+        </key>
+        <key
+              commandId="com.servoy.eclipse.ui.OpenFormHierarchyAction"
+              schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+              sequence="F4">
         </key>
      </extension>
    <extension
@@ -791,6 +826,28 @@
                state="false"
                style="push"
                tooltip="Open form in Debug Client">
+         </action>
+         <visibility>
+            <objectClass
+               name="com.servoy.eclipse.ui.actions.Openable$OpenableForm">
+            </objectClass>
+         </visibility>
+      </objectContribution>
+      <objectContribution
+            objectClass="com.servoy.eclipse.ui.actions.Openable"
+            adaptable="true"
+            id="com.servoy.eclipse.ui.OpenFormHierarchyContributions">
+         <action
+               class="com.servoy.eclipse.ui.actions.OpenFormHierarchyActionDelegate"
+               definitionId="com.servoy.eclipse.ui.OpenFormHierarchyAction"
+               enablesFor="1"
+               icon="icons/forms.gif"
+               id="com.servoy.eclipse.ui.OpenFormHierarchyAction"
+               label="Open Form Hierarchy"
+               menubarPath="open.ext"
+               state="false"
+               style="push"
+               tooltip="Open form hierarchy">
          </action>
          <visibility>
             <objectClass
@@ -1184,5 +1241,5 @@
 			class="com.servoy.eclipse.cheatsheets.HyperlinkCheatSheetExtension"
 			itemAttribute="cheatsheetHyperlink">
 		</itemExtension>
-	</extension>   
+	</extension>
 </plugin>

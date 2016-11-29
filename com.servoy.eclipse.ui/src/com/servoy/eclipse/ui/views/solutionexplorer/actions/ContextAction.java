@@ -27,10 +27,10 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.ui.part.ViewPart;
 
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
-import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
 /**
  * Action delegates to other registered action depending on the selection.
@@ -40,14 +40,15 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 public class ContextAction extends Action implements ISelectionChangedListener
 {
 	final private Map<UserNodeType, IAction> registeredActions = new HashMap<UserNodeType, IAction>();
+	final private Map<Class< ? >, IAction> registeredActionsPerClass = new HashMap<Class< ? >, IAction>();
 
 	private IAction currentAction;
 	private final ImageDescriptor defaultImageDescriptor;
 	private final String defaultText;
 
-	private final SolutionExplorerView viewer;
+	private final ViewPart viewer;
 
-	public ContextAction(SolutionExplorerView viewer, ImageDescriptor defaultImageDescriptor, String text)
+	public ContextAction(ViewPart viewer, ImageDescriptor defaultImageDescriptor, String text)
 	{
 		this.viewer = viewer;
 		this.defaultImageDescriptor = defaultImageDescriptor;
@@ -85,8 +86,18 @@ public class ContextAction extends Action implements ISelectionChangedListener
 		Iterator<SimpleUserNode> sel = ((IStructuredSelection)event.getSelection()).iterator();
 		while (sel.hasNext())
 		{
-			SimpleUserNode node = sel.next();
-			IAction act = registeredActions.get(node.getRealType());
+			Object s = sel.next();
+			IAction act = null;
+			if (s instanceof SimpleUserNode)
+			{
+				SimpleUserNode node = (SimpleUserNode)s;
+				act = registeredActions.get(node.getRealType());
+			}
+			else
+			{
+				act = registeredActionsPerClass.get(s.getClass());
+			}
+
 			if (action == null)
 			{
 				action = act;
@@ -116,13 +127,28 @@ public class ContextAction extends Action implements ISelectionChangedListener
 		}
 	}
 
-	public void registerAction(UserNodeType type, IAction action)
+	public void registerAction(Object type, IAction action)
 	{
-		registeredActions.put(type, action);
+		if (type instanceof UserNodeType)
+		{
+			registeredActions.put((UserNodeType)type, action);
+		}
+		else
+		{
+			registeredActionsPerClass.put((Class< ? >)type, action);
+		}
+
 	}
 
-	public void unregisterAction(UserNodeType type)
+	public void unregisterAction(Object type)
 	{
-		registeredActions.remove(type);
+		if (type instanceof UserNodeType)
+		{
+			registeredActions.remove(type);
+		}
+		else
+		{
+			registeredActionsPerClass.remove(type);
+		}
 	}
 }

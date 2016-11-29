@@ -28,7 +28,9 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.ColumnWrapper;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.util.Pair;
 
 /**
@@ -60,10 +62,18 @@ public class OpenScriptAction extends Action implements ISelectionChangedListene
 		boolean state = it.hasNext();
 		while (it.hasNext())
 		{
-			UserNodeType type = ((SimpleUserNode)it.next()).getType();
-			if (type != UserNodeType.FORM_METHOD && type != UserNodeType.GLOBAL_METHOD_ITEM && type != UserNodeType.GLOBAL_VARIABLE_ITEM &&
-				type != UserNodeType.FORM_VARIABLE_ITEM && type != UserNodeType.CALCULATIONS_ITEM && type != UserNodeType.GLOBALS_ITEM &&
-				type != UserNodeType.FORM_VARIABLES && type != UserNodeType.GLOBAL_VARIABLES)
+			Object sel = it.next();
+			if (sel instanceof UserNodeType)
+			{
+				UserNodeType type = ((SimpleUserNode)sel).getType();
+				if (type != UserNodeType.FORM_METHOD && type != UserNodeType.GLOBAL_METHOD_ITEM && type != UserNodeType.GLOBAL_VARIABLE_ITEM &&
+					type != UserNodeType.FORM_VARIABLE_ITEM && type != UserNodeType.CALCULATIONS_ITEM && type != UserNodeType.GLOBALS_ITEM &&
+					type != UserNodeType.FORM_VARIABLES && type != UserNodeType.GLOBAL_VARIABLES)
+				{
+					state = false;
+				}
+			}
+			else if (!(sel instanceof Form) && !(sel instanceof ScriptMethod))
 			{
 				state = false;
 			}
