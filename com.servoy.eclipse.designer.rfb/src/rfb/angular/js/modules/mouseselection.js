@@ -27,8 +27,18 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 					editorScope.setSelection([]);
 					return;
 				}
+
 				var selection = editorScope.getSelection();
 				if (selection.length > 0) {
+					var shiftSelectType = null;
+					// this is a Shift-type select, it selects elements of the same type as the one selected
+					if(event.altKey) {
+						if(node.getAttribute("svy-layoutname") != selection[0].getAttribute("svy-layoutname")) {
+							return;
+						}
+						shiftSelectType = selection[0].getAttribute("svy-layoutname") ? utils.SELECT_CONTAINER : utils.SELECT_COMPONENT;
+					}
+
 					var rec = node.getBoundingClientRect();
 					var p1 = {
 						top: rec.top,
@@ -49,7 +59,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 							left: Math.max(p2.left, rect.right)
 						}
 					}
-					var elements = utils.getElementsByRectangle(p1, p2, 1, true, true,undefined,true)
+					var elements = utils.getElementsByRectangle(p1, p2, 1, true, true,undefined,true, shiftSelectType);
 					editorScope.setSelection(elements);
 				} else {
 					editorScope.setSelection(node);
@@ -194,6 +204,9 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 	return {
 		getUtilsForScope: function(editorScope) {
 			return {
+
+				SELECT_COMPONENT: 1,
+				SELECT_CONTAINER: 2,
 
 				addGhostsToSelection: function(selection) {
 
@@ -470,7 +483,7 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 					}
 				},
 
-				getElementsByRectangle: function(p1, p2, percentage, fromDoc, fromGlass, skipId,skipConversion) {
+				getElementsByRectangle: function(p1, p2, percentage, fromDoc, fromGlass, skipId, skipConversion, selectType) {
 					var temp = 0;
 					if (p1.left > p2.left) {
 						var temp = p1.left;
@@ -484,9 +497,16 @@ angular.module('mouseselection', ['editor']).run(function($rootScope, $pluginReg
 					}
 					var nodes = [];
 					var ghosts = [];
-					if (fromDoc)
-						nodes = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll("[svy-id]:not([svy-id = '" + (skipId == undefined ? '' : skipId) + "'])"));
-
+					if (fromDoc) {
+						var querySelectorAllString = "[svy-id]:not([svy-id = '" + (skipId == undefined ? '' : skipId) + "'])" ;
+						if(selectType == this.SELECT_COMPONENT) {
+							querySelectorAllString += ":not([svy-layoutname])";
+						}
+						else if(selectType == this.SELECT_CONTAINER) {
+							querySelectorAllString += "[svy-layoutname]";
+						}
+						nodes = Array.prototype.slice.call(editorScope.contentDocument.querySelectorAll(querySelectorAllString));
+					}
 					if (fromGlass)
 						ghosts = Array.prototype.slice.call(editorScope.glasspane.querySelectorAll("[svy-id]:not([svy-id = '" + (skipId == undefined ? '' : skipId) + "'])"));
 					
