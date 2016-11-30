@@ -18,6 +18,7 @@ package com.servoy.eclipse.debug.script;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -57,11 +58,12 @@ public class TypeProvider implements ITypeProvider
 
 	public Set<String> listTypes(ITypeInfoContext context, TypeMode mode, String prefix)
 	{
+		FlattenedSolution flattenedSolution = ElementResolver.getFlattenedSolution(context);
+		if (flattenedSolution == null) return Collections.emptySet();
 		Set<String> names = TYPES.getTypeNames(prefix);
 		if (prefix != null && prefix.trim().length() != 0)
 		{
 			String prefixLower = prefix.toLowerCase();
-			FlattenedSolution flattenedSolution = ElementResolver.getFlattenedSolution(context);
 			if (mode == TypeMode.JSDOC && flattenedSolution != null)
 			{
 				if (prefix.indexOf('.') != -1)
