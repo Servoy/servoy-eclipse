@@ -315,24 +315,27 @@ public class CreateComponentHandler implements IServerService
 					for (String propertyName : new TreeSet<String>(propertyDescription.getAllPropertiesNames()))
 					{
 						PropertyDescription property = propertyDescription.getProperty(propertyName);
-						if (property.getType() instanceof ComponentPropertyType)
+						if (property != null)
 						{
-							// simple component type
-							ChildWebComponent createdWebComponent = createNestedWebComponent(parentWC, property, name, propertyName, -1, x, y, w, h);
-							parentWC.internalAddChild(createdWebComponent);
-							return new IPersist[] { createdWebComponent };
-						}
-						else if (PropertyUtils.isCustomJSONArrayPropertyType(property.getType()) &&
-							((CustomJSONArrayType< ? , ? >)property.getType()).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType)
-						{
-							// array of component types
-							int index = 0;
-							IChildWebObject[] arrayOfChildComponents = (IChildWebObject[])parentWC.getProperty(propertyName);
-							if (arrayOfChildComponents != null) index = arrayOfChildComponents.length;
-							ChildWebComponent createdWebComponent = createNestedWebComponent(parentWC,
-								((CustomJSONArrayType< ? , ? >)property.getType()).getCustomJSONTypeDefinition(), name, propertyName, index, x, y, w, h);
-							parentWC.internalAddChild(createdWebComponent);
-							return new IPersist[] { createdWebComponent };
+							if (property.getType() instanceof ComponentPropertyType)
+							{
+								// simple component type
+								ChildWebComponent createdWebComponent = createNestedWebComponent(parentWC, property, name, propertyName, -1, x, y, w, h);
+								parentWC.internalAddChild(createdWebComponent);
+								return new IPersist[] { createdWebComponent };
+							}
+							else if (PropertyUtils.isCustomJSONArrayPropertyType(property.getType()) &&
+								((CustomJSONArrayType< ? , ? >)property.getType()).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType)
+							{
+								// array of component types
+								int index = 0;
+								IChildWebObject[] arrayOfChildComponents = (IChildWebObject[])parentWC.getProperty(propertyName);
+								if (arrayOfChildComponents != null) index = arrayOfChildComponents.length;
+								ChildWebComponent createdWebComponent = createNestedWebComponent(parentWC,
+									((CustomJSONArrayType< ? , ? >)property.getType()).getCustomJSONTypeDefinition(), name, propertyName, index, x, y, w, h);
+								parentWC.internalAddChild(createdWebComponent);
+								return new IPersist[] { createdWebComponent };
+							}
 						}
 					} // if we found no property to drop to, just continue with code below - it will be dropped on form
 				}
