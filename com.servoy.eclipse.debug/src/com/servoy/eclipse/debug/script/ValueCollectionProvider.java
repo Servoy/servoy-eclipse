@@ -56,6 +56,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.dataprocessing.FoundSet;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
@@ -196,41 +197,54 @@ public class ValueCollectionProvider implements IMemberEvaluator
 				{
 					String config = typeName.substring("Scope<".length(), typeName.length() - 1);
 					String[] split = config.split("/");
-					if (split.length == 2)
+					String solutionName = split[0];
+					String scopeName = null;
+					// this is when only Scope<scopeName> is given
+					if (split.length == 1)
 					{
-						String solutionName = split[0];
-						String scopeName = split[1];
-
-						if (editingFlattenedSolution.getMainSolutionMetaData().getName().equals(solutionName) ||
-							editingFlattenedSolution.hasModule(solutionName))
+						scopeName = solutionName;
+						for (Pair<String, IRootObject> scope : editingFlattenedSolution.getScopes())
 						{
-							ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
-							if (project != null)
+							if (scope.getLeft().equals(solutionName))
 							{
-								String fileName = scopeName + SolutionSerializer.JS_FILE_EXTENSION;
-								IFile file = project.getProject().getFile(fileName);
-								IValueCollection globalsValueCollection = ValueCollectionProvider.getValueCollection(file);
-
-								if (globalsValueCollection == null && !fileName.equals(SolutionSerializer.GLOBALS_FILE))
-								{
-									addToCache(memberType, EMPTY);
-									return null;
-								}
-
-								IValueCollection collection = ValueCollectionFactory.createScopeValueCollection();
-								if (globalsValueCollection != null)
-								{
-									ValueCollectionFactory.copyInto(collection, globalsValueCollection);
-								}
-
-								// Currently only the old globals scope is merged with entries from modules
-								if (ScriptVariable.GLOBAL_SCOPE.equals(scopeName))
-								{
-									ValueCollectionProvider.getGlobalModulesValueCollection(editingFlattenedSolution, fileName, collection);
-								}
-								// scopes other than globals are not merged
-								return addToCache(memberType, collection);
+								solutionName = scope.getRight().getName();
+								break;
 							}
+						}
+					}
+					else
+					{
+						scopeName = split[1];
+					}
+
+					if (editingFlattenedSolution.getMainSolutionMetaData().getName().equals(solutionName) || editingFlattenedSolution.hasModule(solutionName))
+					{
+						ServoyProject project = ServoyModelFinder.getServoyModel().getServoyProject(solutionName);
+						if (project != null)
+						{
+							String fileName = scopeName + SolutionSerializer.JS_FILE_EXTENSION;
+							IFile file = project.getProject().getFile(fileName);
+							IValueCollection globalsValueCollection = ValueCollectionProvider.getValueCollection(file);
+
+							if (globalsValueCollection == null && !fileName.equals(SolutionSerializer.GLOBALS_FILE))
+							{
+								addToCache(memberType, EMPTY);
+								return null;
+							}
+
+							IValueCollection collection = ValueCollectionFactory.createScopeValueCollection();
+							if (globalsValueCollection != null)
+							{
+								ValueCollectionFactory.copyInto(collection, globalsValueCollection);
+							}
+
+							// Currently only the old globals scope is merged with entries from modules
+							if (ScriptVariable.GLOBAL_SCOPE.equals(scopeName))
+							{
+								ValueCollectionProvider.getGlobalModulesValueCollection(editingFlattenedSolution, fileName, collection);
+							}
+							// scopes other than globals are not merged
+							return addToCache(memberType, collection);
 						}
 					}
 				}

@@ -2417,7 +2417,18 @@ public class TypeCreator extends TypeCache
 				String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
 				String[] split = config.split("/");
 				String solutionName = split[0];
-				String scopeName = split[1];
+				// this is when only Scope<scopeName> is given
+				if (split.length == 1)
+				{
+					for (Pair<String, IRootObject> scope : fs.getScopes())
+					{
+						if (scope.getLeft().equals(solutionName))
+						{
+							solutionName = scope.getRight().getName();
+							break;
+						}
+					}
+				}
 
 				EList<Member> members = type.getMembers();
 
