@@ -198,6 +198,7 @@ import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormatPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.LabelForPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.MediaPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGTabSeqPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.RelationPropertyType;
@@ -560,7 +561,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		throws RepositoryException
 	{
 		if (persistContext.getPersist() == propertyDescriptor.valueObject // for beans we show all
-		&& !shouldShow(propertyDescriptor))
+			&& !shouldShow(propertyDescriptor))
 		{
 			return;
 		}
@@ -707,7 +708,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 	public static IPropertyDescriptor createPropertyDescriptor(IPropertySource propertySource, final String id, final PersistContext persistContext,
 		boolean readOnly, PropertyDescriptorWrapper propertyDescriptor, String displayName, FlattenedSolution flattenedEditingSolution, Form form)
-			throws RepositoryException
+		throws RepositoryException
 	{
 		if (!propertyDescriptor.propertyDescriptor.isProperty())
 		{
@@ -717,7 +718,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		IPropertyDescriptor desc = createPropertyDescriptor(propertySource, persistContext, readOnly, propertyDescriptor, id, displayName,
 			flattenedEditingSolution, form);
 		if (desc != null //
-		&& persistContext != null && persistContext.getPersist() != null &&
+			&& persistContext != null && persistContext.getPersist() != null &&
 			persistContext.getPersist().getAncestor(IRepository.FORMS) == persistContext.getContext() // only show overrides when element is shown in its 'own' form
 			&&
 			// skip some specific properties
@@ -1402,7 +1403,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				return retval;
 			}
 
-			if (propertyType == StringPropertyType.INSTANCE || propertyType == ServoyStringPropertyType.INSTANCE)
+			if (propertyType == StringPropertyType.INSTANCE || propertyType == ServoyStringPropertyType.INSTANCE ||
+				propertyType == LabelForPropertyType.INSTANCE)
 			{
 				return new PropertyController<String, String>(id, displayName, NULL_STRING_CONVERTER, null, new ICellEditorFactory()
 				{
@@ -2503,7 +2505,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Form flattenedSuperForm = flattenedEditingSolution.getFlattenedForm(
 					flattenedEditingSolution.getForm(((Form)persistContext.getPersist()).getExtendsID()));
 				propertyReadOnly = flattenedSuperForm == null /* superform not found? make readonly for safety */
-				|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
+					|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
 
 				if (propertyReadOnly && flattenedSuperForm != null && ((Form)persistContext.getPersist()).getDataSource() != null &&
 					!((Form)persistContext.getPersist()).getDataSource().equals(flattenedSuperForm.getDataSource()))
