@@ -553,6 +553,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		{
 			throw new RuntimeException("Could not initialize table editor table could not be found");
 		}
+		isModified = isModified || !table.getExistInDB();
 
 		IServerManagerInternal serverManager = ServoyModel.getServerManager();
 
