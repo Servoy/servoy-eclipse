@@ -408,6 +408,10 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 						}
 					}
 				}
+				if (oldUsedPackageList.size() > 0 || usedPackageProjects.size() > 0)
+				{
+					baseNGPackageManager.clearReferencedNGPackageProjectsCache();
+				}
 				for (String removedProject : oldUsedPackageList)
 				{
 					File projectDir = new File(changedProject.getWorkspace().getRoot().getProject(removedProject).getLocationURI());

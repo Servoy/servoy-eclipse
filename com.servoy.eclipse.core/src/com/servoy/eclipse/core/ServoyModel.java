@@ -126,6 +126,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.ngpackages.IAvailableNGPackageProjectsListener;
+import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.preferences.JSDocScriptTemplates;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseMessages;
@@ -3335,6 +3336,15 @@ public class ServoyModel extends AbstractServoyModel
 			}
 		});
 
+		getNGPackageManager().addLoadedNGPackagesListener(new ILoadedNGPackagesListener()
+		{
+			@Override
+			public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
+			{
+				if (!loadedPackagesAreTheSameAlthoughReferencingModulesChanged) updateWorkingSet();
+
+			}
+		});
 		getUserManager().setFormAndTableChangeAware();
 		// first auto select active project
 		autoSelectActiveProjectIfNull(false);
