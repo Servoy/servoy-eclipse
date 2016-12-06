@@ -55,6 +55,11 @@ public class InstallWebPackageHandler implements IDeveloperService
 
 	public static void importPackage(JSONObject pck, String selectedVersion)
 	{
+		importPackage(pck, selectedVersion, null);
+	}
+
+	private static void importPackage(JSONObject pck, String selectedVersion, String selectedSolution)
+	{
 		String urlString = null;
 		JSONArray jsonArray = pck.getJSONArray("releases");
 		String dependency = null;
@@ -77,7 +82,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 			String solutionName = pck.optString("activeSolution", null);
 			if (solutionName == null)
 			{
-				solutionName = ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
+				solutionName = selectedSolution != null ? selectedSolution : ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
 			}
 			IFolder componentsFolder = RemoveWebPackageHandler.checkPackagesFolderCreated(solutionName, SolutionSerializer.NG_PACKAGES_DIR_NAME);
 
@@ -116,14 +121,14 @@ public class InstallWebPackageHandler implements IDeveloperService
 									{
 										if (versionCheck(releases.getJSONObject(j).optString("version"), version, prefix))
 										{
-											importPackage(pckObject, releases.getJSONObject(j).optString("version"));
+											importPackage(pckObject, releases.getJSONObject(j).optString("version"), solutionName);
 											break;
 										}
 									}
 								}
 								else
 								{
-									importPackage(pckObject, releases.getJSONObject(0).optString("version"));
+									importPackage(pckObject, releases.getJSONObject(0).optString("version"), solutionName);
 								}
 								break;
 							}
