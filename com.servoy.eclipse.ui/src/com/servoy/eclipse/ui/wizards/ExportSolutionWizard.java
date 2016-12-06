@@ -632,7 +632,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 				exportSampleDataButton.setText("Export solution sample data");
 			}
 			checkMetadataTablesButton.setEnabled(!dbiDown);
-			checkMetadataTablesButton.setSelection(dbiDown ? false : exportModel.isExportMetaData());
+			checkMetadataTablesButton.setSelection(dbiDown ? false : exportModel.isCheckMetadataTables());
 			if (dbiDown)
 			{
 				checkMetadataTablesButton.setText("Check metadata tables (one or more used databases is unreacheable)");
