@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.node.UserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.ColumnWrapper;
@@ -58,14 +59,14 @@ public class OpenScriptAction extends Action implements ISelectionChangedListene
 	public void selectionChanged(SelectionChangedEvent event)
 	{
 		selection = (IStructuredSelection)event.getSelection();
-		Iterator it = selection.iterator();
+		Iterator< ? > it = selection.iterator();
 		boolean state = it.hasNext();
 		while (it.hasNext())
 		{
 			Object sel = it.next();
-			if (sel instanceof UserNodeType)
+			if (sel instanceof UserNode)
 			{
-				UserNodeType type = ((SimpleUserNode)sel).getType();
+				UserNodeType type = ((UserNode)sel).getType();
 				if (type != UserNodeType.FORM_METHOD && type != UserNodeType.GLOBAL_METHOD_ITEM && type != UserNodeType.GLOBAL_VARIABLE_ITEM &&
 					type != UserNodeType.FORM_VARIABLE_ITEM && type != UserNodeType.CALCULATIONS_ITEM && type != UserNodeType.GLOBALS_ITEM &&
 					type != UserNodeType.FORM_VARIABLES && type != UserNodeType.GLOBAL_VARIABLES)
@@ -86,31 +87,33 @@ public class OpenScriptAction extends Action implements ISelectionChangedListene
 	{
 		if (selection != null)
 		{
-			Iterator it = selection.iterator();
+			Iterator< ? > it = selection.iterator();
 			while (it.hasNext())
 			{
-				SimpleUserNode node = ((SimpleUserNode)it.next());
-				if (node != null)
+				Object obj = it.next();
+				String scopeName = null;
+				if (obj instanceof SimpleUserNode)
 				{
-					String scopeName = null;
-					Object obj = node.getRealObject();
-					if (obj instanceof ColumnWrapper)
-					{
-						obj = ((ColumnWrapper)obj).getColumn();
-					}
-					else if (obj instanceof Pair< ? , ? >) // Pair<Solution, Scopename>
-					{
-						if (((Pair< ? , ? >)obj).getRight() instanceof String)
-						{
-							scopeName = ((Pair< ? , String>)obj).getRight();
-						}
-						obj = ((Pair< ? , ? >)obj).getLeft();
+					SimpleUserNode node = ((SimpleUserNode)obj);
+					obj = node.getRealObject();
+				}
 
-					}
-					if (obj instanceof IPersist)
+				if (obj instanceof ColumnWrapper)
+				{
+					obj = ((ColumnWrapper)obj).getColumn();
+				}
+				else if (obj instanceof Pair< ? , ? >) // Pair<Solution, Scopename>
+				{
+					if (((Pair< ? , ? >)obj).getRight() instanceof String)
 					{
-						EditorUtil.openScriptEditor((IPersist)obj, scopeName, true);
+						scopeName = ((Pair< ? , String>)obj).getRight();
 					}
+					obj = ((Pair< ? , ? >)obj).getLeft();
+
+				}
+				if (obj instanceof IPersist)
+				{
+					EditorUtil.openScriptEditor((IPersist)obj, scopeName, true);
 				}
 			}
 		}

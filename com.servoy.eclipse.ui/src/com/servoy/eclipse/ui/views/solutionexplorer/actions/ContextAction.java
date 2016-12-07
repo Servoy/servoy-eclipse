@@ -83,7 +83,7 @@ public class ContextAction extends Action implements ISelectionChangedListener
 	public void selectionChanged(SelectionChangedEvent event)
 	{
 		IAction action = null;
-		Iterator<SimpleUserNode> sel = ((IStructuredSelection)event.getSelection()).iterator();
+		Iterator< ? > sel = ((IStructuredSelection)event.getSelection()).iterator();
 		while (sel.hasNext())
 		{
 			Object s = sel.next();
@@ -137,7 +137,6 @@ public class ContextAction extends Action implements ISelectionChangedListener
 		{
 			registeredActionsPerClass.put((Class< ? >)type, action);
 		}
-
 	}
 
 	public void unregisterAction(Object type)

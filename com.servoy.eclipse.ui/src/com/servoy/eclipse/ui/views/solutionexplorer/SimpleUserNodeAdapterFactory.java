@@ -461,8 +461,8 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 					case FORM :
 					case FORM_CONTROLLER :
 					case FORM_VARIABLES :
+					case FORM_METHOD :
 						return Openable.getOpenable(userNode.getRealObject());
-
 					default :
 				}
 			}

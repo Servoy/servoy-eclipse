@@ -24,13 +24,14 @@ import org.eclipse.ui.IActionFilter;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
 /**
  * Openable items for Open menu actions.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -64,10 +65,14 @@ public class Openable implements IActionFilter
 
 	public static Openable getOpenable(Object data)
 	{
-		// create specific subclasses, see objectClass visibility for objectContribution extension point 
+		// create specific subclasses, see objectClass visibility for objectContribution extension point
 		if (data instanceof IPersist)
 		{
 			IPersist persist = (IPersist)data;
+			if (persist instanceof ScriptMethod)
+			{
+				return new OpenableScriptMethod((ScriptMethod)persist);
+			}
 			Form form = (Form)persist.getAncestor(IRepository.FORMS);
 			if (form != null)
 			{
@@ -106,6 +111,20 @@ public class Openable implements IActionFilter
 		public Pair<Solution, String> getData()
 		{
 			return (Pair<Solution, String>)super.getData();
+		}
+	}
+
+	public static class OpenableScriptMethod extends Openable
+	{
+		public OpenableScriptMethod(ScriptMethod data)
+		{
+			super(data);
+		}
+
+		@Override
+		public ScriptMethod getData()
+		{
+			return (ScriptMethod)super.getData();
 		}
 	}
 }

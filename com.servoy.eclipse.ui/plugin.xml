@@ -721,7 +721,7 @@
         <key
               commandId="com.servoy.eclipse.ui.OpenFormHierarchyAction"
               schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-              sequence="F4">
+              sequence="M2+F4">
         </key>
      </extension>
    <extension

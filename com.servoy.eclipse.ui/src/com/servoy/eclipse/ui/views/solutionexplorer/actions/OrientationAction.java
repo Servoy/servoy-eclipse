@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.action.Action;
 
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.views.solutionexplorer.IOrientedView;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 
 /**
@@ -29,37 +30,45 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 public class OrientationAction extends Action
 {
 
-    private SolutionExplorerView fView;    
-    private int fActionOrientation;
-    
-    public OrientationAction(SolutionExplorerView v, int orientation)
-    {
-        super("", AS_RADIO_BUTTON);
-        if (orientation == SolutionExplorerView.VIEW_ORIENTATION_HORIZONTAL) {
-            setText("Horizontal View Orientation"); 
-            setImageDescriptor(Activator.loadImageDescriptorFromBundle("th_horizontal.gif"));
-        } else if (orientation == SolutionExplorerView.VIEW_ORIENTATION_VERTICAL) {
-            setText("Vertical View Orientation"); 
-            setImageDescriptor(Activator.loadImageDescriptorFromBundle("th_vertical.gif"));
-		} else if (orientation == SolutionExplorerView.VIEW_ORIENTATION_AUTOMATIC) {
-            setText("Automatic View Orientation"); 
+	private final IOrientedView fView;
+	private final int fActionOrientation;
+
+	public OrientationAction(IOrientedView v, int orientation)
+	{
+		super("", AS_RADIO_BUTTON);
+		if (orientation == SolutionExplorerView.VIEW_ORIENTATION_HORIZONTAL)
+		{
+			setText("Horizontal View Orientation");
+			setImageDescriptor(Activator.loadImageDescriptorFromBundle("th_horizontal.gif"));
+		}
+		else if (orientation == SolutionExplorerView.VIEW_ORIENTATION_VERTICAL)
+		{
+			setText("Vertical View Orientation");
+			setImageDescriptor(Activator.loadImageDescriptorFromBundle("th_vertical.gif"));
+		}
+		else if (orientation == SolutionExplorerView.VIEW_ORIENTATION_AUTOMATIC)
+		{
+			setText("Automatic View Orientation");
 			setImageDescriptor(Activator.loadImageDescriptorFromBundle("th_automatic.gif"));
-        } else {
-            Assert.isTrue(false);
-        }
-        fView = v;
-        fActionOrientation = orientation;
+		}
+		else
+		{
+			Assert.isTrue(false);
+		}
+		fView = v;
+		fActionOrientation = orientation;
 //        PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_TOGGLE_ORIENTATION_ACTION);
-    }
-    
-    public int getOrientation()
-    {
-        return fActionOrientation;
-    }   
-    
-    public void run()
-    {
-        fView.setOrientation(fActionOrientation);
-    }
-    
+	}
+
+	public int getOrientation()
+	{
+		return fActionOrientation;
+	}
+
+	@Override
+	public void run()
+	{
+		fView.setOrientation(fActionOrientation);
+	}
+
 }
