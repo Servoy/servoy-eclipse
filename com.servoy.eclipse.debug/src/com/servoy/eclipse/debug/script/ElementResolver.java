@@ -302,7 +302,7 @@ public class ElementResolver implements IElementResolver
 			try
 			{
 				IServer server = DataSourceUtils.INMEM_DATASOURCE.equals(serverTablename[0])
-					? ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getMemServer()
+					? ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(resource.getProject().getName()).getMemServer()
 					: fs.getSolution().getServer(serverTablename[0]);
 				if (server != null) table = server.getTable(serverTablename[1]);
 			}
