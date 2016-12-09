@@ -96,6 +96,17 @@ public class ContextAction extends Action implements ISelectionChangedListener
 			else
 			{
 				act = registeredActionsPerClass.get(s.getClass());
+				if (act == null)
+				{
+					for (Class< ? > c : registeredActionsPerClass.keySet())
+					{
+						if (c.isInstance(s))
+						{
+							act = registeredActionsPerClass.get(c);
+							break;
+						}
+					}
+				}
 			}
 
 			if (action == null)
