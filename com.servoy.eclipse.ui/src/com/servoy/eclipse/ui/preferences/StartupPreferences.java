@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.preferences;
 
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
@@ -31,18 +32,20 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.osgi.service.prefs.BackingStoreException;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
 /**
  * Preferences page for developer startup settings.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public class StartupPreferences extends PreferencePage implements IWorkbenchPreferencePage
 {
@@ -64,6 +67,7 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 	private Spinner retriesSpinner;
 	private Text startupLauncherText;
 	private Text shutdownLauncherText;
+	private Text settingsFileText;
 	private Button showErrorsConfirmation;
 	private Button showWarningsConfirmation;
 	private Button startupExtensionUpdateCheck;
@@ -97,6 +101,15 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		shutdownLauncherLabel.setText("Shutdown launcher");
 		shutdownLauncherText = new Text(nativeLaunchers, SWT.BORDER);
 
+		Label settingsFileLabel;
+		settingsFileLabel = new Label(nativeLaunchers, SWT.NONE);
+		settingsFileLabel.setText("Properties file");
+		settingsFileLabel.setToolTipText(
+			"Set properties file (by default servoy.properties) from application server directory to be used for this workspace. After change, restart is required.");
+		settingsFileText = new Text(nativeLaunchers, SWT.BORDER);
+		settingsFileText.setToolTipText(
+			"Set properties file (by default servoy.properties) from application server directory to be used for this workspace. After change, restart is required.");
+
 		Label retriesLabel;
 		retriesLabel = new Label(settings, SWT.NONE);
 		retriesLabel.setText("Max repository connect retries");
@@ -122,7 +135,7 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		gridFactory.generateLayout(composite);
 		((GridData)startupLauncherText.getLayoutData()).widthHint = 200;
 		((GridData)shutdownLauncherText.getLayoutData()).widthHint = 200;
-
+		((GridData)settingsFileText.getLayoutData()).widthHint = 200;
 		initializeFields();
 
 		return composite;
@@ -135,6 +148,8 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		startupLauncherText.setText(settings.getProperty(STARTUP_LAUNCHER_SETTING, ""));
 		shutdownLauncherText.setText(settings.getProperty(SHUTDOWN_LAUNCHER_SETTING, ""));
 		retriesSpinner.setSelection(Utils.getAsInteger(settings.getProperty(RETRIES_SETTING, String.valueOf(RETRIES_DEFAULT))));
+		settingsFileText.setText(InstanceScope.INSTANCE.getNode(com.servoy.eclipse.core.Activator.PLUGIN_ID).get(
+			com.servoy.eclipse.core.Activator.PROPERTIES_FILE_PATH_SETTING, "servoy.properties"));
 
 		IEclipsePreferences eclipsePreferences = Activator.getDefault().getEclipsePreferences();
 		showErrorsConfirmation.setSelection(eclipsePreferences.getBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS, DEFAULT_ERROR_CONFIRMATION));
@@ -151,6 +166,17 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		settings.setProperty(SHUTDOWN_LAUNCHER_SETTING, shutdownLauncherText.getText());
 		settings.setProperty(RETRIES_SETTING, String.valueOf(retriesSpinner.getSelection()));
 
+		InstanceScope.INSTANCE.getNode(com.servoy.eclipse.core.Activator.PLUGIN_ID).put(com.servoy.eclipse.core.Activator.PROPERTIES_FILE_PATH_SETTING,
+			settingsFileText.getText());
+		try
+		{
+			InstanceScope.INSTANCE.getNode(com.servoy.eclipse.core.Activator.PLUGIN_ID).flush();
+		}
+		catch (BackingStoreException e)
+		{
+			ServoyLog.logError(e);
+		}
+
 		IEclipsePreferences eclipsePreferences = Activator.getDefault().getEclipsePreferences();
 		eclipsePreferences.putBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_ERRORS, showErrorsConfirmation.getSelection());
 		eclipsePreferences.putBoolean(DEBUG_CLIENT_CONFIRMATION_WHEN_WARNINGS, showWarningsConfirmation.getSelection());
@@ -165,6 +191,7 @@ public class StartupPreferences extends PreferencePage implements IWorkbenchPref
 		Settings settings = ServoyModel.getSettings();
 		startupLauncherText.setText(settings.getProperty(STARTUP_LAUNCHER_SETTING, ""));
 		shutdownLauncherText.setText(settings.getProperty(SHUTDOWN_LAUNCHER_SETTING, ""));
+		settingsFileText.setText("servoy.properties");
 		retriesSpinner.setSelection(RETRIES_DEFAULT);
 
 		startupExtensionUpdateCheck.setSelection(DEFAULT_STARTUP_EXTENSION_UPDATE_CHECK);

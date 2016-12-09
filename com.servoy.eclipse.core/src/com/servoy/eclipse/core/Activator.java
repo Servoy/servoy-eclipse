@@ -160,6 +160,8 @@ public class Activator extends Plugin
 {
 	public static final String RECREATE_ON_I18N_CHANGE_PREFERENCE = "recreate.forms.on.i18n.change";
 
+	public static final String PROPERTIES_FILE_PATH_SETTING = "servoyPropertiesFile";
+
 	// The plug-in ID
 	public static final String PLUGIN_ID = "com.servoy.eclipse.core";
 
@@ -270,6 +272,12 @@ public class Activator extends Plugin
 
 		super.start(context);
 		plugin = this;
+
+		String propertiesFile = InstanceScope.INSTANCE.getNode(PLUGIN_ID).get(PROPERTIES_FILE_PATH_SETTING, null);
+		if (propertiesFile != null)
+		{
+			System.setProperty("property-file", propertiesFile);
+		}
 
 		ServiceReference ref = context.getServiceReference(IServerStarter.class);
 		ss = (IServerStarter)context.getService(ref);
@@ -1264,12 +1272,12 @@ public class Activator extends Plugin
 													monitor.beginTask("Updating...", IProgressMonitor.UNKNOWN);
 													updatedToVersion[0] = updateAppServerFromSerclipse(new File(appServerDir).getParentFile(), version,
 														ClientVersion.getReleaseNumber(), new ActionListener()
+													{
+														public void actionPerformed(ActionEvent e)
 														{
-															public void actionPerformed(ActionEvent e)
-															{
-																monitor.worked(1);
-															}
-														});
+															monitor.worked(1);
+														}
+													});
 												}
 												catch (Exception e)
 												{
