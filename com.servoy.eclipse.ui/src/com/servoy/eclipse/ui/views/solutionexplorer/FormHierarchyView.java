@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -34,6 +35,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ContextAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenPersistEditorAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenScriptAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OrientationAction;
 import com.servoy.j2db.FlattenedSolution;
@@ -42,6 +44,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.util.Pair;
@@ -148,8 +151,13 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			}
 			else if (element instanceof BaseComponent)
 			{
+				if (element instanceof ISupportName)
+				{
+					String name = ((ISupportName)element).getName();
+					if (name != null && !"".equals(name)) return name;
+				}
 				Pair<String, Image> pair = ElementUtil.getPersistNameAndImage((BaseComponent)element);
-				if (pair != null) return pair.getLeft();
+				if (pair != null) return "<" + pair.getLeft() + ">";
 			}
 			return null;
 		}
@@ -323,6 +331,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 	private int fCurrentOrientation;
 	private OrientationAction[] fToggleOrientationActions;
+	private SelectionProviderMediator fSelectionProviderMediator;
 
 	@Override
 	public void createPartControl(Composite parent)
@@ -338,6 +347,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		openAction = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.gif"), "Open");
 		createTreeViewer(fSplitter);
 		createListViewer(fSplitter);
+		fSelectionProviderMediator = new SelectionProviderMediator(new StructuredViewer[] { tree, list }, null);
+		getSite().setSelectionProvider(fSelectionProviderMediator);
 
 		this.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
 		tree.addSelectionChangedListener(this);
@@ -372,8 +383,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 		IAction openScript = new OpenScriptAction();
 		openAction.registerAction(ScriptMethod.class, openScript);
-//TODO		IAction openPersistEditor = new OpenPersistEditorAction();
-//		openAction.registerAction(BaseComponent.class, openPersistEditor);
+		IAction openPersistEditor = new OpenPersistEditorAction();
+		openAction.registerAction(BaseComponent.class, openPersistEditor);
 		openAction.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
 		list.addSelectionChangedListener(openAction);
 	}
