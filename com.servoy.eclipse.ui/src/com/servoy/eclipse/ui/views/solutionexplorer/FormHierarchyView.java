@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.part.ViewPart;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.ElementUtil;
@@ -233,16 +234,20 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	{
 		private Form input;
 		private IPersist listSelection;
+		private FlattenedSolution activeSolution;
 
 		@Override
 		public void dispose()
 		{
 			input = null;
+			listSelection = null;
+			activeSolution = null;
 		}
 
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
 		{
+			activeSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingFlattenedSolution();
 		}
 
 		@Override
@@ -283,15 +288,14 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 					}
 				}
 
-				FlattenedSolution s = ModelUtils.getEditingFlattenedSolution(f);
-				List<Form> formHierarchy = s.getFormHierarchy(input);
+				List<Form> formHierarchy = activeSolution.getFormHierarchy(input);
 				if (!input.equals(f) && formHierarchy.contains(f))
 				{
 					result.add(formHierarchy.get(formHierarchy.indexOf(f) - 1));
 				}
 				else
 				{
-					result.addAll(s.getDirectlyInheritingForms(f));
+					result.addAll(activeSolution.getDirectlyInheritingForms(f));
 				}
 				return result.toArray();
 			}
@@ -386,6 +390,24 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		treeProvider = new FormTreeContentProvider();
 		tree.setContentProvider(treeProvider);
 		tree.setLabelProvider(new FormViewLabelProvider(treeProvider));
+
+		tree.addDoubleClickListener(new IDoubleClickListener()
+		{
+			public void doubleClick(DoubleClickEvent event)
+			{
+				if (openAction.isEnabled())
+				{
+					openAction.run();
+				}
+			}
+		});
+
+		IAction openScript = new OpenScriptAction();
+		openAction.registerAction(ScriptMethod.class, openScript);
+		IAction openPersistEditor = new OpenPersistEditorAction();
+		openAction.registerAction(BaseComponent.class, openPersistEditor);
+		openAction.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
+		tree.addSelectionChangedListener(openAction);
 	}
 
 	private void createListViewer(Composite parent)
@@ -451,6 +473,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		else
 		{
 			treeProvider.setSelection((IPersist)object);
+			//TODO expand
 		}
 		list.refresh();
 		tree.refresh();
