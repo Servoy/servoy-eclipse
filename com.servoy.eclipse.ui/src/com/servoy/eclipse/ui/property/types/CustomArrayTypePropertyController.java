@@ -328,7 +328,12 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	@Override
 	protected Object createEmptyPropertyValue()
 	{
-		return new WebCustomType[] { getNewElementInitialValue() };
+		PropertyDescription arrayElementPD = getArrayElementPD();
+		if (arrayElementPD.getType() instanceof ICustomType< ? >)
+		{
+			return new WebCustomType[] { getNewElementInitialValue() };
+		}
+		return new Object[] { getNewElementInitialValue() };
 	}
 
 	/*
