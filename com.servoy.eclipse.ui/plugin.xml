@@ -16,14 +16,14 @@
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView"
             id="com.servoy.eclipse.ui.views.SolutionExplorerView">
-      </view>
+      </view> 
       <view
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView"
             icon="icons/forms.gif"
             id="com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView"
             name="Form Hierarchy">
-      </view>      
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -37,7 +37,15 @@
          </view>
       </perspectiveExtension>
       <perspectiveExtension
-            targetID="org.eclipse.team.ui.TeamSynchronizingPerspective">
+            targetID="com.servoy.eclipse.ui.DesignPerspective">
+         <view
+               id="com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView"
+               relationship="stack"
+               relative="com.servoy.eclipse.ui.views.SolutionExplorerView">
+         </view>
+      </perspectiveExtension>
+      <perspectiveExtension
+           targetID="org.eclipse.team.ui.TeamSynchronizingPerspective">
          <view
                id="org.eclipse.ui.navigator.ProjectExplorer"
                relationship="stack"
@@ -49,8 +57,14 @@
          <viewShortcut
                id="com.servoy.eclipse.ui.views.SolutionExplorerView">
          </viewShortcut>
-		 <showInPart
+         <showInPart
                id="com.servoy.eclipse.ui.views.SolutionExplorerView">
+         </showInPart>
+         <viewShortcut
+               id="com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView">
+         </viewShortcut>
+         <showInPart
+               id="com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView">
          </showInPart>
          <showInPart
                id="org.eclipse.ui.views.ResourceNavigator">
@@ -77,15 +91,6 @@
          <perspectiveShortcut
                id="com.servoy.eclipse.ui.DesignPerspective">
          </perspectiveShortcut>
-      </perspectiveExtension>
-      <perspectiveExtension
-            targetID="org.eclipse.jdt.ui.JavaPerspective">
-         <view
-               id="com.servoy.eclipse.ui.views.FormHierarchyView"
-               ratio="0.5"
-               relationship="right"
-               relative="com.servoy.eclipse.ui.views.SolutionExplorerView">
-         </view>
       </perspectiveExtension>
    </extension>
    <extension
