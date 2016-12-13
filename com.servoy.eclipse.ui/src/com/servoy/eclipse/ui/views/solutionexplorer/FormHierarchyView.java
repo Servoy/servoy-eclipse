@@ -38,6 +38,7 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ContextAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenFormEditorAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenPersistEditorAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenScriptAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OrientationAction;
@@ -51,6 +52,7 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.MethodArgument;
+import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
@@ -88,15 +90,19 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				FlattenedSolution s = ModelUtils.getEditingFlattenedSolution(input);
 				List<Object> lst = new ArrayList<>();
 				Form flattenedForm = s.getFlattenedForm(input, false);
+				Iterator<Part> it1 = flattenedForm.getParts();
+				while (it1.hasNext())
+				{
+					lst.add(it1.next());
+				}
 				for (IPersist p : flattenedForm.getAllObjectsAsList())
 				{
 					if (p instanceof BaseComponent) lst.add(p);
 				}
-				Iterator<ScriptMethod> it = flattenedForm.getScriptMethods(true);
-				while (it.hasNext())
+				Iterator<ScriptMethod> it2 = flattenedForm.getScriptMethods(true);
+				while (it2.hasNext())
 				{
-					ScriptMethod sm = it.next();
-					if (!sm.isPrivate()) lst.add(sm);
+					lst.add(it2.next());
 				}
 				return lst.toArray();
 			}
@@ -133,9 +139,9 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				}
 				return uiActivator.loadImageFromBundle("public_method.gif");
 			}
-			else if (element instanceof BaseComponent)
+			else if (element instanceof BaseComponent || element instanceof Part)
 			{
-				Pair<String, Image> pair = ElementUtil.getPersistNameAndImage((BaseComponent)element);
+				Pair<String, Image> pair = ElementUtil.getPersistNameAndImage((IPersist)element);
 				if (pair != null) return pair.getRight();
 			}
 			return null;
@@ -161,6 +167,10 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				}
 				Pair<String, Image> pair = ElementUtil.getPersistNameAndImage((BaseComponent)element);
 				if (pair != null) return "<" + pair.getLeft() + ">";
+			}
+			if (element instanceof Part)
+			{
+				return ((Part)element).toString();
 			}
 			return null;
 		}
@@ -235,6 +245,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		private Form input;
 		private IPersist listSelection;
 		private FlattenedSolution activeSolution;
+		private ArrayList<IPersist> leavesToExpand = new ArrayList<>();
 
 		@Override
 		public void dispose()
@@ -242,6 +253,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			input = null;
 			listSelection = null;
 			activeSolution = null;
+			leavesToExpand = null;
 		}
 
 		@Override
@@ -272,19 +284,22 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				if (listSelection instanceof ScriptMethod)
 				{
 					ScriptMethod sm = f.getScriptMethod(((ScriptMethod)listSelection).getName());
-					if (sm != null) result.add(sm);
+					if (sm != null)
+					{
+						result.add(sm);
+						leavesToExpand.add(sm);
+					}
 				}
 				else if (listSelection instanceof BaseComponent)
 				{
 					for (IPersist p : f.getAllObjectsAsList())
 					{
-						if (p.equals(listSelection))
+						if (p.equals(listSelection) || PersistHelper.getOverrideHierarchy((ISupportExtendsID)listSelection).contains(p) ||
+							PersistHelper.getHierarchyChildren((AbstractBase)listSelection).contains(p))
 						{
-							result.add(listSelection);
-							continue;
+							result.add(p);
+							leavesToExpand.add(p);
 						}
-						if (PersistHelper.getOverrideHierarchy((ISupportExtendsID)listSelection).contains(p)) result.add(p);
-						if (PersistHelper.getHierarchyChildren((AbstractBase)listSelection).contains(p)) result.add(p);
 					}
 				}
 
@@ -300,6 +315,11 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				return result.toArray();
 			}
 			return new Object[0];
+		}
+
+		public List<IPersist> getLeavesToExpand()
+		{
+			return leavesToExpand;
 		}
 
 		@Override
@@ -324,7 +344,27 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			{
 				Form f = (Form)element;
 				FlattenedSolution s = ModelUtils.getEditingFlattenedSolution(f);
-				return !s.getDirectlyInheritingForms(f).isEmpty();
+				boolean hasChildren = !s.getDirectlyInheritingForms(f).isEmpty();
+				if (!hasChildren && listSelection != null)
+				{
+					if (listSelection instanceof ScriptMethod)
+					{
+						ScriptMethod sm = f.getScriptMethod(((ScriptMethod)listSelection).getName());
+						if (sm != null) return true;
+					}
+					else if (listSelection instanceof BaseComponent)
+					{
+						for (IPersist p : f.getAllObjectsAsList())
+						{
+							if (p.equals(listSelection) || PersistHelper.getOverrideHierarchy((ISupportExtendsID)listSelection).contains(p) ||
+								PersistHelper.getHierarchyChildren((AbstractBase)listSelection).contains(p))
+							{
+								return true;
+							}
+						}
+					}
+				}
+				return hasChildren;
 			}
 			return false;
 		}
@@ -332,6 +372,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		public void setSelection(IPersist object)
 		{
 			listSelection = object;
+			leavesToExpand = new ArrayList<>();
 		}
 	}
 
@@ -406,6 +447,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		openAction.registerAction(ScriptMethod.class, openScript);
 		IAction openPersistEditor = new OpenPersistEditorAction();
 		openAction.registerAction(BaseComponent.class, openPersistEditor);
+		IAction openFormEditor = new OpenFormEditorAction();
+		openAction.registerAction(Form.class, openFormEditor);//TODO preference whether to open form or script
 		openAction.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
 		tree.addSelectionChangedListener(openAction);
 	}
@@ -467,16 +510,42 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			selected = (Form)object;
 			tree.setInput(new Form[] { selected });
 			tree.setSelection(new StructuredSelection(selected));
+			tree.refresh();
 
 			list.setInput(selected);
 		}
 		else
 		{
 			treeProvider.setSelection((IPersist)object);
-			//TODO expand
+
+			//tree.getTree().setRedraw(false);
+			tree.refresh();
+			tree.expandAll(); //TODO expand specific paths
+//			List<IPersist> toExpand = treeProvider.getLeavesToExpand();
+//			TreePath[] paths = new TreePath[toExpand.size()];
+//			int i = 0;
+//			List<IPersist> path = null;
+//			for (IPersist p : toExpand)
+//			{
+//				path = new ArrayList<IPersist>();
+//				path.add(p);
+//				Form parent = (Form)p.getParent();
+//				path.addAll(ModelUtils.getEditingFlattenedSolution(parent).getFormHierarchy(parent));
+//				Collections.reverse(path);
+//				//path.add(p);
+//				paths[i++] = new TreePath(path.toArray());
+//			}
+//			tree.getTree().setRedraw(true);
+//			//tree.refresh();
+//			tree.setExpandedTreePaths(paths);
+//			//tree.setExpandedElements(path.toArray());
+//			for (TreePath p : paths)
+//			{
+//				tree.setExpandedState(p, true);
+//			}
 		}
 		list.refresh();
-		tree.refresh();
+
 	}
 
 	public void setOrientation(int o)

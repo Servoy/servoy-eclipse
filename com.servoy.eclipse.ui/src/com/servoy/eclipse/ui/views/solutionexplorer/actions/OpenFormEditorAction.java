@@ -22,7 +22,9 @@ import java.util.Iterator;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.ui.IActionDelegate;
 
 import com.servoy.eclipse.ui.Activator;
@@ -33,7 +35,7 @@ import com.servoy.j2db.persistence.Form;
 /**
  * @author gerzse
  */
-public class OpenFormEditorAction extends Action implements IActionDelegate
+public class OpenFormEditorAction extends Action implements IActionDelegate, ISelectionChangedListener
 {
 
 	protected IStructuredSelection selection;
@@ -53,7 +55,8 @@ public class OpenFormEditorAction extends Action implements IActionDelegate
 			Iterator< ? > it = selection.iterator();
 			while (it.hasNext())
 			{
-				Form form = ((OpenableForm)it.next()).getData();
+				Object next = it.next();
+				Form form = next instanceof OpenableForm ? ((OpenableForm)next).getData() : (Form)next;
 				if (form != null)
 				{
 					EditorUtil.openFormDesignEditor(form);
@@ -79,6 +82,23 @@ public class OpenFormEditorAction extends Action implements IActionDelegate
 			while (it.hasNext())
 			{
 				state = it.next() instanceof OpenableForm;
+			}
+			setEnabled(state);
+		}
+		else setEnabled(false);
+	}
+
+	@Override
+	public void selectionChanged(SelectionChangedEvent event)
+	{
+		if (event.getSelection() instanceof IStructuredSelection)
+		{
+			this.selection = (IStructuredSelection)event.getSelection();
+			Iterator< ? > it = selection.iterator();
+			boolean state = it.hasNext();
+			while (it.hasNext())
+			{
+				state = it.next() instanceof Form;
 			}
 			setEnabled(state);
 		}
