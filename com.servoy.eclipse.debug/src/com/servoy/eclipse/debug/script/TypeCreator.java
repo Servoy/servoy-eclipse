@@ -111,6 +111,7 @@ import com.servoy.eclipse.model.DesignApplication;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.extensions.IDataSourceManager;
 import com.servoy.eclipse.model.extensions.IServoyModel;
+import com.servoy.eclipse.model.inmemory.MemServer;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.util.InMemServerWrapper;
@@ -158,6 +159,7 @@ import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistChangeListener;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IRootObject;
 import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -3698,6 +3700,45 @@ public class TypeCreator extends TypeCache
 	}
 
 
+	private static ITable getTable(IRepository repository, String datasource) throws RepositoryException, RemoteException
+	{
+		String[] dbServernameTablename;
+		ITable tbl = null;
+		if (datasource.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON))
+		{
+			dbServernameTablename = DataSourceUtils.getMemServernameTablename(datasource);
+			if (dbServernameTablename != null)
+			{
+				for (ServoyProject sp : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
+				{
+					MemServer server = sp.getMemServer();
+					if (server != null)
+					{
+						tbl = server.getTable(dbServernameTablename[1]);
+						if (tbl != null)
+						{
+							break;
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			dbServernameTablename = DataSourceUtilsBase.getDBServernameTablename(datasource);
+			if (dbServernameTablename != null)
+			{
+				IServer srv = repository.getServer(dbServernameTablename[0]);
+				if (srv != null)
+				{
+					tbl = srv.getTable(dbServernameTablename[1]);
+				}
+			}
+		}
+
+		return tbl;
+	}
+
 	/**
 	 * Parse the config for a type. Possible combinations:
 	 *
@@ -3730,33 +3771,10 @@ public class TypeCreator extends TypeCache
 						{
 							FlattenedSolution fs = servoyProject.getEditingFlattenedSolution();
 							String tablePart = config.substring(sep + 1);
-							String[] dbServernameTablename = tablePart.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON)
-								? DataSourceUtils.getMemServernameTablename(tablePart) : DataSourceUtilsBase.getDBServernameTablename(tablePart);
-							if (dbServernameTablename != null)
+							ITable tbl = getTable(fs.getSolution().getRepository(), tablePart);
+							if (tbl != null)
 							{
-								ArrayList<IServer> servers = new ArrayList<IServer>();
-								if (tablePart.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON))
-								{
-									for (ServoyProject sp : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
-									{
-										servers.add(sp.getMemServer());
-									}
-								}
-								else
-								{
-									servers.add(fs.getSolution().getRepository().getServer(dbServernameTablename[0]));
-								}
-								for (IServer server : servers)
-								{
-									if (server != null)
-									{
-										ITable table = server.getTable(dbServernameTablename[1]);
-										if (table != null)
-										{
-											return new TypeConfig(fs, table);
-										}
-									}
-								}
+								return new TypeConfig(fs, tbl);
 							}
 						}
 						catch (Exception e)
@@ -3776,28 +3794,10 @@ public class TypeCreator extends TypeCache
 						{
 							try
 							{
-								ArrayList<IServer> servers = new ArrayList<IServer>();
-								if (config.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON))
+								ITable tbl = getTable(servoyModel.getFlattenedSolution().getSolution().getRepository(), config);
+								if (tbl != null)
 								{
-									for (ServoyProject sp : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
-									{
-										servers.add(sp.getMemServer());
-									}
-								}
-								else
-								{
-									servers.add(servoyModel.getFlattenedSolution().getSolution().getRepository().getServer(dbServernameTablename[0]));
-								}
-								for (IServer server : servers)
-								{
-									if (server != null)
-									{
-										ITable table = server.getTable(dbServernameTablename[1]);
-										if (table != null)
-										{
-											return new TypeConfig(table);
-										}
-									}
+									return new TypeConfig(tbl);
 								}
 							}
 							catch (Exception e)
@@ -4298,26 +4298,7 @@ public class TypeCreator extends TypeCache
 			{
 				try
 				{
-					ArrayList<IServer> servers = new ArrayList<IServer>();
-					if (config.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON))
-					{
-						for (ServoyProject sp : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
-						{
-							servers.add(sp.getMemServer());
-						}
-					}
-					else
-					{
-						servers.add(fs.getSolution().getRepository().getServer(serverName));
-					}
-					for (IServer server : servers)
-					{
-						if (server != null)
-						{
-							table = server.getTable(tableName);
-							if (table != null) break;
-						}
-					}
+					table = getTable(fs.getSolution().getRepository(), config);
 				}
 				catch (Exception e)
 				{
