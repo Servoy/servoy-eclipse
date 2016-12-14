@@ -2417,7 +2417,18 @@ public class TypeCreator extends TypeCache
 				String config = typeName.substring(typeName.indexOf('<') + 1, typeName.length() - 1);
 				String[] split = config.split("/");
 				String solutionName = split[0];
-				String scopeName = split[1];
+				// this is when only Scope<scopeName> is given
+				if (split.length == 1)
+				{
+					for (Pair<String, IRootObject> scope : fs.getScopes())
+					{
+						if (scope.getLeft().equals(solutionName))
+						{
+							solutionName = scope.getRight().getName();
+							break;
+						}
+					}
+				}
 
 				EList<Member> members = type.getMembers();
 
@@ -3723,15 +3734,27 @@ public class TypeCreator extends TypeCache
 								? DataSourceUtils.getMemServernameTablename(tablePart) : DataSourceUtilsBase.getDBServernameTablename(tablePart);
 							if (dbServernameTablename != null)
 							{
-								IServer server = tablePart.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON)
-									? ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(fs.getName()).getMemServer()
-									: fs.getSolution().getRepository().getServer(dbServernameTablename[0]);
-								if (server != null)
+								ArrayList<IServer> servers = new ArrayList<IServer>();
+								if (tablePart.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON))
 								{
-									ITable table = server.getTable(dbServernameTablename[1]);
-									if (table != null)
+									for (ServoyProject sp : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
 									{
-										return new TypeConfig(fs, table);
+										servers.add(sp.getMemServer());
+									}
+								}
+								else
+								{
+									servers.add(fs.getSolution().getRepository().getServer(dbServernameTablename[0]));
+								}
+								for (IServer server : servers)
+								{
+									if (server != null)
+									{
+										ITable table = server.getTable(dbServernameTablename[1]);
+										if (table != null)
+										{
+											return new TypeConfig(fs, table);
+										}
 									}
 								}
 							}
@@ -3753,16 +3776,27 @@ public class TypeCreator extends TypeCache
 						{
 							try
 							{
-								IServer server = config.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON)
-									? ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
-										servoyModel.getFlattenedSolution().getName()).getMemServer()
-									: servoyModel.getFlattenedSolution().getSolution().getRepository().getServer(dbServernameTablename[0]);
-								if (server != null)
+								ArrayList<IServer> servers = new ArrayList<IServer>();
+								if (config.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON))
 								{
-									ITable table = server.getTable(dbServernameTablename[1]);
-									if (table != null)
+									for (ServoyProject sp : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
 									{
-										return new TypeConfig(table);
+										servers.add(sp.getMemServer());
+									}
+								}
+								else
+								{
+									servers.add(servoyModel.getFlattenedSolution().getSolution().getRepository().getServer(dbServernameTablename[0]));
+								}
+								for (IServer server : servers)
+								{
+									if (server != null)
+									{
+										ITable table = server.getTable(dbServernameTablename[1]);
+										if (table != null)
+										{
+											return new TypeConfig(table);
+										}
 									}
 								}
 							}
@@ -4264,12 +4298,25 @@ public class TypeCreator extends TypeCache
 			{
 				try
 				{
-					IServer server = config.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON)
-						? ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(fs.getName()).getMemServer()
-						: fs.getSolution().getRepository().getServer(serverName);
-					if (server != null)
+					ArrayList<IServer> servers = new ArrayList<IServer>();
+					if (config.startsWith(DataSourceUtils.INMEM_DATASOURCE_SCHEME_COLON))
 					{
-						table = server.getTable(tableName);
+						for (ServoyProject sp : ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject())
+						{
+							servers.add(sp.getMemServer());
+						}
+					}
+					else
+					{
+						servers.add(fs.getSolution().getRepository().getServer(serverName));
+					}
+					for (IServer server : servers)
+					{
+						if (server != null)
+						{
+							table = server.getTable(tableName);
+							if (table != null) break;
+						}
 					}
 				}
 				catch (Exception e)

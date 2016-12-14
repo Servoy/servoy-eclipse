@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.debug.script;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -125,11 +126,12 @@ public class ElementResolver implements IElementResolver
 
 	public Set<String> listGlobals(ITypeInfoContext context, String prefix)
 	{
-		Set<String> typeNames = getTypeNames(prefix);
+		Set<String> typeNames = Collections.emptySet();
 		FlattenedSolution fs = ElementResolver.getFlattenedSolution(context);
 		IResource resource = context.getModelElement().getResource();
 		if (resource != null && fs != null)
 		{
+			typeNames = getTypeNames(prefix);
 			if (ValueCollectionProvider.getGenerateFullGlobalCollection())
 			{
 				typeNames.add("servoyDeveloper");
@@ -300,7 +302,7 @@ public class ElementResolver implements IElementResolver
 			try
 			{
 				IServer server = DataSourceUtils.INMEM_DATASOURCE.equals(serverTablename[0])
-					? ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getMemServer()
+					? ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(resource.getProject().getName()).getMemServer()
 					: fs.getSolution().getServer(serverTablename[0]);
 				if (server != null) table = server.getTable(serverTablename[1]);
 			}

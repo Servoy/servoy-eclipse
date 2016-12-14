@@ -553,6 +553,7 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 		{
 			throw new RuntimeException("Could not initialize table editor table could not be found");
 		}
+		isModified = isModified || !table.getExistInDB();
 
 		IServerManagerInternal serverManager = ServoyModel.getServerManager();
 
@@ -724,16 +725,19 @@ public class TableEditor extends MultiPageEditorPart implements IActiveProjectLi
 				{
 					propertiesComposite.saveValues();
 				}
-				if (table.getRowIdentColumnsCount() == 0)
+				if (!(table instanceof MemTable))
 				{
-					MessageDialog.openWarning(getSite().getShell(), "Warning", "No primary key specified on table.");
-					table.setHiddenInDeveloperBecauseNoPk(true);
-					server.setTableMarkedAsHiddenInDeveloper(table.getName(), true);
-				}
-				else if (table.isHiddenInDeveloperBecauseNoPk())
-				{
-					table.setHiddenInDeveloperBecauseNoPk(false);
-					server.setTableMarkedAsHiddenInDeveloper(table.getName(), false);
+					if (table.getRowIdentColumnsCount() == 0)
+					{
+						MessageDialog.openWarning(getSite().getShell(), "Warning", "No primary key specified on table.");
+						table.setHiddenInDeveloperBecauseNoPk(true);
+						server.setTableMarkedAsHiddenInDeveloper(table.getName(), true);
+					}
+					else if (table.isHiddenInDeveloperBecauseNoPk())
+					{
+						table.setHiddenInDeveloperBecauseNoPk(false);
+						server.setTableMarkedAsHiddenInDeveloper(table.getName(), false);
+					}
 				}
 				for (Column column : table.getColumns())
 				{

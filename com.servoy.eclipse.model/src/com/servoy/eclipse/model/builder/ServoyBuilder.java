@@ -2684,7 +2684,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										ServoyMarker mk = MarkerMessages.FormTableNotAccessible.fill(form.getName(), form.getTableName());
 										addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_TABLE, IMarker.PRIORITY_HIGH, null, form);
 									}
-									else if (table != null && table.getRowIdentColumnsCount() == 0)
+									else if (table != null && !(table instanceof MemTable) && table.getRowIdentColumnsCount() == 0)
 									{
 										ServoyMarker mk = MarkerMessages.FormTableNoPK.fill(form.getName(), form.getTableName());
 										addMarker(project, mk.getType(), mk.getText(), -1, FORM_INVALID_TABLE, IMarker.PRIORITY_HIGH, null, form);
@@ -4249,7 +4249,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 											IMarker.PRIORITY_LOW, mk.getText(), null));
 									}
 								}
-								else if (table.getRowIdentColumnsCount() == 0)
+								else if (table.getRowIdentColumnsCount() == 0 && !(table instanceof MemTable))
 								{
 									String customSeverity = getSeverity(VALUELIST_DB_TABLE_NO_PK.getLeft(), VALUELIST_DB_TABLE_NO_PK.getRight().name(), vl);
 									if (!customSeverity.equals(ProblemSeverity.IGNORE.name()))
@@ -5551,7 +5551,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(ptable.getDataSource(), "relation ", element.getName());
 								addMarker(project, mk.getType(), mk.getText(), -1, INVALID_TABLE_REFERENCE, IMarker.PRIORITY_LOW, null, element);
 							}
-							if (ptable.getRowIdentColumnsCount() == 0)
+							if (ptable.getRowIdentColumnsCount() == 0 && !(ptable instanceof MemTable))
 							{
 								mk = MarkerMessages.RelationPrimaryTableWithoutPK.fill(element.getName(), primaryTableName, primaryServerName);
 								element.setValid(false);
@@ -5589,7 +5589,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 								mk = MarkerMessages.TableMarkedAsHiddenButUsedIn.fill(ftable.getDataSource(), "relation ", element.getName());
 								addMarker(project, mk.getType(), mk.getText(), -1, INVALID_TABLE_REFERENCE, IMarker.PRIORITY_LOW, null, element);
 							}
-							if (ftable.getRowIdentColumnsCount() == 0)
+							if (ftable.getRowIdentColumnsCount() == 0 && !(ftable instanceof MemTable))
 							{
 								mk = MarkerMessages.RelationForeignTableWithoutPK.fill(element.getName(), foreignTableName, foreignServerName);
 								element.setValid(false);
