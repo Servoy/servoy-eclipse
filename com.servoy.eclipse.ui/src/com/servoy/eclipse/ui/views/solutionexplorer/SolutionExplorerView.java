@@ -408,6 +408,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 	private LoadRelationsAction loadRelationsAction;
 
 	private ToggleFormCommandsAction toggleFormCommandsActions;
+	private AddFormsToWorkingSet addFormsToWorkingSet;
 
 	private ReferenceToRegularFormAction referenceToRegularFormAction;
 
@@ -2380,6 +2381,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		manager.add(new Separator());
 		if (toggleFormCommandsActions.isEnabled()) manager.add(toggleFormCommandsActions);
+		if (addFormsToWorkingSet.isEnabled()) manager.add(addFormsToWorkingSet);
 		if (referenceToRegularFormAction.isEnabled()) manager.add(referenceToRegularFormAction);
 		if (changeResourcesProjectAction.isEnabled()) manager.add(changeResourcesProjectAction);
 		if (replaceServerAction.isEnabled()) manager.add(replaceServerAction);
@@ -2751,6 +2753,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		duplicateServer = new DuplicateServerAction(this);
 		enableServer = new EnableServerAction(shell);
 		toggleFormCommandsActions = new ToggleFormCommandsAction(this);
+		addFormsToWorkingSet = new AddFormsToWorkingSet(this);
 		referenceToRegularFormAction = new ReferenceToRegularFormAction(this);
 
 		replaceActionInTree = new ReplaceTableAction(this);
@@ -3106,6 +3109,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		addTreeSelectionChangedListener(duplicateServer);
 		addTreeSelectionChangedListener(enableServer);
 		addTreeSelectionChangedListener(toggleFormCommandsActions);
+		addTreeSelectionChangedListener(addFormsToWorkingSet);
 		addTreeSelectionChangedListener(expandNodeAction);
 
 		addTreeSelectionChangedListener(addComponentIcon);
