@@ -44,6 +44,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenFormEditorAction
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenPersistEditorAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenScriptAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OrientationAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.ShowAllMembers;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ShowMembersInFormHierarchy;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -89,19 +90,23 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			if (inputElement instanceof Form)
 			{
 				input = (Form)inputElement;
-				FlattenedSolution s = ModelUtils.getEditingFlattenedSolution(input);
+				Form form = input;
+				if (showAllInheritedMembers)
+				{
+					FlattenedSolution s = ModelUtils.getEditingFlattenedSolution(input);
+					form = s.getFlattenedForm(input, false);
+				}
+				Iterator<Part> it1 = form.getParts();
 				List<Object> lst = new ArrayList<>();
-				Form flattenedForm = s.getFlattenedForm(input, false);
-				Iterator<Part> it1 = flattenedForm.getParts();
 				while (it1.hasNext())
 				{
 					lst.add(it1.next());
 				}
-				for (IPersist p : flattenedForm.getAllObjectsAsList())
+				for (IPersist p : form.getAllObjectsAsList())
 				{
 					if (p instanceof BaseComponent) lst.add(p);
 				}
-				Iterator<ScriptMethod> it2 = flattenedForm.getScriptMethods(true);
+				Iterator<ScriptMethod> it2 = form.getScriptMethods(true);
 				while (it2.hasNext())
 				{
 					lst.add(it2.next());
@@ -404,6 +409,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 	private FormTreeContentProvider treeProvider;
 
+	private boolean showAllInheritedMembers;
+
 	@Override
 	public void createPartControl(Composite parent)
 	{
@@ -650,6 +657,9 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		ShowMembersInFormHierarchy showMembersAction = new ShowMembersInFormHierarchy(this, false);
 		lowertbmanager.add(showMembersAction);
 
+		ShowAllMembers showAllAction = new ShowAllMembers(this, false);
+		lowertbmanager.add(showAllAction);
+
 		showMembersAction.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
 		list.addSelectionChangedListener(showMembersAction);
 	}
@@ -666,5 +676,11 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		{
 			tree.getControl().setFocus();
 		}
+	}
+
+	public void showAllInheritedMembers(boolean on)
+	{
+		showAllInheritedMembers = on;
+		list.refresh();
 	}
 }
