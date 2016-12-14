@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.internal.javascript.ti.IReferenceAttributes;
 import org.eclipse.dltk.internal.javascript.ti.IValueProvider;
+import org.eclipse.dltk.internal.javascript.ti.JSVariable;
 import org.eclipse.dltk.javascript.typeinference.IValueCollection;
 import org.eclipse.dltk.javascript.typeinference.IValueReference;
 import org.eclipse.dltk.javascript.typeinference.ValueCollectionFactory;
@@ -45,6 +46,7 @@ import org.eclipse.dltk.javascript.typeinfo.ITypeInfoContext;
 import org.eclipse.dltk.javascript.typeinfo.model.Element;
 import org.eclipse.dltk.javascript.typeinfo.model.JSType;
 import org.eclipse.dltk.javascript.typeinfo.model.Member;
+import org.eclipse.dltk.javascript.typeinfo.model.RecordType;
 import org.eclipse.dltk.javascript.typeinfo.model.Type;
 import org.eclipse.dltk.javascript.typeinfo.model.Visibility;
 
@@ -308,6 +310,14 @@ public class ValueCollectionProvider implements IMemberEvaluator
 							for (String child : children)
 							{
 								IValueReference chld = vc.getChild(child);
+								// check if this type is a type def that can be used in a subform.
+								// copy the record type over to the current context
+								Object variable = chld.getAttribute(IReferenceAttributes.VARIABLE);
+								if (variable instanceof JSVariable && ((JSVariable)variable).getTypeDef() instanceof RecordType)
+								{
+									RecordType type = (RecordType)((JSVariable)variable).getTypeDef();
+									context.registerRecordType(type);
+								}
 								chld.setAttribute(IReferenceAttributes.HIDE_ALLOWED, Boolean.TRUE);
 								// don't set the child to private if the form itself did also implement it.
 								if (form.getScriptMethod(child) == null && form.getScriptVariable(child) == null)
