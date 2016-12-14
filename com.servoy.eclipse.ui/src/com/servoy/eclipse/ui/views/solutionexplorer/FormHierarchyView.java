@@ -1,6 +1,7 @@
 package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
@@ -518,31 +520,23 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		{
 			treeProvider.setSelection((IPersist)object);
 
-			//tree.getTree().setRedraw(false);
+			tree.getTree().setRedraw(false);
 			tree.refresh();
-			tree.expandAll(); //TODO expand specific paths
-//			List<IPersist> toExpand = treeProvider.getLeavesToExpand();
-//			TreePath[] paths = new TreePath[toExpand.size()];
-//			int i = 0;
-//			List<IPersist> path = null;
-//			for (IPersist p : toExpand)
-//			{
-//				path = new ArrayList<IPersist>();
-//				path.add(p);
-//				Form parent = (Form)p.getParent();
-//				path.addAll(ModelUtils.getEditingFlattenedSolution(parent).getFormHierarchy(parent));
-//				Collections.reverse(path);
-//				//path.add(p);
-//				paths[i++] = new TreePath(path.toArray());
-//			}
-//			tree.getTree().setRedraw(true);
-//			//tree.refresh();
-//			tree.setExpandedTreePaths(paths);
-//			//tree.setExpandedElements(path.toArray());
-//			for (TreePath p : paths)
-//			{
-//				tree.setExpandedState(p, true);
-//			}
+			tree.expandAll();
+			List<IPersist> toExpand = treeProvider.getLeavesToExpand();
+			TreePath[] paths = new TreePath[toExpand.size()];
+			int i = 0;
+			for (IPersist p : toExpand)
+			{
+				Form parent = (Form)p.getParent();
+				List<IPersist> path = new ArrayList<IPersist>();
+				path.addAll(ModelUtils.getEditingFlattenedSolution(parent).getFormHierarchy(parent));
+				Collections.reverse(path);
+				paths[i++] = new TreePath(path.toArray());
+			}
+			tree.getTree().setRedraw(true);
+			tree.refresh();
+			tree.setExpandedTreePaths(paths);
 		}
 		list.refresh();
 
