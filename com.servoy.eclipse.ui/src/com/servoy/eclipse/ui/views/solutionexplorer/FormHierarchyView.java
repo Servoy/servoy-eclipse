@@ -2,8 +2,10 @@ package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.ToolBarManager;
@@ -421,6 +423,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private FormTreeContentProvider treeProvider;
 
 	private boolean showAllInheritedMembers;
+	private boolean noSelectionChange = false;
 
 	@Override
 	public void createPartControl(Composite parent)
@@ -568,6 +571,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	@Override
 	public void selectionChanged(SelectionChangedEvent event)
 	{
+		if (noSelectionChange) return;
 		ISelectionProvider selectionProvider = event.getSelectionProvider();
 		IStructuredSelection sel = (IStructuredSelection)selectionProvider.getSelection();
 		if (sel.size() == 1)
@@ -598,27 +602,33 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		else
 		{
 			treeProvider.setSelection((IPersist)object);
+			if (object == null)
+			{
+				tree.refresh();
+				return;
+			}
 
 			tree.getTree().setRedraw(false);
 			tree.refresh();
 			tree.expandAll();
 			List<IPersist> toExpand = treeProvider.getLeavesToExpand();
-			TreePath[] paths = new TreePath[toExpand.size()];
-			int i = 0;
+			Set<TreePath> paths = new HashSet<>();
 			for (IPersist p : toExpand)
 			{
 				Form parent = (Form)p.getParent();
 				List<IPersist> path = new ArrayList<IPersist>();
 				path.addAll(ModelUtils.getEditingFlattenedSolution(parent).getFormHierarchy(parent));
 				Collections.reverse(path);
-				paths[i++] = new TreePath(path.toArray());
+				paths.add(new TreePath(path.toArray()));
 			}
 			tree.getTree().setRedraw(true);
 			tree.refresh();
-			tree.setExpandedTreePaths(paths);
+			noSelectionChange = true;
+			tree.setExpandedTreePaths(paths.toArray(new TreePath[paths.size()]));
+			tree.setSelection(new StructuredSelection(object));
+			noSelectionChange = false;
 		}
 		list.refresh();
-
 	}
 
 	public void setOrientation(int o)
