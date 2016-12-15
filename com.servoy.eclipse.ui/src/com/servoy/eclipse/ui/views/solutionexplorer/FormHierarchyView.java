@@ -33,10 +33,20 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.ViewPart;
 
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ContextAction;
@@ -51,6 +61,7 @@ import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
@@ -479,6 +490,67 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				{
 					openAction.run();
 				}
+			}
+		});
+
+		list.addPostSelectionChangedListener(new ISelectionChangedListener()
+		{
+			@Override
+			public void selectionChanged(SelectionChangedEvent event)
+			{
+				if (openAction.isEnabled())
+				{
+					IPersist persist = null;
+					IStructuredSelection sel = (IStructuredSelection)event.getSelection();
+					Iterator< ? > it = sel.iterator();
+					if (it.hasNext())
+					{
+						Object next = it.next();
+						if (next instanceof ScriptMethod || next instanceof BaseComponent)
+						{
+							persist = (IPersist)next;
+						}
+					}
+					//if the editor is open, show persist in the editor
+					if (isEditorOpen(persist)) openAction.run();
+				}
+			}
+
+			private boolean isEditorOpen(IPersist persist)
+			{
+				if (persist == null) return false;
+				for (IWorkbenchWindow window : PlatformUI.getWorkbench().getWorkbenchWindows())
+				{
+					for (IWorkbenchPage page : window.getPages())
+					{
+						for (IEditorReference editor : page.getEditorReferences())
+						{
+							try
+							{
+								IEditorInput input = editor.getEditorInput();
+								if (input instanceof FileEditorInput && persist instanceof ScriptMethod)
+								{
+									FileEditorInput fileEditorInput = (FileEditorInput)input;
+									String path = SolutionSerializer.getScriptPath(persist.getParent(), false);
+									if (path.equals(
+										fileEditorInput.getFile().getProject().getName() + "/" + fileEditorInput.getFile().getProjectRelativePath().toString()))
+										return true;
+								}
+								if (input instanceof PersistEditorInput && persist instanceof BaseComponent)
+								{
+									PersistEditorInput persistEditorInput = (PersistEditorInput)input;
+									Form f = (Form)persist.getAncestor(IRepository.FORMS);
+									if (f.getUUID().equals(persistEditorInput.getUuid())) return true;
+								}
+							}
+							catch (PartInitException e)
+							{
+								ServoyLog.logError(e);
+							}
+						}
+					}
+				}
+				return false;
 			}
 		});
 
