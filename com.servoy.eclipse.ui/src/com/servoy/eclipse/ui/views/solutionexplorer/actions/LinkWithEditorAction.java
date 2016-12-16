@@ -230,7 +230,7 @@ public class LinkWithEditorAction extends Action
 					{
 						String packageName = file.getParent().getParent().getName();
 						String componentName = file.getParent().getName();
-						SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+						SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 						WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(packageName + "-" + componentName);
 						if (spec != null)
 						{
@@ -239,7 +239,7 @@ public class LinkWithEditorAction extends Action
 						}
 						else
 						{
-							spec = WebServiceSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(packageName + "-" + componentName);
+							spec = WebServiceSpecProvider.getSpecProviderState().getWebComponentSpecification(packageName + "-" + componentName);
 							if (spec != null)
 							{
 								tree.setSelection(new StructuredSelection(new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec, null)),

@@ -100,7 +100,7 @@ public class GhostHandler implements IServerService
 			{
 				if (FormTemplateGenerator.isWebcomponentBean(bean))
 				{
-					SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+					SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 					WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(bean.getTypeName());
 					if (spec == null)
 					{
@@ -553,7 +553,7 @@ public class GhostHandler implements IServerService
 			if (fe instanceof WebComponent && fe.getFlattenedPropertiesMap().containsKey("json"))
 			{
 				JSONObject obj = (JSONObject)fe.getFlattenedPropertiesMap().get("json");
-				WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(((WebComponent)fe).getTypeName());
+				WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(((WebComponent)fe).getTypeName());
 				if (spec != null && !spec.getProperties(VisiblePropertyType.INSTANCE).isEmpty())
 				{
 					PropertyDescription pd = spec.getProperties(VisiblePropertyType.INSTANCE).iterator().next();

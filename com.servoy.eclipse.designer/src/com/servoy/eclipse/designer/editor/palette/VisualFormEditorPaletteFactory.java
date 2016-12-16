@@ -879,7 +879,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 	@Override
 	protected void fillPalette(PaletteRoot palette)
 	{
-		componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+		componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 
 		PaletteCustomization defaultPaletteCustomization = getDefaultPaletteCustomization();
 		PaletteCustomization savedPaletteCustomization = new DesignerPreferences().getPaletteCustomization();

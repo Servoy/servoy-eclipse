@@ -399,7 +399,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 			// open newly created form in the editor (as new editor)
 			boolean returnValue = EditorUtil.openFormDesignEditor(form, true, true) != null;
 
-			if (form.isResponsiveLayout() && WebComponentSpecProvider.getInstance().getSpecProviderState().getLayoutSpecifications().isEmpty())
+			if (form.isResponsiveLayout() && WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().isEmpty())
 			{
 				final MessageDialog dialog = new MessageDialog(getShell(), "No Responsive Layout present", null,
 					"This solution does not have a responsive layout yet. You need a responsive layout to build responsive form, do you want to download a responsive layout now ?",

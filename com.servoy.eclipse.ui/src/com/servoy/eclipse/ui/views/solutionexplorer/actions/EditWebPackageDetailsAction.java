@@ -136,7 +136,7 @@ public class EditWebPackageDetailsAction extends Action implements ISelectionCha
 			return false;
 		}
 
-		SpecProviderState specProviderState = componentsNotServices ? WebComponentSpecProvider.getInstance().getSpecProviderState() : WebServiceSpecProvider.getInstance().getSpecProviderState();
+		SpecProviderState specProviderState = componentsNotServices ? WebComponentSpecProvider.getSpecProviderState() : WebServiceSpecProvider.getSpecProviderState();
 		for (PackageSpecification<WebObjectSpecification> p : specProviderState.getWebObjectSpecifications().values())
 		{
 			if (p.getPackageDisplayname().equals(packageDisplayName))

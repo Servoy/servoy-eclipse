@@ -105,8 +105,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard:" + activeProject.getSolution().getName());
 		setDialogSettings(section);
 		setNeedsProgressMonitor(true);
-		this.componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
-		this.servicesSpecProviderState = WebServiceSpecProvider.getInstance().getSpecProviderState();
+		this.componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
+		this.servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)

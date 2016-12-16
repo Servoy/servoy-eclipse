@@ -336,7 +336,7 @@ public class ElementFactory
 	public static IPersist createWebComponent(Form parent, String name, Point location) throws RepositoryException
 	{
 		WebComponent webComponent = null;
-		WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(name);
+		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(name);
 		if (spec != null)
 		{
 			String compName = null;

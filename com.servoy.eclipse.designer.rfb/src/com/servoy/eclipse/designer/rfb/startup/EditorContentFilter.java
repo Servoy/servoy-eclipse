@@ -97,7 +97,7 @@ public class EditorContentFilter implements Filter
 				variableSubstitution.put("orientation", String.valueOf(0)); // fs.getSolution().getTextOrientation()
 				ArrayList<String> css = new ArrayList<String>();
 				css.add("css/servoy.css");
-				SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+				SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 				for (PackageSpecification<WebLayoutSpecification> entry : componentsSpecProviderState.getLayoutSpecifications().values())
 				{
 					if (entry.getCssDesignLibrary() != null)

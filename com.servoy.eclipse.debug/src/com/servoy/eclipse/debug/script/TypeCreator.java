@@ -471,9 +471,9 @@ public class TypeCreator extends TypeCache
 	private void createSpecTypeDefinitions()
 	{
 		specTypesCreated = true;
-		WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getInstance().getSpecProviderState().getAllWebComponentSpecifications();
+		WebObjectSpecification[] webComponentSpecifications = WebComponentSpecProvider.getSpecProviderState().getAllWebComponentSpecifications();
 		WebObjectSpecification[] webServiceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList(
-			WebServiceSpecProvider.getInstance().getSpecProviderState());
+			WebServiceSpecProvider.getSpecProviderState());
 		Collection<WebObjectSpecification> specs = new ArrayList<WebObjectSpecification>();
 		Collections.addAll(specs, webComponentSpecifications);
 		Collections.addAll(specs, webServiceSpecifications);
@@ -2833,7 +2833,7 @@ public class TypeCreator extends TypeCache
 			if (clientSupport != null && clientSupport.supports(ClientSupport.ng))
 			{
 				WebObjectSpecification[] serviceSpecifications = NGUtils.getAllWebServiceSpecificationsThatCanBeAddedToJavaPluginsList(
-					WebServiceSpecProvider.getInstance().getSpecProviderState());
+					WebServiceSpecProvider.getSpecProviderState());
 				for (WebObjectSpecification spec : serviceSpecifications)
 				{
 					if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)

@@ -163,12 +163,12 @@ public class ModelUtils
 		WebObjectSpecification spec = null;
 		if (persist instanceof IFormElement)
 		{
-			spec = WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(
+			spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
 				FormTemplateGenerator.getComponentTypeName((IFormElement)persist));
 		}
 		else if (persist instanceof LayoutContainer)
 		{
-			PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getSpecProviderState().getLayoutSpecifications().get(
+			PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
 				((LayoutContainer)persist).getPackageName());
 			if (pkg != null)
 			{

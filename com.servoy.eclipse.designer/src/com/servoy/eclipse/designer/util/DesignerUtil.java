@@ -326,7 +326,7 @@ public class DesignerUtil
 
 	private static void fillAllowedChildrenInternal(AllowChildrenMapFiller mapFiller)
 	{
-		Collection<PackageSpecification<WebLayoutSpecification>> packs = WebComponentSpecProvider.getInstance().getSpecProviderState().getLayoutSpecifications().values();
+		Collection<PackageSpecification<WebLayoutSpecification>> packs = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().values();
 		for (PackageSpecification<WebLayoutSpecification> pack : packs)
 		{
 			for (WebLayoutSpecification spec : pack.getSpecifications().values())
