@@ -23,6 +23,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.IServerInternal;
@@ -92,18 +93,7 @@ public class NewPostgresDbAction extends AbstractNewDbAction
 		try
 		{
 			ServerConfig origConfig = serverPrototype.getConfig();
-			String dbname = null;
-			String serverUrl = origConfig.getServerUrl();
-			int startIndex = serverUrl.lastIndexOf("/");
-			int endIndex = serverUrl.indexOf("?", startIndex);
-			if (endIndex == -1) endIndex = serverUrl.length();
-			dbname = serverUrl.substring(startIndex + 1, endIndex);
-			if (dbname != null) serverUrl = serverUrl.replaceFirst("/" + dbname, "/" + name);
-			if (serverUrl.equals(origConfig.getServerUrl()))
-			{
-				// hmm, no replace, fall back to default
-				serverUrl = "jdbc:postgresql://localhost/" + name;
-			}
+			String serverUrl = DatabaseUtils.getPostgresServerUrl(origConfig, name);
 			final IServerManagerInternal serverManager = ServoyModel.getServerManager();
 			String configName = name;
 			for (int i = 1; serverManager.getServerConfig(configName) != null && i < 100; i++)

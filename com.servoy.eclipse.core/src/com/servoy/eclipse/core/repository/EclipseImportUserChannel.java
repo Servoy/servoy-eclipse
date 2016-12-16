@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.core.repository;
 
+import java.sql.PreparedStatement;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,13 +37,17 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.DatabaseUtils;
 import com.servoy.eclipse.core.util.OptionDialog;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.RepositoryHelper;
+import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.ILogLevel;
+import com.servoy.j2db.util.ITransactionConnection;
 import com.servoy.j2db.util.LogUtils;
 import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
@@ -83,9 +88,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	{
 		if (allowSQLKeywords == null)
 		{
-			allowSQLKeywords = Boolean.valueOf(UIUtils.askConfirmation(
-				shell,
-				"SQL Keywords",
+			allowSQLKeywords = Boolean.valueOf(UIUtils.askConfirmation(shell, "SQL Keywords",
 				"SQL keywords are used in this solution as table or column names.\nDo you want to try and import the solution anyway?\n(This will fail unless supported by the backend database)"));
 		}
 		return allowSQLKeywords.booleanValue() ? OK_ACTION : CANCEL_ACTION;
@@ -155,9 +158,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	{
 		if (skipDatabaseViewsUpdate == null)
 		{
-			skipDatabaseViewsUpdate = !Boolean.valueOf(UIUtils.askConfirmation(
-				shell,
-				"Database View Import",
+			skipDatabaseViewsUpdate = !Boolean.valueOf(UIUtils.askConfirmation(shell, "Database View Import",
 				"Database View was encountered during import. Servoy cannot create/update database views. Do you want to create/update views as database tables? (Table Info will be imported no matter what you choose)"));
 		}
 		return skipDatabaseViewsUpdate.booleanValue();
@@ -224,16 +225,16 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	public int askRenameRootObjectAction(final String name, final int objectTypeId)
 	{
 		String objectType = Utils.stringInitCap(RepositoryHelper.getObjectTypeName(objectTypeId));
-		final InputDialog nameDialog = new InputDialog(shell, objectType + " exists", objectType + " with name '" + name +
-			"' already exists(or you choose clean import), specify new name:", "", new IInputValidator()
-		{
-			public String isValid(String newText)
+		final InputDialog nameDialog = new InputDialog(shell, objectType + " exists",
+			objectType + " with name '" + name + "' already exists(or you choose clean import), specify new name:", "", new IInputValidator()
 			{
-				if (!IdentDocumentValidator.isJavaIdentifier(newText)) return "Invalid name.";
-				if (newText != null && newText.length() > IRepository.MAX_ROOT_OBJECT_NAME_LENGTH) return "Name too long.";
-				return null;
-			}
-		});
+				public String isValid(String newText)
+				{
+					if (!IdentDocumentValidator.isJavaIdentifier(newText)) return "Invalid name.";
+					if (newText != null && newText.length() > IRepository.MAX_ROOT_OBJECT_NAME_LENGTH) return "Name too long.";
+					return null;
+				}
+			});
 
 		Display.getDefault().syncExec(new Runnable()
 		{
@@ -275,8 +276,8 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		}
 		final OptionDialog optionDialog = new OptionDialog(shell, "Select server for import user data", null,
 			"Please select server to be used for importing user data that were exported from a server with name : " + importServerName +
-				"\n\nIf you want to import into a new server, please press skip, create the new server and restart the import.", MessageDialog.QUESTION,
-			new String[] { "OK", "Skip" }, 0, serverNames, selectedServerIdx);
+				"\n\nIf you want to import into a new server, please press skip, create the new server and restart the import.",
+			MessageDialog.QUESTION, new String[] { "OK", "Skip" }, 0, serverNames, selectedServerIdx);
 		Display.getDefault().syncExec(new Runnable()
 		{
 			public void run()
@@ -327,8 +328,8 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		{
 			return rootObjectsMap.get(name);
 		}
-		final MessageDialog dialog = new MessageDialog(shell, "Style/Solution '" + name + "' already exists", null, "Style/Solution '" + name +
-			"' exists in the workspace. Do you want to overwrite it or skip its import?", MessageDialog.WARNING,
+		final MessageDialog dialog = new MessageDialog(shell, "Style/Solution '" + name + "' already exists", null,
+			"Style/Solution '" + name + "' exists in the workspace. Do you want to overwrite it or skip its import?", MessageDialog.WARNING,
 			new String[] { "Overwrite", "Skip", "Overwrite all", "Skip all" }, 0);
 		Display.getDefault().syncExec(new Runnable()
 		{
@@ -359,7 +360,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		}
 	}
 
-	public int askUnknownServerAction(String name)
+	public int askUnknownServerAction(final String name)
 	{
 		try
 		{
@@ -372,9 +373,10 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 			{
 				ServoyModelManager.getServoyModelManager().getServoyModel();
 				String[] serverNames = ServoyModel.getServerManager().getServerNames(true, true, true, false);
-				final OptionDialog optionDialog = new OptionDialog(shell, "Server not found", null, "Server with name '" + name +
-					"' is not found, but used by the import solution, select another server to use or press cancel to define the server first",
-					MessageDialog.WARNING, new String[] { "OK", "Cancel" }, 0, serverNames, 0);
+				final OptionDialog optionDialog = new OptionDialog(shell, "Server '" + name + "'not found", null,
+					"Server with name '" + name +
+						"' is not found, but used by the import solution, select another server to use, try to create a new server or press cancel to cancel import and define the server first.",
+					MessageDialog.WARNING, new String[] { "OK", "Create Server", "Cancel" }, 0, serverNames, 0);
 				Display.getDefault().syncExec(new Runnable()
 				{
 					public void run()
@@ -382,6 +384,70 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 						retval = optionDialog.open();
 					}
 				});
+				if (retval == 1)
+				{
+					// create server
+					ServerConfig[] serverConfigs = ServoyModel.getServerManager().getServerConfigs();
+					for (ServerConfig sc : serverConfigs)
+					{
+						if (sc.isEnabled() && sc.isPostgresDriver())
+						{
+							IServerInternal serverPrototype = (IServerInternal)ServoyModel.getServerManager().getServer(sc.getServerName());
+							if (serverPrototype != null && serverPrototype.isValid())
+							{
+								ITransactionConnection connection = null;
+								PreparedStatement ps = null;
+								try
+								{
+									connection = serverPrototype.getUnmanagedConnection();
+									ps = connection.prepareStatement("CREATE DATABASE \"" + name + "\" WITH ENCODING 'UNICODE';");
+									ps.execute();
+									ps.close();
+									ps = null;
+								}
+								catch (Exception e)
+								{
+									ServoyLog.logError(e);
+								}
+								finally
+								{
+									Utils.closeConnection(connection);
+									Utils.closeStatement(ps);
+								}
+
+								String configName = name;
+								for (int i = 1; ServoyModel.getServerManager().getServerConfig(configName) != null && i < 100; i++)
+								{
+									configName = name + i;
+								}
+
+								ServerConfig serverConfig = new ServerConfig(configName, sc.getUserName(), sc.getPassword(),
+									DatabaseUtils.getPostgresServerUrl(sc, configName), sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null,
+									sc.getMaxActive(), sc.getMaxIdle(), sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(),
+									sc.getValidationQuery(), null, true, false, -1, sc.getDialectClass());
+
+								try
+								{
+									ServoyModel.getServerManager().saveServerConfig(null, serverConfig);
+								}
+								catch (Exception ex)
+								{
+									ServoyLog.logError(ex);
+									Display.getDefault().syncExec(new Runnable()
+									{
+										public void run()
+										{
+											MessageDialog.openError(shell, "Cannot create server '" + name + "'",
+												"An unexpected error occured while creating new server, please select an existing server or create server manually.");
+										}
+									});
+								}
+							}
+							break;
+						}
+					}
+					return RETRY_ACTION;
+				}
 				if (retval == Window.OK)
 				{
 					s = serverNames[optionDialog.getSelectedOption()];
@@ -484,8 +550,8 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		private boolean insertNewKeys;
 		private Button insertNewKeysButton;
 
-		public I18NDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage, int dialogImageType,
-			String[] dialogButtonLabels, int defaultIndex)
+		public I18NDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage, int dialogImageType, String[] dialogButtonLabels,
+			int defaultIndex)
 		{
 			super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, dialogButtonLabels, defaultIndex);
 			setBlockOnOpen(true);
@@ -547,9 +613,9 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 		private void fillValues()
 		{
 			addUsersToAdminGroup = addUsersToAdminGroupButton.getSelection();
-			userImportPolicy = new Integer(updateUsers.getSelection() ? IXMLImportUserChannel.IMPORT_USER_POLICY_CREATE_U_UPDATE_G
-				: (overwriteUsers.getSelection() ? IXMLImportUserChannel.IMPORT_USER_POLICY_OVERWRITE_COMPLETELY
-					: IXMLImportUserChannel.IMPORT_USER_POLICY_DONT));
+			userImportPolicy = new Integer(
+				updateUsers.getSelection() ? IXMLImportUserChannel.IMPORT_USER_POLICY_CREATE_U_UPDATE_G : (overwriteUsers.getSelection()
+					? IXMLImportUserChannel.IMPORT_USER_POLICY_OVERWRITE_COMPLETELY : IXMLImportUserChannel.IMPORT_USER_POLICY_DONT));
 		}
 
 		@Override
@@ -597,8 +663,8 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 	{
 		if (allowDataModelChanges == null)
 		{
-			allowDataModelChanges = Boolean.valueOf(UIUtils.askConfirmation(shell, "Allow Database Change",
-				"Do you want to change database structure as in import file?"));
+			allowDataModelChanges = Boolean.valueOf(
+				UIUtils.askConfirmation(shell, "Allow Database Change", "Do you want to change database structure as in import file?"));
 		}
 		return allowDataModelChanges.booleanValue() ? OK_ACTION : CANCEL_ACTION;
 	}
@@ -614,8 +680,8 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 
 	public String askProtectionPassword(String solutionName)
 	{
-		return UIUtils.showPasswordDialog(shell, "Solution '" + solutionName + "' is password protected", "Please enter protection password for solution : '" +
-			solutionName + '\'', "", null);
+		return UIUtils.showPasswordDialog(shell, "Solution '" + solutionName + "' is password protected",
+			"Please enter protection password for solution : '" + solutionName + '\'', "", null);
 
 	}
 

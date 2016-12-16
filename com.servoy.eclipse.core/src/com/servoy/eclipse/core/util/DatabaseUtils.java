@@ -42,6 +42,7 @@ import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.ServerConfig;
 import com.servoy.j2db.persistence.Table;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.util.xmlxport.ColumnInfoDef;
@@ -318,5 +319,22 @@ public final class DatabaseUtils
 			}
 		}
 		return type;
+	}
+
+	public static String getPostgresServerUrl(ServerConfig origConfig, String name)
+	{
+		String dbname = null;
+		String serverUrl = origConfig.getServerUrl();
+		int startIndex = serverUrl.lastIndexOf("/");
+		int endIndex = serverUrl.indexOf("?", startIndex);
+		if (endIndex == -1) endIndex = serverUrl.length();
+		dbname = serverUrl.substring(startIndex + 1, endIndex);
+		if (dbname != null) serverUrl = serverUrl.replaceFirst("/" + dbname, "/" + name);
+		if (serverUrl.equals(origConfig.getServerUrl()))
+		{
+			// hmm, no replace, fall back to default
+			serverUrl = "jdbc:postgresql://localhost/" + name;
+		}
+		return serverUrl;
 	}
 }
