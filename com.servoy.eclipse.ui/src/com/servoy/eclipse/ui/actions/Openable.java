@@ -21,6 +21,8 @@ import java.util.Map;
 
 import org.eclipse.ui.IActionFilter;
 
+import com.servoy.eclipse.ui.actions.Openable.OpenableScriptMethod.OpenableComponent;
+import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
@@ -72,6 +74,10 @@ public class Openable implements IActionFilter
 			if (persist instanceof ScriptMethod)
 			{
 				return new OpenableScriptMethod((ScriptMethod)persist);
+			}
+			if (persist instanceof BaseComponent)
+			{
+				return new OpenableComponent((BaseComponent)persist);
 			}
 			Form form = (Form)persist.getAncestor(IRepository.FORMS);
 			if (form != null)
@@ -125,6 +131,20 @@ public class Openable implements IActionFilter
 		public ScriptMethod getData()
 		{
 			return (ScriptMethod)super.getData();
+		}
+
+		public static class OpenableComponent extends Openable
+		{
+			public OpenableComponent(BaseComponent data)
+			{
+				super(data);
+			}
+
+			@Override
+			public BaseComponent getData()
+			{
+				return (BaseComponent)super.getData();
+			}
 		}
 	}
 }

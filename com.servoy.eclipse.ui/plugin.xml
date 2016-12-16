@@ -757,6 +757,16 @@
             <adapter type="com.servoy.eclipse.ui.actions.Openable"/>
       </factory>
       <factory
+            adaptableType="com.servoy.j2db.persistence.ScriptMethod"
+            class="com.servoy.eclipse.ui.views.solutionexplorer.SimpleUserNodeAdapterFactory">
+            <adapter type="com.servoy.eclipse.ui.actions.Openable"/>
+      </factory>
+      <factory
+            adaptableType="com.servoy.j2db.persistence.BaseComponent"
+            class="com.servoy.eclipse.ui.views.solutionexplorer.SimpleUserNodeAdapterFactory">
+            <adapter type="com.servoy.eclipse.ui.actions.Openable"/>
+      </factory>
+      <factory
             adaptableType="org.eclipse.ui.IEditorPart"
             class="com.servoy.eclipse.ui.views.solutionexplorer.SimpleUserNodeAdapterFactory">
             <adapter type="com.servoy.eclipse.ui.actions.Openable"/>

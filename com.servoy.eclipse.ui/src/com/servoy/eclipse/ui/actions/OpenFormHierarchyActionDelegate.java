@@ -23,7 +23,9 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView;
+import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.util.Debug;
 
 /**
@@ -38,7 +40,7 @@ public class OpenFormHierarchyActionDelegate extends AbstractFormSelectionAction
 		if (lst.size() == 1)
 		{
 			Object obj = lst.get(0).getData();
-			if (obj instanceof Form)
+			if (obj instanceof Form || obj instanceof ScriptMethod || obj instanceof BaseComponent)
 			{
 				return true;
 			}
@@ -50,7 +52,7 @@ public class OpenFormHierarchyActionDelegate extends AbstractFormSelectionAction
 	public void open(Openable openable)
 	{
 		Object obj = openable.getData();
-		if (obj instanceof Form)
+		if (obj instanceof Form || obj instanceof ScriptMethod || obj instanceof BaseComponent)
 		{
 			try
 			{
