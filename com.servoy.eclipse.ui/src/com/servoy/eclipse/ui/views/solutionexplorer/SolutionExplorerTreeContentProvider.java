@@ -252,10 +252,10 @@ public class SolutionExplorerTreeContentProvider
 			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib), //
 			createTypeNode(Messages.TreeStrings_SpecialOperators, UserNodeType.SPECIAL_OPERATORS,
 				com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, jslib), //
-				createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
-				createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
-				createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
-					jslib) };
+			createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
+			createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
+			createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
+				jslib) };
 
 		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, invisibleRootNode);
 
@@ -412,9 +412,9 @@ public class SolutionExplorerTreeContentProvider
 
 	private SpecProviderState getComponentsSpecProviderState()
 	{
-		if (componentsSpecProviderState == null && WebComponentSpecProvider.getInstance() != null)
+		if (componentsSpecProviderState == null)
 		{
-			componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+			componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 		}
 		return componentsSpecProviderState;
 	}
@@ -426,9 +426,9 @@ public class SolutionExplorerTreeContentProvider
 
 	private SpecProviderState getServicesSpecProviderState()
 	{
-		if (servicesSpecProviderState == null && WebServiceSpecProvider.getInstance() != null)
+		if (servicesSpecProviderState == null)
 		{
-			servicesSpecProviderState = WebServiceSpecProvider.getInstance().getSpecProviderState();
+			servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
 		}
 
 		return servicesSpecProviderState;

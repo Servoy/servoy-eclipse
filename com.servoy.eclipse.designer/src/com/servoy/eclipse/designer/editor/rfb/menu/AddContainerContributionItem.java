@@ -55,7 +55,7 @@ public class AddContainerContributionItem extends CompoundContributionItem
 		if (persistContext != null) persist = persistContext.getPersist();
 		if (persist instanceof LayoutContainer)
 		{
-			PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getInstance().getSpecProviderState().getLayoutSpecifications().get(
+			PackageSpecification<WebLayoutSpecification> specifications = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
 				((LayoutContainer)persist).getPackageName());
 			if (specifications != null)
 			{
@@ -117,7 +117,7 @@ public class AddContainerContributionItem extends CompoundContributionItem
 		}
 		else if (persist instanceof Form)
 		{
-			Collection<PackageSpecification<WebLayoutSpecification>> values = WebComponentSpecProvider.getInstance().getSpecProviderState().getLayoutSpecifications().values();
+			Collection<PackageSpecification<WebLayoutSpecification>> values = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().values();
 			for (PackageSpecification<WebLayoutSpecification> specifications : values)
 			{
 				for (WebLayoutSpecification specification : specifications.getSpecifications().values())
@@ -132,7 +132,7 @@ public class AddContainerContributionItem extends CompoundContributionItem
 		}
 		else if (persist instanceof WebComponent)
 		{
-			WebObjectSpecification spec = WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(
+			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
 				((WebComponent)persist).getTypeName());
 			Map<String, PropertyDescription> properties = spec.getProperties();
 			for (PropertyDescription propertyDescription : properties.values())

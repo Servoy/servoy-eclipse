@@ -104,7 +104,7 @@ public class DesignerFilter implements Filter
 			String formName = request.getParameter("formName");
 			if (uri != null && uri.endsWith("palette"))
 			{
-				SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+				SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 
 				((HttpServletResponse)servletResponse).setContentType("application/json");
 

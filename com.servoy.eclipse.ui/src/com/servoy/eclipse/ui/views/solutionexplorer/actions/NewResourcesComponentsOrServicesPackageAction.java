@@ -225,11 +225,11 @@ public class NewResourcesComponentsOrServicesPackageAction extends Action
 		SpecProviderState specProviderState;
 		if (node.getType() == UserNodeType.SERVICES_FROM_RESOURCES)
 		{
-			specProviderState = WebServiceSpecProvider.getInstance().getSpecProviderState();
+			specProviderState = WebServiceSpecProvider.getSpecProviderState();
 		}
 		else
 		{
-			specProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+			specProviderState = WebComponentSpecProvider.getSpecProviderState();
 		}
 		for (PackageSpecification<WebObjectSpecification> p : specProviderState.getWebObjectSpecifications().values())
 		{

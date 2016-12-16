@@ -156,8 +156,8 @@ public abstract class BaseNGPackageManager
 	public List<IPackageReader> getAllPackageReaders()
 	{
 		List<IPackageReader> all = new ArrayList<>();
-		all.addAll(Arrays.asList(WebComponentSpecProvider.getInstance().getSpecProviderState().getAllPackageReaders()));
-		all.addAll(Arrays.asList(WebServiceSpecProvider.getInstance().getSpecProviderState().getAllPackageReaders()));
+		all.addAll(Arrays.asList(WebComponentSpecProvider.getSpecProviderState().getAllPackageReaders()));
+		all.addAll(Arrays.asList(WebServiceSpecProvider.getSpecProviderState().getAllPackageReaders()));
 		return all;
 	}
 
@@ -283,7 +283,7 @@ public abstract class BaseNGPackageManager
 			}
 
 
-			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 			for (String packageName : packagesToUnload)
 			{
 				if (notContainedByOtherProjectsAfterUnloads(projectName, packageName, ngPackageChangesPerReferencingProject))

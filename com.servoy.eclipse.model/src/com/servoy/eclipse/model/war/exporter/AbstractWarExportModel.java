@@ -182,7 +182,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 						{
 							if (node.getExpression().getChilds().size() > 0)
 							{
-								SpecProviderState servicesSpecProviderState = WebServiceSpecProvider.getInstance().getSpecProviderState();
+								SpecProviderState servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
 								String expr = node.getExpression().getChilds().get(0).toString();
 								if (expr.startsWith("plugins."))
 								{
@@ -200,7 +200,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 										if (componentName.startsWith("\"") || componentName.startsWith("'"))
 										{
 											componentName = componentName.replaceAll("'|\"", "");
-											if (WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(componentName) != null)
+											if (WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(componentName) != null)
 											{
 												usedComponents.add(componentName);
 											}

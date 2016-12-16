@@ -70,8 +70,8 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	public JSONArray executeMethod(JSONObject msg)
 	{
 		String activeSolutionName = ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
-		SpecProviderState componentSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
-		SpecProviderState serviceSpecProviderState = WebServiceSpecProvider.getInstance().getSpecProviderState();
+		SpecProviderState componentSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
+		SpecProviderState serviceSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
 		JSONArray result = new JSONArray();
 		try
 		{

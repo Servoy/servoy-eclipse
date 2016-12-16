@@ -305,7 +305,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 
 						if (targetLayoutContainer instanceof LayoutContainer)
 						{
-							PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getSpecProviderState().getLayoutSpecifications().get(
+							PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
 								((LayoutContainer)targetLayoutContainer).getPackageName());
 							WebLayoutSpecification spec = null;
 							if (pkg != null && (spec = pkg.getSpecification(((LayoutContainer)targetLayoutContainer).getSpecName())) != null)
@@ -328,7 +328,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 										}
 										else if (p instanceof WebComponent)
 										{
-											WebObjectSpecification pSpec = WebComponentSpecProvider.getInstance().getSpecProviderState().getWebComponentSpecification(
+											WebObjectSpecification pSpec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
 												((WebComponent)p).getTypeName());
 											sourcePackage = pSpec.getPackageName() + ".*";
 											sourceType = pSpec.getPackageName() + "." + ((WebComponent)p).getTypeName();
@@ -373,7 +373,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 									if (p instanceof LayoutContainer)
 									{
 										WebLayoutSpecification spec = null;
-										PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getInstance().getSpecProviderState().getLayoutSpecifications().get(
+										PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
 											((LayoutContainer)p).getPackageName());
 										if (pkg != null)
 										{

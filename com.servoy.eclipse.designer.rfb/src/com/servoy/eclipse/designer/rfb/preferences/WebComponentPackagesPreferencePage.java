@@ -37,14 +37,14 @@ public class WebComponentPackagesPreferencePage extends FieldEditorPreferencePag
 		for (String packageName : defaultPackageNames)
 		{
 			String displayName = packageName;
-			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 			if (componentsSpecProviderState.getPackageDisplayName(packageName) != null)
 			{
 				displayName = componentsSpecProviderState.getPackageDisplayName(packageName);
 			}
 			else
 			{
-				SpecProviderState servicesSpecProviderState = WebServiceSpecProvider.getInstance().getSpecProviderState();
+				SpecProviderState servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
 				if (servicesSpecProviderState.getPackageDisplayName(packageName) != null)
 				{
 					displayName = servicesSpecProviderState.getPackageDisplayName(packageName);

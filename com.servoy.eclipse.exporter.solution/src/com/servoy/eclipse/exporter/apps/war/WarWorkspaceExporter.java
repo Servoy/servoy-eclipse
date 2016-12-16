@@ -454,8 +454,8 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 	@Override
 	protected void exportActiveSolution(final WarArgumentChest configuration)
 	{
-		SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
-		SpecProviderState servicesSpecProviderState = WebServiceSpecProvider.getInstance().getSpecProviderState();
+		SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
+		SpecProviderState servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
 		WarExporter warExporter = new WarExporter(new CommandLineWarExportModel(configuration, componentsSpecProviderState, servicesSpecProviderState), componentsSpecProviderState,
 			servicesSpecProviderState);
 		try

@@ -768,7 +768,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	{
 		try
 		{
-			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getInstance().getSpecProviderState();
+			SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 
 			if (resource instanceof IFile && resource.getName().endsWith(".js"))
 			{
