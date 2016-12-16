@@ -240,9 +240,11 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 				ApplicationServerRegistry.get().getServerManager().getDriversDir(), exportModel.getDrivers(), new String[] { "hsqldb.jar" },
 				getDialogSettings().get("export.drivers") == null, false);
 			lafSelectionPage = new DirectorySelectionPage("lafpage", "Choose the lafs to export", "Select the lafs that you want to use in the war",
-				ApplicationServerRegistry.get().getLafManager().getLAFDir(), exportModel.getLafs(), null, getDialogSettings().get("export.lafs") == null, false);
+				ApplicationServerRegistry.get().getLafManager().getLAFDir(), exportModel.getLafs(), null, getDialogSettings().get("export.lafs") == null,
+				false);
 			beanSelectionPage = new DirectorySelectionPage("beanpage", "Choose the beans to export", "Select the beans that you want to use in the war",
-				ApplicationServerRegistry.get().getBeanManager().getBeansDir(), exportModel.getBeans(), null, getDialogSettings().get("export.beans") == null,false);
+				ApplicationServerRegistry.get().getBeanManager().getBeansDir(), exportModel.getBeans(), null, getDialogSettings().get("export.beans") == null,
+				false);
 			pluginSelectionPage = new DirectorySelectionPage("pluginpage", "Choose the plugins to export", "Select the plugins that you want to use in the war",
 				ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), exportModel.getPlugins(), null,
 				getDialogSettings().get("export.plugins") == null, true);
@@ -252,13 +254,13 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 			addPage(beanSelectionPage);
 			addPage(lafSelectionPage);
 			addPage(driverSelectionPage);
+			addPage(componentsSelectionPage);
+			addPage(servicesSelectionPage);
 			addPage(defaultAdminConfigurationPage);
 			addPage(servoyPropertiesSelectionPage);
 			addPage(servoyPropertiesConfigurationPage);
-			addPage(serversSelectionPage);
-			addPage(componentsSelectionPage);
-			addPage(servicesSelectionPage);
 			addPage(licenseConfigurationPage);
+			addPage(serversSelectionPage);
 
 			String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, true, false);
 			ArrayList<String> srvNames = new ArrayList<String>(Arrays.asList(serverNames));
