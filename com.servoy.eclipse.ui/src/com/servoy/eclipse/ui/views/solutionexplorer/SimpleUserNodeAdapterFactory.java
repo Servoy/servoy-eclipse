@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dltk.internal.core.SourceMethod;
 import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.sablo.specification.Package.IPackageReader;
@@ -55,6 +56,7 @@ import com.servoy.eclipse.ui.preferences.TeamPreferences;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IServerInternal;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.StringResource;
 import com.servoy.j2db.persistence.Style;
@@ -462,9 +464,14 @@ public class SimpleUserNodeAdapterFactory implements IAdapterFactory
 					case FORM_CONTROLLER :
 					case FORM_VARIABLES :
 					case FORM_METHOD :
+					case FORM_ELEMENTS_ITEM :
 						return Openable.getOpenable(userNode.getRealObject());
 					default :
 				}
+			}
+			if (adaptableObject instanceof ScriptMethod || adaptableObject instanceof SourceMethod)
+			{
+				return Openable.getOpenable(adaptableObject);
 			}
 		}
 		else if (adapterType == IProject.class)

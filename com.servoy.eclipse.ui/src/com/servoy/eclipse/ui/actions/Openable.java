@@ -19,9 +19,11 @@ package com.servoy.eclipse.ui.actions;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.dltk.internal.core.SourceMethod;
 import org.eclipse.ui.IActionFilter;
 
-import com.servoy.eclipse.ui.actions.Openable.OpenableScriptMethod.OpenableComponent;
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -89,6 +91,16 @@ public class Openable implements IActionFilter
 		{
 			return new OpenableGlobalScope((Pair<Solution, String>)data);
 		}
+		if (data instanceof SourceMethod)
+		{
+			SourceMethod method = (SourceMethod)data;
+			FlattenedSolution fs = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getEditingFlattenedSolution();
+			Form f = fs.getForm(method.getParent().getElementName().replace(".js", ""));
+			if (f != null && f.getScriptMethod(method.getElementName()) != null)
+			{
+				return new OpenableScriptMethod(f.getScriptMethod(method.getElementName()));
+			}
+		}
 		return new Openable(data);
 	}
 
@@ -132,19 +144,19 @@ public class Openable implements IActionFilter
 		{
 			return (ScriptMethod)super.getData();
 		}
+	}
 
-		public static class OpenableComponent extends Openable
+	public static class OpenableComponent extends Openable
+	{
+		public OpenableComponent(BaseComponent data)
 		{
-			public OpenableComponent(BaseComponent data)
-			{
-				super(data);
-			}
+			super(data);
+		}
 
-			@Override
-			public BaseComponent getData()
-			{
-				return (BaseComponent)super.getData();
-			}
+		@Override
+		public BaseComponent getData()
+		{
+			return (BaseComponent)super.getData();
 		}
 	}
 }

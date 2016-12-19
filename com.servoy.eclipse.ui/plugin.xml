@@ -767,6 +767,11 @@
             <adapter type="com.servoy.eclipse.ui.actions.Openable"/>
       </factory>
       <factory
+            adaptableType="org.eclipse.dltk.internal.core.SourceMethod"
+            class="com.servoy.eclipse.ui.views.solutionexplorer.SimpleUserNodeAdapterFactory">
+            <adapter type="com.servoy.eclipse.ui.actions.Openable"/>
+      </factory>
+      <factory
             adaptableType="org.eclipse.ui.IEditorPart"
             class="com.servoy.eclipse.ui.views.solutionexplorer.SimpleUserNodeAdapterFactory">
             <adapter type="com.servoy.eclipse.ui.actions.Openable"/>
@@ -865,9 +870,17 @@
                tooltip="Open form hierarchy">
          </action>
          <visibility>
-            <objectClass
-               name="com.servoy.eclipse.ui.actions.Openable$OpenableForm">
-            </objectClass>
+            <or>
+	            <objectClass
+	               name="com.servoy.eclipse.ui.actions.Openable$OpenableForm">
+	            </objectClass>
+	            <objectClass
+	               name="com.servoy.eclipse.ui.actions.Openable$OpenableScriptMethod">
+	            </objectClass>
+	             <objectClass
+	               name="com.servoy.eclipse.ui.actions.Openable$OpenableComponent">
+	            </objectClass>
+            </or>
          </visibility>
       </objectContribution>
    </extension>

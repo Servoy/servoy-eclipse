@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
@@ -33,12 +34,13 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IPersist;
 
 /**
  * Abstract base class for menu object contributions and command actions that work on a form.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 public abstract class AbstractFormSelectionActionDelegate implements IWorkbenchWindowActionDelegate, IObjectActionDelegate
 {
@@ -54,7 +56,7 @@ public abstract class AbstractFormSelectionActionDelegate implements IWorkbenchW
 				Iterator iterator = ((IStructuredSelection)selection).iterator();
 				while (iterator.hasNext())
 				{
-					Openable openable = (Openable)Platform.getAdapterManager().getAdapter(iterator.next(), Openable.class);
+					Openable openable = Platform.getAdapterManager().getAdapter(iterator.next(), Openable.class);
 					if (openable != null)
 					{
 						openables.add(openable);
@@ -69,10 +71,12 @@ public abstract class AbstractFormSelectionActionDelegate implements IWorkbenchW
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart() instanceof IEditorPart)
 				{
 					IWorkbenchPart activePart = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart();
+					String text = selection instanceof TextSelection ? ((TextSelection)selection).getText() : null;
 					Form form = EditorUtil.getForm((IEditorPart)activePart);
-					if (form != null)
+					IPersist persist = (text != null && !"".equals(text) && form != null) ? form.getScriptMethod(text) : form;
+					if (persist != null)
 					{
-						openables.add(Openable.getOpenable(form)); // for script editor
+						openables.add(Openable.getOpenable(persist)); // for script editor
 					}
 				}
 			}
