@@ -31,6 +31,7 @@ import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IPersist;
@@ -95,23 +96,31 @@ public abstract class MoveCommand extends ContentOutlineCommand implements IServ
 
 	protected ArrayList<IPersist> getSortedChildren(ISupportChilds parent)
 	{
-		if (parent instanceof AbstractBase)
+		try
 		{
-			ISupportChilds persist = parent;
-			if (parent instanceof LayoutContainer)
+			if (parent instanceof AbstractBase)
 			{
-				persist = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(parent), editorPart.getForm(), parent);
-			}
-			ArrayList<IPersist> children = new ArrayList<>();
-			Iterator<IPersist> it = persist.getAllObjects();
-			while (it.hasNext())
-			{
-				IPersist p = it.next();
-				children.add(p instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)p).getWrappedPersist() : p);
-			}
-			Collections.sort(children, PositionComparator.XY_PERSIST_COMPARATOR);
+				ISupportChilds persist = parent;
+				if (parent instanceof LayoutContainer)
+				{
+					persist = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(parent), getEditorPart().getForm(), parent);
+				}
+				ArrayList<IPersist> children = new ArrayList<>();
+				Iterator<IPersist> it = persist.getAllObjects();
+				while (it.hasNext())
+				{
+					IPersist p = it.next();
+					children.add(p instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)p).getWrappedPersist() : p);
+				}
+				Collections.sort(children, PositionComparator.XY_PERSIST_COMPARATOR);
 
-			return children;
+				return children;
+			}
+
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
 		}
 		return null;
 
