@@ -428,6 +428,7 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 
 								try
 								{
+									ServoyModel.getServerManager().testServerConfigConnection(serverConfig, 0);
 									ServoyModel.getServerManager().saveServerConfig(null, serverConfig);
 								}
 								catch (Exception ex)
