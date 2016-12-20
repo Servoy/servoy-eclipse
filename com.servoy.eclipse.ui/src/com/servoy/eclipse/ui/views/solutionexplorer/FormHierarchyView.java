@@ -83,6 +83,18 @@ import com.servoy.j2db.util.SortedList;
 
 public class FormHierarchyView extends ViewPart implements ISelectionChangedListener, IOrientedView
 {
+	private final class FormHierarchyDoubleClickListener implements IDoubleClickListener
+	{
+		public void doubleClick(DoubleClickEvent event)
+		{
+			if (openAction.isEnabled())
+			{
+				openAction.run();
+				fSelectionProviderMediator.doSelectionChanged(new SelectionChangedEvent(event.getViewer(), event.getSelection()));
+			}
+		}
+	}
+
 	private final class FocusSelectedElementListener implements ISelectionChangedListener
 	{
 		@Override
@@ -220,20 +232,11 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			{
 				return ElementUtil.getImageForFormEncapsulation((Form)element);
 			}
-			else if (element instanceof ScriptMethod)
+			else if (element instanceof Part)
 			{
-				ScriptMethod sm = (ScriptMethod)element;
-				if (sm.isPrivate())
-				{
-					return uiActivator.loadImageFromBundle("private_method.gif");
-				}
-				if (sm.isProtected())
-				{
-					return uiActivator.loadImageFromBundle("protected_method.gif");
-				}
-				return uiActivator.loadImageFromBundle("public_method.gif");
+				return uiActivator.loadImageFromOldLocation("parts.gif");
 			}
-			else if (element instanceof BaseComponent || element instanceof Part)
+			else
 			{
 				Pair<String, Image> pair = ElementUtil.getPersistNameAndImage((IPersist)element);
 				if (pair != null) return pair.getRight();
@@ -530,17 +533,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		tree.setContentProvider(treeProvider);
 		tree.setLabelProvider(new FormViewLabelProvider(treeProvider));
 
-		tree.addDoubleClickListener(new IDoubleClickListener()
-		{
-			public void doubleClick(DoubleClickEvent event)
-			{
-				if (openAction.isEnabled())
-				{
-					openAction.run();
-				}
-			}
-		});
-
+		tree.addDoubleClickListener(new FormHierarchyDoubleClickListener());
 		tree.addPostSelectionChangedListener(new FocusSelectedElementListener());
 
 		IAction openScript = new OpenScriptAction();
@@ -562,17 +555,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		list.setLabelProvider(new FormViewLabelProvider(null));
 		viewForm.setContent(list.getControl());
 
-		list.addDoubleClickListener(new IDoubleClickListener()
-		{
-			public void doubleClick(DoubleClickEvent event)
-			{
-				if (openAction.isEnabled())
-				{
-					openAction.run();
-				}
-			}
-		});
-
+		list.addDoubleClickListener(new FormHierarchyDoubleClickListener());
 		list.addPostSelectionChangedListener(new FocusSelectedElementListener());
 
 		IAction openScript = new OpenScriptAction();
@@ -659,6 +642,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		noSelectionChange = true;
 		tree.setExpandedTreePaths(paths.toArray(new TreePath[paths.size()]));
 		tree.setSelection(new StructuredSelection(object));
+		list.setInput(((IPersist)object).getParent());
 		noSelectionChange = false;
 	}
 
