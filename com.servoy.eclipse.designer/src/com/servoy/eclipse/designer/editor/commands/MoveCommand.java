@@ -131,7 +131,12 @@ public abstract class MoveCommand extends ContentOutlineCommand implements IServ
 		List<IPersist> selection = getSelection();
 		if (selection.size() == 1)
 		{
-			return selection.get(0);
+			IPersist selectedPersist = selection.get(0);
+			if (selectedPersist instanceof IFlattenedPersistWrapper< ? >)
+			{
+				selectedPersist = ((IFlattenedPersistWrapper< ? >)selectedPersist).getWrappedPersist();
+			}
+			return selectedPersist;
 		}
 		return null;
 	}
