@@ -44,6 +44,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.views.properties.PropertySheetPage;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
@@ -52,6 +53,8 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.util.ElementUtil;
+import com.servoy.eclipse.ui.views.ModifiedPropertySheetEntry;
+import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ContextAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenFormEditorAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenPersistEditorAction;
@@ -792,5 +795,18 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	{
 		showAllInheritedMembers = on;
 		list.refresh();
+	}
+
+	@Override
+	public Object getAdapter(Class type)
+	{
+		if (type == org.eclipse.ui.views.properties.IPropertySheetPage.class)
+		{
+			PropertySheetPage page = new ModifiedPropertySheetPage(null);
+			page.setRootEntry(new ModifiedPropertySheetEntry());
+			return page;
+		}
+
+		return super.getAdapter(type);
 	}
 }
