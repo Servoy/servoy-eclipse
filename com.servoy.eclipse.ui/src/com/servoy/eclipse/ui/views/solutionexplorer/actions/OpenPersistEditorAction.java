@@ -54,7 +54,7 @@ public class OpenPersistEditorAction extends Action implements ISelectionChanged
 				IPersist persist = (IPersist)it.next();
 				if (persist != null)
 				{
-					EditorUtil.openPersistEditor(persist);
+					EditorUtil.openPersistEditor(persist, false);
 				}
 			}
 		}
