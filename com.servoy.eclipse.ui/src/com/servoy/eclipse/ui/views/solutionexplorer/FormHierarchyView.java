@@ -462,6 +462,19 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			{
 				return uiActivator.loadImageFromOldLocation("parts.gif");
 			}
+			else if (element instanceof ScriptMethod)
+			{
+				ScriptMethod sm = (ScriptMethod)element;
+				if (sm.isPrivate())
+				{
+					return uiActivator.loadImageFromBundle("private_method.gif");
+				}
+				if (sm.isProtected())
+				{
+					return uiActivator.loadImageFromBundle("protected_method.gif");
+				}
+				return sm.isPublic() ? uiActivator.loadImageFromBundle("public_method.gif") : DLTKPluginImages.DESC_METHOD_DEFAULT.createImage();
+			}
 			else
 			{
 				Pair<String, Image> pair = ElementUtil.getPersistNameAndImage((IPersist)element);
