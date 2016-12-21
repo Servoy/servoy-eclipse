@@ -93,12 +93,10 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
-import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ISupportDeprecated;
 import com.servoy.j2db.persistence.ISupportDeprecatedAnnotation;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
-import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PositionComparator;
@@ -492,7 +490,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			}
 			else if (element instanceof ScriptMethod)
 			{
-				return getScriptMethodSignature((ScriptMethod)element, null, false, true, true, true);
+				return ((ScriptMethod)element).getScriptMethodSignature(null, false, true, true, true);
 			}
 			else if (element instanceof BaseComponent)
 			{
@@ -530,49 +528,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			return super.getForeground(element);
 		}
 
-		//TODO refactor, copied from solex lst content provider
-		private String getScriptMethodSignature(ScriptMethod sm, String methodName, boolean showParam, boolean showParamType, boolean showReturnType,
-			boolean showReturnTypeAtEnd)
-		{
-			MethodArgument[] args = sm.getRuntimeProperty(IScriptProvider.METHOD_ARGUMENTS);
-
-			StringBuilder methodSignatureBuilder = new StringBuilder();
-			methodSignatureBuilder.append(methodName != null ? methodName : sm.getName()).append('(');
-			for (int i = 0; i < args.length; i++)
-			{
-				if ((showParam || showParamType) && args[i].isOptional()) methodSignatureBuilder.append('[');
-				if (showParam)
-				{
-					methodSignatureBuilder.append(args[i].getName());
-					if (showParamType) methodSignatureBuilder.append(':');
-				}
-				if (showParamType) methodSignatureBuilder.append(args[i].getType());
-				if ((showParam || showParamType) && args[i].isOptional()) methodSignatureBuilder.append(']');
-				if (i < args.length - 1) methodSignatureBuilder.append(", ");
-			}
-			methodSignatureBuilder.append(')');
-
-			if (showReturnType)
-			{
-				MethodArgument returnTypeArgument = sm.getRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE);
-				String returnType = "void";
-				if (returnTypeArgument != null)
-				{
-					if ("*".equals(returnTypeArgument.getType().getName())) returnType = "Any";
-					else returnType = returnTypeArgument.getType().getName();
-				}
-				if (showReturnTypeAtEnd)
-				{
-					methodSignatureBuilder.append(" - ").append(returnType);
-				}
-				else
-				{
-					methodSignatureBuilder.insert(0, ' ').insert(0, returnType);
-				}
-			}
-
-			return methodSignatureBuilder.toString();
-		}
 
 		@Override
 		public Boolean isDeprecated(Object element)
