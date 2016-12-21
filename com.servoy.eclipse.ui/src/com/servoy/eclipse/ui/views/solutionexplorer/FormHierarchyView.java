@@ -589,6 +589,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 	public void setSelection(Object object)
 	{
+		if (noSelectionChange) return;
 		if (object instanceof Form)
 		{
 			selected = (Form)object;
@@ -605,7 +606,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			selected = (Form)(((IPersist)object).getParent());
 			tree.setInput(new Form[] { selected });
 			showMembersInFormHierarchy(object);
-
 			list.setInput(selected);
 		}
 		else
@@ -643,6 +643,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		tree.setExpandedTreePaths(paths.toArray(new TreePath[paths.size()]));
 		tree.setSelection(new StructuredSelection(object));
 		list.setInput(((IPersist)object).getParent());
+		list.setSelection(new StructuredSelection(object));
 		noSelectionChange = false;
 	}
 
