@@ -373,10 +373,37 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 			{
 				ServoyModelManager.getServoyModelManager().getServoyModel();
 				String[] serverNames = ServoyModel.getServerManager().getServerNames(true, true, true, false);
+				ServerConfig serverConfig = null;
+				IServerInternal serverPrototype = null;
+				ServerConfig[] serverConfigs = ServoyModel.getServerManager().getServerConfigs();
+				for (ServerConfig sc : serverConfigs)
+				{
+					if (sc.isEnabled() && sc.isPostgresDriver())
+					{
+						serverPrototype = (IServerInternal)ServoyModel.getServerManager().getServer(sc.getServerName());
+						if (serverPrototype != null && serverPrototype.isValid())
+						{
+							if (ServoyModel.getServerManager().getServerConfig(name) == null)
+							{
+								serverConfig = new ServerConfig(name, sc.getUserName(), sc.getPassword(), DatabaseUtils.getPostgresServerUrl(sc, name),
+									sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null, sc.getMaxActive(), sc.getMaxIdle(),
+									sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(), sc.getValidationQuery(), null, true, false, -1,
+									sc.getDialectClass());
+								if (ServoyModel.getServerManager().validateServerConfig(null, serverConfig) != null)
+								{
+									// something is wrong
+									serverConfig = null;
+								}
+							}
+
+						}
+					}
+				}
+				String[] buttons = serverConfig != null ? new String[] { "OK", "Create Server", "Cancel" } : new String[] { "OK", "Cancel" };
 				final OptionDialog optionDialog = new OptionDialog(shell, "Server '" + name + "'not found", null,
 					"Server with name '" + name +
 						"' is not found, but used by the import solution, select another server to use, try to create a new server or press cancel to cancel import and define the server first.",
-					MessageDialog.WARNING, new String[] { "OK", "Create Server", "Cancel" }, 0, serverNames, 0);
+					MessageDialog.WARNING, buttons, 0, serverNames, 0);
 				Display.getDefault().syncExec(new Runnable()
 				{
 					public void run()
@@ -384,68 +411,45 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 						retval = optionDialog.open();
 					}
 				});
-				if (retval == 1)
+				if (serverConfig != null && retval == 1)
 				{
 					// create server
-					ServerConfig[] serverConfigs = ServoyModel.getServerManager().getServerConfigs();
-					for (ServerConfig sc : serverConfigs)
+					ITransactionConnection connection = null;
+					PreparedStatement ps = null;
+					try
 					{
-						if (sc.isEnabled() && sc.isPostgresDriver())
+						connection = serverPrototype.getUnmanagedConnection();
+						ps = connection.prepareStatement("CREATE DATABASE \"" + name + "\" WITH ENCODING 'UNICODE';");
+						ps.execute();
+						ps.close();
+						ps = null;
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
+					finally
+					{
+						Utils.closeConnection(connection);
+						Utils.closeStatement(ps);
+					}
+
+					try
+					{
+						ServoyModel.getServerManager().testServerConfigConnection(serverConfig, 0);
+						ServoyModel.getServerManager().saveServerConfig(null, serverConfig);
+					}
+					catch (Exception ex)
+					{
+						ServoyLog.logError(ex);
+						Display.getDefault().syncExec(new Runnable()
 						{
-							IServerInternal serverPrototype = (IServerInternal)ServoyModel.getServerManager().getServer(sc.getServerName());
-							if (serverPrototype != null && serverPrototype.isValid())
+							public void run()
 							{
-								ITransactionConnection connection = null;
-								PreparedStatement ps = null;
-								try
-								{
-									connection = serverPrototype.getUnmanagedConnection();
-									ps = connection.prepareStatement("CREATE DATABASE \"" + name + "\" WITH ENCODING 'UNICODE';");
-									ps.execute();
-									ps.close();
-									ps = null;
-								}
-								catch (Exception e)
-								{
-									ServoyLog.logError(e);
-								}
-								finally
-								{
-									Utils.closeConnection(connection);
-									Utils.closeStatement(ps);
-								}
-
-								String configName = name;
-								for (int i = 1; ServoyModel.getServerManager().getServerConfig(configName) != null && i < 100; i++)
-								{
-									configName = name + i;
-								}
-
-								ServerConfig serverConfig = new ServerConfig(configName, sc.getUserName(), sc.getPassword(),
-									DatabaseUtils.getPostgresServerUrl(sc, configName), sc.getConnectionProperties(), sc.getDriver(), sc.getCatalog(), null,
-									sc.getMaxActive(), sc.getMaxIdle(), sc.getMaxPreparedStatementsIdle(), sc.getConnectionValidationType(),
-									sc.getValidationQuery(), null, true, false, -1, sc.getDialectClass());
-
-								try
-								{
-									ServoyModel.getServerManager().testServerConfigConnection(serverConfig, 0);
-									ServoyModel.getServerManager().saveServerConfig(null, serverConfig);
-								}
-								catch (Exception ex)
-								{
-									ServoyLog.logError(ex);
-									Display.getDefault().syncExec(new Runnable()
-									{
-										public void run()
-										{
-											MessageDialog.openError(shell, "Cannot create server '" + name + "'",
-												"An unexpected error occured while creating new server, please select an existing server or create server manually.");
-										}
-									});
-								}
+								MessageDialog.openError(shell, "Cannot create server '" + name + "'",
+									"An unexpected error occured while creating new server, please select an existing server or create server manually.");
 							}
-							break;
-						}
+						});
 					}
 					return RETRY_ACTION;
 				}
@@ -465,11 +469,15 @@ public class EclipseImportUserChannel implements IXMLImportUserChannel
 				return CANCEL_ACTION;
 			}
 		}
-		catch (Exception e)
+		catch (
+
+		Exception e)
+
 		{
 			ServoyLog.logError(e);
 			return CANCEL_ACTION;
 		}
+
 	}
 
 	public int askUserImportPolicy()
