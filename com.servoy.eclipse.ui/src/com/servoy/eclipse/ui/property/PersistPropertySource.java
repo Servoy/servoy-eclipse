@@ -155,6 +155,7 @@ import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IDataProviderLookup;
+import com.servoy.j2db.persistence.IDesignValueConverter;
 import com.servoy.j2db.persistence.IDeveloperRepository;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
@@ -1818,8 +1819,16 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					persistContext);
 				if (desc != null)
 				{
-					if (desc.hasDefault()) return desc.getDefaultValue();
-					if (desc.getType() != null) return desc.getType().defaultValue(desc); // TODO this might be of wrong type - it's meant as a runtime value
+					if (desc.hasDefault())
+					{
+						Object defaultValue = desc.getDefaultValue();
+						if (desc.getType() instanceof IDesignValueConverter)
+						{
+							return ((IDesignValueConverter< ? >)desc.getType()).fromDesignValue(defaultValue, desc);
+						}
+						return defaultValue;
+					}
+					if (desc.getType() != null) return desc.getType().defaultValue(desc); // TODO this might be of wrong type - it's meant as a runtime value, not persist java value right?
 				}
 			}
 			catch (RepositoryException e)
