@@ -30,12 +30,14 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.ChangeParentCommand;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
+import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.util.PersistHelper;
@@ -48,11 +50,13 @@ public abstract class MoveCommand extends ContentOutlineCommand implements IServ
 {
 	private final BaseVisualFormEditor editorPart;
 	private final ISelectionProvider selectionProvider;
+	private final int indexModifier;
 
-	public MoveCommand(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider)
+	public MoveCommand(BaseVisualFormEditor editorPart, ISelectionProvider selectionProvider, int indexModifier)
 	{
 		this.editorPart = editorPart;
 		this.selectionProvider = selectionProvider;
+		this.indexModifier = indexModifier;
 	}
 
 	/*
@@ -73,8 +77,6 @@ public abstract class MoveCommand extends ContentOutlineCommand implements IServ
 		return execute();
 	}
 
-	public abstract Object execute();
-
 	@Override
 	protected BaseVisualFormEditor getEditorPart()
 	{
@@ -94,7 +96,7 @@ public abstract class MoveCommand extends ContentOutlineCommand implements IServ
 		}
 	}
 
-	protected ArrayList<IPersist> getSortedChildren(ISupportChilds parent)
+	private ArrayList<IPersist> getSortedChildren(ISupportChilds parent)
 	{
 		try
 		{
@@ -126,7 +128,7 @@ public abstract class MoveCommand extends ContentOutlineCommand implements IServ
 
 	}
 
-	protected IPersist getSingleSelection()
+	private IPersist getSingleSelection()
 	{
 		List<IPersist> selection = getSelection();
 		if (selection.size() == 1)
@@ -139,5 +141,46 @@ public abstract class MoveCommand extends ContentOutlineCommand implements IServ
 			return selectedPersist;
 		}
 		return null;
+	}
+
+	public Object execute()
+	{
+		IPersist singleSelection = getSingleSelection();
+		if (singleSelection != null)
+		{
+			ArrayList<IPersist> sortedChildren = getSortedChildren(
+				singleSelection instanceof ISupportExtendsID ? ((ISupportExtendsID)singleSelection).getRealParent() : singleSelection.getParent());
+			if (sortedChildren != null)
+			{
+				BaseVisualFormEditor editorPart = getEditorPart();
+				if (editorPart != null)
+				{
+					int selectedPersistIdx = sortedChildren.indexOf(singleSelection);
+					if (selectedPersistIdx >= 0 && selectedPersistIdx + indexModifier >= 0 && selectedPersistIdx + indexModifier < sortedChildren.size())
+					{
+						editorPart.getCommandStack().execute(new ChangeParentCommand(singleSelection, null,
+							sortedChildren.get(selectedPersistIdx + indexModifier), editorPart.getForm(), indexModifier > 0));
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		IPersist singleSelection = getSingleSelection();
+		if (singleSelection != null)
+		{
+			ArrayList<IPersist> sortedChildren = getSortedChildren(
+				singleSelection instanceof ISupportExtendsID ? ((ISupportExtendsID)singleSelection).getRealParent() : singleSelection.getParent());
+			if (sortedChildren != null)
+			{
+				int selectedPersistIdx = sortedChildren.indexOf(singleSelection);
+				return (selectedPersistIdx >= 0 && selectedPersistIdx + indexModifier >= 0 && selectedPersistIdx + indexModifier < sortedChildren.size());
+			}
+		}
+		return false;
 	}
 }
