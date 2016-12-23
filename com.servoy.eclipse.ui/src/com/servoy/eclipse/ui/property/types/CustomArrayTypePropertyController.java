@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.ICustomType;
 
@@ -44,6 +45,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebCustomType;
 import com.servoy.j2db.util.ServoyJSONArray;
+import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -281,7 +283,23 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 					ServoyLog.logError(e);
 				}
 			}
-			else if (defValue instanceof JSONArray) toSet = (JSONArray)defValue;
+			else if (defValue instanceof JSONArray)
+			{
+				int length = ((JSONArray)defValue).length();
+				toSet = new JSONArray();
+				for (int i = 0; i < length; i++)
+				{
+					Object val = ((JSONArray)defValue).opt(i);
+					if (val instanceof JSONObject)
+					{
+						toSet.put(i, ServoyJSONObject.mergeAndDeepCloneJSON((JSONObject)val, new JSONObject()));
+					}
+					else
+					{
+						toSet.put(i, val);
+					}
+				}
+			}
 			propertySource.setPropertyValue(getId(), toSet);
 		}
 		else propertySource.defaultResetProperty(getId());
@@ -295,7 +313,7 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	@Override
 	protected String getLabelText(Object element)
 	{
-		return ((element != null) ? (((Object[])element).length == 0 ? "[]" : "[...]") : "null");
+		return ((element instanceof Object[]) ? (((Object[])element).length == 0 ? "[]" : "[...]") : "null");
 	}
 
 	/*
