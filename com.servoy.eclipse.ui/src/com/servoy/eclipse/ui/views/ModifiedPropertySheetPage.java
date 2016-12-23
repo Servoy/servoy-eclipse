@@ -46,6 +46,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISaveablePart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.views.properties.IPropertySheetEntry;
 import org.eclipse.ui.views.properties.IPropertySheetEntryListener;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -63,7 +64,7 @@ import com.servoy.j2db.util.Utils;
 
 /**
  * PropertySheetPage with additional Servoy features.
- * 
+ *
  * @author acostescu
  */
 
@@ -101,16 +102,6 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 				return super.compare(entryA, entryB);
 			}
 		});
-		getSite().setSelectionProvider(new SelectionProviderAdapter()
-		{
-			@Override
-			public ISelection getSelection()
-			{
-				ISaveablePart sourcePart = getSaveablePart();
-				return sourcePart == null ? StructuredSelection.EMPTY : new StructuredSelection(sourcePart);
-			}
-		});
-
 		Control control = super.getControl();
 		if (control instanceof Tree)
 		{
@@ -220,8 +211,9 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 							{
 								String text = null;
 								if ((RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONFOCUSLOSTMETHODID.getPropertyName(), null).equals(
-									item.getText(0)) || RepositoryHelper.getDisplayName(
-									StaticContentSpecLoader.PROPERTY_ONELEMENTFOCUSLOSTMETHODID.getPropertyName(), null).equals(item.getText(0))) ||
+									item.getText(0)) ||
+									RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONELEMENTFOCUSLOSTMETHODID.getPropertyName(), null).equals(
+										item.getText(0))) ||
 									RepositoryHelper.getDisplayName(StaticContentSpecLoader.PROPERTY_ONDATACHANGEMETHODID.getPropertyName(), null).equals(
 										item.getText(0)))
 								{
@@ -296,6 +288,21 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 				selectionChanged(activeEditor, selectionProvider.getSelection());
 			}
 		}
+	}
+
+	@Override
+	public void init(IPageSite pageSite)
+	{
+		super.init(pageSite);
+		getSite().setSelectionProvider(new SelectionProviderAdapter()
+		{
+			@Override
+			public ISelection getSelection()
+			{
+				ISaveablePart sourcePart = getSaveablePart();
+				return sourcePart == null ? StructuredSelection.EMPTY : new StructuredSelection(sourcePart);
+			}
+		});
 	}
 
 	@Override
