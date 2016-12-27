@@ -901,8 +901,18 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(((WebComponent)o).getTypeName());
 			if (spec == null)
 			{
-				ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Web Component", ((WebComponent)o).getTypeName());
-				addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
+				String[] webcomponentNameAndSpec = ((WebComponent)o).getTypeName().split("-");
+				ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Web Component", webcomponentNameAndSpec[webcomponentNameAndSpec.length - 1],
+					webcomponentNameAndSpec[0]);
+				IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
+				try
+				{
+					marker.setAttribute("packageName", webcomponentNameAndSpec[0]);
+				}
+				catch (CoreException e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
 		}
 		if (o instanceof LayoutContainer)
@@ -915,9 +925,16 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			}
 			if (spec == null)
 			{
-				ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Layout",
-					((LayoutContainer)o).getPackageName() + "-" + ((LayoutContainer)o).getSpecName());
-				addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
+				ServoyMarker mk = MarkerMessages.MissingSpecification.fill("Layout", ((LayoutContainer)o).getSpecName(), ((LayoutContainer)o).getPackageName());
+				IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, MISSING_SPECIFICATION, IMarker.PRIORITY_NORMAL, null, o);
+				try
+				{
+					marker.setAttribute("packageName", ((LayoutContainer)o).getPackageName());
+				}
+				catch (CoreException e)
+				{
+					ServoyLog.logError(e);
+				}
 			}
 		}
 	}

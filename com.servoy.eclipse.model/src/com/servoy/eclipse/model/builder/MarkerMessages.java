@@ -658,5 +658,6 @@ public class MarkerMessages
 	/**
 	 * The roll over imageand cursor is not working in Smart Client tableview/listview form.
 	 */
-	public static ServoyMarker MissingSpecification = new ServoyMarker("{0} specification is missing: \"{1}\"", ServoyBuilder.MISSING_SPEC);
+	public static ServoyMarker MissingSpecification = new ServoyMarker("{0} specification \"{1}\" from package \"{2}\" is missing.",
+		ServoyBuilder.MISSING_SPEC);
 }

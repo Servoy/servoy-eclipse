@@ -23,9 +23,11 @@ import com.servoy.eclipse.ui.Activator;
  * @author lvostinar
  *
  */
-public interface IImportDefaultResponsivePackages
+public interface IAutomaticImportWPMPackages
 {
 	static final String EXTENSION_ID = Activator.PLUGIN_ID + ".importResponsivePackages";
 
 	void importDefaultResponsivePackages();
+
+	void importPackage(String packageName);
 }

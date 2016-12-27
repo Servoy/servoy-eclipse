@@ -31,9 +31,11 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.DataModelManager.TableDifference;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.MethodWithArguments;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.util.IAutomaticImportWPMPackages;
 import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -88,7 +90,26 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 
 			if (type.equals(ServoyBuilder.MISSING_SPEC))
 			{
+				final String packageName = (String)marker.getAttribute("packageName");
 				return new IMarkerResolution[] { new IMarkerResolution()
+				{
+
+					@Override
+					public void run(IMarker marker)
+					{
+						List<IAutomaticImportWPMPackages> defaultImports = ModelUtils.getExtensions(IAutomaticImportWPMPackages.EXTENSION_ID);
+						if (defaultImports != null && defaultImports.size() > 0)
+						{
+							defaultImports.get(0).importPackage(packageName);
+						}
+					}
+
+					@Override
+					public String getLabel()
+					{
+						return "Automatic import of '" + packageName + "' from Web Package Manager";
+					}
+				}, new IMarkerResolution()
 				{
 
 					@Override

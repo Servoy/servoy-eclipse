@@ -75,7 +75,7 @@
                   
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn=":com.servoy.eclipse.ui.util.IImportDefaultResponsivePackages"/>
+                  <meta.attribute kind="java" basedOn=":com.servoy.eclipse.ui.util.IAutomaticImportWPMPackages"/>
                </appInfo>
             </annotation>
          </attribute>

@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.webpackage;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.json.JSONObject;
@@ -24,17 +25,28 @@ import org.json.JSONObject;
 import com.servoy.eclipse.designer.webpackage.endpoint.GetAllInstalledPackages;
 import com.servoy.eclipse.designer.webpackage.endpoint.InstallWebPackageHandler;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.util.IImportDefaultResponsivePackages;
+import com.servoy.eclipse.ui.util.IAutomaticImportWPMPackages;
 
 /**
  * @author lvostinar
  *
  */
-public class InstallDefaultResponsivePackages implements IImportDefaultResponsivePackages
+public class AutomaticInstallWPMPackages implements IAutomaticImportWPMPackages
 {
 
 	@Override
 	public void importDefaultResponsivePackages()
+	{
+		importPackageList(Arrays.asList(new String[] { "bootstrapcomponents", "12grid" }));
+	}
+
+	@Override
+	public void importPackage(String packageName)
+	{
+		importPackageList(Arrays.asList(new String[] { packageName }));
+	}
+
+	private void importPackageList(List<String> packageNames)
 	{
 		try
 		{
@@ -44,7 +56,7 @@ public class InstallDefaultResponsivePackages implements IImportDefaultResponsiv
 				for (JSONObject pck : packages)
 				{
 					String name = pck.optString("name");
-					if ("bootstrapcomponents".equals(name) || "12grid".equals(name))
+					if (packageNames.contains(name))
 					{
 						InstallWebPackageHandler.importPackage(pck, null);
 					}
@@ -56,5 +68,4 @@ public class InstallDefaultResponsivePackages implements IImportDefaultResponsiv
 			ServoyLog.logError(ex);
 		}
 	}
-
 }

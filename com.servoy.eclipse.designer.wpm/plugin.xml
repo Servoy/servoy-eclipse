@@ -76,7 +76,7 @@
    <extension
          point="com.servoy.eclipse.ui.importResponsivePackages">
           <provider
-            class="com.servoy.eclipse.designer.webpackage.InstallDefaultResponsivePackages"
+            class="com.servoy.eclipse.designer.webpackage.AutomaticInstallWPMPackages"
             id="com.servoy.eclipse.designer.webpackage.importResponsivePackages"
             name="Import default responsive packages">
       </provider>

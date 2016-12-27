@@ -18,35 +18,57 @@ package com.servoy.eclipse.ui;
 
 import java.io.File;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.equinox.p2.core.IProvisioningAgent;
 import org.eclipse.equinox.p2.core.IProvisioningAgentProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.source.ISharedTextColors;
 import org.eclipse.search.internal.ui.SearchPlugin;
 import org.eclipse.search.internal.ui.SearchPreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.prefs.BackingStoreException;
+import org.sablo.specification.PackageSpecification;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.WebObjectSpecification;
 
+import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.SerialRule;
 import com.servoy.eclipse.marketplace.ExtensionUpdateAndIncompatibilityCheckJob;
 import com.servoy.eclipse.marketplace.InstalledExtensionsDialog;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
+import com.servoy.eclipse.ui.util.IAutomaticImportWPMPackages;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.IApplication;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistVisitor;
+import com.servoy.j2db.persistence.LayoutContainer;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.server.shared.IApplicationServerSingleton;
 
@@ -95,6 +117,102 @@ public class Activator extends AbstractUIPlugin
 
 		// warn if incompatible extensions are found
 //		doExtensionRelatedChecks(); disabled for now as marketplace/extensions are not currently in production
+
+		ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(new IActiveProjectListener()
+		{
+
+			@Override
+			public boolean activeProjectWillChange(ServoyProject activeProject, ServoyProject toProject)
+			{
+				return true;
+			}
+
+			@Override
+			public void activeProjectChanged(final ServoyProject activeProject)
+			{
+				if (activeProject != null)
+				{
+					WorkspaceJob findMissingSpecs = new WorkspaceJob("Look for missing component/layout specifications")
+					{
+						@Override
+						public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+						{
+							ServoyProject[] modules = ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject();
+							final List<String> processedPackages = new ArrayList<String>();
+							for (final ServoyProject module : modules)
+							{
+								module.getSolution().acceptVisitor(new IPersistVisitor()
+								{
+
+									@Override
+									public Object visit(IPersist o)
+									{
+										String missingPackage = null;
+										if (o instanceof WebComponent)
+										{
+											WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+												((WebComponent)o).getTypeName());
+											if (spec == null)
+											{
+												missingPackage = ((WebComponent)o).getTypeName().split("-")[0];
+											}
+										}
+										if (o instanceof LayoutContainer)
+										{
+											PackageSpecification<WebLayoutSpecification> pkg = WebComponentSpecProvider.getSpecProviderState().getLayoutSpecifications().get(
+												((LayoutContainer)o).getPackageName());
+											if (pkg == null)
+											{
+												missingPackage = ((LayoutContainer)o).getPackageName();
+											}
+										}
+										if (missingPackage != null && !processedPackages.contains(missingPackage))
+										{
+											processedPackages.add(missingPackage);
+											final String automaticDownloadPackage = missingPackage;
+											Display.getDefault().syncExec(new Runnable()
+											{
+
+												@Override
+												public void run()
+												{
+													final MessageDialog dialog = new MessageDialog(new Shell(),
+														"Missing package '" + automaticDownloadPackage + "'", null,
+														"Missing package was detected in solution '" + module.getProject().getName() + "': '" +
+															automaticDownloadPackage + "'. Do you want to try to download it using Web Package Manager ?",
+														MessageDialog.QUESTION, new String[] { "Automatic install", "Cancel" }, 0);
+													dialog.setBlockOnOpen(true);
+													int pressedButton = dialog.open();
+													if (pressedButton == 0)
+													{
+														List<IAutomaticImportWPMPackages> defaultImports = ModelUtils.getExtensions(
+															IAutomaticImportWPMPackages.EXTENSION_ID);
+														if (defaultImports != null && defaultImports.size() > 0)
+														{
+															defaultImports.get(0).importPackage(automaticDownloadPackage);
+														}
+													}
+												}
+											});
+										}
+										return null;
+									}
+								});
+							}
+							return Status.OK_STATUS;
+						}
+					};
+					findMissingSpecs.setRule(ServoyModel.getWorkspace().getRoot());
+					findMissingSpecs.schedule();
+				}
+			}
+
+			@Override
+			public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
+			{
+
+			}
+		});
 	}
 
 	@Override

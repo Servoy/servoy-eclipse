@@ -21,11 +21,6 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -72,6 +67,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.DataSourceWrapperFactory;
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
+import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Activator;
@@ -94,7 +90,7 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.eclipse.ui.util.EditorUtil;
-import com.servoy.eclipse.ui.util.IImportDefaultResponsivePackages;
+import com.servoy.eclipse.ui.util.IAutomaticImportWPMPackages;
 import com.servoy.eclipse.ui.util.IStatusChangedListener;
 import com.servoy.eclipse.ui.util.SnapToGridFieldPositioner;
 import com.servoy.eclipse.ui.views.PlaceFieldOptionGroup;
@@ -413,29 +409,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 				}
 				else if (pressedButton == 0)
 				{
-					IExtensionRegistry reg = Platform.getExtensionRegistry();
-					IExtensionPoint ep = reg.getExtensionPoint(IImportDefaultResponsivePackages.EXTENSION_ID);
-					IExtension[] extensions = ep.getExtensions();
-
-					if (extensions != null)
+					List<IAutomaticImportWPMPackages> defaultImports = ModelUtils.getExtensions(IAutomaticImportWPMPackages.EXTENSION_ID);
+					if (defaultImports != null && defaultImports.size() > 0)
 					{
-						for (IExtension extension : extensions)
-						{
-							IConfigurationElement[] ce = extension.getConfigurationElements();
-							if (ce != null)
-							{
-								try
-								{
-									IImportDefaultResponsivePackages defaultImport = (IImportDefaultResponsivePackages)ce[0].createExecutableExtension("class");
-									defaultImport.importDefaultResponsivePackages();
-									break;
-								}
-								catch (Exception ex)
-								{
-									ServoyLog.logError(ex);
-								}
-							}
-						}
+						defaultImports.get(0).importDefaultResponsivePackages();
 					}
 				}
 			}
@@ -790,13 +767,13 @@ public class NewFormWizard extends Wizard implements INewWizard
 														GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
 															templateLabel)).addPreferredGap(LayoutStyle.RELATED).add(
 																groupLayout.createParallelGroup(GroupLayout.CENTER).add(projectLabel).add(projectComboControl,
-																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-																		LayoutStyle.RELATED).add(
-																			groupLayout.createParallelGroup(GroupLayout.CENTER).add(listFormLabel).add(
-																				listFormCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-																					LayoutStyle.RELATED).add(
-																						groupLayout.createParallelGroup(GroupLayout.CENTER)).addContainerGap(
-																							100, Short.MAX_VALUE)));
+																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																	GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+																		groupLayout.createParallelGroup(GroupLayout.CENTER).add(listFormLabel).add(
+																			listFormCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																			GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+																				groupLayout.createParallelGroup(GroupLayout.CENTER)).addContainerGap(100,
+																					Short.MAX_VALUE)));
 			topLevel.setLayout(groupLayout);
 			topLevel.setTabList(
 				new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl, listFormCheck });
