@@ -101,10 +101,6 @@ public class NGPackageManager extends BaseNGPackageManager
 
 				public void activeProjectChanged(ServoyProject activeProject)
 				{
-					// clear the web object registry as persists are completely different
-					WebObjectRegistry.stopTracking();
-					WebObjectRegistry.startTracking();
-
 					clearReferencedNGPackageProjectsCache();
 					reloadAllNGPackages(null);
 				}
