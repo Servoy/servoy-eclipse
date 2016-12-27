@@ -46,14 +46,11 @@ import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.ui.property.PersistContext;
-import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
@@ -185,7 +182,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				StringWriter htmlTemplate = new StringWriter(512);
 				PrintWriter w = new PrintWriter(htmlTemplate);
 				UUID parentuuid = null;
-				UUID insertBeforeUUID = null;
 
 				boolean componentFound = false;
 				if (name != null)
@@ -202,9 +198,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							if (form.isResponsiveLayout())
 							{
 								IPersist parent = ((ISupportExtendsID)fe.getPersistIfAvailable()).getRealParent();
-								parent = ElementUtil.getOverridePersist(PersistContext.create(parent, editor.getForm()));
 								parentuuid = parent.getUUID();
-								insertBeforeUUID = findNextSibling(fe.getPersistIfAvailable());
 							}
 
 							componentFound = true;
@@ -223,7 +217,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							componentFound = true;
 							IPersist parent = ((ISupportExtendsID)child).getRealParent();
 							parentuuid = parent instanceof Form ? null : parent.getUUID();
-							insertBeforeUUID = findNextSibling(child);
 							FormLayoutStructureGenerator.generateLayoutContainer((LayoutContainer)child, flattenedForm, context.getSolution(), w, true,
 								FormElementHelper.INSTANCE);
 						}
@@ -249,11 +242,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 					writer.key("parentId");
 					writer.value(parentuuid);
 				}
-				if (insertBeforeUUID != null)
-				{
-					writer.key("insertBeforeUUID");
-					writer.value(insertBeforeUUID);
-				}
 				writer.endObject();
 				return writer.toString();
 			}
@@ -278,30 +266,6 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 			writer.value(partWrapper.getStyle());
 		}
 		writer.endObject();
-	}
-
-	/**
-	 * @param wrappedPersist
-	 * @return
-	 */
-	private UUID findNextSibling(IPersist wrappedPersist)
-	{
-		if (wrappedPersist != null && wrappedPersist.getParent() instanceof AbstractContainer)
-		{
-			IPersist persist = wrappedPersist instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)wrappedPersist).getWrappedPersist()
-				: wrappedPersist;
-			AbstractContainer persistParent = (AbstractContainer)((ISupportExtendsID)persist).getRealParent();
-			IPersist superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)persist);
-			ArrayList<IPersist> children = persistParent.getSortedChildren();
-			int indexOf = children.indexOf(persist);
-			if (indexOf == -1 && superPersist != null)
-			{
-				indexOf = children.indexOf(
-					superPersist instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)superPersist).getWrappedPersist() : superPersist);
-			}
-			if (indexOf > -1 && (indexOf + 1) < children.size()) return children.get(indexOf + 1).getUUID();
-		}
-		return null;
 	}
 
 	public String getComponentsJSON(FlattenedSolution fs, Set<IPersist> persists)
@@ -565,6 +529,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				writer.key("index");
 				if (parent instanceof AbstractContainer && form.isResponsiveLayout())
 				{
+					parent = PersistHelper.getFlattenedPersist(fs, form, parent);
 					ArrayList<IPersist> children = ((AbstractContainer)parent).getSortedChildren();
 					writer.value(children.indexOf(p));
 				}

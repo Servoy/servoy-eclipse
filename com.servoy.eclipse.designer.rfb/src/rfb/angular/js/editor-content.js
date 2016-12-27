@@ -397,25 +397,24 @@ angular.module('editorContent',['servoyApp'])
 	    var old_element = document.querySelectorAll("[svy-id='" + tpl[0].getAttribute("svy-id") + "']");
 		if (old_element.length == 1) return; //when it's already there, we don't do anything (this happens when the parent is overridden)
 		
-	    if (json.insertBeforeUUID) {
-	    	var testSibling = function(counter,insertBeforeUUID)
+	    if (parent.children().length > 0) {
+	    	// we have to calculate insert point based on ordered location, just like on server side
+	    	var inserted = false;
+	    	var nodeLocation = parseInt(tpl.attr('svy-location'));
+	    	for (var i=0;i<parent.children().length;i++)
 	    	{
-	    		var sibling = document.querySelectorAll("[svy-id='" + insertBeforeUUID + "']");
-	    		if(sibling[0])
+	    		var currentLocation = parseInt(parent.children()[i].getAttribute('svy-location'));
+	    		if (nodeLocation <= currentLocation)
 	    		{
-	    			var nextSibling = angular.element(sibling);
-	    			tpl.insertBefore(nextSibling);
+	    			tpl.insertBefore(parent.children()[i]);
+	    			inserted = true;
+	    			break;
 	    		}
-	    		else if (counter++ < 10)
-	    		{
-	    			$timeout(function() {testSibling(counter, insertBeforeUUID)},100);
-	    		}
-	    		else
-	    		{
-	    			parent.append(tpl);//next sibling is not here yet, append to parent
-	    		}
-	    	};
-	    	testSibling(0,json.insertBeforeUUID);
+	    	}
+	    	if (!inserted)
+	    	{	
+	    		parent.append(tpl);
+	    	}
 	    }
 	    else
 	    {
@@ -423,7 +422,7 @@ angular.module('editorContent',['servoyApp'])
 	    }
   }
 	   
-  function updateElementIfParentChange(elementId, updateData, getTemplateParam,forceUpdate) {
+  function updateElementIfParentChange(elementId, updateData, getTemplateParam,forceUpdate,elementsToRemove) {
     var elementTemplate = angular.element('[svy-id="' + elementId + '"]');
     var shouldGetTemplate = true;
     if(elementTemplate.length) {
@@ -431,7 +430,7 @@ angular.module('editorContent',['servoyApp'])
     	var currentParentUUID = updateData.childParentMap[elementId].uuid;
     	if(forceUpdate || domParentUUID != currentParentUUID ||
     		((updateData.childParentMap[elementId].index > -1) && (updateData.childParentMap[elementId].index != elementTemplate.index()))) {
-    		elementTemplate.remove();
+    		elementsToRemove.push(elementTemplate);
     	}
     	else {
     		shouldGetTemplate = false;
@@ -518,11 +517,12 @@ angular.module('editorContent',['servoyApp'])
           }
 
           var toDeleteA = [];
+          var domElementsToRemove = [];
           
           if (data.containers) {
               for(var j = 0; j < data.containers.length; j++) {
                 var key = data.containers[j].uuid;
-                var element = updateElementIfParentChange(key, data, { layoutId: key },false);
+                var element = updateElementIfParentChange(key, data, { layoutId: key },false,domElementsToRemove);
                 if(element) {
           		  for (attribute in data.containers[j]) {
           		      if('uuid' === attribute) continue;
@@ -644,7 +644,7 @@ angular.module('editorContent',['servoyApp'])
             }
       
             if((!data.formComponentsComponents || data.formComponentsComponents.indexOf(name) == -1) && data.childParentMap[name] != undefined) {
-            	updateElementIfParentChange(name, data, { name: name },forceUpdate);
+            	updateElementIfParentChange(name, data, { name: name },forceUpdate,domElementsToRemove);
             }
 
             var compLayout = layoutData[name];
@@ -655,6 +655,11 @@ angular.module('editorContent',['servoyApp'])
               compLayout.height = newCompData.size.height + "px";
             }
           }
+          
+          for (var index in domElementsToRemove) {
+              domElementsToRemove[index].remove();
+          }  
+          
           for (var template in data.formcomponenttemplates) {
         	  $templateCache.put(template,data.formcomponenttemplates[template] )
           }

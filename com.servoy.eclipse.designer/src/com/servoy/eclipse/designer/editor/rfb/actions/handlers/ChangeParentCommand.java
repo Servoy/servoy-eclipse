@@ -25,14 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.gef.commands.Command;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
-import com.servoy.eclipse.designer.editor.BaseVisualFormEditorDesignPage;
-import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -47,6 +41,7 @@ import com.servoy.j2db.persistence.ISupportBounds;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.PositionComparator;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.util.PersistHelper;
 
 /**
@@ -55,19 +50,16 @@ import com.servoy.j2db.util.PersistHelper;
  */
 public class ChangeParentCommand extends Command
 {
-	private IPersist child;
+	private final IPersist child;
 	private final IPersist targetChild;
 	private ISupportChilds newParent;
 	private final Form form;
-	private int oldIndex;
 	private final boolean insertAfterTarget;
-
-	private final boolean hasChildPositionSupport;
 	private final Class< ? > childPositionClass;
-	private ISupportChilds oldParent;
-	private int insertIndex;
-	private IPersist oldChild;
 
+	//undo information
+	private int oldIndex;
+	private ISupportChilds oldParent;
 
 	public ChangeParentCommand(IPersist child, ISupportChilds newParent, IPersist targetChild, Form form, boolean insertAfterTarget)
 	{
@@ -80,129 +72,63 @@ public class ChangeParentCommand extends Command
 
 		this.newParent = newParent;
 		this.insertAfterTarget = insertAfterTarget;
-
-		this.hasChildPositionSupport = child instanceof ISupportBounds || child instanceof IChildWebObject;
-		this.childPositionClass = child instanceof ISupportBounds ? ISupportBounds.class : IChildWebObject.class;
+		this.childPositionClass = child instanceof ISupportBounds ? ISupportBounds.class : (child instanceof IChildWebObject ? IChildWebObject.class : null);
 	}
 
 	@Override
 	public void execute()
 	{
-		ISupportChilds initialParent = ((ISupportExtendsID)child).getRealParent();
+		List<IPersist> changes = new ArrayList<>();
 
 		FlattenedSolution flattenedSolution = ModelUtils.getEditingFlattenedSolution(child.getParent());
-		oldParent = PersistHelper.getFlattenedPersist(flattenedSolution, (Form)child.getAncestor(IRepository.FORMS), initialParent);
-		this.newParent = PersistHelper.getFlattenedPersist(flattenedSolution, form,
-			(ISupportChilds)getOverridePersist(newParent == null ? initialParent : newParent));
-		IPersist superPersist = PersistHelper.getSuperPersist((ISupportExtendsID)newParent);
 
-		if (hasChildPositionSupport)
+		ISupportChilds initialParent = child instanceof ISupportExtendsID ? ((ISupportExtendsID)child).getRealParent() : child.getParent();
+		if (newParent == null) newParent = initialParent;
+
+		if (childPositionClass != null)
 		{
-			ArrayList<IPersist> children = getChildrenSortedOnType(oldParent);
-			oldIndex = children.indexOf(child);
+			ISupportChilds flattenedOldParent = PersistHelper.getFlattenedPersist(flattenedSolution, form, initialParent);
+			ArrayList<IPersist> sortedChildren = getChildrenSortedOnType(flattenedOldParent);
+			oldIndex = sortedChildren.indexOf(child);
 		}
-
-		if (!initialParent.equals(superPersist))//if it's an override we don't want to remove the child from its original parent
+		ISupportChilds flattenedNewParent = PersistHelper.getFlattenedPersist(flattenedSolution, form, newParent);
+		if (newParent == initialParent)
 		{
-			oldParent.removeChild(child);
-		}
-
-		oldChild = child;
-		child = getOverridePersist(child);
-		if (child.getParent() instanceof Form)
-		{
-			child.getParent().removeChild(child);
-		}
-		ArrayList<IPersist> children = null;
-		if (hasChildPositionSupport)
-		{
-			children = getChildrenSortedOnType(newParent);
-			newParent.removeChild(child);
-			children.remove(oldChild);
-			children.remove(child);
-			insertIndex = childPositionClass.isInstance(targetChild) ? children.indexOf(targetChild) : -1;
-			if (insertIndex == -1) children.add(child);
-			else
-			{
-				if (insertAfterTarget) insertIndex++;
-				if (insertIndex < children.size()) children.add(insertIndex, child);
-				else children.add(child);
-			}
-		}
-
-		newParent.addChild(child);
-		if (hasChildPositionSupport) updateWithOrderedPosition(children);
-
-		List<IPersist> changes = new ArrayList<>();
-		if (initialParent.equals(superPersist))
-		{
-			if (superPersist.getParent() instanceof Form)
-			{
-				IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
-				for (IEditorReference editorRef : editorRefs)
-				{
-					IEditorPart editor = editorRef.getEditor(false);
-					if (editor instanceof BaseVisualFormEditor)
-					{
-						BaseVisualFormEditorDesignPage activePage = ((BaseVisualFormEditor)editor).getGraphicaleditor();
-						if (activePage instanceof RfbVisualFormEditorDesignPage) ((RfbVisualFormEditorDesignPage)activePage).refreshContent();
-						break;
-					}
-				}
-			}
-			oldParent = newParent;//if it's an override, then on undo we just want to change the position
-			changes.add((((IFlattenedPersistWrapper< ? >)newParent).getWrappedPersist()));
-			changes.addAll(getChildrenSortedOnType(newParent));
+			oldParent = null;
+			//same parent
+			updateChildPosition(flattenedNewParent, changes, false);
 		}
 		else
 		{
-			changes.add(child);
+			//different parent
+			if (PersistHelper.isOverrideElement((ISupportExtendsID)child) || child.getAncestor(IRepository.FORMS) != form)
+			{
+				// cannot modify structure for inherited or override element
+				return;
+			}
+			oldParent = initialParent;
+			initialParent.removeChild(child);
+			newParent.addChild(child);
+			updateChildPosition(flattenedNewParent, changes, false);
 		}
 		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changes);
 	}
 
-	private IPersist getOverridePersist(IPersist persist)
+	@Override
+	public void undo()
 	{
-		if (form != null)
+		ArrayList<IPersist> changes = new ArrayList<IPersist>();
+		// undo hierarchy change
+		if (oldParent != null)
 		{
-			try
-			{
-				return ElementUtil.getOverridePersist(PersistContext.create(persist, form));
-			}
-			catch (Exception ex)
-			{
-				ServoyLog.logError(ex);
-			}
+			oldParent.addChild(child);
+			newParent.removeChild(child);
 		}
-		return persist;
-	}
-
-	private void updateWithOrderedPosition(ArrayList<IPersist> children)
-	{
-		int counter = child instanceof ISupportBounds ? 1 : 0;
-		for (IPersist p : children)
-		{
-			IPersist override = getOverridePersist(p);
-			if (!children.contains(override))
-			{
-				if (override.getParent() instanceof Form)
-				{
-					override.getParent().removeChild(override);
-				}
-				newParent.removeChild(p);
-				newParent.addChild(override);
-				p = override;
-			}
-			if (child instanceof ISupportBounds)
-			{
-				((ISupportBounds)p).setLocation(new Point(counter, counter));
-			}
-			else if (child instanceof IChildWebObject)
-			{
-				((IChildWebObject)p).setIndex(counter);
-			}
-			counter++;
-		}
+		//undo position change
+		ISupportChilds flattenedNewParent = PersistHelper.getFlattenedPersist(ModelUtils.getEditingFlattenedSolution(child.getParent()), form,
+			oldParent != null ? oldParent : newParent);
+		updateChildPosition(flattenedNewParent, changes, true);
+		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changes);
 	}
 
 	private ArrayList<IPersist> getChildrenSortedOnType(ISupportChilds parent)
@@ -237,50 +163,47 @@ public class ChangeParentCommand extends Command
 		return new ArrayList<IPersist>(Arrays.asList(sortedChildArray));
 	}
 
-	@Override
-	public void undo()
+	private void updateChildPosition(ISupportChilds flattenedNewParent, List<IPersist> changes, boolean useOldIndex)
 	{
-		ArrayList<IPersist> changes = new ArrayList<IPersist>();
-		changes.add(child.getParent());
-		changes.add(oldParent);
-		IPersist changedChild = child instanceof IFlattenedPersistWrapper< ? > ? ((IFlattenedPersistWrapper< ? >)child).getWrappedPersist() : child;
-		changes.add(changedChild);
-		child.getParent().removeChild(child);
-
-		if (hasChildPositionSupport)
+		if (childPositionClass != null)
 		{
-			ArrayList<IPersist> children = getChildrenSortedOnType(oldParent);
-			children.remove(insertIndex);
-			if (oldIndex < children.size())
+			ArrayList<IPersist> sortedChildren = getChildrenSortedOnType(flattenedNewParent);
+			sortedChildren.remove(child);
+			int insertIndex = -1;
+			if (useOldIndex)
 			{
-				children.add(oldIndex, child);
+				insertIndex = oldIndex;
 			}
 			else
 			{
-				children.add(child);
+				insertIndex = sortedChildren.indexOf(targetChild);
+				if (insertIndex != -1 && insertAfterTarget) insertIndex++;
 			}
-			oldParent.addChild(child);
-			updateWithOrderedPosition(children);
+			if (insertIndex >= 0)
+			{
+				sortedChildren.add(insertIndex, child);
+				for (int i = 0; i < sortedChildren.size(); i++)
+				{
+					IPersist persist = sortedChildren.get(i);
+					try
+					{
+						persist = ElementUtil.getOverridePersist(PersistContext.create(persist, form));
+					}
+					catch (RepositoryException e)
+					{
+						ServoyLog.logError(e);
+					}
+					if (persist instanceof ISupportBounds)
+					{
+						((ISupportBounds)persist).setLocation(new Point(i + 1, i + 1));
+					}
+					else if (persist instanceof IChildWebObject)
+					{
+						((IChildWebObject)persist).setIndex(i);
+					}
+					changes.add(persist);
+				}
+			}
 		}
-		else
-		{
-			oldParent.addChild(child);
-		}
-		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changes);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.gef.commands.Command#redo()
-	 */
-	@Override
-	public void redo()
-	{
-		ArrayList<IPersist> changes = new ArrayList<IPersist>();
-		changes.add(newParent);
-		changes.add(oldParent);
-		super.redo();
-		ServoyModelManager.getServoyModelManager().getServoyModel().firePersistsChanged(false, changes);
 	}
 }

@@ -773,7 +773,10 @@ public class DataModelManager implements IColumnInfoManager
 		t.setMarkedAsMetaData(tableInfo.isMetaData);
 
 		// let table editors and so on now that a columns are loaded
-		t.fireIColumnsChanged(changedColumns);
+		if (changedColumns != null)
+		{
+			t.fireIColumnsChanged(changedColumns);
+		}
 	}
 
 	private void addDifferenceMarkersIfNecessary(Column c, ColumnInfoDef cid, ITable t, String columnName)

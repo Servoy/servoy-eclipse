@@ -112,15 +112,6 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 				return super.compare(entryA, entryB);
 			}
 		});
-		getSite().setSelectionProvider(new SelectionProviderAdapter()
-		{
-			@Override
-			public ISelection getSelection()
-			{
-				ISaveablePart sourcePart = getSaveablePart();
-				return sourcePart == null ? StructuredSelection.EMPTY : new StructuredSelection(sourcePart);
-			}
-		});
 
 		Control control = super.getControl();
 		if (control instanceof Tree)
@@ -329,6 +320,15 @@ public class ModifiedPropertySheetPage extends PropertySheetPage implements IPro
 				bars.setGlobalActionHandler(id, actions.get(id));
 			}
 		}
+		getSite().setSelectionProvider(new SelectionProviderAdapter()
+		{
+			@Override
+			public ISelection getSelection()
+			{
+				ISaveablePart sourcePart = getSaveablePart();
+				return sourcePart == null ? StructuredSelection.EMPTY : new StructuredSelection(sourcePart);
+			}
+		});
 	}
 
 	/**

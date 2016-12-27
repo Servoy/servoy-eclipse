@@ -186,15 +186,7 @@ public class FormOutlinePage extends ContentOutlinePage implements ISelectionLis
 						for (final IPersist p : dragObjects)
 						{
 							cc.add(new ChangeParentCommand(p, dropTargetForm.equals(p.getAncestor(IRepository.FORMS)) ? dropTarget : null, dropTargetComponent,
-								form, getCurrentLocation() == LOCATION_AFTER)
-							{
-								@Override
-								public void execute()
-								{
-									super.execute();
-									ServoyModelManager.getServoyModelManager().getServoyModel().firePersistChanged(false, p, false);
-								}
-							});
+								form, getCurrentLocation() == LOCATION_AFTER));
 						}
 						if (!cc.isEmpty())
 						{
