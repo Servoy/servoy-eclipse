@@ -166,15 +166,18 @@ public abstract class BaseNGPackageManager
 	{
 		if (referencedNGPackageProjects == null)
 		{
-			ServoyProject activeSolutionProject = ServoyModelFinder.getServoyModel().getActiveProject();
 			HashSet<ServoyNGPackageProject> referencedNGPackageProjectsSet = new HashSet<ServoyNGPackageProject>();
-			ServoyNGPackageProject[] ngPackageProjects = activeSolutionProject.getNGPackageProjects();
-			Collections.addAll(referencedNGPackageProjectsSet, ngPackageProjects);
-			ServoyProject[] modulesOfActiveProject = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
-			for (ServoyProject module : modulesOfActiveProject)
+			ServoyProject activeSolutionProject = ServoyModelFinder.getServoyModel().getActiveProject();
+			if (activeSolutionProject != null)
 			{
-				ngPackageProjects = module.getNGPackageProjects();
+				ServoyNGPackageProject[] ngPackageProjects = activeSolutionProject.getNGPackageProjects();
 				Collections.addAll(referencedNGPackageProjectsSet, ngPackageProjects);
+				ServoyProject[] modulesOfActiveProject = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
+				for (ServoyProject module : modulesOfActiveProject)
+				{
+					ngPackageProjects = module.getNGPackageProjects();
+					Collections.addAll(referencedNGPackageProjectsSet, ngPackageProjects);
+				}
 			}
 			referencedNGPackageProjects = referencedNGPackageProjectsSet.toArray(new ServoyNGPackageProject[referencedNGPackageProjectsSet.size()]);
 		}
