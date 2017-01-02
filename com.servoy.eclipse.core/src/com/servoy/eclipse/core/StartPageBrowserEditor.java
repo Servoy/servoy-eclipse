@@ -155,7 +155,7 @@ public class StartPageBrowserEditor extends EditorPart
 					}
 					introURL.execute();
 				}
-				else if (!url.startsWith(STARTPAGE_URL))
+				else if (!url.startsWith(STARTPAGE_URL) && url.toLowerCase().contains("servoy"))
 				{
 					event.doit = false;
 					try
