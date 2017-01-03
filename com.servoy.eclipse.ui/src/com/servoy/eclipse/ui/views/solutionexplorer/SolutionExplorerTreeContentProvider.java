@@ -61,10 +61,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.mozilla.javascript.JavaMembers;
-import org.sablo.specification.BaseSpecProvider.ISpecReloadListener;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.SpecProviderState;
+import org.sablo.specification.SpecReloadSubject.ISpecReloadListener;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
@@ -346,14 +346,14 @@ public class SolutionExplorerTreeContentProvider
 			resourcesChildren.add(componentsFromResourcesNode);
 		}
 
-		WebComponentSpecProvider.getInstance().addSpecReloadListener(null, specReloadListener);
+		WebComponentSpecProvider.getSpecReloadSubject().addSpecReloadListener(null, specReloadListener);
 
 		if (hasChildren(servicesFromResourcesNode))
 		{
 			resourcesChildren.add(servicesFromResourcesNode);
 		}
 
-		WebServiceSpecProvider.getInstance().addSpecReloadListener(null, specReloadListener);
+		WebServiceSpecProvider.getSpecReloadSubject().addSpecReloadListener(null, specReloadListener);
 
 		resources.children = resourcesChildren.toArray(new PlatformSimpleUserNode[0]);
 
@@ -470,8 +470,8 @@ public class SolutionExplorerTreeContentProvider
 
 		ServoyModelFinder.getServoyModel().getNGPackageManager().removeLoadedNGPackagesListener(this);
 		ServoyModelFinder.getServoyModel().getNGPackageManager().removeAvailableNGPackageProjectsListener(this);
-		WebComponentSpecProvider.getInstance().removeSpecReloadListener(null, specReloadListener);
-		WebServiceSpecProvider.getInstance().removeSpecReloadListener(null, specReloadListener);
+		WebComponentSpecProvider.getSpecReloadSubject().removeSpecReloadListener(null, specReloadListener);
+		WebServiceSpecProvider.getSpecReloadSubject().removeSpecReloadListener(null, specReloadListener);
 	}
 
 	/**

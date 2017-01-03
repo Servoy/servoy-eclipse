@@ -35,9 +35,9 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.sablo.specification.BaseSpecProvider.ISpecReloadListener;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.SpecProviderState;
+import org.sablo.specification.SpecReloadSubject.ISpecReloadListener;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
@@ -62,8 +62,8 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	public GetAllInstalledPackages(WebPackageManagerEndpoint endpoint)
 	{
 		this.endpoint = endpoint;
-		WebComponentSpecProvider.getInstance().addSpecReloadListener(null, this);
-		WebServiceSpecProvider.getInstance().addSpecReloadListener(null, this);
+		WebComponentSpecProvider.getSpecReloadSubject().addSpecReloadListener(null, this);
+		WebServiceSpecProvider.getSpecReloadSubject().addSpecReloadListener(null, this);
 		ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(this);
 	}
 
@@ -211,8 +211,8 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	@Override
 	public void dispose()
 	{
-		WebComponentSpecProvider.getInstance().removeSpecReloadListener(null, this);
-		WebServiceSpecProvider.getInstance().removeSpecReloadListener(null, this);
+		WebComponentSpecProvider.getSpecReloadSubject().removeSpecReloadListener(null, this);
+		WebServiceSpecProvider.getSpecReloadSubject().removeSpecReloadListener(null, this);
 		ServoyModelManager.getServoyModelManager().getServoyModel().removeActiveProjectListener(this);
 	}
 

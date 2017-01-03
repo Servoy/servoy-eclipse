@@ -49,6 +49,7 @@ import org.sablo.specification.WebObjectSpecification;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -107,27 +108,25 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 		@Override
 		public void run(IProgressMonitor monitor) throws CoreException
 		{
-			IProject resources = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject();
-			Iterator<SimpleUserNode> it = savedSelection.iterator();
-			while (it.hasNext())
+			ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+			IProject resources = activeProject == null ? null : activeProject.getResourcesProject().getProject();
+			for (SimpleUserNode selected : savedSelection)
 			{
-				SimpleUserNode next = it.next();
-				Object realObject = next.getRealObject();
+				Object realObject = selected.getRealObject();
 				IResource resource = null;
 				if (realObject instanceof IResource)
 				{
 					resource = (IResource)realObject;
-
 				}
 				else if (realObject instanceof IPackageReader)
 				{
 					resource = SolutionExplorerTreeContentProvider.getResource((IPackageReader)realObject);
 				}
-				else if (next.getType() == UserNodeType.COMPONENT || next.getType() == UserNodeType.SERVICE || next.getType() == UserNodeType.LAYOUT)
+				else if (resources != null &&
+					(selected.getType() == UserNodeType.COMPONENT || selected.getType() == UserNodeType.SERVICE || selected.getType() == UserNodeType.LAYOUT))
 				{
-					resource = getComponentFolderToDelete(resources, next);
+					resource = getComponentFolderToDelete(resources, selected);
 				}
-
 
 				if (resource != null)
 				{
@@ -135,7 +134,7 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 					{
 						if (resource instanceof IFolder)
 						{
-							resources.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+							if (resources != null) resources.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 							deleteFolder((IFolder)resource);
 						}
 						else
@@ -149,7 +148,7 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 								}
 							}
 							resource.delete(true, new NullProgressMonitor());
-							resources.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+							if (resources != null) resources.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 						}
 					}
 					catch (CoreException e)
