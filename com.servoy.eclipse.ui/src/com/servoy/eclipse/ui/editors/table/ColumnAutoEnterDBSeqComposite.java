@@ -23,6 +23,8 @@ import org.eclipse.core.databinding.observable.IChangeListener;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.jface.databinding.swt.SWTObservables;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
@@ -35,8 +37,9 @@ import org.eclipse.swt.widgets.Text;
 import com.servoy.eclipse.ui.util.BindingHelper;
 import com.servoy.eclipse.ui.util.DocumentValidatorVerifyListener;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.util.Settings;
+import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
-import com.servoy.j2db.util.docvalidator.LengthDocumentValidator;
 import com.servoy.j2db.util.docvalidator.ValidatingDocument.IDocumentValidator;
 
 public class ColumnAutoEnterDBSeqComposite extends Composite
@@ -49,7 +52,7 @@ public class ColumnAutoEnterDBSeqComposite extends Composite
 
 	/**
 	 * Create the composite
-	 * 
+	 *
 	 * @param parent
 	 * @param style
 	 */
@@ -63,8 +66,9 @@ public class ColumnAutoEnterDBSeqComposite extends Composite
 
 		text = new Text(this, SWT.BORDER);
 		final DocumentValidatorVerifyListener documentValidatorVerifyListener = new DocumentValidatorVerifyListener(
-			new IDocumentValidator[] { new IdentDocumentValidator(IdentDocumentValidator.TYPE_SQL), new LengthDocumentValidator(
-				Column.MAX_SQL_OBJECT_NAME_LENGTH) });
+			new IDocumentValidator[] { new IdentDocumentValidator(IdentDocumentValidator.TYPE_SQL) });
+		final int maxLength = Utils.getAsInteger(Settings.getInstance().getProperty("ServerManager.databasesequence.maxlength"), 50);
+		text.setTextLimit(maxLength);
 		text.addVerifyListener(new VerifyListener()
 		{
 			public void verifyText(VerifyEvent e)
@@ -81,21 +85,40 @@ public class ColumnAutoEnterDBSeqComposite extends Composite
 				}
 			}
 		});
+		text.addModifyListener(new ModifyListener()
+		{
+			@Override
+			public void modifyText(ModifyEvent e)
+			{
+				if ("".equals(warningLabel.getText()))
+				{
+					if (text.getText().length() == 50 && maxLength == 50)
+					{
+						warningLabel.setText(
+							"Warning: max length is 50 by default, look at your database what max sequence length it supports, can be overriden by the property: 'ServerManager.databasesequence.maxlength'");
+					}
+					else if (text.getText().length() >= 50)
+					{
+						warningLabel.setText(
+							"Warning: exceeding default max length (50) of the database sequence, make sure the database supports it and the servoy repository is created with a Servoy 8.2");
+					}
+				}
+			}
+		});
 
 		warningLabel = new Label(this, SWT.NONE);
 		warningLabel.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
 		warningLabel.setText("");
 
 		final GroupLayout groupLayout = new GroupLayout(this);
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.LEADING).add(warningLabel, GroupLayout.DEFAULT_SIZE, 476, Short.MAX_VALUE).add(
-					groupLayout.createSequentialGroup().add(sequenceNameLabel).addPreferredGap(LayoutStyle.RELATED).add(text, GroupLayout.PREFERRED_SIZE, 368,
-						Short.MAX_VALUE))).addContainerGap()));
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(groupLayout.createSequentialGroup().addContainerGap().add(
+			groupLayout.createParallelGroup(GroupLayout.LEADING).add(warningLabel, GroupLayout.DEFAULT_SIZE, 476, Short.MAX_VALUE).add(
+				groupLayout.createSequentialGroup().add(sequenceNameLabel).addPreferredGap(LayoutStyle.RELATED).add(text, GroupLayout.PREFERRED_SIZE, 368,
+					Short.MAX_VALUE))).addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
-			groupLayout.createSequentialGroup().addContainerGap().add(
-				groupLayout.createParallelGroup(GroupLayout.BASELINE).add(sequenceNameLabel).add(text, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-					GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(warningLabel).addContainerGap()));
+			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(sequenceNameLabel).add(text,
+				GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+					warningLabel).addContainerGap()));
 		setLayout(groupLayout);
 		//
 	}
