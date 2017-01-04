@@ -2421,7 +2421,7 @@ public class TypeCreator extends TypeCache
 				String[] split = config.split("/");
 				String solutionName = split[0];
 				// this is when only Scope<scopeName> is given
-				if (split.length == 1)
+				if (split.length == 1 && fs != null)
 				{
 					for (Pair<String, IRootObject> scope : fs.getScopes())
 					{
