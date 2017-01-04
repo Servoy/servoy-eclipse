@@ -257,7 +257,6 @@ import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.UUID;
-import com.servoy.j2db.util.Utils;
 
 /**
  * This view is meant to be similar to the old designer's tree (in editor) in looks and in functionality. It will show a logical presentation of the eclipse
@@ -685,7 +684,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			{
 				result = HtmlUtils.unescape(result);
 			}
-			result = Utils.stringReplaceCaseInsensitiveSearch(result, "<body>", "<body style=\"font-size:13px\">");
 			return result;
 		}
 

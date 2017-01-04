@@ -2343,12 +2343,13 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						for (int i = 0; i < parameters.length; i++)
 						{
 							paramNames[i] = parameters[i].getName();
-							tooltip = tooltip + "\n @param {" + parameters[i].getType() + "} " + parameters[i].getName() + " " + parameters[i].getDescription();
+							tooltip = tooltip + "\n <b>@param</b> {" + parameters[i].getType() + "} " + parameters[i].getName() + " " +
+								parameters[i].getDescription();
 						}
 					}
 					if (returnType != null)
 					{
-						tooltip = tooltip + "\n @return {" + getReturnTypeString(returnType) + "} ";
+						tooltip = tooltip + "\n <b>@return</b> {" + getReturnTypeString(returnType) + "} ";
 						if (returnDescription != null) tooltip += returnDescription;
 					}
 				}
@@ -2359,6 +2360,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					paramNames = scriptObject.getParameterNames(name);
 					returnType = getMethodReturnType();
 					tooltip = Text.processTags(description, resolver);
+					tooltip = tooltip.replaceAll("@param|@return|@example", "<b>$0</b>");
 				}
 			}
 			else
@@ -2367,15 +2369,23 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			if (tooltip == null) tooltip = "";
 
-			String tmp = "<html><body><b>" + (returnTypeString != null ? returnTypeString : getReturnTypeString(returnType)) + " " + name + "(" +
-				getPrettyParameterTypesString(paramNames, namesOnly) + ")</b>";
+			StringBuilder tmp = new StringBuilder("<html><head><style type=\"text/css\">");
+			tmp.append("html { font-family: 'Segoe UI',sans-serif; font-size: 9pt; font-style: normal; font-weight: normal; }");
+			tmp.append("body { overflow: auto; margin-top: 0px; margin-bottom: 0.5em; margin-left: 0.3em; margin-right: 0px; }");
+			tmp.append("body, p, h5 { font-size:1em;}");
+			tmp.append("pre { font-family: monospace; margin-left: 0.6em;}");
+			tmp.append("></style></head>");
+
+			tmp.append("<body><h5><div style='word-wrap: break-word; position: relative; margin-left: 20px; padding-top: 2px; '>" +
+				(returnTypeString != null ? returnTypeString : getReturnTypeString(returnType)) + " " + name + "(" +
+				getPrettyParameterTypesString(paramNames, namesOnly) + ")</div></h5>");
 			if ("".equals(tooltip))
 			{
-				tooltip = tmp + "</body></html>";
+				tooltip = tmp.toString() + "</body></html>";
 			}
 			else
 			{
-				tooltip = tmp + "<br><pre>" + tooltip + "</pre></body></html>";
+				tooltip = tmp.toString() + "<pre>" + tooltip + "</pre></body></html>";
 			}
 			return tooltip;
 		}
