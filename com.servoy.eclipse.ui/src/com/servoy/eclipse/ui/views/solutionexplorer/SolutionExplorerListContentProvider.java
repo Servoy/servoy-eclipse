@@ -1587,12 +1587,15 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 	}
 
-	public static String getParsedComment(String comment)
+	public static String getParsedComment(String comment, String elementName, boolean toHTML)
 	{
 		if (comment == null) return null;
 		String c = comment.replaceAll("/\\*\\*|\\*/", "");
-		c = c.replaceAll(System.getProperty("line.separator"), "<br/>\n");
 		c = c.replaceAll("(\\s*)\\*", "$1").trim();
+		c = c.replaceAll(System.getProperty("line.separator"), "<br/>");
+		if (elementName != null) c = c.replaceAll("%%elementName%%", elementName);
+		if (!toHTML) return c;
+
 		JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(c));
 		try
 		{
@@ -1604,7 +1607,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 	}
 
-	private SimpleUserNode[] getJSMethods(Object o, String elementName, String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames)
+	private SimpleUserNode[] getJSMethods(Object o, final String elementName, String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames)
 	{
 		if (o == null) return EMPTY_LIST;
 		if (o instanceof WebObjectSpecification)
@@ -1660,7 +1663,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							@Override
 							public String getToolTip(String methodName)
 							{
-								return getParsedComment(api.getDocumentation());
+								return getParsedComment(api.getDocumentation(), elementName, false);
 							}
 
 							@Override
@@ -1956,7 +1959,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		return dlm.toArray(nodes);
 	}
 
-	private SimpleUserNode[] getWebComponentMembers(String prefix, IBasicWebComponent webcomponent)
+	private SimpleUserNode[] getWebComponentMembers(String prefix, final IBasicWebComponent webcomponent)
 	{
 		String prefixForWebComponentMembers = prefix + ".";
 		if (webcomponent == null)
@@ -2021,7 +2024,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					@Override
 					public String getToolTip(String methodName)
 					{
-						return getParsedComment(api.getDocumentation());
+						return getParsedComment(api.getDocumentation(), webcomponent.getName(), false);
 					}
 
 					@Override

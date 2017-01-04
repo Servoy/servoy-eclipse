@@ -86,6 +86,7 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -110,8 +111,10 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.dnd.DND;
@@ -136,6 +139,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -676,14 +680,12 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					deprecatedText = "Deprecated: " + deprecatedText;
 					result = (result != null) ? result += ("\n" + deprecatedText) : deprecatedText;
 				}
-				// nicely remove html markup as SWT does not support it
-				result = Utils.stringReplaceCaseInsensitiveSearch(result, "<br>", "\n");
-				result = Utils.stringRemoveTags(result);
 			}
 			if (result != null)
 			{
 				result = HtmlUtils.unescape(result);
 			}
+			result = Utils.stringReplaceCaseInsensitiveSearch(result, "<body>", "<body style=\"font-size:13px\">");
 			return result;
 		}
 
@@ -1427,11 +1429,56 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		}
 	}
 
+	private static class HTMLToolTipSupport extends ColumnViewerToolTipSupport
+	{
+
+		protected HTMLToolTipSupport(ColumnViewer viewer, int style, boolean manualActivation)
+		{
+			super(viewer, style, manualActivation);
+		}
+
+
+		@Override
+		protected Composite createToolTipContentArea(Event event, Composite parent)
+		{
+			Composite comp = new Composite(parent, SWT.NONE);
+			GridLayout l = new GridLayout(1, false);
+			l.horizontalSpacing = 0;
+			l.marginWidth = 0;
+			l.marginHeight = 0;
+			l.verticalSpacing = 0;
+
+			comp.setLayout(l);
+			Browser browser = new Browser(comp, SWT.BORDER);
+			browser.setText(getText(event));
+			GridData data = new GridData(600, 150);
+			data.horizontalAlignment = GridData.FILL;
+			data.verticalAlignment = GridData.FILL;
+			data.grabExcessHorizontalSpace = true;
+			data.grabExcessVerticalSpace = true;
+			browser.setLayoutData(data);
+
+			return comp;
+		}
+
+		@Override
+		public boolean isHideOnMouseDown()
+		{
+			return false;
+		}
+
+
+		public static final void enableFor(ColumnViewer viewer, int style)
+		{
+			new HTMLToolTipSupport(viewer, style, false);
+		}
+	}
+
 	private void createListViewer(Composite parent)
 	{
 		ViewForm viewForm = new ViewForm(parent, SWT.NONE);
 		list = new TableViewer(viewForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		ColumnViewerToolTipSupport.enableFor(list);
+		HTMLToolTipSupport.enableFor(list, ToolTip.NO_RECREATE);
 		list.setContentProvider(new SolutionExplorerListContentProvider(this));
 		list.setLabelProvider(new DeprecationDecoratingStyledCellLabelProvider(new DecoratingColumnLabelProvider(labelProvider, labelDecorator)));
 		viewForm.setContent(list.getControl());

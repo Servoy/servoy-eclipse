@@ -267,6 +267,7 @@ import com.servoy.j2db.util.Utils;
  */
 public class TypeCreator extends TypeCache
 {
+	private static final String STANDARD_ELEMENT_NAME = "elements.elem";
 	static final String HIDDEN_IN_RELATED = "HIDDEN_IN_RELATED";
 
 	private static final String SCOPE_TABLES = "scope:tables";
@@ -1153,7 +1154,7 @@ public class TypeCreator extends TypeCache
 			method.setName(api.getName());
 			if (api.getDocumentation() != null)
 			{
-				method.setDescription(SolutionExplorerListContentProvider.getParsedComment(api.getDocumentation()));
+				method.setDescription(SolutionExplorerListContentProvider.getParsedComment(api.getDocumentation(), STANDARD_ELEMENT_NAME, true));
 				method.setDeprecated(api.getDocumentation().contains("@deprecated"));
 			}
 			JSType returnType = getType(context, api.getReturnType());
@@ -2184,7 +2185,7 @@ public class TypeCreator extends TypeCache
 						docBuilder.append(returnText);
 					}
 					doc = Utils.stringReplace(docBuilder.toString(), "%%prefix%%", "");
-					doc = Utils.stringReplace(doc, "%%elementName%%", "elements.elem");
+					doc = Utils.stringReplace(doc, "%%elementName%%", STANDARD_ELEMENT_NAME);
 				}
 			}
 			docCache.putIfAbsent(cacheKey, doc);
