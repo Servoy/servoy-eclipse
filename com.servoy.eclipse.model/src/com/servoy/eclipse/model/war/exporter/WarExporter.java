@@ -452,7 +452,8 @@ public class WarExporter
 	{
 		if ((exportModel.getExportedComponents() == null && exportModel.getExportedServices() == null) ||
 			(exportModel.getExportedComponents().size() == componentsSpecProviderState.getWebObjectSpecifications().size() &&
-				exportModel.getExportedServices().size() == NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState).length))
+				exportModel.getExportedServices().size() == NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(
+					servicesSpecProviderState).length))
 			return;
 
 		File exported = new File(tmpWarDir, "WEB-INF/exported_web_objects.properties");
@@ -1338,6 +1339,11 @@ public class WarExporter
 		if (!exportModel.getLicenses().isEmpty())
 		{
 			writeLicenses(properties, exportModel.getLicenses());
+		}
+		String maxSeqLength = Settings.getInstance().getProperty("ServerManager.databasesequence.maxlength");
+		if (maxSeqLength != null)
+		{
+			properties.setProperty("ServerManager.databasesequence.maxlength", maxSeqLength);
 		}
 		// store the servers
 		SortedSet<String> selectedServerNames = exportModel.getSelectedServerNames();
