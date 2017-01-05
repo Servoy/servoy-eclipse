@@ -24,6 +24,7 @@ import org.eclipse.dltk.javascript.ast.VariableDeclaration;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.dltk.utils.TextUtils;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -46,18 +47,21 @@ import org.eclipse.jface.viewers.LabelDecorator;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorReference;
@@ -72,10 +76,12 @@ import org.eclipse.ui.views.properties.PropertySheetPage;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.labelproviders.DeprecationDecoratingStyledCellLabelProvider;
+import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IDeprecationProvider;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetEntry;
@@ -182,7 +188,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		}
 	}
 
-	public class FormListContentProvider implements IStructuredContentProvider
+	public class FormListContentProvider implements ITreeContentProvider
 	{
 		private Form input;
 		private final FormHierarchyView view;
@@ -204,17 +210,22 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		}
 
 		@Override
-		public Object[] getElements(Object inputElement)
+		public Object[] getChildren(Object inputElement)
 		{
+			Comparator< ? > comparator = input.isResponsiveLayout() ? PositionComparator.XY_PERSIST_COMPARATOR : NameComparator.INSTANCE;
+			Form form = showAllInheritedMembers ? activeSolution.getFlattenedForm(input, false) : input;
+			if (inputElement instanceof Pair)
+			{
+				List<IPersist> lst = new SortedList<IPersist>(comparator);
+				for (IPersist persist : form.getAllObjectsAsList())
+				{
+					Pair<String, Image> nameAndImage = ElementUtil.getPersistNameAndImage(persist);
+					if (nameAndImage.equals(inputElement)) lst.add(persist);
+				}
+				return lst.toArray();
+			}
 			if (inputElement instanceof Form)
 			{
-				input = (Form)inputElement;
-				Comparator< ? > comparator = input.isResponsiveLayout() ? PositionComparator.XY_PERSIST_COMPARATOR : NameComparator.INSTANCE;
-				Form form = input;
-				if (showAllInheritedMembers)
-				{
-					form = activeSolution.getFlattenedForm(input, false);
-				}
 				Iterator<Part> it1 = form.getParts();
 				List<IPersist> parts = new SortedList<IPersist>(comparator);
 				while (it1.hasNext())
@@ -238,6 +249,45 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				return lst.toArray();
 			}
 			return new Object[0];
+		}
+
+		@Override
+		public Object getParent(Object element)
+		{
+			if (element instanceof IPersist)
+			{
+				return fDialogSettings.getBoolean(GROUP_ELEMENTS_BY_TYPE) ? ElementUtil.getPersistNameAndImage((IPersist)element)
+					: ((IPersist)element).getParent();
+			}
+			return null;
+		}
+
+		@Override
+		public boolean hasChildren(Object element)
+		{
+			return getChildren(element).length > 0;
+		}
+
+		@Override
+		public Object[] getElements(Object inputElement)
+		{
+			if (inputElement instanceof Form)
+			{
+				input = (Form)inputElement;
+				if (fDialogSettings.getBoolean(GROUP_ELEMENTS_BY_TYPE))
+				{
+					Form form = showAllInheritedMembers ? activeSolution.getFlattenedForm(input, false) : input;
+					HashSet<Object> availableCategories = new HashSet<Object>();
+					for (IPersist p : form.getAllObjectsAsList())
+					{
+						if (p instanceof ScriptVariable) continue;
+						availableCategories.add(ElementUtil.getPersistNameAndImage(p));
+					}
+					return availableCategories.toArray();
+				}
+				return getChildren(inputElement);
+			}
+			return new Form[0];
 		}
 	}
 
@@ -456,10 +506,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			{
 				return ElementUtil.getImageForFormEncapsulation((Form)element);
 			}
-			else if (element instanceof Part)
-			{
-				return uiActivator.loadImageFromOldLocation("parts.gif");
-			}
 			else if (element instanceof ScriptMethod)
 			{
 				ScriptMethod sm = (ScriptMethod)element;
@@ -472,6 +518,15 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 					return uiActivator.loadImageFromBundle("protected_method.gif");
 				}
 				return sm.isPublic() ? uiActivator.loadImageFromBundle("public_method.gif") : DLTKPluginImages.DESC_METHOD_DEFAULT.createImage();
+			}
+			else if (element instanceof Pair< ? , ? >)
+			{
+				return ((Pair<String, Image>)element).getRight();
+			}
+			else if (element instanceof PersistContext)
+			{
+				Pair<String, Image> pair = ElementUtil.getPersistNameAndImage(((PersistContext)element).getPersist());
+				if (pair != null) return pair.getRight();
 			}
 			else
 			{
@@ -504,6 +559,10 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			if (element instanceof Part)
 			{
 				return ((Part)element).toString();
+			}
+			else if (element instanceof Pair< ? , ? >)
+			{
+				return ((Pair<String, Image>)element).getLeft();
 			}
 			return null;
 		}
@@ -680,13 +739,14 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	public static final int VIEW_ORIENTATION_AUTOMATIC = 2;
 	public static final String DIALOGSTORE_VIEWORIENTATION = "FormHierarchyView.orientation";
 	private static final String DIALOGSTORE_RATIO = "FormHierarchyView.ratio";
+	private static final String GROUP_ELEMENTS_BY_TYPE = "GroupElements";
 
 	private IDialogSettings fDialogSettings;
 
 	private Composite fParent;
 	private Form selected = null;
 	private SashForm fSplitter;
-	private TableViewer list;
+	private TreeViewer list;
 	private TreeViewer tree;
 	private ToolBar listToolBar;
 	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
@@ -699,12 +759,16 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 	private FormTreeContentProvider treeProvider;
 
-	private boolean showAllInheritedMembers;
+	private boolean showAllInheritedMembers = false;
 	private boolean noSelectionChange = false;
 
 	private ShowMembersInFormHierarchy showMembersAction;
 
 	private FlattenedSolution activeSolution;
+
+	private Menu listDropDownMenu;
+
+	private MenuItem groupElementsToggleButton;
 
 	@Override
 	public void createPartControl(Composite parent)
@@ -753,7 +817,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private void createListViewer(Composite parent)
 	{
 		ViewForm viewForm = new ViewForm(parent, SWT.NONE);
-		list = new TableViewer(viewForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		list = new TreeViewer(viewForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		ColumnViewerToolTipSupport.enableFor(list);
 		FormListContentProvider listProvider = new FormListContentProvider(this);
 		list.setContentProvider(listProvider);
@@ -773,6 +837,34 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 		listToolBar = new ToolBar(viewForm, SWT.FLAT | SWT.WRAP);
 		viewForm.setTopCenter(listToolBar);
+
+		final ToolBar listMenuToolbar = new ToolBar(viewForm, SWT.FLAT | SWT.WRAP);
+		ToolBarManager listMenuToolbarManager = new ToolBarManager(listMenuToolbar);
+		viewForm.setTopRight(listMenuToolbar);
+
+		listDropDownMenu = new Menu(listMenuToolbar);
+		Action pullDown = new Action("Menu", IAction.AS_PUSH_BUTTON)
+		{
+			@Override
+			public void run()
+			{
+				Point pt = listMenuToolbar.toDisplay(0, listMenuToolbar.getSize().y);
+				listDropDownMenu.setLocation(pt.x, pt.y);
+				listDropDownMenu.setVisible(true);
+			}
+		};
+		Image dropDownImage = UIUtils.paintViewMenuImage();
+		if (dropDownImage != null)
+		{
+			ImageDescriptor dropDownImageDescriptor = ImageDescriptor.createFromImage(dropDownImage);
+			pullDown.setImageDescriptor(dropDownImageDescriptor);
+			pullDown.setDisabledImageDescriptor(dropDownImageDescriptor);
+			pullDown.setHoverImageDescriptor(dropDownImageDescriptor);
+		}
+		pullDown.setToolTipText("More options");
+		listMenuToolbarManager.add(pullDown);
+		listMenuToolbarManager.update(true);
+
 	}
 
 	@Override
@@ -956,6 +1048,36 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		ToolBarManager lowertbmanager = new ToolBarManager(listToolBar);
 		fillListToolbar(lowertbmanager);
 		lowertbmanager.update(true);
+
+		fillListMenu();
+	}
+
+	private void fillListMenu()
+	{
+		groupElementsToggleButton = new MenuItem(listDropDownMenu, SWT.CHECK);
+		groupElementsToggleButton.setText("Group elements by type");
+		groupElementsToggleButton.setSelection(fDialogSettings.getBoolean(GROUP_ELEMENTS_BY_TYPE));
+		groupElementsOption(fDialogSettings.getBoolean(GROUP_ELEMENTS_BY_TYPE));
+		groupElementsToggleButton.addSelectionListener(new SelectionListener()
+		{
+
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+			}
+
+			public void widgetSelected(SelectionEvent e)
+			{
+				groupElementsOption(groupElementsToggleButton.getSelection());
+			}
+		});
+
+	}
+
+	public void groupElementsOption(boolean group)
+	{
+		fDialogSettings.put(GROUP_ELEMENTS_BY_TYPE, group);
+		list.refresh();
+		list.expandAll();
 	}
 
 	private void fillListToolbar(ToolBarManager lowertbmanager)

@@ -58,6 +58,7 @@ import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
+import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RectShape;
@@ -214,6 +215,10 @@ public class ElementUtil
 		if (persist instanceof LayoutContainer)
 		{
 			return "layoutcontainer.gif";
+		}
+		if (persist instanceof Part)
+		{
+			return "parts.gif";
 		}
 
 		return null;
