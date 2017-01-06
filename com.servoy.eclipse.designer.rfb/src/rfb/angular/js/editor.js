@@ -712,19 +712,39 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				$scope.glasspane.style.cursor = cursor;
 			}
 
-			$scope.setGhosts = function(ghosts) {
-				$scope.ghosts = ghosts;
-				$scope.ghostContainerElements = {}
+			function equalGhosts(ghosts1, ghosts2) {
+				if(ghosts1 && ghosts1.ghostContainers && ghosts2 && ghosts2.ghostContainers && (ghosts1.ghostContainers.length == ghosts2.ghostContainers.length)) {
+					for (var i = 0; i < ghosts1.ghostContainers.length; i++) {
+						if(ghosts1.ghostContainers[i].uuid != ghosts2.ghostContainers[i].uuid ||
+							ghosts1.ghostContainers[i].ghosts.length != ghosts2.ghostContainers[i].ghosts.length) {
+							return false;
+						}
+						for (var j = 0; j < ghosts1.ghostContainers[i].ghosts.length; j++) {
+							if(ghosts1.ghostContainers[i].ghosts[j].uuid != ghosts2.ghostContainers[i].ghosts[j].uuid) {
+								return false;
+							}
+						}
+					}
+					return true;
+				}
+				return false;
+			}
 
-				if ($scope.ghosts.ghostContainers) {
-					for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
-						for (j = 0; j < $scope.ghosts.ghostContainers[i].ghosts.length; j++) {
-							if ($scope.ghosts.ghostContainers[i].ghosts[j].type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) {
-								var changedGhosts = $scope.ghosts.ghostContainers[i].ghosts;
-								$timeout(function() {
-									$scope.rearrangeGhosts(changedGhosts)
-								}, 0);
-								break;
+			$scope.setGhosts = function(ghosts) {
+				if(!equalGhosts($scope.ghosts, ghosts)) {
+					$scope.ghosts = ghosts;
+					$scope.ghostContainerElements = {}
+	
+					if ($scope.ghosts.ghostContainers) {
+						for (i = 0; i < $scope.ghosts.ghostContainers.length; i++) {
+							for (j = 0; j < $scope.ghosts.ghostContainers[i].ghosts.length; j++) {
+								if ($scope.ghosts.ghostContainers[i].ghosts[j].type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) {
+									var changedGhosts = $scope.ghosts.ghostContainers[i].ghosts;
+									$timeout(function() {
+										$scope.rearrangeGhosts(changedGhosts)
+									}, 0);
+									break;
+								}
 							}
 						}
 					}
