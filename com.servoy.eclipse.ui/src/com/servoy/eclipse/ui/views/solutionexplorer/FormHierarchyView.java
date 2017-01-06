@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -97,6 +98,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportDeprecated;
@@ -188,6 +190,33 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		}
 	}
 
+	private static Pair<String, Image> ELEMENTS;
+	private static Pair<String, Image> PARTS;
+	private static Pair<String, Image> METHODS;
+	private static Pair<String, Image> VARIABLES;
+	static
+	{
+		ELEMENTS = new Pair<String, Image>("elements", getImage("element.gif"));
+		PARTS = new Pair<String, Image>("parts", getImage("parts.gif"));
+		METHODS = new Pair<String, Image>("methods", getImage("function.gif"));
+		VARIABLES = new Pair<String, Image>("variables", getImage("form_variable.gif"));
+	}
+
+	private static Image getImage(String name)
+	{
+		Image image = null;
+		if (name != null)
+		{
+			image = Activator.getDefault().loadImageFromOldLocation(name);
+			if (image == null)
+			{
+				image = Activator.getDefault().loadImageFromBundle(name);
+			}
+		}
+		return image;
+	}
+
+
 	public class FormListContentProvider implements ITreeContentProvider
 	{
 		private Form input;
@@ -197,6 +226,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		{
 			this.view = formHierarchyView;
 		}
+
 
 		@Override
 		public void dispose()
@@ -216,11 +246,34 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			Form form = showAllInheritedMembers ? activeSolution.getFlattenedForm(input, false) : input;
 			if (inputElement instanceof Pair)
 			{
+				if (inputElement == ELEMENTS)
+				{
+					Set<Pair<String, Image>> availableCategories = new TreeSet<Pair<String, Image>>(new Comparator<Pair<String, Image>>()
+					{
+						@Override
+						public int compare(Pair<String, Image> o1, Pair<String, Image> o2)
+						{
+							if (o1 != null && o2 != null && o1.getLeft() != null)
+							{
+								return o1.getLeft().compareTo(o2.getLeft());
+							}
+							return 0;
+						}
+					});
+					for (IPersist p : form.getAllObjectsAsList())
+					{
+						if (p instanceof IFormElement) availableCategories.add(ElementUtil.getPersistNameAndImage(p));
+					}
+					return availableCategories.toArray();
+				}
+
 				List<IPersist> lst = new SortedList<IPersist>(comparator);
 				for (IPersist persist : form.getAllObjectsAsList())
 				{
 					Pair<String, Image> nameAndImage = ElementUtil.getPersistNameAndImage(persist);
 					if (nameAndImage.equals(inputElement)) lst.add(persist);
+					if (inputElement == METHODS && persist instanceof ScriptMethod) lst.add(persist);
+					if (inputElement == VARIABLES && persist instanceof ScriptVariable) lst.add(persist);
 				}
 				return lst.toArray();
 			}
@@ -277,12 +330,11 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				if (fDialogSettings.getBoolean(GROUP_ELEMENTS_BY_TYPE))
 				{
 					Form form = showAllInheritedMembers ? activeSolution.getFlattenedForm(input, false) : input;
-					HashSet<Object> availableCategories = new HashSet<Object>();
-					for (IPersist p : form.getAllObjectsAsList())
-					{
-						if (p instanceof ScriptVariable) continue;
-						availableCategories.add(ElementUtil.getPersistNameAndImage(p));
-					}
+					List<Pair<String, Image>> availableCategories = new ArrayList<>();
+					if (form.getFormElementsSortedByFormIndex().hasNext()) availableCategories.add(ELEMENTS);
+					if (form.getParts().hasNext()) availableCategories.add(PARTS);
+					if (form.getScriptMethods(false).hasNext()) availableCategories.add(METHODS);
+					if (form.getScriptVariables(false).hasNext()) availableCategories.add(VARIABLES);
 					return availableCategories.toArray();
 				}
 				return getChildren(inputElement);
@@ -539,39 +591,31 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		@Override
 		public String getText(Object element)
 		{
-			if (element instanceof Form)
-			{
-				return ((Form)element).getName();
-			}
-			else if (element instanceof ScriptMethod)
+			if (element instanceof ScriptMethod)
 			{
 				return ((ScriptMethod)element).getScriptMethodSignature(null, false, true, true, true);
-			}
-			else if (element instanceof BaseComponent)
-			{
-				if (element instanceof ISupportName)
-				{
-					String name = ((ISupportName)element).getName();
-					if (name != null && !"".equals(name)) return name;
-				}
-				return "<no name>";
 			}
 			if (element instanceof Part)
 			{
 				return ((Part)element).toString();
 			}
-			else if (element instanceof Pair< ? , ? >)
+			if (element instanceof Pair< ? , ? >)
 			{
 				return ((Pair<String, Image>)element).getLeft();
 			}
-			return null;
+			if (element instanceof ISupportName)
+			{
+				String name = ((ISupportName)element).getName();
+				if (name != null && !"".equals(name)) return name;
+			}
+			return "<no name>";
 		}
 
 		@Override
 		public Color getForeground(Object element)
 		{
 			if (element instanceof Form) return super.getForeground(element);
-			if (provider instanceof ITreeContentProvider) return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE);
+			if (provider instanceof FormTreeContentProvider) return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE);
 			if (element instanceof ISupportExtendsID && ((ISupportExtendsID)element).getExtendsID() > 0)
 			{
 				return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE);
@@ -881,6 +925,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				selected = (Form)obj;
 				list.setInput(selected);
 				list.refresh();
+				list.expandAll();
 			}
 		}
 	}
@@ -912,6 +957,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			showMembersInFormHierarchy(object);
 		}
 		list.refresh();
+		list.expandAll();
 	}
 
 	private void showMembersInFormHierarchy(Object object)
@@ -1110,6 +1156,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	{
 		showAllInheritedMembers = on;
 		list.refresh();
+		list.expandAll();
 	}
 
 	@Override
