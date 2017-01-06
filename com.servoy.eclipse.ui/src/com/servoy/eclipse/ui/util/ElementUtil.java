@@ -56,6 +56,7 @@ import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
+import com.servoy.j2db.persistence.IWebComponent;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.Part;
@@ -123,8 +124,15 @@ public class ElementUtil
 				image = Activator.getDefault().loadImageFromBundle(name);
 			}
 
-			name = name.substring(0, name.lastIndexOf('.'));
-			if (name.lastIndexOf('s') != name.length() - 1) name = name + 's';
+			if (persist instanceof IWebComponent)
+			{
+				name = "components";
+			}
+			else
+			{
+				name = name.substring(0, name.lastIndexOf('.'));
+				if (name.lastIndexOf('s') != name.length() - 1) name = name + 's';
+			}
 		}
 
 		return new Pair<String, Image>(name, image);
@@ -219,6 +227,10 @@ public class ElementUtil
 		if (persist instanceof Part)
 		{
 			return "parts.gif";
+		}
+		if (persist instanceof IWebComponent)
+		{
+			return "bean.gif";
 		}
 
 		return null;
