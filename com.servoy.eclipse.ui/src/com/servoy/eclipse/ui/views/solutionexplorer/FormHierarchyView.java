@@ -286,19 +286,18 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 					parts.add(it1.next());
 				}
 				List<IPersist> elements = new SortedList<IPersist>(comparator);
+				List<IPersist> methods = new SortedList<IPersist>(comparator);
+				List<IPersist> variables = new SortedList<IPersist>(comparator);
 				for (IPersist p : form.getAllObjectsAsList())
 				{
 					if (p instanceof BaseComponent) elements.add(p);
-				}
-				List<IPersist> methods = new SortedList<IPersist>(comparator);
-				Iterator<ScriptMethod> it2 = form.getScriptMethods(true);
-				while (it2.hasNext())
-				{
-					methods.add(it2.next());
+					if (p instanceof ScriptMethod) methods.add(p);
+					if (p instanceof ScriptVariable) variables.add(p);
 				}
 				List<IPersist> lst = new ArrayList<>(parts);
 				lst.addAll(elements);
 				lst.addAll(methods);
+				lst.addAll(variables);
 				return lst.toArray();
 			}
 			return new Object[0];
