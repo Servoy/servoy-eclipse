@@ -118,97 +118,104 @@ public class GhostHandler implements IServerService
 							}
 						}
 					}
-					try
+
+					boolean hasGhosts = (bean instanceof WebComponent && ((WebComponent)bean).getAllPersistMappedProperties().size() > 0) ||
+						(bean instanceof Bean && ((Bean)bean).getBeanXML() != null);
+					if (hasGhosts)
 					{
-						writer.object();
-						writer.key("style");
+						try
 						{
 							writer.object();
-							writer.key("left").value(bean.getLocation().getX());
-							writer.key("top").value(bean.getLocation().getY());
-							writer.endObject();
-						}
-						writer.key("uuid").value(bean.getUUID());
-						writer.key("ghosts");
-						{
-							writer.array();
-							if (bean instanceof WebComponent)
+							writer.key("style");
 							{
-								for (IChildWebObject p : ((WebComponent)bean).getAllPersistMappedProperties())
+								writer.object();
+								writer.key("left").value(bean.getLocation().getX());
+								writer.key("top").value(bean.getLocation().getY());
+								writer.endObject();
+							}
+							writer.key("uuid").value(bean.getUUID());
+							writer.key("ghosts");
+							{
+								writer.array();
+								if (bean instanceof WebComponent)
 								{
-									String text = p.getJsonKey() + (p.getIndex() >= 0 ? "[" + p.getIndex() + "]" : "");
-
-									// special case for tabPanels - text subproperty should be shown as label instead of tabs[0]...
-									if (p.getProperty("json") != null)
+									for (IChildWebObject p : ((WebComponent)bean).getAllPersistMappedProperties())
 									{
-										JSONObject json = (JSONObject)p.getProperty("json");
-										if (json.has("text")) text = json.getString("text");
-									}
+										String text = p.getJsonKey() + (p.getIndex() >= 0 ? "[" + p.getIndex() + "]" : "");
 
-									Object configObject;
-									if (p.getIndex() >= 0)
-										configObject = ((WebObjectImpl)((WebComponent)bean).getImplementation()).getPropertyDescription().getProperty(
-											p.getJsonKey()).getConfig();
-									else configObject = p.getPropertyDescription().getConfig();
+										// special case for tabPanels - text subproperty should be shown as label instead of tabs[0]...
+										if (p.getProperty("json") != null)
+										{
+											JSONObject json = (JSONObject)p.getProperty("json");
+											if (json.has("text")) text = json.getString("text");
+										}
 
-									if (isDroppable(p.getPropertyDescription(), configObject))
-									{
-										String parentKey = bean.getUUID() + p.getJsonKey();
-										writeGhostToJSON(parentKey, writer, text, p.getUUID().toString(), p.getIndex(), p.getTypeName());
+										Object configObject;
+										if (p.getIndex() >= 0)
+											configObject = ((WebObjectImpl)((WebComponent)bean).getImplementation()).getPropertyDescription().getProperty(
+												p.getJsonKey()).getConfig();
+										else configObject = p.getPropertyDescription().getConfig();
+
+										if (isDroppable(p.getPropertyDescription(), configObject))
+										{
+											String parentKey = bean.getUUID() + p.getJsonKey();
+											writeGhostToJSON(parentKey, writer, text, p.getUUID().toString(), p.getIndex(), p.getTypeName());
+										}
 									}
 								}
-							}
-							else if (bean instanceof Bean)
-							{
-								try
+								else if (bean instanceof Bean)
 								{
-									if (((Bean)bean).getBeanXML() != null)
+									try
 									{
-										JSONObject webComponentModelJson = new JSONObject(((Bean)bean).getBeanXML());
-										for (PropertyDescription pd : properties.values())
+										if (((Bean)bean).getBeanXML() != null)
 										{
-											String simpleTypeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(pd.getType());
-											if (webComponentModelJson.has(pd.getName()))
+											JSONObject webComponentModelJson = new JSONObject(((Bean)bean).getBeanXML());
+											for (PropertyDescription pd : properties.values())
 											{
-												Object configObject = pd.getConfig();
-												if (PropertyUtils.isCustomJSONObjectProperty(pd.getType()))
+												String simpleTypeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(pd.getType());
+												if (webComponentModelJson.has(pd.getName()))
 												{
-													if (pd.getType() instanceof ComponentPropertyType || (configObject instanceof JSONObject &&
-														Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
+													Object configObject = pd.getConfig();
+													if (PropertyUtils.isCustomJSONObjectProperty(pd.getType()))
 													{
-														writeGhostToJSON(bean.getUUID() + pd.getName(), pd, simpleTypeName, -1);// -1 does not add a [0] at the end of the name
-													}
-												}
-												else if (PropertyUtils.isCustomJSONArrayPropertyType(pd.getType()))
-												{
-													JSONArray jsonArray = webComponentModelJson.getJSONArray(pd.getName());
-													for (int i = 0; i < jsonArray.length(); i++)
-													{
-														if (((CustomJSONArrayType)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType ||
-															(configObject instanceof JSONObject &&
-																Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
+														if (pd.getType() instanceof ComponentPropertyType || (configObject instanceof JSONObject &&
+															Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
 														{
-															writeGhostToJSON(bean.getUUID() + pd.getName(), writer,
-																pd.getName() + (i >= 0 ? "[" + i + "]" : ""), UUID.randomUUID().toString(), i, simpleTypeName);
+															writeGhostToJSON(bean.getUUID() + pd.getName(), pd, simpleTypeName, -1);// -1 does not add a [0] at the end of the name
+														}
+													}
+													else if (PropertyUtils.isCustomJSONArrayPropertyType(pd.getType()))
+													{
+														JSONArray jsonArray = webComponentModelJson.getJSONArray(pd.getName());
+														for (int i = 0; i < jsonArray.length(); i++)
+														{
+															if (((CustomJSONArrayType)pd.getType()).getCustomJSONTypeDefinition().getType() instanceof ComponentPropertyType ||
+																(configObject instanceof JSONObject &&
+																	Boolean.TRUE.equals(((JSONObject)configObject).opt(FormElement.DROPPABLE))))
+															{
+																writeGhostToJSON(bean.getUUID() + pd.getName(), writer,
+																	pd.getName() + (i >= 0 ? "[" + i + "]" : ""), UUID.randomUUID().toString(), i,
+																	simpleTypeName);
+															}
 														}
 													}
 												}
 											}
 										}
 									}
+									catch (JSONException e)
+									{
+										Debug.error(e);
+									}
 								}
-								catch (JSONException e)
-								{
-									Debug.error(e);
-								}
+								writer.endArray();
 							}
-							writer.endArray();
+							writer.endObject();
 						}
-						writer.endObject();
-					}
-					catch (JSONException e1)
-					{
-						Debug.error(e1);
+						catch (JSONException e1)
+						{
+							Debug.error(e1);
+						}
 					}
 				}
 			}
