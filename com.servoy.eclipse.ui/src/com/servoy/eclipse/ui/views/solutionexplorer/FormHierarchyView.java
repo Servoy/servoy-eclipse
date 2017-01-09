@@ -67,6 +67,8 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
@@ -97,6 +99,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.OrientationAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ShowMembersInFormHierarchy;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.AbstractRepository;
 import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
@@ -114,6 +117,7 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.SortedList;
+import com.servoy.j2db.util.Utils;
 
 
 public class FormHierarchyView extends ViewPart implements ISelectionChangedListener, IOrientedView
@@ -826,6 +830,23 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private AbstractFormHierarchyFilter hidePartsAction;
 	private AbstractFormHierarchyFilter hideVariablesAction;
 
+	private IMemento memento;
+	private static final String SELECTED_FORM = "FormHierarchy.SELECTION";
+
+	@Override
+	public void saveState(IMemento mem)
+	{
+		mem.putString(SELECTED_FORM, selected.getUUID().toString());
+		super.saveState(mem);
+	}
+
+	@Override
+	public void init(IViewSite site, IMemento mem) throws PartInitException
+	{
+		this.memento = mem;
+		super.init(site, mem);
+	}
+
 	@Override
 	public void createPartControl(Composite parent)
 	{
@@ -847,6 +868,16 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		tree.addSelectionChangedListener(this);
 
 		contributeToActionBars();
+
+		if (memento == null) return;
+		String formUuid = memento.getString(SELECTED_FORM);
+		if (formUuid == null) return;
+		IPersist persist = AbstractRepository.searchPersist(ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution().getSolution(),
+			Utils.getAsUUID(formUuid, false));
+		if (persist instanceof Form)
+		{
+			setSelection(persist);
+		}
 	}
 
 	private void createTreeViewer(Composite parent)
