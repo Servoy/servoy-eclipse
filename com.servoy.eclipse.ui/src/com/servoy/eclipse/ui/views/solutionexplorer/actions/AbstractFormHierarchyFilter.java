@@ -26,17 +26,17 @@ import com.servoy.j2db.persistence.IPersist;
 /**
  * @author emera
  */
-public class ShowAllMembers extends Action
+public abstract class AbstractFormHierarchyFilter extends Action
 {
 
 	protected IPersist selection;
-	private final FormHierarchyView view;
+	protected final FormHierarchyView view;
 	boolean on;
 
-	public ShowAllMembers(FormHierarchyView view, boolean initValue)
+	public AbstractFormHierarchyFilter(FormHierarchyView view, boolean initValue, String img, String text)
 	{
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("inher_co.png"));
-		setText("Show All Inherited Members");
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle(img));
+		setText(text);
 		setToolTipText(getText());
 		this.view = view;
 		setChecked(initValue);
@@ -49,8 +49,10 @@ public class ShowAllMembers extends Action
 		if (on != isChecked())
 		{
 			on = isChecked();
-			view.showAllInheritedMembers(on);
+			setFilter(on);
 		}
 		setChecked(on);
 	}
+
+	protected abstract void setFilter(boolean on);
 }

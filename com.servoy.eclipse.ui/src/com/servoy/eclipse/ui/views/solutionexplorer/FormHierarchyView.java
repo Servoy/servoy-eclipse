@@ -26,6 +26,7 @@ import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -87,12 +88,12 @@ import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IDeprecationProvider;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetEntry;
 import com.servoy.eclipse.ui.views.ModifiedPropertySheetPage;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.AbstractFormHierarchyFilter;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ContextAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenFormEditorAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenPersistEditorAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenScriptAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OrientationAction;
-import com.servoy.eclipse.ui.views.solutionexplorer.actions.ShowAllMembers;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ShowMembersInFormHierarchy;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
@@ -281,18 +282,21 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			{
 				Iterator<Part> it1 = form.getParts();
 				List<IPersist> parts = new SortedList<IPersist>(comparator);
-				while (it1.hasNext())
+				if (!hideParts)
 				{
-					parts.add(it1.next());
+					while (it1.hasNext())
+					{
+						parts.add(it1.next());
+					}
 				}
 				List<IPersist> elements = new SortedList<IPersist>(comparator);
 				List<IPersist> methods = new SortedList<IPersist>(comparator);
 				List<IPersist> variables = new SortedList<IPersist>(comparator);
 				for (IPersist p : form.getAllObjectsAsList())
 				{
-					if (p instanceof BaseComponent) elements.add(p);
-					if (p instanceof ScriptMethod) methods.add(p);
-					if (p instanceof ScriptVariable) variables.add(p);
+					if (p instanceof BaseComponent && !hideElements) elements.add(p);
+					if (p instanceof ScriptMethod && !hideMethods) methods.add(p);
+					if (p instanceof ScriptVariable && !hideVariables) variables.add(p);
 				}
 				List<IPersist> lst = new ArrayList<>(parts);
 				lst.addAll(elements);
@@ -330,10 +334,10 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				{
 					Form form = showAllInheritedMembers ? activeSolution.getFlattenedForm(input, false) : input;
 					List<Pair<String, Image>> availableCategories = new ArrayList<>();
-					if (form.getFormElementsSortedByFormIndex().hasNext()) availableCategories.add(ELEMENTS);
-					if (form.getParts().hasNext()) availableCategories.add(PARTS);
-					if (form.getScriptMethods(false).hasNext()) availableCategories.add(METHODS);
-					if (form.getScriptVariables(false).hasNext()) availableCategories.add(VARIABLES);
+					if (!hideElements && form.getFormElementsSortedByFormIndex().hasNext()) availableCategories.add(ELEMENTS);
+					if (!hideParts && form.getParts().hasNext()) availableCategories.add(PARTS);
+					if (!hideMethods && form.getScriptMethods(false).hasNext()) availableCategories.add(METHODS);
+					if (!hideVariables && form.getScriptVariables(false).hasNext()) availableCategories.add(VARIABLES);
 					return availableCategories.toArray();
 				}
 				return getChildren(inputElement);
@@ -812,6 +816,15 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private Menu listDropDownMenu;
 
 	private MenuItem groupElementsToggleButton;
+	protected boolean hideElements = false;
+	protected boolean hideMethods = false;
+	protected boolean hideVariables = false;
+	protected boolean hideParts = false;
+	private AbstractFormHierarchyFilter hideElementsAction;
+	private AbstractFormHierarchyFilter showAllAction;
+	private AbstractFormHierarchyFilter hideMethodsAction;
+	private AbstractFormHierarchyFilter hidePartsAction;
+	private AbstractFormHierarchyFilter hideVariablesAction;
 
 	@Override
 	public void createPartControl(Composite parent)
@@ -1116,6 +1129,14 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			}
 		});
 
+		ActionContributionItem item = new ActionContributionItem(hideElementsAction);
+		item.fill(listDropDownMenu, -1);
+		item = new ActionContributionItem(hideMethodsAction);
+		item.fill(listDropDownMenu, -1);
+		item = new ActionContributionItem(hidePartsAction);
+		item.fill(listDropDownMenu, -1);
+		item = new ActionContributionItem(hideVariablesAction);
+		item.fill(listDropDownMenu, -1);
 	}
 
 	public void groupElementsOption(boolean group)
@@ -1129,12 +1150,66 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	{
 		showMembersAction = new ShowMembersInFormHierarchy(this, false);
 		lowertbmanager.add(showMembersAction);
-
-		ShowAllMembers showAllAction = new ShowAllMembers(this, false);
-		lowertbmanager.add(showAllAction);
-
 		showMembersAction.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
 		list.addSelectionChangedListener(showMembersAction);
+
+		showAllAction = new AbstractFormHierarchyFilter(this, false, "inher_co.png", "Show All Inherited Members")
+		{
+			@Override
+			protected void setFilter(boolean on)
+			{
+				view.showAllInheritedMembers(on);
+			}
+		};
+		lowertbmanager.add(showAllAction);
+
+		hideElementsAction = new AbstractFormHierarchyFilter(this, false, "hide_elements.gif", "Hide elements")
+		{
+			@Override
+			protected void setFilter(boolean on)
+			{
+				hideElements = on;
+				list.refresh();
+				list.expandAll();
+			}
+		};
+		lowertbmanager.add(hideElementsAction);
+
+		hideMethodsAction = new AbstractFormHierarchyFilter(this, false, "hide_methods.gif", "Hide methods")
+		{
+			@Override
+			protected void setFilter(boolean on)
+			{
+				hideMethods = on;
+				list.refresh();
+				list.expandAll();
+			}
+		};
+		lowertbmanager.add(hideMethodsAction);
+
+		hidePartsAction = new AbstractFormHierarchyFilter(this, false, "hide_parts.gif", "Hide parts")
+		{
+			@Override
+			protected void setFilter(boolean on)
+			{
+				hideParts = on;
+				list.refresh();
+				list.expandAll();
+			}
+		};
+		lowertbmanager.add(hidePartsAction);
+
+		hideVariablesAction = new AbstractFormHierarchyFilter(this, false, "hide_variables.gif", "Hide variables")
+		{
+			@Override
+			protected void setFilter(boolean on)
+			{
+				hideVariables = on;
+				list.refresh();
+				list.expandAll();
+			}
+		};
+		lowertbmanager.add(hideVariablesAction);
 	}
 
 	@Override
