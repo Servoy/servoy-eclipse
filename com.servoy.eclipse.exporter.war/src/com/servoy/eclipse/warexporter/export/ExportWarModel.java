@@ -182,7 +182,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		}
 		pluginLocations = new ArrayList<String>();
 		String[] array = settings.getArray("plugin.locations");
-		if (array != null && array.length > 1)
+		if (array != null && array.length > 0)
 		{
 			for (String loc : array)
 			{
