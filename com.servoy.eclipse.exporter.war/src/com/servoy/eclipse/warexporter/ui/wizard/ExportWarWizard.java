@@ -182,6 +182,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 									return;
 								}
 							}
+							exportModel.saveSettings(getDialogSettings());
 						}
 					});
 					if (!cancel[0]) exporter.doExport(monitor);
