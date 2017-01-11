@@ -43,6 +43,11 @@ public class ComponentsSelectionPage extends AbstractComponentsSelectionPage
 		this.componentsSpecProviderState = componentsSpecProviderState;
 		componentsUsed = exportModel.getUsedComponents();
 		selectedComponents = new TreeSet<String>(componentsUsed);
+		joinWithLastUsed();
+	}
+
+	protected void joinWithLastUsed()
+	{
 		if (exportModel.getExportedComponents() == null ||
 			exportModel.getExportedComponents().containsAll(componentsUsed) && componentsUsed.containsAll(exportModel.getExportedComponents())) return;
 		for (String component : exportModel.getExportedComponents())
