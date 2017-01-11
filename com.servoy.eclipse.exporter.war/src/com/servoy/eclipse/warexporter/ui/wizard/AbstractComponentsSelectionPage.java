@@ -261,10 +261,13 @@ public abstract class AbstractComponentsSelectionPage extends WizardPage
 
 	protected abstract Set<String> getAvailableItems();
 
+	protected abstract void joinWithLastUsed();
+
 	public void setComponentsUsed(Set<String> componentsUsed)
 	{
 		this.componentsUsed = componentsUsed;
 		selectedComponents = new TreeSet<String>(componentsUsed);
+		joinWithLastUsed();
 		selectedComponentsList.setItems(selectedComponents.toArray(new String[selectedComponents.size()]));
 		availableComponents = getAvailableItems();
 		availableComponentsList.setItems(availableComponents.toArray(new String[availableComponents.size()]));

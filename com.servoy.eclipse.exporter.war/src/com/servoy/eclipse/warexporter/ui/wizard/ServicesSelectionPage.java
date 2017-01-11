@@ -42,6 +42,11 @@ public class ServicesSelectionPage extends AbstractComponentsSelectionPage
 		this.servicesSpecProviderState = servicesSpecProviderState;
 		componentsUsed = exportModel.getUsedServices();
 		selectedComponents = new TreeSet<String>(componentsUsed);
+		joinWithLastUsed();
+	}
+
+	protected void joinWithLastUsed()
+	{
 		if (exportModel.getExportedServices() == null ||
 			exportModel.getExportedServices().containsAll(componentsUsed) && componentsUsed.containsAll(exportModel.getExportedServices())) return;
 		for (String service : exportModel.getExportedServices())
