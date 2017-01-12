@@ -2494,8 +2494,19 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 										{
 											ServoyMarker mk = MarkerMessages.PropertyOnElementInFormTargetNotFound.fill(handler, ((WebComponent)o).getName(),
 												o.getAncestor(IRepository.FORMS));
-											addMarker(project, INVALID_EVENT_METHOD, mk.getText(), -1, FORM_PROPERTY_TARGET_NOT_FOUND, IMarker.PRIORITY_LOW,
-												null, o);
+											IMarker marker = addMarker(project, INVALID_EVENT_METHOD, mk.getText(), -1, FORM_PROPERTY_TARGET_NOT_FOUND,
+												IMarker.PRIORITY_LOW, null, o);
+											if (marker != null)
+											{
+												try
+												{
+													marker.setAttribute("EventName", handler);
+												}
+												catch (Exception ex)
+												{
+													ServoyLog.logError(ex);
+												}
+											}
 										}
 									}
 								}

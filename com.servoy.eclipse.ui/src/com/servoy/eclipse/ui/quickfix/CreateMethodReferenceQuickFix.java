@@ -34,6 +34,7 @@ import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.MethodTemplate;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.util.UUID;
 
 /**
@@ -97,8 +98,15 @@ public class CreateMethodReferenceQuickFix implements IMarkerResolution
 			ScriptMethod method = NewMethodAction.createNewMethod(UIUtils.getActiveShell(), parent, eventName, true, null, null, substitutions, null, null);
 			if (method != null)
 			{
-				PropertyDescriptor descriptor = new PropertyDescriptor(eventName, persist.getClass());
-				descriptor.getWriteMethod().invoke(persist, new Integer(method.getID()));
+				if (persist instanceof WebComponent)
+				{
+					((WebComponent)persist).setProperty(eventName, method.getUUID());
+				}
+				else
+				{
+					PropertyDescriptor descriptor = new PropertyDescriptor(eventName, persist.getClass());
+					descriptor.getWriteMethod().invoke(persist, new Integer(method.getID()));
+				}
 				servoyProject.saveEditingSolutionNodes(new IPersist[] { parent }, true);
 			}
 		}
