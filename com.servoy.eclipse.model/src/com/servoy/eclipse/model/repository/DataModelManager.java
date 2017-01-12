@@ -1826,4 +1826,15 @@ public class DataModelManager implements IColumnInfoManager
 	{
 		DatabaseUtils.createNewColumnInfo(ApplicationServerRegistry.get().getDeveloperRepository(), c, createMissingServoySequence);
 	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.j2db.persistence.IColumnInfoManager#setTableColumnInfos(com.servoy.j2db.persistence.ITable, java.util.HashMap)
+	 */
+	@Override
+	public void setTableColumnInfos(ITable t, HashMap<String, ColumnInfoDef> columnInfoDefinitions) throws RepositoryException
+	{
+		DatabaseUtils.updateTableColumnInfos(ApplicationServerRegistry.get().getDeveloperRepository(), t, columnInfoDefinitions);
+	}
 }

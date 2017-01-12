@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.editors.table;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.IChangeListener;
@@ -61,6 +62,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Widget;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.inmemory.MemTable;
@@ -77,6 +79,7 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnTypes;
+import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.NameComparator;
@@ -138,7 +141,7 @@ public class ColumnComposite extends Composite
 				if (sel instanceof IStructuredSelection)
 				{
 					final Object first = ((IStructuredSelection)sel).getFirstElement();
-					if (first instanceof Column && !(((Column)first).getTable() instanceof MemTable))
+					if (first instanceof Column)
 					{
 						Column c = (Column)first;
 						boolean b = (c.getColumnInfo() != null);
@@ -189,25 +192,6 @@ public class ColumnComposite extends Composite
 					}
 					else
 					{
-						if (first instanceof Column && ((Column)first).getTable() instanceof MemTable)
-						{
-							Column c = (Column)first;
-							if (c.getColumnInfo() == null)
-							{
-								DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();
-								if (dmm != null)
-								{
-									try
-									{
-										dmm.createNewColumnInfo(c, false);
-									}
-									catch (RepositoryException e)
-									{
-										ServoyLog.logWarning("Cannot create new column info in table editor", e);
-									}
-								}
-							}
-						}
 						tabFolder.setVisible(false);
 						container.setLayout(tableLayout);
 						myScrolledComposite.setMinSize(container.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -724,5 +708,53 @@ public class ColumnComposite extends Composite
 	public boolean isDataProviderIdDisplayed()
 	{
 		return displayDataProviderID.getSelection();
+	}
+
+	public static String[] getSeqDisplayTypeStrings(ITable table)
+	{
+		String[] comboSeqTypes = new String[0];
+
+		try
+		{
+			List<String> seqType = new ArrayList<String>();
+
+			IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(table.getServerName());
+			for (int element : ColumnInfo.allDefinedSeqTypes)
+			{
+				boolean validType = true;
+				if (table instanceof MemTable)
+				{
+					if (element == ColumnInfo.SERVOY_SEQUENCE || element == ColumnInfo.DATABASE_SEQUENCE)
+					{
+						validType = false;
+					}
+				}
+				else if (element != ColumnInfo.NO_SEQUENCE_SELECTED && element != ColumnInfo.SERVOY_SEQUENCE &&
+					!server.supportsSequenceType(element, null/*
+																 * TODO: add current selected column
+																 */))
+				{
+					validType = false;
+				}
+
+				if (validType)
+				{
+					seqType.add(ColumnInfo.getSeqDisplayTypeString(element));
+				}
+			}
+
+			comboSeqTypes = new String[seqType.size()];
+			Object[] oType = seqType.toArray();
+			for (int i = 0; i < oType.length; i++)
+			{
+				comboSeqTypes[i] = oType[i].toString();
+			}
+		}
+		catch (Exception e)
+		{
+			ServoyLog.logError(e);
+		}
+
+		return comboSeqTypes;
 	}
 }

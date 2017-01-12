@@ -16,9 +16,6 @@
  */
 package com.servoy.eclipse.ui.editors.table;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.databinding.observable.AbstractObservable;
 import org.eclipse.core.databinding.observable.ChangeEvent;
 import org.eclipse.core.databinding.observable.ChangeSupport;
@@ -35,15 +32,11 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Control;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.model.inmemory.MemTable;
-import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.util.FixedComboBoxCellEditor;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.IColumnTypes;
-import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.query.ColumnType;
 
@@ -82,42 +75,14 @@ public class ColumnSeqTypeEditingSupport extends EditingSupport
 	}
 
 	private final CellEditor editor;
-	private String[] comboSeqTypes;
+	private final String[] comboSeqTypes;
 	private Column column;
 	private final IObservable observable;
 
 	public ColumnSeqTypeEditingSupport(TableViewer tv, ITable table)
 	{
 		super(tv);
-		int[] types = ColumnInfo.allDefinedSeqTypes;
-		comboSeqTypes = new String[0];
-		try
-		{
-			List<String> seqType = new ArrayList<String>();
-
-			IServerInternal server = (IServerInternal)ServoyModel.getServerManager().getServer(table.getServerName());
-			for (int element : types)
-			{
-				if (element == ColumnInfo.NO_SEQUENCE_SELECTED || (!(table instanceof MemTable) &&
-					(element == ColumnInfo.SERVOY_SEQUENCE || server.supportsSequenceType(element, null/*
-																										 * TODO: add current selected column
-																										 */))))
-				{
-					seqType.add(ColumnInfo.getSeqDisplayTypeString(element));
-				}
-			}
-
-			comboSeqTypes = new String[seqType.size()];
-			Object[] oType = seqType.toArray();
-			for (int i = 0; i < oType.length; i++)
-			{
-				comboSeqTypes[i] = oType[i].toString();
-			}
-		}
-		catch (Exception e)
-		{
-			ServoyLog.logError(e);
-		}
+		comboSeqTypes = ColumnComposite.getSeqDisplayTypeStrings(table);
 		editor = new FixedComboBoxCellEditor(tv.getTable(), comboSeqTypes, SWT.READ_ONLY);
 		Control control = editor.getControl();
 		CCombo c = (CCombo)control;
