@@ -1828,7 +1828,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		}
 
-		ITagResolver resolver = new TagResolver(elementName, (prefix == null ? "%%prefix%%" : prefix));
+		ITagResolver resolver = new TagResolver(elementName, (prefix == null ? "" : prefix));
 		if (!elementName.endsWith(".")) elementName = elementName + ".";
 
 
@@ -2379,9 +2379,8 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			else
 			{
-				tooltip = tmp.toString() + "<br/><pre>" + tooltip + "</pre>";
+				tooltip = tmp.toString() + "<pre>" + tooltip + "</pre>";
 			}
-			tooltip = tooltip.replaceAll("%%prefix%%", "");//TODO find out why the resolver doesn't replace it
 			return tooltip;
 		}
 

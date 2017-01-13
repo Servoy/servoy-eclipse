@@ -1581,7 +1581,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		tree.addFilter(clientSupportViewerFilter);
 
 		tree.setUseHashlookup(true);
-		ColumnViewerToolTipSupport.enableFor(tree);
+		HTMLToolTipSupport.enableFor(tree, ToolTip.NO_RECREATE);
 		drillDownAdapter = new DrillDownAdapter(tree);
 		tree.setContentProvider(new SolutionExplorerTreeContentProvider(this));
 		tree.addSelectionChangedListener(this);

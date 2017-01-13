@@ -126,15 +126,6 @@ public class StatusBarUpdater implements ISelectionChangedListener
 		}
 		else
 		{
-			if (result.indexOf("<h5>") > 0)
-			{
-				//skip the css
-				result = result.substring(result.indexOf("<h5>"));
-				result = result.replaceAll("<h5>", "<b>");
-				result = result.replaceAll("</h5>", "</b>");
-				result = result.replaceAll("<div style='.*'>", "");
-				result = Utils.stringReplaceCaseInsensitiveSearch(result, "</div>", "");
-			}
 			result = "<form><p>" + result + "</p></form>";
 			// as the SWT control uses XHTML, we must change the "<BR>" tags to "<BR/>" ("<BR>" alone is no longer valid in XHTML)
 			result = Utils.stringReplaceCaseInsensitiveSearch(result, "<pre>", " ");
