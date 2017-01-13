@@ -18,28 +18,28 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.viewers.TreeViewer;
 
 import com.servoy.eclipse.ui.Activator;
-import com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView;
 import com.servoy.j2db.persistence.IPersist;
 
 /**
  * @author emera
  */
-public abstract class AbstractFormHierarchyFilter extends Action
+public class FormHierarchyFilter extends Action
 {
 
 	protected IPersist selection;
-	protected final FormHierarchyView view;
 	boolean on;
+	private final TreeViewer viewer;
 
-	public AbstractFormHierarchyFilter(FormHierarchyView view, boolean initValue, String img, String text)
+	public FormHierarchyFilter(TreeViewer viewer, boolean initValue, String img, String text)
 	{
 		setImageDescriptor(Activator.loadImageDescriptorFromBundle(img));
 		setText(text);
 		setToolTipText(getText());
-		this.view = view;
 		setChecked(initValue);
+		this.viewer = viewer;
 		on = initValue;
 	}
 
@@ -49,10 +49,9 @@ public abstract class AbstractFormHierarchyFilter extends Action
 		if (on != isChecked())
 		{
 			on = isChecked();
-			setFilter(on);
 		}
 		setChecked(on);
+		viewer.refresh();
+		viewer.expandAll();
 	}
-
-	protected abstract void setFilter(boolean on);
 }
