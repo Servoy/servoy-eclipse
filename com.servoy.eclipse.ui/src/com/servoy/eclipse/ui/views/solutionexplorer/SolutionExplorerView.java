@@ -18,6 +18,8 @@ package com.servoy.eclipse.ui.views.solutionexplorer;
 
 import java.awt.Dimension;
 import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -65,6 +67,7 @@ import org.eclipse.dltk.javascript.ast.JSDeclaration;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.ast.VariableDeclaration;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
+import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.action.Action;
@@ -1448,7 +1451,17 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 			comp.setLayout(l);
 			Browser browser = new Browser(comp, SWT.BORDER);
-			browser.setText(getText(event));
+			String text = getText(event);
+			JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(text));
+			try
+			{
+				text = reader.getString();
+			}
+			catch (IOException e)
+			{
+				ServoyLog.logInfo("Could not convert tooltip text to HTML: " + text);
+			}
+			browser.setText(text);
 			GridData data = new GridData(600, 150);
 			data.horizontalAlignment = GridData.FILL;
 			data.verticalAlignment = GridData.FILL;

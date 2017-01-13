@@ -1792,7 +1792,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				constantsElementName = ((Class< ? >)real).getSimpleName() + ".";
 			}
-			ITagResolver resolver = new TagResolver(constantsElementName, (prefix == null ? "%%prefix%%" : prefix));
+			ITagResolver resolver = new TagResolver(constantsElementName, (prefix == null ? "" : prefix));
 			if (!constantsElementName.endsWith(".")) constantsElementName = constantsElementName + ".";
 			if (elementName.startsWith(PLUGIN_PREFIX))
 			{
@@ -2337,9 +2337,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					returnDescription = ((XMLScriptObjectAdapter)scriptObject).getReturnDescription(name, (Class[])parameterTypes);
 					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, (Class[])parameterTypes);
 					tooltip = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, (Class[])parameterTypes, csp);
+					tooltip += "\n" + Text.processTags(((XMLScriptObjectAdapter)scriptObject).getSample(name, (Class[])parameterTypes), resolver);
 					if (parameters != null)
 					{
 						paramNames = new String[parameters.length];
+						tooltip += "\n";
 						for (int i = 0; i < parameters.length; i++)
 						{
 							paramNames[i] = parameters[i].getName();
@@ -2369,24 +2371,17 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			}
 			if (tooltip == null) tooltip = "";
 
-			StringBuilder tmp = new StringBuilder("<html><head><style type=\"text/css\">");
-			tmp.append("html { font-family: 'Segoe UI',sans-serif; font-size: 9pt; font-style: normal; font-weight: normal; }");
-			tmp.append("body { overflow: auto; margin-top: 0px; margin-bottom: 0.5em; margin-left: 0.3em; margin-right: 0px; }");
-			tmp.append("body, p, h5 { font-size:1em;}");
-			tmp.append("pre { font-family: monospace; margin-left: 0.6em;}");
-			tmp.append("></style></head>");
-
-			tmp.append("<body><h5><div style='word-wrap: break-word; position: relative; margin-left: 20px; padding-top: 2px; '>" +
-				(returnTypeString != null ? returnTypeString : getReturnTypeString(returnType)) + " " + name + "(" +
-				getPrettyParameterTypesString(paramNames, namesOnly) + ")</div></h5>");
+			StringBuilder tmp = new StringBuilder("<b>" + (returnTypeString != null ? returnTypeString : getReturnTypeString(returnType)) + " " + name + "(" +
+				getPrettyParameterTypesString(paramNames, namesOnly) + ")</b>");
 			if ("".equals(tooltip))
 			{
-				tooltip = tmp.toString() + "</body></html>";
+				tooltip = tmp.toString();
 			}
 			else
 			{
-				tooltip = tmp.toString() + "<pre>" + tooltip + "</pre></body></html>";
+				tooltip = tmp.toString() + "<br/><pre>" + tooltip + "</pre>";
 			}
+			tooltip = tooltip.replaceAll("%%prefix%%", "");//TODO find out why the resolver doesn't replace it
 			return tooltip;
 		}
 
