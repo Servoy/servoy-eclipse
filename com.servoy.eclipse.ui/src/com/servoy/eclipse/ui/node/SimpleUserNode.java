@@ -32,7 +32,7 @@ import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 
 /**
  * Universal class to use in tree nodes and as list item.
- * 
+ *
  * @author jblok, jcompagner
  */
 public class SimpleUserNode implements IAdaptable
@@ -282,7 +282,7 @@ public class SimpleUserNode implements IAdaptable
 
 	/**
 	 * Method getToolTipText.
-	 * 
+	 *
 	 * @return Object
 	 */
 	public String getToolTipText()
@@ -300,14 +300,14 @@ public class SimpleUserNode implements IAdaptable
 		}
 		if (toolTip != null)
 		{
-			return toolTip;
+			return "<pre>" + toolTip + "</pre>";
 		}
 		return developerFeedback.getCode();
 	}
 
 	/**
 	 * Returns the icon.
-	 * 
+	 *
 	 * @return Object
 	 */
 	public Image getIcon()
@@ -335,7 +335,7 @@ public class SimpleUserNode implements IAdaptable
 
 	/**
 	 * Sets the icon.
-	 * 
+	 *
 	 * @param icon The icon to set
 	 */
 	public void setIcon(Image icon)
@@ -345,7 +345,7 @@ public class SimpleUserNode implements IAdaptable
 
 	/**
 	 * Returns the samlpeCode.
-	 * 
+	 *
 	 * @return String
 	 */
 	public String getSampleCode()
@@ -358,7 +358,7 @@ public class SimpleUserNode implements IAdaptable
 
 	/**
 	 * Method setRealObject.
-	 * 
+	 *
 	 * @param table
 	 */
 	public void setRealObject(Object o)
@@ -374,7 +374,7 @@ public class SimpleUserNode implements IAdaptable
 
 	/**
 	 * Searches up in the node hierarchy (including this node) for nodes who's real objects are of the given type.
-	 * 
+	 *
 	 * @param searchClass the class to search for in real objects.
 	 * @return the first node found (searching from this node upwards) in the node hierarchy who's real object is of type searchClass, or null if not found.
 	 */

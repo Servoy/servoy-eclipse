@@ -2229,7 +2229,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 		public String getToolTipText()
 		{
-			return "Table with datasource: '" + getCode() + '\'';
+			return "<pre>Table with datasource: '<b>" + getCode() + "\'</b><pre";
 		}
 
 	}
@@ -2549,12 +2549,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				Object bp = ijm.getField(name, false);
 				if (bp instanceof JavaMembers.BeanProperty)
 				{
-					tmp = "<html><body><b>" + getReturnTypeString(((JavaMembers.BeanProperty)bp).getGetter().getReturnType()) + " " + name + "</b>";
+					tmp = "<b>" + getReturnTypeString(((JavaMembers.BeanProperty)bp).getGetter().getReturnType()) + " " + name + "</b>";
 				}
 				else if (bp instanceof Field)
 				{
-					tmp = "<html><body><b>" + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(((Field)bp).getType()) + " " + name +
-						"</b>";
+					tmp = "<b>" + DocumentationUtil.getJavaToJSTypeTranslator().translateJavaClassToJSTypeName(((Field)bp).getType()) + " " + name + "</b>";
 				}
 				else if (bp == null)
 				{
@@ -2562,17 +2561,17 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					bp = ijm.getField(name, true);
 					if (bp instanceof Field)
 					{
-						tmp = "<html><body><b>" + prefix + name + "</b>";
+						tmp = "<b>" + prefix + name + "</b>";
 					}
 				}
 			}
 			if ("".equals(toolTip))
 			{
-				toolTip = tmp + "</body></html>";
+				toolTip = tmp;
 			}
 			else
 			{
-				toolTip = tmp + "<br><pre>" + toolTip + "</pre></body></html>";
+				toolTip = tmp + "<br><pre>" + toolTip + "</pre>";
 			}
 			return toolTip;
 		}
@@ -2611,7 +2610,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		 */
 		public String getToolTipText()
 		{
-			return c.getTypeAsString() + " " + c.getDataProviderID();
+			return "<pre><b>" + c.getTypeAsString() + " " + c.getDataProviderID() + "</b></pre>";
 		}
 
 	}
