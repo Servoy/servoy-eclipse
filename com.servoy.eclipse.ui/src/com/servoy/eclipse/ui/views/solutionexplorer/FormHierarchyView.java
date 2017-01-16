@@ -831,7 +831,16 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	@Override
 	public void saveState(IMemento mem)
 	{
-		mem.putString(SELECTED_FORM, selected.getUUID().toString());
+		if (selected != null && selected.getUUID() != null)
+		{
+			mem.putString(SELECTED_FORM, selected.getUUID().toString());
+		}
+		else
+		{
+			//this shouldn't happen
+			ServoyLog.logInfo(
+				"Save State failed." + (selected == null ? " Selection in the Form Hierarchy is null." : (selected.toString() + " uuid is null.")));
+		}
 		super.saveState(mem);
 	}
 
