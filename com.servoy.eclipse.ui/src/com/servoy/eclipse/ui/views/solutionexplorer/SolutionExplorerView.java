@@ -679,7 +679,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				String deprecatedText = getDeprecatedText((SimpleUserNode)element);
 				if (deprecatedText != null)
 				{
-					deprecatedText = "Deprecated: " + deprecatedText;
+					deprecatedText = "@deprecated " + deprecatedText;
 					result = (result != null) ? result += ("\n" + deprecatedText) : deprecatedText;
 				}
 			}
@@ -1462,7 +1462,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				ServoyLog.logInfo("Could not convert tooltip text to HTML: " + text);
 			}
 			browser.setText(text);
-			GridData data = new GridData(600, 150);
+			GridData data = (text.contains("<br>") || text.contains("<br/>") || text.contains("\n")) ? new GridData(600, 150) : new GridData(450, 50);
 			data.horizontalAlignment = GridData.FILL;
 			data.verticalAlignment = GridData.FILL;
 			data.grabExcessHorizontalSpace = true;
