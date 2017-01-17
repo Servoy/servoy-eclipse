@@ -305,7 +305,9 @@ public class I18NEditor extends EditorPart implements IEclipseMessageChangeListe
 	@Override
 	public void doSave(IProgressMonitor monitor)
 	{
+		messagesManager.removeChangeListener(this);
 		save();
+		messagesManager.addChangeListener(this);
 	}
 
 	@Override

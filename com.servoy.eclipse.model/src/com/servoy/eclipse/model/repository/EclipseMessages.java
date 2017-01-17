@@ -93,6 +93,7 @@ public class EclipseMessages implements ICustomMessageLoader
 							{
 								if (resourceDelta.getResource().getName().equals(MESSAGES_DIR))
 								{
+									removeCachedMessages();
 									for (IResourceDelta i18nResourceDelta : resourceDelta.getAffectedChildren())
 									{
 										String[] i18nFileName = i18nResourceDelta.getResource().getName().split("\\.");
