@@ -873,7 +873,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		tree.addSelectionChangedListener(this);
 
 		contributeToActionBars();
-		
+
 		showMembersAction.setChecked(fDialogSettings.getBoolean(DIALOGSTORE_SHOW_MEMBERS));
 		if (memento == null) return;
 		String formUuid = memento.getString(SELECTED_FORM);
@@ -1032,13 +1032,19 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		}
 		tree.getTree().setRedraw(true);
 		tree.refresh();
-		noSelectionChange = true;
-		tree.setExpandedTreePaths(paths.toArray(new TreePath[paths.size()]));
-		tree.setSelection(new StructuredSelection(object));
-		list.setInput(((IPersist)object).getParent());
-		list.setSelection(new StructuredSelection(object));
-		list.reveal(object);
-		noSelectionChange = false;
+		try
+		{
+			noSelectionChange = true;
+			tree.setExpandedTreePaths(paths.toArray(new TreePath[paths.size()]));
+			tree.setSelection(new StructuredSelection(object));
+			list.setInput(((IPersist)object).getParent());
+			list.setSelection(new StructuredSelection(object));
+			list.reveal(object);
+		}
+		finally
+		{
+			noSelectionChange = false;
+		}
 	}
 
 	public void setOrientation(int o)
