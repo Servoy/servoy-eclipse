@@ -790,6 +790,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	public static final int VIEW_ORIENTATION_AUTOMATIC = 2;
 	public static final String DIALOGSTORE_VIEWORIENTATION = "FormHierarchyView.orientation";
 	private static final String DIALOGSTORE_RATIO = "FormHierarchyView.ratio";
+	private static final String DIALOGSTORE_SHOW_MEMBERS = "FormHierarchy.SHOW_MEMBERS";
 	private static final String GROUP_ELEMENTS_BY_TYPE = "GroupElements";
 
 	private IDialogSettings fDialogSettings;
@@ -872,7 +873,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		tree.addSelectionChangedListener(this);
 
 		contributeToActionBars();
-
+		
+		showMembersAction.setChecked(fDialogSettings.getBoolean(DIALOGSTORE_SHOW_MEMBERS));
 		if (memento == null) return;
 		String formUuid = memento.getString(SELECTED_FORM);
 		if (formUuid == null) return;
@@ -993,7 +995,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		}
 		else if (tree.getInput() == null)
 		{
-			showMembersAction.setChecked(true);//TODO check if eclipse does this or shows only when the button is checked already
 			selected = (Form)(((IPersist)object).getParent());
 			tree.setInput(new Form[] { selected });
 			showMembersInFormHierarchy(object);
@@ -1229,5 +1230,12 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		}
 
 		return super.getAdapter(type);
+	}
+
+	@Override
+	public void dispose()
+	{
+		fDialogSettings.put(DIALOGSTORE_SHOW_MEMBERS, showMembersAction.isChecked());
+		super.dispose();
 	}
 }
