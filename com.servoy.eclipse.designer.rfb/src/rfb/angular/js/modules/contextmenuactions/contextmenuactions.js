@@ -14,7 +14,8 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 	SEND_TO_BACK_ID: "com.servoy.eclipse.designer.rfb.sendtoback",
 	OPEN_SCRIPT_ID: "com.servoy.eclipse.ui.OpenFormJsAction",
 	GROUP_ID: "com.servoy.eclipse.designer.rfb.group",
-	UNGROUP_ID: "com.servoy.eclipse.designer.rfb.ungroup"
+	UNGROUP_ID: "com.servoy.eclipse.designer.rfb.ungroup",
+	OPEN_FORM_HIERARCHY_ID: "com.servoy.eclipse.ui.OpenFormHierarchyAction"
 })
 .run(function($rootScope, $pluginRegistry,$contextmenu, $editorService,EDITOR_EVENTS,SHORTCUT_IDS,EDITOR_CONSTANTS){
 	$pluginRegistry.registerPlugin(function(editorScope) {
@@ -367,7 +368,21 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 						$editorService.keyPressed({"keyCode":46});
 					}
 				}
-			);	
+			);
+			
+			$contextmenu.add(
+					{
+						text: "Open Form Hierarchy",
+						getIconStyle: function(){ return {'background-image':"url(images/forms.gif)"}},
+						getItemClass: function() { if (!hasSelection(1)) return "enabled";}, 
+						shortcut: shortcuts[SHORTCUT_IDS.OPEN_FORM_HIERARCHY_ID],
+						execute:function()
+						{
+							$("#contextMenu").hide();
+							$editorService.executeAction('openFormHierarchy');
+						}
+					}
+				);
 		});
 	});
 	

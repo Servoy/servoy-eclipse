@@ -34,6 +34,8 @@ import com.servoy.j2db.util.Debug;
 public class OpenFormHierarchyActionDelegate extends AbstractFormSelectionActionDelegate
 {
 
+	public static final String OPEN_FORM_HIERARCHY_ID = "com.servoy.eclipse.ui.OpenFormHierarchyAction";
+
 	@Override
 	protected boolean checkEnabled(List<Openable> lst)
 	{

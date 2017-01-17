@@ -42,6 +42,7 @@ import com.servoy.eclipse.designer.editor.rfb.actions.handlers.KeyPressedHandler
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.MoveInResponsiveLayoutHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenContainedFormHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenElementWizardHandler;
+import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenFormHierarchyHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenScriptHandler;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.PersistFinder;
 import com.servoy.eclipse.designer.editor.rfb.actions.handlers.SetPropertiesHandler;
@@ -108,6 +109,7 @@ public class EditorServiceHandler implements IServerService
 		configuredHandlers.put("openElementWizard", new OpenElementWizardHandler(editorPart, fieldPositioner, selectionProvider));
 		configuredHandlers.put("updateFieldPositioner", new UpdateFieldPositioner(fieldPositioner));
 		configuredHandlers.put("openScript", new OpenScriptHandler(editorPart));
+		configuredHandlers.put("openFormHierarchy", new OpenFormHierarchyHandler(selectionProvider));
 		configuredHandlers.put("updatePaletteOrder", new UpdatePaletteOrder());
 		configuredHandlers.put("openContainedForm", new OpenContainedFormHandler(editorPart));
 		configuredHandlers.put("setInlineEditMode", new IServerService()
