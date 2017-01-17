@@ -47,6 +47,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.FileEditorInput;
 
@@ -54,13 +55,14 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.I18NEditorInput;
 import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.model.repository.IEclipseMessageChangeListener;
 import com.servoy.eclipse.ui.dialogs.I18nComposite;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.i18n.I18NMessagesModel.I18NMessagesModelEntry;
 import com.servoy.j2db.persistence.I18NUtil.MessageEntry;
 import com.servoy.j2db.util.DataSourceUtils;
 
-public class I18NEditor extends EditorPart
+public class I18NEditor extends EditorPart implements IEclipseMessageChangeListener
 {
 	private final IApplication application;
 	private final EclipseMessages messagesManager;
@@ -95,6 +97,7 @@ public class I18NEditor extends EditorPart
 	{
 		application = Activator.getDefault().getDesignClient();
 		messagesManager = ServoyModelManager.getServoyModelManager().getServoyModel().getMessagesManager();
+		messagesManager.addChangeListener(this);
 	}
 
 	@Override
@@ -349,5 +352,33 @@ public class I18NEditor extends EditorPart
 			messagesManager.clearUnsavedMessages(i18nDatasource);
 			setPartName(setInput.getName());
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.repository.IEclipseMessageChangeListener#i18nMessageChanged(java.lang.String)
+	 */
+	@Override
+	public void i18nMessageChanged(String i18nDS)
+	{
+		if (i18nDS.equals(this.i18nDatasource))
+		{
+			PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					i18nComposite.refresh();
+				}
+			});
+		}
+	}
+
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		messagesManager.removeChangeListener(this);
 	}
 }

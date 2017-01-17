@@ -35,6 +35,9 @@ import java.util.Vector;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
@@ -69,9 +72,57 @@ public class EclipseMessages implements ICustomMessageLoader
 	private final HashMap<String, TreeMap<String, I18NUtil.MessageEntry>> i18nDatasourceMessages = new HashMap<String, TreeMap<String, I18NUtil.MessageEntry>>();
 	private final HashMap<String, Boolean> hasI18nDatasourceUnsavedMessages = new HashMap<String, Boolean>();
 
+	private final ArrayList<IEclipseMessageChangeListener> changeListeners = new ArrayList<IEclipseMessageChangeListener>();
+
 	public EclipseMessages()
 	{
 		this.workspaceDir = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(new IResourceChangeListener()
+		{
+			@Override
+			public void resourceChanged(IResourceChangeEvent event)
+			{
+				ServoyResourcesProject resourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
+				if (resourcesProject != null)
+				{
+					for (IResourceDelta projectDelta : event.getDelta().getAffectedChildren())
+					{
+						if (projectDelta.getResource().getProject() == resourcesProject.getProject())
+						{
+							for (IResourceDelta resourceDelta : projectDelta.getAffectedChildren())
+							{
+								if (resourceDelta.getResource().getName().equals(MESSAGES_DIR))
+								{
+									for (IResourceDelta i18nResourceDelta : resourceDelta.getAffectedChildren())
+									{
+										String[] i18nFileName = i18nResourceDelta.getResource().getName().split("\\.");
+										for (IEclipseMessageChangeListener eclipseMessageChangeListener : changeListeners)
+										{
+											eclipseMessageChangeListener.i18nMessageChanged(
+												DataSourceUtils.createDBTableDataSource(i18nFileName[0], i18nFileName[1]));
+										}
+									}
+									return;
+								}
+							}
+						}
+					}
+				}
+			}
+		}, IResourceChangeEvent.POST_CHANGE);
+	}
+
+	public void addChangeListener(IEclipseMessageChangeListener eclipseMessageChangeListener)
+	{
+		if (!changeListeners.contains(eclipseMessageChangeListener))
+		{
+			changeListeners.add(eclipseMessageChangeListener);
+		}
+	}
+
+	public void removeChangeListener(IEclipseMessageChangeListener eclipseChangeListener)
+	{
+		changeListeners.remove(eclipseChangeListener);
 	}
 
 	public void addMessage(String i18nDatasource, I18NUtil.MessageEntry messageEntry)
