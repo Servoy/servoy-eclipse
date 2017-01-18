@@ -1195,6 +1195,12 @@ public class TypeCreator extends TypeCache
 			method.setDescription("Returns the name of the form. (may be empty string as well)</br></br>var name = elements.elem.getFormName();" +
 				"</br></br><b>@return</b> The name of the form.");
 			members.add(method);
+
+			method = TypeInfoModelFactory.eINSTANCE.createMethod();
+			method.setName("getName");
+			method.setDescription("Returns the name of the element. (may be null as well)</br></br>var name = elements.elem.getName();" +
+				"</br></br><b>@return</b> The name of the element.");
+			members.add(method);
 		}
 		return addType(bucket, type);
 	}
