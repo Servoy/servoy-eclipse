@@ -3533,7 +3533,9 @@ public class ServoyModel extends AbstractServoyModel
 				return Status.OK_STATUS;
 			}
 		};
+		updateServoyWorkingSet.setRule(getWorkspace().getRoot());
 		updateServoyWorkingSet.schedule();
+
 	}
 
 	public MultiTextEdit getScriptFileChanges(IPersist savedPersist, final IFile scriptFile)
