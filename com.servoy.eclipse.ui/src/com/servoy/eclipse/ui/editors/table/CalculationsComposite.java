@@ -72,6 +72,7 @@ import com.servoy.j2db.persistence.ValidatorSearchContext;
 public class CalculationsComposite extends AbstractTableEditorComposite
 {
 	private final Button removeButton;
+	private final Button openCalculationButton;
 	private final MenuItem moveItem;
 	private final MenuItem duplicateItem;
 	private final MenuItem searchForReferencesItem;
@@ -81,11 +82,13 @@ public class CalculationsComposite extends AbstractTableEditorComposite
 	public static final int CI_CALCULATION = 2;
 	public static final int CI_STORED = 3;
 	private IPersistChangeListener persistListener;
+	private final TableEditor tableEditor;
 
 	public CalculationsComposite(final TableEditor te, Composite parent, FlattenedSolution flattenedSolution, int style)
 	{
 		super(parent, style, flattenedSolution);
 
+		tableEditor = te;
 		final ITable t = te.getTable();
 		Tree tree = treeViewer.getTree();
 		tree.setLinesVisible(true);
@@ -191,6 +194,28 @@ public class CalculationsComposite extends AbstractTableEditorComposite
 		});
 		removeButton.setEnabled(false);
 
+
+		openCalculationButton = new Button(container, SWT.NONE);
+		openCalculationButton.setText("Open calculation editor");
+		openCalculationButton.addSelectionListener(new SelectionAdapter()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				TreeItem[] selection = treeViewer.getTree().getSelection();
+				if (selection != null && selection.length > 0 && selection[0].getData() instanceof ScriptCalculation)
+				{
+					ScriptCalculation calculation = (ScriptCalculation)selection[0].getData();
+					openCalculationScriptEditor(calculation);
+				}
+				else
+				{
+					MessageDialog.openError(getShell(), "Error", "You must select a calculation to open.");
+				}
+			}
+		});
+		openCalculationButton.setEnabled(false);
+
 		Button addButton;
 		addButton = new Button(container, SWT.NONE);
 		addButton.setText("Add");
@@ -213,6 +238,7 @@ public class CalculationsComposite extends AbstractTableEditorComposite
 				if (selection != null && selection.length > 0 && selection[0].getData() instanceof ScriptCalculation)
 				{
 					removeButton.setEnabled(true);
+					openCalculationButton.setEnabled(true);
 					if (ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject().length > 1)
 					{
 						moveItem.setEnabled(true);
@@ -227,6 +253,7 @@ public class CalculationsComposite extends AbstractTableEditorComposite
 				else
 				{
 					removeButton.setEnabled(false);
+					openCalculationButton.setEnabled(false);
 					moveItem.setEnabled(false);
 					duplicateItem.setEnabled(false);
 				}
@@ -236,10 +263,12 @@ public class CalculationsComposite extends AbstractTableEditorComposite
 		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
 			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.LEADING,
 				treeContainer, GroupLayout.PREFERRED_SIZE, 482, Short.MAX_VALUE).add(
-					groupLayout.createSequentialGroup().add(addButton).addPreferredGap(LayoutStyle.RELATED).add(removeButton))).addContainerGap()));
+					groupLayout.createSequentialGroup().add(addButton).addPreferredGap(LayoutStyle.RELATED).add(removeButton).addPreferredGap(
+						LayoutStyle.RELATED).add(openCalculationButton))).addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(GroupLayout.TRAILING,
 			groupLayout.createSequentialGroup().addContainerGap().add(treeContainer, GroupLayout.PREFERRED_SIZE, 323, Short.MAX_VALUE).addPreferredGap(
-				LayoutStyle.RELATED).add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(removeButton).add(addButton)).addContainerGap()));
+				LayoutStyle.RELATED).add(
+					groupLayout.createParallelGroup(GroupLayout.BASELINE).add(openCalculationButton).add(removeButton).add(addButton)).addContainerGap()));
 		container.setLayout(groupLayout);
 		//
 		createTableColumns(t, te);
@@ -365,6 +394,16 @@ public class CalculationsComposite extends AbstractTableEditorComposite
 		if (treeViewer != null) treeViewer.refresh();
 	}
 
+	private void openCalculationScriptEditor(ScriptCalculation calculation)
+	{
+		if (tableEditor.isDirty())
+		{
+			MessageDialog.openError(getShell(), "Error", "You must save before editing the calculation code.");
+			return;
+		}
+		EditorUtil.openScriptEditor(calculation, null, true);
+	}
+
 	private void createTableColumns(ITable table, final TableEditor te)
 	{
 		TreeColumn nameColumn = new TreeColumn(treeViewer.getTree(), SWT.LEFT, CI_NAME);
@@ -409,12 +448,7 @@ public class CalculationsComposite extends AbstractTableEditorComposite
 					{
 						if (item.getBounds(i).contains(event.x, event.y) && i == CI_CALCULATION)
 						{
-							if (te.isDirty())
-							{
-								MessageDialog.openError(getShell(), "Error", "You must save before editing the calculation code.");
-								return;
-							}
-							EditorUtil.openScriptEditor(calculation, null, true);
+							openCalculationScriptEditor(calculation);
 						}
 					}
 				}
