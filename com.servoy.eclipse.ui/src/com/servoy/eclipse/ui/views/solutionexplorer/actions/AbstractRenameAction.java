@@ -195,11 +195,13 @@ public abstract class AbstractRenameAction extends Action
 	{
 		OutputStream out = null;
 		InputStream in = null;
+		InputStream contents = null;
 		try
 		{
 			IFile m = parent.getFile(new Path("META-INF/MANIFEST.MF"));
 			m.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
-			Manifest manifest = new Manifest(m.getContents());
+			contents = m.getContents();
+			Manifest manifest = new Manifest(contents);
 			Attributes attributes = manifest.getEntries().remove(resource.getName() + "/" + resource.getName() + ".spec");
 			manifest.getEntries().put(newName + "/" + newName + ".spec", attributes);
 			out = new ByteArrayOutputStream();
@@ -217,6 +219,7 @@ public abstract class AbstractRenameAction extends Action
 			{
 				if (out != null) out.close();
 				if (in != null) in.close();
+				if (contents != null) contents.close();
 			}
 			catch (IOException e)
 			{

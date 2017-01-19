@@ -136,7 +136,8 @@ public class EditWebPackageDetailsAction extends Action implements ISelectionCha
 			return false;
 		}
 
-		SpecProviderState specProviderState = componentsNotServices ? WebComponentSpecProvider.getSpecProviderState() : WebServiceSpecProvider.getSpecProviderState();
+		SpecProviderState specProviderState = componentsNotServices ? WebComponentSpecProvider.getSpecProviderState()
+			: WebServiceSpecProvider.getSpecProviderState();
 		for (PackageSpecification<WebObjectSpecification> p : specProviderState.getWebObjectSpecifications().values())
 		{
 			if (p.getPackageDisplayname().equals(packageDisplayName))
@@ -153,11 +154,13 @@ public class EditWebPackageDetailsAction extends Action implements ISelectionCha
 	{
 		OutputStream out = null;
 		InputStream in = null;
+		InputStream contents = null;
 		try
 		{
 			IFile m = container.getFile(new Path("META-INF/MANIFEST.MF"));
 			m.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
-			Manifest manifest = new Manifest(m.getContents());
+			contents = m.getContents();
+			Manifest manifest = new Manifest(contents);
 			Attributes attr = manifest.getMainAttributes();
 			attr.putValue("Bundle-Name", newName);
 			if (newVersion != null && newVersion.trim().length() > 0) attr.putValue("Bundle-Version", newVersion);
@@ -184,6 +187,13 @@ public class EditWebPackageDetailsAction extends Action implements ISelectionCha
 			if (in != null) try
 			{
 				in.close();
+			}
+			catch (IOException e)
+			{
+			}
+			if (contents != null) try
+			{
+				contents.close();
 			}
 			catch (IOException e)
 			{

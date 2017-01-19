@@ -247,15 +247,16 @@ public class NewWebObjectAction extends Action
 		if (packageRoot instanceof IFolder) m = ((IFolder)packageRoot).getFile("META-INF/MANIFEST.MF");
 		if (packageRoot instanceof IProject) m = ((IProject)packageRoot).getFile("META-INF/MANIFEST.MF");
 		m.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
-		Manifest manifest = new Manifest(m.getContents());
-		Attributes attr = new Attributes();
-		attr.put(new Attributes.Name("Web-" + elementType), "True");
-		manifest.getEntries().put(componentOrServiceName + "/" + componentOrServiceName + ".spec", attr);
 
 		OutputStream out = null;
 		InputStream in = null;
+		InputStream contents = m.getContents();
 		try
 		{
+			Manifest manifest = new Manifest(contents);
+			Attributes attr = new Attributes();
+			attr.put(new Attributes.Name("Web-" + elementType), "True");
+			manifest.getEntries().put(componentOrServiceName + "/" + componentOrServiceName + ".spec", attr);
 			out = new ByteArrayOutputStream();
 			manifest.write(out);
 			in = new ByteArrayInputStream(out.toString().getBytes());
@@ -269,6 +270,7 @@ public class NewWebObjectAction extends Action
 		{
 			if (out != null) out.close();
 			if (in != null) in.close();
+			if (contents != null) contents.close();
 		}
 	}
 

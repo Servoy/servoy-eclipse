@@ -146,6 +146,7 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 								{
 									RemovePackageProjectReferenceAction.removeProjectReference(iProject, (IProject)resource);
 								}
+								deleteFolder((IContainer)resource);
 							}
 							resource.delete(true, new NullProgressMonitor());
 							if (resources != null) resources.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
@@ -159,7 +160,7 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 			}
 		}
 
-		private void deleteFolder(IFolder folder) throws CoreException
+		private void deleteFolder(IContainer folder) throws CoreException
 		{
 			for (IResource resource : folder.members())
 			{
@@ -191,6 +192,7 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 			IResource resource = null;
 			OutputStream out = null;
 			InputStream in = null;
+			InputStream contents = null;
 			try
 			{
 				dirResource = resources.getWorkspace().getRoot().findContainersForLocationURI(spec.getSpecURL().toURI());
@@ -202,7 +204,8 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 
 					IFile m = getFile(parent);
 					m.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
-					Manifest manifest = new Manifest(m.getContents());
+					contents = m.getContents();
+					Manifest manifest = new Manifest(contents);
 					manifest.getEntries().remove(resource.getName() + "/" + resource.getName() + ".spec");
 					out = new ByteArrayOutputStream();
 					manifest.write(out);
@@ -228,6 +231,7 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 				{
 					if (out != null) out.close();
 					if (in != null) in.close();
+					if (contents != null) contents.close();
 				}
 				catch (IOException e)
 				{
