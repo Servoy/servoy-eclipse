@@ -339,4 +339,10 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 		}
 		return false;
 	}
+
+	@Override
+	public String toString()
+	{
+		return getKey();
+	}
 }

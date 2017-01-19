@@ -59,12 +59,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.designer.editor.commands.RefreshingCommand;
 import com.servoy.eclipse.designer.property.SetValueCommand;
+import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
 import com.servoy.eclipse.dnd.FormElementTransfer;
 import com.servoy.eclipse.dnd.IDragData;
@@ -72,7 +74,10 @@ import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.views.IndexedListViewer;
 import com.servoy.eclipse.ui.views.IndexedStructuredSelection;
+import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebComponent;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IFlattenedPersistWrapper;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
@@ -80,7 +85,11 @@ import com.servoy.j2db.persistence.ISupportDataProviderID;
 import com.servoy.j2db.persistence.ISupportTabSeq;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabSeqComparator;
+import com.servoy.j2db.server.ngclient.FormElement;
+import com.servoy.j2db.server.ngclient.FormElementHelper;
+import com.servoy.j2db.server.ngclient.FormElementHelper.FormComponentCache;
 import com.servoy.j2db.server.ngclient.FormElementHelper.TabSeqProperty;
+import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.NGTabSeqPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
 import com.servoy.j2db.util.SortedList;
@@ -370,8 +379,10 @@ public class VisualFormEditorTabSequencePage extends Composite
 			{
 				String name1 = "";
 				String name2 = "";
-				IFormElement el1 = o1.element;
-				IFormElement el2 = o2.element;
+				IFormElement el1 = o1.element instanceof WebFormComponentChildType ? ((WebFormComponentChildType)o1.element).getElement()
+					: (IFormElement)o1.element;
+				IFormElement el2 = o2.element instanceof WebFormComponentChildType ? ((WebFormComponentChildType)o2.element).getElement()
+					: (IFormElement)o2.element;
 				if (el1.getName() != null)
 				{
 					name1 += el1.getName();
@@ -421,6 +432,80 @@ public class VisualFormEditorTabSequencePage extends Composite
 							else
 							{
 								available.add(new TabSeqProperty(persist, pd.getName()));
+							}
+						}
+					}
+					properties = specification.getProperties(FormComponentPropertyType.INSTANCE);
+					if (properties.size() > 0)
+					{
+						FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(editor.getForm());
+						FormElement formComponentEl = FormElementHelper.INSTANCE.getFormElement(persist, fs, null, true);
+						for (PropertyDescription pd : properties)
+						{
+							Object propertyValue = formComponentEl.getPropertyValue(pd.getName());
+							Form frm = FormComponentPropertyType.INSTANCE.getForm(propertyValue, fs);
+							if (frm == null) continue;
+							FormComponentCache cache = FormElementHelper.INSTANCE.getFormComponentCache(formComponentEl, pd, (JSONObject)propertyValue, frm,
+								fs);
+							for (FormElement element : cache.getFormComponentElements())
+							{
+								IPersist p = element.getPersistIfAvailable();
+								if (p instanceof IFormElement)
+								{
+									String[] name = ((IFormElement)p).getName().split("\\$");
+									if (name.length > 2 && !name[name.length - 1].startsWith(FormElement.SVY_NAME_PREFIX))
+									{
+										StringBuilder keyBuilder = new StringBuilder();
+										for (int i = 1; i < name.length; i++)
+										{
+											if (i > 1) keyBuilder.append(".");
+											keyBuilder.append(name[i]);
+										}
+										WebFormComponentChildType formComponentChild = new WebFormComponentChildType(
+											persist instanceof WebFormComponentChildType ? ((WebFormComponentChildType)persist).getParentComponent()
+												: (IBasicWebObject)formComponentEl.getPersistIfAvailable(),
+											keyBuilder.toString(), fs);
+
+										if (p instanceof ISupportTabSeq)
+										{
+											if (((ISupportTabSeq)p).getTabSeq() >= 0)
+											{
+												selected.add(new TabSeqProperty(formComponentChild, "tabSeq"));
+											}
+											else
+											{
+												available.add(new TabSeqProperty(formComponentChild, "tabSeq"));
+											}
+										}
+										else if (FormTemplateGenerator.isWebcomponentBean(p))
+										{
+											IBasicWebComponent innerWebComponent = (IBasicWebComponent)p;
+											String innerComponentType = FormTemplateGenerator.getComponentTypeName(innerWebComponent);
+											WebObjectSpecification innerSpecification = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+												innerComponentType);
+											if (innerSpecification != null)
+											{
+												Collection<PropertyDescription> innerTabSeqproperties = innerSpecification.getProperties(
+													NGTabSeqPropertyType.NG_INSTANCE);
+												if (innerTabSeqproperties != null && innerTabSeqproperties.size() > 0)
+												{
+													for (PropertyDescription tabSeqPD : innerTabSeqproperties)
+													{
+														int tabseq = Utils.getAsInteger(formComponentChild.getProperty(tabSeqPD.getName()));
+														if (tabseq >= 0)
+														{
+															selected.add(new TabSeqProperty(formComponentChild, tabSeqPD.getName()));
+														}
+														else
+														{
+															available.add(new TabSeqProperty(formComponentChild, tabSeqPD.getName()));
+														}
+													}
+												}
+											}
+										}
+									}
+								}
 							}
 						}
 					}
