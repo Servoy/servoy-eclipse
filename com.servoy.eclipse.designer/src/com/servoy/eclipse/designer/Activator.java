@@ -41,6 +41,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.editors.I18NEditor;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -87,21 +88,29 @@ public class Activator extends AbstractUIPlugin
 			public void i18nChanged()
 			{
 				com.servoy.eclipse.core.Activator.getDefault().getDesignClient().refreshI18NMessages();
-
-
-				if (PlatformUI.getWorkbench().getActiveWorkbenchWindow() != null &&
-					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage() != null)
+				PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable()
 				{
-					IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
-					for (IEditorReference editorRef : editorRefs)
+					public void run()
 					{
-						IEditorPart editor = editorRef.getEditor(false);
-						if (editor instanceof BaseVisualFormEditor)
+						if (PlatformUI.getWorkbench().getActiveWorkbenchWindow() != null &&
+							PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage() != null)
 						{
-							((BaseVisualFormEditor)editor).refreshGraphicalEditor();
+							IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
+							for (IEditorReference editorRef : editorRefs)
+							{
+								IEditorPart editor = editorRef.getEditor(false);
+								if (editor instanceof BaseVisualFormEditor)
+								{
+									((BaseVisualFormEditor)editor).refreshGraphicalEditor();
+								}
+								else if (editor instanceof I18NEditor)
+								{
+									((I18NEditor)editor).refresh();
+								}
+							}
 						}
 					}
-				}
+				});
 			}
 		});
 

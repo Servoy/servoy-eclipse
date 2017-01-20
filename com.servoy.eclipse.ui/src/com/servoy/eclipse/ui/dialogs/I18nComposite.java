@@ -74,7 +74,6 @@ import com.servoy.j2db.util.Settings;
 
 public class I18nComposite extends Composite
 {
-	private static final int FILTER_TEXT_HEIGHT = 29;
 	private static final int LANG_COMBO_WIDTH = 128;
 	private static final String DIALOGSTORE_FILTER = "I18NComposite.filter";
 	private static final String DIALOGSTORE_LANG_COUNTRY = "I18NComposite.lang_country";
@@ -147,6 +146,7 @@ public class I18nComposite extends Composite
 	private FilterDelayJob delayedFilterJob;
 	private Composite tableContainer;
 	private final String i18nDatasource;
+	private ISelectionChangedListener selectionChangedListener;
 
 	public I18nComposite(Composite parent, int style, IApplication application, boolean addActionColumns)
 	{
@@ -479,11 +479,33 @@ public class I18nComposite extends Composite
 		return selectedLanguage;
 	}
 
+
+	public void setSelectionChangedListener(ISelectionChangedListener selectionChangedListener)
+	{
+		if (this.selectionChangedListener != null)
+		{
+			tableViewer.removeSelectionChangedListener(this.selectionChangedListener);
+		}
+		this.selectionChangedListener = selectionChangedListener;
+		if (this.selectionChangedListener != null)
+		{
+			tableViewer.addSelectionChangedListener(this.selectionChangedListener);
+		}
+	}
+
 	public void refresh()
 	{
 		String selection = getSelectedKey();
+		if (selectionChangedListener != null)
+		{
+			tableViewer.removeSelectionChangedListener(selectionChangedListener);
+		}
 		tableViewer.setInput(messagesModel.getMessages(filterText.getText(), null, null, null,
 			ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionMobile()));
+		if (selectionChangedListener != null)
+		{
+			tableViewer.addSelectionChangedListener(selectionChangedListener);
+		}
 		if (selection != null) selectKey(selection);
 	}
 

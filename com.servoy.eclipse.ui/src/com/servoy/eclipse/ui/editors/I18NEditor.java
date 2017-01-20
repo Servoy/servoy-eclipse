@@ -47,7 +47,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.FileEditorInput;
 
@@ -55,14 +54,13 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.I18NEditorInput;
 import com.servoy.eclipse.model.repository.EclipseMessages;
-import com.servoy.eclipse.model.repository.IEclipseMessageChangeListener;
 import com.servoy.eclipse.ui.dialogs.I18nComposite;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.i18n.I18NMessagesModel.I18NMessagesModelEntry;
 import com.servoy.j2db.persistence.I18NUtil.MessageEntry;
 import com.servoy.j2db.util.DataSourceUtils;
 
-public class I18NEditor extends EditorPart implements IEclipseMessageChangeListener
+public class I18NEditor extends EditorPart
 {
 	private final IApplication application;
 	private final EclipseMessages messagesManager;
@@ -86,9 +84,9 @@ public class I18NEditor extends EditorPart implements IEclipseMessageChangeListe
 				if (currentRefText == null) currentRefText = "";
 				String currentLocaleText = I18NEditor.this.localeText.getText();
 				if (currentLocaleText == null) currentLocaleText = "";
-				i18nComposite.getTableViewer().removeSelectionChangedListener(i18nCompositeSelectionChangedListener);
+				i18nComposite.setSelectionChangedListener(null);
 				onChange(row.key, currentRefText.trim(), currentLocaleText.trim());
-				i18nComposite.getTableViewer().addSelectionChangedListener(i18nCompositeSelectionChangedListener);
+				i18nComposite.setSelectionChangedListener(i18nCompositeSelectionChangedListener);
 			}
 		}
 	};
@@ -97,7 +95,6 @@ public class I18NEditor extends EditorPart implements IEclipseMessageChangeListe
 	{
 		application = Activator.getDefault().getDesignClient();
 		messagesManager = ServoyModelManager.getServoyModelManager().getServoyModel().getMessagesManager();
-		messagesManager.addChangeListener(this);
 	}
 
 	@Override
@@ -196,7 +193,7 @@ public class I18NEditor extends EditorPart implements IEclipseMessageChangeListe
 
 		parentComposite.setLayout(new FillLayout());
 		i18nComposite = new I18nComposite(parentComposite, SWT.NONE, application, true, i18nDatasource);
-		i18nComposite.getTableViewer().addSelectionChangedListener(i18nCompositeSelectionChangedListener = new ISelectionChangedListener()
+		i18nComposite.setSelectionChangedListener(i18nCompositeSelectionChangedListener = new ISelectionChangedListener()
 		{
 
 			public void selectionChanged(SelectionChangedEvent event)
@@ -209,8 +206,16 @@ public class I18NEditor extends EditorPart implements IEclipseMessageChangeListe
 					if (!row.key.equals(I18NEditor.this.keyText.getText()))
 					{
 						I18NEditor.this.keyText.setText(row.key);
-						I18NEditor.this.referenceText.setText(row.defaultvalue != null ? row.defaultvalue : "");
-						I18NEditor.this.localeText.setText(row.localeValue != null ? row.localeValue : "");
+					}
+					String refText = row.defaultvalue != null ? row.defaultvalue : "";
+					if (!refText.equals(I18NEditor.this.referenceText.getText()))
+					{
+						I18NEditor.this.referenceText.setText(refText);
+					}
+					String locText = row.localeValue != null ? row.localeValue : "";
+					if (!locText.equals(I18NEditor.this.localeText.getText()))
+					{
+						I18NEditor.this.localeText.setText(locText);
 					}
 				}
 				else
@@ -305,9 +310,7 @@ public class I18NEditor extends EditorPart implements IEclipseMessageChangeListe
 	@Override
 	public void doSave(IProgressMonitor monitor)
 	{
-		messagesManager.removeChangeListener(this);
 		save();
-		messagesManager.addChangeListener(this);
 	}
 
 	@Override
@@ -356,31 +359,8 @@ public class I18NEditor extends EditorPart implements IEclipseMessageChangeListe
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.model.repository.IEclipseMessageChangeListener#i18nMessageChanged(java.lang.String)
-	 */
-	@Override
-	public void i18nMessageChanged(String i18nDS)
+	public void refresh()
 	{
-		if (i18nDS.equals(this.i18nDatasource))
-		{
-			PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					i18nComposite.refresh();
-				}
-			});
-		}
-	}
-
-	@Override
-	public void dispose()
-	{
-		super.dispose();
-		messagesManager.removeChangeListener(this);
+		i18nComposite.refresh();
 	}
 }
