@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.IWizardContainer2;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
@@ -41,6 +42,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.grouplayout.GroupLayout;
 import org.eclipse.swt.layout.grouplayout.LayoutStyle;
 import org.eclipse.swt.widgets.Button;
@@ -73,16 +75,14 @@ import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
-import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
 import com.servoy.eclipse.ui.dialogs.FormContentProvider;
 import com.servoy.eclipse.ui.dialogs.FormContentProvider.FormListOptions;
+import com.servoy.eclipse.ui.dialogs.PlaceDataProviderConfiguration;
+import com.servoy.eclipse.ui.dialogs.PlaceDataprovidersComposite;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider.TableListOptions;
-import com.servoy.eclipse.ui.dialogs.TreePatternFilter;
-import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.DatasourceLabelProvider;
-import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.FormLabelProvider;
 import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -93,7 +93,6 @@ import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.IAutomaticImportWPMPackages;
 import com.servoy.eclipse.ui.util.IStatusChangedListener;
 import com.servoy.eclipse.ui.util.SnapToGridFieldPositioner;
-import com.servoy.eclipse.ui.views.PlaceFieldOptionGroup;
 import com.servoy.eclipse.ui.views.TreeSelectViewer;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormController;
@@ -275,14 +274,14 @@ public class NewFormWizard extends Wizard implements INewWizard
 	public boolean performFinish()
 	{
 		IDialogSettings settings = getDialogSettings();
-		if (dataProviderWizardPage != null)
-		{
-			settings.put("placeHorizontal", dataProviderWizardPage.optionsGroup.isPlaceHorizontal());
-			settings.put("placeAsLabels", dataProviderWizardPage.optionsGroup.isPlaceAsLabels());
-			settings.put("placeLabels", dataProviderWizardPage.optionsGroup.isPlaceWithLabels());
-			settings.put("fillText", dataProviderWizardPage.optionsGroup.isFillText());
-			settings.put("fillName", dataProviderWizardPage.optionsGroup.isFillName());
-		}
+//		if (dataProviderWizardPage != null)
+//		{
+//			settings.put("placeHorizontal", dataProviderWizardPage.optionsGroup.isPlaceHorizontal());
+//			settings.put("placeAsLabels", dataProviderWizardPage.optionsGroup.isPlaceAsLabels());
+//			settings.put("placeLabels", dataProviderWizardPage.optionsGroup.isPlaceWithLabels());
+//			settings.put("fillText", dataProviderWizardPage.optionsGroup.isFillText());
+//			settings.put("fillName", dataProviderWizardPage.optionsGroup.isFillName());
+//		}
 
 		IDataSourceWrapper tw = newFormWizardPage.getTableWrapper();
 		settings.put("datasource", tw == null ? null : tw.getDataSource());
@@ -364,16 +363,12 @@ public class NewFormWizard extends Wizard implements INewWizard
 			DesignerPreferences designerPreferences = new DesignerPreferences();
 			if (dataProviderWizardPage != null && !form.isResponsiveLayout())
 			{
-				Object[] dataProviders = dataProviderWizardPage.getDataProviders();
-				if (dataProviders != null && dataProviders.length > 0)
+				PlaceDataProviderConfiguration config = dataProviderWizardPage.getDataProviderConfiguration();
+				if (config != null && config.getDataProvidersConfig().size() > 0)
 				{
-					ElementFactory.createFields(form, dataProviders, dataProviderWizardPage.optionsGroup.isPlaceAsLabels(),
-						dataProviderWizardPage.optionsGroup.isPlaceWithLabels(), dataProviderWizardPage.optionsGroup.isPlaceHorizontal(),
-						dataProviderWizardPage.optionsGroup.isFillText(), dataProviderWizardPage.optionsGroup.isFillName(),
-						designerPreferences.getGridSnapTo() ? new SnapToGridFieldPositioner(designerPreferences) : null,
-						dataProviderWizardPage.optionsGroup.isPlaceHorizontal() ? new Point(0, 0) : new Point(60, 70));
-
-					if (dataProviderWizardPage.optionsGroup.isPlaceHorizontal())
+					ElementFactory.createFields(form, config, designerPreferences.getGridSnapTo() ? new SnapToGridFieldPositioner(designerPreferences) : null,
+						config.isPlaceHorizontally() ? new Point(0, 0) : new Point(60, 70));
+					if (config.isPlaceHorizontally())
 					{
 						form.setView(FormController.LOCKED_TABLE_VIEW);
 					}
@@ -767,13 +762,13 @@ public class NewFormWizard extends Wizard implements INewWizard
 														GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
 															templateLabel)).addPreferredGap(LayoutStyle.RELATED).add(
 																groupLayout.createParallelGroup(GroupLayout.CENTER).add(projectLabel).add(projectComboControl,
-																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-																	GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-																		groupLayout.createParallelGroup(GroupLayout.CENTER).add(listFormLabel).add(
-																			listFormCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-																			GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-																				groupLayout.createParallelGroup(GroupLayout.CENTER)).addContainerGap(100,
-																					Short.MAX_VALUE)));
+																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
+																		LayoutStyle.RELATED).add(
+																			groupLayout.createParallelGroup(GroupLayout.CENTER).add(listFormLabel).add(
+																				listFormCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
+																					LayoutStyle.RELATED).add(
+																						groupLayout.createParallelGroup(GroupLayout.CENTER)).addContainerGap(
+																							100, Short.MAX_VALUE)));
 			topLevel.setLayout(groupLayout);
 			topLevel.setTabList(
 				new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl, listFormCheck });
@@ -1137,9 +1132,7 @@ public class NewFormWizard extends Wizard implements INewWizard
 
 	public class DataProviderWizardPage extends WizardPage implements Listener
 	{
-		private DataProviderTreeViewer treeViewer;
-
-		private PlaceFieldOptionGroup optionsGroup;
+		private PlaceDataprovidersComposite comp;
 
 		/**
 		 * Creates a new form creation wizard page.
@@ -1162,41 +1155,22 @@ public class NewFormWizard extends Wizard implements INewWizard
 			initializeDialogUnits(parent);
 			// top level group
 			Composite topLevel = new Composite(parent, SWT.NONE);
-			topLevel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
+			GridLayout layout = new GridLayout();
+			layout.marginHeight = 0;
+			layout.marginWidth = 0;
+			layout.verticalSpacing = 0;
+			topLevel.setLayout(layout);
+			topLevel.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 			setControl(topLevel);
-			treeViewer = new DataProviderTreeViewer(topLevel, DataProviderLabelProvider.INSTANCE_HIDEPREFIX, // label provider will be overwritten when superform is known
-				new DataProviderContentProvider(null, servoyProject.getEditingFlattenedSolution(), null),
-				new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true, true, true, true, INCLUDE_RELATIONS.NESTED, true, true, null),
-				true, true, TreePatternFilter.getSavedFilterMode(getDialogSettings(), TreePatternFilter.FILTER_LEAFS), SWT.MULTI);
-
 			IDialogSettings settings = NewFormWizard.this.getDialogSettings();
-			final boolean isPlaceHorizontal = settings.getBoolean("placeHorizontal");
-			final String isPlaceAsLabels = settings.get("placeAsLabels");
-			final String isPlaceWithLabels = settings.get("placeLabels");
-			final boolean isFillText = settings.getBoolean("fillText");
-			final boolean isFillName = settings.getBoolean("fillName");
+			comp = new PlaceDataprovidersComposite(topLevel, null, servoyProject.getEditingFlattenedSolution(), null,
+				new DataProviderTreeViewer.DataProviderOptions(false, true, true, true, true, true, true, true, INCLUDE_RELATIONS.NESTED, true, true, null),
+				settings);
+			comp.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-			optionsGroup = new PlaceFieldOptionGroup(topLevel, SWT.NONE);
-			optionsGroup.setText("Options");
-			optionsGroup.setPlaceAsLabels(String.valueOf(true).equals(isPlaceAsLabels));
-			optionsGroup.setPlaceWithLabels(isPlaceWithLabels == null || String.valueOf(true).equals(isPlaceWithLabels));
-			optionsGroup.setPlaceHorizontal(isPlaceHorizontal);
-			optionsGroup.setFillText(isFillText);
-			optionsGroup.setFillName(isFillName);
-
-			final GroupLayout groupLayout = new GroupLayout(topLevel);
-			groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(GroupLayout.LEADING, treeViewer,
-				GroupLayout.PREFERRED_SIZE, 274, Short.MAX_VALUE).add(GroupLayout.LEADING, optionsGroup, GroupLayout.PREFERRED_SIZE, 274, Short.MAX_VALUE));
-			groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.TRAILING).add(
-				groupLayout.createSequentialGroup().add(treeViewer, GroupLayout.PREFERRED_SIZE, 133, Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(
-					optionsGroup, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)));
-			topLevel.setLayout(groupLayout);
 		}
 
-		/*
-		 * @see DialogPage.setVisible(boolean)
-		 */
 		@Override
 		public void setVisible(boolean visible)
 		{
@@ -1205,24 +1179,15 @@ public class NewFormWizard extends Wizard implements INewWizard
 			{
 				fillDataproviderTree();
 				setPageComplete(validatePage());
+				((IWizardContainer2)getWizard().getContainer()).updateSize();
 			}
-		}
-
-		@Override
-		public void dispose()
-		{
-			((TreePatternFilter)treeViewer.getPatternFilter()).saveSettings(getDialogSettings());
-			super.dispose();
 		}
 
 		public void fillDataproviderTree()
 		{
 			ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(newFormWizardPage.getDataSource());
 			Form superForm = newFormWizardPage.getSuperForm();
-			((DataProviderContentProvider)treeViewer.getContentProvider()).setTable(table, PersistContext.create(superForm));
-			treeViewer.setLabelProvider(
-				new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(DataProviderLabelProvider.INSTANCE_HIDEPREFIX, superForm)));
-			treeViewer.refreshTree();
+			comp.setTable(table, PersistContext.create(superForm));
 		}
 
 		private boolean validatePage()
@@ -1239,11 +1204,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 			setPageComplete(validatePage());
 		}
 
-		public Object[] getDataProviders()
+		public PlaceDataProviderConfiguration getDataProviderConfiguration()
 		{
-			return treeViewer.getOrderedSelection() != null ? treeViewer.getOrderedSelection().toArray() : new Object[0];
+			return comp.getDataProviderConfiguration();
 		}
-
 	}
 
 	private Solution getActiveSolution()

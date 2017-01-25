@@ -18,28 +18,28 @@ package com.servoy.eclipse.designer.editor.commands;
 
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.designer.editor.VisualFormEditor;
 import com.servoy.eclipse.model.util.ModelUtils;
-import com.servoy.eclipse.ui.dialogs.DataProviderDialog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions.INCLUDE_RELATIONS;
-import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
-import com.servoy.eclipse.ui.labelproviders.FormContextDelegateLabelProvider;
-import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider;
+import com.servoy.eclipse.ui.dialogs.PlaceDataProviderConfiguration;
+import com.servoy.eclipse.ui.dialogs.PlaceDataprovidersComposite;
 import com.servoy.eclipse.ui.property.PersistContext;
-import com.servoy.eclipse.ui.util.IControlFactory;
-import com.servoy.eclipse.ui.views.PlaceFieldOptionGroup;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
@@ -55,7 +55,80 @@ import com.servoy.j2db.persistence.Relation;
  */
 public class AddFieldAction extends DesignerToolbarAction
 {
-	protected PlaceFieldOptionGroup optionsGroup;
+	/**
+	 * @author jcomp
+	 *
+	 */
+	private final class PlaceDataProviderAndFields extends Dialog
+	{
+		private PlaceDataprovidersComposite comp;
+		private final PersistContext persistContext;
+		private final FlattenedSolution flattenedSolution;
+		private final DataProviderOptions dataproviderOptions;
+		private final ITable table;
+
+		/**
+		 * @param parentShell
+		 * @param dialog
+		 * @param input
+		 * @param table
+		 * @param flattenedSolution
+		 * @param persistContext
+		 */
+		private PlaceDataProviderAndFields(Shell parentShell, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
+			DataProviderOptions dataproviderOptions)
+		{
+			super(parentShell);
+			this.persistContext = persistContext;
+			this.flattenedSolution = flattenedSolution;
+			this.table = table;
+			this.dataproviderOptions = dataproviderOptions;
+			setShellStyle(getShellStyle() | SWT.RESIZE);
+		}
+
+		@Override
+		protected void configureShell(Shell newShell)
+		{
+			super.configureShell(newShell);
+			newShell.setText("Select dataprovider and its component/template");
+		}
+
+		@Override
+		public IDialogSettings getDialogBoundsSettings()
+		{
+			return EditorUtil.getDialogSettings("PlaceDataProviderAndFields");
+		}
+
+		@Override
+		protected Control createContents(Composite parent)
+		{
+			Control contents = super.createContents(parent);
+			getButton(IDialogConstants.OK_ID).setEnabled(false);
+			return contents;
+		}
+
+		@Override
+		protected Control createDialogArea(Composite parent)
+		{
+			Composite area = (Composite)super.createDialogArea(parent);
+			comp = new PlaceDataprovidersComposite(area, persistContext, flattenedSolution, table, dataproviderOptions, getDialogBoundsSettings());
+			comp.addReadyListener(new PlaceDataprovidersComposite.IReadyListener()
+			{
+				@Override
+				public void isReady(boolean ready)
+				{
+					getButton(IDialogConstants.OK_ID).setEnabled(ready);
+				}
+			});
+			comp.setLayoutData(new GridData(GridData.FILL_BOTH));
+			return area;
+		}
+
+		public PlaceDataProviderConfiguration getDataProviderConfiguration()
+		{
+			return comp.getDataProviderConfiguration();
+		}
+	}
 
 	public AddFieldAction(IWorkbenchPart part)
 	{
@@ -92,50 +165,20 @@ public class AddFieldAction extends DesignerToolbarAction
 				INCLUDE_RELATIONS.NESTED, true, true, null);
 		}
 
-		DataProviderDialog dialog = new DataProviderDialog(getShell(),
-			new SolutionContextDelegateLabelProvider(new FormContextDelegateLabelProvider(DataProviderLabelProvider.INSTANCE_HIDEPREFIX, form)),
-			PersistContext.create(form), flattenedSolution, table, input, null, SWT.MULTI, "Select Data Providers");
-
-		IDialogSettings settings = dialog.getDataProvideDialogSettings();
-		final boolean isPlaceHorizontal = settings.getBoolean("placeHorizontal");
-		final String isPlaceAsLabels = settings.get("placeAsLabels");
-		final String isPlaceWithLabels = settings.get("placeLabels");
-		final boolean isFillText = settings.getBoolean("fillText");
-		final boolean isFillName = settings.getBoolean("fillName");
-
-		dialog.setOptionsAreaFactory(new IControlFactory()
-		{
-			public Control createControl(Composite composite)
-			{
-				optionsGroup = new PlaceFieldOptionGroup(composite, SWT.NONE);
-				optionsGroup.setText("Options");
-
-				optionsGroup.setPlaceAsLabels(String.valueOf(true).equals(isPlaceAsLabels));
-				// placeWithLabels defaults to true
-				optionsGroup.setPlaceWithLabels(isPlaceWithLabels == null || String.valueOf(true).equals(isPlaceWithLabels));
-				optionsGroup.setPlaceHorizontal(isPlaceHorizontal);
-				optionsGroup.setFillText(isFillText);
-				optionsGroup.setFillName(isFillName);
-
-				return optionsGroup;
-			}
-		});
-
+		PlaceDataProviderAndFields dialog = new PlaceDataProviderAndFields(getShell(), PersistContext.create(form), flattenedSolution, table, input);
 		dialog.open();
 
 		if (dialog.getReturnCode() == Window.CANCEL)
 		{
 			return null;
 		}
-		settings.put("placeHorizontal", optionsGroup.isPlaceHorizontal());
-		settings.put("placeAsLabels", optionsGroup.isPlaceAsLabels());
-		settings.put("placeLabels", optionsGroup.isPlaceWithLabels());
-		settings.put("fillText", optionsGroup.isFillText());
-		settings.put("fillName", optionsGroup.isFillName());
+
+		PlaceDataProviderConfiguration dpConf = dialog.getDataProviderConfiguration();
 
 		// multiple selection
-		return new DataFieldRequest(getRequestType(), ((IStructuredSelection)dialog.getSelection()).toArray(), optionsGroup.isPlaceAsLabels(),
-			optionsGroup.isPlaceWithLabels(), optionsGroup.isPlaceHorizontal(), optionsGroup.isFillText(), optionsGroup.isFillName());
+		return new DataFieldRequest(getRequestType(), dpConf.getDataProvidersConfig(), false, dpConf.isPlaceWithLabels(), dpConf.isPlaceHorizontally(),
+			dpConf.isFillText(), dpConf.isFillName(), dpConf.getFieldSpacing(), dpConf.getLabelSpacing(), dpConf.getLabelComponent(), dpConf.isPlaceOnTop(),
+			dpConf.getFieldSize(), dpConf.getLabelSize());
 	}
 
 	/**

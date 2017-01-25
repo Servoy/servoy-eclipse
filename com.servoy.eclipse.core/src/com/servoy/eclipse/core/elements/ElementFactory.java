@@ -22,6 +22,7 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,6 +39,7 @@ import org.eclipse.swt.graphics.Point;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
@@ -104,6 +106,8 @@ import com.servoy.j2db.persistence.Template;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.headlessclient.dataui.WebDefaultRecordNavigator;
+import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.LabelForPropertyType;
 import com.servoy.j2db.util.ComponentFactoryHelper;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.IStyleRule;
@@ -333,7 +337,7 @@ public class ElementFactory
 		return label;
 	}
 
-	public static IPersist createWebComponent(Form parent, String name, Point location) throws RepositoryException
+	public static WebComponent createWebComponent(Form parent, String name, Point location) throws RepositoryException
 	{
 		WebComponent webComponent = null;
 		WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(name);
@@ -491,8 +495,8 @@ public class ElementFactory
 		return field;
 	}
 
-	public static IPersist[] createFields(ISupportFormElements parent, Object[] dataProviders, boolean placeAsLabels, boolean placeWithLabels,
-		boolean placeHorizontal, boolean fillText, boolean fillName, IFieldPositioner fieldPositioner, Point location) throws RepositoryException
+	public static IPersist[] createFields(ISupportFormElements parent, IPlaceDataProviderConfiguration configuration, IFieldPositioner fieldPositioner,
+		Point location) throws RepositoryException
 	{
 		Point startLocation = location;
 		if (fieldPositioner != null)
@@ -504,37 +508,39 @@ public class ElementFactory
 			startLocation = new Point(0, 0);
 		}
 
+		List<Pair<IDataProvider, Object>> dataProviders = configuration.getDataProvidersConfig();
 		if (dataProviders == null)
 		{
-			return new IPersist[] { placeAsLabels ? createLabel(parent, null, startLocation) : createField(parent, null, startLocation) };
+			return new IPersist[] { false ? createLabel(parent, null, startLocation) : createField(parent, null, startLocation) };
 		}
 
+		boolean placeAsLabels = false;
 		Point loc = null;
 		List<IPersist> lst = new ArrayList<IPersist>();
 		Dimension lastSize = null;
-		for (Object o : dataProviders)
+		for (Pair<IDataProvider, Object> pair : dataProviders)
 		{
+			IDataProvider dp = pair.getLeft();
+			Object o = dp;
 			if (o instanceof IDataProvider)
 			{
 				IDataProvider dataProvider = (IDataProvider)o;
 
+				int fieldSpacing = configuration.getFieldSpacing() > 0 ? configuration.getFieldSpacing() : 10;
 				if (loc == null)
 				{
 					loc = startLocation;
 				}
-				else if (placeHorizontal)
+				else if (configuration.isPlaceHorizontally())
 				{
 					int offset = lastSize == null || lastSize.width < 80 ? 80 : lastSize.width;
-					if (!placeWithLabels)
-					{
-						// do not overlap large fields, leave 10 px space
-						offset += 10;
-					}
+					offset += fieldSpacing;
 					loc = new Point(loc.x + offset, startLocation.y);
 				}
 				else
 				{
-					loc = new Point(startLocation.x, loc.y + 30);
+					int offset = lastSize == null || lastSize.height < 20 ? 20 : lastSize.height;
+					loc = new Point(startLocation.x, loc.y + offset + fieldSpacing);
 				}
 				if (fieldPositioner != null)
 				{
@@ -566,28 +572,100 @@ public class ElementFactory
 				}
 				String name = getCorrectName(parent, cutofDPID);
 
-				if (placeWithLabels)
+				if (configuration.isPlaceWithLabels())
 				{
-					GraphicalComponent label = createLabel(parent, labelText, loc);
-					lst.add(label);
-
-					java.awt.Dimension labeldim = label.getSize();
-					labeldim.width = placeHorizontal ? 140 /* field width */ : 80;
-					label.setSize(labeldim);
-
-					if (fillName)
+					BaseComponent label = null;
+					Object labelComponent = null;
+					String labelComponentName = configuration.getLabelComponent();
+					if (labelComponentName != null)
 					{
-						label.setLabelFor(name);
-						label.setName(name + "_label");
+						List<IRootObject> templates = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveRootObjects(IRepository.TEMPLATES);
+						for (IRootObject template : templates)
+						{
+							if (template.getName().equals(labelComponentName))
+							{
+								labelComponent = template;
+								break;
+							}
+						}
+						if (labelComponent == null)
+						{
+							outer : for (PackageSpecification<WebObjectSpecification> pck : WebComponentSpecProvider.getSpecProviderState().getWebObjectSpecifications().values())
+							{
+								if (pck.getPackageName().equals("servoycore")) continue;
+								for (WebObjectSpecification wos : pck.getSpecifications().values())
+								{
+									if (wos.getName().equals(labelComponentName))
+									{
+										labelComponent = wos;
+										break outer;
+									}
+								}
+							}
+						}
 					}
-
-					if (placeHorizontal)
+					if (labelComponent instanceof WebObjectSpecification)
 					{
-						loc = new Point(loc.x, loc.y + 20);
+						label = createComponent(parent, (WebObjectSpecification)labelComponent, dp, loc);
+					}
+					else if (labelComponent instanceof Template)
+					{
+						Object[] templateComp = ElementFactory.applyTemplate(parent, new TemplateElementHolder((Template)labelComponent), loc, false);
+						label = (BaseComponent)templateComp[0];
 					}
 					else
 					{
-						loc = new Point(loc.x + 90, loc.y);
+						label = createLabel(parent, labelText, loc);
+						java.awt.Dimension labeldim = label.getSize();
+						labeldim.width = configuration.isPlaceHorizontally() ? 140 /* field width */ : 80;
+						label.setSize(labeldim);
+					}
+					lst.add(label);
+
+					Dimension currentSize = label.getSize();
+					Dimension labelSize = configuration.getLabelSize();
+					if (labelSize.height > 0)
+					{
+						currentSize.height = labelSize.height;
+					}
+					if (labelSize.width > 0)
+					{
+						currentSize.width = labelSize.width;
+					}
+					label.setSize(currentSize);
+
+
+					if (configuration.isFillName())
+					{
+						if (label instanceof GraphicalComponent) ((GraphicalComponent)label).setLabelFor(name);
+						else if (label instanceof WebComponent)
+						{
+							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+								((WebComponent)label).getTypeName());
+							Collection<PropertyDescription> labelForProperties = spec.getProperties(LabelForPropertyType.INSTANCE);
+							for (PropertyDescription pd : labelForProperties)
+							{
+								((WebComponent)label).setProperty(pd.getName(), name);
+							}
+						}
+						label.setName(name + "_label");
+					}
+					int labelSpacing = configuration.getLabelSpacing() > 0 ? configuration.getLabelSpacing() : 20;
+
+					if (configuration.isPlaceHorizontally())
+					{
+						loc = new Point(loc.x, loc.y + label.getSize().height + labelSpacing);
+					}
+					else
+					{
+						if (configuration.isPlaceOnTop())
+						{
+							loc = new Point(loc.x, loc.y + label.getSize().height + labelSpacing);
+						}
+						else
+						{
+							loc = new Point(loc.x + label.getSize().width + labelSpacing, loc.y);
+						}
 					}
 					if (fieldPositioner != null)
 					{
@@ -604,19 +682,60 @@ public class ElementFactory
 				}
 				else
 				{
-					bc = createField(parent, dataProvider, loc);
+					if (pair.getRight() instanceof WebObjectSpecification)
+					{
+						bc = createComponent(parent, (WebObjectSpecification)pair.getRight(), dp, loc);
+					}
+					else if (pair.getRight() instanceof Template)
+					{
+						Object[] templateComp = ElementFactory.applyTemplate(parent, new TemplateElementHolder((Template)pair.getRight()), loc, false);
+						bc = (BaseComponent)templateComp[0];
+						if (bc instanceof WebComponent)
+						{
+							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+								((WebComponent)bc).getTypeName());
+							Collection<PropertyDescription> properties = spec.getProperties(DataproviderPropertyType.INSTANCE);
+							for (PropertyDescription pd : properties)
+							{
+								bc.setProperty(pd.getName(), dp.getDataProviderID());
+							}
+						}
+						else if (bc instanceof GraphicalComponent)
+						{
+							((GraphicalComponent)bc).setDataProviderID(dp.getDataProviderID());
+						}
+						else if (bc instanceof Field)
+						{
+							((Field)bc).setDataProviderID(dp.getDataProviderID());
+						}
+					}
+					else
+					{
+						bc = createField(parent, dataProvider, loc);
+						java.awt.Dimension dim = bc.getSize();
+						dim.width = 140;
+						bc.setSize(dim);
+					}
 				}
-				java.awt.Dimension dim = bc.getSize();
-				dim.width = 140;
-				bc.setSize(dim);
 				lst.add(bc);
 
+				Dimension currentSize = bc.getSize();
+				Dimension fieldSize = configuration.getFieldSize();
+				if (fieldSize.height > 0)
+				{
+					currentSize.height = fieldSize.height;
+				}
+				if (fieldSize.width > 0)
+				{
+					currentSize.width = fieldSize.width;
+				}
+				bc.setSize(currentSize);
 
-				if (fillName)
+				if (configuration.isFillName())
 				{
 					bc.setName(name);
 				}
-				if (fillText && bc instanceof ISupportText)
+				if (configuration.isFillText() && bc instanceof ISupportText)
 				{
 					((ISupportText)bc).setText(labelText);
 				}
@@ -629,6 +748,135 @@ public class ElementFactory
 			return null;
 		}
 		return lst.toArray(new IPersist[lst.size()]);
+	}
+
+	/**
+	 * @param wos
+	 * @param left
+	 * @param loc
+	 * @throws RepositoryException
+	 */
+	private static BaseComponent createComponent(ISupportFormElements parent, WebObjectSpecification wos, IDataProvider dp, Point loc)
+		throws RepositoryException
+	{
+		java.awt.Point location = new java.awt.Point(loc.x, loc.y);
+		String name = wos.getName();
+		if ("servoydefault-button".equals(name))
+		{
+			GraphicalComponent gc = parent.createNewGraphicalComponent(location);
+			gc.setText("button");
+			gc.setOnActionMethodID(-1);
+			gc.setDataProviderID(dp.getDataProviderID());
+			return gc;
+		}
+		else if ("servoydefault-label".equals(name))
+		{
+			GraphicalComponent gc = parent.createNewGraphicalComponent(location);
+			gc.setDataProviderID(dp.getDataProviderID());
+			return gc;
+		}
+		else if ("servoydefault-combobox".equals(name))
+		{
+			Field field = parent.createNewField(location);
+			field.setDisplayType(Field.COMBOBOX);
+			field.setDataProviderID(dp.getDataProviderID());
+			return field;
+		}
+		else if ("servoydefault-textfield".equals(name))
+		{
+			Field field = parent.createNewField(location);
+			field.setDisplayType(Field.TEXT_FIELD);
+			field.setDataProviderID(dp.getDataProviderID());
+			return field;
+		}
+		else if ("servoydefault-textarea".equals(name))
+		{
+			Field field = parent.createNewField(location);
+			field.setDisplayType(Field.TEXT_AREA);
+			field.setDataProviderID(dp.getDataProviderID());
+			return field;
+		}
+		else if ("servoydefault-password".equals(name))
+		{
+			Field field = parent.createNewField(location);
+			field.setDisplayType(Field.PASSWORD);
+			field.setDataProviderID(dp.getDataProviderID());
+			return field;
+		}
+		else if ("servoydefault-calendar".equals(name))
+		{
+			Field field = parent.createNewField(location);
+			field.setDisplayType(Field.CALENDAR);
+			field.setDataProviderID(dp.getDataProviderID());
+			return field;
+		}
+		else if ("servoydefault-typeahead".equals(name))
+		{
+			Field field = parent.createNewField(location);
+			field.setDisplayType(Field.TYPE_AHEAD);
+			field.setDataProviderID(dp.getDataProviderID());
+			return field;
+		}
+		else if ("servoydefault-spinner".equals(name))
+		{
+			Field field = parent.createNewField(location);
+			field.setDisplayType(Field.SPINNER);
+			field.setDataProviderID(dp.getDataProviderID());
+			return field;
+		}
+		else if ("servoydefault-check".equals(name) || "servoydefault-checkgroup".equals(name))
+		{
+			Field field = parent.createNewField(location);
+			field.setDisplayType(Field.CHECKS);
+			field.setDataProviderID(dp.getDataProviderID());
+			return field;
+		}
+		else if ("servoydefault-radio".equals(name) || "servoydefault-radiogroup".equals(name))
+		{
+			Field field = parent.createNewField(location);
+			field.setDisplayType(Field.RADIOS);
+			field.setDataProviderID(dp.getDataProviderID());
+			return field;
+		}
+		else if ("servoydefault-imagemedia".equals(name))
+		{
+			Field field = parent.createNewField(location);
+			field.setDisplayType(Field.IMAGE_MEDIA);
+			field.setDataProviderID(dp.getDataProviderID());
+			return field;
+		}
+		else if ("servoydefault-listbox".equals(name))
+		{
+			Field field = parent.createNewField(location);
+			field.setDisplayType(Field.LIST_BOX);
+			field.setDataProviderID(dp.getDataProviderID());
+			return field;
+		}
+		else if ("servoydefault-htmlarea".equals(name))
+		{
+			Field field = parent.createNewField(location);
+			field.setDisplayType(Field.HTML_AREA);
+			field.setEditable(true);
+			field.setDataProviderID(dp.getDataProviderID());
+			return field;
+		}
+
+		else if ("servoydefault-rectangle".equals(name))
+		{
+			RectShape shape = parent.createNewRectangle(location);
+			shape.setLineSize(1);
+			return shape;
+		}
+		else
+		{
+			WebComponent webComp = createWebComponent((Form)parent, name, loc);
+			Collection<PropertyDescription> properties = wos.getProperties(DataproviderPropertyType.INSTANCE);
+			for (PropertyDescription pd : properties)
+			{
+				webComp.setProperty(pd.getName(), dp.getDataProviderID());
+			}
+			return webComp;
+		}
 	}
 
 	private static String getCorrectName(ISupportFormElements parent, String initialName)
@@ -853,8 +1101,8 @@ public class ElementFactory
 		return new Dimension(width, height);
 	}
 
-	public static Portal createPortal(Form form, Object[] dataProviders, boolean fillText, boolean fillName, boolean placeAsLabels, boolean placeWithLabels,
-		Point location, String prefix) throws RepositoryException
+	public static Portal createPortal(Form form, Object[] dataProviders, final boolean fillText, final boolean fillName, final boolean placeAsLabels,
+		final boolean placeWithLabels, Point location, String prefix) throws RepositoryException
 	{
 		Relation[] relations = dataProviders == null || dataProviders.length == 0 ? null : ((IDataProvider)dataProviders[0]).getColumnWrapper().getRelations();
 
@@ -876,12 +1124,84 @@ public class ElementFactory
 			new java.awt.Point(x, y));
 		if (dataProviders != null && dataProviders.length > 0)
 		{
+			final List<Pair<IDataProvider, Object>> lst = new ArrayList<>();
+			for (Object dp : dataProviders)
+			{
+				lst.add(new Pair<IDataProvider, Object>((IDataProvider)dp, null));
+			}
 			Dimension portaldim = new Dimension(dataProviders.length * 140, 50);
 			portal.setSize(portaldim);
 
 			portal.setRelationName(relationName.toString());
 
-			createFields(portal, dataProviders, placeAsLabels, placeWithLabels, true, fillText, fillName, null, new Point(x, y));
+			IPlaceDataProviderConfiguration config = new IPlaceDataProviderConfiguration()
+			{
+				@Override
+				public boolean isPlaceWithLabels()
+				{
+					return placeWithLabels;
+				}
+
+				@Override
+				public boolean isPlaceOnTop()
+				{
+					return false;
+				}
+
+				@Override
+				public boolean isFillText()
+				{
+					return fillText;
+				}
+
+				@Override
+				public boolean isFillName()
+				{
+					return fillName;
+				}
+
+				@Override
+				public int getLabelSpacing()
+				{
+					return -1;
+				}
+
+				@Override
+				public String getLabelComponent()
+				{
+					return null;
+				}
+
+				@Override
+				public int getFieldSpacing()
+				{
+					return -1;
+				}
+
+				@Override
+				public List<Pair<IDataProvider, Object>> getDataProvidersConfig()
+				{
+					return lst;
+				}
+
+				@Override
+				public boolean isPlaceHorizontally()
+				{
+					return true;
+				}
+
+				@Override
+				public Dimension getFieldSize()
+				{
+					return new Dimension(-1, -1);
+				}
+
+				public Dimension getLabelSize()
+				{
+					return new Dimension(-1, -1);
+				}
+			};
+			createFields(portal, config, null, new Point(x, y));
 		}
 		placeElementOnTop(portal);
 		return portal;

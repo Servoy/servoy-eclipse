@@ -16,20 +16,34 @@
  */
 package com.servoy.eclipse.designer.editor.commands;
 
+import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import com.servoy.eclipse.core.elements.IPlaceDataProviderConfiguration;
+import com.servoy.j2db.persistence.IDataProvider;
+import com.servoy.j2db.util.Pair;
 
 /**
  * Request with options for placing fields.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
-public class DataFieldRequest extends DataRequest
+public class DataFieldRequest extends DataRequest implements IPlaceDataProviderConfiguration
 {
 	public final boolean placeAsLabels;
 	public final boolean placeWithLabels;
 	public final boolean placeHorizontal;
 	public final boolean fillText;
 	public final boolean fillName;
+	public final int fieldSpacing;
+	public final int labelSpacing;
+	public final String labelComponent;
+	public final boolean placeOnTop;
+	private Dimension labelSize;
+	private Dimension fieldSize;
 
 	public DataFieldRequest(Object type, Object[] data, boolean placeAsLabels, boolean placeWithLabels, boolean placeHorizontal, boolean fillText,
 		boolean fillName)
@@ -40,5 +54,132 @@ public class DataFieldRequest extends DataRequest
 		this.placeHorizontal = placeHorizontal;
 		this.fillText = fillText;
 		this.fillName = fillName;
+		this.fieldSpacing = -1;
+		this.labelSpacing = -1;
+		this.labelComponent = null;
+		this.placeOnTop = false;
+	}
+
+	/**
+	 * @param requestType
+	 * @param array
+	 * @param b
+	 * @param placeWithLabels2
+	 * @param c
+	 * @param fillText2
+	 * @param fillName2
+	 * @param fieldSpacing
+	 * @param labelSpacing
+	 * @param labelComponent
+	 * @param placeOnTop
+	 */
+	public DataFieldRequest(Object type, List<Pair<IDataProvider, Object>> data, boolean placeAsLabels, boolean placeWithLabels, boolean placeHorizontal,
+		boolean fillText, boolean fillName, int fieldSpacing, int labelSpacing, String labelComponent, boolean placeOnTop, Dimension fieldSize,
+		Dimension labelSize)
+	{
+		super(type, data);
+		this.placeAsLabels = placeAsLabels;
+		this.placeWithLabels = placeWithLabels;
+		this.placeHorizontal = placeHorizontal;
+		this.fillText = fillText;
+		this.fillName = fillName;
+		this.fieldSpacing = fieldSpacing;
+		this.labelSpacing = labelSpacing;
+		this.labelComponent = labelComponent;
+		this.placeOnTop = placeOnTop;
+		this.labelSize = labelSize;
+		this.fieldSize = fieldSize;
+	}
+
+	/**
+	 * @param requestType
+	 * @param data
+	 * @param extendedData
+	 */
+	public DataFieldRequest(Object type, Object[] data, Map<Object, Object> extendedData)
+	{
+		this(type, data, false, false, false, false, false);
+		setExtendedData(extendedData);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Pair<IDataProvider, Object>> getDataProvidersConfig()
+	{
+		Object object = getData();
+		if (object instanceof List< ? >)
+		{
+			return (List<Pair<IDataProvider, Object>>)object;
+		}
+		else if (object instanceof Object[])
+		{
+			List<Pair<IDataProvider, Object>> lst = new ArrayList<>();
+			for (Object pb : (Object[])object)
+			{
+				lst.add(new Pair<IDataProvider, Object>((IDataProvider)pb, null));
+			}
+			return lst;
+		}
+		return null;
+	}
+
+	@Override
+	public int getFieldSpacing()
+	{
+		return fieldSpacing;
+	}
+
+	@Override
+	public boolean isFillName()
+	{
+		return fillName;
+	}
+
+	@Override
+	public boolean isFillText()
+	{
+		return fillText;
+	}
+
+	@Override
+	public boolean isPlaceOnTop()
+	{
+		return placeOnTop;
+	}
+
+	@Override
+	public boolean isPlaceWithLabels()
+	{
+		return placeWithLabels;
+	}
+
+	@Override
+	public String getLabelComponent()
+	{
+		return labelComponent;
+	}
+
+	@Override
+	public int getLabelSpacing()
+	{
+		return labelSpacing;
+	}
+
+	@Override
+	public boolean isPlaceHorizontally()
+	{
+		return placeHorizontal;
+	}
+
+	@Override
+	public Dimension getFieldSize()
+	{
+		return fieldSize;
+	}
+
+	@Override
+	public Dimension getLabelSize()
+	{
+		return labelSize;
 	}
 }

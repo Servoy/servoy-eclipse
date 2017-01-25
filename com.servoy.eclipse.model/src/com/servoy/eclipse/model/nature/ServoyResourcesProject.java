@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.model.nature;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -27,16 +28,21 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.json.JSONObject;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.IWorkingSetChangedListener;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.NameComparator;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.util.ServoyJSONObject;
 
 /**
  * Project nature for Resources Servoy projects.
@@ -318,5 +324,37 @@ public class ServoyResourcesProject implements IProjectNature
 	public void destroy()
 	{
 		listeners = null;
+	}
+
+	public JSONObject getPlaceDataproviderPreferences()
+	{
+		WorkspaceFileAccess wsa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
+		IFile file = getProject().getFile("placedataprovider.preferences");
+		if (file.exists())
+		{
+			try
+			{
+				String contents = wsa.getUTF8Contents(file.getFullPath().toPortableString());
+				return new ServoyJSONObject(contents, false);
+			}
+			catch (IOException e)
+			{
+				ServoyLog.logError(e);
+			}
+		}
+		return new ServoyJSONObject();
+	}
+
+	public void savePlaceDataproviderPreferences(JSONObject object)
+	{
+		WorkspaceFileAccess wsa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
+		try
+		{
+			wsa.setUTF8Contents(getProject().getFile("placedataprovider.preferences").getFullPath().toPortableString(), object.toString());
+		}
+		catch (IOException e)
+		{
+			ServoyLog.logError(e);
+		}
 	}
 }

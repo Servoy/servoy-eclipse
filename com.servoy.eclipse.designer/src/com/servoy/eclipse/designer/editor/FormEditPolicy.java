@@ -88,10 +88,8 @@ public class FormEditPolicy extends ComponentEditPolicy
 		else if (VisualFormEditor.REQ_PLACE_FIELD.equals(request.getType()) && request instanceof DataFieldRequest)
 		{
 			DataFieldRequest dataFieldRequest = ((DataFieldRequest)request);
-			command = new FormPlaceFieldCommand(application, form, form, dataFieldRequest.getData(), dataFieldRequest.getType(),
-				dataFieldRequest.getExtendedData(), fieldPositioner,
-				dataFieldRequest.getlocation() == null ? null : dataFieldRequest.getlocation().getSWTPoint(), null, dataFieldRequest.placeAsLabels,
-				dataFieldRequest.placeWithLabels, dataFieldRequest.placeHorizontal, dataFieldRequest.fillText, dataFieldRequest.fillName, form);
+			command = new FormPlaceFieldCommand(application, form, dataFieldRequest.getType(), dataFieldRequest.getExtendedData(), form, fieldPositioner,
+				dataFieldRequest.getlocation() != null ? dataFieldRequest.getlocation().getSWTPoint() : null, null, form, dataFieldRequest);
 		}
 		else if ((BaseVisualFormEditor.REQ_COPY.equals(request.getType()) || BaseVisualFormEditor.REQ_CUT.equals(request.getType())) &&
 			request instanceof GroupRequest)

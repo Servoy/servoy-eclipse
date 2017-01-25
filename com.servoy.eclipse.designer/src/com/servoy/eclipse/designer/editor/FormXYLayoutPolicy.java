@@ -40,6 +40,7 @@ import com.servoy.eclipse.designer.actions.DistributeRequest;
 import com.servoy.eclipse.designer.actions.DistributeRequest.Distribution;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor.RequestType;
 import com.servoy.eclipse.designer.editor.commands.ChangeBoundsCommand;
+import com.servoy.eclipse.designer.editor.commands.DataFieldRequest;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceElementCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlaceFieldCommand;
 import com.servoy.eclipse.designer.editor.commands.FormPlacePortalCommand;
@@ -155,8 +156,9 @@ public class FormXYLayoutPolicy extends XYLayoutEditPolicy
 			}
 			else if (requestType.type == RequestType.TYPE_FIELD)
 			{
-				command = new FormPlaceFieldCommand(application, form, form, data, requestType, extendedData, null, loc.getSWTPoint(), size, false, false,
-					false, false, false, parent.getPersist());
+				DataFieldRequest dataFieldRequest = new DataFieldRequest(requestType, (Object[])data, extendedData);
+				command = new FormPlaceFieldCommand(application, form, dataFieldRequest.getType(), dataFieldRequest.getExtendedData(), form, null,
+					loc.getSWTPoint(), size, parent.getPersist(), dataFieldRequest);
 			}
 
 

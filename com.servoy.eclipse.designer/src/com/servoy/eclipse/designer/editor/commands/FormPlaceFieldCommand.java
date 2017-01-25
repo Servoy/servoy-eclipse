@@ -16,7 +16,9 @@
  */
 package com.servoy.eclipse.designer.editor.commands;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.graphics.Point;
@@ -24,16 +26,19 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.elements.IFieldPositioner;
+import com.servoy.eclipse.core.elements.IPlaceDataProviderConfiguration;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.IApplication;
 import com.servoy.j2db.persistence.Field;
+import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportFormElements;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
+import com.servoy.j2db.util.Pair;
 
 /**
  * Command to place a field in the form designer.
@@ -43,33 +48,27 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 public class FormPlaceFieldCommand extends BaseFormPlaceElementCommand
 {
-	private final boolean placeAsLabels;
-	private final boolean placeWithLabels;
-	private final boolean placeHorizontal;
-	private final boolean fillText;
-	private final boolean fillName;
 	private final IFieldPositioner fieldPositioner;
 	private final IPersist formContext;
+	private final IPlaceDataProviderConfiguration config;
 
 	/**
-	 * Command to add a field.
-	 *
-	 * @param parent
-	 * @param location
+	 * @param application
+	 * @param form
+	 * @param form2
+	 * @param fieldPositioner2
 	 * @param object
+	 * @param form3
+	 * @param dataFieldRequest
 	 */
-	public FormPlaceFieldCommand(IApplication application, ISupportChilds parent, IPersist formContext, Object object, Object requestType,
-		Map<Object, Object> objectProperties, IFieldPositioner fieldPositioner, Point defaultLocation, org.eclipse.draw2d.geometry.Dimension size,
-		boolean placeAsLabels, boolean placeWithLabels, boolean placeHorizontal, boolean fillText, boolean fillName, IPersist context)
+	public FormPlaceFieldCommand(IApplication application, ISupportChilds parent, Object requestType, Map<Object, Object> extendedData, IPersist formContext,
+		IFieldPositioner fieldPositioner, Point defaultLocation, org.eclipse.draw2d.geometry.Dimension size, IPersist context,
+		IPlaceDataProviderConfiguration config)
 	{
-		super(application, parent, object, requestType, objectProperties, fieldPositioner, defaultLocation, size, context);
+		super(application, parent, config.getDataProvidersConfig(), requestType, extendedData, fieldPositioner, defaultLocation, size, context);
 		this.formContext = formContext;
 		this.fieldPositioner = fieldPositioner;
-		this.placeAsLabels = placeAsLabels;
-		this.placeWithLabels = placeWithLabels;
-		this.placeHorizontal = placeHorizontal;
-		this.fillText = fillText;
-		this.fillName = fillName;
+		this.config = config;
 	}
 
 	@Override
@@ -83,9 +82,21 @@ public class FormPlaceFieldCommand extends BaseFormPlaceElementCommand
 		}
 		if (parent instanceof ISupportFormElements)
 		{
+			List<Pair<IDataProvider, Object>> lst = null;
+			if (object instanceof List< ? >)
+			{
+				lst = (List<Pair<IDataProvider, Object>>)object;
+			}
+			else if (object instanceof Object[])
+			{
+				lst = new ArrayList<>();
+				for (Object dp : (Object[])object)
+				{
+					lst.add(new Pair<IDataProvider, Object>((IDataProvider)dp, null));
+				}
+			}
 			setLabel("place field(s)");
-			IPersist[] elements = ElementFactory.createFields((ISupportFormElements)parent, (Object[])object, placeAsLabels, placeWithLabels, placeHorizontal,
-				fillText, fillName, fieldPositioner, location);
+			IPersist[] elements = ElementFactory.createFields((ISupportFormElements)parent, config, fieldPositioner, location);
 			if (parent instanceof Portal)
 			{
 				// if all elements are from 1 relation, correct the portal
