@@ -161,7 +161,7 @@ public class CalculationsComposite extends AbstractTableEditorComposite
 		tree.setMenu(menu);
 
 		removeButton = new Button(container, SWT.NONE);
-		removeButton.setText("Remove");
+		removeButton.setText("Remove selected");
 		removeButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
@@ -183,6 +183,7 @@ public class CalculationsComposite extends AbstractTableEditorComposite
 							ServoyLog.logError(ex);
 						}
 						treeViewer.remove(calculation);
+						treeViewer.getTree().forceFocus();
 						te.flagModified();
 					}
 				}
@@ -196,16 +197,34 @@ public class CalculationsComposite extends AbstractTableEditorComposite
 
 
 		openCalculationButton = new Button(container, SWT.NONE);
-		openCalculationButton.setText("Open calculation editor");
+		openCalculationButton.setText("Open selected calculation");
 		openCalculationButton.addSelectionListener(new SelectionAdapter()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
+				ScriptCalculation calculation = null;
 				TreeItem[] selection = treeViewer.getTree().getSelection();
-				if (selection != null && selection.length > 0 && selection[0].getData() instanceof ScriptCalculation)
+				if (selection != null && selection.length > 0)
 				{
-					ScriptCalculation calculation = (ScriptCalculation)selection[0].getData();
+					Object selectedData = null;
+					if (selection[0].getData() instanceof Solution && selection[0].getItemCount() > 0)
+					{
+						selectedData = selection[0].getItem(0).getData();
+					}
+					else
+					{
+						selectedData = selection[0].getData();
+					}
+
+					if (selectedData instanceof ScriptCalculation)
+					{
+						calculation = (ScriptCalculation)selectedData;
+					}
+				}
+
+				if (calculation != null)
+				{
 					openCalculationScriptEditor(calculation);
 				}
 				else
@@ -235,19 +254,27 @@ public class CalculationsComposite extends AbstractTableEditorComposite
 			{
 				treeViewer.getTree().setToolTipText("");
 				TreeItem[] selection = treeViewer.getTree().getSelection();
-				if (selection != null && selection.length > 0 && selection[0].getData() instanceof ScriptCalculation)
+				if (selection != null && selection.length > 0)
 				{
-					removeButton.setEnabled(true);
-					openCalculationButton.setEnabled(true);
-					if (ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject().length > 1)
+					if (selection[0].getData() instanceof ScriptCalculation)
 					{
-						moveItem.setEnabled(true);
-						duplicateItem.setEnabled(true);
+						removeButton.setEnabled(true);
+						openCalculationButton.setEnabled(true);
+						if (ServoyModelManager.getServoyModelManager().getServoyModel().getModulesOfActiveProject().length > 1)
+						{
+							moveItem.setEnabled(true);
+							duplicateItem.setEnabled(true);
+						}
+						ScriptCalculation calculation = (ScriptCalculation)selection[0].getData();
+						if (!calculation.getName().toLowerCase().equals(calculation.getName()))
+						{
+							treeViewer.getTree().setToolTipText("Using non lowercase names will make it hard to store a calculation later on.");
+						}
 					}
-					ScriptCalculation calculation = (ScriptCalculation)selection[0].getData();
-					if (!calculation.getName().toLowerCase().equals(calculation.getName()))
+					else if (selection[0].getData() instanceof Solution)
 					{
-						treeViewer.getTree().setToolTipText("Using non lowercase names will make it hard to store a calculation later on.");
+						removeButton.setEnabled(false);
+						openCalculationButton.setEnabled(selection[0].getItemCount() > 0 && (selection[0].getItem(0).getData() instanceof ScriptCalculation));
 					}
 				}
 				else
@@ -356,6 +383,7 @@ public class CalculationsComposite extends AbstractTableEditorComposite
 					treeViewer.refresh(solution);
 					treeViewer.editElement(s, 0);
 					removeButton.setEnabled(true);
+					openCalculationButton.setEnabled(true);
 					moveItem.setEnabled(true);
 					duplicateItem.setEnabled(true);
 					te.flagModified();
@@ -398,8 +426,7 @@ public class CalculationsComposite extends AbstractTableEditorComposite
 	{
 		if (tableEditor.isDirty())
 		{
-			MessageDialog.openError(getShell(), "Error", "You must save before editing the calculation code.");
-			return;
+			tableEditor.doSave(null);
 		}
 		EditorUtil.openScriptEditor(calculation, null, true);
 	}
