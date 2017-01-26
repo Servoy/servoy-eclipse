@@ -99,6 +99,7 @@ import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.websocket.impl.ClientService;
 import org.sablo.websocket.utils.PropertyUtils;
 
+import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.IActiveProjectListener;
 import com.servoy.eclipse.core.ISolutionMetaDataChangeListener;
@@ -154,6 +155,7 @@ import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
+import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
 import com.servoy.j2db.persistence.IFormElement;
@@ -167,6 +169,7 @@ import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.LiteralDataprovider;
 import com.servoy.j2db.persistence.NameComparator;
+import com.servoy.j2db.persistence.Part;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.PositionComparator;
@@ -3945,7 +3948,40 @@ public class TypeCreator extends TypeCache
 							formToUse = fs.getFlattenedForm(form);
 						}
 						IApplication application = com.servoy.eclipse.core.Activator.getDefault().getDesignClient();
-						createFormElementProperties(context, application, members, formToUse.getFlattenedObjects(NameComparator.INSTANCE));
+						List<IFormElement> elements = formToUse.getFlattenedObjects(NameComparator.INSTANCE);
+						if (formToUse.getView() == IFormConstants.VIEW_TYPE_TABLE || formToUse.getView() == IFormConstants.VIEW_TYPE_TABLE_LOCKED)
+						{
+							Iterator<IFormElement> it = elements.iterator();
+							Part bodyPart = null;
+							int startY = 0;
+							while (it.hasNext())
+							{
+								IFormElement element = it.next();
+								if (element instanceof GraphicalComponent && ((GraphicalComponent)element).getLabelFor() != null)
+								{
+									if (bodyPart == null)
+									{
+										Iterator<Part> parts = formToUse.getParts();
+										while (parts.hasNext())
+										{
+											Part p = parts.next();
+											if (p.getPartType() == Part.BODY)
+											{
+												bodyPart = p;
+												startY = formToUse.getPartStartYPos(bodyPart.getID());
+												break;
+											}
+										}
+									}
+									if (bodyPart != null && element.getLocation().y >= startY && element.getLocation().y < bodyPart.getHeight())
+									{
+										// label for label, do not add in code completion, does not exist at runtime
+										it.remove();
+									}
+								}
+							}
+						}
+						createFormElementProperties(context, application, members, elements);
 					}
 					catch (Exception e)
 					{
