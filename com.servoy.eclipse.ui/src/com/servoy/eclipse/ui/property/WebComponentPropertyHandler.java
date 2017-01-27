@@ -37,6 +37,7 @@ import com.servoy.j2db.persistence.IScriptProvider;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Media;
 import com.servoy.j2db.persistence.ValueList;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.property.ComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormComponentPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.FormPropertyType;
@@ -132,7 +133,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 		{
 			Debug.log("illegal value in bean, ignoring it: " + value);
 		}
-		return value;
+		return ((WebComponent)obj).getAttribute(getName()) != null ? ((WebComponent)obj).getAttribute(getName()): value;
 	}
 
 	@Override
@@ -184,6 +185,10 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 					convertedValue = null;
 				}
 			}
+		}
+		else
+		{
+			((WebComponent)obj).putAttribute(getName(), (String)value);
 		}
 
 		bean.setProperty(getName(), convertedValue);

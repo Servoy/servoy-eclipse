@@ -26,18 +26,18 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
-import org.sablo.specification.WebLayoutSpecification;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.j2db.FlattenedSolution;
-import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.RepositoryHelper;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.util.Utils;
 
@@ -87,12 +87,12 @@ public class PDPropertySource extends PersistPropertySource
 			IPropertyHandler propHandler = createPropertyHandlerFromSpec(desc, persistContext);
 			if (propHandler != null) props.add(propHandler);
 		}
-		if (persistContext.getPersist() instanceof LayoutContainer)
+		if (persistContext.getPersist() instanceof LayoutContainer || persistContext.getPersist() instanceof WebComponent)
 		{
 			IPropertyHandler attributesPropertyHandler = new WebComponentPropertyHandler(new PropertyDescription("attributes", null,
 				new PropertySetterDelegatePropertyController<Map<String, Object>, PersistPropertySource>(
 					new MapEntriesPropertyController("attributes", RepositoryHelper.getDisplayName("attributes", Form.class),
-						propertyDescription instanceof WebLayoutSpecification ? ((WebLayoutSpecification)propertyDescription).getAttributes() : null)
+						propertyDescription instanceof WebObjectSpecification ? ((WebObjectSpecification)propertyDescription).getAttributes() : null)
 					{ /*
 						 * (non-Javadoc)
 						 *
@@ -167,15 +167,23 @@ public class PDPropertySource extends PersistPropertySource
 						{
 							return (Map<String, Object>)((LayoutContainer)persist).getCustomProperty(new String[] { "attributes" }); // returns non-null map with copied/merged values, may be written to
 						}
+						else if (persist instanceof WebComponent)//TODO interface
+						{
+							return (Map<String, Object>)((WebComponent)persist).getCustomProperty(new String[] { "attributes" });
+						}
 						return null;
 					}
 
 					public void setProperty(PersistPropertySource propSource, Map<String, Object> value)
 					{
 						IPersist persist = propSource.getPersist();
-						if (persist instanceof AbstractBase)
+						if (persist instanceof LayoutContainer)//TODO interface
 						{
 							((LayoutContainer)persist).putCustomProperty(new String[] { "attributes" }, value);
+						}
+						else if (persist instanceof WebComponent)
+						{
+							((WebComponent)persist).putCustomProperty(new String[] { "attributes" }, value);
 						}
 					}
 				}));
