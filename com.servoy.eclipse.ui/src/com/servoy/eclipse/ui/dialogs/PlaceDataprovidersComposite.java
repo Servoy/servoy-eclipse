@@ -160,6 +160,11 @@ public class PlaceDataprovidersComposite extends Composite
 		if (mainPref == null)
 		{
 			mainPref = new JSONObject();
+			mainPref.put(TEXT_PROPERTY, "servoydefault-textfield");
+			mainPref.put(INTEGER_PROPERTY, "servoydefault-textfield");
+			mainPref.put(NUMBER_PROPERTY, "servoydefault-textfield");
+			mainPref.put(DATETIME_PROPERTY, "servoydefault-calendar");
+			mainPref.put(MEDIA_PROPERTY, "servoydefault-imagemedia");
 			preferences.put("_", mainPref);
 		}
 		currentSelection = mainPref;
@@ -179,7 +184,10 @@ public class PlaceDataprovidersComposite extends Composite
 
 		Label confLabel = new Label(this, SWT.NONE);
 		confLabel.setText("Configuration: ");
-		final CCombo configuration = new CCombo(this, SWT.BORDER);
+		Composite confAndDelete = new Composite(this, SWT.NONE);
+		confAndDelete.setLayout(new GridLayout(2, false));
+		confAndDelete.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+		final CCombo configuration = new CCombo(confAndDelete, SWT.BORDER);
 		configuration.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		configurationViewer = new ComboViewer(configuration);
 		configurationViewer.setLabelProvider(new ColumnLabelProvider()
@@ -193,7 +201,7 @@ public class PlaceDataprovidersComposite extends Composite
 		});
 		configurationViewer.setContentProvider(ArrayContentProvider.getInstance());
 		Set<String> keySet = preferences.keySet();
-		configurationViewer.setInput(keySet.toArray(new String[keySet.size()]));
+		configurationViewer.setInput(new ArrayList<>(keySet));
 		configurationViewer.addSelectionChangedListener(new ISelectionChangedListener()
 		{
 			@Override
@@ -234,6 +242,29 @@ public class PlaceDataprovidersComposite extends Composite
 			{
 				configurationSelection = configurationViewer.getCCombo().getText();
 				currentSelection = new JSONObject(currentSelection, JSONObject.getNames(currentSelection));
+			}
+		});
+		Button deleteConf = new Button(confAndDelete, SWT.PUSH);
+		deleteConf.setText("X");
+		deleteConf.setToolTipText("Removes the current selected configuration");
+		deleteConf.addSelectionListener(new SelectionListener()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				if (!"_".equals(configurationSelection) && configurationSelection != null)
+				{
+					preferences.remove(configurationSelection);
+					((List)configurationViewer.getInput()).remove(configurationSelection);
+					configurationViewer.setSelection(new StructuredSelection("_"));
+					configurationViewer.refresh();
+				}
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+				widgetSelected(e);
 			}
 		});
 
@@ -477,7 +508,7 @@ public class PlaceDataprovidersComposite extends Composite
 
 
 		String selection = settings.get(CONFIGURATION_SELECTION_SETTING);
-		if (selection != null)
+		if (selection != null && preferences.has(selection))
 		{
 			configurationViewer.setSelection(new StructuredSelection(selection));
 		}
