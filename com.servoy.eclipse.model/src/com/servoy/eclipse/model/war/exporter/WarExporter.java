@@ -428,7 +428,7 @@ public class WarExporter
 	{
 		String path = relativePath;
 		String minSuffix = ".min." + suffix;
-		if (!path.endsWith(minSuffix))
+		if (!path.endsWith(minSuffix) && path.contains("."))
 		{
 			//the minified version is preferred if it exists
 			File f = new File(tmpWarDir, path.substring(0, path.lastIndexOf("." + suffix)) + minSuffix);
@@ -452,7 +452,7 @@ public class WarExporter
 	{
 		if ((exportModel.getExportedComponents() == null && exportModel.getExportedServices() == null) ||
 			(exportModel.getExportedComponents().size() == componentsSpecProviderState.getWebObjectSpecifications().size() &&
-				exportModel.getExportedServices().size() == NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState).length))
+			exportModel.getExportedServices().size() == NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState).length))
 			return;
 
 		File exported = new File(tmpWarDir, "WEB-INF/exported_web_objects.properties");
