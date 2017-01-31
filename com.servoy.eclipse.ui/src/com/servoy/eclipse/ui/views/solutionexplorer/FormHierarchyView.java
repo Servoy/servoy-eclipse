@@ -258,7 +258,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 						@Override
 						public int compare(Pair<String, Image> o1, Pair<String, Image> o2)
 						{
-							if (o1 != null && o2 != null && o1.getLeft() != null)
+							if (o1 != null && o2 != null && o1.getLeft() != null && o2.getLeft() != null)
 							{
 								return o1.getLeft().compareTo(o2.getLeft());
 							}
