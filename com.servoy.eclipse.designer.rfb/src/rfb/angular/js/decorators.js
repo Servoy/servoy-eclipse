@@ -102,21 +102,24 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 						$scope.nodes[i].style.display = 'none';
 					}
 					if(!doNotScrollIntoView && $scope.nodes.length > 0) {
-						var target = $scope.nodes[0].node.get(0);
-					    var targetRect = target.getBoundingClientRect();
-						var contentFrameRectTop = $(".contentframe").get(0).getBoundingClientRect().top;
-						var toolbarBottom = $(".toolbar-area").get(0).getBoundingClientRect().bottom;
-						var statusBarHeight = $(".statusbar-area").get(0).getBoundingClientRect().height;
-						
-						var top = targetRect.top + contentFrameRectTop;
-						var bottom = targetRect.bottom + contentFrameRectTop;
-						
-					    if (bottom > window.innerHeight - statusBarHeight) {
-					        target.scrollIntoView(false);
-					    }
-					    if (top < toolbarBottom) {
-					        target.scrollIntoView();
-					    } 						
+						var ghost = $scope.getGhost($scope.nodes[0].node.attr("svy-id"));
+						if(!ghost || (ghost.type != EDITOR_CONSTANTS.GHOST_TYPE_FORM)) {
+							var target = $scope.nodes[0].node.get(0);
+							var targetRect = target.getBoundingClientRect();
+							var contentFrameRectTop = $(".contentframe").get(0).getBoundingClientRect().top;
+							var toolbarBottom = $(".toolbar-area").get(0).getBoundingClientRect().bottom;
+							var statusBarHeight = $(".statusbar-area").get(0).getBoundingClientRect().height;
+							
+							var top = targetRect.top + contentFrameRectTop;
+							var bottom = targetRect.bottom + contentFrameRectTop;
+							
+							if (bottom > window.innerHeight - statusBarHeight) {
+								target.scrollIntoView(false);
+							}
+							if (top < toolbarBottom) {
+								target.scrollIntoView();
+							}
+						}
 					}
 				});
 				}
