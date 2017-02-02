@@ -19,42 +19,29 @@ package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.swt.widgets.Display;
-import org.json.JSONObject;
-import org.sablo.websocket.IServerService;
+import org.eclipse.jface.viewers.ISelection;
 
-import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.ContentOutlineCommand;
-import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.designer.editor.commands.SaveAsTemplateAction;
 
 /**
- * @author gganea@servoy.com
+ * @author gboros
  *
  */
-public class OpenScriptHandler extends ContentOutlineCommand implements IServerService
+public class SaveAsTemplateCommand extends ContentOutlineCommand
 {
-	private final BaseVisualFormEditor editorPart;
+	private final SaveAsTemplateAction saveAsTemplateAction;
 
-	public OpenScriptHandler()
+	public SaveAsTemplateCommand()
 	{
-		this.editorPart = getEditorPart();
-	}
-
-	public OpenScriptHandler(BaseVisualFormEditor editorPart)
-	{
-		this.editorPart = editorPart;
-	}
-
-	public Object executeMethod(String methodName, JSONObject args)
-	{
-		Display.getDefault().asyncExec(new Runnable()
+		saveAsTemplateAction = new SaveAsTemplateAction(getEditorPart())
 		{
-			public void run()
+			@Override
+			protected ISelection getSelection()
 			{
-				EditorUtil.openScriptEditor(editorPart.getForm(), null, true);
+				return getViewSelection();
 			}
-		});
-		return null;
+		};
 	}
 
 	/*
@@ -65,7 +52,7 @@ public class OpenScriptHandler extends ContentOutlineCommand implements IServerS
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException
 	{
-		EditorUtil.openScriptEditor(editorPart.getForm(), null, true);
+		saveAsTemplateAction.run();
 		return null;
 	}
 }

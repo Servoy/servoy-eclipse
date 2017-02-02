@@ -30,7 +30,6 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.designer.actions.AbstractEditorActionDelegateHandler;
 import com.servoy.eclipse.designer.actions.ZOrderAction;
 import com.servoy.eclipse.designer.actions.ZOrderAction.OrderableElement;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
@@ -44,7 +43,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
  * @author lvostinar
  *
  */
-public class ZOrderCommand extends AbstractEditorActionDelegateHandler implements IServerService
+public class ZOrderCommand extends AbstractEditorAndOutlineActionDelegateHandler implements IServerService
 {
 
 	private final ISelectionProvider selectionProvider;

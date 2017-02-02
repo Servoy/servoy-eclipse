@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.IHandler;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -66,12 +67,23 @@ public abstract class ContentOutlineCommand extends AbstractHandler implements I
 
 	protected List<Object> getSelectionList()
 	{
+		ISelection viewSelection = getViewSelection();
+		if (viewSelection != null)
+		{
+			return ((IStructuredSelection)viewSelection).toList();
+		}
+		return new ArrayList<Object>();
+	}
+
+	protected ISelection getViewSelection()
+	{
+		ISelection selection = null;
 		ContentOutline contentOutline = DesignerUtil.getContentOutline();
 		if (contentOutline != null)
 		{
-			return ((IStructuredSelection)contentOutline.getSelection()).toList();
+			selection = contentOutline.getSelection();
 		}
-		return new ArrayList<Object>();
+		return selection;
 	}
 
 	protected BaseVisualFormEditor getEditorPart()

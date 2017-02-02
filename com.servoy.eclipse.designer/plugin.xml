@@ -888,7 +888,17 @@
                name="Custom Type Property"
                optional="true">
          </commandParameter>
+      </command>      
+      <command
+            defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.OpenScriptHandler"
+            id="com.servoy.eclipse.designer.rfb.openscripteditor"
+            name="OpenScriptEditor">
       </command>
+      <command
+            defaultHandler="com.servoy.eclipse.designer.editor.rfb.actions.handlers.SaveAsTemplateCommand"
+            id="com.servoy.eclipse.designer.rfb.saveastemplate"
+            name="SaveAsTemplate">
+      </command>            
       <command
             defaultHandler="com.servoy.eclipse.designer.editor.commands.DeleteCommand"
             id="com.servoy.eclipse.designer.rfb.delete"
@@ -897,12 +907,12 @@
       <command
             defaultHandler="com.servoy.eclipse.designer.editor.commands.MoveUpCommand"
             id="com.servoy.eclipse.designer.rfb.moveup"
-            name="Delete">
+            name="MoveUp">
       </command>
 	  <command
             defaultHandler="com.servoy.eclipse.designer.editor.commands.MoveDownCommand"
             id="com.servoy.eclipse.designer.rfb.movedown"
-            name="Delete">
+            name="MoveDown">
       </command>
    </extension>
       <extension
@@ -1238,6 +1248,145 @@
                allPopups="false"
                locationURI="popup:com.servoy.eclipse.designer.rfb.popup">
             <command
+                  commandId="com.servoy.eclipse.designer.rfb.settabseq"
+                  label="Set Tab Sequence"
+                  style="push">
+            </command>
+            <menu
+                  label="Add">
+               <dynamic
+                     class="com.servoy.eclipse.designer.editor.rfb.menu.AddContainerContributionItem"
+                     id="com.servoy.eclipse.designer.rfb.MyContributionItem">
+               </dynamic>
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeMenuSelection">
+                     <and>
+                        <iterate
+                              operator="and">
+                           <test
+                                 property="com.servoy.eclipse.designer.editor.rfb.iscontainer">
+                           </test>
+                        </iterate>
+                        <count
+                              value="1">
+                        </count>
+                     </and>
+                  </with>
+               </visibleWhen>
+            </menu>
+            <menu
+                  label="Sizing">
+               <visibleWhen
+                     checkEnabled="false">
+	               <test
+	                     property="com.servoy.eclipse.designer.editor.rfb.isabsoluteform">
+	               </test>  
+               </visibleWhen>                  
+               <command
+                     commandId="com.servoy.eclipse.designer.rfb.samewidth"
+                     label="Same width"
+                     style="push">
+               </command>
+               <command
+                     commandId="com.servoy.eclipse.designer.rfb.sameheight"
+                     label="Same height"
+                     style="push">
+               </command>
+            </menu>
+            <menu
+                  label="Anchoring">
+               <visibleWhen
+                     checkEnabled="false">
+	               <test
+	                     property="com.servoy.eclipse.designer.editor.rfb.isabsoluteform">
+	               </test>  
+               </visibleWhen>                  
+               <command
+                     commandId="com.servoy.eclipse.designer.rfb.anchorTop"
+                     label="Top"
+                     style="push">
+               </command>
+               <command
+                     commandId="com.servoy.eclipse.designer.rfb.anchorRight"
+                     label="Right"
+                     style="push">
+               </command>
+               <command
+                     commandId="com.servoy.eclipse.designer.rfb.anchorBottom"
+                     label="Bottom"
+                     style="push">
+               </command>
+               <command
+                     commandId="com.servoy.eclipse.designer.rfb.anchorLeft"
+                     label="Left"
+                     style="push">
+               </command>
+            </menu>
+            <menu
+                  label="Arrange">
+               <visibleWhen
+                     checkEnabled="false">
+	               <test
+	                     property="com.servoy.eclipse.designer.editor.rfb.isabsoluteform">
+	               </test>  
+               </visibleWhen>                  
+               <command
+                     commandId="com.servoy.eclipse.designer.rfb.bringtofrontonestep"
+                     label="Bring forward"
+                     style="push">
+               </command>
+               <command
+                     commandId="com.servoy.eclipse.designer.rfb.sendtobackonestep"
+                     label="Send backward"
+                     style="push">
+               </command>
+               <command
+                     commandId="com.servoy.eclipse.designer.rfb.bringtofront"
+                     label="Bring to front"
+                     style="push">
+               </command>
+               <command
+                     commandId="com.servoy.eclipse.designer.rfb.sendtoback"
+                     label="Send to back"
+                     style="push">
+               </command>
+            </menu>
+            <menu
+                  label="Grouping">
+               <visibleWhen
+                     checkEnabled="false">
+	               <test
+	                     property="com.servoy.eclipse.designer.editor.rfb.isabsoluteform">
+	               </test>  
+               </visibleWhen>                  
+               <command
+                     commandId="com.servoy.eclipse.designer.rfb.group"
+                     label="Group"
+                     style="push">
+               </command>
+               <command
+                     commandId="com.servoy.eclipse.designer.rfb.ungroup"
+                     label="Ungroup"
+                     style="push">
+               </command>
+            </menu>
+            <separator
+                  name="com.servoy.eclipse.designer.separator1"
+                  visible="true">
+            </separator>
+            <command
+                  commandId="com.servoy.eclipse.designer.rfb.saveastemplate"
+                  label="Save as template ..."
+                  style="push">
+            </command>               
+            <command
+                  commandId="com.servoy.eclipse.designer.rfb.openscripteditor"
+                  label="Open in Script Editor"
+                  style="push">
+            </command>
+            <command
                   commandId="com.servoy.eclipse.designer.rfb.delete"
                   label="Delete"
                   style="push">
@@ -1255,30 +1404,6 @@
 		         </iterate>
                </visibleWhen>
             </command>
-            <menu
-                  label="Add">
-               <dynamic
-                     class="com.servoy.eclipse.designer.editor.rfb.menu.AddContainerContributionItem"
-                     id="com.servoy.eclipse.designer.rfb.MyContributionItem">
-               </dynamic>
-               <visibleWhen
-                     checkEnabled="false">
-                  <with  
-                        variable="activeMenuSelection">  
-                     <and>
-                        <iterate
-                              operator="and">
-                           <test
-                                 property="com.servoy.eclipse.designer.editor.rfb.iscontainer">
-                           </test>
-                        </iterate>
-                        <count
-                              value="1">
-                        </count>
-                     </and>  
-                  </with>  
-               </visibleWhen>
-            </menu>
             <command
                   commandId="com.servoy.eclipse.designer.rfb.moveup"
                   label="Move Up"
@@ -1325,6 +1450,9 @@
             </command>
          </menuContribution>
       </extension>
+      
+
+      
       <extension
             point="org.eclipse.core.expressions.propertyTesters">
          <propertyTester
@@ -1345,5 +1473,16 @@
                properties="ismovable"
                type="java.lang.Object">
          </propertyTester>
-      </extension>      
+      </extension>
+      
+	  <extension
+            point="org.eclipse.core.expressions.propertyTesters">
+         <propertyTester
+               class="com.servoy.eclipse.designer.editor.rfb.menu.IsAbsoluteFormPropertyTester"
+               id="com.servoy.eclipse.designer.rfb.isabsoluteform"
+               namespace="com.servoy.eclipse.designer.editor.rfb"
+               properties="isabsoluteform"
+               type="java.lang.Object">
+         </propertyTester>
+      </extension> 
 </plugin>

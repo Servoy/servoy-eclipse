@@ -23,7 +23,6 @@ import java.util.List;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CompoundCommand;
 
-import com.servoy.eclipse.designer.actions.AbstractEditorActionDelegateHandler;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -33,7 +32,7 @@ import com.servoy.j2db.persistence.StaticContentSpecLoader;
  * @author lvostinar
  *
  */
-public class SameSizeCommand extends AbstractEditorActionDelegateHandler
+public class SameSizeCommand extends AbstractEditorAndOutlineActionDelegateHandler
 {
 
 	private final boolean sameWidth;

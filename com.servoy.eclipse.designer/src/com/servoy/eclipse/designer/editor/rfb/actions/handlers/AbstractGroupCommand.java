@@ -30,7 +30,6 @@ import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
 
 import com.servoy.eclipse.core.ServoyModelManager;
-import com.servoy.eclipse.designer.actions.AbstractEditorActionDelegateHandler;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
@@ -43,7 +42,7 @@ import com.servoy.j2db.util.UUID;
 /**
  * @author emera
  */
-public abstract class AbstractGroupCommand extends AbstractEditorActionDelegateHandler implements IServerService
+public abstract class AbstractGroupCommand extends AbstractEditorAndOutlineActionDelegateHandler implements IServerService
 {
 
 	public static class GroupCommand extends AbstractGroupCommand implements IServerService
@@ -160,7 +159,7 @@ public abstract class AbstractGroupCommand extends AbstractEditorActionDelegateH
 			}
 		}
 
-		if (selection.size() > 0)
+		if (selection.size() > 1 || selectedGroups.size() > 0)
 		{
 			CompoundCommand cc = new CompoundCommand();
 
