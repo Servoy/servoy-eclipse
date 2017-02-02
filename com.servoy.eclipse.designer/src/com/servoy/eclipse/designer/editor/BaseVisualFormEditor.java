@@ -40,6 +40,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IShowEditorInput;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.contexts.IContextActivation;
@@ -741,6 +742,10 @@ public abstract class BaseVisualFormEditor extends MultiPageEditorPart
 			// save last selected as default for next time
 			((PersistEditorInput)getEditorInput()).setDesignPagetype(designPagetype);
 		}
+
+		IViewPart contentOutline = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView("org.eclipse.ui.views.ContentOutline");
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().hideView(contentOutline);
+		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("org.eclipse.ui.views.ContentOutline");
 	}
 
 	protected void createDesignPage(DesignPagetype designPagetype) throws PartInitException
