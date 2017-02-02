@@ -176,6 +176,14 @@ public class ElementUtil
 			{
 				return "radio_on.gif";
 			}
+			if ("listbox".equals(lookupName))
+			{
+				return "list.gif";
+			}
+			if ("spinner".equals(lookupName))
+			{
+				return "spinner.png";
+			}
 		}
 		if (persist instanceof Form)
 		{
