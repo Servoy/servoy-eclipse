@@ -1295,7 +1295,7 @@
                      style="push">
                </command>
             </menu>
-            <menu
+            <!-- menu
                   label="Anchoring">
                <visibleWhen
                      checkEnabled="false">
@@ -1323,7 +1323,7 @@
                      label="Left"
                      style="push">
                </command>
-            </menu>
+            </menu -->
             <menu
                   label="Arrange">
                <visibleWhen
