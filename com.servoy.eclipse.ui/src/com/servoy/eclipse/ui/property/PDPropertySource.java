@@ -18,6 +18,7 @@
 package com.servoy.eclipse.ui.property;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +36,7 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.ISupportAttributes;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.WebComponent;
@@ -90,7 +92,7 @@ public class PDPropertySource extends PersistPropertySource
 		if (persistContext.getPersist() instanceof LayoutContainer || persistContext.getPersist() instanceof WebComponent)
 		{
 			IPropertyHandler attributesPropertyHandler = new WebComponentPropertyHandler(new PropertyDescription("attributes", null,
-				new PropertySetterDelegatePropertyController<Map<String, Object>, PersistPropertySource>(
+				new PropertySetterDelegatePropertyController<Map<String, String>, PersistPropertySource>(
 					new MapEntriesPropertyController("attributes", RepositoryHelper.getDisplayName("attributes", Form.class),
 						propertyDescription instanceof WebObjectSpecification ? ((WebObjectSpecification)propertyDescription).getAttributes() : null)
 					{ /*
@@ -160,30 +162,22 @@ public class PDPropertySource extends PersistPropertySource
 				{
 					@SuppressWarnings("unchecked")
 					@Override
-					public Map<String, Object> getProperty(PersistPropertySource propSource)
+					public Map<String, String> getProperty(PersistPropertySource propSource)
 					{
 						IPersist persist = propSource.getPersist();
-						if (persist instanceof LayoutContainer)
+						if (persist instanceof ISupportAttributes)
 						{
-							return (Map<String, Object>)((LayoutContainer)persist).getCustomProperty(new String[] { "attributes" }); // returns non-null map with copied/merged values, may be written to
-						}
-						else if (persist instanceof WebComponent)//TODO interface
-						{
-							return (Map<String, Object>)((WebComponent)persist).getCustomProperty(new String[] { "attributes" });
+							return new HashMap<String, String>(((ISupportAttributes)persist).getAttributes()); // returns non-null map with copied/merged values, may be written to
 						}
 						return null;
 					}
 
-					public void setProperty(PersistPropertySource propSource, Map<String, Object> value)
+					public void setProperty(PersistPropertySource propSource, Map<String, String> value)
 					{
 						IPersist persist = propSource.getPersist();
-						if (persist instanceof LayoutContainer)//TODO interface
+						if (persist instanceof ISupportAttributes)
 						{
-							((LayoutContainer)persist).putCustomProperty(new String[] { "attributes" }, value);
-						}
-						else if (persist instanceof WebComponent)
-						{
-							((WebComponent)persist).putCustomProperty(new String[] { "attributes" }, value);
+							((ISupportAttributes)persist).putAttributes(value);
 						}
 					}
 				}));

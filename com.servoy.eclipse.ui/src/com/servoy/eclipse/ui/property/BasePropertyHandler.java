@@ -48,13 +48,16 @@ import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IContentSpecConstants;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.scripting.annotations.AnnotationManagerReflection;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 
@@ -254,6 +257,13 @@ public class BasePropertyHandler implements IPropertyHandler
 				return false;
 			}
 
+			if (IContentSpecConstants.PROPERTY_ATTRIBUTES.equals(name))
+			{
+				if (!(obj instanceof IFormElement)) return false; 
+				Form form = (Form)((IFormElement)obj).getAncestor(IRepository.FORMS);
+				int type = form.getSolution().getSolutionType();
+				return (obj instanceof WebComponent || type == SolutionMetaData.NG_CLIENT_ONLY);
+			}
 			if (!RepositoryHelper.shouldShow(name, element, persist.getClass(), dispType))
 			{
 				return false;

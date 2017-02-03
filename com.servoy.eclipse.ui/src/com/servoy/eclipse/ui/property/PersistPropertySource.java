@@ -551,9 +551,14 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		{
 			return new IPropertyHandler[] { new PseudoPropertyHandler("loginSolutionName") };
 		}
-		if (Form.class == clazz || IFormElement.class.isAssignableFrom(clazz))
+		if (Form.class == clazz)
 		{
 			return new IPropertyHandler[] { new PseudoPropertyHandler("designTimeProperties") };
+		}
+		if (IFormElement.class.isAssignableFrom(clazz))
+		{
+			return new IPropertyHandler[] { new PseudoPropertyHandler("designTimeProperties"), new PseudoPropertyHandler(
+				IContentSpecConstants.PROPERTY_ATTRIBUTES) };
 		}
 		return null;
 	}

@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.ui.property;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -24,10 +25,13 @@ import org.sablo.specification.PropertyDescription;
 
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractBase;
+import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IContentSpecConstants;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryHelper;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.persistence.StaticContentSpecLoader;
 
 /**
  * Handler for some known pseudo proeties/
@@ -64,6 +68,32 @@ public class PseudoPropertyHandler implements IPropertyHandler
 				if (persist instanceof AbstractBase)
 				{
 					((AbstractBase)persist).setUnmergedCustomDesignTimeProperties(value);
+				}
+			}
+		});
+
+	public static final PropertyDescription ATTRIBUTES_PROPERTY_DESCRIPTION = new PropertyDescription(StaticContentSpecLoader.PROPERTY_ATTRIBUTES, null,
+		new PropertySetterDelegatePropertyController<Map<String, String>, PersistPropertySource>(
+			new MapEntriesPropertyController(StaticContentSpecLoader.PROPERTY_ATTRIBUTES, StaticContentSpecLoader.PROPERTY_ATTRIBUTES, null),
+			StaticContentSpecLoader.PROPERTY_ATTRIBUTES)
+		{
+			@Override
+			public Map<String, String> getProperty(PersistPropertySource propSource)
+			{
+				IPersist persist = propSource.getPersist();
+				if (persist instanceof BaseComponent)
+				{
+					return new HashMap<String, String>(((BaseComponent)persist).getAttributes());
+				}
+				return null;
+			}
+
+			public void setProperty(PersistPropertySource propSource, Map<String, String> value)
+			{
+				IPersist persist = propSource.getPersist();
+				if (persist instanceof BaseComponent)
+				{
+					((BaseComponent)persist).putAttributes(value);
 				}
 			}
 		});
@@ -105,6 +135,11 @@ public class PseudoPropertyHandler implements IPropertyHandler
 		if (name.equals("designTimeProperties"))
 		{
 			return DESIGN_PROPERTIES_DESCRIPTION;
+		}
+
+		if (name.equals(IContentSpecConstants.PROPERTY_ATTRIBUTES))
+		{
+			return ATTRIBUTES_PROPERTY_DESCRIPTION;
 		}
 
 		return null;
