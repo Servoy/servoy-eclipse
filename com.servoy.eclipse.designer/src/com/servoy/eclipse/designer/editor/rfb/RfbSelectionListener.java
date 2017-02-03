@@ -30,6 +30,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.util.Utils;
@@ -129,6 +130,18 @@ public class RfbSelectionListener implements ISelectionListener
 							uuids.add(persist.getUUID().toString());
 							forCurrentForm = true;
 						}
+					}
+				}
+			}
+			else
+			{
+				FormElementGroup formElementGroup = Platform.getAdapterManager().getAdapter(sel, FormElementGroup.class);
+				if (formElementGroup != null)
+				{
+					if (form.getID() == formElementGroup.getParent().getID())
+					{
+						uuids.add(formElementGroup.getGroupID());
+						forCurrentForm = true;
 					}
 				}
 			}
