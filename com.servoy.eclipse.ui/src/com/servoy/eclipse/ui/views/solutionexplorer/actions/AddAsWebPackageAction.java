@@ -17,6 +17,8 @@
 
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import java.io.File;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -25,7 +27,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
+import org.sablo.specification.Package.DirPackageReader;
 import org.sablo.specification.Package.IPackageReader;
+import org.sablo.specification.WebComponentSpecProvider;
 
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.Activator;
@@ -89,6 +93,24 @@ public class AddAsWebPackageAction extends AddAsSolutionReference
 		{
 			setText("Add reference to this Package Project");
 			setToolTipText("Adds a Package Project reference to the active solution or it's modules.");
+		}
+		if (isEnabled() && selectedProjects.size() > 0)
+		{
+			IPackageReader[] readers = WebComponentSpecProvider.getSpecProviderState().getAllPackageReaders();
+			for (IPackageReader pr : readers)
+			{
+				String packageName = pr.getPackageName();
+				for (String projectName : selectedProjects)
+				{
+					IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+					DirPackageReader reader = new DirPackageReader(new File(project.getLocationURI()));
+					if (packageName.equals(reader.getPackageName()))
+					{
+						setEnabled(false);
+						return;
+					}
+				}
+			}
 		}
 	}
 
