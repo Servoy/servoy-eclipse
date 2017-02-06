@@ -152,8 +152,11 @@ public class GhostHandler implements IServerService
 
 										Object configObject;
 										if (p.getIndex() >= 0)
-											configObject = ((WebObjectImpl)((WebComponent)bean).getImplementation()).getPropertyDescription().getProperty(
-												p.getJsonKey()).getConfig();
+										{
+											PropertyDescription pd = ((WebObjectImpl)((WebComponent)bean).getImplementation()).getPropertyDescription();
+											if (pd != null) configObject = pd.getProperty(p.getJsonKey()).getConfig();
+											else configObject = null;
+										}
 										else configObject = p.getPropertyDescription().getConfig();
 
 										if (isDroppable(p.getPropertyDescription(), configObject))
