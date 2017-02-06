@@ -1224,16 +1224,30 @@ public class SolutionExplorerTreeContentProvider
 				{
 					if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
 					{
-						String packageName = iProject.getName();
-						IPackageReader packageType = provider.getPackageReader(packageName);
+						IPackageReader packageType = null;
+						IPackageReader[] allPackageReaders = provider.getAllPackageReaders();
+						File projectDir = new File(iProject.getLocationURI());
+						for (IPackageReader pr : allPackageReaders)
+						{
+							if (projectDir.equals(pr.getResource()))
+							{
+								packageType = pr;
+								break;
+							}
+						}
 						if (packageType == null)
 						{
-							// TODO this is a partial fix for the problem that the project is not the package name
-							// see also the method resolveWebPackageDisplayName above.
-							if (iProject.getFile(new Path("META-INF/MANIFEST.MF")).exists())
+							String packageName = iProject.getName();
+							packageType = provider.getPackageReader(packageName);
+							if (packageType == null)
 							{
-								packageName = new ContainerPackageReader(new File(iProject.getLocationURI()), iProject).getPackageName();
-								packageType = provider.getPackageReader(packageName);
+								// TODO this is a partial fix for the problem that the project is not the package name
+								// see also the method resolveWebPackageDisplayName above.
+								if (iProject.getFile(new Path("META-INF/MANIFEST.MF")).exists())
+								{
+									packageName = new ContainerPackageReader(new File(iProject.getLocationURI()), iProject).getPackageName();
+									packageType = provider.getPackageReader(packageName);
+								}
 							}
 						}
 						if (packageType == null) continue;
