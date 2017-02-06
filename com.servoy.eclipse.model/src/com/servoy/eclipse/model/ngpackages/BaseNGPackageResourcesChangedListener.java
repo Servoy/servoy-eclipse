@@ -187,7 +187,7 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 
 		// keys are projects that contain or reference a modified ng package, values is a pair of removed packages and added packages (as references or binaries of that project)
 		// project can be a solution/module project that either references ng package projects or contains ng package binary/zip, can be a resources project
-		private final Map<String, Pair<Set<String>, Set<IPackageReader>>> ngPackageChangesPerReferencingProject = new HashMap<String, Pair<Set<String>, Set<IPackageReader>>>();
+		private final Map<String, Pair<Set<IPackageReader>, Set<IPackageReader>>> ngPackageChangesPerReferencingProject = new HashMap<>();
 		boolean[] ngPackageListChanged = null;
 
 		private final IResourceChangeEvent event;
@@ -202,7 +202,7 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 			return ngPackageChangesPerReferencingProject.size() > 0 || ngPackageListChanged != null;
 		}
 
-		public Map<String, Pair<Set<String>, Set<IPackageReader>>> getNgPackageChangesPerReferencingProject()
+		public Map<String, Pair<Set<IPackageReader>, Set<IPackageReader>>> getNgPackageChangesPerReferencingProject()
 		{
 			return ngPackageChangesPerReferencingProject;
 		}
@@ -216,20 +216,20 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 		{
 			if (!ngPackageChangesPerReferencingProject.containsKey(projectname))
 			{
-				Set<String> removed = new HashSet<String>();
-				Set<IPackageReader> added = new HashSet<IPackageReader>();
-				ngPackageChangesPerReferencingProject.put(projectname, new Pair<Set<String>, Set<IPackageReader>>(removed, added));
+				Set<IPackageReader> removed = new HashSet<>();
+				Set<IPackageReader> added = new HashSet<>();
+				ngPackageChangesPerReferencingProject.put(projectname, new Pair<Set<IPackageReader>, Set<IPackageReader>>(removed, added));
 			}
 			return ngPackageChangesPerReferencingProject.get(projectname).getRight();
 		}
 
-		private Set<String> getRemovedPackageReaders(String projectname)
+		private Set<IPackageReader> getRemovedPackageReaders(String projectname)
 		{
 			if (!ngPackageChangesPerReferencingProject.containsKey(projectname))
 			{
-				Set<String> removed = new HashSet<String>();
+				Set<IPackageReader> removed = new HashSet<IPackageReader>();
 				Set<IPackageReader> added = new HashSet<IPackageReader>();
-				ngPackageChangesPerReferencingProject.put(projectname, new Pair<Set<String>, Set<IPackageReader>>(removed, added));
+				ngPackageChangesPerReferencingProject.put(projectname, new Pair<Set<IPackageReader>, Set<IPackageReader>>(removed, added));
 			}
 			return ngPackageChangesPerReferencingProject.get(projectname).getLeft();
 		}
@@ -264,9 +264,9 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 					// web package binary
 					if ((resourceDelta.getKind() & IResourceDelta.CHANGED) != 0)
 					{
-						String webPackageNameForFile = ResourceProvider.getComponentPackageNameForFile(new File(resource.getLocationURI()));
+						IPackageReader webPackageNameForFile = ResourceProvider.getComponentPackageReader(new File(resource.getLocationURI()));
 						if (webPackageNameForFile == null)
-							webPackageNameForFile = ResourceProvider.getServicePackageNameForFile(new File(resource.getLocationURI()));
+							webPackageNameForFile = ResourceProvider.getServicePackageReader(new File(resource.getLocationURI()));
 						IPackageReader reader = baseNGPackageManager.readPackageResource(resource);
 						if (reader != null) getAddedPackageReaders(resource.getProject().getName()).add(reader);
 						if (webPackageNameForFile != null) getRemovedPackageReaders(resource.getProject().getName()).add(webPackageNameForFile);
@@ -275,9 +275,9 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 					{
 						if (resource.getLocationURI() != null)
 						{
-							String componentPackageNameForFile = ResourceProvider.getComponentPackageNameForFile(new File(resource.getLocationURI()));
+							IPackageReader componentPackageNameForFile = ResourceProvider.getComponentPackageReader(new File(resource.getLocationURI()));
 							if (componentPackageNameForFile == null)
-								componentPackageNameForFile = ResourceProvider.getServicePackageNameForFile(new File(resource.getLocationURI()));
+								componentPackageNameForFile = ResourceProvider.getServicePackageReader(new File(resource.getLocationURI()));
 							if (componentPackageNameForFile != null) getRemovedPackageReaders(resource.getProject().getName()).add(componentPackageNameForFile);
 						} // otherwise it's probably a post-delete event which was already handled by the pre-delete step handled before; so do nothing here
 					}
@@ -297,9 +297,9 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 					IProject[] referencingProjects = resource.getProject().getReferencingProjects();
 					if (referencingProjects.length > 0)
 					{
-						String webPackageNameForFile = ResourceProvider.getComponentPackageNameForFile(new File(resource.getProject().getLocationURI()));
+						IPackageReader webPackageNameForFile = ResourceProvider.getComponentPackageReader(new File(resource.getProject().getLocationURI()));
 						if (webPackageNameForFile == null)
-							webPackageNameForFile = ResourceProvider.getServicePackageNameForFile(new File(resource.getProject().getLocationURI()));
+							webPackageNameForFile = ResourceProvider.getServicePackageReader(new File(resource.getProject().getLocationURI()));
 
 						List<ServoyProject> allActiveSolutions = Arrays.asList(ServoyModelFinder.getServoyModel().getModulesOfActiveProject());
 
@@ -341,9 +341,8 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 						if (parent != null)
 						{
 							// then parent is either componentsFolderInResources or servicesFolderInResources; so r is the root folder of what should be a the web package
-							String webPackageNameForFile = ResourceProvider.getComponentPackageNameForFile(new File(r.getLocationURI()));
-							if (webPackageNameForFile == null)
-								webPackageNameForFile = ResourceProvider.getServicePackageNameForFile(new File(r.getLocationURI()));
+							IPackageReader webPackageNameForFile = ResourceProvider.getComponentPackageReader(new File(r.getLocationURI()));
+							if (webPackageNameForFile == null) webPackageNameForFile = ResourceProvider.getServicePackageReader(new File(r.getLocationURI()));
 
 							IPackageReader reader = baseNGPackageManager.readPackageResource(r);
 							if (reader != null) getAddedPackageReaders(resource.getProject().getName()).add(reader);
@@ -415,8 +414,8 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 				for (String removedProject : oldUsedPackageList)
 				{
 					File projectDir = new File(changedProject.getWorkspace().getRoot().getProject(removedProject).getLocationURI());
-					String webPackageNameForFile = ResourceProvider.getComponentPackageNameForFile(projectDir);
-					if (webPackageNameForFile == null) webPackageNameForFile = ResourceProvider.getServicePackageNameForFile(projectDir);
+					IPackageReader webPackageNameForFile = ResourceProvider.getComponentPackageReader(projectDir);
+					if (webPackageNameForFile == null) webPackageNameForFile = ResourceProvider.getServicePackageReader(projectDir);
 
 					if (webPackageNameForFile != null) getRemovedPackageReaders(changedProject.getName()).add(webPackageNameForFile);
 				}
@@ -459,13 +458,13 @@ public class BaseNGPackageResourcesChangedListener implements IResourceChangeLis
 						{
 							// remove it from all referencing active projects; but we need to know the package name that it had and the projects to add to the removed map...
 							File projectDir = new File(changedProject.getLocationURI());
-							String webPackageNameForFile = ResourceProvider.getComponentPackageNameForFile(projectDir);
-							if (webPackageNameForFile == null) webPackageNameForFile = ResourceProvider.getServicePackageNameForFile(projectDir);
+							IPackageReader webPackageNameForFile = ResourceProvider.getComponentPackageReader(projectDir);
+							if (webPackageNameForFile == null) webPackageNameForFile = ResourceProvider.getServicePackageReader(projectDir);
 							if (webPackageNameForFile != null)
 							{
 								// we have the package name; now we need the referencing project(s) as well
-								List<String> referencingProjectsThatLoadedThis = baseNGPackageManager.getReferencingProjectsThatLoaded(webPackageNameForFile,
-									projectDir);
+								List<String> referencingProjectsThatLoadedThis = baseNGPackageManager.getReferencingProjectsThatLoaded(
+									webPackageNameForFile.getPackageName(), projectDir);
 								for (String x : referencingProjectsThatLoadedThis)
 								{
 									getRemovedPackageReaders(x).add(webPackageNameForFile);
