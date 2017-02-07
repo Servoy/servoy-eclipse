@@ -1,5 +1,6 @@
 package com.servoy.eclipse.ui.wizards;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,11 +33,15 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+import org.sablo.specification.Package.IPackageReader;
+import org.sablo.specification.WebComponentSpecProvider;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.ngpackages.NGPackageManager;
+import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager.ContainerPackageReader;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.Messages;
 import com.servoy.eclipse.ui.dialogs.FilteredTreeViewer;
@@ -214,12 +219,37 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 					return false;
 				}
 				IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-				for (IProject iProject : projects)
+				for (IProject p : projects)
 				{
-					if (iProject.getName().toLowerCase().equals(text.toLowerCase()))
+					try
 					{
-						setErrorMessage("Project " + text + " already exists in workspace.");
-						result = false;
+						if (text.equals(p.getName()))
+						{
+							setErrorMessage("Project " + text + " already exists in workspace.");
+							return false;
+						}
+						if (p.isAccessible() && p.isOpen() && p.hasNature(ServoyNGPackageProject.NATURE_ID))
+						{
+							if (text.equals(new ContainerPackageReader(new File(p.getLocationURI()), p)))
+							{
+								setErrorMessage("Package project with packagename " + text + " already exists in workspace.");
+								return false;
+							}
+						}
+					}
+					catch (CoreException e)
+					{
+					}
+				}
+				IPackageReader[] readers = WebComponentSpecProvider.getSpecProviderState().getAllPackageReaders();
+				for (IPackageReader pr : readers)
+				{
+					String packageName = pr.getPackageName();
+
+					if (packageName.equals(text))
+					{
+						setErrorMessage("There is already a package with name  " + text + " loaded in the workspace.");
+						return false;
 					}
 				}
 			}

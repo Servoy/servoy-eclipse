@@ -588,7 +588,7 @@ public abstract class BaseNGPackageManager
 			res = res.getParent();
 		}
 		final IResource r = res;
-		scheduleSystemJob(new Job("Adding spec error marker...")
+		scheduleSystemJob(new Job("Removing spec error marker...")
 		{
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
