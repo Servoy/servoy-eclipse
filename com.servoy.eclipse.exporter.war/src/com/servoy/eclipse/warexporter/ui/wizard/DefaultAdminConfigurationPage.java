@@ -21,6 +21,7 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -42,6 +43,7 @@ public class DefaultAdminConfigurationPage extends WizardPage implements Listene
 	private Text defaultAdminUserText;
 	private Text defaultAdminPasswordText;
 	private Text defaultAdminPasswordText2;
+	private Button useAsRealAdmin;
 
 	public DefaultAdminConfigurationPage(String title, ExportWarModel exportModel)
 	{
@@ -88,6 +90,15 @@ public class DefaultAdminConfigurationPage extends WizardPage implements Listene
 		if (exportModel.getDefaultAdminPassword() != null) defaultAdminPasswordText2.setText(exportModel.getDefaultAdminPassword());
 		defaultAdminPasswordText2.addListener(SWT.KeyUp, this);
 
+		useAsRealAdmin = new Button(composite, SWT.CHECK);
+		useAsRealAdmin.setText("Use as a real admin user");
+		useAsRealAdmin.setToolTipText("This user can be used to have full access without first generating a real admin user");
+		useAsRealAdmin.setSelection(exportModel.isUseAsRealAdminUser());
+		useAsRealAdmin.addListener(SWT.Selection, this);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 4;
+		useAsRealAdmin.setLayoutData(gd);
+
 		label = new Label(composite, SWT.NONE);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 4;
@@ -106,6 +117,10 @@ public class DefaultAdminConfigurationPage extends WizardPage implements Listene
 		else if (event.widget == defaultAdminPasswordText)
 		{
 			exportModel.setDefaultAdminPassword(defaultAdminPasswordText.getText());
+		}
+		else if (event.widget == useAsRealAdmin)
+		{
+			exportModel.setUseAsRealAdminUser(useAsRealAdmin.getSelection());
 		}
 
 		getWizard().getContainer().updateButtons();

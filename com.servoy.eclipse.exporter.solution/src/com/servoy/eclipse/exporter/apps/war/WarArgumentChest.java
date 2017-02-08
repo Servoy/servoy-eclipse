@@ -76,6 +76,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 
 	private static final String defaultAdminUser = "defaultAdminUser";
 	private static final String defaultAdminPassword = "defaultAdminPassword";
+	private static final String useAsRealAdminUser = "useAsRealAdminUser";
 	private static final String minimizeJsCss = "minimize";
 	private static final String licenses = "licenses";
 
@@ -163,6 +164,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             Context element; may only be used with createTomcatContextXML.\n"
 			+ "        -" + defaultAdminUser + " user name for admin page when no admin user exists [ required ]\n"
 			+ "        -" + defaultAdminPassword + " password for defaultAdminUser  required ]\n"
+			+ "        -" + useAsRealAdminUser + " can the default admin be used as a normal admin user ]\n"
 			+ "        -" + minimizeJsCss + " minimize JS and CSS files \n"
 			+ "        -" + licenses + " <company_name> <number_of_licenses> <code>... export Servoy Client licenses\n"
 			+ "             to add more licenses, use ',' as delimiter\n";
@@ -449,6 +451,11 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public String getDefaultAdminPassword()
 	{
 		return argumentsMap.get(defaultAdminPassword);
+	}
+
+	public boolean isUseAsRealAdminUser()
+	{
+		return argumentsMap.containsKey(useAsRealAdminUser);
 	}
 
 	public boolean isMinimizeJsCssResources()

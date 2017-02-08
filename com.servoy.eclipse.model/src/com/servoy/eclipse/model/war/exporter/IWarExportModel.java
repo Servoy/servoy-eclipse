@@ -98,9 +98,13 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	public String getDefaultAdminPassword();
 
+	public boolean isUseAsRealAdminUser();
+
+
 	boolean isMinimizeJsCssResources();
 
 	Collection<License> getLicenses();
 
 	String decryptPassword(Cipher desCipher, String code);
+
 }

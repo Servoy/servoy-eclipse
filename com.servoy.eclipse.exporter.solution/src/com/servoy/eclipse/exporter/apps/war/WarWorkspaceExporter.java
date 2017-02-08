@@ -61,7 +61,8 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		 * @param servicesSpecProviderState
 		 * @param componentsSpecProviderState
 		 */
-		private CommandLineWarExportModel(WarArgumentChest configuration, SpecProviderState componentsSpecProviderState, SpecProviderState servicesSpecProviderState)
+		private CommandLineWarExportModel(WarArgumentChest configuration, SpecProviderState componentsSpecProviderState,
+			SpecProviderState servicesSpecProviderState)
 		{
 			super(componentsSpecProviderState, servicesSpecProviderState);
 			this.configuration = configuration;
@@ -433,6 +434,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		}
 
 		@Override
+		public boolean isUseAsRealAdminUser()
+		{
+			return configuration.isUseAsRealAdminUser();
+		}
+
+		@Override
 		public boolean isMinimizeJsCssResources()
 		{
 			return configuration.isMinimizeJsCssResources();
@@ -456,8 +463,8 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 	{
 		SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 		SpecProviderState servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
-		WarExporter warExporter = new WarExporter(new CommandLineWarExportModel(configuration, componentsSpecProviderState, servicesSpecProviderState), componentsSpecProviderState,
-			servicesSpecProviderState);
+		WarExporter warExporter = new WarExporter(new CommandLineWarExportModel(configuration, componentsSpecProviderState, servicesSpecProviderState),
+			componentsSpecProviderState, servicesSpecProviderState);
 		try
 		{
 			warExporter.doExport(new IProgressMonitor()

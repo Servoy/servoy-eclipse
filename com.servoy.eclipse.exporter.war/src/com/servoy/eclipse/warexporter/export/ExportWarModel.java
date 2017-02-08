@@ -104,6 +104,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean minimizeJsCssResources;
 
 	private boolean ready = false;
+	private boolean useAsRealAdminUser;
 
 	/**
 	 * @param servicesSpecProviderState
@@ -261,6 +262,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		if (settings.get("export.defaultAdminPassword") != null)
 		{
 			defaultAdminPassword = decryptPassword(settings, desCipher, "export.defaultAdminPassword");
+			useAsRealAdminUser = settings.getBoolean("export.useAsRealAdminUser");
 		}
 
 
@@ -338,6 +340,7 @@ public class ExportWarModel extends AbstractWarExportModel
 		settings.put("export.defaultAdminUser", defaultAdminUser);
 		if (defaultAdminPassword != null)
 			settings.put("export.defaultAdminPassword", encryptPassword(desCipher, "export.defaultAdminPassword", defaultAdminPassword));
+		settings.put("export.useAsRealAdminUser", useAsRealAdminUser);
 
 		if (exportedComponents != null) settings.put("export.components", exportedComponents.toArray(new String[exportedComponents.size()]));
 		if (exportedServices != null) settings.put("export.services", exportedServices.toArray(new String[exportedServices.size()]));
@@ -1096,6 +1099,19 @@ public class ExportWarModel extends AbstractWarExportModel
 	{
 		this.defaultAdminUser = defaultAdminUser;
 	}
+
+
+	public void setUseAsRealAdminUser(boolean useAsRealAdminUser)
+	{
+		this.useAsRealAdminUser = useAsRealAdminUser;
+	}
+
+
+	public boolean isUseAsRealAdminUser()
+	{
+		return useAsRealAdminUser;
+	}
+
 
 	public boolean isMinimizeJsCssResources()
 	{

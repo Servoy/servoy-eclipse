@@ -452,7 +452,8 @@ public class WarExporter
 	{
 		if ((exportModel.getExportedComponents() == null && exportModel.getExportedServices() == null) ||
 			(exportModel.getExportedComponents().size() == componentsSpecProviderState.getWebObjectSpecifications().size() &&
-			exportModel.getExportedServices().size() == NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState).length))
+				exportModel.getExportedServices().size() == NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(
+					servicesSpecProviderState).length))
 			return;
 
 		File exported = new File(tmpWarDir, "WEB-INF/exported_web_objects.properties");
@@ -861,7 +862,10 @@ public class WarExporter
 				Properties prop = new Properties();
 				prop.setProperty("defaultAdminUser", exportModel.getDefaultAdminUser());
 				prop.setProperty("defaultAdminPassword", SecuritySupport.encrypt(Settings.getInstance(), exportModel.getDefaultAdminPassword()));
-
+				if (exportModel.isUseAsRealAdminUser())
+				{
+					prop.setProperty("useAsRealAdminUser", "true");
+				}
 				try (FileWriter writer = new FileWriter(adminProperties))
 				{
 					prop.store(writer, "admin properties");
