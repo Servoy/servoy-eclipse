@@ -154,7 +154,7 @@ import net.sourceforge.sqlexplorer.plugin.SQLExplorerPlugin;
 
 
 /**
- * The activator class controls the plug-in life cycle
+ * The activator class controls the plug-in life cycle, test
  */
 public class Activator extends Plugin
 {
@@ -1272,12 +1272,12 @@ public class Activator extends Plugin
 													monitor.beginTask("Updating...", IProgressMonitor.UNKNOWN);
 													updatedToVersion[0] = updateAppServerFromSerclipse(new File(appServerDir).getParentFile(), version,
 														ClientVersion.getReleaseNumber(), new ActionListener()
-													{
-														public void actionPerformed(ActionEvent e)
 														{
-															monitor.worked(1);
-														}
-													});
+															public void actionPerformed(ActionEvent e)
+															{
+																monitor.worked(1);
+															}
+														});
 												}
 												catch (Exception e)
 												{
