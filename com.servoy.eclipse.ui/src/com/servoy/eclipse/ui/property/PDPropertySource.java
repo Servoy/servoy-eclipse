@@ -27,7 +27,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
-import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
@@ -94,7 +94,7 @@ public class PDPropertySource extends PersistPropertySource
 			IPropertyHandler attributesPropertyHandler = new WebComponentPropertyHandler(new PropertyDescription("attributes", null,
 				new PropertySetterDelegatePropertyController<Map<String, String>, PersistPropertySource>(
 					new MapEntriesPropertyController("attributes", RepositoryHelper.getDisplayName("attributes", Form.class),
-						propertyDescription instanceof WebObjectSpecification ? ((WebObjectSpecification)propertyDescription).getAttributes() : null)
+						propertyDescription instanceof WebLayoutSpecification ? ((WebLayoutSpecification)propertyDescription).getAttributes() : null)
 					{ /*
 						 * (non-Javadoc)
 						 *
