@@ -1,0 +1,70 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>servoy-eclipse</artifactId>
+	<groupId>com.servoy</groupId>
+	<packaging>pom</packaging>
+	<version>8.1.2.3030</version>
+
+	<properties>
+		<tycho.version>0.26.0</tycho.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<servoy-repo.url>file:/${project.basedir}/../../servoy-osgi-target/eclipse_target/repository/</servoy-repo.url>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>servoy</id>
+			<url>${servoy-repo.url}</url>
+			<layout>p2</layout>
+		</repository>
+	</repositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<extensions>true</extensions>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<version>${tycho.version}</version>
+				<configuration>
+					<pomDependencies>consider</pomDependencies>
+					<resolver>p2</resolver>
+					<environments>
+						<environment>
+							<os>win32</os>
+							<ws>win32</ws>
+							<arch>x86</arch>
+						</environment>
+					</environments>
+					<dependency-resolution>
+						<optionalDependencies>ignore</optionalDependencies>
+					</dependency-resolution>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<modules>
+		<module>com.servoy.eclipse.model</module>
+		<module>com.servoy.eclipse.model.exporter.mobile</module>
+		<module>com.servoy.eclipse.core</module>
+		<module>com.servoy.eclipse.ui</module>
+		<module>com.servoy.eclipse.debug</module>
+		<module>com.servoy.eclipse.designer</module>
+		<module>com.servoy.eclipse.designer.rfb</module>
+		<module>com.servoy.eclipse.designer.rib</module>
+		<module>com.servoy.eclipse.designer.wpm</module>
+		<module>com.servoy.eclipse.jsunit</module>
+		<module>com.servoy.eclipse.exporter.mobile</module>
+		<module>com.servoy.eclipse.exporter.solution</module>
+		<module>com.servoy.eclipse.exporter.war</module>
+		<module>com.servoy.eclipse.extension.compatibility</module>
+		<module>com.servoy.eclipse.profiler</module>
+	</modules>
+</project>
