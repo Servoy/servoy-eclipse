@@ -44,8 +44,8 @@ import com.servoy.j2db.plugins.PluginManager;
 import com.servoy.j2db.scripting.IScriptObject;
 import com.servoy.j2db.scripting.ScriptObjectRegistry;
 import com.servoy.j2db.util.JarManager;
-import com.servoy.j2db.util.JarManager.ExtensionResource;
 import com.servoy.j2db.util.JarManager.Extension;
+import com.servoy.j2db.util.JarManager.ExtensionResource;
 
 public class XMLScriptObjectAdapterLoader
 {
@@ -65,7 +65,7 @@ public class XMLScriptObjectAdapterLoader
 		{
 			URL url = XMLScriptObjectAdapterLoader.class.getResource("doc/servoydoc.xml");
 			IDocumentationManagerProvider documentationManagerProvider = Activator.getDefault().getDocumentationManagerProvider();
-			if (documentationManagerProvider != null)
+			if (documentationManagerProvider != null && url != null)
 			{
 				docManager = documentationManagerProvider.fromXML(url, null);
 			}
