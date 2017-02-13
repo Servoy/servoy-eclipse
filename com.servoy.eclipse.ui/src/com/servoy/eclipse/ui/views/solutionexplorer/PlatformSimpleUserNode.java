@@ -96,7 +96,12 @@ public class PlatformSimpleUserNode extends SimpleUserNode implements IAdaptable
 	{
 		if (getName() != null && getType() != null)
 		{
-			return getName().hashCode() * 31 + getType().hashCode();
+			int hashCode = getName().hashCode() * 31 + getType().hashCode();
+			if (parent != null)
+			{
+				hashCode = hashCode * 31 + parent.hashCode();
+			}
+			return hashCode;
 		}
 		return super.hashCode();
 	}
@@ -107,6 +112,7 @@ public class PlatformSimpleUserNode extends SimpleUserNode implements IAdaptable
 		if (!(obj instanceof PlatformSimpleUserNode)) return false;
 		return Utils.equalObjects(getName(), ((PlatformSimpleUserNode)obj).getName()) &&
 			Utils.equalObjects(getType(), ((PlatformSimpleUserNode)obj).getType()) && hidden == ((PlatformSimpleUserNode)obj).isHidden() &&
-			Utils.equalObjects(getRealObject(), ((PlatformSimpleUserNode)obj).getRealObject());
+			Utils.equalObjects(getRealObject(), ((PlatformSimpleUserNode)obj).getRealObject()) &&
+			Utils.equalObjects(parent, ((PlatformSimpleUserNode)obj).parent);
 	}
 }
