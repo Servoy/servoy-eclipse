@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
@@ -58,6 +59,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.WebComponentSpecProvider;
@@ -65,7 +67,9 @@ import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.base.persistence.constants.IRepositoryConstants;
 import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
@@ -145,17 +149,46 @@ public class PlaceDataprovidersComposite extends Composite
 	private Text labelHeight;
 
 
-	/**
-	 * @param parent
-	 * @param style
-	 */
-	public PlaceDataprovidersComposite(Composite parent, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
+	public PlaceDataprovidersComposite(final Composite parent, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
 		DataProviderOptions dataproviderOptions, final IDialogSettings settings)
 	{
 		super(parent, SWT.None);
 		this.settings = settings;
 
-		preferences = ServoyModelFinder.getServoyModel().getActiveResourcesProject().getPlaceDataproviderPreferences();
+		final ServoyResourcesProject resourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
+
+		JSONObject prefs;
+
+		try
+		{
+			prefs = resourcesProject.getPlaceDataproviderPreferences();
+		}
+		catch (JSONException e)
+		{
+			prefs = new ServoyJSONObject();
+			((ServoyJSONObject)prefs).setNoQuotes(false); // important, as configuration names are stored as keys - and without the quotes we would store invalid json (or they would need to be restrictions on spaces and so on)
+			((ServoyJSONObject)prefs).setNewLines(true);
+			((ServoyJSONObject)prefs).setNoBrackets(false);
+
+			UIUtils.runInUI(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+					MessageDialog errorDialog = new MessageDialog(parent.getShell(), "Error reading the place field configuration", null,
+						"The file 'placedataprovider.preferences' from the active resources project contains invalid JSON. It will be ignored and the place field preferences will revert to default.",
+						MessageDialog.ERROR, new String[] { "Backup and &Discard corrupt preferences", "Ok" }, 0);
+					int opt = errorDialog.open();
+					if (opt == 0)
+					{
+						resourcesProject.backupCorruptedPlaceDataproivderPreferences();
+					} // else just do nothing - the file content will be overwritten anyway
+				}
+			}, false);
+		}
+		preferences = prefs;
+
 		JSONObject mainPref = preferences.optJSONObject("_");
 		if (mainPref == null)
 		{
