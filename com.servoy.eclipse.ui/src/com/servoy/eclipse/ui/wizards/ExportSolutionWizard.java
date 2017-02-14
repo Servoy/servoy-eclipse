@@ -75,6 +75,61 @@ import com.servoy.j2db.util.Utils;
 public class ExportSolutionWizard extends Wizard implements IExportWizard
 {
 
+	/**
+	 * 
+	 */
+	private static final String EXPORT_USING_DBI_FILE_INFO_ONLY = "exportUsingDbiFileInfoOnly";
+
+	/**
+	 * 
+	 */
+	private static final String EXPORT_USERS = "exportUsers";
+
+	/**
+	 * 
+	 */
+	private static final String EXPORTI18N_DATA = "exporti18nData";
+
+	/**
+	 * 
+	 */
+	private static final String NUMBER_OF_SAMPLE_DATA_EXPORTED = "numberOfSampleDataExported";
+
+	/**
+	 * 
+	 */
+	private static final String EXPORT_SAMPLE_DATA = "exportSampleData";
+
+	/**
+	 * 
+	 */
+	private static final String CHECK_METADATA_TABLES = "checkMetadataTables";
+
+	/**
+	 * 
+	 */
+	private static final String EXPORT_META_DATA = "exportMetaData";
+
+	/**
+	 * 
+	 */
+	private static final String EXPORT_ALL_TABLES_FROM_REFERENCED_SERVERS = "exportAllTablesFromReferencedServers";
+
+	/**
+	 * 
+	 */
+	private static final String EXPORT_REFERENCED_MODULES = "exportReferencedModules";
+
+	/**
+	 * 
+	 */
+	private static final String PROTECT_WITH_PASSWORD = "protectWithPassword";
+
+	/**
+	 * 
+	 */
+	private static final String INITIAL_FILE_NAME = "initialFileName";
+
 	private static final String DB_DOWN_WARNING = "Error markers will be ignored because the DB seems to be offline (.dbi files will be used instead).";
 
 	private Solution activeSolution;
@@ -107,7 +162,18 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 	public boolean performFinish()
 	{
 		EditorUtil.saveDirtyEditors(getShell(), true);
-		getDialogSettings().put("initialFileName", exportModel.getFileName());
+		IDialogSettings dialogSettings = getDialogSettings();
+		dialogSettings.put(INITIAL_FILE_NAME, exportModel.getFileName());
+		dialogSettings.put(PROTECT_WITH_PASSWORD, exportModel.isProtectWithPassword());
+		dialogSettings.put(EXPORT_REFERENCED_MODULES, exportModel.isExportReferencedModules());
+		dialogSettings.put(EXPORT_ALL_TABLES_FROM_REFERENCED_SERVERS, exportModel.isExportAllTablesFromReferencedServers());
+		dialogSettings.put(EXPORT_META_DATA, exportModel.isExportMetaData());
+		dialogSettings.put(CHECK_METADATA_TABLES, exportModel.isCheckMetadataTables());
+		dialogSettings.put(EXPORT_SAMPLE_DATA, exportModel.isExportSampleData());
+		dialogSettings.put(NUMBER_OF_SAMPLE_DATA_EXPORTED, exportModel.getNumberOfSampleDataExported());
+		dialogSettings.put(EXPORTI18N_DATA, exportModel.isExportI18NData());
+		dialogSettings.put(EXPORT_USERS, exportModel.isExportUsers());
+		dialogSettings.put(EXPORT_USING_DBI_FILE_INFO_ONLY, exportModel.isExportUsingDbiFileInfoOnly());
 
 		WorkspaceJob exportJob = new ExportSolutionJob("Exporting solution '" + activeSolution.getName() + "'", exportModel, activeSolution,
 			modulesSelectionPage.hasDBDownErrors(), true, workspace);
@@ -124,7 +190,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		if (activeProject != null) activeSolution = activeProject.getSolution();
 
 		exportModel = new ExportSolutionModel();
-		String initialFileName = getDialogSettings().get("initialFileName");
+		IDialogSettings dialogSettings = getDialogSettings();
+		String initialFileName = dialogSettings.get(INITIAL_FILE_NAME);
 		if (initialFileName == null)
 		{
 			ServoyModelManager.getServoyModelManager().getServoyModel();
@@ -138,8 +205,25 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		}
 		exportModel.setFileName(initialFileName);
 
-		exportModel.setExportReferencedModules(activeSolution.getModulesNames() != null);
+		exportModel.setProtectWithPassword(dialogSettings.getBoolean(PROTECT_WITH_PASSWORD));
 
+		boolean exportModules = activeSolution.getModulesNames() != null;
+		if (dialogSettings.get(EXPORT_REFERENCED_MODULES) != null)
+		{
+			exportModules = exportModules && dialogSettings.getBoolean(EXPORT_REFERENCED_MODULES);
+		}
+		exportModel.setExportReferencedModules(exportModules);
+		exportModel.setExportAllTablesFromReferencedServers(dialogSettings.getBoolean(EXPORT_ALL_TABLES_FROM_REFERENCED_SERVERS));
+		exportModel.setExportMetaData(dialogSettings.getBoolean(EXPORT_META_DATA));
+		exportModel.setCheckMetadataTables(dialogSettings.getBoolean(CHECK_METADATA_TABLES));
+		exportModel.setExportSampleData(dialogSettings.getBoolean(EXPORT_SAMPLE_DATA));
+		if (dialogSettings.get(NUMBER_OF_SAMPLE_DATA_EXPORTED) != null)
+		{
+			exportModel.setNumberOfSampleDataExported(dialogSettings.getInt(NUMBER_OF_SAMPLE_DATA_EXPORTED));
+		}
+		exportModel.setExportI18NData(dialogSettings.getBoolean(EXPORTI18N_DATA));
+		exportModel.setExportUsers(dialogSettings.getBoolean(EXPORT_USERS));
+		exportModel.setExportUsingDbiFileInfoOnly(dialogSettings.getBoolean(EXPORT_USING_DBI_FILE_INFO_ONLY));
 
 		int hasErrs = BuilderUtils.getMarkers(
 			new String[] { ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject().getName() });
@@ -543,6 +627,10 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			rowsPerTableRadioButton.setEnabled(false);
 			rowsPerTableRadioButton.setLayoutData(data2);
 			rowsPerTableRadioButton.addListener(SWT.Selection, this);
+			rowsPerTableRadioButton.setEnabled(exportModel.isExportSampleData());
+			rowsPerTableRadioButton.setSelection(
+				exportModel.isExportSampleData() && exportModel.getNumberOfSampleDataExported() != IDataServerInternal.MAX_ROWS_TO_RETRIEVE);
+
 
 			GridData data3 = new GridData();
 			Label textLabel = new Label(horizontalComposite, SWT.NONE);
@@ -555,7 +643,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			nrOfExportedSampleDataSpinner.setMaximum(IDataServerInternal.MAX_ROWS_TO_RETRIEVE);
 			nrOfExportedSampleDataSpinner.setSelection(10000);
 			nrOfExportedSampleDataSpinner.setIncrement(100);
-			nrOfExportedSampleDataSpinner.setEnabled(false);
+			nrOfExportedSampleDataSpinner.setEnabled(
+				exportModel.isExportSampleData() && exportModel.getNumberOfSampleDataExported() != IDataServerInternal.MAX_ROWS_TO_RETRIEVE);
 
 			nrOfExportedSampleDataSpinner.setLayoutData(data4);
 
@@ -580,7 +669,9 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 			GridData data6 = new GridData();
 			allRowsRadioButton = new Button(horizontalComposite, SWT.RADIO);
-			allRowsRadioButton.setEnabled(false);
+			allRowsRadioButton.setEnabled(exportModel.isExportSampleData());
+			allRowsRadioButton.setSelection(
+				exportModel.isExportSampleData() && exportModel.getNumberOfSampleDataExported() == IDataServerInternal.MAX_ROWS_TO_RETRIEVE);
 			allRowsRadioButton.setLayoutData(data6);
 			allRowsRadioButton.addListener(SWT.Selection, this);
 
