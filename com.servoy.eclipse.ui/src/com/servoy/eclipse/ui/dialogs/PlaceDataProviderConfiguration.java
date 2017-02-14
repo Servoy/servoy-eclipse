@@ -44,6 +44,8 @@ public class PlaceDataProviderConfiguration implements IPlaceDataProviderConfigu
 	private final boolean placeHorizontally;
 	private final Dimension fieldSize;
 	private final Dimension labelSize;
+	private final boolean automaticI18N;
+	private final String i18nPrefix;
 
 	/**
 	 * @param selection
@@ -56,7 +58,8 @@ public class PlaceDataProviderConfiguration implements IPlaceDataProviderConfigu
 	 * @param fillText
 	 */
 	public PlaceDataProviderConfiguration(List<Pair<IDataProvider, Object>> selection, int fieldSpacing, boolean placeWithLabels, String labelComponent,
-		int labelSpacing, boolean placeOnTop, boolean fillName, boolean fillText, boolean placeHorizontally, Dimension fieldSize, Dimension labelSize)
+		int labelSpacing, boolean placeOnTop, boolean fillName, boolean fillText, boolean placeHorizontally, Dimension fieldSize, Dimension labelSize,
+		boolean automaticI18N, String i18nPrefix)
 	{
 		this.selection = selection;
 		this.fieldSpacing = fieldSpacing;
@@ -69,6 +72,8 @@ public class PlaceDataProviderConfiguration implements IPlaceDataProviderConfigu
 		this.placeHorizontally = placeHorizontally;
 		this.fieldSize = fieldSize;
 		this.labelSize = labelSize;
+		this.automaticI18N = automaticI18N;
+		this.i18nPrefix = i18nPrefix;
 	}
 
 	/**
@@ -157,5 +162,21 @@ public class PlaceDataProviderConfiguration implements IPlaceDataProviderConfigu
 	public Dimension getLabelSize()
 	{
 		return labelSize;
+	}
+
+	/**
+	 * @return the automaticI18N
+	 */
+	public boolean isAutomaticI18N()
+	{
+		return automaticI18N;
+	}
+
+	/**
+	 * @return the i18nPrefix
+	 */
+	public String getI18NPrefix()
+	{
+		return i18nPrefix;
 	}
 }

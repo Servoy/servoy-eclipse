@@ -50,6 +50,7 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.DesignComponentFactory;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
+import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -67,6 +68,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.DummyValidator;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
@@ -606,7 +608,7 @@ public class ElementFactory
 					}
 					if (labelComponent instanceof WebObjectSpecification)
 					{
-						label = createComponent(parent, (WebObjectSpecification)labelComponent, dp, loc);
+						label = createComponent(parent, (WebObjectSpecification)labelComponent, NO_DATAPROVIDER, loc);
 					}
 					else if (labelComponent instanceof Template)
 					{
@@ -637,7 +639,19 @@ public class ElementFactory
 
 					if (configuration.isFillName())
 					{
-						if (label instanceof GraphicalComponent) ((GraphicalComponent)label).setLabelFor(name);
+						label.setName(name + "_label");
+						if (label instanceof GraphicalComponent)
+						{
+							((GraphicalComponent)label).setLabelFor(name);
+							if (configuration.isAutomaticI18N())
+							{
+								setI18NText((GraphicalComponent)label, configuration, label.getName());
+							}
+							else if (configuration.isFillText())
+							{
+								((GraphicalComponent)label).setText(labelText);
+							}
+						}
 						else if (label instanceof WebComponent)
 						{
 							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
@@ -648,7 +662,6 @@ public class ElementFactory
 								((WebComponent)label).setProperty(pd.getName(), name);
 							}
 						}
-						label.setName(name + "_label");
 					}
 					int labelSpacing = configuration.getLabelSpacing() > 0 ? configuration.getLabelSpacing() : 20;
 
@@ -735,9 +748,16 @@ public class ElementFactory
 				{
 					bc.setName(name);
 				}
-				if (configuration.isFillText() && bc instanceof ISupportText)
+				if (bc instanceof ISupportText)
 				{
-					((ISupportText)bc).setText(labelText);
+					if (configuration.isFillName() && configuration.isAutomaticI18N())
+					{
+						setI18NText((ISupportText)bc, configuration, bc.getName());
+					}
+					else if (configuration.isFillText())
+					{
+						((ISupportText)bc).setText(labelText);
+					}
 				}
 				lastSize = bc.getSize();
 			}
@@ -748,6 +768,20 @@ public class ElementFactory
 			return null;
 		}
 		return lst.toArray(new IPersist[lst.size()]);
+	}
+
+	private static void setI18NText(ISupportText textComponent, IPlaceDataProviderConfiguration configuration, String name)
+	{
+		StringBuilder i18nText = new StringBuilder("i18n:");
+		String prefix = configuration.getI18NPrefix();
+		if (prefix != null)
+		{
+			i18nText.append(prefix).append('.');
+		}
+		i18nText.append(name);
+		String i18nTextString = i18nText.toString();
+		textComponent.setText(i18nTextString);
+		EclipseMessages.addI18NKey(textComponent, i18nTextString);
 	}
 
 	/**
@@ -1199,6 +1233,18 @@ public class ElementFactory
 				public Dimension getLabelSize()
 				{
 					return new Dimension(-1, -1);
+				}
+
+				@Override
+				public boolean isAutomaticI18N()
+				{
+					return false;
+				}
+
+				@Override
+				public String getI18NPrefix()
+				{
+					return null;
 				}
 			};
 			createFields(portal, config, null, new Point(x, y));
@@ -1792,5 +1838,45 @@ public class ElementFactory
 		}
 
 	}
+
+	private static final IDataProvider NO_DATAPROVIDER = new IDataProvider()
+	{
+
+		@Override
+		public boolean isEditable()
+		{
+			return false;
+		}
+
+		@Override
+		public int getLength()
+		{
+			return 0;
+		}
+
+		@Override
+		public int getFlags()
+		{
+			return 0;
+		}
+
+		@Override
+		public int getDataProviderType()
+		{
+			return 0;
+		}
+
+		@Override
+		public String getDataProviderID()
+		{
+			return null;
+		}
+
+		@Override
+		public ColumnWrapper getColumnWrapper()
+		{
+			return null;
+		}
+	};
 
 }

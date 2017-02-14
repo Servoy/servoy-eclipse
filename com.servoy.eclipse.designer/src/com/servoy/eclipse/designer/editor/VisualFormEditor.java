@@ -39,6 +39,8 @@ import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorDesignPage;
 import com.servoy.eclipse.designer.editor.mobile.MobileVisualFormEditorHtmlDesignPage;
 import com.servoy.eclipse.designer.editor.rfb.RfbVisualFormEditorDesignPage;
+import com.servoy.eclipse.model.repository.EclipseMessages;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.editors.ITabbedEditor;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.DesignerPreferences.FormEditorDesignerPreference;
@@ -48,6 +50,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
+import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.ngclient.FormElement;
@@ -182,7 +185,7 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 		{
 			if (formEditorDesignerPreference == FormEditorDesignerPreference.Classic
 			// TODO for now we also map automatic to classic, because mobile doesn't really work correctly currently
-			|| formEditorDesignerPreference == FormEditorDesignerPreference.Automatic)
+				|| formEditorDesignerPreference == FormEditorDesignerPreference.Automatic)
 			{
 				return DesignPagetype.MobileClassic;
 			}
@@ -300,6 +303,15 @@ public class VisualFormEditor extends BaseVisualFormEditor implements ITabbedEdi
 					}
 				}
 			}
+		}
+
+		try
+		{
+			EclipseMessages.saveFormI18NTexts(getForm());
+		}
+		catch (RepositoryException ex)
+		{
+			ServoyLog.logError("Cannot save I18N keys", ex);
 		}
 
 	}

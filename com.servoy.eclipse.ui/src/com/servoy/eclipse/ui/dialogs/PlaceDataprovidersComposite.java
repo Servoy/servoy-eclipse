@@ -113,6 +113,8 @@ public class PlaceDataprovidersComposite extends Composite
 	private static final String FIELD_HEIGTH_PROPERTY = "FIELD_HEIGTH";
 	private static final String LABEL_WIDTH_PROPERTY = "LABEL_WIDTH";
 	private static final String LABEL_HEIGTH_PROPERTY = "LABEL_HEIGTH";
+	private static final String AUTOMATIC_I18N_PROPERTY = "AUTOMATIC_I18N";
+	private static final String I18N_PREFIX_PROPERTY = "I18N_PREFIX";
 
 	private static final String CONFIGURATION_SELECTION_SETTING = "CONFIGURATION_SELECTION";
 	private static final String SINGLE_CLICK_SETTING = "SINGLE_CLICK";
@@ -140,6 +142,8 @@ public class PlaceDataprovidersComposite extends Composite
 	private final Button placeHorizontally;
 	private final Button singleClick;
 	private final List<IReadyListener> readyListeners = new ArrayList<>();
+	private final Button automaticI18N;
+	private final Text i18nPrefix;
 
 	private JSONObject currentSelection;
 	private String configurationSelection = null;
@@ -210,7 +214,7 @@ public class PlaceDataprovidersComposite extends Composite
 		GridData gridData = new GridData();
 		gridData.verticalAlignment = GridData.FILL;
 		gridData.horizontalSpan = 2;
-		gridData.verticalSpan = 20;
+		gridData.verticalSpan = 25;
 		gridData.grabExcessHorizontalSpace = true;
 		gridData.grabExcessVerticalSpace = true;
 		gridData.horizontalAlignment = GridData.FILL;
@@ -264,6 +268,8 @@ public class PlaceDataprovidersComposite extends Composite
 				fieldHeight.setText(currentSelection.optString(FIELD_HEIGTH_PROPERTY));
 				labelWidth.setText(currentSelection.optString(LABEL_WIDTH_PROPERTY));
 				labelHeight.setText(currentSelection.optString(LABEL_HEIGTH_PROPERTY));
+				automaticI18N.setSelection(currentSelection.optBoolean(AUTOMATIC_I18N_PROPERTY));
+				i18nPrefix.setText(currentSelection.optString(I18N_PREFIX_PROPERTY));
 
 				updatePlaceWithLabelState();
 			}
@@ -492,12 +498,68 @@ public class PlaceDataprovidersComposite extends Composite
 		gd.horizontalSpan = 2;
 		new Label(this, SWT.NONE).setLayoutData(gd);
 		fillName = createLabelAndCheck("Fill name property", FILL_NAME_PROPERTY);
+		fillName.addSelectionListener(new SelectionListener()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				if (!fillName.getSelection())
+				{
+					automaticI18N.setSelection(false);
+				}
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+			}
+		});
 		fillText = createLabelAndCheck("Fill text property", FILL_TEXT_PROPERTY);
 
 		placeHorizontally = createLabelAndCheck("Place Horizontally", PLACE_HORIZONTALLY_PROPERTY);
 
+		gd = new GridData();
+		gd.horizontalSpan = 2;
+		new Label(this, SWT.NONE).setLayoutData(gd);
+		automaticI18N = createLabelAndCheck("Automatic i18n text property", AUTOMATIC_I18N_PROPERTY);
+		automaticI18N.addSelectionListener(new SelectionListener()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				if (automaticI18N.getSelection())
+				{
+					fillName.setSelection(true);
+				}
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+			}
+		});
+
+		i18nPrefix = createLabelAndField("I18N prefix", I18N_PREFIX_PROPERTY);
+
+		Label i18nInfo = new Label(this, SWT.NONE);
+		gd = new GridData();
+		gd.horizontalSpan = 2;
+		i18nInfo.setLayoutData(gd);
+
+		if (ServoyModelFinder.getServoyModel().getActiveProject().getSolution().getI18nDataSource() == null)
+		{
+			automaticI18N.setEnabled(false);
+			i18nPrefix.setEnabled(false);
+			i18nInfo.setText("(for I18N you need to set i18nDataSource on the solution)");
+		}
+
+		gd = new GridData();
+		gd.horizontalSpan = 2;
+		new Label(this, SWT.NONE).setLayoutData(gd);
+
 		new Label(this, SWT.NONE);
 		new Label(this, SWT.NONE);
+
 		singleClick = new Button(this, SWT.CHECK);
 		boolean singleClickSelection = settings.getBoolean(SINGLE_CLICK_SETTING);
 		if (singleClickSelection)
@@ -727,7 +789,8 @@ public class PlaceDataprovidersComposite extends Composite
 			currentSelection.optBoolean(PLACE_WITH_LABELS_PROPERTY), currentSelection.optString(LABEL_COMPONENT_PROPERTY),
 			currentSelection.optInt(LABEL_SPACING_PROPERTY, -1), currentSelection.optBoolean(PLACE_ON_TOP_PROPERTY),
 			currentSelection.optBoolean(FILL_NAME_PROPERTY), currentSelection.optBoolean(FILL_TEXT_PROPERTY),
-			currentSelection.optBoolean(PLACE_HORIZONTALLY_PROPERTY), fieldSize, labelSize);
+			currentSelection.optBoolean(PLACE_HORIZONTALLY_PROPERTY), fieldSize, labelSize, currentSelection.optBoolean(AUTOMATIC_I18N_PROPERTY),
+			currentSelection.optString(I18N_PREFIX_PROPERTY));
 	}
 
 	/**
