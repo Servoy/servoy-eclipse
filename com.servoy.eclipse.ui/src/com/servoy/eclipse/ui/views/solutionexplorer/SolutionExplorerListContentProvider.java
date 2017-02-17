@@ -1010,7 +1010,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					}
 					else
 					{
-						String dataSource = s.getTable(tableName).getDataSource();
+						// The table may not have been initialized yet (i.e. loaded columns).
+						// Do not get the table object here because that may cause loading all columns of all tables from
+						// developer rendering developer unresponsive for a long time.
+						String dataSource = s.getTableDatasource(tableName);
 						UserNode node = new UserNode(tableName, type, new DataSourceFeedback(dataSource), DataSourceWrapperFactory.getWrapper(dataSource),
 							uiActivator.loadImageFromBundle("portal.gif"));
 						node.setClientSupport(ClientSupport.All);

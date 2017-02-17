@@ -17,9 +17,13 @@
 
 package com.servoy.eclipse.model.util;
 
+import java.rmi.RemoteException;
+
 import com.servoy.base.util.DataSourceUtilsBase;
-import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.j2db.persistence.IServer;
 import com.servoy.j2db.persistence.ITable;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 
 /**
@@ -34,14 +38,41 @@ public class DataSourceWrapperFactory
 		String[] dbServernameTablename = DataSourceUtilsBase.getDBServernameTablename(dataSource);
 		if (dbServernameTablename != null)
 		{
-			ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(dataSource);
-			boolean isView = table != null ? table.getTableType() == ITable.VIEW : false;
-			return new TableWrapper(dbServernameTablename[0], dbServernameTablename[1], isView);
+			String serverName = dbServernameTablename[0];
+			String tableName = dbServernameTablename[1];
+			int tableType = getTableType(serverName, tableName);
+			return new TableWrapper(serverName, tableName, tableType == ITable.VIEW);
 		}
 
 		String inmemDataSourceName = DataSourceUtils.getInmemDataSourceName(dataSource);
-		if (inmemDataSourceName != null) return new InMemServerWrapper(inmemDataSourceName);
+		if (inmemDataSourceName != null)
+		{
+			return new InMemServerWrapper(inmemDataSourceName);
+		}
 
 		return null;
+	}
+
+	/*
+	 * The table may not have been initialized yet (i.e. loaded columns).
+	 *
+	 * Do not get the table object here because that may cause loading all columns of all tables from developer rendering developer unresponsive for a long
+	 * time.
+	 */
+	private static int getTableType(String serverName, String tableName)
+	{
+		try
+		{
+			IServer server = ApplicationServerRegistry.get().getServerManager().getServer(serverName);
+			if (server != null)
+			{
+				return server.getTableType(tableName);
+			}
+		}
+		catch (RepositoryException | RemoteException e)
+		{
+			ServoyLog.logError(e);
+		}
+		return ITable.UNKNOWN;
 	}
 }
