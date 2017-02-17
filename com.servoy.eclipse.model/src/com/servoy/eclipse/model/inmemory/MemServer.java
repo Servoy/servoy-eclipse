@@ -1079,6 +1079,12 @@ public class MemServer implements IServerInternal, IServer
 		return 0;
 	}
 
+	@Override
+	public String getTableDatasource(String tableName)
+	{
+		return DataSourceUtils.createInmemDataSource(tableName);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 *
