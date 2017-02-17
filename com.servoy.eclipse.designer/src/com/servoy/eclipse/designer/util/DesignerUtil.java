@@ -333,7 +333,7 @@ public class DesignerUtil
 			{
 				List<String> excludedChildren = spec.getExcludedChildren();
 				Set<String> allowedChildren = excludedChildren.size() > 0 ? new HashSet<String>() : new HashSet<String>(spec.getAllowedChildren());
-				if (excludedChildren.size() > 0)
+				if (excludedChildren != null)
 				{
 					for (PackageSpecification<WebLayoutSpecification> pack2 : packs)
 					{
