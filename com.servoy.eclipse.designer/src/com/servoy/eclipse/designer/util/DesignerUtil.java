@@ -332,7 +332,8 @@ public class DesignerUtil
 			for (WebLayoutSpecification spec : pack.getSpecifications().values())
 			{
 				List<String> excludedChildren = spec.getExcludedChildren();
-				Set<String> allowedChildren = excludedChildren.size() > 0 ? new HashSet<String>() : new HashSet<String>(spec.getAllowedChildren());
+				Set<String> allowedChildren = (excludedChildren != null && excludedChildren.size() > 0) ? new HashSet<String>()
+					: new HashSet<String>(spec.getAllowedChildren());
 				if (excludedChildren != null)
 				{
 					for (PackageSpecification<WebLayoutSpecification> pack2 : packs)
