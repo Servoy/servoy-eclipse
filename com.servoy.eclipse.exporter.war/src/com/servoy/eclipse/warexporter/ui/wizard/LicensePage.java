@@ -187,15 +187,10 @@ public class LicensePage extends WizardPage
 		setMessage("");
 		try
 		{
-			int numLicenses = Integer.parseInt(noOfLicensesText.trim());
-			if (numLicenses < 1)
-			{
-				setMessage("The number of licenses must be greater or equal to 1.", IMessageProvider.ERROR);
-			}
-			else if (ApplicationServerRegistry.get().checkClientLicense(companyText, licenseText, numLicenses))
+			if (ApplicationServerRegistry.get().checkClientLicense(companyText, licenseText, noOfLicensesText.trim()))
 			{
 				setMessage("License " + licenseText + " is correct.", IMessageProvider.INFORMATION);
-				License l = new License(companyText, licenseText, numLicenses);
+				License l = new License(companyText, licenseText, noOfLicensesText.trim());
 				boolean isNew = !exportModel.getLicenses().contains(l);
 				exportModel.addLicense(l);
 
@@ -244,7 +239,7 @@ public class LicensePage extends WizardPage
 		for (License license : exportModel.getLicenses())
 		{
 			LicenseFieldsComposite licenseComposite = new LicenseFieldsComposite(new Composite(mainContainer, SWT.BORDER), SWT.NONE, license.getCompanyKey(),
-				license.getCode(), Integer.toString(license.getNumberOfLicenses()));
+				license.getCode(), license.getNumberOfLicenses());
 			ctrls.add(licenseComposite);
 		}
 		sc.setExpandHorizontal(true);

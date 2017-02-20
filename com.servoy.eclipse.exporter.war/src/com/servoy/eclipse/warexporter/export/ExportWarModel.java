@@ -279,8 +279,7 @@ public class ExportWarModel extends AbstractWarExportModel
 			for (int i = 1; i <= totalLicenses; i++)
 			{
 				String code = decryptPassword(settings, desCipher, "export.license." + i + ".code");
-				licenses.put(code,
-					new License(settings.get("export.license." + i + ".company_name"), code, settings.getInt("export.license." + i + ".licenses")));
+				licenses.put(code, new License(settings.get("export.license." + i + ".company_name"), code, settings.get("export.license." + i + ".licenses")));
 			}
 		}
 	}

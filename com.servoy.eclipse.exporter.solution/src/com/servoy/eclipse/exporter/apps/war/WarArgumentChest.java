@@ -223,8 +223,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 				}
 				String company = parts[0].trim();
 				String code = parts[2].trim();
-				int number = Integer.parseInt(parts[1].trim());
-				result.put(code, new License(company, code, number));
+				result.put(code, new License(company, code, parts[1].trim()));
 			}
 		}
 		return result;

@@ -84,9 +84,9 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	{
 		private String companyKey;
 		private String code;
-		private int numberOfLicenses;
+		private String numberOfLicenses;
 
-		public License(String company, String code, int numLicenses)
+		public License(String company, String code, String numLicenses)
 		{
 			this.companyKey = company;
 			this.code = code;
@@ -113,12 +113,12 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			this.code = code;
 		}
 
-		public int getNumberOfLicenses()
+		public String getNumberOfLicenses()
 		{
 			return numberOfLicenses;
 		}
 
-		public void setNumberOfLicenses(int numberOfLicenses)
+		public void setNumberOfLicenses(String numberOfLicenses)
 		{
 			this.numberOfLicenses = numberOfLicenses;
 		}
