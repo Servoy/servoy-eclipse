@@ -30,8 +30,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.sablo.specification.Package.DirPackageReader;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.j2db.util.Debug;
 
@@ -93,11 +97,35 @@ public class InstallWebPackageHandler implements IDeveloperService
 			{
 				try
 				{
-					List<JSONObject> remotePackages = GetAllInstalledPackages.getRemotePackages();
+					ServoyProject activeSolutionProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solutionName);
+					List<JSONObject> remotePackages = null;
 					String[] packages = dependency.split(",");
 					for (String dependendPck : packages)
 					{
 						String[] nameAndVersion = dependendPck.split("#");
+
+						// if active solution has an ng-package-project with the same name, skip downloading from WPM
+						boolean hasNGPackageProject = false;
+						for (ServoyNGPackageProject ngProject : activeSolutionProject.getNGPackageProjects())
+						{
+							DirPackageReader dirPackageReader = new DirPackageReader(ngProject.getProject().getLocation().toFile());
+							if (nameAndVersion[0].equals(dirPackageReader.getPackageName()))
+							{
+								hasNGPackageProject = true;
+								break;
+							}
+						}
+						if (hasNGPackageProject)
+						{
+							continue;
+						}
+
+
+						if (remotePackages == null)
+						{
+							remotePackages = GetAllInstalledPackages.getRemotePackages();
+						}
+
 						for (JSONObject pckObject : remotePackages)
 						{
 							if (pckObject.get("name").equals(nameAndVersion[0]))
