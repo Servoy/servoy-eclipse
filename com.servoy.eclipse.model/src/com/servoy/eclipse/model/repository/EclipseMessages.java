@@ -67,6 +67,7 @@ import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 
 public class EclipseMessages implements ICustomMessageLoader
 {
@@ -695,17 +696,18 @@ public class EclipseMessages implements ICustomMessageLoader
 		return outputBytesCut;
 	}
 
-	private static WeakHashMap<ISupportText, List<String>> componentsI18NKeys = new WeakHashMap<ISupportText, List<String>>();
+	private static WeakHashMap<ISupportText, List<Pair<String, String>>> componentsI18NKeys = new WeakHashMap<ISupportText, List<Pair<String, String>>>();
 
-	public static void addI18NKey(ISupportText component, String i18nKey)
+	public static void addI18NKey(ISupportText component, String i18nKey, String defaultValue)
 	{
-		List<String> componentI18NKeys = componentsI18NKeys.get(component);
+		List<Pair<String, String>> componentI18NKeys = componentsI18NKeys.get(component);
 		if (componentI18NKeys == null)
 		{
-			componentI18NKeys = new ArrayList<String>();
+			componentI18NKeys = new ArrayList<Pair<String, String>>();
 			componentsI18NKeys.put(component, componentI18NKeys);
 		}
-		if (!componentI18NKeys.contains(i18nKey)) componentI18NKeys.add(i18nKey);
+		Pair<String, String> pv = new Pair<String, String>(i18nKey, defaultValue);
+		if (!componentI18NKeys.contains(pv)) componentI18NKeys.add(pv);
 	}
 
 	public static void saveFormI18NTexts(Form form) throws RepositoryException
@@ -716,7 +718,7 @@ public class EclipseMessages implements ICustomMessageLoader
 
 		if (activeSolutionI18NServerName != null && activeSolutionI18NTableName != null)
 		{
-			final ArrayList<String> i18nKeysToSave = new ArrayList<String>();
+			final ArrayList<Pair<String, String>> i18nKeysToSave = new ArrayList<Pair<String, String>>();
 			form.acceptVisitor(new IPersistVisitor()
 			{
 				@Override
@@ -724,7 +726,7 @@ public class EclipseMessages implements ICustomMessageLoader
 				{
 					if (o instanceof ISupportText)
 					{
-						List<String> componentI18NKeys = componentsI18NKeys.remove(o);
+						List<Pair<String, String>> componentI18NKeys = componentsI18NKeys.remove(o);
 						if (componentI18NKeys != null) i18nKeysToSave.addAll(componentI18NKeys);
 					}
 					return IPersistVisitor.CONTINUE_TRAVERSAL;
@@ -743,14 +745,10 @@ public class EclipseMessages implements ICustomMessageLoader
 			}
 
 			TreeMap<String, MessageEntry> messages = new TreeMap<String, MessageEntry>();
-			for (String i18nKey : i18nKeysToSave)
+			for (Pair<String, String> i18nKeyValue : i18nKeysToSave)
 			{
-				if (i18nKey.startsWith("i18n:"))
-				{
-					String k = i18nKey.substring(5);
-					MessageEntry messageEntry = new MessageEntry(null, k, k);
-					messages.put(messageEntry.getLanguageKey(), messageEntry);
-				}
+				MessageEntry messageEntry = new MessageEntry(null, i18nKeyValue.getLeft(), i18nKeyValue.getRight());
+				messages.put(messageEntry.getLanguageKey(), messageEntry);
 			}
 
 			writeMessages(activeSolutionI18NServerName, activeSolutionI18NTableName, messages, new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()),

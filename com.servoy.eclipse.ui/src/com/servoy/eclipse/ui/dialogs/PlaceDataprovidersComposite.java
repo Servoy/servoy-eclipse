@@ -262,7 +262,7 @@ public class PlaceDataprovidersComposite extends Composite
 				placeWithLabelsButton.setSelection(currentSelection.optBoolean(PLACE_WITH_LABELS_PROPERTY));
 				onTopButton.setSelection(currentSelection.optBoolean(PLACE_ON_TOP_PROPERTY));
 				fillName.setSelection(currentSelection.optBoolean(FILL_NAME_PROPERTY));
-				fillText.setSelection(currentSelection.optBoolean(FILL_TEXT_PROPERTY));
+				fillText.setSelection(currentSelection.optBoolean(FILL_TEXT_PROPERTY) || currentSelection.optBoolean(AUTOMATIC_I18N_PROPERTY));
 				placeHorizontally.setSelection(currentSelection.optBoolean(PLACE_HORIZONTALLY_PROPERTY));
 				fieldWidth.setText(currentSelection.optString(FIELD_WIDTH_PROPERTY));
 				fieldHeight.setText(currentSelection.optString(FIELD_HEIGTH_PROPERTY));
@@ -270,6 +270,7 @@ public class PlaceDataprovidersComposite extends Composite
 				labelHeight.setText(currentSelection.optString(LABEL_HEIGTH_PROPERTY));
 				automaticI18N.setSelection(currentSelection.optBoolean(AUTOMATIC_I18N_PROPERTY));
 				i18nPrefix.setText(currentSelection.optString(I18N_PREFIX_PROPERTY));
+				i18nPrefix.setEnabled(currentSelection.optBoolean(AUTOMATIC_I18N_PROPERTY));
 
 				updatePlaceWithLabelState();
 			}
@@ -498,14 +499,16 @@ public class PlaceDataprovidersComposite extends Composite
 		gd.horizontalSpan = 2;
 		new Label(this, SWT.NONE).setLayoutData(gd);
 		fillName = createLabelAndCheck("Fill name property", FILL_NAME_PROPERTY);
-		fillName.addSelectionListener(new SelectionListener()
+		fillText = createLabelAndCheck("Fill text property", FILL_TEXT_PROPERTY);
+		fillText.addSelectionListener(new SelectionListener()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				if (!fillName.getSelection())
+				if (!fillText.getSelection())
 				{
 					automaticI18N.setSelection(false);
+					i18nPrefix.setEnabled(false);
 				}
 			}
 
@@ -514,7 +517,6 @@ public class PlaceDataprovidersComposite extends Composite
 			{
 			}
 		});
-		fillText = createLabelAndCheck("Fill text property", FILL_TEXT_PROPERTY);
 
 		placeHorizontally = createLabelAndCheck("Place Horizontally", PLACE_HORIZONTALLY_PROPERTY);
 
@@ -529,8 +531,9 @@ public class PlaceDataprovidersComposite extends Composite
 			{
 				if (automaticI18N.getSelection())
 				{
-					fillName.setSelection(true);
+					fillText.setSelection(true);
 				}
+				i18nPrefix.setEnabled(automaticI18N.getSelection());
 			}
 
 			@Override

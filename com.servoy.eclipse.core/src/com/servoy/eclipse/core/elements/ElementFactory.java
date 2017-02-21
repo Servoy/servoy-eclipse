@@ -643,14 +643,6 @@ public class ElementFactory
 						if (label instanceof GraphicalComponent)
 						{
 							((GraphicalComponent)label).setLabelFor(name);
-							if (configuration.isAutomaticI18N())
-							{
-								setI18NText((GraphicalComponent)label, configuration, label.getName());
-							}
-							else if (configuration.isFillText())
-							{
-								((GraphicalComponent)label).setText(labelText);
-							}
 						}
 						else if (label instanceof WebComponent)
 						{
@@ -663,6 +655,19 @@ public class ElementFactory
 							}
 						}
 					}
+
+					if (label instanceof GraphicalComponent)
+					{
+						if (configuration.isAutomaticI18N())
+						{
+							setI18NText((GraphicalComponent)label, configuration, configuration.isFillName() ? label.getName() : name, labelText);
+						}
+						else if (configuration.isFillText())
+						{
+							((GraphicalComponent)label).setText(labelText);
+						}
+					}
+
 					int labelSpacing = configuration.getLabelSpacing() > 0 ? configuration.getLabelSpacing() : 20;
 
 					if (configuration.isPlaceHorizontally())
@@ -750,9 +755,9 @@ public class ElementFactory
 				}
 				if (bc instanceof ISupportText)
 				{
-					if (configuration.isFillName() && configuration.isAutomaticI18N())
+					if (configuration.isAutomaticI18N())
 					{
-						setI18NText((ISupportText)bc, configuration, bc.getName());
+						setI18NText((ISupportText)bc, configuration, name, labelText);
 					}
 					else if (configuration.isFillText())
 					{
@@ -770,7 +775,7 @@ public class ElementFactory
 		return lst.toArray(new IPersist[lst.size()]);
 	}
 
-	private static void setI18NText(ISupportText textComponent, IPlaceDataProviderConfiguration configuration, String name)
+	private static void setI18NText(ISupportText textComponent, IPlaceDataProviderConfiguration configuration, String name, String defaultValue)
 	{
 		StringBuilder i18nText = new StringBuilder("i18n:");
 		String prefix = configuration.getI18NPrefix();
@@ -781,7 +786,7 @@ public class ElementFactory
 		i18nText.append(name);
 		String i18nTextString = i18nText.toString();
 		textComponent.setText(i18nTextString);
-		EclipseMessages.addI18NKey(textComponent, i18nTextString);
+		EclipseMessages.addI18NKey(textComponent, i18nTextString, defaultValue);
 	}
 
 	/**
