@@ -786,7 +786,7 @@ public class ElementFactory
 		i18nText.append(name);
 		String i18nTextString = i18nText.toString();
 		textComponent.setText(i18nTextString);
-		EclipseMessages.addI18NKey(textComponent, i18nTextString, defaultValue);
+		EclipseMessages.addI18NKey(textComponent, i18nTextString.substring(5), defaultValue);
 	}
 
 	/**
