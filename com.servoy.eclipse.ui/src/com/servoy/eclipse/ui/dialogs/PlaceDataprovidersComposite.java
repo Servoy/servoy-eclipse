@@ -262,7 +262,7 @@ public class PlaceDataprovidersComposite extends Composite
 				placeWithLabelsButton.setSelection(currentSelection.optBoolean(PLACE_WITH_LABELS_PROPERTY));
 				onTopButton.setSelection(currentSelection.optBoolean(PLACE_ON_TOP_PROPERTY));
 				fillName.setSelection(currentSelection.optBoolean(FILL_NAME_PROPERTY));
-				fillText.setSelection(currentSelection.optBoolean(FILL_TEXT_PROPERTY) || currentSelection.optBoolean(AUTOMATIC_I18N_PROPERTY));
+				fillText.setSelection(currentSelection.optBoolean(FILL_TEXT_PROPERTY));
 				placeHorizontally.setSelection(currentSelection.optBoolean(PLACE_HORIZONTALLY_PROPERTY));
 				fieldWidth.setText(currentSelection.optString(FIELD_WIDTH_PROPERTY));
 				fieldHeight.setText(currentSelection.optString(FIELD_HEIGTH_PROPERTY));
@@ -270,9 +270,9 @@ public class PlaceDataprovidersComposite extends Composite
 				labelHeight.setText(currentSelection.optString(LABEL_HEIGTH_PROPERTY));
 				automaticI18N.setSelection(currentSelection.optBoolean(AUTOMATIC_I18N_PROPERTY));
 				i18nPrefix.setText(currentSelection.optString(I18N_PREFIX_PROPERTY));
-				i18nPrefix.setEnabled(currentSelection.optBoolean(AUTOMATIC_I18N_PROPERTY));
 
 				updatePlaceWithLabelState();
+				updateI18NEnableState();
 			}
 		});
 		configurationViewer.getCCombo().addModifyListener(new ModifyListener()
@@ -469,6 +469,7 @@ public class PlaceDataprovidersComposite extends Composite
 			public void widgetSelected(SelectionEvent e)
 			{
 				updatePlaceWithLabelState();
+				updateI18NEnableState();
 			}
 
 			@Override
@@ -505,11 +506,7 @@ public class PlaceDataprovidersComposite extends Composite
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				if (!fillText.getSelection())
-				{
-					automaticI18N.setSelection(false);
-					i18nPrefix.setEnabled(false);
-				}
+				updateI18NEnableState();
 			}
 
 			@Override
@@ -529,10 +526,6 @@ public class PlaceDataprovidersComposite extends Composite
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				if (automaticI18N.getSelection())
-				{
-					fillText.setSelection(true);
-				}
 				i18nPrefix.setEnabled(automaticI18N.getSelection());
 			}
 
@@ -985,5 +978,15 @@ public class PlaceDataprovidersComposite extends Composite
 	public static interface IReadyListener
 	{
 		void isReady(boolean ready);
+	}
+
+	private void updateI18NEnableState()
+	{
+		if (ServoyModelFinder.getServoyModel().getActiveProject().getSolution().getI18nDataSource() != null)
+		{
+			boolean i18nEnableState = placeWithLabelsButton.getSelection() || fillText.getSelection();
+			automaticI18N.setEnabled(i18nEnableState);
+			i18nPrefix.setEnabled(i18nEnableState && automaticI18N.getSelection());
+		}
 	}
 }

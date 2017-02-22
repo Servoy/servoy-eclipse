@@ -660,9 +660,9 @@ public class ElementFactory
 					{
 						if (configuration.isAutomaticI18N())
 						{
-							setI18NText((GraphicalComponent)label, configuration, configuration.isFillName() ? label.getName() : name, labelText);
+							setI18NText((GraphicalComponent)label, configuration, name + "_label", labelText);
 						}
-						else if (configuration.isFillText())
+						else
 						{
 							((GraphicalComponent)label).setText(labelText);
 						}
