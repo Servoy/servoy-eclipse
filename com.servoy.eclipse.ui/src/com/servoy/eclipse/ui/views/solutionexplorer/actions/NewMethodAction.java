@@ -320,6 +320,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 								((WebComponent)persist).getTypeName());
 							if (spec.getHandler(methodKey) != null)
 							{
+								template = MethodTemplate.DEFAULT_TEMPLATE;
 								PropertyDescription def = spec.getHandler(methodKey).getAsPropertyDescription();
 								if (def != null && def.getConfig() instanceof JSONObject)
 								{
@@ -602,7 +603,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		String defaultName = "";
 		if (methodKey != null)
 		{
-			MethodTemplate template = MethodTemplate.getTemplate(ScriptMethod.class, methodKey);
+			MethodTemplate template = persist instanceof WebComponent ? MethodTemplate.DEFAULT_TEMPLATE
+				: MethodTemplate.getTemplate(ScriptMethod.class, methodKey);
 			MethodArgument signature = template.getSignature();
 			String name;
 			if (signature == null || signature.getName() == null)
