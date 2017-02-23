@@ -58,6 +58,7 @@ import com.servoy.j2db.Messages;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.I18NUtil;
 import com.servoy.j2db.persistence.I18NUtil.MessageEntry;
+import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
@@ -696,9 +697,9 @@ public class EclipseMessages implements ICustomMessageLoader
 		return outputBytesCut;
 	}
 
-	private static WeakHashMap<ISupportText, List<Pair<String, String>>> componentsI18NKeys = new WeakHashMap<ISupportText, List<Pair<String, String>>>();
+	private static WeakHashMap<IFormElement, List<Pair<String, String>>> componentsI18NKeys = new WeakHashMap<IFormElement, List<Pair<String, String>>>();
 
-	public static void addI18NKey(ISupportText component, String i18nKey, String defaultValue)
+	public static void addI18NKey(IFormElement component, String i18nKey, String defaultValue)
 	{
 		List<Pair<String, String>> componentI18NKeys = componentsI18NKeys.get(component);
 		if (componentI18NKeys == null)
@@ -733,13 +734,13 @@ public class EclipseMessages implements ICustomMessageLoader
 				}
 			});
 
-			ArrayList<ISupportText> remainedI18NComponents = new ArrayList<ISupportText>();
-			for (ISupportText textComponent : componentsI18NKeys.keySet())
+			ArrayList<IFormElement> remainedI18NComponents = new ArrayList<IFormElement>();
+			for (IFormElement textComponent : componentsI18NKeys.keySet())
 			{
 				Form f = (Form)((IPersist)textComponent).getAncestor(IRepository.FORMS);
 				if (form.equals(f)) remainedI18NComponents.add(textComponent);
 			}
-			for (ISupportText textComponent : remainedI18NComponents)
+			for (IFormElement textComponent : remainedI18NComponents)
 			{
 				componentsI18NKeys.remove(textComponent);
 			}
