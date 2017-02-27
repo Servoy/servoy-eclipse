@@ -1610,6 +1610,19 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 	}
 
+	private static String getParsedSample(final String name, final WebObjectFunctionDefinition api)
+	{
+		if (api.getDocumentation().contains("@example"))
+		{
+			String description = getParsedComment(api.getDocumentation(), name, false);
+			String example = description.split("@example")[1].split("@")[0];
+			example = example.replaceAll("<br>|<br/>", "\n");
+			example = example.replaceAll("\\<.*?\\>", "");
+			return example;
+		}
+		return null;
+	}
+
 	private SimpleUserNode[] getJSMethods(Object o, final String elementName, String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames)
 	{
 		if (o == null) return EMPTY_LIST;
@@ -1660,7 +1673,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							@Override
 							public String getSample(String methodName)
 							{
-								return null;
+								return getParsedSample(elementName, api);
 							}
 
 							@Override
@@ -2021,7 +2034,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					@Override
 					public String getSample(String methodName)
 					{
-						return null;
+						return getParsedSample(webcomponent.getName(), api);
 					}
 
 					@Override
