@@ -974,8 +974,9 @@ public class NewFormWizard extends Wizard implements INewWizard
 				styleNameCombo.setSelection(new StructuredSelection(superForm.getStyleName() == null ? "" : superForm.getStyleName()));
 			}
 
-			listFormCheck.setSelection(superForm != null ? superForm.isResponsiveLayout() : false);
-			listFormCheck.setEnabled(superForm == null);
+			boolean isParentLogicalForm = superForm != null && !superForm.isResponsiveLayout() && !superForm.getParts().hasNext();
+			if (!isParentLogicalForm) listFormCheck.setSelection(superForm != null ? superForm.isResponsiveLayout() : false);
+			listFormCheck.setEnabled(superForm == null || isParentLogicalForm);
 			dataSourceViewer.setButtonText((superForm == null || superForm.getDataSource() == null) ? TreeSelectViewer.DEFAULT_BUTTON_TEXT : "");
 			setPageComplete(validatePage());
 		}
