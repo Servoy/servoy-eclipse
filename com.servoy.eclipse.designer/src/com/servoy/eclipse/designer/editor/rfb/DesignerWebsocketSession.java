@@ -49,6 +49,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractContainer;
 import com.servoy.j2db.persistence.BaseComponent;
+import com.servoy.j2db.persistence.ChildWebComponent;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IFormElement;
@@ -57,6 +58,7 @@ import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.LayoutContainer;
 import com.servoy.j2db.persistence.Part;
+import com.servoy.j2db.persistence.Portal;
 import com.servoy.j2db.persistence.PositionComparator;
 import com.servoy.j2db.server.ngclient.FormElement;
 import com.servoy.j2db.server.ngclient.FormElementContext;
@@ -343,7 +345,10 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 							refreshTemplate.add(baseComponent);
 						}
 					}
-
+					if (persist instanceof ChildWebComponent || persist.getParent() instanceof Portal)
+					{
+						renderGhosts = true;
+					}
 					checkFormComponents(updatedFormComponentsDesignId, formComponentsComponents,
 						FormElementHelper.INSTANCE.getFormElement(baseComponent, fs, null, true), fs);
 				}
