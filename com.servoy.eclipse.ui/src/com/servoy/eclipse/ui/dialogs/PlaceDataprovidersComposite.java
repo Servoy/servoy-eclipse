@@ -221,12 +221,14 @@ public class PlaceDataprovidersComposite extends Composite
 
 		Label confLabel = new Label(this, SWT.NONE);
 		confLabel.setText("Configuration: ");
+		confLabel.setToolTipText("Select the configuration, or type in new string to save the current configuration below");
 		Composite confAndDelete = new Composite(this, SWT.NONE);
 		confAndDelete.setLayout(new GridLayout(2, false));
 		confAndDelete.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		final CCombo configuration = new CCombo(confAndDelete, SWT.BORDER);
 		configuration.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		configurationViewer = new ComboViewer(configuration);
+		configurationViewer.getCCombo().setToolTipText("Select the configuration, or type in new string to save the current configuration below");
 		configurationViewer.setLabelProvider(new ColumnLabelProvider()
 		{
 			@Override
@@ -324,6 +326,8 @@ public class PlaceDataprovidersComposite extends Composite
 			}
 		});
 
+		dataproviderTreeViewer.getViewer().getTree().setToolTipText("Select the dataprovders for which you want to place fields");
+
 		dataproviderTreeViewer.addOpenListener(new IOpenListener()
 		{
 			@Override
@@ -343,12 +347,15 @@ public class PlaceDataprovidersComposite extends Composite
 		tableViewer = new TableViewer(container, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		tableViewer.getTable().setLinesVisible(true);
 		tableViewer.getTable().setHeaderVisible(true);
+		tableViewer.getTable().setToolTipText("The selected dataproviders and the component or template that will be used to place a field");
 		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		dataproviderColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT);
 		dataproviderColumn.setText("Name");
+		dataproviderColumn.setToolTipText("The dataprovider for which a field must be placed");
 
 		templateColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT);
 		templateColumn.setText("Component/Template");
+		templateColumn.setToolTipText("The component or template that will be used for the placed field, you can override this default");
 
 		TableColumn removeColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT);
 		removeColumn.setText("X");
@@ -430,11 +437,11 @@ public class PlaceDataprovidersComposite extends Composite
 		new Label(this, SWT.NONE).setLayoutData(gd);
 
 
-		stringCombo = generateTypeCombo("String", inputs, TEXT_PROPERTY);
-		intCombo = generateTypeCombo("Integer", inputs, INTEGER_PROPERTY);
-		numberCombo = generateTypeCombo("Number", inputs, NUMBER_PROPERTY);
-		dateCombo = generateTypeCombo("Date", inputs, DATETIME_PROPERTY);
-		mediaCombo = generateTypeCombo("Media", inputs, MEDIA_PROPERTY);
+		stringCombo = generateTypeCombo("String", inputs, TEXT_PROPERTY, "The component/template to use for the STRING type dataprovider");
+		intCombo = generateTypeCombo("Integer", inputs, INTEGER_PROPERTY, "The component/template to use for the INTEGERtype dataprovider");
+		numberCombo = generateTypeCombo("Number", inputs, NUMBER_PROPERTY, "The component/template to use for the NUMBER type dataprovider");
+		dateCombo = generateTypeCombo("Date", inputs, DATETIME_PROPERTY, "The component/template to use for the DATE type dataprovider");
+		mediaCombo = generateTypeCombo("Media", inputs, MEDIA_PROPERTY, "The component/template to use for the MEDIA type dataprovider");
 
 
 		tableViewer.setInput(input);
@@ -443,25 +450,25 @@ public class PlaceDataprovidersComposite extends Composite
 		gd.horizontalSpan = 2;
 		new Label(this, SWT.NONE).setLayoutData(gd);
 
-		fieldSpacing = createLabelAndField("Field spacing", FIELD_SPACING_PROPERTY);
+		fieldSpacing = createLabelAndField("Field spacing", FIELD_SPACING_PROPERTY, "How much space must there between the placed fields in pixels");
 		Label lbl = new Label(this, SWT.NONE);
 		lbl.setText("Default size (w,h)");
-		lbl.setToolTipText("The default size used from components (templates will use the template size");
+		lbl.setToolTipText("The default size used from components (templates will use the template size)");
 		Composite sizeComposite = new Composite(this, SWT.NONE);
 		layout = new GridLayout(2, true);
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
 		sizeComposite.setLayout(layout);
 		sizeComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fieldWidth = createField(sizeComposite, FIELD_WIDTH_PROPERTY);
-		fieldHeight = createField(sizeComposite, FIELD_HEIGTH_PROPERTY);
+		fieldWidth = createField(sizeComposite, FIELD_WIDTH_PROPERTY, "Default width of the placed field (ignored for templates)");
+		fieldHeight = createField(sizeComposite, FIELD_HEIGTH_PROPERTY, "Default height of the placed field (ignored for templates)");
 
 		gd = new GridData();
 		gd.horizontalSpan = 2;
 		new Label(this, SWT.NONE).setLayoutData(gd);
 
-		placeWithLabelsButton = createLabelAndCheck("Place with labels", PLACE_WITH_LABELS_PROPERTY);
-		labelComponentCombo = generateTypeCombo("Label Component", inputs, LABEL_COMPONENT_PROPERTY);
+		placeWithLabelsButton = createLabelAndCheck("Place with labels", PLACE_WITH_LABELS_PROPERTY, "Place a label component together with the field");
+		labelComponentCombo = generateTypeCombo("Label Component", inputs, LABEL_COMPONENT_PROPERTY, "The component/template to use for the label component");
 		labelComponentCombo.getCCombo().setEnabled(placeWithLabelsButton.getSelection());
 		placeWithLabelsButton.addSelectionListener(new SelectionListener()
 		{
@@ -478,29 +485,30 @@ public class PlaceDataprovidersComposite extends Composite
 				widgetSelected(e);
 			}
 		});
-		labelSpacing = createLabelAndField("Label spacing", LABEL_SPACING_PROPERTY);
+		labelSpacing = createLabelAndField("Label spacing", LABEL_SPACING_PROPERTY, "How much space must there between the label and the field in pixels");
 		labelSpacing.setEnabled(placeWithLabelsButton.getSelection());
 
 		lbl = new Label(this, SWT.NONE);
 		lbl.setText("Label size (w,h)");
-		lbl.setToolTipText("The default size used from labels (templates will use the template size");
+		lbl.setToolTipText("The default size used from labels (templates will use the template size)");
 		sizeComposite = new Composite(this, SWT.NONE);
 		layout = new GridLayout(2, true);
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
 		sizeComposite.setLayout(layout);
 		sizeComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		labelWidth = createField(sizeComposite, LABEL_WIDTH_PROPERTY);
-		labelHeight = createField(sizeComposite, LABEL_HEIGTH_PROPERTY);
+		labelWidth = createField(sizeComposite, LABEL_WIDTH_PROPERTY, "Default width of the placed label (ignored for templates)");
+		labelHeight = createField(sizeComposite, LABEL_HEIGTH_PROPERTY, "Default height of the placed label (ignored for templates)");
 
-		onTopButton = createLabelAndCheck("Place label on top", PLACE_ON_TOP_PROPERTY);
+		onTopButton = createLabelAndCheck("Place label on top", PLACE_ON_TOP_PROPERTY, "Place the label on top of the field (instead of in front)");
 		onTopButton.setEnabled(placeWithLabelsButton.getSelection());
 
 		gd = new GridData();
 		gd.horizontalSpan = 2;
 		new Label(this, SWT.NONE).setLayoutData(gd);
-		fillName = createLabelAndCheck("Fill name property", FILL_NAME_PROPERTY);
-		fillText = createLabelAndCheck("Fill text property", FILL_TEXT_PROPERTY);
+		fillName = createLabelAndCheck("Fill name property", FILL_NAME_PROPERTY, "Fill the name property of the field (based on the dataprovider)");
+		fillText = createLabelAndCheck("Fill text property", FILL_TEXT_PROPERTY,
+			"File the text property of the field based on dataprovder or column label property of the table");
 		fillText.addSelectionListener(new SelectionListener()
 		{
 			@Override
@@ -515,12 +523,13 @@ public class PlaceDataprovidersComposite extends Composite
 			}
 		});
 
-		placeHorizontally = createLabelAndCheck("Place Horizontally", PLACE_HORIZONTALLY_PROPERTY);
+		placeHorizontally = createLabelAndCheck("Place Horizontally", PLACE_HORIZONTALLY_PROPERTY, "Place the field horizontal (for tableview mode)");
 
 		gd = new GridData();
 		gd.horizontalSpan = 2;
 		new Label(this, SWT.NONE).setLayoutData(gd);
-		automaticI18N = createLabelAndCheck("Automatic i18n text property", AUTOMATIC_I18N_PROPERTY);
+		automaticI18N = createLabelAndCheck("Automatic i18n text property", AUTOMATIC_I18N_PROPERTY,
+			"Fill the text property fo the field or text of the label component through a generated i18n key");
 		automaticI18N.addSelectionListener(new SelectionListener()
 		{
 			@Override
@@ -535,7 +544,7 @@ public class PlaceDataprovidersComposite extends Composite
 			}
 		});
 
-		i18nPrefix = createLabelAndField("I18N prefix", I18N_PREFIX_PROPERTY);
+		i18nPrefix = createLabelAndField("I18N prefix", I18N_PREFIX_PROPERTY, "The prefix to use when generating the i18nkey (i18n:prefix_dataprovider}");
 
 		Label i18nInfo = new Label(this, SWT.NONE);
 		gd = new GridData();
@@ -609,17 +618,19 @@ public class PlaceDataprovidersComposite extends Composite
 	 * @return
 	 *
 	 */
-	private Button createLabelAndCheck(String label, final String property)
+	private Button createLabelAndCheck(String label, final String property, String tooltip)
 	{
 		GridData gd = new GridData();
 		gd.verticalAlignment = SWT.TOP;
 		Label lbl = new Label(this, SWT.NONE);
 		lbl.setText(label);
 		lbl.setLayoutData(gd);
+		lbl.setToolTipText(tooltip);
 		final Button button = new Button(this, SWT.CHECK);
 		gd = new GridData();
 		gd.verticalAlignment = SWT.TOP;
 		button.setLayoutData(gd);
+		button.setToolTipText(tooltip);
 		button.setSelection(currentSelection.optBoolean(property));
 		button.addSelectionListener(new SelectionListener()
 		{
@@ -642,21 +653,24 @@ public class PlaceDataprovidersComposite extends Composite
 	 * @return
 	 *
 	 */
-	private Text createLabelAndField(String label, final String property)
+	private Text createLabelAndField(String label, final String property, String tooltip)
 	{
-		new Label(this, SWT.NONE).setText(label);
-		return createField(this, property);
+		Label lbl = new Label(this, SWT.NONE);
+		lbl.setText(label);
+		lbl.setToolTipText(tooltip);
+		return createField(this, property, tooltip);
 	}
 
 	/**
 	 * @param property
 	 * @return
 	 */
-	private Text createField(Composite parent, final String property)
+	private Text createField(Composite parent, final String property, String tooltip)
 	{
 		final Text text = new Text(parent, SWT.BORDER);
 		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		text.setText(currentSelection.optString(property));
+		text.setToolTipText(tooltip);
 		text.addModifyListener(new ModifyListener()
 		{
 			@Override
@@ -672,11 +686,13 @@ public class PlaceDataprovidersComposite extends Composite
 	 * @return
 	 *
 	 */
-	private ComboViewer generateTypeCombo(String label, Object[] viewerInput, final String type)
+	private ComboViewer generateTypeCombo(String label, Object[] viewerInput, final String type, String tooltip)
 	{
 		Label stringLabel = new Label(this, SWT.NONE);
 		stringLabel.setText(label);
+		stringLabel.setToolTipText(tooltip);
 		final CCombo stringCC = new CCombo(this, SWT.BORDER | SWT.SEARCH);
+		stringCC.setToolTipText(tooltip);
 		stringCC.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		ComboViewer comboViewer = new ComboViewer(stringCC);
 		comboViewer.setLabelProvider(new TemplateOrWebObjectLabelProvider());
