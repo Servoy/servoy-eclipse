@@ -26,11 +26,9 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
-import com.servoy.j2db.persistence.ArgumentType;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
-import com.servoy.j2db.persistence.MethodArgument;
 import com.servoy.j2db.persistence.ScriptMethod;
 
 public class OverrideMethodAction extends Action implements ISelectionChangedListener
@@ -88,23 +86,9 @@ public class OverrideMethodAction extends Action implements ISelectionChangedLis
 					SimpleUserNode listNode = viewer.getSelectedListNode();
 					if (listNode != null && listNode.getRealObject() instanceof ScriptMethod)
 					{
-						String declaration = ((ScriptMethod)listNode.getRealObject()).getDeclaration();
-						MethodArgument returnType = null;
-						if (declaration.contains("@return"))
-						{
-							declaration = declaration.substring(declaration.indexOf("@return"));
-							declaration = declaration.substring(0, declaration.indexOf("\n"));
-							String type = declaration.substring(declaration.indexOf("{") + 1, declaration.indexOf("}"));
-							String description = "";
-							if (declaration.length() >= (declaration.indexOf("}") + 2))
-							{
-								description = declaration.substring(declaration.indexOf("}") + 2);
-							}
-							returnType = new MethodArgument("", ArgumentType.valueOf(type), description);
-							((ScriptMethod)listNode.getRealObject()).setRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE, returnType);
-						}
-						NewMethodAction.createNewMethod(viewer.getSite().getShell(), (Form)node.getRealObject(), null, true,
-							((ScriptMethod)listNode.getRealObject()).getName(), null, returnType);
+						ScriptMethod scriptMethod = (ScriptMethod)listNode.getRealObject();
+						NewMethodAction.createNewMethod(viewer.getSite().getShell(), (Form)node.getRealObject(), null, true, scriptMethod.getName(), null,
+								scriptMethod.getRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE));
 					}
 				}
 			}

@@ -1259,8 +1259,8 @@ public class WarExporter
 						String code = properties.getProperty("license." + i + ".code", "");
 						if (code.startsWith(IWarExportModel.enc_prefix)) code = exportModel.decryptPassword(desCipher, code);
 						codes.add(code);
-						licenses.add(new License(properties.getProperty("license." + i + ".company_name"), code,
-							Integer.parseInt(properties.getProperty("license." + i + ".licenses"))));
+						licenses.add(
+							new License(properties.getProperty("license." + i + ".company_name"), code, properties.getProperty("license." + i + ".licenses")));
 					}
 				}
 
@@ -1449,7 +1449,7 @@ public class WarExporter
 		for (License license : licenses)
 		{
 			properties.setProperty("license." + i + ".company_name", license.getCompanyKey());
-			properties.setProperty("license." + i + ".licenses", Integer.toString(license.getNumberOfLicenses()));
+			properties.setProperty("license." + i + ".licenses", license.getNumberOfLicenses());
 			properties.setProperty("license." + i + ".product", "0");//client
 			try
 			{

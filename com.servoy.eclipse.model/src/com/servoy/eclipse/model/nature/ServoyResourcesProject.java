@@ -30,9 +30,15 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.model.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IFileAccess;
@@ -326,23 +332,73 @@ public class ServoyResourcesProject implements IProjectNature
 		listeners = null;
 	}
 
-	public JSONObject getPlaceDataproviderPreferences()
+	/**
+	 * @throws JSONException if "placedataprovider.preferences" doesn't contain valid JSON.
+	 */
+	public JSONObject getPlaceDataproviderPreferences() throws JSONException
 	{
+		ServoyJSONObject prefs;
+
 		WorkspaceFileAccess wsa = new WorkspaceFileAccess(ResourcesPlugin.getWorkspace());
-		IFile file = getProject().getFile("placedataprovider.preferences");
+		final IFile file = getProject().getFile("placedataprovider.preferences");
 		if (file.exists())
 		{
 			try
 			{
 				String contents = wsa.getUTF8Contents(file.getFullPath().toPortableString());
-				return new ServoyJSONObject(contents, false);
+				prefs = new ServoyJSONObject(contents, false, false, true);
+			}
+			catch (JSONException e)
+			{
+				ServoyLog.logError(
+					"Corrupt 'placedataprovider.preferences' found in the resources project; will start over with only default place dataprovider preferences...",
+					e);
+				throw e;
 			}
 			catch (IOException e)
 			{
 				ServoyLog.logError(e);
+				prefs = new ServoyJSONObject();
 			}
 		}
-		return new ServoyJSONObject();
+		else prefs = new ServoyJSONObject();
+
+		prefs.setNoQuotes(false); // important, as configuration names are stored as keys - and without the quotes we would store invalid json (or they would need to be restrictions on spaces and so on)
+		prefs.setNewLines(true);
+		prefs.setNoBrackets(false);
+		return prefs;
+	}
+
+	public void backupCorruptedPlaceDataproivderPreferences()
+	{
+		final IFile file = getProject().getFile("placedataprovider.preferences");
+		if (file.exists())
+		{
+			Job moveJob = new Job("Backing up corrupt 'placedataprovider.preferences' file.")
+			{
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
+				{
+					IStatus status;
+					try
+					{
+						file.move(file.getFullPath().removeLastSegments(1).append("placedataprovider.preferences.backup"), true, monitor);
+						status = Status.OK_STATUS;
+					}
+					catch (CoreException e)
+					{
+						ServoyLog.logError("Failed to backup 'placedataprovider.preferences': ", e);
+						status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Failed to backup 'placedataprovider.preferences': ", e);
+					}
+					return status;
+				}
+			};
+
+			moveJob.setRule(file.getParent());
+			moveJob.setUser(true);
+			moveJob.schedule();
+		}
 	}
 
 	public void savePlaceDataproviderPreferences(JSONObject object)

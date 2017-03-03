@@ -178,7 +178,7 @@ public class AddFieldAction extends DesignerToolbarAction
 		// multiple selection
 		return new DataFieldRequest(getRequestType(), dpConf.getDataProvidersConfig(), false, dpConf.isPlaceWithLabels(), dpConf.isPlaceHorizontally(),
 			dpConf.isFillText(), dpConf.isFillName(), dpConf.getFieldSpacing(), dpConf.getLabelSpacing(), dpConf.getLabelComponent(), dpConf.isPlaceOnTop(),
-			dpConf.getFieldSize(), dpConf.getLabelSize());
+			dpConf.getFieldSize(), dpConf.getLabelSize(), dpConf.isAutomaticI18N(), dpConf.getI18NPrefix());
 	}
 
 	/**

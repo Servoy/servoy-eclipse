@@ -79,4 +79,14 @@ public interface IPlaceDataProviderConfiguration
 	 * @return the labelSize
 	 */
 	public Dimension getLabelSize();
+
+	/**
+	 * @return the automaticI18N
+	 */
+	public boolean isAutomaticI18N();
+
+	/**
+	 * @return the i18n prefix
+	 */
+	public String getI18NPrefix();
 }

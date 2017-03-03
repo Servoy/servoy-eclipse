@@ -44,6 +44,8 @@ public class DataFieldRequest extends DataRequest implements IPlaceDataProviderC
 	public final boolean placeOnTop;
 	private Dimension labelSize;
 	private Dimension fieldSize;
+	private final boolean automaticI18N;
+	private final String i18nPrefix;
 
 	public DataFieldRequest(Object type, Object[] data, boolean placeAsLabels, boolean placeWithLabels, boolean placeHorizontal, boolean fillText,
 		boolean fillName)
@@ -58,6 +60,8 @@ public class DataFieldRequest extends DataRequest implements IPlaceDataProviderC
 		this.labelSpacing = -1;
 		this.labelComponent = null;
 		this.placeOnTop = false;
+		this.automaticI18N = false;
+		this.i18nPrefix = null;
 	}
 
 	/**
@@ -75,7 +79,7 @@ public class DataFieldRequest extends DataRequest implements IPlaceDataProviderC
 	 */
 	public DataFieldRequest(Object type, List<Pair<IDataProvider, Object>> data, boolean placeAsLabels, boolean placeWithLabels, boolean placeHorizontal,
 		boolean fillText, boolean fillName, int fieldSpacing, int labelSpacing, String labelComponent, boolean placeOnTop, Dimension fieldSize,
-		Dimension labelSize)
+		Dimension labelSize, boolean automaticI18N, String i18nPrefix)
 	{
 		super(type, data);
 		this.placeAsLabels = placeAsLabels;
@@ -89,6 +93,8 @@ public class DataFieldRequest extends DataRequest implements IPlaceDataProviderC
 		this.placeOnTop = placeOnTop;
 		this.labelSize = labelSize;
 		this.fieldSize = fieldSize;
+		this.automaticI18N = automaticI18N;
+		this.i18nPrefix = i18nPrefix;
 	}
 
 	/**
@@ -181,5 +187,17 @@ public class DataFieldRequest extends DataRequest implements IPlaceDataProviderC
 	public Dimension getLabelSize()
 	{
 		return labelSize;
+	}
+
+	@Override
+	public boolean isAutomaticI18N()
+	{
+		return automaticI18N;
+	}
+
+	@Override
+	public String getI18NPrefix()
+	{
+		return i18nPrefix;
 	}
 }

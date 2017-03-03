@@ -320,6 +320,7 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 								((WebComponent)persist).getTypeName());
 							if (spec.getHandler(methodKey) != null)
 							{
+								template = MethodTemplate.DEFAULT_TEMPLATE;
 								PropertyDescription def = spec.getHandler(methodKey).getAsPropertyDescription();
 								if (def != null && def.getConfig() instanceof JSONObject)
 								{
@@ -357,7 +358,12 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 										for (int i = 0; i < parameters.length(); i++)
 										{
 											JSONObject parameter = parameters.getJSONObject(i);
-											arguments.add(new MethodArgument(parameter.optString("name"), ArgumentType.valueOf(parameter.optString("type")),
+											String argumentType = parameter.optString("type");
+											if (spec.getDeclaredCustomObjectTypes().containsKey(argumentType))
+											{
+												argumentType = spec.getName() + "." + argumentType;
+											}
+											arguments.add(new MethodArgument(parameter.optString("name"), ArgumentType.valueOf(argumentType),
 												parameter.optString("description", ""), parameter.optBoolean("optional", false)));
 										}
 									}
@@ -602,7 +608,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 		String defaultName = "";
 		if (methodKey != null)
 		{
-			MethodTemplate template = MethodTemplate.getTemplate(ScriptMethod.class, methodKey);
+			MethodTemplate template = persist instanceof WebComponent ? MethodTemplate.DEFAULT_TEMPLATE
+				: MethodTemplate.getTemplate(ScriptMethod.class, methodKey);
 			MethodArgument signature = template.getSignature();
 			String name;
 			if (signature == null || signature.getName() == null)

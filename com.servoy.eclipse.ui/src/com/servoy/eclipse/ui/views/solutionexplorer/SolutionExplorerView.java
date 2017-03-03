@@ -1461,14 +1461,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			{
 				ServoyLog.logInfo("Could not convert tooltip text to HTML: " + text);
 			}
-			browser.setText(text);
+			browser.setText("<html><body style='background-color:#ffffcc'>" + text + "</body></html>");
 			GridData data = (text.contains("<br>") || text.contains("<br/>") || text.contains("\n")) ? new GridData(600, 150) : new GridData(450, 50);
 			data.horizontalAlignment = GridData.FILL;
 			data.verticalAlignment = GridData.FILL;
 			data.grabExcessHorizontalSpace = true;
 			data.grabExcessVerticalSpace = true;
 			browser.setLayoutData(data);
-
+			setShift(new Point(1, 1));
 			return comp;
 		}
 

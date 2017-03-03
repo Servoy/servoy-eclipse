@@ -28,6 +28,7 @@ import org.w3c.dom.NodeList;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.persistence.ClientMethodTemplatesLoader;
 import com.servoy.j2db.persistence.MethodTemplate;
+import com.servoy.j2db.util.Utils;
 
 public class MethodTemplatesLoader
 {
@@ -39,6 +40,11 @@ public class MethodTemplatesLoader
 			ClientMethodTemplatesLoader.setLoaded();
 
 			InputStream is = MethodTemplatesLoader.class.getResourceAsStream("doc/methodtemplates.xml");
+			if (is == null)
+			{
+				ServoyLog.logError("Error while loading method templates: doc/methodtemplates.xml not found", null);
+				return;
+			}
 			try
 			{
 				DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -64,6 +70,10 @@ public class MethodTemplatesLoader
 			catch (Throwable e)
 			{
 				ServoyLog.logError("Exception while loading method templates.", e);
+			}
+			finally
+			{
+				Utils.close(is);
 			}
 		}
 	}

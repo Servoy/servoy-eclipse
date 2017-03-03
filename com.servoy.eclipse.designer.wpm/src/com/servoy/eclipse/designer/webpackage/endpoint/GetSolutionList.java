@@ -68,6 +68,7 @@ public class GetSolutionList implements IDeveloperService, IActiveProjectListene
 	@Override
 	public void activeProjectChanged(ServoyProject activeProject)
 	{
+		sendSolutionList();
 	}
 
 	@Override
@@ -75,13 +76,16 @@ public class GetSolutionList implements IDeveloperService, IActiveProjectListene
 	{
 		if (updateInfo == IActiveProjectListener.MODULES_UPDATED)
 		{
-			JSONArray packages = executeMethod(null);
-			JSONObject jsonResult = new JSONObject();
-			jsonResult.put("method", GET_SOLUTION_LIST_METHOD);
-			jsonResult.put("result", packages);
-			endpoint.send(jsonResult.toString());
+			sendSolutionList();
 		}
 	}
 
-
+	private void sendSolutionList()
+	{
+		JSONArray packages = executeMethod(null);
+		JSONObject jsonResult = new JSONObject();
+		jsonResult.put("method", GET_SOLUTION_LIST_METHOD);
+		jsonResult.put("result", packages);
+		endpoint.send(jsonResult.toString());
+	}
 }

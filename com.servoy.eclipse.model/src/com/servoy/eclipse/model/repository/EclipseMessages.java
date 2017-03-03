@@ -24,6 +24,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,6 +32,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.WeakHashMap;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
@@ -53,12 +55,20 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.j2db.ICustomMessageLoader;
 import com.servoy.j2db.Messages;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.I18NUtil;
+import com.servoy.j2db.persistence.I18NUtil.MessageEntry;
+import com.servoy.j2db.persistence.IFormElement;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistVisitor;
+import com.servoy.j2db.persistence.IRepository;
+import com.servoy.j2db.persistence.ISupportText;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Pair;
 
 public class EclipseMessages implements ICustomMessageLoader
 {
@@ -406,19 +416,29 @@ public class EclipseMessages implements ICustomMessageLoader
 					workspaceDir.setContents(relativeFilePath, cutFirstLine(bos.toByteArray()));
 					bos.close();
 				}
-				else if (overwriteExisting)
+				else
 				{
 					Properties newMessages = languageOutputEntry.getValue();
 					Properties oldMessages = new Properties();
 					oldMessages.load(new ByteArrayInputStream(workspaceDir.getContents(relativeFilePath)));
 					if (!oldMessages.equals(newMessages))
 					{
-						if (!deleteNonExistingKeys)
+						if (!overwriteExisting || !deleteNonExistingKeys)
 						{
 							// put non-existing keys to the new messages
 							for (Entry<Object, Object> e : oldMessages.entrySet())
 							{
-								if (!newMessages.containsKey(e.getKey())) newMessages.put(e.getKey(), e.getValue());
+								if (!newMessages.containsKey(e.getKey()))
+								{
+									if (!deleteNonExistingKeys)
+									{
+										newMessages.put(e.getKey(), e.getValue());
+									}
+								}
+								else if (!overwriteExisting)
+								{
+									newMessages.put(e.getKey(), e.getValue());
+								}
 							}
 						}
 
@@ -440,6 +460,7 @@ public class EclipseMessages implements ICustomMessageLoader
 				{
 					messagesResource.accept(new IResourceVisitor()
 					{
+
 						public boolean visit(IResource resource) throws CoreException
 						{
 							String resourceName = resource.getName();
@@ -472,7 +493,9 @@ public class EclipseMessages implements ICustomMessageLoader
 				}
 			}
 		}
-		catch (Exception e)
+		catch (
+
+		Exception e)
 		{
 			throw new RepositoryException(e);
 		}
@@ -672,5 +695,65 @@ public class EclipseMessages implements ICustomMessageLoader
 		System.arraycopy(output, newLineIdx + 1, outputBytesCut, 0, outputBytesCut.length);
 
 		return outputBytesCut;
+	}
+
+	private static WeakHashMap<IFormElement, List<Pair<String, String>>> componentsI18NKeys = new WeakHashMap<IFormElement, List<Pair<String, String>>>();
+
+	public static void addI18NKey(IFormElement component, String i18nKey, String defaultValue)
+	{
+		List<Pair<String, String>> componentI18NKeys = componentsI18NKeys.get(component);
+		if (componentI18NKeys == null)
+		{
+			componentI18NKeys = new ArrayList<Pair<String, String>>();
+			componentsI18NKeys.put(component, componentI18NKeys);
+		}
+		Pair<String, String> pv = new Pair<String, String>(i18nKey, defaultValue);
+		if (!componentI18NKeys.contains(pv)) componentI18NKeys.add(pv);
+	}
+
+	public static void saveFormI18NTexts(Form form) throws RepositoryException
+	{
+		ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+		String activeSolutionI18NServerName = activeProject.getSolution().getI18nServerName();
+		String activeSolutionI18NTableName = activeProject.getSolution().getI18nTableName();
+
+		if (activeSolutionI18NServerName != null && activeSolutionI18NTableName != null)
+		{
+			final ArrayList<Pair<String, String>> i18nKeysToSave = new ArrayList<Pair<String, String>>();
+			form.acceptVisitor(new IPersistVisitor()
+			{
+				@Override
+				public Object visit(IPersist o)
+				{
+					if (o instanceof ISupportText)
+					{
+						List<Pair<String, String>> componentI18NKeys = componentsI18NKeys.remove(o);
+						if (componentI18NKeys != null) i18nKeysToSave.addAll(componentI18NKeys);
+					}
+					return IPersistVisitor.CONTINUE_TRAVERSAL;
+				}
+			});
+
+			ArrayList<IFormElement> remainedI18NComponents = new ArrayList<IFormElement>();
+			for (IFormElement textComponent : componentsI18NKeys.keySet())
+			{
+				Form f = (Form)((IPersist)textComponent).getAncestor(IRepository.FORMS);
+				if (form.equals(f)) remainedI18NComponents.add(textComponent);
+			}
+			for (IFormElement textComponent : remainedI18NComponents)
+			{
+				componentsI18NKeys.remove(textComponent);
+			}
+
+			TreeMap<String, MessageEntry> messages = new TreeMap<String, MessageEntry>();
+			for (Pair<String, String> i18nKeyValue : i18nKeysToSave)
+			{
+				MessageEntry messageEntry = new MessageEntry(null, i18nKeyValue.getLeft(), i18nKeyValue.getRight());
+				messages.put(messageEntry.getLanguageKey(), messageEntry);
+			}
+
+			writeMessages(activeSolutionI18NServerName, activeSolutionI18NTableName, messages, new WorkspaceFileAccess(ResourcesPlugin.getWorkspace()),
+				ServoyModelFinder.getServoyModel().getActiveResourcesProject().getProject(), false, false, false);
+		}
 	}
 }

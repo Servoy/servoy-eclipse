@@ -50,6 +50,7 @@ import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.DesignComponentFactory;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.TemplateElementHolder;
+import com.servoy.eclipse.model.repository.EclipseMessages;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
@@ -67,6 +68,7 @@ import com.servoy.j2db.persistence.BaseComponent;
 import com.servoy.j2db.persistence.Bean;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ColumnInfo;
+import com.servoy.j2db.persistence.ColumnWrapper;
 import com.servoy.j2db.persistence.DummyValidator;
 import com.servoy.j2db.persistence.Field;
 import com.servoy.j2db.persistence.Form;
@@ -108,6 +110,7 @@ import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.server.headlessclient.dataui.WebDefaultRecordNavigator;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.LabelForPropertyType;
+import com.servoy.j2db.server.ngclient.property.types.TagStringPropertyType;
 import com.servoy.j2db.util.ComponentFactoryHelper;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.IStyleRule;
@@ -606,7 +609,7 @@ public class ElementFactory
 					}
 					if (labelComponent instanceof WebObjectSpecification)
 					{
-						label = createComponent(parent, (WebObjectSpecification)labelComponent, dp, loc);
+						label = createComponent(parent, (WebObjectSpecification)labelComponent, NO_DATAPROVIDER, loc);
 					}
 					else if (labelComponent instanceof Template)
 					{
@@ -637,7 +640,11 @@ public class ElementFactory
 
 					if (configuration.isFillName())
 					{
-						if (label instanceof GraphicalComponent) ((GraphicalComponent)label).setLabelFor(name);
+						label.setName(name + "_label");
+						if (label instanceof GraphicalComponent)
+						{
+							((GraphicalComponent)label).setLabelFor(name);
+						}
 						else if (label instanceof WebComponent)
 						{
 							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
@@ -648,8 +655,10 @@ public class ElementFactory
 								((WebComponent)label).setProperty(pd.getName(), name);
 							}
 						}
-						label.setName(name + "_label");
 					}
+
+					fillTextProperty(label, configuration, name, labelText, false, true);
+
 					int labelSpacing = configuration.getLabelSpacing() > 0 ? configuration.getLabelSpacing() : 20;
 
 					if (configuration.isPlaceHorizontally())
@@ -735,10 +744,7 @@ public class ElementFactory
 				{
 					bc.setName(name);
 				}
-				if (configuration.isFillText() && bc instanceof ISupportText)
-				{
-					((ISupportText)bc).setText(labelText);
-				}
+				fillTextProperty(bc, configuration, name, labelText, true, false);
 				lastSize = bc.getSize();
 			}
 		}
@@ -748,6 +754,33 @@ public class ElementFactory
 			return null;
 		}
 		return lst.toArray(new IPersist[lst.size()]);
+	}
+
+	private static void setI18NText(IFormElement textComponent, IPlaceDataProviderConfiguration configuration, String name, String defaultValue)
+	{
+		setI18NText(textComponent, null, configuration, name, defaultValue);
+	}
+
+	private static void setI18NText(IFormElement textComponent, String componentPropertyName, IPlaceDataProviderConfiguration configuration, String name,
+		String defaultValue)
+	{
+		StringBuilder i18nText = new StringBuilder("i18n:");
+		String prefix = configuration.getI18NPrefix();
+		if (prefix != null)
+		{
+			i18nText.append(prefix).append('.');
+		}
+		i18nText.append(name);
+		String i18nTextString = i18nText.toString();
+		if (textComponent instanceof ISupportText)
+		{
+			((ISupportText)textComponent).setText(i18nTextString);
+		}
+		else if (textComponent instanceof WebComponent)
+		{
+			((WebComponent)textComponent).setProperty(componentPropertyName, i18nTextString);
+		}
+		EclipseMessages.addI18NKey(textComponent, i18nTextString.substring(5), defaultValue);
 	}
 
 	/**
@@ -1199,6 +1232,18 @@ public class ElementFactory
 				public Dimension getLabelSize()
 				{
 					return new Dimension(-1, -1);
+				}
+
+				@Override
+				public boolean isAutomaticI18N()
+				{
+					return false;
+				}
+
+				@Override
+				public String getI18NPrefix()
+				{
+					return null;
 				}
 			};
 			createFields(portal, config, null, new Point(x, y));
@@ -1793,4 +1838,79 @@ public class ElementFactory
 
 	}
 
+	private static final IDataProvider NO_DATAPROVIDER = new IDataProvider()
+	{
+
+		@Override
+		public boolean isEditable()
+		{
+			return false;
+		}
+
+		@Override
+		public int getLength()
+		{
+			return 0;
+		}
+
+		@Override
+		public int getFlags()
+		{
+			return 0;
+		}
+
+		@Override
+		public int getDataProviderType()
+		{
+			return 0;
+		}
+
+		@Override
+		public String getDataProviderID()
+		{
+			return null;
+		}
+
+		@Override
+		public ColumnWrapper getColumnWrapper()
+		{
+			return null;
+		}
+	};
+
+	private static void fillTextProperty(IFormElement formElement, IPlaceDataProviderConfiguration configuration, String name, String labelText,
+		boolean checkFillText, boolean isLabelFor)
+	{
+		if (formElement instanceof ISupportText)
+		{
+			if (configuration.isAutomaticI18N())
+			{
+				setI18NText(formElement, configuration, isLabelFor ? name + "_label" : name, labelText);
+			}
+			else if (!checkFillText || configuration.isFillText())
+			{
+				((ISupportText)formElement).setText(labelText);
+			}
+		}
+		else if (formElement instanceof WebComponent)
+		{
+			WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+				((WebComponent)formElement).getTypeName());
+			Collection<PropertyDescription> labelForProperties = spec.getProperties(TagStringPropertyType.INSTANCE);
+			for (PropertyDescription pd : labelForProperties)
+			{
+				String i18nPName = labelForProperties.size() > 1 ? name + "_" + pd.getName() : name;
+				if (isLabelFor) i18nPName += "_label";
+				String pLabelText = labelForProperties.size() > 1 ? labelText + "_" + pd.getName() : labelText;
+				if (configuration.isAutomaticI18N())
+				{
+					setI18NText(formElement, pd.getName(), configuration, i18nPName, pLabelText);
+				}
+				else if (!checkFillText || configuration.isFillText())
+				{
+					((WebComponent)formElement).setProperty(pd.getName(), pLabelText);
+				}
+			}
+		}
+	}
 }

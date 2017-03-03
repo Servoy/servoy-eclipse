@@ -26,6 +26,7 @@ import org.sablo.websocket.IServerService;
 import com.servoy.eclipse.designer.editor.BaseVisualFormEditor;
 import com.servoy.eclipse.designer.editor.commands.ContentOutlineCommand;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.j2db.persistence.Form;
 
 /**
  * @author gganea@servoy.com
@@ -37,7 +38,7 @@ public class OpenScriptHandler extends ContentOutlineCommand implements IServerS
 
 	public OpenScriptHandler()
 	{
-		this.editorPart = getEditorPart();
+		this.editorPart = null;
 	}
 
 	public OpenScriptHandler(BaseVisualFormEditor editorPart)
@@ -47,11 +48,12 @@ public class OpenScriptHandler extends ContentOutlineCommand implements IServerS
 
 	public Object executeMethod(String methodName, JSONObject args)
 	{
+		final Form openForm = editorPart != null ? editorPart.getForm() : getEditorPart().getForm();
 		Display.getDefault().asyncExec(new Runnable()
 		{
 			public void run()
 			{
-				EditorUtil.openScriptEditor(editorPart.getForm(), null, true);
+				EditorUtil.openScriptEditor(openForm, null, true);
 			}
 		});
 		return null;
@@ -65,7 +67,8 @@ public class OpenScriptHandler extends ContentOutlineCommand implements IServerS
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException
 	{
-		EditorUtil.openScriptEditor(editorPart.getForm(), null, true);
+		Form openForm = editorPart != null ? editorPart.getForm() : getEditorPart().getForm();
+		EditorUtil.openScriptEditor(openForm, null, true);
 		return null;
 	}
 }

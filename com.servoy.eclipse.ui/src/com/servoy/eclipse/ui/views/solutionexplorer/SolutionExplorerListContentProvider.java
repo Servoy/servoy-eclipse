@@ -1010,7 +1010,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					}
 					else
 					{
-						String dataSource = s.getTable(tableName).getDataSource();
+						// The table may not have been initialized yet (i.e. loaded columns).
+						// Do not get the table object here because that may cause loading all columns of all tables from
+						// developer rendering developer unresponsive for a long time.
+						String dataSource = s.getTableDatasource(tableName);
 						UserNode node = new UserNode(tableName, type, new DataSourceFeedback(dataSource), DataSourceWrapperFactory.getWrapper(dataSource),
 							uiActivator.loadImageFromBundle("portal.gif"));
 						node.setClientSupport(ClientSupport.All);
@@ -1607,6 +1610,19 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		}
 	}
 
+	private static String getParsedSample(final String name, final WebObjectFunctionDefinition api)
+	{
+		if (api.getDocumentation().contains("@example"))
+		{
+			String description = getParsedComment(api.getDocumentation(), name, false);
+			String example = description.split("@example")[1].split("@")[0];
+			example = example.replaceAll("<br>|<br/>", "\n");
+			example = example.replaceAll("\\<.*?\\>", "");
+			return example;
+		}
+		return null;
+	}
+
 	private SimpleUserNode[] getJSMethods(Object o, final String elementName, String prefix, UserNodeType actionType, Object real, String[] excludeMethodNames)
 	{
 		if (o == null) return EMPTY_LIST;
@@ -1657,7 +1673,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 							@Override
 							public String getSample(String methodName)
 							{
-								return null;
+								return getParsedSample(elementName, api);
 							}
 
 							@Override
@@ -2018,7 +2034,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					@Override
 					public String getSample(String methodName)
 					{
-						return null;
+						return getParsedSample(webcomponent.getName(), api);
 					}
 
 					@Override
@@ -2337,7 +2353,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					returnDescription = ((XMLScriptObjectAdapter)scriptObject).getReturnDescription(name, (Class[])parameterTypes);
 					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, (Class[])parameterTypes);
 					tooltip = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, (Class[])parameterTypes, csp);
-					tooltip += "\n" + Text.processTags(((XMLScriptObjectAdapter)scriptObject).getSample(name, (Class[])parameterTypes), resolver);
+					tooltip += "\n<i>" + Text.processTags(((XMLScriptObjectAdapter)scriptObject).getSample(name, (Class[])parameterTypes), resolver) + "</i>";
 					if (parameters != null)
 					{
 						paramNames = new String[parameters.length];
