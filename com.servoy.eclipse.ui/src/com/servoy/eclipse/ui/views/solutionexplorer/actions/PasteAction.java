@@ -19,6 +19,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 import java.util.Iterator;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -26,8 +27,11 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
+import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.dnd.FormElementDragData.PersistDragData;
@@ -38,15 +42,17 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.IPersistVisitor;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IValidateName;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ValidatorSearchContext;
+import com.servoy.j2db.persistence.WebComponent;
 
 /**
  * Action that will try to paste the contents of the clipboard in the solution explorer. The location of the objects being pasted and the behavior depends on
  * the current selection and the type of objects found in the clipboard.
- * 
+ *
  * @author acostescu
  */
 public class PasteAction extends Action implements ISelectionChangedListener
@@ -57,7 +63,7 @@ public class PasteAction extends Action implements ISelectionChangedListener
 
 	/**
 	 * New paste action.
-	 * 
+	 *
 	 * @param display the display used to create a clipboard.
 	 */
 	public PasteAction(Display display)
@@ -214,6 +220,35 @@ public class PasteAction extends Action implements ISelectionChangedListener
 						{
 							Form f = (Form)sourcePersist;
 							ServoyProject destinationProject = ((ServoyProject)pasteNode.getAncestorOfType(ServoyProject.class).getRealObject());
+
+							//check if form contains unknown components, they should install package first
+							if (f.isResponsiveLayout())
+							{
+								Object unkownSpec = f.acceptVisitor(new IPersistVisitor()
+								{
+
+									@Override
+									public Object visit(IPersist o)
+									{
+										if (o instanceof WebComponent)
+										{
+											WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+												((WebComponent)o).getTypeName());
+											if (spec == null)
+											{
+												return ((WebComponent)o).getTypeName();
+											}
+										}
+										return IPersistVisitor.CONTINUE_TRAVERSAL;
+									}
+								});
+								if (unkownSpec instanceof String)
+								{
+									MessageDialog.openError(new Shell(), "Cannot paste form",
+										"Form contains unkown specification: " + unkownSpec + ", have to install package first.");
+									return;
+								}
+							}
 							// we have the source form and the destination solution; perform the paste
 							IValidateName nameValidator = ServoyModelManager.getServoyModelManager().getServoyModel().getNameValidator();
 							String newName = getCopyName(f.getName(), nameValidator);
