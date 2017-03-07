@@ -26,20 +26,26 @@
     <executions>
      <execution>
       <id>materialize-products</id>
-      <phase>deploy</phase>
       <goals>
        <goal>materialize-products</goal>
       </goals>
      </execution>
      <execution>
       <id>archive-products</id>
-      <phase>deploy</phase>
       <goals>
        <goal>archive-products</goal>
       </goals>
      </execution>
     </executions>
    </plugin>
+	<plugin>
+		<groupId>org.eclipse.tycho</groupId>
+		<artifactId>target-platform-configuration</artifactId>
+		<version>${tycho.version}</version>
+		<configuration>
+			<includePackedArtifacts>true</includePackedArtifacts>
+		</configuration>
+	</plugin>
   </plugins>
  </build>
 </project>

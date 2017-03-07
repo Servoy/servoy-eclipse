@@ -7,7 +7,8 @@
 	<version>8.1.2.3031</version>
 
 	<properties>
-		<tycho.version>0.26.0</tycho.version>
+		<tycho.version>1.0.0</tycho.version>
+		<tycho.extra.version>1.0.0</tycho.extra.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
 	    <maven.compiler.target>1.7</maven.compiler.target>
@@ -77,6 +78,67 @@
 							<arch>x86_64</arch>
 						</environment>
 					</environments>
+				</configuration>
+			</plugin>
+		    <plugin>
+		      <groupId>org.eclipse.tycho.extras</groupId>
+		      <artifactId>tycho-pack200a-plugin</artifactId>
+		      <version>${tycho.extra.version}</version>
+		      <executions>
+		       <execution>
+		        <id>pack200-normalize</id>
+		        <goals>
+		         <goal>normalize</goal>
+		        </goals>
+		       </execution>
+		      </executions>
+		     </plugin>
+		    <plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-jarsigner-plugin</artifactId>
+		    <version>1.4</version>
+		    <configuration>
+		     <keystore>${project.basedir}/../../build/eclipse_build/keystore</keystore>
+		     <alias>ServoyClient</alias>
+		     <tsa>http://sha256timestamp.ws.symantec.com/sha256/timestamp</tsa>
+		    </configuration>
+		    <executions>
+		     <execution>
+		      <id>sign</id>
+		      <goals>
+		       <goal>sign</goal>
+		      </goals>
+		     </execution>
+		    </executions>
+		   </plugin>
+		   <plugin>
+		      <groupId>org.eclipse.tycho.extras</groupId>
+		      <artifactId>tycho-pack200b-plugin</artifactId>
+		      <version>${tycho.extra.version}</version>
+		      <executions>
+		       <execution>
+		        <id>pack200-pack</id>
+		        <goals>
+		         <goal>pack</goal>
+		        </goals>
+		       </execution>
+		      </executions>
+		     </plugin>
+		     <plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-p2-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<executions>
+					<execution>
+						<id>p2-metadata</id>
+						<goals>
+							<goal>p2-metadata</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<defaultP2Metadata>false</defaultP2Metadata>
 				</configuration>
 			</plugin>
 		</plugins>
