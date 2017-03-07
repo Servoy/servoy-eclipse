@@ -384,6 +384,57 @@
 				"additionalProperties":false
 			}
 		},
+		"serverApi":
+		{
+			"description": "The internal api this component has, can be called from client",
+			"type":"object",
+			"additionalProperties": {
+				"type": "object",
+				"properties": {
+					"returns": {
+						"description": "the datatype this api call returns",
+						"type": "string"
+					},
+					"parameters": {
+						"description": "the parameter types this api call accepts",
+						"type":"array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"name": {
+									"description": "the name of the parameter",
+									"type": "string"
+								},
+								"type": {
+									"description": "the type of the parameter",
+									"oneOf": [
+									          {
+									        	  "type": "string"
+									          },
+									          {
+									        	  "type": "object",
+									        	  "properties": {
+									        		  "type": {
+									        			  "type": "string"
+									        		  }
+									        	  },
+									        	  "required": ["type"],
+									        	  "additionalProperties":true
+									          }
+									          ]
+								},
+								"optional": {
+									"type":"boolean"
+								}
+							},
+							"required": ["name","type"],
+							"additionalProperties":false
+						}
+					}
+				},
+				"additionalProperties":false
+			}
+		},
 		"serverscript": {
 			"description": "js reference that will be run on the server",
 			"type": "string"
