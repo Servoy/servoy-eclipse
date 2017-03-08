@@ -48,6 +48,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -58,6 +59,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -303,7 +306,8 @@ public class PlaceDataprovidersComposite extends Composite
 			}
 		});
 		Button deleteConf = new Button(confAndDelete, SWT.PUSH);
-		deleteConf.setText("X");
+		deleteConf.setText("");
+		deleteConf.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE));
 		deleteConf.setToolTipText("Removes the current selected configuration");
 		deleteConf.addSelectionListener(new SelectionListener()
 		{
@@ -509,7 +513,7 @@ public class PlaceDataprovidersComposite extends Composite
 		templateColumn.setToolTipText("The component or template that will be used for the placed field, you can override this default");
 
 		TableColumn removeColumn = new TableColumn(viewer.getTable(), SWT.LEFT);
-		removeColumn.setText("X");
+		removeColumn.setText("");
 
 		TableViewerColumn dataproviderViewerColumn = new TableViewerColumn(viewer, dataproviderColumn);
 		dataproviderViewerColumn.setLabelProvider(new ColumnLabelProvider()
@@ -549,9 +553,15 @@ public class PlaceDataprovidersComposite extends Composite
 		removeViewerColumn.setLabelProvider(new ColumnLabelProvider()
 		{
 			@Override
+			public Image getImage(Object element)
+			{
+				return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+			}
+
+			@Override
 			public String getText(Object element)
 			{
-				return "X";
+				return "";
 			}
 		});
 
