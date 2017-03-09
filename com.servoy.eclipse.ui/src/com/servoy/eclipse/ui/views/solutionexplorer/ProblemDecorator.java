@@ -34,7 +34,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * Problem decorator
- * 
+ *
  * @author gboros
  *
  */
@@ -104,7 +104,7 @@ public class ProblemDecorator implements ILightweightLabelDecorator
 		if (element instanceof PlatformSimpleUserNode)
 		{
 			IResource resource = (IResource)((PlatformSimpleUserNode)element).getAdapter(IResource.class);
-			if (resource != null && resource.exists())
+			if (resource != null && resource.isAccessible())
 			{
 				try
 				{

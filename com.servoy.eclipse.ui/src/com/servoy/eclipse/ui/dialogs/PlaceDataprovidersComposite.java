@@ -48,6 +48,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -58,6 +59,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -118,10 +121,9 @@ public class PlaceDataprovidersComposite extends Composite
 
 	private static final String CONFIGURATION_SELECTION_SETTING = "CONFIGURATION_SELECTION";
 	private static final String SINGLE_CLICK_SETTING = "SINGLE_CLICK";
+	private static final String ADVANCED_MODE_SETTING = "ADVANCED_MODE_SETTING";
 
 	private final TableViewer tableViewer;
-	private final TableColumn dataproviderColumn;
-	private final TableColumn templateColumn;
 	private final JSONObject preferences;
 	private final ComboViewer stringCombo;
 	private final ComboViewer intCombo;
@@ -140,7 +142,7 @@ public class PlaceDataprovidersComposite extends Composite
 	private final DataProviderTreeViewer dataproviderTreeViewer;
 	private final IDialogSettings settings;
 	private final Button placeHorizontally;
-	private final Button singleClick;
+	private Button singleClick;
 	private final List<IReadyListener> readyListeners = new ArrayList<>();
 	private final Button automaticI18N;
 	private final Text i18nPrefix;
@@ -151,6 +153,9 @@ public class PlaceDataprovidersComposite extends Composite
 	private Text fieldHeight;
 	private Text labelWidth;
 	private Text labelHeight;
+	private Composite configurationComposite;
+	private GridData configurationGridData;
+	private Button simpleAdvanced;
 
 
 	public PlaceDataprovidersComposite(final Composite parent, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
@@ -209,24 +214,40 @@ public class PlaceDataprovidersComposite extends Composite
 
 		final Object[] inputs = getComponentsAndTemplatesInput();
 
-		GridLayout layout = new GridLayout(6, false);
+		GridLayout layout = new GridLayout(3, false);
 		this.setLayout(layout);
-		GridData gridData = new GridData();
-		gridData.verticalAlignment = GridData.FILL;
-		gridData.horizontalSpan = 2;
-		gridData.verticalSpan = 25;
-		gridData.grabExcessHorizontalSpace = true;
-		gridData.grabExcessVerticalSpace = true;
-		gridData.horizontalAlignment = GridData.FILL;
 
-		Label confLabel = new Label(this, SWT.NONE);
+		configurationComposite = new Composite(this, SWT.NONE);
+		GridLayout configurationLayout = new GridLayout(2, false);
+		configurationLayout.marginHeight = 0;
+		configurationLayout.marginWidth = 0;
+		configurationLayout.marginRight = 5;
+		configurationComposite.setLayout(configurationLayout);
+
+		configurationGridData = new GridData();
+		configurationGridData.verticalAlignment = GridData.FILL;
+		configurationGridData.horizontalSpan = 1;
+		configurationGridData.verticalSpan = 1;
+		configurationGridData.grabExcessHorizontalSpace = true;
+		configurationGridData.grabExcessVerticalSpace = true;
+		configurationGridData.horizontalAlignment = GridData.FILL;
+		configurationGridData.minimumWidth = 370;
+		configurationComposite.setLayoutData(configurationGridData);
+
+		Label confLabel = new Label(configurationComposite, SWT.NONE);
 		confLabel.setText("Configuration: ");
-		Composite confAndDelete = new Composite(this, SWT.NONE);
-		confAndDelete.setLayout(new GridLayout(2, false));
+		confLabel.setToolTipText("Select the configuration, or type in new string to save the current configuration below");
+		Composite confAndDelete = new Composite(configurationComposite, SWT.NONE);
+		GridLayout confAndDeleteLayout = new GridLayout(2, false);
+		confAndDeleteLayout.marginHeight = 0;
+		confAndDeleteLayout.marginWidth = 0;
+		confAndDelete.setLayout(confAndDeleteLayout);
+
 		confAndDelete.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		final CCombo configuration = new CCombo(confAndDelete, SWT.BORDER);
 		configuration.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		configurationViewer = new ComboViewer(configuration);
+		configurationViewer.getCCombo().setToolTipText("Select the configuration, or type in new string to save the current configuration below");
 		configurationViewer.setLabelProvider(new ColumnLabelProvider()
 		{
 			@Override
@@ -285,7 +306,8 @@ public class PlaceDataprovidersComposite extends Composite
 			}
 		});
 		Button deleteConf = new Button(confAndDelete, SWT.PUSH);
-		deleteConf.setText("X");
+		deleteConf.setText("");
+		deleteConf.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE));
 		deleteConf.setToolTipText("Removes the current selected configuration");
 		deleteConf.addSelectionListener(new SelectionListener()
 		{
@@ -308,52 +330,192 @@ public class PlaceDataprovidersComposite extends Composite
 			}
 		});
 
-		dataproviderTreeViewer = new DataProviderTreeViewer(this, DataProviderLabelProvider.INSTANCE_HIDEPREFIX, // label provider will be overwritten when superform is known
-			new DataProviderContentProvider(persistContext, flattenedSolution, table), dataproviderOptions, true, true,
-			TreePatternFilter.getSavedFilterMode(settings, TreePatternFilter.FILTER_LEAFS), SWT.MULTI);
-		dataproviderTreeViewer.setLayoutData(gridData);
-		dataproviderTreeViewer.addSelectionChangedListener(new ISelectionChangedListener()
+		GridData gd = new GridData();
+		gd.horizontalSpan = 2;
+		new Label(configurationComposite, SWT.NONE).setLayoutData(gd);
+
+
+		stringCombo = generateTypeCombo(configurationComposite, "String", inputs, TEXT_PROPERTY,
+			"The component/template to use for the STRING type dataprovider");
+		intCombo = generateTypeCombo(configurationComposite, "Integer", inputs, INTEGER_PROPERTY,
+			"The component/template to use for the INTEGERtype dataprovider");
+		numberCombo = generateTypeCombo(configurationComposite, "Number", inputs, NUMBER_PROPERTY,
+			"The component/template to use for the NUMBER type dataprovider");
+		dateCombo = generateTypeCombo(configurationComposite, "Date", inputs, DATETIME_PROPERTY,
+			"The component/template to use for the DATE type dataprovider");
+		mediaCombo = generateTypeCombo(configurationComposite, "Media", inputs, MEDIA_PROPERTY,
+			"The component/template to use for the MEDIA type dataprovider");
+
+
+		gd = new GridData();
+		gd.horizontalSpan = 2;
+		new Label(configurationComposite, SWT.NONE).setLayoutData(gd);
+
+		fieldSpacing = createLabelAndField(configurationComposite, "Field spacing", FIELD_SPACING_PROPERTY,
+			"How much space must there between the placed fields in pixels");
+		Label lbl = new Label(configurationComposite, SWT.NONE);
+		lbl.setText("Default size (w,h)");
+		lbl.setToolTipText("The default size used from components (templates will use the template size)");
+		Composite sizeComposite = new Composite(configurationComposite, SWT.NONE);
+		layout = new GridLayout(2, true);
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
+		sizeComposite.setLayout(layout);
+		sizeComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fieldWidth = createField(sizeComposite, FIELD_WIDTH_PROPERTY, "Default width of the placed field (ignored for templates)");
+		fieldHeight = createField(sizeComposite, FIELD_HEIGTH_PROPERTY, "Default height of the placed field (ignored for templates)");
+
+		gd = new GridData();
+		gd.horizontalSpan = 2;
+		new Label(configurationComposite, SWT.NONE).setLayoutData(gd);
+
+		placeWithLabelsButton = createLabelAndCheck(configurationComposite, "Place with labels", PLACE_WITH_LABELS_PROPERTY,
+			"Place a label component together with the field");
+		labelComponentCombo = generateTypeCombo(configurationComposite, "Label Component", inputs, LABEL_COMPONENT_PROPERTY,
+			"The component/template to use for the label component");
+		labelComponentCombo.getCCombo().setEnabled(placeWithLabelsButton.getSelection());
+		placeWithLabelsButton.addSelectionListener(new SelectionListener()
 		{
 			@Override
-			public void selectionChanged(SelectionChangedEvent event)
+			public void widgetSelected(SelectionEvent e)
 			{
-				if (singleClick.getSelection())
-				{
-					moveDataproviderSelection(inputs);
-				}
+				updatePlaceWithLabelState();
+				updateI18NEnableState();
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+				widgetSelected(e);
+			}
+		});
+		labelSpacing = createLabelAndField(configurationComposite, "Label spacing", LABEL_SPACING_PROPERTY,
+			"How much space must there between the label and the field in pixels");
+		labelSpacing.setEnabled(placeWithLabelsButton.getSelection());
+
+		lbl = new Label(configurationComposite, SWT.NONE);
+		lbl.setText("Label size (w,h)");
+		lbl.setToolTipText("The default size used from labels (templates will use the template size)");
+		sizeComposite = new Composite(configurationComposite, SWT.NONE);
+		layout = new GridLayout(2, true);
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
+		sizeComposite.setLayout(layout);
+		sizeComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		labelWidth = createField(sizeComposite, LABEL_WIDTH_PROPERTY, "Default width of the placed label (ignored for templates)");
+		labelHeight = createField(sizeComposite, LABEL_HEIGTH_PROPERTY, "Default height of the placed label (ignored for templates)");
+
+		onTopButton = createLabelAndCheck(configurationComposite, "Place label on top", PLACE_ON_TOP_PROPERTY,
+			"Place the label on top of the field (instead of in front)");
+		onTopButton.setEnabled(placeWithLabelsButton.getSelection());
+
+		gd = new GridData();
+		gd.horizontalSpan = 2;
+		new Label(configurationComposite, SWT.NONE).setLayoutData(gd);
+		fillName = createLabelAndCheck(configurationComposite, "Fill name property", FILL_NAME_PROPERTY,
+			"Fill the name property of the field (based on the dataprovider)");
+		fillText = createLabelAndCheck(configurationComposite, "Fill text property", FILL_TEXT_PROPERTY,
+			"File the text property of the field based on dataprovder or column label property of the table");
+		fillText.addSelectionListener(new SelectionListener()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				updateI18NEnableState();
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
 			}
 		});
 
-		dataproviderTreeViewer.addOpenListener(new IOpenListener()
+		placeHorizontally = createLabelAndCheck(configurationComposite, "Place Horizontally", PLACE_HORIZONTALLY_PROPERTY,
+			"Place the field horizontal (for tableview mode)");
+
+		gd = new GridData();
+		gd.horizontalSpan = 2;
+		new Label(configurationComposite, SWT.NONE).setLayoutData(gd);
+		automaticI18N = createLabelAndCheck(configurationComposite, "Automatic i18n text property", AUTOMATIC_I18N_PROPERTY,
+			"Fill the text property fo the field or text of the label component through a generated i18n key");
+		automaticI18N.addSelectionListener(new SelectionListener()
 		{
 			@Override
-			public void open(OpenEvent event)
+			public void widgetSelected(SelectionEvent e)
 			{
-				moveDataproviderSelection(inputs);
+				i18nPrefix.setEnabled(automaticI18N.getSelection());
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
 			}
 		});
 
+		i18nPrefix = createLabelAndField(configurationComposite, "I18N prefix", I18N_PREFIX_PROPERTY,
+			"The prefix to use when generating the i18nkey (i18n:prefix_dataprovider}");
+
+		Label i18nInfo = new Label(configurationComposite, SWT.NONE);
+		gd = new GridData();
+		gd.horizontalSpan = 2;
+		i18nInfo.setLayoutData(gd);
+
+		if (ServoyModelFinder.getServoyModel().getActiveProject().getSolution().getI18nDataSource() == null)
+		{
+			automaticI18N.setEnabled(false);
+			i18nPrefix.setEnabled(false);
+			i18nInfo.setText("(for I18N you need to set i18nDataSource on the solution)");
+		}
+
+		dataproviderTreeViewer = createDataproviderTree(persistContext, flattenedSolution, table, dataproviderOptions, inputs);
+
+		tableViewer = createTableViewer();
+
+
+		tableViewer.setInput(input);
+
+		String selection = settings.get(CONFIGURATION_SELECTION_SETTING);
+		if (selection != null && preferences.has(selection))
+		{
+			configurationViewer.setSelection(new StructuredSelection(selection));
+		}
+	}
+
+	private TableViewer createTableViewer()
+	{
 		final Composite container = new Composite(this, SWT.NONE);
 		// define layout for the viewer
+
+		GridData gridData = new GridData();
+		gridData.verticalAlignment = GridData.FILL;
+		gridData.horizontalSpan = 1;
+		gridData.verticalSpan = 1;
+		gridData.grabExcessHorizontalSpace = true;
+		gridData.grabExcessVerticalSpace = true;
+		gridData.horizontalAlignment = GridData.FILL;
+		gridData.minimumWidth = 250;
 
 		container.setLayoutData(gridData);
 
 		TableColumnLayout tableColumnLayout = new TableColumnLayout();
 		container.setLayout(tableColumnLayout);
-		tableViewer = new TableViewer(container, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
-		tableViewer.getTable().setLinesVisible(true);
-		tableViewer.getTable().setHeaderVisible(true);
-		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
-		dataproviderColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT);
+		final TableViewer viewer = new TableViewer(container, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+		viewer.getTable().setLinesVisible(true);
+		viewer.getTable().setHeaderVisible(true);
+		viewer.getTable().setToolTipText("The selected dataproviders and the component or template that will be used to place a field");
+		viewer.setContentProvider(ArrayContentProvider.getInstance());
+		TableColumn dataproviderColumn = new TableColumn(viewer.getTable(), SWT.LEFT);
 		dataproviderColumn.setText("Name");
+		dataproviderColumn.setToolTipText("The dataprovider for which a field must be placed");
 
-		templateColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT);
+		TableColumn templateColumn = new TableColumn(viewer.getTable(), SWT.LEFT);
 		templateColumn.setText("Component/Template");
+		templateColumn.setToolTipText("The component or template that will be used for the placed field, you can override this default");
 
-		TableColumn removeColumn = new TableColumn(tableViewer.getTable(), SWT.LEFT);
-		removeColumn.setText("X");
+		TableColumn removeColumn = new TableColumn(viewer.getTable(), SWT.LEFT);
+		removeColumn.setText("");
 
-		TableViewerColumn dataproviderViewerColumn = new TableViewerColumn(tableViewer, dataproviderColumn);
+		TableViewerColumn dataproviderViewerColumn = new TableViewerColumn(viewer, dataproviderColumn);
 		dataproviderViewerColumn.setLabelProvider(new ColumnLabelProvider()
 		{
 			@Override
@@ -366,8 +528,8 @@ public class PlaceDataprovidersComposite extends Composite
 		});
 
 
-		TableViewerColumn templateViewerColumn = new TableViewerColumn(tableViewer, templateColumn);
-		templateViewerColumn.setEditingSupport(new TemplateEditingSupport(tableViewer));
+		TableViewerColumn templateViewerColumn = new TableViewerColumn(viewer, templateColumn);
+		templateViewerColumn.setEditingSupport(new TemplateEditingSupport(viewer));
 		templateViewerColumn.setLabelProvider(new ColumnLabelProvider()
 		{
 			@Override
@@ -387,26 +549,32 @@ public class PlaceDataprovidersComposite extends Composite
 			}
 		});
 
-		final TableViewerColumn removeViewerColumn = new TableViewerColumn(tableViewer, removeColumn);
+		final TableViewerColumn removeViewerColumn = new TableViewerColumn(viewer, removeColumn);
 		removeViewerColumn.setLabelProvider(new ColumnLabelProvider()
 		{
 			@Override
+			public Image getImage(Object element)
+			{
+				return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+			}
+
+			@Override
 			public String getText(Object element)
 			{
-				return "X";
+				return "";
 			}
 		});
 
-		tableViewer.getTable().addListener(SWT.MouseDown, new Listener()
+		viewer.getTable().addListener(SWT.MouseDown, new Listener()
 		{
 			@Override
 			public void handleEvent(Event event)
 			{
 				Point pt = new Point(event.x, event.y);
-				ViewerCell cell = tableViewer.getCell(pt);
+				ViewerCell cell = viewer.getCell(pt);
 				if (cell != null && cell.getColumnIndex() == 2)
 				{
-					int index = tableViewer.getTable().getSelectionIndex();
+					int index = viewer.getTable().getSelectionIndex();
 					input.remove(index);
 					if (input.size() == 0)
 					{
@@ -415,7 +583,7 @@ public class PlaceDataprovidersComposite extends Composite
 							rl.isReady(false);
 						}
 					}
-					tableViewer.refresh();
+					viewer.refresh();
 				}
 			}
 		});
@@ -423,53 +591,47 @@ public class PlaceDataprovidersComposite extends Composite
 		tableColumnLayout.setColumnData(dataproviderColumn, new ColumnWeightData(40, 100, true));
 		tableColumnLayout.setColumnData(templateColumn, new ColumnWeightData(60, 100, true));
 		tableColumnLayout.setColumnData(removeColumn, new ColumnWeightData(16, 16, false));
+		return viewer;
+	}
 
+	/**
+	 * @param inputs
+	 * @param dataproviderOptions
+	 * @param table
+	 * @param flattenedSolution
+	 * @param persistContext
+	 *
+	 */
+	private DataProviderTreeViewer createDataproviderTree(PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
+		DataProviderOptions dataproviderOptions, final Object[] inputs)
+	{
+		GridData gridData = new GridData();
+		gridData.verticalAlignment = GridData.FILL;
+		gridData.horizontalSpan = 1;
+		gridData.verticalSpan = 1;
+		gridData.grabExcessHorizontalSpace = true;
+		gridData.grabExcessVerticalSpace = true;
+		gridData.horizontalAlignment = GridData.FILL;
+		gridData.minimumWidth = 200;
 
-		GridData gd = new GridData();
-		gd.horizontalSpan = 2;
-		new Label(this, SWT.NONE).setLayoutData(gd);
-
-
-		stringCombo = generateTypeCombo("String", inputs, TEXT_PROPERTY);
-		intCombo = generateTypeCombo("Integer", inputs, INTEGER_PROPERTY);
-		numberCombo = generateTypeCombo("Number", inputs, NUMBER_PROPERTY);
-		dateCombo = generateTypeCombo("Date", inputs, DATETIME_PROPERTY);
-		mediaCombo = generateTypeCombo("Media", inputs, MEDIA_PROPERTY);
-
-
-		tableViewer.setInput(input);
-
-		gd = new GridData();
-		gd.horizontalSpan = 2;
-		new Label(this, SWT.NONE).setLayoutData(gd);
-
-		fieldSpacing = createLabelAndField("Field spacing", FIELD_SPACING_PROPERTY);
-		Label lbl = new Label(this, SWT.NONE);
-		lbl.setText("Default size (w,h)");
-		lbl.setToolTipText("The default size used from components (templates will use the template size");
-		Composite sizeComposite = new Composite(this, SWT.NONE);
-		layout = new GridLayout(2, true);
+		Composite parent = new Composite(this, SWT.NONE);
+		GridLayout layout = new GridLayout(1, false);
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
-		sizeComposite.setLayout(layout);
-		sizeComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fieldWidth = createField(sizeComposite, FIELD_WIDTH_PROPERTY);
-		fieldHeight = createField(sizeComposite, FIELD_HEIGTH_PROPERTY);
+		layout.marginRight = 5;
+		parent.setLayout(layout);
+		parent.setLayoutData(gridData);
 
-		gd = new GridData();
-		gd.horizontalSpan = 2;
-		new Label(this, SWT.NONE).setLayoutData(gd);
-
-		placeWithLabelsButton = createLabelAndCheck("Place with labels", PLACE_WITH_LABELS_PROPERTY);
-		labelComponentCombo = generateTypeCombo("Label Component", inputs, LABEL_COMPONENT_PROPERTY);
-		labelComponentCombo.getCCombo().setEnabled(placeWithLabelsButton.getSelection());
-		placeWithLabelsButton.addSelectionListener(new SelectionListener()
+		simpleAdvanced = new Button(parent, SWT.PUSH);
+		showOrHideConfiguration();
+		simpleAdvanced.addSelectionListener(new SelectionListener()
 		{
 			@Override
 			public void widgetSelected(SelectionEvent e)
 			{
-				updatePlaceWithLabelState();
-				updateI18NEnableState();
+				settings.put(ADVANCED_MODE_SETTING, !settings.getBoolean(ADVANCED_MODE_SETTING));
+				showOrHideConfiguration();
+				configurationComposite.getShell().pack(true);
 			}
 
 			@Override
@@ -478,97 +640,39 @@ public class PlaceDataprovidersComposite extends Composite
 				widgetSelected(e);
 			}
 		});
-		labelSpacing = createLabelAndField("Label spacing", LABEL_SPACING_PROPERTY);
-		labelSpacing.setEnabled(placeWithLabelsButton.getSelection());
 
-		lbl = new Label(this, SWT.NONE);
-		lbl.setText("Label size (w,h)");
-		lbl.setToolTipText("The default size used from labels (templates will use the template size");
-		sizeComposite = new Composite(this, SWT.NONE);
-		layout = new GridLayout(2, true);
-		layout.marginHeight = 0;
-		layout.marginWidth = 0;
-		sizeComposite.setLayout(layout);
-		sizeComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		labelWidth = createField(sizeComposite, LABEL_WIDTH_PROPERTY);
-		labelHeight = createField(sizeComposite, LABEL_HEIGTH_PROPERTY);
-
-		onTopButton = createLabelAndCheck("Place label on top", PLACE_ON_TOP_PROPERTY);
-		onTopButton.setEnabled(placeWithLabelsButton.getSelection());
-
-		gd = new GridData();
-		gd.horizontalSpan = 2;
-		new Label(this, SWT.NONE).setLayoutData(gd);
-		fillName = createLabelAndCheck("Fill name property", FILL_NAME_PROPERTY);
-		fillText = createLabelAndCheck("Fill text property", FILL_TEXT_PROPERTY);
-		fillText.addSelectionListener(new SelectionListener()
+		DataProviderTreeViewer treeviewer = new DataProviderTreeViewer(parent, DataProviderLabelProvider.INSTANCE_HIDEPREFIX, // label provider will be overwritten when superform is known
+			new DataProviderContentProvider(persistContext, flattenedSolution, table), dataproviderOptions, true, true,
+			TreePatternFilter.getSavedFilterMode(settings, TreePatternFilter.FILTER_LEAFS), SWT.MULTI);
+		treeviewer.setLayoutData(gridData);
+		treeviewer.addSelectionChangedListener(new ISelectionChangedListener()
 		{
 			@Override
-			public void widgetSelected(SelectionEvent e)
+			public void selectionChanged(SelectionChangedEvent event)
 			{
-				updateI18NEnableState();
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e)
-			{
+				if (singleClick.getSelection())
+				{
+					moveDataproviderSelection(inputs);
+				}
 			}
 		});
 
-		placeHorizontally = createLabelAndCheck("Place Horizontally", PLACE_HORIZONTALLY_PROPERTY);
+		treeviewer.getViewer().getTree().setToolTipText("Select the dataprovders for which you want to place fields");
 
-		gd = new GridData();
-		gd.horizontalSpan = 2;
-		new Label(this, SWT.NONE).setLayoutData(gd);
-		automaticI18N = createLabelAndCheck("Automatic i18n text property", AUTOMATIC_I18N_PROPERTY);
-		automaticI18N.addSelectionListener(new SelectionListener()
+		treeviewer.addOpenListener(new IOpenListener()
 		{
 			@Override
-			public void widgetSelected(SelectionEvent e)
+			public void open(OpenEvent event)
 			{
-				i18nPrefix.setEnabled(automaticI18N.getSelection());
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e)
-			{
+				moveDataproviderSelection(inputs);
 			}
 		});
-
-		i18nPrefix = createLabelAndField("I18N prefix", I18N_PREFIX_PROPERTY);
-
-		Label i18nInfo = new Label(this, SWT.NONE);
-		gd = new GridData();
-		gd.horizontalSpan = 2;
-		i18nInfo.setLayoutData(gd);
-
-		if (ServoyModelFinder.getServoyModel().getActiveProject().getSolution().getI18nDataSource() == null)
-		{
-			automaticI18N.setEnabled(false);
-			i18nPrefix.setEnabled(false);
-			i18nInfo.setText("(for I18N you need to set i18nDataSource on the solution)");
-		}
-
-		gd = new GridData();
-		gd.horizontalSpan = 2;
-		new Label(this, SWT.NONE).setLayoutData(gd);
-
-		new Label(this, SWT.NONE);
-		new Label(this, SWT.NONE);
-
-		singleClick = new Button(this, SWT.CHECK);
+		singleClick = new Button(parent, SWT.CHECK);
 		boolean singleClickSelection = settings.getBoolean(SINGLE_CLICK_SETTING);
-		if (singleClickSelection)
-		{
-			singleClick.setText("Single click selects/moves the provider");
-		}
-		else
-		{
-			singleClick.setText("Single click selects/moves the provider (use double click)");
-		}
+		singleClick.setText("Use single click");
 		singleClick.setSelection(singleClickSelection);
-		gd = new GridData();
-		gd.horizontalSpan = 4;
+		GridData gd = new GridData();
+		gd.horizontalSpan = 1;
 		gd.grabExcessHorizontalSpace = true;
 		gd.horizontalAlignment = SWT.FILL;
 		singleClick.setLayoutData(gd);
@@ -579,15 +683,6 @@ public class PlaceDataprovidersComposite extends Composite
 			{
 				boolean selection = singleClick.getSelection();
 				settings.put(SINGLE_CLICK_SETTING, selection);
-				if (selection)
-				{
-					singleClick.setText("Single click selects/moves the provider");
-				}
-				else
-				{
-					singleClick.setText("Single click selects/moves the provider (use double click)");
-				}
-//				singleClick.getParent().layout();
 			}
 
 			@Override
@@ -597,29 +692,26 @@ public class PlaceDataprovidersComposite extends Composite
 			}
 		});
 
-
-		String selection = settings.get(CONFIGURATION_SELECTION_SETTING);
-		if (selection != null && preferences.has(selection))
-		{
-			configurationViewer.setSelection(new StructuredSelection(selection));
-		}
+		return treeviewer;
 	}
 
 	/**
 	 * @return
 	 *
 	 */
-	private Button createLabelAndCheck(String label, final String property)
+	private Button createLabelAndCheck(Composite parent, String label, final String property, String tooltip)
 	{
 		GridData gd = new GridData();
 		gd.verticalAlignment = SWT.TOP;
-		Label lbl = new Label(this, SWT.NONE);
+		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText(label);
 		lbl.setLayoutData(gd);
-		final Button button = new Button(this, SWT.CHECK);
+		lbl.setToolTipText(tooltip);
+		final Button button = new Button(parent, SWT.CHECK);
 		gd = new GridData();
 		gd.verticalAlignment = SWT.TOP;
 		button.setLayoutData(gd);
+		button.setToolTipText(tooltip);
 		button.setSelection(currentSelection.optBoolean(property));
 		button.addSelectionListener(new SelectionListener()
 		{
@@ -642,21 +734,24 @@ public class PlaceDataprovidersComposite extends Composite
 	 * @return
 	 *
 	 */
-	private Text createLabelAndField(String label, final String property)
+	private Text createLabelAndField(Composite parent, String label, final String property, String tooltip)
 	{
-		new Label(this, SWT.NONE).setText(label);
-		return createField(this, property);
+		Label lbl = new Label(parent, SWT.NONE);
+		lbl.setText(label);
+		lbl.setToolTipText(tooltip);
+		return createField(parent, property, tooltip);
 	}
 
 	/**
 	 * @param property
 	 * @return
 	 */
-	private Text createField(Composite parent, final String property)
+	private Text createField(Composite parent, final String property, String tooltip)
 	{
 		final Text text = new Text(parent, SWT.BORDER);
 		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		text.setText(currentSelection.optString(property));
+		text.setToolTipText(tooltip);
 		text.addModifyListener(new ModifyListener()
 		{
 			@Override
@@ -672,12 +767,16 @@ public class PlaceDataprovidersComposite extends Composite
 	 * @return
 	 *
 	 */
-	private ComboViewer generateTypeCombo(String label, Object[] viewerInput, final String type)
+	private ComboViewer generateTypeCombo(Composite parent, String label, Object[] viewerInput, final String type, String tooltip)
 	{
-		Label stringLabel = new Label(this, SWT.NONE);
+		Label stringLabel = new Label(parent, SWT.NONE);
 		stringLabel.setText(label);
-		final CCombo stringCC = new CCombo(this, SWT.BORDER | SWT.SEARCH);
-		stringCC.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+		stringLabel.setToolTipText(tooltip);
+		final CCombo stringCC = new CCombo(parent, SWT.BORDER | SWT.SEARCH);
+		stringCC.setToolTipText(tooltip);
+		GridData layoutData = new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL);
+		layoutData.minimumWidth = 200;
+		stringCC.setLayoutData(layoutData);
 		ComboViewer comboViewer = new ComboViewer(stringCC);
 		comboViewer.setLabelProvider(new TemplateOrWebObjectLabelProvider());
 		comboViewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -870,15 +969,17 @@ public class PlaceDataprovidersComposite extends Composite
 	private void moveDataproviderSelection(final Object[] inputs)
 	{
 		IDataProvider dataprovider = (IDataProvider)((StructuredSelection)dataproviderTreeViewer.getSelection()).getFirstElement();
-
-		Pair<IDataProvider, Object> row = new Pair<>(dataprovider,
-			findSelectedObject(inputs, currentSelection.optString(Column.getDisplayTypeString(dataprovider.getDataProviderType()))));
-		input.add(row);
-		for (IReadyListener rl : readyListeners)
+		if (dataprovider != null)
 		{
-			rl.isReady(true);
+			Pair<IDataProvider, Object> row = new Pair<>(dataprovider,
+				findSelectedObject(inputs, currentSelection.optString(Column.getDisplayTypeString(dataprovider.getDataProviderType()))));
+			input.add(row);
+			for (IReadyListener rl : readyListeners)
+			{
+				rl.isReady(true);
+			}
+			tableViewer.refresh();
 		}
-		tableViewer.refresh();
 	}
 
 	private static boolean hasDataproviderProperty(JSONObject object)
@@ -988,5 +1089,14 @@ public class PlaceDataprovidersComposite extends Composite
 			automaticI18N.setEnabled(i18nEnableState);
 			i18nPrefix.setEnabled(i18nEnableState && automaticI18N.getSelection());
 		}
+	}
+
+	private void showOrHideConfiguration()
+	{
+		boolean advancedMode = settings.getBoolean(ADVANCED_MODE_SETTING);
+		if (advancedMode) simpleAdvanced.setText(">> Simple");
+		else simpleAdvanced.setText("<< Advanced");
+		configurationGridData.exclude = !advancedMode;
+		configurationComposite.setVisible(advancedMode);
 	}
 }
