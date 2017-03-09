@@ -156,23 +156,37 @@
 			<version>1.2.17</version>
 		</dependency>
 	</dependencies>
-
-	<modules>
-		<module>com.servoy.eclipse.model</module>
-		<module>com.servoy.eclipse.model.exporter.mobile</module>
-		<module>com.servoy.eclipse.core</module>
-		<module>com.servoy.eclipse.ui</module>
-		<module>com.servoy.eclipse.debug</module>
-		<module>com.servoy.eclipse.designer</module>
-		<module>com.servoy.eclipse.designer.rfb</module>
-		<module>com.servoy.eclipse.designer.rib</module>
-		<module>com.servoy.eclipse.designer.wpm</module>
-		<module>com.servoy.eclipse.jsunit</module>
-		<module>com.servoy.eclipse.exporter.mobile</module>
-		<module>com.servoy.eclipse.exporter.solution</module>
-		<module>com.servoy.eclipse.exporter.war</module>
-		<module>com.servoy.eclipse.extension.compatibility</module>
-		<module>com.servoy.eclipse.profiler</module>
-		<module>com.servoy.eclipse.feature</module>
-	</modules>
+	
+	<profiles>
+		<profile>
+			<id>product</id>
+			<modules>
+				<module>com.servoy.eclipse.feature</module>
+				<module>com.servoy.eclipse.product</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>plugins</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>com.servoy.eclipse.model</module>
+				<module>com.servoy.eclipse.model.exporter.mobile</module>
+				<module>com.servoy.eclipse.core</module>
+				<module>com.servoy.eclipse.ui</module>
+				<module>com.servoy.eclipse.debug</module>
+				<module>com.servoy.eclipse.designer</module>
+				<module>com.servoy.eclipse.designer.rfb</module>
+				<module>com.servoy.eclipse.designer.rib</module>
+				<module>com.servoy.eclipse.designer.wpm</module>
+				<module>com.servoy.eclipse.jsunit</module>
+				<module>com.servoy.eclipse.exporter.mobile</module>
+				<module>com.servoy.eclipse.exporter.solution</module>
+				<module>com.servoy.eclipse.exporter.war</module>
+				<module>com.servoy.eclipse.extension.compatibility</module>
+				<module>com.servoy.eclipse.profiler</module>
+			</modules>
+		</profile>
+	</profiles>
 </project>
