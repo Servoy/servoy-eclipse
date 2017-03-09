@@ -969,15 +969,17 @@ public class PlaceDataprovidersComposite extends Composite
 	private void moveDataproviderSelection(final Object[] inputs)
 	{
 		IDataProvider dataprovider = (IDataProvider)((StructuredSelection)dataproviderTreeViewer.getSelection()).getFirstElement();
-
-		Pair<IDataProvider, Object> row = new Pair<>(dataprovider,
-			findSelectedObject(inputs, currentSelection.optString(Column.getDisplayTypeString(dataprovider.getDataProviderType()))));
-		input.add(row);
-		for (IReadyListener rl : readyListeners)
+		if (dataprovider != null)
 		{
-			rl.isReady(true);
+			Pair<IDataProvider, Object> row = new Pair<>(dataprovider,
+				findSelectedObject(inputs, currentSelection.optString(Column.getDisplayTypeString(dataprovider.getDataProviderType()))));
+			input.add(row);
+			for (IReadyListener rl : readyListeners)
+			{
+				rl.isReady(true);
+			}
+			tableViewer.refresh();
 		}
-		tableViewer.refresh();
 	}
 
 	private static boolean hasDataproviderProperty(JSONObject object)
