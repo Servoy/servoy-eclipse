@@ -338,7 +338,7 @@ public class PlaceDataprovidersComposite extends Composite
 		stringCombo = generateTypeCombo(configurationComposite, "String", inputs, TEXT_PROPERTY,
 			"The component/template to use for the STRING type dataprovider");
 		intCombo = generateTypeCombo(configurationComposite, "Integer", inputs, INTEGER_PROPERTY,
-			"The component/template to use for the INTEGERtype dataprovider");
+			"The component/template to use for the INTEGER type dataprovider");
 		numberCombo = generateTypeCombo(configurationComposite, "Number", inputs, NUMBER_PROPERTY,
 			"The component/template to use for the NUMBER type dataprovider");
 		dateCombo = generateTypeCombo(configurationComposite, "Date", inputs, DATETIME_PROPERTY,
@@ -352,7 +352,7 @@ public class PlaceDataprovidersComposite extends Composite
 		new Label(configurationComposite, SWT.NONE).setLayoutData(gd);
 
 		fieldSpacing = createLabelAndField(configurationComposite, "Field spacing", FIELD_SPACING_PROPERTY,
-			"How much space must there between the placed fields in pixels");
+			"How much space must there be between the placed fields in pixels");
 		Label lbl = new Label(configurationComposite, SWT.NONE);
 		lbl.setText("Default size (w,h)");
 		lbl.setToolTipText("The default size used from components (templates will use the template size)");
@@ -390,7 +390,7 @@ public class PlaceDataprovidersComposite extends Composite
 			}
 		});
 		labelSpacing = createLabelAndField(configurationComposite, "Label spacing", LABEL_SPACING_PROPERTY,
-			"How much space must there between the label and the field in pixels");
+			"How much space must there be between the label and the field in pixels");
 		labelSpacing.setEnabled(placeWithLabelsButton.getSelection());
 
 		lbl = new Label(configurationComposite, SWT.NONE);
@@ -415,7 +415,7 @@ public class PlaceDataprovidersComposite extends Composite
 		fillName = createLabelAndCheck(configurationComposite, "Fill name property", FILL_NAME_PROPERTY,
 			"Fill the name property of the field (based on the dataprovider)");
 		fillText = createLabelAndCheck(configurationComposite, "Fill text property", FILL_TEXT_PROPERTY,
-			"File the text property of the field based on dataprovder or column label property of the table");
+			"Fill the text property of the field based on dataprovder or column label property of the table");
 		fillText.addSelectionListener(new SelectionListener()
 		{
 			@Override
@@ -437,7 +437,7 @@ public class PlaceDataprovidersComposite extends Composite
 		gd.horizontalSpan = 2;
 		new Label(configurationComposite, SWT.NONE).setLayoutData(gd);
 		automaticI18N = createLabelAndCheck(configurationComposite, "Automatic i18n text property", AUTOMATIC_I18N_PROPERTY,
-			"Fill the text property fo the field or text of the label component through a generated i18n key");
+			"Fill the text property of the field or text of the label component through a generated i18n key");
 		automaticI18N.addSelectionListener(new SelectionListener()
 		{
 			@Override
@@ -613,6 +613,7 @@ public class PlaceDataprovidersComposite extends Composite
 		gridData.grabExcessVerticalSpace = true;
 		gridData.horizontalAlignment = GridData.FILL;
 		gridData.minimumWidth = 200;
+		gridData.heightHint = 600;
 
 		Composite parent = new Composite(this, SWT.NONE);
 		GridLayout layout = new GridLayout(1, false);
