@@ -1071,6 +1071,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 					if (!treeWidgetDisposed)
 					{
+						ITreeSelection toSelect = getTreeSelection();
 						TreePath[] oldPath = tree.getExpandedTreePaths();
 						toRun.run();
 
@@ -1084,6 +1085,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 							}
 							tree.setExpandedTreePaths(oldPath); // TODO hmm, isn't this redundant? I mean the loop above does the same thing right?
 							list.refresh();
+							tree.setSelection(toSelect, true);
+							ISelection current = tree.getSelection();
+							while (current.isEmpty() && !toSelect.isEmpty())
+							{
+								toSelect = new TreeSelection(toSelect.getPaths()[0].getParentPath());
+								tree.setSelection(toSelect, true);
+								current = tree.getSelection();
+							}
 						}
 						finally
 						{

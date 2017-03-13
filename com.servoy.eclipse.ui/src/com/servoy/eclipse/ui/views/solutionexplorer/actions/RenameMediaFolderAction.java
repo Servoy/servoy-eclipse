@@ -50,7 +50,7 @@ import com.servoy.j2db.persistence.Solution;
 
 /**
  * Action to rename media folder.
- * 
+ *
  * @author gboros
  */
 public class RenameMediaFolderAction extends Action implements ISelectionChangedListener
@@ -68,7 +68,7 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
 	 */
 	public void selectionChanged(SelectionChangedEvent event)
@@ -83,7 +83,8 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 			if (solutionNode != null)
 			{
 				// make sure you have the in-memory version of the solution
-				solution = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(((Solution)solutionNode.getRealObject()).getName()).getEditingSolution();
+				solution = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
+					((Solution)solutionNode.getRealObject()).getName()).getEditingSolution();
 				selection = node;
 			}
 
@@ -127,8 +128,8 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 			String replaceName = ((MediaNode)selection.getRealObject()).getPath();
 			int replaceStartIdx = replaceName.substring(0, replaceName.length() - 1).lastIndexOf('/');
 
-			String newName = (replaceStartIdx == -1) ? renameFolderNameDlg.getValue() + "/" : replaceName.substring(0, replaceStartIdx) + "/" +
-				renameFolderNameDlg.getValue() + "/";
+			String newName = (replaceStartIdx == -1) ? renameFolderNameDlg.getValue() + "/"
+				: replaceName.substring(0, replaceStartIdx) + "/" + renameFolderNameDlg.getValue() + "/";
 
 			ArrayList<Media> createdMedias = new ArrayList<Media>();
 			ArrayList<IPersist> newMedias = new ArrayList<IPersist>();
@@ -160,8 +161,8 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 					StringBuilder sb = new StringBuilder();
 					for (IPersist conflictedMedia : conflictingMedias)
 					{
-						sb.append(((Media)conflictedMedia).getAncestor(IRepository.SOLUTIONS)).append("  ->  ").append(((Media)conflictedMedia).getName()).append(
-							"\n");
+						sb.append(((Media)conflictedMedia).getAncestor(IRepository.SOLUTIONS)).append("  ->  ").append(
+							((Media)conflictedMedia).getName()).append("\n");
 					}
 					UIUtils.showScrollableDialog(UIUtils.getActiveShell(), IMessageProvider.ERROR, "Error",
 						"Cannot rename folder becasue the folowing media items already present in the solution", sb.toString());
@@ -193,6 +194,12 @@ public class RenameMediaFolderAction extends Action implements ISelectionChanged
 				ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(solution.getName()).saveEditingSolutionNodes(
 					changedMedias.toArray(new IPersist[changedMedias.size()]), true, false);
 				wsa.delete(solution.getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + replaceName);
+				if (createdMedias.isEmpty())
+				{
+					// rename empty folder
+					wsa.createFolder(solution.getName() + "/" + SolutionSerializer.MEDIAS_DIR + "/" + newName);
+					viewer.refreshTreeCompletely();
+				}
 			}
 			catch (RepositoryException ex)
 			{
