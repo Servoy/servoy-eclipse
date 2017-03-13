@@ -115,7 +115,7 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 				exporter.exportSolutionToFile(solution, new File(configuration.getExportFileName(solution.getName())), ClientVersion.getVersion(),
 					ClientVersion.getReleaseNumber(), configuration.shouldExportMetaData(), configuration.shouldExportSampleData(),
 					configuration.getNumberOfSampleDataExported(), configuration.shouldExportI18NData(), configuration.shouldExportUsers(),
-					configuration.shouldExportModules(), configuration.shouldProtectWithPassword(), tableDefManager, metadataDefManager, true);
+					configuration.shouldExportModules(), configuration.shouldProtectWithPassword(), tableDefManager, metadataDefManager, true, null);
 			}
 			catch (final RepositoryException e)
 			{
@@ -150,7 +150,8 @@ public class WorkspaceExporter extends AbstractWorkspaceExporter<ArgumentChest>
 		{
 			// this will make the actual export code fail with exception later on that's why we don't set any 'fail' exitcode here; it will catch/set correct exit code anyway
 			moduleNames = new ArrayList<String>();
-			outputError("Cannot check for error markes in all listed modules; please make sure all listed modules (-modules ...) are actually modules of the exported solution.");
+			outputError(
+				"Cannot check for error markes in all listed modules; please make sure all listed modules (-modules ...) are actually modules of the exported solution.");
 		}
 
 		// don't check import hooks as those are not build with active solution in developer either!

@@ -128,7 +128,7 @@ final public class ExportSolutionJob extends WorkspaceJob
 			exporter.exportSolutionToFile(activeSolution, new File(exportModel.getFileName()), ClientVersion.getVersion(), ClientVersion.getReleaseNumber(),
 				exportModel.isExportMetaData() && !dbDown, exportModel.isExportSampleData() && !dbDown, exportModel.getNumberOfSampleDataExported(),
 				exportModel.isExportI18NData(), exportModel.isExportUsers(), exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword(),
-				tableDefManager, metadataDefManager, exportSolution);
+				tableDefManager, metadataDefManager, exportSolution, exportModel.useImportSettings() ? exportModel.getImportSettings() : null);
 
 			monitor.done();
 
@@ -177,8 +177,8 @@ final public class ExportSolutionJob extends WorkspaceJob
 				if (ex.getCause() != null) message = ex.getCause().getMessage();
 				else message = ex.getMessage();
 				if (message == null) message = ex.toString();
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Failed to export the active solution", extraMsg == null ? message
-					: (extraMsg + '\n' + message));
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Failed to export the active solution",
+					extraMsg == null ? message : (extraMsg + '\n' + message));
 			}
 		});
 	}

@@ -17,16 +17,40 @@
 package com.servoy.eclipse.ui.wizards;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.dialogs.PageChangedEvent;
+import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -39,12 +63,17 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
@@ -55,12 +84,14 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.json.JSONObject;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.BuilderUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.IFileAccess;
+import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.Activator;
@@ -70,67 +101,96 @@ import com.servoy.j2db.J2DBGlobals;
 import com.servoy.j2db.dataprocessing.IDataServerInternal;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.SecuritySupport;
+import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.Utils;
 
 public class ExportSolutionWizard extends Wizard implements IExportWizard
 {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final String EXPORT_USING_DBI_FILE_INFO_ONLY = "exportUsingDbiFileInfoOnly";
 
 	/**
-	 * 
+	 *
 	 */
 	private static final String EXPORT_USERS = "exportUsers";
 
 	/**
-	 * 
+	 *
 	 */
 	private static final String EXPORTI18N_DATA = "exporti18nData";
 
 	/**
-	 * 
+	 *
 	 */
 	private static final String NUMBER_OF_SAMPLE_DATA_EXPORTED = "numberOfSampleDataExported";
 
 	/**
-	 * 
+	 *
 	 */
 	private static final String EXPORT_SAMPLE_DATA = "exportSampleData";
 
 	/**
-	 * 
+	 *
 	 */
 	private static final String CHECK_METADATA_TABLES = "checkMetadataTables";
 
 	/**
-	 * 
+	 *
 	 */
 	private static final String EXPORT_META_DATA = "exportMetaData";
 
 	/**
-	 * 
+	 *
 	 */
 	private static final String EXPORT_ALL_TABLES_FROM_REFERENCED_SERVERS = "exportAllTablesFromReferencedServers";
 
 	/**
-	 * 
+	 *
 	 */
 	private static final String EXPORT_REFERENCED_MODULES = "exportReferencedModules";
 
 	/**
-	 * 
+	 *
 	 */
 	private static final String PROTECT_WITH_PASSWORD = "protectWithPassword";
 
 	/**
-	 * 
+	 *
 	 */
 	private static final String INITIAL_FILE_NAME = "initialFileName";
 
 	private static final String DB_DOWN_WARNING = "Error markers will be ignored because the DB seems to be offline (.dbi files will be used instead).";
+
+	/**
+	 *
+	 */
+	private static final String USE_IMPORT_SETTINGS = "useImportSettings";
+
+	/**
+	 *
+	 */
+	private static final String IMPORT_SETTINGS = "importSettings";
+
+	/**
+	 *
+	 */
+	private static final String DEPLOY_TO_APPLICATION_SERVER = "deployToApplicationServer";
+	/**
+	 *
+	 */
+	private static final String DEPLOY_URL = "deployURL";
+	/**
+	 *
+	 */
+	private static final String DEPLOY_USERNAME = "deployUsername";
+	/**
+	 *
+	 */
+	private static final String DEPLOY_PASSWORD = "deployPassword";
 
 	private Solution activeSolution;
 	private ExportSolutionModel exportModel;
@@ -138,10 +198,19 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 	private ExportOptionsPage exportOptionsPage;
 	private ModulesSelectionPage modulesSelectionPage;
 	private PasswordPage passwordPage;
+	private ImportSettingsPage importPage;
+	private DeployPage deployPage;
 
 	private final IFileAccess workspace;
 
 	private boolean activeSolutionDbDownErrors = false;
+
+	private Font labelBoldFont;
+
+	private boolean deployToApplicationServer;
+	private String deployURL;
+	private String deployUsername;
+	private String deployPassword;
 
 	public ExportSolutionWizard()
 	{
@@ -174,15 +243,44 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		dialogSettings.put(EXPORTI18N_DATA, exportModel.isExportI18NData());
 		dialogSettings.put(EXPORT_USERS, exportModel.isExportUsers());
 		dialogSettings.put(EXPORT_USING_DBI_FILE_INFO_ONLY, exportModel.isExportUsingDbiFileInfoOnly());
+		dialogSettings.put(USE_IMPORT_SETTINGS, exportModel.useImportSettings());
+		JSONObject importSettings = exportModel.getImportSettings();
+		if (importSettings != null)
+		{
+			dialogSettings.put(IMPORT_SETTINGS, importSettings.toString());
+		}
+		dialogSettings.put(DEPLOY_TO_APPLICATION_SERVER, deployToApplicationServer);
+		dialogSettings.put(DEPLOY_URL, deployURL);
+		dialogSettings.put(DEPLOY_USERNAME, deployUsername);
+		try
+		{
+			dialogSettings.put(DEPLOY_PASSWORD, SecuritySupport.encrypt(Settings.getInstance(), deployPassword));
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+		}
 
+
+		IWizardPage currentPage = this.getContainer().getCurrentPage();
+		if (currentPage != deployPage)
+		{
+			doExport(null);
+		}
+
+		return true;
+	}
+
+	private void doExport(IJobChangeListener jobChangeListener)
+	{
 		WorkspaceJob exportJob = new ExportSolutionJob("Exporting solution '" + activeSolution.getName() + "'", exportModel, activeSolution,
 			modulesSelectionPage.hasDBDownErrors(), true, workspace);
 
 		exportJob.setUser(true); // we want the progress to be visible in a dialog, not to stay in the status bar
+		if (jobChangeListener != null) exportJob.addJobChangeListener(jobChangeListener);
 		exportJob.schedule();
-
-		return true;
 	}
+
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
 	{
@@ -236,6 +334,34 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		{
 			activeSolutionDbDownErrors = false;
 		}
+
+		exportModel.setUseImportSettings(dialogSettings.getBoolean(USE_IMPORT_SETTINGS));
+		String dlgImportSettings = dialogSettings.get(IMPORT_SETTINGS);
+		exportModel.setImportSettings(dlgImportSettings == null ? null : new JSONObject(dlgImportSettings));
+
+		deployToApplicationServer = dialogSettings.getBoolean(DEPLOY_TO_APPLICATION_SERVER);
+		deployURL = dialogSettings.get(DEPLOY_URL);
+		if (deployURL == null)
+		{
+			deployURL = "http://localhost:8080/servoy-admin/solutions/deploy";
+		}
+		deployUsername = dialogSettings.get(DEPLOY_USERNAME);
+		if (deployUsername == null)
+		{
+			deployUsername = "";
+		}
+		try
+		{
+			deployPassword = SecuritySupport.decrypt(Settings.getInstance(), dialogSettings.get(DEPLOY_PASSWORD));
+		}
+		catch (Exception ex)
+		{
+			ServoyLog.logError(ex);
+		}
+		if (deployPassword == null)
+		{
+			deployPassword = "";
+		}
 	}
 
 	/*
@@ -286,6 +412,10 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		addPage(modulesSelectionPage);
 		passwordPage = new PasswordPage();
 		addPage(passwordPage);
+		importPage = new ImportSettingsPage();
+		addPage(importPage);
+		deployPage = new DeployPage();
+		addPage(deployPage);
 	}
 
 	@Override
@@ -303,6 +433,8 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		{
 			if (modulesSelectionPage.projectProblemsType == BuilderUtils.HAS_ERROR_MARKERS && !modulesSelectionPage.hasDBDownErrors()) return false;
 		}
+		if (exportModel.useImportSettings() && (currentPage != importPage) && (currentPage != deployPage)) return false;
+		if (currentPage == importPage && deployToApplicationServer) return false;
 		return exportModel.canFinish();
 	}
 
@@ -525,6 +657,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		private Button allRowsRadioButton;
 		private Button exportUsingDbiFileInfoOnlyButton;
 		private final int resourcesProjectProblemsType;
+		private Button useImportSettingsButton;
 
 		public ExportOptionsPage()
 		{
@@ -696,6 +829,12 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 			exportUsingDbiFileInfoOnlyButton.addListener(SWT.Selection, this);
 
 			refreshDBIDownFlag(exportModel.isExportReferencedModules() && modulesSelectionPage.hasDBDownErrors());
+
+			useImportSettingsButton = new Button(composite, SWT.CHECK);
+			useImportSettingsButton.setText("Create import settings");
+			useImportSettingsButton.setSelection(exportModel.useImportSettings());
+			useImportSettingsButton.addListener(SWT.Selection, this);
+
 			setControl(composite);
 		}
 
@@ -737,6 +876,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		public void handleEvent(Event event)
 		{
 			if (event.widget == protectWithPasswordButton) exportModel.setProtectWithPassword(protectWithPasswordButton.getSelection());
+			else if (event.widget == useImportSettingsButton) exportModel.setUseImportSettings(useImportSettingsButton.getSelection());
 			else if (event.widget == exportReferencedModulesButton)
 			{
 				exportModel.setExportReferencedModules(exportReferencedModulesButton.getSelection());
@@ -802,6 +942,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		{
 			if (exportModel.isExportReferencedModules()) return modulesSelectionPage;
 			else if (exportModel.isProtectWithPassword()) return passwordPage;
+			else if (exportModel.useImportSettings()) return importPage;
 			else return null;
 		}
 	}
@@ -957,6 +1098,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		public IWizardPage getNextPage()
 		{
 			if (exportModel.isProtectWithPassword()) return passwordPage;
+			else if (exportModel.useImportSettings()) return importPage;
 			else return null;
 		}
 
@@ -1042,8 +1184,539 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 		@Override
 		public IWizardPage getNextPage()
 		{
+			if (exportModel.useImportSettings()) return importPage;
 			return null;
 		}
 	}
 
+	private class ImportSettingsPage extends WizardPage implements Listener
+	{
+		private static final String ENTER_MAINTENANCE_MODE = "emm";
+		private static final String ACTIVATE_NEW_RELEASE = "ac";
+		private static final String COMPACT_BEFORE_INPUT = "cmpt";
+		private static final String OVERWRITE_STYLE = "os";
+		private static final String OVERWRITE_GROUP_SECURITY = "og";
+		private static final String CLEAN_IMPORT = "clean";
+
+		private static final String NEW_SOLUTION_NAME = "newname";
+
+		private static final String OVERRIDE_SEQUENCES = "fs";
+		private static final String UPDATE_SEQUENCES = "useq";
+		private static final String OVERRIDE_DEFAUL_VALUES = "fd";
+
+		private static final String ALLOW_RESERVED_SQL_KEYWORDS = "ak";
+		private static final String ALLOW_DATA_MODEL_CHANGES = "dm";
+		private static final String SKIP_VIEWS = "sv";
+		private static final String DISPLAY_DATA_MODEL_CHANGES = "dmc";
+		private static final String IMPORT_META_DATA = "md";
+		private static final String IMPORT_SAMPLE_DATA = "sd";
+		private static final String IMPORT_I18N_DATA = "id";
+		private static final String INSERT_NEW_I18N_DATA = "io";
+
+		private static final String USER_IMPORT = "up";
+
+		private static final String ALLOW_ADMIN_USER = "aa";
+
+		private JSONObject importSettings;
+
+		public ImportSettingsPage()
+		{
+			super("page5");
+			setTitle("Choose import settings");
+			setDescription("Specify the settings for your import");
+
+			importSettings = exportModel.getImportSettings();
+			if (importSettings == null)
+			{
+				importSettings = new JSONObject();
+			}
+		}
+
+
+		private Button createCheckbox(String label, String property, Composite parent)
+		{
+			GridData gd = new GridData();
+			gd.horizontalSpan = 3;
+			Button checkbox = new Button(parent, SWT.CHECK);
+			checkbox.setLayoutData(gd);
+			checkbox.setText(label);
+			checkbox.setSelection(importSettings.optBoolean(property));
+			checkbox.setData("importProperty", property);
+			checkbox.addListener(SWT.Selection, this);
+			return checkbox;
+		}
+
+		private Button createRadio(String label, String property, Composite parent, int value)
+		{
+			GridData gd = new GridData();
+			gd.horizontalSpan = 3;
+			Button radio = new Button(parent, SWT.RADIO);
+			radio.setLayoutData(gd);
+			radio.setText(label);
+			radio.setSelection(importSettings.optInt(property) == value);
+			radio.setData("importProperty", property);
+			radio.setData("importPropertyValue", Integer.toString(value));
+			radio.addListener(SWT.Selection, this);
+			return radio;
+		}
+
+		private Label createNewLine(Composite parent)
+		{
+			GridData gd = new GridData();
+			gd.horizontalSpan = 3;
+			Label newLine = new Label(parent, SWT.NONE);
+			newLine.setLayoutData(gd);
+			return newLine;
+		}
+
+		private Label createHeader(String text, Composite parent)
+		{
+			GridData gd = new GridData();
+			gd.horizontalSpan = 3;
+			Label header = new Label(parent, SWT.NONE);
+			header.setLayoutData(gd);
+			header.setText(text);
+			header.setFont(getBoldFont(header));
+			return header;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+		 */
+		@Override
+		public void createControl(Composite parent)
+		{
+			ScrolledComposite myScrolledComposite = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+			myScrolledComposite.setExpandHorizontal(true);
+			myScrolledComposite.setExpandVertical(true);
+
+			GridLayout gridLayout = new GridLayout(3, false);
+
+			Composite composite = new Composite(myScrolledComposite, SWT.NONE);
+			composite.setLayout(gridLayout);
+			myScrolledComposite.setContent(composite);
+
+			createHeader("General options...", composite);
+
+			createCheckbox("Enter maintenance mode", ENTER_MAINTENANCE_MODE, composite);
+			createCheckbox("Activate new release of imported solution and modules", ACTIVATE_NEW_RELEASE, composite);
+			createCheckbox("Compact all the solutions/modules first before import", COMPACT_BEFORE_INPUT, composite);
+			createCheckbox("Overwrite repository styles with import version", OVERWRITE_STYLE, composite);
+			createCheckbox("Overwrite repository group security settings with import version", OVERWRITE_GROUP_SECURITY, composite);
+
+
+			GridData gd = new GridData();
+			gd.horizontalSpan = 1;
+			gd.horizontalAlignment = GridData.FILL;
+			gd.verticalAlignment = GridData.FILL;
+			createCheckbox("Clean import  -  New solution name", CLEAN_IMPORT, composite).setLayoutData(gd);
+
+			gd = new GridData();
+			gd.horizontalSpan = 1;
+			gd.horizontalAlignment = GridData.FILL;
+			gd.verticalAlignment = GridData.FILL;
+			gd.widthHint = 250;
+
+			final Text newSolutionNameField = new Text(composite, SWT.BORDER);
+			newSolutionNameField.setLayoutData(gd);
+			newSolutionNameField.setText(importSettings.optString(NEW_SOLUTION_NAME));
+			newSolutionNameField.addModifyListener(new ModifyListener()
+			{
+				@Override
+				public void modifyText(ModifyEvent e)
+				{
+					importSettings.put(NEW_SOLUTION_NAME, newSolutionNameField.getText());
+					exportModel.setImportSettings(importSettings);
+				}
+			});
+
+			gd = new GridData();
+			gd.horizontalSpan = 1;
+			gd.horizontalAlignment = GridData.FILL;
+			gd.verticalAlignment = GridData.FILL;
+
+			Label newSolutionWarningLabel = new Label(composite, SWT.NONE);
+			newSolutionWarningLabel.setText("WARNING: Styles will be overwritten!");
+			newSolutionWarningLabel.setLayoutData(gd);
+
+
+			createNewLine(composite);
+
+			createCheckbox("Override existing sequence type definitions (in repository) with the sequence types contained in the import file",
+				OVERRIDE_SEQUENCES, composite);
+			createCheckbox("Update sequences for all tables on all servers used by the imported solution and modules", UPDATE_SEQUENCES, composite);
+			createCheckbox("Override existing default values (in repository) with the default values contained in the import file", OVERRIDE_DEFAUL_VALUES,
+				composite);
+
+			gd = new GridData();
+			gd.horizontalSpan = 3;
+			Label overrideDefaultWarningLabel = new Label(composite, SWT.NONE);
+			overrideDefaultWarningLabel.setLayoutData(gd);
+			overrideDefaultWarningLabel.setText(
+				"WARNING: This may break other solutions using the same tables, or cause tables to use nonexistent dbidentity or dbsequence sequences or other database auto enter types!");
+
+			createNewLine(composite);
+
+			createCheckbox("Allow reserved SQL keywords as table or column names (will fail unless supported by the backend database)",
+				ALLOW_RESERVED_SQL_KEYWORDS, composite);
+			createCheckbox("Allow data model (database) changes", ALLOW_DATA_MODEL_CHANGES, composite);
+			createCheckbox("Skip database views import", SKIP_VIEWS, composite);
+			createCheckbox("Display data model (database) changes", DISPLAY_DATA_MODEL_CHANGES, composite);
+			createCheckbox("Import solution meta data", IMPORT_META_DATA, composite);
+			createCheckbox("Import solution sample data", IMPORT_SAMPLE_DATA, composite);
+			createCheckbox("Import internationalization (i18n) data (inserts and updates)", IMPORT_I18N_DATA, composite);
+			createCheckbox("Insert new internationalization (i18n) keys only(inserts only, no updates)", INSERT_NEW_I18N_DATA, composite);
+
+			createNewLine(composite);
+
+			createHeader("User import options...", composite);
+
+			createRadio("Do not import users contained in import", USER_IMPORT, composite, 0);
+			createRadio("Create nonexisting users and add existing users to groups specified in import", USER_IMPORT, composite, 1);
+			createRadio("Overwrite existing users completely (USE WITH CARE)", USER_IMPORT, composite, 2);
+
+			createCheckbox("Allow users to be added to the Administrators group", ALLOW_ADMIN_USER, composite);
+
+			createNewLine(composite);
+
+			createHeader("Other options...", composite);
+
+			gd = new GridData();
+			gd.horizontalSpan = 3;
+			final Button deployButton = new Button(composite, SWT.CHECK);
+			deployButton.setLayoutData(gd);
+			deployButton.setText("Deploy to Servoy application server");
+			deployButton.setSelection(deployToApplicationServer);
+			deployButton.addListener(SWT.Selection, new Listener()
+			{
+				@Override
+				public void handleEvent(Event event)
+				{
+					deployToApplicationServer = deployButton.getSelection();
+					getWizard().getContainer().updateButtons();
+				}
+			});
+
+			myScrolledComposite.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+			setControl(myScrolledComposite);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see org.eclipse.swt.widgets.Listener#handleEvent(org.eclipse.swt.widgets.Event)
+		 */
+		@Override
+		public void handleEvent(Event event)
+		{
+			if (event.widget instanceof Button)
+			{
+				String importProperty = (String)event.widget.getData("importProperty");
+				if (importProperty != null)
+				{
+					String importPropertyValue = (String)event.widget.getData("importPropertyValue");
+					importSettings.put(importProperty,
+						importPropertyValue != null ? importPropertyValue : Boolean.valueOf(((Button)event.widget).getSelection()));
+					exportModel.setImportSettings(importSettings);
+				}
+			}
+		}
+
+		@Override
+		public IWizardPage getNextPage()
+		{
+			if (deployToApplicationServer) return deployPage;
+			return null;
+		}
+	}
+
+
+	private class DeployPage extends WizardPage implements IJobChangeListener
+	{
+		private Button deploy;
+		private Text deployOutput;
+
+		public DeployPage()
+		{
+			super("page6");
+			setTitle("Deploy");
+			setDescription("Deploy to Servoy application server");
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+		 */
+		@Override
+		public void createControl(Composite parent)
+		{
+			GridLayout gridLayout = new GridLayout(2, false);
+			Composite composite = new Composite(parent, SWT.NONE);
+			composite.setLayout(gridLayout);
+			composite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+
+			Label lbl = new Label(composite, SWT.NONE);
+			lbl.setText("Deploy URL");
+			final Text deployURLTxt = new Text(composite, SWT.BORDER);
+			deployURLTxt.setText(deployURL);
+			deployURLTxt.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+
+			lbl = new Label(composite, SWT.NONE);
+			lbl.setText("Username");
+			final Text usernameTxt = new Text(composite, SWT.BORDER);
+			usernameTxt.setText(deployUsername);
+			usernameTxt.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+
+			lbl = new Label(composite, SWT.NONE);
+			lbl.setText("Password");
+			// On MacOS, SWT 3.5 does not send events to listeners on password fields.
+			// See: http://www.eclipse.org/forums/index.php?t=msg&goto=508058&
+			int style = SWT.BORDER;
+			if (!Utils.isAppleMacOS()) style |= SWT.PASSWORD;
+			final Text passwordTxt = new Text(composite, style);
+			passwordTxt.setText(deployPassword);
+			passwordTxt.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+			if (Utils.isAppleMacOS()) passwordTxt.setEchoChar('\u2022');
+
+			GridData gd = new GridData();
+			gd.horizontalSpan = 2;
+			deploy = new Button(composite, SWT.PUSH);
+			deploy.setLayoutData(gd);
+			deploy.setText("Deploy");
+			deploy.addSelectionListener(new SelectionListener()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent e)
+				{
+					deployURL = deployURLTxt.getText();
+					deployUsername = usernameTxt.getText();
+					deployPassword = passwordTxt.getText();
+					deployOutput.setText("");
+					doDeploy(deployURL, deployUsername, deployPassword, exportModel.getFileName());
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e)
+				{
+					// TODO Auto-generated method stub
+				}
+			});
+
+			gd = new GridData();
+			gd.horizontalSpan = 2;
+			lbl = new Label(composite, SWT.NONE);
+			lbl.setLayoutData(gd);
+			lbl.setText("Response");
+
+			gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+			gd.horizontalSpan = 2;
+			deployOutput = new Text(composite, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
+			deployOutput.setEditable(false);
+			deployOutput.setLayoutData(gd);
+			setControl(composite);
+		}
+
+		private void doDeploy(final String url, final String username, final String password, final String exportFile)
+		{
+			deploy.setEnabled(false);
+			Job job = new Job("Deploying to Servoy application server")
+			{
+				@Override
+				protected IStatus run(IProgressMonitor monitor)
+				{
+					final StringBuilder responseMessage = new StringBuilder();
+					// the file we want to upload
+					File inFile = new File(exportFile);
+					try
+					{
+						HttpClient httpclient = HttpClients.createDefault();
+
+						CredentialsProvider credsProvider = new BasicCredentialsProvider();
+						credsProvider.setCredentials(new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT),
+							new UsernamePasswordCredentials(username, password));
+
+						HttpPost httppost = new HttpPost(url);
+
+
+						MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
+						multipartEntityBuilder.addPart("if", new FileBody(inFile));
+						if (exportModel.isProtectWithPassword())
+						{
+							multipartEntityBuilder.addPart("solution_password", new StringBody(exportModel.getPassword(), ContentType.MULTIPART_FORM_DATA));
+						}
+						httppost.setEntity(multipartEntityBuilder.build());
+
+						// execute the request
+						HttpClientContext context = HttpClientContext.create();
+						context.setCredentialsProvider(credsProvider);
+						HttpResponse response = httpclient.execute(httppost, context);
+
+						if (response.getStatusLine().getStatusCode() == 200)
+						{
+							HttpEntity responseEntity = response.getEntity();
+							String responseString = EntityUtils.toString(responseEntity);
+							String[] responses = responseString.split("\n");
+
+							for (String s : responses)
+							{
+								responseMessage.append(s.trim()).append('\n');
+							}
+						}
+						else
+						{
+							responseMessage.append("HTTP ERROR : ").append(response.getStatusLine().getStatusCode()).append(' ').append(
+								response.getStatusLine().getReasonPhrase());
+						}
+					}
+					catch (ClientProtocolException e)
+					{
+						String msg = "Unable to make connection";
+						System.err.println(msg);
+						responseMessage.append(msg);
+						e.printStackTrace();
+					}
+					catch (IOException e)
+					{
+						String msg = "Unable to read file";
+						System.err.println(msg);
+						responseMessage.append(msg);
+						e.printStackTrace();
+					}
+					finally
+					{
+						Display.getDefault().syncExec(new Runnable()
+						{
+							@Override
+							public void run()
+							{
+								deployOutput.setText(responseMessage.toString());
+							}
+						});
+					}
+
+					return Status.OK_STATUS;
+				}
+			};
+			job.addJobChangeListener(this);
+			job.schedule();
+		}
+
+		@Override
+		public void setVisible(boolean visible)
+		{
+			super.setVisible(visible);
+			if (visible)
+			{
+				deployOutput.setText("");
+				deploy.setEnabled(false);
+				doExport(this);
+			}
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see org.eclipse.core.runtime.jobs.IJobChangeListener#aboutToRun(org.eclipse.core.runtime.jobs.IJobChangeEvent)
+		 */
+		@Override
+		public void aboutToRun(IJobChangeEvent event)
+		{
+			// TODO Auto-generated method stub
+
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see org.eclipse.core.runtime.jobs.IJobChangeListener#awake(org.eclipse.core.runtime.jobs.IJobChangeEvent)
+		 */
+		@Override
+		public void awake(IJobChangeEvent event)
+		{
+			// TODO Auto-generated method stub
+
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see org.eclipse.core.runtime.jobs.IJobChangeListener#done(org.eclipse.core.runtime.jobs.IJobChangeEvent)
+		 */
+		@Override
+		public void done(IJobChangeEvent event)
+		{
+			Display.getDefault().syncExec(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					if (!deploy.isDisposed())
+					{
+						deploy.setEnabled(true);
+					}
+				}
+			});
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see org.eclipse.core.runtime.jobs.IJobChangeListener#running(org.eclipse.core.runtime.jobs.IJobChangeEvent)
+		 */
+		@Override
+		public void running(IJobChangeEvent event)
+		{
+			// TODO Auto-generated method stub
+
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see org.eclipse.core.runtime.jobs.IJobChangeListener#scheduled(org.eclipse.core.runtime.jobs.IJobChangeEvent)
+		 */
+		@Override
+		public void scheduled(IJobChangeEvent event)
+		{
+			// TODO Auto-generated method stub
+
+		}
+
+		/*
+		 * (non-Javadoc)
+		 *
+		 * @see org.eclipse.core.runtime.jobs.IJobChangeListener#sleeping(org.eclipse.core.runtime.jobs.IJobChangeEvent)
+		 */
+		@Override
+		public void sleeping(IJobChangeEvent event)
+		{
+			// TODO Auto-generated method stub
+
+		}
+	}
+
+
+	private Font getBoldFont(Label label)
+	{
+		if (labelBoldFont == null)
+		{
+			FontDescriptor boldDescriptor = FontDescriptor.createFrom(label.getFont()).setStyle(SWT.BOLD);
+			labelBoldFont = boldDescriptor.createFont(label.getDisplay());
+		}
+		return labelBoldFont;
+	}
+
+	@Override
+	public void dispose()
+	{
+		if (labelBoldFont != null)
+		{
+			labelBoldFont.dispose();
+		}
+		super.dispose();
+	}
 }

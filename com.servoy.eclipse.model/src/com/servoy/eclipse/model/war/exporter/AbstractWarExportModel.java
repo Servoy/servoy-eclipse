@@ -38,6 +38,7 @@ import org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor;
 import org.eclipse.dltk.javascript.ast.CallExpression;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
+import org.json.JSONObject;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
@@ -274,6 +275,18 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	public boolean isExportReferencedModules()
 	{
 		return true;
+	}
+
+	@Override
+	public boolean useImportSettings()
+	{
+		return false;
+	}
+
+	@Override
+	public JSONObject getImportSettings()
+	{
+		return null;
 	}
 
 	protected void search()
