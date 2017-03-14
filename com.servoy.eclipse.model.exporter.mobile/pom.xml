@@ -7,7 +7,7 @@
     <artifactId>servoy-eclipse</artifactId>
     <version>8.1.2.3031</version>
   </parent>
-  <artifactId>com.servoy.eclipse.core</artifactId>
+  <artifactId>com.servoy.eclipse.model.exporter.mobile</artifactId>
   <version>8.1.2.3031</version>
   <packaging>eclipse-plugin</packaging>
   <build>
@@ -18,23 +18,31 @@
 	         <version>3.0.0</version>
 	         <executions>
 	           <execution>
-	             <id>unpack</id>
+	             <id>copy</id>
 	             <phase>prepare-package</phase>
 	             <goals>
-	               <goal>unpack</goal>
+	               <goal>copy</goal>
 	             </goals>
 	             <configuration>
 	               <artifactItems>
 	                 <artifactItem>
 	                   <groupId>com.servoy</groupId>
-	                   <artifactId>servoy-doc</artifactId>
+	                   <artifactId>servoy_mobile</artifactId>
 	                   <version>1.0</version>
-	                   <type>jar</type>
+	                   <type>war</type>
 	                   <overWrite>true</overWrite>
-	                   <outputDirectory>${project.build.directory}/classes/com/servoy/eclipse/core/doc</outputDirectory>
-	                   <includes>*.xml</includes>
+	                   <outputDirectory>${project.build.directory}/classes/com/servoy/eclipse/model/mobile/exporter/resources/</outputDirectory>
+	                 </artifactItem>
+					  <artifactItem>
+	                   <groupId>com.servoy</groupId>
+	                   <artifactId>servoy_mobile_jsunit</artifactId>
+	                   <version>1.0</version>
+	                   <type>war</type>
+	                   <overWrite>true</overWrite>
+	                   <outputDirectory>${project.build.directory}/classes/com/servoy/eclipse/model/mobile/exporter/resources/</outputDirectory>
 	                 </artifactItem>
 	               </artifactItems>
+	               <stripVersion>true</stripVersion>
 	             </configuration>
 	           </execution>
 	         </executions>
