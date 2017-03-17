@@ -201,10 +201,10 @@ public class CreateComponentHandler implements IServerService
 				{
 					IBasicWebComponent parentBean = (IBasicWebComponent)next;
 					String propertyName = args.getString("propertyName");
-					String compName = "bean_" + id.incrementAndGet();
+					String compName = "component_" + id.incrementAndGet();
 					while (!PersistFinder.INSTANCE.checkName(editorPart, compName))
 					{
-						compName = "bean_" + id.incrementAndGet();
+						compName = "component_" + id.incrementAndGet();
 					}
 					WebCustomType bean = AddContainerCommand.addCustomType(parentBean, propertyName, compName, arrayIndex);
 					return new IPersist[] { bean };
@@ -628,10 +628,13 @@ public class CreateComponentHandler implements IServerService
 									JSONObject config = layoutSpec.getConfig() instanceof String ? new JSONObject((String)layoutSpec.getConfig()) : null;
 									boolean fullRefreshNeeded = initialDropTarget != null && !initialDropTarget.equals(dropTarget) &&
 										initialDropTarget.getParent() instanceof Form;
-									IPersist res = createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, x,
+									List<IPersist> res = createLayoutContainer(parentSupportingElements, layoutSpec, sameTypeChildContainer, config, x,
 										specifications, args.optString("packageName"));
-									IPersist[] result = dropTarget != null && !dropTarget.equals(initialDropTarget) ? new IPersist[] { res, dropTarget }
-										: new IPersist[] { res };
+									if (dropTarget != null && !dropTarget.equals(initialDropTarget))
+									{
+										res.add(dropTarget);
+									}
+									IPersist[] result = res.toArray(new IPersist[0]);
 									if (fullRefreshNeeded)
 									{
 										IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
@@ -757,16 +760,17 @@ public class CreateComponentHandler implements IServerService
 		return null;
 	}
 
-	protected IPersist createLayoutContainer(ISupportFormElements parent, WebLayoutSpecification layoutSpec, LayoutContainer sameTypeChildContainer,
+	protected List<IPersist> createLayoutContainer(ISupportFormElements parent, WebLayoutSpecification layoutSpec, LayoutContainer sameTypeChildContainer,
 		JSONObject config, int index, PackageSpecification<WebLayoutSpecification> specifications, String packageName) throws RepositoryException, JSONException
 	{
-
+		List<IPersist> newPersists = new ArrayList<IPersist>();
 		LayoutContainer container = (LayoutContainer)editorPart.getForm().getRootObject().getChangeHandler().createNewObject(parent,
 			IRepository.LAYOUTCONTAINERS);
 		container.setSpecName(layoutSpec.getName());
 		container.setPackageName(packageName);
 		parent.addChild(container);
 		container.setLocation(new Point(index, index));
+		newPersists.add(container);
 		if (config != null)
 		{
 			// if this is a composite try to set the actual layoutname (so a row combination with columns becomes here just a row)
@@ -787,12 +791,29 @@ public class CreateComponentHandler implements IServerService
 						if (jsonObject.has("layoutName"))
 						{
 							WebLayoutSpecification spec = specifications.getSpecification(jsonObject.getString("layoutName"));
-							createLayoutContainer(container, spec, null, jsonObject.optJSONObject("model"), i + 1, specifications, packageName);
+							newPersists.addAll(
+								createLayoutContainer(container, spec, null, jsonObject.optJSONObject("model"), i + 1, specifications, packageName));
 						}
 						else if (jsonObject.has("componentName"))
 						{
-							String compName = "bean_" + id.incrementAndGet();
-							container.createNewWebComponent(compName, jsonObject.getString("componentName"));
+							String compName = "component_" + id.incrementAndGet();
+							WebComponent component = container.createNewWebComponent(compName, jsonObject.getString("componentName"));
+							newPersists.add(component);
+							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
+								jsonObject.getString("componentName"));
+							if (spec != null)
+							{
+								Collection<String> allPropertiesNames = spec.getAllPropertiesNames();
+								for (String string : allPropertiesNames)
+								{
+									PropertyDescription property = spec.getProperty(string);
+									if (property != null && property.getInitialValue() != null)
+									{
+										Object initialValue = property.getInitialValue();
+										if (initialValue != null) component.setProperty(string, initialValue);
+									}
+								}
+							}
 						}
 					}
 				} // children and layoutName are special
@@ -802,6 +823,6 @@ public class CreateComponentHandler implements IServerService
 				}
 			}
 		}
-		return container;
+		return newPersists;
 	}
 }
