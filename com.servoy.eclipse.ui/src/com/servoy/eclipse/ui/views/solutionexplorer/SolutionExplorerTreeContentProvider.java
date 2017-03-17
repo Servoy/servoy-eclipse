@@ -3315,4 +3315,10 @@ public class SolutionExplorerTreeContentProvider
 			}
 		}
 	}
+
+
+	public PlatformSimpleUserNode getAllWebPackagesNode()
+	{
+		return allWebPackagesNode;
+	}
 }
