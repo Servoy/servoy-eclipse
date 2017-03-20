@@ -121,7 +121,7 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 						editingSolution.updateName(servoyModel.getNameValidator(), name);
 						IProjectDescription description = servoyProject.getProject().getDescription();
 						description.setName(name);
-						description.setLocation(null);
+						description.setLocation(servoyProject.getProject().getLocation().removeLastSegments(1).append(name));
 						servoyProject.getProject().move(description, false, null);
 						EclipseRepository repository = (EclipseRepository)ServoyModel.getDeveloperRepository();
 						String protectionPassword = ApplicationServerRegistry.get().calculateProtectionPassword(editingSolution.getSolutionMetaData(), null);
