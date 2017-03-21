@@ -164,7 +164,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			try
 			{
 				InputStream is = scriptFile.getContents();
-				String source = IOUtils.toString(is);
+				final String source = IOUtils.toString(is);
 				is.close();
 				if (source != null)
 				{
@@ -184,7 +184,8 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 							if (node.getExpression().getChilds().size() > 0)
 							{
 								SpecProviderState servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
-								String expr = node.getExpression().getChilds().get(0).toString();
+								ASTNode astNode = node.getExpression().getChilds().get(0);
+								String expr = source.substring(astNode.sourceStart(), astNode.sourceEnd());
 								if (expr.startsWith("plugins."))
 								{
 									String[] parts = expr.split("\\.");
@@ -197,7 +198,8 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 								{
 									if (node.getArguments().size() > 1)
 									{
-										String componentName = node.getArguments().get(1).toString();
+										ASTNode arg = node.getArguments().get(1);
+										String componentName = source.substring(arg.sourceStart(), arg.sourceEnd());
 										if (componentName.startsWith("\"") || componentName.startsWith("'"))
 										{
 											componentName = componentName.replaceAll("'|\"", "");
