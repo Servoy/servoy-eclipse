@@ -32,6 +32,8 @@ public interface IExportSolutionModel
 
 	public abstract boolean isExportReferencedModules();
 
+	public abstract boolean isExportReferencedWebPackages();
+
 	public abstract boolean isExportMetaData();
 
 	public abstract boolean isExportSampleData();

@@ -28,6 +28,7 @@ public class ExportSolutionModel implements IExportSolutionModel
 	private String fileName = null;
 	private boolean protectWithPassword = false;
 	private boolean exportReferencedModules = false;
+	private boolean exportReferencedWebPackages = false;
 	private boolean exportMetaData = true;
 	private boolean exportSampleData = false;
 	private boolean exportI18NData = false;
@@ -100,6 +101,17 @@ public class ExportSolutionModel implements IExportSolutionModel
 	public void setExportReferencedModules(boolean exportReferencedModules)
 	{
 		this.exportReferencedModules = exportReferencedModules;
+	}
+
+	@Override
+	public boolean isExportReferencedWebPackages()
+	{
+		return exportReferencedWebPackages;
+	}
+
+	public void setExportReferencedWebPackages(boolean exportReferencedWebPackages)
+	{
+		this.exportReferencedWebPackages = exportReferencedWebPackages;
 	}
 
 	/*

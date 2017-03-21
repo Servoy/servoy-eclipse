@@ -19,7 +19,15 @@ package com.servoy.eclipse.ui.export;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,9 +38,12 @@ import org.eclipse.swt.widgets.Display;
 import org.json.JSONException;
 
 import com.servoy.eclipse.core.ServoyModel;
+import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.export.IExportSolutionModel;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.EclipseExportI18NHelper;
 import com.servoy.eclipse.model.repository.EclipseExportUserChannel;
+import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.IFileAccess;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableDefinitionUtils;
@@ -125,10 +136,12 @@ final public class ExportSolutionJob extends WorkspaceJob
 					}
 				});
 			}
+
 			exporter.exportSolutionToFile(activeSolution, new File(exportModel.getFileName()), ClientVersion.getVersion(), ClientVersion.getReleaseNumber(),
 				exportModel.isExportMetaData() && !dbDown, exportModel.isExportSampleData() && !dbDown, exportModel.getNumberOfSampleDataExported(),
 				exportModel.isExportI18NData(), exportModel.isExportUsers(), exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword(),
-				tableDefManager, metadataDefManager, exportSolution, exportModel.useImportSettings() ? exportModel.getImportSettings() : null);
+				tableDefManager, metadataDefManager, exportSolution, exportModel.useImportSettings() ? exportModel.getImportSettings() : null,
+				exportModel.isExportReferencedWebPackages() ? getModulesWebPackages() : null);
 
 			monitor.done();
 
@@ -162,6 +175,49 @@ final public class ExportSolutionJob extends WorkspaceJob
 			return Status.CANCEL_STATUS;
 		}
 
+	}
+
+
+	private Map<String, List<File>> getModulesWebPackages()
+	{
+		Map<String, List<File>> modulesWebPackages = new HashMap<String, List<File>>();
+
+		ArrayList<String> allModules = new ArrayList<String>();
+		allModules.add(activeSolution.getName());
+		if (exportModel.isExportReferencedModules())
+		{
+			allModules.addAll(Arrays.asList(exportModel.getModulesToExport()));
+		}
+
+		for (String module : allModules)
+		{
+			ServoyProject moduleProject = ServoyModelFinder.getServoyModel().getServoyProject(module);
+			if (moduleProject != null)
+			{
+				ArrayList<File> webPackages = new ArrayList<File>();
+				IFolder ngPackagesFolder = moduleProject.getProject().getFolder(SolutionSerializer.NG_PACKAGES_DIR_NAME);
+				if (ngPackagesFolder.exists())
+				{
+					try
+					{
+						for (IResource r : ngPackagesFolder.members())
+						{
+							if (r instanceof IFile)
+							{
+								webPackages.add(((IFile)r).getLocation().toFile());
+							}
+						}
+					}
+					catch (CoreException ex)
+					{
+						ServoyLog.logError(ex);
+					}
+					modulesWebPackages.put(module, webPackages);
+				}
+			}
+		}
+
+		return modulesWebPackages;
 	}
 
 	private void handleExportException(final Exception ex, final String extraMsg, IProgressMonitor monitor)
