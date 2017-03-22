@@ -38,7 +38,6 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
-import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
@@ -52,6 +51,7 @@ import com.servoy.eclipse.model.war.exporter.WarExporter;
 import com.servoy.eclipse.warexporter.Activator;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 
@@ -93,9 +93,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 
 	private LicensePage licenseConfigurationPage;
 
-	private final SpecProviderState componentsSpecProviderState;
-
-	private final SpecProviderState servicesSpecProviderState;
+	private boolean isNGExport;
 
 	public ExportWarWizard()
 	{
@@ -105,8 +103,6 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard:" + activeProject.getSolution().getName());
 		setDialogSettings(section);
 		setNeedsProgressMonitor(true);
-		this.componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
-		this.servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
@@ -123,7 +119,9 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		}
 		else
 		{
-			exportModel = new ExportWarModel(getDialogSettings(), componentsSpecProviderState, servicesSpecProviderState);
+			int solutionType = activeProject.getSolutionMetaData().getSolutionType();
+			isNGExport = solutionType != SolutionMetaData.WEB_CLIENT_ONLY && solutionType != SolutionMetaData.SMART_CLIENT_ONLY;
+			exportModel = new ExportWarModel(getDialogSettings(), isNGExport);
 		}
 	}
 
@@ -156,7 +154,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		{
 			public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
-				final WarExporter exporter = new WarExporter(exportModel, componentsSpecProviderState, servicesSpecProviderState);
+				final WarExporter exporter = new WarExporter(exportModel);
 				try
 				{
 					final boolean[] cancel = new boolean[] { false };
@@ -231,11 +229,14 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 				"Please enter the Servoy client license key(s), or leave empty for running the solution in trial mode.", exportModel);
 			servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel);
 			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel);
-			componentsSelectionPage = new ComponentsSelectionPage(exportModel, componentsSpecProviderState, "componentspage", "Select components to export",
-				"View the components used and select others which you want to export.");
+			if (isNGExport)
+			{
+				componentsSelectionPage = new ComponentsSelectionPage(exportModel, WebComponentSpecProvider.getSpecProviderState(), "componentspage",
+					"Select components to export", "View the components used and select others which you want to export.");
+				servicesSelectionPage = new ServicesSelectionPage(exportModel, WebServiceSpecProvider.getSpecProviderState(), "servicespage",
+					"Select services to export", "View the services used and select others which you want to export.");
+			}
 			defaultAdminConfigurationPage = new DefaultAdminConfigurationPage("defaultAdminPage", exportModel);
-			servicesSelectionPage = new ServicesSelectionPage(exportModel, servicesSpecProviderState, "servicespage", "Select services to export",
-				"View the services used and select others which you want to export.");
 			driverSelectionPage = new DirectorySelectionPage("driverpage", "Choose the jdbc drivers to export",
 				"Select the jdbc drivers that you want to use in the war (if the app server doesn't provide them)",
 				ApplicationServerRegistry.get().getServerManager().getDriversDir(), exportModel.getDrivers(), new String[] { "hsqldb.jar" },
@@ -255,8 +256,11 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 			addPage(beanSelectionPage);
 			addPage(lafSelectionPage);
 			addPage(driverSelectionPage);
-			addPage(componentsSelectionPage);
-			addPage(servicesSelectionPage);
+			if (isNGExport)
+			{
+				addPage(componentsSelectionPage);
+				addPage(servicesSelectionPage);
+			}
 			addPage(defaultAdminConfigurationPage);
 			addPage(servoyPropertiesSelectionPage);
 			addPage(servoyPropertiesConfigurationPage);

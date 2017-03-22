@@ -70,17 +70,23 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	private final Set<String> usedServices;
 	protected final Map<String, License> licenses;
 
-	protected final SpecProviderState componentsSpecProviderState;
-	protected final SpecProviderState servicesSpecProviderState;
+	protected SpecProviderState componentsSpecProviderState;
+	protected SpecProviderState servicesSpecProviderState;
+	private final boolean isNgExport;
 
-	public AbstractWarExportModel(SpecProviderState componentsSpecProviderState, SpecProviderState servicesSpecProviderState)
+	public AbstractWarExportModel(boolean isNGExport)
 	{
 		usedComponents = new TreeSet<String>();
 		usedServices = new TreeSet<String>();
 		licenses = new HashMap<String, License>();
 
-		this.componentsSpecProviderState = componentsSpecProviderState;
-		this.servicesSpecProviderState = servicesSpecProviderState;
+		this.isNgExport = isNGExport;
+
+		if (isNGExport)
+		{
+			this.componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
+			this.servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
+		}
 	}
 
 	public static class License
@@ -185,7 +191,6 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 						{
 							if (node.getExpression().getChilds().size() > 0)
 							{
-								SpecProviderState servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
 								ASTNode astNode = node.getExpression().getChilds().get(0);
 								String expr = source.substring(astNode.sourceStart(), astNode.sourceEnd());
 								if (expr.startsWith("plugins."))
@@ -306,6 +311,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 
 	protected void search()
 	{
+		if (!isNGExport()) return;
 		FlattenedSolution solution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
 		Iterator<Form> forms = solution.getForms(false);
 		while (forms.hasNext())
@@ -364,5 +370,10 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			result = new String(Utils.decodeBASE64(password));
 		}
 		return result;
+	}
+
+	public boolean isNGExport()
+	{
+		return isNgExport;
 	}
 }

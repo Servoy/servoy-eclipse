@@ -602,6 +602,7 @@ public class FileSelectionPage extends WizardPage implements Listener
 		});
 
 		minimizeJSAndCSS = new Button(horizontalComposite, SWT.CHECK);
+		minimizeJSAndCSS.setEnabled(exportModel.isNGExport());
 		minimizeJSAndCSS.setText("Minimize JS and CSS");
 		minimizeJSAndCSS.setSelection(exportModel.isMinimizeJsCssResources());
 		minimizeJSAndCSS.addSelectionListener(new SelectionAdapter()
