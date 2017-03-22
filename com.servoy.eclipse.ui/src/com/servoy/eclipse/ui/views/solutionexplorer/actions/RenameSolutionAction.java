@@ -27,7 +27,6 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.window.Window;
-import org.eclipse.team.core.RepositoryProvider;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -50,7 +49,7 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 
 	/**
 	 * Creates a new action for the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public RenameSolutionAction(SolutionExplorerView sev)
@@ -83,12 +82,6 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 		if (node.getRealObject() instanceof ServoyProject)
 		{
 			ServoyProject servoyProject = (ServoyProject)node.getRealObject();
-			if (RepositoryProvider.getProvider(servoyProject.getProject()) != null)
-			{
-				MessageDialog.openInformation(viewer.getViewSite().getShell(), "Cannot rename solution",
-					"Cannot rename a solution that has team provider, must remove share first.");
-				return;
-			}
 			Solution editingSolution = servoyProject.getEditingSolution();
 
 			final String oldName = servoyProject.getProject().getName();
