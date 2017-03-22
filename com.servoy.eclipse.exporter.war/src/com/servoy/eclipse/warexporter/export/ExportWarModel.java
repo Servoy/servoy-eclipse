@@ -105,6 +105,7 @@ public class ExportWarModel extends AbstractWarExportModel
 
 	private boolean ready = false;
 	private boolean useAsRealAdminUser;
+	private boolean searchProblem = false;
 
 	/**
 	 * @param servicesSpecProviderState
@@ -120,8 +121,19 @@ public class ExportWarModel extends AbstractWarExportModel
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 			{
-				search();
-				ready = true;
+				try
+				{
+					search();
+				}
+				catch (final Exception e)
+				{
+					Debug.error(e);
+					searchProblem = true;
+				}
+				finally
+				{
+					ready = true;
+				}
 				return Status.OK_STATUS;
 			}
 		};
@@ -1130,5 +1142,10 @@ public class ExportWarModel extends AbstractWarExportModel
 	public void removeLicense(String code)
 	{
 		licenses.remove(code);
+	}
+
+	public boolean hasSearchError()
+	{
+		return searchProblem;
 	}
 }
