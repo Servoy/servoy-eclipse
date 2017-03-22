@@ -319,8 +319,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 							{
 								public void run()
 								{
-									componentsSelectionPage.setComponentsUsed(exportModel.getUsedComponents());
-									servicesSelectionPage.setComponentsUsed(exportModel.getUsedServices());
+									setupComponentsPages();
 								}
 							});
 							monitor.done();
@@ -338,11 +337,21 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 			}
 			else
 			{
-				componentsSelectionPage.setComponentsUsed(exportModel.getUsedComponents());
-				servicesSelectionPage.setComponentsUsed(exportModel.getUsedServices());
+				setupComponentsPages();
 			}
 
 		}
 		return super.getNextPage(page);
+	}
+
+	private void setupComponentsPages()
+	{
+		if (exportModel.hasSearchError())
+		{
+			componentsSelectionPage.setMessage("There was a problem finding used components, please select them manually.", IMessageProvider.WARNING);
+			servicesSelectionPage.setMessage("There was a problem finding used services, please select them manually.", IMessageProvider.WARNING);
+		}
+		componentsSelectionPage.setComponentsUsed(exportModel.getUsedComponents());
+		servicesSelectionPage.setComponentsUsed(exportModel.getUsedServices());
 	}
 }

@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.sablo.specification.SpecProviderState;
 
@@ -104,6 +105,7 @@ public class ExportWarModel extends AbstractWarExportModel
 	private boolean minimizeJsCssResources;
 
 	private boolean ready = false;
+	private boolean searchProblem = false;
 
 	/**
 	 * @param servicesSpecProviderState
@@ -119,8 +121,19 @@ public class ExportWarModel extends AbstractWarExportModel
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 			{
-				search();
-				ready = true;
+				try
+				{
+					search();
+				}
+				catch (final Exception e)
+				{
+					Debug.error(e);
+					searchProblem = true;
+				}
+				finally
+				{
+					ready = true;
+				}
 				return Status.OK_STATUS;
 			}
 		};
@@ -1114,5 +1127,10 @@ public class ExportWarModel extends AbstractWarExportModel
 	public void removeLicense(String code)
 	{
 		licenses.remove(code);
+	}
+
+	public boolean hasSearchError()
+	{
+		return searchProblem;
 	}
 }
