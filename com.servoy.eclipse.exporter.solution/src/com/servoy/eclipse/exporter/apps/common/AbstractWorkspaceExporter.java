@@ -315,17 +315,22 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 							{
 								output("Found error markers in solution " + solutionName);
 
-								for (IMarker marker : errors)
-								{
-									outputExtra(" -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message."));
-								}
 								if (configuration.shouldIgnoreBuildErrors())
 								{
+									for (IMarker marker : errors)
+									{
+										outputExtra("    -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message."));
+									}
 									output("Ignoring error markers. ('-ie' was used)");
+									if (!verbose) output("(use -verbose for more information)");
 								}
 								else
 								{
-									outputError("EXPORT FAILED. Solution '" + solutionName + "' will NOT be exported. It has error markers");
+									for (IMarker marker : errors)
+									{
+										output("    -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message."));
+									}
+									outputError("EXPORT FAILED. Solution '" + solutionName + "' will NOT be exported. It has error markers.");
 									exitCode = EXIT_EXPORT_FAILED;
 									return;
 								}
@@ -341,7 +346,7 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 									{
 										for (IMarker marker : warnings)
 										{
-											outputExtra(" -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message."));
+											outputExtra("    -" + marker.getAttribute(IMarker.MESSAGE, "Unknown marker message."));
 										}
 									}
 								}
