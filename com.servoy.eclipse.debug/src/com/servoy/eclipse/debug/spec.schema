@@ -220,6 +220,9 @@
 				        		  },
 				        		  "max": {
 					            	"type": "number"
+						          },
+						          "lazyLoading": {
+					            	"type": "boolean"
 						          }
 				        	  },
 				        	  "required":["type"],

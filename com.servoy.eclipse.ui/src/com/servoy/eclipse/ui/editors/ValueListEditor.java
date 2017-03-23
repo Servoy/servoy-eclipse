@@ -143,6 +143,7 @@ public class ValueListEditor extends PersistEditor
 	private Label separatorCharacterLabel;
 
 	private Button allowEmptyValueButton;
+	private Button lazyLoading;
 	private TreeSelectViewer sortingDefinitionSelect;
 
 	private ITable currentTable;
@@ -376,6 +377,12 @@ public class ValueListEditor extends PersistEditor
 		allowEmptyValueButton.setText("Allow empty value");
 		disableInMobileControls.add(allowEmptyValueButton);
 
+		lazyLoading = new Button(valueListEditorComposite, SWT.CHECK);
+		lazyLoading.setText("Lazy loading (NGClient)");
+		lazyLoading.setToolTipText(
+			"Global method valuelist usually has lowest performance amongst all valuelists. \nFor NG Client, we added lazy loading so components can only load the valuelist when values need to be displayed.\nBeware that display value resolve needs all values to be loaded.");
+		disableInMobileControls.add(lazyLoading);
+
 		dp_select1 = new ValueListDPSelectionComposite(definitionGroup, editingFlattenedSolution, SWT.NONE);
 		dp_select2 = new ValueListDPSelectionComposite(definitionGroup, editingFlattenedSolution, SWT.NONE);
 		dp_select3 = new ValueListDPSelectionComposite(definitionGroup, editingFlattenedSolution, SWT.NONE);
@@ -486,22 +493,24 @@ public class ValueListEditor extends PersistEditor
 																						globalMethodValuesButton, GroupLayout.PREFERRED_SIZE, 134,
 																						GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.RELATED).add(
 																							globalMethodSelectControl, GroupLayout.DEFAULT_SIZE, 200,
-																							Short.MAX_VALUE)).add(
-																								groupLayout.createSequentialGroup().add(tableValuesButton,
-																									GroupLayout.PREFERRED_SIZE, 134,
-																									GroupLayout.PREFERRED_SIZE).addPreferredGap(
-																										LayoutStyle.RELATED).add(tableSelectControl,
-																											GroupLayout.DEFAULT_SIZE, 200,
-																											Short.MAX_VALUE))).add(0, 200, 318)).add(
-																												groupLayout.createSequentialGroup().addContainerGap().add(
-																													definitionGroup, 100, 200,
-																													Short.MAX_VALUE).addContainerGap()));
+																							Short.MAX_VALUE).addPreferredGap(LayoutStyle.RELATED).add(
+																								lazyLoading, GroupLayout.PREFERRED_SIZE,
+																								GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)).add(
+																									groupLayout.createSequentialGroup().add(tableValuesButton,
+																										GroupLayout.PREFERRED_SIZE, 134,
+																										GroupLayout.PREFERRED_SIZE).addPreferredGap(
+																											LayoutStyle.RELATED).add(tableSelectControl,
+																												GroupLayout.DEFAULT_SIZE, 200,
+																												Short.MAX_VALUE))).add(0, 200, 318)).add(
+																													groupLayout.createSequentialGroup().addContainerGap().add(
+																														definitionGroup, 100, 200,
+																														Short.MAX_VALUE).addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.LEADING).add(
 			groupLayout.createSequentialGroup().addContainerGap().add(groupLayout.createParallelGroup(GroupLayout.BASELINE).add(nameLabel).add(nameField,
 				GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
 					customValuesButton).addPreferredGap(LayoutStyle.RELATED).add(customValues, 50, 100, 400).addPreferredGap(LayoutStyle.RELATED).add(
-						groupLayout.createParallelGroup(GroupLayout.LEADING).add(globalMethodValuesButton).add(globalMethodSelectControl)).addPreferredGap(
-							LayoutStyle.RELATED).add(
+						groupLayout.createParallelGroup(GroupLayout.CENTER).add(globalMethodValuesButton).add(globalMethodSelectControl).add(
+							lazyLoading)).addPreferredGap(LayoutStyle.RELATED).add(
 								groupLayout.createParallelGroup(GroupLayout.TRAILING).add(tableValuesButton).add(tableSelectControl)).addPreferredGap(
 									LayoutStyle.RELATED).add(applyValuelistNameButton).addPreferredGap(LayoutStyle.RELATED).add(
 										groupLayout.createParallelGroup(GroupLayout.LEADING).add(relatedValuesButton).add(
@@ -760,6 +769,8 @@ public class ValueListEditor extends PersistEditor
 
 		IObservableValue allowEmptyFieldTextObserveWidget = SWTObservables.observeSelection(allowEmptyValueButton);
 		IObservableValue getValueListAllowEmptyValueObserveValue = PojoObservables.observeValue(getValueList(), "addEmptyValue");
+		IObservableValue lazyLoadingTextObserveWidget = SWTObservables.observeSelection(lazyLoading);
+		IObservableValue getValueListLazyLoadingObserveValue = PojoObservables.observeValue(getValueList(), "lazyLoading");
 		IObservableValue applyNameFilterSelectionObserveWidget = SWTObservables.observeSelection(applyValuelistNameButton);
 		IObservableValue getApplyNameFilterSelectionObserveValue = PojoObservables.observeValue(getValueList(), "useTableFilter");
 		IObservableValue deprecatedObserveWidget = SWTObservables.observeText(deprecated, SWT.Modify);
@@ -779,6 +790,7 @@ public class ValueListEditor extends PersistEditor
 			}), new UpdateValueStrategy());
 
 		m_bindingContext.bindValue(nameFieldTextObserveWidget, getValueListNameObserveValue, null, null);
+		m_bindingContext.bindValue(lazyLoadingTextObserveWidget, getValueListLazyLoadingObserveValue, null, null);
 		m_bindingContext.bindValue(customValuesTextObserveWidget, getValueListCustomValuesObserveValue,
 			new UpdateValueStrategy().setConverter(new Converter(String.class, String.class)
 			{
@@ -906,6 +918,7 @@ public class ValueListEditor extends PersistEditor
 		getValueList().setDataSource(null);
 		getValueList().setRelationName(null);
 		getValueList().setCustomValues(null);
+		getValueList().setLazyLoading(false);
 	}
 
 	private void handleDatabaseValuesButtonSelected()
@@ -913,6 +926,7 @@ public class ValueListEditor extends PersistEditor
 		getValueList().setValueListType(IValueListConstants.DATABASE_VALUES);
 		getValueList().setCustomValues(null);
 		getValueList().setRelationName(null);
+		getValueList().setLazyLoading(false);
 		databaseValuesTypeOverride = IValueListConstants.TABLE_VALUES;
 	}
 
@@ -921,6 +935,7 @@ public class ValueListEditor extends PersistEditor
 		getValueList().setValueListType(IValueListConstants.DATABASE_VALUES);
 		getValueList().setCustomValues(null);
 		getValueList().setDataSource(null);
+		getValueList().setLazyLoading(false);
 		databaseValuesTypeOverride = IValueListConstants.RELATED_VALUES;
 	}
 
