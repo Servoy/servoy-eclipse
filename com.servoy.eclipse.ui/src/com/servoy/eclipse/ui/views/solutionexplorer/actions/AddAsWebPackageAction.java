@@ -138,7 +138,7 @@ public class AddAsWebPackageAction extends AddAsSolutionReference
 	{
 		Object realObject = node.getRealObject();
 		if (realObject instanceof IResource) return ((IResource)realObject).getName();
-		return ((IPackageReader)realObject).getName();
+		return ((IPackageReader)realObject).getPackageName();
 	}
 
 }

@@ -47,6 +47,8 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ISetSelectionTarget;
+import org.sablo.specification.Package.IPackageReader;
+import org.sablo.specification.WebObjectSpecification;
 
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -371,7 +373,7 @@ public class LinkWithEditorAction extends Action
 			{
 				PlatformSimpleUserNode packageNode = (PlatformSimpleUserNode)o;
 				if (packageNode.getName().equals(packageName) ||
-					packageNode.getRealObject() instanceof IProject && ((IProject)packageNode.getRealObject()).getName().equals(packageName))
+					packageNode.getRealObject() instanceof IPackageReader && ((IPackageReader)packageNode.getRealObject()).getPackageName().equals(packageName))
 				{
 					if (webObjectName == null)
 					{
@@ -383,10 +385,15 @@ public class LinkWithEditorAction extends Action
 						if (ob instanceof PlatformSimpleUserNode)
 						{
 							PlatformSimpleUserNode webObjectNode = (PlatformSimpleUserNode)ob;
-							if (webObjectNode.getName().equals(webObjectName))
+							if (webObjectNode.getRealObject() instanceof WebObjectSpecification)
 							{
-								tree.setSelection(new StructuredSelection(webObjectNode), true);
-								return true;
+								WebObjectSpecification spec = ((WebObjectSpecification)webObjectNode.getRealObject());
+								String[] n = spec.getName().split("-");
+								if (n.length == 2 && webObjectName.equals(n[1]))
+								{
+									tree.setSelection(new StructuredSelection(webObjectNode), true);
+									return true;
+								}
 							}
 						}
 					}
