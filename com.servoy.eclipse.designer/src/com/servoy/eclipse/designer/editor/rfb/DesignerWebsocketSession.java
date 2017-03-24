@@ -329,6 +329,11 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						if (parent.getParent() instanceof Form)
 						{
 							baseComponents.add((IFormElement)parent);
+							IPersist oldPersist = ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(persist.getUUID());
+							if (oldPersist == null) // a new child was added, force parent refresh
+							{
+								refreshTemplate.add((IFormElement)parent);
+							}
 							break;
 						}
 						else
@@ -355,6 +360,21 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				else
 				{
 					deletedComponents.add(baseComponent);
+					// if it has parent, make sure it refreshes
+					ISupportChilds parent = persist.getParent();
+					while (parent instanceof BaseComponent)
+					{
+						if (parent.getParent() instanceof Form)
+						{
+							baseComponents.add((IFormElement)parent);
+							refreshTemplate.add((IFormElement)parent);
+							break;
+						}
+						else
+						{
+							parent = parent.getParent();
+						}
+					}
 				}
 			}
 			else if (persist instanceof Part)

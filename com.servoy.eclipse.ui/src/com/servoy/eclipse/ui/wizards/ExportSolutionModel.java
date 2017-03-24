@@ -16,6 +16,8 @@
  */
 package com.servoy.eclipse.ui.wizards;
 
+import org.json.JSONObject;
+
 import com.servoy.eclipse.model.export.IExportSolutionModel;
 
 /**
@@ -26,6 +28,7 @@ public class ExportSolutionModel implements IExportSolutionModel
 	private String fileName = null;
 	private boolean protectWithPassword = false;
 	private boolean exportReferencedModules = false;
+	private boolean exportReferencedWebPackages = false;
 	private boolean exportMetaData = true;
 	private boolean exportSampleData = false;
 	private boolean exportI18NData = false;
@@ -39,9 +42,12 @@ public class ExportSolutionModel implements IExportSolutionModel
 	private String userAcknowledgedFileToOverwrite = null;
 	private boolean checkMetadataTables = true; // default
 
+	private boolean useImportSettings;
+	private JSONObject importSettings;
+
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#getFileName()
 	 */
 	@Override
@@ -67,7 +73,7 @@ public class ExportSolutionModel implements IExportSolutionModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isProtectWithPassword()
 	 */
 	@Override
@@ -83,7 +89,7 @@ public class ExportSolutionModel implements IExportSolutionModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportReferencedModules()
 	 */
 	@Override
@@ -97,9 +103,20 @@ public class ExportSolutionModel implements IExportSolutionModel
 		this.exportReferencedModules = exportReferencedModules;
 	}
 
+	@Override
+	public boolean isExportReferencedWebPackages()
+	{
+		return exportReferencedWebPackages;
+	}
+
+	public void setExportReferencedWebPackages(boolean exportReferencedWebPackages)
+	{
+		this.exportReferencedWebPackages = exportReferencedWebPackages;
+	}
+
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportMetaData()
 	 */
 	@Override
@@ -115,7 +132,7 @@ public class ExportSolutionModel implements IExportSolutionModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportSampleData()
 	 */
 	@Override
@@ -131,7 +148,7 @@ public class ExportSolutionModel implements IExportSolutionModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportI18NData()
 	 */
 	@Override
@@ -147,7 +164,7 @@ public class ExportSolutionModel implements IExportSolutionModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportUsers()
 	 */
 	@Override
@@ -163,7 +180,7 @@ public class ExportSolutionModel implements IExportSolutionModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#getModulesToExport()
 	 */
 	@Override
@@ -179,7 +196,7 @@ public class ExportSolutionModel implements IExportSolutionModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#getPassword()
 	 */
 	@Override
@@ -261,7 +278,7 @@ public class ExportSolutionModel implements IExportSolutionModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#getNumberOfSampleDataExported()
 	 */
 	@Override
@@ -277,7 +294,7 @@ public class ExportSolutionModel implements IExportSolutionModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportAllTablesFromReferencedServers()
 	 */
 	@Override
@@ -293,7 +310,7 @@ public class ExportSolutionModel implements IExportSolutionModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isCheckMetadataTables()
 	 */
 	@Override
@@ -309,12 +326,44 @@ public class ExportSolutionModel implements IExportSolutionModel
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.servoy.eclipse.ui.wizards.IExportSolutionModel#isExportUsingDbiFileInfoOnly()
 	 */
 	@Override
 	public boolean isExportUsingDbiFileInfoOnly()
 	{
 		return exportUsingDbiFileInfoOnly;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.export.IExportSolutionModel#useImportSettings()
+	 */
+	@Override
+	public boolean useImportSettings()
+	{
+		return useImportSettings;
+	}
+
+	public void setUseImportSettings(boolean useImportSettings)
+	{
+		this.useImportSettings = useImportSettings;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.export.IExportSolutionModel#getImportSettings()
+	 */
+	@Override
+	public JSONObject getImportSettings()
+	{
+		return importSettings;
+	}
+
+	public void setImportSettings(JSONObject importSettings)
+	{
+		this.importSettings = importSettings;
 	}
 }

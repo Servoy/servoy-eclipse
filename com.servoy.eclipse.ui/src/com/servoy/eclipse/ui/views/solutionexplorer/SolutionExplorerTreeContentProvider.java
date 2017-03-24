@@ -1074,8 +1074,11 @@ public class SolutionExplorerTreeContentProvider
 						{
 							if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
 							{
+								IPackageReader packageType = getPackageType(getComponentsSpecProviderState(), iProject);
+								if (packageType == null) packageType = getPackageType(getServicesSpecProviderState(), iProject);
+								if (packageType == null) continue;
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(resolveWebPackageDisplayName(iProject),
-									UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, iProject, packageIcon);
+									UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, packageType, packageIcon);
 
 								//if it is not loaded, hide it so that it will have the gray icon
 								if (solutionAndModuleReferencedProjects == null || !solutionAndModuleReferencedProjects.contains(iProject)) node.hide();
@@ -1224,32 +1227,7 @@ public class SolutionExplorerTreeContentProvider
 				{
 					if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
 					{
-						IPackageReader packageType = null;
-						IPackageReader[] allPackageReaders = provider.getAllPackageReaders();
-						File projectDir = new File(iProject.getLocationURI());
-						for (IPackageReader pr : allPackageReaders)
-						{
-							if (projectDir.equals(pr.getResource()))
-							{
-								packageType = pr;
-								break;
-							}
-						}
-						if (packageType == null)
-						{
-							String packageName = iProject.getName();
-							packageType = provider.getPackageReader(packageName);
-							if (packageType == null)
-							{
-								// TODO this is a partial fix for the problem that the project is not the package name
-								// see also the method resolveWebPackageDisplayName above.
-								if (iProject.getFile(new Path("META-INF/MANIFEST.MF")).exists())
-								{
-									packageName = new ContainerPackageReader(new File(iProject.getLocationURI()), iProject).getPackageName();
-									packageType = provider.getPackageReader(packageName);
-								}
-							}
-						}
+						IPackageReader packageType = getPackageType(provider, iProject);
 						if (packageType == null) continue;
 
 						// we also check that reader resource matches project just in case there are also for example zip references currently loaded
@@ -1275,6 +1253,39 @@ public class SolutionExplorerTreeContentProvider
 			}
 		}
 		return children;
+	}
+	
+	private IPackageReader getPackageType(SpecProviderState provider, IProject iProject)
+	{
+		IPackageReader packageType = null;
+		IPackageReader[] allPackageReaders = provider.getAllPackageReaders();
+		File projectDir = new File(iProject.getLocationURI());
+		for (IPackageReader pr : allPackageReaders)
+		{
+			if (projectDir.equals(pr.getResource()))
+			{
+				packageType = pr;
+				break;
+			}
+		}
+		if (packageType == null)
+		{
+			String packageName = iProject.getName();
+			packageType = provider.getPackageReader(packageName);
+			if (packageType == null)
+			{
+				// TODO this is a partial fix for the problem that the project is not the package name
+				// see also the method resolveWebPackageDisplayName above.
+				if (iProject.getFile(new Path("META-INF/MANIFEST.MF")).exists())
+				{
+					IPackageReader reader = new ContainerPackageReader(new File(iProject.getLocationURI()), iProject);
+					packageName = reader.getPackageName();
+					packageType = provider.getPackageReader(packageName);
+					if (packageType == null) packageType = reader;
+				}
+			}
+		}
+		return packageType;
 	}
 
 	static String appendModuleName(String name, String moduleName)
@@ -3314,5 +3325,11 @@ public class SolutionExplorerTreeContentProvider
 				}
 			}
 		}
+	}
+
+
+	public PlatformSimpleUserNode getAllWebPackagesNode()
+	{
+		return allWebPackagesNode;
 	}
 }

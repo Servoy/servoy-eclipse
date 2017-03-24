@@ -107,4 +107,6 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	String decryptPassword(Cipher desCipher, String code);
 
+	public boolean isNGExport();
+
 }

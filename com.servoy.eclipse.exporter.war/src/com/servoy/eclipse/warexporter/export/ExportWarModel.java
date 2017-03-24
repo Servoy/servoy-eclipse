@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.ui.PlatformUI;
-import org.sablo.specification.SpecProviderState;
 
 import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.IWarExportModel;
@@ -105,29 +104,43 @@ public class ExportWarModel extends AbstractWarExportModel
 
 	private boolean ready = false;
 	private boolean useAsRealAdminUser;
+	private boolean searchProblem = false;
 
 	/**
-	 * @param servicesSpecProviderState
-	 * @param componentsSpecProviderState
+	 * @param isNGExport
 	 * @param dialogSettings
 	 */
-	public ExportWarModel(IDialogSettings settings, SpecProviderState componentsSpecProviderState, SpecProviderState servicesSpecProviderState)
+	public ExportWarModel(IDialogSettings settings, boolean isNGExport)
 	{
-		super(componentsSpecProviderState, servicesSpecProviderState);
-		WorkspaceJob job = new WorkspaceJob("Searching used components and services data")
+		super(isNGExport);
+		if (isNGExport)
 		{
-
-			@Override
-			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+			WorkspaceJob job = new WorkspaceJob("Searching used components and services data")
 			{
-				search();
-				ready = true;
-				return Status.OK_STATUS;
-			}
-		};
-		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
-		job.setUser(false);
-		job.schedule();
+
+				@Override
+				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+				{
+					try
+					{
+						search();
+					}
+					catch (final Exception e)
+					{
+						Debug.error(e);
+						searchProblem = true;
+					}
+					finally
+					{
+						ready = true;
+					}
+					return Status.OK_STATUS;
+				}
+			};
+			job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+			job.setUser(false);
+			job.schedule();
+		}
 
 		Cipher desCipher = null;
 		try
@@ -173,13 +186,16 @@ public class ExportWarModel extends AbstractWarExportModel
 
 		minimizeJsCssResources = Utils.getAsBoolean(settings.get("export.minimizeJsCssResources"));
 
-		if (settings.getArray("export.components") != null)
+		if (isNGExport())
 		{
-			exportedComponents = new TreeSet<String>(Arrays.asList(settings.getArray("export.components")));
-		}
-		if (settings.getArray("export.services") != null)
-		{
-			exportedServices = new TreeSet<String>(Arrays.asList(settings.getArray("export.services")));
+			if (settings.getArray("export.components") != null)
+			{
+				exportedComponents = new TreeSet<String>(Arrays.asList(settings.getArray("export.components")));
+			}
+			if (settings.getArray("export.services") != null)
+			{
+				exportedServices = new TreeSet<String>(Arrays.asList(settings.getArray("export.services")));
+			}
 		}
 		pluginLocations = new ArrayList<String>();
 		String[] array = settings.getArray("plugin.locations");
@@ -1130,5 +1146,10 @@ public class ExportWarModel extends AbstractWarExportModel
 	public void removeLicense(String code)
 	{
 		licenses.remove(code);
+	}
+
+	public boolean hasSearchError()
+	{
+		return searchProblem;
 	}
 }

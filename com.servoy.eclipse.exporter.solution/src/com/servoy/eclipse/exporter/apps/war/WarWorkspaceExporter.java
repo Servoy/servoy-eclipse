@@ -29,10 +29,7 @@ import java.util.SortedSet;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.equinox.app.IApplicationContext;
-import org.sablo.specification.SpecProviderState;
-import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebObjectSpecification;
-import org.sablo.specification.WebServiceSpecProvider;
 
 import com.servoy.eclipse.exporter.apps.common.AbstractWorkspaceExporter;
 import com.servoy.eclipse.model.ServoyModelFinder;
@@ -42,6 +39,7 @@ import com.servoy.eclipse.model.war.exporter.AbstractWarExportModel;
 import com.servoy.eclipse.model.war.exporter.ExportException;
 import com.servoy.eclipse.model.war.exporter.ServerConfiguration;
 import com.servoy.eclipse.model.war.exporter.WarExporter;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.ngclient.utils.NGUtils;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
@@ -58,13 +56,11 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 
 		/**
 		 * @param configuration
-		 * @param servicesSpecProviderState
-		 * @param componentsSpecProviderState
+		 * @param isNGExport
 		 */
-		private CommandLineWarExportModel(WarArgumentChest configuration, SpecProviderState componentsSpecProviderState,
-			SpecProviderState servicesSpecProviderState)
+		private CommandLineWarExportModel(WarArgumentChest configuration, boolean isNGExport)
 		{
-			super(componentsSpecProviderState, servicesSpecProviderState);
+			super(isNGExport);
 			this.configuration = configuration;
 			search();
 		}
@@ -461,10 +457,14 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 	@Override
 	protected void exportActiveSolution(final WarArgumentChest configuration)
 	{
-		SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
-		SpecProviderState servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
-		WarExporter warExporter = new WarExporter(new CommandLineWarExportModel(configuration, componentsSpecProviderState, servicesSpecProviderState),
-			componentsSpecProviderState, servicesSpecProviderState);
+		boolean isNGExport = false;
+		ServoyProject activeProject = ServoyModelFinder.getServoyModel().getActiveProject();
+		if (activeProject != null)
+		{
+			int solutionType = activeProject.getSolutionMetaData().getSolutionType();
+			isNGExport = solutionType != SolutionMetaData.WEB_CLIENT_ONLY && solutionType != SolutionMetaData.SMART_CLIENT_ONLY;
+		}
+		WarExporter warExporter = new WarExporter(new CommandLineWarExportModel(configuration, isNGExport));
 		try
 		{
 			warExporter.doExport(new IProgressMonitor()

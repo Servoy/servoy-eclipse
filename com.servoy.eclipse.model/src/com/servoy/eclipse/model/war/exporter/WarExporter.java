@@ -77,8 +77,10 @@ import org.sablo.IndexPageEnhancer;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.SpecProviderState;
+import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.WebServiceSpecProvider;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -142,14 +144,18 @@ public class WarExporter
 	private static final String WRO4J_RUNNER = "wro4j-runner-1.7.7";
 
 	private final IWarExportModel exportModel;
-	private final SpecProviderState componentsSpecProviderState;
-	private final SpecProviderState servicesSpecProviderState;
+	private SpecProviderState componentsSpecProviderState;
+	private SpecProviderState servicesSpecProviderState;
 
-	public WarExporter(IWarExportModel exportModel, SpecProviderState componentsSpecProviderState, SpecProviderState servicesSpecProviderState)
+	public WarExporter(IWarExportModel exportModel)
 	{
 		this.exportModel = exportModel;
-		this.componentsSpecProviderState = componentsSpecProviderState;
-		this.servicesSpecProviderState = servicesSpecProviderState;
+
+		if (exportModel.isNGExport())
+		{
+			this.componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
+			this.servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
+		}
 	}
 
 	/**
@@ -201,16 +207,19 @@ public class WarExporter
 			monitor.subTask("Copy the active solution");
 			copyActiveSolution(monitor.newChild(2), tmpWarDir);
 		}
-		monitor.setWorkRemaining(9);
-		monitor.subTask("Copying NGClient components/services...");
-		copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, targetLibDir);
-		monitor.setWorkRemaining(5);
-		monitor.subTask("Copy exported components");
-		copyExportedComponentsAndServicesPropertyFile(tmpWarDir);
-		monitor.worked(2);
-		monitor.subTask("Grouping JS and CSS resources");
-		copyMinifiedAndGrouped(tmpWarDir);
-		monitor.worked(1);
+		monitor.setWorkRemaining(exportModel.isNGExport() ? 9 : 3);
+		if (exportModel.isNGExport())
+		{
+			monitor.subTask("Copying NGClient components/services...");
+			copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, targetLibDir);
+			monitor.setWorkRemaining(5);
+			monitor.subTask("Copy exported components");
+			copyExportedComponentsAndServicesPropertyFile(tmpWarDir);
+			monitor.worked(2);
+			monitor.subTask("Grouping JS and CSS resources");
+			copyMinifiedAndGrouped(tmpWarDir);
+			monitor.worked(1);
+		}
 		monitor.subTask("Creating/zipping the WAR file");
 		zipDirectory(tmpWarDir, warFile);
 		monitor.worked(2);
@@ -937,7 +946,7 @@ public class WarExporter
 			exporter.exportSolutionToFile(activeSolution, new File(tmpWarDir, "WEB-INF/solution.servoy"), ClientVersion.getVersion(),
 				ClientVersion.getReleaseNumber(), exportModel.isExportMetaData(), exportModel.isExportSampleData(), exportModel.getNumberOfSampleDataExported(),
 				exportModel.isExportI18NData(), exportModel.isExportUsers(), exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword(),
-				tableDefManager, metadataDefManager, exportSolution);
+				tableDefManager, metadataDefManager, exportSolution, exportModel.useImportSettings() ? exportModel.getImportSettings() : null, null);
 
 			monitor.done();
 		}

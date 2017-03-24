@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.model.export;
 
+import org.json.JSONObject;
 
 /**
  * @author Johan
@@ -30,6 +31,8 @@ public interface IExportSolutionModel
 	public abstract boolean isProtectWithPassword();
 
 	public abstract boolean isExportReferencedModules();
+
+	public abstract boolean isExportReferencedWebPackages();
 
 	public abstract boolean isExportMetaData();
 
@@ -50,5 +53,9 @@ public interface IExportSolutionModel
 	public abstract boolean isCheckMetadataTables();
 
 	public abstract boolean isExportUsingDbiFileInfoOnly();
+
+	public abstract boolean useImportSettings();
+
+	public abstract JSONObject getImportSettings();
 
 }

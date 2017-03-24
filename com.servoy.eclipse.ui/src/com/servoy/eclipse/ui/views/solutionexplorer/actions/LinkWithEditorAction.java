@@ -47,11 +47,11 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ISetSelectionTarget;
-import org.sablo.specification.SpecProviderState;
-import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebObjectSpecification;
-import org.sablo.specification.WebServiceSpecProvider;
 
+import com.servoy.eclipse.core.ServoyModelManager;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.TableWrapper;
@@ -228,37 +228,12 @@ public class LinkWithEditorAction extends Action
 				{
 					if (file.getParent() != null && file.getParent().getParent() != null)
 					{
-						String packageName = file.getParent().getParent().getName();
-						String componentName = file.getParent().getName();
-						SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
-						WebObjectSpecification spec = componentsSpecProviderState.getWebComponentSpecification(packageName + "-" + componentName);
-						if (spec != null)
-						{
-							tree.setSelection(new StructuredSelection(new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.COMPONENT, spec, null)),
-								true);
-						}
-						else
-						{
-							spec = WebServiceSpecProvider.getSpecProviderState().getWebComponentSpecification(packageName + "-" + componentName);
-							if (spec != null)
-							{
-								tree.setSelection(new StructuredSelection(new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.SERVICE, spec, null)),
-									true);
-							}
-							else
-							{
-								spec = componentsSpecProviderState.getLayoutSpecifications().get(packageName) != null
-									? componentsSpecProviderState.getLayoutSpecifications().get(packageName).getSpecification(
-										packageName + "-" + componentName)
-									: null;
-								if (spec != null)
-								{
-									tree.setSelection(
-										new StructuredSelection(new PlatformSimpleUserNode(spec.getDisplayName(), UserNodeType.LAYOUT, spec, null)), true);
-								}
-							}
-						}
+						setProperWebObjectSelection(file, (SolutionExplorerTreeContentProvider)treeContentProvider);
 					}
+				}
+				if ("MANIFEST.MF".equals(file.getName()) && file.getParent() != null && file.getParent().getParent() != null)
+				{
+					setProperWebObjectSelection(file, (SolutionExplorerTreeContentProvider)treeContentProvider);
 				}
 			}
 			else
@@ -358,6 +333,74 @@ public class LinkWithEditorAction extends Action
 				((ISetSelectionTarget)part).selectReveal(new StructuredSelection(files.values().toArray()));
 			}
 		}
+	}
+
+	private void setProperWebObjectSelection(IFile file, SolutionExplorerTreeContentProvider treeContentProvider)
+	{
+		String packageName = file.getParent().getParent().getName();
+		String webObjectName = file.getName().endsWith(".MF") ? null : file.getParent().getName();
+
+		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
+		Solution activeSolution = activeProject != null ? activeProject.getSolution() : null;
+
+		boolean selected = false;
+		if (activeSolution != null)
+		{
+			PlatformSimpleUserNode solutionNode = treeContentProvider.getSolutionNode(activeSolution.getName());
+			for (Object obj : treeContentProvider.getChildren(solutionNode))
+			{
+				if (obj instanceof PlatformSimpleUserNode &&
+					((PlatformSimpleUserNode)obj).getRealType() == UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES)
+				{
+					selected = selectWebObjectNode(treeContentProvider, packageName, webObjectName, obj);
+					break;
+				}
+			}
+		}
+		if (!selected)
+		{
+			PlatformSimpleUserNode allPackages = treeContentProvider.getAllWebPackagesNode();
+			selectWebObjectNode(treeContentProvider, packageName, webObjectName, allPackages);
+		}
+
+	}
+
+	private boolean selectWebObjectNode(SolutionExplorerTreeContentProvider treeContentProvider, String packageName, String webObjectName, Object obj)
+	{
+		for (Object o : treeContentProvider.getChildren(obj))
+		{
+			if (o instanceof PlatformSimpleUserNode)
+			{
+				PlatformSimpleUserNode packageNode = (PlatformSimpleUserNode)o;
+				if (packageNode.getName().equals(packageName) ||
+					packageNode.getRealObject() instanceof IPackageReader && ((IPackageReader)packageNode.getRealObject()).getPackageName().equals(packageName))
+				{
+					if (webObjectName == null)
+					{
+						tree.setSelection(new StructuredSelection(packageNode), true);
+						return true;
+					}
+					for (Object ob : treeContentProvider.getChildren(packageNode))
+					{
+						if (ob instanceof PlatformSimpleUserNode)
+						{
+							PlatformSimpleUserNode webObjectNode = (PlatformSimpleUserNode)ob;
+							if (webObjectNode.getRealObject() instanceof WebObjectSpecification)
+							{
+								WebObjectSpecification spec = ((WebObjectSpecification)webObjectNode.getRealObject());
+								String[] n = spec.getName().split("-");
+								if (n.length == 2 && webObjectName.equals(n[1]))
+								{
+									tree.setSelection(new StructuredSelection(webObjectNode), true);
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	private void setProperSelection(IPersist persist, UserNodeType persistType, IContentProvider contentProvider)
