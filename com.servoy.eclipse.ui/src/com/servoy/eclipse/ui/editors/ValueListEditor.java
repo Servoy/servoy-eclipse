@@ -380,7 +380,7 @@ public class ValueListEditor extends PersistEditor
 		lazyLoading = new Button(valueListEditorComposite, SWT.CHECK);
 		lazyLoading.setText("Lazy loading (NGClient)");
 		lazyLoading.setToolTipText(
-			"Global method valuelist usually has lowest performance amongst all valuelists. \nFor NG Client, we added lazy loading so components can only load the valuelist when values need to be displayed.\nBeware that display value resolve needs all values to be loaded.");
+			"Global method valuelist usually has lowest performance amongst all valuelists. \nFor NG Client, we added lazy loading so components can only load the valuelist when values need to be displayed.\n This flag has to be set both on valuelist and in component spec, on valuelist property.\n Beware that real value resolvement to display value needs loading all items.");
 		disableInMobileControls.add(lazyLoading);
 
 		dp_select1 = new ValueListDPSelectionComposite(definitionGroup, editingFlattenedSolution, SWT.NONE);
