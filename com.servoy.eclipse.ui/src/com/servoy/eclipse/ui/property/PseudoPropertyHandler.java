@@ -23,6 +23,7 @@ import java.util.Map;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.sablo.specification.PropertyDescription;
 
+import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
 import com.servoy.j2db.documentation.ClientSupport;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.BaseComponent;
@@ -74,8 +75,46 @@ public class PseudoPropertyHandler implements IPropertyHandler
 
 	public static final PropertyDescription ATTRIBUTES_PROPERTY_DESCRIPTION = new PropertyDescription(StaticContentSpecLoader.PROPERTY_ATTRIBUTES, null,
 		new PropertySetterDelegatePropertyController<Map<String, String>, PersistPropertySource>(
-			new MapEntriesPropertyController(StaticContentSpecLoader.PROPERTY_ATTRIBUTES, StaticContentSpecLoader.PROPERTY_ATTRIBUTES, null),
-			StaticContentSpecLoader.PROPERTY_ATTRIBUTES)
+			new MapEntriesPropertyController(StaticContentSpecLoader.PROPERTY_ATTRIBUTES, StaticContentSpecLoader.PROPERTY_ATTRIBUTES, null)
+			{
+
+				@Override
+				protected ComplexPropertyConverter<Map<String, Object>> createConverter()
+				{
+					return new ComplexProperty.ComplexPropertyConverter<Map<String, Object>>()
+					{
+						@Override
+						public Object convertProperty(final Object id, Map<String, Object> value)
+						{
+							return new ComplexProperty<Map<String, Object>>(value)
+							{
+								@Override
+								public IPropertySource getPropertySource()
+								{
+									return new MapPropertySource(this)
+									{
+										@Override
+										protected String toJSExpression(Object v)
+										{
+											String result;
+											if (v instanceof String && ((String)v).length() > 0)
+											{
+												result = v.toString();
+											}
+											else
+											{
+												result = null;
+											}
+											return result;
+										}
+									};
+								}
+							};
+						}
+					};
+				}
+
+			}, StaticContentSpecLoader.PROPERTY_ATTRIBUTES)
 		{
 			@Override
 			public Map<String, String> getProperty(PersistPropertySource propSource)
