@@ -299,7 +299,7 @@ public class ExportSolutionWizard extends Wizard implements IExportWizard
 
 		exportModel.setUseImportSettings(dialogSettings.getBoolean(USE_IMPORT_SETTINGS));
 		String dlgImportSettings = dialogSettings.get(IMPORT_SETTINGS);
-		exportModel.setImportSettings(dlgImportSettings == null ? null : new JSONObject(dlgImportSettings));
+		exportModel.setImportSettings(dlgImportSettings == null ? new JSONObject() : new JSONObject(dlgImportSettings));
 
 		deployToApplicationServer = dialogSettings.getBoolean(DEPLOY_TO_APPLICATION_SERVER);
 		deployURL = dialogSettings.get(DEPLOY_URL);
