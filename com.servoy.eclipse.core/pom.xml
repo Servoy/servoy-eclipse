@@ -28,7 +28,7 @@
 	                 <artifactItem>
 	                   <groupId>com.servoy</groupId>
 	                   <artifactId>servoy-doc</artifactId>
-	                   <version>1.0</version>
+	                   <version>8.0</version>
 	                   <type>jar</type>
 	                   <overWrite>true</overWrite>
 	                   <outputDirectory>${project.build.directory}/classes/com/servoy/eclipse/core/doc</outputDirectory>
