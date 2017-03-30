@@ -186,6 +186,7 @@
 				<module>com.servoy.eclipse.exporter.war</module>
 				<module>com.servoy.eclipse.extension.compatibility</module>
 				<module>com.servoy.eclipse.profiler</module>
+				<module>com.servoy.eclipse.ui.tweaks</module>
 			</modules>
 		</profile>
 	</profiles>
