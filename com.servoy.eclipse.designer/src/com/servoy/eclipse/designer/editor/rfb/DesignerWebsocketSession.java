@@ -35,6 +35,7 @@ import java.util.Set;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.json.JSONWriter;
+import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.websocket.BaseWebsocketSession;
@@ -84,7 +85,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	public static final String EDITOR_CONTENT_SERVICE = "$editorContentService";
 
 	private static final WebObjectSpecification EDITOR_CONTENT_SERVICE_SPECIFICATION = new WebObjectSpecification(EDITOR_CONTENT_SERVICE, "",
-		EDITOR_CONTENT_SERVICE, null, null, null, "", null);
+		IPackageReader.WEB_SERVICE, EDITOR_CONTENT_SERVICE, null, null, null, "", null);
 
 	private final Form form;
 

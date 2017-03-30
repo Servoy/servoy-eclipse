@@ -113,10 +113,7 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 							var top = targetRect.top + contentFrameRectTop;
 							var bottom = targetRect.bottom + contentFrameRectTop;
 							
-							if (bottom > window.innerHeight - statusBarHeight) {
-								target.scrollIntoView(false);
-							}
-							if (top < toolbarBottom) {
+							if ((top < toolbarBottom) || (bottom > window.innerHeight - statusBarHeight)) {
 								target.scrollIntoView();
 							}
 						}

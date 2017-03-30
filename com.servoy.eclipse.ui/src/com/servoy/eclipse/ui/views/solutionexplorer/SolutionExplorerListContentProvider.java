@@ -1648,7 +1648,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				for (Object element : ids)
 				{
 					Image icon = propertiesIcon;
-					String pluginsPrefix = PLUGIN_PREFIX + "." + ((WebObjectSpecification)o).getName() + ".";
+					String pluginsPrefix = PLUGIN_PREFIX + "." + ((WebObjectSpecification)o).getScriptingName() + ".";
 					IDeveloperFeedback feedback = new FieldFeedback((String)element, pluginsPrefix, null, null, null);
 					if (spec.getApiFunction((String)element) != null)
 					{

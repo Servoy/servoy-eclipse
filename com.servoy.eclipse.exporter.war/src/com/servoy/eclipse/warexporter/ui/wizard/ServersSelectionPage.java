@@ -19,6 +19,7 @@ package com.servoy.eclipse.warexporter.ui.wizard;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.SortedSet;
 
@@ -52,19 +53,23 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 	private CheckboxTableViewer checkboxTableViewer;
 	private final String[] requiredServers;
 	private SelectAllButtonsBar selectAllButtons;
+	private final HashMap<String, IWizardPage> serverConfigurationPages;
 
 	/**
+	 * @param serverConfigurationPages
 	 * @param string
 	 * @param string2
 	 * @param string3
 	 * @param pluginDir
 	 * @param beanSelectionPage
 	 */
-	public ServersSelectionPage(String pagename, String title, String description, SortedSet<String> selectedServers, String[] requiredServers)
+	public ServersSelectionPage(String pagename, String title, String description, SortedSet<String> selectedServers, String[] requiredServers,
+		HashMap<String, IWizardPage> serverConfigurationPages)
 	{
 		super(pagename);
 		this.selectedServers = selectedServers;
 		this.requiredServers = requiredServers;
+		this.serverConfigurationPages = serverConfigurationPages;
 		setTitle(title);
 		setDescription(description);
 	}
@@ -167,7 +172,7 @@ public class ServersSelectionPage extends WizardPage implements ICheckStateListe
 	{
 		storeInput();
 		if (selectedServers.size() == 0) return null;
-		return super.getNextPage();
+		return serverConfigurationPages.get(selectedServers.first());
 	}
 
 	private class ServersContentProvider implements IStructuredContentProvider
