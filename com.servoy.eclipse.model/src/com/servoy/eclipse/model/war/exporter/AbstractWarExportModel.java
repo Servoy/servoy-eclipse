@@ -40,7 +40,9 @@ import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
+import org.sablo.websocket.impl.ClientService;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -188,9 +190,10 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 								if (expr.startsWith("plugins."))
 								{
 									String[] parts = expr.split("\\.");
-									if (parts.length > 1 && servicesSpecProviderState.getWebComponentSpecification(parts[1]) != null)
+									if (parts.length > 1)
 									{
-										usedServices.add(servicesSpecProviderState.getWebComponentSpecification(parts[1]).getName());
+										WebObjectSpecification serviceSpec = ClientService.getServiceDefinitionFromScriptingName(parts[1]);
+										if (serviceSpec != null) usedServices.add(serviceSpec.getName());
 									}
 								}
 								else if (expr.contains("newWebComponent"))

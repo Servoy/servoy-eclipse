@@ -1782,7 +1782,7 @@ public class SolutionExplorerTreeContentProvider
 				@Override
 				public int compare(WebObjectSpecification o1, WebObjectSpecification o2)
 				{
-					return o1.getName().compareTo(o2.getName());
+					return o1.getScriptingName().compareTo(o2.getScriptingName());
 				}
 
 			});
@@ -1790,7 +1790,7 @@ public class SolutionExplorerTreeContentProvider
 			{
 				if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)
 				{
-					PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getName(), UserNodeType.PLUGIN, spec,
+					PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getScriptingName(), UserNodeType.PLUGIN, spec,
 						uiActivator.loadImageFromBundle("plugin_conn.gif"), WebServiceScriptable.class);
 					plugins.add(node);
 					node.parent = pluginNode;

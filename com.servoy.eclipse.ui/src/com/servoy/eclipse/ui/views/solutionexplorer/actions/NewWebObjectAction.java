@@ -140,6 +140,8 @@ public class NewWebObjectAction extends Action
 				return;
 			}
 
+
+			// IMPORTANT: this should always stay in sync with WebObjectSpecification.scriptifyNameIfNeeded()
 			String moduleName = packageRoot.getName() + componentOrServiceName.substring(0, 1).toUpperCase() + componentOrServiceName.substring(1);
 
 			folder.create(IResource.FORCE, true, new NullProgressMonitor());
@@ -161,7 +163,7 @@ public class NewWebObjectAction extends Action
 				in = uiActivator.getBundle().getEntry("/component-templates/" + elementType.toLowerCase() + ".spec").openStream();
 				text = IOUtils.toString(in, "UTF-8");
 				text = text.replaceAll("\\$\\{MODULENAME\\}", moduleName);
-				text = text.replaceAll("\\$\\{NAME\\}", componentOrServiceName);
+				text = text.replaceAll("\\$\\{NAME\\}", componentOrServiceName); // IMPORTANT service name from service.spec template should always be built of packagename dash name so that WebObjectSpecification.scriptifyNameIfNeeded() can get the "moduleName" or scripting name out of that
 				text = text.replaceAll("\\$\\{DASHEDNAME\\}", getDashedName(componentOrServiceName));
 				text = text.replaceAll("\\$\\{PACKAGENAME\\}", packageRoot.getName());
 				createFile(componentOrServiceName + ".spec", folder, new ByteArrayInputStream(text.getBytes("UTF-8")));
