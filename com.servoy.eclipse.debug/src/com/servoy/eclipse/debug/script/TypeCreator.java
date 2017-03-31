@@ -3162,11 +3162,18 @@ public class TypeCreator extends TypeCache
 							Relation relation = relations.next();
 							if (Relation.isValid(relation, fs))
 							{
+
 								Property property = createProperty(relation.getName(), true,
 									getTypeRef(context, QBJoin.class.getSimpleName() + '<' + relation.getForeignDataSource() + '>'),
 									getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns(fs)), RELATION_IMAGE,
 									relation);
 								property.setVisible(true);
+								if (relation.isMultiServer())
+								{
+									property.setDescription(property.getDescription() + "<b>Joins cannot be made using multi-server relations</b>");
+									property.setDeprecated(true);
+
+								}
 								type.getMembers().add(property);
 							}
 						}
