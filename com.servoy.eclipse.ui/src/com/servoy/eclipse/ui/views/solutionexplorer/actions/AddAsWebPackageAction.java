@@ -32,6 +32,7 @@ import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.WebComponentSpecProvider;
 
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager.ContainerPackageReader;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
@@ -138,7 +139,8 @@ public class AddAsWebPackageAction extends AddAsSolutionReference
 	{
 		Object realObject = node.getRealObject();
 		if (realObject instanceof IResource) return ((IResource)realObject).getName();
-		return ((IPackageReader)realObject).getPackageName();
+		if (realObject instanceof ContainerPackageReader) return ((ContainerPackageReader)realObject).getContainerName();
+		return ((IPackageReader)realObject).getName();
 	}
 
 }
