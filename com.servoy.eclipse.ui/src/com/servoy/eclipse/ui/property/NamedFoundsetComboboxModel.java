@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui.property;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -27,6 +28,8 @@ import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.util.SortedList;
+import com.servoy.j2db.util.StringComparator;
 
 /**
  * IComboboxPropertyModel model for namedFoundset.
@@ -45,30 +48,30 @@ public class NamedFoundsetComboboxModel implements IComboboxPropertyModel<String
 
 	public String[] getDisplayValues()
 	{
-		String[] globalRelations = getCompatibleGlobalRelations();
-		String[] displayValues = new String[globalRelations.length + 3]; // 3 constant values
-		displayValues[0] = Messages.LabelDefault;
-		displayValues[1] = Messages.LabelSeparate;
-		displayValues[2] = Messages.LabelEmpty;
-		for (int i = 3; i < displayValues.length; i++)
-		{
-			displayValues[i] = globalRelations[i - 3];
-		}
-		return displayValues;
+		List<String> displayValues = new ArrayList<String>();
+		displayValues.add(Messages.LabelDefault);
+		displayValues.add(Messages.LabelSeparate);
+		displayValues.add(Messages.LabelEmpty);
+		displayValues.addAll(Arrays.asList(getCompatibleGlobalRelations()));
+		displayValues.addAll(getCompatibleNamedFoundsets());
+		return displayValues.toArray(new String[0]);
 	}
 
 	public String[] getRealValues()
 	{
-		String[] globalRelations = getCompatibleGlobalRelations();
-		String[] realValues = new String[globalRelations.length + 3]; // 3 constant values
-		realValues[0] = null;
-		realValues[1] = Form.NAMED_FOUNDSET_SEPARATE;
-		realValues[2] = Form.NAMED_FOUNDSET_EMPTY;
-		for (int i = 3; i < realValues.length; i++)
+		List<String> realValues = new ArrayList<String>();
+		realValues.add(null);
+		realValues.add(Form.NAMED_FOUNDSET_SEPARATE);
+		realValues.add(Form.NAMED_FOUNDSET_EMPTY);
+		for (String relation : getCompatibleGlobalRelations())
 		{
-			realValues[i] = Form.NAMED_FOUNDSET_GLOBAL_RELATION_PREFIX + globalRelations[i - 3];
+			realValues.add(Form.NAMED_FOUNDSET_GLOBAL_RELATION_PREFIX + relation);
 		}
-		return realValues;
+		for (String namedFoundset : getCompatibleNamedFoundsets())
+		{
+			realValues.add(Form.NAMED_FOUNDSET_SEPARATE_PREFIX + namedFoundset);
+		}
+		return realValues.toArray(new String[0]);
 	}
 
 	@Override
@@ -98,5 +101,25 @@ public class NamedFoundsetComboboxModel implements IComboboxPropertyModel<String
 			ServoyLog.logError(e);
 		}
 		return gr.toArray(new String[gr.size()]);
+	}
+
+	protected List<String> getCompatibleNamedFoundsets()
+	{
+		SortedList<String> namedFoundsets = new SortedList<String>(StringComparator.INSTANCE);
+		FlattenedSolution fs = ModelUtils.getEditingFlattenedSolution(form);
+		Iterator<Form> it = fs.getForms(fs.getTable(form.getDataSource()), false);
+		while (it.hasNext())
+		{
+			Form form = it.next();
+			if (form.getNamedFoundSet() != null && form.getNamedFoundSet().startsWith(Form.NAMED_FOUNDSET_SEPARATE_PREFIX))
+			{
+				String name = form.getNamedFoundSet().substring(Form.NAMED_FOUNDSET_SEPARATE_PREFIX_LENGTH);
+				if (!namedFoundsets.contains(name))
+				{
+					namedFoundsets.add(name);
+				}
+			}
+		}
+		return namedFoundsets;
 	}
 }
