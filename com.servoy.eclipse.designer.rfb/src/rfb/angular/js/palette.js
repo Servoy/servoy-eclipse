@@ -1,6 +1,6 @@
 angular.module("palette", ['ui.bootstrap', 'ui.sortable'])
 .config(['$provide', function($provide) {
-	$provide.decorator('accordionDirective', function($delegate) {
+	$provide.decorator('uibAccordionDirective', function($delegate) {
 		var directive = $delegate[0];
 		directive.replace = true;
 		return $delegate;
