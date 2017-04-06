@@ -62,8 +62,8 @@ import com.servoy.j2db.util.xmlxport.TableDef;
  */
 public class TableDefinitionUtils
 {
-	public static Pair<ITableDefinitionsManager, IMetadataDefManager> getTableDefinitionsFromDBI(IServerInternal server) throws CoreException, JSONException,
-		IOException
+	public static Pair<ITableDefinitionsManager, IMetadataDefManager> getTableDefinitionsFromDBI(IServerInternal server)
+		throws CoreException, JSONException, IOException
 	{
 		final Map<String, List<String>> neededServersTables = new HashMap<String, List<String>>();
 		neededServersTables.put(server.getName(), new ArrayList<String>());
@@ -76,6 +76,7 @@ public class TableDefinitionUtils
 	{
 		DataModelManager dmm = ServoyModelFinder.getServoyModel().getDataModelManager();
 
+		if (dmm == null) return null;
 		// B. for needed tables, get dbi files (db is down)
 		Map<String, List<IFile>> server_tableDbiFiles = new HashMap<String, List<IFile>>();
 		for (Entry<String, List<String>> neededServersTableEntry : neededServersTables.entrySet())
@@ -321,8 +322,8 @@ public class TableDefinitionUtils
 		}
 
 		// check if i18n info is needed
-		if (mainActiveSolution.getI18nDataSource() != null && includeI18NData) addServerTable(neededServersTablesMap, mainActiveSolution.getI18nServerName(),
-			mainActiveSolution.getI18nTableName());
+		if (mainActiveSolution.getI18nDataSource() != null && includeI18NData)
+			addServerTable(neededServersTablesMap, mainActiveSolution.getI18nServerName(), mainActiveSolution.getI18nTableName());
 
 		return neededServersTablesMap;
 	}

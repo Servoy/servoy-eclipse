@@ -70,7 +70,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 
 		ServoyModel model = ServoyModelManager.getServoyModelManager().getServoyModel();
 		resourcesProjectProblemsType = model.getActiveResourcesProject() != null
-			? BuilderUtils.getMarkers(new String[] { model.getActiveResourcesProject().getProject().getName() }) : BuilderUtils.HAS_ERROR_MARKERS;
+			? BuilderUtils.getMarkers(new String[] { model.getActiveResourcesProject().getProject().getName() }) : 0;
 
 		updateMessages();
 	}

@@ -252,10 +252,10 @@ public class SolutionExplorerTreeContentProvider
 			createTypeNode(Messages.TreeStrings_Statements, UserNodeType.STATEMENTS, com.servoy.j2db.documentation.scripting.docs.Statements.class, jslib), //
 			createTypeNode(Messages.TreeStrings_SpecialOperators, UserNodeType.SPECIAL_OPERATORS,
 				com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, jslib), //
-			createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
-			createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
-			createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
-				jslib) };
+				createTypeNode(Messages.TreeStrings_JSON, UserNodeType.JSON, com.servoy.j2db.documentation.scripting.docs.JSON.class, jslib), //
+				createTypeNode(Messages.TreeStrings_XMLMethods, UserNodeType.XML_METHODS, com.servoy.j2db.documentation.scripting.docs.XML.class, jslib), //
+				createTypeNode(Messages.TreeStrings_XMLListMethods, UserNodeType.XML_LIST_METHODS, com.servoy.j2db.documentation.scripting.docs.XMLList.class,
+					jslib) };
 
 		PlatformSimpleUserNode application = createTypeNode(Messages.TreeStrings_Application, UserNodeType.APPLICATION, JSApplication.class, invisibleRootNode);
 
@@ -1140,7 +1140,10 @@ public class SolutionExplorerTreeContentProvider
 				allReferencedProjects.add(eclipseProject);
 			}
 			ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
-			allReferencedProjects.remove(activeResourcesProject.getProject());
+			if (activeResourcesProject != null)
+			{
+				allReferencedProjects.remove(activeResourcesProject.getProject());
+			}
 
 			addBinaryReferecedPackages(un, result, packageIcon, allReferencedProjects, componentsProvider.getAllPackageReaders());
 			addBinaryReferecedPackages(un, result, packageIcon, allReferencedProjects, servicesProvider.getAllPackageReaders());
@@ -1254,7 +1257,7 @@ public class SolutionExplorerTreeContentProvider
 		}
 		return children;
 	}
-	
+
 	private IPackageReader getPackageType(SpecProviderState provider, IProject iProject)
 	{
 		IPackageReader packageType = null;
@@ -1586,7 +1589,10 @@ public class SolutionExplorerTreeContentProvider
 				allReferencedProjects.add(eclipseProject);
 			}
 			ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
-			allReferencedProjects.remove(activeResourcesProject.getProject());
+			if (activeResourcesProject != null)
+			{
+				allReferencedProjects.remove(activeResourcesProject.getProject());
+			}
 			ArrayList<IPackageReader> packages = new ArrayList<>(Arrays.asList(componentProvider.getAllPackageReaders()));
 			packages.addAll(Arrays.asList(serviceProvider.getAllPackageReaders()));
 

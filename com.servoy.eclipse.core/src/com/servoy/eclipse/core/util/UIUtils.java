@@ -1076,7 +1076,8 @@ public class UIUtils
 			}
 			else
 			{
-				newResourcesProject = dialog.getResourceProjectData().getExistingResourceProject().getProject();
+				newResourcesProject = dialog.getResourceProjectData().getExistingResourceProject() != null
+					? dialog.getResourceProjectData().getExistingResourceProject().getProject() : null;
 			}
 			// ok now associate the selected(create if necessary) resources project with the solution resources project
 			WorkspaceJob job;

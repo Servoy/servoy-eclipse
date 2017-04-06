@@ -121,7 +121,7 @@ public class FormContentProvider implements ITreeContentProvider
 
 	private void addFormInList(ServoyResourcesProject activeProject, Form form, String[] solutionNames, List<Object> formIdsAndWorkingSets)
 	{
-		String workingSetName = activeProject.getContainingWorkingSet(form.getName(), solutionNames);
+		String workingSetName = activeProject != null ? activeProject.getContainingWorkingSet(form.getName(), solutionNames) : null;
 		if (workingSetName == null)
 		{
 			formIdsAndWorkingSets.add(new Integer(form.getID()));
@@ -199,7 +199,7 @@ public class FormContentProvider implements ITreeContentProvider
 			// a form
 			ServoyResourcesProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject();
 			Form form = flattenedSolution.getForm(((Integer)element).intValue());
-			if (form != null)
+			if (activeProject != null && form != null)
 			{
 				return activeProject.getContainingWorkingSet(form.getName(), flattenedSolution.getSolutionNames());
 			}

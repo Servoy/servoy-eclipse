@@ -168,33 +168,43 @@ public class PlaceDataprovidersComposite extends Composite
 
 		JSONObject prefs;
 
-		try
+		if (resourcesProject != null)
 		{
-			prefs = resourcesProject.getPlaceDataproviderPreferences();
+			try
+			{
+				prefs = resourcesProject.getPlaceDataproviderPreferences();
+			}
+			catch (JSONException e)
+			{
+				prefs = new ServoyJSONObject();
+				((ServoyJSONObject)prefs).setNoQuotes(false); // important, as configuration names are stored as keys - and without the quotes we would store invalid json (or they would need to be restrictions on spaces and so on)
+				((ServoyJSONObject)prefs).setNewLines(true);
+				((ServoyJSONObject)prefs).setNoBrackets(false);
+
+				UIUtils.runInUI(new Runnable()
+				{
+
+					@Override
+					public void run()
+					{
+						MessageDialog errorDialog = new MessageDialog(parent.getShell(), "Error reading the place field configuration", null,
+							"The file 'placedataprovider.preferences' from the active resources project contains invalid JSON. It will be ignored and the place field preferences will revert to default.",
+							MessageDialog.ERROR, new String[] { "Backup and &Discard corrupt preferences", "Ok" }, 0);
+						int opt = errorDialog.open();
+						if (opt == 0)
+						{
+							resourcesProject.backupCorruptedPlaceDataproivderPreferences();
+						} // else just do nothing - the file content will be overwritten anyway
+					}
+				}, false);
+			}
 		}
-		catch (JSONException e)
+		else
 		{
 			prefs = new ServoyJSONObject();
-			((ServoyJSONObject)prefs).setNoQuotes(false); // important, as configuration names are stored as keys - and without the quotes we would store invalid json (or they would need to be restrictions on spaces and so on)
+			((ServoyJSONObject)prefs).setNoQuotes(false);
 			((ServoyJSONObject)prefs).setNewLines(true);
 			((ServoyJSONObject)prefs).setNoBrackets(false);
-
-			UIUtils.runInUI(new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					MessageDialog errorDialog = new MessageDialog(parent.getShell(), "Error reading the place field configuration", null,
-						"The file 'placedataprovider.preferences' from the active resources project contains invalid JSON. It will be ignored and the place field preferences will revert to default.",
-						MessageDialog.ERROR, new String[] { "Backup and &Discard corrupt preferences", "Ok" }, 0);
-					int opt = errorDialog.open();
-					if (opt == 0)
-					{
-						resourcesProject.backupCorruptedPlaceDataproivderPreferences();
-					} // else just do nothing - the file content will be overwritten anyway
-				}
-			}, false);
 		}
 		preferences = prefs;
 
@@ -876,7 +886,10 @@ public class PlaceDataprovidersComposite extends Composite
 		settings.put(CONFIGURATION_SELECTION_SETTING, configurationSelection);
 		((TreePatternFilter)dataproviderTreeViewer.getPatternFilter()).saveSettings(settings);
 		preferences.put(configurationSelection, currentSelection);
-		ServoyModelFinder.getServoyModel().getActiveResourcesProject().savePlaceDataproviderPreferences(preferences);
+		if (ServoyModelFinder.getServoyModel().getActiveResourcesProject() != null)
+		{
+			ServoyModelFinder.getServoyModel().getActiveResourcesProject().savePlaceDataproviderPreferences(preferences);
+		}
 
 		Dimension fieldSize = new Dimension(currentSelection.optInt(FIELD_WIDTH_PROPERTY, -1), currentSelection.optInt(FIELD_HEIGTH_PROPERTY, -1));
 		Dimension labelSize = new Dimension(currentSelection.optInt(LABEL_WIDTH_PROPERTY, -1), currentSelection.optInt(LABEL_HEIGTH_PROPERTY, -1));

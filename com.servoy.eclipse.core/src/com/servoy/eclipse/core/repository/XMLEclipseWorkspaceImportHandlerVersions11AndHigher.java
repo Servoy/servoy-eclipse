@@ -122,7 +122,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 	public static IRootObject[] importFromJarFile(final IXMLImportEngine importEngine, final IXMLImportHandlerVersions11AndHigher x11handler,
 		final IXMLImportUserChannel userChannel, final EclipseRepository repository, final String newResourcesProjectName,
 		final ServoyResourcesProject resourcesProject, final IProgressMonitor m, final boolean activateSolution, final boolean cleanImport)
-		throws RepositoryException
+			throws RepositoryException
 	{
 		final List<IProject> createdProjects = new ArrayList<IProject>();
 		try
@@ -209,7 +209,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 						servoyModel.setActiveProject(dummyServoyProject, false);
 
 						// verify that correct resources project is active
-						if (servoyModel.getActiveResourcesProject() == null || servoyModel.getActiveResourcesProject().getProject() != rProject[0])
+						if (rProject[0] != null && servoyModel.getActiveResourcesProject().getProject() != rProject[0])
 						{
 							throw new RepositoryException("Cannot activate resources project " + rProject[0].getName() + ".");
 						}
@@ -230,9 +230,12 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 								newProject.create(null);
 								newProject.open(null);
 
-								IProjectDescription description = newProject.getDescription();
-								description.setReferencedProjects(new IProject[] { rProject[0] });
-								newProject.setDescription(description, null);
+								if (rProject[0] != null)
+								{
+									IProjectDescription description = newProject.getDescription();
+									description.setReferencedProjects(new IProject[] { rProject[0] });
+									newProject.setDescription(description, null);
+								}
 								if (mainProject[0] == null)
 								{
 									mainProject[0] = newProject;
@@ -333,15 +336,18 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 						// should be applied to the proper resources project (maybe other stuff as well from resources project, such as i18n)
 						if (resourcesProject == null)
 						{
-							// create the resources project
-							// create a new resource project
-							rProject[0] = ServoyModel.getWorkspace().getRoot().getProject(newResourcesProjectName);
-							rProject[0].create(null);
-							rProject[0].open(null);
-							IProjectDescription resourceProjectDescription = rProject[0].getDescription();
-							resourceProjectDescription.setNatureIds(new String[] { ServoyResourcesProject.NATURE_ID });
-							rProject[0].setDescription(resourceProjectDescription, null);
-							createdProjects.add(rProject[0]);
+							if (newResourcesProjectName != null)
+							{
+								// create the resources project
+								// create a new resource project
+								rProject[0] = ServoyModel.getWorkspace().getRoot().getProject(newResourcesProjectName);
+								rProject[0].create(null);
+								rProject[0].open(null);
+								IProjectDescription resourceProjectDescription = rProject[0].getDescription();
+								resourceProjectDescription.setNatureIds(new String[] { ServoyResourcesProject.NATURE_ID });
+								rProject[0].setDescription(resourceProjectDescription, null);
+								createdProjects.add(rProject[0]);
+							}
 						}
 						else
 						{
@@ -364,7 +370,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 						createdProjects.add(dummySolProject[0]);
 						IProjectDescription description = dummySolProject[0].getDescription();
 						description.setNatureIds(new String[] { ServoyProject.NATURE_ID, JavaScriptNature.NATURE_ID });
-						description.setReferencedProjects(new IProject[] { rProject[0] });
+						if (rProject[0] != null) description.setReferencedProjects(new IProject[] { rProject[0] });
 						dummySolProject[0].setDescription(description, null);
 						Solution dummySolution = (Solution)repository.createNewRootObject(dummySolProject[0].getName(), IRepository.SOLUTIONS);
 						SolutionSerializer.writePersist(dummySolution, wsa, repository, true, false, true);

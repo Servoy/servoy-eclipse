@@ -45,14 +45,14 @@ import com.servoy.eclipse.ui.util.EditorUtil;
 
 /**
  * @author jcompagner
- * 
+ *
  */
 public abstract class StartDebugHandler extends AbstractHandler implements IHandler
 {
 	public static boolean LAUNCH;
 
 	/**
-	 * 
+	 *
 	 */
 	public StartDebugHandler()
 	{
@@ -98,18 +98,6 @@ public abstract class StartDebugHandler extends AbstractHandler implements IHand
 			if (markers != null && markers.length > 0)
 			{
 				displayError(markers[0].getAttribute(IMarker.MESSAGE, "Project references multiple resources projects."));
-				return false;
-			}
-			try
-			{
-				markers = project.getProject().findMarkers(ServoyBuilder.NO_RESOURCES_PROJECTS_MARKER_TYPE, false, IResource.DEPTH_INFINITE);
-			}
-			catch (CoreException e)
-			{
-			}
-			if (markers != null && markers.length > 0)
-			{
-				displayError(markers[0].getAttribute(IMarker.MESSAGE, "Project has no resource project attached."));
 				return false;
 			}
 			try

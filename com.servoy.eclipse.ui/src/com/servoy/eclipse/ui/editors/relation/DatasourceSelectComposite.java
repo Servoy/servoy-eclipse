@@ -201,8 +201,11 @@ public class DatasourceSelectComposite extends Composite
 					IDataSourceWrapper tableWrapper = ((IDataSourceWrapper)selection.getFirstElement());
 					relationEditor.getRelation().setPrimaryDataSource(tableWrapper.getDataSource());
 					ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-					servoyModel.getDataModelManager().testTableAndCreateDBIFile(
-						servoyModel.getDataSourceManager().getDataSource(relationEditor.getRelation().getPrimaryDataSource()));
+					if (servoyModel.getDataModelManager() != null)
+					{
+						servoyModel.getDataModelManager().testTableAndCreateDBIFile(
+							servoyModel.getDataSourceManager().getDataSource(relationEditor.getRelation().getPrimaryDataSource()));
+					}
 					relationEditor.registerListeners();
 					relationEditor.createInput(false, true, true);
 					relationEditor.flagModified(false);
@@ -224,8 +227,11 @@ public class DatasourceSelectComposite extends Composite
 					String oldTableName = relation.getForeignTableName();
 					relationEditor.getRelation().setForeignDataSource(tableWrapper.getDataSource());
 					ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-					servoyModel.getDataModelManager().testTableAndCreateDBIFile(
-						servoyModel.getDataSourceManager().getDataSource(relationEditor.getRelation().getForeignDataSource()));
+					if (servoyModel.getDataModelManager() != null)
+					{
+						servoyModel.getDataModelManager().testTableAndCreateDBIFile(
+							servoyModel.getDataSourceManager().getDataSource(relationEditor.getRelation().getForeignDataSource()));
+					}
 					relationEditor.registerListeners();
 					if (relationEditor.getRelation().getPrimaryDataSource() == null)
 					{

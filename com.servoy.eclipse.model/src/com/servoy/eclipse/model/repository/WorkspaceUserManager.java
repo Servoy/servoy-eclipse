@@ -2597,7 +2597,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		{
 			removeSecurityProblemMarker();
 		}
-		if (isOperational())
+		if (resourcesProject != null)
 		{
 			writeUserAndGroupInfo(false);
 			writeAllTableInfo();
