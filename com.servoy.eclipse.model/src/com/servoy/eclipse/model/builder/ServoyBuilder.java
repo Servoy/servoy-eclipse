@@ -2739,7 +2739,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							// if form uses global relation named foundset, check to see that it is valid
 							String namedFoundset = form.getNamedFoundSet();
 							if (namedFoundset != null && !namedFoundset.equals(Form.NAMED_FOUNDSET_EMPTY) &&
-								!namedFoundset.equals(Form.NAMED_FOUNDSET_SEPARATE))
+								!namedFoundset.equals(Form.NAMED_FOUNDSET_SEPARATE) && !namedFoundset.startsWith(Form.NAMED_FOUNDSET_SEPARATE_PREFIX))
 							{
 								// it must be a global relation then
 								Relation r = formFlattenedSolution.getRelation(form.getGlobalRelationNamedFoundset());

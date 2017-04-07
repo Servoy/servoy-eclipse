@@ -339,10 +339,9 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		{
 			if (form != null)
 			{
-				NamedFoundsetComboboxModel model = new NamedFoundsetComboboxModel(form);
 				// null type: use property controller internally
-				return new PropertyDescription("namedFoundSet", null, new ComboboxPropertyController<String>(name, displayName, model, Messages.LabelUnresolved,
-					new ComboboxDelegateValueEditor<String>(new NamedFoundsetRelationValueEditor(form), model)));
+				return new PropertyDescription("namedFoundSet", null,
+					new NamedFoundSetPropertyController(name, displayName, NamedFoundSetPropertyController.getDisplayValues(form), form));
 			}
 		}
 
@@ -515,8 +514,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				public CellEditor createPropertyEditor(Composite parent)
 				{
 					return new ListSelectCellEditor(parent, "Select parent form", new FormContentProvider(flattenedEditingSolution, form), formLabelProvider,
-						new FormValueEditor(flattenedEditingSolution), false, new FormContentProvider.FormListOptions(FormListOptions.FormListType.HIERARCHY,
-							null, true, false, false, form.isFormComponent(), null),
+						new FormValueEditor(flattenedEditingSolution), false,
+						new FormContentProvider.FormListOptions(FormListOptions.FormListType.HIERARCHY, null, true, false, false, form.isFormComponent(), null),
 						SWT.NONE, null, "parentFormDialog")
 					{
 						@Override
