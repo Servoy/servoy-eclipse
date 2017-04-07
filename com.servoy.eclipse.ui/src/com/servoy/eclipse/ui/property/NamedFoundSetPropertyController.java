@@ -45,7 +45,7 @@ public class NamedFoundSetPropertyController extends EditableComboboxPropertyCon
 
 	public NamedFoundSetPropertyController(String name, String displayName, String[] displayValues, Form form)
 	{
-		super(name, displayName, displayValues);
+		super(name, displayName, displayValues, new NamedFoundsetRelationValueEditor(form));
 		this.form = form;
 	}
 
