@@ -169,7 +169,7 @@ public class PlaceDataProviderConfiguration implements IPlaceDataProviderConfigu
 	 */
 	public boolean isAutomaticI18N()
 	{
-		return automaticI18N;
+		return fillText && automaticI18N;
 	}
 
 	/**
