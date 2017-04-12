@@ -153,6 +153,10 @@ public class OpenAdapter implements IOpenDelegate
 		{
 			EditorUtil.openTableEditor((ITable)resource);
 		}
+		else if (resource instanceof TableConfig)
+		{
+			EditorUtil.openTableEditor(((TableConfig)resource).getTable());
+		}
 		return null;
 	}
 }
