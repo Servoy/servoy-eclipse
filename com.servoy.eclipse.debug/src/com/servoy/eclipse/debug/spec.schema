@@ -434,7 +434,6 @@
 							"additionalProperties":false
 						}
 					},
-					,
 					"delayUntilFormLoads": {
 						"description": "Delay this api call until the form is really loaded on the client (example: requestFocus).",
 						"type": "boolean"
