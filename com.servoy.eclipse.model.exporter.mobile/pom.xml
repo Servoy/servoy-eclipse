@@ -28,7 +28,7 @@
 	                 <artifactItem>
 	                   <groupId>com.servoy</groupId>
 	                   <artifactId>servoy_mobile</artifactId>
-	                   <version>1.0</version>
+	                   <version>${servoy-version}</version>
 	                   <type>war</type>
 	                   <overWrite>true</overWrite>
 	                   <outputDirectory>${project.build.directory}/classes/com/servoy/eclipse/model/mobile/exporter/resources/</outputDirectory>
@@ -36,7 +36,7 @@
 					  <artifactItem>
 	                   <groupId>com.servoy</groupId>
 	                   <artifactId>servoy_mobile_jsunit</artifactId>
-	                   <version>1.0</version>
+	                   <version>${servoy-version}</version>
 	                   <type>war</type>
 	                   <overWrite>true</overWrite>
 	                   <outputDirectory>${project.build.directory}/classes/com/servoy/eclipse/model/mobile/exporter/resources/</outputDirectory>
