@@ -96,6 +96,7 @@ import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.persistence.StaticContentSpecLoader;
 import com.servoy.j2db.persistence.Style;
 import com.servoy.j2db.persistence.TabPanel;
+import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.query.ISQLJoin;
 import com.servoy.j2db.server.ngclient.property.types.BorderPropertyType;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
@@ -339,10 +340,9 @@ public class PersistPropertyHandler extends BasePropertyHandler
 		{
 			if (form != null)
 			{
-				NamedFoundsetComboboxModel model = new NamedFoundsetComboboxModel(form);
 				// null type: use property controller internally
-				return new PropertyDescription("namedFoundSet", null, new ComboboxPropertyController<String>(name, displayName, model, Messages.LabelUnresolved,
-					new ComboboxDelegateValueEditor<String>(new NamedFoundsetRelationValueEditor(form), model)));
+				return new PropertyDescription("namedFoundSet", null,
+					new NamedFoundSetPropertyController(name, displayName, NamedFoundSetPropertyController.getDisplayValues(form), form));
 			}
 		}
 
@@ -515,8 +515,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				public CellEditor createPropertyEditor(Composite parent)
 				{
 					return new ListSelectCellEditor(parent, "Select parent form", new FormContentProvider(flattenedEditingSolution, form), formLabelProvider,
-						new FormValueEditor(flattenedEditingSolution), false, new FormContentProvider.FormListOptions(FormListOptions.FormListType.HIERARCHY,
-							null, true, false, false, form.isFormComponent(), null),
+						new FormValueEditor(flattenedEditingSolution), false,
+						new FormContentProvider.FormListOptions(FormListOptions.FormListType.HIERARCHY, null, true, false, false, form.isFormComponent(), null),
 						SWT.NONE, null, "parentFormDialog")
 					{
 						@Override
@@ -839,7 +839,8 @@ public class PersistPropertyHandler extends BasePropertyHandler
 				{
 					if (object instanceof IFormElement && ((IFormElement)object).getName() != null && ((IFormElement)object).getName().length() > 0)
 					{
-						boolean add = ((IFormElement)object).getTypeID() == IRepository.FIELDS;
+						boolean add = ((IFormElement)object).getTypeID() == IRepository.FIELDS || (object instanceof WebComponent &&
+							!((WebComponent)object).hasProperty(StaticContentSpecLoader.PROPERTY_LABELFOR.getPropertyName()));
 						if (!add && bodyStart >= 0 && (!(object instanceof GraphicalComponent) || ((GraphicalComponent)object).getLabelFor() == null))
 						{
 							// TableView, add elements in the body

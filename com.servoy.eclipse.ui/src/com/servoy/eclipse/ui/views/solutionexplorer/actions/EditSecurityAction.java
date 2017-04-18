@@ -32,7 +32,7 @@ public class EditSecurityAction extends Action
 {
 	/**
 	 * Creates a new open action that uses the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public EditSecurityAction()
@@ -51,5 +51,11 @@ public class EditSecurityAction extends Action
 		{
 			EditorUtil.openSecurityEditor(srp.getProject().getFile(WorkspaceUserManager.SECURITY_FILE_RELATIVE_TO_PROJECT));
 		}
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		return super.isEnabled() && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null;
 	}
 }

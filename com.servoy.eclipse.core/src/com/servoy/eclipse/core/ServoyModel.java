@@ -565,9 +565,6 @@ public class ServoyModel extends AbstractServoyModel
 
 			public boolean activeProjectWillChange(ServoyProject activeProject, final ServoyProject toProject)
 			{
-				// if it has no resource project, let the user choose one
-				if (toProject != null && toProject.getResourcesProject() == null && !UIUtils.showChangeResourceProjectDlg(UIUtils.getActiveShell(), toProject))
-					return false;
 				try
 				{
 					if (toProject != null && ServoyUpdatingProject.needUpdate(toProject.getProject()))

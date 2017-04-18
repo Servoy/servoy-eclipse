@@ -81,8 +81,6 @@ public class MarkerMessages
 	// loaded (and so the message never gets displayed).
 	public static ServoyMarker ReferencesToMultipleResources = new ServoyMarker(
 		"Solution project \"{0}\" has references to more than one Servoy Resources Projects.", ServoyBuilder.MULTIPLE_RESOURCES_PROJECTS_MARKER_TYPE);
-	public static ServoyMarker NoResourceReference = new ServoyMarker("Solution project \"{0}\" has no Servoy Resources Project referenced.",
-		ServoyBuilder.NO_RESOURCES_PROJECTS_MARKER_TYPE);
 	// It seems that elements with duplicate UUIDs are not loaded at all.
 	public static ServoyMarker UUIDDuplicateIn = new ServoyMarker("UUID duplicate found \"{0}\" in {1}.", ServoyBuilder.DUPLICATE_UUID);
 	// Seems to be superseded by the Marker_Form_Solution_PropertyTargetNotFound family of messages.

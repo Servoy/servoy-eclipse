@@ -88,7 +88,7 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 							offset.left -= node.parent().parent().offset().left;
 						}
 						
-						if (!hasClass(node.context,"ghost"))
+						if (!hasClass(node.get(0),"ghost"))
 							offset = adjustForPadding(offset)
 						currentNode.style = {
 							height: height,
@@ -113,7 +113,7 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 							var top = targetRect.top + contentFrameRectTop;
 							var bottom = targetRect.bottom + contentFrameRectTop;
 							
-							if ((top < toolbarBottom) || (bottom > window.innerHeight - statusBarHeight)) {
+							if ((bottom < toolbarBottom) || (top > window.innerHeight - statusBarHeight)) {
 								target.scrollIntoView();
 							}
 						}

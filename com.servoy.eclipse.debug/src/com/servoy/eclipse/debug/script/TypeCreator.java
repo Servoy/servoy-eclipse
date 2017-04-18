@@ -3165,11 +3165,18 @@ public class TypeCreator extends TypeCache
 							Relation relation = relations.next();
 							if (Relation.isValid(relation, fs))
 							{
+
 								Property property = createProperty(relation.getName(), true,
 									getTypeRef(context, QBJoin.class.getSimpleName() + '<' + relation.getForeignDataSource() + '>'),
 									getRelationDescription(relation, relation.getPrimaryDataProviders(fs), relation.getForeignColumns(fs)), RELATION_IMAGE,
 									relation);
 								property.setVisible(true);
+								if (relation.isMultiServer())
+								{
+									property.setDescription(property.getDescription() + "<b>Joins cannot be made using multi-server relations</b>");
+									property.setDeprecated(true);
+
+								}
 								type.getMembers().add(property);
 							}
 						}
@@ -3321,18 +3328,15 @@ public class TypeCreator extends TypeCache
 						{
 							for (String name : server.getTableAndViewNames(true))
 							{
-								ITable table = server.getTable(name);
-								if (table != null)
-								{
-									Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
-									property.setName(name);
-									property.setAttribute(RESOURCE, table);
-									property.setVisible(true);
-									property.setType(getTypeRef(context, JSDataSource.class.getSimpleName() + '<' + table.getDataSource() + '>'));
-									property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("portal.gif"));
-									property.setDescription(Table.getTableTypeAsString(table.getTableType()));
-									type.getMembers().add(property);
-								}
+								Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
+								property.setName(name);
+								property.setAttribute(RESOURCE, new TableConfig(name,server));
+								property.setVisible(true);
+								property.setType(getTypeRef(context,
+									JSDataSource.class.getSimpleName() + '<' + DataSourceUtils.createDBTableDataSource(server.getName(), name) + '>'));
+								property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("portal.gif"));
+								property.setDescription(Table.getTableTypeAsString(server.getTableType(name)));
+								type.getMembers().add(property);
 							}
 						}
 						catch (RepositoryException e)

@@ -2832,7 +2832,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction newSolution = new OpenWizardAction(NewSolutionWizard.class, Activator.loadImageDescriptorFromBundle("solution_icon.gif"),
 			"Create new solution");
 		IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("solution_module_m.gif"), "Create new module");
-		IAction newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.gif"), "Create new style");
+		IAction newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.gif"), "Create new style")
+		{
+			@Override
+			public boolean isEnabled()
+			{
+				return super.isEnabled() && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null;
+			}
+		};
 		exportActiveSolutionAction = new OpenWizardAction(ExportSolutionWizard.class, Activator.loadImageDescriptorFromOldLocations("export_wiz.gif"),
 			"File Export");
 		importSolutionAction = new OpenWizardAction(ImportSolutionWizard.class, Activator.loadImageDescriptorFromOldLocations("import_wiz.gif"),

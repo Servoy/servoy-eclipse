@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="8.1.2.3031" useFeatures="true" includeLaunchers="true">
+<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="8.1.3.3032-rc" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="icons/installer_image.png"/>
@@ -10,7 +10,7 @@
 
 Version: 8.0.0  - build 3020
 
-Copyright © 1997-2016 Servoy BV. All rights reserved.
+Copyright © 1997-2017 Servoy BV. All rights reserved.
 Visit http://www.servoy.com
 
 This computer program is protected by copyright law and international treaties.

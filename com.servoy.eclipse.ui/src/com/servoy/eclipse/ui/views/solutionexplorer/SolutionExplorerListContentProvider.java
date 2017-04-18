@@ -733,7 +733,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	private SimpleUserNode[] createComponentFileList(SimpleUserNode un)
 	{
 		WebObjectSpecification spec = (WebObjectSpecification)un.getRealObject();
-		IProject resources = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject();
+		IProject resources = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject();
 		if ("file".equals(spec.getSpecURL().getProtocol()))
 		{
 			try

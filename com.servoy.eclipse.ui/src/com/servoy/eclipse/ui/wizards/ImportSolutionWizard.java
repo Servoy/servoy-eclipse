@@ -232,7 +232,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 
 			resourceProjectComposite = new ResourcesProjectChooserComposite(topLevel, SWT.NONE, this,
 				"Please choose the resources project the solution will reference (for styles, column/sequence info, security)",
-				ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject());
+				ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject(), false);
 
 			// layout of the page
 			FormLayout formLayout = new FormLayout();
@@ -331,9 +331,9 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 
 						x11handler.setAskForImportServerName(ImportSolutionWizard.this.shouldAskForImportServerName());
 
-						IRootObject[] rootObjects = XMLEclipseWorkspaceImportHandlerVersions11AndHigher.importFromJarFile(importEngine, x11handler,
-							userChannel, (EclipseRepository)ServoyModel.getDeveloperRepository(), resourcesProjectName, existingProject, monitor,
-							doActivateSolution, isCleanImport);
+						IRootObject[] rootObjects = XMLEclipseWorkspaceImportHandlerVersions11AndHigher.importFromJarFile(importEngine, x11handler, userChannel,
+							(EclipseRepository)ServoyModel.getDeveloperRepository(), resourcesProjectName, existingProject, monitor, doActivateSolution,
+							isCleanImport);
 						if (rootObjects != null)
 						{
 							String detail = userChannel.getAllImportantMSGes() + "\nSolution '" + rootObjects[0].getName() + "' imported";

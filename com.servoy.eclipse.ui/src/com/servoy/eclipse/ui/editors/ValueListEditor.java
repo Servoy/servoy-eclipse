@@ -970,7 +970,10 @@ public class ValueListEditor extends PersistEditor
 			try
 			{
 				ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-				servoyModel.getDataModelManager().testTableAndCreateDBIFile(servoyModel.getDataSourceManager().getDataSource(tableWrapper.getDataSource()));
+				if (servoyModel.getDataModelManager() != null)
+				{
+					servoyModel.getDataModelManager().testTableAndCreateDBIFile(servoyModel.getDataSourceManager().getDataSource(tableWrapper.getDataSource()));
+				}
 			}
 			catch (Exception e)
 			{

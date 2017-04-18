@@ -291,7 +291,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String MISSING_MODULES_MARKER_TYPE = _PREFIX + ".missingModulesProblem";
 	public static final String MISPLACED_MODULES_MARKER_TYPE = _PREFIX + ".misplacedModulesProblem";
 	public static final String MULTIPLE_RESOURCES_PROJECTS_MARKER_TYPE = _PREFIX + ".multipleResourcesProblem";
-	public static final String NO_RESOURCES_PROJECTS_MARKER_TYPE = _PREFIX + ".noResourcesProblem";
 	public static final String DIFFERENT_RESOURCES_PROJECTS_MARKER_TYPE = _PREFIX + ".differentResourcesProblem";
 	public static final String PROJECT_RELATION_MARKER_TYPE = _PREFIX + ".relationProblem";
 	public static final String MEDIA_MARKER_TYPE = _PREFIX + ".mediaProblem";
@@ -2740,7 +2739,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							// if form uses global relation named foundset, check to see that it is valid
 							String namedFoundset = form.getNamedFoundSet();
 							if (namedFoundset != null && !namedFoundset.equals(Form.NAMED_FOUNDSET_EMPTY) &&
-								!namedFoundset.equals(Form.NAMED_FOUNDSET_SEPARATE))
+								!namedFoundset.equals(Form.NAMED_FOUNDSET_SEPARATE) && !namedFoundset.startsWith(Form.NAMED_FOUNDSET_SEPARATE_PREFIX))
 							{
 								// it must be a global relation then
 								Relation r = formFlattenedSolution.getRelation(form.getGlobalRelationNamedFoundset());
@@ -5771,7 +5770,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	private void checkResourcesForServoyProject(IProject project)
 	{
 		deleteMarkers(project, MULTIPLE_RESOURCES_PROJECTS_MARKER_TYPE);
-		deleteMarkers(project, NO_RESOURCES_PROJECTS_MARKER_TYPE);
 		try
 		{
 			// check if this project references more than one or no resources projects
@@ -5790,12 +5788,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 				// > 1 => multiple referenced resources projects; error; quick fix would be choose one of them
 				ServoyMarker mk = MarkerMessages.ReferencesToMultipleResources.fill(project.getName());
 				addMarker(project, mk.getType(), mk.getText(), -1, REFERENCES_TO_MULTIPLE_RESOURCES, IMarker.PRIORITY_NORMAL, null, null);
-			}
-			else if (count == 0)
-			{
-				// 0 => no referenced resources projects; error; quick fix would be choose one of the resources projects in the work space
-				ServoyMarker mk = MarkerMessages.NoResourceReference.fill(project.getName());
-				addMarker(project, mk.getType(), mk.getText(), -1, NO_RESOURCE_REFERENCE, IMarker.PRIORITY_NORMAL, null, null);
 			}
 		}
 		catch (CoreException e)

@@ -670,6 +670,11 @@ public abstract class BaseNGPackageManager
 			this.container = folder;
 		}
 
+		public String getContainerName()
+		{
+			return container.getName();
+		}
+
 		@Override
 		public Manifest getManifest() throws IOException
 		{

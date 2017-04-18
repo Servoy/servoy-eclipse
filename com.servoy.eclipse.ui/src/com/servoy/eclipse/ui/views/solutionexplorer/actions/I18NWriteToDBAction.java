@@ -51,7 +51,7 @@ public class I18NWriteToDBAction extends Action
 {
 	/**
 	 * Creates a new open action that uses the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public I18NWriteToDBAction()
@@ -117,8 +117,8 @@ public class I18NWriteToDBAction extends Action
 						{
 							public void run()
 							{
-								MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Cannot write I18N to database : " + i18nDatasource +
-									".\n" + ex.getMessage());
+								MessageDialog.openError(Display.getDefault().getActiveShell(), "Error",
+									"Cannot write I18N to database : " + i18nDatasource + ".\n" + ex.getMessage());
 							}
 						});
 					}
@@ -129,5 +129,11 @@ public class I18NWriteToDBAction extends Action
 		};
 		writingI18NJob.setUser(false);
 		writingI18NJob.schedule();
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		return super.isEnabled() && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null;
 	}
 }

@@ -567,7 +567,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		throws RepositoryException
 	{
 		if (persistContext.getPersist() == propertyDescriptor.valueObject // for beans we show all
-			&& !shouldShow(propertyDescriptor))
+		&& !shouldShow(propertyDescriptor))
 		{
 			return;
 		}
@@ -714,7 +714,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 	public static IPropertyDescriptor createPropertyDescriptor(IPropertySource propertySource, final String id, final PersistContext persistContext,
 		boolean readOnly, PropertyDescriptorWrapper propertyDescriptor, String displayName, FlattenedSolution flattenedEditingSolution, Form form)
-		throws RepositoryException
+			throws RepositoryException
 	{
 		if (!propertyDescriptor.propertyDescriptor.isProperty())
 		{
@@ -724,7 +724,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		IPropertyDescriptor desc = createPropertyDescriptor(propertySource, persistContext, readOnly, propertyDescriptor, id, displayName,
 			flattenedEditingSolution, form);
 		if (desc != null //
-			&& persistContext != null && persistContext.getPersist() != null &&
+		&& persistContext != null && persistContext.getPersist() != null &&
 			persistContext.getPersist().getAncestor(IRepository.FORMS) == persistContext.getContext() // only show overrides when element is shown in its 'own' form
 			&&
 			// skip some specific properties
@@ -2519,7 +2519,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Form flattenedSuperForm = flattenedEditingSolution.getFlattenedForm(
 					flattenedEditingSolution.getForm(((Form)persistContext.getPersist()).getExtendsID()));
 				propertyReadOnly = flattenedSuperForm == null /* superform not found? make readonly for safety */
-					|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
+				|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
 
 				if (propertyReadOnly && flattenedSuperForm != null && ((Form)persistContext.getPersist()).getDataSource() != null &&
 					!((Form)persistContext.getPersist()).getDataSource().equals(flattenedSuperForm.getDataSource()))
@@ -2585,7 +2585,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			if (config.isEditable())
 			{
 				// only display values
-				return new EditableComboboxPropertyController(id, displayName, config.getDisplay());
+				return new EditableComboboxPropertyController(id, displayName, config.getDisplay(), null);
 			}
 
 			if (config.isMultiple())

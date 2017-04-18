@@ -385,7 +385,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 			// save
 			servoyProject.saveEditingSolutionNodes(new IPersist[] { form }, true);
 
-			servoyModel.getDataModelManager().testTableAndCreateDBIFile(servoyModel.getDataSourceManager().getDataSource(form.getDataSource()));
+			if (servoyModel.getActiveResourcesProject() != null)
+			{
+				servoyModel.getDataModelManager().testTableAndCreateDBIFile(servoyModel.getDataSourceManager().getDataSource(form.getDataSource()));
+			}
 
 			// open newly created form in the editor (as new editor)
 			boolean returnValue = EditorUtil.openFormDesignEditor(form, true, true) != null;
@@ -762,13 +765,13 @@ public class NewFormWizard extends Wizard implements INewWizard
 														GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
 															templateLabel)).addPreferredGap(LayoutStyle.RELATED).add(
 																groupLayout.createParallelGroup(GroupLayout.CENTER).add(projectLabel).add(projectComboControl,
-																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-																		LayoutStyle.RELATED).add(
-																			groupLayout.createParallelGroup(GroupLayout.CENTER).add(listFormLabel).add(
-																				listFormCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-																					LayoutStyle.RELATED).add(
-																						groupLayout.createParallelGroup(GroupLayout.CENTER)).addContainerGap(
-																							100, Short.MAX_VALUE)));
+																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																	GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+																		groupLayout.createParallelGroup(GroupLayout.CENTER).add(listFormLabel).add(
+																			listFormCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																			GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
+																				groupLayout.createParallelGroup(GroupLayout.CENTER)).addContainerGap(100,
+																					Short.MAX_VALUE)));
 			topLevel.setLayout(groupLayout);
 			topLevel.setTabList(
 				new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl, listFormCheck });

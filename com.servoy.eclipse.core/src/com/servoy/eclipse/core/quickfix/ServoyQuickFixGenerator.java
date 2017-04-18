@@ -94,11 +94,7 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 		try
 		{
 			String type = marker.getType();
-			if (type.equals(ServoyBuilder.NO_RESOURCES_PROJECTS_MARKER_TYPE))
-			{
-				fixes = new IMarkerResolution[] { new NoResourcesMarkerQuickFix(), new ChangeResourcesProjectQuickFix() };
-			}
-			else if (type.equals(ServoyBuilder.MULTIPLE_RESOURCES_PROJECTS_MARKER_TYPE))
+			if (type.equals(ServoyBuilder.MULTIPLE_RESOURCES_PROJECTS_MARKER_TYPE))
 			{
 				fixes = new IMarkerResolution[] { new MultipleResourcesMarkerQuickFix(), new NoResourcesMarkerQuickFix(), new ChangeResourcesProjectQuickFix() };
 			}
@@ -197,25 +193,25 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				if (servoyProject.isSolutionLoaded())
 				{
 					IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), id);
-					if (serverName != null) fixes = new IMarkerResolution[] { new MissingServerQuickFix(serverName), new DeletePersistQuickFix(persist,
-							servoyProject) };
-						else fixes = new IMarkerResolution[0];
-					}
+					if (serverName != null)
+						fixes = new IMarkerResolution[] { new MissingServerQuickFix(serverName), new DeletePersistQuickFix(persist, servoyProject) };
 					else fixes = new IMarkerResolution[0];
 				}
-				else if (type.equals(ServoyBuilder.BAD_STRUCTURE_MARKER_TYPE))
-				{
-					String solName = (String)marker.getAttribute("SolutionName");
-					String uuid = (String)marker.getAttribute("Uuid");
-					fixes = new IMarkerResolution[] { new DeleteOrphanPersistQuickFix("invalid element: " + uuid, uuid, solName) };
-				}
-				else if (type.equals(ServoyBuilder.EVENT_METHOD_MARKER_TYPE))
-				{
-					String solName = (String)marker.getAttribute("SolutionName");
-					String uuid = (String)marker.getAttribute("Uuid");
-					String eventName = (String)marker.getAttribute("EventName");
-					fixes = new IMarkerResolution[] { new AddTemplateArgumentsQuickFix(uuid, solName, Utils.getAsInteger(marker.getAttribute(IMarker.LINE_NUMBER),
-						false), eventName) };
+				else fixes = new IMarkerResolution[0];
+			}
+			else if (type.equals(ServoyBuilder.BAD_STRUCTURE_MARKER_TYPE))
+			{
+				String solName = (String)marker.getAttribute("SolutionName");
+				String uuid = (String)marker.getAttribute("Uuid");
+				fixes = new IMarkerResolution[] { new DeleteOrphanPersistQuickFix("invalid element: " + uuid, uuid, solName) };
+			}
+			else if (type.equals(ServoyBuilder.EVENT_METHOD_MARKER_TYPE))
+			{
+				String solName = (String)marker.getAttribute("SolutionName");
+				String uuid = (String)marker.getAttribute("Uuid");
+				String eventName = (String)marker.getAttribute("EventName");
+				fixes = new IMarkerResolution[] { new AddTemplateArgumentsQuickFix(uuid, solName,
+					Utils.getAsInteger(marker.getAttribute(IMarker.LINE_NUMBER), false), eventName) };
 			}
 			else if (type.equals(ServoyBuilder.PORTAL_DIFFERENT_RELATION_NAME_MARKER_TYPE))
 			{
@@ -262,13 +258,14 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 				{
 					if (solType != null && (Integer)solType == SolutionMetaData.MOBILE)
 					{
-						fixes = new IMarkerResolution[] { new ChangeSolutionTypeQuickFix(solName, SolutionMetaData.MOBILE_MODULE), new ChangeSolutionTypeQuickFix(
-								solName, SolutionMetaData.SOLUTION), new ChangeSolutionTypeQuickFix(solName, SolutionMetaData.MODULE) };
-						}
-						else
-						{
-							fixes = new IMarkerResolution[] { new ChangeSolutionTypeQuickFix(solName, SolutionMetaData.MOBILE), new ChangeSolutionTypeQuickFix(
-								solName, SolutionMetaData.MOBILE_MODULE) };
+						fixes = new IMarkerResolution[] { new ChangeSolutionTypeQuickFix(solName,
+							SolutionMetaData.MOBILE_MODULE), new ChangeSolutionTypeQuickFix(solName,
+								SolutionMetaData.SOLUTION), new ChangeSolutionTypeQuickFix(solName, SolutionMetaData.MODULE) };
+					}
+					else
+					{
+						fixes = new IMarkerResolution[] { new ChangeSolutionTypeQuickFix(solName,
+							SolutionMetaData.MOBILE), new ChangeSolutionTypeQuickFix(solName, SolutionMetaData.MOBILE_MODULE) };
 					}
 				}
 

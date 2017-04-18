@@ -18,6 +18,7 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.actions.ShowI18NDialogActionDelegate;
 
@@ -40,5 +41,11 @@ public class EditI18nAction extends Action
 	{
 		ShowI18NDialogActionDelegate delegate = new ShowI18NDialogActionDelegate();
 		delegate.run(ShowI18NDialogActionDelegate.ACTION_EDIT);
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		return super.isEnabled() && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null;
 	}
 }

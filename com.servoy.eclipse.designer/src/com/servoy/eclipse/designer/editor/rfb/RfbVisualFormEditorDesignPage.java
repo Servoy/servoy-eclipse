@@ -38,6 +38,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.json.JSONObject;
@@ -80,7 +82,7 @@ import com.servoy.j2db.util.Utils;
  * @author rgansevles
  *
  */
-public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage implements ILoadedNGPackagesListener, ISupportCheatSheetActions
+public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPage implements ISupportCheatSheetActions
 {
 	// for setting selection when clicked in editor
 	private final ISelectionProvider selectionProvider = new SelectionProviderAdapter()
@@ -135,6 +137,8 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	private String editorId = null;
 	private String clientId = null;
 
+	private final PartListener partListener = new PartListener();
+
 	public RfbVisualFormEditorDesignPage(BaseVisualFormEditor editorPart)
 	{
 		super(editorPart);
@@ -166,7 +170,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		editorServiceHandler = new EditorServiceHandler(editorPart, selectionProvider, selectionListener, fieldPositioner);
 
 		editorWebsocketSession.registerServerService("formeditor", editorServiceHandler);
-		ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(this);
+		ServoyModelFinder.getServoyModel().getNGPackageManager().addLoadedNGPackagesListener(partListener);
 		try
 		{
 			browser = new Browser(parent, SWT.NONE);
@@ -266,6 +270,7 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException
 	{
 		super.init(site, input);
+		getSite().getPage().addPartListener(partListener);
 	}
 
 	@Override
@@ -274,9 +279,10 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		super.dispose();
 		getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(selectionListener);
 		getSite().setSelectionProvider(null);
+		getSite().getPage().removePartListener(partListener);
 		WebsocketSessionManager.removeSession(editorWebsocketSession.getUuid());
 		WebsocketSessionManager.removeSession(designerWebsocketSession.getUuid());
-		ServoyModelFinder.getServoyModel().getNGPackageManager().removeLoadedNGPackagesListener(this);
+		ServoyModelFinder.getServoyModel().getNGPackageManager().removeLoadedNGPackagesListener(partListener);
 	}
 
 //	protected IWebsocketSession getContentWebsocketSession()
@@ -482,19 +488,6 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 		return new FixedSelectAllAction(editorPart, selectionProvider);
 	}
 
-	@Override
-	public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
-	{
-		if (!loadedPackagesAreTheSameAlthoughReferencingModulesChanged) Display.getDefault().asyncExec(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
-			}
-		});
-	}
-
 	public void createNewComponent(JSONObject componentDefinition)
 	{
 		if (editorServiceHandler != null)
@@ -514,4 +507,89 @@ public class RfbVisualFormEditorDesignPage extends BaseVisualFormEditorDesignPag
 			}
 		});
 	}
+
+	private final class PartListener implements IPartListener2, ILoadedNGPackagesListener
+	{
+		private boolean hidden = false;
+		private boolean refresh = false;
+
+		@Override
+		public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
+		{
+			if (!loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
+			{
+				if (!hidden)
+				{
+					refresh();
+				}
+				else refresh = true;
+			}
+		}
+
+		private void refresh()
+		{
+			Display.getDefault().asyncExec(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					((RfbVisualFormEditorDesignPage)editorPart.getGraphicaleditor()).refreshBrowserUrl(true);
+				}
+			});
+		}
+
+		@Override
+		public void partVisible(IWorkbenchPartReference partRef)
+		{
+			if ((partRef.getPart(false) == getEditorPart()))
+			{
+				if (refresh)
+				{
+					refresh = false;
+					refresh();
+				}
+				hidden = false;
+			}
+		}
+
+		@Override
+		public void partHidden(IWorkbenchPartReference partRef)
+		{
+			if ((partRef.getPart(false) == getEditorPart()))
+			{
+				hidden = true;
+			}
+		}
+
+		@Override
+		public void partOpened(IWorkbenchPartReference partRef)
+		{
+		}
+
+		@Override
+		public void partInputChanged(IWorkbenchPartReference partRef)
+		{
+		}
+
+		@Override
+		public void partDeactivated(IWorkbenchPartReference partRef)
+		{
+		}
+
+		@Override
+		public void partClosed(IWorkbenchPartReference partRef)
+		{
+		}
+
+		@Override
+		public void partBroughtToTop(IWorkbenchPartReference partRef)
+		{
+		}
+
+		@Override
+		public void partActivated(IWorkbenchPartReference partRef)
+		{
+		}
+	}
+
 }
