@@ -229,14 +229,13 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					var css;
 					var beanModel = editorScope.getBeanModel(node);
 					var ghostObject = editorScope.getGhost(node.getAttribute("svy-id"));
-					if (beanModel){
-						beanModel.location.y = beanModel.location.y + changeY;
-						if(minY != undefined && beanModel.location.y < minY) beanModel.location.y = minY;
-						beanModel.location.x = beanModel.location.x + changeX;
-						if(minX != undefined && beanModel.location.x < minX) beanModel.location.x = minX;
+					if (beanModel)
+					{	
+						if(minY == undefined || beanModel.location.y + changeY >= minY) beanModel.location.y = beanModel.location.y + changeY;
+						if(minX == undefined || beanModel.location.x + chnageX >= minX) beanModel.location.x = beanModel.location.x + changeX;
 						
-					    	//it can happen that we have the node in the bean model but it is outside the form
-					    	//in this case do not update the css as that will be done in the 'if (ghostObject) {...}'
+					    //it can happen that we have the node in the bean model but it is outside the form
+					    //in this case do not update the css as that will be done in the 'if (ghostObject) {...}'
 						if (!ghostObject) { 
         						css = { top: beanModel.location.y, left: beanModel.location.x }
         						angular.element(node).css(css);
@@ -415,7 +414,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 
 						dragStartEvent = event;
 
-							if (canDrop.dropTarget && editorScope.selectionToDrag) {
+						if (canDrop.dropTarget && editorScope.selectionToDrag) {
 								for (var i = 0; i < editorScope.selectionToDrag.length; i++) {
 									var node = angular.element(editorScope.selectionToDrag[i]);
 									if (editorScope.glasspane.style.cursor == "pointer") {
@@ -434,7 +433,22 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					} else {
 						var changeX = event.screenX- dragStartEvent.screenX;
 						var changeY = event.screenY- dragStartEvent.screenY;
-						updateAbsoluteLayoutComponentsLocations(editorScope, editorScope.selectionToDrag, changeX, changeY);
+						
+						//make sure no element goes offscreen
+						var canMove = true;
+						var selection = editorScope.getSelection();
+						for (var i = 0; i < selection.length; i++)
+						{
+							var beanModel = editorScope.getBeanModel(selection[i]);
+							if (!beanModel)	beanModel = editorScope.getGhost(selection[i].getAttribute("svy-id"));								
+							if (beanModel && beanModel.location && (beanModel.location.y + changeY < 0 || beanModel.location.x + changeX < 0) )
+							{
+								canMove = false;
+								break;
+							}
+						}
+						
+						if (canMove) updateAbsoluteLayoutComponentsLocations(editorScope, editorScope.selectionToDrag, changeX, changeY);
 						dragStartEvent = event;
 						
 						editorScope.getEditorContentRootScope().drag_highlight = editorScope.selectionToDrag;
