@@ -63,7 +63,10 @@ public class DeveloperFlattenedSolution extends FlattenedSolution
 		Map<String, Solution> map = new HashMap<String, Solution>();
 		for (Solution m : modules)
 		{
-			map.put(m.getName(), m);
+			if (m != null)
+			{
+				map.put(m.getName(), m);
+			}
 		}
 
 		// find the main solution

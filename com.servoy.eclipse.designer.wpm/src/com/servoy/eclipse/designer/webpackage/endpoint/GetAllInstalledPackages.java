@@ -121,7 +121,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	public static List<JSONObject> getRemotePackages() throws Exception
 	{
 		List<JSONObject> result = new ArrayList<>();
-		String repositoriesIndex = getUrlContents("http://servoy.github.io/webpackageindex");
+		String repositoriesIndex = getUrlContents("https://servoy.github.io/webpackageindex/");
 
 		JSONArray repoArray = new JSONArray(repositoriesIndex);
 		for (int i = repoArray.length(); i-- > 0;)
