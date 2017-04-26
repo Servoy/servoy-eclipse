@@ -1349,7 +1349,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				BorderPropertyController borderPropertyController = new BorderPropertyController(id, displayName, propertySource, persistContext);
 				borderPropertyController.setReadonly(readOnly);
 
-				if (Boolean.TRUE.equals(propertyDescription.getConfig()))
+				if (IContentSpecConstants.PROPERTY_BORDERTYPE.equals(propertyDescription.getName()))
 				{
 					// BorderPropertyController handles Border objects, the property is a String.
 					return new PropertyController<String, Object>(id, displayName,
@@ -2651,7 +2651,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			{
 				getLastPaintedFont = null;
 			}
-			if (Boolean.TRUE.equals(propertyDescription.getConfig()))
+			if (IContentSpecConstants.PROPERTY_FONTTYPE.equals(propertyDescription.getName()))
 			{
 				// Both property (P) and edit (E) types are font strings, parse the string as awt font and convert back so that guessed fonts are mapped to
 				// the correct string for that font
