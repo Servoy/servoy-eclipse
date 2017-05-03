@@ -232,7 +232,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					if (beanModel)
 					{	
 						if(minY == undefined || beanModel.location.y + changeY >= minY) beanModel.location.y = beanModel.location.y + changeY;
-						if(minX == undefined || beanModel.location.x + chnageX >= minX) beanModel.location.x = beanModel.location.x + changeX;
+						if(minX == undefined || beanModel.location.x + changeX >= minX) beanModel.location.x = beanModel.location.x + changeX;
 						
 					    //it can happen that we have the node in the bean model but it is outside the form
 					    //in this case do not update the css as that will be done in the 'if (ghostObject) {...}'
@@ -436,11 +436,24 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						
 						//make sure no element goes offscreen
 						var canMove = true;
-						var selection = editorScope.getSelection();
+						var selection = editorScope.selectionToDrag;
+						//depending if the cursor is inside or outside the form area we want to remove from the selection 
+						//the ghosts which have also bean model, or respectively the elements which also have ghosts 
+						var toRemove = [];
+						var removeGhosts = event.screenX > formWidth || event.screenY > formHeight;
+						var formSize = editorScope.getContentSize();
+						var formWidth = parseInt(formSize.width);
+						var formHeight = parseInt(formSize.height);
 						for (var i = 0; i < selection.length; i++)
 						{
 							var beanModel = editorScope.getBeanModel(selection[i]);
-							if (!beanModel)	beanModel = editorScope.getGhost(selection[i].getAttribute("svy-id"));								
+							var svy_id = selection[i].getAttribute("svy-id");
+							var ghost = editorScope.getGhost(svy_id);		
+							if (beanModel && ghost && toRemove.indexOf(svy_id) == -1)
+							{
+								toRemove.push(svy_id);
+							}
+							if (!beanModel) beanModel = ghost;
 							if (beanModel && beanModel.location && (beanModel.location.y + changeY < 0 || beanModel.location.x + changeX < 0) )
 							{
 								canMove = false;
@@ -448,7 +461,24 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 							}
 						}
 						
-						if (canMove) updateAbsoluteLayoutComponentsLocations(editorScope, editorScope.selectionToDrag, changeX, changeY);
+						if (canMove)
+						{
+							for (var i = 0; i < toRemove.length; i++)
+							{
+								for (var j = 0; j < editorScope.selectionToDrag.length; j++)
+								{
+									if (editorScope.selectionToDrag[j].getAttribute("svy-id") == toRemove[i])
+									{
+										if (removeGhosts && editorScope.selectionToDrag[j].classList.contains("ghost") || !removeGhosts && editorScope.selectionToDrag[j].classList.contains("svy-wrapper"))
+										{
+											editorScope.selectionToDrag.splice(j,1);
+											break;
+										}
+									}
+								}
+							}									
+							updateAbsoluteLayoutComponentsLocations(editorScope, editorScope.selectionToDrag, changeX, changeY);
+						}
 						dragStartEvent = event;
 						
 						editorScope.getEditorContentRootScope().drag_highlight = editorScope.selectionToDrag;
