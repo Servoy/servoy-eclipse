@@ -46,6 +46,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Solution;
+import com.servoy.j2db.server.ngclient.NGClientEntryFilter;
 import com.servoy.j2db.server.ngclient.ServoyDataConverterContext;
 import com.servoy.j2db.server.ngclient.template.FormLayoutGenerator;
 import com.servoy.j2db.server.ngclient.template.FormLayoutStructureGenerator;
@@ -129,7 +130,7 @@ public class EditorContentFilter implements Filter
 					}
 				}
 				IndexPageEnhancer.enhance(getClass().getResource("editor-content.html"), httpServletRequest.getContextPath(), css, formScripts, null,
-					variableSubstitution, w, null);
+					variableSubstitution, w, null, NGClientEntryFilter.CONTRIBUTION_ENTRY_FILTER);
 				w.flush();
 				return;
 			}

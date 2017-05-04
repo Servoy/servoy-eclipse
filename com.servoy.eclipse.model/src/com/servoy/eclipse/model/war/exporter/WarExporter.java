@@ -362,7 +362,7 @@ public class WarExporter
 			if (exportModel.getExportedComponents() != null) exportedWebObjects.addAll(exportModel.getExportedComponents());
 			if (exportModel.getExportedServices() != null) exportedWebObjects.addAll(exportModel.getExportedServices());
 		}
-		Object[] allContributions = IndexPageEnhancer.getAllContributions(exportedWebObjects, Boolean.TRUE);
+		Object[] allContributions = IndexPageEnhancer.getAllContributions(exportedWebObjects, Boolean.TRUE, NGClientEntryFilter.CONTRIBUTION_ENTRY_FILTER);
 		Element group = doc.createElement("group");
 		rootElement.appendChild(group);
 		attr = doc.createAttribute("name");
