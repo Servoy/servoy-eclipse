@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
+import java.awt.Point;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -647,17 +648,43 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		return fixedFormElementName.replace('-', '_');
 	}
 
-	/**
-	 * @param fs
-	 * @param writer
-	 * @param baseComponents
-	 */
+	private Collection<IFormElement> filterGhosts(Collection<IFormElement> baseComponents)
+	{
+		if (form.isResponsiveLayout()) return baseComponents;
+		Collection<IFormElement> filtered = new ArrayList<IFormElement>();
+		int formHeight = 0;
+		if (form.getParts().hasNext())
+		{
+			formHeight = form.getSize().height;
+		}
+		else
+		{
+			Form f = form;
+			while (formHeight == 0 && (f = form.extendsForm) != null)
+			{
+				formHeight = f.getParts().hasNext() ? f.getSize().height : 0;
+			}
+		}
+		for (IFormElement fe : baseComponents)
+		{
+			if (!PersistHelper.isOverrideOrphanElement(fe))
+			{
+				Point location = fe.getLocation();
+				if (location != null && location.x <= form.getWidth() && location.y <= formHeight)
+				{
+					filtered.add(fe);
+				}
+			}
+		}
+		return filtered;
+	}
+
 	private void sendComponents(FlattenedSolution fs, JSONWriter writer, Collection<IFormElement> baseComponents, Collection<IFormElement> deletedComponents)
 	{
 		if (baseComponents.size() > 0)
 		{
 			Map<String, String> formComponentTemplates = new HashMap<String, String>();
-			List<IFormElement> components = new ArrayList<IFormElement>(baseComponents);
+			List<IFormElement> components = new ArrayList<IFormElement>(filterGhosts(baseComponents));
 			Collections.sort(components, PositionComparator.XY_PERSIST_COMPARATOR);
 			Collections.reverse(components);
 			writer.key("components");
