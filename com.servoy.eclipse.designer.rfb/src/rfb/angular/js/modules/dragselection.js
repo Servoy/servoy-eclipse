@@ -448,7 +448,8 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						{
 							var beanModel = editorScope.getBeanModel(selection[i]);
 							var svy_id = selection[i].getAttribute("svy-id");
-							var ghost = editorScope.getGhost(svy_id);		
+							var ghost = editorScope.getGhost(svy_id);	
+							if (ghost && ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) continue;
 							if (beanModel && ghost && toRemove.indexOf(svy_id) == -1)
 							{
 								toRemove.push(svy_id);
