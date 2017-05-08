@@ -80,6 +80,14 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 								offset.top = beanModel.location.y;
 								offset.left = beanModel.location.x;
 							}
+							else if (ghost)
+							{
+								offset.top = ghost.location.y;
+								offset.left = ghost.location.x;
+								offset = adjustForPadding(offset);
+								height = ghost.size.height;
+								width = ghost.size.width;
+							}
 						}
 						
 						//this is so that ghost elements decorators are positioned correctly

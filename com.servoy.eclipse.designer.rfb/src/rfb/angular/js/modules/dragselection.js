@@ -201,6 +201,7 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 							}
 							editorScope.refreshEditorContent();
 							$editorService.sendChanges(obj);
+							$rootScope.$broadcast(EDITOR_EVENTS.RENDER_DECORATORS, editorScope.selectionToDrag);
 						}
 					}
 
