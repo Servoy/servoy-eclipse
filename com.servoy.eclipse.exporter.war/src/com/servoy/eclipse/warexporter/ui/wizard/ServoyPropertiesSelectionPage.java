@@ -54,11 +54,13 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 	private final ExportWarModel exportModel;
 	private Text fileNameText;
 	private Button browseButton;
+	private final ExportWarWizard wizard;
 
-	public ServoyPropertiesSelectionPage(ExportWarModel exportModel)
+	public ServoyPropertiesSelectionPage(ExportWarModel exportModel, ExportWarWizard wizard)
 	{
 		super("servoypropertyselection");
 		this.exportModel = exportModel;
+		this.wizard = wizard;
 		setTitle("Choose an existing servoy properties file (skip to generate default)");
 		setDescription("Select the servoy properties file that you want to use, skip if default should be generated");
 	}
@@ -233,13 +235,14 @@ public class ServoyPropertiesSelectionPage extends WizardPage implements Listene
 		{
 			setMessage(null);
 		}
-		return result;
+
+		return getMessageType() != IMessageProvider.WARNING;
 	}
 
 	@Override
 	public IWizardPage getNextPage()
 	{
 		if (exportModel.getServoyPropertiesFileName() == null) return super.getNextPage();
-		return null;
+		else return wizard.getLastPage();
 	}
 }

@@ -978,7 +978,8 @@ public class WarExporter
 		else
 		{
 			File sourceFile = new File(exportModel.getServoyPropertiesFileName());
-			if (exportModel.allowOverwriteSocketFactoryProperties() || !exportModel.getLicenses().isEmpty())
+			if (exportModel.allowOverwriteSocketFactoryProperties() || !exportModel.getLicenses().isEmpty() ||
+				(exportModel.getUserHome() != null && exportModel.getUserHome().trim().length() > 0))
 			{
 				changeAndWritePropertiesFile(tmpWarDir, sourceFile);
 			}
@@ -1237,6 +1238,11 @@ public class WarExporter
 			Properties properties = new SortedProperties();
 			properties.load(fis);
 
+			if (exportModel.getUserHome() != null && exportModel.getUserHome().trim().length() > 0)
+			{
+				properties.setProperty(Settings.USER_HOME, exportModel.getUserHome());
+			}
+
 			if (exportModel.allowOverwriteSocketFactoryProperties())
 			{
 				properties.setProperty("SocketFactory.rmiServerFactory", "com.servoy.j2db.server.rmi.tunnel.ServerTunnelRMISocketFactoryFactory");
@@ -1347,6 +1353,12 @@ public class WarExporter
 		// TODO ask for all kinds of other stuff like branding?
 		properties.setProperty("servoy.server.start.rmi", Boolean.toString(exportModel.getStartRMI()));
 		properties.setProperty("servoy.rmiStartPort", exportModel.getStartRMIPort());
+
+
+		if (exportModel.getUserHome() != null && exportModel.getUserHome().trim().length() > 0)
+		{
+			properties.setProperty(Settings.USER_HOME, exportModel.getUserHome());
+		}
 
 		if (!exportModel.getLicenses().isEmpty())
 		{
