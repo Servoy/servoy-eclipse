@@ -102,8 +102,16 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		setWindowTitle("War Export");
 		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
 		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard:" + activeProject.getSolution().getName());
-		setDialogSettings(section);
+		if (activeProject != null)
+		{
+			IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard:" + activeProject.getSolution().getName());
+			setDialogSettings(section);
+		}
+		else
+		{
+			IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard");
+			setDialogSettings(section);
+		}
 		setNeedsProgressMonitor(true);
 	}
 
