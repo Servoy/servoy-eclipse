@@ -178,7 +178,7 @@ public class FormatCellEditor extends TextDialogCellEditor
 								{
 									form = flattenedSolution.getFlattenedForm(form);
 									IDataProviderLookup dataproviderLookup = flattenedSolution.getDataproviderLookup(
-										com.servoy.eclipse.core.Activator.getDefault().getDesignClient().getFoundSetManager(), form);
+										Activator.getDefault().getDesignClient().getFoundSetManager(), form);
 									ComponentFormat componentFormat = ComponentFormat.getComponentFormat(formatString, dataProviderID, dataproviderLookup,
 										Activator.getDefault().getDesignClient());
 									type = componentFormat.dpType;
