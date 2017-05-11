@@ -103,7 +103,7 @@ public class EclipseUserManager extends WorkspaceUserManager
 				{
 					Debug.error("Access to repository server denied to client code, see admin property " + Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_SETTING,
 						new IllegalAccessException());
-					throw new RepositoryException(ServoyException.NO_ACCESS);
+					throw new RepositoryException(ServoyException.NO_ACCESS, new Object[] { IRepository.ADMIN_GROUP });
 				}
 			}
 		}
