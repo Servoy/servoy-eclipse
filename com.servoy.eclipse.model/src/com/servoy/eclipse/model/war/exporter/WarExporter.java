@@ -452,7 +452,8 @@ public class WarExporter
 	{
 		if ((exportModel.getExportedComponents() == null && exportModel.getExportedServices() == null) ||
 			(exportModel.getExportedComponents().size() == componentsSpecProviderState.getWebObjectSpecifications().size() &&
-			exportModel.getExportedServices().size() == NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(servicesSpecProviderState).length))
+				exportModel.getExportedServices().size() == NGUtils.getAllWebServiceSpecificationsThatCanBeUncheckedAtWarExport(
+					servicesSpecProviderState).length))
 			return;
 
 		File exported = new File(tmpWarDir, "WEB-INF/exported_web_objects.properties");
@@ -1374,6 +1375,7 @@ public class WarExporter
 //			}
 			properties.put("server." + i + ".driver", sc.getDriver());
 			properties.put("server." + i + ".skipSysTables", "" + sc.isSkipSysTables());
+			properties.put("server." + i + ".prefixTables", "" + sc.isPrefixTables());
 			String catalog = sc.getCatalog();
 			if (catalog == null)
 			{
