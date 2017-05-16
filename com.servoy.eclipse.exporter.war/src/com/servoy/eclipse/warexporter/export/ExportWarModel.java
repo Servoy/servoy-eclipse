@@ -270,6 +270,7 @@ public class ExportWarModel extends AbstractWarExportModel
 					sc.setMaxIdle(Utils.getAsInteger(settings.get("export.servers." + name + ".maxidle")));
 					sc.setMaxPreparedStatementsIdle(Utils.getAsInteger(settings.get("export.servers." + name + ".maxstatements")));
 					sc.setSkipSysTables(Utils.getAsBoolean(settings.get("export.servers." + name + ".skipsystables")));
+					sc.setPrefixTables(Utils.getAsBoolean(settings.get("export.servers." + name + ".prefixTables")));
 				}
 			}
 		}
@@ -434,6 +435,7 @@ public class ExportWarModel extends AbstractWarExportModel
 				settings.put("export.servers." + name + ".maxidle", sc.getMaxIdle());
 				settings.put("export.servers." + name + ".maxstatements", sc.getMaxPreparedStatementsIdle());
 				settings.put("export.servers." + name + ".skipsystables", sc.isSkipSysTables());
+				settings.put("export.servers." + name + ".prefixTables", sc.isPrefixTables());
 			}
 			settings.put("export.servers", sb.toString());
 		}

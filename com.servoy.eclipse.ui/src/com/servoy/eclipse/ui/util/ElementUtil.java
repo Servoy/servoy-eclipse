@@ -302,6 +302,29 @@ public class ElementUtil
 		{
 			// override does not exist yet, create it
 			ISupportChilds parent = (Form)context;
+			if (!((Form)ancestorForm).isResponsiveLayout() && !(parentPersist.getParent() instanceof Form))
+			{
+				parent = null;
+				parent = (ISupportChilds)context.acceptVisitor(new IPersistVisitor()
+				{
+					public Object visit(IPersist o)
+					{
+						if (o instanceof ISupportExtendsID && ((ISupportExtendsID)o).getExtendsID() == parentPersist.getParent().getID())
+						{
+							return o;
+						}
+						return CONTINUE_TRAVERSAL;
+					}
+				});
+
+				if (parent == null)
+				{
+					parent = (ISupportChilds)((AbstractBase)persist.getParent()).cloneObj((Form)context, false, null, false, false, false);
+					((AbstractBase)parent).copyPropertiesMap(null, true);
+					((ISupportExtendsID)parent).setExtendsID(parentPersist.getParent().getID());
+				}
+			}
+
 			newPersist = ((AbstractBase)persist).cloneObj(parent, false, null, false, false, false);
 			((AbstractBase)newPersist).copyPropertiesMap(null, true);
 			((ISupportExtendsID)newPersist).setExtendsID(parentPersist.getID());

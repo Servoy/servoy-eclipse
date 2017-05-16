@@ -93,6 +93,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 
 	private LicensePage licenseConfigurationPage;
 
+	private UserHomeSelectionPage userHomeSelectionPage;
+
 	private boolean isNGExport;
 
 	public ExportWarWizard()
@@ -100,8 +102,16 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		setWindowTitle("War Export");
 		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
 		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard:" + activeProject.getSolution().getName());
-		setDialogSettings(section);
+		if (activeProject != null)
+		{
+			IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard:" + activeProject.getSolution().getName());
+			setDialogSettings(section);
+		}
+		else
+		{
+			IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard");
+			setDialogSettings(section);
+		}
 		setNeedsProgressMonitor(true);
 	}
 
@@ -203,7 +213,9 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		{
 			getContainer().run(true, false, job);
 		}
-		catch (Exception e)
+		catch (
+
+		Exception e)
 		{
 			Debug.error(e);
 			return false;
@@ -228,7 +240,8 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 			licenseConfigurationPage = new LicensePage("licensepage", "Enter license key",
 				"Please enter the Servoy client license key(s), or leave empty for running the solution in trial mode.", exportModel);
 			servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel);
-			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel);
+			userHomeSelectionPage = new UserHomeSelectionPage("userhomepage", exportModel);
+			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel, this);
 			if (isNGExport)
 			{
 				componentsSelectionPage = new ComponentsSelectionPage(exportModel, WebComponentSpecProvider.getSpecProviderState(), "componentspage",
@@ -251,6 +264,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 				ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), exportModel.getPlugins(), null,
 				getDialogSettings().get("export.plugins") == null, true);
 			fileSelectionPage = new FileSelectionPage(exportModel);
+
 			addPage(fileSelectionPage);
 			addPage(pluginSelectionPage);
 			addPage(beanSelectionPage);
@@ -266,6 +280,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 			addPage(servoyPropertiesConfigurationPage);
 			addPage(licenseConfigurationPage);
 			addPage(serversSelectionPage);
+			addPage(userHomeSelectionPage);
 
 			String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, true, false);
 			ArrayList<String> srvNames = new ArrayList<String>(Arrays.asList(serverNames));
@@ -277,7 +292,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 			{
 				ServerConfiguration serverConfiguration = exportModel.getServerConfiguration(serverName);
 				ServerConfigurationPage configurationPage = new ServerConfigurationPage("serverconf:" + serverName, serverConfiguration,
-					exportModel.getSelectedServerNames(), serverConfigurationPages);
+					exportModel.getSelectedServerNames(), serverConfigurationPages, this);
 				addPage(configurationPage);
 				serverConfigurationPages.put(serverName, configurationPage);
 			}
@@ -287,17 +302,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 	@Override
 	public boolean canFinish()
 	{
-		IWizardPage currentPage = getContainer().getCurrentPage();
-		if (currentPage instanceof ServoyPropertiesSelectionPage && ((ServoyPropertiesSelectionPage)currentPage).getMessageType() == IMessageProvider.WARNING)
-		{
-			return false; //if any warning about the selected properties file, disable finish
-		}
-		if (currentPage instanceof ServersSelectionPage || currentPage instanceof ServerConfigurationPage ||
-			currentPage instanceof ServoyPropertiesSelectionPage)
-		{
-			return currentPage.getNextPage() == null;
-		}
-		return false;
+		return getContainer().getCurrentPage() instanceof UserHomeSelectionPage;
 	}
 
 	@Override
@@ -358,4 +363,10 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		componentsSelectionPage.setComponentsUsed(exportModel.getUsedComponents());
 		servicesSelectionPage.setComponentsUsed(exportModel.getUsedServices());
 	}
+
+	public IWizardPage getLastPage()
+	{
+		return userHomeSelectionPage;
+	}
+
 }

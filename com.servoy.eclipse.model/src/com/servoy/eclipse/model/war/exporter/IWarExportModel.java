@@ -109,4 +109,7 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	public boolean isNGExport();
 
+	public void setUserHome(String userHome);
+
+	public String getUserHome();
 }

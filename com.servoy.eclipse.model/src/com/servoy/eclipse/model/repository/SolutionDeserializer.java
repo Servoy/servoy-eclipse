@@ -1650,8 +1650,9 @@ public class SolutionDeserializer
 			if (retval == null)
 			{
 				retval = createPersistInParent(parent, repository, obj, uuid);
-				if (persistUUIDNotFound && solutionUUIDs.contains(uuid))
+				if (persistUUIDNotFound && testOverAllUUIDs(uuid))
 				{
+					((AbstractBase)retval).resetUUID();
 					((AbstractBase)retval).setRuntimeProperty(POSSIBLE_DUPLICATE_UUID, Boolean.TRUE);
 				}
 			}
@@ -1666,7 +1667,7 @@ public class SolutionDeserializer
 			}
 		}
 
-		solutionUUIDs.add(uuid);
+		solutionUUIDs.add(retval.getUUID());
 
 		if (file != null)
 		{
@@ -1718,6 +1719,15 @@ public class SolutionDeserializer
 
 		if (useFilesForDirtyMark) handleChanged(obj, retval);
 		return retval;
+	}
+	
+	private static boolean testOverAllUUIDs(UUID uuid)
+	{
+		for (HashSet<UUID> uuids : alreadyUsedUUID.values())
+		{
+			if (uuids.contains(uuid)) return true;
+		}
+		return false;
 	}
 
 	private static IPersist createPersistInParent(ISupportChilds parent, IDeveloperRepository repository, JSONObject obj, UUID uuid)

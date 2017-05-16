@@ -143,6 +143,11 @@ public abstract class AbstractWorkspaceExporter<T extends IArgumentChest> implem
 						// set correct application server dir
 						Settings.getInstance().put(J2DBGlobals.SERVOY_APPLICATION_SERVER_DIRECTORY_KEY, f.getAbsolutePath());
 					}
+					else
+					{
+						outputError("Incorrect value for application server location. '" + configuration.getAppServerDir() +
+							(!f.exists() ? "' does not exist." : " is not a directory"));
+					}
 				}
 
 				// initialize app server

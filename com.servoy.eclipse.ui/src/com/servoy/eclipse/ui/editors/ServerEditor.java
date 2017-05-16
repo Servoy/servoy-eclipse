@@ -1022,8 +1022,8 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		}
 
 		serverConfigObservable = new ImmutableObjectObservable<ServerConfig>(serverConfig,
-			new Class[] { String.class, String.class, String.class, String.class, Map.class, String.class, String.class, String.class, int.class, int.class, int.class, int.class, String.class, String.class, boolean.class, boolean.class, int.class, String.class },
-			new String[] { "serverName", "userName", "password", "serverUrl", "connectionProperties", "driver", "catalog", "schema", "maxActive", "maxIdle", "maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", "skipSysTables", "idleTimeout", "dialectClass" });
+			new Class[] { String.class, String.class, String.class, String.class, Map.class, String.class, String.class, String.class, int.class, int.class, int.class, int.class, String.class, String.class, boolean.class, boolean.class, boolean.class, int.class, String.class },
+			new String[] { "serverName", "userName", "password", "serverUrl", "connectionProperties", "driver", "catalog", "schema", "maxActive", "maxIdle", "maxPreparedStatementsIdle", "connectionValidationType", "validationQuery", "dataModelCloneFrom", "enabled", "skipSysTables", "prefixTables", "idleTimeout", "dialectClass" });
 
 		serverConfigObservable.setPropertyValue("serverName", serverInput.getName());
 		if (serverInput.getIsNew()) flagModified();

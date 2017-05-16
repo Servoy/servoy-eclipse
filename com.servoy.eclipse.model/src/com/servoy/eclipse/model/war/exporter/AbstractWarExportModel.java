@@ -75,6 +75,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	protected SpecProviderState componentsSpecProviderState;
 	protected SpecProviderState servicesSpecProviderState;
 	private final boolean isNgExport;
+	private String userHome;
 
 	public AbstractWarExportModel(boolean isNGExport)
 	{
@@ -378,5 +379,27 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	public boolean isNGExport()
 	{
 		return isNgExport;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#setUserHome(java.lang.String)
+	 */
+	@Override
+	public void setUserHome(String userHome)
+	{
+		this.userHome = userHome;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getUserHome()
+	 */
+	@Override
+	public String getUserHome()
+	{
+		return userHome;
 	}
 }

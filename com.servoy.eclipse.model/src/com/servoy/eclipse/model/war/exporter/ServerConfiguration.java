@@ -34,6 +34,7 @@ public class ServerConfiguration
 	private int maxPreparedStatementsIdle;
 	private String schema;
 	private boolean skipSysTables;
+	private boolean prefixTables;
 	private final String name;
 
 	public ServerConfiguration(String name)
@@ -59,6 +60,7 @@ public class ServerConfiguration
 		maxIdle = config.getMaxIdle();
 		maxPreparedStatementsIdle = config.getMaxPreparedStatementsIdle();
 		skipSysTables = config.getSkipSysTables();
+		prefixTables = config.getPrefixTables();
 	}
 
 	private String getDisplayValue(String value)
@@ -187,6 +189,14 @@ public class ServerConfiguration
 	}
 
 	/**
+	 * @return the prefixTables
+	 */
+	public boolean isPrefixTables()
+	{
+		return prefixTables;
+	}
+
+	/**
 	 * @param serverUrl the serverUrl to set
 	 */
 	public void setServerUrl(String serverUrl)
@@ -288,6 +298,14 @@ public class ServerConfiguration
 	public void setSkipSysTables(boolean skipSysTables)
 	{
 		this.skipSysTables = skipSysTables;
+	}
+
+	/**
+	 * @param prefixTables the prefixTables to set
+	 */
+	public void setPrefixTables(boolean prefixTables)
+	{
+		this.prefixTables = prefixTables;
 	}
 
 }

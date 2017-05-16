@@ -77,8 +77,8 @@ public abstract class AbstractNewDbAction extends Action
 		final IServerInternal serverPrototype = (IServerInternal)ServoyModel.getServerManager().getServer(serverMap.get(dbSelection).getServerName());
 		if (serverPrototype == null)
 		{
-			UIUtils.reportError("Create new database", "Could not find server '" + serverMap.get(dbSelection).getServerName() +
-				"', the server should be enabled and valid");
+			UIUtils.reportError("Create new database",
+				"Could not find server '" + serverMap.get(dbSelection).getServerName() + "', the server should be enabled and valid");
 			return;
 		}
 		final String name = getDatabaseName();
@@ -172,7 +172,7 @@ public abstract class AbstractNewDbAction extends Action
 	}
 
 	/**
-	 * Open a db server selection dialog if we have more servers of dbType. 
+	 * Open a db server selection dialog if we have more servers of dbType.
 	 * @param serverMap
 	 * @return
 	 */
@@ -245,8 +245,8 @@ public abstract class AbstractNewDbAction extends Action
 	{
 		final ServerConfig serverConfig = new ServerConfig(configName, origConfig.getUserName(), origConfig.getPassword(), serverUrl,
 			origConfig.getConnectionProperties(), origConfig.getDriver(), origConfig.getCatalog(), null, origConfig.getMaxActive(), origConfig.getMaxIdle(),
-			origConfig.getMaxPreparedStatementsIdle(), origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false, -1,
-			origConfig.getDialectClass());
+			origConfig.getMaxPreparedStatementsIdle(), origConfig.getConnectionValidationType(), origConfig.getValidationQuery(), null, true, false,
+			origConfig.getPrefixTables(), -1, origConfig.getDialectClass());
 		Display.getDefault().asyncExec(new Runnable()
 		{
 			public void run()
