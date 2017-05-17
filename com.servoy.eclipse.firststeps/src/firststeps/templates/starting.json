@@ -1,0 +1,147 @@
+{
+    "steps": [{
+            "template": "welcome",
+            "elements": [
+                { "type": "popup-title", "value": "Welcome back" },
+                { "type": "sub-title", "value": "You didn't finish the first-launch wizard" },
+                { "type": "image-tag", "value": "icon-rocket-big.png" },
+                { "type": "button", "id": "continue", "url": "javascript:SVY_TEMPLATE.setStep(1)", "value": "Continue the wizard" }
+            ]
+        }, {
+            "template": "welcome-button",
+            "elements": [
+                { "type": "popup-title", "value": "Welcome to Servoy" },
+                { "type": "sub-title", "value": "Sed posuere consectetur est at lobortis.<br />Etiam porta sem malesuada<br /> magna mollis euismod." },
+                { "type": "welcome-button", "title": "I will do it myself", "text": "I know the way, or just don't want to be guided", "buttonText": "Close dialog", "buttonUrl": "/firststeps/action/com.servoy.eclipse.firststeps.ui.actions.CloseDialog" },
+                { "type": "welcome-button", "title": "I need a little help", "text": "I would appreciate some guidance in my exploration.", "buttonText": "Get started", "buttonUrl": "javascript:SVY_TEMPLATE.nextStep()" }
+            ]
+        },
+        {
+            "template": "detailed",
+            "showFooterNavigation": true,
+            "elements": [
+                { "type": "popup-title", "id": "popup-title", "value": "Let's form a form" },
+                { "type": "sub-title", "value": "Sed posuere consectetur est at lobortis.<br />Etiam porta sem malesuada<br /> magna mollis euismod." },
+                { "type": "title", "value": "In servoy every page/screen is called a form" },
+                { "type": "intro-text", "value": "Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Praesent magna, vel scelerisque et." }
+            ]
+        },
+        {
+            "template": "two-icon",
+            "showFooterNavigation": false,
+            "elements": [
+                { "type": "popup-title", "id": "popup-title", "value": "Choose your starting poing" },
+                { "type": "sub-title", "value": "Sed posuere consectetur est at lobortis.<br />Etiam porta sem malesuada<br /> magna mollis euismod." },
+                {
+                    "type": "two-icon-icons",
+                    "items": [
+                        { "title": "Start from scratch", "subtitle": "Open Servoy how you left it the last time", "icon": "icon-scratch-big.png", "url": "javascript:SVY_TEMPLATE.setStep(3)" },
+                        { "title": "Open template", "subtitle": "Let us guide you by some videps", "icon": "icon-template-big.png", "url": "javascript:SVY_TEMPLATE.setStep(4)" }
+                    ]
+                }
+            ]
+        },
+        {
+            "template": "two-list",
+            "showFooterNavigation": true,
+            "elements": [
+                { "type": "popup-title", "value": "Let’s build something epic" },
+                { "type": "sub-title", "value": "Sed posuere consectetur est at lobortis.<br />Etiam porta sem malesuada<br /> magna mollis euismod." },
+                {
+                    "type": "menu",
+                    "id": "menu-left",
+                    "title": "Create new",
+                    "items": [
+                        { "title": "Form", "icon": "icon-form.png", "url": "/firststeps/action/com.servoy.eclipse.firststeps.ui.actions.NewForm" },
+                        { "title": "Database server", "icon": "icon-database.png", "url": "/firststeps/action/com.servoy.eclipse.firststeps.ui.actions.OpenURL/http://www.servoy.com" },
+                        { "title": "New package project", "icon": "icon-new-package.png", "url": "" },
+                        { "title": "Relation", "icon": "icon-relation.png", "url": "" },
+                        { "title": "Servoy solution", "icon": "icon-servoy.png", "url": "javascript:SVY_TEMPLATE.setStep(3)" },
+                        { "title": "Style", "icon": "icon-style.png", "url": "javascript:SVY_TEMPLATE.setStep(1)" }
+                    ]
+                },
+                {
+                    "type": "menu",
+                    "id": "menu-right",
+                    "title": "Support",
+                    "items": [
+                        { "title": "Video tutorials", "icon": "icon-video.png", "url": "" },
+                        { "title": "Documentation", "icon": "icon-documentation.png", "url": "" },
+                        { "title": "University", "icon": "icon-university.png", "url": "" }
+                    ]
+                }
+            ]
+        }, {
+            "template": "three-icon",
+            "showFooterNavigation": true,
+            "elements": [
+                { "type": "popup-title", "id": "popup-title", "value": "Take of again" },
+                { "type": "sub-title", "value": "Sed posuere consectetur est at lobortis.<br />Etiam porta sem malesuada<br /> magna mollis euismod." },
+                {
+                    "type": "three-icon-icons",
+                    "items": [
+                        { "title": "Open Wiki", "subtitle": "Open Servoy how you left it the last time", "icon": "icon-wiki-big.png", "url": "javascript:SVY_TEMPLATE.setStep(0)" },
+                        { "title": "Open demo files", "subtitle": "Explore Servoy by yourself", "icon": "icon-files-big.png", "url": "http://www.google.nl" },
+                        { "title": "Watch some tutorials", "subtitle": "Let us guide you by some videps", "icon": "icon-video-big.png", "url": "http://www.google.nl" }
+                    ]
+                }
+            ]
+        }, {
+            "template": "textual",
+            "showFooterNavigation": true,
+            "elements": [
+                { "type": "popup-title", "id": "popup-title", "value": "A Package project" },
+                { "type": "sub-title", "value": "The place where you can start new things or<br />open stuff you worked on earlier." },
+                { "type": "intro-text", "value": "Aenean lacinia bibendum nulla sed consectetur. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Morbi leo risus, porta ac consectetur ac, vestibulum at eros." },
+                {
+                    "type": "list",
+                    "title": "With the solution explorer you can",
+                    "items": [
+                        "Aenean lacinia bibendum nulla sed consectetur",
+                        "Integer posuere erat a",
+                        "Ante venenatis",
+                        "Dapibus posuere velit aliquet",
+                        "Praesent commodo cursus",
+                        "Magna, vel scelerisque nisl consectetur et. Morbi leo risus, porta ac consectetur ac, vestibulum at eros."
+                    ]
+                },
+                { "type": "image", "value": "icon-export-project-large.png" }
+            ]
+        }, {
+            "template": "textual",
+            "showFooterNavigation": true,
+            "elements": [
+                { "type": "popup-title", "id": "popup-title", "value": "The Solution Explorer" },
+                { "type": "sub-title", "value": "The place where you can start new things or<br />open stuff you worked on earlier." },
+                { "type": "intro-text", "value": "Aenean lacinia bibendum nulla sed consectetur. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Morbi leo risus, porta ac consectetur ac, vestibulum at eros." },
+                {
+                    "type": "list",
+                    "title": "With the solution explorer you can",
+                    "items": [
+                        "Aenean lacinia bibendum nulla sed consectetur",
+                        "Integer posuere erat a",
+                        "Ante venenatis",
+                        "Dapibus posuere velit aliquet",
+                        "Praesent commodo cursus",
+                        "Magna, vel scelerisque nisl consectetur et. Morbi leo risus, porta ac consectetur ac, vestibulum at eros."
+                    ]
+                },
+                { "type": "image", "value": "solution-explorer.png" }
+            ]
+        }, {
+            "template": "three-icon",
+            "showFooterNavigation": false,
+            "elements": [
+                { "type": "popup-title", "id": "popup-title", "value": "Take of again" },
+                { "type": "sub-title", "value": "Sed posuere consectetur est at lobortis.<br />Etiam porta sem malesuada<br /> magna mollis euismod." },
+                {
+                    "type": "three-icon-icons",
+                    "items": [
+                        { "title": "Open Wiki", "subtitle": "Open Servoy how you left it the last time", "icon": "icon-wiki-big.png", "url": "javascript:SVY_TEMPLATE.setStep(0)" },
+                        { "title": "Open demo files", "subtitle": "Explore Servoy by yourself", "icon": "icon-files-big.png", "url": "http://www.google.nl" }
+                    ]
+                }
+            ]
+        }
+    ]
+}

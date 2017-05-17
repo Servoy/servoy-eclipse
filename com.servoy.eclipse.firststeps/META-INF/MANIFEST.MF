@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: First Steps
+Bundle-SymbolicName: com.servoy.eclipse.firststeps;singleton:=true
+Bundle-Version: 8.1.3.3033
+Bundle-Vendor: Servoy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Require-Bundle: javax.servlet,
+ servoy_shared,
+ org.apache.tomcat,
+ org.eclipse.ui,
+ com.servoy.eclipse.model,
+ org.eclipse.ui.intro,
+ com.servoy.eclipse.ui,
+ com.servoy.eclipse.core,
+ org.eclipse.core.runtime

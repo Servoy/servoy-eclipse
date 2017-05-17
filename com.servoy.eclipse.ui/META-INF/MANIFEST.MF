@@ -75,7 +75,8 @@ Require-Bundle: org.eclipse.ui,
  org.apache.httpcomponents.httpclient;bundle-version="4.3.6",
  org.apache.httpcomponents.httpcore;bundle-version="4.3.3"
 Bundle-ActivationPolicy: lazy
-Export-Package: com.servoy.eclipse.cheatsheets.actions,
+Export-Package: com.servoy.eclipse.cheatsheets,
+ com.servoy.eclipse.cheatsheets.actions,
  com.servoy.eclipse.ui,
  com.servoy.eclipse.ui.actions,
  com.servoy.eclipse.ui.dialogs,
