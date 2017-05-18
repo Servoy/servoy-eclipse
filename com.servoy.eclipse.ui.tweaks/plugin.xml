@@ -13,6 +13,178 @@
       </weaveClass>
    </extension>
    
+   <extension
+         id="com.servoy.eclipse.ui.tweaks.imageReplacementExtensions"
+         name="Image replacements performed by the c.s.e.ui.tweaks plugin"
+         point="com.servoy.eclipse.ui.tweaks.imageReplacement">
+      
+      <urlBasedImageReplacement
+            originalImageURL="bundleentry://267.fwk77269878/icons/full/etool16/new_wiz.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/new.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/etool16/save_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/save.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/dtool16/save_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/save.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/etool16/saveas_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/save-as.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/dtool16/saveas_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/save-as.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>      
+     
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/etool16/saveall_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/save-all.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/dtool16/saveall_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/save-all.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="bundleentry://267.fwk77269878/icons/full/etool16/pin_editor.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/pin.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="bundleentry://267.fwk77269878/icons/full/dtool16/pin_editor.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/pin.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="bundleentry://267.fwk77269878/icons/full/etool16/print_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/print.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="bundleentry://267.fwk77269878/icons/full/etool16/import_wiz.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/import.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="bundleentry://267.fwk77269878/icons/full/etool16/export_wiz.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/export.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>      
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/elcl16/refresh_nav.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/refresh.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/$nl$/icons/full/etool16/search.gif">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/search.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/etool16/prev_nav.gif">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-annotation.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/dtool16/prev_nav.gif">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-annotation.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/etool16/next_nav.gif">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/forward-to-annotation.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/dtool16/next_nav.gif">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/forward-to-annotation.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="bundleentry://267.fwk77269878/icons/full/elcl16/backward_nav.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-document.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="bundleentry://267.fwk77269878/icons/full/dlcl16/backward_nav.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-document.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="bundleentry://267.fwk77269878/icons/full/elcl16/forward_nav.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/forward-to-document.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="bundleentry://267.fwk77269878/icons/full/dlcl16/forward_nav.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/forward-to-document.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/etool16/last_edit_pos.gif">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-last-edit.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/dtool16/last_edit_pos.gif">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-last-edit.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+	</extension>
+   
 <!--   
    <extension
          id="com.servoy.eclipse.ui.tweaks.imageReplacementExtensions"
