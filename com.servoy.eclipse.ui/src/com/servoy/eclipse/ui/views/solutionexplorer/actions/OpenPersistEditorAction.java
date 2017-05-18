@@ -38,7 +38,7 @@ public class OpenPersistEditorAction extends Action implements ISelectionChanged
 
 	public OpenPersistEditorAction()
 	{
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("designer.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("form.png"));
 		setText("Open Persist Editor");
 		setToolTipText(getText());
 	}

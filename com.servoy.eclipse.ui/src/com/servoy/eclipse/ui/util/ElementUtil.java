@@ -207,7 +207,7 @@ public class ElementUtil
 		}
 		if (persist instanceof ValueList)
 		{
-			return "valuelists.gif";
+			return "valuelists.png";
 		}
 		if (persist instanceof ScriptCalculation)
 		{
@@ -705,7 +705,7 @@ public class ElementUtil
 				relPath = "icons/designer_private.gif";
 			else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)
 				relPath = "icons/designer_public.gif";
-			else relPath = "icons/designer.gif";
+			else relPath = "icons/form.png";
 		}
 		return relPath;
 	}
@@ -728,7 +728,7 @@ public class ElementUtil
 				image = Activator.getDefault().loadImageFromBundle("designer_private.gif");
 			else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)
 				image = Activator.getDefault().loadImageFromBundle("designer_public.gif");
-			else image = Activator.getDefault().loadImageFromBundle("designer.gif");
+			else image = Activator.getDefault().loadImageFromBundle("form.png");
 		}
 		return image;
 	}

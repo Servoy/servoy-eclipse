@@ -64,7 +64,7 @@ public abstract class AbstractNewDbAction extends Action
 		this.dbType = type;
 		setText("Create " + dbType + "Database");
 		setToolTipText(getText());
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("server.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("server.png"));
 	}
 
 	@Override

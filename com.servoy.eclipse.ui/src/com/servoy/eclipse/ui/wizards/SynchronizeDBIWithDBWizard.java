@@ -250,7 +250,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 					}
 				};
 
-				Image serverImage = Activator.getDefault().loadImageFromBundle("server.gif");
+				Image serverImage = Activator.getDefault().loadImageFromBundle("server.png");
 				Image tableImage = Activator.getDefault().loadImageFromBundle("portal.gif");
 				Image viewImage = Activator.getDefault().loadImageFromBundle("view.png");
 

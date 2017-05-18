@@ -2906,7 +2906,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newComponentsPackageProjectAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newComponentsPackageProjectAction);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENT_FORMS,
-			new OpenWizardAction(NewFormComponentWizard.class, Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new form component"));
+			new OpenWizardAction(NewFormComponentWizard.class, Activator.loadImageDescriptorFromBundle("form.png"), "Create new form component"));
 
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA_FOLDER, importMediaFolder);
@@ -2922,7 +2922,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		importMediaFolder = new ImportMediaFolderAction(this);
 		importMediaFolder.setEnabled(false);
 
-		openNewSubFormWizardAction = new OpenWizardAction(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form");
+		openNewSubFormWizardAction = new OpenWizardAction(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("form.png"), "Create new sub form");
 		newActionInTreeSecondary.registerAction(UserNodeType.FORM, openNewSubFormWizardAction);
 
 		newActionInTreeSecondary.registerAction(UserNodeType.SOLUTION, newForm);

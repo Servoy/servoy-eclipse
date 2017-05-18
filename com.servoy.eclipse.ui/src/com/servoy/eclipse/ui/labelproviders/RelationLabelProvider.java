@@ -39,7 +39,7 @@ public class RelationLabelProvider extends SupportNameLabelProvider implements I
 	public static final RelationLabelProvider INSTANCE_LAST_NAME_ONLY = new RelationLabelProvider(Messages.LabelNone, true, true);
 	public static final RelationLabelProvider INSTANCE_ALL = new RelationLabelProvider(Messages.LabelNone, true, false);
 
-	private static final Image RELATION_IMAGE = Activator.getDefault().loadImageFromBundle("relation.gif");
+	private static final Image RELATION_IMAGE = Activator.getDefault().loadImageFromBundle("relation.png");
 	private static final Image GLOBAL_RELATION_IMAGE = Activator.getDefault().loadImageFromBundle("global_relation.gif");
 	private static final Image RELATION_PROTECTED_IMAGE = Activator.getDefault().loadImageFromBundle("relation_protected.gif");
 	private static final Image GLOBAL_RELATION_PROTECTED_IMAGE = Activator.getDefault().loadImageFromBundle("global_relation_protected.gif");

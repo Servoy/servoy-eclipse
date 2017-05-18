@@ -41,7 +41,7 @@ import com.servoy.j2db.query.ISQLJoin;
 
 /**
  * Action to create a new form/global method depending on the selection of a solution view.
- * 
+ *
  * @author jcompagner
  */
 public class NewRelationAction extends Action implements ISelectionChangedListener
@@ -51,14 +51,14 @@ public class NewRelationAction extends Action implements ISelectionChangedListen
 
 	/**
 	 * Creates a new "create new method" action for the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public NewRelationAction(SolutionExplorerView sev)
 	{
 		viewer = sev;
 
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("newrelation.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("relation.png"));
 		setText("Create relation");
 		setToolTipText("Create relation");
 	}

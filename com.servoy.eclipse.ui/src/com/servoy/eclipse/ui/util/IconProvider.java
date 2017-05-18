@@ -40,7 +40,7 @@ import com.servoy.j2db.util.ServoyException;
 
 /**
  * Maps Class<?>es to icons, so that the same icon is uniformly used for a certain class in all places.
- * 
+ *
  * @author gerzse
  */
 public class IconProvider
@@ -76,7 +76,7 @@ public class IconProvider
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.Number.class, "number.gif");
 
 		c2i.put(JSApplication.class, "application.gif");
-		c2i.put(JSDatabaseManager.class, "server.gif");
+		c2i.put(JSDatabaseManager.class, "server.png");
 		c2i.put(JSDataSources.class, "datasources.png");
 		c2i.put(JSUtils.class, "toolbox.gif");
 		c2i.put(HistoryProvider.class, "history.gif");

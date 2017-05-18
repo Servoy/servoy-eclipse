@@ -113,7 +113,7 @@
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewFormWizard"
             hasPages="true"
-            icon="icons/new_form_wizard.gif"
+            icon="icons/new_form_wizard.png"
             id="com.servoy.eclipse.ui.NewFormWizard"
             name="Form"
             project="false">
@@ -122,7 +122,7 @@
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewSolutionWizard"
-            icon="icons/new_solution_wizard.gif"
+            icon="icons/new_solution_wizard.png"
             id="com.servoy.eclipse.ui.NewSolutionWizard"
             name="Servoy Solution"
             project="true">
@@ -131,7 +131,7 @@
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewStyleWizard"
-            icon="icons/new_style_wizard.gif"
+            icon="icons/new_style_wizard.png"
             id="com.servoy.eclipse.ui.NewStyleWizard"
             name="Style"
             project="false">
@@ -140,7 +140,7 @@
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewRelationWizard"
-            icon="icons/new_relation_wizard.gif"
+            icon="icons/new_relation_wizard.png"
             id="com.servoy.eclipse.ui.NewRelationWizard"
             name="Relation"
             project="false">
@@ -149,7 +149,7 @@
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewValueListWizard"
-            icon="icons/new_valuelist_wizard.gif"
+            icon="icons/new_valuelist_wizard.png"
             id="com.servoy.eclipse.ui.NewValueListWizard"
             name="Valuelist"
             project="false">
@@ -158,7 +158,7 @@
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewMethodWizard"
-            icon="icons/new_method_wizard.gif"
+            icon="icons/new_method_wizard.png"
             id="com.servoy.eclipse.ui.NewMethodWizard"
             name="Method"
             project="false">
@@ -167,7 +167,7 @@
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewServerWizard"
-            icon="icons/new_server.gif"
+            icon="icons/new_server.png"
             id="com.servoy.eclipse.ui.NewServerWizard"
             name="Database Server"
             project="false">
@@ -176,7 +176,7 @@
             canFinishEarly="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.wizards.NewPackageProjectWizard"
-            icon="icons/new_solution_wizard.gif"
+            icon="icons/new_solution_wizard.png"
             id="com.servoy.eclipse.ui.NewPackageProjectWizard"
             name="New Package Project"
             project="true">
@@ -262,7 +262,7 @@
             class="com.servoy.eclipse.ui.editors.RelationEditor"
             default="true"
             extensions="rel"
-            icon="icons/relation.gif"
+            icon="icons/relation.png"
             id="com.servoy.eclipse.ui.editors.RelationEditor"
             matchingStrategy="com.servoy.eclipse.core.resource.PersistMatchingStrategy"
             name="Relation Editor">
@@ -274,7 +274,7 @@
             class="com.servoy.eclipse.ui.editors.ValueListEditor"
             default="true"
             extensions="val"
-            icon="icons/valuelist.gif"
+            icon="icons/valuelist.png"
             id="com.servoy.eclipse.ui.editors.ValueListEditor"
             matchingStrategy="com.servoy.eclipse.core.resource.PersistMatchingStrategy"
             name="ValueList Editor">
@@ -311,7 +311,7 @@
       <editor
             class="com.servoy.eclipse.ui.editors.ServerEditor"
             default="true"
-            icon="icons/server.gif"
+            icon="icons/server.png"
             id="com.servoy.eclipse.ui.editors.ServerEditor"
             name="Server Editor">
          <contentTypeBinding
