@@ -1,0 +1,473 @@
+@import url("https://fonts.googleapis.com/css?family=Titillium+Web:200,200i,300,300i,400,400i,600,600i,700,700i,900");
+body {
+  margin: 0px;
+  min-width: 800px;
+  overflow: hidden; }
+
+div.popup-base {
+  width: 100%;
+  margin: 0 auto;
+  overflow-y: scroll;
+  height: 100%; }
+  div.popup-base .steps {
+    height: 20px;
+    position: absolute;
+    text-align: center;
+    display: block;
+    width: 100%; }
+  div.popup-base .step-indicator {
+    margin: 0 auto;
+    width: 70px;
+    display: inline-block;
+    height: 2px;
+    border-radius: 90px;
+    background-color: rgba(155, 154, 155, 0.5);
+    margin-right: 3px; }
+    div.popup-base .step-indicator:last-child {
+      margin-right: 0px; }
+    div.popup-base .step-indicator.active {
+      background-color: #e9720b; }
+  div.popup-base .header {
+    background-image: url("../img/header-img.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position-y: -10px;
+    min-height: 217px;
+    position: relative; }
+    div.popup-base .header .steps {
+      margin-top: 105px; }
+    div.popup-base .header h1 {
+      width: 100%;
+      position: absolute;
+      color: white;
+      text-align: center;
+      font-family: 'Titillium Web', sans-serif;
+      font-weight: 200;
+      margin-top: 40px;
+      font-size: 36px; }
+    div.popup-base .header .sub-title {
+      width: 100%;
+      position: absolute;
+      text-align: center;
+      margin-top: 120px;
+      color: rgba(255, 255, 255, 0.5);
+      font-family: "Titillium Web";
+      font-size: 15px;
+      font-weight: 200;
+      line-height: 19px; }
+  div.popup-base .footer {
+    min-height: 104px;
+    width: 100%;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-color: white;
+    position: fixed;
+    display: block;
+    bottom: 0px;
+    margin-bottom: 0px; }
+    div.popup-base .footer.backgrounded {
+      background-image: url("../img/footer.png"); }
+      div.popup-base .footer.backgrounded a {
+        color: #ffffff !important;
+        border: 1px solid #ffffff !important; }
+        div.popup-base .footer.backgrounded a:hover {
+          color: #e9720b !important;
+          border: 1px solid #e9720b !important; }
+    div.popup-base .footer .steps {
+      margin-top: 25px; }
+    div.popup-base .footer .button-bar {
+      width: 100%;
+      text-align: center;
+      margin-top: 50px; }
+      div.popup-base .footer .button-bar a {
+        color: #e9720b;
+        font-family: "Titillium Web";
+        font-size: 14px;
+        font-weight: 300;
+        text-decoration: none;
+        border: 1px solid #e9720b;
+        border-radius: 100px;
+        padding: 10px 25px;
+        margin-right: 30px; }
+        div.popup-base .footer .button-bar a:last-child {
+          margin-right: 0px; }
+        div.popup-base .footer .button-bar a:hover {
+          color: #b85a09;
+          border: 1px solid #b85a09; }
+        div.popup-base .footer .button-bar a.prev img {
+          margin-right: 30px;
+          transform: rotate(180deg); }
+        div.popup-base .footer .button-bar a.next img {
+          margin-left: 15px; }
+  div.popup-base .body {
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    background-color: white;
+    padding: 80px 0px 204px 0px; }
+    div.popup-base .body .two-list-menu {
+      width: 768px;
+      margin: 0 auto; }
+      div.popup-base .body .two-list-menu .menu {
+        border-left: 1px solid rgba(0, 0, 0, 0.15);
+        padding-left: 50px;
+        width: 333px;
+        float: left; }
+        div.popup-base .body .two-list-menu .menu h2 {
+          color: rgba(0, 0, 0, 0.54);
+          font-family: "Titillium Web";
+          font-size: 24px;
+          font-weight: 300; }
+        div.popup-base .body .two-list-menu .menu ul {
+          list-style-type: none;
+          padding: 0px; }
+          div.popup-base .body .two-list-menu .menu ul li a {
+            font-family: "Titillium Web";
+            font-size: 14px;
+            padding: 5px 10px;
+            display: block;
+            width: 80%;
+            cursor: pointer;
+            color: #323b46;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 100px;
+            border: 1px solid white; }
+            div.popup-base .body .two-list-menu .menu ul li a img {
+              margin-right: 10px;
+              position: absolute;
+              margin-top: 2px; }
+            div.popup-base .body .two-list-menu .menu ul li a span {
+              margin-left: 35px; }
+            div.popup-base .body .two-list-menu .menu ul li a:hover {
+              border: 1px solid #323b46; }
+    div.popup-base .body.body-detailed {
+      padding-top: 0px; }
+      div.popup-base .body.body-detailed .detailed-body {
+        border-left: 1px solid rgba(0, 0, 0, 0.15);
+        width: 768px;
+        margin: 0 auto;
+        padding-left: 40px; }
+        div.popup-base .body.body-detailed .detailed-body #title {
+          color: rgba(0, 0, 0, 0.54);
+          font-family: "Titillium Web";
+          font-size: 24px;
+          font-weight: 300; }
+        div.popup-base .body.body-detailed .detailed-body #intro-text {
+          color: #323b46;
+          font-family: "Titillium Web";
+          font-size: 15px;
+          font-weight: 300;
+          line-height: 25px; }
+        div.popup-base .body.body-detailed .detailed-body span {
+          color: #323b46;
+          font-family: "Titillium Web";
+          font-size: 14px;
+          font-weight: 600; }
+          div.popup-base .body.body-detailed .detailed-body span img {
+            padding-bottom: 2px;
+            margin-right: 5px; }
+    div.popup-base .body.body-welcome-button {
+      padding: 0px; }
+      div.popup-base .body.body-welcome-button .header-guy {
+        background-image: url("../img/full-background.png");
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center center;
+        width: 100%;
+        margin-top: -24px;
+        padding-top: 90px; }
+        div.popup-base .body.body-welcome-button .header-guy h1 {
+          color: #ffffff;
+          font-family: "Titillium Web";
+          font-size: 36px;
+          font-weight: 300; }
+        div.popup-base .body.body-welcome-button .header-guy .step-indicator {
+          margin-top: -10px;
+          margin-bottom: 20px; }
+        div.popup-base .body.body-welcome-button .header-guy .sub-title {
+          color: rgba(255, 255, 255, 0.35);
+          font-family: "Titillium Web";
+          font-size: 15px;
+          font-weight: 300;
+          line-height: 19px; }
+      div.popup-base .body.body-welcome-button .col-50 {
+        width: 50%;
+        float: left;
+        position: relative; }
+        div.popup-base .body.body-welcome-button .col-50 .text {
+          float: right;
+          width: 300px;
+          text-align: center;
+          margin-right: 0px;
+          right: 0px; }
+        div.popup-base .body.body-welcome-button .col-50 img {
+          margin-left: 0px;
+          left: 0;
+          margin-bottom: 0px;
+          bottom: 0px; }
+      div.popup-base .body.body-welcome-button .button-area {
+        width: 768px;
+        margin: 0 auto;
+        margin-top: 60px; }
+        div.popup-base .body.body-welcome-button .button-area .button-container {
+          width: 383px;
+          float: left;
+          border-right: 1px solid purple;
+          text-align: center; }
+          div.popup-base .body.body-welcome-button .button-area .button-container:last-child {
+            border-right: 0px; }
+          div.popup-base .body.body-welcome-button .button-area .button-container .title {
+            color: #323b46;
+            font-family: "Titillium Web";
+            font-size: 24px;
+            font-weight: 300; }
+          div.popup-base .body.body-welcome-button .button-area .button-container .text {
+            max-width: 200px;
+            margin: 0 auto;
+            color: rgba(50, 59, 70, 0.5);
+            font-family: "Titillium Web";
+            font-size: 14px;
+            font-weight: 300;
+            font-style: italic; }
+          div.popup-base .body.body-welcome-button .button-area .button-container a {
+            color: #292929;
+            font-family: "Titillium Web";
+            font-size: 14px;
+            font-weight: 300;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 30px;
+            border: 1px solid #292929;
+            border-radius: 100px;
+            padding: 10px 25px;
+            margin-right: 30px; }
+            div.popup-base .body.body-welcome-button .button-area .button-container a:last-child {
+              margin-right: 0px; }
+            div.popup-base .body.body-welcome-button .button-area .button-container a:hover {
+              color: #e9720b;
+              border: 1px solid #e9720b; }
+            div.popup-base .body.body-welcome-button .button-area .button-container a.prev img {
+              margin-right: 30px;
+              transform: rotate(180deg); }
+            div.popup-base .body.body-welcome-button .button-area .button-container a.next img {
+              margin-left: 15px; }
+    div.popup-base .body.body-welcome {
+      background: url("../img/full-background.png");
+      background-position: center center;
+      background-size: cover;
+      width: 100%;
+      height: 100%;
+      display: block;
+      text-align: center; }
+      div.popup-base .body.body-welcome h1 {
+        color: #ffffff;
+        font-family: "Titillium Web";
+        font-size: 36px;
+        font-weight: 200; }
+      div.popup-base .body.body-welcome .sub-title {
+        color: rgba(255, 255, 255, 0.5);
+        font-family: "Titillium Web";
+        font-size: 15px;
+        font-weight: 200;
+        line-height: 19px;
+        margin-top: 15px; }
+      div.popup-base .body.body-welcome .step-indicator {
+        margin-top: -10px; }
+      div.popup-base .body.body-welcome .image {
+        margin-top: 70px;
+        margin-bottom: 20px; }
+      div.popup-base .body.body-welcome a.continue {
+        width: 360px;
+        height: 36px;
+        color: rgba(255, 255, 255, 0.54);
+        font-family: "Titillium Web";
+        font-size: 24px;
+        font-weight: 200;
+        display: block;
+        text-align: center;
+        margin: 0 auto; }
+      div.popup-base .body.body-welcome span {
+        display: block;
+        margin: 0 auto;
+        /* Style for "or" */
+        color: rgba(255, 255, 255, 0.75);
+        font-family: "Titillium Web";
+        font-size: 15px;
+        font-weight: 200;
+        line-height: 19px;
+        padding: 25px 0px; }
+      div.popup-base .body.body-welcome a.start {
+        color: white;
+        font-family: "Titillium Web";
+        font-size: 14px;
+        font-weight: 300;
+        text-decoration: none;
+        border: 1px solid white;
+        border-radius: 100px;
+        padding: 10px 25px; }
+        div.popup-base .body.body-welcome a.start:hover {
+          color: #e9720b;
+          border: 1px solid #e9720b; }
+        div.popup-base .body.body-welcome a.start.prev img {
+          margin-right: 30px;
+          transform: rotate(180deg); }
+        div.popup-base .body.body-welcome a.start.next img {
+          margin-left: 15px; }
+    div.popup-base .body.body-textual {
+      padding: 0px 0px 104px 0px; }
+      div.popup-base .body.body-textual .textual {
+        width: 788px;
+        margin: 0 auto; }
+        div.popup-base .body.body-textual .textual .col-left {
+          width: 250px;
+          float: left; }
+          div.popup-base .body.body-textual .textual .col-left .textual-image {
+            display: block;
+            min-width: 250px;
+            height: 450px;
+            background-position: center center;
+            background-size: contain;
+            background-repeat: no-repeat; }
+        div.popup-base .body.body-textual .textual .col-right {
+          width: calc(100% - 290px);
+          float: left;
+          padding-left: 30px; }
+        div.popup-base .body.body-textual .textual h1 {
+          color: #262d36;
+          font-family: "Titillium Web";
+          font-size: 36px;
+          font-weight: 200; }
+        div.popup-base .body.body-textual .textual #sub-title {
+          color: rgba(0, 0, 0, 0.54);
+          font-family: "Titillium Web";
+          font-size: 18px;
+          font-weight: 300; }
+        div.popup-base .body.body-textual .textual #intro-text {
+          margin-top: 20px;
+          color: #262d36;
+          font-family: "Titillium Web";
+          font-size: 14px;
+          font-weight: 300; }
+        div.popup-base .body.body-textual .textual #list-title {
+          margin-top: 25px;
+          color: #323b46;
+          font-family: "Titillium Web";
+          font-size: 18px;
+          font-weight: 300; }
+        div.popup-base .body.body-textual .textual #list-items {
+          list-style-type: circle;
+          color: #262d36;
+          font-family: "Titillium Web";
+          font-size: 14px;
+          font-weight: 300;
+          line-height: 15px; }
+          div.popup-base .body.body-textual .textual #list-items li {
+            margin-top: 10px; }
+    div.popup-base .body .two-icon-icons {
+      width: 788px;
+      margin: 0 auto; }
+      div.popup-base .body .two-icon-icons .icon-item {
+        width: 393px;
+        float: left;
+        text-align: center;
+        border-right: 1px solid rgba(0, 0, 0, 0.15); }
+        div.popup-base .body .two-icon-icons .icon-item a {
+          text-decoration: none; }
+          div.popup-base .body .two-icon-icons .icon-item a img {
+            margin-bottom: 30px;
+            opacity: 0.5; }
+          div.popup-base .body .two-icon-icons .icon-item a .title {
+            color: rgba(0, 0, 0, 0.54);
+            font-family: "Titillium Web";
+            font-size: 24px;
+            font-weight: 300;
+            line-height: 26px;
+            margin-bottom: 20px;
+            display: block; }
+          div.popup-base .body .two-icon-icons .icon-item a .sub-title {
+            /* Style for "Let us gui" */
+            color: rgba(50, 59, 70, 0.5);
+            font-family: "Titillium Web";
+            font-size: 14px;
+            font-weight: 200;
+            font-style: italic;
+            display: block; }
+          div.popup-base .body .two-icon-icons .icon-item a:hover img {
+            opacity: 0.7; }
+          div.popup-base .body .two-icon-icons .icon-item a:hover title {
+            color: rgba(0, 0, 0, 0.74); }
+          div.popup-base .body .two-icon-icons .icon-item a:hover sub-title {
+            color: rgba(0, 0, 0, 0.74); }
+        div.popup-base .body .two-icon-icons .icon-item:last-child {
+          border-right: 0px; }
+    div.popup-base .body .three-icon-icons {
+      width: 788px;
+      margin: 0 auto; }
+      div.popup-base .body .three-icon-icons .icon-item {
+        width: 261px;
+        float: left;
+        text-align: center;
+        border-right: 1px solid rgba(0, 0, 0, 0.15); }
+        div.popup-base .body .three-icon-icons .icon-item a {
+          text-decoration: none; }
+          div.popup-base .body .three-icon-icons .icon-item a img {
+            margin-bottom: 30px;
+            opacity: 0.5; }
+          div.popup-base .body .three-icon-icons .icon-item a .title {
+            color: rgba(0, 0, 0, 0.54);
+            font-family: "Titillium Web";
+            font-size: 24px;
+            font-weight: 300;
+            line-height: 26px;
+            margin-bottom: 20px;
+            display: block; }
+          div.popup-base .body .three-icon-icons .icon-item a .sub-title {
+            /* Style for "Let us gui" */
+            color: rgba(50, 59, 70, 0.5);
+            font-family: "Titillium Web";
+            font-size: 14px;
+            font-weight: 200;
+            font-style: italic;
+            display: block; }
+          div.popup-base .body .three-icon-icons .icon-item a:hover img {
+            opacity: 0.7; }
+          div.popup-base .body .three-icon-icons .icon-item a:hover title {
+            color: rgba(0, 0, 0, 0.74); }
+          div.popup-base .body .three-icon-icons .icon-item a:hover sub-title {
+            color: rgba(0, 0, 0, 0.74); }
+        div.popup-base .body .three-icon-icons .icon-item:last-child {
+          border-right: 0px; }
+
+.clearfix:after {
+  visibility: hidden;
+  display: block;
+  font-size: 0;
+  content: " ";
+  clear: both;
+  height: 0; }
+
+.clearfix {
+  display: inline-block; }
+
+/* start commented backslash hack \*/
+* html .clearfix {
+  height: 1%; }
+
+.clearfix {
+  display: block; }
+
+/*
+@media screen and ( max-height: 600px) {
+    .body {
+        background-color: blue !important;
+    }
+}
+
+@media screen and ( min-height: 600px) {
+    div.popup-base .footer {
+        position: fixed;
+    }
+}*/
+/* close commented backslash hack */
+
+/*# sourceMappingURL=style.css.map */

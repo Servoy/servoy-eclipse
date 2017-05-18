@@ -1,0 +1,9 @@
+Run HTML trough an webbrower with the following parameters:
+
+template - The template JSON file which should be used
+[step] - Optional: is you want to start in another step then the default one. Array based.
+
+Example:
+index.html?template=starting&step=0
+- or -
+index.html?template=starting&step=1
