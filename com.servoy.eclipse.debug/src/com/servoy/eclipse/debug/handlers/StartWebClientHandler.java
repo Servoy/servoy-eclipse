@@ -113,6 +113,7 @@ public class StartWebClientHandler extends StartDebugHandler implements IRunnabl
 
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 	{
+		StartClientHandler.setLastCommand(StartClientHandler.START_WEB_CLIENT);
 		monitor.beginTask(getStartTitle(), 5);
 		monitor.worked(1);
 		try
