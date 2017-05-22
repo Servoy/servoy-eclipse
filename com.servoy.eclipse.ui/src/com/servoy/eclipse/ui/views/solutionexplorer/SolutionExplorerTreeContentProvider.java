@@ -35,7 +35,6 @@ import java.util.TreeSet;
 
 import javax.swing.Icon;
 
-import org.apache.commons.dbcp.DbcpException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -2159,17 +2158,12 @@ public class SolutionExplorerTreeContentProvider
 		{
 			IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
 			PlatformSimpleUserNode columnsNode = null;
-			try
+//			try
 			{
 				columnsNode = new PlatformSimpleUserNode(Messages.TreeStrings_selectedrecord, UserNodeType.TABLE_COLUMNS, dsm.getDataSource(f.getDataSource()),
 					f, uiActivator.loadImageFromBundle("selected_record.gif"));
 				columnsNode.parent = formNode;
 				node.add(columnsNode);
-			}
-			catch (DbcpException e)
-			{
-				ServoyLog.logInfo("Cannot create 'selectedrecord' node for " + formNode.getName() + ": " + e.getMessage());
-				disableServer(f.getServerName());
 			}
 
 			PlatformSimpleUserNode relationsNode = new PlatformSimpleUserNode(Messages.TreeStrings_relations, UserNodeType.RELATIONS, f, f,
@@ -2525,16 +2519,8 @@ public class SolutionExplorerTreeContentProvider
 	private void addFormRelationsNodeChildren(PlatformSimpleUserNode formRelationsNode)
 	{
 		Form f = (Form)formRelationsNode.getRealObject();
-		try
-		{
-			ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(f.getDataSource());
-			addRelationsNodeChildren(formRelationsNode, f.getSolution(), table, UserNodeType.RELATION);
-		}
-		catch (DbcpException e)
-		{
-			ServoyLog.logInfo("Cannot create " + formRelationsNode.getName() + " node: " + e.getMessage());
-			disableServer(f.getServerName());
-		}
+		ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(f.getDataSource());
+		addRelationsNodeChildren(formRelationsNode, f.getSolution(), table, UserNodeType.RELATION);
 	}
 
 	private void addRelationsNodeChildren(PlatformSimpleUserNode relationsNode, Solution solution, ITable table, UserNodeType type)

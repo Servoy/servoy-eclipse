@@ -980,14 +980,14 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          unpack="false"/>
 
    <plugin
-         id="org.apache.commons.dbcp"
+         id="org.apache.commons.dbcp2"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.apache.commons.pool"
+         id="org.apache.commons.pool2"
          download-size="0"
          install-size="0"
          version="0.0.0"

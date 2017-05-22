@@ -240,7 +240,7 @@ public class ExportOptionsPage extends WizardPage implements Listener
 		refreshDBIDownFlag(exportSolutionWizard.getModel().isExportReferencedModules() && exportSolutionWizard.getModulesSelectionPage().hasDBDownErrors());
 
 		useImportSettingsButton = new Button(composite, SWT.CHECK);
-		useImportSettingsButton.setText("Create import settings");
+		useImportSettingsButton.setText("Create import settings / Deploy to Servoy application server");
 		useImportSettingsButton.setSelection(exportSolutionWizard.getModel().useImportSettings());
 		useImportSettingsButton.addListener(SWT.Selection, this);
 
