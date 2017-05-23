@@ -142,6 +142,7 @@ public class SolutionDeserializer
 	private final IDeveloperRepository repository;
 	private final ErrorKeeper<File, String> errorKeeper;
 	private static final Map<UUID, HashSet<UUID>> alreadyUsedUUID = new HashMap<UUID, HashSet<UUID>>(16, 0.9f);
+	private static final Map<UUID, UUID> childToParentUUID = new HashMap<UUID, UUID>(16, 0.9f);
 	private final File jsFile;
 	private final String jsContent;
 
@@ -1650,7 +1651,7 @@ public class SolutionDeserializer
 			if (retval == null)
 			{
 				retval = createPersistInParent(parent, repository, obj, uuid);
-				if (persistUUIDNotFound && testOverAllUUIDs(uuid))
+				if (persistUUIDNotFound && childToParentUUID.get(uuid) != null && !parent.getUUID().equals(childToParentUUID.get(uuid)))
 				{
 					((AbstractBase)retval).resetUUID();
 					((AbstractBase)retval).setRuntimeProperty(POSSIBLE_DUPLICATE_UUID, Boolean.TRUE);
@@ -1668,6 +1669,7 @@ public class SolutionDeserializer
 		}
 
 		solutionUUIDs.add(retval.getUUID());
+		childToParentUUID.put(retval.getUUID(), parent.getUUID());
 
 		if (file != null)
 		{
@@ -1719,15 +1721,6 @@ public class SolutionDeserializer
 
 		if (useFilesForDirtyMark) handleChanged(obj, retval);
 		return retval;
-	}
-	
-	private static boolean testOverAllUUIDs(UUID uuid)
-	{
-		for (HashSet<UUID> uuids : alreadyUsedUUID.values())
-		{
-			if (uuids.contains(uuid)) return true;
-		}
-		return false;
 	}
 
 	private static IPersist createPersistInParent(ISupportChilds parent, IDeveloperRepository repository, JSONObject obj, UUID uuid)
