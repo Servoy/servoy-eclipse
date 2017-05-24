@@ -68,7 +68,9 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 
 		Label lblDBProp = new Label(composite, SWT.NONE);
 		lblDBProp.setText("Overwrite DB servers properties");
+		lblDBProp.setToolTipText("Overwrite all DB servers related changes that were made on the previous deploy of the war");
 		overwriteDBServerPropertiesBtn = new Button(composite, SWT.CHECK);
+		overwriteDBServerPropertiesBtn.setToolTipText(lblDBProp.getToolTipText());
 		overwriteDBServerPropertiesBtn.setSelection(exportModel.isOverwriteDeployedDBServerProperties());
 		overwriteDBServerPropertiesBtn.addSelectionListener(this);
 		GridData gdDBProp = new GridData(GridData.FILL_HORIZONTAL);
@@ -77,7 +79,9 @@ public class DeployConfigurationPage extends WizardPage implements Listener, Sel
 
 		Label lblAllProp = new Label(composite, SWT.NONE);
 		lblAllProp.setText("Overwrite all Servoy properties");
+		lblAllProp.setToolTipText("Overwrite all servoy.properties changes that were made on the previous deploy of the war");
 		overwriteAllPropertiesBtn = new Button(composite, SWT.CHECK);
+		overwriteAllPropertiesBtn.setToolTipText(lblAllProp.getToolTipText());
 		overwriteAllPropertiesBtn.setSelection(exportModel.isOverwriteDeployedServoyProperties());
 		overwriteAllPropertiesBtn.addSelectionListener(this);
 		GridData gdAllProp = new GridData(GridData.FILL_HORIZONTAL);
