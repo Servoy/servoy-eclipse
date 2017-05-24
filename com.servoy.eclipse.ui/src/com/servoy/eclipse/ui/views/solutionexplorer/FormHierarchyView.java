@@ -28,6 +28,7 @@ import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -827,6 +828,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private FormHierarchyFilter hideVariablesAction;
 
 	private IMemento memento;
+	private StatusBarUpdater statusBarUpdater;
 	private static final String SELECTED_FORM = "FormHierarchy.SELECTION";
 
 	@Override
@@ -871,6 +873,12 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 		this.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
 		tree.addSelectionChangedListener(this);
+
+		IStatusLineManager slManager = getViewSite().getActionBars().getStatusLineManager();
+		statusBarUpdater = new StatusBarUpdater(slManager);
+		statusBarUpdater.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
+		list.addSelectionChangedListener(statusBarUpdater);
+		getSite().setSelectionProvider(fSelectionProviderMediator);
 
 		contributeToActionBars();
 
