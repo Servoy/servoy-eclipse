@@ -186,6 +186,24 @@ public class ExportWarModel extends AbstractWarExportModel
 
 		minimizeJsCssResources = Utils.getAsBoolean(settings.get("export.minimizeJsCssResources"));
 
+		if (settings.get("export.overwriteDBServerProperties") != null)
+		{
+			setOverwriteDeployedDBServerProperties(Utils.getAsBoolean(settings.get("export.overwriteDBServerProperties")));
+		}
+		else
+		{
+			setOverwriteDeployedDBServerProperties(true);
+		}
+
+		if (settings.get("export.overwriteAllProperties") != null)
+		{
+			setOverwriteDeployedServoyProperties(Utils.getAsBoolean(settings.get("export.overwriteAllProperties")));
+		}
+		else
+		{
+			setOverwriteDeployedServoyProperties(false);
+		}
+
 		if (isNGExport())
 		{
 			if (settings.getArray("export.components") != null)
@@ -357,6 +375,10 @@ public class ExportWarModel extends AbstractWarExportModel
 		if (defaultAdminPassword != null)
 			settings.put("export.defaultAdminPassword", encryptPassword(desCipher, "export.defaultAdminPassword", defaultAdminPassword));
 		settings.put("export.useAsRealAdminUser", useAsRealAdminUser);
+
+		settings.put("export.overwriteDBServerProperties", isOverwriteDeployedDBServerProperties());
+		settings.put("export.overwriteAllProperties", isOverwriteDeployedServoyProperties());
+
 
 		if (exportedComponents != null) settings.put("export.components", exportedComponents.toArray(new String[exportedComponents.size()]));
 		if (exportedServices != null) settings.put("export.services", exportedServices.toArray(new String[exportedServices.size()]));

@@ -76,6 +76,8 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	protected SpecProviderState servicesSpecProviderState;
 	private final boolean isNgExport;
 	private String userHome;
+	private boolean isOverwriteDeployedDBServerProperties = true;
+	private boolean isOverwriteDeployedServoyProperties;
 
 	public AbstractWarExportModel(boolean isNGExport)
 	{
@@ -401,5 +403,49 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	public String getUserHome()
 	{
 		return userHome;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#isOverwriteDeployedDBServerProperties()
+	 */
+	@Override
+	public boolean isOverwriteDeployedDBServerProperties()
+	{
+		return isOverwriteDeployedDBServerProperties;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#isOverwriteDeployedServoyProperties()
+	 */
+	@Override
+	public boolean isOverwriteDeployedServoyProperties()
+	{
+		return isOverwriteDeployedServoyProperties;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#setOverwriteDeployedDBServerProperties(boolean)
+	 */
+	@Override
+	public void setOverwriteDeployedDBServerProperties(boolean isOverwriteDeployedDBServerProperties)
+	{
+		this.isOverwriteDeployedDBServerProperties = isOverwriteDeployedDBServerProperties;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#setOverwriteDeployedServoyProperties(boolean)
+	 */
+	@Override
+	public void setOverwriteDeployedServoyProperties(boolean isOverwriteDeployedServoyProperties)
+	{
+		this.isOverwriteDeployedServoyProperties = isOverwriteDeployedServoyProperties;
 	}
 }

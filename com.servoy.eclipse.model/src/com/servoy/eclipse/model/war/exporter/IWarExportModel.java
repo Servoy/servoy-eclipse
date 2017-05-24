@@ -112,4 +112,12 @@ public interface IWarExportModel extends IExportSolutionModel
 	public void setUserHome(String userHome);
 
 	public String getUserHome();
+
+	public void setOverwriteDeployedDBServerProperties(boolean isOverwriteDeployedDBServerProperties);
+
+	public boolean isOverwriteDeployedDBServerProperties();
+
+	public void setOverwriteDeployedServoyProperties(boolean isOverwriteDeployedServoyProperties);
+
+	public boolean isOverwriteDeployedServoyProperties();
 }

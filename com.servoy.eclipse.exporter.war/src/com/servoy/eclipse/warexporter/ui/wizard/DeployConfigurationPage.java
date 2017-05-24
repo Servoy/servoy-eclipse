@@ -25,8 +25,11 @@ import java.util.Properties;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -42,17 +45,19 @@ import com.servoy.j2db.util.SortedProperties;
  * @author gboros
  *
  */
-public class UserHomeSelectionPage extends WizardPage implements Listener
+public class DeployConfigurationPage extends WizardPage implements Listener, SelectionListener
 {
 	private final ExportWarModel exportModel;
+	private Button overwriteDBServerPropertiesBtn;
+	private Button overwriteAllPropertiesBtn;
 	private Text userHomeText;
 
-	public UserHomeSelectionPage(String title, ExportWarModel exportModel)
+	public DeployConfigurationPage(String title, ExportWarModel exportModel)
 	{
 		super(title);
 		this.exportModel = exportModel;
-		setTitle("User home directory");
-		setDescription("Specify the user home directory that will be used by the deployed war");
+		setTitle("Deploy configuration");
+		setDescription("Specify settings for the deployed war");
 	}
 
 	public void createControl(Composite parent)
@@ -61,9 +66,26 @@ public class UserHomeSelectionPage extends WizardPage implements Listener
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(gridLayout);
 
+		Label lblDBProp = new Label(composite, SWT.NONE);
+		lblDBProp.setText("Overwrite DB servers properties");
+		overwriteDBServerPropertiesBtn = new Button(composite, SWT.CHECK);
+		overwriteDBServerPropertiesBtn.setSelection(exportModel.isOverwriteDeployedDBServerProperties());
+		overwriteDBServerPropertiesBtn.addSelectionListener(this);
+		GridData gdDBProp = new GridData(GridData.FILL_HORIZONTAL);
+		gdDBProp.horizontalSpan = 3;
+		overwriteDBServerPropertiesBtn.setLayoutData(gdDBProp);
+
+		Label lblAllProp = new Label(composite, SWT.NONE);
+		lblAllProp.setText("Overwrite all Servoy properties");
+		overwriteAllPropertiesBtn = new Button(composite, SWT.CHECK);
+		overwriteAllPropertiesBtn.setSelection(exportModel.isOverwriteDeployedServoyProperties());
+		overwriteAllPropertiesBtn.addSelectionListener(this);
+		GridData gdAllProp = new GridData(GridData.FILL_HORIZONTAL);
+		gdAllProp.horizontalSpan = 3;
+		overwriteAllPropertiesBtn.setLayoutData(gdAllProp);
+
 		Label label = new Label(composite, SWT.NONE);
 		label.setText("User home directory ");
-
 		userHomeText = new Text(composite, SWT.BORDER);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 3;
@@ -121,5 +143,34 @@ public class UserHomeSelectionPage extends WizardPage implements Listener
 	public void handleEvent(Event event)
 	{
 		exportModel.setUserHome(userHomeText.getText());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+	 */
+	@Override
+	public void widgetSelected(SelectionEvent e)
+	{
+		if (e.widget == overwriteDBServerPropertiesBtn)
+		{
+			exportModel.setOverwriteDeployedDBServerProperties(overwriteDBServerPropertiesBtn.getSelection());
+		}
+		else if (e.widget == overwriteAllPropertiesBtn)
+		{
+			exportModel.setOverwriteDeployedServoyProperties(overwriteAllPropertiesBtn.getSelection());
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
+	 */
+	@Override
+	public void widgetDefaultSelected(SelectionEvent e)
+	{
+		// TODO Auto-generated method stub
 	}
 }

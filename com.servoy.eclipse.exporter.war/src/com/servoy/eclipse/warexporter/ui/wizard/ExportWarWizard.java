@@ -93,7 +93,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 
 	private LicensePage licenseConfigurationPage;
 
-	private UserHomeSelectionPage userHomeSelectionPage;
+	private DeployConfigurationPage userHomeSelectionPage;
 
 	private boolean isNGExport;
 
@@ -240,7 +240,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 			licenseConfigurationPage = new LicensePage("licensepage", "Enter license key",
 				"Please enter the Servoy client license key(s), or leave empty for running the solution in trial mode.", exportModel);
 			servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel);
-			userHomeSelectionPage = new UserHomeSelectionPage("userhomepage", exportModel);
+			userHomeSelectionPage = new DeployConfigurationPage("userhomepage", exportModel);
 			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel, this);
 			if (isNGExport)
 			{
@@ -302,7 +302,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 	@Override
 	public boolean canFinish()
 	{
-		return getContainer().getCurrentPage() instanceof UserHomeSelectionPage;
+		return getContainer().getCurrentPage() instanceof DeployConfigurationPage;
 	}
 
 	@Override
