@@ -450,7 +450,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 				}
 				else if (element instanceof Scope)
 				{
-					image = "scopes.gif";
+					image = "scopes.png";
 				}
 
 				if (image == null)

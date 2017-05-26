@@ -766,14 +766,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 				if (selFirstEl instanceof PlatformSimpleUserNode && ((SimpleUserNode)selFirstEl).getType() == UserNodeType.FORM)
 				{
 					Form f = (Form)((PlatformSimpleUserNode)selFirstEl).getRealObject();
-					ImageDescriptor imgd = Activator.loadImageDescriptorFromBundle("designer_public.gif");
+					ImageDescriptor imgd = Activator.loadImageDescriptorFromBundle("designer_public.png");
 					switch (f.getEncapsulation())
 					{
 						case PersistEncapsulation.MODULE_SCOPE :
-							imgd = Activator.loadImageDescriptorFromBundle("designer_protected.gif");
+							imgd = Activator.loadImageDescriptorFromBundle("designer_protected.png");
 							break;
 						case PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE :
-							imgd = Activator.loadImageDescriptorFromBundle("designer_private.gif");
+							imgd = Activator.loadImageDescriptorFromBundle("designer_private.png");
 							break;
 					}
 					openNewSubFormWizardAction.setImageDescriptor(imgd);
@@ -3625,17 +3625,17 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 								}
 								else
 								{
-									scaledImage = uiActivator.loadImageFromBundle("image.gif");
+									scaledImage = uiActivator.loadImageFromBundle("image.png");
 								}
 							}
 							catch (SWTException e)
 							{
-								scaledImage = uiActivator.loadImageFromBundle("image.gif");
+								scaledImage = uiActivator.loadImageFromBundle("image.png");
 							}
 						}
 						else
 						{
-							if (scaledImage == null) scaledImage = uiActivator.loadImageFromBundle("image.gif");
+							if (scaledImage == null) scaledImage = uiActivator.loadImageFromBundle("image.png");
 						}
 					}
 					String mediaInfo = mediaNode.getInfo();

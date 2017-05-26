@@ -62,7 +62,7 @@ public class IconProvider
 		c2i = new HashMap<Class< ? >, String>();
 		oldLocation = new HashSet<Class< ? >>();
 
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.JSLib.class, "jslibfolder.gif");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.JSLib.class, "jslibfolder.png");
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.Array.class, "jslibarray.gif");
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.Date.class, "day_obj.gif");
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.String.class, "jslibstring.gif");

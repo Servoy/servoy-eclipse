@@ -1931,29 +1931,29 @@ public class SolutionExplorerTreeContentProvider
 		{
 			PlatformSimpleUserNode scopesFolder = new PlatformSimpleUserNode(Messages.TreeStrings_Scopes,
 				solutionOfCalculation == null ? UserNodeType.SCOPES_ITEM : UserNodeType.SCOPES_ITEM_CALCULATION_MODE, solution,
-				uiActivator.loadImageFromBundle("scopes.gif"));
+				uiActivator.loadImageFromBundle("scopes.png"));
 			scopesFolder.parent = projectNode;
 			addScopesNodeChildren(scopesFolder);
 
 			PlatformSimpleUserNode forms = new PlatformSimpleUserNode(Messages.TreeStrings_Forms, UserNodeType.FORMS, solution,
-				uiActivator.loadImageFromBundle("forms.gif"));
+				uiActivator.loadImageFromBundle("forms.png"));
 			forms.parent = projectNode;
 
 			PlatformSimpleUserNode formReferences = new PlatformSimpleUserNode(Messages.TreeStrings_FormComponents, UserNodeType.COMPONENT_FORMS, solution,
-				uiActivator.loadImageFromBundle("forms.gif"));
+				uiActivator.loadImageFromBundle("forms.png"));
 			formReferences.parent = projectNode;
 			PlatformSimpleUserNode allRelations = null;
 			if (solutionOfCalculation == null)
 			{
 				allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.ALL_RELATIONS, solution,
-					uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
+					uiActivator.loadImageFromBundle("relations.png"));
 				allRelations.parent = projectNode;
 			}
 			PlatformSimpleUserNode valuelists = new PlatformSimpleUserNode(Messages.TreeStrings_ValueLists, UserNodeType.VALUELISTS, solution,
 				uiActivator.loadImageFromBundle("valuelists.png"));
 			valuelists.parent = projectNode;
 			PlatformSimpleUserNode media = new PlatformSimpleUserNode(Messages.TreeStrings_Media, UserNodeType.MEDIA, solution,
-				uiActivator.loadImageFromBundle("image.gif"));
+				uiActivator.loadImageFromBundle("image.png"));
 			media.parent = projectNode;
 			addMediaFolderChildrenNodes(media, solution);
 
@@ -1977,7 +1977,7 @@ public class SolutionExplorerTreeContentProvider
 				PlatformSimpleUserNode dataProvidersNode = new PlatformSimpleUserNode(Messages.TreeStrings_DataProviders, UserNodeType.TABLE_COLUMNS,
 					tableOfCalculation, solution, uiActivator.loadImageFromBundle("selected_record.gif"));
 				allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.RELATIONS, tableOfCalculation,
-					uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
+					uiActivator.loadImageFromBundle("relations.png"));
 				addRelationsNodeChildren(allRelations, solution, tableOfCalculation, UserNodeType.CALC_RELATION);
 
 				dataProvidersNode.parent = projectNode;
@@ -2050,7 +2050,7 @@ public class SolutionExplorerTreeContentProvider
 		globalVariables.parent = globalsFolder;
 
 		PlatformSimpleUserNode globalRelations = new PlatformSimpleUserNode(Messages.TreeStrings_relations, UserNodeType.GLOBALRELATIONS, solutionAndScope,
-			uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
+			uiActivator.loadImageFromBundle("relations.png"));
 		addGlobalRelationsNodeChildren(globalRelations);
 		globalRelations.parent = globalsFolder;
 		globalsFolder.children = new PlatformSimpleUserNode[] { globalVariables, globalRelations };
@@ -2167,7 +2167,7 @@ public class SolutionExplorerTreeContentProvider
 			}
 
 			PlatformSimpleUserNode relationsNode = new PlatformSimpleUserNode(Messages.TreeStrings_relations, UserNodeType.RELATIONS, f, f,
-				uiActivator.loadImageFromOldLocation("relationsoverview.gif"));
+				uiActivator.loadImageFromBundle("relations.png"));
 			relationsNode.parent = formNode;
 			node.add(relationsNode);
 			addFormRelationsNodeChildren(relationsNode);

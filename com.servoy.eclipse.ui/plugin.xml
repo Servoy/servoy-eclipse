@@ -20,7 +20,7 @@
       <view
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView"
-            icon="icons/forms.gif"
+            icon="icons/forms.png"
             id="com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView"
             name="Form Hierarchy">
       </view>
@@ -285,7 +285,7 @@
       <editor
             class="com.servoy.eclipse.ui.editors.MediaViewer"
             default="true"
-            icon="icons/image.gif"
+            icon="icons/image.png"
             id="com.servoy.eclipse.ui.editors.MediaViewer"
             matchingStrategy="com.servoy.eclipse.core.resource.PersistMatchingStrategy"
             name="Media Viewer">
@@ -861,7 +861,7 @@
                class="com.servoy.eclipse.ui.actions.OpenFormHierarchyActionDelegate"
                definitionId="com.servoy.eclipse.ui.OpenFormHierarchyAction"
                enablesFor="1"
-               icon="icons/forms.gif"
+               icon="icons/forms.png"
                id="com.servoy.eclipse.ui.OpenFormHierarchyAction"
                label="Open Form Hierarchy"
                menubarPath="open.ext"

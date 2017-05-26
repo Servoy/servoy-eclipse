@@ -203,7 +203,7 @@ public class ElementUtil
 		}
 		if (persist instanceof Media)
 		{
-			return "image.gif";
+			return "image.png";
 		}
 		if (persist instanceof ValueList)
 		{
@@ -698,13 +698,13 @@ public class ElementUtil
 		String relPath = null;
 		if (f != null)
 		{
-			//designer.gif
+			//designer.png
 			int encapsulation = f.getEncapsulation();
-			if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE) relPath = "icons/designer_protected.gif";
+			if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE) relPath = "icons/designer_protected.png";
 			else if ((encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE)
-				relPath = "icons/designer_private.gif";
+				relPath = "icons/designer_private.png";
 			else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)
-				relPath = "icons/designer_public.gif";
+				relPath = "icons/designer_public.png";
 			else relPath = "icons/form.png";
 		}
 		return relPath;
@@ -723,11 +723,11 @@ public class ElementUtil
 		{
 			int encapsulation = (form).getEncapsulation();
 			if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE)
-				image = Activator.getDefault().loadImageFromBundle("designer_protected.gif");
+				image = Activator.getDefault().loadImageFromBundle("designer_protected.png");
 			else if ((encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE)
-				image = Activator.getDefault().loadImageFromBundle("designer_private.gif");
+				image = Activator.getDefault().loadImageFromBundle("designer_private.png");
 			else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)
-				image = Activator.getDefault().loadImageFromBundle("designer_public.gif");
+				image = Activator.getDefault().loadImageFromBundle("designer_public.png");
 			else image = Activator.getDefault().loadImageFromBundle("form.png");
 		}
 		return image;

@@ -56,7 +56,7 @@ public class RenameScopeAction extends Action implements ISelectionChangedListen
 
 		setText("Rename scope");
 		setToolTipText(getText());
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("scopes.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("scopes.png"));
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)

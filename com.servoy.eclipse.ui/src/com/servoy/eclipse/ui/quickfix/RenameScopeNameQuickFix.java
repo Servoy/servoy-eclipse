@@ -114,7 +114,7 @@ public class RenameScopeNameQuickFix implements IMarkerResolution2
 	 */
 	public Image getImage()
 	{
-		return Activator.getDefault().loadImageFromBundle("scopes.gif");
+		return Activator.getDefault().loadImageFromBundle("scopes.png");
 	}
 
 }

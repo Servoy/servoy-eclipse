@@ -62,7 +62,7 @@ public class NewScopeAction extends Action implements ISelectionChangedListener
 
 		setText("Create new scope");
 		setToolTipText(getText());
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("scopes.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("scopes.png"));
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)

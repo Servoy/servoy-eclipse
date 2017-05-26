@@ -1366,7 +1366,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		{
 			ValueList var = (ValueList)persist;
 			SimpleUserNode node = new UserNode(getDisplayName(var, s), UserNodeType.VALUELIST_ITEM, null, var.getName(), var,
-				uiActivator.loadImageFromBundle(PersistEncapsulation.isModuleScope(var, null) ? "valuelist_protected.gif" : "valuelists.png"));
+				uiActivator.loadImageFromBundle(PersistEncapsulation.isModuleScope(var, null) ? "valuelist_protected.png" : "valuelist.png"));
 			dlm.add(node);
 		}
 		return dlm.toArray();

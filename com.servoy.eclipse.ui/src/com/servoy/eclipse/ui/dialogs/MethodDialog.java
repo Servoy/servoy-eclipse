@@ -73,22 +73,22 @@ public class MethodDialog extends TreeSelectDialog
 	public static final Object SCOPE_METHODS = new Object();
 
 	private static final Image solutionImage = Activator.getDefault().loadImageFromBundle("solution.gif");
-	private static final Image formMethodsImage = Activator.getDefault().loadImageFromBundle("designer.gif");
-	private static final Image scopeMethodsImage = Activator.getDefault().loadImageFromBundle("scopes.gif");
+	private static final Image formMethodsImage = Activator.getDefault().loadImageFromBundle("designer.png");
+	private static final Image scopeMethodsImage = Activator.getDefault().loadImageFromBundle("scopes.png");
 	private static final Image foundsetMethodsImage = Activator.getDefault().loadImageFromBundle("foundset_method.gif");
 
 	/**
 	 * Creates a new method cell dialog parented under the given shell.
-	 * 
+	 *
 	 * @param labelProvider
-	 * 
+	 *
 	 * @param parent the parent control
 	 */
 	public MethodDialog(Shell shell, ILabelProvider labelProvider, ITreeContentProvider contentProvider, ISelection selection,
-		Object /* MethodListOptions */input, int treeStyle, String title, IValueEditor< ? > valueEditor)
+		Object /* MethodListOptions */ input, int treeStyle, String title, IValueEditor< ? > valueEditor)
 	{
 		super(shell, true, true, TreePatternFilter.FILTER_LEAFS,
-		// content provider
+			// content provider
 			contentProvider,
 			// label provider
 			new MethodDialogLabelProvider(labelProvider),
