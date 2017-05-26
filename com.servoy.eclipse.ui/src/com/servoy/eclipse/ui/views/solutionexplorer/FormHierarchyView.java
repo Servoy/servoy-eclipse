@@ -28,6 +28,7 @@ import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -380,7 +381,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		@Override
 		public boolean isLabelProperty(Object element, String property)
 		{
-			// TODO Auto-generated method stub
 			return false;
 		}
 
@@ -392,33 +392,41 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		@Override
 		public Image decorateImage(Image image, Object element, IDecorationContext context)
 		{
-			Image resultImage = null;
+			//problem (warning/error) decoration
+			int severity = getProblemType((IPersist)element);
 			ImageDescriptor imageDescriptor = null;
+			if (severity == IMarker.SEVERITY_ERROR) imageDescriptor = DLTKPluginImages.DESC_OVR_ERROR;
+			else if (severity == IMarker.SEVERITY_WARNING) imageDescriptor = DLTKPluginImages.DESC_OVR_WARNING;
 
+			Image resultImage = (imageDescriptor != null ? new DecorationOverlayIcon(image, imageDescriptor, IDecoration.BOTTOM_LEFT).createImage() : image);
+
+			if (element instanceof ISupportDeprecatedAnnotation)
+			{
+				ISupportDeprecatedAnnotation isda = (ISupportDeprecatedAnnotation)element;
+				if (isda.isDeprecated())
+				{
+					resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_DEPRECATED, IDecoration.UNDERLAY).createImage();
+				}
+			}
+
+			if (element instanceof Form) return resultImage;
 			if (element instanceof ScriptMethod || element instanceof ScriptVariable)
 			{
-				//problem (warning/error) decoration
-				int severity = getProblemType((IPersist)element);
-				if (severity == IMarker.SEVERITY_ERROR) imageDescriptor = DLTKPluginImages.DESC_OVR_ERROR;
-				else if (severity == IMarker.SEVERITY_WARNING) imageDescriptor = DLTKPluginImages.DESC_OVR_WARNING;
-
-				resultImage = (imageDescriptor != null ? new DecorationOverlayIcon(image, imageDescriptor, IDecoration.BOTTOM_LEFT).createImage() : image);
-
-				//deprecated decoration for vars/functions
-				if (element instanceof ISupportDeprecatedAnnotation)
-				{
-					ISupportDeprecatedAnnotation isda = (ISupportDeprecatedAnnotation)element;
-					if (isda.isDeprecated())
-					{
-						resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_DEPRECATED, IDecoration.UNDERLAY).createImage();
-					}
-				}
-
 				//constructor decoration for functions
 				if (element instanceof ScriptMethod && ((ScriptMethod)element).isConstructor())
 				{
 					resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_CONSTRUCTOR, IDecoration.TOP_RIGHT).createImage();
 				}
+
+				//override decoration for functions
+				if (element instanceof ScriptMethod && PersistHelper.getOverridenMethod((ScriptMethod)element) != null)
+				{
+					resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_OVERRIDES, IDecoration.BOTTOM_RIGHT).createImage();
+				}
+			}
+			else if (element instanceof ISupportExtendsID && ((ISupportExtendsID)element).getExtendsID() > 0)
+			{
+				resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_OVERRIDES, IDecoration.BOTTOM_RIGHT).createImage();
 			}
 			return resultImage;
 		}
@@ -455,8 +463,30 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 					}
 				}
 			}
-
-			// unspecified
+			else if (element instanceof Form)
+			{
+				IFile resource = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getRelativeFilePath(element, false)));
+				{
+					try
+					{
+						IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+						if (markers != null)
+						{
+							int severity = -1;
+							for (IMarker marker : markers)
+							{
+								severity = marker.getAttribute(IMarker.SEVERITY, -1);
+								if (severity == IMarker.SEVERITY_ERROR) break;
+							}
+							return severity;
+						}
+					}
+					catch (Exception e)
+					{
+						ServoyLog.logError(e);
+					}
+				}
+			}
 			return -1;
 		}
 
@@ -536,17 +566,19 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		@Override
 		public String decorateText(String text, Object element, IDecorationContext context)
 		{
-			// TODO Auto-generated method stub
+			if (element instanceof Form) return text;
+			if (showAllAction.isChecked())
+			{
+				return text + " [" + ((Form)((AbstractBase)element).getAncestor(IRepository.FORMS)).getName() + "]";
+			}
 			return null;
 		}
 
 		@Override
 		public boolean prepareDecoration(Object element, String originalText, IDecorationContext context)
 		{
-			// TODO Auto-generated method stub
 			return false;
 		}
-
 	}
 
 	private class FormViewLabelProvider extends ColumnLabelProvider implements IDeprecationProvider
@@ -623,11 +655,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		{
 			if (element instanceof Form) return super.getForeground(element);
 			if (provider instanceof FormTreeContentProvider) return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE);
-			if (element instanceof ISupportExtendsID && ((ISupportExtendsID)element).getExtendsID() > 0)
-			{
-				return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE);
-			}
-			if (element instanceof ScriptMethod)
+			if (element instanceof AbstractBase)
 			{
 				AbstractBase sm = (AbstractBase)element;
 				if (!sm.getParent().equals(selected))
@@ -827,6 +855,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private FormHierarchyFilter hideVariablesAction;
 
 	private IMemento memento;
+	private StatusBarUpdater statusBarUpdater;
 	private static final String SELECTED_FORM = "FormHierarchy.SELECTION";
 
 	@Override
@@ -871,6 +900,12 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 		this.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
 		tree.addSelectionChangedListener(this);
+
+		IStatusLineManager slManager = getViewSite().getActionBars().getStatusLineManager();
+		statusBarUpdater = new StatusBarUpdater(slManager);
+		statusBarUpdater.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
+		list.addSelectionChangedListener(statusBarUpdater);
+		getSite().setSelectionProvider(fSelectionProviderMediator);
 
 		contributeToActionBars();
 

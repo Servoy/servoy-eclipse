@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.apache.commons.dbcp.DbcpException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
@@ -49,6 +48,7 @@ import org.eclipse.dltk.compiler.problem.ProblemSeverity;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.builder.MarkerMessages;
@@ -156,7 +156,7 @@ public class DataModelManager implements IColumnInfoManager
 				for (Column column : t.getColumns())
 				{
 					if (column.getColumnInfo() != null && column.getSequenceType() == ColumnInfo.UUID_GENERATOR &&
-						!column.getColumnInfo().hasFlag(Column.UUID_COLUMN))
+						!column.getColumnInfo().hasFlag(IBaseColumn.UUID_COLUMN))
 					{
 						try
 						{
@@ -427,11 +427,6 @@ public class DataModelManager implements IColumnInfoManager
 		catch (RepositoryException e)
 		{
 			ServoyLog.logError(e);
-		}
-		catch (DbcpException ex)
-		{
-			// the initialize of servers might not be completed at this point; so we may have an invalid server
-			// don't do anything, this error should not exist
 		}
 	}
 
@@ -798,7 +793,7 @@ public class DataModelManager implements IColumnInfoManager
 			ColumnInfoDef dbCid = new ColumnInfoDef();
 			dbCid.columnType = c.getColumnType();
 			dbCid.allowNull = c.getAllowNull();
-			dbCid.flags = c.isDatabasePK() ? Column.PK_COLUMN : 0;
+			dbCid.flags = c.isDatabasePK() ? IBaseColumn.PK_COLUMN : 0;
 			addDifferenceMarker(new TableDifference(t, columnName, TableDifference.COLUMN_CONFLICT, dbCid, cid));
 		}
 	}
@@ -1501,11 +1496,11 @@ public class DataModelManager implements IColumnInfoManager
 		{
 			StringBuffer message = new StringBuffer();
 			message.append("(");
-			if ((definition.flags & Column.PK_COLUMN) != 0)
+			if ((definition.flags & IBaseColumn.PK_COLUMN) != 0)
 			{
 				message.append("pk, ");
 			}
-			else if ((definition.flags & Column.USER_ROWID_COLUMN) != 0)
+			else if ((definition.flags & IBaseColumn.USER_ROWID_COLUMN) != 0)
 			{
 				message.append("row_ident, ");
 			}
@@ -1600,15 +1595,15 @@ public class DataModelManager implements IColumnInfoManager
 				if (severity != IMarker.SEVERITY_ERROR) // if we already discovered an error, no use checking further
 				{
 					// real column can only know if it's pk or not (doesn't know about USER_ROWID_COLUMN)
-					boolean columnInfoIsPk = ((dbiFileDefinition.flags & Column.PK_COLUMN) != 0);
+					boolean columnInfoIsPk = ((dbiFileDefinition.flags & IBaseColumn.PK_COLUMN) != 0);
 					if (c.isDatabasePK() != columnInfoIsPk)
 					{
-						if ((c.isDatabasePK() && (dbiFileDefinition.flags & Column.IDENT_COLUMNS) == 0) || columnInfoIsPk)
+						if ((c.isDatabasePK() && (dbiFileDefinition.flags & IBaseColumn.IDENT_COLUMNS) == 0) || columnInfoIsPk)
 						{
 							// column is pk, but columninfo knows it as normal column, or column is not pk and columninfo knows it as pk
 							severity = getErrorSeverity(tableName);
 						}
-						else if (c.isDatabasePK() && ((dbiFileDefinition.flags & Column.USER_ROWID_COLUMN) != 0))
+						else if (c.isDatabasePK() && ((dbiFileDefinition.flags & IBaseColumn.USER_ROWID_COLUMN) != 0))
 						{
 							// columns is pk, column info says it's USER_ROWID_COLUMN - both ident columns, but not quite the same
 							severity = computeCustomSeverity(ServoyBuilder.DBI_COLUMN_CONFLICT);

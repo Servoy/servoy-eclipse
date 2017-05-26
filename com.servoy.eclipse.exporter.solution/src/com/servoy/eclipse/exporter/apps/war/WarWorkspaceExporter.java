@@ -446,6 +446,24 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		{
 			return configuration.getLicenses().values();
 		}
+
+		@Override
+		public boolean isOverwriteDeployedDBServerProperties()
+		{
+			return configuration.isOverwriteDeployedDBServerProperties();
+		}
+
+		@Override
+		public boolean isOverwriteDeployedServoyProperties()
+		{
+			return configuration.isOverwriteDeployedServoyProperties();
+		}
+
+		@Override
+		public String getUserHome()
+		{
+			return configuration.getUserHome();
+		}
 	}
 
 	@Override

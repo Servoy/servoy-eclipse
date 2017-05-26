@@ -17,7 +17,7 @@ Require-Bundle: servoy_shared,
  servoy_ngclient,
  org.eclipse.dltk.javascript.rhino,
  sablo,
- org.apache.commons.dbcp,
+ org.apache.commons.dbcp2,
  org.apache.commons.io,
  org.eclipse.swt,
  org.eclipse.jface

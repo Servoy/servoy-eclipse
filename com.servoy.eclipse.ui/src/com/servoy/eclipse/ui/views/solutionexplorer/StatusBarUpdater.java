@@ -33,6 +33,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.Column;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.util.Utils;
 
@@ -113,6 +114,10 @@ public class StatusBarUpdater implements ISelectionChangedListener
 				if (selObj instanceof SimpleUserNode)
 				{
 					result = ((SimpleUserNode)selObj).getToolTipText();
+				}
+				if (selObj instanceof ScriptMethod)
+				{
+					result = ((ScriptMethod)selObj).getScriptMethodSignature(null, false, true, true, true);
 				}
 				else
 				{

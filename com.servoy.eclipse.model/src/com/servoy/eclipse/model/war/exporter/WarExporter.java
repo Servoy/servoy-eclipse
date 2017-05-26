@@ -165,7 +165,7 @@ public class WarExporter
 	 */
 	public void doExport(IProgressMonitor m) throws ExportException
 	{
-		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 36);
+		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 37);
 		File warFile = createNewWarFile();
 		monitor.worked(2);
 		File tmpWarDir = createTempDir();
@@ -220,6 +220,9 @@ public class WarExporter
 			copyMinifiedAndGrouped(tmpWarDir);
 			monitor.worked(1);
 		}
+		monitor.subTask("Creating deploy properties");
+		createDeployPropertiesFile(tmpWarDir);
+		monitor.worked(1);
 		monitor.subTask("Creating/zipping the WAR file");
 		zipDirectory(tmpWarDir, warFile);
 		monitor.worked(2);
@@ -1776,5 +1779,21 @@ public class WarExporter
 			if (!found) return libName;
 		}
 		return null;
+	}
+
+	private void createDeployPropertiesFile(File tmpWarDir) throws ExportException
+	{
+		File deployPropertiesFile = new File(tmpWarDir, "WEB-INF/deploy.properties");
+		Properties properties = new Properties();
+		properties.put("isOverwriteDeployedDBServerProperties", String.valueOf(exportModel.isOverwriteDeployedDBServerProperties()));
+		properties.put("isOverwriteDeployedServoyProperties", String.valueOf(exportModel.isOverwriteDeployedServoyProperties()));
+		try (FileOutputStream fos = new FileOutputStream(deployPropertiesFile))
+		{
+			properties.store(fos, "");
+		}
+		catch (Exception e)
+		{
+			throw new ExportException("Couldn't generate the deploy.properties file", e);
+		}
 	}
 }
