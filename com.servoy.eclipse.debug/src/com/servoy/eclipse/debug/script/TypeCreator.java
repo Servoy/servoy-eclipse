@@ -98,6 +98,7 @@ import org.sablo.specification.property.types.LongPropertyType;
 import org.sablo.specification.property.types.StringPropertyType;
 import org.sablo.websocket.utils.PropertyUtils;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.base.persistence.constants.IFormConstants;
 import com.servoy.base.util.DataSourceUtilsBase;
 import com.servoy.eclipse.core.IActiveProjectListener;
@@ -335,9 +336,9 @@ public class TypeCreator extends TypeCache
 	protected final static ImageDescriptor GLOBALS = ImageDescriptor.createFromURL(
 		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/globe.gif"), null));
 	protected final static ImageDescriptor SCOPES = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/scopes.gif"), null));
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/scopes.png"), null));
 	protected final static ImageDescriptor FORMS = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/forms.gif"), null));
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/forms.png"), null));
 
 	protected final static ImageDescriptor PLUGINS = ImageDescriptor.createFromURL(
 		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/plugin.gif"), null));
@@ -1752,7 +1753,7 @@ public class TypeCreator extends TypeCache
 			ColumnInfo columnInfo = ((Column)provider).getColumnInfo();
 			if (columnInfo != null)
 			{
-				if (columnInfo.hasFlag(Column.UUID_COLUMN))
+				if (columnInfo.hasFlag(IBaseColumn.UUID_COLUMN))
 				{
 					return context.getType("UUID");
 				}
@@ -3330,7 +3331,7 @@ public class TypeCreator extends TypeCache
 							{
 								Property property = TypeInfoModelFactory.eINSTANCE.createProperty();
 								property.setName(name);
-								property.setAttribute(RESOURCE, new TableConfig(name,server));
+								property.setAttribute(RESOURCE, new TableConfig(name, server));
 								property.setVisible(true);
 								property.setType(getTypeRef(context,
 									JSDataSource.class.getSimpleName() + '<' + DataSourceUtils.createDBTableDataSource(server.getName(), name) + '>'));
@@ -3591,7 +3592,7 @@ public class TypeCreator extends TypeCache
 					{
 						ColumnInfo ci = ((Column)provider).getColumnInfo();
 						if (ci != null && ci.isExcluded()) continue;
-						if (ci != null && ci.hasFlag(Column.UUID_COLUMN))
+						if (ci != null && ci.hasFlag(IBaseColumn.UUID_COLUMN))
 						{
 							uuid = true;
 						}
@@ -4445,12 +4446,12 @@ public class TypeCreator extends TypeCache
 
 	protected static ImageDescriptor getImageDescriptorForFormEncapsulation(int encapsulation)
 	{
-		String imgPath = "/icons/designer.gif";
-		if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE) imgPath = "/icons/designer_protected.gif";
+		String imgPath = "/icons/designer.png";
+		if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE) imgPath = "/icons/designer_protected.png";
 		else if ((encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE)
-			imgPath = "/icons/designer_private.gif";
+			imgPath = "/icons/designer_private.png";
 		else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)
-			imgPath = "/icons/designer_public.gif";
+			imgPath = "/icons/designer_public.png";
 		return ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path(imgPath), null));
 	}
 }
