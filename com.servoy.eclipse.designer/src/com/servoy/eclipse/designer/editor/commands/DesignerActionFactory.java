@@ -597,7 +597,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 
 	public static final String ADD_MEDIA_TEXT = "Place Image Wizard";
 	public static final String ADD_MEDIA_TOOLTIP = ADD_MEDIA_TEXT;
-	public static final ImageDescriptor ADD_MEDIA_IMAGE = Activator.loadImageDescriptorFromBundle("image.gif");
+	public static final ImageDescriptor ADD_MEDIA_IMAGE = Activator.loadImageDescriptorFromBundle("image.png");
 	public static final ActionFactory ADD_MEDIA = new ActionFactory("place-image")
 	{
 

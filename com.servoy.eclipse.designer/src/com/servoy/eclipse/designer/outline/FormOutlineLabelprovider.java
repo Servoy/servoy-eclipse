@@ -237,7 +237,7 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 			// TODO use the image from the webcomponent spec
 			if (p instanceof WebComponent && "servoycore-formcomponent".equals(((WebComponent)p).getTypeName()))
 			{
-				imageName = "designer.gif";
+				imageName = "designer.png";
 			}
 			else
 			{
