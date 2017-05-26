@@ -373,7 +373,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 			$contextmenu.add(
 					{
 						text: "Open Form Hierarchy",
-						getIconStyle: function(){ return {'background-image':"url(images/forms.gif)"}},
+						getIconStyle: function(){ return {'background-image':"url(images/forms.png)"}},
 						getItemClass: function() { if (!hasSelection(1)) return "enabled";}, 
 						shortcut: shortcuts[SHORTCUT_IDS.OPEN_FORM_HIERARCHY_ID],
 						execute:function()
