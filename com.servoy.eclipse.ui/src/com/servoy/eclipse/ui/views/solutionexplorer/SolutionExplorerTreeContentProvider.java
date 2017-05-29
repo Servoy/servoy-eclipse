@@ -1708,10 +1708,6 @@ public class SolutionExplorerTreeContentProvider
 	public static Image getServerImage(String serverName, IServerInternal server)
 	{
 		String imgName = "server.png";
-		if (!server.getConfig().isEnabled())
-		{
-			imgName = "serverDisabled.gif";
-		}
 		if (!server.isValid())
 		{
 			ImageDescriptor IMG_ERROR = JFaceResources.getImageRegistry().getDescriptor("org.eclipse.jface.fieldassist.IMG_DEC_FIELD_ERROR");
@@ -1722,7 +1718,7 @@ public class SolutionExplorerTreeContentProvider
 			imgName = "serverDuplicate.gif";
 		}
 
-		return uiActivator.loadImageFromBundle(imgName);
+		return uiActivator.loadImageFromBundle(imgName,!server.getConfig().isEnabled());
 	}
 
 	private void handleServerViewsNode(IServerInternal serverObj, PlatformSimpleUserNode node)

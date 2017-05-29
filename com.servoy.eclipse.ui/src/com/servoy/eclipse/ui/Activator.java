@@ -318,7 +318,7 @@ public class Activator extends AbstractUIPlugin
 				{
 					if (disabled)
 					{
-						img = new Image(img.getDevice(), img, SWT.IMAGE_GRAY);
+						img = new Image(img.getDevice(), img, SWT.IMAGE_DISABLE);
 					}
 					imageCacheBundle.put(storeName, img);
 				}
