@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.ui.tweaks;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -31,6 +32,7 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -219,17 +221,27 @@ public class ImageReplacementMapper
 	 * @throws IllegalAccessException if an attempt to call the original {@link ImageDescriptor#createFromURL(URL)} failed.
 	 *
 	 * @return see description above.
+	 * @throws IOException
 	 */
 	public static ImageDescriptor getUrlBasedImageReplacement(URL url, final Method originalCreateFromURL, final Method originalCreateFromFile)
-		throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+		throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException
 	{
-		AlternateImageLocation replacement = urlReplacements.get(url);
+		URL stableUrl = url;
+		if (String.valueOf(url).startsWith("bundleentry://"))
+		{
+			URI uri = URI.createURI(String.valueOf(url));
+			long bundleId = Long.parseLong(uri.host().split("\\.")[0]);//the first number after bundleentry:// is the bundle id
+			String name = Activator.getDefault().getBundle().getBundleContext().getBundle(bundleId).getSymbolicName();
+			if (name != null) stableUrl = new URL(URI.createPlatformPluginURI(name + uri.path(), true).toString());
+		}
+
+		AlternateImageLocation replacement = urlReplacements.get(stableUrl);
 
 		if (LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS)
 		{
-			if (interceptableUrls.add(String.valueOf(url)))
+			if (interceptableUrls.add(String.valueOf(stableUrl)))
 			{
-				System.out.println((replacement == null ? "(ORIGINAL)" : "(REPLACED)") + " URLBasedImageReplacer: (" + url + ")");
+				System.out.println((replacement == null ? "(ORIGINAL)" : "(REPLACED)") + " URLBasedImageReplacer: (" + stableUrl + ")");
 			}
 		}
 

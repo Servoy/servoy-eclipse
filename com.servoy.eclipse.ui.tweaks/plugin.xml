@@ -19,7 +19,7 @@
          point="com.servoy.eclipse.ui.tweaks.imageReplacement">
       
       <urlBasedImageReplacement
-            originalImageURL="bundleentry://265.fwk77269878/icons/full/etool16/new_wiz.png">
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/new_wiz.png">
          <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/new.png">
          </alternateURLImageLocation>
@@ -79,21 +79,21 @@
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
-            originalImageURL="bundleentry://265.fwk77269878/icons/full/etool16/print_edit.png">
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/print_edit.png">
          <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/print.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
-            originalImageURL="bundleentry://265.fwk77269878/icons/full/etool16/import_wiz.png">
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/import_wiz.png">
          <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/import.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
-            originalImageURL="bundleentry://265.fwk77269878/icons/full/etool16/export_wiz.png">
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/export_wiz.png">
          <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/export.png">
          </alternateURLImageLocation>
@@ -142,28 +142,28 @@
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
-            originalImageURL="bundleentry://265.fwk77269878/icons/full/elcl16/backward_nav.png">
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/elcl16/backward_nav.png">
          <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-document.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
-            originalImageURL="bundleentry://265.fwk77269878/icons/full/dlcl16/backward_nav.png">
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dlcl16/backward_nav.png">
          <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-document.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
-            originalImageURL="bundleentry://265.fwk77269878/icons/full/elcl16/forward_nav.png">
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/elcl16/forward_nav.png">
          <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/forward-to-document.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
-            originalImageURL="bundleentry://265.fwk77269878/icons/full/dlcl16/forward_nav.png">
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dlcl16/forward_nav.png">
          <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/forward-to-document.png">
          </alternateURLImageLocation>
