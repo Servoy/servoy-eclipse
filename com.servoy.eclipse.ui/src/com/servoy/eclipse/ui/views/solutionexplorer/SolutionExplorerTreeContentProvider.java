@@ -49,6 +49,10 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.DecorationOverlayIcon;
+import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreePath;
@@ -217,7 +221,7 @@ public class SolutionExplorerTreeContentProvider
 
 	private final List<String> unreachableServers = new ArrayList<String>();
 
-	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
+	private final static com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
 	private final List<Image> imagesConvertedFromSwing = new ArrayList<Image>();
 
@@ -1668,7 +1672,7 @@ public class SolutionExplorerTreeContentProvider
 				tooltip = "Duplicate of " + serverObj.getName();
 			}
 			PlatformSimpleUserNode node = new PlatformSimpleUserNode(server_name, UserNodeType.SERVER, "", tooltip, serverObj,
-				uiActivator.loadImageFromBundle(getServerImageName(server_name, serverObj)));
+				getServerImage(server_name, serverObj));
 			serverNodes.add(node);
 			node.parent = serversNode;
 			handleServerViewsNode(serverObj, node);
@@ -1701,22 +1705,24 @@ public class SolutionExplorerTreeContentProvider
 		}
 	}
 
-	public static String getServerImageName(String serverName, IServerInternal server)
+	public static Image getServerImage(String serverName, IServerInternal server)
 	{
+		String imgName = "server.png";
 		if (!server.getConfig().isEnabled())
 		{
-			return "serverDisabled.gif";
+			imgName = "serverDisabled.gif";
 		}
 		if (!server.isValid())
 		{
-			return "serverError.gif";
+			ImageDescriptor IMG_ERROR = JFaceResources.getImageRegistry().getDescriptor("org.eclipse.jface.fieldassist.IMG_DEC_FIELD_ERROR");
+			return new DecorationOverlayIcon(uiActivator.loadImageFromBundle("server.png"), IMG_ERROR, IDecoration.BOTTOM_LEFT).createImage();
 		}
 		if (!server.getName().equals(serverName))
 		{
-			return "serverDuplicate.gif";
+			imgName = "serverDuplicate.gif";
 		}
 
-		return "server.png";
+		return uiActivator.loadImageFromBundle(imgName);
 	}
 
 	private void handleServerViewsNode(IServerInternal serverObj, PlatformSimpleUserNode node)

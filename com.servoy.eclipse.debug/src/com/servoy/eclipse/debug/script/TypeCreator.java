@@ -3218,8 +3218,7 @@ public class TypeCreator extends TypeCache
 					property.setVisible(true);
 					property.setType(
 						getTypeRef(context, DBDataSourceServer.class.getSimpleName() + '<' + DataSourceUtils.createDBTableDataSource(serverName, null) + '>'));
-					property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle(
-						SolutionExplorerTreeContentProvider.getServerImageName(serverName, server)));
+					property.setAttribute(IMAGE_DESCRIPTOR, SolutionExplorerTreeContentProvider.getServerImage(serverName, server));
 					property.setDescription("Server");
 					type.getMembers().add(property);
 				}
