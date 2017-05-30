@@ -9,22 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.ast.ASTNode;
-import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.builder.ISourceLineTracker;
-import org.eclipse.dltk.javascript.ast.FunctionStatement;
-import org.eclipse.dltk.javascript.ast.JSDeclaration;
-import org.eclipse.dltk.javascript.ast.Script;
-import org.eclipse.dltk.javascript.ast.VariableDeclaration;
-import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.dltk.ui.DLTKPluginImages;
-import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -34,19 +19,13 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
-import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDecoration;
-import org.eclipse.jface.viewers.IDecorationContext;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelDecorator;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -78,7 +57,6 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -107,7 +85,6 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportDeprecated;
-import com.servoy.j2db.persistence.ISupportDeprecatedAnnotation;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.NameComparator;
@@ -348,236 +325,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				return getChildren(inputElement);
 			}
 			return new Form[0];
-		}
-	}
-
-	private class FormViewLabelDecorator extends LabelDecorator
-	{
-
-		@Override
-		public Image decorateImage(Image image, Object element)
-		{
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public String decorateText(String text, Object element)
-		{
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public void addListener(ILabelProviderListener listener)
-		{
-		}
-
-		@Override
-		public void dispose()
-		{
-		}
-
-		@Override
-		public boolean isLabelProperty(Object element, String property)
-		{
-			return false;
-		}
-
-		@Override
-		public void removeListener(ILabelProviderListener listener)
-		{
-		}
-
-		@Override
-		public Image decorateImage(Image image, Object element, IDecorationContext context)
-		{
-			//problem (warning/error) decoration
-			int severity = getProblemType((IPersist)element);
-			ImageDescriptor imageDescriptor = null;
-			if (severity == IMarker.SEVERITY_ERROR) imageDescriptor = DLTKPluginImages.DESC_OVR_ERROR;
-			else if (severity == IMarker.SEVERITY_WARNING) imageDescriptor = DLTKPluginImages.DESC_OVR_WARNING;
-
-			Image resultImage = (imageDescriptor != null ? new DecorationOverlayIcon(image, imageDescriptor, IDecoration.BOTTOM_LEFT).createImage() : image);
-
-			if (element instanceof ISupportDeprecatedAnnotation)
-			{
-				ISupportDeprecatedAnnotation isda = (ISupportDeprecatedAnnotation)element;
-				if (isda.isDeprecated())
-				{
-					resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_DEPRECATED, IDecoration.UNDERLAY).createImage();
-				}
-			}
-
-			if (element instanceof Form) return resultImage;
-			if (element instanceof ScriptMethod || element instanceof ScriptVariable)
-			{
-				//constructor decoration for functions
-				if (element instanceof ScriptMethod && ((ScriptMethod)element).isConstructor())
-				{
-					resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_CONSTRUCTOR, IDecoration.TOP_RIGHT).createImage();
-				}
-
-				//override decoration for functions
-				if (element instanceof ScriptMethod && PersistHelper.getOverridenMethod((ScriptMethod)element) != null)
-				{
-					resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_OVERRIDES, IDecoration.BOTTOM_RIGHT).createImage();
-				}
-			}
-			else if (element instanceof ISupportExtendsID && ((ISupportExtendsID)element).getExtendsID() > 0)
-			{
-				resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_OVERRIDES, IDecoration.BOTTOM_RIGHT).createImage();
-			}
-			return resultImage;
-		}
-
-		private int getProblemType(IPersist element)
-		{
-			if (element instanceof ScriptVariable || element instanceof ScriptMethod)
-			{
-				IFile jsResource = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath(element, false)));
-				if (jsResource.exists())
-				{
-					try
-					{
-						IMarker[] jsMarkers = jsResource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-						if (jsMarkers != null && jsMarkers.length > 0)
-						{
-							ISourceModule sourceModule = DLTKCore.createSourceModuleFrom(jsResource);
-							Script script = JavaScriptParserUtil.parse(sourceModule);
-
-							if (element instanceof ScriptMethod)
-							{
-								return getProblemLevel(jsMarkers, sourceModule, getFunctionStatementForName(script, ((ScriptMethod)element).getName()));
-							}
-
-							if (element instanceof ScriptVariable)
-							{
-								return getProblemLevel(jsMarkers, sourceModule, getVariableDeclarationForName(script, ((ScriptVariable)element).getName()));
-							}
-						}
-					}
-					catch (Exception e)
-					{
-						ServoyLog.logError(e);
-					}
-				}
-			}
-			else if (element instanceof Form)
-			{
-				IFile resource = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getRelativeFilePath(element, false)));
-				{
-					try
-					{
-						IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-						if (markers != null)
-						{
-							int severity = -1;
-							for (IMarker marker : markers)
-							{
-								severity = marker.getAttribute(IMarker.SEVERITY, -1);
-								if (severity == IMarker.SEVERITY_ERROR) break;
-							}
-							return severity;
-						}
-					}
-					catch (Exception e)
-					{
-						ServoyLog.logError(e);
-					}
-				}
-			}
-			return -1;
-		}
-
-		//TODO refactor, copied from solex
-		public int getProblemLevel(IMarker[] jsMarkers, ISourceModule sourceModule, ASTNode node) throws ModelException
-		{
-			int problemLevel = -1;
-			if (jsMarkers == null || node == null) return problemLevel;
-			ISourceLineTracker sourceLineTracker = null;
-			for (IMarker marker : jsMarkers)
-			{
-				if (marker.getAttribute(IMarker.SEVERITY, -1) > problemLevel)
-				{
-					int start = marker.getAttribute(IMarker.CHAR_START, -1);
-					if (start != -1)
-					{
-						if (node.sourceStart() <= start && start <= node.sourceEnd())
-						{
-							problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
-						}
-					}
-					else
-					{
-						int line = marker.getAttribute(IMarker.LINE_NUMBER, -1); // 1 based
-						if (line != -1)
-						{
-							if (sourceLineTracker == null) sourceLineTracker = TextUtils.createLineTracker(sourceModule.getSource());
-							// getLineNumberOfOffset == 0 based so +1 to match the markers line
-							if (sourceLineTracker.getLineNumberOfOffset(node.sourceStart()) + 1 <= line &&
-								line <= sourceLineTracker.getLineNumberOfOffset(node.sourceEnd()) + 1)
-							{
-								problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
-							}
-						}
-					}
-
-				}
-			}
-			return problemLevel;
-		}
-
-		//TODO refactor, copied from solex
-		private FunctionStatement getFunctionStatementForName(Script script, String metName)
-		{
-			for (JSDeclaration dec : script.getDeclarations())
-			{
-				if (dec instanceof FunctionStatement)
-				{
-					FunctionStatement fstmt = (FunctionStatement)dec;
-					if (fstmt.getFunctionName().equals(metName))
-					{
-						return fstmt;
-					}
-				}
-			}
-			return null;
-		}
-
-		//TODO refactor, copied from solex
-		private VariableDeclaration getVariableDeclarationForName(Script script, String varName)
-		{
-			for (JSDeclaration dec : script.getDeclarations())
-			{
-				if (dec instanceof VariableDeclaration)
-				{
-					VariableDeclaration varDec = (VariableDeclaration)dec;
-					if (varDec.getVariableName().equals(varName))
-					{
-						return varDec;
-					}
-				}
-			}
-			return null;
-		}
-
-
-		@Override
-		public String decorateText(String text, Object element, IDecorationContext context)
-		{
-			if (element instanceof Form) return text;
-			if (showAllAction.isChecked())
-			{
-				return text + " [" + ((Form)((AbstractBase)element).getAncestor(IRepository.FORMS)).getName() + "]";
-			}
-			return null;
-		}
-
-		@Override
-		public boolean prepareDecoration(Object element, String originalText, IDecorationContext context)
-		{
-			return false;
 		}
 	}
 
@@ -900,7 +647,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 		this.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
 		tree.addSelectionChangedListener(this);
-
+		
 		IStatusLineManager slManager = getViewSite().getActionBars().getStatusLineManager();
 		statusBarUpdater = new StatusBarUpdater(slManager);
 		statusBarUpdater.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
@@ -925,8 +672,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		tree = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		treeProvider = new FormTreeContentProvider();
 		tree.setContentProvider(treeProvider);
-		tree.setLabelProvider(new DeprecationDecoratingStyledCellLabelProvider(
-			new DecoratingLabelProvider(new FormViewLabelProvider(treeProvider), new FormViewLabelDecorator())));
+		tree.setLabelProvider(new DeprecationDecoratingStyledCellLabelProvider(new DecoratedLabelProvider(new FormViewLabelProvider(treeProvider))));
 
 		tree.addDoubleClickListener(new FormHierarchyDoubleClickListener());
 		tree.addPostSelectionChangedListener(new FocusSelectedElementListener());
@@ -948,8 +694,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		ColumnViewerToolTipSupport.enableFor(list);
 		FormListContentProvider listProvider = new FormListContentProvider(this);
 		list.setContentProvider(listProvider);
-		list.setLabelProvider(new DeprecationDecoratingStyledCellLabelProvider(
-			new DecoratingLabelProvider(new FormViewLabelProvider(listProvider), new FormViewLabelDecorator())));
+		list.setLabelProvider(//new DeprecationDecoratingStyledCellLabelProvider(
+			new DecoratedLabelProvider(new FormViewLabelProvider(listProvider)));//, new FormViewLabelDecorator())));
 		viewForm.setContent(list.getControl());
 
 		list.addDoubleClickListener(new FormHierarchyDoubleClickListener());
