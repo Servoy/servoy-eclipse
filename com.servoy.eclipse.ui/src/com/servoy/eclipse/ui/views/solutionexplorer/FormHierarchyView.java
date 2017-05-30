@@ -905,7 +905,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		statusBarUpdater = new StatusBarUpdater(slManager);
 		statusBarUpdater.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
 		list.addSelectionChangedListener(statusBarUpdater);
-		getSite().setSelectionProvider(fSelectionProviderMediator);
 
 		contributeToActionBars();
 
@@ -1277,6 +1276,14 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	public void dispose()
 	{
 		fDialogSettings.put(DIALOGSTORE_SHOW_MEMBERS, showMembersAction.isChecked());
+
+		if (statusBarUpdater != null)
+		{
+			statusBarUpdater.dispose();
+			fSelectionProviderMediator.removeSelectionChangedListener(statusBarUpdater);
+			statusBarUpdater = null;
+		}
+
 		super.dispose();
 	}
 }
