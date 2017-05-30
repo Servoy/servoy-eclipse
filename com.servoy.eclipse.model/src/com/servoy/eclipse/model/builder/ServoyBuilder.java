@@ -75,6 +75,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.servoy.base.persistence.IBaseColumn;
 import com.servoy.base.persistence.IMobileProperties;
 import com.servoy.base.persistence.PersistUtils;
 import com.servoy.base.persistence.constants.IValueListConstants;
@@ -188,6 +189,7 @@ import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.RoundHalfUpDecimalFormat;
 import com.servoy.j2db.util.ScopesUtils;
+import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.Settings;
 import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
@@ -3668,6 +3670,22 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													else
 													{
 														invalid = persistFlattenedSolution.getRelation(fs) == null;
+														if (invalid)
+														{
+															IServiceProvider serviceProvider = ServoyModelFinder.getServiceProvider();
+															try
+															{
+																if (serviceProvider != null &&
+																	serviceProvider.getFoundSetManager().getNamedFoundSet(fs) != null)
+																{
+																	invalid = false;
+																}
+															}
+															catch (ServoyException e)
+															{
+																ServoyLog.logError(e);
+															}
+														}
 													}
 													if (invalid)
 													{
@@ -4922,7 +4940,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							for (Column column : table.getColumns())
 							{
 								if (column.getColumnInfo() != null && column.getSequenceType() == ColumnInfo.UUID_GENERATOR &&
-									!column.getColumnInfo().hasFlag(Column.UUID_COLUMN))
+									!column.getColumnInfo().hasFlag(IBaseColumn.UUID_COLUMN))
 								{
 									ServoyMarker mk = MarkerMessages.ColumnUUIDFlagNotSet.fill(tableName, column.getName());
 									addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_UUID_FLAG_NOT_SET, IMarker.PRIORITY_NORMAL, null, null).setAttribute(
@@ -4939,13 +4957,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									addMarker(res, mk.getType(), mk.getText(), -1, COLUMN_INCOMPATIBLE_TYPE_FOR_SEQUENCE, IMarker.PRIORITY_NORMAL, null,
 										null).setAttribute("columnName", column.getName());
 								}
-								if (table.getTableType() != ITable.VIEW && column.getAllowNull() && column.getRowIdentType() != Column.NORMAL_COLUMN)
+								if (table.getTableType() != ITable.VIEW && column.getAllowNull() && column.getRowIdentType() != IBaseColumn.NORMAL_COLUMN)
 								{
 									ServoyMarker mk = MarkerMessages.ColumnRowIdentShouldNotAllowNull.fill(tableName, column.getName());
 									addMarker(res, mk.getType(), mk.getText(), -1, ROW_IDENT_SHOULD_NOT_BE_NULL, IMarker.PRIORITY_NORMAL, null,
 										null).setAttribute("columnName", column.getName());
 								}
-								if (column.hasFlag(Column.UUID_COLUMN))
+								if (column.hasFlag(IBaseColumn.UUID_COLUMN))
 								{
 									int length = columnHasConvertedType(column) ? 0 : column.getConfiguredColumnType().getLength();
 									boolean compatibleForUUID = false;
@@ -5712,8 +5730,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 							if (dataProvider != null && column != null && dataProvider instanceof Column && column instanceof Column &&
 								((Column)dataProvider).getColumnInfo() != null && ((Column)column).getColumnInfo() != null)
 							{
-								boolean primaryColumnUuidFlag = ((Column)dataProvider).getColumnInfo().hasFlag(Column.UUID_COLUMN);
-								boolean foreignColumnUuidFlag = ((Column)column).getColumnInfo().hasFlag(Column.UUID_COLUMN);
+								boolean primaryColumnUuidFlag = ((Column)dataProvider).getColumnInfo().hasFlag(IBaseColumn.UUID_COLUMN);
+								boolean foreignColumnUuidFlag = ((Column)column).getColumnInfo().hasFlag(IBaseColumn.UUID_COLUMN);
 								if ((primaryColumnUuidFlag && !foreignColumnUuidFlag) || (!primaryColumnUuidFlag && foreignColumnUuidFlag))
 								{
 									if (!(((Column)dataProvider).getTable() instanceof MemTable) && !(((Column)column).getTable() instanceof MemTable))

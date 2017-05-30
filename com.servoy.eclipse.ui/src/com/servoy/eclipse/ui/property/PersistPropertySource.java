@@ -133,6 +133,7 @@ import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBasicFormManager;
 import com.servoy.j2db.component.ComponentFormat;
+import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataui.PropertyEditorClass;
 import com.servoy.j2db.dataui.PropertyEditorHint;
 import com.servoy.j2db.dataui.PropertyEditorOption;
@@ -2732,6 +2733,21 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						else if (flattenedEditingSolution.getRelation(foundsetValue) != null)
 						{
 							table = dsm.getDataSource(flattenedEditingSolution.getRelation(foundsetValue).getForeignDataSource());
+						}
+						else
+						{
+							try
+							{
+								IFoundSet foundset = Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(foundsetValue);
+								if (foundset != null)
+								{
+									table = dsm.getDataSource(foundset.getDataSource());
+								}
+							}
+							catch (Exception ex)
+							{
+								ServoyLog.logError(ex);
+							}
 						}
 					}
 				}
