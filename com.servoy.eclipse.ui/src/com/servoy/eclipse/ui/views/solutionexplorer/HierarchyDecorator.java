@@ -6,18 +6,12 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.builder.ISourceLineTracker;
-import org.eclipse.dltk.javascript.ast.FunctionStatement;
-import org.eclipse.dltk.javascript.ast.JSDeclaration;
 import org.eclipse.dltk.javascript.ast.Script;
-import org.eclipse.dltk.javascript.ast.VariableDeclaration;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.dltk.ui.DLTKPluginImages;
-import org.eclipse.dltk.utils.TextUtils;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -27,6 +21,7 @@ import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IPersist;
@@ -39,7 +34,9 @@ import com.servoy.j2db.util.PersistHelper;
 
 public class HierarchyDecorator implements ILightweightLabelDecorator
 {
+	public static final String ID = "com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView.PersistDecorator";
 	private final ArrayList<ILabelProviderListener> listeners = new ArrayList<ILabelProviderListener>();
+	private static IDialogSettings fDialogSettings = Activator.getDefault().getDialogSettings();
 
 	@Override
 	public void addListener(ILabelProviderListener listener)
@@ -47,7 +44,6 @@ public class HierarchyDecorator implements ILightweightLabelDecorator
 		listeners.add(listener);
 	}
 
-	//TODO
 	public void fireChanged(IResource[] resource)
 	{
 		synchronized (listeners)
@@ -60,6 +56,11 @@ public class HierarchyDecorator implements ILightweightLabelDecorator
 	@Override
 	public void dispose()
 	{
+		synchronized (listeners)
+		{
+			for (ILabelProviderListener listener : listeners)
+				removeListener(listener);
+		}
 	}
 
 	@Override
@@ -118,9 +119,7 @@ public class HierarchyDecorator implements ILightweightLabelDecorator
 		{
 			decoration.addOverlay(DLTKPluginImages.DESC_OVR_OVERRIDES, IDecoration.BOTTOM_RIGHT);
 		}
-
-		//TODO if (showAllAction.isChecked() &&
-		if (element instanceof AbstractBase)
+		if (fDialogSettings.getBoolean(FormHierarchyView.DIALOGSTORE_SHOW_ALL_MEMBERS) && element instanceof AbstractBase)
 		{
 			decoration.addSuffix(" [" + ((Form)((AbstractBase)element).getAncestor(IRepository.FORMS)).getName() + "]");
 		}
@@ -143,12 +142,14 @@ public class HierarchyDecorator implements ILightweightLabelDecorator
 
 						if (element instanceof ScriptMethod)
 						{
-							return getProblemLevel(jsMarkers, sourceModule, getFunctionStatementForName(script, ((ScriptMethod)element).getName()));
+							return DecoratorHelper.getProblemLevel(jsMarkers, sourceModule,
+								DecoratorHelper.getFunctionStatementForName(script, ((ScriptMethod)element).getName()));
 						}
 
 						if (element instanceof ScriptVariable)
 						{
-							return getProblemLevel(jsMarkers, sourceModule, getVariableDeclarationForName(script, ((ScriptVariable)element).getName()));
+							return DecoratorHelper.getProblemLevel(jsMarkers, sourceModule,
+								DecoratorHelper.getVariableDeclarationForName(script, ((ScriptVariable)element).getName()));
 						}
 					}
 				}
@@ -184,77 +185,4 @@ public class HierarchyDecorator implements ILightweightLabelDecorator
 		}
 		return -1;
 	}
-
-	//TODO refactor, copied from solex
-	public int getProblemLevel(IMarker[] jsMarkers, ISourceModule sourceModule, ASTNode node) throws ModelException
-	{
-		int problemLevel = -1;
-		if (jsMarkers == null || node == null) return problemLevel;
-		ISourceLineTracker sourceLineTracker = null;
-		for (IMarker marker : jsMarkers)
-		{
-			if (marker.getAttribute(IMarker.SEVERITY, -1) > problemLevel)
-			{
-				int start = marker.getAttribute(IMarker.CHAR_START, -1);
-				if (start != -1)
-				{
-					if (node.sourceStart() <= start && start <= node.sourceEnd())
-					{
-						problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
-					}
-				}
-				else
-				{
-					int line = marker.getAttribute(IMarker.LINE_NUMBER, -1); // 1 based
-					if (line != -1)
-					{
-						if (sourceLineTracker == null) sourceLineTracker = TextUtils.createLineTracker(sourceModule.getSource());
-						// getLineNumberOfOffset == 0 based so +1 to match the markers line
-						if (sourceLineTracker.getLineNumberOfOffset(node.sourceStart()) + 1 <= line &&
-							line <= sourceLineTracker.getLineNumberOfOffset(node.sourceEnd()) + 1)
-						{
-							problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
-						}
-					}
-				}
-
-			}
-		}
-		return problemLevel;
-	}
-
-	//TODO refactor, copied from solex
-	private FunctionStatement getFunctionStatementForName(Script script, String metName)
-	{
-		for (JSDeclaration dec : script.getDeclarations())
-		{
-			if (dec instanceof FunctionStatement)
-			{
-				FunctionStatement fstmt = (FunctionStatement)dec;
-				if (fstmt.getFunctionName().equals(metName))
-				{
-					return fstmt;
-				}
-			}
-		}
-		return null;
-	}
-
-	//TODO refactor, copied from solex
-	private VariableDeclaration getVariableDeclarationForName(Script script, String varName)
-	{
-		for (JSDeclaration dec : script.getDeclarations())
-		{
-			if (dec instanceof VariableDeclaration)
-			{
-				VariableDeclaration varDec = (VariableDeclaration)dec;
-				if (varDec.getVariableName().equals(varName))
-				{
-					return varDec;
-				}
-			}
-		}
-		return null;
-	}
-
 }

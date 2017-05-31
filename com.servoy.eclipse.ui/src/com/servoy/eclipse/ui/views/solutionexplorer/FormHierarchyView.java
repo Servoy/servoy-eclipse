@@ -9,6 +9,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IMarkerDelta;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -17,6 +23,8 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -63,7 +71,6 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
-import com.servoy.eclipse.ui.labelproviders.DeprecationDecoratingStyledCellLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IDeprecationProvider;
@@ -566,6 +573,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	public static final String DIALOGSTORE_VIEWORIENTATION = "FormHierarchyView.orientation";
 	private static final String DIALOGSTORE_RATIO = "FormHierarchyView.ratio";
 	private static final String DIALOGSTORE_SHOW_MEMBERS = "FormHierarchy.SHOW_MEMBERS";
+	public static final String DIALOGSTORE_SHOW_ALL_MEMBERS = "FormHierarchy.SHOW_ALL_MEMBERS";
 	private static final String GROUP_ELEMENTS_BY_TYPE = "GroupElements";
 
 	private IDialogSettings fDialogSettings;
@@ -603,6 +611,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 	private IMemento memento;
 	private StatusBarUpdater statusBarUpdater;
+	private IResourceChangeListener resourceChangeListener;
 	private static final String SELECTED_FORM = "FormHierarchy.SELECTION";
 
 	@Override
@@ -647,7 +656,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 		this.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
 		tree.addSelectionChangedListener(this);
-		
+
 		IStatusLineManager slManager = getViewSite().getActionBars().getStatusLineManager();
 		statusBarUpdater = new StatusBarUpdater(slManager);
 		statusBarUpdater.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
@@ -665,6 +674,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		{
 			setSelection(persist);
 		}
+		//TODO addResourceListener();
 	}
 
 	private void createTreeViewer(Composite parent)
@@ -672,7 +682,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		tree = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		treeProvider = new FormTreeContentProvider();
 		tree.setContentProvider(treeProvider);
-		tree.setLabelProvider(new DeprecationDecoratingStyledCellLabelProvider(new DecoratedLabelProvider(new FormViewLabelProvider(treeProvider))));
+		tree.setLabelProvider(new DecoratedLabelProvider(new FormViewLabelProvider(treeProvider)));
 
 		tree.addDoubleClickListener(new FormHierarchyDoubleClickListener());
 		tree.addPostSelectionChangedListener(new FocusSelectedElementListener());
@@ -694,8 +704,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		ColumnViewerToolTipSupport.enableFor(list);
 		FormListContentProvider listProvider = new FormListContentProvider(this);
 		list.setContentProvider(listProvider);
-		list.setLabelProvider(//new DeprecationDecoratingStyledCellLabelProvider(
-			new DecoratedLabelProvider(new FormViewLabelProvider(listProvider)));//, new FormViewLabelDecorator())));
+		list.setLabelProvider(new DecoratedLabelProvider(new FormViewLabelProvider(listProvider)));
 		viewForm.setContent(list.getControl());
 
 		list.addDoubleClickListener(new FormHierarchyDoubleClickListener());
@@ -976,6 +985,16 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		list.addSelectionChangedListener(showMembersAction);
 
 		showAllAction = new FormHierarchyFilter(list, false, "inher_co.png", "Show All Inherited Members");
+		showAllAction.setChecked(fDialogSettings.getBoolean(DIALOGSTORE_SHOW_ALL_MEMBERS));
+		showAllAction.addPropertyChangeListener(new IPropertyChangeListener()
+		{
+
+			@Override
+			public void propertyChange(PropertyChangeEvent event)
+			{
+				fDialogSettings.put(DIALOGSTORE_SHOW_ALL_MEMBERS, showAllAction.isChecked());
+			}
+		});
 		lowertbmanager.add(showAllAction);
 
 		hideElementsAction = new FormHierarchyFilter(list, false, "hide_elements.gif", "Hide elements");
@@ -1005,6 +1024,55 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		}
 	}
 
+	private void addResourceListener()
+	{
+		final HierarchyDecorator decorator = (HierarchyDecorator)PlatformUI.getWorkbench().getDecoratorManager().getBaseLabelProvider(HierarchyDecorator.ID);
+		// we monitor the changes to eclipse projects in order to keep the list of
+		// projects in the tree up to date
+		Display.getCurrent().asyncExec(new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				resourceChangeListener = new IResourceChangeListener()
+				{
+					public void resourceChanged(IResourceChangeEvent event)
+					{
+						if ((event.getType() & IResourceChangeEvent.POST_CHANGE) != 0)
+						{
+							setSelection(selected);//refresh
+						}
+						else if (decorator != null)
+						{
+							IMarkerDelta[] markersDelta = event.findMarkerDeltas(IMarker.PROBLEM, true);
+							HashSet<IResource> changedProblemResources = new HashSet<IResource>();
+							for (IMarkerDelta md : markersDelta)
+							{
+								IResource r = md.getResource();
+								do
+								{
+									if (!changedProblemResources.add(r))
+									{
+										break;
+									}
+									r = r.getParent();
+								}
+								while (r != null && r.getType() != IResource.ROOT);
+							}
+
+							decorator.fireChanged(changedProblemResources.toArray(new IResource[changedProblemResources.size()]));
+						}
+					}
+				};
+
+				ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener,
+					IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
+			}
+		});
+	}
+
+
 	@Override
 	public Object getAdapter(Class type)
 	{
@@ -1028,6 +1096,12 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			statusBarUpdater.dispose();
 			fSelectionProviderMediator.removeSelectionChangedListener(statusBarUpdater);
 			statusBarUpdater = null;
+		}
+
+		if (resourceChangeListener != null)
+		{
+			ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
+			resourceChangeListener = null;
 		}
 
 		super.dispose();
