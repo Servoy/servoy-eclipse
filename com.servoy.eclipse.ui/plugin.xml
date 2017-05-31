@@ -1141,6 +1141,17 @@
         Servoy solution explorer problem decorator
      </description>
   	</decorator>
+  	<decorator
+         adaptable="true"
+         class="com.servoy.eclipse.ui.views.solutionexplorer.HierarchyDecorator"
+         id="com.servoy.eclipse.ui.views.solutionexplorer.PersistDecorator"
+         label="Persist Decorator"
+         lightweight="true"
+         state="true"> 
+    <description> 
+      Decorator for the persists in the FormHierarchyView.
+    </description>
+  </decorator> 
    <decorator
          adaptable="true"
          class="com.servoy.eclipse.ui.views.solutionexplorer.WebPackageDecorator"

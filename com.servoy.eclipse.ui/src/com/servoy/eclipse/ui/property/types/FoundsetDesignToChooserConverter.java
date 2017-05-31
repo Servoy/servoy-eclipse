@@ -27,9 +27,11 @@ import com.servoy.eclipse.ui.dialogs.CombinedTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.FormFoundsetEntryContentProvider;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider.RelationsWrapper;
 import com.servoy.eclipse.ui.property.DatasourcePropertyConverter;
+import com.servoy.eclipse.ui.property.NamedFoundsetConverter;
 import com.servoy.eclipse.ui.property.RelationNameConverter;
 import com.servoy.eclipse.ui.util.UnresolvedValue;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyTypeConfig;
 import com.servoy.j2db.util.ServoyJSONObject;
@@ -46,11 +48,13 @@ public class FoundsetDesignToChooserConverter
 
 	protected final RelationNameConverter relationNameConverter;
 	protected final DatasourcePropertyConverter datasourcePropertyConverter;
+	protected final NamedFoundsetConverter namedFoundsetConverter;
 
 	public FoundsetDesignToChooserConverter(FlattenedSolution flattenedSolution)
 	{
 		relationNameConverter = new RelationNameConverter(flattenedSolution);
 		datasourcePropertyConverter = new DatasourcePropertyConverter();
+		namedFoundsetConverter = new NamedFoundsetConverter(flattenedSolution);
 	}
 
 	public Object convertJSONValueToChooserValue(Object value)
@@ -64,9 +68,17 @@ public class FoundsetDesignToChooserConverter
 			else if ("".equals(selectorString)) valueForChooser = FormFoundsetEntryContentProvider.FORM_FOUNDSET;
 			else
 			{
-				// either a datasource or a relation
+				// either a datasource , relation or named foundset
 				valueForChooser = datasourcePropertyConverter.convertProperty(null, selectorString);
 				if (valueForChooser == null) valueForChooser = relationNameConverter.convertProperty(null, selectorString);
+				if (valueForChooser == null || valueForChooser instanceof UnresolvedValue)
+				{
+					Form form = namedFoundsetConverter.convertProperty(null, selectorString);
+					if (form != null)
+					{
+						valueForChooser = form;
+					}
+				}
 			}
 		}
 		else valueForChooser = value;
@@ -96,6 +108,7 @@ public class FoundsetDesignToChooserConverter
 				}
 
 				if (value instanceof RelationsWrapper) newFoundsetSelector = relationNameConverter.convertValue(null, value);
+				else if (value instanceof Form) newFoundsetSelector = namedFoundsetConverter.convertValue(null, (Form)value);
 				else if (value instanceof IDataSourceWrapper)
 				{
 					newFoundsetSelector = datasourcePropertyConverter.convertValue(null, (IDataSourceWrapper)value);

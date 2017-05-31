@@ -29,6 +29,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer;
@@ -54,6 +55,7 @@ import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PropertyController;
 import com.servoy.j2db.FlattenedSolution;
+import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.persistence.ITable;
 import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.server.ngclient.property.FoundsetPropertyType;
@@ -333,6 +335,21 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 					baseTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(foundsetSelector);
 					if (baseTable == null)
 					{
+						try
+						{
+							IFoundSet foundset = Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(foundsetSelector);
+							if (foundset != null)
+							{
+								baseTable = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(foundset.getDataSource());
+							}
+						}
+						catch (Exception ex)
+						{
+							ServoyLog.logError(ex);
+						}
+					}
+					if (baseTable == null)
+					{
 						ServoyLog.logInfo("Cannot find a table with datasource " + foundsetSelector +
 							" for a foundset typed property. Using form table in dataprovider chooser.");
 						baseTable = formTable;
@@ -398,19 +415,15 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 								{
 									// drop the 'dp' prefix from dp0, dp1, ...
 									int idx = Integer.parseInt(key.substring(DP_PREFIX.length()));
-									if (dpValue != null && !("".equals(foundsetSelector) || isSeparateDatasource))
+									if (dpValue != null && !("".equals(foundsetSelector) || isSeparateDatasource) &&
+										Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(foundsetSelector) == null)
 									{
 										// then it's a relation
 										dpValue = foundsetSelector + "." + dpValue;
 									}
 									dataprovidersArray.put(idx, dpValue);
 								}
-								catch (NumberFormatException e)
-								{
-									ServoyLog.logError(e);
-									continue; // we don't know what DP this is so ignore it
-								}
-								catch (JSONException e)
+								catch (Exception e)
 								{
 									ServoyLog.logError(e);
 								}
@@ -436,7 +449,8 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 								dpValue = (String)ServoyJSONObject.jsonNullToNull(dataprovidersValues.opt(staticConfigDataprovider));
 
 								// drop the 'dp' prefix from dp0, dp1, ...
-								if (dpValue != null && !("".equals(foundsetSelector) || isSeparateDatasource))
+								if (dpValue != null && !("".equals(foundsetSelector) || isSeparateDatasource) &&
+									Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(foundsetSelector) == null)
 								{
 									// then it's a relation
 									dpValue = foundsetSelector + "." + dpValue;
@@ -444,12 +458,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 							}
 							dataprovidersObj.put(staticConfigDataprovider, dpValue);
 						}
-						catch (NumberFormatException e)
-						{
-							ServoyLog.logError(e);
-							continue; // we don't know what DP this is so ignore it
-						}
-						catch (JSONException e)
+						catch (Exception e)
 						{
 							ServoyLog.logError(e);
 						}
@@ -534,10 +543,18 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 						{
 							String foundsetSelector = (String)ServoyJSONObject.jsonNullToNull(editableValue.opt(FoundsetPropertyType.FOUNDSET_SELECTOR));
 							String dp = (dataprovidersArray.isNull(i) ? null : dataprovidersArray.getString(i));
-							if (dp != null && !("".equals(foundsetSelector) || isSeparateDatasource))
+							try
 							{
-								// then it's a relation
-								dp = dp.substring(foundsetSelector.length() + 1);
+								if (dp != null && !("".equals(foundsetSelector) || isSeparateDatasource) &&
+									Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(foundsetSelector) == null)
+								{
+									// then it's a relation
+									dp = dp.substring(foundsetSelector.length() + 1);
+								}
+							}
+							catch (Exception ex)
+							{
+								ServoyLog.logError(ex);
 							}
 
 							dataprovidersValues.put(DP_PREFIX + i, dp != null ? dp : JSONObject.NULL);
@@ -555,10 +572,18 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 							String foundsetSelector = (String)ServoyJSONObject.jsonNullToNull(editableValue.opt(FoundsetPropertyType.FOUNDSET_SELECTOR));
 							String dp = (dataprovidersObj == null || dataprovidersObj.isNull(staticConfigDataprovider) ? null
 								: dataprovidersObj.getString(staticConfigDataprovider));
-							if (dp != null && !("".equals(foundsetSelector) || isSeparateDatasource))
+							try
 							{
-								// then it's a relation
-								dp = dp.substring(foundsetSelector.length() + 1);
+								if (dp != null && !("".equals(foundsetSelector) || isSeparateDatasource) &&
+									Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(foundsetSelector) == null)
+								{
+									// then it's a relation
+									dp = dp.substring(foundsetSelector.length() + 1);
+								}
+							}
+							catch (Exception ex)
+							{
+								ServoyLog.logError(ex);
 							}
 
 							dataprovidersValues.put(staticConfigDataprovider, dp != null ? dp : JSONObject.NULL);
