@@ -613,10 +613,10 @@ public class WarExporter
 	private void copyNGLibs(File targetLibDir) throws ExportException, IOException
 	{
 		List<String> pluginLocations = exportModel.getPluginLocations();
-		File parent = null;
+		File eclipseParent = null;
+		File userDir = new File(System.getProperty("user.dir"));
 		if (System.getProperty("eclipse.home.location") != null)
-			parent = new File(URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
-		else parent = new File(System.getProperty("user.dir"));
+			eclipseParent = new File(URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
 		for (String libName : NG_LIBS)
 		{
 			int i = 0;
@@ -624,9 +624,21 @@ public class WarExporter
 			while (!found && i < pluginLocations.size())
 			{
 				File pluginLocation = new File(pluginLocations.get(i));
-				if (!pluginLocation.isAbsolute())
+				if (!pluginLocation.exists())
 				{
-					pluginLocation = new File(parent, pluginLocations.get(i));
+					if (eclipseParent != null)
+					{
+						pluginLocation = new File(eclipseParent, pluginLocations.get(i));
+					}
+					if (!pluginLocation.exists())
+					{
+						pluginLocation = new File(userDir, pluginLocations.get(i));
+					}
+					if (!pluginLocation.exists())
+					{
+						System.err.println("Trying different parents for " + pluginLocations.get(i) + " eclipse: " + eclipseParent + " userdir: " + userDir +
+							" none are found");
+					}
 				}
 				FileFilter filter = new WildcardFileFilter(libName);
 				try
@@ -1752,12 +1764,11 @@ public class WarExporter
 	 */
 	public String searchExportedPlugins()
 	{
-		File parent = null;
-		if (System.getProperty("eclipse.home.location") != null)
-			parent = new File(URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
-		else parent = new File(System.getProperty("user.dir"));
-
 		List<String> pluginLocations = exportModel.getPluginLocations();
+		File eclipseParent = null;
+		File userDir = new File(System.getProperty("user.dir"));
+		if (System.getProperty("eclipse.home.location") != null)
+			eclipseParent = new File(URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
 		for (String libName : NG_LIBS)
 		{
 			int i = 0;
@@ -1765,9 +1776,21 @@ public class WarExporter
 			while (!found && i < pluginLocations.size())
 			{
 				File pluginLocation = new File(pluginLocations.get(i));
-				if (!pluginLocation.isAbsolute())
+				if (!pluginLocation.exists())
 				{
-					pluginLocation = new File(parent, pluginLocations.get(i));
+					if (eclipseParent != null)
+					{
+						pluginLocation = new File(eclipseParent, pluginLocations.get(i));
+					}
+					if (!pluginLocation.exists())
+					{
+						pluginLocation = new File(userDir, pluginLocations.get(i));
+					}
+					if (!pluginLocation.exists())
+					{
+						System.err.println("Trying different parents for " + pluginLocations.get(i) + " eclipse: " + eclipseParent + " userdir: " + userDir +
+							" none are found");
+					}
 				}
 				FileFilter filter = new WildcardFileFilter(libName);
 				File[] libs = pluginLocation.listFiles(filter);
