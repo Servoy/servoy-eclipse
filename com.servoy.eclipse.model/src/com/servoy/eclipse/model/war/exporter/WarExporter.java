@@ -1221,6 +1221,7 @@ public class WarExporter
 		{
 			try
 			{
+				defaultCss.getParentFile().mkdirs();
 				String styleCSS = TemplateGenerator.getStyleCSS("servoy_web_client_default.css");
 				OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(defaultCss), "utf8");
 				fw.write(styleCSS);
@@ -1674,6 +1675,7 @@ public class WarExporter
 	{
 		if (!destDir.exists() && !destDir.mkdirs()) throw new ExportException("Can't create destination dir: " + destDir);
 		File[] listFiles = sourceDir.listFiles();
+		if (listFiles == null) return;
 		for (File file : listFiles)
 		{
 			if (file.isDirectory())
