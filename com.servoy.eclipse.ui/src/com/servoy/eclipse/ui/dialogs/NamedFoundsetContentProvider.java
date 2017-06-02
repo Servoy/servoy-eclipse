@@ -64,7 +64,7 @@ public class NamedFoundsetContentProvider implements ITreeContentProvider
 		Map<String, Form> namedFoundsetForms = new HashMap<String, Form>();
 		if (parentElement == NAMED_FOUNDSET)
 		{
-			Iterator<Form> it = flattenedSolution.getForms(true);
+			Iterator<Form> it = flattenedSolution.getForms(false);
 			while (it.hasNext())
 			{
 				Form form = it.next();

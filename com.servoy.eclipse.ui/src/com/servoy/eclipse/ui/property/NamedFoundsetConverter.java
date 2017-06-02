@@ -41,7 +41,7 @@ public class NamedFoundsetConverter implements IPropertyConverter<String, Form>
 	{
 		if (value != null)
 		{
-			Iterator<Form> it = flattenedSolution.getForms(true);
+			Iterator<Form> it = flattenedSolution.getForms(false);
 			while (it.hasNext())
 			{
 				Form form = it.next();
