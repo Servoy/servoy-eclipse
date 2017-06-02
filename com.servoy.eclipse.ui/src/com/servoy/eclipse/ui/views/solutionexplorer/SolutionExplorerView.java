@@ -57,19 +57,12 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.builder.ISourceLineTracker;
-import org.eclipse.dltk.javascript.ast.FunctionStatement;
-import org.eclipse.dltk.javascript.ast.JSDeclaration;
 import org.eclipse.dltk.javascript.ast.Script;
-import org.eclipse.dltk.javascript.ast.VariableDeclaration;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.dltk.ui.DLTKPluginImages;
-import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.ControlContribution;
@@ -3887,12 +3880,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 							if (realObject instanceof ScriptMethod)
 							{
-								return getProblemLevel(jsMarkers, sourceModule, getFunctionStatementForName(script, ((ScriptMethod)realObject).getName()));
+								return DecoratorHelper.getProblemLevel(jsMarkers, sourceModule,
+									DecoratorHelper.getFunctionStatementForName(script, ((ScriptMethod)realObject).getName()));
 							}
 
 							if (realObject instanceof ScriptVariable)
 							{
-								return getProblemLevel(jsMarkers, sourceModule, getVariableDeclarationForName(script, ((ScriptVariable)realObject).getName()));
+								return DecoratorHelper.getProblemLevel(jsMarkers, sourceModule,
+									DecoratorHelper.getVariableDeclarationForName(script, ((ScriptVariable)realObject).getName()));
 							}
 						}
 					}
@@ -3905,83 +3900,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 			// unspecified
 			return -1;
-		}
-
-		/**
-		 * @param problemLevel
-		 * @param jsMarkers
-		 * @param sourceModule
-		 * @param node
-		 * @return
-		 * @throws ModelException
-		 */
-		public int getProblemLevel(IMarker[] jsMarkers, ISourceModule sourceModule, ASTNode node) throws ModelException
-		{
-			int problemLevel = -1;
-			if (jsMarkers == null || node == null) return problemLevel;
-			ISourceLineTracker sourceLineTracker = null;
-			for (IMarker marker : jsMarkers)
-			{
-				if (marker.getAttribute(IMarker.SEVERITY, -1) > problemLevel)
-				{
-					int start = marker.getAttribute(IMarker.CHAR_START, -1);
-					if (start != -1)
-					{
-						if (node.sourceStart() <= start && start <= node.sourceEnd())
-						{
-							problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
-						}
-					}
-					else
-					{
-						int line = marker.getAttribute(IMarker.LINE_NUMBER, -1); // 1 based
-						if (line != -1)
-						{
-							if (sourceLineTracker == null) sourceLineTracker = TextUtils.createLineTracker(sourceModule.getSource());
-							// getLineNumberOfOffset == 0 based so +1 to match the markers line
-							if (sourceLineTracker.getLineNumberOfOffset(node.sourceStart()) + 1 <= line &&
-								line <= sourceLineTracker.getLineNumberOfOffset(node.sourceEnd()) + 1)
-							{
-								problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
-							}
-						}
-					}
-
-				}
-			}
-			return problemLevel;
-		}
-
-		private FunctionStatement getFunctionStatementForName(Script script, String metName)
-		{
-			for (JSDeclaration dec : script.getDeclarations())
-			{
-				if (dec instanceof FunctionStatement)
-				{
-					FunctionStatement fstmt = (FunctionStatement)dec;
-					if (fstmt.getFunctionName().equals(metName))
-					{
-						return fstmt;
-					}
-				}
-			}
-			return null;
-		}
-
-		private VariableDeclaration getVariableDeclarationForName(Script script, String varName)
-		{
-			for (JSDeclaration dec : script.getDeclarations())
-			{
-				if (dec instanceof VariableDeclaration)
-				{
-					VariableDeclaration varDec = (VariableDeclaration)dec;
-					if (varDec.getVariableName().equals(varName))
-					{
-						return varDec;
-					}
-				}
-			}
-			return null;
 		}
 
 		public Image decorateImage(Image image, Object element)

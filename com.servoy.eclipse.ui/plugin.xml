@@ -1144,7 +1144,7 @@
   	<decorator
          adaptable="true"
          class="com.servoy.eclipse.ui.views.solutionexplorer.HierarchyDecorator"
-         id="com.servoy.eclipse.ui.views.solutionexplorer.PersistDecorator"
+         id="com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView.PersistDecorator"
          label="Persist Decorator"
          lightweight="true"
          state="true"> 

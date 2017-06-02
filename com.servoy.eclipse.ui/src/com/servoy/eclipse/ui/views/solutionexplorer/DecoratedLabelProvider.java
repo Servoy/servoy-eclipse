@@ -29,13 +29,17 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.jface.viewers.ViewerColumn;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.PlatformUI;
+
+import com.servoy.eclipse.ui.util.IDeprecationProvider;
 
 public class DecoratedLabelProvider extends DecoratingStyledCellLabelProvider implements IPropertyChangeListener, ILabelProvider, ITableLabelProvider
 {
@@ -56,16 +60,38 @@ public class DecoratedLabelProvider extends DecoratingStyledCellLabelProvider im
 			return provider.getImage(element);
 		}
 
+		private static final Styler STRIKEOUT_STYLER = new Styler()
+		{
+			@Override
+			public void applyStyles(TextStyle textStyle)
+			{
+				textStyle.strikeout = true;
+			}
+		};
+
 		@Override
 		public StyledString getStyledText(Object element)
 		{
+			StyledString styledText = null;
 			if (provider instanceof IStyledLabelProvider)
 			{
-				return ((IStyledLabelProvider)provider).getStyledText(element);
+				styledText = ((IStyledLabelProvider)provider).getStyledText(element);
 			}
-			String text = provider.getText(element);
-			if (text == null) text = ""; //$NON-NLS-1$
-			return new StyledString(text);
+			else
+			{
+				String text = provider.getText(element);
+				if (text == null) text = ""; //$NON-NLS-1$
+				styledText = new StyledString(text);
+			}
+			if (provider instanceof IDeprecationProvider)
+			{
+				Boolean isDeprecated = ((IDeprecationProvider)provider).isDeprecated(element);
+				if (isDeprecated != null && isDeprecated.booleanValue())
+				{
+					styledText.setStyle(0, styledText.length(), STRIKEOUT_STYLER);
+				}
+			}
+			return styledText;
 		}
 
 		@Override
