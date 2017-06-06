@@ -39,7 +39,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnPlaceImage = {
 		text: "Place Image Wizard",
-		icon: "toolbaractions/icons/image.png",
+		icon: "toolbaractions/icons/media.png",
 		enabled: true,
 		onclick: function() {
 			$editorService.openElementWizard('image');
