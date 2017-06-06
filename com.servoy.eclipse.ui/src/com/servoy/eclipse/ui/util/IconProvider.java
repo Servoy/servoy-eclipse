@@ -18,9 +18,7 @@
 package com.servoy.eclipse.ui.util;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
@@ -54,14 +52,11 @@ public class IconProvider
 	}
 
 	private final Map<Class< ? >, String> c2i;
-	private final Set<Class< ? >> oldLocation;
 	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
 	private IconProvider()
 	{
 		c2i = new HashMap<Class< ? >, String>();
-		oldLocation = new HashSet<Class< ? >>();
-
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.JSLib.class, "jslibfolder.png");
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.Array.class, "jslibarray.gif");
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.Date.class, "day_obj.gif");
@@ -75,20 +70,18 @@ public class IconProvider
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.RegExp.class, "regExp_image.gif");
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.Number.class, "number.gif");
 
-		c2i.put(JSApplication.class, "application.gif");
-		c2i.put(JSDatabaseManager.class, "server.png");
+		c2i.put(JSApplication.class, "application.png");
+		c2i.put(JSDatabaseManager.class, "database_manager.png");
 		c2i.put(JSDataSources.class, "datasources.png");
-		c2i.put(JSUtils.class, "toolbox.gif");
-		c2i.put(HistoryProvider.class, "history.gif");
-		c2i.put(JSSecurity.class, "lock.gif");
-		c2i.put(JSI18N.class, "i18n.gif");
-		c2i.put(JSSolutionModel.class, "blueprint.gif");
+		c2i.put(JSUtils.class, "utils.png");
+		c2i.put(HistoryProvider.class, "history.png");
+		c2i.put(JSSecurity.class, "security.png");
+		c2i.put(JSI18N.class, "i18n.png");
+		c2i.put(JSSolutionModel.class, "blueprint.png");
 		c2i.put(JSUnitAssertFunctions.class, "jsunit.png");
 		c2i.put(ServoyException.class, "exception.gif");
 		c2i.put(JSForm.class, "formula.gif");
 		c2i.put(FoundSet.class, "foundset.gif");
-
-		oldLocation.add(JSUtils.class);
 	}
 
 	public ImageDescriptor descriptor(Class< ? > cls)
@@ -96,8 +89,7 @@ public class IconProvider
 		String icon = c2i.get(cls);
 		if (icon != null)
 		{
-			if (oldLocation.contains(cls)) return com.servoy.eclipse.ui.Activator.loadImageDescriptorFromOldLocations(icon);
-			else return com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle(icon);
+			return com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle(icon);
 		}
 		else return null;
 	}
@@ -107,8 +99,7 @@ public class IconProvider
 		String icon = c2i.get(cls);
 		if (icon != null)
 		{
-			if (oldLocation.contains(cls)) return uiActivator.loadImageFromOldLocation(icon);
-			else return uiActivator.loadImageFromBundle(icon);
+			return uiActivator.loadImageFromBundle(icon);
 		}
 		else return null;
 	}

@@ -203,7 +203,7 @@ public class ElementUtil
 		}
 		if (persist instanceof Media)
 		{
-			return "image.png";
+			return "media.png";
 		}
 		if (persist instanceof ValueList)
 		{

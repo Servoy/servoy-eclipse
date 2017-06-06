@@ -12,7 +12,7 @@
       </category>
       <view
             name="Solution Explorer"
-            icon="icons/solution.gif"
+            icon="icons/solution.png"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView"
             id="com.servoy.eclipse.ui.views.SolutionExplorerView">
@@ -250,7 +250,7 @@
             class="com.servoy.eclipse.ui.editors.I18NEditor"
             default="true"
             extensions="properties"
-            icon="icons/i18n.gif"
+            icon="icons/i18n.png"
             id="com.servoy.eclipse.ui.editors.I18NEditor"
             matchingStrategy="com.servoy.eclipse.core.resource.I18NMatchingStrategy"
             name="I18N Editor">
@@ -285,7 +285,7 @@
       <editor
             class="com.servoy.eclipse.ui.editors.MediaViewer"
             default="true"
-            icon="icons/image.png"
+            icon="icons/media.png"
             id="com.servoy.eclipse.ui.editors.MediaViewer"
             matchingStrategy="com.servoy.eclipse.core.resource.PersistMatchingStrategy"
             name="Media Viewer">
@@ -423,7 +423,7 @@
          </menu>
          <action
                class="com.servoy.eclipse.ui.actions.ShowI18NDialogActionDelegate"
-               icon="icons/i18n.gif"
+               icon="icons/i18n.png"
                id="com.servoy.eclipse.ui.actions.OpenI18nDialog"
                label="Show I18N Dialog"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/actions"
@@ -433,7 +433,7 @@
          </action>
          <action
                class="com.servoy.eclipse.ui.actions.ShowI18NDialogActionDelegate"
-               icon="icons/i18n_ext.gif"
+               icon="icons/i18n_ext.png"
                id="com.servoy.eclipse.ui.actions.I18nExternalizeDialog"
                label="Show Externalize Strings Dialog"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/actions"

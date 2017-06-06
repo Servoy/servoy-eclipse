@@ -2832,7 +2832,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction newSolution = new OpenWizardAction(NewSolutionWizard.class, Activator.loadImageDescriptorFromBundle("solution_icon.gif"),
 			"Create new solution");
 		IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("solution_module_m.gif"), "Create new module");
-		IAction newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.gif"), "Create new style")
+		IAction newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.png"), "Create new style")
 		{
 			@Override
 			public boolean isEnabled()
@@ -2934,7 +2934,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newVariable = new NewVariableAction(this);
 		newValueList = new NewValueListAction(this);
 
-		newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.gif"), "Create new style");
+		newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.png"), "Create new style");
 		importMedia = new ImportMediaAction(this);
 		newRelation = new NewRelationAction(this);
 		newForm = new OpenNewFormWizardAction();
@@ -3625,17 +3625,17 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 								}
 								else
 								{
-									scaledImage = uiActivator.loadImageFromBundle("image.png");
+									scaledImage = uiActivator.loadImageFromBundle("media.png");
 								}
 							}
 							catch (SWTException e)
 							{
-								scaledImage = uiActivator.loadImageFromBundle("image.png");
+								scaledImage = uiActivator.loadImageFromBundle("media.png");
 							}
 						}
 						else
 						{
-							if (scaledImage == null) scaledImage = uiActivator.loadImageFromBundle("image.png");
+							if (scaledImage == null) scaledImage = uiActivator.loadImageFromBundle("media.png");
 						}
 					}
 					String mediaInfo = mediaNode.getInfo();

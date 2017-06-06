@@ -160,7 +160,7 @@ import com.servoy.j2db.util.Utils;
 public class SolutionExplorerTreeContentProvider
 	implements IStructuredContentProvider, ITreeContentProvider, ILoadedNGPackagesListener, IAvailableNGPackageProjectsListener
 {
-	private static final String IMG_SOLUTION = "solution.gif";
+	private static final String IMG_SOLUTION = "solution.png";
 	private static final String IMG_SOLUTION_M = "module.gif";
 	private static final String IMG_SOLUTION_MODULE = "solution_module.gif";
 	private static final String IMG_SOLUTION_LOGIN = "solution_login.gif";
@@ -268,7 +268,7 @@ public class SolutionExplorerTreeContentProvider
 		resources = new PlatformSimpleUserNode(Messages.TreeStrings_Resources, UserNodeType.RESOURCES, null, uiActivator.loadImageFromBundle("resources.png"));
 		resources.parent = invisibleRootNode;
 
-		stylesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Styles, UserNodeType.STYLES, null, uiActivator.loadImageFromBundle("styles.gif"));
+		stylesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Styles, UserNodeType.STYLES, null, uiActivator.loadImageFromBundle("styles.png"));
 		stylesNode.setClientSupport(ClientSupport.ng_wc_sc);
 		stylesNode.parent = resources;
 
@@ -283,31 +283,31 @@ public class SolutionExplorerTreeContentProvider
 		servicesFromResourcesNode.parent = resources;
 
 		userGroupSecurityNode = new PlatformSimpleUserNode(Messages.TreeStrings_UserGroupSecurity, UserNodeType.USER_GROUP_SECURITY, null,
-			uiActivator.loadImageFromBundle("lock.gif"));
+			uiActivator.loadImageFromBundle("userandgroupsecurity.png"));
 		userGroupSecurityNode.setClientSupport(ClientSupport.ng_wc_sc);
 		userGroupSecurityNode.parent = resources;
 
-		i18nFilesNode = new PlatformSimpleUserNode(Messages.TreeStrings_I18NFiles, UserNodeType.I18N_FILES, null, uiActivator.loadImageFromBundle("i18n.gif"));
+		i18nFilesNode = new PlatformSimpleUserNode(Messages.TreeStrings_I18NFiles, UserNodeType.I18N_FILES, null, uiActivator.loadImageFromBundle("i18n.png"));
 		i18nFilesNode.parent = resources;
 
 		templatesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Templates, UserNodeType.TEMPLATES, null,
-			uiActivator.loadImageFromBundle("template.gif"));
+			uiActivator.loadImageFromBundle("template.png"));
 		templatesNode.setClientSupport(ClientSupport.ng_wc_sc);
 		templatesNode.parent = resources;
 
 		activeSolutionNode = new PlatformSimpleUserNode(Messages.TreeStrings_NoActiveSolution, UserNodeType.SOLUTION, null,
-			Messages.SolutionExplorerView_activeSolution, null, uiActivator.loadImageFromBundle("solution.gif"));
+			Messages.SolutionExplorerView_activeSolution, null, uiActivator.loadImageFromBundle("solution.png"));
 		activeSolutionNode.parent = invisibleRootNode;
 		modulesOfActiveSolution = new PlatformSimpleUserNode(Messages.TreeStrings_Modules, UserNodeType.MODULES, null,
-			uiActivator.loadImageFromBundle("modules.gif"));
+			uiActivator.loadImageFromBundle("modules.png"));
 		modulesOfActiveSolution.parent = activeSolutionNode;
 
 		allSolutionsNode = new PlatformSimpleUserNode(Messages.TreeStrings_AllSolutions, UserNodeType.ALL_SOLUTIONS, null,
-			PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
+			uiActivator.loadImageFromBundle("solutions.png"));
 		allSolutionsNode.parent = invisibleRootNode;
 
 		allWebPackagesNode = new PlatformSimpleUserNode(Messages.TreeStrings_AllWebPackageProjects, UserNodeType.ALL_WEB_PACKAGE_PROJECTS, null,
-			PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
+			uiActivator.loadImageFromBundle("all_packages.png"));
 		allWebPackagesNode.parent = invisibleRootNode;
 
 		databaseManager = createTypeNode(Messages.TreeStrings_DatabaseManager, UserNodeType.FOUNDSET_MANAGER, JSDatabaseManager.class, invisibleRootNode);
@@ -329,11 +329,11 @@ public class SolutionExplorerTreeContentProvider
 		i18n = createTypeNode(Messages.TreeStrings_i18n, UserNodeType.I18N, JSI18N.class, invisibleRootNode);
 		addReturnTypeNodes(i18n, ScriptObjectRegistry.getScriptObjectForClass(JSI18N.class).getAllReturnedTypes());
 
-		servers = new PlatformSimpleUserNode(Messages.TreeStrings_DBServers, UserNodeType.SERVERS, null, uiActivator.loadImageFromBundle("database_srv.gif"));
+		servers = new PlatformSimpleUserNode(Messages.TreeStrings_DBServers, UserNodeType.SERVERS, null, uiActivator.loadImageFromBundle("database_srv.png"));
 		servers.parent = resources;
 
 		final PlatformSimpleUserNode plugins = new PlatformSimpleUserNode(Messages.TreeStrings_Plugins, UserNodeType.PLUGINS, null,
-			uiActivator.loadImageFromBundle("plugin.gif"));
+			uiActivator.loadImageFromBundle("plugins.png"));
 		plugins.parent = invisibleRootNode;
 
 
@@ -1718,7 +1718,7 @@ public class SolutionExplorerTreeContentProvider
 			imgName = "serverDuplicate.gif";
 		}
 
-		return uiActivator.loadImageFromBundle(imgName,!server.getConfig().isEnabled());
+		return uiActivator.loadImageFromBundle(imgName, !server.getConfig().isEnabled());
 	}
 
 	private void handleServerViewsNode(IServerInternal serverObj, PlatformSimpleUserNode node)
@@ -1942,7 +1942,7 @@ public class SolutionExplorerTreeContentProvider
 			forms.parent = projectNode;
 
 			PlatformSimpleUserNode formReferences = new PlatformSimpleUserNode(Messages.TreeStrings_FormComponents, UserNodeType.COMPONENT_FORMS, solution,
-				uiActivator.loadImageFromBundle("forms.png"));
+				uiActivator.loadImageFromBundle("form_component.png"));
 			formReferences.parent = projectNode;
 			PlatformSimpleUserNode allRelations = null;
 			if (solutionOfCalculation == null)
@@ -1955,7 +1955,7 @@ public class SolutionExplorerTreeContentProvider
 				uiActivator.loadImageFromBundle("valuelists.png"));
 			valuelists.parent = projectNode;
 			PlatformSimpleUserNode media = new PlatformSimpleUserNode(Messages.TreeStrings_Media, UserNodeType.MEDIA, solution,
-				uiActivator.loadImageFromBundle("image.png"));
+				uiActivator.loadImageFromBundle("media.png"));
 			media.parent = projectNode;
 			addMediaFolderChildrenNodes(media, solution);
 
