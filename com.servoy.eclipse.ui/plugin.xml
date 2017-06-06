@@ -544,7 +544,7 @@
             visible="true">
          <action
                class="com.servoy.eclipse.ui.actions.ShowFontChooserActionDelegate"
-               icon="icons/text.gif"
+               icon="icons/text.png"
                id="com.servoy.eclipse.ui.actions.OpenFontDialog"
                label="Font Chooser"
                menubarPath="edit/Choosers"
@@ -555,7 +555,7 @@
          </action>
          <action
                class="com.servoy.eclipse.ui.actions.ShowColorChooserActionDelegate"
-               icon="icons/colorchooser.gif"
+               icon="icons/colorchooser.png"
                id="com.servoy.eclipse.ui.actions.OpenColorDialog"
                label="Color Chooser"
                menubarPath="edit/Choosers"
