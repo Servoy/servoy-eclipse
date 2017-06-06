@@ -815,7 +815,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 				{
 					if (object.has("imageMediaID"))
 					{
-						return Activator.loadImageDescriptorFromBundle("image.png");
+						return Activator.loadImageDescriptorFromBundle("media.png");
 					}
 					return Activator.loadImageDescriptorFromBundle("text.gif");
 				}

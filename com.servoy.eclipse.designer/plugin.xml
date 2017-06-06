@@ -201,7 +201,7 @@
          <action
                class="com.servoy.eclipse.designer.actions.AddMediaActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addMediaAction"
-               icon="icons/image.png"
+               icon="icons/media.png"
                id="com.servoy.eclipse.designer.action.addMediaAction"
                label="Place Image Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
