@@ -72,11 +72,9 @@
 	height: 26px;
 	min-width: 26px;
 	text-align: center;
-	border: 1px solid transparent;
-	border-radius: 2px;
+	border: 0px;
 	margin: 2px;
-	
-	background-color: #d9d9d9;
+	padding: 0px;
 }
 
 .toolbar-action:hover {
@@ -95,9 +93,9 @@
 	border: 1px dashed #C0C0C0;
 }
 
-.disabled img {
-	opacity: 0.4;
-	filter: alpha(opacity=40); /* msie */
+[disabled] img {
+	-webkit-filter: grayscale(100%); /* Safari 6.0 - 9.0 */
+    filter: grayscale(100%);
 }
 
 .onoffswitch {
