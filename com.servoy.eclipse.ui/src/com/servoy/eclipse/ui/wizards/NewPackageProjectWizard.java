@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
@@ -62,6 +63,11 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 
 	private PlatformSimpleUserNode treeNode;
 	private final String packageType;
+
+	public NewPackageProjectWizard()
+	{
+		this(IPackageReader.WEB_COMPONENT);
+	}
 
 	public NewPackageProjectWizard(String packageType)
 	{
@@ -128,7 +134,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 				if (viewer != null)
 				{
 					SimpleUserNode nodeToExpand = treeNode;
-					if (treeNode.parent != null)
+					if (treeNode != null && treeNode.parent != null)
 					{
 						List<IProject> projects = Arrays.asList(referencedProjects);
 						if (treeNode.parent.getRealObject() instanceof ServoyProject &&
@@ -288,7 +294,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 			}
 			ftv.setInput(availableSolutions.toArray());
 
-			if (treeNode.parent.getType() == UserNodeType.SOLUTION || treeNode.parent.getType() == UserNodeType.SOLUTION_ITEM)
+			if (treeNode != null && (treeNode.parent.getType() == UserNodeType.SOLUTION || treeNode.parent.getType() == UserNodeType.SOLUTION_ITEM))
 			{
 				ftv.setSelection(new StructuredSelection(((ServoyProject)treeNode.parent.getRealObject()).getProject().getName()));
 			}
