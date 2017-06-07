@@ -336,8 +336,8 @@
            <command
                  commandId="com.servoy.eclipse.ui.StartSmartClient"
                  id="com.servoy.eclipse.ui.StartSmartClient"
-                 icon="icons/launch.gif"
-                 label="Debug Smart Client"
+                 icon="icons/launch.png"
+                 label="Start Smart Client"
                  style="push">
                  <visibleWhen>
               <with
@@ -353,8 +353,8 @@
               allPopups="false"
               locationURI="menu:com.servoy.eclipse.ui.StartClient">
            <menu id="com.servoy.eclipse.ui.StartWebClient"
-                 icon="icons/launch_web.gif"
-                 label="Debug Web Client">
+                 icon="icons/launch_web.png"
+                 label="Start Web Client">
 			<visibleWhen>
               <with
                   variable="com.servoy.eclipse.core.webClientState">
@@ -368,8 +368,8 @@
         <menuContribution
               allPopups="false"
               locationURI="menu:com.servoy.eclipse.ui.StartClient">
-	         <menu label="Debug NG Client"
-	                 icon="icons/launch_ng.gif"
+	         <menu label="Start NG Client"
+	                 icon="icons/launch_ng.png"
 	                 id="com.servoy.eclipse.ui.StartNGClient"> 
 	             <visibleWhen>
               		<with
