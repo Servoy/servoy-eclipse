@@ -458,7 +458,7 @@
          <action
                class="com.servoy.eclipse.ui.actions.SearchServoyAction"
                definitionId="com.servoy.eclipse.ui.search"
-               icon="icons/search_it.gif"
+               icon="icons/search_servoy_resources.png"
                id="searchServoyResource"
                label="Locate Servoy Resource"
                menubarPath="navigate/open.ext2"
