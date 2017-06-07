@@ -30,7 +30,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	});
 	var btnPlaceField = {
 		text: "Place Field Wizard",
-		icon: "toolbaractions/icons/field.gif",
+		icon: "toolbaractions/icons/field_wizard.png",
 		enabled: true,
 		onclick: function() {
 			$editorService.openElementWizard('field');
@@ -39,7 +39,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnPlaceImage = {
 		text: "Place Image Wizard",
-		icon: "toolbaractions/icons/media.png",
+		icon: "toolbaractions/icons/image_wizard.png",
 		enabled: true,
 		onclick: function() {
 			$editorService.openElementWizard('image');
@@ -48,7 +48,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnPlacePortal = {
 		text: "Place Portal Wizard",
-		icon: "toolbaractions/icons/portal.gif",
+		icon: "toolbaractions/icons/portal_wizard.png",
 		enabled: true,
 		onclick: function() {
 			$editorService.openElementWizard('portal');
@@ -57,7 +57,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnPlaceSplitPane = {
 		text: "Place SplitPane Wizard",
-		icon: "toolbaractions/icons/split.gif",
+		icon: "toolbaractions/icons/split.png",
 		enabled: true,
 		onclick: function() {
 			$editorService.openElementWizard('splitpane');
@@ -66,7 +66,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnPlaceTabPanel = {
 		text: "Place TabPanel Wizard",
-		icon: "toolbaractions/icons/tabs.gif",
+		icon: "toolbaractions/icons/tabs.png",
 		enabled: true,
 		onclick: function() {
 			$editorService.openElementWizard('tabpanel');
@@ -75,7 +75,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnPlaceAccordion = {
 		text: "Place Accordion Panel Wizard",
-		icon: "toolbaractions/icons/accordion.jpg",
+		icon: "toolbaractions/icons/accordion.png",
 		enabled: true,
 		onclick: function() {
 			$editorService.openElementWizard('accordion');
@@ -140,7 +140,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnSaveAsTemplate = {
 		text: "Save as template...",
-		icon: "toolbaractions/icons/template.gif",
+		icon: "toolbaractions/icons/template_save.png",
 		enabled: true,
 		onclick: function() {
 			$editorService.openElementWizard('saveastemplate');
@@ -237,7 +237,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnSameWidth = {
 		text: "Same width",
-		icon: "../../images/same_width.gif",
+		icon: "../../images/same_width.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.sameSize(true);
@@ -246,7 +246,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnSameHeight = {
 		text: "Same height",
-		icon: "../../images/same_height.gif",
+		icon: "../../images/same_height.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.sameSize(false);
@@ -258,7 +258,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnLeftAlign = {
 		text: "Align Left",
-		icon: "../../images/alignleft.gif",
+		icon: "../../images/alignleft.png",
 		enabled: false,
 		onclick: function() {
 			var selection = editorScope.getSelection();
@@ -295,7 +295,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnRightAlign = {
 		text: "Align Right",
-		icon: "../../images/alignright.gif",
+		icon: "../../images/alignright.png",
 		enabled: false,
 		onclick: function() {
 			var selection = editorScope.getSelection();
@@ -328,7 +328,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnTopAlign = {
 		text: "Align Top",
-		icon: "../../images/aligntop.gif",
+		icon: "../../images/aligntop.png",
 		enabled: false,
 		onclick: function() {
 			var selection = editorScope.getSelection();
@@ -363,7 +363,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnBottomAlign = {
 		text: "Align Bottom",
-		icon: "../../images/alignbottom.gif",
+		icon: "../../images/alignbottom.png",
 		enabled: false,
 		onclick: function() {
 			var selection = editorScope.getSelection();
@@ -398,7 +398,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnCenterAlign = {
 		text: "Align Center",
-		icon: "../../images/aligncenter.gif",
+		icon: "../../images/aligncenter.png",
 		enabled: false,
 		onclick: function() {
 			var selection = editorScope.getSelection();
@@ -442,7 +442,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnMiddleAlign = {
 		text: "Align Middle",
-		icon: "../../images/alignmid.gif",
+		icon: "../../images/alignmid.png",
 		enabled: false,
 		onclick: function() {
 			var selection = editorScope.getSelection();
@@ -493,7 +493,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnDistributeHorizontalSpacing = {
 		text: "Horizontal Spacing",
-		icon: "../../images/distribute_hspace.gif",
+		icon: "../../images/distribute_hspace.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.executeAction('horizontal_spacing');
@@ -520,7 +520,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnDistributeVerticalSpacing = {
 		text: "Vertical Spacing",
-		icon: "../../images/distribute_vspace.gif",
+		icon: "../../images/distribute_vspace.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.executeAction('vertical_spacing');
