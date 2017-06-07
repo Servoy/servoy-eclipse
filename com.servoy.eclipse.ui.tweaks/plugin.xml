@@ -34,7 +34,7 @@
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/dtool16/save_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/save.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/save-disabled.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
@@ -47,7 +47,7 @@
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/dtool16/saveas_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/save-as.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/save-as-disabled.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>      
      
@@ -60,7 +60,7 @@
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/dtool16/saveall_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/save-all.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/save-all-disabled.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
@@ -74,7 +74,7 @@
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dtool16/pin_editor.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/pin.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/pin-disabled.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
@@ -123,7 +123,7 @@
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/dtool16/prev_nav.gif">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-annotation.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-annotation-disabled.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
@@ -137,7 +137,7 @@
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/dtool16/next_nav.gif">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/forward-to-annotation.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/forward-to-annotation-disabled.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
@@ -151,7 +151,7 @@
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dlcl16/backward_nav.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-document.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-document-disabled.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
@@ -165,7 +165,7 @@
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dlcl16/forward_nav.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/forward-to-document.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/forward-to-document-disabled.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
@@ -179,7 +179,49 @@
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/dtool16/last_edit_pos.gif">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-last-edit.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-last-edit-disabled.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.externaltools/$nl$/icons/full/obj16/external_tools.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/launch_last_tool.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/elcl16/skip_brkp.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/skip_breakpoints.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/undo_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/undo.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dtool16/undo_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/undo.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/redo_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/redo.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dtool16/redo_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/redo.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
