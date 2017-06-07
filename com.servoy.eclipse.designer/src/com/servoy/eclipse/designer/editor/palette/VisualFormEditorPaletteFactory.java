@@ -362,26 +362,26 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 		else if (ELEMENTS_LABEL_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("text.gif");
+			icon = Activator.loadImageDescriptorFromBundle("label.png");
 			requestType = VisualFormEditor.REQ_PLACE_LABEL;
 			size = new Dimension(80, 20);
 		}
 
 		else if (ELEMENTS_TEXT_FIELD_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("field.gif");
+			icon = Activator.loadImageDescriptorFromBundle("textfield.png");
 		}
 
 		else if (ELEMENTS_TEXT_AREA_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("TEXTAREA16.png");
+			icon = Activator.loadImageDescriptorFromBundle("textarea.png");
 			displayType = Field.TEXT_AREA;
 			size = new Dimension(140, 140);
 		}
 
 		else if (ELEMENTS_RTF_AREA_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("doc_rtf.png");
+			icon = Activator.loadImageDescriptorFromBundle("doc_rtf.png");//TODO new icon
 			displayType = Field.RTF_AREA;
 			size = new Dimension(140, 140);
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_EDITABLE, Boolean.FALSE);
@@ -389,7 +389,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 		else if (ELEMENTS_HTML_AREA_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("H1_C16.png");
+			icon = Activator.loadImageDescriptorFromBundle("html_area.png");
 			displayType = Field.HTML_AREA;
 			size = new Dimension(140, 140);
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_EDITABLE, Boolean.FALSE);
@@ -397,45 +397,45 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 		else if (ELEMENTS_COMBOBOX_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("SELECT16.png");
+			icon = Activator.loadImageDescriptorFromBundle("combobox.png");
 			displayType = Field.COMBOBOX;
 		}
 
 		else if (ELEMENTS_RADIOS_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("RADIO16.png");
+			icon = Activator.loadImageDescriptorFromBundle("radiobutton.png");
 			displayType = Field.RADIOS;
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TRANSPARENT, Boolean.TRUE);
 		}
 
 		else if (ELEMENTS_CHECKS_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("CHECKBOX16.png");
+			icon = Activator.loadImageDescriptorFromBundle("checkbox.png");
 			displayType = Field.CHECKS;
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_TRANSPARENT, Boolean.TRUE);
 		}
 
 		else if (ELEMENTS_CALENDAR_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("Calendar_C16.png");
+			icon = Activator.loadImageDescriptorFromBundle("calendar.png");
 			displayType = Field.CALENDAR;
 		}
 
 		else if (ELEMENTS_PASSWORD_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("password_field_16.png");
+			icon = Activator.loadImageDescriptorFromBundle("password_field.png");
 			displayType = Field.PASSWORD;
 		}
 
 		else if (ELEMENTS_IMAGE_MEDIA_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("IMG16.png");
+			icon = Activator.loadImageDescriptorFromBundle("media.png");
 			displayType = Field.IMAGE_MEDIA;
 		}
 
 		else if (ELEMENTS_TYPE_AHEAD_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("bhdropdownlisticon.gif");
+			icon = Activator.loadImageDescriptorFromBundle("typeahead.png");
 			displayType = Field.TYPE_AHEAD;
 		}
 		else if (ELEMENTS_LISTBOX_ID.equals(id))
@@ -460,7 +460,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		{
 			requestType = VisualFormEditor.REQ_PLACE_PORTAL;
 			size = new Dimension(200, 200);
-			icon = com.servoy.eclipse.designer.Activator.loadImageDescriptorFromBundle("portal.gif");
+			icon = com.servoy.eclipse.designer.Activator.loadImageDescriptorFromBundle("portal.png");
 		}
 
 		if (icon != null)
@@ -497,7 +497,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 		else if (SHAPES_RECTANGLE_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("rectangle.gif");
+			icon = Activator.loadImageDescriptorFromBundle("rectangle.png");
 			shapeType = RectShape.RECTANGLE;
 		}
 
@@ -570,11 +570,11 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		int tabOrienation = TabPanel.DEFAULT_ORIENTATION;
 		if (CONTAINERS_DEFAULT_PANEL_ID.equals(id))
 		{
-			icon = com.servoy.eclipse.designer.Activator.loadImageDescriptorFromBundle("tabs.gif");
+			icon = com.servoy.eclipse.designer.Activator.loadImageDescriptorFromBundle("tab.png");
 		}
 		else if (CONTAINERS_SPLIT_PANE_HORIZONTAL_ID.equals(id))
 		{
-			icon = com.servoy.eclipse.designer.Activator.loadImageDescriptorFromBundle("split.gif");
+			icon = com.servoy.eclipse.designer.Activator.loadImageDescriptorFromBundle("split.png");
 			tabOrienation = TabPanel.SPLIT_HORIZONTAL;
 			nameHint = "split";
 		}

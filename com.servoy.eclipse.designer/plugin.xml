@@ -171,7 +171,7 @@
          <action
                class="com.servoy.eclipse.designer.actions.AddTabActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addTabAction"
-               icon="icons/tabs.gif"
+               icon="icons/tab.png"
                id="com.servoy.eclipse.designer.action.addTabAction"
                label="Place TabPanel Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
@@ -181,7 +181,7 @@
          <action
                class="com.servoy.eclipse.designer.actions.AddSplitPaneActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addSplitPaneAction"
-               icon="icons/split.gif"
+               icon="icons/split.png"
                id="com.servoy.eclipse.designer.action.addSplitPaneAction"
                label="Place SplitPane Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
@@ -221,7 +221,7 @@
          <action
                class="com.servoy.eclipse.designer.actions.AddPortalActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addPortalAction"
-               icon="icons/portal.gif"
+               icon="icons/portal.png"
                id="com.servoy.eclipse.designer.action.addPortalAction"
                label="Place Portal Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
@@ -241,7 +241,7 @@
          <action
                class="com.servoy.eclipse.designer.actions.AddFieldActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addFieldAction"
-               icon="icons/field.gif"
+               icon="icons/textfield.png"
                id="com.servoy.eclipse.designer.action.addFieldAction"
                label="Place Field Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
@@ -251,7 +251,7 @@
          <action
                class="com.servoy.eclipse.designer.actions.AddLabelActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addLabelAction"
-               icon="icons/text.gif"
+               icon="icons/label.png"
                id="com.servoy.eclipse.designer.action.addLabelAction"
                label="Place Label"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
