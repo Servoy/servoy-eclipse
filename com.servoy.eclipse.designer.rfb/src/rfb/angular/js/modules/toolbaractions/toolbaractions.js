@@ -238,6 +238,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	var btnSameWidth = {
 		text: "Same width",
 		icon: "../../images/same_width.png",
+		disabledIcon: "../../images/same_width-disabled.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.sameSize(true);
@@ -247,6 +248,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	var btnSameHeight = {
 		text: "Same height",
 		icon: "../../images/same_height.png",
+		disabledIcon: "../../images/same_height-disabled.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.sameSize(false);
@@ -259,6 +261,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	var btnLeftAlign = {
 		text: "Align Left",
 		icon: "../../images/alignleft.png",
+		disabledIcon: "../../images/alignleft-disabled.png",
 		enabled: false,
 		onclick: function() {
 			var selection = editorScope.getSelection();
@@ -296,6 +299,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	var btnRightAlign = {
 		text: "Align Right",
 		icon: "../../images/alignright.png",
+		disabledIcon: "../../images/alignright-disabled.png",
 		enabled: false,
 		onclick: function() {
 			var selection = editorScope.getSelection();
@@ -329,6 +333,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	var btnTopAlign = {
 		text: "Align Top",
 		icon: "../../images/aligntop.png",
+		disabledIcon: "../../images/aligntop-disabled.png",
 		enabled: false,
 		onclick: function() {
 			var selection = editorScope.getSelection();
@@ -364,6 +369,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	var btnBottomAlign = {
 		text: "Align Bottom",
 		icon: "../../images/alignbottom.png",
+		disabledIcon: "../../images/alignbottom-disabled.png",
 		enabled: false,
 		onclick: function() {
 			var selection = editorScope.getSelection();
@@ -494,6 +500,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	var btnDistributeHorizontalSpacing = {
 		text: "Horizontal Spacing",
 		icon: "../../images/distribute_hspace.png",
+		disabledIcon: "../../images/distribute_hspace-disabled.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.executeAction('horizontal_spacing');
@@ -521,6 +528,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	var btnDistributeVerticalSpacing = {
 		text: "Vertical Spacing",
 		icon: "../../images/distribute_vspace.png",
+		disabledIcon: "../../images/distribute_vspace-disabled.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.executeAction('vertical_spacing');
