@@ -230,7 +230,7 @@
                tooltip="Place Portal Wizard"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddButtonActionDelegate"
-               icon="icons/button.gif"
+               icon="icons/button.png"
                id="com.servoy.eclipse.designer.action.addButtonAction"
                definitionId="com.servoy.eclipse.designer.action.addButtonAction"
                label="Place Button"

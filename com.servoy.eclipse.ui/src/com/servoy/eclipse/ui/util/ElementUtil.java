@@ -128,6 +128,10 @@ public class ElementUtil
 			{
 				name = "components";
 			}
+			else if (name.startsWith("combobox"))
+			{
+				name = "comboboxes";
+			}
 			else
 			{
 				name = name.substring(0, name.lastIndexOf('.'));
@@ -146,39 +150,39 @@ public class ElementUtil
 			String lookupName = ComponentFactory.getLookupName((BaseComponent)persist);
 			if ("button".equals(lookupName))
 			{
-				return "button.gif";
+				return "button.png";
 			}
 			if ("check".equals(lookupName))
 			{
-				return "chk_on_icon.gif";
+				return "checkbox.png";
 			}
 			if ("combobox".equals(lookupName))
 			{
-				return "field.gif"; // todo: combobox.gif
+				return "combobox.png";
 			}
 			if ("field".equals(lookupName))
 			{
-				return "field.gif";
+				return "textfield.png";
 			}
 			if ("portal".equals(lookupName))
 			{
-				return "portal.gif";
+				return "portal.png";
 			}
 			if ("tabpanel".equals(lookupName))
 			{
-				return "tabs.gif";
+				return "tab.png";
 			}
 			if ("label".equals(lookupName))
 			{
-				return "text.gif";
+				return "label.png";
 			}
 			if ("radio".equals(lookupName))
 			{
-				return "radio_on.gif";
+				return "radiobutton.png";
 			}
 			if ("listbox".equals(lookupName))
 			{
-				return "list.gif";
+				return "listbox.png";
 			}
 			if ("spinner".equals(lookupName))
 			{
@@ -195,7 +199,7 @@ public class ElementUtil
 		}
 		if (persist instanceof RectShape)
 		{
-			return "rectangle.gif";
+			return "rectangle.png";
 		}
 		if (persist instanceof Relation)
 		{

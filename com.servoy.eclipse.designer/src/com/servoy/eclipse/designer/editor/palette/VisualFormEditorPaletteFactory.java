@@ -355,7 +355,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 		if (ELEMENTS_BUTTON_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("button.gif");
+			icon = Activator.loadImageDescriptorFromBundle("button.png");
 			requestType = VisualFormEditor.REQ_PLACE_BUTTON;
 			size = new Dimension(80, 20);
 		}
@@ -795,20 +795,20 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 				switch (object.optInt("displayType"))
 				{
 					case Field.CHECKS :
-						return Activator.loadImageDescriptorFromBundle("chk_on_icon.gif");
+						return Activator.loadImageDescriptorFromBundle("check.png");
 
 					case Field.RADIOS :
-						return Activator.loadImageDescriptorFromBundle("radio_on.gif");
+						return Activator.loadImageDescriptorFromBundle("radiobutton.png");
 
 					case Field.COMBOBOX :
-						return Activator.loadImageDescriptorFromBundle("dropdown_icon.gif");
+						return Activator.loadImageDescriptorFromBundle("combobox.png");
 
 					case Field.CALENDAR :
-						return Activator.loadImageDescriptorFromBundle("calendar_icon.gif");
+						return Activator.loadImageDescriptorFromBundle("calendar.png");
 
 				}
 
-				return Activator.loadImageDescriptorFromBundle("field.gif");
+				return Activator.loadImageDescriptorFromBundle("textfield.png");
 
 			case IRepository.GRAPHICALCOMPONENTS :
 				if (object.optInt("onActionMethodID") == 0 || !object.optBoolean("showClick", true))
@@ -817,29 +817,29 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 					{
 						return Activator.loadImageDescriptorFromBundle("media.png");
 					}
-					return Activator.loadImageDescriptorFromBundle("text.gif");
+					return Activator.loadImageDescriptorFromBundle("label.png");
 				}
 
-				return Activator.loadImageDescriptorFromBundle("button.gif");
+				return Activator.loadImageDescriptorFromBundle("button.png");
 
 			case IRepository.RECTSHAPES :
 			case IRepository.SHAPES :
-				return Activator.loadImageDescriptorFromBundle("rectangle.gif");
+				return Activator.loadImageDescriptorFromBundle("rectangle.png");
 
 			case IRepository.PORTALS :
-				return Activator.loadImageDescriptorFromBundle("portal.gif");
+				return Activator.loadImageDescriptorFromBundle("portal.png");
 
 
 			case IRepository.TABPANELS :
 				int orient = object.optInt("tabOrientation");
 				if (orient == TabPanel.SPLIT_HORIZONTAL || orient == TabPanel.SPLIT_VERTICAL)
 				{
-					return Activator.loadImageDescriptorFromBundle("split.gif");
+					return Activator.loadImageDescriptorFromBundle("split.png");
 				}
-				return Activator.loadImageDescriptorFromBundle("tabs.gif");
+				return Activator.loadImageDescriptorFromBundle("tabs.png");
 
 			case IRepository.TABS :
-				return Activator.loadImageDescriptorFromBundle("tabs.gif");
+				return Activator.loadImageDescriptorFromBundle("tabs.png");
 
 			case IRepository.BEANS :
 				return Activator.loadImageDescriptorFromBundle("bean.gif");

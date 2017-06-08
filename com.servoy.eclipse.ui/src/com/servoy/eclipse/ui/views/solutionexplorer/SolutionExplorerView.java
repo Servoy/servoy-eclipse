@@ -2829,8 +2829,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		openSqlEditorAction = new OpenSqlEditorAction();
 
 		IAction newForm = new OpenNewFormWizardAction();
-		IAction newSolution = new OpenWizardAction(NewSolutionWizard.class, Activator.loadImageDescriptorFromBundle("solution_icon.gif"),
-			"Create new solution");
+		IAction newSolution = new OpenWizardAction(NewSolutionWizard.class, Activator.loadImageDescriptorFromBundle("solution.png"), "Create new solution");
 		IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("solution_module_m.gif"), "Create new module");
 		IAction newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.png"), "Create new style")
 		{

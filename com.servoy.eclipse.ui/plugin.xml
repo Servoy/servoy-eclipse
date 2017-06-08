@@ -97,7 +97,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="com.servoy.eclipse.ui.DesignPerspective"
-            icon="icons/windowicon.png"
+            icon="icons/solution.png"
             id="com.servoy.eclipse.ui.DesignPerspective"
             name="Servoy Design">
       </perspective>
@@ -191,7 +191,7 @@
    		<wizard
             category="com.servoy.eclipse.ui"
        		class="com.servoy.eclipse.ui.wizards.ExportSolutionWizard"
-       		icon="icons/solution_icon.gif"
+       		icon="icons/solution.png"
        		id="com.servoy.eclipse.ui.ExportSolutionWizard"
        		name="Export Active Solution">
    		</wizard>
@@ -893,7 +893,7 @@
       <wizard
             category="com.servoy.eclipse.ui.ImportCategory"
             class="com.servoy.eclipse.ui.wizards.ImportSolutionWizard"
-            icon="icons/solution_icon.gif"
+            icon="icons/solution.png"
             id="com.servoy.eclipse.ui.ImportSolutionWizard"
             name="Import Solution">
       </wizard>

@@ -37,7 +37,7 @@ import com.servoy.j2db.util.Utils;
 
 public class ColumnLabelProvider extends LabelProvider implements ITableLabelProvider, ITableColorProvider
 {
-	public static final Image TRUE_IMAGE = Activator.getDefault().loadImageFromBundle("chk_on_icon.gif");
+	public static final Image TRUE_IMAGE = Activator.getDefault().loadImageFromBundle("checkbox.png");
 	public static final Image FALSE_IMAGE = Activator.getDefault().loadImageFromBundle("chk_off_icon.gif");
 	public static final Image TRUE_RADIO = Activator.getDefault().loadImageFromBundle("radio_on.gif");
 	public static final Image FALSE_RADIO = Activator.getDefault().loadImageFromBundle("radio_off.gif");
