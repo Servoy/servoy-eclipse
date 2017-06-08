@@ -177,6 +177,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	var btnBringForward = {
 		text: "Bring forward",
 		icon: "../../images/bring_forward.png",
+		disabledIcon: "../../images/bring_forward-disabled.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.executeAction('z_order_bring_to_front_one_step');
@@ -186,6 +187,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	var btnSendBackward = {
 		text: "Send backward",
 		icon: "../../images/send_backward.png",
+		disabledIcon: "../../images/send_backward-disabled.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.executeAction('z_order_send_to_back_one_step');
@@ -195,6 +197,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	var btnBringToFront = {
 		text: "Bring to front",
 		icon: "../../images/bring_to_front.png",
+		disabledIcon: "../../images/bring_to_front-disabled.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.executeAction('z_order_bring_to_front');
@@ -204,6 +207,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	var btnSendToBack = {
 		text: "Send to back",
 		icon: "../../images/send_to_back.png",
+		disabledIcon: "../../images/send_to_back-disabled.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.executeAction('z_order_send_to_back');
