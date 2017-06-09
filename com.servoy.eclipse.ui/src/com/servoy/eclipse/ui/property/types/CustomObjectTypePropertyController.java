@@ -21,6 +21,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
+import org.sablo.websocket.utils.PropertyUtils;
 
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.ComplexProperty;
@@ -212,19 +213,19 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 	protected Object toggleValue(Object oldPropertyValue)
 	{
 		WebCustomType newPropertyValue;
+		String typeName = null;
 		if (oldPropertyValue != null)
 		{
 			WebCustomType ct = (WebCustomType)(oldPropertyValue);
 			newPropertyValue = WebCustomType.createNewInstance(ct.getParent(), ct.getPropertyDescription(), ct.getJsonKey(), ct.getIndex(), true);
+			typeName = ct.getTypeName();
 		}
 		else
 		{
 			newPropertyValue = WebCustomType.createNewInstance((IBasicWebObject)persistContext.getPersist(), propertyDescription, getId().toString(), 0, true);
+			typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(propertyDescription.getType());
 		}
-		if (!isJSONNull(oldPropertyValue))
-		{
-			newPropertyValue.setJson(null);
-		}
+		newPropertyValue.setTypeName(typeName);
 		return newPropertyValue;
 	}
 
