@@ -22,10 +22,10 @@
   
    
    <!-- define mobile action set -->
-    <extension point="org.eclipse.ui.actionSets">
+    <!--extension point="org.eclipse.ui.actionSets">
     <actionSet
-    	  label="Start Mobile Client"
           id="com.servoy.eclipse.ui.start_mobile_actionSet"
+          label="Start Mobile Client"
           visible="true">
           <action
                 class="com.servoy.eclipse.exporter.mobile.action.StartMobileClientActionDelegate"
@@ -41,10 +41,10 @@
                     <pluginState
                           id="com.servoy.eclipse.exporter.mobile.pluginState5" value="activated">
                     </pluginState>
-                </enablement>         
-         </action>         
+                </enablement>      
+         </action>        
     </actionSet>                 
-   </extension>
+   </extension-->
     
    <extension
          point="org.eclipse.ui.commands">
@@ -53,7 +53,12 @@
             description="Start Mobile Client"
             id="com.servoy.eclipse.ui.StartMobileClient"
             name="Start Mobile Client"
-           >           
+           > 
+           <commandParameter
+               id="com.servoy.eclipse.mobile.launch.config"
+               name="com.servoy.eclipse.mobile.launch.config"
+               optional="true">
+         </commandParameter>          
       </command>
    </extension>
    
@@ -127,6 +132,22 @@
  	</extension>
  <extension
        point="org.eclipse.ui.menus">
+       <menuContribution
+              allPopups="false"
+              locationURI="menu:com.servoy.eclipse.ui.StartClient">
+           <dynamic
+                 class="com.servoy.eclipse.exporter.mobile.action.StartMobileClientContribution"
+                 id="com.servoy.eclipse.exporter.mobile.dynamic">
+                 <visibleWhen>                    
+			          <with
+			                variable="com.servoy.eclipse.core.mobileState">
+			             <equals
+			                   value="ENABLED">
+			             </equals>
+			          </with>
+                  </visibleWhen>
+           </dynamic>
+        </menuContribution>
     <menuContribution
           allPopups="false"
           locationURI="popup:org.eclipse.ui.popup.any?before=additions">
@@ -156,15 +177,23 @@
                 style="push"
                 tooltip="Runs JS Unit Tests in a mobile client; activates the mobile service solution before starting the tests (so that debug works on the service solution)">
           </command>
-          <separator
-                name="additions"
-                visible="false">
-          </separator>
        </menu>
     </menuContribution>
  </extension>
  <extension
        point="org.eclipse.ui.handlers">
+       <handler
+          class="com.servoy.eclipse.exporter.mobile.action.StartMobileClientHandler"
+          commandId="com.servoy.eclipse.ui.StartMobileClient">
+       <activeWhen>
+          <with
+                variable="com.servoy.eclipse.core.mobileState">
+             <equals
+                   value="ENABLED">
+             </equals>
+          </with>
+       </activeWhen>
+    </handler>
     <handler
           class="com.servoy.eclipse.exporter.mobile.action.RunMobileTestsHandler"
           commandId="com.servoy.eclipse.jsunit.commands.runScriptUnitTests">

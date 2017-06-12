@@ -54,6 +54,7 @@ public class StartClientHandler extends StartDebugHandler implements IElementUpd
 	static final String START_WEB_CLIENT = "com.servoy.eclipse.ui.StartWebClient";
 	static final String START_SMART_CLIENT = "com.servoy.eclipse.ui.StartSmartClient";
 	static final String START_NG_CLIENT = "com.servoy.eclipse.ui.StartNGClient";
+	static final String START_MOBILE_CLIENT = "com.servoy.eclipse.ui.StartMobileClient";
 	final static IDialogSettings fDialogSettings = Activator.getDefault().getDialogSettings();
 
 	@Override
@@ -85,6 +86,8 @@ public class StartClientHandler extends StartDebugHandler implements IElementUpd
 				return "Smart client start";
 			case START_WEB_CLIENT :
 				return "Web client start";
+			case START_MOBILE_CLIENT :
+				return "Mobile client start";
 			default :
 				return "NG client start";
 		}
@@ -133,6 +136,8 @@ public class StartClientHandler extends StartDebugHandler implements IElementUpd
 					return START_WEB_CLIENT;
 				case SolutionMetaData.NG_CLIENT_ONLY :
 					return START_NG_CLIENT;
+				case SolutionMetaData.MOBILE :
+					return START_MOBILE_CLIENT;
 				default :
 					return fDialogSettings.get("lastDebugCommandId") != null ? fDialogSettings.get("lastDebugCommandId") : START_NG_CLIENT;//default NG
 			}

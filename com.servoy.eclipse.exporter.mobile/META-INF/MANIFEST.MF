@@ -22,7 +22,8 @@ Require-Bundle: com.servoy.eclipse.model,
  org.maven.ide.eclipse.grouplayout,
  org.apache.commons.collections;bundle-version="3.2.1",
  org.apache.httpcomponents.httpcore,
- org.apache.httpcomponents.httpclient
+ org.apache.httpcomponents.httpclient,
+ com.servoy.eclipse.debug
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
