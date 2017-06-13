@@ -299,6 +299,10 @@ public class MarkerMessages
 		"Non-public {0} \"{1}\" from module \"{2}\" is used in solution \"{3}\", in form \"{4}\". This is not allowed.",
 		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 
+	public static ServoyMarker NamedFoundsetDatasourceNotMatching = new ServoyMarker(
+		"Named foundset \"{0}\" used on form \"{1}\" from datasource \"{2}\" does not match its usage from form \"{3}\". Datasources should match.",
+		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
+
 	/**
 	 * This means that the sam tab sequence position is assigned to more than one element on a form.
 	 */

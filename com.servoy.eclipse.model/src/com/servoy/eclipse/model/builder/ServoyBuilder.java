@@ -490,6 +490,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> FORM_FOUNDSET_INCORRECT_VALUE = new Pair<String, ProblemSeverity>("formFoundsetIncorrectValue",
 		ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> FORM_NAMED_FOUNDSET_DATASOURCE_MISMATCH = new Pair<String, ProblemSeverity>(
+		"namedFoundsetDatasourceMismatch", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> COMPONENT_FOUNDSET_INVALID = new Pair<String, ProblemSeverity>("componentFoundsetInvalid",
 		ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> FORM_PORTAL_INVALID_RELATION_NAME = new Pair<String, ProblemSeverity>("formPortalInvalidRelationName",
@@ -1955,7 +1957,6 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, DUPLICATE_MEM_TABLE_TYPE);
 		deleteMarkers(project, SUPERFORM_PROBLEM_TYPE);
 		deleteMarkers(project, MISSING_SPEC);
-
 		try
 		{
 			if (project.getReferencedProjects() != null)
@@ -2045,6 +2046,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 					private final Map<UUID, List<IPersist>> theMakeSureNoDuplicateUUIDsAreFound = new HashMap<UUID, List<IPersist>>();
 					private final Map<Form, Boolean> formsAbstractChecked = new HashMap<Form, Boolean>();
 					private final Set<UUID> methodsParsed = new HashSet<UUID>();
+					private final Map<String, Form> namedFoundsets = new HashMap<String, Form>();
 
 					public Object visit(final IPersist o)
 					{
@@ -2100,6 +2102,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 													// uuid is inherited as it is in json, thus generating duplicate uuids; we should fix inheritance
 													if (p instanceof ChildWebComponent) return IPersistVisitor.CONTINUE_TRAVERSAL;
 													elementIdPersistMap.put(p.getID(), p);
+													if (p instanceof Form && ((Form)p).getNamedFoundSet() != null &&
+														((Form)p).getNamedFoundSet().startsWith(Form.NAMED_FOUNDSET_SEPARATE_PREFIX))
+													{
+														namedFoundsets.put(((Form)p).getNamedFoundSet(), (Form)p);
+													}
 													List<IPersist> lst = theMakeSureNoDuplicateUUIDsAreFound.get(p.getUUID());
 													if (lst == null)
 													{
@@ -2157,6 +2164,11 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 															public Object visit(IPersist p)
 															{
 																elementIdPersistMap.put(p.getID(), p);
+																if (p instanceof Form && ((Form)p).getNamedFoundSet() != null &&
+																	((Form)p).getNamedFoundSet().startsWith(Form.NAMED_FOUNDSET_SEPARATE_PREFIX))
+																{
+																	namedFoundsets.put(((Form)p).getNamedFoundSet(), (Form)p);
+																}
 																List<IPersist> lst = theMakeSureNoDuplicateUUIDsAreFound.get(p.getUUID());
 																if (lst == null)
 																{
@@ -2760,7 +2772,25 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 									addMarker(project, mk.getType(), mk.getText(), -1, FORM_FOUNDSET_INCORRECT_VALUE, IMarker.PRIORITY_NORMAL, null, form);
 								}
 							}
+							if (namedFoundset != null && namedFoundset.startsWith(Form.NAMED_FOUNDSET_SEPARATE_PREFIX))
+							{
+								if (namedFoundsets.containsKey(namedFoundset) &&
+									!Utils.equalObjects(form.getDataSource(), namedFoundsets.get(namedFoundset).getDataSource()))
+								{
+									Form defineForm = namedFoundsets.get(namedFoundset);
+									ServoyMarker mk = MarkerMessages.NamedFoundsetDatasourceNotMatching.fill(
+										namedFoundset.substring(Form.NAMED_FOUNDSET_SEPARATE_PREFIX_LENGTH), form.getName(), form.getDataSource(),
+										defineForm.getName());
+									addMarker(project, mk.getType(), mk.getText(), -1, FORM_NAMED_FOUNDSET_DATASOURCE_MISMATCH, IMarker.PRIORITY_NORMAL, null,
+										form);
 
+									mk = MarkerMessages.NamedFoundsetDatasourceNotMatching.fill(
+										namedFoundset.substring(Form.NAMED_FOUNDSET_SEPARATE_PREFIX_LENGTH), defineForm.getName(), defineForm.getDataSource(),
+										form.getName());
+									addMarker(project, mk.getType(), mk.getText(), -1, FORM_NAMED_FOUNDSET_DATASOURCE_MISMATCH, IMarker.PRIORITY_NORMAL, null,
+										defineForm);
+								}
+							}
 							try
 							{
 								if (table != null)
