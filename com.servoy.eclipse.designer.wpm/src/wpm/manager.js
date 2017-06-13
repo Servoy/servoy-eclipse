@@ -46,11 +46,13 @@ angular.module('app', ['ngMaterial'])
 	$scope.componentPackages = []
 	$scope.servicePackages = []
 	$scope.layoutPackages = []
+	$scope.solutionPackages = []
 	  
 	this.requestAllInstalledPackages = function(packagesArray){
 		$scope.componentPackages.length = 0;
 		$scope.servicePackages.length = 0;
 		$scope.layoutPackages.length = 0;
+		$scope.solutionPackages.length = 0;
 		for(i=0;i<packagesArray.length;i++) {
 			if (packagesArray[i].packageType == "Web-Component") {
 				$scope.componentPackages.push(packagesArray[i]);
@@ -60,6 +62,9 @@ angular.module('app', ['ngMaterial'])
 			}
 			else if (packagesArray[i].packageType == "Web-Layout") {
 				$scope.layoutPackages.push(packagesArray[i]);
+			}
+			else if (packagesArray[i].packageType == "Solution") {
+				$scope.solutionPackages.push(packagesArray[i]);
 			}
 		}
 	};
