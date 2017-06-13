@@ -2965,7 +2965,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		newActionInListSecondary.registerAction(UserNodeType.INMEMORY_DATASOURCE, newForm);
 		newActionInListSecondary.registerAction(UserNodeType.VIEW, newForm);
 
-		openAction = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.gif"), "Open");
+		openAction = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.png"), "Open");
 
 		IAction openScript = new OpenScriptAction();
 		openAction.registerAction(UserNodeType.FORM_METHOD, openScript);
@@ -2995,7 +2995,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction addComponentIconAction = new AddComponentIconResourceAction(this);
 		addComponentIcon.registerAction(UserNodeType.COMPONENT, addComponentIconAction);
 
-		deleteActionInList = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE), "Delete");
+		deleteActionInList = new ContextAction(this, Activator.loadImageDescriptorFromBundle("delete.png"), "Delete");
 		IAction deleteMedia = new DeleteMediaAction("Delete media", this);
 		IAction deleteMediaFolder = new DeleteMediaAction("Delete media", this);
 		IAction deleteValueList = new DeletePersistAction(UserNodeType.VALUELIST_ITEM, "Delete value list");
@@ -3052,7 +3052,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 		debugMethodAction = new DebugMethodAction(this);
 
-		openActionInTree = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.gif"), "Open");
+		openActionInTree = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.png"), "Open");
 		IAction openRelation = new OpenRelationAction(); // must be another instance
 		// (in order to use only
 		// selections from the tree)
@@ -3073,7 +3073,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		openActionInTree.registerAction(UserNodeType.INMEMORY_DATASOURCE, openTableInTree);
 		openActionInTree.registerAction(UserNodeType.VIEW, openTableInTree);
 
-		deleteActionInTree = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE), "Delete");
+		deleteActionInTree = new ContextAction(this, Activator.loadImageDescriptorFromBundle("delete.png"), "Delete");
 		IAction deleteForm = new DeletePersistAction(UserNodeType.FORM, "Delete form");
 		deleteRelation = new DeletePersistAction(UserNodeType.RELATION, "Delete relation");
 		IAction deleteSolution = new DeleteSolutionAction(shell);

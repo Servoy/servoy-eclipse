@@ -22,8 +22,6 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.ui.Activator;
@@ -68,7 +66,7 @@ public class ColumnLabelProvider extends LabelProvider implements ITableLabelPro
 		}
 		if (columnIndex == ColumnComposite.CI_DELETE + delta)
 		{
-			return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+			return Activator.getDefault().loadImageFromBundle("delete.png");
 		}
 		return null;
 	}

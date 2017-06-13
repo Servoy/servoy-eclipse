@@ -863,7 +863,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		fSplitter = new SashForm(fParent, SWT.NONE);
 		initOrientation();//TODO add preference page & menu for the orientation settings
 
-		openAction = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.gif"), "Open");
+		openAction = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.png"), "Open");
 		createTreeViewer(fSplitter);
 		createListViewer(fSplitter);
 		fSelectionProviderMediator = new SelectionProviderMediator(new StructuredViewer[] { tree, list }, null);

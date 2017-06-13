@@ -12,14 +12,13 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.property.MethodPropertyController.MethodPropertySource;
 
 /**
- * 
- * the text is readonly 
+ *
+ * the text is readonly
  * @author obuligan
  */
 public class TextAndButtonCellEditor extends CellEditor
@@ -62,7 +61,7 @@ public class TextAndButtonCellEditor extends CellEditor
 
 
 		button = new Button(composite, SWT.NONE);
-		button.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE));
+		button.setImage(Activator.getDefault().loadImageFromBundle("delete.png"));
 		FormData fd_button = new FormData();
 		fd_button.top = new FormAttachment(text, 0, SWT.TOP);
 		fd_button.right = new FormAttachment(100);

@@ -30,10 +30,9 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.wizards.extension.ShowMessagesPage.UIMessage;
 import com.servoy.extension.DependencyMetadata;
 import com.servoy.extension.ExtensionDependencyDeclaration;
@@ -74,8 +73,8 @@ public class UninstallReviewPage extends ReviewOperationPage
 	@Override
 	protected void fillData()
 	{
-		DependencyMetadata[] dmds = state.installedExtensionsProvider.getDependencyMetadata(new ExtensionDependencyDeclaration(state.extensionID,
-			state.version, state.version));
+		DependencyMetadata[] dmds = state.installedExtensionsProvider.getDependencyMetadata(
+			new ExtensionDependencyDeclaration(state.extensionID, state.version, state.version));
 		if (dmds != null && dmds.length == 1)
 		{
 			final String name = dmds[0].extensionName;
@@ -246,15 +245,16 @@ public class UninstallReviewPage extends ReviewOperationPage
 			{
 				// more extensions are to be installed/replaced (or one is down-graded); tell the user
 				UIMessage[] messages;
-				Image removeIcon = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+				Activator.getDefault();
+				Image removeIcon = Activator.getDefault().loadImageFromBundle("delete.png");
 
 				String[] header = new String[] { "", "Version", "Name", "Id" };
 				messages = new UIMessage[state.chosenPath.installSequence.length];
 				for (int i = state.chosenPath.installSequence.length - 1; i >= 0; i--)
 				{
 					ExtensionNode ext = state.chosenPath.installSequence[i].extension;
-					DependencyMetadata[] extMeta = state.installedExtensionsProvider.getDependencyMetadata(new ExtensionDependencyDeclaration(ext.id,
-						ext.version, ext.version));
+					DependencyMetadata[] extMeta = state.installedExtensionsProvider.getDependencyMetadata(
+						new ExtensionDependencyDeclaration(ext.id, ext.version, ext.version));
 					String name = "";
 					if (extMeta != null && extMeta.length == 1)
 					{
@@ -264,8 +264,8 @@ public class UninstallReviewPage extends ReviewOperationPage
 					messages[i] = new UIMessage(removeIcon, new String[] { ext.installedVersion, name, ext.id });
 				}
 
-				nextPage = new ShowMessagesPage(
-					"UniReview", "Dependent extensions will be uninstalled as well", "Please review uninstall changes.", header, messages, true, nextPage);
+				nextPage = new ShowMessagesPage("UniReview", "Dependent extensions will be uninstalled as well", "Please review uninstall changes.", header,
+					messages, true, nextPage);
 				nextPage.setWizard(getWizard());
 			} // else just use nextPage to uninstall
 
@@ -273,8 +273,8 @@ public class UninstallReviewPage extends ReviewOperationPage
 			if (expW.length > 0)
 			{
 				// user should know about these; or should we just consider this step failed directly?
-				nextPage = new ShowMessagesPage(
-					"UniWarnings", "Some items require your attention", "However, you can continue with the uninstall process.", null, expW, true, nextPage);
+				nextPage = new ShowMessagesPage("UniWarnings", "Some items require your attention", "However, you can continue with the uninstall process.",
+					null, expW, true, nextPage);
 				nextPage.setWizard(getWizard());
 			}
 		}

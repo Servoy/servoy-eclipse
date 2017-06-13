@@ -97,7 +97,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="com.servoy.eclipse.ui.DesignPerspective"
-            icon="icons/solution.png"
+            icon="icons/servoy_design.png"
             id="com.servoy.eclipse.ui.DesignPerspective"
             name="Servoy Design">
       </perspective>

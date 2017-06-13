@@ -91,7 +91,7 @@ public class LinkWithEditorAction extends Action
 		this.tree = tree;
 		this.list = list;
 		setText("Link with Editor");
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("synced.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("link_to_editor.png"));
 	}
 
 	@Override

@@ -103,7 +103,7 @@ public class I18nComposite extends Composite
 			}
 			if (columnIndex == CI_DELETE)
 			{
-				return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+				return Activator.getDefault().loadImageFromBundle("delete.png");
 			}
 			return null;
 		}

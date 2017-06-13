@@ -59,8 +59,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,6 +72,7 @@ import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderContentProvider;
 import com.servoy.eclipse.ui.dialogs.DataProviderTreeViewer.DataProviderOptions;
 import com.servoy.eclipse.ui.labelproviders.DataProviderLabelProvider;
@@ -317,7 +316,7 @@ public class PlaceDataprovidersComposite extends Composite
 		});
 		Button deleteConf = new Button(confAndDelete, SWT.PUSH);
 		deleteConf.setText("");
-		deleteConf.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE));
+		deleteConf.setImage(Activator.getDefault().loadImageFromBundle("delete.png"));
 		deleteConf.setToolTipText("Removes the current selected configuration");
 		deleteConf.addSelectionListener(new SelectionListener()
 		{
@@ -565,7 +564,7 @@ public class PlaceDataprovidersComposite extends Composite
 			@Override
 			public Image getImage(Object element)
 			{
-				return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+				return Activator.getDefault().loadImageFromBundle("delete.png");
 			}
 
 			@Override

@@ -23,7 +23,7 @@ import com.servoy.eclipse.ui.Activator;
 
 /**
  * Collapses a TreeViewer.
- * 
+ *
  * @author acostescu
  */
 public class CollapseTreeAction extends Action
@@ -33,14 +33,14 @@ public class CollapseTreeAction extends Action
 
 	/**
 	 * Creates a new collapse action for the given TreeViewer.
-	 * 
+	 *
 	 * @param treeViewer the TreeViewer to use.
 	 */
 	public CollapseTreeAction(TreeViewer treeViewer)
 	{
 		this.treeViewer = treeViewer;
 		setText("Collapse tree");
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("collapseall.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("collapse_tree.png"));
 	}
 
 	@Override

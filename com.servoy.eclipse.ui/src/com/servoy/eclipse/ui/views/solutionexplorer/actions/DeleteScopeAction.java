@@ -26,13 +26,13 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
@@ -42,7 +42,7 @@ import com.servoy.j2db.util.Pair;
 
 /**
  * Action to delete global files
- * 
+ *
  * @author rgansevles
  */
 
@@ -53,7 +53,8 @@ public class DeleteScopeAction extends Action implements ISelectionChangedListen
 	public DeleteScopeAction(String text, SolutionExplorerView viewer)
 	{
 		this.viewer = viewer;
-		setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE));
+		Activator.getDefault();
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("delete.png"));
 		setText(text);
 		setToolTipText(text);
 	}

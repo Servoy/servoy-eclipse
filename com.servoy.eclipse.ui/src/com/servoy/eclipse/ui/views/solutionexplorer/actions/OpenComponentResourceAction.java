@@ -41,14 +41,14 @@ public class OpenComponentResourceAction extends Action implements ISelectionCha
 	 */
 	public OpenComponentResourceAction()
 	{
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.png"));
 		setText("Open file");
 		setToolTipText("Open file");
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
 	 */
 	@Override

@@ -50,7 +50,7 @@ public class OpenScriptAction extends Action implements ISelectionChangedListene
 	 */
 	public OpenScriptAction()
 	{
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("open.png"));
 		setText("Open in Script Editor");
 		setToolTipText(getText());
 		setId(OPEN_SCRIPT_ID);
