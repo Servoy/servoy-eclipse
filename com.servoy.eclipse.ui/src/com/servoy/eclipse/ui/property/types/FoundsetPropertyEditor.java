@@ -35,6 +35,8 @@ import com.servoy.eclipse.ui.dialogs.CombinedTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.CombinedTreeContentProvider.CombinedTreeOptions;
 import com.servoy.eclipse.ui.dialogs.FormFoundsetEntryContentProvider;
 import com.servoy.eclipse.ui.dialogs.FormFoundsetEntryLabelProvider;
+import com.servoy.eclipse.ui.dialogs.NamedFoundsetContentProvider;
+import com.servoy.eclipse.ui.dialogs.NamedFoundsetLabelProvider;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider.RelationsWrapper;
 import com.servoy.eclipse.ui.dialogs.TableContentProvider;
@@ -94,6 +96,10 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 				{
 					return ((IDataSourceWrapper)toTest).getTableName() != null && ((IDataSourceWrapper)toTest).getTableName().length() > 0;
 				}
+				else if (toTest instanceof Form)
+				{
+					return true;
+				}
 				return false;
 			}
 		});
@@ -106,7 +112,8 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 		IPersist contextPersist = persistContext.getContext();
 		CombinedTreeContentProvider foundsetContentProvider = new CombinedTreeContentProvider(1,
 			new ITreeContentProvider[] { new FormFoundsetEntryContentProvider(), new CombinedTreeContentProvider(2,
-				new ITreeContentProvider[] { new RelationContentProvider(flattenedSolution, contextPersist), new TableContentProvider() }) });
+				new ITreeContentProvider[] { new RelationContentProvider(flattenedSolution,
+					contextPersist), new TableContentProvider() }), new NamedFoundsetContentProvider(flattenedSolution) });
 		// @formatter:on
 
 		return foundsetContentProvider;
@@ -116,10 +123,10 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 	{
 		// @formatter:off
 		CombinedTreeLabelProvider foundsetChooserLabelProvider = new CombinedTreeLabelProvider(1,
-			new ILabelProvider[] { new FormFoundsetEntryLabelProvider(), new CombinedTreeLabelProvider(2,
+			new ILabelProvider[] { new FormFoundsetEntryLabelProvider(), new NamedFoundsetLabelProvider(), new CombinedTreeLabelProvider(2,
 				new ILabelProvider[] { new RelationLabelProvider("", true, true), new DatasourceLabelProvider("", true, false) }) });
 		CombinedTreeLabelProvider foundsetCellLabelProvider = new CombinedTreeLabelProvider(1,
-			new ILabelProvider[] { new FormFoundsetEntryLabelProvider(), new CombinedTreeLabelProvider(2,
+			new ILabelProvider[] { new FormFoundsetEntryLabelProvider(), new NamedFoundsetLabelProvider(), new CombinedTreeLabelProvider(2,
 				new ILabelProvider[] { new RelationLabelProvider("", true, true), new DatasourceLabelProvider("", true, true) }) });
 
 		final SolutionContextDelegateLabelProvider withSolutionContextForChooser = new SolutionContextDelegateLabelProvider(foundsetChooserLabelProvider,
@@ -155,7 +162,7 @@ public class FoundsetPropertyEditor extends ListSelectCellEditor
 		return new CombinedTreeOptions(null, true,
 			new Object[] { null, new CombinedTreeOptions(new String[] { "Related foundset", "Separate foundset (random table)" }, false,
 				new Object[] { new RelationContentProvider.RelationListOptions(primaryTableForRelation, foreignTableForRelation, false,
-					true), new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, false) }) });
+					true), new TableContentProvider.TableListOptions(TableListOptions.TableListType.ALL, false) }), null });
 		// @formatter:on
 	}
 

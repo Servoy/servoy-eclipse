@@ -297,8 +297,11 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 			state = (node.getRealType() == nodeType);
 			if (node.getType() == UserNodeType.COMPONENT || node.getType() == UserNodeType.SERVICE || node.getType() == UserNodeType.LAYOUT)
 			{
-				state = node.getRealObject() instanceof WebObjectSpecification || node.parent.getRealObject() instanceof IFolder ||
-					node.parent.getRealObject() instanceof IProject;
+				if (node.getRealObject() instanceof WebObjectSpecification)
+				{
+					state = !((WebObjectSpecification)node.getRealObject()).getSpecURL().getProtocol().equals("jar");
+				}
+				else state = node.parent.getRealObject() instanceof IFolder || node.parent.getRealObject() instanceof IProject;
 			}
 		}
 		if (state)

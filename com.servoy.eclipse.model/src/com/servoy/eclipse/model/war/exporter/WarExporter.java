@@ -165,7 +165,7 @@ public class WarExporter
 	 */
 	public void doExport(IProgressMonitor m) throws ExportException
 	{
-		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 36);
+		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 37);
 		File warFile = createNewWarFile();
 		monitor.worked(2);
 		File tmpWarDir = createTempDir();
@@ -220,6 +220,9 @@ public class WarExporter
 			copyMinifiedAndGrouped(tmpWarDir);
 			monitor.worked(1);
 		}
+		monitor.subTask("Creating deploy properties");
+		createDeployPropertiesFile(tmpWarDir);
+		monitor.worked(1);
 		monitor.subTask("Creating/zipping the WAR file");
 		zipDirectory(tmpWarDir, warFile);
 		monitor.worked(2);
@@ -610,10 +613,10 @@ public class WarExporter
 	private void copyNGLibs(File targetLibDir) throws ExportException, IOException
 	{
 		List<String> pluginLocations = exportModel.getPluginLocations();
-		File parent = null;
+		File eclipseParent = null;
+		File userDir = new File(System.getProperty("user.dir"));
 		if (System.getProperty("eclipse.home.location") != null)
-			parent = new File(URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
-		else parent = new File(System.getProperty("user.dir"));
+			eclipseParent = new File(URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
 		for (String libName : NG_LIBS)
 		{
 			int i = 0;
@@ -621,9 +624,21 @@ public class WarExporter
 			while (!found && i < pluginLocations.size())
 			{
 				File pluginLocation = new File(pluginLocations.get(i));
-				if (!pluginLocation.isAbsolute())
+				if (!pluginLocation.exists())
 				{
-					pluginLocation = new File(parent, pluginLocations.get(i));
+					if (eclipseParent != null)
+					{
+						pluginLocation = new File(eclipseParent, pluginLocations.get(i));
+					}
+					if (!pluginLocation.exists())
+					{
+						pluginLocation = new File(userDir, pluginLocations.get(i));
+					}
+					if (!pluginLocation.exists())
+					{
+						System.err.println("Trying different parents for " + pluginLocations.get(i) + " eclipse: " + eclipseParent + " userdir: " + userDir +
+							" none are found");
+					}
 				}
 				FileFilter filter = new WildcardFileFilter(libName);
 				try
@@ -1218,6 +1233,7 @@ public class WarExporter
 		{
 			try
 			{
+				defaultCss.getParentFile().mkdirs();
 				String styleCSS = TemplateGenerator.getStyleCSS("servoy_web_client_default.css");
 				OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(defaultCss), "utf8");
 				fw.write(styleCSS);
@@ -1671,6 +1687,7 @@ public class WarExporter
 	{
 		if (!destDir.exists() && !destDir.mkdirs()) throw new ExportException("Can't create destination dir: " + destDir);
 		File[] listFiles = sourceDir.listFiles();
+		if (listFiles == null) return;
 		for (File file : listFiles)
 		{
 			if (file.isDirectory())
@@ -1747,12 +1764,11 @@ public class WarExporter
 	 */
 	public String searchExportedPlugins()
 	{
-		File parent = null;
-		if (System.getProperty("eclipse.home.location") != null)
-			parent = new File(URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
-		else parent = new File(System.getProperty("user.dir"));
-
 		List<String> pluginLocations = exportModel.getPluginLocations();
+		File eclipseParent = null;
+		File userDir = new File(System.getProperty("user.dir"));
+		if (System.getProperty("eclipse.home.location") != null)
+			eclipseParent = new File(URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
 		for (String libName : NG_LIBS)
 		{
 			int i = 0;
@@ -1760,9 +1776,21 @@ public class WarExporter
 			while (!found && i < pluginLocations.size())
 			{
 				File pluginLocation = new File(pluginLocations.get(i));
-				if (!pluginLocation.isAbsolute())
+				if (!pluginLocation.exists())
 				{
-					pluginLocation = new File(parent, pluginLocations.get(i));
+					if (eclipseParent != null)
+					{
+						pluginLocation = new File(eclipseParent, pluginLocations.get(i));
+					}
+					if (!pluginLocation.exists())
+					{
+						pluginLocation = new File(userDir, pluginLocations.get(i));
+					}
+					if (!pluginLocation.exists())
+					{
+						System.err.println("Trying different parents for " + pluginLocations.get(i) + " eclipse: " + eclipseParent + " userdir: " + userDir +
+							" none are found");
+					}
 				}
 				FileFilter filter = new WildcardFileFilter(libName);
 				File[] libs = pluginLocation.listFiles(filter);
@@ -1776,5 +1804,21 @@ public class WarExporter
 			if (!found) return libName;
 		}
 		return null;
+	}
+
+	private void createDeployPropertiesFile(File tmpWarDir) throws ExportException
+	{
+		File deployPropertiesFile = new File(tmpWarDir, "WEB-INF/deploy.properties");
+		Properties properties = new Properties();
+		properties.put("isOverwriteDeployedDBServerProperties", String.valueOf(exportModel.isOverwriteDeployedDBServerProperties()));
+		properties.put("isOverwriteDeployedServoyProperties", String.valueOf(exportModel.isOverwriteDeployedServoyProperties()));
+		try (FileOutputStream fos = new FileOutputStream(deployPropertiesFile))
+		{
+			properties.store(fos, "");
+		}
+		catch (Exception e)
+		{
+			throw new ExportException("Couldn't generate the deploy.properties file", e);
+		}
 	}
 }

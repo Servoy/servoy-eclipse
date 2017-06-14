@@ -584,6 +584,7 @@ public class MobileExporter
 				buildRenameEntriesList(renameMap);
 				String fileNameWithoutExtension = solutionName + (useTestWar ? "_TEST" : "");
 				exportedFile = new File(outputFolder, fileNameWithoutExtension + (exportAsZip ? ".zip" : ".war"));
+				exportedFile.getParentFile().mkdirs();
 				warStream = new ZipOutputStream(new FileOutputStream(exportedFile));
 
 				Pair<String, Boolean> doMediaExportReturn = doMediaExport(warStream, developmentWorkspaceExport ? outputFolder : null);

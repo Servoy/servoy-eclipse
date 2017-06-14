@@ -9,43 +9,31 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.ast.ASTNode;
-import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.builder.ISourceLineTracker;
-import org.eclipse.dltk.javascript.ast.FunctionStatement;
-import org.eclipse.dltk.javascript.ast.JSDeclaration;
-import org.eclipse.dltk.javascript.ast.Script;
-import org.eclipse.dltk.javascript.ast.VariableDeclaration;
-import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.dltk.ui.DLTKPluginImages;
-import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
-import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDecoration;
-import org.eclipse.jface.viewers.IDecorationContext;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelDecorator;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -77,14 +65,12 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 
-import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
-import com.servoy.eclipse.ui.labelproviders.DeprecationDecoratingStyledCellLabelProvider;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IDeprecationProvider;
@@ -106,7 +92,6 @@ import com.servoy.j2db.persistence.IFormElement;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.ISupportDeprecated;
-import com.servoy.j2db.persistence.ISupportDeprecatedAnnotation;
 import com.servoy.j2db.persistence.ISupportExtendsID;
 import com.servoy.j2db.persistence.ISupportName;
 import com.servoy.j2db.persistence.NameComparator;
@@ -350,205 +335,6 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		}
 	}
 
-	private class FormViewLabelDecorator extends LabelDecorator
-	{
-
-		@Override
-		public Image decorateImage(Image image, Object element)
-		{
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public String decorateText(String text, Object element)
-		{
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public void addListener(ILabelProviderListener listener)
-		{
-		}
-
-		@Override
-		public void dispose()
-		{
-		}
-
-		@Override
-		public boolean isLabelProperty(Object element, String property)
-		{
-			// TODO Auto-generated method stub
-			return false;
-		}
-
-		@Override
-		public void removeListener(ILabelProviderListener listener)
-		{
-		}
-
-		@Override
-		public Image decorateImage(Image image, Object element, IDecorationContext context)
-		{
-			Image resultImage = null;
-			ImageDescriptor imageDescriptor = null;
-
-			if (element instanceof ScriptMethod || element instanceof ScriptVariable)
-			{
-				//problem (warning/error) decoration
-				int severity = getProblemType((IPersist)element);
-				if (severity == IMarker.SEVERITY_ERROR) imageDescriptor = DLTKPluginImages.DESC_OVR_ERROR;
-				else if (severity == IMarker.SEVERITY_WARNING) imageDescriptor = DLTKPluginImages.DESC_OVR_WARNING;
-
-				resultImage = (imageDescriptor != null ? new DecorationOverlayIcon(image, imageDescriptor, IDecoration.BOTTOM_LEFT).createImage() : image);
-
-				//deprecated decoration for vars/functions
-				if (element instanceof ISupportDeprecatedAnnotation)
-				{
-					ISupportDeprecatedAnnotation isda = (ISupportDeprecatedAnnotation)element;
-					if (isda.isDeprecated())
-					{
-						resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_DEPRECATED, IDecoration.UNDERLAY).createImage();
-					}
-				}
-
-				//constructor decoration for functions
-				if (element instanceof ScriptMethod && ((ScriptMethod)element).isConstructor())
-				{
-					resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_CONSTRUCTOR, IDecoration.TOP_RIGHT).createImage();
-				}
-			}
-			return resultImage;
-		}
-
-		private int getProblemType(IPersist element)
-		{
-			if (element instanceof ScriptVariable || element instanceof ScriptMethod)
-			{
-				IFile jsResource = ServoyModel.getWorkspace().getRoot().getFile(new Path(SolutionSerializer.getScriptPath(element, false)));
-				if (jsResource.exists())
-				{
-					try
-					{
-						IMarker[] jsMarkers = jsResource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-						if (jsMarkers != null && jsMarkers.length > 0)
-						{
-							ISourceModule sourceModule = DLTKCore.createSourceModuleFrom(jsResource);
-							Script script = JavaScriptParserUtil.parse(sourceModule);
-
-							if (element instanceof ScriptMethod)
-							{
-								return getProblemLevel(jsMarkers, sourceModule, getFunctionStatementForName(script, ((ScriptMethod)element).getName()));
-							}
-
-							if (element instanceof ScriptVariable)
-							{
-								return getProblemLevel(jsMarkers, sourceModule, getVariableDeclarationForName(script, ((ScriptVariable)element).getName()));
-							}
-						}
-					}
-					catch (Exception e)
-					{
-						ServoyLog.logError(e);
-					}
-				}
-			}
-
-			// unspecified
-			return -1;
-		}
-
-		//TODO refactor, copied from solex
-		public int getProblemLevel(IMarker[] jsMarkers, ISourceModule sourceModule, ASTNode node) throws ModelException
-		{
-			int problemLevel = -1;
-			if (jsMarkers == null || node == null) return problemLevel;
-			ISourceLineTracker sourceLineTracker = null;
-			for (IMarker marker : jsMarkers)
-			{
-				if (marker.getAttribute(IMarker.SEVERITY, -1) > problemLevel)
-				{
-					int start = marker.getAttribute(IMarker.CHAR_START, -1);
-					if (start != -1)
-					{
-						if (node.sourceStart() <= start && start <= node.sourceEnd())
-						{
-							problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
-						}
-					}
-					else
-					{
-						int line = marker.getAttribute(IMarker.LINE_NUMBER, -1); // 1 based
-						if (line != -1)
-						{
-							if (sourceLineTracker == null) sourceLineTracker = TextUtils.createLineTracker(sourceModule.getSource());
-							// getLineNumberOfOffset == 0 based so +1 to match the markers line
-							if (sourceLineTracker.getLineNumberOfOffset(node.sourceStart()) + 1 <= line &&
-								line <= sourceLineTracker.getLineNumberOfOffset(node.sourceEnd()) + 1)
-							{
-								problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
-							}
-						}
-					}
-
-				}
-			}
-			return problemLevel;
-		}
-
-		//TODO refactor, copied from solex
-		private FunctionStatement getFunctionStatementForName(Script script, String metName)
-		{
-			for (JSDeclaration dec : script.getDeclarations())
-			{
-				if (dec instanceof FunctionStatement)
-				{
-					FunctionStatement fstmt = (FunctionStatement)dec;
-					if (fstmt.getFunctionName().equals(metName))
-					{
-						return fstmt;
-					}
-				}
-			}
-			return null;
-		}
-
-		//TODO refactor, copied from solex
-		private VariableDeclaration getVariableDeclarationForName(Script script, String varName)
-		{
-			for (JSDeclaration dec : script.getDeclarations())
-			{
-				if (dec instanceof VariableDeclaration)
-				{
-					VariableDeclaration varDec = (VariableDeclaration)dec;
-					if (varDec.getVariableName().equals(varName))
-					{
-						return varDec;
-					}
-				}
-			}
-			return null;
-		}
-
-
-		@Override
-		public String decorateText(String text, Object element, IDecorationContext context)
-		{
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public boolean prepareDecoration(Object element, String originalText, IDecorationContext context)
-		{
-			// TODO Auto-generated method stub
-			return false;
-		}
-
-	}
-
 	private class FormViewLabelProvider extends ColumnLabelProvider implements IDeprecationProvider
 	{
 		private final IStructuredContentProvider provider;
@@ -623,11 +409,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		{
 			if (element instanceof Form) return super.getForeground(element);
 			if (provider instanceof FormTreeContentProvider) return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE);
-			if (element instanceof ISupportExtendsID && ((ISupportExtendsID)element).getExtendsID() > 0)
-			{
-				return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE);
-			}
-			if (element instanceof ScriptMethod)
+			if (element instanceof AbstractBase)
 			{
 				AbstractBase sm = (AbstractBase)element;
 				if (!sm.getParent().equals(selected))
@@ -791,6 +573,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	public static final String DIALOGSTORE_VIEWORIENTATION = "FormHierarchyView.orientation";
 	private static final String DIALOGSTORE_RATIO = "FormHierarchyView.ratio";
 	private static final String DIALOGSTORE_SHOW_MEMBERS = "FormHierarchy.SHOW_MEMBERS";
+	public static final String DIALOGSTORE_SHOW_ALL_MEMBERS = "FormHierarchy.SHOW_ALL_MEMBERS";
 	private static final String GROUP_ELEMENTS_BY_TYPE = "GroupElements";
 
 	private IDialogSettings fDialogSettings;
@@ -827,6 +610,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private FormHierarchyFilter hideVariablesAction;
 
 	private IMemento memento;
+	private StatusBarUpdater statusBarUpdater;
+	private IResourceChangeListener resourceChangeListener;
 	private static final String SELECTED_FORM = "FormHierarchy.SELECTION";
 
 	@Override
@@ -872,6 +657,11 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		this.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
 		tree.addSelectionChangedListener(this);
 
+		IStatusLineManager slManager = getViewSite().getActionBars().getStatusLineManager();
+		statusBarUpdater = new StatusBarUpdater(slManager);
+		statusBarUpdater.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
+		list.addSelectionChangedListener(statusBarUpdater);
+
 		contributeToActionBars();
 
 		showMembersAction.setChecked(fDialogSettings.getBoolean(DIALOGSTORE_SHOW_MEMBERS));
@@ -884,6 +674,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		{
 			setSelection(persist);
 		}
+		//TODO addResourceListener();
 	}
 
 	private void createTreeViewer(Composite parent)
@@ -891,8 +682,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		tree = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		treeProvider = new FormTreeContentProvider();
 		tree.setContentProvider(treeProvider);
-		tree.setLabelProvider(new DeprecationDecoratingStyledCellLabelProvider(
-			new DecoratingLabelProvider(new FormViewLabelProvider(treeProvider), new FormViewLabelDecorator())));
+		tree.setLabelProvider(new DecoratedLabelProvider(new FormViewLabelProvider(treeProvider)));
 
 		tree.addDoubleClickListener(new FormHierarchyDoubleClickListener());
 		tree.addPostSelectionChangedListener(new FocusSelectedElementListener());
@@ -914,8 +704,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		ColumnViewerToolTipSupport.enableFor(list);
 		FormListContentProvider listProvider = new FormListContentProvider(this);
 		list.setContentProvider(listProvider);
-		list.setLabelProvider(new DeprecationDecoratingStyledCellLabelProvider(
-			new DecoratingLabelProvider(new FormViewLabelProvider(listProvider), new FormViewLabelDecorator())));
+		list.setLabelProvider(new DecoratedLabelProvider(new FormViewLabelProvider(listProvider)));
 		viewForm.setContent(list.getControl());
 
 		list.addDoubleClickListener(new FormHierarchyDoubleClickListener());
@@ -1196,6 +985,16 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		list.addSelectionChangedListener(showMembersAction);
 
 		showAllAction = new FormHierarchyFilter(list, false, "inher_co.png", "Show All Inherited Members");
+		showAllAction.setChecked(fDialogSettings.getBoolean(DIALOGSTORE_SHOW_ALL_MEMBERS));
+		showAllAction.addPropertyChangeListener(new IPropertyChangeListener()
+		{
+
+			@Override
+			public void propertyChange(PropertyChangeEvent event)
+			{
+				fDialogSettings.put(DIALOGSTORE_SHOW_ALL_MEMBERS, showAllAction.isChecked());
+			}
+		});
 		lowertbmanager.add(showAllAction);
 
 		hideElementsAction = new FormHierarchyFilter(list, false, "hide_elements.gif", "Hide elements");
@@ -1225,6 +1024,55 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		}
 	}
 
+	private void addResourceListener()
+	{
+		final HierarchyDecorator decorator = (HierarchyDecorator)PlatformUI.getWorkbench().getDecoratorManager().getBaseLabelProvider(HierarchyDecorator.ID);
+		// we monitor the changes to eclipse projects in order to keep the list of
+		// projects in the tree up to date
+		Display.getCurrent().asyncExec(new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				resourceChangeListener = new IResourceChangeListener()
+				{
+					public void resourceChanged(IResourceChangeEvent event)
+					{
+						if ((event.getType() & IResourceChangeEvent.POST_CHANGE) != 0)
+						{
+							setSelection(selected);//refresh
+						}
+						else if (decorator != null)
+						{
+							IMarkerDelta[] markersDelta = event.findMarkerDeltas(IMarker.PROBLEM, true);
+							HashSet<IResource> changedProblemResources = new HashSet<IResource>();
+							for (IMarkerDelta md : markersDelta)
+							{
+								IResource r = md.getResource();
+								do
+								{
+									if (!changedProblemResources.add(r))
+									{
+										break;
+									}
+									r = r.getParent();
+								}
+								while (r != null && r.getType() != IResource.ROOT);
+							}
+
+							decorator.fireChanged(changedProblemResources.toArray(new IResource[changedProblemResources.size()]));
+						}
+					}
+				};
+
+				ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener,
+					IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
+			}
+		});
+	}
+
+
 	@Override
 	public Object getAdapter(Class type)
 	{
@@ -1242,6 +1090,20 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	public void dispose()
 	{
 		fDialogSettings.put(DIALOGSTORE_SHOW_MEMBERS, showMembersAction.isChecked());
+
+		if (statusBarUpdater != null)
+		{
+			statusBarUpdater.dispose();
+			fSelectionProviderMediator.removeSelectionChangedListener(statusBarUpdater);
+			statusBarUpdater = null;
+		}
+
+		if (resourceChangeListener != null)
+		{
+			ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
+			resourceChangeListener = null;
+		}
+
 		super.dispose();
 	}
 }

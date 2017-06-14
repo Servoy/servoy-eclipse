@@ -57,20 +57,19 @@
 		      </md-tab>
 		      <md-tab label="NG Services {{getUpgradeCount(servicePackages)}}">
 		        <md-content class="md-padding">
-					<packages packages="servicePackages" solution-list="solutionList" websocket="websocket">
+							<packages packages="servicePackages" solution-list="solutionList" websocket="websocket">
 		        </md-content>
 		      </md-tab>
-			  <md-tab label="NG Layouts {{getUpgradeCount(layoutPackages)}}">
+			  	<md-tab label="NG Layouts {{getUpgradeCount(layoutPackages)}}">
 		        <md-content class="md-padding">
 		          <packages packages="layoutPackages" solution-list="solutionList" websocket="websocket">
 		        </md-content>
 		      </md-tab>
-		<!--  <md-tab label="Servoy Modules">
+					<md-tab label="Servoy solutions">
 		        <md-content class="md-padding">
-		          <packages packages="items" solution-list="solutionList">
+		          <packages packages="solutionPackages" solution-list="solutionList" websocket="websocket">
 		        </md-content>
-		      </md-tab>
-		-->      
+		      </md-tab>   
 		    </md-tabs>
 		  </div>
 		</div>

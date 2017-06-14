@@ -44,7 +44,7 @@
       <!-- Added -->
       <div class="align-center"> 
         <p> {{package.installed}} </p>
-        <md-button class="md-icon-button fa fa-trash"  ng-click="uninstall(package, $index)" ng-if="package.installed" ng-disabled="isInstallingOrRemoving($index)">
+        <md-button class="md-icon-button fa fa-trash"  ng-click="uninstall(package, $index)" ng-if="package.installed && (package.packageType != 'Solution')" ng-disabled="isInstallingOrRemoving($index)">
           <md-tooltip md-direction="bottom" md-autohide="true">
             Remove the web package from solution '{{packages[$index].activeSolution}}'.
           </md-tooltip>
