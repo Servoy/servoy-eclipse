@@ -116,6 +116,10 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 							}
 						}
 					}
+					else
+					{
+						pack.put("activeSolution", activeSolutionName);
+					}
 				}
 				else
 				{
