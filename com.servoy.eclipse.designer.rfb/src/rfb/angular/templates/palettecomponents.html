@@ -1,6 +1,6 @@
 <li ng-repeat="item in items | filter:{displayName:searchText} | orderBy:'displayName'" style="position:relative;">
 	<div ng-mousedown="enterDragMode($event,item.name,package.packageName,item.tagName,item.model,item.componentType,item.topContainer, item.layoutName) " class="paletteItem" title="Drag component {{item.displayName}} to form to add it"> 
-		<img draggable="false" ng-src="/{{item.icon}}" alt=""/>{{item.displayName}}
+		<img draggable="false" style="align:center" ng-src="/{{item.icon}}" alt=""/>{{item.displayName}}
 	</div>
 	<img ng-click="showPreviewImage(item.preview)" draggable="false" ng-if="item.preview" src="images/images.jpeg" title="Open preview" alt="" style="position:absolute; right:0; bottom:0.14em; cursor:pointer;"/>
 		<ul>
