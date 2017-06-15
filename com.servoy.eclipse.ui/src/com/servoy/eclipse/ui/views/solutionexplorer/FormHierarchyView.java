@@ -19,7 +19,10 @@ import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -34,6 +37,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -56,6 +60,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -81,8 +86,11 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.FormHierarchyFilter;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenFormEditorAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenPersistEditorAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenScriptAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenWizardAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OrientationAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.OverrideMethodAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ShowMembersInFormHierarchy;
+import com.servoy.eclipse.ui.wizards.NewFormWizard;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -105,7 +113,7 @@ import com.servoy.j2db.util.SortedList;
 import com.servoy.j2db.util.Utils;
 
 
-public class FormHierarchyView extends ViewPart implements ISelectionChangedListener, IOrientedView
+public class FormHierarchyView extends ViewPart implements ISelectionChangedListener, IOrientedView, ITreeListView
 {
 	private final class FormHierarchyDoubleClickListener implements IDoubleClickListener
 	{
@@ -587,6 +595,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
 	private ContextAction openAction;
+	private ContextAction treeNewAction;
+	private OverrideMethodAction overrideAction;
 
 	private int fCurrentOrientation;
 	private OrientationAction[] fToggleOrientationActions;
@@ -649,6 +659,9 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		initOrientation();//TODO add preference page & menu for the orientation settings
 
 		openAction = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.gif"), "Open");
+		treeNewAction = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD), "New");
+		overrideAction = new OverrideMethodAction(this);
+
 		createTreeViewer(fSplitter);
 		createListViewer(fSplitter);
 		fSelectionProviderMediator = new SelectionProviderMediator(new StructuredViewer[] { tree, list }, null);
@@ -663,6 +676,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		list.addSelectionChangedListener(statusBarUpdater);
 
 		contributeToActionBars();
+		hookContextMenu();
 
 		showMembersAction.setChecked(fDialogSettings.getBoolean(DIALOGSTORE_SHOW_MEMBERS));
 		if (memento == null) return;
@@ -695,6 +709,11 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		openAction.registerAction(Form.class, openFormEditor);//TODO preference whether to open form or script
 		openAction.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
 		tree.addSelectionChangedListener(openAction);
+
+		IAction newSubform = new OpenWizardAction(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form");
+		treeNewAction.registerAction(Form.class, newSubform);
+		treeNewAction.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
+		tree.addSelectionChangedListener(treeNewAction);
 	}
 
 	private void createListViewer(Composite parent)
@@ -716,6 +735,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		openAction.registerAction(BaseComponent.class, openPersistEditor);
 		openAction.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
 		list.addSelectionChangedListener(openAction);
+		overrideAction.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
+		list.addSelectionChangedListener(overrideAction);
 
 		listToolBar = new ToolBar(viewForm, SWT.FLAT | SWT.WRAP);
 		viewForm.setTopCenter(listToolBar);
@@ -970,6 +991,48 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		item.fill(listDropDownMenu, -1);
 	}
 
+	private void hookContextMenu()
+	{
+		MenuManager menuMgr = new MenuManager("#TreePopupMenu");
+		menuMgr.setRemoveAllWhenShown(true);
+		menuMgr.addMenuListener(new IMenuListener()
+		{
+			public void menuAboutToShow(IMenuManager manager)
+			{
+				FormHierarchyView.this.fillTreeContextMenu(manager);
+			}
+		});
+		Menu menu = menuMgr.createContextMenu(tree.getControl());
+		tree.getControl().setMenu(menu);
+
+		getSite().registerContextMenu(ID + ".tree", menuMgr, tree);
+
+		menuMgr = new MenuManager("#ListPopupMenu");
+		menuMgr.setRemoveAllWhenShown(true);
+		menuMgr.addMenuListener(new IMenuListener()
+		{
+			public void menuAboutToShow(IMenuManager manager)
+			{
+				FormHierarchyView.this.fillListContextMenu(manager);
+			}
+		});
+		menu = menuMgr.createContextMenu(list.getControl());
+		list.getControl().setMenu(menu);
+
+		getSite().registerContextMenu(ID + ".list", menuMgr, list);
+
+	}
+
+	private void fillTreeContextMenu(IMenuManager manager)
+	{
+		if (treeNewAction.isEnabled()) manager.add(treeNewAction);
+	}
+
+	private void fillListContextMenu(IMenuManager manager)
+	{
+		if (overrideAction.isEnabled()) manager.add(overrideAction);
+	}
+
 	public void groupElementsOption(boolean group)
 	{
 		fDialogSettings.put(GROUP_ELEMENTS_BY_TYPE, group);
@@ -1105,5 +1168,27 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		}
 
 		super.dispose();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.ui.views.solutionexplorer.ITreeListView#getSelectedTreeElement()
+	 */
+	@Override
+	public Object getSelectedTreeElement()
+	{
+		return ((ITreeSelection)tree.getSelection()).getFirstElement();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.ui.views.solutionexplorer.ITreeListView#getSelectedListElement()
+	 */
+	@Override
+	public Object getSelectedListElement()
+	{
+		return ((IStructuredSelection)list.getSelection()).getFirstElement();
 	}
 }
