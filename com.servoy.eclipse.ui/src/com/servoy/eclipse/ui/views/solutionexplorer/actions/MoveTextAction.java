@@ -74,7 +74,7 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 
 		if (moveSampleText)
 		{
-			setImageDescriptor(Activator.loadImageDescriptorFromBundle("copycont_r_co.gif"));
+			setImageDescriptor(Activator.loadImageDescriptorFromBundle("move_sample.png"));
 			setText(Messages.MoveTextAction_moveSample);
 			setToolTipText(Messages.MoveTextAction_moveSample);
 		}
