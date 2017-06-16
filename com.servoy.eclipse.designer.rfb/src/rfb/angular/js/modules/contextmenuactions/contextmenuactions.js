@@ -86,7 +86,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 		
 			$contextmenu.add({
 				text: "Set Tab Sequence",
-				getIconStyle: function(){ return {'background-image':"url(images/th_horizontal.gif)"};},
+				getIconStyle: function(){ return {'background-image':"url(images/th_horizontal.png)"};},
 				shortcut: shortcuts[SHORTCUT_IDS.SET_TAB_SEQUENCE_ID],
 				getItemClass: function() { if (!editorScope.getSelection() || editorScope.getSelection().length < 2) return "disabled";},
 				execute:function(){
@@ -102,7 +102,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         			sizingActions.push(
         					{
         						text: "Same Width",
-        						getIconStyle: function(){ return {'background-image':"url(images/same_width.gif)"};},
+        						getIconStyle: function(){ return {'background-image':"url(images/same_width.png)"};},
         						shortcut: shortcuts[SHORTCUT_IDS.SAME_WIDTH_ID],
         						getItemClass: function() { if (!editorScope.getSelection() || editorScope.getSelection().length < 2) return "disabled";},
         						execute:function()
@@ -115,7 +115,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         			sizingActions.push(
         					{
         						text: "Same Height",
-        						getIconStyle: function(){ return {'background-image':"url(images/same_height.gif)"};},
+        						getIconStyle: function(){ return {'background-image':"url(images/same_height.png)"};},
         						shortcut: shortcuts[SHORTCUT_IDS.SAME_HEIGHT_ID],
         						getItemClass: function() { if (!editorScope.getSelection() || editorScope.getSelection().length < 2) return "disabled";},
         						execute:function()
@@ -270,7 +270,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         			groupingActions.push(
         					{
         						text: "Group",
-        						getIconStyle: function(){ return {'background-image':"url(images/group.gif)"}},
+        						getIconStyle: function(){ return {'background-image':"url(images/group.png)"}},
         						getItemClass: function() {if (!editorScope.getSelection() || editorScope.getSelection().length < 2) return "disabled";},
         						shortcut: shortcuts[SHORTCUT_IDS.GROUP_ID],
         						execute: function()
@@ -284,7 +284,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         			groupingActions.push(
         					{
         						text: "Ungroup",
-        						getIconStyle: function(){ return {'background-image':"url(images/ungroup.gif)"}},
+        						getIconStyle: function(){ return {'background-image':"url(images/ungroup.png)"}},
         						getItemClass: function() {
         							if (!hasSelection()) return "disabled";
         							//at least one selected element should be a group
@@ -335,7 +335,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 			$contextmenu.add(
 				{
 					text: "Save as template ...",
-					getIconStyle: function(){ return {'background-image':"url(toolbaractions/icons/template.gif)"}},
+					getIconStyle: function(){ return {'background-image':"url(toolbaractions/icons/template.png)"}},
 					execute:function()
 					{
 						$("#contextMenu").hide();

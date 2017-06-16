@@ -131,7 +131,8 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnTabSequence = {
 		text: "Set tab sequence",
-		icon: "../../images/th_horizontal.gif",
+		icon: "../../images/th_horizontal.png",
+		disabledIcon: "../../images/th_horizontal-disabled.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.executeAction('setTabSequence');
@@ -154,7 +155,8 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnHideInheritedElements = {
 		text: "Hide inherited elements",
-		icon: "../../images/hide_inherited.gif",
+		icon: "../../images/hide_inherited.png",
+		disabledIcon: "../../images/hide_inherited-disabled.png",
 		enabled: true,
 		onclick: function() {
 			$(editorScope.contentDocument).find('.inherited_element').each(function(index, element) {
@@ -409,6 +411,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	var btnCenterAlign = {
 		text: "Align Center",
 		icon: "../../images/aligncenter.png",
+		disabledIcon: "../../images/aligncenter-disabled.png",
 		enabled: false,
 		onclick: function() {
 			var selection = editorScope.getSelection();
@@ -453,6 +456,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	var btnMiddleAlign = {
 		text: "Align Middle",
 		icon: "../../images/alignmid.png",
+		disabledIcon: "../../images/alignmid-disabled.png",
 		enabled: false,
 		onclick: function() {
 			var selection = editorScope.getSelection();
@@ -567,7 +571,8 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	var btnGroup =
 	{
 			text: "Group",
-			icon: "../../images/group.gif",
+			icon: "../../images/group.png",
+			disabledIcon: "../../images/group-disabled.png",
 			enabled: false,
 			onclick: function()
 			{
@@ -578,7 +583,8 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	var btnUngroup =
 	{
 		text: "Ungroup",
-		icon: "../../images/ungroup.gif",
+		icon: "../../images/ungroup.png",
+		disabledIcon: "../../images/ungroup-disabled.png",
 		enabled: false,
 		onclick: function()
 		{
@@ -601,7 +607,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	
 	var btnClassicEditor = {
 			text: "Switch to classic editor",
-			icon: "../../images/html5-gray.png",
+			icon: "../../images/html5.png",
 			enabled: true,
 			onclick: function() {
 				$editorService.executeAction('switchEditorClassic');
