@@ -44,7 +44,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * Action to create a new global scope.
- * 
+ *
  * @author rgansevles
  */
 public class NewScopeAction extends Action implements ISelectionChangedListener
@@ -53,7 +53,7 @@ public class NewScopeAction extends Action implements ISelectionChangedListener
 
 	/**
 	 * Creates a new "create new variable" action for the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public NewScopeAction(SolutionExplorerView sev)
@@ -62,7 +62,7 @@ public class NewScopeAction extends Action implements ISelectionChangedListener
 
 		setText("Create new scope");
 		setToolTipText(getText());
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("scopes.png"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("new_scope.png"));
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)
