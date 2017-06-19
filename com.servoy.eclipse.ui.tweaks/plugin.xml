@@ -116,7 +116,7 @@
        <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dlcl16/home_nav.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/home.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/home-disabled.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
@@ -165,28 +165,28 @@
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/elcl16/backward_nav.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-document.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/backward_nav.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dlcl16/backward_nav.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-document-disabled.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/backward_nav-disabled.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/elcl16/forward_nav.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/forward-to-document.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/forward_nav.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dlcl16/forward_nav.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/forward-to-document-disabled.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/forward_nav-disabled.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
@@ -429,6 +429,93 @@
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/pin_view.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.views/icons/full/eview16/outline_co.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/outline.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.views/$nl$/icons/full/eview16/outline_co.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/outline.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.views/icons/full/eview16/prop_ps.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/properties.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.views/$nl$/icons/full/eview16/prop_ps.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/properties.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>  
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.ide/$nl$/icons/full/eview16/pview.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/progress.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.ide/icons/full/eview16/pview.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/progress.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>     
+     
+     <!--the minimize, maximize and view menu icons replacement does not work even though the names seem correct, perhaps on eclipse upgrade-->
+     <!-- http://git.eclipse.org/c/platform/eclipse.platform.ui.git/plain/bundles/org.eclipse.ui/icons/full/elcl16/thin_min_view.png-->
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/elcl16/thin_min_view.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/minimize.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/elcl16/thin_min_view.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/minimize.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/elcl16/thin_max_view.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/maximize.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+    
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/elcl16/thin_max_view.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/maximize.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/elcl16/thin_view_menu.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/more.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/elcl16/thin_view_menu.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/more.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement> 
+     <!-- -->    
 
 </extension>
    
