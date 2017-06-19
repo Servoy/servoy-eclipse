@@ -68,6 +68,7 @@ public class KeyPressedHandler implements IServerService
 	 */
 	public Object executeMethod(String methodName, final JSONObject args)
 	{
+		System.err.println("keypressed " + methodName + args);
 		int keyCode = args.optInt("keyCode");
 		boolean isCtrl = args.optBoolean("ctrl");
 		boolean isShift = args.optBoolean("shift");
@@ -106,16 +107,30 @@ public class KeyPressedHandler implements IServerService
 				break;
 
 			case 83 : // s
-				if (isCtrl && isShift) // ctrl+shift+s (save all)
+				if (isCtrl)
 				{
-					Display.getDefault().asyncExec(new Runnable()
+					if (isShift) // ctrl+shift+s (save all)
 					{
-						public void run()
+						Display.getDefault().asyncExec(new Runnable()
 						{
-							IWorkbenchPage page = editorPart.getSite().getPage();
-							((WorkbenchPage)page).saveAllEditors(false, false, true);
-						}
-					});
+							public void run()
+							{
+								IWorkbenchPage page = editorPart.getSite().getPage();
+								((WorkbenchPage)page).saveAllEditors(false, false, true);
+							}
+						});
+					}
+					else
+					{
+						Display.getDefault().asyncExec(new Runnable()
+						{
+							public void run()
+							{
+								IWorkbenchPage page = editorPart.getSite().getPage();
+								((WorkbenchPage)page).saveEditor(editorPart, false);
+							}
+						});
+					}
 				}
 				break;
 
