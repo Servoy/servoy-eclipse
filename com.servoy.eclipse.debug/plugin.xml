@@ -301,33 +301,13 @@
               locationURI="toolbar:org.eclipse.ui.main.toolbar?endof=additions">
            <toolbar
                  id="com.servoy.eclipse.debug.toolbar">
-               <command
+              <command
                     commandId="com.servoy.eclipse.ui.StartClient"
                     icon="icons/run.png"
                     id="com.servoy.eclipse.ui.StartClient"
                     label="Start Debug Client"
                     style="pulldown">
               </command>
-              <!--command
-                    commandId="com.servoy.eclipse.ui.StartSmartClient"
-                    icon="icons/launch.gif"
-                    label="Start Debug Smart Client"
-                    style="push">
-              </command>
-              <command
-                    commandId="com.servoy.eclipse.ui.StartWebClient"
-                    icon="icons/launch_web.gif"
-                    id="com.servoy.eclipse.ui.StartWebClient.dynamic"
-                    label="Start Debug Web Client"
-                    style="pulldown">
-              </command>
-              <command
-                    commandId="com.servoy.eclipse.ui.StartNGClient"
-                    icon="icons/launch_ng.gif"
-                    id="com.servoy.eclipse.ui.StartNGClient.dynamic"
-                    label="Start NGClient"
-                    style="pulldown">
-              </command-->
            </toolbar>
         </menuContribution>
         <menuContribution
@@ -398,7 +378,7 @@
                  id="com.servoy.eclipse.ui.StartNGClient.dynamic.contributions">
            </dynamic>
         </menuContribution>
-        <!--menuContribution
+        <menuContribution
               allPopups="false"
               locationURI="menu:org.eclipse.ui.run?after=breakpointGroup">
            <separator
@@ -407,27 +387,23 @@
            </separator>
            <command
                  commandId="com.servoy.eclipse.ui.StartWebClient"
-                 icon="icons/launch_web.gif"
+                 icon="icons/launch_web.png"
                  label="Start Debug Web Client"
                  style="push">
            </command>
            <command
                  commandId="com.servoy.eclipse.ui.StartSmartClient"
-                 icon="icons/launch.gif"
+                 icon="icons/launch.png"
                  label="Start Debug Smart Client"
                  style="push">
            </command>
            <command
                  commandId="com.servoy.eclipse.ui.StartNGClient"
-                 icon="icons/launch_ng.gif"
+                 icon="icons/launch_ng.png"
                  label="Start NGClient"
                  style="push">
            </command>
-        </menuContribution-->
-        <group
-              id="com.servoy.eclipse.debug.group2"
-              separatorsVisible="true">
-        </group>
+        </menuContribution>
      </extension>
      <extension
            point="org.eclipse.ui.handlers">
