@@ -9,12 +9,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IMarkerDelta;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -73,6 +74,7 @@ import org.eclipse.ui.views.properties.PropertySheetPage;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
@@ -688,7 +690,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		{
 			setSelection(persist);
 		}
-		//TODO addResourceListener();
+		addResourceListener();
 	}
 
 	private void createTreeViewer(Composite parent)
@@ -1089,50 +1091,47 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 	private void addResourceListener()
 	{
-		final HierarchyDecorator decorator = (HierarchyDecorator)PlatformUI.getWorkbench().getDecoratorManager().getBaseLabelProvider(HierarchyDecorator.ID);
-		// we monitor the changes to eclipse projects in order to keep the list of
-		// projects in the tree up to date
-		Display.getCurrent().asyncExec(new Runnable()
+		resourceChangeListener = new IResourceChangeListener()
 		{
-
-			@Override
-			public void run()
+			public void resourceChanged(IResourceChangeEvent event)
 			{
-				resourceChangeListener = new IResourceChangeListener()
+				if ((event.getType() & IResourceChangeEvent.POST_CHANGE) != 0)
 				{
-					public void resourceChanged(IResourceChangeEvent event)
+					boolean mustRefresh = false;
+					IResourceDelta[] affectedChildren = event.getDelta().getAffectedChildren();
+					try
 					{
-						if ((event.getType() & IResourceChangeEvent.POST_CHANGE) != 0)
+						for (IResourceDelta element : affectedChildren)
 						{
-							setSelection(selected);//refresh
-						}
-						else if (decorator != null)
-						{
-							IMarkerDelta[] markersDelta = event.findMarkerDeltas(IMarker.PROBLEM, true);
-							HashSet<IResource> changedProblemResources = new HashSet<IResource>();
-							for (IMarkerDelta md : markersDelta)
+							IResource resource = element.getResource();
+							if (resource instanceof IProject && ((IProject)resource).hasNature(ServoyProject.NATURE_ID))
 							{
-								IResource r = md.getResource();
-								do
-								{
-									if (!changedProblemResources.add(r))
-									{
-										break;
-									}
-									r = r.getParent();
-								}
-								while (r != null && r.getType() != IResource.ROOT);
+								mustRefresh = true;
+								break;
 							}
-
-							decorator.fireChanged(changedProblemResources.toArray(new IResource[changedProblemResources.size()]));
 						}
 					}
-				};
+					catch (CoreException ex)
+					{
+						ServoyLog.logError(ex);
+					}
 
-				ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener,
-					IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
+					if (mustRefresh)
+					{
+						Display.getDefault().asyncExec(new Runnable()
+						{
+							@Override
+							public void run()
+							{
+								setSelection(selected);//refresh
+							}
+						});
+					}
+				}
 			}
-		});
+		};
+
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
 	}
 
 
