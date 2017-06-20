@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -75,6 +78,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
@@ -112,6 +116,7 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.SortedList;
+import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 
@@ -1095,6 +1100,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		{
 			public void resourceChanged(IResourceChangeEvent event)
 			{
+				HierarchyDecorator decorator = (HierarchyDecorator)PlatformUI.getWorkbench().getDecoratorManager().getBaseLabelProvider(HierarchyDecorator.ID);
 				if ((event.getType() & IResourceChangeEvent.POST_CHANGE) != 0)
 				{
 					boolean mustRefresh = false;
@@ -1127,6 +1133,30 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 							}
 						});
 					}
+				}
+				else if (decorator != null)
+				{
+					IMarkerDelta[] markersDelta = event.findMarkerDeltas(IMarker.PROBLEM, true);
+					HashSet<IPersist> changedProblemPersists = new HashSet<IPersist>();
+					for (IMarkerDelta md : markersDelta)
+					{
+						IResource r = md.getResource();
+						if (r instanceof IFile)
+						{
+							IFile resource = (IFile)r;
+							if (SolutionSerializer.FORM_FILE_EXTENSION.equals("." + resource.getFileExtension()))//TODO how to refresh decorators for items in js resources?
+							{
+								ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
+									resource.getProject().getName());
+								if (servoyProject == null) continue;
+								UUID uuid = SolutionDeserializer.getUUID(resource.getRawLocation().toFile());
+								IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), uuid);
+								if (persist != null) changedProblemPersists.add(persist);
+							}
+						}
+					}
+
+					decorator.fireChanged(changedProblemPersists.toArray(new IPersist[changedProblemPersists.size()]));
 				}
 			}
 		};
