@@ -18,7 +18,11 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -74,6 +78,7 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
@@ -671,20 +676,17 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 		createTreeViewer(fSplitter);
 		createListViewer(fSplitter);
-		fSelectionProviderMediator = new SelectionProviderMediator(new StructuredViewer[] { tree, list }, null);
-		getSite().setSelectionProvider(fSelectionProviderMediator);
-
-		this.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
-		tree.addSelectionChangedListener(this);
-
-		IStatusLineManager slManager = getViewSite().getActionBars().getStatusLineManager();
-		statusBarUpdater = new StatusBarUpdater(slManager);
-		statusBarUpdater.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
-		list.addSelectionChangedListener(statusBarUpdater);
-
+		createSelectionProvider();
+		createStatusBarUpdater();
 		contributeToActionBars();
 		hookContextMenu();
+		restoreView();
+		addResourceListener();
+	}
 
+
+	private void restoreView()
+	{
 		showMembersAction.setChecked(fDialogSettings.getBoolean(DIALOGSTORE_SHOW_MEMBERS));
 		if (memento == null) return;
 		String formUuid = memento.getString(SELECTED_FORM);
@@ -695,7 +697,22 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		{
 			setSelection(persist);
 		}
-		addResourceListener();
+	}
+
+	private void createStatusBarUpdater()
+	{
+		IStatusLineManager slManager = getViewSite().getActionBars().getStatusLineManager();
+		statusBarUpdater = new StatusBarUpdater(slManager);
+		statusBarUpdater.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
+		list.addSelectionChangedListener(statusBarUpdater);
+	}
+
+	private void createSelectionProvider()
+	{
+		fSelectionProviderMediator = new SelectionProviderMediator(new StructuredViewer[] { tree, list }, null);
+		getSite().setSelectionProvider(fSelectionProviderMediator);
+		this.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
+		tree.addSelectionChangedListener(this);
 	}
 
 	private void createTreeViewer(Composite parent)
@@ -798,6 +815,11 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 	public void setSelection(Object object)
 	{
+		setSelection(object, true);
+	}
+
+	public void setSelection(Object object, boolean refreshList)
+	{
 		if (noSelectionChange) return;
 		activeSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 		if (object instanceof Form)
@@ -814,25 +836,26 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		{
 			selected = (Form)(((IPersist)object).getParent());
 			tree.setInput(new Form[] { selected });
-			showMembersInFormHierarchy(object);
+			showMembersInFormHierarchy(object, true);
 			list.setInput(selected);
 		}
 		else
 		{
-			showMembersInFormHierarchy(object);
+			showMembersInFormHierarchy(object, refreshList);
 		}
 		list.refresh();
 		list.expandAll();
 	}
 
-	private void showMembersInFormHierarchy(Object object)
+	private void showMembersInFormHierarchy(Object object, boolean refreshList)
 	{
-		treeProvider.setSelection((IPersist)object);
 		if (object == null)
 		{
 			tree.refresh();
 			return;
 		}
+		IStructuredSelection initialSelection = tree.getStructuredSelection();
+		treeProvider.setSelection((IPersist)object);
 
 		tree.getTree().setRedraw(false);
 		tree.refresh();
@@ -853,10 +876,13 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		{
 			noSelectionChange = true;
 			tree.setExpandedTreePaths(paths.toArray(new TreePath[paths.size()]));
-			tree.setSelection(new StructuredSelection(object));
-			list.setInput(((IPersist)object).getParent());
-			list.setSelection(new StructuredSelection(object));
-			list.reveal(object);
+			tree.setSelection(initialSelection);
+			if (refreshList)
+			{
+				list.setInput(((IPersist)object).getParent());
+				list.setSelection(new StructuredSelection(object));
+				list.reveal(object);
+			}
 		}
 		finally
 		{
@@ -1098,6 +1124,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	{
 		resourceChangeListener = new IResourceChangeListener()
 		{
+			private WorkspaceJob refreshHierarchyJob;
+
 			public void resourceChanged(IResourceChangeEvent event)
 			{
 				HierarchyDecorator decorator = (HierarchyDecorator)PlatformUI.getWorkbench().getDecoratorManager().getBaseLabelProvider(HierarchyDecorator.ID);
@@ -1124,14 +1152,25 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 					if (mustRefresh)
 					{
-						Display.getDefault().asyncExec(new Runnable()
+						if (refreshHierarchyJob != null) refreshHierarchyJob.cancel();
+						refreshHierarchyJob = new WorkspaceJob("Refreshing Form Hierarchy")
 						{
 							@Override
-							public void run()
+							public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 							{
-								setSelection(selected);//refresh
+								Display.getDefault().asyncExec(new Runnable()
+								{
+									@Override
+									public void run()
+									{
+										setSelection(selected);//refresh
+									}
+								});
+								return Status.OK_STATUS;
 							}
-						});
+						};
+						refreshHierarchyJob.setRule(ServoyModel.getWorkspace().getRoot());
+						refreshHierarchyJob.schedule();
 					}
 				}
 				else if (decorator != null)
