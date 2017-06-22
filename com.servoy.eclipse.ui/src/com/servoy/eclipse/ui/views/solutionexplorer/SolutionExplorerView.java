@@ -255,7 +255,6 @@ import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
 import com.servoy.j2db.util.DataSourceUtils;
-import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Pair;
@@ -682,10 +681,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					deprecatedText = "@deprecated " + deprecatedText;
 					result = (result != null) ? result += ("\n" + deprecatedText) : deprecatedText;
 				}
-			}
-			if (result != null)
-			{
-				result = HtmlUtils.unescape(result);
 			}
 			return result;
 		}

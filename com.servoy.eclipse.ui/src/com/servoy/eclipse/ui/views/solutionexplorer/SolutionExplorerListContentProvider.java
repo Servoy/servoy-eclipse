@@ -2288,7 +2288,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				sample = Text.processTags(sample, resolver);
 			}
-			return sample;
+			return HtmlUtils.escapeMarkup(sample).toString();
 		}
 
 		/**
@@ -2340,7 +2340,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					returnDescription = ((XMLScriptObjectAdapter)scriptObject).getReturnDescription(name, (Class[])parameterTypes);
 					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, (Class[])parameterTypes);
 					tooltip = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, (Class[])parameterTypes, csp);
-					tooltip += "\n<i>" + Text.processTags(((XMLScriptObjectAdapter)scriptObject).getSample(name, (Class[])parameterTypes), resolver) + "</i>";
+					tooltip += "\n<i>" +
+						Text.processTags(HtmlUtils.escapeMarkup(((XMLScriptObjectAdapter)scriptObject).getSample(name, (Class[])parameterTypes)).toString(),
+							resolver).toString() +
+						"</i>";
 					if (parameters != null)
 					{
 						paramNames = new String[parameters.length];
@@ -2522,7 +2525,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				sample = Text.processTags(sample, resolver);
 			}
-			return sample;
+			return HtmlUtils.escapeMarkup(sample).toString();
 		}
 
 		/**

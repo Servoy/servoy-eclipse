@@ -53,6 +53,7 @@ import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.DataSourceUtils;
+import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Text;
 
 /**
@@ -97,6 +98,10 @@ public class MoveTextAction extends Action implements ISelectionChangedListener,
 			if (moveSampleText)
 			{
 				textToMove = un.getSampleCode();
+				if (textToMove != null)
+				{
+					textToMove = HtmlUtils.unescape(textToMove);
+				}
 			}
 			else
 			{
