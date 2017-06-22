@@ -22,7 +22,6 @@ import org.json.JSONObject;
 
 import com.servoy.eclipse.model.util.IDataSourceWrapper;
 import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.model.util.TableWrapper;
 import com.servoy.eclipse.ui.dialogs.CombinedTreeContentProvider;
 import com.servoy.eclipse.ui.dialogs.FormFoundsetEntryContentProvider;
 import com.servoy.eclipse.ui.dialogs.RelationContentProvider.RelationsWrapper;
@@ -115,7 +114,7 @@ public class FoundsetDesignToChooserConverter
 					try
 					{
 						jsonValue.put(FoundsetPropertyType.FOUNDSET_SELECTOR, newFoundsetSelector);
-						if (value instanceof TableWrapper)
+						if (value instanceof IDataSourceWrapper)
 						{
 							if (oldLoadAllRecordsForSeparate == null) jsonValue.put(FoundsetPropertyType.LOAD_ALL_RECORDS_FOR_SEPARATE, true); // by default load all records initially for separate foundsets
 							else jsonValue.put(FoundsetPropertyType.LOAD_ALL_RECORDS_FOR_SEPARATE, oldLoadAllRecordsForSeparate);
