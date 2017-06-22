@@ -35,6 +35,7 @@ import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.j2db.persistence.Column;
 import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
+import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -159,7 +160,7 @@ public class StatusBarUpdater implements ISelectionChangedListener
 				{
 					SimpleUserNode node = (SimpleUserNode)selObj;
 					StringBuffer standard = new StringBuffer("<form><p><b>");
-					standard.append(node.getName());
+					standard.append(HtmlUtils.escapeMarkup(node.getName()));
 					standard.append("</b> ");
 					if (node.getType() == UserNodeType.GLOBAL_VARIABLE_ITEM)
 					{
