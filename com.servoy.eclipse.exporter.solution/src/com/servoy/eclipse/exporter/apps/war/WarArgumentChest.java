@@ -162,12 +162,20 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             element; may only be used with createTomcatContextXML\n"
 			+ "        -" + clearReferencesStopTimerThreads + " ... add clearReferencesStopTimerThreads=\"true\" to\n"
 			+ "             Context element; may only be used with createTomcatContextXML.\n"
-			+ "        -" + defaultAdminUser + " user name for admin page when no admin user exists [ required ]\n"
-			+ "        -" + defaultAdminPassword + " password for defaultAdminUser  required ]\n"
 			+ "        -" + minimizeJsCss + " minimize JS and CSS files \n"
 			+ "        -" + licenses + " <company_name> <number_of_licenses> <code>... export Servoy Client licenses\n"
 			+ "             to add more licenses, use ',' as delimiter\n";
 		// @formatter:on
+	}
+
+
+	@Override
+	protected String getMandatoryArgumentsMessage()
+	{
+		StringBuilder message = new StringBuilder(super.getMandatoryArgumentsMessage());
+		message.append(" -" + defaultAdminUser + " <user name for admin page when no admin user exists>");
+		message.append(" -" + defaultAdminPassword + "<password for defaultAdminUser>");
+		return message.toString();
 	}
 
 	@Override
