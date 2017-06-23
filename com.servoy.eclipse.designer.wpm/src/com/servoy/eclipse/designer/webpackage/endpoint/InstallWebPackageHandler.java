@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.webpackage.endpoint;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -31,6 +32,7 @@ import java.util.Properties;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -50,6 +52,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.wizards.ImportSolutionWizard;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.RepositoryException;
@@ -307,14 +310,16 @@ public class InstallWebPackageHandler implements IDeveloperService
 								}
 
 								// save version
-								File wpmPropertiesFile = new File(
-									ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name).getProject().getLocation().toFile(),
-									"wpm.properties");
 								Properties wpmProperties = new Properties();
 								wpmProperties.put("version", version);
-								try (FileOutputStream wpmfos = new FileOutputStream(wpmPropertiesFile))
+
+								try (ByteArrayOutputStream wpmbos = new ByteArrayOutputStream())
 								{
-									wpmProperties.store(wpmfos, "");
+									wpmProperties.store(wpmbos, "");
+									byte[] wpmPropertiesBytes = wpmbos.toByteArray();
+									IProject importedProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name).getProject();
+									WorkspaceFileAccess importedProjectFA = new WorkspaceFileAccess(importedProject.getWorkspace());
+									importedProjectFA.setContents(importedProject.getFullPath().append("wpm.properties").toOSString(), wpmPropertiesBytes);
 								}
 								catch (Exception ex)
 								{
