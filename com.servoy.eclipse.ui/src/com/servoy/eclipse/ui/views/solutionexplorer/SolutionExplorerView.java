@@ -1490,13 +1490,6 @@ public class SolutionExplorerView extends ViewPart
 			return comp;
 		}
 
-		@Override
-		public boolean isHideOnMouseDown()
-		{
-			return false;
-		}
-
-
 		public static final void enableFor(ColumnViewer viewer, int style)
 		{
 			new HTMLToolTipSupport(viewer, style, false);
