@@ -17,17 +17,30 @@
 
 package com.servoy.eclipse.designer.webpackage.endpoint;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sablo.specification.Package.DirPackageReader;
@@ -37,7 +50,15 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
+import com.servoy.eclipse.model.util.ModelUtils;
+import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.model.util.WorkspaceFileAccess;
+import com.servoy.eclipse.ui.wizards.ImportSolutionWizard;
+import com.servoy.j2db.persistence.IPersist;
+import com.servoy.j2db.persistence.RepositoryException;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author gganea
@@ -46,23 +67,30 @@ import com.servoy.j2db.util.Debug;
 public class InstallWebPackageHandler implements IDeveloperService
 {
 
+	private final IWPMController resourceListenerSwitch;
+
+	public InstallWebPackageHandler(IWPMController resourceListenerSwitch)
+	{
+		this.resourceListenerSwitch = resourceListenerSwitch;
+	}
+
 	@Override
 	public JSONObject executeMethod(JSONObject msg)
 	{
 		JSONObject pck = msg.getJSONObject("package");
 		String selected = pck.optString("selected");
 		if (selected == null) return null;
-		importPackage(pck, selected);
+		importPackage(pck, selected, resourceListenerSwitch);
 		return null;
 	}
 
 
-	public static void importPackage(JSONObject pck, String selectedVersion)
+	public static void importPackage(JSONObject pck, String selectedVersion, IWPMController resourceListenerSwitch)
 	{
-		importPackage(pck, selectedVersion, null);
+		importPackage(pck, selectedVersion, null, resourceListenerSwitch);
 	}
 
-	private static void importPackage(JSONObject pck, String selectedVersion, String selectedSolution)
+	private static void importPackage(JSONObject pck, String selectedVersion, String selectedSolution, IWPMController resourceListenerSwitch)
 	{
 		String urlString = null;
 		JSONArray jsonArray = pck.getJSONArray("releases");
@@ -79,19 +107,31 @@ public class InstallWebPackageHandler implements IDeveloperService
 		}
 		try
 		{
+
 			URL url = new URL(urlString);
 			URLConnection conn = url.openConnection();
-			InputStream in = conn.getInputStream();
+
 			String packageName = pck.getString("name");
+			String packageType = pck.getString("packageType");
+			String packageVersion = pck.getString("selected");
 			String solutionName = pck.optString("activeSolution", null);
 			if (solutionName == null)
 			{
 				solutionName = selectedSolution != null ? selectedSolution : ServoyModelFinder.getServoyModel().getFlattenedSolution().getName();
 			}
-			IFolder componentsFolder = RemoveWebPackageHandler.checkPackagesFolderCreated(solutionName, SolutionSerializer.NG_PACKAGES_DIR_NAME);
 
-			importZipFileComponent(componentsFolder, in, packageName);
-			in.close();
+			try (InputStream in = conn.getInputStream())
+			{
+				if ("Solution".equals(packageType))
+				{
+					importSolution(in, packageName, packageVersion, solutionName, resourceListenerSwitch);
+				}
+				else
+				{
+					IFolder componentsFolder = RemoveWebPackageHandler.checkPackagesFolderCreated(solutionName, SolutionSerializer.NG_PACKAGES_DIR_NAME);
+					importZipFileComponent(componentsFolder, in, packageName);
+				}
+			}
 
 			if (dependency != null)
 			{
@@ -149,14 +189,14 @@ public class InstallWebPackageHandler implements IDeveloperService
 									{
 										if (versionCheck(releases.getJSONObject(j).optString("version"), version, prefix))
 										{
-											importPackage(pckObject, releases.getJSONObject(j).optString("version"), solutionName);
+											importPackage(pckObject, releases.getJSONObject(j).optString("version"), solutionName, resourceListenerSwitch);
 											break;
 										}
 									}
 								}
 								else
 								{
-									importPackage(pckObject, releases.getJSONObject(0).optString("version"), solutionName);
+									importPackage(pckObject, releases.getJSONObject(0).optString("version"), solutionName, resourceListenerSwitch);
 								}
 								break;
 							}
@@ -214,6 +254,95 @@ public class InstallWebPackageHandler implements IDeveloperService
 		catch (CoreException e)
 		{
 			Debug.log(e);
+		}
+	}
+
+	private static void importSolution(InputStream is, final String name, final String version, final String targetSolution,
+		IWPMController resourceListenerSwitch) throws IOException, FileNotFoundException
+	{
+		if (name.equals(targetSolution)) return; // import solution and target can't be the same
+		final File importSolutionFile = new File(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile(), name + ".servoy");
+		if (importSolutionFile.exists())
+		{
+			importSolutionFile.delete();
+		}
+		try (FileOutputStream fos = new FileOutputStream(importSolutionFile))
+		{
+			if (resourceListenerSwitch != null)
+			{
+				resourceListenerSwitch.resourceListenersOff();
+			}
+			Utils.streamCopy(is, fos);
+			Display.getDefault().syncExec(new Runnable()
+			{
+				public void run()
+				{
+					ImportSolutionWizard importSolutionWizard = new ImportSolutionWizard();
+					importSolutionWizard.setSolutionFilePath(importSolutionFile.getAbsolutePath());
+					importSolutionWizard.setAllowSolutionFilePathSelection(false);
+					importSolutionWizard.setActivateSolution(false);
+					importSolutionWizard.init(PlatformUI.getWorkbench(), null);
+					WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), importSolutionWizard);
+					if (dialog.open() == Window.OK)
+					{
+						ServoyProject targetServoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(targetSolution);
+						if (targetServoyProject != null)
+						{
+							Solution editingSolution = targetServoyProject.getEditingSolution();
+							if (editingSolution != null)
+							{
+								String[] modules = Utils.getTokenElements(editingSolution.getModulesNames(), ",", true);
+								List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
+								if (!modulesList.contains(name))
+								{
+									modulesList.add(name);
+								}
+								String modulesTokenized = ModelUtils.getTokenValue(modulesList.toArray(new String[] { }), ",");
+								editingSolution.setModulesNames(modulesTokenized);
+
+								try
+								{
+									targetServoyProject.saveEditingSolutionNodes(new IPersist[] { editingSolution }, false);
+								}
+								catch (RepositoryException e)
+								{
+									ServoyLog.logError("Cannot save new module list for active module " + targetServoyProject.getProject().getName(), e);
+								}
+
+								// save version
+								Properties wpmProperties = new Properties();
+								wpmProperties.put("version", version);
+
+								try (ByteArrayOutputStream wpmbos = new ByteArrayOutputStream())
+								{
+									wpmProperties.store(wpmbos, "");
+									byte[] wpmPropertiesBytes = wpmbos.toByteArray();
+									IProject importedProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name).getProject();
+									WorkspaceFileAccess importedProjectFA = new WorkspaceFileAccess(importedProject.getWorkspace());
+									importedProjectFA.setContents(importedProject.getFullPath().append("wpm.properties").toOSString(), wpmPropertiesBytes);
+								}
+								catch (Exception ex)
+								{
+									Debug.log(ex);
+								}
+							}
+						}
+					}
+
+				}
+			});
+		}
+		finally
+		{
+			if (resourceListenerSwitch != null)
+			{
+				resourceListenerSwitch.resourceListenersOn();
+				resourceListenerSwitch.reloadPackages();
+			}
+			if (importSolutionFile.exists())
+			{
+				importSolutionFile.delete();
+			}
 		}
 	}
 

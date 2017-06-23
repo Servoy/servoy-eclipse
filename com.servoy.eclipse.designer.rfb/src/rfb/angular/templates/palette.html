@@ -1,10 +1,10 @@
 <div id="paletteContent" class="paletteContent">
 		<input type="text" class="form-control input-xs" placeholder="Search" ng-model="searchText"/>
-		<accordion close-others='oneAtATime' ui-sortable="sortableOptions" ng-model="packages">
-			<accordion-group ng-repeat="(packageIndex, package) in packages" is-open="package.isOpen" ng-if="((package.components | filter:{displayName:searchText}).length > 0) || ((package.categories | filter:{displayName:searchText}).length > 0)" >
-				<accordion-heading>
+		<div uib-accordion close-others='oneAtATime' ui-sortable="sortableOptions" ng-model="packages">
+			<div uib-accordion-group ng-repeat="(packageIndex, package) in packages" is-open="package.isOpen" ng-if="((package.components | filter:{displayName:searchText}).length > 0) || ((package.categories | filter:{displayName:searchText}).length > 0)" >
+				<uib-accordion-heading>
 					<h1 class="palette-heading handle"><i class="glyphicon glyphicon-move"></i>{{package.packageDisplayname}}<span ng-class="package.isOpen ? 'glyphicon glyphicon-chevron-down' : 'glyphicon glyphicon-chevron-right'" style="float: right"></span></h1>
-				</accordion-heading>
+				</uib-accordion-heading>
 			    <div>
 				    <ul>
 				    <palette-components enter-drag-mode="enterDragMode" package="package" search-text="searchText" show-preview-image="showPreviewImage"></palette-components>
@@ -18,7 +18,7 @@
 						</li>
 				    </ul>
 				 </div>
-			</accordion-group>
-		</accordion>
+			</div>
+		</div>
 		<button type="button" class="btn btn-default linkbtn" ng-click="openPackageManager()"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Add components</button>
 </div>

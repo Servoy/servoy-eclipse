@@ -21,23 +21,32 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import com.servoy.eclipse.ui.editors.DialogCellEditor;
+import com.servoy.eclipse.ui.editors.DialogCellEditor.ValueEditorCellLayout;
+import com.servoy.eclipse.ui.editors.IValueEditor;
 import com.servoy.eclipse.ui.util.ModifiedComboBoxCellEditor;
 
 /**
  * An cell editor for a text field that can be edited.
  * <p>
  * A combobox is shown with predefined values.
- * 
+ *
  * @author rgansevles
- * 
+ *
  */
 
 public class EditableComboboxPropertyController extends PropertyController<String, String>
 {
 	private final String[] displayValues;
+	private final IValueEditor valueEditor;
+
 	private static final ILabelProvider LABEL_PROVIDER = new LabelProvider()
 	{
 		@Override
@@ -47,24 +56,71 @@ public class EditableComboboxPropertyController extends PropertyController<Strin
 		}
 	};
 
-	public EditableComboboxPropertyController(String id, String displayName, String[] displayValues)
+	public EditableComboboxPropertyController(String id, String displayName, String[] displayValues, IValueEditor valueEditor)
 	{
 		super(id, displayName);
 		this.displayValues = displayValues;
+		this.valueEditor = valueEditor;
 	}
 
 	@Override
-	public CellEditor createPropertyEditor(Composite parent)
+	public CellEditor createPropertyEditor(final Composite parent)
 	{
 		return new ModifiedComboBoxCellEditor(parent, displayValues, SWT.NONE) // not SWT.READ_ONLY
 		{
 			private CCombo comboBox;
+			private Button editorButton;
+
+			@Override
+			public void activate()
+			{
+				if (valueEditor != null)
+				{
+					editorButton.setEnabled(valueEditor.canEdit(comboBox.getText()));
+				}
+				super.activate();
+			}
 
 			@Override
 			protected Control createControl(Composite controlParent)
 			{
-				comboBox = (CCombo)super.createControl(controlParent);
-				return comboBox;
+				Composite composite = null;
+				if (valueEditor != null)
+				{
+					composite = new Composite(parent, SWT.None);
+					comboBox = (CCombo)super.createControl(composite);
+					editorButton = new Button(composite, SWT.FLAT);
+					editorButton.setImage(DialogCellEditor.OPEN_IMAGE);
+					editorButton.addMouseListener(new MouseAdapter()
+					{
+						@Override
+						public void mouseDown(org.eclipse.swt.events.MouseEvent e)
+						{
+							valueEditor.openEditor(doGetValue());
+						}
+					});
+					ValueEditorCellLayout layout = new ValueEditorCellLayout();
+					layout.setValueEditor(valueEditor);
+					composite.setLayout(layout);
+				}
+				else
+				{
+					comboBox = (CCombo)super.createControl(parent);
+					composite = comboBox;
+				}
+				comboBox.addSelectionListener(new SelectionAdapter()
+				{
+					@Override
+					public void widgetSelected(SelectionEvent event)
+					{
+						// the selection is already updated at this point using the SelectionAdapter created in super.createControl()
+						if (valueEditor != null)
+						{
+							editorButton.setEnabled(valueEditor.canEdit(doGetValue()));
+						}
+					}
+				});
+				return composite;
 			}
 
 			@Override

@@ -19,13 +19,16 @@ package com.servoy.eclipse.designer.webpackage.endpoint;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Properties;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -48,13 +51,15 @@ import com.servoy.eclipse.core.resource.WebPackageManagerEditorInput;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.j2db.ClientVersion;
+import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.util.Debug;
+import com.servoy.j2db.util.Utils;
 
 /**
  * @author gganea
  *
  */
-public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadListener, IActiveProjectListener
+public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadListener, IActiveProjectListener, IWPMController
 {
 	public static final String CLIENT_SERVER_METHOD = "requestAllInstalledPackages";
 	private final WebPackageManagerEndpoint endpoint;
@@ -62,9 +67,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	public GetAllInstalledPackages(WebPackageManagerEndpoint endpoint)
 	{
 		this.endpoint = endpoint;
-		WebComponentSpecProvider.getSpecReloadSubject().addSpecReloadListener(null, this);
-		WebServiceSpecProvider.getSpecReloadSubject().addSpecReloadListener(null, this);
-		ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(this);
+		resourceListenersOn();
 	}
 
 	public JSONArray executeMethod(JSONObject msg)
@@ -80,19 +83,60 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 			for (JSONObject pack : remotePackages)
 			{
 				String name = pack.getString("name");
-				IPackageReader reader = componentSpecProviderState.getPackageReader(name);
-				if (reader == null) reader = serviceSpecProviderState.getPackageReader(name);
-				if (reader != null)
+				String type = pack.getString("packageType");
+
+				if ("Solution".equals(type))
 				{
-					pack.put("installed", reader.getVersion());
-					String parentSolutionName = getParentProjectNameForPackage(reader.getResource());
-					pack.put("activeSolution", parentSolutionName != null ? parentSolutionName : activeSolutionName);
+					String moduleParent = findModuleParent(ServoyModelFinder.getServoyModel().getFlattenedSolution().getSolution(), name);
+					if (moduleParent != null)
+					{
+						pack.put("activeSolution", moduleParent);
+
+						ServoyProject solutionProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name);
+						if (solutionProject != null)
+						{
+							File wpmPropertiesFile = new File(solutionProject.getProject().getLocation().toFile(), "wpm.properties");
+							if (wpmPropertiesFile.exists())
+							{
+								Properties wpmProperties = new Properties();
+
+								try (FileInputStream wpmfis = new FileInputStream(wpmPropertiesFile))
+								{
+									wpmProperties.load(wpmfis);
+									String version = wpmProperties.getProperty("version");
+									if (version != null)
+									{
+										pack.put("installed", version);
+									}
+								}
+								catch (Exception ex)
+								{
+									Debug.log(ex);
+								}
+							}
+						}
+					}
+					else
+					{
+						pack.put("activeSolution", activeSolutionName);
+					}
 				}
 				else
 				{
-					pack.put("activeSolution", msg != null && msg.has("solution") ? msg.get("solution") : activeSolutionName);
+					IPackageReader reader = componentSpecProviderState.getPackageReader(name);
+					if (reader == null) reader = serviceSpecProviderState.getPackageReader(name);
+					if (reader != null)
+					{
+						pack.put("installed", reader.getVersion());
+						String parentSolutionName = getParentProjectNameForPackage(reader.getResource());
+						pack.put("activeSolution", parentSolutionName != null ? parentSolutionName : activeSolutionName);
+					}
+					else
+					{
+						pack.put("activeSolution", msg != null && msg.has("solution") ? msg.get("solution") : activeSolutionName);
+					}
 				}
-				// TODO add the solution where this package is installed in.
+
 				result.put(pack);
 			}
 		}
@@ -118,10 +162,37 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return null;
 	}
 
+	private String findModuleParent(Solution solution, String moduleName)
+	{
+		String[] modules = Utils.getTokenElements(solution.getModulesNames(), ",", true);
+		List<String> modulesList = new ArrayList<String>(Arrays.asList(modules));
+		if (modulesList.size() == 0)
+		{
+			return null;
+		}
+		else if (modulesList.contains(moduleName))
+		{
+			return solution.getName();
+		}
+		else
+		{
+			for (String module : modulesList)
+			{
+				ServoyProject solutionProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(module);
+				String moduleParent = findModuleParent(solutionProject.getSolution(), moduleName);
+				if (moduleParent != null)
+				{
+					return moduleParent;
+				}
+			}
+		}
+		return null;
+	}
+
 	public static List<JSONObject> getRemotePackages() throws Exception
 	{
 		List<JSONObject> result = new ArrayList<>();
-		String repositoriesIndex = getUrlContents("http://servoy.github.io/webpackageindex");
+		String repositoriesIndex = getUrlContents("https://servoy.github.io/webpackageindex/");
 
 		JSONArray repoArray = new JSONArray(repositoriesIndex);
 		for (int i = repoArray.length(); i-- > 0;)
@@ -211,9 +282,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	@Override
 	public void dispose()
 	{
-		WebComponentSpecProvider.getSpecReloadSubject().removeSpecReloadListener(null, this);
-		WebServiceSpecProvider.getSpecReloadSubject().removeSpecReloadListener(null, this);
-		ServoyModelManager.getServoyModelManager().getServoyModel().removeActiveProjectListener(this);
+		resourceListenersOff();
 	}
 
 	@Override
@@ -267,5 +336,24 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	@Override
 	public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
 	{
+	}
+
+	public void resourceListenersOn()
+	{
+		WebComponentSpecProvider.getSpecReloadSubject().addSpecReloadListener(null, this);
+		WebServiceSpecProvider.getSpecReloadSubject().addSpecReloadListener(null, this);
+		ServoyModelManager.getServoyModelManager().getServoyModel().addActiveProjectListener(this);
+	}
+
+	public void resourceListenersOff()
+	{
+		WebComponentSpecProvider.getSpecReloadSubject().removeSpecReloadListener(null, this);
+		WebServiceSpecProvider.getSpecReloadSubject().removeSpecReloadListener(null, this);
+		ServoyModelManager.getServoyModelManager().getServoyModel().removeActiveProjectListener(this);
+	}
+
+	public void reloadPackages()
+	{
+		webObjectSpecificationReloaded();
 	}
 }

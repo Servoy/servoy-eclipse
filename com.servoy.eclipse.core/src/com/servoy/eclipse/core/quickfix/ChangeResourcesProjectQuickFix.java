@@ -69,7 +69,7 @@ import com.servoy.eclipse.model.util.ServoyLog;
 
 /**
  * Quick fix that allows the user to change the resources project or create a new one.
- * 
+ *
  * @author acostescu
  */
 public class ChangeResourcesProjectQuickFix implements IMarkerResolution
@@ -104,13 +104,17 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 					{
 						newResourcesProject = dialog.getResourceProjectData().getExistingResourceProject().getProject();
 					}
-					// ok now associate the selected(create if necessary) resources project with the solution resources project
-					// create new resource project if necessary and reference it from selected solution
-					WorkspaceJob job = new ResourcesProjectSetupJob("Setting up resources project for solution '" + servoyProject.getProject().getName() + "'",
-						newResourcesProject, null, servoyProject.getProject(), true);
-					job.setRule(servoyProject.getProject().getWorkspace().getRoot());
-					job.setUser(true);
-					job.schedule();
+					if (newResourcesProject != null)
+					{
+						// ok now associate the selected(create if necessary) resources project with the solution resources project
+						// create new resource project if necessary and reference it from selected solution
+						WorkspaceJob job = new ResourcesProjectSetupJob(
+							"Setting up resources project for solution '" + servoyProject.getProject().getName() + "'", newResourcesProject, null,
+							servoyProject.getProject(), true);
+						job.setRule(servoyProject.getProject().getWorkspace().getRoot());
+						job.setUser(true);
+						job.schedule();
+					}
 				}
 			}
 			else
@@ -172,7 +176,8 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 			gd.verticalAlignment = SWT.FILL;
 			gd.grabExcessHorizontalSpace = true;
 			gd.grabExcessVerticalSpace = true;
-			chooserComposite = new ResourcesProjectChooserComposite(composite, SWT.NONE, this, "Please select the resources project", initialSelection);
+			chooserComposite = new ResourcesProjectChooserComposite(composite, SWT.NONE, this, "Please select the resources project", initialSelection,
+				initialSelection == null);
 			chooserComposite.setLayoutData(gd);
 
 			Composite errorComposite = new Composite(composite, SWT.NONE);
@@ -297,7 +302,7 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 				oldReferences = oldToKeep.toArray(new IProject[oldToKeep.size()]);
 			}
 			ArrayList<IProject> newReferences = new ArrayList<IProject>(oldReferences.length + 1);
-			newReferences.add(newResourcesProject);
+			if (newResourcesProject != null) newReferences.add(newResourcesProject);
 			for (IProject ref : oldReferences)
 			{
 				if (ref != newResourcesProject)
@@ -315,7 +320,7 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 
 		public static void createResourcesProjectIfNeeded(IProject newResourcesProject) throws CoreException
 		{
-			if (!newResourcesProject.exists())
+			if (newResourcesProject != null && !newResourcesProject.exists())
 			{
 				// create a new resource project
 				newResourcesProject.create(null);
@@ -334,10 +339,13 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 	public static class ResourcesProjectChooserComposite extends Composite implements IValidator
 	{
 		private boolean createResourceProject;
+		private boolean noResourceProject;
 
 		private static final String NEW_RESOURCE_PROJECT = "1";
 		private static final String EXISTING_RESOURCE_PROJECT = "2";
+		private static final String NO_RESOURCE_PROJECT = "3";
 
+		private final Button radio3;
 		private final Button radio2;
 		private final Button radio1;
 		private final Text resourceProjectNameField;
@@ -348,7 +356,8 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 
 		private final IValidator validator;
 
-		public ResourcesProjectChooserComposite(Composite parent, int style, IValidator validator, String text, ServoyResourcesProject initialResourcesProject)
+		public ResourcesProjectChooserComposite(Composite parent, int style, IValidator validator, String text, ServoyResourcesProject initialResourcesProject,
+			boolean noResourcesProject)
 		{
 			super(parent, style);
 			setLayout(new FillLayout());
@@ -408,14 +417,34 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 					handleExistingResourceProjectChanged((ServoyResourcesProject)((IStructuredSelection)event.getSelection()).getFirstElement());
 				}
 			});
+
+			radio3 = new Button(radioGroupComposite, SWT.RADIO | SWT.LEFT);
+			radio3.setText("No resources project");
+			radio3.setData(NO_RESOURCE_PROJECT);
+			radio3.addSelectionListener(new SelectionAdapter()
+			{
+				@Override
+				public void widgetSelected(SelectionEvent event)
+				{
+					handleResourceProjectRadioSelected((String)event.widget.getData());
+				}
+			});
+
 			GridData data = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
 			data.heightHint = 60;
 			data.widthHint = 150;
 			resourceProjectList.getList().setLayoutData(data);
 
-			// setup initial page state
-			selectResourceProjectRadio(resourcesProjects);
-			selectExistingResourceProject(resourceProjectList, resourcesProjects, initialResourcesProject);
+			if (noResourcesProject)
+			{
+				radio3.setSelection(true);
+			}
+			else
+			{
+				// setup initial page state
+				selectResourceProjectRadio(resourcesProjects);
+				selectExistingResourceProject(resourceProjectList, resourcesProjects, initialResourcesProject);
+			}
 		}
 
 		private void selectResourceProjectRadio(ServoyResourcesProject[] resourcesProjects)
@@ -455,12 +484,21 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 				createResourceProject = true;
 				resourceProjectNameField.setEnabled(true);
 				resourceProjectList.getList().setEnabled(false);
+				noResourceProject = false;
 			}
 			else if (newSelection == EXISTING_RESOURCE_PROJECT)
 			{
 				createResourceProject = false;
 				resourceProjectList.getList().setEnabled(true);
 				resourceProjectNameField.setEnabled(false);
+				noResourceProject = false;
+			}
+			else if (newSelection == NO_RESOURCE_PROJECT)
+			{
+				createResourceProject = false;
+				resourceProjectNameField.setEnabled(false);
+				resourceProjectList.getList().setEnabled(false);
+				noResourceProject = true;
 			}
 			if (validator != null) validator.validate();
 		}
@@ -479,7 +517,7 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 
 		public ServoyResourcesProject getExistingResourceProject()
 		{
-			return createResourceProject ? null : existingResourcesProject;
+			return createResourceProject ? null : (noResourceProject ? null : existingResourcesProject);
 		}
 
 		public String getNewResourceProjectName()
@@ -510,7 +548,7 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 					}
 				}
 			}
-			else if (existingResourcesProject == null)
+			else if (existingResourcesProject == null && !noResourceProject)
 			{
 				error = "Please select one of the resource projects in the list"; // this should never happen (radio button should be disabled)
 			}
@@ -526,7 +564,7 @@ public class ChangeResourcesProjectQuickFix implements IMarkerResolution
 	{
 		/**
 		 * Validates the data held by this object.
-		 * 
+		 *
 		 * @return If the data is valid returns null, otherwise returns a message explaining the problem.
 		 */
 		String validate();

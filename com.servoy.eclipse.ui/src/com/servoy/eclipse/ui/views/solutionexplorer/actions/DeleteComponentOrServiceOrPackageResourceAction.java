@@ -49,6 +49,7 @@ import org.sablo.specification.WebObjectSpecification;
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.util.RunInWorkspaceJob;
+import com.servoy.eclipse.core.util.UIUtils.MessageAndCheckBoxDialog;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
@@ -66,6 +67,7 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 	private IStructuredSelection selection;
 	private final Shell shell;
 	private final UserNodeType nodeType;
+	private boolean deleteFromDisk;
 
 
 	public DeleteComponentOrServiceOrPackageResourceAction(Shell shell, String text, UserNodeType nodeType)
@@ -79,20 +81,46 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 	@Override
 	public void run()
 	{
-		if (selection != null && MessageDialog.openConfirm(shell, getText(), "Are you sure you want to delete?"))
+		if (selection != null)
 		{
 			//first save the current selection so that he user can't change it while the job is running
-			List<SimpleUserNode> saveTheSelection = new ArrayList<SimpleUserNode>();
+			List<SimpleUserNode> savedSelection = new ArrayList<SimpleUserNode>();
 			Iterator<SimpleUserNode> it = selection.iterator();
+			boolean packageProjectSelected = false;
 			while (it.hasNext())
-				saveTheSelection.add(it.next());
-			//start the delete job
-			RunInWorkspaceJob deleteJob = new RunInWorkspaceJob(new DeleteComponentOrServiceResourcesWorkspaceJob(saveTheSelection));
-			deleteJob.setName("Deleting component or service resources");
-			deleteJob.setRule(ServoyModel.getWorkspace().getRoot());
-			deleteJob.setUser(false);
-			deleteJob.schedule();
+			{
+				SimpleUserNode next = it.next();
+				savedSelection.add(next);
+				if (next.getRealObject() instanceof IPackageReader &&
+					SolutionExplorerTreeContentProvider.getResource((IPackageReader)next.getRealObject()) instanceof IProject) packageProjectSelected = true;
+			}
+
+			if (packageProjectSelected)
+			{
+				MessageAndCheckBoxDialog dialog = new MessageAndCheckBoxDialog(shell, "Delete Package", null, "Are you sure you want to delete?",
+					"Delete package contents on disk (cannot be undone)                                                   ", false, MessageDialog.QUESTION,
+					new String[] { "Ok", "Cancel" }, 0);
+				if (dialog.open() == 0)
+				{
+					deleteFromDisk = dialog.isChecked();
+					startDeleteJob(savedSelection);
+				}
+			}
+			else if (MessageDialog.openConfirm(shell, getText(), "Are you sure you want to delete?"))
+			{
+				startDeleteJob(savedSelection);
+			}
 		}
+	}
+
+	private void startDeleteJob(List<SimpleUserNode> saveTheSelection)
+	{
+		//start the delete job
+		RunInWorkspaceJob deleteJob = new RunInWorkspaceJob(new DeleteComponentOrServiceResourcesWorkspaceJob(saveTheSelection));
+		deleteJob.setName("Deleting component or service resources");
+		deleteJob.setRule(ServoyModel.getWorkspace().getRoot());
+		deleteJob.setUser(false);
+		deleteJob.schedule();
 	}
 
 	private class DeleteComponentOrServiceResourcesWorkspaceJob implements IWorkspaceRunnable
@@ -146,9 +174,12 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 								{
 									RemovePackageProjectReferenceAction.removeProjectReference(iProject, (IProject)resource);
 								}
-								deleteFolder((IContainer)resource);
+								((IProject)resource).delete(deleteFromDisk, true, monitor);
 							}
-							resource.delete(true, new NullProgressMonitor());
+							else
+							{
+								resource.delete(true, new NullProgressMonitor());
+							}
 							if (resources != null) resources.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 						}
 					}
@@ -266,8 +297,11 @@ public class DeleteComponentOrServiceOrPackageResourceAction extends Action impl
 			state = (node.getRealType() == nodeType);
 			if (node.getType() == UserNodeType.COMPONENT || node.getType() == UserNodeType.SERVICE || node.getType() == UserNodeType.LAYOUT)
 			{
-				state = node.getRealObject() instanceof WebObjectSpecification || node.parent.getRealObject() instanceof IFolder ||
-					node.parent.getRealObject() instanceof IProject;
+				if (node.getRealObject() instanceof WebObjectSpecification)
+				{
+					state = !((WebObjectSpecification)node.getRealObject()).getSpecURL().getProtocol().equals("jar");
+				}
+				else state = node.parent.getRealObject() instanceof IFolder || node.parent.getRealObject() instanceof IProject;
 			}
 		}
 		if (state)

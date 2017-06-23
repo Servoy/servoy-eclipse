@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Workspace based Repository
 Bundle-SymbolicName: com.servoy.eclipse.model;singleton:=true
-Bundle-Version: 8.1.2.3031
+Bundle-Version: 8.2.0.3100
 Bundle-Vendor: Servoy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: servoy_shared,
@@ -17,7 +17,7 @@ Require-Bundle: servoy_shared,
  servoy_ngclient,
  org.eclipse.dltk.javascript.rhino,
  sablo,
- org.apache.commons.dbcp,
+ org.apache.commons.dbcp2,
  org.apache.commons.io,
  org.eclipse.swt,
  org.eclipse.jface

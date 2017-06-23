@@ -77,8 +77,10 @@ import org.sablo.IndexPageEnhancer;
 import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PackageSpecification;
 import org.sablo.specification.SpecProviderState;
+import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebLayoutSpecification;
 import org.sablo.specification.WebObjectSpecification;
+import org.sablo.specification.WebServiceSpecProvider;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -143,14 +145,18 @@ public class WarExporter
 	private static final String WRO4J_RUNNER = "wro4j-runner-1.7.7";
 
 	private final IWarExportModel exportModel;
-	private final SpecProviderState componentsSpecProviderState;
-	private final SpecProviderState servicesSpecProviderState;
+	private SpecProviderState componentsSpecProviderState;
+	private SpecProviderState servicesSpecProviderState;
 
-	public WarExporter(IWarExportModel exportModel, SpecProviderState componentsSpecProviderState, SpecProviderState servicesSpecProviderState)
+	public WarExporter(IWarExportModel exportModel)
 	{
 		this.exportModel = exportModel;
-		this.componentsSpecProviderState = componentsSpecProviderState;
-		this.servicesSpecProviderState = servicesSpecProviderState;
+
+		if (exportModel.isNGExport())
+		{
+			this.componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
+			this.servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
+		}
 	}
 
 	/**
@@ -160,7 +166,7 @@ public class WarExporter
 	 */
 	public void doExport(IProgressMonitor m) throws ExportException
 	{
-		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 36);
+		SubMonitor monitor = SubMonitor.convert(m, "Creating War File", 37);
 		File warFile = createNewWarFile();
 		monitor.worked(2);
 		File tmpWarDir = createTempDir();
@@ -202,15 +208,21 @@ public class WarExporter
 			monitor.subTask("Copy the active solution");
 			copyActiveSolution(monitor.newChild(2), tmpWarDir);
 		}
-		monitor.setWorkRemaining(9);
-		monitor.subTask("Copying NGClient components/services...");
-		copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, targetLibDir);
-		monitor.setWorkRemaining(5);
-		monitor.subTask("Copy exported components");
-		copyExportedComponentsAndServicesPropertyFile(tmpWarDir);
-		monitor.worked(2);
-		monitor.subTask("Grouping JS and CSS resources");
-		copyMinifiedAndGrouped(tmpWarDir);
+		monitor.setWorkRemaining(exportModel.isNGExport() ? 9 : 3);
+		if (exportModel.isNGExport())
+		{
+			monitor.subTask("Copying NGClient components/services...");
+			copyComponentsAndServicesPlusLibs(monitor.newChild(2), tmpWarDir, targetLibDir);
+			monitor.setWorkRemaining(5);
+			monitor.subTask("Copy exported components");
+			copyExportedComponentsAndServicesPropertyFile(tmpWarDir);
+			monitor.worked(2);
+			monitor.subTask("Grouping JS and CSS resources");
+			copyMinifiedAndGrouped(tmpWarDir);
+			monitor.worked(1);
+		}
+		monitor.subTask("Creating deploy properties");
+		createDeployPropertiesFile(tmpWarDir);
 		monitor.worked(1);
 		monitor.subTask("Creating/zipping the WAR file");
 		zipDirectory(tmpWarDir, warFile);
@@ -354,7 +366,7 @@ public class WarExporter
 			if (exportModel.getExportedComponents() != null) exportedWebObjects.addAll(exportModel.getExportedComponents());
 			if (exportModel.getExportedServices() != null) exportedWebObjects.addAll(exportModel.getExportedServices());
 		}
-		Object[] allContributions = IndexPageEnhancer.getAllContributions(exportedWebObjects, Boolean.TRUE);
+		Object[] allContributions = IndexPageEnhancer.getAllContributions(exportedWebObjects, Boolean.TRUE, NGClientEntryFilter.CONTRIBUTION_ENTRY_FILTER);
 		Element group = doc.createElement("group");
 		rootElement.appendChild(group);
 		attr = doc.createAttribute("name");
@@ -602,10 +614,10 @@ public class WarExporter
 	private void copyNGLibs(File targetLibDir) throws ExportException, IOException
 	{
 		List<String> pluginLocations = exportModel.getPluginLocations();
-		File parent = null;
+		File eclipseParent = null;
+		File userDir = new File(System.getProperty("user.dir"));
 		if (System.getProperty("eclipse.home.location") != null)
-			parent = new File(URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
-		else parent = new File(System.getProperty("user.dir"));
+			eclipseParent = new File(URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
 		for (String libName : NG_LIBS)
 		{
 			int i = 0;
@@ -613,9 +625,21 @@ public class WarExporter
 			while (!found && i < pluginLocations.size())
 			{
 				File pluginLocation = new File(pluginLocations.get(i));
-				if (!pluginLocation.isAbsolute())
+				if (!pluginLocation.exists())
 				{
-					pluginLocation = new File(parent, pluginLocations.get(i));
+					if (eclipseParent != null)
+					{
+						pluginLocation = new File(eclipseParent, pluginLocations.get(i));
+					}
+					if (!pluginLocation.exists())
+					{
+						pluginLocation = new File(userDir, pluginLocations.get(i));
+					}
+					if (!pluginLocation.exists())
+					{
+						System.err.println("Trying different parents for " + pluginLocations.get(i) + " eclipse: " + eclipseParent + " userdir: " + userDir +
+							" none are found");
+					}
 				}
 				FileFilter filter = new WildcardFileFilter(libName);
 				try
@@ -938,7 +962,7 @@ public class WarExporter
 			exporter.exportSolutionToFile(activeSolution, new File(tmpWarDir, "WEB-INF/solution.servoy"), ClientVersion.getVersion(),
 				ClientVersion.getReleaseNumber(), exportModel.isExportMetaData(), exportModel.isExportSampleData(), exportModel.getNumberOfSampleDataExported(),
 				exportModel.isExportI18NData(), exportModel.isExportUsers(), exportModel.isExportReferencedModules(), exportModel.isProtectWithPassword(),
-				tableDefManager, metadataDefManager, exportSolution);
+				tableDefManager, metadataDefManager, exportSolution, exportModel.useImportSettings() ? exportModel.getImportSettings() : null, null);
 
 			monitor.done();
 		}
@@ -970,7 +994,8 @@ public class WarExporter
 		else
 		{
 			File sourceFile = new File(exportModel.getServoyPropertiesFileName());
-			if (exportModel.allowOverwriteSocketFactoryProperties() || !exportModel.getLicenses().isEmpty())
+			if (exportModel.allowOverwriteSocketFactoryProperties() || !exportModel.getLicenses().isEmpty() ||
+				(exportModel.getUserHome() != null && exportModel.getUserHome().trim().length() > 0))
 			{
 				changeAndWritePropertiesFile(tmpWarDir, sourceFile);
 			}
@@ -1209,6 +1234,7 @@ public class WarExporter
 		{
 			try
 			{
+				defaultCss.getParentFile().mkdirs();
 				String styleCSS = TemplateGenerator.getStyleCSS("servoy_web_client_default.css");
 				OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(defaultCss), "utf8");
 				fw.write(styleCSS);
@@ -1228,6 +1254,11 @@ public class WarExporter
 		{
 			Properties properties = new SortedProperties();
 			properties.load(fis);
+
+			if (exportModel.getUserHome() != null && exportModel.getUserHome().trim().length() > 0)
+			{
+				properties.setProperty(Settings.USER_HOME, exportModel.getUserHome());
+			}
 
 			if (exportModel.allowOverwriteSocketFactoryProperties())
 			{
@@ -1340,6 +1371,12 @@ public class WarExporter
 		properties.setProperty("servoy.server.start.rmi", Boolean.toString(exportModel.getStartRMI()));
 		properties.setProperty("servoy.rmiStartPort", exportModel.getStartRMIPort());
 
+
+		if (exportModel.getUserHome() != null && exportModel.getUserHome().trim().length() > 0)
+		{
+			properties.setProperty(Settings.USER_HOME, exportModel.getUserHome());
+		}
+
 		if (!exportModel.getLicenses().isEmpty())
 		{
 			writeLicenses(properties, exportModel.getLicenses());
@@ -1384,6 +1421,7 @@ public class WarExporter
 //			}
 			properties.put("server." + i + ".driver", sc.getDriver());
 			properties.put("server." + i + ".skipSysTables", "" + sc.isSkipSysTables());
+			properties.put("server." + i + ".prefixTables", "" + sc.isPrefixTables());
 			String catalog = sc.getCatalog();
 			if (catalog == null)
 			{
@@ -1650,6 +1688,7 @@ public class WarExporter
 	{
 		if (!destDir.exists() && !destDir.mkdirs()) throw new ExportException("Can't create destination dir: " + destDir);
 		File[] listFiles = sourceDir.listFiles();
+		if (listFiles == null) return;
 		for (File file : listFiles)
 		{
 			if (file.isDirectory())
@@ -1726,12 +1765,11 @@ public class WarExporter
 	 */
 	public String searchExportedPlugins()
 	{
-		File parent = null;
-		if (System.getProperty("eclipse.home.location") != null)
-			parent = new File(URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
-		else parent = new File(System.getProperty("user.dir"));
-
 		List<String> pluginLocations = exportModel.getPluginLocations();
+		File eclipseParent = null;
+		File userDir = new File(System.getProperty("user.dir"));
+		if (System.getProperty("eclipse.home.location") != null)
+			eclipseParent = new File(URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
 		for (String libName : NG_LIBS)
 		{
 			int i = 0;
@@ -1739,9 +1777,21 @@ public class WarExporter
 			while (!found && i < pluginLocations.size())
 			{
 				File pluginLocation = new File(pluginLocations.get(i));
-				if (!pluginLocation.isAbsolute())
+				if (!pluginLocation.exists())
 				{
-					pluginLocation = new File(parent, pluginLocations.get(i));
+					if (eclipseParent != null)
+					{
+						pluginLocation = new File(eclipseParent, pluginLocations.get(i));
+					}
+					if (!pluginLocation.exists())
+					{
+						pluginLocation = new File(userDir, pluginLocations.get(i));
+					}
+					if (!pluginLocation.exists())
+					{
+						System.err.println("Trying different parents for " + pluginLocations.get(i) + " eclipse: " + eclipseParent + " userdir: " + userDir +
+							" none are found");
+					}
 				}
 				FileFilter filter = new WildcardFileFilter(libName);
 				File[] libs = pluginLocation.listFiles(filter);
@@ -1755,5 +1805,21 @@ public class WarExporter
 			if (!found) return libName;
 		}
 		return null;
+	}
+
+	private void createDeployPropertiesFile(File tmpWarDir) throws ExportException
+	{
+		File deployPropertiesFile = new File(tmpWarDir, "WEB-INF/deploy.properties");
+		Properties properties = new Properties();
+		properties.put("isOverwriteDeployedDBServerProperties", String.valueOf(exportModel.isOverwriteDeployedDBServerProperties()));
+		properties.put("isOverwriteDeployedServoyProperties", String.valueOf(exportModel.isOverwriteDeployedServoyProperties()));
+		try (FileOutputStream fos = new FileOutputStream(deployPropertiesFile))
+		{
+			properties.store(fos, "");
+		}
+		catch (Exception e)
+		{
+			throw new ExportException("Couldn't generate the deploy.properties file", e);
+		}
 	}
 }

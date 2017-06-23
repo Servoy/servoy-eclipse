@@ -17,11 +17,13 @@
 
 package com.servoy.eclipse.model.war.exporter;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -38,9 +40,12 @@ import org.eclipse.dltk.javascript.ast.AbstractNavigationVisitor;
 import org.eclipse.dltk.javascript.ast.CallExpression;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
+import org.json.JSONObject;
 import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
+import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.WebServiceSpecProvider;
+import org.sablo.websocket.impl.ClientService;
 
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyProject;
@@ -67,17 +72,26 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 	private final Set<String> usedServices;
 	protected final Map<String, License> licenses;
 
-	protected final SpecProviderState componentsSpecProviderState;
-	protected final SpecProviderState servicesSpecProviderState;
+	protected SpecProviderState componentsSpecProviderState;
+	protected SpecProviderState servicesSpecProviderState;
+	private final boolean isNgExport;
+	private String userHome;
+	private boolean isOverwriteDeployedDBServerProperties = true;
+	private boolean isOverwriteDeployedServoyProperties;
 
-	public AbstractWarExportModel(SpecProviderState componentsSpecProviderState, SpecProviderState servicesSpecProviderState)
+	public AbstractWarExportModel(boolean isNGExport)
 	{
 		usedComponents = new TreeSet<String>();
 		usedServices = new TreeSet<String>();
 		licenses = new HashMap<String, License>();
 
-		this.componentsSpecProviderState = componentsSpecProviderState;
-		this.servicesSpecProviderState = servicesSpecProviderState;
+		this.isNgExport = isNGExport;
+
+		if (isNGExport)
+		{
+			this.componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
+			this.servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
+		}
 	}
 
 	public static class License
@@ -163,7 +177,7 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			try
 			{
 				InputStream is = scriptFile.getContents();
-				String source = IOUtils.toString(is);
+				final String source = IOUtils.toString(is);
 				is.close();
 				if (source != null)
 				{
@@ -182,21 +196,23 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 						{
 							if (node.getExpression().getChilds().size() > 0)
 							{
-								SpecProviderState servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
-								String expr = node.getExpression().getChilds().get(0).toString();
+								ASTNode astNode = node.getExpression().getChilds().get(0);
+								String expr = source.substring(astNode.sourceStart(), astNode.sourceEnd());
 								if (expr.startsWith("plugins."))
 								{
 									String[] parts = expr.split("\\.");
-									if (parts.length > 1 && servicesSpecProviderState.getWebComponentSpecification(parts[1]) != null)
+									if (parts.length > 1)
 									{
-										usedServices.add(servicesSpecProviderState.getWebComponentSpecification(parts[1]).getName());
+										WebObjectSpecification serviceSpec = ClientService.getServiceDefinitionFromScriptingName(parts[1]);
+										if (serviceSpec != null) usedServices.add(serviceSpec.getName());
 									}
 								}
 								else if (expr.contains("newWebComponent"))
 								{
 									if (node.getArguments().size() > 1)
 									{
-										String componentName = node.getArguments().get(1).toString();
+										ASTNode arg = node.getArguments().get(1);
+										String componentName = source.substring(arg.sourceStart(), arg.sourceEnd());
 										if (componentName.startsWith("\"") || componentName.startsWith("'"))
 										{
 											componentName = componentName.replaceAll("'|\"", "");
@@ -276,8 +292,32 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 		return true;
 	}
 
+	@Override
+	public boolean isExportReferencedWebPackages()
+	{
+		return false;
+	}
+
+	public List<Pair<String, List<File>>> getModulesWebPackages()
+	{
+		return null;
+	}
+
+	@Override
+	public boolean useImportSettings()
+	{
+		return false;
+	}
+
+	@Override
+	public JSONObject getImportSettings()
+	{
+		return null;
+	}
+
 	protected void search()
 	{
+		if (!isNGExport()) return;
 		FlattenedSolution solution = ServoyModelFinder.getServoyModel().getFlattenedSolution();
 		Iterator<Form> forms = solution.getForms(false);
 		while (forms.hasNext())
@@ -336,5 +376,76 @@ public abstract class AbstractWarExportModel implements IWarExportModel
 			result = new String(Utils.decodeBASE64(password));
 		}
 		return result;
+	}
+
+	public boolean isNGExport()
+	{
+		return isNgExport;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#setUserHome(java.lang.String)
+	 */
+	@Override
+	public void setUserHome(String userHome)
+	{
+		this.userHome = userHome;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#getUserHome()
+	 */
+	@Override
+	public String getUserHome()
+	{
+		return userHome;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#isOverwriteDeployedDBServerProperties()
+	 */
+	@Override
+	public boolean isOverwriteDeployedDBServerProperties()
+	{
+		return isOverwriteDeployedDBServerProperties;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#isOverwriteDeployedServoyProperties()
+	 */
+	@Override
+	public boolean isOverwriteDeployedServoyProperties()
+	{
+		return isOverwriteDeployedServoyProperties;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#setOverwriteDeployedDBServerProperties(boolean)
+	 */
+	@Override
+	public void setOverwriteDeployedDBServerProperties(boolean isOverwriteDeployedDBServerProperties)
+	{
+		this.isOverwriteDeployedDBServerProperties = isOverwriteDeployedDBServerProperties;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.model.war.exporter.IWarExportModel#setOverwriteDeployedServoyProperties(boolean)
+	 */
+	@Override
+	public void setOverwriteDeployedServoyProperties(boolean isOverwriteDeployedServoyProperties)
+	{
+		this.isOverwriteDeployedServoyProperties = isOverwriteDeployedServoyProperties;
 	}
 }

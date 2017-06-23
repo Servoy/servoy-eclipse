@@ -80,6 +80,14 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 								offset.top = beanModel.location.y;
 								offset.left = beanModel.location.x;
 							}
+							else if (ghost)
+							{
+								offset.top = ghost.location.y;
+								offset.left = ghost.location.x;
+								offset = adjustForPadding(offset);
+								height = ghost.size.height;
+								width = ghost.size.width;
+							}
 						}
 						
 						//this is so that ghost elements decorators are positioned correctly
@@ -88,7 +96,7 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 							offset.left -= node.parent().parent().offset().left;
 						}
 						
-						if (!hasClass(node.context,"ghost"))
+						if (!hasClass(node.get(0),"ghost"))
 							offset = adjustForPadding(offset)
 						currentNode.style = {
 							height: height,
@@ -113,10 +121,7 @@ angular.module("decorators",['editor','margin','resizeknobs']).directive("decora
 							var top = targetRect.top + contentFrameRectTop;
 							var bottom = targetRect.bottom + contentFrameRectTop;
 							
-							if (bottom > window.innerHeight - statusBarHeight) {
-								target.scrollIntoView(false);
-							}
-							if (top < toolbarBottom) {
+							if ((bottom < toolbarBottom) || (top > window.innerHeight - statusBarHeight)) {
 								target.scrollIntoView();
 							}
 						}

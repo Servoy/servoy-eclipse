@@ -80,6 +80,10 @@ public class WarArgumentChest extends AbstractArgumentChest
 	private static final String minimizeJsCss = "minimize";
 	private static final String licenses = "licenses";
 
+	private static final String userHomeDirectory = "userHomeDirectory";
+	private static final String overwriteDBServerProperties = "overwriteDBServerProperties";
+	private static final String overwriteAllProperties = "overwriteAllProperties";
+
 	private HashMap<String, String> argumentsMap;
 	private Map<String, License> licenseMap = new HashMap<>();
 
@@ -107,7 +111,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             Default: all plugins from application_server/plugins are exported.\n"
 			+ "        -active <true/false> ... export active solution (and its modules) only\n"
 			+ "				Default: true\n"
-			+ "        -pluginLocations <absolute paths to plugins folder>\n"
+			+ "        -pluginLocations <absolute paths to developer 'plugins' folder> ...  needed in case\n"
+			+ "             you don't run the exporter from [servoy_install]/developer/exporter"
 			+ "             Default: '../plugins'.\n"
 			+ "        -crefs ... exports only the components used by the solution.\n"
 			+ "             Default: all components are exported.\n"
@@ -162,13 +167,27 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             element; may only be used with createTomcatContextXML\n"
 			+ "        -" + clearReferencesStopTimerThreads + " ... add clearReferencesStopTimerThreads=\"true\" to\n"
 			+ "             Context element; may only be used with createTomcatContextXML.\n"
-			+ "        -" + defaultAdminUser + " user name for admin page when no admin user exists [ required ]\n"
-			+ "        -" + defaultAdminPassword + " password for defaultAdminUser  required ]\n"
 			+ "        -" + useAsRealAdminUser + " can the default admin be used as a normal admin user ]\n"
 			+ "        -" + minimizeJsCss + " minimize JS and CSS files \n"
 			+ "        -" + licenses + " <company_name> <number_of_licenses> <code>... export Servoy Client licenses\n"
-			+ "             to add more licenses, use ',' as delimiter\n";
+			+ "             to add more licenses, use ',' as delimiter\n"
+			+ "        -" + userHomeDirectory + " <user_home_directory>... this must be a writable directory where Servoy\n"
+			+ "              application related files will be stored; if not set, the system user home directory will be used\n"
+			+ "        -" + overwriteDBServerProperties + " overwrite the DB servers properties of an already deployed application\n"
+			+ "              by using the DB servers from the servoy.properties of the war\n"
+			+ "        -" + overwriteAllProperties + " overwrite all properties of an already deployed application\n"
+			+ "              by using the values from the servoy.properties of the war\n";
 		// @formatter:on
+	}
+
+
+	@Override
+	protected String getMandatoryArgumentsMessage()
+	{
+		StringBuilder message = new StringBuilder(super.getMandatoryArgumentsMessage());
+		message.append(" -" + defaultAdminUser + " <user name for admin page when no admin user exists>");
+		message.append(" -" + defaultAdminPassword + "<password for defaultAdminUser>");
+		return message.toString();
 	}
 
 	@Override
@@ -205,6 +224,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 		parseArg("defaultAdminPassword", "Parameters'-defaultAdminUser' and '-defaultAdminPassword' are required.", argsMap, true);
 
 		if (argsMap.containsKey(licenses)) licenseMap = parseLicensesArg(argsMap);
+
+
 		argumentsMap = argsMap;
 	}
 
@@ -465,5 +486,20 @@ public class WarArgumentChest extends AbstractArgumentChest
 	public Map<String, License> getLicenses()
 	{
 		return licenseMap;
+	}
+
+	public boolean isOverwriteDeployedDBServerProperties()
+	{
+		return argumentsMap.containsKey(overwriteDBServerProperties);
+	}
+
+	public boolean isOverwriteDeployedServoyProperties()
+	{
+		return argumentsMap.containsKey(overwriteAllProperties);
+	}
+
+	public String getUserHome()
+	{
+		return argumentsMap.get(userHomeDirectory);
 	}
 }

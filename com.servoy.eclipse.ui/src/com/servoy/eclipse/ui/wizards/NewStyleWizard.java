@@ -73,7 +73,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * Wizard used in order to create a new Servoy style. Will optionally create new resource project (for styles & other info).
- * 
+ *
  * @author acostescu
  */
 public class NewStyleWizard extends Wizard implements INewWizard
@@ -108,7 +108,7 @@ public class NewStyleWizard extends Wizard implements INewWizard
 				}
 				else if (selectedObject instanceof IAdaptable)
 				{
-					p = (IProject)((IAdaptable)selectedObject).getAdapter(IProject.class);
+					p = ((IAdaptable)selectedObject).getAdapter(IProject.class);
 				}
 
 				if (p != null)
@@ -302,7 +302,7 @@ public class NewStyleWizard extends Wizard implements INewWizard
 
 		/**
 		 * Creates a new style creation wizard page.
-		 * 
+		 *
 		 * @param pageName the name of the page
 		 * @param defaultResourceProjectToUse the initially selected resource project in which the style should be created.
 		 */
@@ -317,7 +317,7 @@ public class NewStyleWizard extends Wizard implements INewWizard
 
 		/**
 		 * Returns the composite that handles the resources project data. It can be used to determine what the user selected.
-		 * 
+		 *
 		 * @return the composite that handles the resources project data. It can be used to determine what the user selected.
 		 */
 		public ResourcesProjectChooserComposite getResourceProjectData()
@@ -327,7 +327,7 @@ public class NewStyleWizard extends Wizard implements INewWizard
 
 		/**
 		 * Returns the name of the new style.
-		 * 
+		 *
 		 * @return the name of the new style.
 		 */
 		public String getNewStyleName()
@@ -370,7 +370,7 @@ public class NewStyleWizard extends Wizard implements INewWizard
 				setDescription("- a new style will be created in resources project \"" + active.getProject().getName() + "\"");
 			}
 			resourceProjectComposite = new ResourcesProjectChooserComposite(topLevel, SWT.NONE, this,
-				"Choose the resources project (it will become the resource project for the active solution)", defaultResourceProjectToUse);
+				"Choose the resources project (it will become the resource project for the active solution)", defaultResourceProjectToUse, active == null);
 			resourceProjectComposite.setVisible(resourcesVisible);
 
 			// layout of the page
@@ -417,7 +417,7 @@ public class NewStyleWizard extends Wizard implements INewWizard
 
 		/**
 		 * Sees if the data is filled up correctly.
-		 * 
+		 *
 		 * @return true if the content is OK (page ready); false otherwise.
 		 */
 		protected boolean validatePage()
@@ -489,7 +489,7 @@ public class NewStyleWizard extends Wizard implements INewWizard
 
 		/**
 		 * Creates a new style creation wizard page.
-		 * 
+		 *
 		 * @param pageName the name of the page
 		 */
 		public NewStyleContentPage(String pageName)

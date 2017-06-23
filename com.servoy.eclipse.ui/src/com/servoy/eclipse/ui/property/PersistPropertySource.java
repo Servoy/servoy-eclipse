@@ -133,6 +133,7 @@ import com.servoy.eclipse.ui.views.properties.IMergedPropertyDescriptor;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.IBasicFormManager;
 import com.servoy.j2db.component.ComponentFormat;
+import com.servoy.j2db.dataprocessing.IFoundSet;
 import com.servoy.j2db.dataui.PropertyEditorClass;
 import com.servoy.j2db.dataui.PropertyEditorHint;
 import com.servoy.j2db.dataui.PropertyEditorOption;
@@ -567,7 +568,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		throws RepositoryException
 	{
 		if (persistContext.getPersist() == propertyDescriptor.valueObject // for beans we show all
-			&& !shouldShow(propertyDescriptor))
+		&& !shouldShow(propertyDescriptor))
 		{
 			return;
 		}
@@ -714,7 +715,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 
 	public static IPropertyDescriptor createPropertyDescriptor(IPropertySource propertySource, final String id, final PersistContext persistContext,
 		boolean readOnly, PropertyDescriptorWrapper propertyDescriptor, String displayName, FlattenedSolution flattenedEditingSolution, Form form)
-		throws RepositoryException
+			throws RepositoryException
 	{
 		if (!propertyDescriptor.propertyDescriptor.isProperty())
 		{
@@ -724,7 +725,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 		IPropertyDescriptor desc = createPropertyDescriptor(propertySource, persistContext, readOnly, propertyDescriptor, id, displayName,
 			flattenedEditingSolution, form);
 		if (desc != null //
-			&& persistContext != null && persistContext.getPersist() != null &&
+		&& persistContext != null && persistContext.getPersist() != null &&
 			persistContext.getPersist().getAncestor(IRepository.FORMS) == persistContext.getContext() // only show overrides when element is shown in its 'own' form
 			&&
 			// skip some specific properties
@@ -1354,7 +1355,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				BorderPropertyController borderPropertyController = new BorderPropertyController(id, displayName, propertySource, persistContext);
 				borderPropertyController.setReadonly(readOnly);
 
-				if (Boolean.TRUE.equals(propertyDescription.getConfig()))
+				if (IContentSpecConstants.PROPERTY_BORDERTYPE.equals(propertyDescription.getName()))
 				{
 					// BorderPropertyController handles Border objects, the property is a String.
 					return new PropertyController<String, Object>(id, displayName,
@@ -2519,7 +2520,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				Form flattenedSuperForm = flattenedEditingSolution.getFlattenedForm(
 					flattenedEditingSolution.getForm(((Form)persistContext.getPersist()).getExtendsID()));
 				propertyReadOnly = flattenedSuperForm == null /* superform not found? make readonly for safety */
-					|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
+				|| flattenedSuperForm.getDataSource() != null; /* superform has a data source */
 
 				if (propertyReadOnly && flattenedSuperForm != null && ((Form)persistContext.getPersist()).getDataSource() != null &&
 					!((Form)persistContext.getPersist()).getDataSource().equals(flattenedSuperForm.getDataSource()))
@@ -2585,7 +2586,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			if (config.isEditable())
 			{
 				// only display values
-				return new EditableComboboxPropertyController(id, displayName, config.getDisplay());
+				return new EditableComboboxPropertyController(id, displayName, config.getDisplay(), null);
 			}
 
 			if (config.isMultiple())
@@ -2656,7 +2657,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 			{
 				getLastPaintedFont = null;
 			}
-			if (Boolean.TRUE.equals(propertyDescription.getConfig()))
+			if (IContentSpecConstants.PROPERTY_FONTTYPE.equals(propertyDescription.getName()))
 			{
 				// Both property (P) and edit (E) types are font strings, parse the string as awt font and convert back so that guessed fonts are mapped to
 				// the correct string for that font
@@ -2732,6 +2733,21 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						else if (flattenedEditingSolution.getRelation(foundsetValue) != null)
 						{
 							table = dsm.getDataSource(flattenedEditingSolution.getRelation(foundsetValue).getForeignDataSource());
+						}
+						else
+						{
+							try
+							{
+								IFoundSet foundset = Activator.getDefault().getDesignClient().getFoundSetManager().getNamedFoundSet(foundsetValue);
+								if (foundset != null)
+								{
+									table = dsm.getDataSource(foundset.getDataSource());
+								}
+							}
+							catch (Exception ex)
+							{
+								ServoyLog.logError(ex);
+							}
 						}
 					}
 				}

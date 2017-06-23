@@ -25,7 +25,7 @@ import com.servoy.j2db.persistence.Form;
 
 /**
  *  Value editor for namedFoundset property. It is able to open global relations if available.
- * 
+ *
  * @author acostescu
  *
  */
@@ -41,12 +41,12 @@ public class NamedFoundsetRelationValueEditor implements IValueEditor<String>
 
 	public void openEditor(String value)
 	{
-		EditorUtil.openRelationEditor(fs.getRelation(value.substring(Form.NAMED_FOUNDSET_GLOBAL_RELATION_PREFIX_LENGTH)));
+		EditorUtil.openRelationEditor(fs.getRelation(value));
 	}
 
 	public boolean canEdit(String value)
 	{
-		return value != null && value.startsWith(Form.NAMED_FOUNDSET_GLOBAL_RELATION_PREFIX);
+		return value != null && fs.getRelation(value) != null;
 	}
 
 }

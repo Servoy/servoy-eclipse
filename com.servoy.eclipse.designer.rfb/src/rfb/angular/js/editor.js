@@ -1057,7 +1057,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 		replace: true
 	};
 
-}).factory("$editorService", function($rootScope, $webSocket, $log, $q, $window, EDITOR_EVENTS, $rootScope, $timeout,
+}).factory("$editorService", function($rootScope, $webSocket, $log, $q, $window, EDITOR_EVENTS, $timeout,
 	$selectionUtils, $allowedChildren) {
 	var realConsole = $window.console;
 	$window.console = {

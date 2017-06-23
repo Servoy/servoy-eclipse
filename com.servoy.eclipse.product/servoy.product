@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="8.1.2.3031" useFeatures="true" includeLaunchers="true">
+<product name="Servoy Developer" uid="servoy.product" id="com.servoy.eclipse.core.ide" application="org.eclipse.ui.ide.workbench" version="8.2.0.3100-b1" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="icons/installer_image.png"/>
       <text>
          Servoy
 
-Version: 8.0.0  - build 3020
+Version: 8.2b1  - build 3100
 
-Copyright © 1997-2016 Servoy BV. All rights reserved.
+Copyright © 1997-2017 Servoy BV. All rights reserved.
 Visit http://www.servoy.com
 
 This computer program is protected by copyright law and international treaties.
@@ -21,10 +21,10 @@ and will be prosecuted to the maximum extent possible under law.
    </aboutInfo>
 
    <configIni use="default">
-      <linux>/com.servoy.eclipse.core/config.ini</linux>
-      <macosx>/com.servoy.eclipse.core/config.ini</macosx>
-      <solaris>/com.servoy.eclipse.core/config.ini</solaris>
-      <win32>/com.servoy.eclipse.core/config.ini</win32>
+      <linux>/com.servoy.eclipse.product/config.ini</linux>
+      <macosx>/com.servoy.eclipse.product/config.ini</macosx>
+      <solaris>/com.servoy.eclipse.product/config.ini</solaris>
+      <win32>/com.servoy.eclipse.product/config.ini</win32>
    </configIni>
 
    <launcherArgs>

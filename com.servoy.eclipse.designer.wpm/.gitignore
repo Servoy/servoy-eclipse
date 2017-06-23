@@ -1,1 +1,6 @@
 /bin/
+/${buildDirectory}/
+/build.xml
+/javaCompiler...args
+/@dot.log
+/target/

@@ -733,7 +733,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	private SimpleUserNode[] createComponentFileList(SimpleUserNode un)
 	{
 		WebObjectSpecification spec = (WebObjectSpecification)un.getRealObject();
-		IProject resources = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject();
+		IProject resources = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getProject();
 		if ("file".equals(spec.getSpecURL().getProtocol()))
 		{
 			try
@@ -1648,7 +1648,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				for (Object element : ids)
 				{
 					Image icon = propertiesIcon;
-					String pluginsPrefix = PLUGIN_PREFIX + "." + ((WebObjectSpecification)o).getName() + ".";
+					String pluginsPrefix = PLUGIN_PREFIX + "." + ((WebObjectSpecification)o).getScriptingName() + ".";
 					IDeveloperFeedback feedback = new FieldFeedback((String)element, pluginsPrefix, null, null, null);
 					if (spec.getApiFunction((String)element) != null)
 					{
@@ -2301,7 +2301,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				sample = Text.processTags(sample, resolver);
 			}
-			return sample;
+			return HtmlUtils.escapeMarkup(sample).toString();
 		}
 
 		/**
@@ -2353,7 +2353,10 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					returnDescription = ((XMLScriptObjectAdapter)scriptObject).getReturnDescription(name, (Class[])parameterTypes);
 					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, (Class[])parameterTypes);
 					tooltip = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, (Class[])parameterTypes, csp);
-					tooltip += "\n<i>" + Text.processTags(((XMLScriptObjectAdapter)scriptObject).getSample(name, (Class[])parameterTypes), resolver) + "</i>";
+					tooltip += "\n<i>" +
+						Text.processTags(HtmlUtils.escapeMarkup(((XMLScriptObjectAdapter)scriptObject).getSample(name, (Class[])parameterTypes)).toString(),
+							resolver).toString() +
+						"</i>";
 					if (parameters != null)
 					{
 						paramNames = new String[parameters.length];
@@ -2535,7 +2538,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				sample = Text.processTags(sample, resolver);
 			}
-			return sample;
+			return HtmlUtils.escapeMarkup(sample).toString();
 		}
 
 		/**

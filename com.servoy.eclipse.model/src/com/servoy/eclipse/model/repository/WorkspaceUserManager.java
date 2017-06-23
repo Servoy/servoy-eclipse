@@ -34,7 +34,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.dbcp.DbcpException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -2597,7 +2596,7 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 		{
 			removeSecurityProblemMarker();
 		}
-		if (isOperational())
+		if (resourcesProject != null)
 		{
 			writeUserAndGroupInfo(false);
 			writeAllTableInfo();
@@ -2631,11 +2630,6 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 							throw e;
 						}
 					}
-				}
-				catch (DbcpException ex)
-				{
-					// the initialize of servers might not be completed at this point; so we may have an invalid server
-					// don't do anything, this error should not exist
 				}
 				catch (RepositoryException e)
 				{
@@ -2706,11 +2700,6 @@ public class WorkspaceUserManager implements IUserManager, IUserManagerInternal
 								throw e;
 							}
 						}
-					}
-					catch (DbcpException ex)
-					{
-						// the initialize of servers might not be completed at this point; so we may have an invalid server
-						// don't do anything, this error should not exist
 					}
 					catch (RepositoryException e)
 					{

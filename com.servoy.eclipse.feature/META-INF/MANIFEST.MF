@@ -1,1 +1,0 @@
-Comment: Dummy file to enable Plug-in Tools -> Create Ant Build File on feature project

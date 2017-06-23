@@ -57,19 +57,12 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.builder.ISourceLineTracker;
-import org.eclipse.dltk.javascript.ast.FunctionStatement;
-import org.eclipse.dltk.javascript.ast.JSDeclaration;
 import org.eclipse.dltk.javascript.ast.Script;
-import org.eclipse.dltk.javascript.ast.VariableDeclaration;
 import org.eclipse.dltk.javascript.parser.JavaScriptParserUtil;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
 import org.eclipse.dltk.ui.DLTKPluginImages;
-import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.ControlContribution;
@@ -255,7 +248,6 @@ import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
 import com.servoy.j2db.util.DataSourceUtils;
-import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Pair;
@@ -265,7 +257,8 @@ import com.servoy.j2db.util.UUID;
  * This view is meant to be similar to the old designer's tree (in editor) in looks and in functionality. It will show a logical presentation of the eclipse
  * workspace's Servoy related solutions/styles.
  */
-public class SolutionExplorerView extends ViewPart implements ISelectionChangedListener, FilteredEntity, IShowInSource, IShowInTarget, IOrientedView
+public class SolutionExplorerView extends ViewPart
+	implements ISelectionChangedListener, FilteredEntity, IShowInSource, IShowInTarget, IOrientedView, ITreeListView
 {
 	private final Color yellow = new Color(null, 255, 255, 0);
 	private final Color light_grey = new Color(null, 120, 120, 120);
@@ -683,10 +676,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					result = (result != null) ? result += ("\n" + deprecatedText) : deprecatedText;
 				}
 			}
-			if (result != null)
-			{
-				result = HtmlUtils.unescape(result);
-			}
 			return result;
 		}
 
@@ -1071,6 +1060,7 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 					if (!treeWidgetDisposed)
 					{
+						ITreeSelection toSelect = getTreeSelection();
 						TreePath[] oldPath = tree.getExpandedTreePaths();
 						toRun.run();
 
@@ -1084,6 +1074,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 							}
 							tree.setExpandedTreePaths(oldPath); // TODO hmm, isn't this redundant? I mean the loop above does the same thing right?
 							list.refresh();
+							tree.setSelection(toSelect, true);
+							ISelection current = tree.getSelection();
+							while (current.isEmpty() && !toSelect.isEmpty())
+							{
+								toSelect = new TreeSelection(toSelect.getPaths()[0].getParentPath());
+								tree.setSelection(toSelect, true);
+								current = tree.getSelection();
+							}
 						}
 						finally
 						{
@@ -1212,6 +1210,16 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		return ret;
 	}
 
+	public Object getSelectedListElement()
+	{
+		SimpleUserNode selectedListNode = getSelectedListNode();
+		if (selectedListNode != null)
+		{
+			return selectedListNode.getRealObject();
+		}
+		return null;
+	}
+
 	/**
 	 * Returns the node that is selected in the tree, if there is exactly one node selected. If more than 1 node is selected, returns the first node from the
 	 * selection.
@@ -1228,6 +1236,16 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			ret = (SimpleUserNode)obj;
 		}
 		return ret;
+	}
+
+	public Object getSelectedTreeElement()
+	{
+		SimpleUserNode selectedTreeNode = getSelectedTreeNode();
+		if (selectedTreeNode != null)
+		{
+			return selectedTreeNode.getRealObject();
+		}
+		return null;
 	}
 
 	/**
@@ -2823,7 +2841,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		IAction newSolution = new OpenWizardAction(NewSolutionWizard.class, Activator.loadImageDescriptorFromBundle("solution_icon.gif"),
 			"Create new solution");
 		IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("solution_module_m.gif"), "Create new module");
-		IAction newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.gif"), "Create new style");
+		IAction newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.gif"), "Create new style")
+		{
+			@Override
+			public boolean isEnabled()
+			{
+				return super.isEnabled() && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null;
+			}
+		};
 		exportActiveSolutionAction = new OpenWizardAction(ExportSolutionWizard.class, Activator.loadImageDescriptorFromOldLocations("export_wiz.gif"),
 			"File Export");
 		importSolutionAction = new OpenWizardAction(ImportSolutionWizard.class, Activator.loadImageDescriptorFromOldLocations("import_wiz.gif"),
@@ -3871,12 +3896,14 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 							if (realObject instanceof ScriptMethod)
 							{
-								return getProblemLevel(jsMarkers, sourceModule, getFunctionStatementForName(script, ((ScriptMethod)realObject).getName()));
+								return DecoratorHelper.getProblemLevel(jsMarkers, sourceModule,
+									DecoratorHelper.getFunctionStatementForName(script, ((ScriptMethod)realObject).getName()));
 							}
 
 							if (realObject instanceof ScriptVariable)
 							{
-								return getProblemLevel(jsMarkers, sourceModule, getVariableDeclarationForName(script, ((ScriptVariable)realObject).getName()));
+								return DecoratorHelper.getProblemLevel(jsMarkers, sourceModule,
+									DecoratorHelper.getVariableDeclarationForName(script, ((ScriptVariable)realObject).getName()));
 							}
 						}
 					}
@@ -3889,83 +3916,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 
 			// unspecified
 			return -1;
-		}
-
-		/**
-		 * @param problemLevel
-		 * @param jsMarkers
-		 * @param sourceModule
-		 * @param node
-		 * @return
-		 * @throws ModelException
-		 */
-		public int getProblemLevel(IMarker[] jsMarkers, ISourceModule sourceModule, ASTNode node) throws ModelException
-		{
-			int problemLevel = -1;
-			if (jsMarkers == null || node == null) return problemLevel;
-			ISourceLineTracker sourceLineTracker = null;
-			for (IMarker marker : jsMarkers)
-			{
-				if (marker.getAttribute(IMarker.SEVERITY, -1) > problemLevel)
-				{
-					int start = marker.getAttribute(IMarker.CHAR_START, -1);
-					if (start != -1)
-					{
-						if (node.sourceStart() <= start && start <= node.sourceEnd())
-						{
-							problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
-						}
-					}
-					else
-					{
-						int line = marker.getAttribute(IMarker.LINE_NUMBER, -1); // 1 based
-						if (line != -1)
-						{
-							if (sourceLineTracker == null) sourceLineTracker = TextUtils.createLineTracker(sourceModule.getSource());
-							// getLineNumberOfOffset == 0 based so +1 to match the markers line
-							if (sourceLineTracker.getLineNumberOfOffset(node.sourceStart()) + 1 <= line &&
-								line <= sourceLineTracker.getLineNumberOfOffset(node.sourceEnd()) + 1)
-							{
-								problemLevel = marker.getAttribute(IMarker.SEVERITY, -1);
-							}
-						}
-					}
-
-				}
-			}
-			return problemLevel;
-		}
-
-		private FunctionStatement getFunctionStatementForName(Script script, String metName)
-		{
-			for (JSDeclaration dec : script.getDeclarations())
-			{
-				if (dec instanceof FunctionStatement)
-				{
-					FunctionStatement fstmt = (FunctionStatement)dec;
-					if (fstmt.getFunctionName().equals(metName))
-					{
-						return fstmt;
-					}
-				}
-			}
-			return null;
-		}
-
-		private VariableDeclaration getVariableDeclarationForName(Script script, String varName)
-		{
-			for (JSDeclaration dec : script.getDeclarations())
-			{
-				if (dec instanceof VariableDeclaration)
-				{
-					VariableDeclaration varDec = (VariableDeclaration)dec;
-					if (varDec.getVariableName().equals(varName))
-					{
-						return varDec;
-					}
-				}
-			}
-			return null;
 		}
 
 		public Image decorateImage(Image image, Object element)

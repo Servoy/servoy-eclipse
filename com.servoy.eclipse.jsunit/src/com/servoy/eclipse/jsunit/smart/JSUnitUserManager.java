@@ -56,7 +56,7 @@ public final class JSUnitUserManager extends WorkspaceUserManager
 	 * <p> Some operations can only be done by admin user or own user (like change own password)
 	 * @param clientId
 	 * @param ownerUserId allowed when non-null
-	 * @throws RepositoryException 
+	 * @throws RepositoryException
 	 */
 	@Override
 	protected void checkForAdminUser(String clientId, String ownerUserId) throws RepositoryException
@@ -78,7 +78,7 @@ public final class JSUnitUserManager extends WorkspaceUserManager
 			{
 				Debug.error("Access to repository server denied to client code, see admin property " + Settings.ALLOW_CLIENT_REPOSITORY_ACCESS_SETTING,
 					new IllegalAccessException());
-				throw new RepositoryException(ServoyException.NO_ACCESS);
+				throw new RepositoryException(ServoyException.NO_ACCESS, new Object[] { IRepository.ADMIN_GROUP });
 			}
 		}
 

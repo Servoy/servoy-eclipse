@@ -73,7 +73,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * Wizard used in order to create a new Servoy solution project. Will optionally create linked resource project (with styles & other info).
- * 
+ *
  * @author acostescu
  */
 public class NewSolutionWizard extends Wizard implements INewWizard
@@ -140,7 +140,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					}
 					else
 					{
-						resourceProject = page1.getResourceProjectData().getExistingResourceProject().getProject();
+						resourceProject = page1.getResourceProjectData().getExistingResourceProject() != null
+							? page1.getResourceProjectData().getExistingResourceProject().getProject() : null;
 					}
 
 					monitor.setTaskName("Creating and opening project");
@@ -167,7 +168,11 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					monitor.worked(1);
 
 					// link solution project to the resource project; store project description
-					description.setReferencedProjects(new IProject[] { resourceProject });
+
+					if (resourceProject != null)
+					{
+						description.setReferencedProjects(new IProject[] { resourceProject });
+					}
 					newProject.setDescription(description, null);
 					monitor.worked(1);
 					monitor.done();
@@ -270,8 +275,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	 */
 	protected boolean shouldAddAsModule(final Solution activeEditingSolution)
 	{
-		return (page1.getSolutionType() == SolutionMetaData.MODULE || page1.getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK || page1.getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK) &&
-			activeEditingSolution != null;
+		return (page1.getSolutionType() == SolutionMetaData.MODULE || page1.getSolutionType() == SolutionMetaData.PRE_IMPORT_HOOK ||
+			page1.getSolutionType() == SolutionMetaData.POST_IMPORT_HOOK) && activeEditingSolution != null;
 	}
 
 	public static class NewSolutionWizardPage extends WizardPage implements Listener, IValidator
@@ -287,7 +292,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 		/**
 		 * Creates a new solution creation wizard page.
-		 * 
+		 *
 		 * @param pageName the name of the page
 		 */
 		public NewSolutionWizardPage(String pageName)
@@ -299,7 +304,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 		/**
 		 * Returns the composite that handles the resources project data. It can be used to determine what the user selected.
-		 * 
+		 *
 		 * @return the composite that handles the resources project data. It can be used to determine what the user selected.
 		 */
 		public ResourcesProjectChooserComposite getResourceProjectData()
@@ -309,7 +314,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 		/**
 		 * Returns the name of the new solution.
-		 * 
+		 *
 		 * @return the name of the new solution.
 		 */
 		public String getNewSolutionName()
@@ -319,7 +324,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 		/**
 		 * Returns the selected solution type. One of {@link SolutionMetaData#MODULE} or {@link SolutionMetaData#SOLUTION} constants.
-		 * 
+		 *
 		 * @return the selected solution type. One of {@link SolutionMetaData#MODULE} or {@link SolutionMetaData#SOLUTION} constants.
 		 */
 		public int getSolutionType()
@@ -370,7 +375,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 			resourceProjectComposite = new ResourcesProjectChooserComposite(topLevel, SWT.NONE, this,
 				"Please choose the resources project this solution will reference (for styles, column/sequence info, security)",
-				ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject());
+				ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject(), false);
 
 			// layout of the page
 			FormLayout formLayout = new FormLayout();
@@ -459,7 +464,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 
 		/**
 		 * Sees if the data is filled up correctly.
-		 * 
+		 *
 		 * @return true if the content is OK (page ready); false otherwise.
 		 */
 		protected boolean validatePage()

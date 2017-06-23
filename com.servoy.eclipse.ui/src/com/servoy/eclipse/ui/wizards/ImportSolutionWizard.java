@@ -111,7 +111,9 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 
 	public static String initialPath = getInitialImportPath();
 	private String solutionFilePath;
+	private boolean allowSolutionFilePathSelection = true;
 	private boolean askForImportServerName;
+	private boolean activateSolution = true;
 
 	private static String getInitialImportPath()
 	{
@@ -130,6 +132,11 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		return solutionFilePath;
 	}
 
+	public void setAllowSolutionFilePathSelection(boolean allowSolutionFilePathSelection)
+	{
+		this.allowSolutionFilePathSelection = allowSolutionFilePathSelection;
+	}
+
 	public void setAskForImportServerName(boolean askForImportServerName)
 	{
 		this.askForImportServerName = askForImportServerName;
@@ -145,6 +152,12 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		return titleText;
 	}
 
+	public void setActivateSolution(boolean activateSolution)
+	{
+		this.activateSolution = activateSolution;
+	}
+
+
 	public class ImportSolutionWizardPage extends WizardPage implements IValidator
 	{
 		private ResourcesProjectChooserComposite resourceProjectComposite;
@@ -153,7 +166,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		private Button cleanImport;
 		private Button allowDataModelChange;
 		private Button displayDataModelChanges;
-		private Button activateSolution;
+		private Button bActivateSolution;
 
 		private final ImportSolutionWizard wizard;
 
@@ -183,6 +196,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					}
 				}
 			});
+			filePath.setEditable(allowSolutionFilePathSelection);
 
 			browseButton = new Button(topLevel, SWT.NONE);
 			browseButton.setText("Browse");
@@ -201,6 +215,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 					}
 				}
 			});
+			browseButton.setEnabled(allowSolutionFilePathSelection);
 
 			final String solutionFilePath = wizard.getSolutionFilePath();
 			if (solutionFilePath != null)
@@ -226,13 +241,13 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			displayDataModelChanges = new Button(topLevel, SWT.CHECK);
 			displayDataModelChanges.setText("Display data model (database) changes");
 
-			activateSolution = new Button(topLevel, SWT.CHECK);
-			activateSolution.setText("Activate solution after import");
-			activateSolution.setSelection(true);
+			bActivateSolution = new Button(topLevel, SWT.CHECK);
+			bActivateSolution.setText("Activate solution after import");
+			bActivateSolution.setSelection(activateSolution);
 
 			resourceProjectComposite = new ResourcesProjectChooserComposite(topLevel, SWT.NONE, this,
 				"Please choose the resources project the solution will reference (for styles, column/sequence info, security)",
-				ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject());
+				ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject(), false);
 
 			// layout of the page
 			FormLayout formLayout = new FormLayout();
@@ -274,12 +289,12 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			formData.left = new FormAttachment(cleanImport, 0, SWT.LEFT);
 			formData.top = new FormAttachment(displayDataModelChanges, 0, SWT.BOTTOM);
 			formData.right = new FormAttachment(100, 0);
-			activateSolution.setLayoutData(formData);
+			bActivateSolution.setLayoutData(formData);
 
 			formData = new FormData();
 			formData.left = new FormAttachment(0, 0);
 			formData.right = new FormAttachment(100, 0);
-			formData.top = new FormAttachment(activateSolution, 10);
+			formData.top = new FormAttachment(bActivateSolution, 10);
 			formData.bottom = new FormAttachment(100, 0);
 			resourceProjectComposite.setLayoutData(formData);
 		}
@@ -331,9 +346,9 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 
 						x11handler.setAskForImportServerName(ImportSolutionWizard.this.shouldAskForImportServerName());
 
-						IRootObject[] rootObjects = XMLEclipseWorkspaceImportHandlerVersions11AndHigher.importFromJarFile(importEngine, x11handler,
-							userChannel, (EclipseRepository)ServoyModel.getDeveloperRepository(), resourcesProjectName, existingProject, monitor,
-							doActivateSolution, isCleanImport);
+						IRootObject[] rootObjects = XMLEclipseWorkspaceImportHandlerVersions11AndHigher.importFromJarFile(importEngine, x11handler, userChannel,
+							(EclipseRepository)ServoyModel.getDeveloperRepository(), resourcesProjectName, existingProject, monitor, doActivateSolution,
+							isCleanImport);
 						if (rootObjects != null)
 						{
 							String detail = userChannel.getAllImportantMSGes() + "\nSolution '" + rootObjects[0].getName() + "' imported";
@@ -469,7 +484,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 
 		public boolean getActivateSolution()
 		{
-			return activateSolution.getSelection();
+			return bActivateSolution.getSelection();
 		}
 
 		@Override

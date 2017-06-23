@@ -220,6 +220,9 @@
 				        		  },
 				        		  "max": {
 					            	"type": "number"
+						          },
+						          "lazyLoading": {
+					            	"type": "boolean"
 						          }
 				        	  },
 				        	  "required":["type"],
@@ -384,9 +387,9 @@
 				"additionalProperties":false
 			}
 		},
-		"serverApi":
+		"internalApi":
 		{
-			"description": "The internal api this component has, can be called from client",
+			"description": "The internal api this component has, can be called from client or from server side scripting",
 			"type":"object",
 			"additionalProperties": {
 				"type": "object",
@@ -430,6 +433,22 @@
 							"required": ["name","type"],
 							"additionalProperties":false
 						}
+					},
+					"delayUntilFormLoads": {
+						"description": "Delay this api call until the form is really loaded on the client (example: requestFocus).",
+						"type": "boolean"
+					},
+					"async": {
+						"description": "Execute this api call async (don't wait for return value).",
+						"type": "boolean"
+					},
+					"globalExclusive": {
+						"description": "Deprecated. Use discardPreviouslyQueuedSimilarCalls instead.",
+						"type": "boolean"
+					},
+					"discardPreviouslyQueuedSimilarCalls": {
+						"description": "False by default. When true (only makes sense for async or delayUntilFormLoads type of calls), only the last call (inside an event handler on the event thread - when multiple async/delayed API calls get queued before being sent to the client) to this method (identified by method name) on any component on the current window will be executed. The previous calls are discarded. For example when the user clicks a button, an event handler on the server that executes lots of code might end up calling .requestFocus() on many components for many different forms on this window. But to keep things fast, only the last requestFocus() is really relevant and only that really needs to get executed on the client - there is no use in executing any of the others. So by marking requestFocus() with this flag in the .spec you can achieve that.",
+						"type": "boolean"
 					}
 				},
 				"additionalProperties":false

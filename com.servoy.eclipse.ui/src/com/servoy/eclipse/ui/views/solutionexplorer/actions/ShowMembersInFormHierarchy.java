@@ -44,7 +44,7 @@ public class ShowMembersInFormHierarchy extends Action implements ISelectionChan
 				{
 					selection = (IPersist)next;
 					if (!isChecked()) return;
-					view.setSelection(selection);
+					view.setSelection(selection, false);
 				}
 			}
 		}

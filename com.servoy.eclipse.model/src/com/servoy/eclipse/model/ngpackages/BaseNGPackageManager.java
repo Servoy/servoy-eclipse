@@ -562,7 +562,7 @@ public abstract class BaseNGPackageManager
 		{
 			addErrorMarker(resource,
 				"NG Package '" + resource.getName() + " cannot be loaded; please check the contents/structure of that package. Does it have a manifest file?",
-				null);
+				null, true);
 		}
 		else if (!(IPackageReader.WEB_COMPONENT.equals(reader.getPackageType()) || IPackageReader.WEB_LAYOUT.equals(reader.getPackageType()) ||
 			IPackageReader.WEB_SERVICE.equals(reader.getPackageType())))
@@ -611,6 +611,11 @@ public abstract class BaseNGPackageManager
 
 	protected static void addErrorMarker(IResource resource, final String markerMessage, final Exception e)
 	{
+		addErrorMarker(resource, markerMessage, e, false);
+	}
+
+	protected static void addErrorMarker(IResource resource, final String markerMessage, final Exception e, final boolean isWarning)
+	{
 		IResource res = resource;
 		// I think this search in parents is for unzipped packages only - where a file nested somewhere inside the container is given here as resource - which means
 		// that the parent search should always end at most in ng package dir, not higher (so normally when this mehod gets called the ng package root container should always exist);
@@ -641,7 +646,7 @@ public abstract class BaseNGPackageManager
 							marker = r.createMarker(SPEC_READ_MARKER);
 						}
 						marker.setAttribute(IMarker.MESSAGE, (markerMessage != null) ? markerMessage : e.getMessage());
-						marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+						marker.setAttribute(IMarker.SEVERITY, isWarning ? IMarker.SEVERITY_WARNING : IMarker.SEVERITY_ERROR);
 						marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
 						marker.setAttribute(IMarker.LOCATION, r.getLocation().toString());
 					}
@@ -668,6 +673,11 @@ public abstract class BaseNGPackageManager
 		{
 			super(dir);
 			this.container = folder;
+		}
+
+		public String getContainerName()
+		{
+			return container.getName();
 		}
 
 		@Override

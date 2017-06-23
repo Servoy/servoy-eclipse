@@ -31,7 +31,7 @@ public class I18NReadFromDBAction extends Action
 {
 	/**
 	 * Creates a new open action that uses the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public I18NReadFromDBAction()
@@ -57,5 +57,11 @@ public class I18NReadFromDBAction extends Action
 				EclipseMessages.writeProjectI18NFiles(activeProject, true, deleteNonExistingKeys);
 			}
 		}
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		return super.isEnabled() && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null;
 	}
 }

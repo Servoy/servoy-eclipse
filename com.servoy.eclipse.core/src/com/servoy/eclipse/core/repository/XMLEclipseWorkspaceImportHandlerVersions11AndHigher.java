@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import org.eclipse.core.resources.IFile;
@@ -78,8 +79,10 @@ import com.servoy.j2db.query.QuerySelect;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.ILogLevel;
+import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.ServoyException;
 import com.servoy.j2db.util.UUID;
+import com.servoy.j2db.util.Utils;
 import com.servoy.j2db.util.xmlxport.GroupInfo;
 import com.servoy.j2db.util.xmlxport.GroupInfo.GroupElementInfo;
 import com.servoy.j2db.util.xmlxport.IXMLImportEngine;
@@ -119,7 +122,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 	public static IRootObject[] importFromJarFile(final IXMLImportEngine importEngine, final IXMLImportHandlerVersions11AndHigher x11handler,
 		final IXMLImportUserChannel userChannel, final EclipseRepository repository, final String newResourcesProjectName,
 		final ServoyResourcesProject resourcesProject, final IProgressMonitor m, final boolean activateSolution, final boolean cleanImport)
-		throws RepositoryException
+			throws RepositoryException
 	{
 		final List<IProject> createdProjects = new ArrayList<IProject>();
 		try
@@ -206,14 +209,15 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 						servoyModel.setActiveProject(dummyServoyProject, false);
 
 						// verify that correct resources project is active
-						if (servoyModel.getActiveResourcesProject() == null || servoyModel.getActiveResourcesProject().getProject() != rProject[0])
+						if (rProject[0] != null && servoyModel.getActiveResourcesProject().getProject() != rProject[0])
 						{
 							throw new RepositoryException("Cannot activate resources project " + rProject[0].getName() + ".");
 						}
 
+						XMLEclipseWorkspaceImportHandlerVersions11AndHigher eclipseWorkspaceImportHandler = new XMLEclipseWorkspaceImportHandlerVersions11AndHigher(
+							x11handler, repository, resourcesProject, userManager, m, createdProjects);
 						// read jar file & import some stuff into resources project
-						rootObjects[0] = importEngine.importFromJarFile(new XMLEclipseWorkspaceImportHandlerVersions11AndHigher(x11handler, repository,
-							resourcesProject, userManager, m, createdProjects), cleanImport);
+						rootObjects[0] = importEngine.importFromJarFile(eclipseWorkspaceImportHandler, cleanImport);
 						if (rootObjects[0] == null || rootObjects[0].length == 0) throw new RepositoryException("No solution was imported.");
 
 						// create the eclipse solution projects
@@ -226,9 +230,12 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 								newProject.create(null);
 								newProject.open(null);
 
-								IProjectDescription description = newProject.getDescription();
-								description.setReferencedProjects(new IProject[] { rProject[0] });
-								newProject.setDescription(description, null);
+								if (rProject[0] != null)
+								{
+									IProjectDescription description = newProject.getDescription();
+									description.setReferencedProjects(new IProject[] { rProject[0] });
+									newProject.setDescription(description, null);
+								}
 								if (mainProject[0] == null)
 								{
 									mainProject[0] = newProject;
@@ -259,6 +266,16 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 								}
 								m.setTaskName("Writing solution/module " + root.getName());
 								SolutionSerializer.writePersist(root, wsa, repository, true, false, true);
+
+								List<Pair<String, byte[]>> webPackages = eclipseWorkspaceImportHandler.getWebPackages(root.getName());
+								if (webPackages != null)
+								{
+									for (Pair<String, byte[]> wp : webPackages)
+									{
+										m.setTaskName("Writing web package " + wp.getLeft());
+										wsa.setContents(root.getName() + "/" + SolutionSerializer.NG_PACKAGES_DIR_NAME + "/" + wp.getLeft(), wp.getRight());
+									}
+								}
 							}
 						}
 
@@ -271,9 +288,9 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 								p.setDescription(description, null);
 							}
 						}
-						
+
 						ServoyModelManager.getServoyModelManager().getServoyModel().refreshServoyProjects();
-						
+
 						m.setTaskName("Updating workbench state");
 
 						job = new RunInWorkspaceJob(importJob3);
@@ -319,15 +336,18 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 						// should be applied to the proper resources project (maybe other stuff as well from resources project, such as i18n)
 						if (resourcesProject == null)
 						{
-							// create the resources project
-							// create a new resource project
-							rProject[0] = ServoyModel.getWorkspace().getRoot().getProject(newResourcesProjectName);
-							rProject[0].create(null);
-							rProject[0].open(null);
-							IProjectDescription resourceProjectDescription = rProject[0].getDescription();
-							resourceProjectDescription.setNatureIds(new String[] { ServoyResourcesProject.NATURE_ID });
-							rProject[0].setDescription(resourceProjectDescription, null);
-							createdProjects.add(rProject[0]);
+							if (newResourcesProjectName != null)
+							{
+								// create the resources project
+								// create a new resource project
+								rProject[0] = ServoyModel.getWorkspace().getRoot().getProject(newResourcesProjectName);
+								rProject[0].create(null);
+								rProject[0].open(null);
+								IProjectDescription resourceProjectDescription = rProject[0].getDescription();
+								resourceProjectDescription.setNatureIds(new String[] { ServoyResourcesProject.NATURE_ID });
+								rProject[0].setDescription(resourceProjectDescription, null);
+								createdProjects.add(rProject[0]);
+							}
 						}
 						else
 						{
@@ -350,13 +370,13 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 						createdProjects.add(dummySolProject[0]);
 						IProjectDescription description = dummySolProject[0].getDescription();
 						description.setNatureIds(new String[] { ServoyProject.NATURE_ID, JavaScriptNature.NATURE_ID });
-						description.setReferencedProjects(new IProject[] { rProject[0] });
+						if (rProject[0] != null) description.setReferencedProjects(new IProject[] { rProject[0] });
 						dummySolProject[0].setDescription(description, null);
 						Solution dummySolution = (Solution)repository.createNewRootObject(dummySolProject[0].getName(), IRepository.SOLUTIONS);
 						SolutionSerializer.writePersist(dummySolution, wsa, repository, true, false, true);
 
 						ServoyModelManager.getServoyModelManager().getServoyModel().refreshServoyProjects();
-						
+
 						m.setTaskName("Updating workbench state");
 						job = new RunInWorkspaceJob(importJob2);
 						job.setRule(ServoyModel.getWorkspace().getRoot());
@@ -497,9 +517,9 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 				rootObjectMetaData = repository.getRootObjectMetaData(name, typeId);
 				if (rootObjectMetaData != null && importInfo.isProtected)
 				{
-					throw new RepositoryException("A different " + objectType + " with the name '" + name +
-						"' already exists, but the import is protected. Rename or remove the " + objectType +
-						" in the workspace (Servoy cannot automatically rename a protected solution).");
+					throw new RepositoryException(
+						"A different " + objectType + " with the name '" + name + "' already exists, but the import is protected. Rename or remove the " +
+							objectType + " in the workspace (Servoy cannot automatically rename a protected solution).");
 				}
 
 			}
@@ -516,9 +536,9 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 				}
 				if (rootObjectMetaData != null && importInfo.isProtected)
 				{
-					throw new RepositoryException("A different " + objectType + " with the name '" + name +
-						"' already exists, but the import is protected. Rename or remove the " + objectType +
-						" in the workspace (Servoy cannot automatically rename a protected style).");
+					throw new RepositoryException(
+						"A different " + objectType + " with the name '" + name + "' already exists, but the import is protected. Rename or remove the " +
+							objectType + " in the workspace (Servoy cannot automatically rename a protected style).");
 				}
 			}
 
@@ -574,8 +594,8 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		x11handler.getRootObjectIdForImport(importInfo, rootObjectImportInfo);
 	}
 
-	public IRootObject importRootObject(RootObjectImportInfo rootObjectImportInfo) throws IllegalAccessException, IntrospectionException,
-		InvocationTargetException, RepositoryException
+	public IRootObject importRootObject(RootObjectImportInfo rootObjectImportInfo)
+		throws IllegalAccessException, IntrospectionException, InvocationTargetException, RepositoryException
 	{
 		m.setTaskName("Reading " + rootObjectImportInfo.name);
 		IRootObject root = x11handler.importRootObject(rootObjectImportInfo);
@@ -806,7 +826,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 							throw new RepositoryException("Error importing meta data table, Cannot find table '" + dataSource + "'.");
 						}
 
-						if (!((Table)table).isMarkedAsMetaData() && MetaDataUtils.canBeMarkedAsMetaData((Table)table))
+						if (!((Table)table).isMarkedAsMetaData() && MetaDataUtils.canBeMarkedAsMetaData(table))
 						{
 							// mark table as meta, also if user said no to import meta data
 							((Table)table).setMarkedAsMetaData(true);
@@ -817,7 +837,7 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 								{
 									throw new RepositoryException("Error importing meta data table, Cannot find dbi file for datasource '" + dataSource + "'.");
 								}
-								ws.setUTF8Contents(dbi.getFullPath().toString(), dmm.serializeTable((Table)table));
+								ws.setUTF8Contents(dbi.getFullPath().toString(), dmm.serializeTable(table));
 							}
 							catch (JSONException e)
 							{
@@ -860,19 +880,18 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 					// save it in the table when it is empty
 					try
 					{
-						QuerySelect query = MetaDataUtils.createTableMetadataQuery((Table)table, null);
+						QuerySelect query = MetaDataUtils.createTableMetadataQuery(table, null);
 						IDataSet ds = ApplicationServerRegistry.get().getDataServer().performQuery(ApplicationServerRegistry.get().getClientId(),
 							table.getServerName(), null, query, null, false, 0, 1, IDataServer.META_DATA_QUERY, null);
 						if (ds.getRowCount() == 0)
 						{
-							MetaDataUtils.loadMetadataInTable((Table)table, def.tableMetaData);
+							MetaDataUtils.loadMetadataInTable(table, def.tableMetaData);
 							x11handler.getUserChannel().info("Loaded meta data for datasource '" + dataSource + "' in database.", ILogLevel.INFO);
 						}
 						else
 						{
-							x11handler.getUserChannel().info(
-								"Meta data for table '" + table.getName() + "' in server '" + server.getName() +
-									"' was not loaded (table not empty), please update table meta data", ILogLevel.INFO);
+							x11handler.getUserChannel().info("Meta data for table '" + table.getName() + "' in server '" + server.getName() +
+								"' was not loaded (table not empty), please update table meta data", ILogLevel.INFO);
 						}
 					}
 					catch (Exception e)
@@ -891,8 +910,8 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		x11handler.importSampleData(jarFile, importInfo);
 	}
 
-	public void importBlobs(JarFile jarFile, List<String> blobs, ImportInfo importInfo, Map<String, byte[]> digestMap) throws IOException, RepositoryException,
-		NoSuchAlgorithmException
+	public void importBlobs(JarFile jarFile, List<String> blobs, ImportInfo importInfo, Map<String, byte[]> digestMap)
+		throws IOException, RepositoryException, NoSuchAlgorithmException
 	{
 		m.setTaskName("Importing blobs");
 		x11handler.importBlobs(jarFile, blobs, importInfo, digestMap);
@@ -1038,8 +1057,8 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		return x11handler.getPropertyValue(oldValue);
 	}
 
-	public IPersist loadDeletedObjectByElementId(IRootObject rootObject, int elementId, ISupportChilds parent) throws RepositoryException,
-		IllegalAccessException, IntrospectionException, InvocationTargetException
+	public IPersist loadDeletedObjectByElementId(IRootObject rootObject, int elementId, ISupportChilds parent)
+		throws RepositoryException, IllegalAccessException, IntrospectionException, InvocationTargetException
 	{
 		return x11handler.loadDeletedObjectByElementId(rootObject, elementId, parent);
 	}
@@ -1064,4 +1083,38 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 
 	}
 
+	private final Map<String, List<Pair<String, byte[]>>> webPackages = new HashMap<String, List<Pair<String, byte[]>>>();
+
+	/*
+	 * @see com.servoy.j2db.util.xmlxport.IXMLImportHandlerVersions11AndHigher#loadWebPackage(java.lang.String, java.lang.String, java.util.jar.JarFile,
+	 * java.util.jar.JarEntry)
+	 */
+	@Override
+	public void loadWebPackage(String solutionName, String webPackageName, JarFile jarFile, JarEntry jarEntry)
+	{
+		List<Pair<String, byte[]>> solutionWebPackages = webPackages.get(solutionName);
+		if (solutionWebPackages == null)
+		{
+			solutionWebPackages = new ArrayList<Pair<String, byte[]>>();
+			webPackages.put(solutionName, solutionWebPackages);
+		}
+		try
+		{
+			solutionWebPackages.add(new Pair<String, byte[]>(webPackageName, Utils.getBytesFromInputStream(jarFile.getInputStream(jarEntry))));
+		}
+		catch (IOException ex)
+		{
+			ServoyLog.logError(ex);
+		}
+	}
+
+
+	/*
+	 * @see com.servoy.j2db.util.xmlxport.IXMLImportHandlerVersions11AndHigher#getWebPackages(java.lang.String)
+	 */
+	@Override
+	public List<Pair<String, byte[]>> getWebPackages(String solutionName)
+	{
+		return webPackages.get(solutionName);
+	}
 }

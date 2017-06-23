@@ -73,7 +73,8 @@ public class NewInMemoryDataSourceAction extends Action implements ISelectionCha
 			if (node.getRealObject() instanceof IServerInternal)
 			{
 				IServerInternal s = (IServerInternal)node.getRealObject();
-				state = (node.getType() == UserNodeType.INMEMORY_DATASOURCES);
+				state = (node.getType() == UserNodeType.INMEMORY_DATASOURCES) &&
+					ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null;
 			}
 		}
 		setEnabled(state);

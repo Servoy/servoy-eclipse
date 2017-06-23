@@ -81,8 +81,6 @@ public class MarkerMessages
 	// loaded (and so the message never gets displayed).
 	public static ServoyMarker ReferencesToMultipleResources = new ServoyMarker(
 		"Solution project \"{0}\" has references to more than one Servoy Resources Projects.", ServoyBuilder.MULTIPLE_RESOURCES_PROJECTS_MARKER_TYPE);
-	public static ServoyMarker NoResourceReference = new ServoyMarker("Solution project \"{0}\" has no Servoy Resources Project referenced.",
-		ServoyBuilder.NO_RESOURCES_PROJECTS_MARKER_TYPE);
 	// It seems that elements with duplicate UUIDs are not loaded at all.
 	public static ServoyMarker UUIDDuplicateIn = new ServoyMarker("UUID duplicate found \"{0}\" in {1}.", ServoyBuilder.DUPLICATE_UUID);
 	// Seems to be superseded by the Marker_Form_Solution_PropertyTargetNotFound family of messages.
@@ -299,6 +297,10 @@ public class MarkerMessages
 
 	public static ServoyMarker NonAccessibleFormInModuleUsedInParentSolutionForm = new ServoyMarker(
 		"Non-public {0} \"{1}\" from module \"{2}\" is used in solution \"{3}\", in form \"{4}\". This is not allowed.",
+		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
+
+	public static ServoyMarker NamedFoundsetDatasourceNotMatching = new ServoyMarker(
+		"Named foundset \"{0}\" used on form \"{1}\" from datasource \"{2}\" does not match its usage from form \"{3}\". Datasources should match.",
 		ServoyBuilder.PROJECT_FORM_MARKER_TYPE);
 
 	/**

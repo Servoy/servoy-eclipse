@@ -191,6 +191,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 					servoyProject = (ServoyProject)projectNode.getRealObject();
 				}
 			}
+			else if (selected instanceof Form)
+			{
+				selectedForm = (Form)selected;
+			}
 		}
 		if (servoyProject == null)
 		{
@@ -385,7 +389,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 			// save
 			servoyProject.saveEditingSolutionNodes(new IPersist[] { form }, true);
 
-			servoyModel.getDataModelManager().testTableAndCreateDBIFile(servoyModel.getDataSourceManager().getDataSource(form.getDataSource()));
+			if (servoyModel.getActiveResourcesProject() != null)
+			{
+				servoyModel.getDataModelManager().testTableAndCreateDBIFile(servoyModel.getDataSourceManager().getDataSource(form.getDataSource()));
+			}
 
 			// open newly created form in the editor (as new editor)
 			boolean returnValue = EditorUtil.openFormDesignEditor(form, true, true) != null;

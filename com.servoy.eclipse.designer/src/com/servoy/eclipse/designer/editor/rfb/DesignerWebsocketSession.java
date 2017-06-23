@@ -17,6 +17,7 @@
 
 package com.servoy.eclipse.designer.editor.rfb;
 
+import java.awt.Point;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import java.util.Set;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.json.JSONWriter;
+import org.sablo.specification.Package.IPackageReader;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebObjectSpecification;
 import org.sablo.websocket.BaseWebsocketSession;
@@ -84,7 +86,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 	public static final String EDITOR_CONTENT_SERVICE = "$editorContentService";
 
 	private static final WebObjectSpecification EDITOR_CONTENT_SERVICE_SPECIFICATION = new WebObjectSpecification(EDITOR_CONTENT_SERVICE, "",
-		EDITOR_CONTENT_SERVICE, null, null, null, "", null);
+		IPackageReader.WEB_SERVICE, EDITOR_CONTENT_SERVICE, null, null, null, "", null);
 
 	private final Form form;
 
@@ -329,6 +331,11 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 						if (parent.getParent() instanceof Form)
 						{
 							baseComponents.add((IFormElement)parent);
+							IPersist oldPersist = ServoyModelFinder.getServoyModel().getFlattenedSolution().searchPersist(persist.getUUID());
+							if (oldPersist == null) // a new child was added, force parent refresh
+							{
+								refreshTemplate.add((IFormElement)parent);
+							}
 							break;
 						}
 						else
@@ -355,6 +362,21 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				else
 				{
 					deletedComponents.add(baseComponent);
+					// if it has parent, make sure it refreshes
+					ISupportChilds parent = persist.getParent();
+					while (parent instanceof BaseComponent)
+					{
+						if (parent.getParent() instanceof Form)
+						{
+							baseComponents.add((IFormElement)parent);
+							refreshTemplate.add((IFormElement)parent);
+							break;
+						}
+						else
+						{
+							parent = parent.getParent();
+						}
+					}
 				}
 			}
 			else if (persist instanceof Part)
@@ -626,17 +648,43 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 		return fixedFormElementName.replace('-', '_');
 	}
 
-	/**
-	 * @param fs
-	 * @param writer
-	 * @param baseComponents
-	 */
+	private Collection<IFormElement> filterGhosts(Collection<IFormElement> baseComponents)
+	{
+		if (form.isResponsiveLayout()) return baseComponents;
+		Collection<IFormElement> filtered = new ArrayList<IFormElement>();
+		int formHeight = 0;
+		if (form.getParts().hasNext())
+		{
+			formHeight = form.getSize().height;
+		}
+		else
+		{
+			Form f = form;
+			while (formHeight == 0 && (f = form.extendsForm) != null)
+			{
+				formHeight = f.getParts().hasNext() ? f.getSize().height : 0;
+			}
+		}
+		for (IFormElement fe : baseComponents)
+		{
+			if (!PersistHelper.isOverrideOrphanElement(fe))
+			{
+				Point location = fe.getLocation();
+				if (location != null && location.x <= form.getWidth() && location.y <= formHeight)
+				{
+					filtered.add(fe);
+				}
+			}
+		}
+		return filtered;
+	}
+
 	private void sendComponents(FlattenedSolution fs, JSONWriter writer, Collection<IFormElement> baseComponents, Collection<IFormElement> deletedComponents)
 	{
 		if (baseComponents.size() > 0)
 		{
 			Map<String, String> formComponentTemplates = new HashMap<String, String>();
-			List<IFormElement> components = new ArrayList<IFormElement>(baseComponents);
+			List<IFormElement> components = new ArrayList<IFormElement>(filterGhosts(baseComponents));
 			Collections.sort(components, PositionComparator.XY_PERSIST_COMPARATOR);
 			Collections.reverse(components);
 			writer.key("components");

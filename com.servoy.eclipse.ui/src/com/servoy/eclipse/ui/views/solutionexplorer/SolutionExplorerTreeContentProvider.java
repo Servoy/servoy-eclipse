@@ -35,7 +35,6 @@ import java.util.TreeSet;
 
 import javax.swing.Icon;
 
-import org.apache.commons.dbcp.DbcpException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -1074,8 +1073,11 @@ public class SolutionExplorerTreeContentProvider
 						{
 							if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
 							{
+								IPackageReader packageType = getPackageType(getComponentsSpecProviderState(), iProject);
+								if (packageType == null) packageType = getPackageType(getServicesSpecProviderState(), iProject);
+								if (packageType == null) continue;
 								PlatformSimpleUserNode node = new PlatformSimpleUserNode(resolveWebPackageDisplayName(iProject),
-									UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, iProject, packageIcon);
+									UserNodeType.WEB_PACKAGE_PROJECT_IN_WORKSPACE, packageType, packageIcon);
 
 								//if it is not loaded, hide it so that it will have the gray icon
 								if (solutionAndModuleReferencedProjects == null || !solutionAndModuleReferencedProjects.contains(iProject)) node.hide();
@@ -1137,7 +1139,10 @@ public class SolutionExplorerTreeContentProvider
 				allReferencedProjects.add(eclipseProject);
 			}
 			ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
-			allReferencedProjects.remove(activeResourcesProject.getProject());
+			if (activeResourcesProject != null)
+			{
+				allReferencedProjects.remove(activeResourcesProject.getProject());
+			}
 
 			addBinaryReferecedPackages(un, result, packageIcon, allReferencedProjects, componentsProvider.getAllPackageReaders());
 			addBinaryReferecedPackages(un, result, packageIcon, allReferencedProjects, servicesProvider.getAllPackageReaders());
@@ -1224,32 +1229,7 @@ public class SolutionExplorerTreeContentProvider
 				{
 					if (iProject.isAccessible() && iProject.hasNature(ServoyNGPackageProject.NATURE_ID))
 					{
-						IPackageReader packageType = null;
-						IPackageReader[] allPackageReaders = provider.getAllPackageReaders();
-						File projectDir = new File(iProject.getLocationURI());
-						for (IPackageReader pr : allPackageReaders)
-						{
-							if (projectDir.equals(pr.getResource()))
-							{
-								packageType = pr;
-								break;
-							}
-						}
-						if (packageType == null)
-						{
-							String packageName = iProject.getName();
-							packageType = provider.getPackageReader(packageName);
-							if (packageType == null)
-							{
-								// TODO this is a partial fix for the problem that the project is not the package name
-								// see also the method resolveWebPackageDisplayName above.
-								if (iProject.getFile(new Path("META-INF/MANIFEST.MF")).exists())
-								{
-									packageName = new ContainerPackageReader(new File(iProject.getLocationURI()), iProject).getPackageName();
-									packageType = provider.getPackageReader(packageName);
-								}
-							}
-						}
+						IPackageReader packageType = getPackageType(provider, iProject);
 						if (packageType == null) continue;
 
 						// we also check that reader resource matches project just in case there are also for example zip references currently loaded
@@ -1275,6 +1255,39 @@ public class SolutionExplorerTreeContentProvider
 			}
 		}
 		return children;
+	}
+
+	private IPackageReader getPackageType(SpecProviderState provider, IProject iProject)
+	{
+		IPackageReader packageType = null;
+		IPackageReader[] allPackageReaders = provider.getAllPackageReaders();
+		File projectDir = new File(iProject.getLocationURI());
+		for (IPackageReader pr : allPackageReaders)
+		{
+			if (projectDir.equals(pr.getResource()))
+			{
+				packageType = pr;
+				break;
+			}
+		}
+		if (packageType == null)
+		{
+			String packageName = iProject.getName();
+			packageType = provider.getPackageReader(packageName);
+			if (packageType == null)
+			{
+				// TODO this is a partial fix for the problem that the project is not the package name
+				// see also the method resolveWebPackageDisplayName above.
+				if (iProject.getFile(new Path("META-INF/MANIFEST.MF")).exists())
+				{
+					IPackageReader reader = new ContainerPackageReader(new File(iProject.getLocationURI()), iProject);
+					packageName = reader.getPackageName();
+					packageType = provider.getPackageReader(packageName);
+					if (packageType == null) packageType = reader;
+				}
+			}
+		}
+		return packageType;
 	}
 
 	static String appendModuleName(String name, String moduleName)
@@ -1575,7 +1588,10 @@ public class SolutionExplorerTreeContentProvider
 				allReferencedProjects.add(eclipseProject);
 			}
 			ServoyResourcesProject activeResourcesProject = ServoyModelFinder.getServoyModel().getActiveResourcesProject();
-			allReferencedProjects.remove(activeResourcesProject.getProject());
+			if (activeResourcesProject != null)
+			{
+				allReferencedProjects.remove(activeResourcesProject.getProject());
+			}
 			ArrayList<IPackageReader> packages = new ArrayList<>(Arrays.asList(componentProvider.getAllPackageReaders()));
 			packages.addAll(Arrays.asList(serviceProvider.getAllPackageReaders()));
 
@@ -1796,7 +1812,7 @@ public class SolutionExplorerTreeContentProvider
 				@Override
 				public int compare(WebObjectSpecification o1, WebObjectSpecification o2)
 				{
-					return o1.getName().compareTo(o2.getName());
+					return o1.getScriptingName().compareTo(o2.getScriptingName());
 				}
 
 			});
@@ -1804,7 +1820,7 @@ public class SolutionExplorerTreeContentProvider
 			{
 				if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)
 				{
-					PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getName(), UserNodeType.PLUGIN, spec,
+					PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getScriptingName(), UserNodeType.PLUGIN, spec,
 						uiActivator.loadImageFromBundle("plugin_conn.gif"), WebServiceScriptable.class);
 					plugins.add(node);
 					node.parent = pluginNode;
@@ -2142,17 +2158,12 @@ public class SolutionExplorerTreeContentProvider
 		{
 			IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
 			PlatformSimpleUserNode columnsNode = null;
-			try
+//			try
 			{
 				columnsNode = new PlatformSimpleUserNode(Messages.TreeStrings_selectedrecord, UserNodeType.TABLE_COLUMNS, dsm.getDataSource(f.getDataSource()),
 					f, uiActivator.loadImageFromBundle("selected_record.gif"));
 				columnsNode.parent = formNode;
 				node.add(columnsNode);
-			}
-			catch (DbcpException e)
-			{
-				ServoyLog.logInfo("Cannot create 'selectedrecord' node for " + formNode.getName() + ": " + e.getMessage());
-				disableServer(f.getServerName());
 			}
 
 			PlatformSimpleUserNode relationsNode = new PlatformSimpleUserNode(Messages.TreeStrings_relations, UserNodeType.RELATIONS, f, f,
@@ -2508,16 +2519,8 @@ public class SolutionExplorerTreeContentProvider
 	private void addFormRelationsNodeChildren(PlatformSimpleUserNode formRelationsNode)
 	{
 		Form f = (Form)formRelationsNode.getRealObject();
-		try
-		{
-			ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(f.getDataSource());
-			addRelationsNodeChildren(formRelationsNode, f.getSolution(), table, UserNodeType.RELATION);
-		}
-		catch (DbcpException e)
-		{
-			ServoyLog.logInfo("Cannot create " + formRelationsNode.getName() + " node: " + e.getMessage());
-			disableServer(f.getServerName());
-		}
+		ITable table = ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(f.getDataSource());
+		addRelationsNodeChildren(formRelationsNode, f.getSolution(), table, UserNodeType.RELATION);
 	}
 
 	private void addRelationsNodeChildren(PlatformSimpleUserNode relationsNode, Solution solution, ITable table, UserNodeType type)
@@ -3314,5 +3317,11 @@ public class SolutionExplorerTreeContentProvider
 				}
 			}
 		}
+	}
+
+
+	public PlatformSimpleUserNode getAllWebPackagesNode()
+	{
+		return allWebPackagesNode;
 	}
 }

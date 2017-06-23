@@ -2,7 +2,7 @@
 <feature
       id="com.servoy.eclipse.feature"
       label="Servoy Feature"
-      version="8.1.2.3031"
+      version="8.2.0.3100"
       provider-name="Servoy"
       plugin="com.servoy.eclipse.core">
 
@@ -11,7 +11,7 @@
    </description>
 
    <copyright url="http://download.servoy.com/developer/copyright.html">
-      Copyright © 1997-2016 Servoy BV. All rights reserved.
+      Copyright © 1997-2017 Servoy BV. All rights reserved.
 Visit http://www.servoy.com
 This computer program is protected by copyright law and international
 treaties.
@@ -980,14 +980,14 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
          unpack="false"/>
 
    <plugin
-         id="org.apache.commons.dbcp"
+         id="org.apache.commons.dbcp2"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.apache.commons.pool"
+         id="org.apache.commons.pool2"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -1080,6 +1080,20 @@ Servoy, De Brand 26, 3823 LJ Amersfoort, The Netherlands, www.servoy.com
 
    <plugin
          id="com.servoy.eclipse.ui.tweaks"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.objectweb.asm"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.objectweb.asm.tree"
          download-size="0"
          install-size="0"
          version="0.0.0"

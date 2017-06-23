@@ -18,13 +18,14 @@ package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
 
+import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.ui.actions.ShowI18NDialogActionDelegate;
 
 public class I18NExternalizeAction extends Action
 {
 	/**
 	 * Creates a new open action that uses the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public I18NExternalizeAction()
@@ -39,5 +40,11 @@ public class I18NExternalizeAction extends Action
 	{
 		ShowI18NDialogActionDelegate delegate = new ShowI18NDialogActionDelegate();
 		delegate.run(ShowI18NDialogActionDelegate.ACTION_EXTERNALIZE);
+	}
+
+	@Override
+	public boolean isEnabled()
+	{
+		return super.isEnabled() && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null;
 	}
 }

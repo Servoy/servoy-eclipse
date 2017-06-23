@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy Extension Compatibility
 Bundle-SymbolicName: com.servoy.eclipse.extension.compatibility;singleton:=true
-Bundle-Version: 8.1.2.3031
+Bundle-Version: 8.2.0.3100
 Bundle-Vendor: Servoy
 Require-Bundle: servoy_shared,
  servoy_smart_client,
@@ -17,7 +17,7 @@ Require-Bundle: servoy_shared,
  com.sun.mail.javax.mail,
  org.apache.httpcomponents.httpclient,
  org.apache.httpcomponents.httpcore,
- org.apache.commons.pool,
+ org.apache.commons.pool2,
  j2db_server,
  org.apache.commons.codec,
  org.apache.commons.io,

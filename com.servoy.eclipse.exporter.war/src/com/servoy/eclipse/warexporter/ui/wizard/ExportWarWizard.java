@@ -38,7 +38,6 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
-import org.sablo.specification.SpecProviderState;
 import org.sablo.specification.WebComponentSpecProvider;
 import org.sablo.specification.WebServiceSpecProvider;
 
@@ -52,6 +51,7 @@ import com.servoy.eclipse.model.war.exporter.WarExporter;
 import com.servoy.eclipse.warexporter.Activator;
 import com.servoy.eclipse.warexporter.export.ExportWarModel;
 import com.servoy.j2db.persistence.IServer;
+import com.servoy.j2db.persistence.SolutionMetaData;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 import com.servoy.j2db.util.Debug;
 
@@ -93,20 +93,26 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 
 	private LicensePage licenseConfigurationPage;
 
-	private final SpecProviderState componentsSpecProviderState;
+	private DeployConfigurationPage userHomeSelectionPage;
 
-	private final SpecProviderState servicesSpecProviderState;
+	private boolean isNGExport;
 
 	public ExportWarWizard()
 	{
 		setWindowTitle("War Export");
 		IDialogSettings workbenchSettings = Activator.getDefault().getDialogSettings();
 		ServoyProject activeProject = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject();
-		IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard:" + activeProject.getSolution().getName());
-		setDialogSettings(section);
+		if (activeProject != null)
+		{
+			IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard:" + activeProject.getSolution().getName());
+			setDialogSettings(section);
+		}
+		else
+		{
+			IDialogSettings section = DialogSettings.getOrCreateSection(workbenchSettings, "WarExportWizard");
+			setDialogSettings(section);
+		}
 		setNeedsProgressMonitor(true);
-		this.componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
-		this.servicesSpecProviderState = WebServiceSpecProvider.getSpecProviderState();
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)
@@ -123,7 +129,9 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		}
 		else
 		{
-			exportModel = new ExportWarModel(getDialogSettings(), componentsSpecProviderState, servicesSpecProviderState);
+			int solutionType = activeProject.getSolutionMetaData().getSolutionType();
+			isNGExport = solutionType != SolutionMetaData.WEB_CLIENT_ONLY && solutionType != SolutionMetaData.SMART_CLIENT_ONLY;
+			exportModel = new ExportWarModel(getDialogSettings(), isNGExport);
 		}
 	}
 
@@ -156,7 +164,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		{
 			public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 			{
-				final WarExporter exporter = new WarExporter(exportModel, componentsSpecProviderState, servicesSpecProviderState);
+				final WarExporter exporter = new WarExporter(exportModel);
 				try
 				{
 					final boolean[] cancel = new boolean[] { false };
@@ -205,7 +213,9 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 		{
 			getContainer().run(true, false, job);
 		}
-		catch (Exception e)
+		catch (
+
+		Exception e)
 		{
 			Debug.error(e);
 			return false;
@@ -226,16 +236,20 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 
 			serversSelectionPage = new ServersSelectionPage("serverspage", "Choose the database servernames to export",
 				"Select the database server names that will be used on the application server", exportModel.getSelectedServerNames(),
-				new String[] { IServer.REPOSITORY_SERVER });
+				new String[] { IServer.REPOSITORY_SERVER }, serverConfigurationPages);
 			licenseConfigurationPage = new LicensePage("licensepage", "Enter license key",
 				"Please enter the Servoy client license key(s), or leave empty for running the solution in trial mode.", exportModel);
 			servoyPropertiesConfigurationPage = new ServoyPropertiesConfigurationPage("propertiespage", exportModel);
-			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel);
-			componentsSelectionPage = new ComponentsSelectionPage(exportModel, componentsSpecProviderState, "componentspage", "Select components to export",
-				"View the components used and select others which you want to export.");
+			userHomeSelectionPage = new DeployConfigurationPage("userhomepage", exportModel);
+			servoyPropertiesSelectionPage = new ServoyPropertiesSelectionPage(exportModel, this);
+			if (isNGExport)
+			{
+				componentsSelectionPage = new ComponentsSelectionPage(exportModel, WebComponentSpecProvider.getSpecProviderState(), "componentspage",
+					"Select components to export", "View the components used and select others which you want to export.");
+				servicesSelectionPage = new ServicesSelectionPage(exportModel, WebServiceSpecProvider.getSpecProviderState(), "servicespage",
+					"Select services to export", "View the services used and select others which you want to export.");
+			}
 			defaultAdminConfigurationPage = new DefaultAdminConfigurationPage("defaultAdminPage", exportModel);
-			servicesSelectionPage = new ServicesSelectionPage(exportModel, servicesSpecProviderState, "servicespage", "Select services to export",
-				"View the services used and select others which you want to export.");
 			driverSelectionPage = new DirectorySelectionPage("driverpage", "Choose the jdbc drivers to export",
 				"Select the jdbc drivers that you want to use in the war (if the app server doesn't provide them)",
 				ApplicationServerRegistry.get().getServerManager().getDriversDir(), exportModel.getDrivers(), new String[] { "hsqldb.jar" },
@@ -250,18 +264,23 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 				ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), exportModel.getPlugins(), null,
 				getDialogSettings().get("export.plugins") == null, true);
 			fileSelectionPage = new FileSelectionPage(exportModel);
+
 			addPage(fileSelectionPage);
 			addPage(pluginSelectionPage);
 			addPage(beanSelectionPage);
 			addPage(lafSelectionPage);
 			addPage(driverSelectionPage);
-			addPage(componentsSelectionPage);
-			addPage(servicesSelectionPage);
+			if (isNGExport)
+			{
+				addPage(componentsSelectionPage);
+				addPage(servicesSelectionPage);
+			}
 			addPage(defaultAdminConfigurationPage);
 			addPage(servoyPropertiesSelectionPage);
 			addPage(servoyPropertiesConfigurationPage);
 			addPage(licenseConfigurationPage);
 			addPage(serversSelectionPage);
+			addPage(userHomeSelectionPage);
 
 			String[] serverNames = ApplicationServerRegistry.get().getServerManager().getServerNames(true, true, true, false);
 			ArrayList<String> srvNames = new ArrayList<String>(Arrays.asList(serverNames));
@@ -273,7 +292,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 			{
 				ServerConfiguration serverConfiguration = exportModel.getServerConfiguration(serverName);
 				ServerConfigurationPage configurationPage = new ServerConfigurationPage("serverconf:" + serverName, serverConfiguration,
-					exportModel.getSelectedServerNames(), serverConfigurationPages);
+					exportModel.getSelectedServerNames(), serverConfigurationPages, this);
 				addPage(configurationPage);
 				serverConfigurationPages.put(serverName, configurationPage);
 			}
@@ -283,17 +302,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 	@Override
 	public boolean canFinish()
 	{
-		IWizardPage currentPage = getContainer().getCurrentPage();
-		if (currentPage instanceof ServoyPropertiesSelectionPage && ((ServoyPropertiesSelectionPage)currentPage).getMessageType() == IMessageProvider.WARNING)
-		{
-			return false; //if any warning about the selected properties file, disable finish
-		}
-		if (currentPage instanceof ServersSelectionPage || currentPage instanceof ServerConfigurationPage ||
-			currentPage instanceof ServoyPropertiesSelectionPage)
-		{
-			return currentPage.getNextPage() == null;
-		}
-		return false;
+		return getContainer().getCurrentPage() instanceof DeployConfigurationPage;
 	}
 
 	@Override
@@ -319,8 +328,7 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 							{
 								public void run()
 								{
-									componentsSelectionPage.setComponentsUsed(exportModel.getUsedComponents());
-									servicesSelectionPage.setComponentsUsed(exportModel.getUsedServices());
+									setupComponentsPages();
 								}
 							});
 							monitor.done();
@@ -338,11 +346,27 @@ public class ExportWarWizard extends Wizard implements IExportWizard
 			}
 			else
 			{
-				componentsSelectionPage.setComponentsUsed(exportModel.getUsedComponents());
-				servicesSelectionPage.setComponentsUsed(exportModel.getUsedServices());
+				setupComponentsPages();
 			}
 
 		}
 		return super.getNextPage(page);
 	}
+
+	private void setupComponentsPages()
+	{
+		if (exportModel.hasSearchError())
+		{
+			componentsSelectionPage.setMessage("There was a problem finding used components, please select them manually.", IMessageProvider.WARNING);
+			servicesSelectionPage.setMessage("There was a problem finding used services, please select them manually.", IMessageProvider.WARNING);
+		}
+		componentsSelectionPage.setComponentsUsed(exportModel.getUsedComponents());
+		servicesSelectionPage.setComponentsUsed(exportModel.getUsedServices());
+	}
+
+	public IWizardPage getLastPage()
+	{
+		return userHomeSelectionPage;
+	}
+
 }

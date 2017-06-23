@@ -107,4 +107,17 @@ public interface IWarExportModel extends IExportSolutionModel
 
 	String decryptPassword(Cipher desCipher, String code);
 
+	public boolean isNGExport();
+
+	public void setUserHome(String userHome);
+
+	public String getUserHome();
+
+	public void setOverwriteDeployedDBServerProperties(boolean isOverwriteDeployedDBServerProperties);
+
+	public boolean isOverwriteDeployedDBServerProperties();
+
+	public void setOverwriteDeployedServoyProperties(boolean isOverwriteDeployedServoyProperties);
+
+	public boolean isOverwriteDeployedServoyProperties();
 }

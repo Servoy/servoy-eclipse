@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Servoy UI Plug-in
 Bundle-SymbolicName: com.servoy.eclipse.ui; singleton:=true
-Bundle-Version: 8.1.2.3031
+Bundle-Version: 8.2.0.3100
 Bundle-Activator: com.servoy.eclipse.ui.Activator
 Bundle-Vendor: Servoy
 Require-Bundle: org.eclipse.ui,
@@ -69,9 +69,11 @@ Require-Bundle: org.eclipse.ui,
  servoy_ngclient,
  org.apache.commons.io;bundle-version="2.4.0",
  org.maven.ide.eclipse.grouplayout;bundle-version="1.1.0",
- org.apache.commons.dbcp;bundle-version="1.4.0",
+ org.apache.commons.dbcp2,
  org.eclipse.jface,
- sj.jsonschemavalidation
+ sj.jsonschemavalidation,
+ org.apache.httpcomponents.httpclient;bundle-version="4.3.6",
+ org.apache.httpcomponents.httpcore;bundle-version="4.3.3"
 Bundle-ActivationPolicy: lazy
 Export-Package: com.servoy.eclipse.cheatsheets.actions,
  com.servoy.eclipse.ui,
