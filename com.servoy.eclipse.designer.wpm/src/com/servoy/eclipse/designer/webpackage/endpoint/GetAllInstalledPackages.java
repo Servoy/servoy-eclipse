@@ -151,10 +151,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 							String[] minAndMax = servoyVersion.split(" - ");
 							if (minAndMax[0].compareTo(currentVersion) <= 0)
 							{
-								if (minAndMax.length == 1 || minAndMax[1].compareTo(currentVersion) >= 0)
-								{
-									toSort.add(jsonObject);
-								}
+								toSort.add(jsonObject);
 							}
 						}
 						else toSort.add(jsonObject);
@@ -169,8 +166,26 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 								return o2.optString("version", "").compareTo(o1.optString("version", ""));
 							}
 						});
-						packageObject.put("releases", toSort);
-						result.add(packageObject);
+
+						List<JSONObject> currentVersionReleases = new ArrayList<>();
+						for (JSONObject jsonObject : toSort)
+						{
+							if (jsonObject.has("servoy-version"))
+							{
+								String servoyVersion = jsonObject.getString("servoy-version");
+								String[] minAndMax = servoyVersion.split(" - ");
+								if (minAndMax.length > 1 && minAndMax[1].compareTo(currentVersion) <= 0)
+								{
+									break;
+								}
+							}
+							currentVersionReleases.add(jsonObject);
+						}
+						if (currentVersionReleases.size() > 0)
+						{
+							packageObject.put("releases", currentVersionReleases);
+							result.add(packageObject);
+						}
 					}
 				}
 				catch (Exception e)
