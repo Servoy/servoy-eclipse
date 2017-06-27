@@ -886,7 +886,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 		while (stylesIterator.hasNext())
 		{
 			IRootObject style = stylesIterator.next();
-			UserNode node = new UserNode(style.getName(), UserNodeType.STYLE_ITEM, style, null);
+			UserNode node = new UserNode(style.getName(), UserNodeType.STYLE_ITEM, style, uiActivator.loadImageFromBundle("style.png"));
 			dlm.add(node);
 		}
 		return dlm.toArray();
