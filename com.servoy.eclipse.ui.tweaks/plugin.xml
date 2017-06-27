@@ -375,6 +375,13 @@
      </urlBasedImageReplacement>
      
      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.console/icons/full/clcl16/pin.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/pin_view.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.console/icons/full/dlcl16/pin.png">
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/pin_view.png">
@@ -471,6 +478,178 @@
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/progress.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>     
+     
+     <!--TODO add missing icons-->
+     <!--urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.views/$nl$/icons/full/elcl16/filter_ps.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/show_advanced_properties.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement> 
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.views/$nl$/icons/full/elcl16/tree_mode.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/show_categories.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.views/$nl$/icons/full/elcl16/defaults_ps.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/restore_default_value.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.views/$nl$/icons/full/dlcl16/defaults_ps.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/restore_default_value-disabled.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement-->
+     
+     <!--urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.console/icons/full/cview16/console_view.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/display_selected_console.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.console/icons/full/elcl16/new_con.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/open_console.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.console/icons/full/clcl16/clear_co.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/clear_console.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.console/icons/full/dlcl16/clear_co.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/clear_console-disabled.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>     
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.console/icons/full/clcl16/lock_co.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/scroll_lock.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.console/icons/full/dlcl16/lock_co.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/scroll_lock.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.console/icons/full/clcl16/wordwrap.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/word_wrap.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.console/icons/full/dlcl16/wordwrap.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/word_wrap.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/terminate_co.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/terminate.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.debug.ui/icons/full/dlcl16/terminate_co.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/terminate-disabled.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/rem_co.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/rem.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.debug.ui/icons/full/dlcl16/rem_co.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/rem-disabled.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/rem_all_co.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/rem_all.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.debug.ui/icons/full/dlcl16/rem_all_co.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/rem_all-disabled.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.ui/icons/full/etool16/mark_occurrences.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/mark_occurrences.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.ui/icons/full/dtool16/mark_occurrences.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/mark_occurrences-disabled.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.ui/$nl$/icons/full/etool16/mark_occurrences.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/mark_occurrences.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.ui/$nl$/icons/full/dtool16/mark_occurrences.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/mark_occurrences-disabled.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.workbench.texteditor/$nl$/icons/full/etool16/block_selection_mode.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/block_selection_mode.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.workbench.texteditor/$nl$/icons/full/dtool16/block_selection_mode.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/block_selection_mode-disabled.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.testing/$nl$/icons/full/eview16/testing.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/script_unit_test.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.testing/icons/full/eview16/testing.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/script_unit_test.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement-->
      
      <!--the minimize, maximize and view menu icons replacement does not work even though the names seem correct, perhaps on eclipse upgrade-->
      <!-- http://git.eclipse.org/c/platform/eclipse.platform.ui.git/plain/bundles/org.eclipse.ui/icons/full/elcl16/thin_min_view.png-->
