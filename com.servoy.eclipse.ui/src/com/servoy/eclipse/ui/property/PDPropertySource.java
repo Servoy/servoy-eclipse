@@ -28,7 +28,6 @@ import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.ValuesConfig;
 import org.sablo.specification.WebLayoutSpecification;
-import org.sablo.specification.WebObjectSpecification;
 import org.sablo.specification.property.types.StyleClassPropertyType;
 import org.sablo.specification.property.types.ValuesPropertyType;
 
@@ -243,16 +242,6 @@ public class PDPropertySource extends PersistPropertySource
 			return new LayoutContainerPropertyHandler(desc);
 		}
 		return new WebComponentPropertyHandler(desc);
-	}
-
-	@Override
-	protected PropertyCategory createPropertyCategory(PropertyDescriptorWrapper propertyDescriptor)
-	{
-		if (getPropertyDescription() instanceof WebObjectSpecification &&
-			((WebObjectSpecification)getPropertyDescription()).getHandlers().containsKey(propertyDescriptor.propertyDescriptor.getName()))
-			return PropertyCategory.Events;
-		if (getPropertyDescription().getProperties().containsKey(propertyDescriptor.propertyDescriptor.getName())) return PropertyCategory.Component;
-		return super.createPropertyCategory(propertyDescriptor);
 	}
 
 	@Override
