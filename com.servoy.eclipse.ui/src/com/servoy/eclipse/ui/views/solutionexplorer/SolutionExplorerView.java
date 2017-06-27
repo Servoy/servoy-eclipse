@@ -248,7 +248,6 @@ import com.servoy.j2db.persistence.TableNode;
 import com.servoy.j2db.persistence.WebComponent;
 import com.servoy.j2db.serverconfigtemplates.ServerTemplateDefinition;
 import com.servoy.j2db.util.DataSourceUtils;
-import com.servoy.j2db.util.HtmlUtils;
 import com.servoy.j2db.util.ImageLoader;
 import com.servoy.j2db.util.MimeTypes;
 import com.servoy.j2db.util.Pair;
@@ -258,7 +257,8 @@ import com.servoy.j2db.util.UUID;
  * This view is meant to be similar to the old designer's tree (in editor) in looks and in functionality. It will show a logical presentation of the eclipse
  * workspace's Servoy related solutions/styles.
  */
-public class SolutionExplorerView extends ViewPart implements ISelectionChangedListener, FilteredEntity, IShowInSource, IShowInTarget, IOrientedView
+public class SolutionExplorerView extends ViewPart
+	implements ISelectionChangedListener, FilteredEntity, IShowInSource, IShowInTarget, IOrientedView, ITreeListView
 {
 	private final Color yellow = new Color(null, 255, 255, 0);
 	private final Color light_grey = new Color(null, 120, 120, 120);
@@ -675,10 +675,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 					deprecatedText = "@deprecated " + deprecatedText;
 					result = (result != null) ? result += ("\n" + deprecatedText) : deprecatedText;
 				}
-			}
-			if (result != null)
-			{
-				result = HtmlUtils.unescape(result);
 			}
 			return result;
 		}
@@ -1214,6 +1210,16 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 		return ret;
 	}
 
+	public Object getSelectedListElement()
+	{
+		SimpleUserNode selectedListNode = getSelectedListNode();
+		if (selectedListNode != null)
+		{
+			return selectedListNode.getRealObject();
+		}
+		return null;
+	}
+
 	/**
 	 * Returns the node that is selected in the tree, if there is exactly one node selected. If more than 1 node is selected, returns the first node from the
 	 * selection.
@@ -1230,6 +1236,16 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			ret = (SimpleUserNode)obj;
 		}
 		return ret;
+	}
+
+	public Object getSelectedTreeElement()
+	{
+		SimpleUserNode selectedTreeNode = getSelectedTreeNode();
+		if (selectedTreeNode != null)
+		{
+			return selectedTreeNode.getRealObject();
+		}
+		return null;
 	}
 
 	/**
@@ -1473,13 +1489,6 @@ public class SolutionExplorerView extends ViewPart implements ISelectionChangedL
 			setShift(new Point(1, 1));
 			return comp;
 		}
-
-		@Override
-		public boolean isHideOnMouseDown()
-		{
-			return false;
-		}
-
 
 		public static final void enableFor(ColumnViewer viewer, int style)
 		{

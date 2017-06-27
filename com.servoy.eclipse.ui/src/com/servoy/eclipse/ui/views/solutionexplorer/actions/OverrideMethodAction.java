@@ -21,28 +21,24 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
-import com.servoy.eclipse.model.nature.ServoyProject;
-import com.servoy.eclipse.model.util.ServoyLog;
-import com.servoy.eclipse.ui.node.SimpleUserNode;
-import com.servoy.eclipse.ui.node.UserNodeType;
-import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.eclipse.ui.views.solutionexplorer.ITreeListView;
 import com.servoy.j2db.persistence.Form;
-import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
+import com.servoy.j2db.persistence.ISupportChilds;
 import com.servoy.j2db.persistence.ScriptMethod;
 
 public class OverrideMethodAction extends Action implements ISelectionChangedListener
 {
-	private final SolutionExplorerView viewer;
+	private final ITreeListView viewer;
 
 	/**
 	 * Creates a new "create new method" action for the given solution view.
 	 *
 	 * @param sev the solution view to use.
 	 */
-	public OverrideMethodAction(SolutionExplorerView sev)
+	public OverrideMethodAction(ITreeListView viewer)
 	{
-		viewer = sev;
+		this.viewer = viewer;
 		setText("Override method");
 		setToolTipText("Override method");
 		setEnabled(false);
@@ -55,19 +51,21 @@ public class OverrideMethodAction extends Action implements ISelectionChangedLis
 		if (state)
 		{
 			state = false;
-			UserNodeType type = ((SimpleUserNode)sel.getFirstElement()).getType();
-			if (type == UserNodeType.FORM_METHOD && ((SimpleUserNode)sel.getFirstElement()).getRealObject() instanceof ScriptMethod)
+			Object selectedListElement = viewer.getSelectedListElement();
+			if (selectedListElement instanceof ScriptMethod)
 			{
-				SimpleUserNode node = (SimpleUserNode)sel.getFirstElement();
-				ScriptMethod method = (ScriptMethod)node.getRealObject();
-				SimpleUserNode formNode = node.getAncestorOfType(Form.class);
-				Form parent = (Form)method.getAncestor(IRepository.FORMS);
-				if (parent != null && parent.getName() != null && formNode != null && formNode.getRealObject() instanceof Form &&
-					!parent.getName().equals(((Form)formNode.getRealObject()).getName()))
+				ISupportChilds parent = ((ScriptMethod)selectedListElement).getParent();
+				if (parent instanceof Form)
 				{
-					state = true;
+					Form scriptForm = (Form)parent;
+					Object selectedTreeElement = viewer.getSelectedTreeElement();
+					if (selectedTreeElement instanceof Form && !selectedTreeElement.equals(scriptForm))
+					{
+						state = true;
+					}
 				}
 			}
+
 		}
 		setEnabled(state);
 	}
@@ -75,27 +73,9 @@ public class OverrideMethodAction extends Action implements ISelectionChangedLis
 	@Override
 	public void run()
 	{
-		SimpleUserNode node = viewer.getSelectedTreeNode();
-		if (node != null)
-		{
-			ServoyProject pr = (ServoyProject)node.getAncestorOfType(ServoyProject.class).getRealObject();
-			if (pr != null)
-			{
-				if (node.getType() == UserNodeType.FORM)
-				{
-					SimpleUserNode listNode = viewer.getSelectedListNode();
-					if (listNode != null && listNode.getRealObject() instanceof ScriptMethod)
-					{
-						ScriptMethod scriptMethod = (ScriptMethod)listNode.getRealObject();
-						NewMethodAction.createNewMethod(viewer.getSite().getShell(), (Form)node.getRealObject(), null, true, scriptMethod.getName(), null,
-								scriptMethod.getRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE));
-					}
-				}
-			}
-			else
-			{
-				ServoyLog.logWarning("Cannot find servoy project", null);
-			}
-		}
+		ScriptMethod selectedScriptMethod = (ScriptMethod)viewer.getSelectedListElement();
+		Form targetForm = (Form)viewer.getSelectedTreeElement();
+		NewMethodAction.createNewMethod(viewer.getSite().getShell(), targetForm, null, true, selectedScriptMethod.getName(), null,
+			selectedScriptMethod.getRuntimeProperty(IScriptProvider.METHOD_RETURN_TYPE));
 	}
 }

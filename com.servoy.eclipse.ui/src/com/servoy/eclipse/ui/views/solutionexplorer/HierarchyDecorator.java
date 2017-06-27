@@ -44,12 +44,12 @@ public class HierarchyDecorator implements ILightweightLabelDecorator
 		listeners.add(listener);
 	}
 
-	public void fireChanged(IResource[] resource)
+	public void fireChanged(IPersist[] persists)
 	{
 		synchronized (listeners)
 		{
 			for (ILabelProviderListener listener : listeners)
-				listener.labelProviderChanged(new LabelProviderChangedEvent(this, resource));
+				listener.labelProviderChanged(new LabelProviderChangedEvent(this, persists));
 		}
 	}
 

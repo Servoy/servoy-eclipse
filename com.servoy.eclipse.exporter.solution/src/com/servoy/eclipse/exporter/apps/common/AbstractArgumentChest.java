@@ -183,7 +183,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 		return "USAGE:\n\n"
 			+ "   -help or -? or /? or no arguments ... shows current help message.\n\n"
 			+ "                  OR\n\n"
-			+ "   -s <solutions_separated_by_comma> -o <out_dir> -data <workspace_location> [optional_args]\n\n"
+			+ getMandatoryArgumentsMessage() + " [optional_args]\n\n"
 
 			+ "        Optional arguments:\n\n"
 			+ "        -verbose ... prints more info to console\n"
@@ -199,6 +199,11 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 			+ "             invalid solutions to be exported.\n"
 			+ getHelpMessageDbi();
 		// @formatter:on
+	}
+
+	protected String getMandatoryArgumentsMessage()
+	{
+		return "   -s <solutions_separated_by_comma> -o <out_dir> -data <workspace_location>";
 	}
 
 	// dbi and dbd are implemented by mobile exporter, but hardcoded, not configurable - so not part of the help message; allow extending classes to suppress these

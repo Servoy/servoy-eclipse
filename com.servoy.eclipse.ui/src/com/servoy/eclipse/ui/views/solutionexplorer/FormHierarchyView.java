@@ -9,17 +9,28 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -34,6 +45,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -56,6 +68,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -65,9 +78,12 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 
+import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.resource.PersistEditorInput;
 import com.servoy.eclipse.core.util.UIUtils;
+import com.servoy.eclipse.model.nature.ServoyProject;
+import com.servoy.eclipse.model.repository.SolutionDeserializer;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.Activator;
@@ -81,8 +97,11 @@ import com.servoy.eclipse.ui.views.solutionexplorer.actions.FormHierarchyFilter;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenFormEditorAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenPersistEditorAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenScriptAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenWizardAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.OrientationAction;
+import com.servoy.eclipse.ui.views.solutionexplorer.actions.OverrideMethodAction;
 import com.servoy.eclipse.ui.views.solutionexplorer.actions.ShowMembersInFormHierarchy;
+import com.servoy.eclipse.ui.wizards.NewFormWizard;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.persistence.AbstractBase;
 import com.servoy.j2db.persistence.AbstractRepository;
@@ -102,10 +121,11 @@ import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.PersistHelper;
 import com.servoy.j2db.util.SortedList;
+import com.servoy.j2db.util.UUID;
 import com.servoy.j2db.util.Utils;
 
 
-public class FormHierarchyView extends ViewPart implements ISelectionChangedListener, IOrientedView
+public class FormHierarchyView extends ViewPart implements ISelectionChangedListener, IOrientedView, ITreeListView
 {
 	private final class FormHierarchyDoubleClickListener implements IDoubleClickListener
 	{
@@ -587,6 +607,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private final com.servoy.eclipse.ui.Activator uiActivator = com.servoy.eclipse.ui.Activator.getDefault();
 
 	private ContextAction openAction;
+	private ContextAction treeNewAction;
+	private OverrideMethodAction overrideAction;
 
 	private int fCurrentOrientation;
 	private OrientationAction[] fToggleOrientationActions;
@@ -648,22 +670,22 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		fSplitter = new SashForm(fParent, SWT.NONE);
 		initOrientation();//TODO add preference page & menu for the orientation settings
 
-		openAction = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.png"), "Open");
+		openAction = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.gif"), "Open");
+		treeNewAction = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD), "New");
+		overrideAction = new OverrideMethodAction(this);
 		createTreeViewer(fSplitter);
 		createListViewer(fSplitter);
-		fSelectionProviderMediator = new SelectionProviderMediator(new StructuredViewer[] { tree, list }, null);
-		getSite().setSelectionProvider(fSelectionProviderMediator);
-
-		this.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
-		tree.addSelectionChangedListener(this);
-
-		IStatusLineManager slManager = getViewSite().getActionBars().getStatusLineManager();
-		statusBarUpdater = new StatusBarUpdater(slManager);
-		statusBarUpdater.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
-		list.addSelectionChangedListener(statusBarUpdater);
-
+		createSelectionProvider();
+		createStatusBarUpdater();
 		contributeToActionBars();
+		hookContextMenu();
+		restoreView();
+		addResourceListener();
+	}
 
+
+	private void restoreView()
+	{
 		showMembersAction.setChecked(fDialogSettings.getBoolean(DIALOGSTORE_SHOW_MEMBERS));
 		if (memento == null) return;
 		String formUuid = memento.getString(SELECTED_FORM);
@@ -674,7 +696,22 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		{
 			setSelection(persist);
 		}
-		//TODO addResourceListener();
+	}
+
+	private void createStatusBarUpdater()
+	{
+		IStatusLineManager slManager = getViewSite().getActionBars().getStatusLineManager();
+		statusBarUpdater = new StatusBarUpdater(slManager);
+		statusBarUpdater.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
+		list.addSelectionChangedListener(statusBarUpdater);
+	}
+
+	private void createSelectionProvider()
+	{
+		fSelectionProviderMediator = new SelectionProviderMediator(new StructuredViewer[] { tree, list }, null);
+		getSite().setSelectionProvider(fSelectionProviderMediator);
+		this.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
+		tree.addSelectionChangedListener(this);
 	}
 
 	private void createTreeViewer(Composite parent)
@@ -695,6 +732,11 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		openAction.registerAction(Form.class, openFormEditor);//TODO preference whether to open form or script
 		openAction.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
 		tree.addSelectionChangedListener(openAction);
+
+		IAction newSubform = new OpenWizardAction(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form");
+		treeNewAction.registerAction(Form.class, newSubform);
+		treeNewAction.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
+		tree.addSelectionChangedListener(treeNewAction);
 	}
 
 	private void createListViewer(Composite parent)
@@ -716,6 +758,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		openAction.registerAction(BaseComponent.class, openPersistEditor);
 		openAction.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
 		list.addSelectionChangedListener(openAction);
+		overrideAction.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
+		list.addSelectionChangedListener(overrideAction);
 
 		listToolBar = new ToolBar(viewForm, SWT.FLAT | SWT.WRAP);
 		viewForm.setTopCenter(listToolBar);
@@ -770,6 +814,11 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 	public void setSelection(Object object)
 	{
+		setSelection(object, true);
+	}
+
+	public void setSelection(Object object, boolean refreshList)
+	{
 		if (noSelectionChange) return;
 		activeSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 		if (object instanceof Form)
@@ -786,25 +835,26 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		{
 			selected = (Form)(((IPersist)object).getParent());
 			tree.setInput(new Form[] { selected });
-			showMembersInFormHierarchy(object);
+			showMembersInFormHierarchy(object, true);
 			list.setInput(selected);
 		}
 		else
 		{
-			showMembersInFormHierarchy(object);
+			showMembersInFormHierarchy(object, refreshList);
 		}
 		list.refresh();
 		list.expandAll();
 	}
 
-	private void showMembersInFormHierarchy(Object object)
+	private void showMembersInFormHierarchy(Object object, boolean refreshList)
 	{
-		treeProvider.setSelection((IPersist)object);
 		if (object == null)
 		{
 			tree.refresh();
 			return;
 		}
+		IStructuredSelection initialSelection = tree.getStructuredSelection();
+		treeProvider.setSelection((IPersist)object);
 
 		tree.getTree().setRedraw(false);
 		tree.refresh();
@@ -825,10 +875,13 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		{
 			noSelectionChange = true;
 			tree.setExpandedTreePaths(paths.toArray(new TreePath[paths.size()]));
-			tree.setSelection(new StructuredSelection(object));
-			list.setInput(((IPersist)object).getParent());
-			list.setSelection(new StructuredSelection(object));
-			list.reveal(object);
+			tree.setSelection(initialSelection);
+			if (refreshList)
+			{
+				list.setInput(((IPersist)object).getParent());
+				list.setSelection(new StructuredSelection(object));
+				list.reveal(object);
+			}
 		}
 		finally
 		{
@@ -970,6 +1023,48 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		item.fill(listDropDownMenu, -1);
 	}
 
+	private void hookContextMenu()
+	{
+		MenuManager menuMgr = new MenuManager("#TreePopupMenu");
+		menuMgr.setRemoveAllWhenShown(true);
+		menuMgr.addMenuListener(new IMenuListener()
+		{
+			public void menuAboutToShow(IMenuManager manager)
+			{
+				FormHierarchyView.this.fillTreeContextMenu(manager);
+			}
+		});
+		Menu menu = menuMgr.createContextMenu(tree.getControl());
+		tree.getControl().setMenu(menu);
+
+		getSite().registerContextMenu(ID + ".tree", menuMgr, tree);
+
+		menuMgr = new MenuManager("#ListPopupMenu");
+		menuMgr.setRemoveAllWhenShown(true);
+		menuMgr.addMenuListener(new IMenuListener()
+		{
+			public void menuAboutToShow(IMenuManager manager)
+			{
+				FormHierarchyView.this.fillListContextMenu(manager);
+			}
+		});
+		menu = menuMgr.createContextMenu(list.getControl());
+		list.getControl().setMenu(menu);
+
+		getSite().registerContextMenu(ID + ".list", menuMgr, list);
+
+	}
+
+	private void fillTreeContextMenu(IMenuManager manager)
+	{
+		if (treeNewAction.isEnabled()) manager.add(treeNewAction);
+	}
+
+	private void fillListContextMenu(IMenuManager manager)
+	{
+		if (overrideAction.isEnabled()) manager.add(overrideAction);
+	}
+
 	public void groupElementsOption(boolean group)
 	{
 		fDialogSettings.put(GROUP_ELEMENTS_BY_TYPE, group);
@@ -1026,50 +1121,85 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 
 	private void addResourceListener()
 	{
-		final HierarchyDecorator decorator = (HierarchyDecorator)PlatformUI.getWorkbench().getDecoratorManager().getBaseLabelProvider(HierarchyDecorator.ID);
-		// we monitor the changes to eclipse projects in order to keep the list of
-		// projects in the tree up to date
-		Display.getCurrent().asyncExec(new Runnable()
+		resourceChangeListener = new IResourceChangeListener()
 		{
+			private WorkspaceJob refreshHierarchyJob;
 
-			@Override
-			public void run()
+			public void resourceChanged(IResourceChangeEvent event)
 			{
-				resourceChangeListener = new IResourceChangeListener()
+				HierarchyDecorator decorator = (HierarchyDecorator)PlatformUI.getWorkbench().getDecoratorManager().getBaseLabelProvider(HierarchyDecorator.ID);
+				if ((event.getType() & IResourceChangeEvent.POST_CHANGE) != 0)
 				{
-					public void resourceChanged(IResourceChangeEvent event)
+					boolean mustRefresh = false;
+					IResourceDelta[] affectedChildren = event.getDelta().getAffectedChildren();
+					try
 					{
-						if ((event.getType() & IResourceChangeEvent.POST_CHANGE) != 0)
+						for (IResourceDelta element : affectedChildren)
 						{
-							setSelection(selected);//refresh
-						}
-						else if (decorator != null)
-						{
-							IMarkerDelta[] markersDelta = event.findMarkerDeltas(IMarker.PROBLEM, true);
-							HashSet<IResource> changedProblemResources = new HashSet<IResource>();
-							for (IMarkerDelta md : markersDelta)
+							IResource resource = element.getResource();
+							if (resource instanceof IProject && ((IProject)resource).hasNature(ServoyProject.NATURE_ID))
 							{
-								IResource r = md.getResource();
-								do
-								{
-									if (!changedProblemResources.add(r))
-									{
-										break;
-									}
-									r = r.getParent();
-								}
-								while (r != null && r.getType() != IResource.ROOT);
+								mustRefresh = true;
+								break;
 							}
-
-							decorator.fireChanged(changedProblemResources.toArray(new IResource[changedProblemResources.size()]));
 						}
 					}
-				};
+					catch (CoreException ex)
+					{
+						ServoyLog.logError(ex);
+					}
 
-				ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener,
-					IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
+					if (mustRefresh)
+					{
+						if (refreshHierarchyJob != null) refreshHierarchyJob.cancel();
+						refreshHierarchyJob = new WorkspaceJob("Refreshing Form Hierarchy")
+						{
+							@Override
+							public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
+							{
+								Display.getDefault().asyncExec(new Runnable()
+								{
+									@Override
+									public void run()
+									{
+										setSelection(selected);//refresh
+									}
+								});
+								return Status.OK_STATUS;
+							}
+						};
+						refreshHierarchyJob.setRule(ServoyModel.getWorkspace().getRoot());
+						refreshHierarchyJob.schedule();
+					}
+				}
+				else if (decorator != null)
+				{
+					IMarkerDelta[] markersDelta = event.findMarkerDeltas(IMarker.PROBLEM, true);
+					HashSet<IPersist> changedProblemPersists = new HashSet<IPersist>();
+					for (IMarkerDelta md : markersDelta)
+					{
+						IResource r = md.getResource();
+						if (r instanceof IFile)
+						{
+							IFile resource = (IFile)r;
+							if (SolutionSerializer.FORM_FILE_EXTENSION.equals("." + resource.getFileExtension()))//TODO how to refresh decorators for items in js resources?
+							{
+								ServoyProject servoyProject = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
+									resource.getProject().getName());
+								if (servoyProject == null) continue;
+								UUID uuid = SolutionDeserializer.getUUID(resource.getRawLocation().toFile());
+								IPersist persist = AbstractRepository.searchPersist(servoyProject.getSolution(), uuid);
+								if (persist != null) changedProblemPersists.add(persist);
+							}
+						}
+					}
+
+					decorator.fireChanged(changedProblemPersists.toArray(new IPersist[changedProblemPersists.size()]));
+				}
 			}
-		});
+		};
+
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE | IResourceChangeEvent.POST_BUILD);
 	}
 
 
@@ -1105,5 +1235,27 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		}
 
 		super.dispose();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.ui.views.solutionexplorer.ITreeListView#getSelectedTreeElement()
+	 */
+	@Override
+	public Object getSelectedTreeElement()
+	{
+		return ((ITreeSelection)tree.getSelection()).getFirstElement();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.servoy.eclipse.ui.views.solutionexplorer.ITreeListView#getSelectedListElement()
+	 */
+	@Override
+	public Object getSelectedListElement()
+	{
+		return ((IStructuredSelection)list.getSelection()).getFirstElement();
 	}
 }

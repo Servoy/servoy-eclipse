@@ -18,7 +18,6 @@
 package com.servoy.eclipse.designer.editor.rfb.actions.handlers;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -80,29 +79,32 @@ public class KeyPressedHandler implements IServerService
 				{
 					public void run()
 					{
-						List<PersistContext> contextSelection = new ArrayList<PersistContext>(
-							((IStructuredSelection)selectionProvider.getSelection()).toList());
+						List<Object> contextSelection = new ArrayList<>(((IStructuredSelection)selectionProvider.getSelection()).toList());
 						List<IPersist> selection = new ArrayList<IPersist>();
-						for (PersistContext pc : contextSelection)
+						for (Object selected : contextSelection)
 						{
-							selection.add(pc.getPersist());
-						}
-						Iterator<IPersist> it = selection.iterator();
-						while (it.hasNext())
-						{
-							if (it.next() instanceof Form)
+							IPersist persist = null;
+							if (selected instanceof IPersist)
 							{
-								it.remove();
+								persist = (IPersist)selected;
+							}
+							else if (selected instanceof PersistContext)
+							{
+								persist = ((PersistContext)selected).getPersist();
+							}
+							if (persist != null && !(persist instanceof Form))
+							{
+								selection.add(persist);
 							}
 						}
-						if (selection.size() > 0)
+						if (selection.size() > 0 && !containsInheritedElements(selection))
 						{
-							if (!containsInheritedElements(selection))
-								editorPart.getCommandStack().execute(new FormElementDeleteCommand(selection.toArray(new IPersist[0])));
+							editorPart.getCommandStack().execute(new FormElementDeleteCommand(selection.toArray(new IPersist[selection.size()])));
 						}
 					}
 				});
 				break;
+
 			case 83 : // s
 				if (isCtrl && isShift) // ctrl+shift+s (save all)
 				{
@@ -116,7 +118,8 @@ public class KeyPressedHandler implements IServerService
 					});
 				}
 				break;
-			case 90 : //z
+
+			case 90 : // z
 				if (isCtrl && isShift)
 				{
 					Display.getDefault().asyncExec(new Runnable()

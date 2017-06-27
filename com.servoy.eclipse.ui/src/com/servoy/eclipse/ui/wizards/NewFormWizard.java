@@ -191,6 +191,10 @@ public class NewFormWizard extends Wizard implements INewWizard
 					servoyProject = (ServoyProject)projectNode.getRealObject();
 				}
 			}
+			else if (selected instanceof Form)
+			{
+				selectedForm = (Form)selected;
+			}
 		}
 		if (servoyProject == null)
 		{
@@ -765,13 +769,13 @@ public class NewFormWizard extends Wizard implements INewWizard
 														GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).add(
 															templateLabel)).addPreferredGap(LayoutStyle.RELATED).add(
 																groupLayout.createParallelGroup(GroupLayout.CENTER).add(projectLabel).add(projectComboControl,
-																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-																	GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-																		groupLayout.createParallelGroup(GroupLayout.CENTER).add(listFormLabel).add(
-																			listFormCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-																			GroupLayout.PREFERRED_SIZE)).addPreferredGap(LayoutStyle.RELATED).add(
-																				groupLayout.createParallelGroup(GroupLayout.CENTER)).addContainerGap(100,
-																					Short.MAX_VALUE)));
+																	GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
+																		LayoutStyle.RELATED).add(
+																			groupLayout.createParallelGroup(GroupLayout.CENTER).add(listFormLabel).add(
+																				listFormCheck, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addPreferredGap(
+																					LayoutStyle.RELATED).add(
+																						groupLayout.createParallelGroup(GroupLayout.CENTER)).addContainerGap(
+																							100, Short.MAX_VALUE)));
 			topLevel.setLayout(groupLayout);
 			topLevel.setTabList(
 				new Control[] { formNameField, dataSOurceControl, extendsFormControl, styleNameComboControl, templateNameComboControl, projectComboControl, listFormCheck });

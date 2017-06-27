@@ -56,6 +56,7 @@ import com.servoy.eclipse.ui.property.PDPropertySource;
 import com.servoy.eclipse.ui.property.PersistContext;
 import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.eclipse.ui.property.PointPropertySource;
+import com.servoy.eclipse.ui.property.PropertyCategory;
 import com.servoy.eclipse.ui.property.RetargetToEditorPersistProperties;
 import com.servoy.eclipse.ui.property.SavingPersistPropertySource;
 import com.servoy.eclipse.ui.property.WebComponentPropertyHandler;
@@ -333,6 +334,18 @@ public class DesignerPropertyAdapterFactory implements IAdapterFactory
 									}
 								}
 								return handlers.toArray(new IPropertyHandler[handlers.size()]);
+							}
+
+							@Override
+							protected PropertyCategory createPropertyCategory(PropertyDescriptorWrapper propertyDescriptor)
+							{
+								if (getPropertyDescription() instanceof WebObjectSpecification &&
+									((WebObjectSpecification)getPropertyDescription()).getHandlers().containsKey(
+										propertyDescriptor.propertyDescriptor.getName()))
+									return PropertyCategory.Events;
+								if (getPropertyDescription().getProperties().containsKey(propertyDescriptor.propertyDescriptor.getName()))
+									return PropertyCategory.Component;
+								return super.createPropertyCategory(propertyDescriptor);
 							}
 
 							@Override
