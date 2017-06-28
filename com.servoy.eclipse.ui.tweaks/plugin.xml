@@ -803,7 +803,7 @@
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/com.servoy.eclipse.debug/icons/stop.gif">
         <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/happy.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/stop.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      
