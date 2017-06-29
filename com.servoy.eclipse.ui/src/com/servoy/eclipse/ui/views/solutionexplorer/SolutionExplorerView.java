@@ -134,6 +134,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -1454,6 +1455,7 @@ public class SolutionExplorerView extends ViewPart
 		protected HTMLToolTipSupport(ColumnViewer viewer, int style, boolean manualActivation)
 		{
 			super(viewer, style, manualActivation);
+			setHideOnMouseDown(false);
 		}
 
 
@@ -1468,7 +1470,31 @@ public class SolutionExplorerView extends ViewPart
 			l.verticalSpacing = 0;
 
 			comp.setLayout(l);
-			Browser browser = new Browser(comp, SWT.BORDER);
+			final Browser browser = new Browser(comp, SWT.BORDER);
+			browser.addListener(SWT.MouseMove, new Listener()
+			{
+
+				@Override
+				public void handleEvent(Event event)
+				{
+					Rectangle rect = browser.getBounds();
+					rect.x += 3;
+					rect.y += 3;
+					rect.width -= 6;
+					rect.height -= 6;
+					if (!rect.contains(event.x, event.y))
+					{
+						// if we are on the right side exit
+						rect = browser.getBounds();
+						rect.x += rect.width / 2;
+						if (rect.contains(event.x, event.y))
+						{
+							hide();
+						}
+					}
+				}
+
+			});
 			String text = getText(event);
 			JavaDoc2HTMLTextReader reader = new JavaDoc2HTMLTextReader(new StringReader(text));
 			try
