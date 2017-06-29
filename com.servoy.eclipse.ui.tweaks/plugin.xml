@@ -246,7 +246,148 @@
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
-       <urlBasedImageReplacement
+      <!-- prepare for menu icons replacement-->
+      <!--urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/cut_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/cut_edit.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dtool16/cut_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/cut_edit.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/copy_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/copy_edit.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dtool16/copy_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/copy_edit.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/paste_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/paste_edit.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dtool16/paste_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/paste_edit.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/delete_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/delete_edit.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dtool16/delete_edit.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/delete_edit.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.ide/icons/full/etool16/next_nav.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/next_nav.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.ide/icons/full/etool16/prev_nav.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/prev_nav.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/$nl$/icons/full/elcl16/tsearch_obj.gif">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/search_file.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.ide/icons/full/etool16/build_exec.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/build_all.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.ide/icons/full/dtool16/build_exec.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/build_all.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/obj16/brkp_obj.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/breakpoint.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/obj16/readwrite_obj.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/watchpoint.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/help_contents.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/help_contents.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/help_search.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/help_search.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.equinox.p2.ui.sdk/icons/obj/iu_update_obj.gif">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/check_for_updates.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.equinox.p2.ui.sdk/icons/obj/iu_obj.gif">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/install_new_software.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
+      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.equinox.p2.ui.sdk/icons/obj/profile_obj.gif">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/installation_details.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement-->
+      
+      
+      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/elcl16/delete_edit.png">
          <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/delete.png">
@@ -1019,6 +1160,92 @@
         </alternateURLImageLocation>
      </urlBasedImageReplacement> 
      <!-- -->    
+     
+     <!-- some toolbar actions in the old editor-->
+     <classAndFileBasedImageReplacement
+            originalImageFileName="icons/alignbottom.gif"
+            originalRelativeToFullClassName="org.eclipse.gef.internal.InternalImages">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/alignbottom.png">
+         </alternateURLImageLocation>
+      </classAndFileBasedImageReplacement>
+      <classAndFileBasedImageReplacement
+            originalImageFileName="icons/aligncenter.gif"
+            originalRelativeToFullClassName="org.eclipse.gef.internal.InternalImages">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/aligncenter.png">
+         </alternateURLImageLocation>
+      </classAndFileBasedImageReplacement>
+      <classAndFileBasedImageReplacement
+            originalImageFileName="icons/alignleft.gif"
+            originalRelativeToFullClassName="org.eclipse.gef.internal.InternalImages">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/alignleft.png">
+         </alternateURLImageLocation>
+      </classAndFileBasedImageReplacement>
+      <classAndFileBasedImageReplacement
+            originalImageFileName="icons/alignmid.gif"
+            originalRelativeToFullClassName="org.eclipse.gef.internal.InternalImages">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/alignmid.png">
+         </alternateURLImageLocation>
+      </classAndFileBasedImageReplacement>
+      <classAndFileBasedImageReplacement
+            originalImageFileName="icons/alignright.gif"
+            originalRelativeToFullClassName="org.eclipse.gef.internal.InternalImages">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/alignright.png">
+         </alternateURLImageLocation>
+      </classAndFileBasedImageReplacement>
+      <classAndFileBasedImageReplacement
+            originalImageFileName="icons/aligntop.gif"
+            originalRelativeToFullClassName="org.eclipse.gef.internal.InternalImages">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/aligntop.png">
+         </alternateURLImageLocation>
+      </classAndFileBasedImageReplacement>
+      <classAndFileBasedImageReplacement
+            originalImageFileName="icons/alignbottom_d.gif"
+            originalRelativeToFullClassName="org.eclipse.gef.internal.InternalImages">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/alignbottom-disabled.png">
+         </alternateURLImageLocation>
+      </classAndFileBasedImageReplacement>
+      <classAndFileBasedImageReplacement
+            originalImageFileName="icons/aligncenter_d.gif"
+            originalRelativeToFullClassName="org.eclipse.gef.internal.InternalImages">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/aligncenter-disabled.png">
+         </alternateURLImageLocation>
+      </classAndFileBasedImageReplacement>
+      <classAndFileBasedImageReplacement
+            originalImageFileName="icons/alignleft_d.gif"
+            originalRelativeToFullClassName="org.eclipse.gef.internal.InternalImages">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/alignleft-disabled.png">
+         </alternateURLImageLocation>
+      </classAndFileBasedImageReplacement>
+      <classAndFileBasedImageReplacement
+            originalImageFileName="icons/alignmid_d.gif"
+            originalRelativeToFullClassName="org.eclipse.gef.internal.InternalImages">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/alignmid-disabled.png">
+         </alternateURLImageLocation>
+      </classAndFileBasedImageReplacement>
+      <classAndFileBasedImageReplacement
+            originalImageFileName="icons/alignright_d.gif"
+            originalRelativeToFullClassName="org.eclipse.gef.internal.InternalImages">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/alignright-disabled.png">
+         </alternateURLImageLocation>
+      </classAndFileBasedImageReplacement>
+      <classAndFileBasedImageReplacement
+            originalImageFileName="icons/aligntop_d.gif"
+            originalRelativeToFullClassName="org.eclipse.gef.internal.InternalImages">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/aligntop-disabled.png">
+         </alternateURLImageLocation>
+      </classAndFileBasedImageReplacement>
 
 </extension>
    
