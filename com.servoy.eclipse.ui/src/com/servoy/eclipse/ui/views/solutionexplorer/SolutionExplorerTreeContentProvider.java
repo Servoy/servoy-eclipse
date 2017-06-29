@@ -2286,7 +2286,7 @@ public class SolutionExplorerTreeContentProvider
 					node = new PlatformSimpleUserNode(groupLabel, UserNodeType.FORM_ELEMENTS_GROUP,
 						new Object[] { new FormElementGroup(element.getGroupID(),
 							ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution(), (Form)element.getParent()), null },
-						originalForm, uiActivator.loadImageFromBundle("group.gif"));
+						originalForm, uiActivator.loadImageFromBundle("group.png"));
 					node.setDeveloperFeedback(new SimpleDeveloperFeedback(element.getName() + ".", null, null));
 					elements.add(node);
 					node.parent = parentNode;
