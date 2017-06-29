@@ -246,7 +246,7 @@ public class DesignerFilter implements Filter
 												size.put("width", Integer.valueOf(80));
 												model.put("size", size);
 												jsonWriter.key("model").value(new JSONObject(model));
-												jsonWriter.key("icon").value("rfb/angular/js/modules/toolbaractions/icons/template.gif");
+												jsonWriter.key("icon").value("rfb/angular/js/modules/toolbaractions/icons/template_save.png");
 												jsonWriter.endObject();
 											}
 										}

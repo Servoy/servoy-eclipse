@@ -580,13 +580,13 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		}
 		else if (CONTAINERS_TABLESS_PANEL_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("tabless.gif");
+			icon = Activator.loadImageDescriptorFromBundle("tabless.png");
 			tabOrienation = TabPanel.HIDE;
 			nameHint = "tabless";
 		}
 		else if (CONTAINERS_ACCORDION_PANEL_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("accordion.jpg");
+			icon = Activator.loadImageDescriptorFromBundle("accordion.png");
 			tabOrienation = TabPanel.ACCORDION_PANEL;
 			nameHint = "accordion";
 		}
@@ -688,7 +688,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		if (icon == null)
 		{
 			// default icon
-			icon = Activator.loadImageDescriptorFromBundle("template.gif");
+			icon = Activator.loadImageDescriptorFromBundle("template_save.png");
 		}
 		return new ElementCreationToolEntry("", "", factory, icon, icon);
 	}
@@ -764,7 +764,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		if (icon == null)
 		{
 			// default icon
-			icon = Activator.loadImageDescriptorFromBundle("template.gif");
+			icon = Activator.loadImageDescriptorFromBundle("template_save.png");
 		}
 		return new ElementCreationToolEntry(Utils.stringInitCap(displayName), "Create/apply template " + displayName, factory, icon, icon);
 	}
@@ -780,7 +780,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 		if (elements.size() > 1)
 		{
-			return com.servoy.eclipse.designer.Activator.loadImageDescriptorFromBundle("group.gif");
+			return com.servoy.eclipse.designer.Activator.loadImageDescriptorFromBundle("group.png");
 		}
 
 		return getTemplateIcon(elements.get(0));

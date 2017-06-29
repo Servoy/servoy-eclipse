@@ -161,7 +161,7 @@
          <action
                class="com.servoy.eclipse.designer.actions.ApplyTemplateActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.applyTemplateAction"
-               icon="icons/template.gif"
+               icon="icons/template_save.png"
                id="com.servoy.eclipse.designer.action.applyTemplateAction"
                label="Place Template Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
@@ -191,7 +191,7 @@
            <action
                class="com.servoy.eclipse.designer.actions.AddAccordionPaneActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addAccordionPaneAction"
-               icon="icons/accordion.jpg"
+               icon="icons/accordion.png"
                id="com.servoy.eclipse.designer.action.addAccordionPaneAction"
                label="Place Accordion Panel Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
@@ -201,7 +201,7 @@
          <action
                class="com.servoy.eclipse.designer.actions.AddMediaActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addMediaAction"
-               icon="icons/media.png"
+               icon="icons/image_wizard.png"
                id="com.servoy.eclipse.designer.action.addMediaAction"
                label="Place Image Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
@@ -221,7 +221,7 @@
          <action
                class="com.servoy.eclipse.designer.actions.AddPortalActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addPortalAction"
-               icon="icons/portal.png"
+               icon="icons/portal_wizard.png"
                id="com.servoy.eclipse.designer.action.addPortalAction"
                label="Place Portal Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
@@ -1062,7 +1062,7 @@
          <action
                class="com.servoy.eclipse.designer.editor.commands.ToggleGroupingActionDelegateHandler$Ungroup"
                definitionId="com.servoy.eclipse.designer.ungroup"
-               icon="icons/ungroup.gif"
+               icon="icons/ungroup.png"
                id="com.servoy.eclipse.designer.action.ungroup"
                label="Ungroup"
                menubarPath="com.servoy.eclipse.designer.groupingmenu/com.servoy.eclipse.designer.grouping">
@@ -1070,7 +1070,7 @@
          <action
                class="com.servoy.eclipse.designer.editor.commands.ToggleGroupingActionDelegateHandler$Group"
                definitionId="com.servoy.eclipse.designer.group"
-               icon="icons/group.gif"
+               icon="icons/group.png"
                id="com.servoy.eclipse.designer.action.group"
                label="Group"
                menubarPath="com.servoy.eclipse.designer.groupingmenu/com.servoy.eclipse.designer.grouping"
@@ -1080,7 +1080,7 @@
          <action
                class="com.servoy.eclipse.designer.editor.commands.SameSizeActionDelegateHandler$Height"
                definitionId="com.servoy.eclipse.designer.sameheight"
-               icon="icons/same_height.gif"
+               icon="icons/same_height.png"
                id="com.servoy.eclipse.designer.action.sameheight"
                label="Same Height"
                menubarPath="com.servoy.eclipse.designer.sizingmenu/com.servoy.eclipse.designer.sizing"
@@ -1090,7 +1090,7 @@
          <action
                class="com.servoy.eclipse.designer.editor.commands.SameSizeActionDelegateHandler$Width"
                definitionId="com.servoy.eclipse.designer.samewidth"
-               icon="icons/same_width.gif"
+               icon="icons/same_width.png"
                id="com.servoy.eclipse.designer.action.samewidth"
                label="Same Width"
                menubarPath="com.servoy.eclipse.designer.sizingmenu/com.servoy.eclipse.designer.sizing"
@@ -1148,7 +1148,7 @@
          <action
                class="com.servoy.eclipse.designer.editor.commands.TabSequenceActionDelegateHandler"
                definitionId="com.servoy.eclipse.designer.settabseq"
-               icon="icons/th_horizontal.gif"
+               icon="icons/th_horizontal.png"
                id="com.servoy.eclipse.designer.action.settabseq"
                label="Set Tab Sequence"
                menubarPath="group.elements"
