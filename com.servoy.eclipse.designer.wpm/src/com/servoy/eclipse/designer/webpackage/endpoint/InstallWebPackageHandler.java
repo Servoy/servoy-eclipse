@@ -113,7 +113,7 @@ public class InstallWebPackageHandler implements IDeveloperService
 
 			String packageName = pck.getString("name");
 			String packageType = pck.getString("packageType");
-			String packageVersion = pck.getString("selected");
+			String packageVersion = pck.optString("selected");
 			String solutionName = pck.optString("activeSolution", null);
 			if (solutionName == null)
 			{
