@@ -2301,7 +2301,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				sample = Text.processTags(sample, resolver);
 			}
-			return HtmlUtils.escapeMarkup(sample).toString();
+			return HtmlUtils.escapeMarkup(sample != null ? sample : "").toString();
 		}
 
 		/**
@@ -2381,7 +2381,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					paramNames = scriptObject.getParameterNames(name);
 					returnType = getMethodReturnType();
 					tooltip = Text.processTags(description, resolver);
-					tooltip = tooltip.replaceAll("@param|@return|@example", "<b>$0</b>");
+					tooltip = tooltip != null ? tooltip.replaceAll("@param|@return|@example", "<b>$0</b>") : "";
 				}
 			}
 			else
