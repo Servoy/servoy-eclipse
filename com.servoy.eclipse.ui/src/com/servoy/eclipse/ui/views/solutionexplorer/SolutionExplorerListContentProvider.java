@@ -1612,7 +1612,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	private static String getParsedSample(final String name, final WebObjectFunctionDefinition api)
 	{
-		if (api.getDocumentation().contains("@example"))
+		if (api.getDocumentation() != null && api.getDocumentation().contains("@example"))
 		{
 			String description = getParsedComment(api.getDocumentation(), name, false);
 			String example = description.split("@example")[1].split("@")[0];
