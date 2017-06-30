@@ -2867,10 +2867,8 @@ public class SolutionExplorerView extends ViewPart
 				return super.isEnabled() && ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject() != null;
 			}
 		};
-		exportActiveSolutionAction = new OpenWizardAction(ExportSolutionWizard.class, Activator.loadImageDescriptorFromOldLocations("export_wiz.gif"),
-			"File Export");
-		importSolutionAction = new OpenWizardAction(ImportSolutionWizard.class, Activator.loadImageDescriptorFromOldLocations("import_wiz.gif"),
-			"Import solution");
+		exportActiveSolutionAction = new OpenWizardAction(ExportSolutionWizard.class, Activator.loadImageDescriptorFromBundle("export.png"), "File Export");
+		importSolutionAction = new OpenWizardAction(ImportSolutionWizard.class, Activator.loadImageDescriptorFromBundle("import.png"), "Import solution");
 		i18nExternalizeAction = new I18NExternalizeAction();
 		i18nCreateFromDBAction = new I18NReadFromDBAction();
 		i18nWriteToDBAction = new I18NWriteToDBAction();

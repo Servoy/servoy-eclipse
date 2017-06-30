@@ -72,7 +72,7 @@ public class MethodDialog extends TreeSelectDialog
 	public static final Object FORM_METHODS = new Object();
 	public static final Object SCOPE_METHODS = new Object();
 
-	private static final Image solutionImage = Activator.getDefault().loadImageFromBundle("solution.gif");
+	private static final Image solutionImage = Activator.getDefault().loadImageFromBundle("solution.png");
 	private static final Image formMethodsImage = Activator.getDefault().loadImageFromBundle("designer.png");
 	private static final Image scopeMethodsImage = Activator.getDefault().loadImageFromBundle("scopes.png");
 	private static final Image foundsetMethodsImage = Activator.getDefault().loadImageFromBundle("foundset_method.gif");
@@ -344,9 +344,9 @@ public class MethodDialog extends TreeSelectDialog
 
 	/**
 	 * Label provider that adds text and images for the nodes defined by the dialog
-	 * 
+	 *
 	 * @author rgansevles
-	 * 
+	 *
 	 */
 	public static class MethodDialogLabelProvider extends DelegateLabelProvider implements IFontProvider
 	{

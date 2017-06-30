@@ -29,7 +29,7 @@ import com.servoy.j2db.persistence.Form;
  */
 public class NamedFoundsetLabelProvider extends LabelProvider
 {
-	private static final Image FORM_IMAGE = Activator.getDefault().loadImageFromBundle("designer.gif");
+	private static final Image FORM_IMAGE = Activator.getDefault().loadImageFromBundle("designer.png");
 
 	@Override
 	public String getText(Object value)

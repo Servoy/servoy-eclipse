@@ -251,7 +251,7 @@ public class SynchronizeDBIWithDBWizard extends Wizard implements IWorkbenchWiza
 				};
 
 				Image serverImage = Activator.getDefault().loadImageFromBundle("server.png");
-				Image tableImage = Activator.getDefault().loadImageFromBundle("portal.gif");
+				Image tableImage = Activator.getDefault().loadImageFromBundle("portal.png");
 				Image viewImage = Activator.getDefault().loadImageFromBundle("view.png");
 
 				if (foundMissingTables.size() > 0)

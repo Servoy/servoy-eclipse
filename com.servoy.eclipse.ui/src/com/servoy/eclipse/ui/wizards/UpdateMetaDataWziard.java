@@ -147,7 +147,7 @@ public class UpdateMetaDataWziard extends Wizard
 			};
 
 			Image serverImage = Activator.getDefault().loadImageFromBundle("server.png");
-			Image tableImage = Activator.getDefault().loadImageFromBundle("portal.gif");
+			Image tableImage = Activator.getDefault().loadImageFromBundle("portal.png");
 			overwriteSelectionPage = new SplitInTwoWizardPage<String, ITable>("The following tables are not empty",
 				"Data synchronize will overwrite existing data, continue?", "Skip", "Overwrite data", "Skip all/multiselection", "Overwrite all/multiselection",
 				tablesWithDataInDB, comparator, serverImage, tableImage);

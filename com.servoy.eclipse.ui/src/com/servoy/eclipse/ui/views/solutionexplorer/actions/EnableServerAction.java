@@ -20,9 +20,11 @@ import java.util.Iterator;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -45,7 +47,7 @@ public class EnableServerAction extends Action implements ISelectionChangedListe
 		this.shell = shell;
 		setText("Enable/Disable Server");
 		setToolTipText("Enable/Disable Server");
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("serverDisabled.gif"));
+		setImageDescriptor(ImageDescriptor.createWithFlags(Activator.loadImageDescriptorFromBundle("server.png"), SWT.IMAGE_DISABLE));
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)

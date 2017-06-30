@@ -446,7 +446,7 @@ public class ServoySearchDialog extends FilteredItemsSelectionDialog
 				}
 				else if (element instanceof Table)
 				{
-					image = "portal.gif";
+					image = "portal.png";
 				}
 				else if (element instanceof Scope)
 				{

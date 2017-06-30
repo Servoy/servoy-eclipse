@@ -216,7 +216,7 @@ public class CheckboxPropertyDescriptor extends PropertyDescriptor
 	 */
 	public static class CheckboxLabelProvider extends BaseLabelProvider implements ILabelProvider
 	{
-		public static final Image TRUE_IMAGE = Activator.getDefault().loadImageFromBundle("chk_on.gif");
+		public static final Image TRUE_IMAGE = Activator.getDefault().loadImageFromBundle("checkbox.png");
 		public static final Image FALSE_IMAGE = Activator.getDefault().loadImageFromBundle("chk_off.gif");
 
 		public Image getImage(Object element)

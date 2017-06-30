@@ -172,10 +172,10 @@ public class I18NExternalizeDialog extends Dialog
 	private Button showOnlyEditedMessagesButton;
 
 	private final ContentSpec contentSpec = StaticContentSpecLoader.getContentSpec();
-	private final Image solutionImage = Activator.getDefault().loadImageFromBundle("solution.gif");
+	private final Image solutionImage = Activator.getDefault().loadImageFromBundle("solution.png");
 	private final Image elementImage = Activator.getDefault().loadImageFromBundle("element.gif");
 	private final Image serverImage = Activator.getDefault().loadImageFromBundle("server.png");
-	private final Image tableImage = Activator.getDefault().loadImageFromBundle("portal.gif");
+	private final Image tableImage = Activator.getDefault().loadImageFromBundle("portal.png");
 	private final Image jsImage = Activator.getDefault().loadImageFromBundle("js.gif");
 	private final ServoyProject project;
 	private ArrayList<ServoyProject> i18nProjects;

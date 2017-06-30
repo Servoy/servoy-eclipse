@@ -297,7 +297,7 @@
             class="com.servoy.eclipse.ui.editors.TableEditor"
             default="true"
             extensions="tbl"
-            icon="icons/portal.gif"
+            icon="icons/portal.png"
             id="com.servoy.eclipse.ui.editors.TableEditor"
             matchingStrategy="com.servoy.eclipse.core.resource.TableMatchingStrategy"
             name="Table Editor">
@@ -321,7 +321,7 @@
       <editor
             class="com.servoy.eclipse.ui.editors.SecurityEditor"
             default="true"
-            icon="icons/lock.gif"
+            icon="icons/security.png"
             id="com.servoy.eclipse.ui.editors.SecurityEditor"
             name="User/Group Editor">
          <contentTypeBinding
