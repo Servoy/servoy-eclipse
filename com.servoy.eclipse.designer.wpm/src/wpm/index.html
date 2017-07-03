@@ -40,6 +40,17 @@
 		<div class="wpm"> 
 		  <div class="wpm-header">
 		    <md-content>
+		      <div style="float:right" layout="row">
+		       <md-select ng-model="activeRepository" class="repository">
+		          <md-option ng-value="repository" ng-repeat="repository in repositories">{{repository}}</md-option>
+		           <md-tooltip md-direction="bottom" md-autohide="true">Select to change the repository</md-tooltip>
+		        </md-select>
+		         <md-button style="height:auto;" class="md-icon-button fa fa-trash"  ng-click="removeRepository()" ng-if="showRemoveRepository">
+		          <md-tooltip md-direction="bottom" md-autohide="true">
+		            Remove the repository url'.
+		          </md-tooltip>
+		        </md-button>
+		      </div>
 		      <h1 class="wpm-title">Servoy Package Manager</h1>
 		      <p class="wpm-subtitle">Manage Web Packages of the active solution {{ !!getActiveSolution() ? "'" + getActiveSolution() + "'" : ""}} and it's modules...</p>
 		    </md-content>
