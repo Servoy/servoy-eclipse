@@ -2340,10 +2340,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					returnDescription = ((XMLScriptObjectAdapter)scriptObject).getReturnDescription(name, (Class[])parameterTypes);
 					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, (Class[])parameterTypes);
 					tooltip = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, (Class[])parameterTypes, csp);
-					tooltip += "\n<i>" +
-						Text.processTags(HtmlUtils.escapeMarkup(((XMLScriptObjectAdapter)scriptObject).getSample(name, (Class[])parameterTypes)).toString(),
-							resolver).toString() +
-						"</i>";
+					String sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name, (Class[])parameterTypes);
+					if (sample != null)
+					{
+						tooltip += "\n<i>" + Text.processTags(HtmlUtils.escapeMarkup(sample).toString(), resolver).toString() + "</i>";
+					}
 					if (parameters != null)
 					{
 						paramNames = new String[parameters.length];
