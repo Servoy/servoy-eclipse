@@ -813,7 +813,7 @@
                class="com.servoy.eclipse.ui.actions.OpenInScripteditorActionDelegate"
                definitionId="com.servoy.eclipse.ui.OpenFormJsAction"
                enablesFor="1"
-               icon="icons/js.gif"
+               icon="icons/js.png"
                id="com.servoy.eclipse.ui.OpenFormJsAction"
                label="Open in Script Editor"
                menubarPath="open.ext"

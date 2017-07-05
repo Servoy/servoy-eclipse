@@ -273,12 +273,12 @@ public class SolutionExplorerTreeContentProvider
 		stylesNode.parent = resources;
 
 		componentsFromResourcesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Components, UserNodeType.COMPONENTS_FROM_RESOURCES,
-			SolutionSerializer.COMPONENTS_DIR_NAME, uiActivator.loadImageFromBundle("coffee_grains.png"));
+			SolutionSerializer.COMPONENTS_DIR_NAME, uiActivator.loadImageFromBundle("ng_components.png"));
 		componentsFromResourcesNode.setClientSupport(ClientSupport.ng_wc_sc);
 		componentsFromResourcesNode.parent = resources;
 
 		servicesFromResourcesNode = new PlatformSimpleUserNode(Messages.TreeStrings_Services, UserNodeType.SERVICES_FROM_RESOURCES,
-			SolutionSerializer.SERVICES_DIR_NAME, uiActivator.loadImageFromBundle("services.gif"));
+			SolutionSerializer.SERVICES_DIR_NAME, uiActivator.loadImageFromBundle("ng_services.png"));
 		servicesFromResourcesNode.setClientSupport(ClientSupport.ng_wc_sc);
 		servicesFromResourcesNode.parent = resources;
 

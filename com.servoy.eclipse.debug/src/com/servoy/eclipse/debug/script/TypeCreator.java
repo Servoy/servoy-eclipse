@@ -318,7 +318,7 @@ public class TypeCreator extends TypeCache
 		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_private.gif"), null));
 
 	protected final static ImageDescriptor FOUNDSET_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/foundset.gif"), null));
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/foundset.png"), null));
 	protected final static ImageDescriptor RELATION_IMAGE = ImageDescriptor.createFromURL(
 		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/relation.gif"), null));
 	protected final static ImageDescriptor RELATION_PROTECTED_IMAGE = ImageDescriptor.createFromURL(

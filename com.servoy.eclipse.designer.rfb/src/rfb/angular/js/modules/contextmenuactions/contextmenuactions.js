@@ -347,7 +347,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 			$contextmenu.add(
 				{
 					text: "Open in Script Editor",
-					getIconStyle: function(){ return {'background-image':"url(images/js.gif)"}},
+					getIconStyle: function(){ return {'background-image':"url(images/js.png)"}},
 					shortcut: shortcuts[SHORTCUT_IDS.OPEN_SCRIPT_ID],
 					execute:function()
 					{

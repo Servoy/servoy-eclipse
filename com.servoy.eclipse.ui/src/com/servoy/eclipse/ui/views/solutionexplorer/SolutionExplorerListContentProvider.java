@@ -776,7 +776,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				else
 				{
 					PlatformSimpleUserNode node = new PlatformSimpleUserNode(path + name, UserNodeType.COMPONENT_RESOURCE, resource,
-						uiActivator.loadImageFromBundle("js.gif"));
+						uiActivator.loadImageFromBundle("js.png"));
 					list.add(node);
 				}
 			}
@@ -1206,7 +1206,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			dlm.add(
 				new UserNode(form.getName(), UserNodeType.FORM_FOUNDSET, form.getName(), form.getName(), form, ElementUtil.getImageForFormEncapsulation(form)));
 			TreeBuilder.docToOneNode(com.servoy.j2db.documentation.scripting.docs.Form.class, this, UserNodeType.FOUNDSET_ITEM, null, dlm, "foundset", form,
-				uiActivator.loadImageFromBundle("foundset.gif"));
+				uiActivator.loadImageFromBundle("foundset.png"));
 			FlattenedSolution flatSolution = ServoyModelManager.getServoyModelManager().getServoyModel().getFlattenedSolution();
 			if (flatSolution != null)
 			{
@@ -1410,7 +1410,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				exludeMethods = new String[] { "clearFoundSet", "clear", "addFoundSetFilterParam" };
 			}
-			dlm.add(new UserNode(r.getName(), UserNodeType.RELATION, r.getName(), r.getName(), r, uiActivator.loadImageFromBundle("foundset.gif")));
+			dlm.add(new UserNode(r.getName(), UserNodeType.RELATION, r.getName(), r.getName(), r, uiActivator.loadImageFromBundle("foundset.png")));
 			SimpleUserNode[] methods = getJSMethods(RelatedFoundSet.class, r.getName(), null, UserNodeType.RELATION_METHODS, null, exludeMethods);
 
 			genTableColumns(ServoyModelFinder.getServoyModel().getDataSourceManager().getDataSource(r.getForeignDataSource()), dlm,

@@ -133,8 +133,8 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 	{
 		viewer = sev;
 
-		newFormMethodImage = Activator.loadImageDescriptorFromBundle("new_form_method.gif");
-		newGlobalMethodImage = Activator.loadImageDescriptorFromBundle("new_global_method.gif");
+		newFormMethodImage = Activator.loadImageDescriptorFromBundle("new_form_method.png");
+		newGlobalMethodImage = Activator.loadImageDescriptorFromBundle("new_global_method.png");
 		setText("Create method");
 		setToolTipText("Create method");
 	}

@@ -639,8 +639,8 @@
         </alternateURLImageLocation>
      </urlBasedImageReplacement>     
      
-     <!--TODO add missing icons-->
-     <!--urlBasedImageReplacement
+     
+     <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.views/$nl$/icons/full/elcl16/filter_ps.png">
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/show_advanced_properties.png">
@@ -666,9 +666,9 @@
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/restore_default_value-disabled.png">
         </alternateURLImageLocation>
-     </urlBasedImageReplacement-->
+     </urlBasedImageReplacement>
      
-     <!--urlBasedImageReplacement
+     <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.console/icons/full/cview16/console_view.gif">
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/display_selected_console.png">
@@ -747,6 +747,12 @@
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.javascript.ui/icons/obj16/sourceEditor.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/js.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.dltk.ui/icons/full/etool16/mark_occurrences.gif">
         <alternateURLImageLocation
@@ -798,7 +804,7 @@
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      
-     <urlBasedImageReplacement
+     <!--urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/resume_co.png">
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/resume.png">
@@ -953,7 +959,7 @@
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/stop.png">
         </alternateURLImageLocation>
-     </urlBasedImageReplacement>
+     </urlBasedImageReplacement-->
      
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/terminate_co.png">
@@ -980,7 +986,7 @@
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      
-     <urlBasedImageReplacement
+     <!--urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/disconnect_co.png">
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/disconnect.png">

@@ -81,7 +81,7 @@ public class IconProvider
 		c2i.put(JSUnitAssertFunctions.class, "jsunit.png");
 		c2i.put(ServoyException.class, "exception.gif");
 		c2i.put(JSForm.class, "formula.gif");
-		c2i.put(FoundSet.class, "foundset.gif");
+		c2i.put(FoundSet.class, "foundset.png");
 	}
 
 	public ImageDescriptor descriptor(Class< ? > cls)
