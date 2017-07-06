@@ -138,7 +138,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 
 	public static final String SELECT_FEEDBACK_TEXT = "Visual Feedback Options";
 	public static final String SELECT_FEEDBACK_TOOLTIP = SELECT_FEEDBACK_TEXT;
-	public static final ImageDescriptor SELECT_FEEDBACK_IMAGE = Activator.loadImageDescriptorFromBundle("grid.gif");
+	public static final ImageDescriptor SELECT_FEEDBACK_IMAGE = Activator.loadImageDescriptorFromBundle("grid.png");
 	public static final ActionFactory SELECT_FEEDBACK = new ActionFactory("select-feedback-mode")
 	{
 
@@ -182,7 +182,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 
 	public static final String SELECT_SNAPMODE_TEXT = "Element Placement Guide Options";
 	public static final String SELECT_SNAPMODE_TOOLTIP = SELECT_SNAPMODE_TEXT;
-	public static final ImageDescriptor SELECT_SNAPTMODE_IMAGE = Activator.loadImageDescriptorFromBundle("snaptogrid.gif");
+	public static final ImageDescriptor SELECT_SNAPTMODE_IMAGE = Activator.loadImageDescriptorFromBundle("snaptogrid.png");
 	public static final ActionFactory SELECT_SNAPMODE = new ActionFactory("select-snapmode")
 	{
 
@@ -226,7 +226,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 
 	public static final String DISTRIBUTE_HORIZONTAL_CENTER_TEXT = "Horizontal Centers";
 	public static final String DISTRIBUTE_HORIZONTAL_CENTER_TOOLTIP = DISTRIBUTE_HORIZONTAL_CENTER_TEXT;
-	public static final ImageDescriptor DISTRIBUTE_HORIZONTAL_CENTER_IMAGE = Activator.loadImageDescriptorFromBundle("distribute_hcenters.gif");
+	public static final ImageDescriptor DISTRIBUTE_HORIZONTAL_CENTER_IMAGE = Activator.loadImageDescriptorFromBundle("distribute_hcenters.png");
 	public static final ActionFactory DISTRIBUTE_HORIZONTAL_CENTER = new ActionFactory("distribute-horizontal-center")
 	{
 
@@ -248,7 +248,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 
 	public static final String DISTRIBUTE_HORIZONTAL_PACK_TEXT = "Leftward";
 	public static final String DISTRIBUTE_HORIZONTAL_PACK_TOOLTIP = DISTRIBUTE_HORIZONTAL_PACK_TEXT;
-	public static final ImageDescriptor DISTRIBUTE_HORIZONTAL_PACK_IMAGE = Activator.loadImageDescriptorFromBundle("distribute_leftward.gif");
+	public static final ImageDescriptor DISTRIBUTE_HORIZONTAL_PACK_IMAGE = Activator.loadImageDescriptorFromBundle("distribute_leftward.png");
 	public static final ActionFactory DISTRIBUTE_HORIZONTAL_PACK = new ActionFactory("distribute-horizontal-pack")
 	{
 
@@ -292,7 +292,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 
 	public static final String DISTRIBUTE_VERTICAL_CENTER_TEXT = "Vertical Centers";
 	public static final String DISTRIBUTE_VERTICAL_CENTER_TOOLTIP = DISTRIBUTE_VERTICAL_CENTER_TEXT;
-	public static final ImageDescriptor DISTRIBUTE_VERTICAL_CENTER_IMAGE = Activator.loadImageDescriptorFromBundle("distribute_vcenters.gif");
+	public static final ImageDescriptor DISTRIBUTE_VERTICAL_CENTER_IMAGE = Activator.loadImageDescriptorFromBundle("distribute_vcenters.png");
 	public static final ActionFactory DISTRIBUTE_VERTICAL_CENTER = new ActionFactory("distribute-vertical-center")
 	{
 
@@ -314,7 +314,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 
 	public static final String DISTRIBUTE_VERTICAL_PACK_TEXT = "Upward";
 	public static final String DISTRIBUTE_VERTICAL_PACK_TOOLTIP = DISTRIBUTE_VERTICAL_PACK_TEXT;
-	public static final ImageDescriptor DISTRIBUTE_VERTICAL_PACK_IMAGE = Activator.loadImageDescriptorFromBundle("distribute_upward.gif");
+	public static final ImageDescriptor DISTRIBUTE_VERTICAL_PACK_IMAGE = Activator.loadImageDescriptorFromBundle("distribute_upward.png");
 	public static final ActionFactory DISTRIBUTE_VERTICAL_PACK = new ActionFactory("distribute-vertical-pack")
 	{
 
