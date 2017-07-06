@@ -804,7 +804,7 @@
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      
-     <!--urlBasedImageReplacement
+     <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/resume_co.png">
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/resume.png">
@@ -879,7 +879,7 @@
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      
-     <urlBasedImageReplacement
+     <!--urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/stepover_co.png">
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/step_over.png">
@@ -902,7 +902,7 @@
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/step_over-disabled.png">
         </alternateURLImageLocation>
-     </urlBasedImageReplacement>
+     </urlBasedImageReplacement-->
      
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/stepreturn_co.png">
@@ -959,7 +959,7 @@
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/stop.png">
         </alternateURLImageLocation>
-     </urlBasedImageReplacement-->
+     </urlBasedImageReplacement>
      
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/terminate_co.png">
@@ -986,7 +986,7 @@
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      
-     <!--urlBasedImageReplacement
+     <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/disconnect_co.png">
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/disconnect.png">
@@ -1060,7 +1060,7 @@
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/breakpoint_view.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
-     <urlBasedImageReplacement
+     <!--urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.debug.ui/icons/full/eview16/watchlist_view.png">
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/watchlist_view.png">
@@ -1071,7 +1071,7 @@
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/watchlist_view.png">
         </alternateURLImageLocation>
-     </urlBasedImageReplacement>
+     </urlBasedImageReplacement-->
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.dltk.debug.ui/icons/full/eview16/debug_console.gif">
         <alternateURLImageLocation
@@ -1127,7 +1127,7 @@
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/profiler_view.png">
         </alternateURLImageLocation>
-     </urlBasedImageReplacement-->
+     </urlBasedImageReplacement>
      
      <!--the minimize, maximize and view menu icons replacement does not work even though the names seem correct, perhaps on eclipse upgrade-->
      <!-- http://git.eclipse.org/c/platform/eclipse.platform.ui.git/plain/bundles/org.eclipse.ui/icons/full/elcl16/thin_min_view.png-->
