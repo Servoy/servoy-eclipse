@@ -246,8 +246,7 @@
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
-      <!-- prepare for menu icons replacement-->
-      <!--urlBasedImageReplacement
+      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/cut_edit.png">
          <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/cut_edit.png">
@@ -358,12 +357,12 @@
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
-      <urlBasedImageReplacement
+      <!--urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/help_search.png">
          <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/help_search.png">
          </alternateURLImageLocation>
-      </urlBasedImageReplacement>
+      </urlBasedImageReplacement-->
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.equinox.p2.ui.sdk/icons/obj/iu_update_obj.gif">
@@ -384,7 +383,7 @@
          <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/installation_details.png">
          </alternateURLImageLocation>
-      </urlBasedImageReplacement-->
+      </urlBasedImageReplacement>
       
       
       <urlBasedImageReplacement
@@ -1171,8 +1170,7 @@
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/more.png">
         </alternateURLImageLocation>
-     </urlBasedImageReplacement> 
-     <!-- -->    
+     </urlBasedImageReplacement>  
      
      <!-- some toolbar actions in the old editor-->
      <classAndFileBasedImageReplacement
