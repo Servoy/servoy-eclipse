@@ -360,7 +360,8 @@ public class EventsComposite extends Composite
 			onFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONSEARCHMETHODID),
 			afterFoundSetRecordCreate(StaticContentSpecLoader.PROPERTY_ONAFTERCREATEMETHODID),
 			afterFoundSetFind(StaticContentSpecLoader.PROPERTY_ONAFTERFINDMETHODID),
-			afterFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONAFTERSEARCHMETHODID);
+			afterFoundSetSearch(StaticContentSpecLoader.PROPERTY_ONAFTERSEARCHMETHODID),
+			onLoad(StaticContentSpecLoader.PROPERTY_ONFOUNDSETLOADMETHODID);
 
 			private final TypedProperty<Integer> property;
 
@@ -438,6 +439,7 @@ public class EventsComposite extends Composite
 			IDataSourceManager dsm = ServoyModelFinder.getServoyModel().getDataSourceManager();
 			for (EventNodeType tp : EventNodeType.values())
 			{
+				if (tp == EventNodeType.onLoad && !(table instanceof MemTable)) continue;
 				children.add(new EventNode(tp,
 					tableNode == null ? MethodWithArguments.METHOD_DEFAULT : new MethodWithArguments(
 						((Integer)tableNode.getProperty(tp.getProperty().getPropertyName())).intValue(), dsm.getDataSource(tableNode.getDataSource())),

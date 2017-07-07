@@ -6,10 +6,10 @@ angular.module('app', ['ngMaterial'])
     .iconSet('communication', 'img/icons/sets/communication-icons.svg', 24)
     .defaultIconSet('img/icons/sets/core-icons.svg', 24);
 })
-.controller('appPackages', function($scope,$window,$sce) {
+.controller('appPackages', function($scope,$window,$sce,$mdDialog) {
     var loc = $window.location;
     var self = this;
-		  
+    var addRemove = "Add...";
 	var uri = "ws://"+loc.host+"/wpm/angular2/websocket";
 //		var uri = "ws://localhost:8080/wpm/angular2/websocket";
 	  
@@ -31,13 +31,15 @@ angular.module('app', ['ngMaterial'])
 	      ws.send(JSON.stringify(command)); 
 	      command = {"method":"getSolutionList"};
 	      ws.send(JSON.stringify(command)); 
+	      
+	      command = {"method":"getRepositories"};
+	      ws.send(JSON.stringify(command)); 
 	};
 	  
 	ws.onmessage = function (msg){
 		$scope.$apply(function() {
 			var receivedJson = JSON.parse(msg.data);
 			var method = receivedJson["method"];
-			if(method === "requestAllInstalledPackages") $scope.isLoading = false;
 			self[method](receivedJson["result"]);
 		})
 	}
@@ -49,6 +51,7 @@ angular.module('app', ['ngMaterial'])
 	$scope.solutionPackages = []
 	  
 	this.requestAllInstalledPackages = function(packagesArray){
+		$scope.isLoading = false;
 		$scope.componentPackages.length = 0;
 		$scope.servicePackages.length = 0;
 		$scope.layoutPackages.length = 0;
@@ -81,6 +84,31 @@ angular.module('app', ['ngMaterial'])
 	  	    }
 	  	}
     }
+    
+    this.getRepositories = function(repositories) {
+    	$scope.repositories = [];
+    	for(var i=0;i<repositories.length;i++) {
+    		if (repositories[i].selected) {
+    			$scope.activeRepository = repositories[i].name;
+    		}
+    		$scope.repositories[i] =  repositories[i].name;
+    	}
+    	$scope.repositories[repositories.length] = addRemove;
+    }
+    
+    this.addRepository = function(newPackagesAndRepositories) {
+    	this.getRepositories(newPackagesAndRepositories.repositories)
+    	this.requestAllInstalledPackages(newPackagesAndRepositories.packages);
+    }
+    
+    this.removeRepository = function (repositories) {
+    	this.getRepositories(repositories);
+    }
+    
+    this.setSelectedRepository = function(newPackages) {
+    	this.requestAllInstalledPackages(newPackages);
+    }
+    
 
     $scope.tabSelected = 1;
 
@@ -104,6 +132,84 @@ angular.module('app', ['ngMaterial'])
   	  } catch (e) {}
       return count ? "(" + count +")" : "";
     }
+    
+    $scope.showRemoveRepository = false;
+    
+    $scope.repositories = ["Servoy Default",addRemove]
+    $scope.activeRepository = "Servoy Default";
+    
+    $scope.removeRepository = function() {
+    	$scope.isLoading = true;
+		var command = {"method":"removeRepository","name": $scope.activeRepository};
+		$scope.websocket.send(JSON.stringify(command));
+    }
+	   
+	$scope.$watch("activeRepository", function(newValue,oldValue) {
+		if (newValue === oldValue) return;
+		if (newValue == addRemove) {
+			showAddDialog();
+			$scope.showRemoveRepository = false;
+		}
+		else {
+			$scope.isLoading = true;
+			$scope.showRemoveRepository = newValue != "Servoy Default";
+			var command = {"method":"setSelectedRepository","name": newValue};
+			$scope.websocket.send(JSON.stringify(command));
+		}
+	});
+	
+	function showAddDialog() {
+		$mdDialog.show({
+		      controller: DialogController,
+		      templateUrl: 'addrepository.tmpl.html',
+		      parent: angular.element(document.body),
+		      clickOutsideToClose:true
+		    })
+		    .then(function(result) {
+		    		function showAlert(txt) {
+		    			 $mdDialog.show($mdDialog.alert()
+					    	        .parent(angular.element(document.body))
+					    	        .clickOutsideToClose(true)
+					    	        .title("Error creating new repository index")
+					    	        .textContent(txt)
+					    	        .ariaLabel(txt)
+					    	        .ok('OK')).then(function(){
+					    	        	 showAddDialog()
+					    	        })
+		    		}
+		    	   if(result.name == addRemove) {
+		    		   showAlert("The name can't be " + addRemove);
+		    		   return;
+		    	   }
+		    	   if (result.name == "" || result.url == "") {
+		    		   showAlert("The name or url must be filled in");
+		    		   return;
+		    		   
+		    	   }
+		    	   for (var i =0;i< $scope.repositories.length;i++) {
+		    		   if (result.name ==  $scope.repositories[i]) {
+		    			   showAlert("The name is already defined");
+			    		   return; 
+		    		   }
+		    	   }
+		    	   $scope.isLoading = true;
+				   var command = {"method":"addRepository","values": result};
+				   $scope.websocket.send(JSON.stringify(command));
+		    }, function() {
+		    	 $scope.activeRepository = "Servoy Default"
+		    });
+	}
+	function DialogController($scope, $mdDialog) {
+		$scope.name = "";
+		$scope.url = ""
+	    $scope.cancel = function() {
+	      $mdDialog.cancel();
+	    };
+
+	    $scope.add = function() {
+	      $mdDialog.hide({name:$scope.name, url:$scope.url});
+	    };
+	  }
 
 }).directive('packages',  function ($sce) {
 	return {
@@ -183,8 +289,7 @@ angular.module('app', ['ngMaterial'])
 			   var command = {"method":"install","package": pck};
 			   $scope.websocket.send(JSON.stringify(command));
 		  	}
-
-
+		   
 		  $scope.uninstall = function(pck, index) {
 			  $scope.packages[index].removing = true;
 			   var command = {"method":"remove","package": pck};
@@ -240,6 +345,7 @@ angular.module('app', ['ngMaterial'])
 			  var command = {"method":"showurl","url": value};
 			   $scope.websocket.send(JSON.stringify(command));
 		  }
+
 		}
 	}
 });

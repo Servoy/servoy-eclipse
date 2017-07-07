@@ -447,7 +447,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 
 	// module problems
 	public final static Pair<String, ProblemSeverity> MODULE_NOT_FOUND = new Pair<String, ProblemSeverity>("moduleNotFound", ProblemSeverity.ERROR);
-	public final static Pair<String, ProblemSeverity> MODULE_MISPLACED = new Pair<String, ProblemSeverity>("moduleMisplaced", ProblemSeverity.WARNING);
+	public final static Pair<String, ProblemSeverity> MODULE_MISPLACED = new Pair<String, ProblemSeverity>("moduleMisplaced", ProblemSeverity.ERROR);
 	public final static Pair<String, ProblemSeverity> MODULE_DIFFERENT_I18N_TABLE = new Pair<String, ProblemSeverity>("moduleDifferentI18NTable",
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> MODULE_DIFFERENT_RESOURCE_PROJECT = new Pair<String, ProblemSeverity>("moduleDifferentResourceProject",
@@ -949,7 +949,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, INVALID_MOBILE_MODULE_MARKER_TYPE);
 
 		final ServoyProject servoyProject = getServoyProject(project);
-		boolean active = servoyModel.isSolutionActive(project.getName());
+		boolean active = servoyModel.shouldBeModuleOfActiveSolution(project.getName());
 
 		if (servoyProject != null && active && servoyProject.getSolution() != null)
 		{

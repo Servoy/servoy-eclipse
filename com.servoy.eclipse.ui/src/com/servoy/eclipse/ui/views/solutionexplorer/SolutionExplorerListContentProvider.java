@@ -1612,7 +1612,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	private static String getParsedSample(final String name, final WebObjectFunctionDefinition api)
 	{
-		if (api.getDocumentation().contains("@example"))
+		if (api.getDocumentation() != null && api.getDocumentation().contains("@example"))
 		{
 			String description = getParsedComment(api.getDocumentation(), name, false);
 			String example = description.split("@example")[1].split("@")[0];
@@ -2301,7 +2301,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				}
 				sample = Text.processTags(sample, resolver);
 			}
-			return HtmlUtils.escapeMarkup(sample).toString();
+			return HtmlUtils.escapeMarkup(sample != null ? sample : "").toString();
 		}
 
 		/**
@@ -2353,10 +2353,11 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					returnDescription = ((XMLScriptObjectAdapter)scriptObject).getReturnDescription(name, (Class[])parameterTypes);
 					IParameter[] parameters = ((XMLScriptObjectAdapter)scriptObject).getParameters(name, (Class[])parameterTypes);
 					tooltip = ((XMLScriptObjectAdapter)scriptObject).getToolTip(name, (Class[])parameterTypes, csp);
-					tooltip += "\n<i>" +
-						Text.processTags(HtmlUtils.escapeMarkup(((XMLScriptObjectAdapter)scriptObject).getSample(name, (Class[])parameterTypes)).toString(),
-							resolver).toString() +
-						"</i>";
+					String sample = ((XMLScriptObjectAdapter)scriptObject).getSample(name, (Class[])parameterTypes);
+					if (sample != null)
+					{
+						tooltip += "\n<i>" + Text.processTags(HtmlUtils.escapeMarkup(sample).toString(), resolver).toString() + "</i>";
+					}
 					if (parameters != null)
 					{
 						paramNames = new String[parameters.length];
@@ -2381,7 +2382,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					paramNames = scriptObject.getParameterNames(name);
 					returnType = getMethodReturnType();
 					tooltip = Text.processTags(description, resolver);
-					tooltip = tooltip.replaceAll("@param|@return|@example", "<b>$0</b>");
+					tooltip = tooltip != null ? tooltip.replaceAll("@param|@return|@example", "<b>$0</b>") : "";
 				}
 			}
 			else

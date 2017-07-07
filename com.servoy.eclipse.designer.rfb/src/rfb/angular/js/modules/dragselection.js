@@ -207,6 +207,42 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 
 					utils.setDraggingFromPallete(null);
 				}
+				
+				var toRemove = [];
+				var formSize = editorScope.getContentSize();
+				var formWidth = parseInt(formSize.width);
+				var formHeight = parseInt(formSize.height);
+				var removeGhosts = event.screenX > formWidth || event.screenY > formHeight;
+				var selection = editorScope.getSelection();
+				for (var i = 0; i < selection.length; i++)
+				{
+					var beanModel = editorScope.getBeanModel(selection[i]);
+					var svy_id = selection[i].getAttribute("svy-id");
+					var ghost = editorScope.getGhost(svy_id);	
+					if (ghost && ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) continue;
+					if (beanModel && ghost && toRemove.indexOf(svy_id) == -1)
+					{
+						toRemove.push(svy_id);
+					}					
+				}
+				
+				var nodesToRemove = [];
+				for (var i = 0; i < toRemove.length; i++)
+				{
+					for (var j = 0; j < selection.length; j++)
+					{
+						if (editorScope.selection[j].getAttribute("svy-id") == toRemove[i])
+						{
+							if (removeGhosts && editorScope.selectionToDrag[j].classList.contains("ghost") || !removeGhosts && editorScope.selectionToDrag[j].classList.contains("svy-wrapper"))
+							{
+								nodesToRemove.push(selection[j]);
+								break;
+							}
+						}
+					}
+				}
+				editorScope.reduceSelection(nodesToRemove);
+				
 				editorScope.selectionToDrag = null;
 				editorScope.glasspane.style.cursor = "";
 			}
@@ -441,10 +477,10 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						//depending if the cursor is inside or outside the form area we want to remove from the selection 
 						//the ghosts which have also bean model, or respectively the elements which also have ghosts 
 						var toRemove = [];
-						var removeGhosts = event.screenX > formWidth || event.screenY > formHeight;
 						var formSize = editorScope.getContentSize();
 						var formWidth = parseInt(formSize.width);
 						var formHeight = parseInt(formSize.height);
+						var removeGhosts = event.screenX > formWidth || event.screenY > formHeight;
 						for (var i = 0; i < selection.length; i++)
 						{
 							var beanModel = editorScope.getBeanModel(selection[i]);

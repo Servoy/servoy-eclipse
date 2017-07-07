@@ -62,7 +62,9 @@ import com.servoy.j2db.util.Utils;
 public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadListener, IActiveProjectListener, IWPMController
 {
 	public static final String CLIENT_SERVER_METHOD = "requestAllInstalledPackages";
+	public static final String MAIN_WEBPACKAGEINDEX = "https://servoy.github.io/webpackageindex/";
 	private final WebPackageManagerEndpoint endpoint;
+	private static String selectedWebPackageIndex = MAIN_WEBPACKAGEINDEX;
 
 	public GetAllInstalledPackages(WebPackageManagerEndpoint endpoint)
 	{
@@ -189,10 +191,24 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 		return null;
 	}
 
+	public static List<JSONObject> setSelectedWebPackageIndex(String index)
+	{
+		selectedWebPackageIndex = index;
+		try
+		{
+			return getRemotePackages();
+		}
+		catch (Exception e)
+		{
+			Debug.log(e);
+		}
+		return null;
+	}
+
 	public static List<JSONObject> getRemotePackages() throws Exception
 	{
 		List<JSONObject> result = new ArrayList<>();
-		String repositoriesIndex = getUrlContents("https://servoy.github.io/webpackageindex/");
+		String repositoriesIndex = getUrlContents(selectedWebPackageIndex);
 
 		JSONArray repoArray = new JSONArray(repositoriesIndex);
 		for (int i = repoArray.length(); i-- > 0;)
@@ -222,10 +238,7 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 							String[] minAndMax = servoyVersion.split(" - ");
 							if (minAndMax[0].compareTo(currentVersion) <= 0)
 							{
-								if (minAndMax.length == 1 || minAndMax[1].compareTo(currentVersion) >= 0)
-								{
-									toSort.add(jsonObject);
-								}
+								toSort.add(jsonObject);
 							}
 						}
 						else toSort.add(jsonObject);
@@ -240,8 +253,26 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 								return o2.optString("version", "").compareTo(o1.optString("version", ""));
 							}
 						});
-						packageObject.put("releases", toSort);
-						result.add(packageObject);
+
+						List<JSONObject> currentVersionReleases = new ArrayList<>();
+						for (JSONObject jsonObject : toSort)
+						{
+							if (jsonObject.has("servoy-version"))
+							{
+								String servoyVersion = jsonObject.getString("servoy-version");
+								String[] minAndMax = servoyVersion.split(" - ");
+								if (minAndMax.length > 1 && minAndMax[1].compareTo(currentVersion) <= 0)
+								{
+									break;
+								}
+							}
+							currentVersionReleases.add(jsonObject);
+						}
+						if (currentVersionReleases.size() > 0)
+						{
+							packageObject.put("releases", currentVersionReleases);
+							result.add(packageObject);
+						}
 					}
 				}
 				catch (Exception e)
@@ -355,5 +386,10 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	public void reloadPackages()
 	{
 		webObjectSpecificationReloaded();
+	}
+
+	public static String getSelectedWebPackageIndex()
+	{
+		return selectedWebPackageIndex;
 	}
 }

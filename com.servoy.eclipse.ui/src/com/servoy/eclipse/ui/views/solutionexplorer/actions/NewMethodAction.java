@@ -90,6 +90,7 @@ import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
 import com.servoy.j2db.persistence.ArgumentType;
 import com.servoy.j2db.persistence.Form;
+import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.IScriptProvider;
@@ -314,11 +315,11 @@ public class NewMethodAction extends Action implements ISelectionChangedListener
 					}
 					else
 					{
-						if (persist instanceof WebComponent)
+						if (persist instanceof IBasicWebObject)
 						{
 							WebObjectSpecification spec = WebComponentSpecProvider.getSpecProviderState().getWebComponentSpecification(
-								((WebComponent)persist).getTypeName());
-							if (spec.getHandler(methodKey) != null)
+								((IBasicWebObject)persist).getTypeName());
+							if (spec != null && spec.getHandler(methodKey) != null)
 							{
 								template = MethodTemplate.DEFAULT_TEMPLATE;
 								PropertyDescription def = spec.getHandler(methodKey).getAsPropertyDescription();
