@@ -183,9 +183,13 @@ md-select.select-solution {
   max-width: 260px;
 }
 
-md-select.repository:not([disabled]):focus ._md-select-value {
+md-select.repository:not([disabled]):focus .md-select-value {
 	color:#fff;
 	border-bottom-color: #000;
+}
+
+md-select.repository .md-select-icon {
+	color: #fff;
 }
 
 md-select.select-release {
