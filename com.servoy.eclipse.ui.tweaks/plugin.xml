@@ -357,12 +357,12 @@
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
-      <!--urlBasedImageReplacement
+      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/help_search.png">
          <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/help_search.png">
          </alternateURLImageLocation>
-      </urlBasedImageReplacement-->
+      </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.equinox.p2.ui.sdk/icons/obj/iu_update_obj.gif">
@@ -878,7 +878,7 @@
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      
-     <!--urlBasedImageReplacement
+     <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/stepover_co.png">
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/step_over.png">
@@ -901,7 +901,7 @@
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/step_over-disabled.png">
         </alternateURLImageLocation>
-     </urlBasedImageReplacement-->
+     </urlBasedImageReplacement>
      
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.debug.ui/icons/full/elcl16/stepreturn_co.png">
@@ -1059,18 +1059,18 @@
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/breakpoint_view.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
-     <!--urlBasedImageReplacement
+     <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.debug.ui/icons/full/eview16/watchlist_view.png">
         <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/watchlist_view.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/expressions.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/eview16/watchlist_view.png">
         <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/watchlist_view.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/expressions.png">
         </alternateURLImageLocation>
-     </urlBasedImageReplacement-->
+     </urlBasedImageReplacement>
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.dltk.debug.ui/icons/full/eview16/debug_console.gif">
         <alternateURLImageLocation
