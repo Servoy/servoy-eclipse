@@ -23,6 +23,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import com.servoy.eclipse.core.ServoyModel;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.util.EditorUtil;
@@ -40,7 +41,7 @@ public class DuplicateServerAction extends Action implements ISelectionChangedLi
 		viewer = sev;
 		setText("Duplicate Server");
 		setToolTipText("Duplicate Server");
-//		setImageDescriptor(Activator.loadImageDescriptorFromBundle("serverDuplicate.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("duplicate_server.png"));
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)

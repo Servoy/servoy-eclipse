@@ -910,7 +910,7 @@ public class SolutionExplorerTreeContentProvider
 							Collections.sort(components);
 							IFolder folder = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveProject().getResourcesProject().getProject().getFolder(
 								SolutionSerializer.COMPONENTS_DIR_NAME);
-							Image componentIcon = uiActivator.loadImageFromBundle("bean.gif");
+							Image componentIcon = uiActivator.loadImageFromBundle("ng_component.png");
 							for (String component : components)
 							{
 								WebObjectSpecification spec = getComponentsSpecProviderState().getWebComponentSpecification(component);
@@ -950,7 +950,7 @@ public class SolutionExplorerTreeContentProvider
 						{
 							Collections.sort(components);
 							IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(packageName);
-							Image componentIcon = uiActivator.loadImageFromBundle("bean.gif");
+							Image componentIcon = uiActivator.loadImageFromBundle("ng_component.png");
 							for (String component : components)
 							{
 								WebObjectSpecification spec = getComponentsSpecProviderState().getWebComponentSpecification(component);
@@ -1715,7 +1715,7 @@ public class SolutionExplorerTreeContentProvider
 		}
 		if (!server.getName().equals(serverName))
 		{
-			imgName = "serverDuplicate.gif";
+			imgName = "duplicate_server.png";
 		}
 
 		return uiActivator.loadImageFromBundle(imgName, !server.getConfig().isEnabled());
@@ -1977,7 +1977,7 @@ public class SolutionExplorerTreeContentProvider
 			{
 				// in case of calculation editor
 				PlatformSimpleUserNode dataProvidersNode = new PlatformSimpleUserNode(Messages.TreeStrings_DataProviders, UserNodeType.TABLE_COLUMNS,
-					tableOfCalculation, solution, uiActivator.loadImageFromBundle("selected_record.gif"));
+					tableOfCalculation, solution, uiActivator.loadImageFromBundle("selected_record.png"));
 				allRelations = new PlatformSimpleUserNode(Messages.TreeStrings_Relations, UserNodeType.RELATIONS, tableOfCalculation,
 					uiActivator.loadImageFromBundle("relations.png"));
 				addRelationsNodeChildren(allRelations, solution, tableOfCalculation, UserNodeType.CALC_RELATION);
@@ -2141,17 +2141,17 @@ public class SolutionExplorerTreeContentProvider
 
 		List<PlatformSimpleUserNode> node = new ArrayList<PlatformSimpleUserNode>();
 		PlatformSimpleUserNode functionsNode = new PlatformSimpleUserNode(Messages.TreeStrings_controller, UserNodeType.FORM_CONTROLLER, f,
-			uiActivator.loadImageFromBundle("formula.gif"));
+			uiActivator.loadImageFromBundle("controller.png"));
 		functionsNode.parent = formNode;
 		node.add(functionsNode);
 
 		PlatformSimpleUserNode variables = new PlatformSimpleUserNode(Messages.TreeStrings_variables, UserNodeType.FORM_VARIABLES, f,
-			uiActivator.loadImageFromBundle("form_variabletree.gif"));
+			uiActivator.loadImageFromBundle("variables.png"));
 		variables.parent = formNode;
 		node.add(variables);
 
 		PlatformSimpleUserNode elementsNode = new PlatformSimpleUserNode(Messages.TreeStrings_elements, UserNodeType.FORM_ELEMENTS, f,
-			uiActivator.loadImageFromBundle("elements.gif"));
+			uiActivator.loadImageFromBundle("elements.png"));
 		elementsNode.parent = formNode;
 		node.add(elementsNode);
 		addFormElementsChildren(elementsNode);
@@ -2163,7 +2163,7 @@ public class SolutionExplorerTreeContentProvider
 //			try
 			{
 				columnsNode = new PlatformSimpleUserNode(Messages.TreeStrings_selectedrecord, UserNodeType.TABLE_COLUMNS, dsm.getDataSource(f.getDataSource()),
-					f, uiActivator.loadImageFromBundle("selected_record.gif"));
+					f, uiActivator.loadImageFromBundle("selected_record.png"));
 				columnsNode.parent = formNode;
 				node.add(columnsNode);
 			}
@@ -2239,7 +2239,7 @@ public class SolutionExplorerTreeContentProvider
 				if (!inspectedForms.contains(parentForm))
 				{
 					parentElementsNode = new PlatformSimpleUserNode(parentForm.getName(), UserNodeType.FORM_ELEMENTS_INHERITED, null,
-						uiActivator.loadImageFromBundle("elements.gif"));
+						uiActivator.loadImageFromBundle("elements.png"));
 
 					addFormElementsChildren(parentElementsNode, inspectedForms, originalForm, parentForm);
 				}

@@ -244,9 +244,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	SolutionExplorerListContentProvider(SolutionExplorerView v)
 	{
 		view = v;
-		propertiesIcon = loadImage("properties_icon.gif");
-		specialPropertiesIcon = loadImage("special_properties_icon.gif");
-		functionIcon = uiActivator.loadImageFromBundle("function.gif");
+		propertiesIcon = loadImage("properties.png");
+		specialPropertiesIcon = loadImage("special_properties.png");
+		functionIcon = uiActivator.loadImageFromBundle("function.png");
 	}
 
 	public void dispose()

@@ -377,7 +377,7 @@ public class ServerEditor extends EditorPart implements IShowInSource
 		advancedSettingsCollapser.setForeground(display.getSystemColor(SWT.COLOR_DARK_BLUE));
 
 		advancedSettingsComposite = new Composite(advancedSettingsCollapser, SWT.NONE);
-		collapsableItem.setImage(Activator.getDefault().loadImageFromBundle("outline_co.gif"));
+		collapsableItem.setImage(Activator.getDefault().loadImageFromBundle("advanced_serverproperties.png"));
 		collapsableItem.setControl(advancedSettingsComposite);
 
 		Label urlLabel;

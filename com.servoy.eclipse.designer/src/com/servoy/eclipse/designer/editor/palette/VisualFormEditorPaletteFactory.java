@@ -654,7 +654,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		ImageDescriptor iconSmall, iconLarge;
 		if (smallIcon == null)
 		{
-			iconSmall = Activator.loadImageDescriptorFromBundle("bean.gif");
+			iconSmall = Activator.loadImageDescriptorFromBundle("ng_component.png");
 		}
 		else
 		{
@@ -698,7 +698,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 		String webComponentClassName = FormTemplateGenerator.getComponentTypeName(beanClassName);
 		WebObjectSpecification webComponentDescription = componentsSpecProviderState.getWebComponentSpecification(webComponentClassName);
 		Dimension dimension = getDimensionFromSpec(webComponentDescription);
-		ImageDescriptor beanIcon = Activator.loadImageDescriptorFromBundle("bean.gif");
+		ImageDescriptor beanIcon = Activator.loadImageDescriptorFromBundle("ng_component.png");
 		RequestTypeCreationFactory factory = new RequestTypeCreationFactory(VisualFormEditor.REQ_PLACE_COMPONENT, dimension);
 		factory.setData(beanClassName);
 
@@ -842,7 +842,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 				return Activator.loadImageDescriptorFromBundle("tabs.png");
 
 			case IRepository.BEANS :
-				return Activator.loadImageDescriptorFromBundle("bean.gif");
+				return Activator.loadImageDescriptorFromBundle("ng_component.png");
 		}
 
 		return null;

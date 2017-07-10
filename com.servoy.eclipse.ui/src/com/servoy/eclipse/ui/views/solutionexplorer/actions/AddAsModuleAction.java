@@ -52,7 +52,7 @@ public class AddAsModuleAction extends AddAsSolutionReference
 		super(shell, UserNodeType.SOLUTION_ITEM_NOT_ACTIVE_MODULE);
 		setText("Add as module");
 		setToolTipText("Add as a module to an already active module");
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("add_as_module.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("add_as_module.png"));
 	}
 
 	@Override

@@ -208,7 +208,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	{
 		ELEMENTS = new Pair<String, Image>("elements", getImage("element.gif"));
 		PARTS = new Pair<String, Image>("parts", getImage("parts.gif"));
-		METHODS = new Pair<String, Image>("methods", getImage("function.gif"));
+		METHODS = new Pair<String, Image>("methods", getImage("function.png"));
 		VARIABLES = new Pair<String, Image>("variables", getImage("form_variable.gif"));
 	}
 

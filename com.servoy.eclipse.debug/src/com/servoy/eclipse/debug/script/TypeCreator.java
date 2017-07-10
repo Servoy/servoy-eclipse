@@ -283,17 +283,17 @@ public class TypeCreator extends TypeCache
 	public static final String PLUGIN_TYPE_PREFIX = "plugins.";
 
 	protected final static ImageDescriptor METHOD = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/function.gif"), null));
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/function.png"), null));
 	protected final static ImageDescriptor PROPERTY = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/properties_icon.gif"), null));
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/properties.png"), null));
 	protected final static ImageDescriptor CONSTANT = ImageDescriptor.createFromURL(
 		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/constant.gif"), null));
 
 	protected final static ImageDescriptor ELEMENTS = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/elements.gif"), null));
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/elements.png"), null));
 
 	protected final static ImageDescriptor SPECIAL_PROPERTY = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/special_properties_icon.gif"), null));
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/special_properties.png"), null));
 
 	protected final static ImageDescriptor PUBLIC_GLOBAL_VAR_IMAGE = ImageDescriptor.createFromURL(
 		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_public.gif"), null));
@@ -322,9 +322,9 @@ public class TypeCreator extends TypeCache
 	protected final static ImageDescriptor RELATION_IMAGE = ImageDescriptor.createFromURL(
 		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/relation.gif"), null));
 	protected final static ImageDescriptor RELATION_PROTECTED_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/relation_protected.gif"), null));
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/relation_protected.png"), null));
 	protected final static ImageDescriptor RELATION_PRIVATE_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/relation_private.gif"), null));
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/relation_private.png"), null));
 
 	protected final static ImageDescriptor COLUMN_IMAGE = ImageDescriptor.createFromURL(
 		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/column.gif"), null));

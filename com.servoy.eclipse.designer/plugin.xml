@@ -211,7 +211,7 @@
          <action
                class="com.servoy.eclipse.designer.actions.AddBeanActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addBeanAction"
-               icon="icons/bean.gif"
+               icon="icons/ng_component.png"
                id="com.servoy.eclipse.designer.action.addBeanAction"
                label="Place Bean Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"

@@ -58,7 +58,7 @@ import com.servoy.j2db.util.Debug;
 
 /**
  * Class that allows the selection of modules to be added to the currently active solution.
- * 
+ *
  * @author acostache
  *
  */
@@ -71,7 +71,7 @@ public class AddModuleAction extends Action implements ISelectionChangedListener
 		this.shell = shell;
 		setText("Add Module");
 		setToolTipText("Add a module to the solution");
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("add_as_module.gif")); //FIXME: NOK - other icon
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("add_as_module.png"));
 	}
 
 	@Override
@@ -122,8 +122,8 @@ public class AddModuleAction extends Action implements ISelectionChangedListener
 		}
 		else
 		{
-			labelProvider = new ValidvalueDelegatelabelProvider(new ArrayLabelProvider(converter), availableSolutions, null, FontResource.getDefaultFont(
-				SWT.ITALIC, 0));
+			labelProvider = new ValidvalueDelegatelabelProvider(new ArrayLabelProvider(converter), availableSolutions, null,
+				FontResource.getDefaultFont(SWT.ITALIC, 0));
 		}
 
 		ITreeContentProvider contentProvider = FlatTreeContentProvider.INSTANCE;

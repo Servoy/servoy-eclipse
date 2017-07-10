@@ -195,7 +195,7 @@ public class ElementUtil
 		}
 		if (persist instanceof Bean)
 		{
-			return "bean.gif";
+			return "ng_component.png";
 		}
 		if (persist instanceof RectShape)
 		{
@@ -242,7 +242,7 @@ public class ElementUtil
 		}
 		if (persist instanceof IWebComponent)
 		{
-			return "bean.gif";
+			return "ng_component.png";
 		}
 
 		return null;

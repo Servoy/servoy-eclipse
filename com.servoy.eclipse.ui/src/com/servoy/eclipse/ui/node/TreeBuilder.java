@@ -61,10 +61,10 @@ public class TreeBuilder
 	 */
 	public static UserNode[] createLengthAndArray(IImageLookup imageLookup, String prefix)
 	{
-		Image propertiesIcon = imageLookup.loadImage("properties_icon.gif");
+		Image propertiesIcon = imageLookup.loadImage("properties.png");
 		List<UserNode> dlm = new ArrayList<UserNode>();
-		dlm.add(new UserNode(
-			"allnames", UserNodeType.ARRAY, prefix + ".allnames", prefix + ".allnames", "Get all names as an array", null, imageLookup.loadImage("special_properties_icon.gif")));
+		dlm.add(new UserNode("allnames", UserNodeType.ARRAY, prefix + ".allnames", prefix + ".allnames", "Get all names as an array", null,
+			imageLookup.loadImage("special_properties.png")));
 		dlm.add(new UserNode("length", UserNodeType.ARRAY, prefix + ".length", prefix + ".length", "Get the length of the array", null, propertiesIcon));
 		dlm.add(new UserNode("['name']", UserNodeType.ARRAY, prefix + "['name']", prefix + "['name']", "Get an element by name", null, propertiesIcon));
 		return dlm.toArray(new UserNode[dlm.size()]);
@@ -117,9 +117,9 @@ public class TreeBuilder
 
 	public static UserNode[] createTypedArray(IImageLookup imageLookup, Class< ? > clazz, UserNodeType type, List<UserNode> existingDlm)
 	{
-		Image constructorIcon = imageLookup.loadImage("constructor.gif");
-		Image functionIcon = imageLookup.loadImage("function.gif");
-		Image propertiesIcon = imageLookup.loadImage("properties_icon.gif");
+		Image constructorIcon = imageLookup.loadImage("constructor.png");
+		Image functionIcon = imageLookup.loadImage("function.png");
+		Image propertiesIcon = imageLookup.loadImage("properties.png");
 
 		List<UserNode> dlm = existingDlm != null ? new ArrayList<UserNode>(existingDlm) : new ArrayList<UserNode>();
 
@@ -162,8 +162,7 @@ public class TreeBuilder
 	{
 		ClientSupport clientType = ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType();
 		String tooltip = "<html><body><b>" + fdoc.getFullSignature(true, true) + "</b><br>" + fdoc.getDescription(clientType) + "</body></html>";
-		UserNode un = new UserNode(fdoc.getFullSignature(false, true), type, fdoc.getSignature("."), fdoc.getSample(clientType), tooltip, null,
-			functionIcon);
+		UserNode un = new UserNode(fdoc.getFullSignature(false, true), type, fdoc.getSignature("."), fdoc.getSample(clientType), tooltip, null, functionIcon);
 		un.setClientSupport(fdoc.getClientSupport());
 		return un;
 	}
@@ -191,9 +190,9 @@ public class TreeBuilder
 	public static List<SimpleUserNode> docToNodesInternal(Class< ? > clz, IImageLookup imageLookup, UserNodeType type, String codePrefix,
 		List<SimpleUserNode> existingDlm, Map<String, Object> onlyThese, Image icon)
 	{
-		Image functionIcon = imageLookup.loadImage("function.gif");
-		Image propertiesIcon = imageLookup.loadImage("properties_icon.gif");
-		Image specialPropertiesIcon = imageLookup.loadImage("special_properties_icon.gif");
+		Image functionIcon = imageLookup.loadImage("function.png");
+		Image propertiesIcon = imageLookup.loadImage("properties.png");
+		Image specialPropertiesIcon = imageLookup.loadImage("special_properties.png");
 
 		List<SimpleUserNode> dlm = existingDlm != null ? existingDlm : new ArrayList<SimpleUserNode>();
 
@@ -222,7 +221,8 @@ public class TreeBuilder
 				if (answeredName != null) realObject = onlyThese.get(answeredName);
 
 				String toolTip = fdoc.getDescription(ServoyModelManager.getServoyModelManager().getServoyModel().getActiveSolutionClientType());
-				String tmp = "<html><body><b>" + SolutionExplorerListContentProvider.getReturnTypeString(fdoc.getReturnedType()) + " " + fdoc.getMainName() + "</b>";
+				String tmp = "<html><body><b>" + SolutionExplorerListContentProvider.getReturnTypeString(fdoc.getReturnedType()) + " " + fdoc.getMainName() +
+					"</b>";
 				if ("".equals(toolTip))
 				{
 					toolTip = tmp + "</body></html>";

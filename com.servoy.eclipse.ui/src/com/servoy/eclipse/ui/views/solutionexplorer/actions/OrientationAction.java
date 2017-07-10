@@ -39,17 +39,17 @@ public class OrientationAction extends Action
 		if (orientation == SolutionExplorerView.VIEW_ORIENTATION_HORIZONTAL)
 		{
 			setText("Horizontal View Orientation");
-			setImageDescriptor(Activator.loadImageDescriptorFromBundle("th_horizontal.gif"));
+			setImageDescriptor(Activator.loadImageDescriptorFromBundle("th_horizontal.png"));
 		}
 		else if (orientation == SolutionExplorerView.VIEW_ORIENTATION_VERTICAL)
 		{
 			setText("Vertical View Orientation");
-			setImageDescriptor(Activator.loadImageDescriptorFromBundle("th_vertical.gif"));
+			setImageDescriptor(Activator.loadImageDescriptorFromBundle("th_vertical.png"));
 		}
 		else if (orientation == SolutionExplorerView.VIEW_ORIENTATION_AUTOMATIC)
 		{
 			setText("Automatic View Orientation");
-			setImageDescriptor(Activator.loadImageDescriptorFromBundle("th_automatic.gif"));
+			setImageDescriptor(Activator.loadImageDescriptorFromBundle("th_automatic.png"));
 		}
 		else
 		{
