@@ -64,7 +64,7 @@ public class StartClientHandler extends StartDebugHandler implements IElementUpd
 		DLTKDebugUIPlugin.getDefault();
 		DebugPlugin.getDefault();
 
-		Job job = new Job("Starting client")
+		Job job = new Job("Launching client")
 		{
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
@@ -83,13 +83,13 @@ public class StartClientHandler extends StartDebugHandler implements IElementUpd
 		switch (commandId)
 		{
 			case START_SMART_CLIENT :
-				return "Smart client start";
+				return "Smart client launch";
 			case START_WEB_CLIENT :
-				return "Web client start";
+				return "Web client launch";
 			case START_MOBILE_CLIENT :
-				return "Mobile client start";
+				return "Mobile client launch";
 			default :
-				return "NG client start";
+				return "NG client launch";
 		}
 	}
 

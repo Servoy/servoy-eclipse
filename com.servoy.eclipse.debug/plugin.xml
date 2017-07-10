@@ -99,15 +99,15 @@
          point="org.eclipse.ui.commands">
       <command
             categoryId="com.servoy.eclipse.ui"
-            description="Start SmartClient"
+            description="Launch SmartClient"
             id="com.servoy.eclipse.ui.StartSmartClient"
-            name="Start SmartClient">
+            name="Launch SmartClient">
       </command>
       <command
             categoryId="com.servoy.eclipse.ui"
-            description="Start WebClient"
+            description="Launch WebClient"
             id="com.servoy.eclipse.ui.StartWebClient"
-            name="Start WebClient">
+            name="Launch WebClient">
          <commandParameter
                id="com.servoy.eclipse.debug.browser"
                name="com.servoy.eclipse.debug.browser"
@@ -116,9 +116,9 @@
       </command>
       <command
             categoryId="com.servoy.eclipse.ui"
-            description="Start NGClient"
+            description="Launch NGClient"
             id="com.servoy.eclipse.ui.StartNGClient"
-            name="Start NGClient">
+            name="Launch NGClient">
          <commandParameter
                id="com.servoy.eclipse.debug.browser"
                name="com.servoy.eclipse.debug.browser"
@@ -305,7 +305,7 @@
                     commandId="com.servoy.eclipse.ui.StartClient"
                     icon="icons/run.png"
                     id="com.servoy.eclipse.ui.StartClient"
-                    label="Start Debug Client"
+                    label="Launch Debug Client"
                     style="pulldown">
               </command>
            </toolbar>
@@ -317,7 +317,7 @@
                  commandId="com.servoy.eclipse.ui.StartSmartClient"
                  id="com.servoy.eclipse.ui.StartSmartClient"
                  icon="icons/launch.png"
-                 label="Start Smart Client"
+                 label="Launch Smart Client"
                  style="push">
                  <visibleWhen>
               <with
@@ -334,7 +334,7 @@
               locationURI="menu:com.servoy.eclipse.ui.StartClient">
            <menu id="com.servoy.eclipse.ui.StartWebClient"
                  icon="icons/launch_web.png"
-                 label="Start Web Client">
+                 label="Launch Web Client">
 			<visibleWhen>
               <with
                   variable="com.servoy.eclipse.core.webClientState">
@@ -348,7 +348,7 @@
         <menuContribution
               allPopups="false"
               locationURI="menu:com.servoy.eclipse.ui.StartClient">
-	         <menu label="Start NG Client"
+	         <menu label="Launch NG Client"
 	                 icon="icons/launch_ng.png"
 	                 id="com.servoy.eclipse.ui.StartNGClient"> 
 	             <visibleWhen>

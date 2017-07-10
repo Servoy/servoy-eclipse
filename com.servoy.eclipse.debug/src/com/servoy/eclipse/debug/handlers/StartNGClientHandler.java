@@ -49,7 +49,7 @@ public class StartNGClientHandler extends StartWebClientHandler
 	@Override
 	public String getStartTitle()
 	{
-		return "NGClient start";
+		return "NGClient launch";
 	}
 
 	/*

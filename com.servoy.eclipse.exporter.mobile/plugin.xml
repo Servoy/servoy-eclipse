@@ -50,9 +50,9 @@
          point="org.eclipse.ui.commands">
       <command
             categoryId="com.servoy.eclipse.ui"
-            description="Start Mobile Client"
+            description="Launch Mobile Client"
             id="com.servoy.eclipse.ui.StartMobileClient"
-            name="Start Mobile Client"
+            name="Launch Mobile Client"
            > 
            <commandParameter
                id="com.servoy.eclipse.mobile.launch.config"

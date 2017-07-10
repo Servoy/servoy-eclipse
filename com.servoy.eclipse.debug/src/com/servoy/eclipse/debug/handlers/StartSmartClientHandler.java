@@ -86,7 +86,7 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 	{
 		makeSureNeededPluginsAreStarted();
 
-		Job job = new Job("Smart client start")
+		Job job = new Job("Smart client launch")
 		{
 			@Override
 			protected IStatus run(IProgressMonitor monitor)
@@ -114,7 +114,7 @@ public class StartSmartClientHandler extends StartDebugHandler implements IRunna
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
 	{
 		StartClientHandler.setLastCommand(StartClientHandler.START_SMART_CLIENT);
-		monitor.beginTask("Smart client start", 5);
+		monitor.beginTask("Smart client launch", 5);
 		monitor.worked(1);
 		try
 		{
