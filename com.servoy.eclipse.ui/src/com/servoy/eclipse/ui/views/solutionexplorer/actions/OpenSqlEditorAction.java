@@ -16,11 +16,6 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
-import net.sourceforge.sqlexplorer.dbproduct.Alias;
-import net.sourceforge.sqlexplorer.plugin.SQLExplorerPlugin;
-import net.sourceforge.sqlexplorer.plugin.editors.SQLEditor;
-import net.sourceforge.sqlexplorer.plugin.editors.SQLEditorInput;
-
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
@@ -45,10 +40,15 @@ import com.servoy.eclipse.ui.wizards.ReplaceTableWizard;
 import com.servoy.j2db.persistence.IServerInternal;
 import com.servoy.j2db.persistence.Table;
 
+import net.sourceforge.sqlexplorer.dbproduct.Alias;
+import net.sourceforge.sqlexplorer.plugin.SQLExplorerPlugin;
+import net.sourceforge.sqlexplorer.plugin.editors.SQLEditor;
+import net.sourceforge.sqlexplorer.plugin.editors.SQLEditorInput;
+
 /**
- * 
+ *
  * @author asisu
- * 
+ *
  */
 public class OpenSqlEditorAction extends Action implements ISelectionChangedListener
 {
@@ -60,12 +60,12 @@ public class OpenSqlEditorAction extends Action implements ISelectionChangedList
 
 	/**
 	 * Creates a new action for the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public OpenSqlEditorAction()
 	{
-		setImageDescriptor(Activator.getImageDescriptor("icons/sqleditor.gif"));
+		setImageDescriptor(Activator.getImageDescriptor("icons/sql_editor.png"));
 		setText("Open SQL Editor");
 		setToolTipText("Open the SQL Editor for this server");
 		sqlExplorerLoaded = com.servoy.eclipse.core.Activator.getDefault().isSqlExplorerLoaded();

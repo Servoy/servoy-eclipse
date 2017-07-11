@@ -839,7 +839,7 @@
                class="com.servoy.eclipse.ui.actions.OpenFormInClientActionDelegate"
                definitionId="com.servoy.eclipse.ui.OpenFormInClientAction"
                enablesFor="1"
-               icon="icons/showform.gif"
+               icon="icons/open_debug_client.png"
                id="com.servoy.eclipse.ui.OpenFormInClientAction"
                label="Open in Debug Client"
                menubarPath="open.ext"

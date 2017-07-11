@@ -238,7 +238,7 @@ public class ElementUtil
 		}
 		if (persist instanceof Part)
 		{
-			return "parts.gif";
+			return "parts.png";
 		}
 		if (persist instanceof IWebComponent)
 		{

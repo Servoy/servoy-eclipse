@@ -1352,6 +1352,12 @@
         </alternateURLImageLocation>
      </urlBasedImageReplacement-->
      
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.jdt.ui/$nl$/icons/full/etool16/opentype.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/open_type.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
      
      <!--the minimize, maximize and view menu icons replacement does not work even though the names seem correct, perhaps on eclipse upgrade-->
      <!-- http://git.eclipse.org/c/platform/eclipse.platform.ui.git/plain/bundles/org.eclipse.ui/icons/full/elcl16/thin_min_view.png-->

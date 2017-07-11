@@ -68,7 +68,7 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 	{
 		if (element == FormOutlineContentProvider.PARTS)
 		{
-			return Activator.getDefault().loadImageFromOldLocation("parts.gif");
+			return Activator.getDefault().loadImageFromBundle("parts.png");
 		}
 		if (element == FormOutlineContentProvider.ELEMENTS)
 		{

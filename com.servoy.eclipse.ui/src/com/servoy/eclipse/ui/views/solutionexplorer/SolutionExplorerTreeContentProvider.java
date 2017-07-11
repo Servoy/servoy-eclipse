@@ -859,7 +859,7 @@ public class SolutionExplorerTreeContentProvider
 						SpecProviderState componentsSpecProviderState = getComponentsSpecProviderState();
 						if (componentsSpecProviderState != null) // the package management system might not yet be initialized at developer startup
 						{
-							Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
+							Image packageIcon = uiActivator.loadImageFromBundle("components_package.png");
 							Image zipPackageIcon = PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor("test.zip").createImage();
 							IPackageReader[] packages = componentsSpecProviderState.getAllPackageReaders();
 							List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
@@ -888,11 +888,11 @@ public class SolutionExplorerTreeContentProvider
 						SpecProviderState serviceSpecProvider = getServicesSpecProviderState();
 						if (componentSpecProvider != null && serviceSpecProvider != null) // the package management system might not yet be initialized at developer startup
 						{
-							List<PlatformSimpleUserNode> children = getWebProjects(un, componentSpecProvider, "package_obj.gif",
+							List<PlatformSimpleUserNode> children = getWebProjects(un, componentSpecProvider, "services_package.png",
 								UserNodeType.COMPONENTS_PROJECT_PACKAGE, IPackageReader.WEB_COMPONENT);
-							List<PlatformSimpleUserNode> layoutProjects = getWebProjects(un, componentSpecProvider, "package_obj.gif",
+							List<PlatformSimpleUserNode> layoutProjects = getWebProjects(un, componentSpecProvider, "components_package.png",
 								UserNodeType.LAYOUT_PROJECT_PACKAGE, IPackageReader.WEB_LAYOUT);
-							List<PlatformSimpleUserNode> servicesProjects = getWebProjects(un, serviceSpecProvider, "package_obj.gif",
+							List<PlatformSimpleUserNode> servicesProjects = getWebProjects(un, serviceSpecProvider, "services_package.png",
 								UserNodeType.SERVICES_PROJECT_PACKAGE, IPackageReader.WEB_SERVICE);
 							children.addAll(servicesProjects);
 							children.addAll(layoutProjects);
@@ -987,7 +987,7 @@ public class SolutionExplorerTreeContentProvider
 						{
 							IPackageReader[] packages = provider.getAllPackageReaders();
 							List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
-							Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
+							Image packageIcon = uiActivator.loadImageFromBundle("services_package.png");
 							Image zipPackageIcon = PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor("test.zip").createImage();
 							for (IPackageReader entry : packages)
 							{
@@ -1069,7 +1069,7 @@ public class SolutionExplorerTreeContentProvider
 						// the package reader is not loaded/created.
 						List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 						IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-						Image packageIcon = uiActivator.loadImageFromBundle("package_obj.gif");
+						Image packageIcon = uiActivator.loadImageFromBundle("components_package.png");
 						ServoyProject activeSolution = ServoyModelFinder.getServoyModel().getActiveProject();
 						List<IProject> solutionAndModuleReferencedProjects = (activeSolution != null ? activeSolution.getSolutionAndModuleReferencedProjects()
 							: null);
