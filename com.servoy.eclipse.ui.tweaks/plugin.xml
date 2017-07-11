@@ -133,6 +133,12 @@
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/search.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.ide/icons/full/etool16/search_src.png">
+         <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/search.png">
+         </alternateURLImageLocation>
+      </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/etool16/prev_nav.gif">
@@ -638,7 +644,6 @@
         </alternateURLImageLocation>
      </urlBasedImageReplacement>     
      
-     
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.views/$nl$/icons/full/elcl16/filter_ps.png">
         <alternateURLImageLocation
@@ -1139,6 +1144,214 @@
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/profiler_view.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/elcl16/trash.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/delete.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dlcl16/trash.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/delete.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/dlcl16/pin_view.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/pin_view.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/elcl16/pin_view.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/pin_view.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/dlcl16/stop.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/terminate-disabled.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/elcl16/stop.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/terminate.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/dlcl16/search_remall.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/rem_all-disabled.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/elcl16/search_remall.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/rem_all.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/dlcl16/search_rem.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/rem-disabled.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/elcl16/search_rem.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/rem.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <!--urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/dlcl16/search_next.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/next_nav-disabled.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement-->
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/elcl16/search_next.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/next_nav.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <!--urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/dlcl16/search_prev.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/prev_nav-disabled.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement-->
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/elcl16/search_prev.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/prev_nav.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <!--urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/dlcl16/expandall.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/expandall-disabled.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/elcl16/expandall.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/expandall.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement-->
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/dlcl16/collapseall.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/collapseall-disabled.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/elcl16/collapseall.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/collapseall.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <!--urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/dlcl16/refresh.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/refresh-disabled.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement-->
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/elcl16/refresh.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/refresh.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/elcl16/tsearch_obj.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/search_file.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/$nl$/icons/full/elcl16/tsearch_obj.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/search_file.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/dlcl16/search_history.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/search_file.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/elcl16/search_history.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/search_file.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.search/icons/full/obj16/line_match.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/forward_nav.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <!--urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.ui/icons/full/obj16/methpub_obj.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/method_public.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.ui/icons/full/obj16/methpro_obj.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/method_private.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.ui/icons/full/obj16/methpri_obj.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/method_protected.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.ui/icons/full/obj16/methdef_obj.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/method_defaut.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.ui/icons/full/dlcl16/alphab_sort_co.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/sort.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/alphab_sort_co.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/sort.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/filter_fields.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/hide_variables.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/filter_methods.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/hide_methods.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/filter_classes.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/hide_classes.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement-->
+     
      
      <!--the minimize, maximize and view menu icons replacement does not work even though the names seem correct, perhaps on eclipse upgrade-->
      <!-- http://git.eclipse.org/c/platform/eclipse.platform.ui.git/plain/bundles/org.eclipse.ui/icons/full/elcl16/thin_min_view.png-->
