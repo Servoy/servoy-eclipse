@@ -745,6 +745,18 @@
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/rem_all-disabled.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/elcl16/rem_all_co.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/rem_all.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/dlcl16/rem_all_co.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/rem_all-disabled.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
      
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.dltk.javascript.ui/icons/obj16/sourceEditor.gif">

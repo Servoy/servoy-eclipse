@@ -517,7 +517,8 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnDistributeHorizontalCenters = {
 		text: "Horizontal Centers",
-		icon: "../../images/distribute_hcenters.gif",
+		icon: "../../images/distribute_hcenters.png",
+		disabledIcon: "../../images/distribute_hcenters-disabled.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.executeAction('horizontal_centers');
@@ -526,7 +527,8 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnDistributeLeftward = {
 		text: "Leftward",
-		icon: "../../images/distribute_leftward.gif",
+		icon: "../../images/distribute_leftward.png",
+		disabledIcon: "../../images/distribute_leftward-disabled.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.executeAction('horizontal_pack');
@@ -545,7 +547,8 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnDistributeVerticalCenters = {
 		text: "Vertical Centers",
-		icon: "../../images/distribute_vcenters.gif",
+		icon: "../../images/distribute_vcenters.png",
+		disabledIcon: "../../images/distribute_vcenters-disabled.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.executeAction('vertical_centers');
@@ -554,7 +557,8 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnDistributeUpward = {
 		text: "Upward",
-		icon: "../../images/distribute_upward.gif",
+		icon: "../../images/distribute_upward.png",
+		disabledIcon: "../../images/distribute_upward-disabled.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.executeAction('vertical_pack');
