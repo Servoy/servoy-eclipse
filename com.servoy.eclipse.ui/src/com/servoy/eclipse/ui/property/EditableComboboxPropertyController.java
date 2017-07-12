@@ -132,7 +132,12 @@ public class EditableComboboxPropertyController extends PropertyController<Strin
 			@Override
 			protected Object doGetValue()
 			{
-				return comboBox.getText();
+				String text = comboBox.getText();
+				if ("".equals(text))
+				{
+					return null;
+				}
+				return text;
 			}
 		};
 	}
