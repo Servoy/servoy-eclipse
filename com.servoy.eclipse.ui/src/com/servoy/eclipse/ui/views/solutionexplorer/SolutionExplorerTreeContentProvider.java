@@ -161,12 +161,12 @@ public class SolutionExplorerTreeContentProvider
 	implements IStructuredContentProvider, ITreeContentProvider, ILoadedNGPackagesListener, IAvailableNGPackageProjectsListener
 {
 	private static final String IMG_SOLUTION = "solution.png";
-	private static final String IMG_SOLUTION_M = "module.gif";
-	private static final String IMG_SOLUTION_MODULE = "solution_module.gif";
-	private static final String IMG_SOLUTION_LOGIN = "solution_login.gif";
-	private static final String IMG_SOLUTION_AUTHENTICATOR = "solution_auth.gif";
-	private static final String IMG_SOLUTION_SMART_ONLY = "solution_smart_only.gif";
-	private static final String IMG_SOLUTION_WEB_ONLY = "solution_web_only.gif";
+	private static final String IMG_SOLUTION_M = "module.png";
+	private static final String IMG_SOLUTION_MODULE = "module.png";
+	private static final String IMG_SOLUTION_LOGIN = "solution_login.png";
+	private static final String IMG_SOLUTION_AUTHENTICATOR = "solution_auth.png";
+	private static final String IMG_SOLUTION_SMART_ONLY = "solution_smart_only.png";
+	private static final String IMG_SOLUTION_WEB_ONLY = "solution_web_only.png";
 	private static final String IMG_SOLUTION_PREIMPORT = "solution_preimport.png";
 	private static final String IMG_SOLUTION_POSTIMPORT = "solution_postimport.png";
 	private static Map<IPath, Image> imageCache = new HashMap<IPath, Image>();
@@ -860,7 +860,7 @@ public class SolutionExplorerTreeContentProvider
 						if (componentsSpecProviderState != null) // the package management system might not yet be initialized at developer startup
 						{
 							Image packageIcon = uiActivator.loadImageFromBundle("components_package.png");
-							Image zipPackageIcon = PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor("test.zip").createImage();
+							Image zipPackageIcon = uiActivator.loadImageFromBundle("zip_package.png");
 							IPackageReader[] packages = componentsSpecProviderState.getAllPackageReaders();
 							List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 							for (IPackageReader entry : packages)
@@ -988,7 +988,7 @@ public class SolutionExplorerTreeContentProvider
 							IPackageReader[] packages = provider.getAllPackageReaders();
 							List<PlatformSimpleUserNode> children = new ArrayList<PlatformSimpleUserNode>();
 							Image packageIcon = uiActivator.loadImageFromBundle("services_package.png");
-							Image zipPackageIcon = PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor("test.zip").createImage();
+							Image zipPackageIcon = uiActivator.loadImageFromBundle("zip_package.png");
 							for (IPackageReader entry : packages)
 							{
 								IResource resource = getResource(entry);
@@ -1120,7 +1120,7 @@ public class SolutionExplorerTreeContentProvider
 			Solution servoySolution = (Solution)realObject;
 			ServoyProject servoyProject = ServoyModelFinder.getServoyModel().getServoyProject(servoySolution.getName());
 			IProject eclipseProject = servoyProject.getProject();
-			Image packageIcon = PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor("test.zip").createImage();
+			Image packageIcon = uiActivator.loadImageFromBundle("zip_package.png");
 
 
 			List<IProject> allReferencedProjects;

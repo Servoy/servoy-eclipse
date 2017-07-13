@@ -1015,7 +1015,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 						// developer rendering developer unresponsive for a long time.
 						String dataSource = s.getTableDatasource(tableName);
 						UserNode node = new UserNode(tableName, type, new DataSourceFeedback(dataSource), DataSourceWrapperFactory.getWrapper(dataSource),
-							uiActivator.loadImageFromBundle("portal.gif"));
+							uiActivator.loadImageFromBundle("table.png"));
 						node.setClientSupport(ClientSupport.All);
 						dlm.add(node);
 					}
