@@ -1185,8 +1185,8 @@ public class Activator extends Plugin
 			return;
 		}
 
-		ss.init();
 		ss.setDeveloperStartup(true);
+		ss.init();
 		ss.setRepositoryFactory(repositoryFactory);
 		ss.setDebugClientHandler(debugClientHandler);
 		ss.setUserManagerFactory(userManagerFactory);
