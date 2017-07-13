@@ -337,8 +337,8 @@ angular.module('editorContent',['servoyApp'])
     callServerSideApi: function(methodName, args) {
       return null;
     },
-    getFormComponentElements: function(propertyName, templateUUID) {
-    	return $compile($templateCache.get(templateUUID))($scope);
+    getFormComponentElements: function(propertyName, formComponentValue) {
+    	return $compile($templateCache.get(formComponentValue.uuid))($scope);
 	},
 	isInDesigner: function() {
 		return true;
