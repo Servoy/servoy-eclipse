@@ -116,8 +116,7 @@ public class EditorServiceHandler implements IServerService
 				Font f = JFaceResources.getFont(JFaceResources.DEFAULT_FONT);
 				JSONObject result = new JSONObject();
 				result.put("font", f.getFontData()[0].getName());
-				result.put("size", Math.abs(f.getFontData()[0].data.lfHeight));
-				result.put("weight", f.getFontData()[0].data.lfWeight);
+				result.put("size", f.getFontData()[0].getHeight());
 				return result;
 			}
 		});
