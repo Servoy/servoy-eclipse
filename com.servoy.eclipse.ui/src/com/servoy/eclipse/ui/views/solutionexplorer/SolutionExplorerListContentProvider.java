@@ -1027,7 +1027,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					{
 						String dataSource = s.getTable(name).getDataSource();
 						UserNode node = new UserNode(name, type, DataSourceWrapperFactory.getWrapper(dataSource),
-							uiActivator.loadImageFromBundle("portal.gif", true));
+							uiActivator.loadImageFromBundle("portal.png", true));
 						node.setAppearenceFlags(SimpleUserNode.TEXT_GRAYED_OUT);
 						node.setToolTipText(Messages.SolutionExplorerListContentProvider_hidden);
 						dlm.add(node);
