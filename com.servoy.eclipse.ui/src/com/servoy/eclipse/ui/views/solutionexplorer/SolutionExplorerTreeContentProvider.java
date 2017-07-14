@@ -1705,20 +1705,29 @@ public class SolutionExplorerTreeContentProvider
 		}
 	}
 
-	public static Image getServerImage(String serverName, IServerInternal server)
+	public static Image getServerImage(final String serverName, final IServerInternal server)
 	{
-		String imgName = "server.png";
-		if (!server.isValid())
+		final Image[] result = new Image[1];
+		Display.getDefault().syncExec(new Runnable()
 		{
-			ImageDescriptor IMG_ERROR = JFaceResources.getImageRegistry().getDescriptor("org.eclipse.jface.fieldassist.IMG_DEC_FIELD_ERROR");
-			return new DecorationOverlayIcon(uiActivator.loadImageFromBundle("server.png"), IMG_ERROR, IDecoration.BOTTOM_LEFT).createImage();
-		}
-		if (!server.getName().equals(serverName))
-		{
-			imgName = "duplicate_server.png";
-		}
+			public void run()
+			{
+				String imgName = "server.png";
+				if (!server.isValid())
+				{
+					ImageDescriptor IMG_ERROR = JFaceResources.getImageRegistry().getDescriptor("org.eclipse.jface.fieldassist.IMG_DEC_FIELD_ERROR");
+					result[0] = new DecorationOverlayIcon(uiActivator.loadImageFromBundle("server.png"), IMG_ERROR, IDecoration.BOTTOM_LEFT).createImage();
+					return;
+				}
+				if (!server.getName().equals(serverName))
+				{
+					imgName = "duplicate_server.png";
+				}
 
-		return uiActivator.loadImageFromBundle(imgName, !server.getConfig().isEnabled());
+				result[0] = uiActivator.loadImageFromBundle(imgName, !server.getConfig().isEnabled());
+			}
+		});
+		return result[0];
 	}
 
 	private void handleServerViewsNode(IServerInternal serverObj, PlatformSimpleUserNode node)
