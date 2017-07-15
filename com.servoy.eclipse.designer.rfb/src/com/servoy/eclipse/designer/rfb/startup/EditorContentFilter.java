@@ -20,8 +20,10 @@ package com.servoy.eclipse.designer.rfb.startup;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.Filter;
@@ -94,9 +96,8 @@ public class EditorContentFilter implements Filter
 				Set<String> formScripts = new HashSet<String>();
 				formScripts.add("js/servoy-components.js?x=" + System.currentTimeMillis());
 //				formScripts.add("solutions/" + solution + "/forms/" + form + ".js");
-				HashMap<String, String> variableSubstitution = new HashMap<String, String>();
-				variableSubstitution.put("orientation", String.valueOf(0)); // fs.getSolution().getTextOrientation()
-				ArrayList<String> css = new ArrayList<String>();
+				Map<String, Object> variableSubstitution = Collections.singletonMap("orientation", (Object)Integer.valueOf(0)); // fs.getSolution().getTextOrientation()
+				List<String> css = new ArrayList<String>();
 				css.add("css/servoy.css");
 				SpecProviderState componentsSpecProviderState = WebComponentSpecProvider.getSpecProviderState();
 				for (PackageSpecification<WebLayoutSpecification> entry : componentsSpecProviderState.getLayoutSpecifications().values())
