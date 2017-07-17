@@ -367,6 +367,10 @@ public class GetAllInstalledPackages implements IDeveloperService, ISpecReloadLi
 	@Override
 	public void activeProjectUpdated(ServoyProject activeProject, int updateInfo)
 	{
+		if (updateInfo == IActiveProjectListener.MODULES_UPDATED)
+		{
+			reloadPackages();
+		}
 	}
 
 	public void resourceListenersOn()
