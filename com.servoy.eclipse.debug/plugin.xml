@@ -388,19 +388,19 @@
            <command
                  commandId="com.servoy.eclipse.ui.StartWebClient"
                  icon="icons/launch_web.png"
-                 label="Start Debug Web Client"
+                 label="Launch Debug Web Client"
                  style="push">
            </command>
            <command
                  commandId="com.servoy.eclipse.ui.StartSmartClient"
                  icon="icons/launch.png"
-                 label="Start Debug Smart Client"
+                 label="Launch Debug Smart Client"
                  style="push">
            </command>
            <command
                  commandId="com.servoy.eclipse.ui.StartNGClient"
                  icon="icons/launch_ng.png"
-                 label="Start NGClient"
+                 label="Launch NGClient"
                  style="push">
            </command>
         </menuContribution>
