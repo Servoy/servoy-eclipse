@@ -23,6 +23,7 @@ import java.util.concurrent.Callable;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.json.JSONObject;
 import org.sablo.websocket.IServerService;
@@ -116,7 +117,8 @@ public class EditorServiceHandler implements IServerService
 				Font f = JFaceResources.getFont(JFaceResources.DEFAULT_FONT);
 				JSONObject result = new JSONObject();
 				result.put("font", f.getFontData()[0].getName());
-				result.put("size", f.getFontData()[0].getHeight());
+				int pxHeight = Math.round(f.getFontData()[0].getHeight() * Display.getDefault().getDPI().y / 72f);
+				result.put("size", pxHeight);
 				return result;
 			}
 		});

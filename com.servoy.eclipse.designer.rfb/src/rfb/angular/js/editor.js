@@ -926,7 +926,7 @@ angular.module('editor', ['mc.resizer', 'palette', 'toolbar', 'contextmenu', 'mo
 				fontPromise.then(function(result){
 				    $document[0].body.style.fontFamily = result.font;
 				    $document[0].body.style.fontWeight = 500;
-					$document[0].body.style.fontSize = result.size+'pt';
+					$document[0].body.style.fontSize = result.size+'px';
 					$document[0].body.style.lineHeight = '18px';
 				});
 
