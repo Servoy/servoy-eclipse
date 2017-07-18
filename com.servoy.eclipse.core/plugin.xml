@@ -15,9 +15,9 @@
             name="Servoy Developer"
             description="%productBlurb">
          <property
-           name="applicationCSS"
-           value="platform:/plugin/com.servoy.eclipse.core/servoytheme/servoy.css ">
-     	</property>
+               name="cssTheme"
+               value="com.servoy.eclipse.core.servoytheme">
+         </property>
          <property
                name="applicationCSSResources"
                value="platform:/plugin/org.eclipse.platform/images/">
@@ -622,5 +622,13 @@
                priorityLevel="workbench">
          </variable>
       </sourceProvider>
+   </extension>
+   <extension
+         point="org.eclipse.e4.ui.css.swt.theme">
+      <theme
+            basestylesheeturi="servoytheme/servoy.css"
+            id="com.servoy.eclipse.core.servoytheme"
+            label="Servoy Default Theme">
+      </theme>
    </extension>
 </plugin>
