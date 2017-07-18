@@ -75,6 +75,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.FormElementGroup;
 import com.servoy.j2db.persistence.GraphicalComponent;
 import com.servoy.j2db.persistence.IAnchorConstants;
+import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IColumn;
 import com.servoy.j2db.persistence.IColumnTypes;
 import com.servoy.j2db.persistence.IDataProvider;
@@ -1515,6 +1516,11 @@ public class ElementFactory
 									}
 								}
 							}
+							if (o instanceof IChildWebObject)
+							{
+								((IChildWebObject)o).resetUUID();
+							}
+
 							return IPersistVisitor.CONTINUE_TRAVERSAL;
 						}
 					});
