@@ -3,7 +3,7 @@
 		<div uib-accordion close-others='oneAtATime' ui-sortable="sortableOptions" ng-model="packages">
 			<div uib-accordion-group ng-repeat="(packageIndex, package) in packages" is-open="package.isOpen" ng-if="((package.components | filter:{displayName:searchText}).length > 0) || ((package.categories | filter:{displayName:searchText}).length > 0)" >
 				<uib-accordion-heading>
-					<h1 class="palette-heading handle"><img ng-src="{{package.isOpen ? 'templates/images/chevron_down.png' : 'templates/images/chevron_right.png'}}" style="margin-right:0"/>{{package.packageDisplayname}}<img id="move" ng-src="templates/images/move.png" style="float:right"/></h1>
+					<h1 class="palette-heading handle" ng-attr-style="{{systemFont}}"><img ng-src="{{package.isOpen ? 'templates/images/chevron_down.png' : 'templates/images/chevron_right.png'}}" style="margin-right:0"/>{{package.packageDisplayname}}<img id="move" ng-src="templates/images/move.png" style="float:right"/></h1>
 				</uib-accordion-heading>
 			    <div>
 				    <ul>
