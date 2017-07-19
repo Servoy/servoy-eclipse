@@ -20,7 +20,7 @@
       <view
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView"
-            icon="icons/forms.png"
+            icon="icons/form_hierarchy.png"
             id="com.servoy.eclipse.ui.views.solutionexplorer.FormHierarchyView"
             name="Form Hierarchy">
       </view>
@@ -861,7 +861,7 @@
                class="com.servoy.eclipse.ui.actions.OpenFormHierarchyActionDelegate"
                definitionId="com.servoy.eclipse.ui.OpenFormHierarchyAction"
                enablesFor="1"
-               icon="icons/forms.png"
+               icon="icons/form_hierarchy.png"
                id="com.servoy.eclipse.ui.OpenFormHierarchyAction"
                label="Open Form Hierarchy"
                menubarPath="open.ext"
@@ -1267,7 +1267,7 @@
          point="org.eclipse.ui.workingSets">
       <workingSet
             description="Working set for Servoy elements."
-            icon="icons/servoy_workingset.gif"
+            icon="icons/servoy_workingset.png"
             id="com.servoy.eclipse.core.ServoyWorkingSet"
             name="Servoy Elements"
             pageClass="org.eclipse.ui.internal.ide.dialogs.ResourceWorkingSetPage"

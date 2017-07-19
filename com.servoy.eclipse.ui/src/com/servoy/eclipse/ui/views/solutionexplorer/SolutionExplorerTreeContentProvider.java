@@ -2044,7 +2044,7 @@ public class SolutionExplorerTreeContentProvider
 			{
 				Pair<Solution, String> solutionAndScope = new Pair<Solution, String>(solution, scopeName);
 				PlatformSimpleUserNode globalsFolder = new PlatformSimpleUserNode(scopeName, UserNodeType.GLOBALS_ITEM, solutionAndScope,
-					uiActivator.loadImageFromBundle("globe.gif"));
+					uiActivator.loadImageFromBundle("globals.png"));
 				globalsFolder.parent = parent;
 				nodes.add(globalsFolder);
 				addGlobalsNodeChildren(globalsFolder, solutionAndScope);
@@ -2118,7 +2118,7 @@ public class SolutionExplorerTreeContentProvider
 				for (String workingSet : workingSets)
 				{
 					PlatformSimpleUserNode node = new PlatformSimpleUserNode(workingSet, UserNodeType.WORKING_SET, null, solution,
-						uiActivator.loadImageFromBundle("servoy_workingset.gif"));
+						uiActivator.loadImageFromBundle("servoy_workingset.png"));
 					nodes.add(node);
 					node.parent = formsNode;
 				}

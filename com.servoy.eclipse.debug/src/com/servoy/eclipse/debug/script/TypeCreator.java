@@ -300,18 +300,18 @@ public class TypeCreator extends TypeCache
 	protected final static ImageDescriptor PRIVATE_GLOBAL_VAR_IMAGE = ImageDescriptor.createFromURL(
 		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_private.gif"), null));
 	protected final static ImageDescriptor PUBLIC_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/public_method.gif"), null));
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_public.png"), null));
 	protected final static ImageDescriptor PROTECTED_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/protected_method.gif"), null));
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_protected.png"), null));
 	protected final static ImageDescriptor PRIVATE_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/private_method.gif"), null));
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_private.png"), null));
 
 	protected final static ImageDescriptor FORM_PUBLIC_METHOD_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/public_method.gif"), null));
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_public.png"), null));
 	protected final static ImageDescriptor FORM_PROTECTED_METHOD_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/protected_method.gif"), null));
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_protected.png"), null));
 	protected final static ImageDescriptor FORM_PRIVATE_METHOD_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/private_method.gif"), null));
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_private.png"), null));
 	protected final static ImageDescriptor FORM_PUBLIC_VARIABLE_IMAGE = ImageDescriptor.createFromURL(
 		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_public.gif"), null));
 	protected final static ImageDescriptor FORM_PRIVATE_VARIABLE_IMAGE = ImageDescriptor.createFromURL(
@@ -320,7 +320,7 @@ public class TypeCreator extends TypeCache
 	protected final static ImageDescriptor FOUNDSET_IMAGE = ImageDescriptor.createFromURL(
 		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/foundset.png"), null));
 	protected final static ImageDescriptor RELATION_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/relation.gif"), null));
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/relation.png"), null));
 	protected final static ImageDescriptor RELATION_PROTECTED_IMAGE = ImageDescriptor.createFromURL(
 		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/relation_protected.png"), null));
 	protected final static ImageDescriptor RELATION_PRIVATE_IMAGE = ImageDescriptor.createFromURL(
@@ -334,7 +334,7 @@ public class TypeCreator extends TypeCache
 		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/columncalc.gif"), null));
 
 	protected final static ImageDescriptor GLOBALS = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/globe.gif"), null));
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/globals.png"), null));
 	protected final static ImageDescriptor SCOPES = ImageDescriptor.createFromURL(
 		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/scopes.png"), null));
 	protected final static ImageDescriptor FORMS = ImageDescriptor.createFromURL(

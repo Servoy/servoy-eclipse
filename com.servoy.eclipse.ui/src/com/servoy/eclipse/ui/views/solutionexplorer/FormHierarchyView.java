@@ -376,13 +376,13 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				ScriptMethod sm = (ScriptMethod)element;
 				if (sm.isPrivate())
 				{
-					return uiActivator.loadImageFromBundle("private_method.gif");
+					return uiActivator.loadImageFromBundle("method_private.png");
 				}
 				if (sm.isProtected())
 				{
-					return uiActivator.loadImageFromBundle("protected_method.gif");
+					return uiActivator.loadImageFromBundle("method_protected.png");
 				}
-				return sm.isPublic() ? uiActivator.loadImageFromBundle("public_method.gif") : DLTKPluginImages.DESC_METHOD_DEFAULT.createImage();
+				return sm.isPublic() ? uiActivator.loadImageFromBundle("method_public.png") : DLTKPluginImages.DESC_METHOD_DEFAULT.createImage();
 			}
 			else if (element instanceof Pair< ? , ? >)
 			{
@@ -733,7 +733,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		openAction.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
 		tree.addSelectionChangedListener(openAction);
 
-		IAction newSubform = new OpenWizardAction(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("designer.gif"), "Create new sub form");
+		IAction newSubform = new OpenWizardAction(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("designer.png"), "Create new sub form");
 		treeNewAction.registerAction(Form.class, newSubform);
 		treeNewAction.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
 		tree.addSelectionChangedListener(treeNewAction);
@@ -1079,7 +1079,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		showMembersAction.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
 		list.addSelectionChangedListener(showMembersAction);
 
-		showAllAction = new FormHierarchyFilter(list, false, "inher_co.png", "Show All Inherited Members");
+		showAllAction = new FormHierarchyFilter(list, false, "show_all_inherited.png", "Show All Inherited Members");
 		showAllAction.setChecked(fDialogSettings.getBoolean(DIALOGSTORE_SHOW_ALL_MEMBERS));
 		showAllAction.addPropertyChangeListener(new IPropertyChangeListener()
 		{
@@ -1092,16 +1092,16 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		});
 		lowertbmanager.add(showAllAction);
 
-		hideElementsAction = new FormHierarchyFilter(list, false, "hide_elements.gif", "Hide elements");
+		hideElementsAction = new FormHierarchyFilter(list, false, "hide_elements.png", "Hide elements");
 		lowertbmanager.add(hideElementsAction);
 
-		hideMethodsAction = new FormHierarchyFilter(list, false, "hide_methods.gif", "Hide methods");
+		hideMethodsAction = new FormHierarchyFilter(list, false, "hide_method.png", "Hide methods");
 		lowertbmanager.add(hideMethodsAction);
 
-		hidePartsAction = new FormHierarchyFilter(list, false, "hide_parts.gif", "Hide parts");
+		hidePartsAction = new FormHierarchyFilter(list, false, "hide_parts.png", "Hide parts");
 		lowertbmanager.add(hidePartsAction);
 
-		hideVariablesAction = new FormHierarchyFilter(list, false, "hide_variables.gif", "Hide variables");
+		hideVariablesAction = new FormHierarchyFilter(list, false, "hide_variables.png", "Hide variables");
 		lowertbmanager.add(hideVariablesAction);
 	}
 

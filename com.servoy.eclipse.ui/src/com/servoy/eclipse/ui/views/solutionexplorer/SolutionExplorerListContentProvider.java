@@ -1232,19 +1232,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					nodeText = getScriptMethodSignature(sm, null, false, true, true, true) + " [" + ((Form)sm.getParent()).getName() + "]";
 				}
 
-				Image icon = null;
-				if (sm.isPrivate())
-				{
-					icon = uiActivator.loadImageFromBundle("private_method.gif");
-				}
-				else if (sm.isProtected())
-				{
-					icon = uiActivator.loadImageFromBundle("protected_method.gif");
-				}
-				else
-				{
-					icon = uiActivator.loadImageFromBundle("public_method.gif");
-				}
+				Image icon = getImageForMethodEncapsulation(sm);
 
 				String sampleCode = getScriptMethodSignature(sm, null, true, false, false, false);
 				String tooltipCode = "<html><body><b>" + HtmlUtils.escapeMarkup(getScriptMethodSignature(sm, null, true, true, true, false)) +
@@ -1323,9 +1311,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	private Image getImageForMethodEncapsulation(ScriptMethod sm)
 	{
-		if (sm.isPrivate()) return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_METHOD_PRIVATE);
-		if (sm.isProtected()) return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_METHOD_PROTECTED);
-		return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_METHOD_PUBLIC);
+		if (sm.isPrivate()) return uiActivator.loadImageFromBundle("method_private.png");
+		if (sm.isProtected()) return uiActivator.loadImageFromBundle("method_protected.png");
+		return uiActivator.loadImageFromBundle("method_public.png");
 	}
 
 	private Object[] createGlobalScripts(SimpleUserNode un)

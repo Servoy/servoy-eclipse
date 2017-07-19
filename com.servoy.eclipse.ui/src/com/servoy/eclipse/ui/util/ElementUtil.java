@@ -228,9 +228,9 @@ public class ElementUtil
 		if (persist instanceof ScriptMethod)
 		{
 			ScriptMethod sm = (ScriptMethod)persist;
-			if (sm.isPrivate()) return "private_method.gif";
-			else if (sm.isProtected()) return "protected_method.gif";
-			else return "public_method.gif";
+			if (sm.isPrivate()) return "method_private.png";
+			else if (sm.isProtected()) return "method_protected.png";
+			else return "method_public.png";
 		}
 		if (persist instanceof LayoutContainer)
 		{
