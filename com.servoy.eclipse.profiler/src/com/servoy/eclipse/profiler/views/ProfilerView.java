@@ -223,9 +223,9 @@ public class ProfilerView extends ViewPart
 					if (oldDataCallProfileData != null)
 					{
 						DataCallProfileData newDataCallProfileData = new DataCallProfileData(oldDataCallProfileData.getName(),
-							oldDataCallProfileData.getDatasource(), oldDataCallProfileData.getTransactionId(), 0, oldDataCallProfileData.getTime() +
-								dataCallProfileData.getTime(), oldDataCallProfileData.getQuery(), oldDataCallProfileData.getArgumentString(),
-							dataCallProfileData.getCount() + oldDataCallProfileData.getCount());
+							oldDataCallProfileData.getDatasource(), oldDataCallProfileData.getTransactionId(), 0,
+							oldDataCallProfileData.getTime() + dataCallProfileData.getTime(), oldDataCallProfileData.getQuery(),
+							oldDataCallProfileData.getArgumentString(), dataCallProfileData.getCount() + oldDataCallProfileData.getCount());
 						dataCallProfileDataMap.put(oldDataCallProfileData.getQuery(), newDataCallProfileData);
 					}
 					else
@@ -582,7 +582,7 @@ public class ProfilerView extends ViewPart
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 		 */
 		public void dispose()
@@ -591,7 +591,7 @@ public class ProfilerView extends ViewPart
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 		 */
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
@@ -602,7 +602,7 @@ public class ProfilerView extends ViewPart
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 		 */
 		public Object[] getElements(Object inputElement)
@@ -669,7 +669,7 @@ public class ProfilerView extends ViewPart
 	{
 		private final Image methodImage = Activator.getImageDescriptor("icons/form_method.gif").createImage();
 
-		private final Image calcImage = Activator.getImageDescriptor("icons/columnaggr.gif").createImage();
+		private final Image calcImage = Activator.getImageDescriptor("icons/columnaggr.png").createImage();
 
 		/**
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object,
@@ -1355,7 +1355,7 @@ public class ProfilerView extends ViewPart
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	protected void exportData()
 	{
@@ -1452,7 +1452,7 @@ public class ProfilerView extends ViewPart
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.part.ViewPart#init(org.eclipse.ui.IViewSite, org.eclipse.ui.IMemento)
 	 */
 	@Override
@@ -1480,7 +1480,7 @@ public class ProfilerView extends ViewPart
 
 		super.init(site, mem);
 
-		IPageService service = (IPageService)getSite().getService(IPageService.class);
+		IPageService service = getSite().getService(IPageService.class);
 		service.addPerspectiveListener(new PerspectiveAdapter()
 		{
 			@Override
@@ -1507,7 +1507,7 @@ public class ProfilerView extends ViewPart
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.part.ViewPart#saveState(org.eclipse.ui.IMemento)
 	 */
 	@Override

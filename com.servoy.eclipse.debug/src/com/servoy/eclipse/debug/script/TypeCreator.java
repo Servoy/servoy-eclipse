@@ -287,7 +287,7 @@ public class TypeCreator extends TypeCache
 	protected final static ImageDescriptor PROPERTY = ImageDescriptor.createFromURL(
 		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/properties.png"), null));
 	protected final static ImageDescriptor CONSTANT = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/constant.gif"), null));
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/constant.png"), null));
 
 	protected final static ImageDescriptor ELEMENTS = ImageDescriptor.createFromURL(
 		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/elements.png"), null));
@@ -296,9 +296,9 @@ public class TypeCreator extends TypeCache
 		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/special_properties.png"), null));
 
 	protected final static ImageDescriptor PUBLIC_GLOBAL_VAR_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_public.gif"), null));
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_public.png"), null));
 	protected final static ImageDescriptor PRIVATE_GLOBAL_VAR_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_private.gif"), null));
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_private.png"), null));
 	protected final static ImageDescriptor PUBLIC_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(
 		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_public.png"), null));
 	protected final static ImageDescriptor PROTECTED_GLOBAL_METHOD_IMAGE = ImageDescriptor.createFromURL(
@@ -313,9 +313,9 @@ public class TypeCreator extends TypeCache
 	protected final static ImageDescriptor FORM_PRIVATE_METHOD_IMAGE = ImageDescriptor.createFromURL(
 		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/method_private.png"), null));
 	protected final static ImageDescriptor FORM_PUBLIC_VARIABLE_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_public.gif"), null));
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_public.png"), null));
 	protected final static ImageDescriptor FORM_PRIVATE_VARIABLE_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_private.gif"), null));
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/variable_private.png"), null));
 
 	protected final static ImageDescriptor FOUNDSET_IMAGE = ImageDescriptor.createFromURL(
 		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/foundset.png"), null));
@@ -329,9 +329,9 @@ public class TypeCreator extends TypeCache
 	protected final static ImageDescriptor COLUMN_IMAGE = ImageDescriptor.createFromURL(
 		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/column.gif"), null));
 	protected final static ImageDescriptor COLUMN_AGGR_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/columnaggr.gif"), null));
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/columnaggr.png"), null));
 	protected final static ImageDescriptor COLUMN_CALC_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/columncalc.gif"), null));
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/columncalc.png"), null));
 
 	protected final static ImageDescriptor GLOBALS = ImageDescriptor.createFromURL(
 		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/globals.png"), null));
@@ -341,10 +341,10 @@ public class TypeCreator extends TypeCache
 		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/forms.png"), null));
 
 	protected final static ImageDescriptor PLUGINS = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/plugin.gif"), null));
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/plugins.png"), null));
 
 	protected final static ImageDescriptor PLUGIN_DEFAULT = ImageDescriptor.createFromURL(
-		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/plugin_conn.gif"), null));
+		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/plugin.png"), null));
 
 	public static final String ARRAY_INDEX_PROPERTY_PREFIX = "array__indexedby_";
 

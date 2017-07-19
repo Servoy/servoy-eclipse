@@ -31,7 +31,7 @@ import com.servoy.j2db.persistence.ValueList;
 
 /**
  * This action opens in the editor the user script element currently selected in the outline of the solution view.
- * 
+ *
  * @author acostescu
  */
 public class OpenValueListAction extends Action implements ISelectionChangedListener
@@ -41,14 +41,14 @@ public class OpenValueListAction extends Action implements ISelectionChangedList
 
 	/**
 	 * Creates a new open action that uses the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public OpenValueListAction(SolutionExplorerView sev)
 	{
 		viewer = sev;
 
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("openvaluelist.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("openvaluelist.png"));
 		setText("Edit valuelist");
 		setToolTipText("Edit valuelist");
 	}

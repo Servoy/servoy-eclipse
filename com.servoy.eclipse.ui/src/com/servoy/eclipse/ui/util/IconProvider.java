@@ -58,17 +58,17 @@ public class IconProvider
 	{
 		c2i = new HashMap<Class< ? >, String>();
 		c2i.put(com.servoy.j2db.documentation.scripting.docs.JSLib.class, "jslibfolder.png");
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.Array.class, "jslibarray.gif");
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.Date.class, "day_obj.gif");
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.String.class, "jslibstring.gif");
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.Math.class, "sum.gif");
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.JSON.class, "json.gif");
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.Statements.class, "statements.gif");
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, "special_operators.gif");
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.XML.class, "xml_image.gif");
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.XMLList.class, "xmlList_image.gif");
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.RegExp.class, "regExp_image.gif");
-		c2i.put(com.servoy.j2db.documentation.scripting.docs.Number.class, "number.gif");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.Array.class, "jslibarray.png");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.Date.class, "day_obj.png");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.String.class, "jslibstring.png");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.Math.class, "sum.png");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.JSON.class, "json.png");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.Statements.class, "statements.png");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.SpecialOperators.class, "special_operators.png");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.XML.class, "xml.png");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.XMLList.class, "xml-list.png");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.RegExp.class, "reg_exp.png");
+		c2i.put(com.servoy.j2db.documentation.scripting.docs.Number.class, "number.png");
 
 		c2i.put(JSApplication.class, "application.png");
 		c2i.put(JSDatabaseManager.class, "database_manager.png");

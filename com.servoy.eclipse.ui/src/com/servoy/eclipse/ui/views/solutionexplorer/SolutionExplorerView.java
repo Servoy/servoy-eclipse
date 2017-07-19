@@ -591,7 +591,7 @@ public class SolutionExplorerView extends ViewPart
 
 		ViewLabelProvider()
 		{
-			null_image = Activator.getDefault().loadImageFromBundle("gray_dot.gif");
+			null_image = Activator.getDefault().loadImageFromBundle("gray_dot.png");
 		}
 
 		@Override

@@ -1790,7 +1790,7 @@ public class SolutionExplorerTreeContentProvider
 						}
 						if (image == null)
 						{
-							image = uiActivator.loadImageFromBundle("plugin_conn.gif");
+							image = uiActivator.loadImageFromBundle("plugin.png");
 						}
 
 						PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName(), UserNodeType.PLUGIN, scriptObject, image,
@@ -1832,7 +1832,7 @@ public class SolutionExplorerTreeContentProvider
 				if (spec.getApiFunctions().size() != 0 || spec.getAllPropertiesNames().size() != 0)
 				{
 					PlatformSimpleUserNode node = new PlatformSimpleUserNode(spec.getScriptingName(), UserNodeType.PLUGIN, spec,
-						uiActivator.loadImageFromBundle("plugin_conn.gif"), WebServiceScriptable.class);
+						uiActivator.loadImageFromBundle("plugin.png"), WebServiceScriptable.class);
 					plugins.add(node);
 					node.parent = pluginNode;
 				}
@@ -1878,7 +1878,7 @@ public class SolutionExplorerTreeContentProvider
 						!(javaMembers instanceof InstanceJavaMembers && javaMembers.getMethodIds(false).size() > 0))
 					{
 						constantsChildren.add(n);
-						n.setIcon(uiActivator.loadImageFromBundle("constant.gif"));
+						n.setIcon(uiActivator.loadImageFromBundle("constant.png"));
 					}
 					else if (ServoyException.class.isAssignableFrom(cls))
 					{
@@ -1896,7 +1896,7 @@ public class SolutionExplorerTreeContentProvider
 			if (constantsChildren.size() > 0)
 			{
 				children.add(constants = new PlatformSimpleUserNode("Constants", UserNodeType.RETURNTYPE_CONSTANT, null,
-					uiActivator.loadImageFromBundle("constant.gif")));
+					uiActivator.loadImageFromBundle("constant.png")));
 				constants.parent = node;
 			}
 

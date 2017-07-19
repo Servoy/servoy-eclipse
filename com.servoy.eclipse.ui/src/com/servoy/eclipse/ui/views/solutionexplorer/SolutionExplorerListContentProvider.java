@@ -1133,7 +1133,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 			{
 				AggregateVariable av = aggs.next();
 				Object real = relation == null ? av : new ColumnWrapper(av, relation);
-				sl.add(new UserNode(av.getDataProviderID(), type, new ColumnFeedback(prefix, av), real, uiActivator.loadImageFromBundle("columnaggr.gif")));
+				sl.add(new UserNode(av.getDataProviderID(), type, new ColumnFeedback(prefix, av), real, uiActivator.loadImageFromBundle("columnaggr.png")));
 			}
 		}
 		dlm.addAll(sl);
@@ -1148,7 +1148,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				ScriptCalculation sc = calcs.next();
 				Object real = relation == null ? sc : new ColumnWrapper(sc, relation);
 				sl.add(new UserNode(sc.getDataProviderID(), UserNodeType.CALCULATIONS_ITEM, new ColumnFeedback(prefix, sc), real,
-					uiActivator.loadImageFromBundle("columncalc.gif")));
+					uiActivator.loadImageFromBundle("columncalc.png")));
 			}
 		}
 		dlm.addAll(sl);
@@ -1816,7 +1816,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 					if (adapter.isDeprecated(constantsElementName + (String)element)) continue;
 
 					node = new UserNode((String)element, actionType, new FieldFeedback((String)element, constantsElementName, resolver, scriptObject, ijm),
-						real, uiActivator.loadImageFromBundle("constant.gif"));
+						real, uiActivator.loadImageFromBundle("constant.png"));
 
 					// this field is a constant
 					Field field = (Field)ijm.getField((String)element, true);
@@ -1825,7 +1825,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				else
 				{
 					node = new UserNode((String)element, actionType, constantsElementName + element, null, null, real,
-						uiActivator.loadImageFromBundle("constant.gif"));
+						uiActivator.loadImageFromBundle("constant.png"));
 				}
 				dlm.add(node);
 			}

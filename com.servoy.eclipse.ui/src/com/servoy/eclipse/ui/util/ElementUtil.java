@@ -144,7 +144,7 @@ public class ElementUtil
 
 	public static String getPersistImageName(IPersist persist)
 	{
-		if (persist instanceof Portal && ((Portal)persist).isMobileInsetList()) return "insetlist.gif";
+		if (persist instanceof Portal && ((Portal)persist).isMobileInsetList()) return "insetlist.png";
 		if (persist instanceof BaseComponent)
 		{
 			String lookupName = ComponentFactory.getLookupName((BaseComponent)persist);
@@ -215,15 +215,15 @@ public class ElementUtil
 		}
 		if (persist instanceof ScriptCalculation)
 		{
-			return "columncalc.gif";
+			return "columncalc.png";
 		}
 		if (persist instanceof ScriptVariable)
 		{
 			ScriptVariable sv = (ScriptVariable)persist;
-			if (sv.isPrivate()) return "variable_private.gif";
-			if (sv.isPublic()) return "variable_public.gif";
-			if (sv.getScopeName() != null) return "global_variable.gif";
-			else return "form_variable.gif";
+			if (sv.isPrivate()) return "variable_private.png";
+			if (sv.isPublic()) return "variable_public.png";
+			if (sv.getScopeName() != null) return "variable_global.png";
+			else return "form_variable.png";
 		}
 		if (persist instanceof ScriptMethod)
 		{
@@ -234,7 +234,7 @@ public class ElementUtil
 		}
 		if (persist instanceof LayoutContainer)
 		{
-			return "layoutcontainer.gif";
+			return "layoutcontainer.png";
 		}
 		if (persist instanceof Part)
 		{

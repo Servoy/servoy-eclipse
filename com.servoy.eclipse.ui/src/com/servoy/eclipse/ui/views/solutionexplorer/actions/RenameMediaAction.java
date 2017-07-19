@@ -41,7 +41,7 @@ import com.servoy.j2db.persistence.ValidatorSearchContext;
 
 /**
  * Action to rename media.
- * 
+ *
  * @author lvostinar
  *
  */
@@ -54,14 +54,14 @@ public class RenameMediaAction extends Action implements ISelectionChangedListen
 
 	/**
 	 * Creates a new "rename media" action for the given solution view.
-	 * 
+	 *
 	 * @param viewer the solution view to use.
 	 */
 	public RenameMediaAction(SolutionExplorerView viewer)
 	{
 		this.viewer = viewer;
 
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("rename_media.gif"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("rename_media.png"));
 		setText("Rename media item");
 		setToolTipText(getText());
 	}
@@ -88,7 +88,8 @@ public class RenameMediaAction extends Action implements ISelectionChangedListen
 				selectedMediaName = node.getName();
 
 				// make sure you have the in-memory version of the solution
-				solution = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(((Solution)solutionNode.getRealObject()).getName()).getEditingSolution();
+				solution = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(
+					((Solution)solutionNode.getRealObject()).getName()).getEditingSolution();
 			}
 		}
 		setEnabled(solution != null);

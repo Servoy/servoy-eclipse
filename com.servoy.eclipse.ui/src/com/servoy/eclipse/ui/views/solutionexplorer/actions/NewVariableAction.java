@@ -88,7 +88,7 @@ import com.servoy.j2db.util.docvalidator.IdentDocumentValidator;
 
 /**
  * Action to create a new form/global variable depending on the selection of a solution view.
- * 
+ *
  * @author acostescu
  */
 public class NewVariableAction extends Action implements ISelectionChangedListener
@@ -100,15 +100,15 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 
 	/**
 	 * Creates a new "create new variable" action for the given solution view.
-	 * 
+	 *
 	 * @param sev the solution view to use.
 	 */
 	public NewVariableAction(SolutionExplorerView sev)
 	{
 		viewer = sev;
 
-		newFormVariableImage = Activator.loadImageDescriptorFromBundle("new_form_variable.gif");
-		newGlobalVariableImage = Activator.loadImageDescriptorFromBundle("new_global_variable.gif");
+		newFormVariableImage = Activator.loadImageDescriptorFromBundle("new_form_variable.png");
+		newGlobalVariableImage = Activator.loadImageDescriptorFromBundle("new_global_variable.png");
 		setText("Create variable");
 		setToolTipText("Create variable");
 	}
@@ -320,7 +320,7 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 
 	/**
 	 * This is a dialog that allows you to specify a name/type/default value for a variable.
-	 * 
+	 *
 	 * @author acostescu
 	 */
 	public static class VariableEditDialog extends Dialog
@@ -347,7 +347,7 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 
 		/**
 		 * Creates a new Dialog for new variable name, type and default value.
-		 * 
+		 *
 		 * @param parentShell the parent shell for the dialog.
 		 * @param title the title of the dialog.
 		 * @param inputValidator
@@ -361,7 +361,7 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 
 		/**
 		 * Creates a new Dialog for editing a variable name, type and default value.
-		 * 
+		 *
 		 * @param parentShell the parent shell for the dialog.
 		 * @param title the title of the dialog.
 		 * @param inputValidator
@@ -628,7 +628,7 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 
 		/**
 		 * Returns the name of the variable as given by the user or null if the user canceled the dialog.
-		 * 
+		 *
 		 * @return the name of the variable as given by the user or null if the user canceled the dialog.
 		 */
 		public String getVariableName()
@@ -638,7 +638,7 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 
 		/**
 		 * Returns the default value of the variable as given by the user.
-		 * 
+		 *
 		 * @return the default value of the variable as given by the user.
 		 */
 		public String getVariableDefaultValue()
@@ -660,7 +660,7 @@ public class NewVariableAction extends Action implements ISelectionChangedListen
 
 		/**
 		 * Returns the type of the variable as given by the user.
-		 * 
+		 *
 		 * @return the type of the variable as given by the user.
 		 */
 		public int getVariableType()
