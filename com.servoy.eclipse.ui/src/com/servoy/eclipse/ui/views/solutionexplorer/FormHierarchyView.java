@@ -702,8 +702,11 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	{
 		IStatusLineManager slManager = getViewSite().getActionBars().getStatusLineManager();
 		statusBarUpdater = new StatusBarUpdater(slManager);
+		statusBarUpdater.setShowModule(true);
 		statusBarUpdater.selectionChanged(new SelectionChangedEvent(list, list.getSelection()));
 		list.addSelectionChangedListener(statusBarUpdater);
+		statusBarUpdater.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
+		tree.addSelectionChangedListener(statusBarUpdater);
 	}
 
 	private void createSelectionProvider()
