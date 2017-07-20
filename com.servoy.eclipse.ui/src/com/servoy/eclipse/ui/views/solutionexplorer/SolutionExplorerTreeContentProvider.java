@@ -1811,7 +1811,7 @@ public class SolutionExplorerTreeContentProvider
 				{
 					ServoyLog.logError("Error loading plugin " + plugin.getName() + " exception: ", e);
 					PlatformSimpleUserNode node = new PlatformSimpleUserNode(plugin.getName() + " (not loaded!)", UserNodeType.PLUGIN, null, null, e.toString(),
-						null, uiActivator.loadImageFromBundle("warning.gif"));
+						null, uiActivator.loadImageFromBundle("warning.png"));
 					plugins.add(node);
 					node.parent = pluginNode;
 				}
