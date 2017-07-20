@@ -222,7 +222,8 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnMoveUp = {
 		text: "Move to left inside parent container",
-		icon: "../../images/back.gif",
+		icon: "../../images/move_back.png",
+		disabledIcon: "../../images/move_back-disabled.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.executeAction('responsive_move_up');
@@ -231,7 +232,8 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 
 	var btnMoveDown = {
 		text: "Move to right inside parent container",
-		icon: "../../images/forward.gif",
+		icon: "../../images/move_forward.png",
+		disabledIcon: "../../images/move_forward-disabled.png",
 		enabled: false,
 		onclick: function() {
 			$editorService.executeAction('responsive_move_down');
