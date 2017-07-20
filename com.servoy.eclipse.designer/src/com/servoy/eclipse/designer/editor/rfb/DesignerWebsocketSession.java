@@ -164,7 +164,7 @@ public class DesignerWebsocketSession extends BaseWebsocketSession implements IS
 				JSONWriter writer = new JSONStringer();
 				writer.object();
 				writer.key("formProperties");
-				writer.value(wrapper.getPropertiesString());
+				writer.value(new JSONObject(wrapper.getPropertiesString()));
 				writer.key("parentUuid");
 				writer.value(form.extendsForm != null ? form.extendsForm.getUUID() : null);
 				Collection<IFormElement> baseComponents = new ArrayList<IFormElement>(wrapper.getBaseComponents());
