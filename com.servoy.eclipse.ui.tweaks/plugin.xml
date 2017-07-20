@@ -567,6 +567,13 @@
      </urlBasedImageReplacement>
      
      <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.team.ui/$nl$/icons/full/elcl16/synch_participants.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/team_synchronizing.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.team.ui/icons/full/elcl16/refresh.gif">
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/refresh.png">
