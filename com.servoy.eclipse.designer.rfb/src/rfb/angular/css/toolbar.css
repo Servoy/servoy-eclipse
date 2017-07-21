@@ -77,6 +77,10 @@
 	padding: 0px;
 }
 
+.toolbar-action button{
+	background-color: transparent;
+}
+
 .toolbar-action:hover {
 	border-color: #C0C0C0
 }
