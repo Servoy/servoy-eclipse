@@ -88,7 +88,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 	public NewSolutionWizard()
 	{
 		setWindowTitle("New solution");
-		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("solution_wizard_description.gif"));
+		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("solution_wizard_description.png"));
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)

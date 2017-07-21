@@ -2057,7 +2057,7 @@ public class SolutionExplorerTreeContentProvider
 	private void addGlobalsNodeChildren(PlatformSimpleUserNode globalsFolder, Pair<Solution, String> solutionAndScope)
 	{
 		PlatformSimpleUserNode globalVariables = new PlatformSimpleUserNode(Messages.TreeStrings_variables, UserNodeType.GLOBAL_VARIABLES, solutionAndScope,
-			uiActivator.loadImageFromBundle("global_variabletree.gif"));
+			uiActivator.loadImageFromBundle("variable_global.png"));
 		globalVariables.parent = globalsFolder;
 
 		PlatformSimpleUserNode globalRelations = new PlatformSimpleUserNode(Messages.TreeStrings_relations, UserNodeType.GLOBALRELATIONS, solutionAndScope,
@@ -2331,7 +2331,7 @@ public class SolutionExplorerTreeContentProvider
 					}
 
 					node = new PlatformSimpleUserNode(element.getName(), UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { model, null }, originalForm,
-						uiActivator.loadImageFromBundle("element.gif"));
+						uiActivator.loadImageFromBundle("element.png"));
 					node.setDeveloperFeedback(new SimpleDeveloperFeedback(element.getName() + ".", null, null));
 				}
 				elements.add(node);
@@ -2350,7 +2350,7 @@ public class SolutionExplorerTreeContentProvider
 						if (portalElement.getName() != null && portalElement.getName().trim().length() > 0)
 						{
 							node = new PlatformSimpleUserNode(portalElement.getName(), UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { portalElement, null },
-								originalForm, uiActivator.loadImageFromBundle("element.gif"));
+								originalForm, uiActivator.loadImageFromBundle("element.png"));
 							elements.add(node);
 							node.parent = parentNode;
 						}
@@ -2432,7 +2432,7 @@ public class SolutionExplorerTreeContentProvider
 				// show all sub-types
 				String className = beanClass.getSimpleName();
 				node = new PlatformSimpleUserNode(bean.getName() + " (" + className + ')', UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { bean, beanClass },
-					bean.getParent(), uiActivator.loadImageFromBundle("element.gif"));
+					bean.getParent(), uiActivator.loadImageFromBundle("element.png"));
 				node.setDeveloperFeedback(new SimpleDeveloperFeedback(bean.getName() + ".", null, null));
 
 				Class< ? > superClass = beanClass.getSuperclass();
@@ -2442,7 +2442,7 @@ public class SolutionExplorerTreeContentProvider
 				{
 					className = superClass.getSimpleName();
 					currentClassNode = new PlatformSimpleUserNode(className, UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { bean, superClass },
-						bean.getParent(), uiActivator.loadImageFromBundle("element.gif"));
+						bean.getParent(), uiActivator.loadImageFromBundle("element.png"));
 					currentClassNode.setDeveloperFeedback(new SimpleDeveloperFeedback(bean.getName() + ".", null, null));
 					currentClassNode.parent = parentClassNode;
 					parentClassNode.children = new PlatformSimpleUserNode[] { currentClassNode };
@@ -2454,7 +2454,7 @@ public class SolutionExplorerTreeContentProvider
 			{
 				// do not show subtypes
 				node = new PlatformSimpleUserNode(bean.getName(), UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { bean, null }, bean.getParent(),
-					uiActivator.loadImageFromBundle("element.gif"));
+					uiActivator.loadImageFromBundle("element.png"));
 				node.setDeveloperFeedback(new SimpleDeveloperFeedback(bean.getName() + ".", null, null));
 			}
 
@@ -2482,7 +2482,7 @@ public class SolutionExplorerTreeContentProvider
 		{
 			ServoyLog.logWarning("Solution explorer cannot create bean " + bean.getName(), e);
 			node = new PlatformSimpleUserNode(bean.getName(), UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { bean, null }, bean.getParent(),
-				uiActivator.loadImageFromBundle("element.gif"));
+				uiActivator.loadImageFromBundle("element.png"));
 			node.setDeveloperFeedback(new SimpleDeveloperFeedback(bean.getName() + ".", null, null));
 		}
 		return node;
@@ -2491,7 +2491,7 @@ public class SolutionExplorerTreeContentProvider
 	private PlatformSimpleUserNode createNodeForWebComponentBean(Bean bean)
 	{
 		PlatformSimpleUserNode node = new PlatformSimpleUserNode(bean.getName(), UserNodeType.FORM_ELEMENTS_ITEM, new Object[] { bean, null }, bean.getParent(),
-			uiActivator.loadImageFromBundle("element.gif"));
+			uiActivator.loadImageFromBundle("element.png"));
 		node.setDeveloperFeedback(new SimpleDeveloperFeedback(bean.getName() + ".", null, null));
 		return node;
 	}

@@ -260,7 +260,7 @@
                tooltip="Place Label"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddHorizontalLineActionDelegate"
-               icon="icons/hline.gif"
+               icon="icons/hline.png"
                id="com.servoy.eclipse.designer.action.addHLineAction"
                label="Place Horizontal Line"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
@@ -269,7 +269,7 @@
                tooltip="Horizontal Line"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddVerticalLineActionDelegate"
-               icon="icons/vline.gif"
+               icon="icons/vline.png"
                id="com.servoy.eclipse.designer.action.addVLineAction"
                label="Place Vertical Line"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
@@ -283,7 +283,7 @@
             visible="true">
          <action
                class="com.servoy.eclipse.designer.actions.AddBorderPanelActionDelegate"
-               icon="icons/titledBorder.gif"
+               icon="icons/titledborder.png"
                id="com.servoy.eclipse.designer.action.addBorderPanelAction"
                label="Place Border panel"
                state="false"
@@ -291,7 +291,7 @@
                tooltip="Place Border Panel"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddRoundedRectangleActionDelegate"
-               icon="icons/rrect.gif"
+               icon="icons/rounded_rectangle.png"
                id="com.servoy.eclipse.designer.action.addRoundedRectangleAction"
                label="Place Rounded Rectangle"
                state="false"
@@ -307,7 +307,7 @@
                tooltip="Place Rectangle"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddCircleActionDelegate"
-               icon="icons/circle.gif"
+               icon="icons/circle.png"
                id="com.servoy.eclipse.designer.action.addCircleAction"
                label="Place Circle"
                state="false"

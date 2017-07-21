@@ -76,7 +76,7 @@ public class NewPackageProjectWizard extends Wizard implements INewWizard
 	public NewPackageProjectWizard(String packageType)
 	{
 		setWindowTitle("New Package Project");
-		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("solution_wizard_description.gif"));
+		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("solution_wizard_description.png"));
 		this.packageType = packageType;
 		page1 = new NewPackageProjectPage();
 	}

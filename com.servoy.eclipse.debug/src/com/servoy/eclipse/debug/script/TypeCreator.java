@@ -327,7 +327,7 @@ public class TypeCreator extends TypeCache
 		FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path("/icons/relation_private.png"), null));
 
 	protected final static ImageDescriptor COLUMN_IMAGE = ImageDescriptor.createFromURL(
-		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/column.gif"), null));
+		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/column.png"), null));
 	protected final static ImageDescriptor COLUMN_AGGR_IMAGE = ImageDescriptor.createFromURL(
 		FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/columnaggr.png"), null));
 	protected final static ImageDescriptor COLUMN_CALC_IMAGE = ImageDescriptor.createFromURL(

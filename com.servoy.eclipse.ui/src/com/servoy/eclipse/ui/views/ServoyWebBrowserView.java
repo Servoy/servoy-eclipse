@@ -111,7 +111,7 @@ public abstract class ServoyWebBrowserView extends WebBrowserView
 
 							final ToolItem maximizeRestore = new ToolItem(toolbar, SWT.NONE);
 							final Image maximize = Activator.loadImageDescriptorFromBundle("maximize.png").createImage();
-							final Image restore = Activator.loadImageDescriptorFromBundle("restore.gif").createImage();
+							final Image restore = Activator.loadImageDescriptorFromBundle("restore.png").createImage();
 							maximizeRestore.setImage(maximize);
 							maximizeRestore.setToolTipText("Maximize");
 							maximizeRestore.addSelectionListener(new SelectionAdapter()

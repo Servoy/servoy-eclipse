@@ -79,7 +79,7 @@ public class IconProvider
 		c2i.put(JSI18N.class, "i18n.png");
 		c2i.put(JSSolutionModel.class, "blueprint.png");
 		c2i.put(JSUnitAssertFunctions.class, "jsunit.png");
-		c2i.put(ServoyException.class, "exception.gif");
+		c2i.put(ServoyException.class, "exception.png");
 		c2i.put(JSForm.class, "controller.png");
 		c2i.put(FoundSet.class, "foundset.png");
 	}

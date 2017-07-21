@@ -173,7 +173,7 @@ public class I18NExternalizeDialog extends Dialog
 
 	private final ContentSpec contentSpec = StaticContentSpecLoader.getContentSpec();
 	private final Image solutionImage = Activator.getDefault().loadImageFromBundle("solution.png");
-	private final Image elementImage = Activator.getDefault().loadImageFromBundle("element.gif");
+	private final Image elementImage = Activator.getDefault().loadImageFromBundle("element.png");
 	private final Image serverImage = Activator.getDefault().loadImageFromBundle("server.png");
 	private final Image tableImage = Activator.getDefault().loadImageFromBundle("portal.png");
 	private final Image jsImage = Activator.getDefault().loadImageFromBundle("js.png");

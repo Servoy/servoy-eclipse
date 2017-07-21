@@ -489,7 +489,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 		if (SHAPES_BORDER_PANEL_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("titledBorder.gif");
+			icon = Activator.loadImageDescriptorFromBundle("titledborder.png");
 			shapeType = RectShape.BORDER_PANEL;
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_BORDERTYPE,
 				new ComplexProperty<Border>(BorderPropertyController.getDefaultBorderValuesMap().get(BorderType.Title)));
@@ -503,14 +503,14 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 
 		else if (SHAPES_ROUNDED_RECTANGLE_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("rrect.gif");
+			icon = Activator.loadImageDescriptorFromBundle("rounded_rectangle.png");
 			shapeType = RectShape.ROUNDED_RECTANGLE;
 			setProperty(extendedData, StaticContentSpecLoader.PROPERTY_ROUNDEDRADIUS, Integer.valueOf(35));
 		}
 
 		else if (SHAPES_OVAL_ID.equals(id))
 		{
-			icon = Activator.loadImageDescriptorFromBundle("circle.gif");
+			icon = Activator.loadImageDescriptorFromBundle("circle.png");
 			shapeType = RectShape.OVAL;
 		}
 
@@ -519,7 +519,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 			float top, left;
 			if (SHAPES_HORIZONTAL_LINE_ID.equals(id))
 			{
-				icon = Activator.loadImageDescriptorFromBundle("hline.gif");
+				icon = Activator.loadImageDescriptorFromBundle("hline.png");
 				top = 1;
 				left = 0;
 				size = new Dimension(40, 1);
@@ -527,7 +527,7 @@ public class VisualFormEditorPaletteFactory extends BaseVisualFormEditorPaletteF
 			else
 			{
 				// SHAPES_VERTICAL_LINE_ID
-				icon = Activator.loadImageDescriptorFromBundle("vline.gif");
+				icon = Activator.loadImageDescriptorFromBundle("vline.png");
 				top = 0;
 				left = 1;
 				size = new Dimension(1, 40);

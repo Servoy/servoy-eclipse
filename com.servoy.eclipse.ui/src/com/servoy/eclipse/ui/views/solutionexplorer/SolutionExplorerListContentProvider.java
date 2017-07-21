@@ -1121,7 +1121,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				continue;
 			}
 			Object real = relation == null ? c : new ColumnWrapper(c, new Relation[] { relation });
-			dlm.add(new UserNode(c.getDataProviderID(), type, new ColumnFeedback(prefix, c), real, uiActivator.loadImageFromBundle("column.gif")));
+			dlm.add(new UserNode(c.getDataProviderID(), type, new ColumnFeedback(prefix, c), real, uiActivator.loadImageFromBundle("column.png")));
 		}
 		Iterator<Solution> modules = modulesOfSolution.values().iterator();
 		SortedList<UserNode> sl = new SortedList<UserNode>(NameComparator.INSTANCE);

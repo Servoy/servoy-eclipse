@@ -3670,7 +3670,7 @@ public class SolutionExplorerView extends ViewPart
 				else if (mediaNode.getType() == MediaNode.TYPE.FOLDER && mediaNodeTypeFilter.contains(MediaNode.TYPE.FOLDER))
 				{
 					node = new PlatformSimpleUserNode(mediaNode.getName(), UserNodeType.MEDIA_FOLDER, mediaNode,
-						uiActivator.loadImageFromBundle("media_folder.gif"));
+						uiActivator.loadImageFromBundle("media_folder.png"));
 				}
 
 				if (node != null) dlm.add(node);

@@ -245,7 +245,7 @@ public class DependencyResolvingPage extends ReviewOperationPage
 		collapsableItem.setControl(advancedResolvingComposite);
 		collapsableItem.setText("Advanced dependency resolve options");
 		collapsableItem.setHeight(advancedResolvingComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
-		collapsableItem.setImage(Activator.getDefault().loadImageFromBundle("dependency.gif"));
+		collapsableItem.setImage(Activator.getDefault().loadImageFromBundle("dependency.png"));
 
 		separator1.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
 		advancedResolvingCollapser.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
@@ -278,8 +278,8 @@ public class DependencyResolvingPage extends ReviewOperationPage
 					monitor.beginTask("Getting extension", 11);
 
 					monitor.subTask("acquiring extension name...");
-					DependencyMetadata[] dmds = state.extensionProvider.getDependencyMetadata(new ExtensionDependencyDeclaration(state.extensionID,
-						state.version, state.version));
+					DependencyMetadata[] dmds = state.extensionProvider.getDependencyMetadata(
+						new ExtensionDependencyDeclaration(state.extensionID, state.version, state.version));
 					if (dmds != null && dmds.length == 1)
 					{
 						final String name = dmds[0].extensionName;
@@ -673,16 +673,16 @@ public class DependencyResolvingPage extends ReviewOperationPage
 				// more extensions are to be installed/replaced (or one is down-graded); tell the user
 				UIMessage[] messages;
 				Image addIcon = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ADD);
-				Image upgradeIcon = Activator.getDefault().loadImageFromBundle("upgrade.gif");
-				Image downgradeIcon = Activator.getDefault().loadImageFromBundle("downgrade.gif");
+				Image upgradeIcon = Activator.getDefault().loadImageFromBundle("upgrade.png");
+				Image downgradeIcon = Activator.getDefault().loadImageFromBundle("downgrade.png");
 
 				String[] header = new String[] { "", "From", "To", "Name", "Id" };
 				messages = new UIMessage[state.chosenPath.extensionPath.length];
 				for (int i = state.chosenPath.extensionPath.length - 1; i >= 0; i--)
 				{
 					ExtensionNode ext = state.chosenPath.extensionPath[i];
-					DependencyMetadata[] newOne = state.extensionProvider.getDependencyMetadata(new ExtensionDependencyDeclaration(ext.id, ext.version,
-						ext.version));
+					DependencyMetadata[] newOne = state.extensionProvider.getDependencyMetadata(
+						new ExtensionDependencyDeclaration(ext.id, ext.version, ext.version));
 					String name = "";
 					if (newOne != null && newOne.length == 1)
 					{
@@ -713,8 +713,8 @@ public class DependencyResolvingPage extends ReviewOperationPage
 			if (exp1W.length > 0)
 			{
 				// user should know about these; or should we just consider this step failed directly?
-				nextPage = new ShowMessagesPage(
-					"DepWarnings", "Some items require your attention", "However, you can continue with the install process.", null, exp1W, true, nextPage);
+				nextPage = new ShowMessagesPage("DepWarnings", "Some items require your attention", "However, you can continue with the install process.", null,
+					exp1W, true, nextPage);
 				nextPage.setWizard(getWizard());
 			}
 		}

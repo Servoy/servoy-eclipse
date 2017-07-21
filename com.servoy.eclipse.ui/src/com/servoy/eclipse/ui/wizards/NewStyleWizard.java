@@ -90,7 +90,7 @@ public class NewStyleWizard extends Wizard implements INewWizard
 	public NewStyleWizard()
 	{
 		setWindowTitle("New style");
-		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("solution_wizard_description.gif"));
+		setDefaultPageImageDescriptor(Activator.loadImageDescriptorFromBundle("solution_wizard_description.png"));
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection selection)

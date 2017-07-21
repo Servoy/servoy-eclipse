@@ -72,7 +72,7 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 		}
 		if (element == FormOutlineContentProvider.ELEMENTS)
 		{
-			return Activator.getDefault().loadImageFromBundle("element.gif");
+			return Activator.getDefault().loadImageFromBundle("element.png");
 		}
 		if (element instanceof Pair)
 		{
@@ -241,7 +241,7 @@ public class FormOutlineLabelprovider extends ColumnLabelProvider implements IPe
 			}
 			else
 			{
-				imageName = "element.gif";
+				imageName = "element.png";
 			}
 		}
 		else return elementNameAndImage.getRight();

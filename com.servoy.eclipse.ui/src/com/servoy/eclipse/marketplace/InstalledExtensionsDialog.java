@@ -533,7 +533,7 @@ public class InstalledExtensionsDialog extends TrayDialog
 			{
 				if (table == null || getShell().isDisposed()) return;
 
-				Image updateIcon = Activator.getDefault().loadImageFromBundle("upgrade.gif");
+				Image updateIcon = Activator.getDefault().loadImageFromBundle("upgrade.png");
 				Image uninstallIcon = Activator.getDefault().loadImageFromBundle("delete.png");
 
 				table.setVisible(false);
