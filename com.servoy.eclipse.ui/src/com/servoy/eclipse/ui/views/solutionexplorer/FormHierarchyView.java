@@ -65,6 +65,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IMemento;
@@ -595,6 +596,9 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private static final String DIALOGSTORE_SHOW_MEMBERS = "FormHierarchy.SHOW_MEMBERS";
 	public static final String DIALOGSTORE_SHOW_ALL_MEMBERS = "FormHierarchy.SHOW_ALL_MEMBERS";
 	private static final String GROUP_ELEMENTS_BY_TYPE = "GroupElements";
+	private static final String OPEN_FORM_PREFERENCE = "FormHierarchy.OPEN_FORM";
+	public static final int OPEN_IN_FORM_EDITOR = 0;
+	public static final int OPEN_IN_SCRIPT_EDITOR = 1;
 
 	private IDialogSettings fDialogSettings;
 
@@ -634,6 +638,8 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private IMemento memento;
 	private StatusBarUpdater statusBarUpdater;
 	private IResourceChangeListener resourceChangeListener;
+	private OpenFormAction openInFormEditor;
+	private OpenFormAction openInScriptEditor;
 	private static final String SELECTED_FORM = "FormHierarchy.SELECTION";
 
 	@Override
@@ -664,13 +670,13 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	{
 		fParent = parent;
 		fDialogSettings = Activator.getDefault().getDialogSettings();
+		if (fDialogSettings.get(OPEN_FORM_PREFERENCE) == null) fDialogSettings.put(OPEN_FORM_PREFERENCE, OPEN_IN_FORM_EDITOR);
 		fToggleOrientationActions = new OrientationAction[] { new OrientationAction(this, VIEW_ORIENTATION_VERTICAL), new OrientationAction(this,
 			VIEW_ORIENTATION_HORIZONTAL), new OrientationAction(this, VIEW_ORIENTATION_AUTOMATIC) };
-
 		fSplitter = new SashForm(fParent, SWT.NONE);
 		initOrientation();//TODO add preference page & menu for the orientation settings
 
-		openAction = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.gif"), "Open");
+		openAction = new ContextAction(this, Activator.loadImageDescriptorFromBundle("open.png"), "Open");
 		treeNewAction = new ContextAction(this, PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD), "New");
 		overrideAction = new OverrideMethodAction(this);
 		createTreeViewer(fSplitter);
@@ -731,8 +737,27 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		openAction.registerAction(ScriptMethod.class, openScript);
 		IAction openPersistEditor = new OpenPersistEditorAction();
 		openAction.registerAction(BaseComponent.class, openPersistEditor);
-		IAction openFormEditor = new OpenFormEditorAction();
-		openAction.registerAction(Form.class, openFormEditor);//TODO preference whether to open form or script
+		final OpenFormEditorAction openFormEditor = new OpenFormEditorAction();
+		openFormEditor.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
+		tree.addSelectionChangedListener(openFormEditor);
+		final OpenScriptAction openScriptEditor = new OpenScriptAction();
+		openScriptEditor.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
+		tree.addSelectionChangedListener(openScriptEditor);
+		openAction.registerAction(Form.class, new Action()
+		{
+			@Override
+			public void run()
+			{
+				if (fDialogSettings.getInt(OPEN_FORM_PREFERENCE) == OPEN_IN_FORM_EDITOR)
+				{
+					openFormEditor.run();
+				}
+				else
+				{
+					openScriptEditor.run();
+				}
+			}
+		});
 		openAction.selectionChanged(new SelectionChangedEvent(tree, tree.getSelection()));
 		tree.addSelectionChangedListener(openAction);
 
@@ -993,8 +1018,47 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 		ToolBarManager lowertbmanager = new ToolBarManager(listToolBar);
 		fillListToolbar(lowertbmanager);
 		lowertbmanager.update(true);
-
 		fillListMenu();
+
+		IActionBars bars = getViewSite().getActionBars();
+		fillViewMenu(bars.getMenuManager());
+	}
+
+	private class OpenFormAction extends Action
+	{
+		private final int selectionValue;
+
+		public OpenFormAction(String text, int selectionValue, String image)
+		{
+			super(text, AS_RADIO_BUTTON);
+			this.selectionValue = selectionValue;
+			setImageDescriptor(Activator.loadImageDescriptorFromBundle(image));
+			setChecked(fDialogSettings.getInt(OPEN_FORM_PREFERENCE) == selectionValue);
+		}
+
+		@Override
+		public void run()
+		{
+			updateOpenFormPreference(selectionValue);
+		}
+	}
+
+	private void updateOpenFormPreference(int selectionValue)
+	{
+		fDialogSettings.put(OPEN_FORM_PREFERENCE, selectionValue);
+		openInFormEditor.setChecked(fDialogSettings.getInt(OPEN_FORM_PREFERENCE) == OPEN_IN_FORM_EDITOR);
+		openInScriptEditor.setChecked(fDialogSettings.getInt(OPEN_FORM_PREFERENCE) == OPEN_IN_SCRIPT_EDITOR);
+
+	}
+
+	private void fillViewMenu(IMenuManager menuManager)
+	{
+		MenuManager openSubMenu = new MenuManager("Open Form in");
+		openInFormEditor = new OpenFormAction("Form Editor", OPEN_IN_FORM_EDITOR, "designer.png");
+		openSubMenu.add(openInFormEditor);
+		openInScriptEditor = new OpenFormAction("Script Editor", OPEN_IN_SCRIPT_EDITOR, "js.png");
+		openSubMenu.add(openInScriptEditor);
+		menuManager.add(openSubMenu);
 	}
 
 	private void fillListMenu()
