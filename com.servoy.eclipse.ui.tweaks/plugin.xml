@@ -1241,13 +1241,13 @@
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/expandall-disabled.png">
         </alternateURLImageLocation>
-     </urlBasedImageReplacement>
+     </urlBasedImageReplacement-->
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.search/icons/full/elcl16/expandall.gif">
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/expandall.png">
         </alternateURLImageLocation>
-     </urlBasedImageReplacement-->
+     </urlBasedImageReplacement>
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.search/icons/full/dlcl16/collapseall.gif">
         <alternateURLImageLocation
@@ -1321,10 +1321,10 @@
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/method_private.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
-     <!--urlBasedImageReplacement
+     <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.dltk.ui/icons/full/obj16/methdef_obj.gif">
         <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/method_defaut.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/method_default.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      <urlBasedImageReplacement
@@ -1338,7 +1338,7 @@
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/sort.png">
         </alternateURLImageLocation>
-     </urlBasedImageReplacement-->
+     </urlBasedImageReplacement>
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.dltk.ui/icons/full/elcl16/filter_fields.gif">
         <alternateURLImageLocation
@@ -1376,6 +1376,19 @@
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/obj16/fldr_obj.png">
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/project.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/obj16/file_obj.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/file_obj.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.ui.editors/icons/full/obj16/file_obj.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/file_obj.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      

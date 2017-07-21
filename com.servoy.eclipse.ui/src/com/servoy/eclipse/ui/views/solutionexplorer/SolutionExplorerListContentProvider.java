@@ -57,7 +57,6 @@ import org.eclipse.dltk.javascript.ast.ReturnStatement;
 import org.eclipse.dltk.javascript.ast.Script;
 import org.eclipse.dltk.javascript.parser.JavaScriptParser;
 import org.eclipse.dltk.javascript.scriptdoc.JavaDoc2HTMLTextReader;
-import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
@@ -94,7 +93,6 @@ import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.TreeBuilder;
 import com.servoy.eclipse.ui.node.UserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
-import com.servoy.eclipse.ui.resource.ImageResource;
 import com.servoy.eclipse.ui.scripting.CalculationModeHandler;
 import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.util.ElementUtil;
@@ -1304,9 +1302,9 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 
 	private Image getImageForVariableEncapsulation(ScriptVariable sv)
 	{
-		if (sv.isPrivate()) return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_FIELD_PRIVATE);
-		if (sv.isPublic()) return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_FIELD_PUBLIC);
-		return ImageResource.INSTANCE.getImage(DLTKPluginImages.DESC_OBJS_FIELD); //dltk default handling
+		if (sv.isPrivate()) return uiActivator.loadImageFromBundle("variable_private.png");
+		if (sv.isPublic()) uiActivator.loadImageFromBundle("variable_public.png");
+		return uiActivator.loadImageFromBundle("variable_public.png"); //TODO variable_default
 	}
 
 	private Image getImageForMethodEncapsulation(ScriptMethod sm)
