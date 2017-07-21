@@ -115,6 +115,10 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		public List<String> getPlugins()
 		{
 			Set<String> names = null;
+			if ("<none>".equals(configuration.getPlugins().toLowerCase()))
+			{
+				return Collections.emptyList();
+			}
 			if (configuration.getPlugins() != null)
 			{
 				names = new HashSet<String>(Arrays.asList(configuration.getPlugins().toLowerCase().split(" ")));

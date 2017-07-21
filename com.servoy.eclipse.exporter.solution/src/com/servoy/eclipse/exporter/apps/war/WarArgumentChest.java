@@ -109,6 +109,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             Default: all drivers from application_server/drivers are exported.\n"
 			+ "        -pi <plugin_names> ... the list of plugins to export e.g -pi plugin1.jar plugin2.zip\n"
 			+ "             Default: all plugins from application_server/plugins are exported.\n"
+			+ "             Can also use -pi <none> to not export any plugin\n"
 			+ "        -active <true/false> ... export active solution (and its modules) only\n"
 			+ "				Default: true\n"
 			+ "        -pluginLocations <absolute paths to developer 'plugins' folder> ...  needed in case\n"
