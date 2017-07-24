@@ -39,6 +39,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.internal.util.PrefUtil;
 
 import com.servoy.eclipse.ui.Activator;
+import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.j2db.persistence.ColumnInfo;
 import com.servoy.j2db.util.ObjectWrapper;
 
@@ -60,6 +61,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 	private Button showNavigatorDefaultButton;
 	private ComboViewer encapsulationTypeCombo;
 	private Spinner waitForSolutionToBeLoadedInTestClientSpinner;
+	private Button useDarkIconsButton;
 
 	public void init(IWorkbench workbench)
 	{
@@ -137,9 +139,10 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		primaryKeySequenceTypeCombo = new ComboViewer(defaultPrimaryKeySequenceType);
 		primaryKeySequenceTypeCombo.setContentProvider(new ArrayContentProvider());
 		primaryKeySequenceTypeCombo.setLabelProvider(new LabelProvider());
-		primaryKeySequenceTypeCombo.setInput(new ObjectWrapper[] { new ObjectWrapper("Servoy Sequence", new Integer(ColumnInfo.SERVOY_SEQUENCE)), new ObjectWrapper(
-			"Database Sequence", new Integer(ColumnInfo.DATABASE_SEQUENCE)), new ObjectWrapper("Database Identity", new Integer(ColumnInfo.DATABASE_IDENTITY)), new ObjectWrapper(
-			"UUID Generator", new Integer(ColumnInfo.UUID_GENERATOR)) });
+		primaryKeySequenceTypeCombo.setInput(
+			new ObjectWrapper[] { new ObjectWrapper("Servoy Sequence", new Integer(ColumnInfo.SERVOY_SEQUENCE)), new ObjectWrapper("Database Sequence",
+				new Integer(ColumnInfo.DATABASE_SEQUENCE)), new ObjectWrapper("Database Identity",
+					new Integer(ColumnInfo.DATABASE_IDENTITY)), new ObjectWrapper("UUID Generator", new Integer(ColumnInfo.UUID_GENERATOR)) });
 
 		//Form Properties
 		Group formProperties = new Group(rootContainer, SWT.NONE);
@@ -157,8 +160,19 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		encapsulationTypeCombo = new ComboViewer(encapsulationProperties);
 		encapsulationTypeCombo.setContentProvider(new ArrayContentProvider());
 		encapsulationTypeCombo.setLabelProvider(new LabelProvider());
-		encapsulationTypeCombo.setInput(new ObjectWrapper[] { new ObjectWrapper("Public, Hide All", new Integer(
-			DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)), new ObjectWrapper("Public", new Integer(DesignerPreferences.ENCAPSULATION_PUBLIC)) });
+		encapsulationTypeCombo.setInput(
+			new ObjectWrapper[] { new ObjectWrapper("Public, Hide All", new Integer(DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)), new ObjectWrapper(
+				"Public", new Integer(DesignerPreferences.ENCAPSULATION_PUBLIC)) });
+
+		// Appearance
+		Group appearanceOptionsContainer = new Group(rootContainer, SWT.NONE);
+		appearanceOptionsContainer.setText("Appearance Options");
+		appearanceOptionsContainer.setLayout(new GridLayout(1, false));
+		appearanceOptionsContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		useDarkIconsButton = new Button(appearanceOptionsContainer, SWT.CHECK);
+		useDarkIconsButton.setText("Use dark theme icons (restart required)");
+
 
 		Group launcherSettings = new Group(rootContainer, SWT.NONE); // TODO it would really be nicer to have these in a real launch configuration page (similar to what mobile client lauchers do)
 		launcherSettings.setText("Launcher settings");
@@ -199,6 +213,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		showNavigatorDefaultButton.setSelection(prefs.getShowNavigatorDefault());
 		setEncapsulationTypeValue(prefs.getEncapsulationType());
 		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(prefs.getTestClientLoadTimeout());
+		useDarkIconsButton.setSelection(IconPreferences.getInstance().getUseDarkThemeIcons());
 	}
 
 	@Override
@@ -214,7 +229,7 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		showNavigatorDefaultButton.setSelection(DesignerPreferences.SHOW_NAVIGATOR_DEFAULT);
 		setEncapsulationTypeValue(DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL);
 		waitForSolutionToBeLoadedInTestClientSpinner.setSelection(DesignerPreferences.WAIT_FOR_SOLUTION_TO_BE_LOADED_IN_TEST_CLIENT_DEFAULT);
-
+		useDarkIconsButton.setSelection(IconPreferences.USE_DARK_THEME_ICONS_DEFAULT);
 		super.performDefaults();
 	}
 
@@ -228,12 +243,16 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		PrefUtil.getAPIPreferenceStore().setValue(IWorkbenchPreferenceConstants.CLOSE_EDITORS_ON_EXIT, closeEditorOnExitButton.getSelection());
 		prefs.setOpenFirstFormDesigner(openFirstFormDesignerButton.getSelection());
 		prefs.setShowColumnsInDbOrder(showColumnsInDbOrderButton.getSelection());
-		prefs.setPrimaryKeySequenceType(((Integer)((ObjectWrapper)((IStructuredSelection)primaryKeySequenceTypeCombo.getSelection()).getFirstElement()).getType()).intValue());
+		prefs.setPrimaryKeySequenceType(
+			((Integer)((ObjectWrapper)((IStructuredSelection)primaryKeySequenceTypeCombo.getSelection()).getFirstElement()).getType()).intValue());
 		prefs.setShowNavigatorDefault(showNavigatorDefaultButton.getSelection());
-		prefs.setEncapsulationType(((Integer)((ObjectWrapper)((IStructuredSelection)encapsulationTypeCombo.getSelection()).getFirstElement()).getType()).intValue());
+		prefs.setEncapsulationType(
+			((Integer)((ObjectWrapper)((IStructuredSelection)encapsulationTypeCombo.getSelection()).getFirstElement()).getType()).intValue());
 		prefs.setTestClientLoadTimeout(waitForSolutionToBeLoadedInTestClientSpinner.getSelection());
 		prefs.save();
 
+		IconPreferences.getInstance().setUseDarkThemeIcons(useDarkIconsButton.getSelection());
+		IconPreferences.getInstance().save();
 		return true;
 	}
 

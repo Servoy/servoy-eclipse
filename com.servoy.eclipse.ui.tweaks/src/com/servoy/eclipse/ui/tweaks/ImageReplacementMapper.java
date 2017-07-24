@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -63,6 +64,10 @@ public class ImageReplacementMapper
 	public static final String ALTERNATE_URL_KEY = "imageURL";
 
 	public static final String LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS_KEY = "listInterceptableImageDescriptorsInConsole";
+
+
+	public static final String DEFAULT_ICONS_PATH = "icons";
+	public static final String DARK_ICONS_PATH = "darkicons";
 
 	// just logging interceptable images stuff
 	private static boolean LIST_ALL_INTERCEPTABLE_IMG_MAPPINGS = Boolean.valueOf(
@@ -170,12 +175,14 @@ public class ImageReplacementMapper
 		if (ALTERNATE_URL_EL_KEY.equals(alternateType))
 		{
 			String alternateURL = alternateElement.getAttribute(ALTERNATE_URL_KEY);
+			alternateURL = MessageFormat.format(alternateURL, new Object[] { getIconsPath() });
 			return new AlternateURLImageLocation(new URL(alternateURL));
 		}
 		else if (ALTERNATE_CLASS_AND_FILE_EL_KEY.equals(alternateType))
 		{
 			String alternateFullClassName = alternateElement.getAttribute(ALTERNATE_CLASS_KEY);
 			String alternateFileName = alternateElement.getAttribute(ALTERNATE_FILE_NAME_KEY);
+			alternateFileName = MessageFormat.format(alternateFileName, new Object[] { getIconsPath() });
 			return new AlternateClassAndFileNameImageLocation(Class.forName(alternateFullClassName), alternateFileName);
 		}
 		throw new IllegalArgumentException("Invalid alternate image location configuration");
@@ -247,6 +254,12 @@ public class ImageReplacementMapper
 
 		if (replacement != null) return replacement.createAlternateImage(originalCreateFromURL, originalCreateFromFile);
 		else return (ImageDescriptor)originalCreateFromURL.invoke(null, new Object[] { url });
+	}
+
+
+	private static String getIconsPath()
+	{
+		return IconPreferences.getInstance().getUseDarkThemeIcons() ? DARK_ICONS_PATH : DEFAULT_ICONS_PATH;
 	}
 
 }

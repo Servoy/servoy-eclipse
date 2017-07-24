@@ -21,4 +21,5 @@ Import-Package: com.servoy.eclipse.model.util,
  org.objectweb.asm.tree;version="5.0.1",
  org.osgi.framework;version="1.8.0",
  org.osgi.framework.hooks.weaving
-Require-Bundle: org.eclipse.emf.ecore
+Require-Bundle: org.eclipse.emf.ecore,
+ org.eclipse.core.runtime

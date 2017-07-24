@@ -62,6 +62,7 @@ import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.preferences.StartupPreferences;
+import com.servoy.eclipse.ui.tweaks.IconPreferences;
 import com.servoy.eclipse.ui.util.IAutomaticImportWPMPackages;
 import com.servoy.j2db.ClientVersion;
 import com.servoy.j2db.IApplication;
@@ -92,6 +93,7 @@ public class Activator extends AbstractUIPlugin
 	 * The path to icons used by this view (relative to the plug-in folder).
 	 */
 	public static final String ICONS_PATH = "$nl$/icons";
+	public static final String DARK_ICONS_PATH = "$nl$/darkicons";
 
 	private final Map<String, Image> imageCacheOld = new HashMap<String, Image>();
 
@@ -385,7 +387,7 @@ public class Activator extends AbstractUIPlugin
 	 */
 	public static ImageDescriptor loadImageDescriptorFromBundle(String name)
 	{
-		return getImageDescriptor(ICONS_PATH + "/" + name);
+		return getImageDescriptor((IconPreferences.getInstance().getUseDarkThemeIcons() ? DARK_ICONS_PATH : ICONS_PATH) + "/" + name);
 	}
 
 	/**
