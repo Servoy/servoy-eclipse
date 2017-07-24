@@ -5,10 +5,10 @@
   <parent>
     <groupId>com.servoy</groupId>
     <artifactId>servoy-eclipse</artifactId>
-    <version>8.2.0.3100</version>
+    <version>8.2.0.3101_rc1</version>
   </parent>
   <artifactId>com.servoy.eclipse.core</artifactId>
-  <version>8.2.0.3100</version>
+  <version>8.2.0.3101_rc1</version>
   <packaging>eclipse-plugin</packaging>
   <build>
 		<plugins>
@@ -28,7 +28,7 @@
 	                 <artifactItem>
 	                   <groupId>com.servoy</groupId>
 	                   <artifactId>servoy-doc</artifactId>
-	                   <version>${servoy-version}</version>
+	                   <version>${project.version}</version>
 	                   <type>jar</type>
 	                   <overWrite>true</overWrite>
 	                   <outputDirectory>${project.build.directory}/classes/com/servoy/eclipse/core/doc</outputDirectory>

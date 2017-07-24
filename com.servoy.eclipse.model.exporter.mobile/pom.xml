@@ -5,10 +5,10 @@
   <parent>
     <groupId>com.servoy</groupId>
     <artifactId>servoy-eclipse</artifactId>
-    <version>8.2.0.3100</version>
+    <version>8.2.0.3101_rc1</version>
   </parent>
   <artifactId>com.servoy.eclipse.model.exporter.mobile</artifactId>
-  <version>8.2.0.3100</version>
+  <version>8.2.0.3101_rc1</version>
   <packaging>eclipse-plugin</packaging>
   <build>
 		<plugins>
@@ -28,7 +28,7 @@
 	                 <artifactItem>
 	                   <groupId>com.servoy</groupId>
 	                   <artifactId>servoy_mobile</artifactId>
-	                   <version>${servoy-version}</version>
+	                   <version>${project.version}</version>
 	                   <type>war</type>
 	                   <overWrite>true</overWrite>
 	                   <outputDirectory>${project.build.directory}/classes/com/servoy/eclipse/model/mobile/exporter/resources/</outputDirectory>
@@ -36,7 +36,7 @@
 					  <artifactItem>
 	                   <groupId>com.servoy</groupId>
 	                   <artifactId>servoy_mobile_jsunit</artifactId>
-	                   <version>${servoy-version}</version>
+	                   <version>${project.version}</version>
 	                   <type>war</type>
 	                   <overWrite>true</overWrite>
 	                   <outputDirectory>${project.build.directory}/classes/com/servoy/eclipse/model/mobile/exporter/resources/</outputDirectory>
