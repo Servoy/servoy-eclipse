@@ -1304,7 +1304,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	{
 		if (sv.isPrivate()) return uiActivator.loadImageFromBundle("variable_private.png");
 		if (sv.isPublic()) uiActivator.loadImageFromBundle("variable_public.png");
-		return uiActivator.loadImageFromBundle("variable_public.png"); //TODO variable_default
+		return uiActivator.loadImageFromBundle("variable_default.png");
 	}
 
 	private Image getImageForMethodEncapsulation(ScriptMethod sm)

@@ -163,7 +163,7 @@
             allowMultiple="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.debug.scriptingconsole.ScriptingConsole"
-            icon="icons/commandconsole.gif"
+            icon="icons/interactive_console.png"
             id="com.servoy.eclipse.debug.scriptingconsole"
             name="Command Console"
             restorable="true">

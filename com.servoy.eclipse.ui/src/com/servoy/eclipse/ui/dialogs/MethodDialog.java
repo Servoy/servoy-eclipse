@@ -75,7 +75,7 @@ public class MethodDialog extends TreeSelectDialog
 	private static final Image solutionImage = Activator.getDefault().loadImageFromBundle("solution.png");
 	private static final Image formMethodsImage = Activator.getDefault().loadImageFromBundle("designer.png");
 	private static final Image scopeMethodsImage = Activator.getDefault().loadImageFromBundle("scopes.png");
-	private static final Image foundsetMethodsImage = Activator.getDefault().loadImageFromBundle("foundset_method.gif");
+	private static final Image foundsetMethodsImage = Activator.getDefault().loadImageFromBundle("foundset_method.png");
 
 	/**
 	 * Creates a new method cell dialog parented under the given shell.

@@ -58,7 +58,7 @@ public class WebPackageDecorator implements ILightweightLabelDecorator
 			if (platformSimpleUserNode.getType() == UserNodeType.COMPONENTS_NONPROJECT_PACKAGE ||
 				platformSimpleUserNode.getType() == UserNodeType.COMPONENTS_PROJECT_PACKAGE)
 			{
-				imgd = Activator.loadImageDescriptorFromBundle("bean_decorator.png");
+				imgd = Activator.loadImageDescriptorFromBundle("component_decorator.png");
 			}
 			if (platformSimpleUserNode.getType() == UserNodeType.SERVICES_NONPROJECT_PACKAGE ||
 				platformSimpleUserNode.getType() == UserNodeType.SERVICES_PROJECT_PACKAGE)
@@ -90,14 +90,14 @@ public class WebPackageDecorator implements ILightweightLabelDecorator
 		String imageFile;
 
 		String packageType = WebComponentSpecProvider.getSpecProviderState().getPackageType(iProject.getName());
-		if (IPackageReader.WEB_COMPONENT.equals(packageType)) imageFile = "bean_decorator.png";
+		if (IPackageReader.WEB_COMPONENT.equals(packageType)) imageFile = "component_decorator.png";
 		else if (IPackageReader.WEB_LAYOUT.equals(packageType)) imageFile = "layout_decorator.png";
 		else if (IPackageReader.WEB_SERVICE.equals(WebServiceSpecProvider.getSpecProviderState().getPackageType(iProject.getName())))
 			imageFile = "service_decorator.png";
 		else
 		{
 			// now we have to read the package type from the manifest
-			imageFile = "bean_decorator.png";
+			imageFile = "component_decorator.png";
 			if (iProject.getFile(new Path("META-INF/MANIFEST.MF")).exists())
 			{
 				String notReferencesProjectPackageType = new ContainerPackageReader(new File(iProject.getLocationURI()), iProject).getPackageType();

@@ -1236,12 +1236,12 @@
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/prev_nav.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
-     <!--urlBasedImageReplacement
+     <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.search/icons/full/dlcl16/expandall.gif">
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/expandall-disabled.png">
         </alternateURLImageLocation>
-     </urlBasedImageReplacement-->
+     </urlBasedImageReplacement>
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.search/icons/full/elcl16/expandall.gif">
         <alternateURLImageLocation
@@ -1325,6 +1325,24 @@
             originalImageURL="platform:/plugin/org.eclipse.dltk.ui/icons/full/obj16/methdef_obj.gif">
         <alternateURLImageLocation
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/method_default.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.ui/icons/full/obj16/field_default_obj.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/variable_default.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.ui/icons/full/obj16/field_private_obj.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/variable_private.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/org.eclipse.dltk.ui/icons/full/obj16/field_public_obj.gif">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/variable_public.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      <urlBasedImageReplacement
