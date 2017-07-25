@@ -94,12 +94,15 @@ public class Activator extends AbstractUIPlugin
 	 */
 	public static final String ICONS_PATH = "$nl$/icons";
 	public static final String DARK_ICONS_PATH = "$nl$/darkicons";
+	public static final String DARK_ICONS_FOLDER = "/darkicons/";
 
 	private final Map<String, Image> imageCacheOld = new HashMap<String, Image>();
 
 	private final Map<String, Image> imageCacheBundle = new HashMap<String, Image>();
 
 	private final Map<String, Image> grayCacheBundle = new HashMap<String, Image>();
+
+	private static BundleContext context;
 
 	private static final String SERVOY_VERSION = "servoy_version";
 
@@ -110,6 +113,7 @@ public class Activator extends AbstractUIPlugin
 
 		super.start(context);
 		plugin = this;
+		Activator.context = context;
 
 		//replace Eclipse default text search query provider with Servoy's
 		SearchPlugin.getDefault().getPreferenceStore().putValue(SearchPreferencePage.TEXT_SEARCH_QUERY_PROVIDER, "com.servoy.eclipse.ui.search.textSearch");
@@ -387,7 +391,13 @@ public class Activator extends AbstractUIPlugin
 	 */
 	public static ImageDescriptor loadImageDescriptorFromBundle(String name)
 	{
-		return getImageDescriptor((IconPreferences.getInstance().getUseDarkThemeIcons() ? DARK_ICONS_PATH : ICONS_PATH) + "/" + name);
+		return getImageDescriptor((IconPreferences.getInstance().getUseDarkThemeIcons() && darkIconExists(name) ? DARK_ICONS_PATH : ICONS_PATH) + "/" + name);
+	}
+
+
+	private static boolean darkIconExists(String name)
+	{
+		return context.getBundle().getEntry(DARK_ICONS_FOLDER + name) != null;
 	}
 
 	/**
