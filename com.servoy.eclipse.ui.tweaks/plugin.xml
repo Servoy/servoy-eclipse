@@ -21,46 +21,46 @@
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/new_wiz.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/new.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/new.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/etool16/save_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/save.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/save.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/dtool16/save_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/save-disabled.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/save-disabled.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/etool16/saveas_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/save-as.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/save-as.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/dtool16/saveas_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/save-as-disabled.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/save-as-disabled.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>      
      
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/etool16/saveall_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/save-all.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/save-all.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/dtool16/saveall_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/save-all-disabled.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/save-all-disabled.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
@@ -81,28 +81,28 @@
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/print_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/print.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/print.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/import_wiz.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/import.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/import.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/export_wiz.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/export.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/export.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>      
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/$nl$/icons/full/elcl16/refresh_nav.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/refresh.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/refresh.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
@@ -123,20 +123,20 @@
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.search/$nl$/icons/full/etool16/search.gif">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/search.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/search.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
        <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.ide/icons/full/dtool16/search_src.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/search.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/search.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.ide/icons/full/etool16/search_src.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/search.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/search.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
@@ -171,42 +171,42 @@
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/elcl16/backward_nav.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/backward_nav.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/backward_nav.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dlcl16/backward_nav.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/backward_nav-disabled.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/backward_nav-disabled.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/elcl16/forward_nav.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/forward_nav.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/forward_nav.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dlcl16/forward_nav.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/forward_nav-disabled.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/forward_nav-disabled.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/etool16/last_edit_pos.gif">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/back-to-last-edit.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-last-edit.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.editors/$nl$/icons/full/dtool16/last_edit_pos.gif">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/back-to-last-edit-disabled.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/back-to-last-edit-disabled.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
@@ -220,174 +220,174 @@
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/elcl16/skip_brkp.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/skip_breakpoints.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/skip_breakpoints.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/undo_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/undo.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/undo.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dtool16/undo_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/undo.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/undo.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/redo_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/redo.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/redo.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dtool16/redo_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/redo.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/redo.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/cut_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/cut_edit.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/cut_edit.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dtool16/cut_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/cut_edit.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/cut_edit.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/copy_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/copy_edit.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/copy_edit.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dtool16/copy_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/copy_edit.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/copy_edit.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/paste_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/paste_edit.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/paste_edit.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dtool16/paste_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/paste_edit.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/paste_edit.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/delete_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/delete_edit.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/delete.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dtool16/delete_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/delete_edit.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/delete.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.ide/icons/full/etool16/next_nav.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/next_nav.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/next_nav.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.ide/icons/full/etool16/prev_nav.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/prev_nav.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/prev_nav.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.search/$nl$/icons/full/elcl16/tsearch_obj.gif">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/search_file.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/search_file.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.ide/icons/full/etool16/build_exec.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/build_all.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/build_all.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.ide/icons/full/dtool16/build_exec.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/build_all.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/build_all.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/obj16/brkp_obj.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/breakpoint.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/breakpoint.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.debug.ui/$nl$/icons/full/obj16/readwrite_obj.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/watchpoint.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/watchpoint.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/help_contents.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/help_contents.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/help_contents.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/etool16/help_search.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/help_search.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/help_search.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.equinox.p2.ui.sdk/icons/obj/iu_update_obj.gif">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/check_for_updates.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/check_for_updates.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.equinox.p2.ui.sdk/icons/obj/iu_obj.gif">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/install_new_software.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/install_new_software.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.equinox.p2.ui.sdk/icons/obj/profile_obj.gif">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/installation_details.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/installation_details.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
@@ -395,14 +395,14 @@
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/elcl16/delete_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/delete.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/delete.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
        <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dlcl16/delete_edit.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/delete.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/delete.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
       
@@ -520,14 +520,14 @@
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.console/icons/full/cview16/console_view.png">
          <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/console.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/console.png">
          </alternateURLImageLocation>
       </urlBasedImageReplacement>
 	
 	<urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.console/$nl$/icons/full/cview16/console_view.png">
         <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/console.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/console.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      
@@ -611,28 +611,28 @@
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.views/icons/full/eview16/outline_co.png">
         <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/outline.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/outline.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.views/$nl$/icons/full/eview16/outline_co.png">
         <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/outline.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/outline.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.views/icons/full/eview16/prop_ps.png">
         <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/properties.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/properties.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      
       <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui.views/$nl$/icons/full/eview16/prop_ps.png">
         <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/properties.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/properties.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>  
      
@@ -1147,20 +1147,20 @@
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/com.servoy.eclipse.profiler/icons/viewicon.gif">
         <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/profiler_view.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/profiler_view.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/elcl16/trash.png">
         <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/delete.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/delete.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.ui/icons/full/dlcl16/trash.png">
         <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/delete.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/delete.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      
@@ -1275,25 +1275,25 @@
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.search/icons/full/elcl16/tsearch_obj.gif">
         <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/search_file.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/search_file.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.search/$nl$/icons/full/elcl16/tsearch_obj.gif">
         <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/search_file.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/search_file.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.search/icons/full/dlcl16/search_history.gif">
         <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/search_file-disabled.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/search_file-disabled.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      <urlBasedImageReplacement
             originalImageURL="platform:/plugin/org.eclipse.search/icons/full/elcl16/search_history.gif">
         <alternateURLImageLocation
-               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/search_file.png">
+               imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/search_file.png">
         </alternateURLImageLocation>
      </urlBasedImageReplacement>
      <urlBasedImageReplacement
@@ -1539,7 +1539,21 @@
                imageURL="platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/aligntop-disabled.png">
          </alternateURLImageLocation>
       </classAndFileBasedImageReplacement>
-
+      
+     <!-- icons in other plugin.xml that can have a dark theme icon -->
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/com.servoy.eclipse.designer/icons/designer.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui/{0}/designer.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
+     
+     <urlBasedImageReplacement
+            originalImageURL="platform:/plugin/com.servoy.eclipse.ui/icons/portal.png">
+        <alternateURLImageLocation
+               imageURL="platform:/plugin/com.servoy.eclipse.ui/{0}/portal.png">
+        </alternateURLImageLocation>
+     </urlBasedImageReplacement>
 </extension>
    
 <!--   

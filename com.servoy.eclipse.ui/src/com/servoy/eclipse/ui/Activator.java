@@ -383,6 +383,11 @@ public class Activator extends AbstractUIPlugin
 		return neededDescriptor;
 	}
 
+	public static ImageDescriptor loadDefaultImageDescriptorFromBundle(String name)
+	{
+		return getImageDescriptor(ICONS_PATH + "/" + name);
+	}
+
 	/**
 	 * Get an image with the given name from this plugin's bundle.
 	 *

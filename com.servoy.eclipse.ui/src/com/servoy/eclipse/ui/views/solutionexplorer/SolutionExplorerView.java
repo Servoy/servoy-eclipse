@@ -2857,8 +2857,9 @@ public class SolutionExplorerView extends ViewPart
 		openSqlEditorAction = new OpenSqlEditorAction();
 
 		IAction newForm = new OpenNewFormWizardAction();
-		IAction newSolution = new OpenWizardAction(NewSolutionWizard.class, Activator.loadImageDescriptorFromBundle("solution.png"), "Create new solution");
-		IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("solution_module_m.gif"), "Create new module");
+		IAction newSolution = new OpenWizardAction(NewSolutionWizard.class, Activator.loadDefaultImageDescriptorFromBundle("solution.png"),
+			"Create new solution");
+		IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadDefaultImageDescriptorFromBundle("module.png"), "Create new module");
 		IAction newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.png"), "Create new style")
 		{
 			@Override
@@ -2931,7 +2932,7 @@ public class SolutionExplorerView extends ViewPart
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newComponentsPackageProjectAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newComponentsPackageProjectAction);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENT_FORMS,
-			new OpenWizardAction(NewFormComponentWizard.class, Activator.loadImageDescriptorFromBundle("form.png"), "Create new form component"));
+			new OpenWizardAction(NewFormComponentWizard.class, Activator.loadImageDescriptorFromBundle("new_form_component.png"), "Create new form component"));
 
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA_FOLDER, importMediaFolder);

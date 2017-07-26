@@ -1054,7 +1054,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private void fillViewMenu(IMenuManager menuManager)
 	{
 		MenuManager openSubMenu = new MenuManager("Open Form in");
-		openInFormEditor = new OpenFormAction("Form Editor", OPEN_IN_FORM_EDITOR, "designer.png");
+		openInFormEditor = new OpenFormAction("Form Editor", OPEN_IN_FORM_EDITOR, "form.png");
 		openSubMenu.add(openInFormEditor);
 		openInScriptEditor = new OpenFormAction("Script Editor", OPEN_IN_SCRIPT_EDITOR, "js.png");
 		openSubMenu.add(openInScriptEditor);

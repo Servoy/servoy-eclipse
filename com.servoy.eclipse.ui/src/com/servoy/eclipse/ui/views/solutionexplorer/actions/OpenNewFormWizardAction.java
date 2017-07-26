@@ -37,7 +37,7 @@ public class OpenNewFormWizardAction extends OpenWizardAction implements ISelect
 
 	public OpenNewFormWizardAction()
 	{
-		super(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("form.png"), "Create new form");
+		super(NewFormWizard.class, Activator.loadImageDescriptorFromBundle("new_form_wizard.png"), "Create new form");
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)

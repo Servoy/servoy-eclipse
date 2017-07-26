@@ -4445,12 +4445,12 @@ public class TypeCreator extends TypeCache
 
 	protected static ImageDescriptor getImageDescriptorForFormEncapsulation(int encapsulation)
 	{
-		String imgPath = "/icons/designer.png";
-		if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE) imgPath = "/icons/designer_protected.png";
+		String imgPath = "designer.png";
+		if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE) imgPath = "designer_protected.png";
 		else if ((encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE)
-			imgPath = "/icons/designer_private.png";
+			imgPath = "designer_private.png";
 		else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)
-			imgPath = "/icons/designer_public.png";
-		return ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path(imgPath), null));
+			imgPath = "designer_public.png";
+		return com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle(imgPath);
 	}
 }

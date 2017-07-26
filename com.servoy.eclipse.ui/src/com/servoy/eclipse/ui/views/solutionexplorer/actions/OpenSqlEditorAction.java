@@ -65,7 +65,7 @@ public class OpenSqlEditorAction extends Action implements ISelectionChangedList
 	 */
 	public OpenSqlEditorAction()
 	{
-		setImageDescriptor(Activator.getImageDescriptor("icons/sql_editor.png"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("sql_editor.png"));
 		setText("Open SQL Editor");
 		setToolTipText("Open the SQL Editor for this server");
 		sqlExplorerLoaded = com.servoy.eclipse.core.Activator.getDefault().isSqlExplorerLoaded();

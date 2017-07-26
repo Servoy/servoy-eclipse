@@ -52,7 +52,7 @@ public class AddWorkingSetAction extends Action implements ISelectionChangedList
 	{
 		setText("Add working set");
 		setToolTipText("Add working set");
-		setImageDescriptor(Activator.loadImageDescriptorFromBundle("servoy_workingset.png"));
+		setImageDescriptor(Activator.loadImageDescriptorFromBundle("new_servoy_workingset.png"));
 	}
 
 	public void selectionChanged(SelectionChangedEvent event)
