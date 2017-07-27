@@ -844,7 +844,8 @@ public class WarExporter
 				{
 					if (!destinationFolder.exists()) destinationFolder.mkdir();
 					SolutionSerializer.writeRuntimeSolution(null, new File(destinationFolder, sp.getSolution().getName() + ".runtime"), sp.getSolution(),
-						ApplicationServerRegistry.get().getDeveloperRepository(), sp.getModules());
+						ApplicationServerRegistry.get().getDeveloperRepository(),
+						sp.getSolution().getReferencedModulesRecursive(new HashMap<String, Solution>()).values().toArray(new Solution[0]));
 				}
 			}
 
