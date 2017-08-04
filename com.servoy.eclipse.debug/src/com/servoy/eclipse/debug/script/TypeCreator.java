@@ -121,7 +121,6 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
-import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
 import com.servoy.j2db.BasicFormController.JSForm;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormManager.HistoryProvider;
@@ -3218,7 +3217,7 @@ public class TypeCreator extends TypeCache
 					property.setVisible(true);
 					property.setType(
 						getTypeRef(context, DBDataSourceServer.class.getSimpleName() + '<' + DataSourceUtils.createDBTableDataSource(serverName, null) + '>'));
-					property.setAttribute(IMAGE_DESCRIPTOR, SolutionExplorerTreeContentProvider.getServerImage(serverName, server));
+					property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("server.png"));
 					property.setDescription("Server");
 					type.getMembers().add(property);
 				}
