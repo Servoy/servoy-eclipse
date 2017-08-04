@@ -333,6 +333,28 @@ public class Activator extends AbstractUIPlugin
 		return img;
 	}
 
+	/**
+	 * Loads the image from the bundle cache, so that it will be disposed.
+	 * @param name
+	 * @return
+	 */
+	public Image loadImageFromCache(String name)
+	{
+		return imageCacheBundle.get(name);
+	}
+
+	/**
+	 * stores the given image to the cache, if there was a previous one with that name then that one will be disposed
+	 * @param name
+	 * @param image
+	 */
+	public void putImageInCache(String name, Image image)
+	{
+		Image prev = loadImageFromCache(name);
+		if (prev != null) prev.dispose();
+		imageCacheBundle.put(name, image);
+	}
+
 	public Image loadImageFromOldLocation(String name)
 	{
 		return loadImageFromOldLocation(name, false);

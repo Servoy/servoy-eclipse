@@ -1715,8 +1715,13 @@ public class SolutionExplorerTreeContentProvider
 				String imgName = "server.png";
 				if (!server.isValid())
 				{
-					ImageDescriptor IMG_ERROR = JFaceResources.getImageRegistry().getDescriptor("org.eclipse.jface.fieldassist.IMG_DEC_FIELD_ERROR");
-					result[0] = new DecorationOverlayIcon(uiActivator.loadImageFromBundle("server.png"), IMG_ERROR, IDecoration.BOTTOM_LEFT).createImage();
+					Image image = uiActivator.loadImageFromCache("server.png_IMG_DEC_FIELD_ERROR");
+					if (image == null)
+					{
+						ImageDescriptor IMG_ERROR = JFaceResources.getImageRegistry().getDescriptor("org.eclipse.jface.fieldassist.IMG_DEC_FIELD_ERROR");
+						result[0] = new DecorationOverlayIcon(uiActivator.loadImageFromBundle("server.png"), IMG_ERROR, IDecoration.BOTTOM_LEFT).createImage();
+						uiActivator.putImageInCache("server.png_IMG_DEC_FIELD_ERROR", result[0]);
+					}
 					return;
 				}
 				if (!server.getName().equals(serverName))
