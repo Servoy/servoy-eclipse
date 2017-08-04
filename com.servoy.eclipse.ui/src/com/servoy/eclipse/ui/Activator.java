@@ -316,18 +316,28 @@ public class Activator extends AbstractUIPlugin
 		Image img = imageCacheBundle.get(storeName);
 		if (img == null)
 		{
-			ImageDescriptor id = Activator.loadImageDescriptorFromBundle(name);
-			if (id != null)
+			if (disabled)
 			{
-				img = id.createImage();
+				// first just load the normal image from the cache (or create and store it in the cache so it will be disposed)
+				img = loadImageFromBundle(name, false);
 				if (img != null)
 				{
-					if (disabled)
-					{
-						img = new Image(img.getDevice(), img, SWT.IMAGE_DISABLE);
-					}
+					img = new Image(img.getDevice(), img, SWT.IMAGE_DISABLE);
 					imageCacheBundle.put(storeName, img);
 				}
+			}
+			else
+			{
+				ImageDescriptor id = Activator.loadImageDescriptorFromBundle(name);
+				if (id != null)
+				{
+					img = id.createImage();
+					if (img != null)
+					{
+						imageCacheBundle.put(storeName, img);
+					}
+				}
+
 			}
 		}
 		return img;
