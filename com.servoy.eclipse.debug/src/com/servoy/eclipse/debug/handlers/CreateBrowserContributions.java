@@ -35,7 +35,7 @@ public class CreateBrowserContributions extends CompoundContributionItem impleme
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.menus.IWorkbenchContribution#initialize(org.eclipse.ui.services.IServiceLocator)
 	 */
 	@Override
@@ -71,7 +71,7 @@ public class CreateBrowserContributions extends CompoundContributionItem impleme
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.actions.CompoundContributionItem#getContributionItems()
 	 */
 	@Override
@@ -86,7 +86,7 @@ public class CreateBrowserContributions extends CompoundContributionItem impleme
 			{
 
 				final IBrowserDescriptor ewb = (IBrowserDescriptor)iterator.next();
-				final CommandContributionItemParameter contributionParameter = new CommandContributionItemParameter(mServiceLocator, null, computeCommandId(),
+				final CommandContributionItemParameter contributionParameter = new CommandContributionItemParameter(mServiceLocator, null, getId(),
 					CommandContributionItem.STYLE_PUSH);
 				contributionParameter.label = ewb.getName();
 				contributionParameter.visibleEnabled = true;
@@ -105,12 +105,5 @@ public class CreateBrowserContributions extends CompoundContributionItem impleme
 		}
 
 		return contributions.toArray(new IContributionItem[contributions.size()]);
-	}
-
-
-	//we use this class for both WebClient and NGClient
-	private String computeCommandId()
-	{
-		return getId().replace(".dynamic.contributions", ""); //getId() returns the id of the dinamic contribution
 	}
 }
