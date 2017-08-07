@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -383,7 +382,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				{
 					return uiActivator.loadImageFromBundle("method_protected.png");
 				}
-				return sm.isPublic() ? uiActivator.loadImageFromBundle("method_public.png") : DLTKPluginImages.DESC_METHOD_DEFAULT.createImage();
+				return sm.isPublic() ? uiActivator.loadImageFromBundle("method_public.png") : uiActivator.loadImageFromBundle("method_default.png");
 			}
 			else if (element instanceof Pair< ? , ? >)
 			{
