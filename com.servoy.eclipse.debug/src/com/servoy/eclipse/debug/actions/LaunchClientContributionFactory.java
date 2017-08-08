@@ -60,7 +60,7 @@ public abstract class LaunchClientContributionFactory extends ExtensionContribut
 	@Override
 	public void createContributionItems(IServiceLocator serviceLocator, IContributionRoot additions)
 	{
-		MenuManager manager = new MenuManager(menuText);
+		final MenuManager manager = new MenuManager(menuText);
 		manager.setImageDescriptor(ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path(iconPath), null)));
 		manager.setActionDefinitionId(commandId);
 		CreateBrowserContributions item = new CreateBrowserContributions(commandId);
@@ -72,8 +72,10 @@ public abstract class LaunchClientContributionFactory extends ExtensionContribut
 			public EvaluationResult evaluate(IEvaluationContext context) throws CoreException
 			{
 				Object variable = context.getVariable(variableName);
-				if ("ENABLED".equals(variable)) return EvaluationResult.TRUE;
-				else return EvaluationResult.FALSE;
+				boolean shouldBeEnabled = "ENABLED".equals(variable);
+				manager.setVisible(shouldBeEnabled);
+				if (shouldBeEnabled) return EvaluationResult.TRUE;
+				return EvaluationResult.FALSE;
 			}
 		});
 	}
