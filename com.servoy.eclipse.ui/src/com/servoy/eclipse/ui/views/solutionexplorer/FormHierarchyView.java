@@ -491,7 +491,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			{
 				ArrayList<IPersist> result = new ArrayList<IPersist>();
 				Form f = (Form)parentElement;
-				if (listSelection instanceof ScriptMethod)
+				if (listSelection instanceof ScriptMethod && showMembersAction.isChecked())
 				{
 					ScriptMethod sm = f.getScriptMethod(((ScriptMethod)listSelection).getName());
 					if (sm != null)
@@ -500,7 +500,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 						leavesToExpand.add(sm);
 					}
 				}
-				else if (listSelection instanceof BaseComponent)
+				else if (listSelection instanceof BaseComponent && showMembersAction.isChecked())
 				{
 					for (IPersist p : f.getAllObjectsAsList())
 					{
@@ -1323,5 +1323,11 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	public Object getSelectedListElement()
 	{
 		return ((IStructuredSelection)list.getSelection()).getFirstElement();
+	}
+
+	public void open(Object obj)
+	{
+		showMembersAction.clearSelection();
+		setSelection(obj);
 	}
 }

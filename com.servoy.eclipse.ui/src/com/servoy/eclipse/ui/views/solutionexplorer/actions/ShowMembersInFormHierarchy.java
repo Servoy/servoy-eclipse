@@ -68,4 +68,9 @@ public class ShowMembersInFormHierarchy extends Action implements ISelectionChan
 		setChecked(on);
 	}
 
+	public void clearSelection()
+	{
+		selection = null;
+	}
+
 }
