@@ -3449,7 +3449,17 @@ public class ServoyModel extends AbstractServoyModel
 	private IProject[] getAllReferencedProjectsOfActiveProject()
 	{
 		Set<IProject> allModuleProjects = new HashSet<IProject>();
-		ServoyProject[] modules = getModulesOfActiveProjectWithImportHooks();
+		ServoyProject[] modules = getModulesOfActiveProject();
+
+		List<ServoyProject> importHookModulesToBeIgnored = new ArrayList<ServoyProject>();
+		addImportHookModules(getActiveProject(), importHookModulesToBeIgnored);
+		if (importHookModulesToBeIgnored.contains(getActiveProject())) importHookModulesToBeIgnored.clear();
+
+		HashSet<String> importHookModuleNamesToBeIgnored = new HashSet<String>(importHookModulesToBeIgnored.size());
+		for (ServoyProject p : importHookModulesToBeIgnored)
+		{
+			importHookModuleNamesToBeIgnored.add(p.getProject().getName());
+		}
 
 		for (ServoyProject spm : modules)
 		{
@@ -3460,7 +3470,7 @@ public class ServoyModel extends AbstractServoyModel
 				for (String module : moduleNames)
 				{
 					IProject tmp = ResourcesPlugin.getWorkspace().getRoot().getProject(module);
-					if (tmp != null)
+					if (tmp != null && !importHookModuleNamesToBeIgnored.contains(tmp.getName()))
 					{
 						allModuleProjects.add(tmp);
 					}
