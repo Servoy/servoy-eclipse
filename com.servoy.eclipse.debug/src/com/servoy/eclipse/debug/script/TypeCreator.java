@@ -1203,6 +1203,12 @@ public class TypeCreator extends TypeCache
 			method.setDescription("Returns the name of the element. (may be null as well)</br></br>var name = elements.elem.getName();" +
 				"</br></br><b>@return</b> The name of the element.");
 			members.add(method);
+
+			method = TypeInfoModelFactory.eINSTANCE.createMethod();
+			method.setName("getElementType");
+			method.setDescription("Returns the web component type from specification file</br></br>var elementType = elements.elem.getElementType();" +
+				"</br></br><b>@return</b> The web component spec type.");
+			members.add(method);
 		}
 		return addType(bucket, type);
 	}
