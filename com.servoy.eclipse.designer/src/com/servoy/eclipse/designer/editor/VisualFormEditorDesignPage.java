@@ -68,6 +68,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.part.IPage;
 
 import com.servoy.eclipse.core.Activator;
 import com.servoy.eclipse.core.resource.DesignPagetype;
@@ -82,6 +83,7 @@ import com.servoy.eclipse.designer.editor.palette.VisualFormEditorPaletteCustomi
 import com.servoy.eclipse.designer.editor.palette.VisualFormEditorPaletteFactory;
 import com.servoy.eclipse.designer.editor.rulers.FormRulerComposite;
 import com.servoy.eclipse.designer.editor.rulers.RulerManager;
+import com.servoy.eclipse.designer.outline.FormOutlinePage;
 import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
@@ -681,6 +683,11 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 				if (evt.getPropertyName().equals(PROPERTY_HIDE_INHERITED))
 				{
 					getGraphicalViewer().getRootEditPart().getContents().refresh();
+					IPage outline = DesignerUtil.getContentOutline().getCurrentPage();
+					if (outline instanceof FormOutlinePage)
+					{
+						((FormOutlinePage)outline).refresh();
+					}
 				}
 			}
 		});
@@ -796,5 +803,11 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 		{
 			refreshPalette();
 		}
+	}
+
+	@Override
+	public String getPartProperty(String key)
+	{
+		return super.getPartProperty(key) != null ? super.getPartProperty(key) : String.valueOf(getGraphicalViewer().getProperty(key));
 	}
 }

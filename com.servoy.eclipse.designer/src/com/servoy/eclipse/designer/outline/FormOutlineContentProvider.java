@@ -34,6 +34,8 @@ import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.WebObjectSpecification;
 
+import com.servoy.eclipse.designer.editor.VisualFormEditorDesignPage;
+import com.servoy.eclipse.designer.util.DesignerUtil;
 import com.servoy.eclipse.designer.util.WebFormComponentChildType;
 import com.servoy.eclipse.model.util.ModelUtils;
 import com.servoy.eclipse.model.util.ServoyLog;
@@ -93,7 +95,9 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 		{
 			try
 			{
-				Form flattenedForm = (Form)getFlattenedWhenForm(form);
+				Boolean hideInherited = Boolean.valueOf(
+					DesignerUtil.getActiveEditor().getGraphicaleditor().getPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED));
+				Form flattenedForm = Boolean.TRUE.equals(hideInherited) ? form : (Form)getFlattenedWhenForm(form);
 				List<Object> nodes = new ArrayList<Object>();
 				Set<FormElementGroup> groups = new HashSet<FormElementGroup>();
 				if (flattenedForm != null)
@@ -155,68 +159,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 
 	public Object[] getChildrenGrouped(Object parentElement)
 	{
-		Comparator comparator = form.isResponsiveLayout() ? PersistContextLocationComparator.INSTANCE : PersistContextNameComparator.INSTANCE;
-		if (parentElement == ELEMENTS || parentElement == PARTS)
-		{
-			HashSet<Object> availableCategories = null;
-			try
-			{
-				Form flattenedForm = (Form)getFlattenedWhenForm(form);
-				if (flattenedForm != null)
-				{
-					availableCategories = new HashSet<Object>();
-					for (IPersist persist : flattenedForm.getAllObjectsAsList())
-					{
-						if (persist instanceof IScriptElement)
-						{
-							continue;
-						}
-						if (parentElement == ELEMENTS && persist instanceof IFormElement)
-						{
-							availableCategories.add(ElementUtil.getPersistNameAndImage(persist));
-						}
-						if ((parentElement == PARTS) && (persist instanceof Part))
-						{
-							availableCategories.add(PersistContext.create(persist, form));
-						}
-					}
-				}
-				return availableCategories.toArray();
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError("Could not create flattened form for form " + form, e);
-			}
-		}
-		else if (parentElement instanceof Pair)
-		{
-			try
-			{
-				Form flattenedForm = (Form)getFlattenedWhenForm(form);
-				List<Object> nodes = new ArrayList<Object>();
-				if (flattenedForm != null)
-				{
-					for (IPersist persist : flattenedForm.getAllObjectsAsList())
-					{
-						if (persist instanceof IScriptElement || persist instanceof Part)
-						{
-							continue;
-						}
-						if (persist instanceof IFormElement)
-						{
-							Pair<String, Image> nameAndImage = ElementUtil.getPersistNameAndImage(persist);
-							if (nameAndImage.equals(parentElement)) nodes.add(PersistContext.create(persist, form));
-						}
-					}
-				}
-				return new SortedList(comparator, nodes).toArray();
-			}
-			catch (RepositoryException e)
-			{
-				ServoyLog.logError("Could not create flattened form for form " + form, e);
-			}
-		}
-		else if (parentElement instanceof PersistContext && ((PersistContext)parentElement).getPersist() instanceof AbstractBase)
+		if (parentElement instanceof PersistContext && ((PersistContext)parentElement).getPersist() instanceof AbstractBase)
 		{
 			List<PersistContext> list = new ArrayList<PersistContext>();
 			for (IPersist persist : getPersistChildrenAsList(((AbstractBase)((PersistContext)parentElement).getPersist()), false))
@@ -224,6 +167,62 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 				list.add(PersistContext.create(persist, ((PersistContext)parentElement).getContext()));
 			}
 			return list.toArray();
+		}
+		else
+		{
+			Boolean hideInherited = Boolean.valueOf(
+				DesignerUtil.getActiveEditor().getGraphicaleditor().getPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED));
+			try
+			{
+				Form flattenedForm = Boolean.TRUE.equals(hideInherited) ? form : (Form)getFlattenedWhenForm(form);
+				if (flattenedForm != null)
+				{
+					if (parentElement == ELEMENTS || parentElement == PARTS)
+					{
+						HashSet<Object> availableCategories = null;
+						availableCategories = new HashSet<Object>();
+						for (IPersist persist : flattenedForm.getAllObjectsAsList())
+						{
+							if (persist instanceof IScriptElement)
+							{
+								continue;
+							}
+							if (parentElement == ELEMENTS && persist instanceof IFormElement)
+							{
+								availableCategories.add(ElementUtil.getPersistNameAndImage(persist));
+							}
+							if ((parentElement == PARTS) && (persist instanceof Part))
+							{
+								availableCategories.add(PersistContext.create(persist, form));
+							}
+						}
+						return availableCategories.toArray();
+					}
+					else if (parentElement instanceof Pair)
+					{
+						Comparator comparator = form.isResponsiveLayout() ? PersistContextLocationComparator.INSTANCE : PersistContextNameComparator.INSTANCE;
+						List<Object> nodes = new ArrayList<Object>();
+
+						for (IPersist persist : flattenedForm.getAllObjectsAsList())
+						{
+							if (persist instanceof IScriptElement || persist instanceof Part)
+							{
+								continue;
+							}
+							if (persist instanceof IFormElement)
+							{
+								Pair<String, Image> nameAndImage = ElementUtil.getPersistNameAndImage(persist);
+								if (nameAndImage.equals(parentElement)) nodes.add(PersistContext.create(persist, form));
+							}
+						}
+						return new SortedList(comparator, nodes).toArray();
+					}
+				}
+			}
+			catch (RepositoryException e)
+			{
+				ServoyLog.logError("Could not create flattened form for form " + form, e);
+			}
 		}
 
 		return null;
