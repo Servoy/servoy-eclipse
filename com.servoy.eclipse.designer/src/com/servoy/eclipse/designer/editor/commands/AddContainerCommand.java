@@ -404,6 +404,11 @@ public class AddContainerCommand extends AbstractHandler implements IHandler
 						ArrayList<IChildWebObject> arrayList = new ArrayList<IChildWebObject>();
 						arrayList.addAll(Arrays.asList(arrayValue));
 						arrayList.add(index, bean);
+						// update index for all elements that are after the inserted one
+						for (int i = index + 1; i < arrayList.size(); i++)
+						{
+							arrayList.get(i).setIndex(i);
+						}
 						arrayValue = arrayList.toArray(new IChildWebObject[arrayList.size()]);
 					}
 					else
