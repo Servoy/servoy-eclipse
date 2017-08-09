@@ -145,7 +145,7 @@ public class FoundsetDesignToChooserConverter
 						jsonValue = oldValue; // if an error happened. don't change anything
 					}
 				}
-				else jsonValue = oldValue; // if we don't know what the user selected, don't change anything (this shouldn't happen)
+				else jsonValue = oldValue; // if we don't know what the user selected or the user canceled selection, don't change anything (this shouldn't happen); note: "-none-" is treated above in the if (value == CombinedTreeContentProvider.NONE)
 			}
 		}
 		return jsonValue;

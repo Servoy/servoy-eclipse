@@ -118,7 +118,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 
 				return Integer.MAX_VALUE;
 			}
-			else if (value == null && propertyDescription.hasDefault())
+			else if (value == null && !webObject.hasProperty(getName()) && propertyDescription.hasDefault())
 			{
 				Object defaultValue = propertyDescription.getDefaultValue();
 				if (propertyDescription.getType() instanceof IDesignValueConverter)

@@ -18,8 +18,6 @@
 package com.servoy.eclipse.ui.property.types;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.websocket.utils.PropertyUtils;
 
@@ -73,18 +71,11 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 			IPersist persist = (IPersist)getEditableValue(); // parent persist holding property with propertyDescription
 			PersistContext pContext = PersistContext.create(persist, persistContext.getContext());
 
-			if (underlyingPropertySource == null || ((persist instanceof IBasicWebObject) && (((IBasicWebObject)persist).getFlattenedJson() == null))) // so if we have no propertySource or if we have one but we shouldn't (json became null meanwhile)
+			if (underlyingPropertySource == null || persist == null) // so if we have no propertySource or if we have one but we shouldn't
 			{
 				if (persist instanceof IBasicWebObject)
 				{
-					if (((IBasicWebObject)persist).getFlattenedJson() != null)
-					{
-						underlyingPropertySource = new PDPropertySource(pContext, readOnly, propertyDescription);
-					}
-					else
-					{
-						underlyingPropertySource = null;
-					}
+					underlyingPropertySource = new PDPropertySource(pContext, readOnly, propertyDescription);
 				}
 				else if (persist == null)
 				{
@@ -156,31 +147,27 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 	@Override
 	public void resetPropertyValue(ISetterAwarePropertySource propertySource)
 	{
-		if (propertyDescription.hasDefault())
-		{
-			Object defValue = propertyDescription.getDefaultValue();
-			JSONObject toSet = null;
-			if (defValue instanceof String)
-			{
-				try
-				{
-					toSet = new ServoyJSONObject((String)defValue, false);
-				}
-				catch (JSONException e)
-				{
-					ServoyLog.logError(e);
-				}
-			}
-			propertySource.setPropertyValue(getId(), toSet);
-		}
-		else propertySource.defaultResetProperty(getId());
+//		if (propertyDescription.hasDefault())
+//		{
+//			Object defValue = propertyDescription.getDefaultValue();
+//			JSONObject toSet = null;
+//			if (defValue instanceof String)
+//			{
+//				try
+//				{
+//					toSet = new ServoyJSONObject((String)defValue, false);
+//				}
+//				catch (JSONException e)
+//				{
+//					ServoyLog.logError(e);
+//				}
+//			}
+//			propertySource.setPropertyValue(getId(), toSet);
+//		}
+//		else propertySource.defaultResetProperty(getId());
+		propertySource.defaultResetProperty(getId());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.ui.property.ObjectTypePropertyController#getLabelText(java.lang.Object)
-	 */
 	@Override
 	protected String getLabelText(Object element)
 	{
@@ -190,25 +177,15 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 	@Override
 	protected boolean isJSONNull(Object element)
 	{
-		return element == null || (element instanceof WebCustomType && ((WebCustomType)element).getFlattenedJson() == null);
+		return element == null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.ui.property.ObjectTypePropertyController#getMainObjectTextConverter()
-	 */
 	@Override
 	protected IObjectTextConverter getMainObjectTextConverter()
 	{
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.ui.property.ObjectTypePropertyController#toggleValue(java.lang.Object)
-	 */
 	@Override
 	protected Object toggleValue(Object oldPropertyValue)
 	{
@@ -216,16 +193,16 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 		String typeName = null;
 		if (oldPropertyValue != null)
 		{
-			WebCustomType ct = (WebCustomType)(oldPropertyValue);
-			newPropertyValue = WebCustomType.createNewInstance(ct.getParent(), ct.getPropertyDescription(), ct.getJsonKey(), ct.getIndex(), true);
-			typeName = ct.getTypeName();
+			newPropertyValue = null;
 		}
 		else
 		{
+			// the index and json key given as arguments below might not be correct if this is the element of a WebCustomType array property; but they
+			// will automatically be updated in WebObjectImpl.updatePersistMappedPropeties
 			newPropertyValue = WebCustomType.createNewInstance((IBasicWebObject)persistContext.getPersist(), propertyDescription, getId().toString(), 0, true);
 			typeName = PropertyUtils.getSimpleNameOfCustomJSONTypeProperty(propertyDescription.getType());
+			newPropertyValue.setTypeName(typeName);
 		}
-		newPropertyValue.setTypeName(typeName);
 		return newPropertyValue;
 	}
 

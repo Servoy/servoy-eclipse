@@ -226,11 +226,6 @@ public abstract class JSONObjectTypePropertyController extends ObjectTypePropert
 		return propertySource.defaultIsPropertySet(getId());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.ui.property.ObjectTypePropertyController#isJSONNull(java.lang.Object)
-	 */
 	@Override
 	protected boolean isJSONNull(Object value)
 	{

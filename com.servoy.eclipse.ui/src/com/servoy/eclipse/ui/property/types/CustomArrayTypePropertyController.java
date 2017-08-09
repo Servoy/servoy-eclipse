@@ -21,9 +21,6 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.sablo.specification.PropertyDescription;
 import org.sablo.specification.property.ICustomType;
 
@@ -44,8 +41,6 @@ import com.servoy.j2db.persistence.IChildWebObject;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.WebCustomType;
-import com.servoy.j2db.util.ServoyJSONArray;
-import com.servoy.j2db.util.ServoyJSONObject;
 import com.servoy.j2db.util.Utils;
 
 /**
@@ -93,7 +88,6 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		return getNewElementValue(0);
 	}
 
-
 	@Override
 	protected CustomArrayPropertySource getArrayElementPropertySource(ComplexProperty<Object> complexProperty)
 	{
@@ -140,7 +134,8 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 					PersistContext persistContextForElement = persistContext;
 					if (arrayElementInPersist instanceof IChildWebObject[])
 					{
-						persistContextForElement = PersistContext.create(((IChildWebObject[])arrayElementInPersist)[i], persistContext.getContext());
+						IChildWebObject childPersist = ((IChildWebObject[])arrayElementInPersist)[i];
+						if (childPersist != null) persistContextForElement = PersistContext.create(childPersist, persistContext.getContext());
 					}
 					PropertyDescriptorWrapper propertyDescriptorWrapper = new PersistPropertySource.PropertyDescriptorWrapper(
 						PDPropertySource.createPropertyHandlerFromSpec(getArrayElementPD(), persistContext), arrayValue[i]);
@@ -168,11 +163,6 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			return getEditableValue();
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.property.ISetterAwarePropertySource#defaultResetProperty(java.lang.Object)
-		 */
 		@Override
 		public void defaultResetProperty(Object id)
 		{
@@ -180,22 +170,12 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayPropertySource#insertNewElementAfterIndex(int)
-		 */
 		@Override
 		protected Object insertNewElementAfterIndex(int idx)
 		{
 			return insertElementAtIndex(idx + 1, getNewElementValue(idx + 1), getEditableValue());
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayPropertySource#deleteElementAtIndex(int)
-		 */
 		@Override
 		protected Object deleteElementAtIndex(int idx)
 		{
@@ -207,11 +187,6 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			return newArrayValue;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayPropertySource#defaultSetElement(java.lang.Object, int)
-		 */
 		@Override
 		protected void defaultSetElement(Object value, int idx)
 		{
@@ -219,33 +194,18 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			((Object[])getEditableValue())[idx] = value;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayPropertySource#defaultGetElement(int)
-		 */
 		@Override
 		protected Object defaultGetElement(int idx)
 		{
 			return ((Object[])getEditableValue())[idx];
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayPropertySource#defaultIsElementSet(int)
-		 */
 		@Override
 		protected boolean defaultIsElementSet(int idx)
 		{
 			return ((Object[])getEditableValue()).length > idx;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController.ArrayPropertySource#resetComplexElementValue(java.lang.Object, int)
-		 */
 		@Override
 		protected Object resetComplexElementValue(Object id, int idx)
 		{
@@ -268,81 +228,62 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 	@Override
 	public void resetPropertyValue(ISetterAwarePropertySource propertySource)
 	{
-		if (propertyDescription.hasDefault())
-		{
-			Object defValue = propertyDescription.getDefaultValue();
-			JSONArray toSet = null;
-			if (defValue instanceof String)
-			{
-				try
-				{
-					toSet = new ServoyJSONArray((String)defValue);
-				}
-				catch (JSONException e)
-				{
-					ServoyLog.logError(e);
-				}
-			}
-			else if (defValue instanceof JSONArray)
-			{
-				int length = ((JSONArray)defValue).length();
-				toSet = new JSONArray();
-				for (int i = 0; i < length; i++)
-				{
-					Object val = ((JSONArray)defValue).opt(i);
-					if (val instanceof JSONObject)
-					{
-						toSet.put(i, ServoyJSONObject.mergeAndDeepCloneJSON((JSONObject)val, new JSONObject()));
-					}
-					else
-					{
-						toSet.put(i, val);
-					}
-				}
-			}
-			propertySource.setPropertyValue(getId(), toSet);
-		}
-		else propertySource.defaultResetProperty(getId());
+//		if (propertyDescription.hasDefault())
+//		{
+//			Object defValue = propertyDescription.getDefaultValue();
+//			JSONArray toSet = null;
+//			if (defValue instanceof String)
+//			{
+//				try
+//				{
+//					toSet = new ServoyJSONArray((String)defValue);
+//				}
+//				catch (JSONException e)
+//				{
+//					ServoyLog.logError(e);
+//				}
+//			}
+//			else if (defValue instanceof JSONArray)
+//			{
+//				int length = ((JSONArray)defValue).length();
+//				toSet = new JSONArray();
+//				for (int i = 0; i < length; i++)
+//				{
+//					Object val = ((JSONArray)defValue).opt(i);
+//					if (val instanceof JSONObject)
+//					{
+//						toSet.put(i, ServoyJSONObject.mergeAndDeepCloneJSON((JSONObject)val, new JSONObject()));
+//					}
+//					else
+//					{
+//						toSet.put(i, val);
+//					}
+//				}
+//			}
+//			propertySource.setPropertyValue(getId(), toSet);
+//		}
+//		else propertySource.defaultResetProperty(getId());
+		propertySource.defaultResetProperty(getId());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController#getLabelText(java.lang.Object)
-	 */
 	@Override
 	protected String getLabelText(Object element)
 	{
 		return ((element instanceof Object[]) ? (((Object[])element).length == 0 ? "[]" : "[...]") : "null");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController#getMainObjectTextConverter()
-	 */
 	@Override
 	protected IObjectTextConverter getMainObjectTextConverter()
 	{
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController#isNotSet(java.lang.Object)
-	 */
 	@Override
 	protected boolean isNotSet(Object value)
 	{
 		return value == null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController#createEmptyPropertyValue()
-	 */
 	@Override
 	protected Object createEmptyPropertyValue()
 	{
@@ -354,11 +295,6 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		return new Object[] { getNewElementInitialValue() };
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.servoy.eclipse.ui.property.ArrayTypePropertyController#insertElementAtIndex(int, java.lang.Object, java.lang.Object)
-	 */
 	@Override
 	protected Object insertElementAtIndex(int i, Object elementValue, Object oldMainValue)
 	{
@@ -381,4 +317,5 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 			}
 		}
 	}
+
 }

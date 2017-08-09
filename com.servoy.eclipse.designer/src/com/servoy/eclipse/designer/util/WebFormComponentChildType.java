@@ -146,6 +146,14 @@ public class WebFormComponentChildType extends AbstractBase implements IBasicWeb
 	}
 
 	@Override
+	public Object getPropertyDefaultValueClone(String propertyName)
+	{
+		PropertyDescription pd = getPropertyDescription();
+		PropertyDescription propPD = pd != null ? pd.getProperty(propertyName) : null;
+		return propPD != null && propPD.hasDefault() ? ServoyJSONObject.deepCloneJSONArrayOrObj(propPD.getDefaultValue()) : null;
+	}
+
+	@Override
 	public boolean hasProperty(String propertyName)
 	{
 		return getJson().has(propertyName);
