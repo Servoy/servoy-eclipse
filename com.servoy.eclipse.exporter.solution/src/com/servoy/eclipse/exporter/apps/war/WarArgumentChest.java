@@ -94,12 +94,29 @@ public class WarArgumentChest extends AbstractArgumentChest
 	}
 
 	@Override
+	protected String getMandatoryArgumentsMessage()
+	{
+		StringBuilder message = new StringBuilder(super.getMandatoryArgumentsMessage());
+		message.append("\n");
+		message.append(MANDATORY_ARGS_INDENT);
+		message.append("-");
+		message.append(defaultAdminUser);
+		message.append(" <user name for admin page when no admin user exists>");
+		message.append("\n");
+		message.append(MANDATORY_ARGS_INDENT);
+		message.append("-");
+		message.append(defaultAdminPassword);
+		message.append(" <password for defaultAdminUser>");
+		return message.toString();
+	}
+
+	@Override
 	public String getHelpMessage()
 	{
 		// @formatter:off
 		return  "WAR exporter. Exports workspace solutions into .war files.\n"
 			+ super.getHelpMessageCore()
-			+ "        -pfw <properties_file> ... path and name of properties file to be included in the war.\n"
+			+ "        -pfw <properties_file> ... path & name of properties file to be included in the war.\n"
 			+ "             Default: the 'servoy.properties' file  from 'application_server'  will be used.\n"
 			+ "        -b <bean_names> ... the list of beans to export\n"
 			+ "             Default: all beans from application_server/beans are exported.\n"
@@ -114,8 +131,8 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             Can also use -pi <none> to not export any plugin\n"
 			+ "        -active <true/false> ... export active solution (and its modules) only\n"
 			+ "				Default: true\n"
-			+ "        -pluginLocations <absolute paths to developer 'plugins' folder> ...  needed in case\n"
-			+ "             you don't run the exporter from [servoy_install]/developer/exporter"
+			+ "        -pluginLocations <absolute paths to developer 'plugins' folder> ...  needed in  case\n"
+			+ "             you don't run the exporter from [servoy_install]/developer/exporter\n"
 			+ "             Default: '../plugins'.\n"
 			+ "        -crefs ... exports only the components used by the solution.\n"
 			+ "             Default: all components are exported.\n"
@@ -131,7 +148,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             exports  the services  used by the solution  and the services in the additional\n"
 			+ "             services list.\n"
 			+ "             Default: all services are exported.\n"
-			+ "        -excludeServicePkgs ... space separated list of excluded service packages\n"
+			+ "        -excludeServicePkgs ... space separated list of excluded service packages.\n"
 			+ "             Default: none is excluded.\n"
 			+ "        -md ws|db|none|both ... take table  metadata from workspace / database / both+check.\n"
 			+ "             Usually you will want to use 'ws'.\n"
@@ -158,39 +175,30 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "        -" + addUsersToAdminGroup + " ... adds Users To Admin Group\n"
 			+ "        -" + updateSequences + " ... updates Sequences\n"
 			+ "        -" + upgradeRepository + " ... automatically upgrade repository if needed\n"
-			+ "        -" + createTomcatContextXML + " ... create   a   META-INF/context.xml  file;   please  see\n"
-			+ "             https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Standard_Impleme\n"
-			+ "             ntation\n"
-			+ "             for more information\n"
-			+ "        -" + antiResourceLocking + " ... add  antiResourceLocking=\"true\"  to  Context element; may\n"
-			+ "             only be used with createTomcatContextXML\n"
-			+ "        -" + clearReferencesStatic + " ... add  clearReferencesStatic=\"true\"  to  Context element;\n"
-			+ "             may only be used with createTomcatContextXML\n"
-			+ "        -" + clearReferencesStopThreads + " ... add  clearReferencesStopThreads=\"true\"  to Context\n"
-			+ "             element; may only be used with createTomcatContextXML\n"
-			+ "        -" + clearReferencesStopTimerThreads + " ... add clearReferencesStopTimerThreads=\"true\" to\n"
+			+ "        -" + createTomcatContextXML + " ... create   a   META-INF/context.xml   file;   please   see\n"
+			+ "             https://tomcat.apache.org/tomcat-8.0-doc/config/context.html#Standard_Implement\n"
+			+ "             ation for more information.\n"
+			+ "        -" + antiResourceLocking + " ... add antiResourceLocking=\"true\" to Context element; may only\n"
+			+ "             be used with createTomcatContextXML.\n"
+			+ "        -" + clearReferencesStatic + " ... add clearReferencesStatic=\"true\" to  Context element; may\n"
+			+ "             only be used with createTomcatContextXML.\n"
+			+ "        -" + clearReferencesStopThreads + " ... add   clearReferencesStopThreads=\"true\"   to Context\n"
+			+ "             element; may only be used with createTomcatContextXML.\n"
+			+ "        -" + clearReferencesStopTimerThreads + " ... add  clearReferencesStopTimerThreads=\"true\"  to\n"
 			+ "             Context element; may only be used with createTomcatContextXML.\n"
-			+ "        -" + useAsRealAdminUser + " can the default admin be used as a normal admin user ]\n"
+			+ "        -" + useAsRealAdminUser + "the  default admin user login given via  -" + defaultAdminUser + "  above\n"
+			+ "             will be available as a normal admin user in solutions as well.\n"
 			+ "        -" + minimizeJsCss + " minimize JS and CSS files \n"
-			+ "        -" + licenses + " <company_name> <number_of_licenses> <code>... export Servoy Client licenses\n"
-			+ "             to add more licenses, use ',' as delimiter\n"
-			+ "        -" + userHomeDirectory + " <user_home_directory>... this must be a writable directory where Servoy\n"
-			+ "              application related files will be stored; if not set, the system user home directory will be used\n"
-			+ "        -" + overwriteDBServerProperties + " overwrite the DB servers properties of an already deployed application\n"
-			+ "              by using the DB servers from the servoy.properties of the war\n"
-			+ "        -" + overwriteAllProperties + " overwrite all properties of an already deployed application\n"
-			+ "              by using the values from the servoy.properties of the war\n";
+			+ "        -" + licenses + " <company_name> <number_of_licenses> <license_code>... export Servoy Client\n"
+			+ "             licenses; to add more licenses use ',' as delimiter.\n"
+			+ "        -" + userHomeDirectory + " <user_home_directory>... this must be a  writable directory where\n"
+			+ "             Servoy application  related files  will be stored;  if not set, then the system\n"
+			+ "             user home directory will be used.\n"
+			+ "        -" + overwriteDBServerProperties + " overwrite  the  DB  server   properties  of an  already\n"
+			+ "             deployed app. by using the DB servers from the servoy.properties of the war.\n"
+			+ "        -" + overwriteAllProperties + " overwrite all properties of  an already deployed application\n"
+			+ "             by using the values from the servoy.properties of the war.\n";
 		// @formatter:on
-	}
-
-
-	@Override
-	protected String getMandatoryArgumentsMessage()
-	{
-		StringBuilder message = new StringBuilder(super.getMandatoryArgumentsMessage());
-		message.append(" -" + defaultAdminUser + " <user name for admin page when no admin user exists>");
-		message.append(" -" + defaultAdminPassword + "<password for defaultAdminUser>");
-		return message.toString();
 	}
 
 	@Override

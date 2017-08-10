@@ -39,6 +39,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 	private String appServerDir = "../../application_server";
 	private boolean exportUsingDbiFileInfoOnly = false;
 	private boolean ignoreBuildErrors = false;
+	protected String MANDATORY_ARGS_INDENT = "   ";
 
 
 	// this must not be done in constructor as it calls an abstract method that can end up setting fields in an extending class - fields that are not yet set to default values and will be after the constructor of this class finishes
@@ -203,7 +204,7 @@ public abstract class AbstractArgumentChest implements IArgumentChest
 
 	protected String getMandatoryArgumentsMessage()
 	{
-		return "   -s <solutions_separated_by_comma> -o <out_dir> -data <workspace_location>";
+		return MANDATORY_ARGS_INDENT + "-s <solutions_separated_by_comma> -o <out_dir> -data <workspace_location>";
 	}
 
 	// dbi and dbd are implemented by mobile exporter, but hardcoded, not configurable - so not part of the help message; allow extending classes to suppress these
