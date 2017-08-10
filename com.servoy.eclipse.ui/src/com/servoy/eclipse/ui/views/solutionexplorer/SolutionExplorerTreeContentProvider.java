@@ -169,6 +169,9 @@ public class SolutionExplorerTreeContentProvider
 	private static final String IMG_SOLUTION_WEB_ONLY = "solution_web_only.png";
 	private static final String IMG_SOLUTION_PREIMPORT = "solution_preimport.png";
 	private static final String IMG_SOLUTION_POSTIMPORT = "solution_postimport.png";
+	private static final String SERVER_IMAGE = "server.png";
+	private static final String SERVER_DUPLICATE_IMAGE = "duplicate_server.png";
+	private static final String SERVER_ERROR_IMAGE = "server.png_IMG_DEC_FIELD_ERROR";
 	private static Map<IPath, Image> imageCache = new HashMap<IPath, Image>();
 
 	private PlatformSimpleUserNode invisibleRootNode;
@@ -1712,21 +1715,21 @@ public class SolutionExplorerTreeContentProvider
 		{
 			public void run()
 			{
-				String imgName = "server.png";
+				String imgName = SERVER_IMAGE;
 				if (!server.isValid())
 				{
-					Image image = uiActivator.loadImageFromCache("server.png_IMG_DEC_FIELD_ERROR");
-					if (image == null)
+					result[0] = uiActivator.loadImageFromCache(SERVER_ERROR_IMAGE);
+					if (result[0] == null)
 					{
 						ImageDescriptor IMG_ERROR = JFaceResources.getImageRegistry().getDescriptor("org.eclipse.jface.fieldassist.IMG_DEC_FIELD_ERROR");
 						result[0] = new DecorationOverlayIcon(uiActivator.loadImageFromBundle("server.png"), IMG_ERROR, IDecoration.BOTTOM_LEFT).createImage();
-						uiActivator.putImageInCache("server.png_IMG_DEC_FIELD_ERROR", result[0]);
+						uiActivator.putImageInCache(SERVER_ERROR_IMAGE, result[0]);
 					}
 					return;
 				}
 				if (!server.getName().equals(serverName))
 				{
-					imgName = "duplicate_server.png";
+					imgName = SERVER_DUPLICATE_IMAGE;
 				}
 
 				result[0] = uiActivator.loadImageFromBundle(imgName, !server.getConfig().isEnabled());
