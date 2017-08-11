@@ -142,6 +142,13 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 			underlyingPropertySource.defaultResetProperty(id);
 		}
 
+		@Override
+		public Object resetComplexPropertyValue(Object id)
+		{
+			PDPropertySource underlying = getUnderlyingPropertySource();
+			return underlying.getDefaultPersistValue(id);
+		}
+
 	}
 
 	@Override

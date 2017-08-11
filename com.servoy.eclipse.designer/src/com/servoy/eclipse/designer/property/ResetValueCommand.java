@@ -26,7 +26,7 @@ import com.servoy.eclipse.ui.views.properties.PropertySheetEntry;
 /**
  * Command to reset a value on a IPropertySource target.
  * Copied from gef with minor changes.
- * 
+ *
  * @author rgansevles
  */
 
@@ -43,7 +43,7 @@ public class ResetValueCommand extends Command
 
 	/**
 	 * Default Constructor: Sets the label for the Command
-	 * 
+	 *
 	 * @since 3.1
 	 */
 	public ResetValueCommand()
@@ -56,7 +56,7 @@ public class ResetValueCommand extends Command
 	 * 1) the target and property have been specified<br>
 	 * 2) the property has a default value<br>
 	 * 3) the value set for that property is not the default
-	 * 
+	 *
 	 * @see org.eclipse.gef.commands.Command#canExecute()
 	 */
 	@Override
@@ -73,7 +73,7 @@ public class ResetValueCommand extends Command
 
 	/**
 	 * Caches the undo value and invokes redo()
-	 * 
+	 *
 	 * @see org.eclipse.gef.commands.Command#execute()
 	 */
 	@Override
@@ -86,7 +86,7 @@ public class ResetValueCommand extends Command
 
 	/**
 	 * Sets the IPropertySource.
-	 * 
+	 *
 	 * @param propSource the IPropertySource whose property has to be reset
 	 */
 	public void setTarget(IPropertySource propSource)
@@ -101,7 +101,7 @@ public class ResetValueCommand extends Command
 
 	/**
 	 * Resets the specified property on the specified IPropertySource
-	 * 
+	 *
 	 * @see org.eclipse.gef.commands.Command#redo()
 	 */
 	@Override
@@ -120,7 +120,7 @@ public class ResetValueCommand extends Command
 
 	/**
 	 * Sets the property that is to be reset.
-	 * 
+	 *
 	 * @param pName the property to be reset
 	 */
 	public void setPropertyId(Object pName)
@@ -130,7 +130,7 @@ public class ResetValueCommand extends Command
 
 	/**
 	 * Restores the non-default value that was reset.
-	 * 
+	 *
 	 * @see org.eclipse.gef.commands.Command#undo()
 	 */
 	@Override
