@@ -236,11 +236,17 @@ public class StartMobileClientContribution extends CompoundContributionItem impl
 			String label = config.getName().split(DASH)[0].trim();
 			try
 			{
-				if (!config.getAttribute("nodebug", true)) label.replace("Run", "Debug");
+				if (Boolean.valueOf(config.getAttribute("nodebug", "true")) == Boolean.FALSE) label = label.replace("Run", "Debug");
 			}
 			catch (CoreException e)
 			{
 				ServoyLog.logError("Could not get launch configuration 'nodebug' attribute value.", e);
+			}
+			if (label.length() > 40)
+			{
+				//if it's too long, limit it to max 40 chars
+				label = label.substring(0, 37);
+				label += "...";
 			}
 			contributionParameter.label = label;
 			contributionParameter.visibleEnabled = true;
