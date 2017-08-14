@@ -118,7 +118,7 @@ public class WebComponentPropertyHandler implements IPropertyHandler
 
 				return Integer.MAX_VALUE;
 			}
-			else if (value == null && !webObject.hasProperty(getName()) && propertyDescription.hasDefault())
+			else if (value == null && !webObject.hasProperty(getName()) && propertyDescription.hasDefault()) // default values for persist mapped properties are already handled by WebObjectImpl, so value will not be null here for those
 			{
 				Object defaultValue = propertyDescription.getDefaultValue();
 				if (propertyDescription.getType() instanceof IDesignValueConverter)

@@ -45,7 +45,7 @@ import com.servoy.j2db.util.IDelegate;
  *
  * @author acostescu
  */
-public abstract class ArrayTypePropertyController extends PropertyController<Object, Object>implements IPropertySetter<Object, ISetterAwarePropertySource>
+public abstract class ArrayTypePropertyController extends PropertyController<Object, Object> implements IPropertySetter<Object, ISetterAwarePropertySource>
 {
 
 	protected ILabelProvider labelProvider = null;
@@ -223,7 +223,7 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 		return cellEditor;
 	}
 
-	protected abstract class ArrayPropertySource extends ComplexPropertySource<Object>implements ISetterAwarePropertySource
+	protected abstract class ArrayPropertySource extends ComplexPropertySource<Object> implements ISetterAwarePropertySource
 	{
 
 		protected IPropertyDescriptor[] elementPropertyDescriptors;

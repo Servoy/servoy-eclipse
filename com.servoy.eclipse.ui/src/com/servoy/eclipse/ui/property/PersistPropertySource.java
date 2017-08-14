@@ -1830,7 +1830,7 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					persistContext);
 				if (desc != null)
 				{
-					if (desc.hasDefault())
+					if (desc.hasDefault() && !WebObjectImpl.isPersistMappedProperty(desc)) // persist mapped property defaults are handled in WebObjectImpl directly
 					{
 						Object defaultValue = desc.getDefaultValue();
 						if (desc.getType() instanceof IDesignValueConverter)
@@ -2108,11 +2108,12 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 					PropertyDescription propDescription = specPD.getProperty((String)id);
 					if (propDescription != null)
 					{
-						if (propDescription.hasDefault())
+						if (propDescription.hasDefault() && !WebObjectImpl.isPersistMappedProperty(propDescription)) // persist mapped prop. default values are handled directly in WebObjectImpl, so ignore those
 						{
 							// so this is a property that has a default value defined in the .spec file; default might not be null
 							defaultSpecValue = propDescription.getDefaultValue();
-							isDefaultValue = JSONUtils.areEqual(defaultSpecValue, ServoyJSONObject.nullToJsonNull(value));
+							isDefaultValue = JSONUtils.areEqual(defaultSpecValue,
+								ServoyJSONObject.nullToJsonNull(WebObjectImpl.convertFromJavaType(propDescription, value)));
 						}
 					}
 				}

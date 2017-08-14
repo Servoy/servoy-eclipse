@@ -28,6 +28,7 @@ import com.servoy.eclipse.ui.property.ISetterAwarePropertySource;
 import com.servoy.eclipse.ui.property.ObjectTypePropertyController;
 import com.servoy.eclipse.ui.property.PDPropertySource;
 import com.servoy.eclipse.ui.property.PersistContext;
+import com.servoy.eclipse.ui.property.PersistPropertySource;
 import com.servoy.j2db.persistence.IBasicWebObject;
 import com.servoy.j2db.persistence.IPersist;
 import com.servoy.j2db.persistence.WebCustomType;
@@ -146,7 +147,8 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 		public Object resetComplexPropertyValue(Object id)
 		{
 			PDPropertySource underlying = getUnderlyingPropertySource();
-			return underlying.getDefaultPersistValue(id);
+			PersistPropertySource.adjustPropertyValueAndReset(id, underlying.getPropertyDescriptor(id), this);
+			return PersistPropertySource.adjustPropertyValueToGet(id, underlying.getPropertyDescriptor(id), this);
 		}
 
 	}
