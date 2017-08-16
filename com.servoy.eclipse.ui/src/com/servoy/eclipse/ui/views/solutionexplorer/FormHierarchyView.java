@@ -1328,6 +1328,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	public void open(Object obj)
 	{
 		showMembersAction.clearSelection();
+		showMembersAction.setChecked(obj instanceof ScriptMethod);
 		setSelection(obj);
 	}
 }

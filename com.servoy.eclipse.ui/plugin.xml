@@ -728,6 +728,12 @@
               schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
               sequence="F4">
         </key>
+        <key
+            commandId="com.servoy.eclipse.ui.OpenFormHierarchyAction"
+            contextId="org.eclipse.dltk.ui.javascriptEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="F4">
+      </key>
      </extension>
    <extension
          point="org.eclipse.core.runtime.adapters">
@@ -883,6 +889,19 @@
             </or>
          </visibility>
       </objectContribution>
+      <viewerContribution
+            id="com.servoy.eclipse.ui.viewer.JavascriptEditor"
+            targetID="#JavascriptEditorContext">
+         <action
+               class="com.servoy.eclipse.ui.actions.OpenFormHierarchyAction"
+               id="com.servoy.eclipse.ui.OpenFormHierarchyAction"
+               definitionId="com.servoy.eclipse.ui.OpenFormHierarchyAction"
+               icon="icons/form_hierarchy.png"
+               label="Open Form Hierarchy"
+               menubarPath="open.ext"
+               tooltip="Open form hierarchy">
+         </action>
+      </viewerContribution>
    </extension>
    <extension
          point="org.eclipse.ui.importWizards">
