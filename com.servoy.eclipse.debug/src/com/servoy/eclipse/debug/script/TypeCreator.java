@@ -1209,6 +1209,37 @@ public class TypeCreator extends TypeCache
 			method.setDescription("Returns the web component type from specification file</br></br>var elementType = elements.elem.getElementType();" +
 				"</br></br><b>@return</b> The web component spec type.");
 			members.add(method);
+
+			method = TypeInfoModelFactory.eINSTANCE.createMethod();
+			method.setName("putClientProperty");
+			EList<Parameter> parameters = method.getParameters();
+			Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+			param.setType(getTypeRef(null, "String"));
+			param.setName("key");
+			parameters.add(param);
+			param = TypeInfoModelFactory.eINSTANCE.createParameter();
+			param.setType(getTypeRef(null, "Object"));
+			parameters.add(param);
+			param.setName("value");
+			method.setDescription(
+				"Sets the value for the specified element client property key. NOTE: Depending on the operating system, a user interface property name may be available.</br>" +
+					"elements.elem.putClientProperty('ToolTipText','some text');</br></br>" +
+					"@param {Object} key user interface key (depends on operating system)</br>" + "@param {Object} value a predefined value for the key");
+			members.add(method);
+
+			method = TypeInfoModelFactory.eINSTANCE.createMethod();
+			method.setName("getClientProperty");
+			parameters = method.getParameters();
+			param = TypeInfoModelFactory.eINSTANCE.createParameter();
+			param.setType(getTypeRef(null, "String"));
+			param.setName("key");
+			parameters.add(param);
+			method.setDescription(
+				"Gets the specified client property for the element based on a key. NOTE: Depending on the operating system, a user interface property name may be available.</br>" +
+					"var property = elements.elem.getClientProperty('ToolTipText');</br></br>" +
+					"@param {Object} key user interface key (depends on operating system)</br></br>" +
+					"@return Object The value of the property for specified key.");
+			members.add(method);
 		}
 		return addType(bucket, type);
 	}
