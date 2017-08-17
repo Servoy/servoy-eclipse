@@ -17,6 +17,7 @@
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
@@ -27,10 +28,11 @@ import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.util.EditorUtil;
 
 /**
  * Action for opening a wizard.
- * 
+ *
  * @author acostescu
  */
 public class OpenWizardAction extends Action
@@ -40,7 +42,7 @@ public class OpenWizardAction extends Action
 
 	/**
 	 * Creates a new "open wizard" action.
-	 * 
+	 *
 	 * @param wizardClass the class of the wizard that this action will open.
 	 * @param image the image descriptor for this action.
 	 * @param text the text to be used as text & tool tip for this action.
@@ -73,15 +75,22 @@ public class OpenWizardAction extends Action
 			wizard.init(PlatformUI.getWorkbench(), selection);
 
 			// Instantiates the wizard container with the wizard and opens it
-			WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard);
+			WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), wizard)
+			{
+				@Override
+				protected IDialogSettings getDialogBoundsSettings()
+				{
+					return EditorUtil.getDialogSettings("newformdialog");
+				}
+			};
 			if (wizard instanceof IPageChangedListener)
 			{
 				dialog.addPageChangedListener((IPageChangedListener)wizard);
 			}
-
 			dialog.create();
 			dialog.open();
 			wizard.dispose();
+
 		}
 		catch (InstantiationException e)
 		{

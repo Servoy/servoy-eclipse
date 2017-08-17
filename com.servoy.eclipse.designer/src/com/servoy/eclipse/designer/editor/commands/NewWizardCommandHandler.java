@@ -19,6 +19,7 @@ package com.servoy.eclipse.designer.editor.commands;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -28,6 +29,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
+import com.servoy.eclipse.ui.util.EditorUtil;
 import com.servoy.eclipse.ui.wizards.NewFormWizard;
 import com.servoy.eclipse.ui.wizards.NewMethodWizard;
 import com.servoy.eclipse.ui.wizards.NewRelationWizard;
@@ -36,7 +38,7 @@ import com.servoy.j2db.persistence.Solution;
 
 /**
  * Handles dropdown for new-wizards (form, relation, ...)
- * 
+ *
  * @author asisu
  */
 
@@ -201,9 +203,15 @@ public class NewWizardCommandHandler extends AbstractHandler
 		IStructuredSelection selection = StructuredSelection.EMPTY;
 		newFormWizard.init(PlatformUI.getWorkbench(), selection);
 
-		WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), newFormWizard);
+		WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), newFormWizard)
+		{
+			@Override
+			protected IDialogSettings getDialogBoundsSettings()
+			{
+				return EditorUtil.getDialogSettings("newformdialog");
+			}
+		};
 		dialog.create();
 		dialog.open();
-
 	}
 }
