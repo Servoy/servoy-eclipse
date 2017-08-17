@@ -44,12 +44,14 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -223,10 +225,11 @@ public class PlaceDataprovidersComposite extends Composite
 
 		final Object[] inputs = getComponentsAndTemplatesInput();
 
-		GridLayout layout = new GridLayout(3, false);
-		this.setLayout(layout);
+		this.setLayout(new FillLayout());
+		SashForm form = new SashForm(this, SWT.HORIZONTAL);
+		form.setLayout(new FillLayout());
 
-		configurationComposite = new Composite(this, SWT.NONE);
+		configurationComposite = new Composite(form, SWT.NONE);
 		GridLayout configurationLayout = new GridLayout(2, false);
 		configurationLayout.marginHeight = 0;
 		configurationLayout.marginWidth = 0;
@@ -366,7 +369,7 @@ public class PlaceDataprovidersComposite extends Composite
 		lbl.setText("Default size (w,h)");
 		lbl.setToolTipText("The default size used from components (templates will use the template size)");
 		Composite sizeComposite = new Composite(configurationComposite, SWT.NONE);
-		layout = new GridLayout(2, true);
+		GridLayout layout = new GridLayout(2, true);
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
 		sizeComposite.setLayout(layout);
@@ -476,9 +479,9 @@ public class PlaceDataprovidersComposite extends Composite
 			i18nInfo.setText("(for I18N you need to set i18nDataSource on the solution)");
 		}
 
-		dataproviderTreeViewer = createDataproviderTree(persistContext, flattenedSolution, table, dataproviderOptions, inputs);
+		dataproviderTreeViewer = createDataproviderTree(form, persistContext, flattenedSolution, table, dataproviderOptions, inputs);
 
-		tableViewer = createTableViewer();
+		tableViewer = createTableViewer(form);
 
 
 		tableViewer.setInput(input);
@@ -488,11 +491,14 @@ public class PlaceDataprovidersComposite extends Composite
 		{
 			configurationViewer.setSelection(new StructuredSelection(selection));
 		}
+
+		form.setWeights(new int[] { 30, 30, 40 });
+
 	}
 
-	private TableViewer createTableViewer()
+	private TableViewer createTableViewer(SashForm form)
 	{
-		final Composite container = new Composite(this, SWT.NONE);
+		final Composite container = new Composite(form, SWT.NONE);
 		// define layout for the viewer
 
 		GridData gridData = new GridData();
@@ -611,7 +617,7 @@ public class PlaceDataprovidersComposite extends Composite
 	 * @param persistContext
 	 *
 	 */
-	private DataProviderTreeViewer createDataproviderTree(PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
+	private DataProviderTreeViewer createDataproviderTree(SashForm form, PersistContext persistContext, FlattenedSolution flattenedSolution, ITable table,
 		DataProviderOptions dataproviderOptions, final Object[] inputs)
 	{
 		GridData gridData = new GridData();
@@ -621,10 +627,10 @@ public class PlaceDataprovidersComposite extends Composite
 		gridData.grabExcessHorizontalSpace = true;
 		gridData.grabExcessVerticalSpace = true;
 		gridData.horizontalAlignment = GridData.FILL;
-		gridData.minimumWidth = 200;
+//		gridData.minimumWidth = 400;
 		gridData.heightHint = 600;
 
-		Composite parent = new Composite(this, SWT.NONE);
+		Composite parent = new Composite(form, SWT.NONE);
 		GridLayout layout = new GridLayout(1, false);
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
