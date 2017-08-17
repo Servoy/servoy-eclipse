@@ -231,9 +231,10 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 				{
 					for (var j = 0; j < selection.length; j++)
 					{
-						if (editorScope.selection[j].getAttribute("svy-id") == toRemove[i])
+						var node = selection[j].nodeType === Node.ELEMENT_NODE ? selection[j] : selection[j][0];
+						if (selection[j].getAttribute("svy-id") == toRemove[i])
 						{
-							if (removeGhosts && editorScope.selectionToDrag[j].classList.contains("ghost") || !removeGhosts && editorScope.selectionToDrag[j].classList.contains("svy-wrapper"))
+							if (removeGhosts && selection[j].classList.contains("ghost") || !removeGhosts && selection[j].classList.contains("svy-wrapper"))
 							{
 								nodesToRemove.push(selection[j]);
 								break;
@@ -483,8 +484,9 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 						var removeGhosts = event.screenX > formWidth || event.screenY > formHeight;
 						for (var i = 0; i < selection.length; i++)
 						{
-							var beanModel = editorScope.getBeanModel(selection[i]);
-							var svy_id = selection[i].getAttribute("svy-id");
+							var node = selection[i].nodeType === Node.ELEMENT_NODE ? selection[i] : selection[i][0];
+							var beanModel = editorScope.getBeanModel(node);
+							var svy_id = node.getAttribute("svy-id");
 							var ghost = editorScope.getGhost(svy_id);	
 							if (ghost && ghost.type == EDITOR_CONSTANTS.GHOST_TYPE_CONFIGURATION) continue;
 							if (beanModel && ghost && toRemove.indexOf(svy_id) == -1)
@@ -505,9 +507,10 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 							{
 								for (var j = 0; j < editorScope.selectionToDrag.length; j++)
 								{
-									if (editorScope.selectionToDrag[j].getAttribute("svy-id") == toRemove[i])
+									var node = editorScope.selectionToDrag[j].nodeType === Node.ELEMENT_NODE ? editorScope.selectionToDrag[j] : editorScope.selectionToDrag[j][0];
+									if (node.getAttribute("svy-id") == toRemove[i])
 									{
-										if (removeGhosts && editorScope.selectionToDrag[j].classList.contains("ghost") || !removeGhosts && editorScope.selectionToDrag[j].classList.contains("svy-wrapper"))
+										if (removeGhosts && node.classList.contains("ghost") || !removeGhosts && node.classList.contains("svy-wrapper"))
 										{
 											editorScope.selectionToDrag.splice(j,1);
 											break;
