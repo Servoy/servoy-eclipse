@@ -530,7 +530,7 @@ public class ElementFactory
 			{
 				IDataProvider dataProvider = (IDataProvider)o;
 
-				int fieldSpacing = configuration.getFieldSpacing() > 0 ? configuration.getFieldSpacing() : 10;
+				int fieldSpacing = configuration.getFieldSpacing() >= 0 ? configuration.getFieldSpacing() : 10;
 				if (loc == null)
 				{
 					loc = startLocation;
@@ -660,7 +660,7 @@ public class ElementFactory
 
 					fillTextProperty(label, configuration, name, labelText, false, true);
 
-					int labelSpacing = configuration.getLabelSpacing() > 0 ? configuration.getLabelSpacing() : 20;
+					int labelSpacing = configuration.getLabelSpacing() >= 0 ? configuration.getLabelSpacing() : 20;
 
 					if (configuration.isPlaceHorizontally())
 					{
