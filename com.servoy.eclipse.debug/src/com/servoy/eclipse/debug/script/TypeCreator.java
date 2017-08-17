@@ -1240,6 +1240,26 @@ public class TypeCreator extends TypeCache
 					"@param {Object} key user interface key (depends on operating system)</br></br>" +
 					"@return Object The value of the property for specified key.");
 			members.add(method);
+
+			method = TypeInfoModelFactory.eINSTANCE.createMethod();
+			method.setName("getDesignTimeProperty");
+			method.setType(getTypeRef(null, ITypeNames.OBJECT));
+			parameters = method.getParameters();
+			param = TypeInfoModelFactory.eINSTANCE.createParameter();
+			param.setType(getTypeRef(null, "String"));
+			param.setName("key");
+			parameters.add(param);
+			method.setDescription(
+				"Get a design-time property of an element.</br>" + "	var property = elements.elem.getDesignTimeProperty('myprop');</br></br>" +
+					"@param {Object} key the name of the property</br></br>" + "@return Object The value of the property for specified key.");
+			members.add(method);
+
+			method = TypeInfoModelFactory.eINSTANCE.createMethod();
+			method.setName("getDesignTimePropertyNames");
+			method.setType(getTypeRef(null, ITypeNames.ARRAY));
+			method.setDescription("Get the design-time property names of an element.</br>" +
+				"	var properties = elements.elem.getDesignTimePropertyNames();</br></br>" + "@return Array<String> The names of the design time properties.");
+			members.add(method);
 		}
 		return addType(bucket, type);
 	}
