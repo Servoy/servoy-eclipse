@@ -95,9 +95,7 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 		{
 			try
 			{
-				Boolean hideInherited = Boolean.valueOf(
-					DesignerUtil.getActiveEditor().getGraphicaleditor().getPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED));
-				Form flattenedForm = Boolean.TRUE.equals(hideInherited) ? form : (Form)getFlattenedWhenForm(form);
+				Form flattenedForm = isHideInheritedElements() ? form : (Form)getFlattenedWhenForm(form);
 				List<Object> nodes = new ArrayList<Object>();
 				Set<FormElementGroup> groups = new HashSet<FormElementGroup>();
 				if (flattenedForm != null)
@@ -157,6 +155,16 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 		return null;
 	}
 
+	private boolean isHideInheritedElements()
+	{
+		if (DesignerUtil.getActiveEditor() != null && DesignerUtil.getActiveEditor().getGraphicaleditor() != null)
+		{
+			return Boolean.valueOf(
+				DesignerUtil.getActiveEditor().getGraphicaleditor().getPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED)).booleanValue();
+		}
+		return false;
+	}
+
 	public Object[] getChildrenGrouped(Object parentElement)
 	{
 		if (parentElement instanceof PersistContext && ((PersistContext)parentElement).getPersist() instanceof AbstractBase)
@@ -170,11 +178,9 @@ public class FormOutlineContentProvider implements ITreeContentProvider
 		}
 		else
 		{
-			Boolean hideInherited = Boolean.valueOf(
-				DesignerUtil.getActiveEditor().getGraphicaleditor().getPartProperty(VisualFormEditorDesignPage.PROPERTY_HIDE_INHERITED));
 			try
 			{
-				Form flattenedForm = Boolean.TRUE.equals(hideInherited) ? form : (Form)getFlattenedWhenForm(form);
+				Form flattenedForm = isHideInheritedElements() ? form : (Form)getFlattenedWhenForm(form);
 				if (flattenedForm != null)
 				{
 					if (parentElement == ELEMENTS || parentElement == PARTS)
