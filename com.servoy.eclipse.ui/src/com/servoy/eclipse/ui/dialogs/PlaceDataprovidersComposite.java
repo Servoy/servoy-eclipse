@@ -132,7 +132,7 @@ public class PlaceDataprovidersComposite extends Composite
 	private final ComboViewer mediaCombo;
 	private final ComboViewer dateCombo;
 	private final List<Pair<IDataProvider, Object>> input = new ArrayList<>();
-	private final ComboViewer configurationViewer;
+	private ComboViewer configurationViewer;
 	private final ComboViewer labelComponentCombo;
 	private final Text labelSpacing;
 	private final Text fieldSpacing;
@@ -150,12 +150,12 @@ public class PlaceDataprovidersComposite extends Composite
 
 	private JSONObject currentSelection;
 	private String configurationSelection = null;
-	private Text fieldWidth;
-	private Text fieldHeight;
-	private Text labelWidth;
-	private Text labelHeight;
-	private Composite configurationComposite;
-	private GridData configurationGridData;
+	private final Text fieldWidth;
+	private final Text fieldHeight;
+	private final Text labelWidth;
+	private final Text labelHeight;
+	private final Composite configurationComposite;
+	private final GridData configurationGridData;
 	private Button simpleAdvanced;
 
 
@@ -246,101 +246,6 @@ public class PlaceDataprovidersComposite extends Composite
 		configurationGridData.minimumWidth = 370;
 		configurationComposite.setLayoutData(configurationGridData);
 
-		Label confLabel = new Label(configurationComposite, SWT.NONE);
-		confLabel.setText("Configuration: ");
-		confLabel.setToolTipText("Select the configuration, or type in new string to save the current configuration below");
-		Composite confAndDelete = new Composite(configurationComposite, SWT.NONE);
-		GridLayout confAndDeleteLayout = new GridLayout(2, false);
-		confAndDeleteLayout.marginHeight = 0;
-		confAndDeleteLayout.marginWidth = 0;
-		confAndDelete.setLayout(confAndDeleteLayout);
-
-		confAndDelete.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
-		final CCombo configuration = new CCombo(confAndDelete, SWT.BORDER);
-		configuration.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
-		configurationViewer = new ComboViewer(configuration);
-		configurationViewer.getCCombo().setToolTipText("Select the configuration, or type in new string to save the current configuration below");
-		configurationViewer.setLabelProvider(new ColumnLabelProvider()
-		{
-			@Override
-			public String getText(Object element)
-			{
-				if ("_".equals(element)) return "";
-				return super.getText(element);
-			}
-		});
-		configurationViewer.setContentProvider(ArrayContentProvider.getInstance());
-		Set<String> keySet = preferences.keySet();
-		configurationViewer.setInput(new ArrayList<>(keySet));
-		configurationViewer.addSelectionChangedListener(new ISelectionChangedListener()
-		{
-			@Override
-			public void selectionChanged(SelectionChangedEvent event)
-			{
-				configurationSelection = (String)((StructuredSelection)event.getSelection()).getFirstElement();
-				currentSelection = preferences.optJSONObject(configurationSelection);
-				if (currentSelection == null)
-				{
-					currentSelection = new JSONObject();
-					preferences.put(configurationSelection, currentSelection);
-				}
-				setSelection(stringCombo, TEXT_PROPERTY);
-				setSelection(intCombo, INTEGER_PROPERTY);
-				setSelection(numberCombo, NUMBER_PROPERTY);
-				setSelection(dateCombo, DATETIME_PROPERTY);
-				setSelection(mediaCombo, MEDIA_PROPERTY);
-				setSelection(labelComponentCombo, LABEL_COMPONENT_PROPERTY);
-				labelSpacing.setText(currentSelection.optString(LABEL_SPACING_PROPERTY));
-				fieldSpacing.setText(currentSelection.optString(FIELD_SPACING_PROPERTY));
-				placeWithLabelsButton.setSelection(currentSelection.optBoolean(PLACE_WITH_LABELS_PROPERTY));
-				onTopButton.setSelection(currentSelection.optBoolean(PLACE_ON_TOP_PROPERTY));
-				fillName.setSelection(currentSelection.optBoolean(FILL_NAME_PROPERTY));
-				fillText.setSelection(currentSelection.optBoolean(FILL_TEXT_PROPERTY));
-				placeHorizontally.setSelection(currentSelection.optBoolean(PLACE_HORIZONTALLY_PROPERTY));
-				fieldWidth.setText(currentSelection.optString(FIELD_WIDTH_PROPERTY));
-				fieldHeight.setText(currentSelection.optString(FIELD_HEIGTH_PROPERTY));
-				labelWidth.setText(currentSelection.optString(LABEL_WIDTH_PROPERTY));
-				labelHeight.setText(currentSelection.optString(LABEL_HEIGTH_PROPERTY));
-				automaticI18N.setSelection(currentSelection.optBoolean(AUTOMATIC_I18N_PROPERTY));
-				i18nPrefix.setText(currentSelection.optString(I18N_PREFIX_PROPERTY));
-
-				updatePlaceWithLabelState();
-				updateI18NEnableState();
-			}
-		});
-		configurationViewer.getCCombo().addModifyListener(new ModifyListener()
-		{
-			@Override
-			public void modifyText(ModifyEvent e)
-			{
-				configurationSelection = configurationViewer.getCCombo().getText();
-				currentSelection = new JSONObject(currentSelection, JSONObject.getNames(currentSelection));
-			}
-		});
-		Button deleteConf = new Button(confAndDelete, SWT.PUSH);
-		deleteConf.setText("");
-		deleteConf.setImage(Activator.getDefault().loadImageFromBundle("delete.png"));
-		deleteConf.setToolTipText("Removes the current selected configuration");
-		deleteConf.addSelectionListener(new SelectionListener()
-		{
-			@Override
-			public void widgetSelected(SelectionEvent e)
-			{
-				if (!"_".equals(configurationSelection) && configurationSelection != null)
-				{
-					preferences.remove(configurationSelection);
-					((List)configurationViewer.getInput()).remove(configurationSelection);
-					configurationViewer.setSelection(new StructuredSelection("_"));
-					configurationViewer.refresh();
-				}
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e)
-			{
-				widgetSelected(e);
-			}
-		});
 
 		GridData gd = new GridData();
 		gd.horizontalSpan = 2;
@@ -638,7 +543,14 @@ public class PlaceDataprovidersComposite extends Composite
 		parent.setLayout(layout);
 		parent.setLayoutData(gridData);
 
-		simpleAdvanced = new Button(parent, SWT.PUSH);
+		Composite confAndDelete = new Composite(parent, SWT.NONE);
+		GridLayout confAndDeleteLayout = new GridLayout(3, false);
+		confAndDeleteLayout.marginHeight = 0;
+		confAndDeleteLayout.marginWidth = 0;
+		confAndDelete.setLayout(confAndDeleteLayout);
+		confAndDelete.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+
+		simpleAdvanced = new Button(confAndDelete, SWT.PUSH);
 		showOrHideConfiguration();
 		simpleAdvanced.addSelectionListener(new SelectionListener()
 		{
@@ -656,6 +568,92 @@ public class PlaceDataprovidersComposite extends Composite
 				widgetSelected(e);
 			}
 		});
+		final CCombo configuration = new CCombo(confAndDelete, SWT.BORDER);
+		configuration.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+		configurationViewer = new ComboViewer(configuration);
+		configurationViewer.getCCombo().setToolTipText("Select the configuration, or type in new string to save the current configuration below");
+		configurationViewer.setLabelProvider(new ColumnLabelProvider()
+		{
+			@Override
+			public String getText(Object element)
+			{
+				if ("_".equals(element)) return "";
+				return super.getText(element);
+			}
+		});
+		configurationViewer.setContentProvider(ArrayContentProvider.getInstance());
+		Set<String> keySet = preferences.keySet();
+		configurationViewer.setInput(new ArrayList<>(keySet));
+		configurationViewer.addSelectionChangedListener(new ISelectionChangedListener()
+		{
+			@Override
+			public void selectionChanged(SelectionChangedEvent event)
+			{
+				configurationSelection = (String)((StructuredSelection)event.getSelection()).getFirstElement();
+				currentSelection = preferences.optJSONObject(configurationSelection);
+				if (currentSelection == null)
+				{
+					currentSelection = new JSONObject();
+					preferences.put(configurationSelection, currentSelection);
+				}
+				setSelection(stringCombo, TEXT_PROPERTY);
+				setSelection(intCombo, INTEGER_PROPERTY);
+				setSelection(numberCombo, NUMBER_PROPERTY);
+				setSelection(dateCombo, DATETIME_PROPERTY);
+				setSelection(mediaCombo, MEDIA_PROPERTY);
+				setSelection(labelComponentCombo, LABEL_COMPONENT_PROPERTY);
+				labelSpacing.setText(currentSelection.optString(LABEL_SPACING_PROPERTY));
+				fieldSpacing.setText(currentSelection.optString(FIELD_SPACING_PROPERTY));
+				placeWithLabelsButton.setSelection(currentSelection.optBoolean(PLACE_WITH_LABELS_PROPERTY));
+				onTopButton.setSelection(currentSelection.optBoolean(PLACE_ON_TOP_PROPERTY));
+				fillName.setSelection(currentSelection.optBoolean(FILL_NAME_PROPERTY));
+				fillText.setSelection(currentSelection.optBoolean(FILL_TEXT_PROPERTY));
+				placeHorizontally.setSelection(currentSelection.optBoolean(PLACE_HORIZONTALLY_PROPERTY));
+				fieldWidth.setText(currentSelection.optString(FIELD_WIDTH_PROPERTY));
+				fieldHeight.setText(currentSelection.optString(FIELD_HEIGTH_PROPERTY));
+				labelWidth.setText(currentSelection.optString(LABEL_WIDTH_PROPERTY));
+				labelHeight.setText(currentSelection.optString(LABEL_HEIGTH_PROPERTY));
+				automaticI18N.setSelection(currentSelection.optBoolean(AUTOMATIC_I18N_PROPERTY));
+				i18nPrefix.setText(currentSelection.optString(I18N_PREFIX_PROPERTY));
+
+				updatePlaceWithLabelState();
+				updateI18NEnableState();
+			}
+		});
+		configurationViewer.getCCombo().addModifyListener(new ModifyListener()
+		{
+			@Override
+			public void modifyText(ModifyEvent e)
+			{
+				configurationSelection = configurationViewer.getCCombo().getText();
+				currentSelection = new JSONObject(currentSelection, JSONObject.getNames(currentSelection));
+			}
+		});
+		Button deleteConf = new Button(confAndDelete, SWT.PUSH);
+		deleteConf.setText("");
+		deleteConf.setImage(Activator.getDefault().loadImageFromBundle("delete.png"));
+		deleteConf.setToolTipText("Removes the current selected configuration");
+		deleteConf.addSelectionListener(new SelectionListener()
+		{
+			@Override
+			public void widgetSelected(SelectionEvent e)
+			{
+				if (!"_".equals(configurationSelection) && configurationSelection != null)
+				{
+					preferences.remove(configurationSelection);
+					((List)configurationViewer.getInput()).remove(configurationSelection);
+					configurationViewer.setSelection(new StructuredSelection("_"));
+					configurationViewer.refresh();
+				}
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e)
+			{
+				widgetSelected(e);
+			}
+		});
+
 
 		DataProviderTreeViewer treeviewer = new DataProviderTreeViewer(parent, DataProviderLabelProvider.INSTANCE_HIDEPREFIX, // label provider will be overwritten when superform is known
 			new DataProviderContentProvider(persistContext, flattenedSolution, table), dataproviderOptions, true, true,
@@ -1113,8 +1111,17 @@ public class PlaceDataprovidersComposite extends Composite
 	private void showOrHideConfiguration()
 	{
 		boolean advancedMode = settings.getBoolean(ADVANCED_MODE_SETTING);
-		if (advancedMode) simpleAdvanced.setText(">> Simple");
-		else simpleAdvanced.setText("<< Advanced");
+		if (advancedMode)
+		{
+			simpleAdvanced.setText(">> Simple configuration");
+			simpleAdvanced.setToolTipText("Closed the advanced configuration dialog, it will still be saved with the given name on of the right textfield");
+		}
+		else
+		{
+			simpleAdvanced.setText("<< Advanced configuration");
+			simpleAdvanced.setToolTipText(
+				"Opens the advanced configuration block to adjust a configuration that will be saved with the given name of the right text field");
+		}
 		configurationGridData.exclude = !advancedMode;
 		configurationComposite.setVisible(advancedMode);
 	}
