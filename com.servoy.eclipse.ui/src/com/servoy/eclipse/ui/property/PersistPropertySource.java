@@ -2089,10 +2089,6 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 
 				Object beanPropertyPersist = beanPropertyDescriptor.valueObject;
-				boolean hasInheritedValue = (value == null && persistContext.getPersist() instanceof ISupportExtendsID &&
-					beanPropertyPersist == persistContext.getPersist() &&
-					PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist()) != null &&
-					((AbstractBase)PersistHelper.getSuperPersist((ISupportExtendsID)persistContext.getPersist())).getProperty((String)id) != null);
 
 				boolean isDefaultValue = (value == null); // most properties have null as a default value
 				Object defaultSpecValue = null;
@@ -2117,6 +2113,8 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 						}
 					}
 				}
+
+				boolean hasInheritedValue = isDefaultValue && hasInheritedValue(id, beanPropertyPersist);
 
 				if (beanPropertyPersist instanceof AbstractBase && !(beanPropertyPersist instanceof LayoutContainer) && isDefaultValue && !hasInheritedValue)
 				{
@@ -2206,6 +2204,44 @@ public class PersistPropertySource implements ISetterAwarePropertySource, IAdapt
 				}
 			}
 		}
+	}
+
+	private boolean hasInheritedValue(Object id, Object beanPropertyPersist)
+	{
+		boolean hasInheritedValue = false;
+
+		if (beanPropertyPersist == persistContext.getPersist())
+		{
+			IPersist persistThatCouldBeExtended = (IPersist)beanPropertyPersist;
+
+			String topMostKey = (String)id;
+			while (persistThatCouldBeExtended instanceof IChildWebObject)
+			{
+				topMostKey = ((IChildWebObject)persistThatCouldBeExtended).getJsonKey();
+				persistThatCouldBeExtended = persistThatCouldBeExtended.getParent();
+			}
+
+			// ok see if there is a value for the property with id "id" inside "beanPropertyPersist" in any of the 'extended' persists
+			while (!hasInheritedValue && persistThatCouldBeExtended instanceof ISupportExtendsID)
+			{
+				// take the next 'super' persist in the inheritance chain
+				persistThatCouldBeExtended = PersistHelper.getSuperPersist((ISupportExtendsID)persistThatCouldBeExtended);
+
+				if (persistThatCouldBeExtended != null)
+				{
+					if (persistThatCouldBeExtended instanceof IBasicWebObject)
+					{
+						JSONObject ownJson = (JSONObject)((IBasicWebObject)persistThatCouldBeExtended).getOwnProperty(
+							StaticContentSpecLoader.PROPERTY_JSON.getPropertyName());
+						// we only need to check top most key (the one from the actual extended obj. even for nested objects/array); once anything is set in the 'path' to the subprop we can consider tbat it does have inherited values
+						hasInheritedValue = (!ServoyJSONObject.isJavascriptNullOrUndefined(ownJson) && ownJson.has(topMostKey));
+					}
+					else hasInheritedValue = (((AbstractBase)persistThatCouldBeExtended).getProperty((String)id) != null);
+				}
+			}
+		}
+
+		return hasInheritedValue;
 	}
 
 	public static void refreshPropertiesView()

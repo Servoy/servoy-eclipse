@@ -36,11 +36,11 @@ import com.servoy.j2db.persistence.RepositoryException;
  * Property source for custom sub-properties of a bean.
  * <p>
  * For example, a bean groups a number of settings in 1 object, the settings can be collapsed in Properties View.
- * 
+ *
  * @author rgansevles
  */
 
-public class BeanSubpropertyPropertySource extends ComplexPropertySource<Object>
+public class BeanSubpropertyPropertySource extends ComplexPropertySourceWithStandardReset<Object>
 {
 	private final Object valueObject;
 	private final BeanPropertyHandler propertyDescriptor;
@@ -222,7 +222,8 @@ public class BeanSubpropertyPropertySource extends ComplexPropertySource<Object>
 
 			try
 			{
-				beanPropertyDescriptor.setValue(editableValue, PersistPropertySource.convertSetPropertyValue(id, propertyDescriptors.get(id), v), null /* persistContext */);
+				beanPropertyDescriptor.setValue(editableValue, PersistPropertySource.convertSetPropertyValue(id, propertyDescriptors.get(id), v),
+					null /* persistContext */);
 			}
 			catch (Exception e)
 			{

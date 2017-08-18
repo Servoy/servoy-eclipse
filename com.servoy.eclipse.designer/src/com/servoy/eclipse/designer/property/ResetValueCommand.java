@@ -20,7 +20,7 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.IPropertySource2;
 
-import com.servoy.eclipse.ui.property.ComplexPropertySource;
+import com.servoy.eclipse.ui.property.ComplexPropertySourceWithStandardReset;
 import com.servoy.eclipse.ui.views.properties.PropertySheetEntry;
 
 /**
@@ -107,9 +107,9 @@ public class ResetValueCommand extends Command
 	@Override
 	public void redo()
 	{
-		if (propertySheetEntry != null && target instanceof ComplexPropertySource< ? >)
+		if (propertySheetEntry != null && target instanceof ComplexPropertySourceWithStandardReset< ? >)
 		{
-			Object restValue = ((ComplexPropertySource< ? >)target).resetComplexPropertyValue(propertyName);
+			Object restValue = ((ComplexPropertySourceWithStandardReset< ? >)target).resetComplexPropertyValue(propertyName);
 			propertySheetEntry.setValue(restValue);
 		}
 		else

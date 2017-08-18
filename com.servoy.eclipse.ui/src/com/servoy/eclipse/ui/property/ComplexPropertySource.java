@@ -21,11 +21,11 @@ import org.eclipse.ui.views.properties.IPropertySource;
 
 /**
  * Base IPropertySource implementation for properties with sub-properties (like Dimension, Point, ..).
- * 
+ *
  * @author rgansevles
  */
 
-public class ComplexPropertySource<T> implements IPropertySource
+public abstract class ComplexPropertySource<T> implements IPropertySource
 {
 	private final ComplexProperty<T> complexProperty;
 	protected boolean readOnly = false;
@@ -65,9 +65,7 @@ public class ComplexPropertySource<T> implements IPropertySource
 		complexProperty.setValue(setComplexPropertyValue(id, v));
 	}
 
-	protected T setComplexPropertyValue(@SuppressWarnings("unused")
-	Object id, @SuppressWarnings("unused")
-	Object v)
+	protected T setComplexPropertyValue(@SuppressWarnings("unused") Object id, @SuppressWarnings("unused") Object v)
 	{
 		return null;
 	}
@@ -94,14 +92,4 @@ public class ComplexPropertySource<T> implements IPropertySource
 		return false;
 	}
 
-	public final void resetPropertyValue(Object id)
-	{
-		setPropertyValue(id, resetComplexPropertyValue(id));
-	}
-
-	public Object resetComplexPropertyValue(@SuppressWarnings("unused")
-	Object id)
-	{
-		return null;
-	}
 }

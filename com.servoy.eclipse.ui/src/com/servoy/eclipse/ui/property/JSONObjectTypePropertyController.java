@@ -175,7 +175,11 @@ public abstract class JSONObjectTypePropertyController extends ObjectTypePropert
 			return ((JSONObject)getEditableValue()).has((String)id);
 		}
 
-		@Override
+		public final void resetPropertyValue(Object id)
+		{
+			setPropertyValue(id, resetComplexPropertyValue(id));
+		}
+
 		public Object resetComplexPropertyValue(Object id)
 		{
 			IPropertyDescriptor pd = findPD(id);

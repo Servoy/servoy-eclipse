@@ -105,7 +105,7 @@ public class MapEntriesPropertyController extends PropertyController<Map<String,
 		};
 	}
 
-	protected class MapPropertySource extends ComplexPropertySource<Map<String, Object>>
+	protected class MapPropertySource extends ComplexPropertySourceWithStandardReset<Map<String, Object>>
 	{
 		private static final String REMOVE_VALUE = "<removed>&*^&^%&$#@^%$&%%^#$*$($";
 

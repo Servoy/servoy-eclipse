@@ -26,11 +26,11 @@ import com.servoy.j2db.persistence.ISupportScrollbars;
 
 /**
  * Property controller for scrollbars property.
- * 
+ *
  * @author rgansevles
  */
 
-public class ScrollbarSettingPropertySource extends ComplexPropertySource<Integer>
+public class ScrollbarSettingPropertySource extends ComplexPropertySourceWithStandardReset<Integer>
 {
 	public static final String HORIZONTAL = "horizontal";
 	public static final String VERTICAL = "vertical";
@@ -48,8 +48,8 @@ public class ScrollbarSettingPropertySource extends ComplexPropertySource<Intege
 	@Override
 	public IPropertyDescriptor[] createPropertyDescriptors()
 	{
-		return new IPropertyDescriptor[] { new ModifiedComboBoxPropertyDescriptor(HORIZONTAL, HORIZONTAL, SCROLL_OPTIONS), new ModifiedComboBoxPropertyDescriptor(
-			VERTICAL, VERTICAL, SCROLL_OPTIONS) };
+		return new IPropertyDescriptor[] { new ModifiedComboBoxPropertyDescriptor(HORIZONTAL, HORIZONTAL,
+			SCROLL_OPTIONS), new ModifiedComboBoxPropertyDescriptor(VERTICAL, VERTICAL, SCROLL_OPTIONS) };
 	}
 
 

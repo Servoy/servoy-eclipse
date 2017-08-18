@@ -285,7 +285,7 @@ public class MethodPropertyController<P> extends PropertyController<P, Object> i
 	}
 
 
-	public static class MethodPropertySource extends ComplexPropertySource<MethodWithArguments>
+	public static class MethodPropertySource extends ComplexPropertySourceWithStandardReset<MethodWithArguments>
 	{
 		public static final String DELETED_ARGUMENT = "-DELETED-ARGUMENT-";
 

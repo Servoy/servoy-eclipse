@@ -144,11 +144,10 @@ public class CustomObjectTypePropertyController extends ObjectTypePropertyContro
 		}
 
 		@Override
-		public Object resetComplexPropertyValue(Object id)
+		public final void resetPropertyValue(Object id)
 		{
 			PDPropertySource underlying = getUnderlyingPropertySource();
 			PersistPropertySource.adjustPropertyValueAndReset(id, underlying.getPropertyDescriptor(id), this);
-			return PersistPropertySource.adjustPropertyValueToGet(id, underlying.getPropertyDescriptor(id), this);
 		}
 
 	}

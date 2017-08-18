@@ -26,7 +26,7 @@ import com.servoy.j2db.persistence.IAnchorConstants;
 
 /**
  * Property controller for anchors properties.
- * 
+ *
  * @author rgansevles
  *
  */
@@ -61,7 +61,7 @@ public class AnchorPropertyController extends PropertyController<Integer, Object
 		}
 	}
 
-	public static class AnchorPropertySource extends ComplexPropertySource<Integer>
+	public static class AnchorPropertySource extends ComplexPropertySourceWithStandardReset<Integer>
 	{
 		public static final String TOP = "top";
 		public static final String RIGHT = "right";
@@ -84,8 +84,9 @@ public class AnchorPropertyController extends PropertyController<Integer, Object
 		public IPropertyDescriptor[] createPropertyDescriptors()
 		{
 			// make sure sub-properties are sorted in defined order
-			return PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { new CheckboxPropertyDescriptor(TOP, "top"), new CheckboxPropertyDescriptor(
-				RIGHT, "right"), new CheckboxPropertyDescriptor(BOTTOM, "bottom"), new CheckboxPropertyDescriptor(LEFT, "left") });
+			return PropertyController.applySequencePropertyComparator(
+				new IPropertyDescriptor[] { new CheckboxPropertyDescriptor(TOP, "top"), new CheckboxPropertyDescriptor(RIGHT,
+					"right"), new CheckboxPropertyDescriptor(BOTTOM, "bottom"), new CheckboxPropertyDescriptor(LEFT, "left") });
 		}
 
 		@Override

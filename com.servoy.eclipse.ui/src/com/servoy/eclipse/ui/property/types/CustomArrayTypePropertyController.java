@@ -207,10 +207,18 @@ public class CustomArrayTypePropertyController extends ArrayTypePropertyControll
 		}
 
 		@Override
-		protected Object resetComplexElementValue(Object id, int idx)
+		public void resetPropertyValue(Object id)
 		{
-			PersistPropertySource.adjustPropertyValueAndReset(id, getPropertyDescriptors()[idx], this);
-			return PersistPropertySource.adjustPropertyValueToGet(id, getPropertyDescriptors()[idx], this);
+			try
+			{
+				final int idx = getIndexFromId((String)id);
+
+				PersistPropertySource.adjustPropertyValueAndReset(id, getPropertyDescriptors()[idx], this);
+			}
+			catch (NumberFormatException e)
+			{
+				ServoyLog.logError(e);
+			}
 		}
 
 		protected void defaultElementWasSet(Object newMainValue)

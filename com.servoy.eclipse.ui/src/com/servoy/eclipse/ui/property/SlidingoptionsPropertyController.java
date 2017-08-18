@@ -27,7 +27,7 @@ import com.servoy.j2db.persistence.ISupportPrintSliding;
 
 /**
  * Property controller for printSliding property.
- * 
+ *
  * @author rgansevles
  */
 
@@ -135,8 +135,10 @@ public class SlidingoptionsPropertyController extends PropertyController<Integer
 			{
 				int slide = options.intValue();
 				return new Slidingoption(
-					(((slide & ISupportPrintSliding.ALLOW_MOVE_MIN_X) == ISupportPrintSliding.ALLOW_MOVE_MIN_X) || ((slide & ISupportPrintSliding.ALLOW_MOVE_PLUS_X) == ISupportPrintSliding.ALLOW_MOVE_PLUS_X)),
-					(((slide & ISupportPrintSliding.ALLOW_MOVE_PLUS_Y) == ISupportPrintSliding.ALLOW_MOVE_PLUS_Y) || ((slide & ISupportPrintSliding.ALLOW_MOVE_MIN_Y) == ISupportPrintSliding.ALLOW_MOVE_MIN_Y)),
+					(((slide & ISupportPrintSliding.ALLOW_MOVE_MIN_X) == ISupportPrintSliding.ALLOW_MOVE_MIN_X) ||
+						((slide & ISupportPrintSliding.ALLOW_MOVE_PLUS_X) == ISupportPrintSliding.ALLOW_MOVE_PLUS_X)),
+					(((slide & ISupportPrintSliding.ALLOW_MOVE_PLUS_Y) == ISupportPrintSliding.ALLOW_MOVE_PLUS_Y) ||
+						((slide & ISupportPrintSliding.ALLOW_MOVE_MIN_Y) == ISupportPrintSliding.ALLOW_MOVE_MIN_Y)),
 					((slide & ISupportPrintSliding.GROW_WIDTH) == ISupportPrintSliding.GROW_WIDTH),
 					((slide & ISupportPrintSliding.SHRINK_WIDTH) == ISupportPrintSliding.SHRINK_WIDTH),
 					((slide & ISupportPrintSliding.GROW_HEIGHT) == ISupportPrintSliding.GROW_HEIGHT),
@@ -162,11 +164,11 @@ public class SlidingoptionsPropertyController extends PropertyController<Integer
 
 	/*
 	 * Sliding option source property implementation
-	 * 
+	 *
 	 * @author rgansevles
 	 */
 
-	public static class SlidingoptionsPropertySource extends ComplexPropertySource<Slidingoption>
+	public static class SlidingoptionsPropertySource extends ComplexPropertySourceWithStandardReset<Slidingoption>
 	{
 		public final String MOVE_HORIZONTAL = "move_horizontal";
 		public final String MOVE_VERTICAL = "move_vertical";
@@ -184,10 +186,11 @@ public class SlidingoptionsPropertyController extends PropertyController<Integer
 		public IPropertyDescriptor[] createPropertyDescriptors()
 		{
 			// make sure sub-properties are sorted in defined order
-			return PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { new CheckboxPropertyDescriptor(MOVE_HORIZONTAL,
-				"Move: allow horizontal"), new CheckboxPropertyDescriptor(MOVE_VERTICAL, "Move: allow vertical"), new CheckboxPropertyDescriptor(WIDTH_GROW,
-				"Width: allow grow"), new CheckboxPropertyDescriptor(WIDTH_SHRINK, "Width: allow shrink"), new CheckboxPropertyDescriptor(HEIGHT_GROW,
-				"Height: allow grow"), new CheckboxPropertyDescriptor(HEIGHT_SHRINK, "Height: allow shrink") });
+			return PropertyController.applySequencePropertyComparator(
+				new IPropertyDescriptor[] { new CheckboxPropertyDescriptor(MOVE_HORIZONTAL, "Move: allow horizontal"), new CheckboxPropertyDescriptor(
+					MOVE_VERTICAL, "Move: allow vertical"), new CheckboxPropertyDescriptor(WIDTH_GROW,
+						"Width: allow grow"), new CheckboxPropertyDescriptor(WIDTH_SHRINK, "Width: allow shrink"), new CheckboxPropertyDescriptor(HEIGHT_GROW,
+							"Height: allow grow"), new CheckboxPropertyDescriptor(HEIGHT_SHRINK, "Height: allow shrink") });
 		}
 
 		@Override
@@ -212,18 +215,18 @@ public class SlidingoptionsPropertyController extends PropertyController<Integer
 		protected Slidingoption setComplexPropertyValue(Object id, Object v)
 		{
 			Slidingoption val = getEditableValue();
-			if (MOVE_HORIZONTAL.equals(id)) return new Slidingoption(Boolean.TRUE.equals(v), val.move_vertical, val.width_grow, val.width_shrink,
-				val.height_grow, val.height_shrink);
-			if (MOVE_VERTICAL.equals(id)) return new Slidingoption(val.move_horizontal, Boolean.TRUE.equals(v), val.width_grow, val.width_shrink,
-				val.height_grow, val.height_shrink);
-			if (WIDTH_GROW.equals(id)) return new Slidingoption(val.move_horizontal, val.move_vertical, Boolean.TRUE.equals(v), val.width_shrink,
-				val.height_grow, val.height_shrink);
-			if (WIDTH_SHRINK.equals(id)) return new Slidingoption(val.move_horizontal, val.move_vertical, val.width_grow, Boolean.TRUE.equals(v),
-				val.height_grow, val.height_shrink);
-			if (HEIGHT_GROW.equals(id)) return new Slidingoption(val.move_horizontal, val.move_vertical, val.width_grow, val.width_shrink,
-				Boolean.TRUE.equals(v), val.height_shrink);
-			if (HEIGHT_SHRINK.equals(id)) return new Slidingoption(val.move_horizontal, val.move_vertical, val.width_grow, val.width_shrink, val.height_grow,
-				Boolean.TRUE.equals(v));
+			if (MOVE_HORIZONTAL.equals(id))
+				return new Slidingoption(Boolean.TRUE.equals(v), val.move_vertical, val.width_grow, val.width_shrink, val.height_grow, val.height_shrink);
+			if (MOVE_VERTICAL.equals(id))
+				return new Slidingoption(val.move_horizontal, Boolean.TRUE.equals(v), val.width_grow, val.width_shrink, val.height_grow, val.height_shrink);
+			if (WIDTH_GROW.equals(id))
+				return new Slidingoption(val.move_horizontal, val.move_vertical, Boolean.TRUE.equals(v), val.width_shrink, val.height_grow, val.height_shrink);
+			if (WIDTH_SHRINK.equals(id))
+				return new Slidingoption(val.move_horizontal, val.move_vertical, val.width_grow, Boolean.TRUE.equals(v), val.height_grow, val.height_shrink);
+			if (HEIGHT_GROW.equals(id))
+				return new Slidingoption(val.move_horizontal, val.move_vertical, val.width_grow, val.width_shrink, Boolean.TRUE.equals(v), val.height_shrink);
+			if (HEIGHT_SHRINK.equals(id))
+				return new Slidingoption(val.move_horizontal, val.move_vertical, val.width_grow, val.width_shrink, val.height_grow, Boolean.TRUE.equals(v));
 
 			return null;
 		}

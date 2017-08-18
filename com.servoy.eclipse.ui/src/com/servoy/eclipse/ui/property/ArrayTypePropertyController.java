@@ -249,8 +249,6 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 
 		protected abstract boolean defaultIsElementSet(final int idx);
 
-		protected abstract Object resetComplexElementValue(Object id, final int idx);
-
 		protected abstract int getIndexFromId(String id);
 
 		protected abstract String getIdFromIndex(int idx);
@@ -367,22 +365,6 @@ public abstract class ArrayTypePropertyController extends PropertyController<Obj
 				ServoyLog.logError(e);
 			}
 			return false;
-		}
-
-
-		@Override
-		public Object resetComplexPropertyValue(Object id)
-		{
-			try
-			{
-				final int idx = getIndexFromId((String)id);
-				return resetComplexElementValue(id, idx);
-			}
-			catch (NumberFormatException e)
-			{
-				ServoyLog.logError(e);
-			}
-			return null;
 		}
 
 	}
