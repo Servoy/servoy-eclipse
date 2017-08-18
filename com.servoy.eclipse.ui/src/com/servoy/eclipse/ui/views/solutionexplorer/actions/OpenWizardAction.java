@@ -80,7 +80,7 @@ public class OpenWizardAction extends Action
 				@Override
 				protected IDialogSettings getDialogBoundsSettings()
 				{
-					return EditorUtil.getDialogSettings("newformdialog");
+					return EditorUtil.getDialogSettings(wizardClass.getSimpleName());
 				}
 			};
 			if (wizard instanceof IPageChangedListener)
