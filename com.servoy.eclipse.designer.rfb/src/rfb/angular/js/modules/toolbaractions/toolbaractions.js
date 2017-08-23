@@ -613,7 +613,7 @@ angular.module('toolbaractions', ['toolbar', 'editor']).run(function($rootScope,
 	
 	var btnClassicEditor = {
 			text: "Switch to classic editor",
-			icon: "../../images/html5.png",
+			icon: "../../images/classic_editor.png",
 			enabled: true,
 			onclick: function() {
 				$editorService.executeAction('switchEditorClassic');
