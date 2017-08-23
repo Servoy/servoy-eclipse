@@ -1013,8 +1013,8 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						}
 					}
 					//import hook is not active, add error here as well
-					if (!servoyModel.isSolutionActive(module.getProject().getName()) && SolutionMetaData.isPreImportHook(module.getSolution()) &&
-						module.getSolution().getModulesNames() != null)
+					if (module != null && !servoyModel.isSolutionActive(module.getProject().getName()) &&
+						SolutionMetaData.isPreImportHook(module.getSolution()) && module.getSolution().getModulesNames() != null)
 					{
 						String message = "Module " + module.getSolution().getName() + " is a solution import hook, so it should not contain any modules.";
 						addMarker(project, MISPLACED_MODULES_MARKER_TYPE, message, -1, MODULE_MISPLACED, IMarker.PRIORITY_LOW, null, null);

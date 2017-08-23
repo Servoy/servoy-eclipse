@@ -16,9 +16,20 @@
  */
 package com.servoy.eclipse.ui.views.solutionexplorer.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -81,8 +92,8 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 		SimpleUserNode node = viewer.getSelectedTreeNode();
 		if (node.getRealObject() instanceof ServoyProject)
 		{
-			ServoyProject servoyProject = (ServoyProject)node.getRealObject();
-			Solution editingSolution = servoyProject.getEditingSolution();
+			final ServoyProject servoyProject = (ServoyProject)node.getRealObject();
+			final Solution editingSolution = servoyProject.getEditingSolution();
 
 			final String oldName = servoyProject.getProject().getName();
 			InputDialog nameDialog = new InputDialog(viewer.getViewSite().getShell(), "Rename solution", "Rename solution", oldName, new IInputValidator()
@@ -96,75 +107,93 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 			int res = nameDialog.open();
 			if (res == Window.OK)
 			{
-				String name = nameDialog.getValue();
+				final String name = nameDialog.getValue();
 				ServoyProject project = ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProject(name);
 				if (project == null)
 				{
-					try
+					WorkspaceJob saveJob = new WorkspaceJob("Renaming solution...")
 					{
-						ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
-						boolean isActive = servoyModel.isSolutionActiveImportHook(oldName) || servoyModel.isSolutionActive(oldName);
-						ServoyProject activeProject = servoyModel.getActiveProject();
-						ServoyProject[] activeProjects = servoyModel.getModulesOfActiveProjectWithImportHooks();
-						if (isActive)
+						@Override
+						public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException
 						{
-							servoyModel.setActiveProject(null, false);
-						}
-						servoyProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
-						editingSolution.updateName(servoyModel.getNameValidator(), name);
-						IProjectDescription description = servoyProject.getProject().getDescription();
-						description.setName(name);
-						description.setLocation(servoyProject.getProject().getLocation().removeLastSegments(1).append(name));
-						servoyProject.getProject().move(description, false, null);
-						EclipseRepository repository = (EclipseRepository)ServoyModel.getDeveloperRepository();
-						String protectionPassword = ApplicationServerRegistry.get().calculateProtectionPassword(editingSolution.getSolutionMetaData(), null);
-						editingSolution.getSolutionMetaData().setProtectionPassword(protectionPassword);
-						repository.updateNodesInWorkspace(new IPersist[] { editingSolution }, true);
-						servoyProject.getSolution().getSolutionMetaData().setProtectionPassword(protectionPassword);
-						if (isActive)
-						{
-							for (ServoyProject module : activeProjects)
+							try
 							{
-								String[] modulesNames = Utils.getTokenElements(module.getEditingSolution().getModulesNames(), ",", true);
-								if (modulesNames != null && modulesNames.length > 0)
+								ServoyModel servoyModel = ServoyModelManager.getServoyModelManager().getServoyModel();
+								boolean isActive = servoyModel.isSolutionActiveImportHook(oldName) || servoyModel.isSolutionActive(oldName);
+								ServoyProject activeProject = servoyModel.getActiveProject();
+								if (isActive)
 								{
-									boolean changed = false;
-									for (int i = 0; i < modulesNames.length; i++)
+									servoyModel.setActiveProject(null, false);
+								}
+								servoyProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
+								editingSolution.updateName(servoyModel.getNameValidator(), name);
+								IProjectDescription description = servoyProject.getProject().getDescription();
+								description.setName(name);
+								description.setLocation(servoyProject.getProject().getLocation().removeLastSegments(1).append(name));
+								servoyProject.getProject().move(description, false, null);
+								EclipseRepository repository = (EclipseRepository)ServoyModel.getDeveloperRepository();
+								String protectionPassword = ApplicationServerRegistry.get().calculateProtectionPassword(editingSolution.getSolutionMetaData(),
+									null);
+								editingSolution.getSolutionMetaData().setProtectionPassword(protectionPassword);
+								repository.updateNodes(new IPersist[] { editingSolution }, true);
+								servoyProject.getSolution().getSolutionMetaData().setProtectionPassword(protectionPassword);
+
+								List<IPersist> toUpdate = new ArrayList<>();
+								for (ServoyProject solution : ServoyModelManager.getServoyModelManager().getServoyModel().getServoyProjects())
+								{
+									Solution editingSol = solution.getEditingSolution();
+									String[] modulesNames = Utils.getTokenElements(editingSol.getModulesNames(), ",", true);
+									if (modulesNames != null && modulesNames.length > 0)
 									{
-										if (oldName.equals(modulesNames[i]))
+										for (int i = 0; i < modulesNames.length; i++)
 										{
-											changed = true;
-											modulesNames[i] = name;
+											if (oldName.equals(modulesNames[i]))
+											{
+												modulesNames[i] = name;
+												String modulesTokenized = ModelUtils.getTokenValue(modulesNames, ",");
+												editingSol.setModulesNames(modulesTokenized);
+												toUpdate.add(editingSol);
+												break;
+											}
 										}
 									}
-									if (changed)
+								}
+								repository.updateNodes(toUpdate.toArray(new IPersist[toUpdate.size()]), false);
+								if (isActive)
+								{
+									ServoyProject svyProject = activeProject.getEditingSolution().getName().equals(name) ? servoyModel.getServoyProject(name)
+										: servoyModel.getServoyProject(activeProject.getProject().getName());
+									svyProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+									IJobManager jobManager = Job.getJobManager();
+									try
 									{
-										String modulesTokenized = ModelUtils.getTokenValue(modulesNames, ",");
-										module.getEditingSolution().setModulesNames(modulesTokenized);
-										repository.updateNodesInWorkspace(new IPersist[] { module.getEditingSolution() }, false);
+										jobManager.join(ResourcesPlugin.FAMILY_MANUAL_BUILD, new NullProgressMonitor());
+										jobManager.join(ResourcesPlugin.FAMILY_AUTO_BUILD, new NullProgressMonitor());
+										servoyModel.setActiveProject(svyProject, true);
+									}
+									catch (Exception e)
+									{
+										ServoyLog.logError(e);
+										MessageDialog.openError(viewer.getViewSite().getShell(), "Could not set active solution ", e.getMessage());
 									}
 								}
 							}
-							if (activeProject.getEditingSolution().getName().equals(name))
+							catch (RepositoryException e)
 							{
-								servoyModel.setActiveProject(servoyModel.getServoyProject(name), true);
+								ServoyLog.logError(e);
+								MessageDialog.openError(viewer.getViewSite().getShell(), "Rename failed", e.getMessage());
 							}
-							else
+							catch (CoreException e)
 							{
-								servoyModel.setActiveProject(activeProject, true);
+								ServoyLog.logError(e);
+								MessageDialog.openError(viewer.getViewSite().getShell(), "Rename failed", "Could not move the project to new directory");
 							}
+							return Status.OK_STATUS;
 						}
-					}
-					catch (RepositoryException e)
-					{
-						ServoyLog.logError(e);
-						MessageDialog.openError(viewer.getViewSite().getShell(), "Rename failed", e.getMessage());
-					}
-					catch (CoreException e)
-					{
-						ServoyLog.logError(e);
-						MessageDialog.openError(viewer.getViewSite().getShell(), "Rename failed", "Could not move the project to new directory");
-					}
+					};
+					saveJob.setUser(false);
+					saveJob.setRule(ResourcesPlugin.getWorkspace().getRoot());
+					saveJob.schedule();
 				}
 				else
 				{
