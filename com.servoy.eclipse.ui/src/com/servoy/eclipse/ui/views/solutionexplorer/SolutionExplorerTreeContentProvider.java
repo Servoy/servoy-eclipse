@@ -167,6 +167,8 @@ public class SolutionExplorerTreeContentProvider
 	private static final String IMG_SOLUTION_AUTHENTICATOR = "solution_auth.png";
 	private static final String IMG_SOLUTION_SMART_ONLY = "solution_smart_only.png";
 	private static final String IMG_SOLUTION_WEB_ONLY = "solution_web_only.png";
+	private static final String IMG_SOLUTION_NG_ONLY = "solution_ng.png";
+	private static final String IMG_SOLUTION_MOBILE = "solution_mobile.png";
 	private static final String IMG_SOLUTION_PREIMPORT = "solution_preimport.png";
 	private static final String IMG_SOLUTION_POSTIMPORT = "solution_postimport.png";
 	private static final String SERVER_IMAGE = "server.png";
@@ -564,6 +566,12 @@ public class SolutionExplorerTreeContentProvider
 						break;
 					case SolutionMetaData.WEB_CLIENT_ONLY :
 						imgName = IMG_SOLUTION_WEB_ONLY;
+						break;
+					case SolutionMetaData.NG_CLIENT_ONLY :
+						imgName = IMG_SOLUTION_NG_ONLY;
+						break;
+					case SolutionMetaData.MOBILE :
+						imgName = IMG_SOLUTION_MOBILE;
 						break;
 					case SolutionMetaData.PRE_IMPORT_HOOK :
 						imgName = IMG_SOLUTION_PREIMPORT;
@@ -1880,7 +1888,8 @@ public class SolutionExplorerTreeContentProvider
 						}
 						nodeName = cls.getName().substring(index + 1);
 					}
-					PlatformSimpleUserNode n = new PlatformSimpleUserNode(nodeName, UserNodeType.RETURNTYPE, cls, (Image)null, cls);
+					PlatformSimpleUserNode n = new PlatformSimpleUserNode(nodeName, UserNodeType.RETURNTYPE, cls, uiActivator.loadImageFromBundle("class.png"),
+						cls);
 					JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(cls, null);
 					if (IConstantsObject.class.isAssignableFrom(cls) &&
 						!(javaMembers instanceof InstanceJavaMembers && javaMembers.getMethodIds(false).size() > 0))
