@@ -492,7 +492,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 
 	public static final String ADD_TAB_TEXT = "Place TabPanel Wizard";
 	public static final String ADD_TAB_TOOLTIP = ADD_TAB_TEXT;
-	public static final ImageDescriptor ADD_TAB_IMAGE = Activator.loadImageDescriptorFromBundle("tab.png");
+	public static final ImageDescriptor ADD_TAB_IMAGE = Activator.loadImageDescriptorFromBundle("place_tabs.png");
 	public static final ActionFactory ADD_TAB = new ActionFactory("place-tabpanel")
 	{
 
@@ -513,7 +513,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 
 	public static final String ADD_SPLITPANE_TEXT = "Place SplitPane Wizard";
 	public static final String ADD_SPLITPANE_TOOLTIP = ADD_SPLITPANE_TEXT;
-	public static final ImageDescriptor ADD_SPLITPANE_IMAGE = Activator.loadImageDescriptorFromBundle("split.png");
+	public static final ImageDescriptor ADD_SPLITPANE_IMAGE = Activator.loadImageDescriptorFromBundle("place_split.png");
 	public static final ActionFactory ADD_SPLITPANE = new ActionFactory("place-splitpane")
 	{
 
@@ -555,7 +555,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 
 	public static final String ADD_PORTAL_TEXT = "Place Portal Wizard";
 	public static final String ADD_PORTAL_TOOLTIP = ADD_PORTAL_TEXT;
-	public static final ImageDescriptor ADD_PORTAL_IMAGE = Activator.loadImageDescriptorFromBundle("portal.png");
+	public static final ImageDescriptor ADD_PORTAL_IMAGE = Activator.loadImageDescriptorFromBundle("portal_wizard.png");
 	public static final ActionFactory ADD_PORTAL = new ActionFactory("place-portal")
 	{
 
@@ -576,7 +576,7 @@ public abstract class DesignerActionFactory extends ActionFactory
 
 	public static final String ADD_FIELD_TEXT = "Place Field Wizard";
 	public static final String ADD_FIELD_TOOLTIP = ADD_FIELD_TEXT;
-	public static final ImageDescriptor ADD_FIELD_IMAGE = Activator.loadImageDescriptorFromBundle("textfield.png");
+	public static final ImageDescriptor ADD_FIELD_IMAGE = Activator.loadImageDescriptorFromBundle("place_textfield.png");
 	public static final ActionFactory ADD_FIELD = new ActionFactory("place-field")
 	{
 
