@@ -171,7 +171,7 @@
          <action
                class="com.servoy.eclipse.designer.actions.AddTabActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addTabAction"
-               icon="icons/tab.png"
+               icon="icons/place_tabs.png"
                id="com.servoy.eclipse.designer.action.addTabAction"
                label="Place TabPanel Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
@@ -181,7 +181,7 @@
          <action
                class="com.servoy.eclipse.designer.actions.AddSplitPaneActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addSplitPaneAction"
-               icon="icons/split.png"
+               icon="icons/place_split.png"
                id="com.servoy.eclipse.designer.action.addSplitPaneAction"
                label="Place SplitPane Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
@@ -211,7 +211,7 @@
          <action
                class="com.servoy.eclipse.designer.actions.AddBeanActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addBeanAction"
-               icon="icons/ng_component.png"
+               icon="icons/place_ng_component.png"
                id="com.servoy.eclipse.designer.action.addBeanAction"
                label="Place Bean Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
@@ -230,7 +230,7 @@
                tooltip="Place Portal Wizard"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddButtonActionDelegate"
-               icon="icons/button.png"
+               icon="icons/place_button.png"
                id="com.servoy.eclipse.designer.action.addButtonAction"
                definitionId="com.servoy.eclipse.designer.action.addButtonAction"
                label="Place Button"
@@ -241,7 +241,7 @@
          <action
                class="com.servoy.eclipse.designer.actions.AddFieldActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addFieldAction"
-               icon="icons/textfield.png"
+               icon="icons/place_textfield.png"
                id="com.servoy.eclipse.designer.action.addFieldAction"
                label="Place Field Wizard"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
@@ -251,7 +251,7 @@
          <action
                class="com.servoy.eclipse.designer.actions.AddLabelActionDelegate"
                definitionId="com.servoy.eclipse.designer.action.addLabelAction"
-               icon="icons/label.png"
+               icon="icons/place_label.png"
                id="com.servoy.eclipse.designer.action.addLabelAction"
                label="Place Label"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
@@ -260,7 +260,7 @@
                tooltip="Place Label"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddHorizontalLineActionDelegate"
-               icon="icons/hline.png"
+               icon="icons/place_hline.png"
                id="com.servoy.eclipse.designer.action.addHLineAction"
                label="Place Horizontal Line"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
@@ -269,7 +269,7 @@
                tooltip="Horizontal Line"/>
          <action
                class="com.servoy.eclipse.designer.actions.AddVerticalLineActionDelegate"
-               icon="icons/vline.png"
+               icon="icons/place_vline.png"
                id="com.servoy.eclipse.designer.action.addVLineAction"
                label="Place Vertical Line"
                menubarPath="com.servoy.eclipse.ui.actionsMenu/elements"
