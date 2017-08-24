@@ -183,6 +183,10 @@ public class PDPropertySource extends PersistPropertySource
 				}));
 			props.add(attributesPropertyHandler);
 		}
+		if (persistContext.getPersist() instanceof WebComponent)
+		{
+			props.add(new PseudoPropertyHandler("designTimeProperties"));
+		}
 		return props.toArray(new IPropertyHandler[props.size()]);
 	}
 

@@ -697,27 +697,21 @@ public class ElementUtil
 		return element1Rectangle.intersects(element2Rectangle);
 	}
 
-	public static String getImageRelPathForFormEncapsulation(Form f)
+	public static String getImageNameForFormEncapsulation(Form f)
 	{
 		String relPath = null;
 		if (f != null)
 		{
 			//designer.png
 			int encapsulation = f.getEncapsulation();
-			if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE) relPath = "icons/designer_protected.png";
+			if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE) relPath = "designer_protected.png";
 			else if ((encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE)
-				relPath = "icons/designer_private.png";
+				relPath = "designer_private.png";
 			else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)
-				relPath = "icons/designer_public.png";
-			else relPath = "icons/form.png";
+				relPath = "designer_public.png";
+			else relPath = "designer.png";
 		}
 		return relPath;
-	}
-
-	public static String getImageNameForFormEncapsulation(Form form)
-	{
-		String relPath = getImageRelPathForFormEncapsulation(form);
-		return (relPath != null ? relPath.substring(6) : null);
 	}
 
 	public static Image getImageForFormEncapsulation(Form form)
@@ -732,7 +726,7 @@ public class ElementUtil
 				image = Activator.getDefault().loadImageFromBundle("designer_private.png");
 			else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)
 				image = Activator.getDefault().loadImageFromBundle("designer_public.png");
-			else image = Activator.getDefault().loadImageFromBundle("form.png");
+			else image = Activator.getDefault().loadImageFromBundle("designer.png");
 		}
 		return image;
 	}

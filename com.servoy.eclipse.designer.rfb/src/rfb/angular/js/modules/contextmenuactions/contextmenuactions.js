@@ -53,7 +53,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 			}
 			return false;
 		}
-		var setAnchoring = function(anchor){
+		var setAnchoring = function(anchor, opposite){
 			var selection = editorScope.getSelection();
 			if (selection && selection.length == 1)
 			{
@@ -69,6 +69,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
 					{
 						// already exists, remove it
 						beanAnchor = beanAnchor - anchor;
+						if ((beanAnchor & opposite) != opposite) beanAnchor += opposite;
 					}
 					else
 					{
@@ -148,7 +149,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         						getItemClass: function() { if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
         						execute:function()
         						{
-        							setAnchoring(1);
+        							setAnchoring(1, 4);
         						}
         					}
         				);
@@ -161,7 +162,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         						getItemClass: function() { if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
         						execute:function()
         						{
-        							setAnchoring(2);
+        							setAnchoring(2, 8);
         						}
         					}
         				);
@@ -174,7 +175,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         						getItemClass: function() {  if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
         						execute:function()
         						{
-        							setAnchoring(4);
+        							setAnchoring(4, 1);
         						}
         					}
         				);			
@@ -187,7 +188,7 @@ angular.module('contextmenuactions',['contextmenu','editor'])
         						getItemClass: function() { if (!hasSelection(1) || !editorScope.isAbsoluteFormLayout()) return "disabled";},
         						execute:function()
         						{
-        							setAnchoring(8);
+        							setAnchoring(8, 2);
         						}
         					}
         				);

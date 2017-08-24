@@ -141,7 +141,7 @@ public class StringListWithContentProposalsPropertyController extends PropertyCo
 		return beginIndex >= endIndex ? null : txt.substring(beginIndex, endIndex);
 	}
 
-	protected static class ListPropertySource extends ComplexPropertySource<List<String>>
+	protected static class ListPropertySource extends ComplexPropertySourceWithStandardReset<List<String>>
 	{
 		private static final String REMOVE_VALUE = "<removed>&*^&^%&$#@^%$&%%^#$*$($l";
 

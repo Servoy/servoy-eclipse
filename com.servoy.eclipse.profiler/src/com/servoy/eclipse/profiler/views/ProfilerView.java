@@ -667,7 +667,7 @@ public class ProfilerView extends ViewPart
 
 	class MethodCallLabelProvider implements ITableLabelProvider
 	{
-		private final Image methodImage = Activator.getImageDescriptor("icons/form_method.gif").createImage();
+		private final Image methodImage = Activator.getImageDescriptor("icons/form_method.png").createImage();
 
 		private final Image calcImage = Activator.getImageDescriptor("icons/columnaggr.png").createImage();
 

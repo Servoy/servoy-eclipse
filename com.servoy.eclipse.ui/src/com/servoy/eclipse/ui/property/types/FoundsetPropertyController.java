@@ -43,7 +43,7 @@ import com.servoy.eclipse.ui.labelproviders.SolutionContextDelegateLabelProvider
 import com.servoy.eclipse.ui.property.CheckboxPropertyDescriptor;
 import com.servoy.eclipse.ui.property.ComplexProperty;
 import com.servoy.eclipse.ui.property.ComplexProperty.ComplexPropertyConverter;
-import com.servoy.eclipse.ui.property.ComplexPropertySource;
+import com.servoy.eclipse.ui.property.ComplexPropertySourceWithStandardReset;
 import com.servoy.eclipse.ui.property.DataProviderConverter;
 import com.servoy.eclipse.ui.property.ICellEditorFactory;
 import com.servoy.eclipse.ui.property.IPropertyConverter;
@@ -151,7 +151,7 @@ public class FoundsetPropertyController extends PropertyController<JSONObject, O
 		return new FoundsetPropertyEditor(parent, persistContext, formTable, null /* foreignTable */, isReadOnly(), designToChooserConverter);
 	}
 
-	static class FoundsetPropertySource extends ComplexPropertySource<JSONObject>
+	static class FoundsetPropertySource extends ComplexPropertySourceWithStandardReset<JSONObject>
 	{
 		private final FlattenedSolution flattenedSolution;
 		private final PersistContext persistContext;

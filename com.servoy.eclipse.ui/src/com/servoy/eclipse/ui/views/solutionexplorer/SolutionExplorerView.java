@@ -206,6 +206,7 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.preferences.SolutionExplorerPreferences;
 import com.servoy.eclipse.ui.search.SearchAction;
 import com.servoy.eclipse.ui.util.EditorUtil;
+import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.FilterDelayJob;
 import com.servoy.eclipse.ui.util.FilteredEntity;
 import com.servoy.eclipse.ui.util.IDeprecationProvider;
@@ -2857,8 +2858,9 @@ public class SolutionExplorerView extends ViewPart
 		openSqlEditorAction = new OpenSqlEditorAction();
 
 		IAction newForm = new OpenNewFormWizardAction();
-		IAction newSolution = new OpenWizardAction(NewSolutionWizard.class, Activator.loadImageDescriptorFromBundle("solution.png"), "Create new solution");
-		IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadImageDescriptorFromBundle("solution_module_m.gif"), "Create new module");
+		IAction newSolution = new OpenWizardAction(NewSolutionWizard.class, Activator.loadDefaultImageDescriptorFromBundle("solution.png"),
+			"Create new solution");
+		IAction newModule = new OpenWizardAction(NewModuleWizard.class, Activator.loadDefaultImageDescriptorFromBundle("module.png"), "Create new module");
 		IAction newStyle = new OpenWizardAction(NewStyleWizard.class, Activator.loadImageDescriptorFromBundle("styles.png"), "Create new style")
 		{
 			@Override
@@ -2931,7 +2933,7 @@ public class SolutionExplorerView extends ViewPart
 		newActionInTreePrimary.registerAction(UserNodeType.ALL_WEB_PACKAGE_PROJECTS, newComponentsPackageProjectAction);
 		newActionInTreePrimary.registerAction(UserNodeType.SOLUTION_CONTAINED_AND_REFERENCED_WEB_PACKAGES, newComponentsPackageProjectAction);
 		newActionInTreePrimary.registerAction(UserNodeType.COMPONENT_FORMS,
-			new OpenWizardAction(NewFormComponentWizard.class, Activator.loadImageDescriptorFromBundle("form.png"), "Create new form component"));
+			new OpenWizardAction(NewFormComponentWizard.class, Activator.loadImageDescriptorFromBundle("new_form_component.png"), "Create new form component"));
 
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA, importMediaFolder);
 		newActionInTreeSecondary.registerAction(UserNodeType.MEDIA_FOLDER, importMediaFolder);
@@ -3863,31 +3865,54 @@ public class SolutionExplorerView extends ViewPart
 				UserNode unElem = (UserNode)element;
 				if (unElem.getRealObject() instanceof ScriptMethod || unElem.getRealObject() instanceof ScriptVariable)
 				{
+					String name = ElementUtil.getPersistImageName((IPersist)unElem.getRealObject());
+
 					//problem (warning/error) decoration
 					int severity = getProblemType(unElem);
-					if (severity == IMarker.SEVERITY_ERROR) imageDescriptor = DLTKPluginImages.DESC_OVR_ERROR;
-					else if (severity == IMarker.SEVERITY_WARNING) imageDescriptor = DLTKPluginImages.DESC_OVR_WARNING;
+					if (severity == IMarker.SEVERITY_ERROR)
+					{
+						imageDescriptor = DLTKPluginImages.DESC_OVR_ERROR;
+						name += "_DESC_OVR_ERROR";
+					}
+					else if (severity == IMarker.SEVERITY_WARNING)
+					{
+						imageDescriptor = DLTKPluginImages.DESC_OVR_WARNING;
+						name += "_DESC_OVR_WARNING";
+					}
 
-					resultImage = (imageDescriptor != null ? new DecorationOverlayIcon(image, imageDescriptor, IDecoration.BOTTOM_LEFT).createImage() : image);
-
+					boolean isDeprecated = false;
 					//deprecated decoration for vars/functions
 					if (unElem.getRealObject() instanceof ISupportDeprecatedAnnotation)
 					{
 						ISupportDeprecatedAnnotation isda = (ISupportDeprecatedAnnotation)unElem.getRealObject();
-						if (isda.isDeprecated())
-						{
-							resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_DEPRECATED, IDecoration.UNDERLAY).createImage();
-						}
+						isDeprecated = isda.isDeprecated();
+						if (isDeprecated) name += "_depr";
 					}
 
+					boolean isConstructor = false;
 					//constructor decoration for functions
 					if (unElem.getRealObject() instanceof ScriptMethod)
 					{
 						ScriptMethod sm = (ScriptMethod)unElem.getRealObject();
-						if (sm.isConstructor())
+						isConstructor = sm.isConstructor();
+						if (isConstructor) name += "_constr";
+					}
+
+					resultImage = Activator.getDefault().loadImageFromBundle(name);
+					if (resultImage == null)
+					{
+						resultImage = (imageDescriptor != null ? new DecorationOverlayIcon(image, imageDescriptor, IDecoration.BOTTOM_LEFT).createImage()
+							: image);
+						if (isDeprecated)
+						{
+							resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_DEPRECATED, IDecoration.UNDERLAY).createImage();
+						}
+						if (isConstructor)
 						{
 							resultImage = new DecorationOverlayIcon(resultImage, DLTKPluginImages.DESC_OVR_CONSTRUCTOR, IDecoration.TOP_RIGHT).createImage();
 						}
+
+						Activator.getDefault().putImageInCache(name, resultImage);
 					}
 				}
 			}

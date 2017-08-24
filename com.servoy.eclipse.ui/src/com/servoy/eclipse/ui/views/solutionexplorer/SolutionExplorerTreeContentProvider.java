@@ -167,8 +167,13 @@ public class SolutionExplorerTreeContentProvider
 	private static final String IMG_SOLUTION_AUTHENTICATOR = "solution_auth.png";
 	private static final String IMG_SOLUTION_SMART_ONLY = "solution_smart_only.png";
 	private static final String IMG_SOLUTION_WEB_ONLY = "solution_web_only.png";
+	private static final String IMG_SOLUTION_NG_ONLY = "solution_ng.png";
+	private static final String IMG_SOLUTION_MOBILE = "solution_mobile.png";
 	private static final String IMG_SOLUTION_PREIMPORT = "solution_preimport.png";
 	private static final String IMG_SOLUTION_POSTIMPORT = "solution_postimport.png";
+	private static final String SERVER_IMAGE = "server.png";
+	private static final String SERVER_DUPLICATE_IMAGE = "duplicate_server.png";
+	private static final String SERVER_ERROR_IMAGE = "server.png_IMG_DEC_FIELD_ERROR";
 	private static Map<IPath, Image> imageCache = new HashMap<IPath, Image>();
 
 	private PlatformSimpleUserNode invisibleRootNode;
@@ -561,6 +566,12 @@ public class SolutionExplorerTreeContentProvider
 						break;
 					case SolutionMetaData.WEB_CLIENT_ONLY :
 						imgName = IMG_SOLUTION_WEB_ONLY;
+						break;
+					case SolutionMetaData.NG_CLIENT_ONLY :
+						imgName = IMG_SOLUTION_NG_ONLY;
+						break;
+					case SolutionMetaData.MOBILE :
+						imgName = IMG_SOLUTION_MOBILE;
 						break;
 					case SolutionMetaData.PRE_IMPORT_HOOK :
 						imgName = IMG_SOLUTION_PREIMPORT;
@@ -1712,16 +1723,21 @@ public class SolutionExplorerTreeContentProvider
 		{
 			public void run()
 			{
-				String imgName = "server.png";
+				String imgName = SERVER_IMAGE;
 				if (!server.isValid())
 				{
-					ImageDescriptor IMG_ERROR = JFaceResources.getImageRegistry().getDescriptor("org.eclipse.jface.fieldassist.IMG_DEC_FIELD_ERROR");
-					result[0] = new DecorationOverlayIcon(uiActivator.loadImageFromBundle("server.png"), IMG_ERROR, IDecoration.BOTTOM_LEFT).createImage();
+					result[0] = uiActivator.loadImageFromCache(SERVER_ERROR_IMAGE);
+					if (result[0] == null)
+					{
+						ImageDescriptor IMG_ERROR = JFaceResources.getImageRegistry().getDescriptor("org.eclipse.jface.fieldassist.IMG_DEC_FIELD_ERROR");
+						result[0] = new DecorationOverlayIcon(uiActivator.loadImageFromBundle("server.png"), IMG_ERROR, IDecoration.BOTTOM_LEFT).createImage();
+						uiActivator.putImageInCache(SERVER_ERROR_IMAGE, result[0]);
+					}
 					return;
 				}
 				if (!server.getName().equals(serverName))
 				{
-					imgName = "duplicate_server.png";
+					imgName = SERVER_DUPLICATE_IMAGE;
 				}
 
 				result[0] = uiActivator.loadImageFromBundle(imgName, !server.getConfig().isEnabled());
@@ -1872,7 +1888,8 @@ public class SolutionExplorerTreeContentProvider
 						}
 						nodeName = cls.getName().substring(index + 1);
 					}
-					PlatformSimpleUserNode n = new PlatformSimpleUserNode(nodeName, UserNodeType.RETURNTYPE, cls, (Image)null, cls);
+					PlatformSimpleUserNode n = new PlatformSimpleUserNode(nodeName, UserNodeType.RETURNTYPE, cls, uiActivator.loadImageFromBundle("class.png"),
+						cls);
 					JavaMembers javaMembers = ScriptObjectRegistry.getJavaMembers(cls, null);
 					if (IConstantsObject.class.isAssignableFrom(cls) &&
 						!(javaMembers instanceof InstanceJavaMembers && javaMembers.getMethodIds(false).size() > 0))

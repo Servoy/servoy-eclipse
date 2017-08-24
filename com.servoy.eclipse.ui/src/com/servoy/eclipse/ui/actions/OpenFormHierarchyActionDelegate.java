@@ -59,7 +59,7 @@ public class OpenFormHierarchyActionDelegate extends AbstractFormSelectionAction
 			try
 			{
 				FormHierarchyView view = (FormHierarchyView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(FormHierarchyView.ID);
-				view.setSelection(obj);
+				view.open(obj);
 			}
 			catch (PartInitException e)
 			{

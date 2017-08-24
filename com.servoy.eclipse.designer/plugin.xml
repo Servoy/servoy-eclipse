@@ -933,7 +933,7 @@
          <action
                class="com.servoy.eclipse.ui.views.solutionexplorer.actions.OpenFormEditorAction"
                definitionId="com.servoy.eclipse.designer.command.showDesigner"
-               icon="icons/designer.png"
+               icon="icons/form.png"
                id="com.servoy.eclipse.ui.javascript.showDesigner"
                label="Open in Form Editor"
                menubarPath="open.ext"
@@ -959,7 +959,7 @@
          <action
                class="com.servoy.eclipse.designer.actions.ShowDesignerAction"
                definitionId="com.servoy.eclipse.designer.command.showDesigner"
-               icon="icons/designer.png"
+               icon="icons/form.png"
                id="com.servoy.eclipse.ui.javascript.showDesigner"
                label="Open in Form Editor"
                menubarPath="open.ext"

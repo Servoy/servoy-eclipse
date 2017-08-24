@@ -27,6 +27,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
 
@@ -36,6 +37,7 @@ import com.servoy.eclipse.exporter.mobile.launch.IMobileLaunchConstants;
 import com.servoy.eclipse.exporter.mobile.launch.MobileLaunchUtils;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.util.ServoyLog;
+import com.servoy.eclipse.ui.Activator;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
 
 /**
@@ -44,6 +46,7 @@ import com.servoy.j2db.server.shared.ApplicationServerRegistry;
  */
 public class StartMobileClientHandler extends StartClientHandler implements IHandler
 {
+	final static IDialogSettings fDialogSettings = Activator.getDefault().getDialogSettings();
 
 	public StartMobileClientHandler()
 	{
@@ -57,7 +60,8 @@ public class StartMobileClientHandler extends StartClientHandler implements IHan
 		DebugPlugin.getDefault();
 		DebugUIPlugin.getDefault();
 
-		final String launchConfig = event.getParameter("com.servoy.eclipse.mobile.launch.config");
+		final String launchConfig = event.getParameter("com.servoy.eclipse.mobile.launch.config") != null
+			? event.getParameter("com.servoy.eclipse.mobile.launch.config") : fDialogSettings.get("com.servoy.eclipse.mobile.launch.config");
 		Job job = new Job("Starting mobile client")
 		{
 			@Override
@@ -91,8 +95,12 @@ public class StartMobileClientHandler extends StartClientHandler implements IHan
 				}
 				else
 				{
-					DebugUITools.launch(StartMobileClientContribution.getLaunchConfigByName(activeProject.getSolution().getName(), launchConfig),
-						ILaunchManager.RUN_MODE);
+					String solutionName = activeProject.getSolution().getName();
+					String config = launchConfig == null
+						? StartMobileClientContribution.getDefaultConfigName(solutionName, IMobileLaunchConstants.LAUNCH_CONFIGURATION_TYPE_ID, true)
+						: launchConfig;
+					DebugUITools.launch(StartMobileClientContribution.getLaunchConfigByName(solutionName, config), ILaunchManager.RUN_MODE);
+					fDialogSettings.put("com.servoy.eclipse.mobile.launch.config", config);
 				}
 				return Status.OK_STATUS;
 			}

@@ -135,7 +135,25 @@ public abstract class JSONArrayTypePropertyController extends ArrayTypePropertyC
 			return ((JSONArray)getEditableValue()).length() > idx;
 		}
 
-		@Override
+		public final void resetPropertyValue(Object id)
+		{
+			setPropertyValue(id, resetComplexPropertyValue(id));
+		}
+
+		public Object resetComplexPropertyValue(Object id)
+		{
+			try
+			{
+				final int idx = getIndexFromId((String)id);
+				return resetComplexElementValue(id, idx);
+			}
+			catch (NumberFormatException e)
+			{
+				ServoyLog.logError(e);
+			}
+			return null;
+		}
+
 		protected Object resetComplexElementValue(Object id, final int idx)
 		{
 			PersistPropertySource.adjustPropertyValueAndReset(id, getPropertyDescriptors()[idx], this);

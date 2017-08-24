@@ -121,7 +121,6 @@ import com.servoy.eclipse.ui.preferences.DesignerPreferences;
 import com.servoy.eclipse.ui.util.ElementUtil;
 import com.servoy.eclipse.ui.util.IconProvider;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerListContentProvider;
-import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerTreeContentProvider;
 import com.servoy.j2db.BasicFormController.JSForm;
 import com.servoy.j2db.FlattenedSolution;
 import com.servoy.j2db.FormManager.HistoryProvider;
@@ -1203,6 +1202,56 @@ public class TypeCreator extends TypeCache
 			method.setName("getName");
 			method.setDescription("Returns the name of the element. (may be null as well)</br></br>var name = elements.elem.getName();" +
 				"</br></br><b>@return</b> The name of the element.");
+			members.add(method);
+
+			method = TypeInfoModelFactory.eINSTANCE.createMethod();
+			method.setName("getElementType");
+			method.setDescription("Returns the web component type from specification file</br></br>var elementType = elements.elem.getElementType();" +
+				"</br></br><b>@return</b> The web component spec type.");
+			members.add(method);
+
+			method = TypeInfoModelFactory.eINSTANCE.createMethod();
+			method.setName("putClientProperty");
+			EList<Parameter> parameters = method.getParameters();
+			Parameter param = TypeInfoModelFactory.eINSTANCE.createParameter();
+			param.setType(getTypeRef(null, "String"));
+			param.setName("key");
+			parameters.add(param);
+			param = TypeInfoModelFactory.eINSTANCE.createParameter();
+			param.setType(getTypeRef(null, "Object"));
+			parameters.add(param);
+			param.setName("value");
+			method.setDescription(
+				"Sets the value for the specified element client property key. NOTE: Depending on the operating system, a user interface property name may be available.</br>" +
+					"elements.elem.putClientProperty('ToolTipText','some text');</br></br>" +
+					"@param {Object} key user interface key (depends on operating system)</br>" + "@param {Object} value a predefined value for the key");
+			members.add(method);
+
+			method = TypeInfoModelFactory.eINSTANCE.createMethod();
+			method.setName("getClientProperty");
+			parameters = method.getParameters();
+			param = TypeInfoModelFactory.eINSTANCE.createParameter();
+			param.setType(getTypeRef(null, "String"));
+			param.setName("key");
+			parameters.add(param);
+			method.setDescription(
+				"Gets the specified client property for the element based on a key. NOTE: Depending on the operating system, a user interface property name may be available.</br>" +
+					"var property = elements.elem.getClientProperty('ToolTipText');</br></br>" +
+					"@param {Object} key user interface key (depends on operating system)</br></br>" +
+					"@return Object The value of the property for specified key.");
+			members.add(method);
+
+			method = TypeInfoModelFactory.eINSTANCE.createMethod();
+			method.setName("getDesignTimeProperty");
+			method.setType(getTypeRef(null, ITypeNames.OBJECT));
+			parameters = method.getParameters();
+			param = TypeInfoModelFactory.eINSTANCE.createParameter();
+			param.setType(getTypeRef(null, "String"));
+			param.setName("key");
+			parameters.add(param);
+			method.setDescription(
+				"Get a design-time property of an element.</br>" + "	var property = elements.elem.getDesignTimeProperty('myprop');</br></br>" +
+					"@param {Object} key the name of the property</br></br>" + "@return Object The value of the property for specified key.");
 			members.add(method);
 		}
 		return addType(bucket, type);
@@ -3218,7 +3267,7 @@ public class TypeCreator extends TypeCache
 					property.setVisible(true);
 					property.setType(
 						getTypeRef(context, DBDataSourceServer.class.getSimpleName() + '<' + DataSourceUtils.createDBTableDataSource(serverName, null) + '>'));
-					property.setAttribute(IMAGE_DESCRIPTOR, SolutionExplorerTreeContentProvider.getServerImage(serverName, server));
+					property.setAttribute(IMAGE_DESCRIPTOR, com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle("server.png"));
 					property.setDescription("Server");
 					type.getMembers().add(property);
 				}
@@ -4445,12 +4494,12 @@ public class TypeCreator extends TypeCache
 
 	protected static ImageDescriptor getImageDescriptorForFormEncapsulation(int encapsulation)
 	{
-		String imgPath = "/icons/designer.png";
-		if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE) imgPath = "/icons/designer_protected.png";
+		String imgPath = "designer.png";
+		if ((encapsulation & PersistEncapsulation.MODULE_SCOPE) == PersistEncapsulation.MODULE_SCOPE) imgPath = "designer_protected.png";
 		else if ((encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE)
-			imgPath = "/icons/designer_private.png";
+			imgPath = "designer_private.png";
 		else if ((encapsulation & DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL) == DesignerPreferences.ENCAPSULATION_PUBLIC_HIDE_ALL)
-			imgPath = "/icons/designer_public.png";
-		return ImageDescriptor.createFromURL(FileLocator.find(com.servoy.eclipse.ui.Activator.getDefault().getBundle(), new Path(imgPath), null));
+			imgPath = "designer_public.png";
+		return com.servoy.eclipse.ui.Activator.loadImageDescriptorFromBundle(imgPath);
 	}
 }

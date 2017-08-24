@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -383,7 +382,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 				{
 					return uiActivator.loadImageFromBundle("method_protected.png");
 				}
-				return sm.isPublic() ? uiActivator.loadImageFromBundle("method_public.png") : DLTKPluginImages.DESC_METHOD_DEFAULT.createImage();
+				return sm.isPublic() ? uiActivator.loadImageFromBundle("method_public.png") : uiActivator.loadImageFromBundle("method_default.png");
 			}
 			else if (element instanceof Pair< ? , ? >)
 			{
@@ -492,7 +491,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 			{
 				ArrayList<IPersist> result = new ArrayList<IPersist>();
 				Form f = (Form)parentElement;
-				if (listSelection instanceof ScriptMethod)
+				if (listSelection instanceof ScriptMethod && showMembersAction.isChecked())
 				{
 					ScriptMethod sm = f.getScriptMethod(((ScriptMethod)listSelection).getName());
 					if (sm != null)
@@ -501,7 +500,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 						leavesToExpand.add(sm);
 					}
 				}
-				else if (listSelection instanceof BaseComponent)
+				else if (listSelection instanceof BaseComponent && showMembersAction.isChecked())
 				{
 					for (IPersist p : f.getAllObjectsAsList())
 					{
@@ -1054,7 +1053,7 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	private void fillViewMenu(IMenuManager menuManager)
 	{
 		MenuManager openSubMenu = new MenuManager("Open Form in");
-		openInFormEditor = new OpenFormAction("Form Editor", OPEN_IN_FORM_EDITOR, "designer.png");
+		openInFormEditor = new OpenFormAction("Form Editor", OPEN_IN_FORM_EDITOR, "form.png");
 		openSubMenu.add(openInFormEditor);
 		openInScriptEditor = new OpenFormAction("Script Editor", OPEN_IN_SCRIPT_EDITOR, "js.png");
 		openSubMenu.add(openInScriptEditor);
@@ -1324,5 +1323,12 @@ public class FormHierarchyView extends ViewPart implements ISelectionChangedList
 	public Object getSelectedListElement()
 	{
 		return ((IStructuredSelection)list.getSelection()).getFirstElement();
+	}
+
+	public void open(Object obj)
+	{
+		showMembersAction.clearSelection();
+		showMembersAction.setChecked(obj instanceof ScriptMethod);
+		setSelection(obj);
 	}
 }

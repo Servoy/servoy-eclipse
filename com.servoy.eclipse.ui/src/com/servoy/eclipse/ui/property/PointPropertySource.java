@@ -28,11 +28,11 @@ import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConve
 
 /**
  * IPropertySource for awt Point, show x and y subproperties
- * 
+ *
  * @author rgansevles
  */
 
-public class PointPropertySource extends ComplexPropertySource<java.awt.Point>
+public class PointPropertySource extends ComplexPropertySourceWithStandardReset<java.awt.Point>
 {
 	private static final String Y = "y";
 	private static final String X = "x";
@@ -48,8 +48,8 @@ public class PointPropertySource extends ComplexPropertySource<java.awt.Point>
 	@Override
 	public IPropertyDescriptor[] createPropertyDescriptors()
 	{
-		return new IPropertyDescriptor[] { new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, X, X), new NumberTypePropertyDescriptor(
-			NumberCellEditor.INTEGER, Y, Y) };
+		return new IPropertyDescriptor[] { new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, X,
+			X), new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, Y, Y) };
 	}
 
 	@Override

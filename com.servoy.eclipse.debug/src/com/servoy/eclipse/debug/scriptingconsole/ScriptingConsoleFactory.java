@@ -45,7 +45,7 @@ public class ScriptingConsoleFactory implements IEvaluateConsoleFactory
 		{
 			/*
 			 * (non-Javadoc)
-			 * 
+			 *
 			 * @see com.servoy.eclipse.debug.scriptingconsole.ScriptConsole#dispose()
 			 */
 			@Override
@@ -90,7 +90,7 @@ public class ScriptingConsoleFactory implements IEvaluateConsoleFactory
 
 	public ImageDescriptor getImageDescriptor()
 	{
-		return ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/commandconsole.gif"), null));
+		return ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(), new Path("/icons/interactive_console.png"), null));
 	}
 
 }

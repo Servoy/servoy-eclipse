@@ -233,7 +233,22 @@ public class StartMobileClientContribution extends CompoundContributionItem impl
 		{
 			final CommandContributionItemParameter contributionParameter = new CommandContributionItemParameter(mServiceLocator, null, COMMAND_ID,
 				CommandContributionItem.STYLE_PUSH);
-			contributionParameter.label = config.getName();
+			String label = config.getName().split(DASH)[0].trim();
+			try
+			{
+				if (Boolean.valueOf(config.getAttribute("nodebug", "true")) == Boolean.FALSE) label = label.replace("Run", "Debug");
+			}
+			catch (CoreException e)
+			{
+				ServoyLog.logError("Could not get launch configuration 'nodebug' attribute value.", e);
+			}
+			if (label.length() > 40)
+			{
+				//if it's too long, limit it to max 40 chars
+				label = label.substring(0, 37);
+				label += "...";
+			}
+			contributionParameter.label = label;
 			contributionParameter.visibleEnabled = true;
 			contributionParameter.icon = getIcon(config);
 
@@ -250,11 +265,11 @@ public class StartMobileClientContribution extends CompoundContributionItem impl
 	private ImageDescriptor getIcon(ILaunchConfiguration config)
 	{
 		String imageName = null;
-		if (config.getName().startsWith("Run mobile client"))
+		if (config.getName().contains("mobile client"))
 		{
 			imageName = "icons/launch_mobile.png";
 		}
-		if (config.getName().startsWith("Run mobile JS Unit Tests"))
+		if (config.getName().contains("JS Unit"))
 		{
 			imageName = "icons/jsunit.png";
 		}

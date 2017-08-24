@@ -26,7 +26,7 @@ import com.servoy.j2db.persistence.PersistEncapsulation;
 
 /**
  * Property controller for encapsulation properties.
- * 
+ *
  * @author jcompagner
  * @since 6.0
  */
@@ -62,7 +62,7 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 		}
 	}
 
-	public static class EncapsulationPropertySource extends ComplexPropertySource<Integer>
+	public static class EncapsulationPropertySource extends ComplexPropertySourceWithStandardReset<Integer>
 	{
 		private static final int ALL = PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE + PersistEncapsulation.MODULE_SCOPE +
 			PersistEncapsulation.HIDE_CONTROLLER + PersistEncapsulation.HIDE_DATAPROVIDERS + PersistEncapsulation.HIDE_ELEMENTS +
@@ -90,18 +90,18 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 		public IPropertyDescriptor[] createPropertyDescriptors()
 		{
 			// make sure sub-properties are sorted in defined order
-			return PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { new CheckboxPropertyDescriptor(
-				HIDE_IN_SCRIPTING_MODULE_SCOPE,
-				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE))),//
-			new CheckboxPropertyDescriptor(MODULE_SCOPE, EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.MODULE_SCOPE))),//
-			new CheckboxPropertyDescriptor(HIDE_DATAPROVIDERS,
-				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_DATAPROVIDERS))),//
-			new CheckboxPropertyDescriptor(HIDE_FOUNDSET,
-				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_FOUNDSET))),//
-			new CheckboxPropertyDescriptor(HIDE_CONTROLLER,
-				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_CONTROLLER))),//
-			new CheckboxPropertyDescriptor(HIDE_ELEMENTS,
-				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_ELEMENTS))) //
+			return PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { new CheckboxPropertyDescriptor(HIDE_IN_SCRIPTING_MODULE_SCOPE,
+				EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE))), //
+				new CheckboxPropertyDescriptor(MODULE_SCOPE,
+					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.MODULE_SCOPE))), //
+				new CheckboxPropertyDescriptor(HIDE_DATAPROVIDERS,
+					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_DATAPROVIDERS))), //
+				new CheckboxPropertyDescriptor(HIDE_FOUNDSET,
+					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_FOUNDSET))), //
+				new CheckboxPropertyDescriptor(HIDE_CONTROLLER,
+					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_CONTROLLER))), //
+				new CheckboxPropertyDescriptor(HIDE_ELEMENTS,
+					EncapsulationLabelProvider.LABEL_INSTANCE.getText(Integer.valueOf(PersistEncapsulation.HIDE_ELEMENTS))) //
 			});
 		}
 
@@ -111,8 +111,8 @@ public class EncapsulationPropertyController extends PropertyController<Integer,
 			int encapsulation = getEditableValue().intValue();
 			if (encapsulation == -1) return Boolean.FALSE;
 
-			if (HIDE_IN_SCRIPTING_MODULE_SCOPE.equals(id)) return (encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == 0 ? Boolean.FALSE
-				: Boolean.TRUE;
+			if (HIDE_IN_SCRIPTING_MODULE_SCOPE.equals(id))
+				return (encapsulation & PersistEncapsulation.HIDE_IN_SCRIPTING_MODULE_SCOPE) == 0 ? Boolean.FALSE : Boolean.TRUE;
 			if (MODULE_SCOPE.equals(id)) return (encapsulation & PersistEncapsulation.MODULE_SCOPE) == 0 ? Boolean.FALSE : Boolean.TRUE;
 			if (HIDE_DATAPROVIDERS.equals(id)) return (encapsulation & PersistEncapsulation.HIDE_DATAPROVIDERS) == 0 ? Boolean.FALSE : Boolean.TRUE;
 			if (HIDE_FOUNDSET.equals(id)) return (encapsulation & PersistEncapsulation.HIDE_FOUNDSET) == 0 ? Boolean.FALSE : Boolean.TRUE;

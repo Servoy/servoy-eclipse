@@ -512,10 +512,6 @@ public class EclipseRepository extends AbstractRepository implements IRemoteRepo
 
 	/**
 	 * Only for nodes that are part of a solution tree (not for styles).
-	 *
-	 * @param node
-	 * @param recursive
-	 * @throws RepositoryException
 	 */
 	public void updateNode(final IPersist node, final boolean recursive) throws RepositoryException
 	{

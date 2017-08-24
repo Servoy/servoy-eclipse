@@ -163,7 +163,7 @@
             allowMultiple="false"
             category="com.servoy.eclipse.ui"
             class="com.servoy.eclipse.debug.scriptingconsole.ScriptingConsole"
-            icon="icons/commandconsole.gif"
+            icon="icons/interactive_console.png"
             id="com.servoy.eclipse.debug.scriptingconsole"
             name="Command Console"
             restorable="true">
@@ -331,53 +331,15 @@
         </menuContribution>
         <menuContribution
               allPopups="false"
+              class="com.servoy.eclipse.debug.actions.LaunchWebClientContributionFactory"
               locationURI="menu:com.servoy.eclipse.ui.StartClient">
-           <menu id="com.servoy.eclipse.ui.StartWebClient"
-                 icon="icons/launch_web.png"
-                 label="Launch Web Client">
-			<visibleWhen>
-              <with
-                  variable="com.servoy.eclipse.core.webClientState">
-                 <equals
-                       value="ENABLED">
-                 </equals>
-              </with>
-           </visibleWhen>
-           </menu>
         </menuContribution>
         <menuContribution
               allPopups="false"
+              class="com.servoy.eclipse.debug.actions.LaunchNGClientContributionFactory"
               locationURI="menu:com.servoy.eclipse.ui.StartClient">
-	         <menu label="Launch NG Client"
-	                 icon="icons/launch_ng.png"
-	                 id="com.servoy.eclipse.ui.StartNGClient"> 
-	             <visibleWhen>
-              		<with
-                    variable="com.servoy.eclipse.core.ngClientState">
-                 <equals
-                       value="ENABLED">
-                 </equals>
-              </with>
-           </visibleWhen>    
-	        </menu>
         </menuContribution>
         
-        <menuContribution
-              allPopups="false"
-              locationURI="menu:com.servoy.eclipse.ui.StartWebClient">
-           <dynamic
-                 class="com.servoy.eclipse.debug.handlers.CreateBrowserContributions"
-                 id="com.servoy.eclipse.ui.StartWebClient.dynamic.contributions">
-           </dynamic>
-        </menuContribution>
-        <menuContribution
-              allPopups="false"
-              locationURI="menu:com.servoy.eclipse.ui.StartNGClient">
-           <dynamic
-                 class="com.servoy.eclipse.debug.handlers.CreateBrowserContributions"
-                 id="com.servoy.eclipse.ui.StartNGClient.dynamic.contributions">
-           </dynamic>
-        </menuContribution>
         <menuContribution
               allPopups="false"
               locationURI="menu:org.eclipse.ui.run?after=breakpointGroup">

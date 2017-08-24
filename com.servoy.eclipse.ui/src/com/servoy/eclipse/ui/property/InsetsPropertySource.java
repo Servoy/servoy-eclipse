@@ -28,11 +28,11 @@ import com.servoy.eclipse.ui.property.ConvertorObjectCellEditor.IObjectTextConve
 
 /**
  * IPropertySource for awt Insets, show top, right, bottom and left subproperties.
- * 
+ *
  * @author rgansevles
  */
 
-public class InsetsPropertySource extends ComplexPropertySource<java.awt.Insets>
+public class InsetsPropertySource extends ComplexPropertySourceWithStandardReset<java.awt.Insets>
 {
 	private static final String RIGHT = "right";
 	private static final String BOTTOM = "bottom";
@@ -51,9 +51,10 @@ public class InsetsPropertySource extends ComplexPropertySource<java.awt.Insets>
 	public IPropertyDescriptor[] createPropertyDescriptors()
 	{
 		// make sure sub-properties are sorted in defined order
-		return PropertyController.applySequencePropertyComparator(new IPropertyDescriptor[] { new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, TOP,
-			TOP), new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, LEFT, LEFT), new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, BOTTOM,
-			BOTTOM), new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, RIGHT, RIGHT) });
+		return PropertyController.applySequencePropertyComparator(
+			new IPropertyDescriptor[] { new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, TOP, TOP), new NumberTypePropertyDescriptor(
+				NumberCellEditor.INTEGER, LEFT, LEFT), new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, BOTTOM,
+					BOTTOM), new NumberTypePropertyDescriptor(NumberCellEditor.INTEGER, RIGHT, RIGHT) });
 	}
 
 	@Override

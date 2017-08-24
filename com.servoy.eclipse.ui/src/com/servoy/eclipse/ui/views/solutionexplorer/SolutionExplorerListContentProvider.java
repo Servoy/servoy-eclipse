@@ -163,6 +163,11 @@ import com.servoy.j2db.scripting.solutionmodel.JSSolutionModel;
 import com.servoy.j2db.server.ngclient.WebFormComponent;
 import com.servoy.j2db.server.ngclient.property.types.DataproviderPropertyType;
 import com.servoy.j2db.server.ngclient.template.FormTemplateGenerator;
+import com.servoy.j2db.ui.runtime.HasRuntimeClientProperty;
+import com.servoy.j2db.ui.runtime.HasRuntimeDesignTimeProperty;
+import com.servoy.j2db.ui.runtime.HasRuntimeElementType;
+import com.servoy.j2db.ui.runtime.HasRuntimeFormName;
+import com.servoy.j2db.ui.runtime.HasRuntimeName;
 import com.servoy.j2db.util.DataSourceUtils;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.HtmlUtils;
@@ -1304,7 +1309,7 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 	{
 		if (sv.isPrivate()) return uiActivator.loadImageFromBundle("variable_private.png");
 		if (sv.isPublic()) uiActivator.loadImageFromBundle("variable_public.png");
-		return uiActivator.loadImageFromBundle("variable_public.png"); //TODO variable_default
+		return uiActivator.loadImageFromBundle("variable_default.png");
 	}
 
 	private Image getImageForMethodEncapsulation(ScriptMethod sm)
@@ -2046,9 +2051,19 @@ public class SolutionExplorerListContentProvider implements IStructuredContentPr
 				nodes.add(new UserNode(name + displayParams, UserNodeType.FORM_ELEMENTS, feedback, webcomponent, functionIcon));
 			}
 		}
-
+		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeFormName.class));
+		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeName.class));
+		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeElementType.class));
+		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeDesignTimeProperty.class));
+		nodes.addAll(getJSMethodsFromClass(prefix, webcomponent, HasRuntimeClientProperty.class));
 		return nodes.toArray(new SimpleUserNode[nodes.size()]);
 
+	}
+
+	private List<SimpleUserNode> getJSMethodsFromClass(String prefix, final IBasicWebComponent webcomponent, Class< ? > clazz)
+	{
+		return Arrays.asList(getJSMethodsViaJavaMembers(new InstanceJavaMembers(new DummyScope(), clazz), clazz,
+			ScriptObjectRegistry.getScriptObjectForClass(clazz), webcomponent.getName(), prefix, UserNodeType.FORM_ELEMENTS, webcomponent, null));
 	}
 
 	private SimpleUserNode[] getScriptableMethods(Scriptable scriptable, String elementName, String prefix)

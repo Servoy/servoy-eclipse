@@ -30,17 +30,19 @@ import com.servoy.eclipse.ui.util.ModifiedComboBoxCellEditor;
 
 /**
  * Property controller for mediaOptions property.
- * 
+ *
  * @author rgansevles
  */
 
 public class MediaoptionsPropertyController extends PropertyController<Integer, Object>
 {
 	final static ComboboxPropertyController<MediaoptionsType> comboboxController = new ComboboxPropertyController<MediaoptionsType>("MEDIA_OPTIONS",
-		"media options", new ComboboxPropertyModel<MediaoptionsType>(
+		"media options",
+		new ComboboxPropertyModel<MediaoptionsType>(
 			new MediaoptionsType[] { MediaoptionsType.Crop, MediaoptionsType.Reduce, MediaoptionsType.Enlarge, MediaoptionsType.ReduceEnlarge },
 			new String[] { MediaoptionsType.Crop.name(), MediaoptionsType.Reduce.name(), MediaoptionsType.Enlarge.name(), MediaoptionsType.Reduce.name() + '/' +
-				MediaoptionsType.Enlarge.name() }), Messages.LabelUnresolved);
+				MediaoptionsType.Enlarge.name() }),
+		Messages.LabelUnresolved);
 
 	private static ILabelProvider labelProvider = null;
 
@@ -211,11 +213,11 @@ public class MediaoptionsPropertyController extends PropertyController<Integer, 
 
 	/*
 	 * Media option source property implementation
-	 * 
+	 *
 	 * @author rgansevles
 	 */
 
-	public static class MediaoptionsPropertySource extends ComplexPropertySource<Mediaoption>
+	public static class MediaoptionsPropertySource extends ComplexPropertySourceWithStandardReset<Mediaoption>
 	{
 		private static final String KEEP_ASPECT_RATIO = "keep_aspect_ratio";
 

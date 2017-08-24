@@ -20,7 +20,7 @@
 					{
 						"type": "string"
 					},
-					"url":{
+					"url": {
 						"type": "string"
 					},
 					"mimetype": {
@@ -33,9 +33,8 @@
 					}
 				},
 				"required": ["name","version","url","mimetype"],
-				"additionalProperties":false
+				"additionalProperties": false
 			},
-
 			"description": "Extra Javascript or CSS libraries that this component uses",
 			"type": "array"
 		},
@@ -103,13 +102,13 @@
 		{ 
 			"description": "The version of the component",
 			"oneOf": [
-			            {
-			            	"type": "string"
-			            },
-			            {
-			            	"type": "number"
-			            }
-			         ]
+				{
+					"type": "string"
+				},
+				{
+					"type": "number"
+				}
+			]
 		},
 		"group": 
 		{
@@ -119,340 +118,351 @@
 		"model":
 		{
 			"description": "The model this component has",
-			"type":"object",
-			"additionalProperties": {
-				"oneOf": [
-				          {
-				        	  "type": "string"
-				          },
-				          {
-				        	  "type": "object",
-				        	  "properties": {
-				        		  "type": {
-				        			  "type":"string"
-				        		  },
-				        		  "droppable": {
-				        			  "type":"boolean"
-				        		  },
-				        		  "for": {
-				        			  "oneOf": [
-				        			            {
-				        			            	"type": "string"
-				        			            },
-				        			            {
-				        			            	"type": "array"
-				        			            },
-				        			            {
-				        			            	"type": "object"
-				        			            }
-				        			            ]
-				        		  },
-				        		  "blockingOn": {
-				        			  "type": "boolean"
-				        		  },
-				        		  "provideColumnFormats": {
-				        			  "type": "boolean"
-				        		  },
-				        		  "includeColumnNames": {
-				        		  	  "type": "boolean"
-				        		  },
-				        		  "columnTypes":{
-				        		  	  "type": "object"
-				        		  },
-				        		  "pushToServer": {
+			"type": "object",
+			"patternProperties": {
+				"^\\S+$": {
+					"oneOf": [
+						{
+							"type": "string"
+						},
+						{
+							"type": "object",
+							"properties": {
+								"type": {
+									"type": "string"
+								},
+								"droppable": {
+									"type": "boolean"
+								},
+								"for": {
+									"oneOf": [
+										{
+											"type": "string"
+										},
+										{
+											"type": "array"
+										},
+										{
+											"type": "object"
+										}
+									]
+								},
+								"blockingOn": {
+									"type": "boolean"
+								},
+								"provideColumnFormats": {
+									"type": "boolean"
+								},
+								"includeColumnNames": {
+									"type": "boolean"
+								},
+								"columnTypes": {
+									"type": "object"
+								},
+								"pushToServer": {
 				        			  "enum" : ["reject", "allow", "shallow", "deep"]
-				        		  },
-				        		  "tags": {
-				        			  "type": "object"
-				        		  },
-				        		  "values":{
-				        			  "type": "array"
-				        		  },
-				        		  "default": {
-				        		  },
-				        		  "initialValue": {
-				        		  },
-				        		  "ondatachange" : {
-				        			  "description": "object that configures that this dataprovider type has ondatachange support",
-				        			  "type": "object",
-				        			  "properties": {
+								},
+								"tags": {
+									"type": "object"
+								},
+								"values": {
+									"type": "array"
+								},
+								"default": {
+								},
+								"initialValue": {
+								},
+								"ondatachange": {
+									"description": "object that configures that this dataprovider type has ondatachange support",
+									"type": "object",
+									"properties": {
 				        				  "onchange": {"type":"string"},
 				        				  "callback": {"type":"string"},
 				        				  "parsehtml": {"type":"boolean"}
-				        			  },
+										},
 				        			  "required": ["onchange"],
-				        			  "additionalProperties": false
-				        		  },
-				        		  "forFoundset": {
-				        			  "type":"string"
-				        		  },
-				        		  "displayTagsPropertyName": {
-				        			  "type":"string"
-				        		  },
-				        		  "oppositeOf": {
-				        			  "type":"string"
-				        		  },
-				        		  "dynamicDataproviders": {
-				        			  "type":"boolean"
-				        		  },
-				        		  "initialPreferredViewPortSize": {
-				        			  "type":"number"
-				        		  },
-				        		  "sendSelectionViewportInitially": {
-				        			  "type":"boolean"
-				        		  },
-				        		  "stringformat": {
-				        			  "type":"boolean"
-				        		  },
-				        		  "elementConfig": {
-				        			  "type":"object",
-				        			  "properties":{
-				        				  "forFoundset": {
-				        					  "type":"string"
-				        				  }
-				        			  }
-				        		  },
-				        		  "dataproviders":{
-				        			  "type":"array",
-				        			  "items": {
-				        				  "type": "string"
-				        			  }
-				        		  },
-				        		  "max": {
-					            	"type": "number"
-						          },
-						          "lazyLoading": {
-					            	"type": "boolean"
-						          }
-				        	  },
+									"additionalProperties": false
+								},
+								"forFoundset": {
+									"type": "string"
+								},
+								"displayTagsPropertyName": {
+									"type": "string"
+								},
+								"oppositeOf": {
+									"type": "string"
+								},
+								"dynamicDataproviders": {
+									"type": "boolean"
+								},
+								"initialPreferredViewPortSize": {
+									"type": "number"
+								},
+								"sendSelectionViewportInitially": {
+									"type": "boolean"
+								},
+								"stringformat": {
+									"type": "boolean"
+								},
+								"elementConfig": {
+									"type": "object",
+									"properties": {
+										"forFoundset": {
+											"type": "string"
+										}
+									}
+								},
+								"dataproviders": {
+									"type": "array",
+									"items": {
+										"type": "string"
+									}
+								},
+								"max": {
+									"type": "number"
+								},
+								"lazyLoading": {
+									"type": "boolean"
+								}
+							},
 				        	  "required":["type"],
-				        	  "additionalProperties": false
-				          }
-				          ]
-			}
+							"additionalProperties": false
+						}
+					]
+				}
+			},
+			"additionalProperties": false
 		},
 		"handlers":
 		{
 			"description": "The event handlers this component has",
-			"type":"object",
-			"additionalProperties": {
-				"oneOf": [
-				          { 
-				        	  "type": "string" ,
+			"type": "object",
+			"patternProperties": {
+				"^\\S+$": {
+					"oneOf": [
+						{
+							"type": "string",
 				        	  "enum" : ["function"]
-				          },
-				          {
-				        	  "type": "object",
-				        	  "description": "The description of this component handler", 
-				        	  "properties": {
-				        		  "returns":{ 
-				        			  "description":"the datatype this handler call returns",
-				        			  "oneOf": [
-				        			            {
-
-				        			            	"type":"string"
-				        			            },
-				        			            {
-				        			            	"type":"object",
-				        			            	"properties": {
-				        			            		"description": {
-				        			            			"description":"the description of the result",
-				        			            			"type":"string"
-				        			            		},
-				        			            		"type":{  
-				        			            			"type":"string"
-				        			            		}
-				        			            	}
-				        			            }
-				        			            ]
-				        		  },
-				        		  "parameters":{  
-				        			  "description":"the parameter types this handler call accepts",
-				        			  "type":"array",
-				        			  "items":{  
-				        				  "type":"object",
-				        				  "properties":{  
-				        					  "name":{  
-				        						  "description":"the name of the parameter",
-				        						  "type":"string"
-				        					  },
-				        					  "description": {
-				        						  "description":"the description of the parameter",
-				        						  "type":"string"
-				        					  },
-				        					  "type":{  
-				        						  "description":"the type of the parameter",
-				        						  "oneOf":[  
-				        						           {  
-				        						        	   "type":"string"
-				        						           },
-				        						           {  
-				        						        	   "type":"object",
-				        						        	   "properties":{  
-				        						        		   "type":{  
-				        						        			   "type":"string"
-				        						        		   }
-				        						        	   },
-				        						        	   "required":[  
-				        						        	               "type"
-				        						        	               ],
-				        						        	               "additionalProperties":true
-				        						           }
-				        						           ]
-				        					  },
-				        					  "optional":{  
-				        						  "type":"boolean"
-				        					  }
-				        				  },
-				        				  "required":[  
-				        				              "name",
-				        				              "type"
-				        				              ],
-				        				              "additionalProperties":false
-				        			  }
-				        		  }
-				        	  }
-				          }
-				          ]
-			}
+						},
+						{
+							"type": "object",
+							"description": "The description of this component handler",
+							"properties": {
+								"returns": {
+									"description": "the datatype this handler call returns",
+									"oneOf": [
+										{
+											"type": "string"
+										},
+										{
+											"type": "object",
+											"properties": {
+												"description": {
+													"description": "the description of the result",
+													"type": "string"
+												},
+												"type": {
+													"type": "string"
+												}
+											}
+										}
+									]
+								},
+								"parameters": {
+									"description": "the parameter types this handler call accepts",
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"name": {
+												"description": "the name of the parameter",
+												"type": "string"
+											},
+											"description": {
+												"description": "the description of the parameter",
+												"type": "string"
+											},
+											"type": {
+												"description": "the type of the parameter",
+												"oneOf": [
+													{
+														"type": "string"
+													},
+													{
+														"type": "object",
+														"properties": {
+															"type": {
+																"type": "string"
+															}
+														},
+														"required": [
+															"type"
+														],
+														"additionalProperties": true
+													}
+												]
+											},
+											"optional": {
+												"type": "boolean"
+											}
+										},
+										"required": [
+											"name",
+											"type"
+										],
+										"additionalProperties": false
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			"additionalProperties": false
 		},
 		"api":
 		{
 			"description": "The api this component has",
-			"type":"object",
-			"additionalProperties": {
-				"type": "object",
-				"properties": {
-					"returns": {
-						"description": "the datatype this api call returns",
-						"type": "string"
-					},
-					"parameters": {
-						"description": "the parameter types this api call accepts",
-						"type":"array",
-						"items": {
-							"type": "object",
-							"properties": {
-								"name": {
-									"description": "the name of the parameter",
-									"type": "string"
-								},
-								"type": {
-									"description": "the type of the parameter",
-									"oneOf": [
-									          {
-									        	  "type": "string"
-									          },
-									          {
-									        	  "type": "object",
-									        	  "properties": {
-									        		  "type": {
-									        			  "type": "string"
-									        		  }
-									        	  },
+			"type": "object",
+			"patternProperties": {
+				"^\\S+$": {
+					"type": "object",
+					"properties": {
+						"returns": {
+							"description": "the datatype this api call returns",
+							"type": "string"
+						},
+						"parameters": {
+							"description": "the parameter types this api call accepts",
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"description": "the name of the parameter",
+										"type": "string"
+									},
+									"type": {
+										"description": "the type of the parameter",
+										"oneOf": [
+											{
+												"type": "string"
+											},
+											{
+												"type": "object",
+												"properties": {
+													"type": {
+														"type": "string"
+													}
+												},
 									        	  "required": ["type"],
-									        	  "additionalProperties":true
-									          }
-									          ]
+												"additionalProperties": true
+											}
+										]
+									},
+									"optional": {
+										"type": "boolean"
+									}
 								},
-								"optional": {
-									"type":"boolean"
-								}
-							},
 							"required": ["name","type"],
-							"additionalProperties":false
+								"additionalProperties": false
+							}
+						},
+						"delayUntilFormLoad": {
+							"description": "Deprecated. Use delayUntilFormLoads instead.",
+							"type": "boolean"
+						},
+						"delayUntilFormLoads": {
+							"description": "Delay this api call until the form is really loaded on the client (example: requestFocus).",
+							"type": "boolean"
+						},
+						"async": {
+							"description": "Execute this api call async (don't wait for return value).",
+							"type": "boolean"
+						},
+						"globalExclusive": {
+							"description": "Deprecated. Use discardPreviouslyQueuedSimilarCalls instead.",
+							"type": "boolean"
+						},
+						"discardPreviouslyQueuedSimilarCalls": {
+							"description": "False by default. When true (only makes sense for async or delayUntilFormLoads type of calls), only the last call (inside an event handler on the event thread - when multiple async/delayed API calls get queued before being sent to the client) to this method (identified by method name) on any component on the current window will be executed. The previous calls are discarded. For example when the user clicks a button, an event handler on the server that executes lots of code might end up calling .requestFocus() on many components for many different forms on this window. But to keep things fast, only the last requestFocus() is really relevant and only that really needs to get executed on the client - there is no use in executing any of the others. So by marking requestFocus() with this flag in the .spec you can achieve that.",
+							"type": "boolean"
 						}
 					},
-					"delayUntilFormLoad": {
-						"description": "Deprecated. Use delayUntilFormLoads instead.",
-						"type": "boolean"
-					},
-					"delayUntilFormLoads": {
-						"description": "Delay this api call until the form is really loaded on the client (example: requestFocus).",
-						"type": "boolean"
-					},
-					"async": {
-						"description": "Execute this api call async (don't wait for return value).",
-						"type": "boolean"
-					},
-					"globalExclusive": {
-						"description": "Deprecated. Use discardPreviouslyQueuedSimilarCalls instead.",
-						"type": "boolean"
-					},
-					"discardPreviouslyQueuedSimilarCalls": {
-						"description": "False by default. When true (only makes sense for async or delayUntilFormLoads type of calls), only the last call (inside an event handler on the event thread - when multiple async/delayed API calls get queued before being sent to the client) to this method (identified by method name) on any component on the current window will be executed. The previous calls are discarded. For example when the user clicks a button, an event handler on the server that executes lots of code might end up calling .requestFocus() on many components for many different forms on this window. But to keep things fast, only the last requestFocus() is really relevant and only that really needs to get executed on the client - there is no use in executing any of the others. So by marking requestFocus() with this flag in the .spec you can achieve that.",
-						"type": "boolean"
-					}
-				},
-				"additionalProperties":false
-			}
+					"additionalProperties": false
+				}
+			},
+			"additionalProperties": false
 		},
 		"internalApi":
 		{
 			"description": "The internal api this component has, can be called from client or from server side scripting",
-			"type":"object",
-			"additionalProperties": {
-				"type": "object",
-				"properties": {
-					"returns": {
-						"description": "the datatype this api call returns",
-						"type": "string"
-					},
-					"parameters": {
-						"description": "the parameter types this api call accepts",
-						"type":"array",
-						"items": {
-							"type": "object",
-							"properties": {
-								"name": {
-									"description": "the name of the parameter",
-									"type": "string"
-								},
-								"type": {
-									"description": "the type of the parameter",
-									"oneOf": [
-									          {
-									        	  "type": "string"
-									          },
-									          {
-									        	  "type": "object",
-									        	  "properties": {
-									        		  "type": {
-									        			  "type": "string"
-									        		  }
-									        	  },
+			"type": "object",
+			"patternProperties": {
+				"^\\S+$": {
+					"type": "object",
+					"properties": {
+						"returns": {
+							"description": "the datatype this api call returns",
+							"type": "string"
+						},
+						"parameters": {
+							"description": "the parameter types this api call accepts",
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"description": "the name of the parameter",
+										"type": "string"
+									},
+									"type": {
+										"description": "the type of the parameter",
+										"oneOf": [
+											{
+												"type": "string"
+											},
+											{
+												"type": "object",
+												"properties": {
+													"type": {
+														"type": "string"
+													}
+												},
 									        	  "required": ["type"],
-									        	  "additionalProperties":true
-									          }
-									          ]
+												"additionalProperties": true
+											}
+										]
+									},
+									"optional": {
+										"type": "boolean"
+									}
 								},
-								"optional": {
-									"type":"boolean"
-								}
-							},
 							"required": ["name","type"],
-							"additionalProperties":false
+								"additionalProperties": false
+							}
+						},
+						"delayUntilFormLoads": {
+							"description": "Delay this api call until the form is really loaded on the client (example: requestFocus).",
+							"type": "boolean"
+						},
+						"async": {
+							"description": "Execute this api call async (don't wait for return value).",
+							"type": "boolean"
+						},
+						"globalExclusive": {
+							"description": "Deprecated. Use discardPreviouslyQueuedSimilarCalls instead.",
+							"type": "boolean"
+						},
+						"discardPreviouslyQueuedSimilarCalls": {
+							"description": "False by default. When true (only makes sense for async or delayUntilFormLoads type of calls), only the last call (inside an event handler on the event thread - when multiple async/delayed API calls get queued before being sent to the client) to this method (identified by method name) on any component on the current window will be executed. The previous calls are discarded. For example when the user clicks a button, an event handler on the server that executes lots of code might end up calling .requestFocus() on many components for many different forms on this window. But to keep things fast, only the last requestFocus() is really relevant and only that really needs to get executed on the client - there is no use in executing any of the others. So by marking requestFocus() with this flag in the .spec you can achieve that.",
+							"type": "boolean"
 						}
 					},
-					"delayUntilFormLoads": {
-						"description": "Delay this api call until the form is really loaded on the client (example: requestFocus).",
-						"type": "boolean"
-					},
-					"async": {
-						"description": "Execute this api call async (don't wait for return value).",
-						"type": "boolean"
-					},
-					"globalExclusive": {
-						"description": "Deprecated. Use discardPreviouslyQueuedSimilarCalls instead.",
-						"type": "boolean"
-					},
-					"discardPreviouslyQueuedSimilarCalls": {
-						"description": "False by default. When true (only makes sense for async or delayUntilFormLoads type of calls), only the last call (inside an event handler on the event thread - when multiple async/delayed API calls get queued before being sent to the client) to this method (identified by method name) on any component on the current window will be executed. The previous calls are discarded. For example when the user clicks a button, an event handler on the server that executes lots of code might end up calling .requestFocus() on many components for many different forms on this window. But to keep things fast, only the last requestFocus() is really relevant and only that really needs to get executed on the client - there is no use in executing any of the others. So by marking requestFocus() with this flag in the .spec you can achieve that.",
-						"type": "boolean"
-					}
-				},
-				"additionalProperties":false
-			}
+					"additionalProperties": false
+				}
+			},
+			"additionalProperties": false
 		},
 		"serverscript": {
 			"description": "js reference that will be run on the server",
@@ -461,72 +471,78 @@
 		"types": {
 			"description": "an object of custom types that is used in the model for property type or api for an return/parameter type",
 			"type": "object",
-			"additionalProperties": {
-				"type":"object",
-				"additionalProperties": {
-					"oneOf": [
-					          {
-					        	  "type": "string"
-					          },
-					          {
-					        	  "type": "object",
-					        	  "properties": {
-					        		  "type": {
-					        			  "type":"string"
-					        		  },
-					        		  "values":{
-					        			  "type": "array"
-					        		  },
-					        		  "default": {
-					        		  },
-					        		   "initialValue": {
-					        		  },
-					        		  "pushToServer": {
+			"patternProperties": {
+				"^\\S+$": {
+					"type": "object",
+					"patternProperties": {
+						"^\\S+$": {
+							"oneOf": [
+								{
+									"type": "string"
+								},
+								{
+									"type": "object",
+									"properties": {
+										"type": {
+											"type": "string"
+										},
+										"values": {
+											"type": "array"
+										},
+										"default": {
+										},
+										"initialValue": {
+										},
+										"pushToServer": {
 				        			  		"enum" : ["reject", "allow", "shallow", "deep"]
-				        		 	  },
-					        		  "forFoundset":{
-					        			  "type":"string"
-					        		  },
-					        		  "for": {
-					        			  "oneOf": [
-					        			            {
-					        			            	"type": "string"
-					        			            },
-					        			            {
-					        			            	"type": "array"
-					        			            },
-					        			            {
-					        			            	"type": "object"
-					        			            }
-					        			           ]
-				        		  	},
-				        		 	"tags": {
-				        			  "type": "object"
-				        		  	},
-				        		  	"elementConfig": {
-				        		  		"type":"object",
-				        		  		"properties":{
-				        		  			"forFoundset": {
-				        		  				"type":"string"
-				        		  			}
-				        		  		}
-				        		  	}				        		  	
-					        	  },
+										},
+										"forFoundset": {
+											"type": "string"
+										},
+										"for": {
+											"oneOf": [
+												{
+													"type": "string"
+												},
+												{
+													"type": "array"
+												},
+												{
+													"type": "object"
+												}
+											]
+										},
+										"tags": {
+											"type": "object"
+										},
+										"elementConfig": {
+											"type": "object",
+											"properties": {
+												"forFoundset": {
+													"type": "string"
+												}
+											}
+										}
+									},
 					        	  "required":["type"],
-					        	  "additionalProperties": false
-					          }
-					          ]
+									"additionalProperties": false
+								}
+							]
+						}
+					},
+					"additionalProperties": false
 				}
-			}
+			},
+			"additionalProperties": false
 		}
 	},
 
 	"required": 
 		[
-		 "name",
-		 "displayName",
-		 "definition",
-		 "version"
-		 ],
-		 "additionalProperties":false
+		"name",
+		"displayName",
+		"definition",
+		"version"
+	],
+	"additionalProperties": false
 }

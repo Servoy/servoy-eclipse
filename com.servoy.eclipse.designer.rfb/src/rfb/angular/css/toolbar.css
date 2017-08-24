@@ -97,7 +97,7 @@
 	border: 1px dashed #C0C0C0;
 }
 
-[disabled] img {
+.disabled img {
 	opacity: 0.4;
 	filter: alpha(opacity=40); /* msie */
 }

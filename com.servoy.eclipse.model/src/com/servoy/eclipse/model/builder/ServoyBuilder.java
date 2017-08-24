@@ -949,7 +949,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, INVALID_MOBILE_MODULE_MARKER_TYPE);
 
 		final ServoyProject servoyProject = getServoyProject(project);
-		boolean active = servoyModel.shouldBeModuleOfActiveSolution(project.getName());
+		boolean active = servoyModel.isSolutionActive(project.getName());
 
 		if (servoyProject != null && active && servoyProject.getSolution() != null)
 		{
@@ -1011,6 +1011,13 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 						{
 							ServoyLog.logError(e);
 						}
+					}
+					//import hook is not active, add error here as well
+					if (module != null && !servoyModel.isSolutionActive(module.getProject().getName()) &&
+						SolutionMetaData.isPreImportHook(module.getSolution()) && module.getSolution().getModulesNames() != null)
+					{
+						String message = "Module " + module.getSolution().getName() + " is a solution import hook, so it should not contain any modules.";
+						addMarker(project, MISPLACED_MODULES_MARKER_TYPE, message, -1, MODULE_MISPLACED, IMarker.PRIORITY_LOW, null, null);
 					}
 				}
 

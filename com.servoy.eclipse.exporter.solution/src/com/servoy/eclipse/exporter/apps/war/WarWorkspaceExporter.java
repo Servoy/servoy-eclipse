@@ -115,12 +115,12 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 		public List<String> getPlugins()
 		{
 			Set<String> names = null;
-			if ("<none>".equals(configuration.getPlugins().toLowerCase()))
-			{
-				return Collections.emptyList();
-			}
 			if (configuration.getPlugins() != null)
 			{
+				if ("<none>".equals(configuration.getPlugins().toLowerCase()))
+				{
+					return Collections.emptyList();
+				}
 				names = new HashSet<String>(Arrays.asList(configuration.getPlugins().toLowerCase().split(" ")));
 			}
 			return getFiles(ApplicationServerRegistry.get().getPluginManager().getPluginsDir(), names);
@@ -132,6 +132,10 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			Set<String> names = null;
 			if (configuration.getLafs() != null)
 			{
+				if ("<none>".equals(configuration.getLafs().toLowerCase()))
+				{
+					return Collections.emptyList();
+				}
 				names = new HashSet<String>(Arrays.asList(configuration.getLafs().toLowerCase().split(" ")));
 			}
 			return getFiles(ApplicationServerRegistry.get().getLafManager().getLAFDir(), names);
@@ -167,6 +171,10 @@ public class WarWorkspaceExporter extends AbstractWorkspaceExporter<WarArgumentC
 			Set<String> names = null;
 			if (configuration.getBeans() != null)
 			{
+				if ("<none>".equals(configuration.getBeans().toLowerCase()))
+				{
+					return Collections.emptyList();
+				}
 				names = new HashSet<String>(Arrays.asList(configuration.getBeans().toLowerCase().split(" ")));
 			}
 			return getFiles(ApplicationServerRegistry.get().getBeanManager().getBeansDir(), names);
