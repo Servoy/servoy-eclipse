@@ -232,7 +232,7 @@ public class ImageReplacementMapper
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.debug.ui/icons/full/eview16/debug_view.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/debug.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide.application/$nl$/icons/full/eview16/resource_persp.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/resource.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/resource.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/eview16/new_persp.png"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/open_perspective.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui.ide/icons/full/eview16/tasks_tsk.png"),

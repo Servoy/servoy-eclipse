@@ -232,9 +232,9 @@ angular.module('dragselection', ['mouseselection']).run(function($rootScope, $pl
 					for (var j = 0; j < selection.length; j++)
 					{
 						var node = selection[j].nodeType === Node.ELEMENT_NODE ? selection[j] : selection[j][0];
-						if (selection[j].getAttribute("svy-id") == toRemove[i])
+						if (node.getAttribute("svy-id") == toRemove[i])
 						{
-							if (removeGhosts && selection[j].classList.contains("ghost") || !removeGhosts && selection[j].classList.contains("svy-wrapper"))
+							if (removeGhosts && node.classList.contains("ghost") || !removeGhosts && node.classList.contains("svy-wrapper"))
 							{
 								nodesToRemove.push(selection[j]);
 								break;
