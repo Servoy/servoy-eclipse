@@ -51,6 +51,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarContributionItem;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -457,7 +458,7 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 		coolBarManager = new CoolBarManager(SWT.WRAP | SWT.FLAT);
 		coolBarManager.setContextMenuManager(getToolbarMenuManager());
 		CoolBar coolBar = coolBarManager.createControl(c);
-
+		coolBar.setBackground(JFaceResources.getColorRegistry().get("org.eclipse.ui.workbench.INACTIVE_TAB_OUTER_KEYLINE_COLOR"));
 		FormData formData = new FormData();
 		formData.left = new FormAttachment(0);
 		formData.right = new FormAttachment(100);
