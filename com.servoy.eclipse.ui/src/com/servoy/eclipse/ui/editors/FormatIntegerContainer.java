@@ -248,7 +248,7 @@ public class FormatIntegerContainer extends Composite implements IFormatTextCont
 			}
 		}
 
-		return new ParsedFormat(false, false, false, false, false, editFormat.getText(), displayFormat.getText(), len, null, null, null);
+		return new ParsedFormat(false, false, false, false, false, editFormat.getText(), displayFormat.getText(), len, null, null, null, false);
 
 	}
 
