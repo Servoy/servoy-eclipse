@@ -255,7 +255,8 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 				}
 			}
 		});
-		tableViewer.setInput(new String[][] { { "#", "Any valid number (0-9)" }, { "'", "Escape character, used to escape any of the special formatting characters" }, { "U", "Any alpha character. All lowercase letters are mapped to upper case (A-Z)" }, { "L", "Any alpha character. All upper case letters are mapped to lower case (a-z)" }, { "A", "Any alpha character or number (a-z,A-Z,0-9)" }, { "?", "Any alpha character (a-z,A-Z)" }, { "*", "Anything" }, { "H", "Any hex character, lowercase will be converted to uppercase (0-9,A-F)" } });
+		tableViewer.setInput(
+			new String[][] { { "#", "Any valid number (0-9)" }, { "'", "Escape character, used to escape any of the special formatting characters" }, { "U", "Any alpha character. All lowercase letters are mapped to upper case (A-Z)" }, { "L", "Any alpha character. All upper case letters are mapped to lower case (a-z)" }, { "A", "Any alpha character or number (a-z,A-Z,0-9)" }, { "?", "Any alpha character (a-z,A-Z)" }, { "*", "Anything" }, { "H", "Any hex character, lowercase will be converted to uppercase (0-9,A-F)" } });
 		ignoreTextChanges = false;
 	}
 
@@ -265,7 +266,7 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 	public ParsedFormat getParsedFormat()
 	{
 		Integer len = null;
-		// if there is a display or edit format then ignore length, format dictates it. 
+		// if there is a display or edit format then ignore length, format dictates it.
 		if (!displayFormatRadio.getSelection() || (displayFormat.getText().equals("") && placeHolder.getText().equals("")))
 		{
 			try
@@ -278,7 +279,7 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 			}
 		}
 		return new ParsedFormat(upperCase.getSelection(), lowerCase.getSelection(), numberInput.getSelection(), useRaw.getSelection(), false,
-			placeHolder.getText(), displayFormat.getText(), len, null, null, allowedCharacters.getText());
+			placeHolder.getText(), displayFormat.getText(), len, null, null, allowedCharacters.getText(), false);
 	}
 
 	/**
@@ -327,7 +328,7 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private void clearText()
 	{
@@ -342,7 +343,7 @@ public class FormatTextContainer extends Composite implements IFormatTextContain
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void setEnablementOfDisplayFormatOptions()
 	{
