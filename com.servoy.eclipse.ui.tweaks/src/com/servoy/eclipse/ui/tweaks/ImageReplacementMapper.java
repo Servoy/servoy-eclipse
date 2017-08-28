@@ -452,9 +452,9 @@ public class ImageReplacementMapper
 			urlReplacements.put(new URL("platform:/plugin/com.servoy.eclipse.profiler/icons/viewicon.gif"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/profiler_view.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/elcl16/trash.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/delete.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/trash.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.ui/icons/full/dlcl16/trash.png"),
-				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/delete.png"));
+				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/icons/trash.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.search/icons/full/dlcl16/pin_view.gif"),
 				formatUrl("platform:/plugin/com.servoy.eclipse.ui.tweaks/{0}/pin_view.png"));
 			urlReplacements.put(new URL("platform:/plugin/org.eclipse.search/icons/full/elcl16/pin_view.gif"),
