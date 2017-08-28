@@ -176,7 +176,7 @@ public class FormatDateContainer extends Composite implements IFormatTextContain
 		useLocalDateTime.setText("Use as LocalDateTime (NG client only)");
 		useLocalDateTime.setToolTipText("Show the same date-time on all clients, don't do time convertion based on client timezone (UTC offset)");
 		useLocalDateTime.setEnabled(ServoyModelManager.getServoyModelManager().getServoyModel().isActiveSolutionNGClient());
-		GridData gridData_useLocalDateTime = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		GridData gridData_useLocalDateTime = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
 		useLocalDateTime.setLayoutData(gridData_useLocalDateTime);
 
 		new Label(this, SWT.NONE);
