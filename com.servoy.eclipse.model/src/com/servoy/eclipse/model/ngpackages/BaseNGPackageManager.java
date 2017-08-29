@@ -353,12 +353,17 @@ public abstract class BaseNGPackageManager
 		if (activeSolutionProject != null)
 		{
 			ServoyProject[] modulesOfActiveProject = ServoyModelFinder.getServoyModel().getModulesOfActiveProject();
+			ArrayList<ServoyNGPackageProject> alreadyAddedNGPackageProject = new ArrayList<ServoyNGPackageProject>();
 			for (ServoyProject servoyProject : modulesOfActiveProject)
 			{
 				ServoyNGPackageProject[] ngPackageProjects = servoyProject.getNGPackageProjects();
 				for (ServoyNGPackageProject servoyNGPackageProject : ngPackageProjects)
 				{
-					collectReferencedProjectAsPackageReader(componentReaders, servoyProject.getProject().getName(), servoyNGPackageProject.getProject(), m);
+					if (!alreadyAddedNGPackageProject.contains(servoyNGPackageProject))
+					{
+						collectReferencedProjectAsPackageReader(componentReaders, servoyProject.getProject().getName(), servoyNGPackageProject.getProject(), m);
+						alreadyAddedNGPackageProject.add(servoyNGPackageProject);
+					}
 				}
 			}
 			m.worked(8);
