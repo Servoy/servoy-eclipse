@@ -161,14 +161,16 @@ public class RenameSolutionAction extends Action implements ISelectionChangedLis
 								repository.updateNodes(toUpdate.toArray(new IPersist[toUpdate.size()]), false);
 								if (isActive)
 								{
-									ServoyProject svyProject = activeProject.getEditingSolution().getName().equals(name) ? servoyModel.getServoyProject(name)
-										: servoyModel.getServoyProject(activeProject.getProject().getName());
-									svyProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+									servoyProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 									IJobManager jobManager = Job.getJobManager();
 									try
 									{
 										jobManager.join(ResourcesPlugin.FAMILY_MANUAL_BUILD, new NullProgressMonitor());
 										jobManager.join(ResourcesPlugin.FAMILY_AUTO_BUILD, new NullProgressMonitor());
+										ServoyModel.getDeveloperRepository().flushAllCachedData();
+										servoyModel = (ServoyModel)servoyModel.refreshServoyProjects();
+										ServoyProject svyProject = activeProject.getEditingSolution().getName().equals(name)
+											? servoyModel.getServoyProject(name) : servoyModel.getServoyProject(activeProject.getProject().getName());
 										servoyModel.setActiveProject(svyProject, true);
 									}
 									catch (Exception e)
