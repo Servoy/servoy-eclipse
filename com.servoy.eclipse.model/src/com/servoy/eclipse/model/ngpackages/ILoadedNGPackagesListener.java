@@ -25,6 +25,10 @@ package com.servoy.eclipse.model.ngpackages;
  */
 public interface ILoadedNGPackagesListener
 {
+	enum CHANGE_REASON
+	{
+		RELOAD, ACTIVE_PROJECT_CHANGED, RESOURCES_UPDATED_ON_ACTIVE_PROJECT, MODULES_UPDATED
+	}
 
 	// TODO here we could provide exactly what packages were changed/added/deleted and maybe the types of packages affected - it could be useful in a few places
 	// and I think we have that info
@@ -34,6 +38,6 @@ public interface ILoadedNGPackagesListener
 	 *
 	 * @param loadedPackagesAreTheSameAlthoughReferencingModulesChanged see method description.
 	 */
-	void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged);
+	void ngPackagesChanged(CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged);
 
 }
