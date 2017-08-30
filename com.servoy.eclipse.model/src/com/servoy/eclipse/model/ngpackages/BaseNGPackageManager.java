@@ -64,6 +64,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
+import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener.CHANGE_REASON;
 import com.servoy.eclipse.model.repository.SolutionSerializer;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.j2db.server.ngclient.startup.resourceprovider.ResourceProvider;
@@ -93,7 +94,7 @@ public abstract class BaseNGPackageManager
 
 	public BaseNGPackageManager()
 	{
-		if (ServoyModelFinder.getServoyModel().getActiveProject() != null) reloadAllNGPackages(null); // initial load
+		if (ServoyModelFinder.getServoyModel().getActiveProject() != null) reloadAllNGPackages(CHANGE_REASON.RELOAD, null); // initial load
 
 		resourceChangeListener = new BaseNGPackageResourcesChangedListener(this);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener,
@@ -127,11 +128,11 @@ public abstract class BaseNGPackageManager
 		loadedNGPackagesListeners.remove(listener);
 	}
 
-	public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
+	public void ngPackagesChanged(CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 	{
 		for (ILoadedNGPackagesListener listener : loadedNGPackagesListeners)
 		{
-			listener.ngPackagesChanged(loadedPackagesAreTheSameAlthoughReferencingModulesChanged);
+			listener.ngPackagesChanged(changeReason, loadedPackagesAreTheSameAlthoughReferencingModulesChanged);
 		}
 	}
 
@@ -188,7 +189,7 @@ public abstract class BaseNGPackageManager
 	 * Reloads all ng packages (both resources project ones and referenced ng package project ones).
 	 * It takes care to unload all from all places before loading in the new ones to avoid generating wrong duplicate conflicts problems (if a package is moved between it's own project and the resources project).
 	 */
-	public void reloadAllNGPackages(IProgressMonitor m)
+	public void reloadAllNGPackages(CHANGE_REASON changeReason, IProgressMonitor m)
 	{
 		projectNameToContainedPackages.clear();
 		setRemovedPackages();
@@ -208,7 +209,7 @@ public abstract class BaseNGPackageManager
 
 		monitor.worked(9);
 		monitor.setTaskName("Announcing ng packages load");
-		ngPackagesChanged(false);
+		ngPackagesChanged(changeReason, false);
 		monitor.worked(1);
 		monitor.done();
 	}
@@ -319,7 +320,7 @@ public abstract class BaseNGPackageManager
 		ResourceProvider.updatePackageResources(componentsReallyToUnload, new HashSet<IPackageReader>(componentsReallyToLoad.values()), serviceReallyToUnload,
 			new HashSet<IPackageReader>(serviceReallyToLoad.values()));
 
-		ngPackagesChanged(!reallyChanged); // we always have to notify, even for example when loaded packages are really the same, just a second (doubled) reference to a project was removed, because solex has to know that case as well
+		ngPackagesChanged(CHANGE_REASON.RELOAD, !reallyChanged); // we always have to notify, even for example when loaded packages are really the same, just a second (doubled) reference to a project was removed, because solex has to know that case as well
 	}
 
 	/**

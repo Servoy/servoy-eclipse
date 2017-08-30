@@ -40,6 +40,7 @@ import com.servoy.eclipse.model.ServoyModelFinder;
 import com.servoy.eclipse.model.nature.ServoyNGPackageProject;
 import com.servoy.eclipse.model.nature.ServoyProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
+import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.j2db.persistence.WebObjectRegistry;
 
 import sj.jsonschemavalidation.builder.JsonSchemaValidationNature;
@@ -70,7 +71,7 @@ public class NGPackageManager extends BaseNGPackageManager
 				// TODO we should really check here if the property that changed does affect web packages!
 				WebComponentSpecProvider.disposeInstance();
 				WebServiceSpecProvider.disposeInstance();
-				reloadAllNGPackages(null);
+				reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.RELOAD, null);
 			}
 		});
 
@@ -87,14 +88,14 @@ public class NGPackageManager extends BaseNGPackageManager
 				{
 					if (updateInfo == RESOURCES_UPDATED_ON_ACTIVE_PROJECT)
 					{
-						reloadAllNGPackages(null);
+						reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.RESOURCES_UPDATED_ON_ACTIVE_PROJECT, null);
 					}
 					else if (updateInfo == MODULES_UPDATED)
 					{
 						// TODO if we will take referenced ng package projects even from modules, we should enable this code...
 						clearReferencedNGPackageProjectsCache();
 						//TODO can we improve this?
-						reloadAllNGPackages(null);
+						reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.MODULES_UPDATED, null);
 //						reloadAllSolutionReferencedPackages(new NullProgressMonitor(), false);
 					}
 				}
@@ -102,7 +103,7 @@ public class NGPackageManager extends BaseNGPackageManager
 				public void activeProjectChanged(ServoyProject activeProject)
 				{
 					clearReferencedNGPackageProjectsCache();
-					reloadAllNGPackages(null);
+					reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.ACTIVE_PROJECT_CHANGED, null);
 				}
 			};
 			((ServoyModel)ServoyModelFinder.getServoyModel()).addActiveProjectListener(activeProjectListenerForRegisteringResources);
@@ -112,7 +113,7 @@ public class NGPackageManager extends BaseNGPackageManager
 	}
 
 	@Override
-	public void reloadAllNGPackages(IProgressMonitor m)
+	public void reloadAllNGPackages(final ILoadedNGPackagesListener.CHANGE_REASON changeReason, IProgressMonitor m)
 	{
 		// do what super does but in a job; this is what code prior to the refactor did as well
 		Job registerAllNGPackagesJob = new Job("Reading ng packages from resources project...")
@@ -121,7 +122,7 @@ public class NGPackageManager extends BaseNGPackageManager
 			public IStatus run(IProgressMonitor monitor)
 			{
 				// do the actual work
-				NGPackageManager.super.reloadAllNGPackages(monitor);
+				NGPackageManager.super.reloadAllNGPackages(changeReason, monitor);
 				return Status.OK_STATUS;
 			}
 
@@ -178,9 +179,9 @@ public class NGPackageManager extends BaseNGPackageManager
 	}
 
 	@Override
-	public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
+	public void ngPackagesChanged(ILoadedNGPackagesListener.CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 	{
-		super.ngPackagesChanged(loadedPackagesAreTheSameAlthoughReferencingModulesChanged);
+		super.ngPackagesChanged(changeReason, loadedPackagesAreTheSameAlthoughReferencingModulesChanged);
 		WebObjectRegistry.clearWebObjectCaches();
 	}
 
