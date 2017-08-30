@@ -36,6 +36,7 @@ import com.servoy.eclipse.core.ServoyModelManager;
 import com.servoy.eclipse.core.elements.ElementFactory;
 import com.servoy.eclipse.core.util.UIUtils;
 import com.servoy.eclipse.model.ServoyModelFinder;
+import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.util.ServoyLog;
 import com.servoy.eclipse.ui.property.PersistContext;
@@ -255,7 +256,7 @@ public class SaveAsTemplateAction extends SelectionAction
 		}
 
 		// TODO - is this ok? manually triggering the ng component package change broadcast just to refresh the palette?
-		ServoyModelFinder.getServoyModel().getNGPackageManager().ngPackagesChanged(false);
+		ServoyModelFinder.getServoyModel().getNGPackageManager().ngPackagesChanged(ILoadedNGPackagesListener.CHANGE_REASON.RELOAD, false);
 	}
 
 	/**

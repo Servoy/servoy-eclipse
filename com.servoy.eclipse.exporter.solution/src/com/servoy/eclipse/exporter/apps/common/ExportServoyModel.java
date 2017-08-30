@@ -24,6 +24,7 @@ import com.servoy.eclipse.model.extensions.AbstractServoyModel;
 import com.servoy.eclipse.model.extensions.IServoyModel;
 import com.servoy.eclipse.model.nature.ServoyResourcesProject;
 import com.servoy.eclipse.model.ngpackages.BaseNGPackageManager;
+import com.servoy.eclipse.model.ngpackages.ILoadedNGPackagesListener;
 import com.servoy.eclipse.model.repository.DataModelManager;
 import com.servoy.eclipse.model.repository.EclipseRepository;
 import com.servoy.eclipse.model.repository.EclipseSequenceProvider;
@@ -61,7 +62,7 @@ public class ExportServoyModel extends AbstractServoyModel implements IServoyMod
 			System.out.println("Cannot find solution project named '" + solutionName + "'. Are you sure you specified the correct workspace location?");
 		}
 		getNGPackageManager().clearReferencedNGPackageProjectsCache();
-		getNGPackageManager().reloadAllNGPackages(null);
+		getNGPackageManager().reloadAllNGPackages(ILoadedNGPackagesListener.CHANGE_REASON.RELOAD, null);
 	}
 
 	private void setActiveResourcesProject(ServoyResourcesProject servoyResourcesProject)

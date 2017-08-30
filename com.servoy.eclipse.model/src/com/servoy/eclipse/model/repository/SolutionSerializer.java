@@ -81,6 +81,7 @@ import com.servoy.j2db.persistence.Relation;
 import com.servoy.j2db.persistence.RelationItem;
 import com.servoy.j2db.persistence.RepositoryException;
 import com.servoy.j2db.persistence.ScriptCalculation;
+import com.servoy.j2db.persistence.ScriptMethod;
 import com.servoy.j2db.persistence.ScriptVariable;
 import com.servoy.j2db.persistence.Solution;
 import com.servoy.j2db.persistence.SolutionMetaData;
@@ -212,6 +213,7 @@ public class SolutionSerializer
 
 	public static final String PROPERTIESKEY = "@properties=";
 	public static final String TYPEKEY = "@type";
+	public static final String OVERRIDEKEY = "@override";
 
 	/**
 	 *
@@ -745,7 +747,7 @@ public class SolutionSerializer
 			// remove custom properties (extra comment part)
 			obj.remove("customProperties");
 			StringBuilder sb = new StringBuilder();
-			if (currentComment == null)
+			if (currentComment == null || "".equals(currentComment))
 			{
 				generateDefaultJSDoc(obj, sb, userTemplate, persist instanceof AbstractScriptProvider ? (AbstractScriptProvider)persist : null);
 			}
@@ -1013,6 +1015,10 @@ public class SolutionSerializer
 		else
 		{
 			sb.append(" *");
+		}
+		if (abstractScriptProvider instanceof ScriptMethod && PersistHelper.getOverridenMethod((ScriptMethod)abstractScriptProvider) != null)
+		{
+			sb.append("\n * " + SolutionSerializer.OVERRIDEKEY).toString();
 		}
 		sb.append("\n " + SV_COMMENT_END + "\n");
 	}

@@ -3336,7 +3336,7 @@ public class ServoyModel extends AbstractServoyModel
 		getNGPackageManager().addLoadedNGPackagesListener(new ILoadedNGPackagesListener()
 		{
 			@Override
-			public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
+			public void ngPackagesChanged(CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 			{
 				if (!loadedPackagesAreTheSameAlthoughReferencingModulesChanged) updateWorkingSet();
 

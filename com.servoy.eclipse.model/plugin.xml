@@ -823,4 +823,15 @@
             	label="Non externalized string"/>
         </section>
    </extension>
+    <extension
+         id="com.servoy.eclipse.core.methodOverride"
+         name="Method Override Problem"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="com.servoy.eclipse.core.builderProblem">
+      </super>
+   </extension>
 </plugin>

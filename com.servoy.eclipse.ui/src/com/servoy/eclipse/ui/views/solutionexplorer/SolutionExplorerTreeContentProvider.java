@@ -3201,7 +3201,7 @@ public class SolutionExplorerTreeContentProvider
 	}
 
 	@Override
-	public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
+	public void ngPackagesChanged(CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 	{
 		// refreshing tree due to ng component/service package changes...
 		refreshTreeNode(allWebPackagesNode);

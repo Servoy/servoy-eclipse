@@ -54,7 +54,6 @@ import com.servoy.j2db.util.keyword.Ident;
  */
 public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 {
-
 	public IMarkerResolution[] getResolutions(IMarker marker)
 	{
 		try
@@ -244,6 +243,10 @@ public class ServoyQuickFixGenerator implements IMarkerResolutionGenerator
 			else if (type.equals(BaseNGPackageManager.SPEC_READ_MARKER))
 			{
 				resolutions.add(new SpecReadMarkerQuickFix(marker.getResource()));
+			}
+			else if (type.equals(ServoyBuilder.METHOD_OVERRIDE))
+			{
+				resolutions.add(new MethodOverrideProblemQuickFix());
 			}
 
 			return resolutions.toArray(new IMarkerResolution[resolutions.size()]);

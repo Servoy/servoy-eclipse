@@ -1001,12 +1001,15 @@ public class Activator extends Plugin
 				{
 
 					@Override
-					public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
+					public void ngPackagesChanged(CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 					{
-						IDebugClientHandler dch = getDebugClientHandler();
-						if (dch.getDebugNGClient() != null)
+						if (changeReason != CHANGE_REASON.ACTIVE_PROJECT_CHANGED)
 						{
-							dch.getDebugNGClient().recreateForms();
+							IDebugClientHandler dch = getDebugClientHandler();
+							if (dch.getDebugNGClient() != null)
+							{
+								dch.getDebugNGClient().recreateForms();
+							}
 						}
 					}
 				});

@@ -893,7 +893,7 @@ public class TypeCreator extends TypeCache
 				{
 
 					@Override
-					public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
+					public void ngPackagesChanged(CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 					{
 						Job job = new Job("clearing cache")
 						{

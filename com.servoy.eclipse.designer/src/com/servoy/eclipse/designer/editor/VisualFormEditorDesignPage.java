@@ -575,12 +575,12 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 										sb.append(' ');
 									}
 									sb.append('(')//
-									.append(location.x).append(',').append(location.y)//
-									.append(' ')//
-									.append(size.width).append('x').append(size.height)//
-									.append(' ')//
-									.append(location.x + size.width).append(',').append(location.y + size.height)//
-									.append(')');
+										.append(location.x).append(',').append(location.y)//
+										.append(' ')//
+										.append(size.width).append('x').append(size.height)//
+										.append(' ')//
+										.append(location.x + size.width).append(',').append(location.y + size.height)//
+										.append(')');
 								}
 							}
 							else if (((EditPart)next).getModel() instanceof Part)
@@ -798,7 +798,7 @@ public class VisualFormEditorDesignPage extends BaseVisualFormEditorGEFDesignPag
 	}
 
 	@Override
-	public void ngPackagesChanged(boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
+	public void ngPackagesChanged(CHANGE_REASON changeReason, boolean loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 	{
 		if (!loadedPackagesAreTheSameAlthoughReferencingModulesChanged)
 		{
