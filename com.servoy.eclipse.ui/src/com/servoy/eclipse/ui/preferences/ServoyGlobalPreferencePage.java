@@ -16,6 +16,7 @@
  */
 package com.servoy.eclipse.ui.preferences;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -30,12 +31,14 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.util.PrefUtil;
 
 import com.servoy.eclipse.ui.Activator;
@@ -251,8 +254,17 @@ public class ServoyGlobalPreferencePage extends PreferencePage implements IWorkb
 		prefs.setTestClientLoadTimeout(waitForSolutionToBeLoadedInTestClientSpinner.getSelection());
 		prefs.save();
 
-		IconPreferences.getInstance().setUseDarkThemeIcons(useDarkIconsButton.getSelection());
-		IconPreferences.getInstance().save();
+		IconPreferences iconPreferences = IconPreferences.getInstance();
+		if (useDarkIconsButton.getSelection() != iconPreferences.getUseDarkThemeIcons())
+		{
+			iconPreferences.setUseDarkThemeIcons(useDarkIconsButton.getSelection());
+			iconPreferences.save();
+			if (MessageDialog.openQuestion(Display.getCurrent().getActiveShell(), "Use dark icons preference changed",
+				"It is strongly recommended to restart your Servoy Developer. Would you like to restart now?"))
+			{
+				PlatformUI.getWorkbench().restart();
+			}
+		}
 		return true;
 	}
 
