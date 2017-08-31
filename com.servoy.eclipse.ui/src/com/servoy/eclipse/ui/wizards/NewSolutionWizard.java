@@ -22,8 +22,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.javascript.core.JavaScriptNature;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -148,7 +150,15 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					// as the serialization is done using java.io, we must make sure the Eclipse resource structure
 					// stays up to date; we create a project, then we must open it and add servoy solution nature
 					IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(page1.getNewSolutionName());
-					newProject.create(null);
+					String location = page1.getProjectLocation();
+					IProjectDescription description = ServoyModel.getWorkspace().newProjectDescription(page1.getNewSolutionName());
+					if (location != null)
+					{
+						IPath path = new Path(location);
+						path = path.append(page1.getNewSolutionName());
+						description.setLocation(path);
+					}
+					newProject.create(description, null);
 					newProject.open(null);
 					newProject.getFile(SolutionSerializer.GLOBALS_FILE).create(Utils.getUTF8EncodedStream(""), true, null);
 					monitor.worked(1);
@@ -163,7 +173,6 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 					monitor.worked(1);
 
 					monitor.setTaskName("Registering natures");
-					IProjectDescription description = newProject.getDescription();
 					description.setNatureIds(new String[] { ServoyProject.NATURE_ID, JavaScriptNature.NATURE_ID });
 					monitor.worked(1);
 
@@ -288,6 +297,7 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 		private Combo solutionTypeCombo;
 		private int[] solutionTypeComboValues;
 		private ResourcesProjectChooserComposite resourceProjectComposite;
+		private ProjectLocationComposite projectLocationComposite;
 
 
 		/**
@@ -300,6 +310,11 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			super(pageName);
 			setTitle("Create a new solution");
 			setDescription("- a new Servoy solution project will be created");
+		}
+
+		public String getProjectLocation()
+		{
+			return projectLocationComposite.getProjectLocation();
 		}
 
 		/**
@@ -373,6 +388,8 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 				}
 			});
 
+			projectLocationComposite = new ProjectLocationComposite(topLevel, SWT.NONE, this.getClass().getName());
+
 			resourceProjectComposite = new ResourcesProjectChooserComposite(topLevel, SWT.NONE, this,
 				"Please choose the resources project this solution will reference (for styles, column/sequence info, security)",
 				ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject(), false);
@@ -408,7 +425,13 @@ public class NewSolutionWizard extends Wizard implements INewWizard
 			formData = new FormData();
 			formData.left = new FormAttachment(0, 0);
 			formData.right = new FormAttachment(100, 0);
-			formData.top = new FormAttachment(solutionTypeCombo, 30);
+			formData.top = new FormAttachment(solutionTypeCombo, 20);
+			projectLocationComposite.setLayoutData(formData);
+
+			formData = new FormData();
+			formData.left = new FormAttachment(0, 0);
+			formData.right = new FormAttachment(100, 0);
+			formData.top = new FormAttachment(projectLocationComposite, 30);
 			formData.bottom = new FormAttachment(100, 0);
 			resourceProjectComposite.setLayoutData(formData);
 		}

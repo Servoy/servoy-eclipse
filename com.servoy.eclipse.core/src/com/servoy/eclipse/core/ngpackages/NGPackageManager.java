@@ -21,9 +21,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
@@ -166,12 +168,18 @@ public class NGPackageManager extends BaseNGPackageManager
 		return PlatformUI.getPreferenceStore().getBoolean("com.servoy.eclipse.designer.rfb.packages.enable." + packageName);
 	}
 
-	public static IProject createNGPackageProject(String name) throws CoreException
+	public static IProject createNGPackageProject(String name, String location) throws CoreException
 	{
 		IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(name);
-		newProject.create(new NullProgressMonitor());
+		IProjectDescription description = ServoyModel.getWorkspace().newProjectDescription(name);
+		if (location != null)
+		{
+			IPath path = new Path(location);
+			path = path.append(name);
+			description.setLocation(path);
+		}
+		newProject.create(description, new NullProgressMonitor());
 		newProject.open(new NullProgressMonitor());
-		IProjectDescription description = newProject.getDescription();
 		description.setNatureIds(new String[] { ServoyNGPackageProject.NATURE_ID, JsonSchemaValidationNature.NATURE_ID });
 		newProject.setDescription(description, new NullProgressMonitor());
 
