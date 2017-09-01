@@ -33,6 +33,7 @@ import com.servoy.j2db.debug.DebugJ2DBClient;
 import com.servoy.j2db.debug.DebugUtils;
 import com.servoy.j2db.persistence.IRepository;
 import com.servoy.j2db.server.shared.ApplicationServerRegistry;
+import com.servoy.j2db.server.shared.IApplicationServer;
 import com.servoy.j2db.server.shared.IUserManager;
 import com.servoy.j2db.util.Debug;
 
@@ -142,6 +143,18 @@ public class DebugJ2DBTestClient extends DebugJ2DBClient
 	{
 		DebugUtils.infoToDebugger(getScriptEngine(), message);
 		Debug.trace(message);
+	}
+
+	@Override
+	protected IApplicationServer connectApplicationServer() throws Exception
+	{
+		return ApplicationServerRegistry.getService(IApplicationServer.class);
+	}
+
+	@Override
+	public void showDefaultLogin()
+	{
+		// don't do dummy authentication, just like regular test client for in sync behavior
 	}
 
 }
