@@ -17,8 +17,11 @@
 
 package com.servoy.eclipse.ui.wizards;
 
+import java.io.File;
+
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -91,6 +94,27 @@ public class ProjectLocationComposite extends Composite
 		locationText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		locationText.setEditable(!useDefaultLocationButton.getSelection());
 		locationText.setText(location);
+		locationText.addListener(SWT.FocusOut, new Listener()
+		{
+
+			@Override
+			public void handleEvent(Event event)
+			{
+				File f = new File(locationText.getText());
+				if (!f.isDirectory())
+				{
+					locationText.setText("");
+					Display.getDefault().asyncExec(new Runnable()
+					{
+						public void run()
+						{
+							MessageDialog.openError(getShell(), "Project Location Error", "Please select a folder for location.");
+						}
+					});
+				}
+
+			}
+		});
 
 		browseButton = new Button(fileBrowsePanel, SWT.PUSH);
 		browseButton.setText("Browse...");

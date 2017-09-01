@@ -22,7 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -36,6 +35,21 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.sablo.specification.Package.IPackageReader;
 
 import com.servoy.eclipse.core.ServoyModel;
@@ -48,6 +62,7 @@ import com.servoy.eclipse.model.util.WorkspaceFileAccess;
 import com.servoy.eclipse.ui.node.SimpleUserNode;
 import com.servoy.eclipse.ui.node.UserNodeType;
 import com.servoy.eclipse.ui.views.solutionexplorer.SolutionExplorerView;
+import com.servoy.eclipse.ui.wizards.ProjectLocationComposite;
 import com.servoy.j2db.util.Pair;
 import com.servoy.j2db.util.Utils;
 
@@ -56,10 +71,107 @@ import com.servoy.j2db.util.Utils;
  */
 public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 {
+	private String projectLocation;
+
 	public ImportZipPackageAsProjectAction(SolutionExplorerView viewer)
 	{
 		super(viewer, "Import zip web package as project",
 			"Imports a zip web package (component/service/layout package) into the workspace as a separate (expanded) project and references it from the solution. This is useful if you want to be able to change/extend the package.");
+	}
+
+	@Override
+	public void run()
+	{
+		Shell shell = viewer.getSite().getShell();
+		ImportPackageDialog dialog = new ImportPackageDialog(shell);
+		dialog.open();
+		if (dialog.getReturnCode() == Window.OK)
+		{
+			checkForDefaultPackageNameConflict(dialog.fileNames);
+			projectLocation = dialog.projectLocationComposite.getProjectLocation();
+			doImport(dialog.fileNames, dialog.filterPath);
+		}
+	}
+
+	private static class ImportPackageDialog extends Dialog
+	{
+		private final Shell shell;
+		private List fileNamesList;
+		private Button selectButton;
+		public String filterPath;
+		public String[] fileNames;
+		public ProjectLocationComposite projectLocationComposite;
+
+		private ImportPackageDialog(Shell parentShell)
+		{
+			super(parentShell);
+			this.shell = parentShell;
+		}
+
+		@Override
+		protected void configureShell(Shell sh)
+		{
+			super.configureShell(sh);
+			sh.setText("Import Zip Package as Project");
+		}
+
+		@Override
+		protected Control createContents(Composite c)
+		{
+			Composite parent = new Composite(c, SWT.NONE);
+			Label selected = new Label(parent, SWT.NONE);
+			selected.setText("The follwing packages will be imported: ");
+			selectButton = new Button(parent, SWT.PUSH);
+			selectButton.setText("Select zip package(s)");
+			selectButton.addListener(SWT.Selection, new Listener()
+			{
+				@Override
+				public void handleEvent(Event event)
+				{
+					FileDialog fd = new FileDialog(shell, SWT.OPEN | SWT.MULTI);
+					fd.open();
+					fileNames = fd.getFileNames();
+					filterPath = fd.getFilterPath();
+					fileNamesList.setItems(fileNames);
+				}
+			});
+			fileNamesList = new List(parent, SWT.BORDER);
+			fileNamesList.setEnabled(false);
+
+			projectLocationComposite = new ProjectLocationComposite(parent, SWT.NONE, this.getClass().getName());
+
+			FormLayout formLayout = new FormLayout();
+			formLayout.spacing = 5;
+			formLayout.marginWidth = formLayout.marginHeight = 20;
+			parent.setLayout(formLayout);
+
+			FormData formData = new FormData();
+			formData.left = new FormAttachment(0, 0);
+			formData.top = new FormAttachment(0, 0);
+			formData.right = new FormAttachment(100, 0);
+			selected.setLayoutData(formData);
+
+			formData = new FormData();
+			formData.left = new FormAttachment(0, 0);
+			formData.top = new FormAttachment(selected, 0);
+			formData.right = new FormAttachment(100, 0);
+			fileNamesList.setLayoutData(formData);
+
+			formData = new FormData();
+			formData.left = new FormAttachment(50, 100);
+			formData.right = new FormAttachment(100, 0);
+			formData.top = new FormAttachment(fileNamesList, 10);
+			selectButton.setLayoutData(formData);
+
+			formData = new FormData();
+			formData.left = new FormAttachment(0, 0);
+			formData.right = new FormAttachment(100, 0);
+			formData.top = new FormAttachment(selectButton, 10);
+			formData.bottom = new FormAttachment(100, 0);
+			projectLocationComposite.setLayoutData(formData);
+
+			return super.createContents(c);
+		}
 	}
 
 	@Override
@@ -84,7 +196,7 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 						try
 						{
 							if (!checkForExistingProjectOrLoadedPackage(packageNameToImport)) continue;
-							IProject newProject = NGPackageManager.createNGPackageProject(packageNameToImport, null);
+							IProject newProject = NGPackageManager.createNGPackageProject(packageNameToImport, projectLocation);
 
 							zis = new ZipInputStream(new FileInputStream(filterPath + File.separator + zipFile));
 							ZipEntry ze = zis.getNextEntry();
@@ -160,7 +272,8 @@ public class ImportZipPackageAsProjectAction extends ImportZipPackageAction
 		else
 		{
 			// see if an active zip or package project with the same package name exists (so we don't end up having two separate locations the same package can be loaded from in the active solution)
-			List<Pair<String, File>> loaded = ServoyModelFinder.getServoyModel().getNGPackageManager().getReferencingProjectsThatLoaded(packageNameToBeLoaded);
+			java.util.List<Pair<String, File>> loaded = ServoyModelFinder.getServoyModel().getNGPackageManager().getReferencingProjectsThatLoaded(
+				packageNameToBeLoaded);
 			if (loaded.size() > 0)
 			{
 				UIUtils.reportError("Cannot import zip package as project",

@@ -169,6 +169,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 		private Button bActivateSolution;
 
 		private final ImportSolutionWizard wizard;
+		private ProjectLocationComposite projectLocationComposite;
 
 		protected ImportSolutionWizardPage(ImportSolutionWizard wizard, String pageName)
 		{
@@ -245,6 +246,8 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			bActivateSolution.setText("Activate solution after import");
 			bActivateSolution.setSelection(activateSolution);
 
+			projectLocationComposite = new ProjectLocationComposite(topLevel, SWT.NONE, this.getClass().getName());
+
 			resourceProjectComposite = new ResourcesProjectChooserComposite(topLevel, SWT.NONE, this,
 				"Please choose the resources project the solution will reference (for styles, column/sequence info, security)",
 				ServoyModelManager.getServoyModelManager().getServoyModel().getActiveResourcesProject(), false);
@@ -295,6 +298,12 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 			formData.left = new FormAttachment(0, 0);
 			formData.right = new FormAttachment(100, 0);
 			formData.top = new FormAttachment(bActivateSolution, 10);
+			projectLocationComposite.setLayoutData(formData);
+
+			formData = new FormData();
+			formData.left = new FormAttachment(0, 0);
+			formData.right = new FormAttachment(100, 0);
+			formData.top = new FormAttachment(projectLocationComposite, 10);
 			formData.bottom = new FormAttachment(100, 0);
 			resourceProjectComposite.setLayoutData(formData);
 		}
@@ -348,7 +357,7 @@ public class ImportSolutionWizard extends Wizard implements IImportWizard
 
 						IRootObject[] rootObjects = XMLEclipseWorkspaceImportHandlerVersions11AndHigher.importFromJarFile(importEngine, x11handler, userChannel,
 							(EclipseRepository)ServoyModel.getDeveloperRepository(), resourcesProjectName, existingProject, monitor, doActivateSolution,
-							isCleanImport);
+							isCleanImport, projectLocationComposite.getProjectLocation());
 						if (rootObjects != null)
 						{
 							String detail = userChannel.getAllImportantMSGes() + "\nSolution '" + rootObjects[0].getName() + "' imported";
