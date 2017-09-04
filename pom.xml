@@ -7,7 +7,7 @@
 	<artifactId>servoy-eclipse</artifactId>
 	<groupId>com.servoy</groupId>
 	<packaging>pom</packaging>
-	<version>8.2.0.3103</version>
+	<version>8.3.0.3200_b1</version>
 
 	<properties>
 		<tycho.version>1.0.0</tycho.version>
@@ -15,8 +15,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
-		<servoy-repo.url>http://developer.servoy.com/p2_repository/compile_target/install/</servoy-repo.url>
-		<servoy-deltapack.url>http://developer.servoy.com/p2_repository/compile_target/install/deltapack/</servoy-deltapack.url>
+		<servoy-repo.url>http://download.eclipse.org/eclipse/updates/4.7-M-builds/M-4.7.1RC3-201709011220/</servoy-repo.url>
 		<servoy-shiplibs.url>http://developer.servoy.com/p2_repository/ship_plugins/</servoy-shiplibs.url>
 	</properties>
 
@@ -29,11 +28,6 @@
 		<repository>
 			<id>servoy_shiblibs</id>
 			<url>${servoy-shiplibs.url}</url>
-			<layout>p2</layout>
-		</repository>
-		<repository>
-			<id>servoy_deltapack</id>
-			<url>${servoy-deltapack.url}</url>
 			<layout>p2</layout>
 		</repository>
 	</repositories>
