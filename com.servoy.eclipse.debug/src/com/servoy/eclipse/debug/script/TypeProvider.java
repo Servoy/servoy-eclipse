@@ -38,6 +38,7 @@ import com.servoy.j2db.persistence.Form;
 import com.servoy.j2db.persistence.IServerManagerInternal;
 import com.servoy.j2db.persistence.PersistEncapsulation;
 import com.servoy.j2db.persistence.ScriptMethod;
+import com.servoy.j2db.querybuilder.impl.QBSelect;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
 
@@ -199,6 +200,11 @@ public class TypeProvider implements ITypeProvider
 			{
 				names.add(FoundSet.JS_FOUNDSET);
 				if (prefixLower.equalsIgnoreCase(FoundSet.JS_FOUNDSET)) datasourcePrefix = FoundSet.JS_FOUNDSET + '<';
+			}
+			if (QBSelect.class.getSimpleName().toLowerCase().startsWith(prefixLower))
+			{
+				names.add(QBSelect.class.getSimpleName());
+				if (prefixLower.equalsIgnoreCase(QBSelect.class.getSimpleName())) datasourcePrefix = QBSelect.class.getSimpleName() + '<';
 			}
 			if (datasourcePrefix != null && mode == TypeMode.JSDOC)
 			{

@@ -753,20 +753,7 @@ public class SolutionSerializer
 			}
 			else
 			{
-				String comment = currentComment;
-				if (persist instanceof ScriptMethod)
-				{
-					if (currentComment.indexOf(SolutionSerializer.OVERRIDEKEY) > 0 && PersistHelper.getOverridenMethod((ScriptMethod)persist) == null)
-					{
-						comment = comment.replace(" * " + SolutionSerializer.OVERRIDEKEY + "\n", "");
-					}
-					if (PersistHelper.getOverridenMethod((ScriptMethod)persist) != null && currentComment.indexOf(SolutionSerializer.OVERRIDEKEY) == -1)
-					{
-						comment = new StringBuilder(comment).insert(comment.indexOf("*/"), "* " + SolutionSerializer.OVERRIDEKEY + "\n ").toString();
-					}
-
-				}
-				sb.append(comment);
+				sb.append(currentComment);
 				replacePropertiesTag(obj, sb, userTemplate, persist instanceof AbstractScriptProvider ? (AbstractScriptProvider)persist : null);
 			}
 			if (persist instanceof ScriptVariable)

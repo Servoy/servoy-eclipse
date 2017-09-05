@@ -21,9 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.SwingUtilities;
 
-import junit.framework.Test;
-import junit.framework.TestResult;
-
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
@@ -36,6 +33,9 @@ import com.servoy.j2db.scripting.IExecutingEnviroment;
 import com.servoy.j2db.scripting.ScriptEngine;
 import com.servoy.j2db.util.Debug;
 import com.servoy.j2db.util.Utils;
+
+import junit.framework.Test;
+import junit.framework.TestResult;
 
 /**
  * This class generates a javascript test suite from an existing initialized Servoy application, with a loaded Servoy solution.
@@ -52,8 +52,8 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 
 	/**
 	 * Creates a new application test Suite.
-	 * @param target 
-	 * 
+	 * @param target
+	 *
 	 * @param app the application that will be used to create a JSUnit test suite. The application must have a loaded solution in order for the tests to be
 	 *            performed.
 	 */
@@ -110,6 +110,11 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 				System.err.println(msg);
 				throw e;
 			}
+			catch (Exception ex)
+			{
+				Debug.error(ex);
+				throw ex;
+			}
 		}
 	}
 
@@ -158,7 +163,7 @@ public class ApplicationJSTestSuite extends JSUnitSuite
 
 	/**
 	 * Sets the application that will be used to create a JSUnit test suite. The application must have a loaded solution in order for the tests to be performed.
-	 * 
+	 *
 	 * @param app the application that has the solution to be tested already loaded.
 	 * @param target specifies what test sub-tree should be run from the solution loaded in app.
 	 */

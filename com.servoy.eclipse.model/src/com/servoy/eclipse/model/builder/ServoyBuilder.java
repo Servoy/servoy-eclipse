@@ -340,6 +340,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public static final String DUPLICATE_MEM_TABLE_TYPE = _PREFIX + ".duplicateMemTable";
 	public static final String SUPERFORM_PROBLEM_TYPE = _PREFIX + ".superformProblem";
 	public static final String MISSING_SPEC = _PREFIX + ".missingSpec";
+	public static final String METHOD_OVERRIDE = _PREFIX + ".methodOverride";
 
 	// warning/error level settings keys/defaults
 	public final static String ERROR_WARNING_PREFERENCES_NODE = Activator.PLUGIN_ID + "/errorWarningLevels";
@@ -528,6 +529,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 	public final static Pair<String, ProblemSeverity> ELEMENT_EXTENDS_DELETED_ELEMENT = new Pair<String, ProblemSeverity>("elementExtendsDeletedElement", //$NON-NLS-1$
 		ProblemSeverity.WARNING);
 	public final static Pair<String, ProblemSeverity> MISSING_SPECIFICATION = new Pair<String, ProblemSeverity>("missingSpec", ProblemSeverity.ERROR);
+	public final static Pair<String, ProblemSeverity> METHOD_OVERRIDE_PROBLEM = new Pair<String, ProblemSeverity>("methodOverride", ProblemSeverity.ERROR);
 
 	// relations related
 	public final static Pair<String, ProblemSeverity> RELATION_PRIMARY_SERVER_WITH_PROBLEMS = new Pair<String, ProblemSeverity>(
@@ -1395,8 +1397,27 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 			{
 				public Object visit(IPersist o)
 				{
-					if (!(o instanceof ScriptVariable) && !(o instanceof ScriptMethod) && !(o instanceof Form) && o instanceof ISupportName &&
-						((ISupportName)o).getName() != null)
+					if (o instanceof ScriptMethod)
+					{
+						ScriptMethod scriptMethod = (ScriptMethod)o;
+						if (scriptMethod.getDeclaration() != null && scriptMethod.getDeclaration().contains(SolutionSerializer.OVERRIDEKEY) &&
+							PersistHelper.getOverridenMethod(scriptMethod) == null)
+						{
+							ServoyMarker mk = MarkerMessages.MethodOverrideProblem.fill(scriptMethod.getName(), ((Form)scriptMethod.getParent()).getName());
+							IMarker marker = addMarker(project, mk.getType(), mk.getText(), -1, METHOD_OVERRIDE_PROBLEM, IMarker.PRIORITY_NORMAL, null, o);
+							try
+							{
+								marker.setAttribute("Uuid", scriptMethod.getUUID().toString());
+								marker.setAttribute("SolutionName", scriptMethod.getRootObject().getName());
+							}
+							catch (CoreException e)
+							{
+								Debug.error(e);
+							}
+
+						}
+					}
+					else if (!(o instanceof ScriptVariable) && !(o instanceof Form) && o instanceof ISupportName && ((ISupportName)o).getName() != null)
 					{
 						Set<IPersist> duplicates = formElementsByName.get(((ISupportName)o).getName());
 						if (duplicates != null)
@@ -1964,6 +1985,7 @@ public class ServoyBuilder extends IncrementalProjectBuilder
 		deleteMarkers(project, DUPLICATE_MEM_TABLE_TYPE);
 		deleteMarkers(project, SUPERFORM_PROBLEM_TYPE);
 		deleteMarkers(project, MISSING_SPEC);
+		deleteMarkers(project, METHOD_OVERRIDE);
 		try
 		{
 			if (project.getReferencedProjects() != null)

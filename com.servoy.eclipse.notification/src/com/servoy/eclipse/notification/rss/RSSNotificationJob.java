@@ -46,11 +46,9 @@ import com.servoy.eclipse.notification.OnNotificationClose;
  */
 public class RSSNotificationJob extends Job
 {
-	//private static final long CHECK_INTERVAL = 60000;
-	private static final long CHECK_INTERVAL = 10000;
+	private static final long CHECK_INTERVAL = 60000;
 	
 	private static final String RSS = "https://forum.servoy.com/rss.php";
-	//private static final String RSS = "http://www.hotnews.ro/rss";
 	
 	private boolean running = true;
 	
@@ -64,7 +62,7 @@ public class RSSNotificationJob extends Job
 	{
 		super("Servoy notification job");
 		setSystem(true);
-		//lastNotificationTimestamp = new Date(Activator.getDefault().getPreferenceStore().getLong(PROPERTY_LAST_NOTIFICATION_TIMESTAMP));
+		lastNotificationTimestamp = new Date(Activator.getDefault().getPreferenceStore().getLong(PROPERTY_LAST_NOTIFICATION_TIMESTAMP));
 	}
 
 	/*
@@ -116,6 +114,10 @@ public class RSSNotificationJob extends Job
 			{
 				RSSNotification notification = new RSSNotification(feedEntriesIte.next());
 				Date notificationDate = notification.getDate();
+				if(notificationDate == null)
+				{
+					notificationDate = feed.getPublishedDate();
+				}
 				if(notificationDate != null)
 				{
 					if(lastNotificationTimestamp != null && (notificationDate.equals(lastNotificationTimestamp) || notificationDate.before(lastNotificationTimestamp)))
@@ -131,20 +133,20 @@ public class RSSNotificationJob extends Job
 			}
 			if(topNotificationTimestamp != null)
 			{
-//				lastNotificationTimestamp = topNotificationTimestamp;
-//				IPreferenceStore pref = Activator.getDefault().getPreferenceStore();
-//				pref.setValue(PROPERTY_LAST_NOTIFICATION_TIMESTAMP, lastNotificationTimestamp.getTime());
-//				if(pref instanceof IPersistentPreferenceStore) // save it asap if possible
-//				{
-//					try
-//					{
-//						((IPersistentPreferenceStore)pref).save();
-//					}
-//					catch(Exception ex)
-//					{
-//						ServoyLog.logError("Error saving notification timestamp", ex);
-//					}
-//				}
+				lastNotificationTimestamp = topNotificationTimestamp;
+				IPreferenceStore pref = Activator.getDefault().getPreferenceStore();
+				pref.setValue(PROPERTY_LAST_NOTIFICATION_TIMESTAMP, lastNotificationTimestamp.getTime());
+				if(pref instanceof IPersistentPreferenceStore) // save it asap if possible
+				{
+					try
+					{
+						((IPersistentPreferenceStore)pref).save();
+					}
+					catch(Exception ex)
+					{
+						ServoyLog.logError("Error saving notification timestamp", ex);
+					}
+				}
 			}
 		}
 		catch(Exception ex)

@@ -24,8 +24,10 @@ import java.util.ArrayList;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -44,7 +46,7 @@ import com.servoy.eclipse.notification.mylyn.ScalingHyperlink;
  */
 public class NotificationPopUpUI extends AbstractNotificationPopup
 {
-	private static final int NUM_NOTIFICATIONS_TO_DISPLAY = 6;
+	private static final int NUM_NOTIFICATIONS_TO_DISPLAY = 4;
 	
 	private Image servoyLogoImg;
 	
@@ -63,85 +65,141 @@ public class NotificationPopUpUI extends AbstractNotificationPopup
 		this.onCloseCallback = onCloseCallback;
 	}
 	
+	private ArrayList<Composite> stacks = new ArrayList<Composite>();
+	
+	private Composite createStack(Composite parent)
+	{
+		Composite stack = new Composite(parent, SWT.NO_FOCUS);
+		stack.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridLayout layout = new GridLayout(1, false);
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		layout.verticalSpacing = 0;
+		stack.setLayout(layout);
+		
+		stacks.add(stack);
+		
+		return stack;
+	}
+	
+	private Composite createNavigator(Composite parent)
+	{
+		Composite navigatorComposite = new Composite(parent, SWT.NO_FOCUS);
+		GridLayout gridLayout = new GridLayout(2, false);
+		GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.TOP).applyTo(navigatorComposite);
+		navigatorComposite.setLayout(gridLayout);
+		navigatorComposite.setBackground(parent.getBackground());
+		
+		return navigatorComposite;
+	}
+	
 	@Override
 	protected void createContentArea(Composite parent)
 	{
-		int count = 0;
+		final Composite stacksParent = new Composite(parent, SWT.NO_FOCUS);
+		stacksParent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		final StackLayout layout = new StackLayout();
+		stacksParent.setLayout(layout);
+		
+		Composite stack = createStack(stacksParent);
+		
+		int count = 1;
 		for (final INotification notification : notifications)
 		{
-			Composite notificationComposite = new Composite(parent, SWT.NO_FOCUS);
+			Composite notificationComposite = new Composite(stack, SWT.NO_FOCUS);
 			GridLayout gridLayout = new GridLayout(1, false);
 			GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.TOP).applyTo(notificationComposite);
 			notificationComposite.setLayout(gridLayout);
 			notificationComposite.setBackground(parent.getBackground());
-
-			if (count < NUM_NOTIFICATIONS_TO_DISPLAY)
-			{
-				final ScalingHyperlink itemLink = new ScalingHyperlink(notificationComposite, SWT.NO_FOCUS);
-				GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.TOP).applyTo(itemLink);
-				itemLink.setForeground(linkColor);
-				itemLink.registerMouseTrackListener();
-				itemLink.setText(notification.getTitle());
-				itemLink.setBackground(parent.getBackground());
-				itemLink.addHyperlinkListener(new HyperlinkAdapter() {
-					@Override
-					public void linkActivated(HyperlinkEvent e) {
-						try
-						{
-							PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(notification.getLink()));
-						}
-						catch(Exception ex)
-						{
-							ServoyLog.logError(ex);
-						}
+						
+			final ScalingHyperlink itemLink = new ScalingHyperlink(notificationComposite, SWT.NO_FOCUS);
+			GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.TOP).applyTo(itemLink);
+			itemLink.setForeground(linkColor);
+			itemLink.registerMouseTrackListener();
+			itemLink.setText(notification.getTitle());
+			itemLink.setBackground(parent.getBackground());
+			itemLink.addHyperlinkListener(new HyperlinkAdapter() {
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					try
+					{
+						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(notification.getLink()));
 					}
-				});
-
-				String descriptionText = null;
-				if (notification.getDescription() != null)
-				{
-					descriptionText = notification.getDescription();
+					catch(Exception ex)
+					{
+						ServoyLog.logError(ex);
+					}
 				}
-				if (descriptionText != null && !descriptionText.trim().equals("")) //$NON-NLS-1$
+			});
+
+			String descriptionText = null;
+			if (notification.getDescription() != null)
+			{
+				descriptionText = notification.getDescription();
+			}
+			if (descriptionText != null && !descriptionText.trim().equals("")) //$NON-NLS-1$
+			{
+				Label descriptionLabel = new Label(notificationComposite, SWT.NO_FOCUS);
+				descriptionLabel.setText(descriptionText);
+				//descriptionLabel.setBackground(parent.getBackground());
+				GridDataFactory.fillDefaults()
+					.grab(true, false)
+					.align(SWT.FILL, SWT.TOP)
+					.applyTo(descriptionLabel);
+			}
+
+			boolean hasPrev = count > NUM_NOTIFICATIONS_TO_DISPLAY && ((count % NUM_NOTIFICATIONS_TO_DISPLAY == 0) || (count == notifications.size())); 
+			boolean hasNext = count % NUM_NOTIFICATIONS_TO_DISPLAY == 0;
+			
+			if(hasPrev || hasNext)
+			{
+				Composite navigatorComposite = createNavigator(notificationComposite);
+				if(hasPrev)
 				{
-					Label descriptionLabel = new Label(notificationComposite, SWT.NO_FOCUS);
-					descriptionLabel.setText(descriptionText);
-					descriptionLabel.setBackground(parent.getBackground());
-					GridDataFactory.fillDefaults()
-							.grab(true, false)
-							.align(SWT.FILL, SWT.TOP)
-							.applyTo(descriptionLabel);
+					final int prevStackIdx = stacks.size() - 2;
+					int numNotificationsNewer = (prevStackIdx + 1) * NUM_NOTIFICATIONS_TO_DISPLAY;
+					ScalingHyperlink newerLink = new ScalingHyperlink(navigatorComposite, SWT.NO_FOCUS);
+					newerLink.setForeground(linkColor);
+					newerLink.registerMouseTrackListener();
+					newerLink.setBackground(parent.getBackground());
+
+					newerLink.setText(NLS.bind("<< {0} newer", numNotificationsNewer)); //$NON-NLS-1$
+					GridDataFactory.fillDefaults().span(hasNext ? 1 : 2, 1).applyTo(newerLink);
+
+					newerLink.addHyperlinkListener(new HyperlinkAdapter() {
+						@Override
+						public void linkActivated(HyperlinkEvent e) {
+							layout.topControl = stacks.get(prevStackIdx);
+							stacksParent.layout();
+						}
+					});
+				}			
+				
+				if(hasNext)
+				{
+					final int nextStackIdx = count / NUM_NOTIFICATIONS_TO_DISPLAY;
+					int numNotificationsRemain = notifications.size() - count;
+					ScalingHyperlink remainingLink = new ScalingHyperlink(navigatorComposite, SWT.NO_FOCUS);
+					remainingLink.setForeground(linkColor);
+					remainingLink.registerMouseTrackListener();
+					remainingLink.setBackground(parent.getBackground());
+
+					remainingLink.setText(NLS.bind("{0} more >>", numNotificationsRemain)); //$NON-NLS-1$
+					GridDataFactory.fillDefaults().applyTo(remainingLink);
+					remainingLink.addHyperlinkListener(new HyperlinkAdapter() {
+						@Override
+						public void linkActivated(HyperlinkEvent e) {
+							layout.topControl = stacks.get(nextStackIdx);
+							stacksParent.layout();
+						}
+					});
+					stack = createStack(stacksParent);
 				}
 			}
-			else
-			{
-				int numNotificationsRemain = notifications.size() - count;
-				ScalingHyperlink remainingLink = new ScalingHyperlink(notificationComposite, SWT.NO_FOCUS);
-				remainingLink.setForeground(linkColor);
-				remainingLink.registerMouseTrackListener();
-				remainingLink.setBackground(parent.getBackground());
-
-				remainingLink.setText(NLS.bind("{0} more", numNotificationsRemain)); //$NON-NLS-1$
-				GridDataFactory.fillDefaults().applyTo(remainingLink);
-				remainingLink.addHyperlinkListener(new HyperlinkAdapter() {
-					@Override
-					public void linkActivated(HyperlinkEvent e) {
-//						// FIXME
-//						//						TasksUiUtil.openTasksViewInActivePerspective().setFocus();
-//						IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-//						if (window != null) {
-//							Shell windowShell = window.getShell();
-//							if (windowShell != null) {
-//								windowShell.setMaximized(true);
-//								windowShell.open();
-//							}
-//						}
-					}
-				});
-				break;
-			}
+			
 			count++;
 		}
+		layout.topControl = stacks.get(0);
 	}	
 	
 

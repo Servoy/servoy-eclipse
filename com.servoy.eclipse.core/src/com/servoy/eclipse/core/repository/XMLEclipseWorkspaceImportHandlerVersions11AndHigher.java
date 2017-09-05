@@ -38,7 +38,9 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.javascript.core.JavaScriptNature;
 import org.json.JSONException;
 
@@ -118,11 +120,20 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 		this.createdProjects = createdProjects;
 	}
 
-
 	public static IRootObject[] importFromJarFile(final IXMLImportEngine importEngine, final IXMLImportHandlerVersions11AndHigher x11handler,
 		final IXMLImportUserChannel userChannel, final EclipseRepository repository, final String newResourcesProjectName,
 		final ServoyResourcesProject resourcesProject, final IProgressMonitor m, final boolean activateSolution, final boolean cleanImport)
-			throws RepositoryException
+		throws RepositoryException
+	{
+		return importFromJarFile(importEngine, x11handler, userChannel, repository, newResourcesProjectName, resourcesProject, m, activateSolution, cleanImport,
+			null);
+	}
+
+
+	public static IRootObject[] importFromJarFile(final IXMLImportEngine importEngine, final IXMLImportHandlerVersions11AndHigher x11handler,
+		final IXMLImportUserChannel userChannel, final EclipseRepository repository, final String newResourcesProjectName,
+		final ServoyResourcesProject resourcesProject, final IProgressMonitor m, final boolean activateSolution, final boolean cleanImport,
+		final String projectLocation) throws RepositoryException
 	{
 		final List<IProject> createdProjects = new ArrayList<IProject>();
 		try
@@ -227,12 +238,19 @@ public class XMLEclipseWorkspaceImportHandlerVersions11AndHigher implements IXML
 							{
 								IProject newProject = ServoyModel.getWorkspace().getRoot().getProject(root.getName());
 								if (newProject.exists()) newProject.delete(true, true, null);
-								newProject.create(null);
+								IProjectDescription description = ServoyModel.getWorkspace().newProjectDescription(root.getName());
+								if (projectLocation != null)
+								{
+									IPath path = new Path(projectLocation);
+									path = path.append(root.getName());
+									description.setLocation(path);
+								}
+								newProject.create(description, null);
 								newProject.open(null);
 
 								if (rProject[0] != null)
 								{
-									IProjectDescription description = newProject.getDescription();
+									description = newProject.getDescription();
 									description.setReferencedProjects(new IProject[] { rProject[0] });
 									newProject.setDescription(description, null);
 								}
