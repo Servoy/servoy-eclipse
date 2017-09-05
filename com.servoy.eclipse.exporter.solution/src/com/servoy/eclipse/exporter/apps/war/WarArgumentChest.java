@@ -131,7 +131,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 			+ "             Can also use -pi <none> to not export any plugin\n"
 			+ "        -active <true/false> ... export active solution (and its modules) only\n"
 			+ "				Default: true\n"
-			+ "        -pluginLocations <absolute paths to developer 'plugins' folder> ...  needed in  case\n"
+			+ "        -pluginLocations <ABSOLUTE paths to developer 'plugins' folder> ...  needed in  case\n"
 			+ "             you don't run the exporter from [servoy_install]/developer/exporter\n"
 			+ "             Default: '../plugins'.\n"
 			+ "        -crefs ... exports only the components used by the solution.\n"
@@ -213,7 +213,7 @@ public class WarArgumentChest extends AbstractArgumentChest
 		isExportActiveSolutionOnly = true;
 		if (argsMap.containsKey("active") && !Utils.getAsBoolean(argsMap.get("active"))) isExportActiveSolutionOnly = false;
 		pluginLocations = parseArg("pluginLocations", null, argsMap, false);
-		if (pluginLocations == null) pluginLocations = "developer/../plugins";
+		if (pluginLocations == null) pluginLocations = "../plugins";
 		selectedComponents = parseComponentsArg("crefs", argsMap);
 		selectedServices = parseComponentsArg("srefs", argsMap);
 		excludedComponentPackages = parseComponentsArg("excludeComponentPkgs", argsMap);
