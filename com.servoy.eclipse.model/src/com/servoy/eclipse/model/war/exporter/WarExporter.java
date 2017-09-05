@@ -613,11 +613,19 @@ public class WarExporter
 	 */
 	private void copyNGLibs(File targetLibDir) throws ExportException, IOException
 	{
-		List<String> pluginLocations = exportModel.getPluginLocations();
+		List<String> pluginLocations = new ArrayList<String>();
 		File eclipseParent = null;
 		File userDir = new File(System.getProperty("user.dir"));
 		if (System.getProperty("eclipse.home.location") != null)
+		{
 			eclipseParent = new File(URI.create(System.getProperty("eclipse.home.location").replaceAll(" ", "%20")));
+			if (eclipseParent.exists())
+			{
+				//first check the plugins folder of eclipse home
+				pluginLocations.add(new File(eclipseParent, "/plugins").getAbsolutePath().toString());
+			}
+		}
+		pluginLocations.addAll(exportModel.getPluginLocations());
 		for (String libName : NG_LIBS)
 		{
 			int i = 0;
@@ -627,18 +635,13 @@ public class WarExporter
 				File pluginLocation = new File(pluginLocations.get(i));
 				if (!pluginLocation.exists())
 				{
-					if (eclipseParent != null)
-					{
-						pluginLocation = new File(eclipseParent, pluginLocations.get(i));
-					}
-					if (!pluginLocation.exists())
+					if (!pluginLocation.isAbsolute() && !pluginLocation.exists())
 					{
 						pluginLocation = new File(userDir, pluginLocations.get(i));
 					}
 					if (!pluginLocation.exists())
 					{
-						System.err.println("Trying different parents for " + pluginLocations.get(i) + " eclipse: " + eclipseParent + " userdir: " + userDir +
-							" none are found");
+						System.err.println("Trying userDir" + userDir + " as parent for " + pluginLocations.get(i) + " but is not found");
 					}
 				}
 				FileFilter filter = new WildcardFileFilter(libName);
