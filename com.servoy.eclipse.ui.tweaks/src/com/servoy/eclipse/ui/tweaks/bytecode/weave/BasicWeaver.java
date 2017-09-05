@@ -17,7 +17,7 @@
 
 package com.servoy.eclipse.ui.tweaks.bytecode.weave;
 
-import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.core.runtime.Platform;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
@@ -50,11 +50,11 @@ public abstract class BasicWeaver
 			{
 
 				Class< ? > c, d;
-				ClassLoader classLoader = ImageDescriptor.class.getClassLoader();
+
 				try
 				{
-					c = Class.forName(type1.replace('/', '.'), false, classLoader);
-					d = Class.forName(type2.replace('/', '.'), false, classLoader);
+					c = Platform.getBundle("org.eclipse.jface").loadClass(type1.replace('/', '.'));
+					d = Platform.getBundle("org.eclipse.jface").loadClass(type2.replace('/', '.'));
 				}
 				catch (Exception e)
 				{
