@@ -117,20 +117,28 @@ public class NGPackageManager extends BaseNGPackageManager
 	@Override
 	public void reloadAllNGPackages(final ILoadedNGPackagesListener.CHANGE_REASON changeReason, IProgressMonitor m)
 	{
-		// do what super does but in a job; this is what code prior to the refactor did as well
-		Job registerAllNGPackagesJob = new Job("Reading ng packages from resources project...")
+		// we need to call it right away if the spec provider is not initalized yet, else we will be to late for certain calls to the spec provider
+		if (WebComponentSpecProvider.getInstance() == null)
 		{
-			@Override
-			public IStatus run(IProgressMonitor monitor)
+			super.reloadAllNGPackages(changeReason, m);
+		}
+		else
+		{
+			// do what super does but in a job; this is what code prior to the refactor did as well
+			Job registerAllNGPackagesJob = new Job("Reading ng packages from resources project...")
 			{
-				// do the actual work
-				NGPackageManager.super.reloadAllNGPackages(changeReason, monitor);
-				return Status.OK_STATUS;
-			}
+				@Override
+				public IStatus run(IProgressMonitor monitor)
+				{
+					// do the actual work
+					NGPackageManager.super.reloadAllNGPackages(changeReason, monitor);
+					return Status.OK_STATUS;
+				}
 
-		};
-		registerAllNGPackagesJob.setRule(MultiRule.combine(ResourcesPlugin.getWorkspace().getRoot(), serialRule));
-		registerAllNGPackagesJob.schedule();
+			};
+			registerAllNGPackagesJob.setRule(MultiRule.combine(ResourcesPlugin.getWorkspace().getRoot(), serialRule));
+			registerAllNGPackagesJob.schedule();
+		}
 	}
 
 	// commented this out as it gets called from a resource changed event; I don't think we need a job/rule to just re-read what changed
