@@ -289,8 +289,9 @@ public class WarExporter
 			args.add(wroPropertiesFile.getAbsolutePath());
 			args.add("-m");
 			args.add("-c");
-			String processors = "semicolonAppender,cssDataUri";
+			String processors = "semicolonAppender";
 			if (exportModel.isMinimizeJsCssResources()) processors += ",jsMin,cssMin";
+			processors += ",cssDataUri";
 			args.add(processors);
 
 			ProcessBuilder builder = new ProcessBuilder(args);
