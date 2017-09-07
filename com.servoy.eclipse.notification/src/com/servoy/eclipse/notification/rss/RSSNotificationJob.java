@@ -46,9 +46,9 @@ import com.servoy.eclipse.notification.OnNotificationClose;
  */
 public class RSSNotificationJob extends Job
 {
-	private static final long CHECK_INTERVAL = 60000;
+	private static final long CHECK_INTERVAL = 60000 * 30; // 30 min
 	
-	private static final String RSS = "https://forum.servoy.com/rss.php";
+	private static final String RSS = "http://developer.servoy.com/servoy.rss";
 	
 	private boolean running = true;
 	
