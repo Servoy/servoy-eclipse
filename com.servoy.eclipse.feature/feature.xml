@@ -22,7 +22,7 @@ and will be prosecuted to the maximum extent possible under law.
    </copyright>
 
    <license url="http://download.servoy.com/developer/license.txt">
-DEMO COPY 
+      DEMO COPY 
 
 In the event the Servoy Software is downloaded and no written agreement has been
 settled with Servoy, the downloader acknowledges and agrees explicitly that this a demo-copy of
@@ -58,7 +58,7 @@ Article 1. Definitions.
 - Maintenance Release (x.x.x): the generally commercially available patch of the Servoy Software which is limited to bug fixing;
 - Minor Release (--.x.0): the generally commercially available release of the Servoy Software which primarily contains corrections and/or possibly some limited new functionality;
 - Major Release (x.0.0): the generally commercially available version of the Servoy Software which primarily contains corrections and new functionality.
-The timing of the provision by Servoy of the Releases shall be at its sole discretion. 
+The timing of the provision by Servoy of the Releases shall be at its sole discretion.
    </license>
 
    <url>
@@ -484,6 +484,13 @@ The timing of the provision by Servoy of the Releases shall be at its sole discr
 
    <plugin
          id="org.objectweb.asm.tree"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.servoy.eclipse.notification"
          download-size="0"
          install-size="0"
          version="0.0.0"
