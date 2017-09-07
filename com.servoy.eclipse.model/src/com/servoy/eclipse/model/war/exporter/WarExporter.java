@@ -290,7 +290,7 @@ public class WarExporter
 			args.add("-m");
 			args.add("-c");
 			String processors = "semicolonAppender,cssDataUri";
-			if (exportModel.isMinimizeJsCssResources()) processors += ",jsMin,cssCompressor";
+			if (exportModel.isMinimizeJsCssResources()) processors += ",jsMin,cssMin";
 			args.add(processors);
 
 			ProcessBuilder builder = new ProcessBuilder(args);
